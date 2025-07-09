@@ -111,10 +111,10 @@
     X(v1, Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
     X(v1, Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
-// Tiered limits for immediate data sizes.
-//                                   compat  tier0  tier1
+// Tired limits for immediate data sizes.
+//                                 compat  tier0  tier1
 #define LIMITS_IMMEDIATE_SIZE(X) \
-    X(v1, Maximum, maxImmediateSize,      0,     0,    16)
+  X(v1, Maximum, maxImmediateSize,       0,    0,    16,  32,  64)
 
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros

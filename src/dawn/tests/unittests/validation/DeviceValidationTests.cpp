@@ -409,11 +409,6 @@ class RequestDeviceWithImmediateDataValidationTest : public ValidationTest {
         DAWN_SKIP_TEST_IF(UsesWire());
     }
 
-    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
-                           dawn::utils::ComboLimits& required) override {
-        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
-    }
-
     MockCppCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView)>
         mRequestDeviceCallback;
 };
@@ -431,20 +426,21 @@ TEST_F(RequestDeviceWithImmediateDataValidationTest, HigherIsBetter) {
 
     uint32_t supportedImmediateDataLimit = supportedLimits.maxImmediateSize;
 
-    // If we can support better than the default, test below the max.
-    if (supportedImmediateDataLimit >= kDefaultMaxImmediateDataBytes) {
-        limits.maxImmediateSize = kDefaultMaxImmediateDataBytes;
-        EXPECT_CALL(mRequestDeviceCallback,
-                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
-            .WillOnce(WithArgs<1>([&](wgpu::Device device) {
-                wgpu::Limits deviceLimits;
-                device.GetLimits(&deviceLimits);
-                // Check we got exactly the request.
-                EXPECT_EQ(deviceLimits.maxImmediateSize, kDefaultMaxImmediateDataBytes);
-            }));
-        adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
-                              mRequestDeviceCallback.Callback());
-    }
+    // DeviceNull has a maxImmediateSize of 64, larger than the default of 16.
+    EXPECT_GT(supportedImmediateDataLimit, kDefaultMaxImmediateDataBytes);
+
+    // Test below the max.
+    limits.maxImmediateSize = kDefaultMaxImmediateDataBytes;
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([&](wgpu::Device device) {
+            wgpu::Limits deviceLimits;
+            device.GetLimits(&deviceLimits);
+            // Check we got exactly the request.
+            EXPECT_EQ(deviceLimits.maxImmediateSize, kDefaultMaxImmediateDataBytes);
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
 
     // Test the max.
     limits.maxImmediateSize = supportedImmediateDataLimit;

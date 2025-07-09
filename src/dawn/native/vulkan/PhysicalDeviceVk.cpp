@@ -768,11 +768,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
     // Vulkan needs to have enough push constant range size for all
     // internal and external immediate data usages.
     constexpr uint32_t kVkGuaranteedMaxPushConstantsSize = 128;  // from Vulkan spec
+    constexpr uint32_t kMaxInternalConstants =
+        std::max(sizeof(RenderImmediateConstants) - sizeof(UserImmediateConstants),
+                 sizeof(ComputeImmediateConstants) - sizeof(UserImmediateConstants));
     static_assert(kVkGuaranteedMaxPushConstantsSize >=
-                  kDefaultMaxImmediateDataBytes + std::max(sizeof(RenderImmediateConstants),
-                                                           sizeof(ComputeImmediateConstants)));
+                  kMaxSupportedImmediateDataBytes + kMaxInternalConstants);
     DAWN_ASSERT(vkLimits.maxPushConstantsSize >= kVkGuaranteedMaxPushConstantsSize);
-    limits->v1.maxImmediateSize = kDefaultMaxImmediateDataBytes;
+    limits->v1.maxImmediateSize = kMaxSupportedImmediateDataBytes;
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
         mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <=
