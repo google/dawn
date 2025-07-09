@@ -53,7 +53,7 @@ namespace {
 constexpr std::string_view kVertexOutputsStruct = R"(
 struct VertexOutputs {
   @builtin(position) position : vec4<f32>,
-  @location(0) @interpolate(flat) offsets : vec2i,
+  @location(0) @interpolate(flat, either) offsets : vec2i,
 };
 )";
 
