@@ -500,10 +500,12 @@ match workgroup
 @must_use implicit(F: texel_format, R: read) fn textureDimensions(texture: texture_storage_2d<F, R>) -> vec2<u32>
 @must_use implicit(F: texel_format, R: read) fn textureDimensions(texture: texture_storage_2d_array<F, R>) -> vec2<u32>
 @must_use implicit(F: texel_format, R: read) fn textureDimensions(texture: texture_storage_3d<F, R>) -> vec3<u32>
+@must_use implicit(F: texel_format, R: read) fn textureDimensions(texture: texel_buffer<F, R>) -> u32
 @must_use @stage("fragment", "compute") implicit(F: texel_format, W: writable) fn textureDimensions(texture: texture_storage_1d<F, W>) -> u32
 @must_use @stage("fragment", "compute") implicit(F: texel_format, W: writable) fn textureDimensions(texture: texture_storage_2d<F, W>) -> vec2<u32>
 @must_use @stage("fragment", "compute") implicit(F: texel_format, W: writable) fn textureDimensions(texture: texture_storage_2d_array<F, W>) -> vec2<u32>
 @must_use @stage("fragment", "compute") implicit(F: texel_format, W: writable) fn textureDimensions(texture: texture_storage_3d<F, W>) -> vec3<u32>
+@must_use @stage("fragment", "compute") implicit(F: texel_format, W: writable) fn textureDimensions(texture: texel_buffer<F, W>) -> u32
 @must_use fn textureDimensions(texture: texture_external) -> vec2<u32>
 @must_use implicit(T: fiu32, C: iu32) fn textureGather(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
 @must_use implicit(T: fiu32, C: iu32) fn textureGather(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<T>
@@ -605,14 +607,17 @@ match workgroup
 @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, W: writable) fn textureStore(texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<f32>)
 @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, W: writable, A: iu32) fn textureStore(texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<f32>)
 @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, W: writable) fn textureStore(texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<f32>)
+@stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, RW: read_write) fn textureStore(texture: texel_buffer<F, RW>, coords: C, value: vec4<f32>)
 @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, W: writable) fn textureStore(texture: texture_storage_1d<F, W>, coords: C, value: vec4<i32>)
 @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, W: writable) fn textureStore(texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<i32>)
 @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, W: writable, A: iu32) fn textureStore(texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<i32>)
 @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, W: writable) fn textureStore(texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<i32>)
+@stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, RW: read_write) fn textureStore(texture: texel_buffer<F, RW>, coords: C, value: vec4<i32>)
 @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, W: writable) fn textureStore(texture: texture_storage_1d<F, W>, coords: C, value: vec4<u32>)
 @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, W: writable) fn textureStore(texture: texture_storage_2d<F, W>, coords: vec2<C>, value: vec4<u32>)
 @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, W: writable, A: iu32) fn textureStore(texture: texture_storage_2d_array<F, W>, coords: vec2<C>, array_index: A, value: vec4<u32>)
 @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, W: writable) fn textureStore(texture: texture_storage_3d<F, W>, coords: vec3<C>, value: vec4<u32>)
+@stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, RW: read_write) fn textureStore(texture: texel_buffer<F, RW>, coords: C, value: vec4<u32>)
 @must_use implicit(T: fiu32, C: iu32, L: iu32) fn textureLoad(texture: texture_1d<T>, coords: C, level: L) -> vec4<T>
 @must_use implicit(T: fiu32, C: iu32, L: iu32) fn textureLoad(texture: texture_2d<T>, coords: vec2<C>, level: L) -> vec4<T>
 @must_use implicit(T: fiu32, C: iu32, A: iu32, L: iu32) fn textureLoad(texture: texture_2d_array<T>, coords: vec2<C>, array_index: A, level: L) -> vec4<T>
@@ -634,6 +639,9 @@ match workgroup
 @must_use implicit(C: iu32, F: f32_texel_format, R: read) fn textureLoad(texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<f32>
 @must_use implicit(C: iu32, F: i32_texel_format, R: read) fn textureLoad(texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<i32>
 @must_use implicit(C: iu32, F: u32_texel_format, R: read) fn textureLoad(texture: texture_storage_3d<F, R>, coords: vec3<C>) -> vec4<u32>
+@must_use implicit(C: iu32, F: f32_texel_format, R: read) fn textureLoad(texture: texel_buffer<F, R>, coords: C) -> vec4<f32>
+@must_use implicit(C: iu32, F: i32_texel_format, R: read) fn textureLoad(texture: texel_buffer<F, R>, coords: C) -> vec4<i32>
+@must_use implicit(C: iu32, F: u32_texel_format, R: read) fn textureLoad(texture: texel_buffer<F, R>, coords: C) -> vec4<u32>
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_1d<F, RW>, coords: C) -> vec4<f32>
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_1d<F, RW>, coords: C) -> vec4<i32>
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_1d<F, RW>, coords: C) -> vec4<u32>
@@ -646,6 +654,9 @@ match workgroup
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_3d<F, RW>, coords: vec3<C>) -> vec4<f32>
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_3d<F, RW>, coords: vec3<C>) -> vec4<i32>
 @must_use @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, RW: read_write) fn textureLoad(texture: texture_storage_3d<F, RW>, coords: vec3<C>) -> vec4<u32>
+@must_use @stage("fragment", "compute") implicit(C: iu32, F: f32_texel_format, RW: read_write) fn textureLoad(texture: texel_buffer<F, RW>, coords: C) -> vec4<f32>
+@must_use @stage("fragment", "compute") implicit(C: iu32, F: i32_texel_format, RW: read_write) fn textureLoad(texture: texel_buffer<F, RW>, coords: C) -> vec4<i32>
+@must_use @stage("fragment", "compute") implicit(C: iu32, F: u32_texel_format, RW: read_write) fn textureLoad(texture: texel_buffer<F, RW>, coords: C) -> vec4<u32>
 
 @stage("fragment") implicit(T: fiu32) fn inputAttachmentLoad(input_attachment: input_attachment<T>) -> vec4<T>
 

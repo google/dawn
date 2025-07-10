@@ -9,4 +9,4 @@ SKIP: INVALID
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
 
-tint executable returned error: signal: illegal instruction
+tint executable returned error: signal: illegal instruction (core dumped)

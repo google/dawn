@@ -1,0 +1,182 @@
+SKIP: FAILED
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, u32, read_write> @offset(0)
+  arg_0:texel_buffer<rgb10a2unorm, read_write> @offset(0)
+}
+
+%textureDimensions_cacef4 = func(%tint_module_vars:tint_module_vars_struct):u32 {
+  $B1: {
+    %3:texel_buffer<rgb10a2unorm, read_write> = access %tint_module_vars, 1u
+    %4:u32 = %3.get_width
+    %5:u32 = construct %4
+    %res:ptr<function, u32, read_write> = var %5
+    %7:u32 = load %res
+    ret %7
+  }
+}
+%fragment_main = @fragment func(%prevent_dce:ptr<storage, u32, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rgb10a2unorm, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %11:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %11  # %tint_module_vars_1: 'tint_module_vars'
+    %13:u32 = call %textureDimensions_cacef4, %tint_module_vars_1
+    %14:ptr<storage, u32, read_write> = access %tint_module_vars_1, 0u
+    store %14, %13
+    ret
+  }
+}
+Failed to generate: :9:17 error: get_width: no matching call to 'get_width(texel_buffer<rgb10a2unorm, read_write>)'
+
+16 candidate functions:
+ • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d_array<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_3d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_2d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_2d_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_3d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+
+    %4:u32 = %3.get_width
+                ^^^^^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, u32, read_write> @offset(0)
+  arg_0:texel_buffer<rgb10a2unorm, read_write> @offset(0)
+}
+
+%textureDimensions_cacef4 = func(%tint_module_vars:tint_module_vars_struct):u32 {
+  $B1: {
+    %3:texel_buffer<rgb10a2unorm, read_write> = access %tint_module_vars, 1u
+    %4:u32 = %3.get_width
+    %5:u32 = construct %4
+    %res:ptr<function, u32, read_write> = var %5
+    %7:u32 = load %res
+    ret %7
+  }
+}
+%fragment_main = @fragment func(%prevent_dce:ptr<storage, u32, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rgb10a2unorm, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %11:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %11  # %tint_module_vars_1: 'tint_module_vars'
+    %13:u32 = call %textureDimensions_cacef4, %tint_module_vars_1
+    %14:ptr<storage, u32, read_write> = access %tint_module_vars_1, 0u
+    store %14, %13
+    ret
+  }
+}
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, u32, read_write> @offset(0)
+  arg_0:texel_buffer<rgb10a2unorm, read_write> @offset(0)
+}
+
+%textureDimensions_cacef4 = func(%tint_module_vars:tint_module_vars_struct):u32 {
+  $B1: {
+    %3:texel_buffer<rgb10a2unorm, read_write> = access %tint_module_vars, 1u
+    %4:u32 = %3.get_width
+    %5:u32 = construct %4
+    %res:ptr<function, u32, read_write> = var %5
+    %7:u32 = load %res
+    ret %7
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, u32, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rgb10a2unorm, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %11:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %11  # %tint_module_vars_1: 'tint_module_vars'
+    %13:u32 = call %textureDimensions_cacef4, %tint_module_vars_1
+    %14:ptr<storage, u32, read_write> = access %tint_module_vars_1, 0u
+    store %14, %13
+    ret
+  }
+}
+Failed to generate: :9:17 error: get_width: no matching call to 'get_width(texel_buffer<rgb10a2unorm, read_write>)'
+
+16 candidate functions:
+ • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d_array<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_3d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_2d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_2d_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_3d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+
+    %4:u32 = %3.get_width
+                ^^^^^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, u32, read_write> @offset(0)
+  arg_0:texel_buffer<rgb10a2unorm, read_write> @offset(0)
+}
+
+%textureDimensions_cacef4 = func(%tint_module_vars:tint_module_vars_struct):u32 {
+  $B1: {
+    %3:texel_buffer<rgb10a2unorm, read_write> = access %tint_module_vars, 1u
+    %4:u32 = %3.get_width
+    %5:u32 = construct %4
+    %res:ptr<function, u32, read_write> = var %5
+    %7:u32 = load %res
+    ret %7
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, u32, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rgb10a2unorm, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %11:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %11  # %tint_module_vars_1: 'tint_module_vars'
+    %13:u32 = call %textureDimensions_cacef4, %tint_module_vars_1
+    %14:ptr<storage, u32, read_write> = access %tint_module_vars_1, 0u
+    store %14, %13
+    ret
+  }
+}
+
+//
+// fragment_main
+//
+//
+// compute_main
+//
+
+tint executable returned error: exit status 1

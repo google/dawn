@@ -540,7 +540,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(bool, bool)'
 
-27 candidate functions:
+28 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✗ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d_array  ✗ , level: L  ✗ ) -> vec2<u32>' where:
@@ -576,6 +576,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByNumberOfParameters) {
  • 'textureDimensions(texture: texture_storage_2d<F, A>  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_storage_2d_array<F, A>  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_storage_3d<F, A>  ✗ ) -> vec3<u32>'
+ • 'textureDimensions(texture: texel_buffer<F, A>  ✗ ) -> u32'
  • 'textureDimensions(texture: texture_external  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_1d<T>  ✗ ) -> u32' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
@@ -603,7 +604,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
     ASSERT_EQ(result.Failure().Plain(),
               R"(no matching call to 'textureDimensions(texture_depth_2d, bool)'
 
-27 candidate functions:
+28 candidate functions:
  • 'textureDimensions(texture: texture_depth_2d  ✓ , level: L  ✗ ) -> vec2<u32>' where:
       ✗  'L' is 'i32' or 'u32'
  • 'textureDimensions(texture: texture_depth_2d  ✓ ) -> vec2<u32>' where:
@@ -640,6 +641,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
  • 'textureDimensions(texture: texture_storage_2d<F, A>  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_storage_2d_array<F, A>  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_storage_3d<F, A>  ✗ ) -> vec3<u32>'
+ • 'textureDimensions(texture: texel_buffer<F, A>  ✗ ) -> u32'
  • 'textureDimensions(texture: texture_external  ✗ ) -> vec2<u32>'
  • 'textureDimensions(texture: texture_1d<T>  ✗ ) -> u32' where:
       ✗  'T' is 'f32', 'i32' or 'u32'

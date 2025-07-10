@@ -1,34 +1,85 @@
 SKIP: FAILED
 
-#include <metal_stdlib>
-using namespace metal;
-
-template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-struct tint_module_vars_struct {
-  device tint_array<float, 1024>* prevent_dce;
-};
-
-simdgroup_float8x8 subgroupMatrixMultiply_5677fc() {
-  simdgroup_half8x8 arg_0 = simdgroup_half8x8();
-  simdgroup_half8x8 arg_1 = simdgroup_half8x8();
-  simdgroup_float8x8 v = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
-  simdgroup_multiply(v, arg_0, arg_1);
-  simdgroup_float8x8 res = v;
-  return res;
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, array<f32, 1024>, read_write> @offset(0)
 }
 
-kernel void compute_main(device tint_array<float, 1024>* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  simdgroup_store(subgroupMatrixMultiply_5677fc(), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
+%subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var %2
+    %4:subgroup_matrix_right<f16, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var %4
+    %6:subgroup_matrix_left<f16, 8, 8> = load %arg_0
+    %7:subgroup_matrix_right<f16, 8, 8> = load %arg_1
+    %8:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %9:subgroup_matrix_result<f32, 8, 8> = load %8
+    %10:void = msl.simdgroup_multiply %9, %6, %7
+    %11:subgroup_matrix_result<f32, 8, 8> = load %8
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %11
+    %13:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %13
+  }
 }
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce
+    %tint_module_vars:tint_module_vars_struct = let %16
+    %18:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiply_5677fc
+    %19:ptr<storage, array<f32, 1024>, read_write> = access %tint_module_vars, 0u
+    %20:ptr<storage, f32, read_write> = access %19, 0u
+    %21:u64 = msl.convert 64u
+    %22:void = msl.simdgroup_store %18, %20, %21, vec2<u64>(0u64), false
+    ret
+  }
+}
+Failed to generate: :15:16 error: msl.simdgroup_multiply: no matching call to 'msl.simdgroup_multiply(subgroup_matrix_result<f32, 8, 8>, subgroup_matrix_left<f16, 8, 8>, subgroup_matrix_right<f16, 8, 8>)'
+
+1 candidate function:
+ • 'msl.simdgroup_multiply(subgroup_matrix<result, S, C, R>  ✓ , subgroup_matrix<left, S, K, R>  ✗ , subgroup_matrix<right, S, C, K>  ✗ )' where:
+      ✓  'S' is 'f32' or 'f16'
+
+    %10:void = msl.simdgroup_multiply %9, %6, %7
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+:6:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, array<f32, 1024>, read_write> @offset(0)
+}
+
+%subgroupMatrixMultiply_5677fc = func():subgroup_matrix_result<f32, 8, 8> {
+  $B1: {
+    %2:subgroup_matrix_left<f16, 8, 8> = construct
+    %arg_0:ptr<function, subgroup_matrix_left<f16, 8, 8>, read_write> = var %2
+    %4:subgroup_matrix_right<f16, 8, 8> = construct
+    %arg_1:ptr<function, subgroup_matrix_right<f16, 8, 8>, read_write> = var %4
+    %6:subgroup_matrix_left<f16, 8, 8> = load %arg_0
+    %7:subgroup_matrix_right<f16, 8, 8> = load %arg_1
+    %8:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %9:subgroup_matrix_result<f32, 8, 8> = load %8
+    %10:void = msl.simdgroup_multiply %9, %6, %7
+    %11:subgroup_matrix_result<f32, 8, 8> = load %8
+    %res:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var %11
+    %13:subgroup_matrix_result<f32, 8, 8> = load %res
+    ret %13
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, array<f32, 1024>, read_write> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce
+    %tint_module_vars:tint_module_vars_struct = let %16
+    %18:subgroup_matrix_result<f32, 8, 8> = call %subgroupMatrixMultiply_5677fc
+    %19:ptr<storage, array<f32, 1024>, read_write> = access %tint_module_vars, 0u
+    %20:ptr<storage, f32, read_write> = access %19, 0u
+    %21:u64 = msl.convert 64u
+    %22:void = msl.simdgroup_store %18, %20, %21, vec2<u64>(0u64), false
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1

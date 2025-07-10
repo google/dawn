@@ -325,6 +325,11 @@ enable f16;
 enable chromium_internal_graphite;
 {{    end -}}
 
+{{- /* Emit 'requires texel_buffers' if required */ -}}
+{{-   if OverloadUsesType $overload "texel_buffer"}}
+requires texel_buffers;
+{{    end -}}
+
 {{- end -}}
 
 
