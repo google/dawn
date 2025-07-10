@@ -115,6 +115,7 @@ if (!defined(dawn_egl_registry_dir)) {
   dawn_egl_registry_dir = "${dawn_root}/third_party/khronos/EGL-Registry"
 }
 
+# Defaults to the value inherited from .gclient.
 if (!defined(dawn_wasm)) {
   dawn_wasm = false
 }

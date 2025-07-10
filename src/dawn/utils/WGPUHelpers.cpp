@@ -29,7 +29,6 @@
 
 #include <cstring>
 #include <iomanip>
-#include <limits>
 #include <mutex>
 #include <sstream>
 
@@ -37,52 +36,7 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Numeric.h"
 
-#if TINT_BUILD_SPV_READER
-#include "spirv-tools/optimizer.hpp"
-#endif
-
 namespace dawn::utils {
-#if TINT_BUILD_SPV_READER
-wgpu::ShaderModule CreateShaderModuleFromASM(
-    const wgpu::Device& device,
-    const char* source,
-    wgpu::DawnShaderModuleSPIRVOptionsDescriptor* spirv_options) {
-    // Use SPIRV-Tools's C API to assemble the SPIR-V assembly text to binary. Because the types
-    // aren't RAII, we don't return directly on success and instead always go through the code
-    // path that destroys the SPIRV-Tools objects.
-    wgpu::ShaderModule result = nullptr;
-
-    spv_context context = spvContextCreate(SPV_ENV_UNIVERSAL_1_3);
-    DAWN_ASSERT(context != nullptr);
-
-    spv_binary spirv = nullptr;
-    spv_diagnostic diagnostic = nullptr;
-    if (spvTextToBinary(context, source, strlen(source), &spirv, &diagnostic) == SPV_SUCCESS) {
-        DAWN_ASSERT(spirv != nullptr);
-        DAWN_ASSERT(spirv->wordCount <= std::numeric_limits<uint32_t>::max());
-
-        wgpu::ShaderSourceSPIRV spirvDesc;
-        spirvDesc.codeSize = static_cast<uint32_t>(spirv->wordCount);
-        spirvDesc.code = spirv->code;
-        spirvDesc.nextInChain = spirv_options;
-
-        wgpu::ShaderModuleDescriptor descriptor;
-        descriptor.nextInChain = &spirvDesc;
-        result = device.CreateShaderModule(&descriptor);
-    } else {
-        DAWN_ASSERT(diagnostic != nullptr);
-        dawn::WarningLog() << "CreateShaderModuleFromASM SPIRV assembly error:"
-                           << diagnostic->position.line + 1 << ":"
-                           << diagnostic->position.column + 1 << ": " << diagnostic->error;
-    }
-
-    spvDiagnosticDestroy(diagnostic);
-    spvBinaryDestroy(spirv);
-    spvContextDestroy(context);
-
-    return result;
-}
-#endif
 
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source) {
     wgpu::ShaderSourceWGSL wgslDesc;

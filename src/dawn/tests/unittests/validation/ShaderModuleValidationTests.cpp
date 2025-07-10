@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -38,12 +39,57 @@
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
+#if TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+#include "spirv-tools/optimizer.hpp"
+#endif  // TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+
 namespace dawn {
 namespace {
 
 class ShaderModuleValidationTest : public ValidationTest {};
 
-#if TINT_BUILD_SPV_READER
+#if TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
+
+wgpu::ShaderModule CreateShaderModuleFromASM(
+    const wgpu::Device& device,
+    const char* source,
+    wgpu::DawnShaderModuleSPIRVOptionsDescriptor* spirv_options = nullptr) {
+    // Use SPIRV-Tools's C API to assemble the SPIR-V assembly text to binary. Because the types
+    // aren't RAII, we don't return directly on success and instead always go through the code
+    // path that destroys the SPIRV-Tools objects.
+    wgpu::ShaderModule result = nullptr;
+
+    spv_context context = spvContextCreate(SPV_ENV_UNIVERSAL_1_3);
+    DAWN_ASSERT(context != nullptr);
+
+    spv_binary spirv = nullptr;
+    spv_diagnostic diagnostic = nullptr;
+    if (spvTextToBinary(context, source, strlen(source), &spirv, &diagnostic) == SPV_SUCCESS) {
+        DAWN_ASSERT(spirv != nullptr);
+        DAWN_ASSERT(spirv->wordCount <= std::numeric_limits<uint32_t>::max());
+
+        wgpu::ShaderSourceSPIRV spirvDesc;
+        spirvDesc.codeSize = static_cast<uint32_t>(spirv->wordCount);
+        spirvDesc.code = spirv->code;
+        spirvDesc.nextInChain = spirv_options;
+
+        wgpu::ShaderModuleDescriptor descriptor;
+        descriptor.nextInChain = &spirvDesc;
+        result = device.CreateShaderModule(&descriptor);
+    } else {
+        DAWN_ASSERT(diagnostic != nullptr);
+        dawn::WarningLog() << "CreateShaderModuleFromASM SPIRV assembly error:"
+                           << diagnostic->position.line + 1 << ":"
+                           << diagnostic->position.column + 1 << ": " << diagnostic->error;
+    }
+
+    spvDiagnosticDestroy(diagnostic);
+    spvBinaryDestroy(spirv);
+    spvContextDestroy(context);
+
+    return result;
+}
+
 // Test case with a simpler shader that should successfully be created
 TEST_F(ShaderModuleValidationTest, CreationSuccess) {
     const char* shader = R"(
@@ -73,7 +119,7 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
                    OpReturn
                    OpFunctionEnd)";
 
-    utils::CreateShaderModuleFromASM(device, shader);
+    CreateShaderModuleFromASM(device, shader);
 }
 
 // Tint's SPIR-V reader transforms a combined image sampler into two
@@ -118,7 +164,7 @@ TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
                OpFunctionEnd
         )";
 
-    utils::CreateShaderModuleFromASM(device, shader);
+    CreateShaderModuleFromASM(device, shader);
 }
 
 TEST_F(ShaderModuleValidationTest, ArrayOfCombinedTextureAndSampler) {
@@ -156,7 +202,7 @@ TEST_F(ShaderModuleValidationTest, ArrayOfCombinedTextureAndSampler) {
                OpFunctionEnd
         )";
 
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, shader));
+    ASSERT_DEVICE_ERROR(CreateShaderModuleFromASM(device, shader));
 }
 
 // Test that it is not allowed to declare a multisampled-array interface texture.
@@ -197,7 +243,7 @@ TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
                OpFunctionEnd
         )";
 
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, shader));
+    ASSERT_DEVICE_ERROR(CreateShaderModuleFromASM(device, shader));
 }
 
 const char* kShaderWithNonUniformDerivative = R"(
@@ -229,7 +275,7 @@ const char* kShaderWithNonUniformDerivative = R"(
 // Test that creating a module with a SPIR-V shader that has a uniformity violation fails when no
 // SPIR-V options descriptor is used.
 TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_NoOptions) {
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative));
+    ASSERT_DEVICE_ERROR(CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative));
 }
 
 // Test that creating a module with a SPIR-V shader that has a uniformity violation fails when
@@ -237,8 +283,8 @@ TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_NoOptions) {
 TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_FlagSetToFalse) {
     wgpu::DawnShaderModuleSPIRVOptionsDescriptor spirv_options_desc = {};
     spirv_options_desc.allowNonUniformDerivatives = false;
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative,
-                                                         &spirv_options_desc));
+    ASSERT_DEVICE_ERROR(
+        CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative, &spirv_options_desc));
 }
 
 // Test that creating a module with a SPIR-V shader that has a uniformity violation succeeds when
@@ -246,10 +292,10 @@ TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_FlagSetToFalse) {
 TEST_F(ShaderModuleValidationTest, NonUniformDerivatives_FlagSetToTrue) {
     wgpu::DawnShaderModuleSPIRVOptionsDescriptor spirv_options_desc = {};
     spirv_options_desc.allowNonUniformDerivatives = true;
-    utils::CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative, &spirv_options_desc);
+    CreateShaderModuleFromASM(device, kShaderWithNonUniformDerivative, &spirv_options_desc);
 }
 
-#endif  // TINT_BUILD_SPV_READER
+#endif  // TINT_BUILD_SPV_READER && !defined(__EMSCRIPTEN__)
 
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be
 // WGSL or SPIRV, not empty)

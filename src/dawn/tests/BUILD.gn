@@ -26,6 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
+import("../../../scripts/tint_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
 import("${dawn_root}/generator/dawn_generator.gni")
@@ -465,6 +466,10 @@ dawn_test("dawn_unittests") {
 
   if (dawn_enable_vulkan) {
     sources += [ "unittests/validation/YCbCrInfoValidationTests.cpp" ]
+  }
+
+  if (tint_build_spv_reader) {
+    deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
   }
 
   # When building inside Chromium, use their gtest main function because it is

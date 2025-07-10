@@ -67,9 +67,6 @@ static_library("wgpu_utils") {
     "${dawn_root}/src/dawn/common",
   ]
   deps = [ ":dawn_utils_gen" ]
-  if (tint_build_spv_reader) {
-    deps += [ "${dawn_spirv_tools_dir}:spvtools_opt" ]
-  }
 }
 
 static_library("test_utils") {

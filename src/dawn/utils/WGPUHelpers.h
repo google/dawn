@@ -42,12 +42,6 @@ namespace dawn::utils {
 
 enum Expectation { Success, Failure };
 
-#if TINT_BUILD_SPV_READER
-wgpu::ShaderModule CreateShaderModuleFromASM(
-    const wgpu::Device& device,
-    const char* source,
-    wgpu::DawnShaderModuleSPIRVOptionsDescriptor* spirv_options = nullptr);
-#endif
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source);
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::string& source);
 
