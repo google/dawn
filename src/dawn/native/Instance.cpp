@@ -158,6 +158,7 @@ wgpu::Status APIGetInstanceLimits(InstanceLimits* limits) {
 
 static constexpr auto kSupportedFeatures = std::array{
     wgpu::InstanceFeatureName::TimedWaitAny,
+    wgpu::InstanceFeatureName::ShaderSourceSPIRV,
     wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
 };
 
@@ -285,6 +286,11 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
         mRuntimeSearchPaths.push_back(std::move(*p));
     }
     mRuntimeSearchPaths.push_back("");
+
+    if (descriptor->requiredFeatureCount > 0) {
+        auto features = std::span(descriptor->requiredFeatures, descriptor->requiredFeatureCount);
+        mInstanceFeatures = {features.begin(), features.end()};
+    }
 
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     DAWN_TRY(mEventManager.Initialize(descriptor));
@@ -585,6 +591,10 @@ void InstanceBase::AddDevice(DeviceBase* device) {
 
 void InstanceBase::RemoveDevice(DeviceBase* device) {
     mDevicesList.Use([&](auto deviceList) { deviceList->erase(device); });
+}
+
+bool InstanceBase::HasFeature(wgpu::InstanceFeatureName feature) const {
+    return mInstanceFeatures.contains(feature);
 }
 
 bool InstanceBase::ProcessEvents() {

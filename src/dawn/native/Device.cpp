@@ -492,7 +492,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
         mMutex = nullptr;
     }
 
-    mAdapter->GetInstance()->AddDevice(this);
+    GetInstance()->AddDevice(this);
 
     return {};
 }
@@ -551,11 +551,11 @@ void DeviceBase::WillDropLastExternalRef() {
         mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
     }
 
-    mAdapter->GetInstance()->RemoveDevice(this);
+    GetInstance()->RemoveDevice(this);
 
     // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
     // queue instead.
-    mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
+    mCallbackTaskManager = GetInstance()->GetCallbackTaskManager();
 }
 
 void DeviceBase::DestroyObjects() {
@@ -2154,8 +2154,10 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     // Module type specific validation
     switch (moduleType) {
         case wgpu::SType::ShaderSourceSPIRV: {
-            DAWN_INVALID_IF(!TINT_BUILD_SPV_READER || IsToggleEnabled(Toggle::DisallowSpirv),
-                            "SPIR-V is disallowed.");
+            DAWN_INVALID_IF(
+                !TINT_BUILD_SPV_READER || IsToggleEnabled(Toggle::DisallowSpirv) ||
+                    !GetInstance()->HasFeature(wgpu::InstanceFeatureName::ShaderSourceSPIRV),
+                "SPIR-V is disallowed.");
             break;
         }
         case wgpu::SType::ShaderSourceWGSL: {

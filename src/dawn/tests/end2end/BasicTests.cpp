@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <unordered_set>
+
 #include "dawn/common/FutureUtils.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -92,23 +94,29 @@ TEST_P(BasicTests, GetInstanceFeatures) {
     wgpu::SupportedInstanceFeatures out{};
     wgpu::GetInstanceFeatures(&out);
 
-    auto features = std::span(out.features, out.featureCount);
-    EXPECT_EQ(out.featureCount, UsesWire() ? 0u : 2u);
-    EXPECT_EQ(UsesWire(), std::find(features.begin(), features.end(),
-                                    wgpu::InstanceFeatureName::TimedWaitAny) == features.end());
-    EXPECT_EQ(UsesWire(),
-              std::find(features.begin(), features.end(),
-                        wgpu::InstanceFeatureName::MultipleDevicesPerAdapter) == features.end());
+    static const auto kKnownFeatures = std::unordered_set{
+        wgpu::InstanceFeatureName::ShaderSourceSPIRV,
+        wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
+        wgpu::InstanceFeatureName::TimedWaitAny,
+    };
+    auto features = std::unordered_set(out.features, out.features + out.featureCount);
 
-    for (auto feature : features) {
-        EXPECT_TRUE(wgpu::HasInstanceFeature(feature));
-    }
     if (UsesWire()) {
-        EXPECT_FALSE(wgpu::HasInstanceFeature(wgpu::InstanceFeatureName::TimedWaitAny));
-        EXPECT_FALSE(
-            wgpu::HasInstanceFeature(wgpu::InstanceFeatureName::MultipleDevicesPerAdapter));
+        // Wire exposes no features because it doesn't support CreateInstance.
+        EXPECT_EQ(features.size(), 0u);
+    } else {
+        // Native (currently) exposes all known features.
+        EXPECT_EQ(features, kKnownFeatures);
     }
+
+    // Check that GetInstanceFeatures and HasInstanceFeature match.
+    for (auto feature : kKnownFeatures) {
+        EXPECT_EQ(features.contains(feature), wgpu::HasInstanceFeature(feature));
+    }
+    // Check some bogus feature enum values.
     EXPECT_FALSE(wgpu::HasInstanceFeature(wgpu::InstanceFeatureName(0)));
+    EXPECT_FALSE(
+        wgpu::HasInstanceFeature(wgpu::InstanceFeatureName(WGPUInstanceFeatureName_Force32)));
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests,

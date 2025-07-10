@@ -338,6 +338,7 @@ DAWN_WIRE_EXPORT WGPUStatus wgpuDawnWireClientGetInstanceLimits(WGPUInstanceLimi
     return WGPUStatus_Success;
 }
 
+// No features listed here because CreateInstance is not supported in the wire.
 static constexpr auto kSupportedFeatures = std::array<WGPUInstanceFeatureName, 0>{};
 
 DAWN_WIRE_EXPORT WGPUBool wgpuDawnWireClientHasInstanceFeature(WGPUInstanceFeatureName feature) {
@@ -355,6 +356,7 @@ DAWN_WIRE_EXPORT void wgpuDawnWireClientGetInstanceFeatures(
 
 DAWN_WIRE_EXPORT WGPUInstance
 wgpuDawnWireClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
-    DAWN_UNREACHABLE();
+    // Not implemented. Wire currently must be created from an existing server side instance.
+    DAWN_CHECK(false);
     return nullptr;
 }

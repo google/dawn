@@ -159,7 +159,7 @@ class NonMovable : NonCopyable {
 // For some objects we may do additional cleanup routines, i.e. Destroy if the
 // object was natively created via the API. However, if the object was imported
 // from JS, we don't do the additional cleanup because they may still be used
-// outside of the WASM API.
+// outside of the Wasm API.
 struct ImportedFromJSTag {};
 static constexpr ImportedFromJSTag kImportedFromJS;
 
@@ -1658,7 +1658,11 @@ Ref<WGPUInstanceImpl> WGPUInstanceImpl::Create(
         case WGPUInstanceFeatureName_MultipleDevicesPerAdapter:
           DEBUG_PRINTF(
               "MultipleDevicesPerAdapter requested, but not supported in "
-              "WASM.\n");
+              "Wasm.\n");
+          return {};
+        case WGPUInstanceFeatureName_ShaderSourceSPIRV:
+          DEBUG_PRINTF(
+              "ShaderSourceSPIRV requested, but not supported in Wasm.\n");
           return {};
         case WGPUInstanceFeatureName_Force32:
           return {};

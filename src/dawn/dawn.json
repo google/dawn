@@ -2513,7 +2513,7 @@
         "category": "enum",
         "values": [
             {"value": 1, "name": "timed wait any"},
-            {"value": 2, "name": "shader source SPIRV", "tags": ["upstream"]},
+            {"value": 2, "name": "shader source SPIRV"},
             {"value": 3, "name": "multiple devices per adapter"}
         ]
     },

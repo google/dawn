@@ -33,6 +33,7 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/ShaderModule.h"
 
 namespace dawn::native {
@@ -72,8 +73,10 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
 #if TINT_BUILD_SPV_READER
     // Handling SPIR-V if enabled.
     if (const auto* spirvDesc = descriptor.Get<ShaderSourceSPIRV>()) {
-        // SpirV toggle should have been validated before chacking cache.
+        // SPIRV toggle and instance feature should have been validated before checking cache.
         DAWN_ASSERT(!device->IsToggleEnabled(Toggle::DisallowSpirv));
+        DAWN_ASSERT(
+            device->GetInstance()->HasFeature(wgpu::InstanceFeatureName::ShaderSourceSPIRV));
         // Descriptor should not contain WGSL part.
         DAWN_ASSERT(descriptor.Get<ShaderSourceWGSL>() == nullptr);
 
