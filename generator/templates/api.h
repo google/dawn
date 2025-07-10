@@ -40,7 +40,7 @@
 //* -------------------------------------------------------------------------------------
 //* The follow block defines Dawn generator specific macros and #defines for migrations.
 //* -------------------------------------------------------------------------------------
-{%- if 'upstream' not in enabled_tags %}
+{%- if 'dawn' in enabled_tags or 'emscripten' in enabled_tags %}
 
     #define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
     #define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
