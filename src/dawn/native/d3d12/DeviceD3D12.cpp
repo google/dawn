@@ -290,26 +290,46 @@ MutexProtected<ResidencyManager>& Device::GetResidencyManager() const {
 
 MaybeError Device::CreateZeroBuffer() {
     BufferDescriptor zeroBufferDescriptor;
-    zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     zeroBufferDescriptor.size = kZeroBufferSize;
     zeroBufferDescriptor.label = "ZeroBuffer_Internal";
-    DAWN_TRY_ASSIGN(mZeroBuffer, Buffer::Create(this, Unpack(&zeroBufferDescriptor)));
 
-    CommandRecordingContext* commandContext =
-        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
+    Ref<BufferBase> zeroBufferBase;
 
-    return GetDynamicUploader()->WithUploadReservation(
-        kZeroBufferSize, kCopyBufferToBufferOffsetAlignment,
-        [&](UploadReservation reservation) -> MaybeError {
-            memset(reservation.mappedPointer, 0u, kZeroBufferSize);
+    // Clear zero buffer from CPU when `Feature::BufferMapExtendedUsages` is supported.
+    if (ToBackend(GetPhysicalDevice())->SupportsBufferMapExtendedUsages()) {
+        zeroBufferDescriptor.mappedAtCreation = true;
+        zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
 
-            CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
-                                          reservation.offsetInBuffer, mZeroBuffer.Get(), 0,
-                                          kZeroBufferSize);
+        DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
 
-            mZeroBuffer->SetInitialized(true);
-            return {};
-        });
+        void* mappedPointer = zeroBufferBase->GetMappedPointer();
+        DAWN_ASSERT(mappedPointer != nullptr);
+        memset(mappedPointer, 0, zeroBufferBase->GetAllocatedSize());
+        DAWN_TRY(zeroBufferBase->Unmap());
+    } else {
+        zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+
+        DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
+
+        CommandRecordingContext* commandContext =
+            ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
+
+        DAWN_TRY(GetDynamicUploader()->WithUploadReservation(
+            kZeroBufferSize, kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                memset(reservation.mappedPointer, 0u, kZeroBufferSize);
+
+                CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
+                                              reservation.offsetInBuffer, zeroBufferBase.Get(), 0,
+                                              kZeroBufferSize);
+
+                zeroBufferBase->SetInitialized(true);
+                return {};
+            }));
+    }
+
+    mZeroBuffer = ToBackend(zeroBufferBase);
+    return {};
 }
 
 MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
