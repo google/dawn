@@ -1264,11 +1264,11 @@ TEST_F(R8UnormStorageValidationTests, End2endUsage) {
     device.GetQueue().Submit(1, &commands);
 }
 
-// Check that it is not allowed to create
-// r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm texture with the storage usage
-// without TextureFormatsTier1.
+// Check that it is not allowed to create a kTier1AdditionalStorageFormats format
+// texture with the storage usage.
 TEST_F(StorageTextureValidationTests, TextureCreationWithoutFeature) {
-    for (const auto format : utils::kTier1TestFormats16Bit) {
+    for (const auto format : utils::kTier1AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
         wgpu::TextureDescriptor desc;
         desc.format = format;
         desc.usage = wgpu::TextureUsage::StorageBinding;
@@ -1278,10 +1278,10 @@ TEST_F(StorageTextureValidationTests, TextureCreationWithoutFeature) {
 }
 
 // Check that it is not allowed to create a BGL with a read-only or write-only
-// r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm storage texture
-// entry without TextureFormatsTier1.
+// kTier1AdditionalStorageFormat format storage texture entry.
 TEST_F(StorageTextureValidationTests, BGLEntryWithoutFeature) {
-    for (const auto format : utils::kTier1TestFormats16Bit) {
+    for (const auto format : utils::kTier1AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
         ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
             device,
             {{0, wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, format}}));
@@ -1297,10 +1297,11 @@ class TextureFormatsTier1StorageValidationTests : public StorageTextureValidatio
     }
 };
 
-// Check that it is allowed to create r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm
+// Check that it is allowed to create a kTier1AdditionalStorageFormats format
 // texture with the storage usage with TextureFormatsTier1.
 TEST_F(TextureFormatsTier1StorageValidationTests, TextureCreation) {
-    for (const auto format : utils::kTier1TestFormats16Bit) {
+    for (const auto format : utils::kTier1AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
         wgpu::TextureDescriptor desc;
         desc.format = format;
         desc.usage = wgpu::TextureUsage::StorageBinding;
@@ -1310,10 +1311,10 @@ TEST_F(TextureFormatsTier1StorageValidationTests, TextureCreation) {
 }
 
 // Check that it is allowed to create a BGL with a read-only or write-only
-// r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm storage texture
-// entry with TextureFormatsTier1.
+// kTier1AdditionalStorageFormat format storage texture entry with TextureFormatsTier1.
 TEST_F(TextureFormatsTier1StorageValidationTests, BGLEntry) {
-    for (const auto format : utils::kTier1TestFormats16Bit) {
+    for (const auto format : utils::kTier1AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
         utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment,
                                              wgpu::StorageTextureAccess::ReadOnly, format}});
         utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment,
