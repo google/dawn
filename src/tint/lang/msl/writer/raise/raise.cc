@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/builtin_scalarize.h"
+#include "src/tint/lang/core/ir/transform/change_immediate_to_uniform.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -151,11 +152,19 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
                   raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});
     RUN_TRANSFORM(raise::PackedVec3, module);
     RUN_TRANSFORM(raise::SimdBallot, module);
-
     // ArgumentBuffers must come before ModuleScopeVars
     if (options.use_argument_buffers) {
         RUN_TRANSFORM(raise::ArgumentBuffers, module);
     }
+
+    // ChangeImmediateToUniform must come before ModuleScopeVars
+    {
+        core::ir::transform::ChangeImmediateToUniformConfig config = {
+            .immediate_binding_point = options.immediate_binding_point,
+        };
+        RUN_TRANSFORM(core::ir::transform::ChangeImmediateToUniform, module, config);
+    }
+
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
 
     RUN_TRANSFORM(raise::BinaryPolyfill, module);

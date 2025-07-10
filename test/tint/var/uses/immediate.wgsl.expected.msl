@@ -1,17 +1,61 @@
-SKIP: FAILED
-
-immediate data is not supported by the MSL backend
-immediate data is not supported by the MSL backend
-immediate data is not supported by the MSL backend
 //
 // main1
 //
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant int* a;
+};
+
+void uses_a(tint_module_vars_struct tint_module_vars) {
+  int const foo = (*tint_module_vars.a);
+}
+
+kernel void main1(const constant int* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  uses_a(tint_module_vars);
+}
 //
 // main2
 //
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant int* a;
+};
+
+void uses_a(tint_module_vars_struct tint_module_vars) {
+  int const foo = (*tint_module_vars.a);
+}
+
+void uses_uses_a(tint_module_vars_struct tint_module_vars) {
+  uses_a(tint_module_vars);
+}
+
+kernel void main2(const constant int* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  uses_uses_a(tint_module_vars);
+}
 //
 // main3
 //
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant int* b;
+};
+
+void uses_b(tint_module_vars_struct tint_module_vars) {
+  int const foo = (*tint_module_vars.b);
+}
+
+kernel void main3(const constant int* b [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
+  uses_b(tint_module_vars);
+}
 //
 // main4
 //
@@ -20,5 +64,3 @@ using namespace metal;
 
 kernel void main4() {
 }
-
-tint executable returned error: exit status 1

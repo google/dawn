@@ -133,12 +133,14 @@ struct State {
 
 Result<SuccessType> ChangeImmediateToUniform(core::ir::Module& ir,
                                              const ChangeImmediateToUniformConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ChangeImmediateToUniform",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowClipDistancesOnF32,
-                                              core::ir::Capability::kAllowDuplicateBindings,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "core.ChangeImmediateToUniform",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowClipDistancesOnF32,
+                                    core::ir::Capability::kAllowDuplicateBindings,
+                                    core::ir::Capability::kAllowNonCoreTypes,
+                                    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                                });
     if (result != Success) {
         return result.Failure();
     }

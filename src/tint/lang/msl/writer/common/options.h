@@ -190,6 +190,9 @@ struct Options {
     /// The optional vertex pulling configuration.
     std::optional<VertexPullingConfig> vertex_pulling_config = {};
 
+    /// Immediate binding point info
+    std::optional<BindingPoint> immediate_binding_point = {};
+
     /// The bindings.
     Bindings bindings;
 
@@ -211,6 +214,7 @@ struct Options {
                  pixel_local_attachments,
                  array_length_from_uniform,
                  vertex_pulling_config,
+                 immediate_binding_point,
                  bindings);
 };
 
