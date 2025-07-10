@@ -588,14 +588,15 @@ using BuiltinInputTest = SpirvParserTestWithParam<BuiltinCase>;
 
 TEST_P(BuiltinInputTest, Enum) {
     auto params = GetParam();
-    EXPECT_IR(R"(
+    EXPECT_IR_SPV(R"(
+               OpCapability GroupNonUniform
                OpCapability Shader
                OpCapability SampleRateShading
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpDecorate %var BuiltIn )" +
-                  params.spirv_builtin + R"(
+                      params.spirv_builtin + R"(
        %void = OpTypeVoid
        %bool = OpTypeBool
         %u32 = OpTypeInt 32 0
@@ -607,7 +608,7 @@ TEST_P(BuiltinInputTest, Enum) {
     %fn_type = OpTypeFunction %void
 
  %_ptr_Input = OpTypePointer Input %)" +
-                  params.spirv_type + R"(
+                      params.spirv_type + R"(
         %var = OpVariable %_ptr_Input Input
 
        %main = OpFunction %void None %fn_type
@@ -615,7 +616,7 @@ TEST_P(BuiltinInputTest, Enum) {
                OpReturn
                OpFunctionEnd
 )",
-              params.ir);
+                  params.ir, SPV_ENV_VULKAN_1_1);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -666,6 +667,11 @@ INSTANTIATE_TEST_SUITE_P(
             "arr_u32_1",
             "SampleMask",
             "%1:ptr<__in, array<u32, 1>, read> = var undef @builtin(sample_mask)",
+        },
+        BuiltinCase{
+            "u32",
+            "SubgroupSize",
+            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_size)",
         },
         BuiltinCase{
             "u32",
