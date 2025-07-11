@@ -1822,6 +1822,41 @@ fn main() {
     EXPECT_EQ(inspector::ResourceBinding::SampledKind::kSInt, result[1].sampled_kind);
 }
 
+TEST_F(InspectorGetResourceBindingsTest, TexelBuffer) {
+    auto* src = R"(
+
+@group(0) @binding(0) var tb_read: texel_buffer<rgba8uint, read>;
+@group(2) @binding(1) var tb_rw: texel_buffer<r32sint, read_write>;
+
+fn use_tb() {
+  _ = textureDimensions(tb_read);
+  textureStore(tb_rw, 0u, vec4<i32>());
+}
+
+@fragment
+fn main() { use_tb(); }
+)";
+
+    Inspector& inspector = Initialize(src);
+    auto result = inspector.GetResourceBindings("main");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+    ASSERT_EQ(2u, result.size());
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyTexelBuffer, result[0].resource_type);
+    EXPECT_EQ(0u, result[0].bind_group);
+    EXPECT_EQ(0u, result[0].binding);
+    EXPECT_EQ(ResourceBinding::TextureDimension::k1d, result[0].dim);
+    EXPECT_EQ(ResourceBinding::TexelFormat::kRgba8Uint, result[0].image_format);
+    EXPECT_EQ(ResourceBinding::SampledKind::kUInt, result[0].sampled_kind);
+
+    EXPECT_EQ(ResourceBinding::ResourceType::kReadWriteTexelBuffer, result[1].resource_type);
+    EXPECT_EQ(2u, result[1].bind_group);
+    EXPECT_EQ(1u, result[1].binding);
+    EXPECT_EQ(ResourceBinding::TextureDimension::k1d, result[1].dim);
+    EXPECT_EQ(ResourceBinding::TexelFormat::kR32Sint, result[1].image_format);
+    EXPECT_EQ(ResourceBinding::SampledKind::kSInt, result[1].sampled_kind);
+}
+
 TEST_F(InspectorGetResourceBindingsTest, MissingEntryPoint) {
     auto* src = R"()";
     Inspector& inspector = Initialize(src);

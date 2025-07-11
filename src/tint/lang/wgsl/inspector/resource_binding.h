@@ -122,6 +122,8 @@ struct ResourceBinding {
         kDepthTexture,
         kDepthMultisampledTexture,
         kExternalTexture,
+        kReadOnlyTexelBuffer,
+        kReadWriteTexelBuffer,
         kInputAttachment,
     };
 
