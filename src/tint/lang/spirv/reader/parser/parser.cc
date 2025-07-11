@@ -2137,6 +2137,9 @@ class Parser {
                 case spv::Op::OpGroupNonUniformAny:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAny);
                     break;
+                case spv::Op::OpGroupNonUniformElect:
+                    EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupElect);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
