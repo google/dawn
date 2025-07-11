@@ -1697,5 +1697,36 @@ TEST_F(SpirvParserTest, OuterProductVec3Vec2) {
 )");
 }
 
+TEST_F(SpirvParserTest, NonUniformAll_Scalar) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformVote
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformAll %bool %uint_3 %true
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = subgroupAll true
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

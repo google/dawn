@@ -2130,11 +2130,26 @@ class Parser {
                 case spv::Op::OpPhi:
                     EmitPhi(inst);
                     break;
+
+                case spv::Op::OpGroupNonUniformAll:
+                    EmitSubgroupAll(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    void EmitSubgroupAll(spvtools::opt::Instruction& inst) {
+        uint32_t scope = inst.GetSingleWordInOperand(0);
+
+        if (static_cast<spv::Scope>(scope) != spv::Scope::Subgroup) {
+            TINT_ICE() << "subgroup scope required for GroupNonUniform instructions";
+        }
+
+        Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kSubgroupAll, Args(inst, 3)),
+             inst.result_id());
     }
 
     struct IfBranchValue {
