@@ -614,6 +614,8 @@ class Parser {
                 return core::BuiltinValue::kSampleMask;
             case spv::BuiltIn::SubgroupSize:
                 return core::BuiltinValue::kSubgroupSize;
+            case spv::BuiltIn::SubgroupLocalInvocationId:
+                return core::BuiltinValue::kSubgroupInvocationId;
             case spv::BuiltIn::VertexIndex:
                 return core::BuiltinValue::kVertexIndex;
             case spv::BuiltIn::WorkgroupId:

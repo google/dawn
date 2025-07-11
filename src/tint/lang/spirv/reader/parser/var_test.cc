@@ -675,6 +675,11 @@ INSTANTIATE_TEST_SUITE_P(
         },
         BuiltinCase{
             "u32",
+            "SubgroupLocalInvocationId",
+            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_invocation_id)",
+        },
+        BuiltinCase{
+            "u32",
             "VertexIndex",
             "%1:ptr<__in, u32, read> = var undef @builtin(vertex_index)",
         },
