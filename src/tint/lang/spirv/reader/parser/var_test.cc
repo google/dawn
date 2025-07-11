@@ -670,6 +670,11 @@ INSTANTIATE_TEST_SUITE_P(
         },
         BuiltinCase{
             "u32",
+            "SubgroupId",
+            "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_id)",
+        },
+        BuiltinCase{
+            "u32",
             "SubgroupSize",
             "%1:ptr<__in, u32, read> = var undef @builtin(subgroup_size)",
         },
