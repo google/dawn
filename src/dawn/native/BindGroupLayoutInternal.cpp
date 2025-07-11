@@ -49,6 +49,7 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/ValidationUtils_autogen.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 
 namespace dawn::native {
 
@@ -77,6 +78,8 @@ MaybeError ValidateStorageTextureFormat(DeviceBase* device,
     // TODO(427681156): Remove this deprecation warning
     if (storageTextureFormat == wgpu::TextureFormat::BGRA8Unorm &&
         access == wgpu::StorageTextureAccess::ReadOnly) {
+        DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "BGRA8UnormStorageTextureReadOnlyUsage",
+                               true);
         device->EmitWarningOnce(
             "bgra8unorm with read-only access is deprecated. bgra8unorm only supports write-only "
             "access. Note: allowing this usage was a bug in Chrome. The spec disallows it as it is "
