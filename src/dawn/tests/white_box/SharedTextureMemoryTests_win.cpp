@@ -306,7 +306,6 @@ class Backend : public SharedTextureMemoryTestBackend {
                     case Mode::D3D11Texture2D: {
                         native::d3d11::SharedTextureMemoryD3D11Texture2DDescriptor texture2DDesc;
                         texture2DDesc.texture = d3d11Texture;
-                        texture2DDesc.requiresEndAccessFence = mRequiresEndAccessFence;
 
                         wgpu::SharedTextureMemoryDescriptor desc;
                         desc.nextInChain = &texture2DDesc;
@@ -600,15 +599,13 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,
                                   Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
                                  {1});
 
-DAWN_INSTANTIATE_PREFIXED_TEST_P(
-    D3D,
-    SharedTextureMemoryTests,
-    {D3D11Backend(), D3D11Backend({"d3d11_delay_flush_to_gpu"}),
-     D3D11Backend({"d3d11_disable_fence"}), D3D12Backend()},
-    {Backend::GetInstance<Mode::DXGISharedHandle>(),
-     Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>(),
-     Backend::GetInstanceWithoutEndAccessFence<Mode::DXGISharedHandle>()},
-    {1});
+DAWN_INSTANTIATE_PREFIXED_TEST_P(D3D,
+                                 SharedTextureMemoryTests,
+                                 {D3D11Backend(), D3D11Backend({"d3d11_delay_flush_to_gpu"}),
+                                  D3D11Backend({"d3d11_disable_fence"}), D3D12Backend()},
+                                 {Backend::GetInstance<Mode::DXGISharedHandle>(),
+                                  Backend::GetKeyedMutexInstance<Mode::DXGISharedHandle>()},
+                                 {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(
     D3D11,
