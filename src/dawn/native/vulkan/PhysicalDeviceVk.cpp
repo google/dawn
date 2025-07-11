@@ -548,7 +548,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
     }
 
-    if (SupportsBufferMapExtendedUsages(mDeviceInfo)) {
+    // Using mappable buffers on Windows + NVIDIA is significantly slower and
+    // causes test timeouts.
+    if (!IsWinNvidia() && SupportsBufferMapExtendedUsages(mDeviceInfo)) {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
@@ -1080,6 +1082,14 @@ bool PhysicalDevice::IsIntelMesa() const {
         return mDeviceInfo.driverProperties.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA_KHR;
     }
     return false;
+}
+
+bool PhysicalDevice::IsWinNvidia() const {
+#if DAWN_PLATFORM_IS(WINDOWS)
+    return gpu_info::IsNvidia(GetVendorId());
+#else
+    return false;
+#endif
 }
 
 bool PhysicalDevice::IsSwiftshader() const {

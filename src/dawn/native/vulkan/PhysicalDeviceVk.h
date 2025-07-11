@@ -67,6 +67,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsIntelMesa() const;
     bool IsAndroidHuawei() const;
     bool IsSwiftshader() const;
+    bool IsWinNvidia() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 

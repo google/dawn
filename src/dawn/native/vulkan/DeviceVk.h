@@ -218,8 +218,6 @@ class Device final : public DeviceBase {
 
     Ref<QuerySetBase> mEmptyPassQuerySet;
 
-    bool mSupportsMappableStorageBuffer = false;
-
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,
                                    VkImage image,

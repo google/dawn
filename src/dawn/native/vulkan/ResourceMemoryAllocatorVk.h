@@ -113,8 +113,11 @@ class ResourceMemoryAllocator {
         VkDeviceSize mTotalSize = 0;
     };
 
+    VkMemoryPropertyFlags GetRequiredMemoryPropertyFlags(MemoryKind memoryKind) const;
+
     raw_ptr<Device> mDevice;
     const VkDeviceSize mMaxSizeForSuballocation;
+    bool mUseHostCachedForMappable = false;
 
     class SingleTypeAllocator;
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;

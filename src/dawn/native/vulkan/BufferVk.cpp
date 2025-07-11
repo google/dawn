@@ -174,11 +174,6 @@ MemoryKind GetMemoryKindFor(wgpu::BufferUsage bufferUsage) {
         kReadOnlyStorageBuffer | kIndirectBufferForBackendResourceTracking;
     if (bufferUsage & kDeviceLocalBufferUsages) {
         requestKind |= MemoryKind::DeviceLocal;
-        // All mappable buffers with extended buffer usages should be allocated on the memory type
-        // with `VK_MEMORY_PROPERTY_HOST_CACHED_BIT`.
-        if (bufferUsage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
-            requestKind |= MemoryKind::HostCached;
-        }
     }
 
     return requestKind;
