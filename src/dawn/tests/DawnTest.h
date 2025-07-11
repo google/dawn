@@ -678,6 +678,10 @@ class DawnTestBase {
     virtual void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
                                    dawn::utils::ComboLimits& required);
 
+    // Called in SetUp() to check if 'SetUseTieredLimits' should be set to true on the backend
+    // adapter.
+    virtual bool GetRequireUseTieredLimits();
+
     const TestAdapterProperties& GetAdapterProperties() const;
 
     const dawn::utils::ComboLimits& GetAdapterLimits();
@@ -767,6 +771,7 @@ class DawnTestBase {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
+    bool mRequireUseTieredLimits = false;
     native::Adapter mBackendAdapter;
     WGPUDevice mLastCreatedBackendDevice;
 
