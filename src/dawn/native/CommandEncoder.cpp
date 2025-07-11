@@ -120,7 +120,6 @@ class RenderPassValidationState final : public NonMovable {
         }
 
         DAWN_ASSERT(attachment->GetLevelCount() == 1);
-        DAWN_ASSERT(attachment->GetLayerCount() == 1);
 
         const std::string_view attachmentTypeStr = GetAttachmentTypeStr(attachmentType);
 
@@ -282,6 +281,31 @@ class RenderPassValidationState final : public NonMovable {
         mRecords.push_back(record);
 
         return {};
+    }
+
+    // Only sets the values needed for executing the render pass, used when validation is disabled.
+    void SetUnvalidatedAttachment(const TextureViewBase* attachment) {
+        // Should only be called once.
+        DAWN_ASSERT(!HasAttachment());
+
+        DAWN_ASSERT(attachment);
+        DAWN_ASSERT(attachment->GetLevelCount() == 1);
+
+        Extent3D renderSize = attachment->GetSingleSubresourceVirtualSize();
+        mRenderWidth = renderSize.width;
+        mRenderHeight = renderSize.height;
+        mAttachmentValidationWidth = mRenderWidth;
+        mAttachmentValidationHeight = mRenderHeight;
+        mSampleCount = attachment->GetTexture()->GetSampleCount();
+
+        DAWN_ASSERT(mRenderWidth != 0);
+        DAWN_ASSERT(mRenderHeight != 0);
+        DAWN_ASSERT(mSampleCount != 0);
+
+        RecordedAttachment record;
+        record.texture = attachment->GetTexture();
+        record.mipLevel = attachment->GetBaseMipLevel();
+        mRecords.push_back(record);
     }
 
     bool HasAttachment() const { return !mRecords.empty(); }
@@ -882,32 +906,44 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
 
 // Adds a single attachment to the validation state to ensure that it is valid and can report a
 // render width and height.
-MaybeError InitializeValidationStateAttachment(UnpackedPtr<RenderPassDescriptor> descriptor,
+MaybeError InitializeValidationStateAttachment(DeviceBase* device,
+                                               UnpackedPtr<RenderPassDescriptor> descriptor,
                                                RenderPassValidationState* validationState) {
+    TextureViewBase* representativeView = nullptr;
+
+    // Check every attachment to guard against invalid objects caused by OOM errors.
+    auto CheckAttachment = [&](TextureViewBase* view) -> MaybeError {
+        DAWN_ASSERT(view);
+        DAWN_TRY(device->IsNotErrorObject(view));
+        representativeView = view;
+        return {};
+    };
+
+    auto pls = descriptor.Get<RenderPassPixelLocalStorage>();
+    if (pls != nullptr && pls->storageAttachmentCount > 0) {
+        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
+            const RenderPassStorageAttachment& attachment = pls->storageAttachments[i];
+            DAWN_TRY(CheckAttachment(attachment.storage));
+        }
+    }
+
     if (descriptor->depthStencilAttachment != nullptr) {
-        DAWN_TRY(validationState->AddAttachment(descriptor->depthStencilAttachment->view,
-                                                AttachmentType::DepthStencilAttachment));
-    } else {
-        for (size_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
-            const RenderPassColorAttachment& colorAttachment = descriptor->colorAttachments[i];
-            if (colorAttachment.view != nullptr) {
-                DAWN_TRY(validationState->AddAttachment(colorAttachment.view,
-                                                        AttachmentType::ColorAttachment,
-                                                        colorAttachment.depthSlice));
-                break;
+        DAWN_TRY(CheckAttachment(descriptor->depthStencilAttachment->view));
+    }
+
+    for (size_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
+        const RenderPassColorAttachment& colorAttachment = descriptor->colorAttachments[i];
+        if (colorAttachment.view != nullptr) {
+            DAWN_TRY(CheckAttachment(colorAttachment.view));
+            if (colorAttachment.resolveTarget != nullptr) {
+                DAWN_TRY(device->IsNotErrorObject(colorAttachment.resolveTarget));
             }
         }
     }
 
-    if (!validationState->HasAttachment()) {
-        // It's also possible that pixel local storage contains the only attachments.
-        auto pls = descriptor.Get<RenderPassPixelLocalStorage>();
-        if (pls != nullptr && pls->storageAttachmentCount > 0) {
-            const RenderPassStorageAttachment& attachment = pls->storageAttachments[0];
-            DAWN_TRY(validationState->AddAttachment(attachment.storage,
-                                                    AttachmentType::StorageAttachment));
-        }
-    }
+    // Only one attachment needs to be added to the validation state.
+    DAWN_ASSERT(representativeView);
+    validationState->SetUnvalidatedAttachment(representativeView);
 
     return {};
 }
@@ -1319,7 +1355,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             } else {
                 // If validation is skipped at least one attachment still needs to be added to the
                 // validation state to compute the render width and height from.
-                DAWN_TRY(InitializeValidationStateAttachment(descriptor, &validationState));
+                DAWN_TRY(InitializeValidationStateAttachment(device, descriptor, &validationState));
             }
 
             DAWN_ASSERT(validationState.IsValidState());

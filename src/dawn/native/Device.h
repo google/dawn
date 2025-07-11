@@ -133,6 +133,9 @@ class DeviceBase : public ErrorSink,
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
+    // Similar to ValidateObject, but skips the Device check. Asserts that validation is disabled.
+    MaybeError IsNotErrorObject(const ApiObjectBase* object) const;
+
     InstanceBase* GetInstance() const;
     AdapterBase* GetAdapter() const;
     PhysicalDeviceBase* GetPhysicalDevice() const;

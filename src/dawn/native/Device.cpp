@@ -910,6 +910,14 @@ MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
     return {};
 }
 
+MaybeError DeviceBase::IsNotErrorObject(const ApiObjectBase* object) const {
+    DAWN_ASSERT(!IsValidationEnabled());
+    DAWN_ASSERT(object != nullptr);
+    DAWN_INVALID_IF(object->IsError(), "%s is invalid.", object);
+
+    return {};
+}
+
 MaybeError DeviceBase::ValidateIsAlive() const {
     DAWN_INVALID_IF(mState != State::Alive, "%s is lost.", this);
     return {};
