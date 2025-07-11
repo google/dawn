@@ -40,10 +40,6 @@
 #include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
-namespace dawn::native::d3d {
-class ExternalImageDXGIImpl;
-}  // namespace dawn::native::d3d
-
 namespace dawn::native::d3d12 {
 
 class PlatformFunctions;

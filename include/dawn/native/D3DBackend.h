@@ -39,8 +39,6 @@
 
 namespace dawn::native::d3d {
 
-class ExternalImageDXGIImpl;
-
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<IDXGIAdapter> GetDXGIAdapter(WGPUAdapter adapter);
 
 // Can be chained in WGPURequestAdapterOptions
