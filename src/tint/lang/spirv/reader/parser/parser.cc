@@ -2132,7 +2132,10 @@ class Parser {
                     break;
 
                 case spv::Op::OpGroupNonUniformAll:
-                    EmitSubgroupAll(inst);
+                    EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAll);
+                    break;
+                case spv::Op::OpGroupNonUniformAny:
+                    EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAny);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -2141,15 +2144,14 @@ class Parser {
         }
     }
 
-    void EmitSubgroupAll(spvtools::opt::Instruction& inst) {
+    void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
         uint32_t scope = inst.GetSingleWordInOperand(0);
 
         if (static_cast<spv::Scope>(scope) != spv::Scope::Subgroup) {
             TINT_ICE() << "subgroup scope required for GroupNonUniform instructions";
         }
 
-        Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kSubgroupAll, Args(inst, 3)),
-             inst.result_id());
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 3)), inst.result_id());
     }
 
     struct IfBranchValue {
