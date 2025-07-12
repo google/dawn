@@ -338,10 +338,10 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
 bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
                                         wgpu::TextureFormat textureFormat);
 
-#ifndef __EMSCRIPTEN__
 bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat);
 bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat);
 
+#ifndef __EMSCRIPTEN__
 bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat);
 uint32_t GetMultiPlaneTextureBitDepth(wgpu::TextureFormat textureFormat);
 uint32_t GetMultiPlaneTextureNumPlanes(wgpu::TextureFormat textureFormat);
