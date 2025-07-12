@@ -70,10 +70,22 @@
     // These appear in the final build result so should be kept minimal.
     globalThis.WEBGPU_INT_TO_STRING_TABLES = `
         {% for type in by_category["enum"] if not type.json_data.get("emscripten_no_enum_table") %}
-            {{type.name.CamelCase()}}: {% if type.contiguousFromZero -%}
+            //* Use an array if the enum is contiguous, allowing up to an arbitrary 10 blank entries
+            //* at the start before falling back to the object syntax.
+            {{type.name.CamelCase()}}: {% if type.contiguous and type.startValue < 10 -%}
                 [
+                    {% for i in range(type.startValue) %}
+                        ,
+                    {% endfor %}
                     {% for value in type.values %}
-                        {{as_jsEnumValue(value)}},
+                        {% set jsEnumValue = as_jsEnumValue(value) %}
+                        {% if jsEnumValue == 'undefined' %}
+                            //* Blank array element rather than explicit undefined, which mostly
+                            //* has the same effect but saves code size.
+                            ,
+                        {% else %}
+                            {{ jsEnumValue }},
+                        {% endif %}
                     {% endfor %}
                 ]
             {%- else -%}

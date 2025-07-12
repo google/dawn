@@ -308,6 +308,7 @@ if (EMSCRIPTEN)
     if (${DAWN_BUILD_TESTS})
         set(emdawnwebgpu_test_sources
             "tests/FuturesTests.cpp"
+            "tests/SpotTests.cpp"
         )
         set(emdawnwebgpu_test_deps
             dawn::dawn_wgpu_utils

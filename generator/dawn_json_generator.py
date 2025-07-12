@@ -142,8 +142,9 @@ class EnumType(Type):
 
         self.values = []
         self.hasUndefined = False
-        self.contiguousFromZero = True
-        lastValue = -1
+        self.contiguous = True
+        self.startValue = None
+        lastValue = None
         for m in self.json_data['values']:
             if not is_enabled(m):
                 continue
@@ -182,8 +183,10 @@ class EnumType(Type):
 
             if value_name == "undefined":
                 self.hasUndefined = True
-            if value != lastValue + 1:
-                self.contiguousFromZero = False
+            if lastValue == None:
+                self.startValue = value
+            elif value != lastValue + 1:
+                self.contiguous = False
             lastValue = value
             self.values.append(
                 EnumValue(Name(value_name), value, m.get('valid', True), m))
