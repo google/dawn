@@ -56,7 +56,7 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
     WGPUWaitStatus APIWaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
 
     bool APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
-    WGPUStatus APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
+    void APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
 
     WGPUSurface APICreateSurface(const WGPUSurfaceDescriptor* desc) const;
 

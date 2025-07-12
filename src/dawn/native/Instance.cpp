@@ -733,8 +733,7 @@ bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName featu
     return mWGSLFeatures.contains(feature);
 }
 
-wgpu::Status InstanceBase::APIGetWGSLLanguageFeatures(
-    SupportedWGSLLanguageFeatures* features) const {
+void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const {
     DAWN_ASSERT(features != nullptr);
 
     size_t featureCount = mWGSLFeatures.size();
@@ -747,7 +746,6 @@ wgpu::Status InstanceBase::APIGetWGSLLanguageFeatures(
 
     features->featureCount = featureCount;
     features->features = wgslFeatures;
-    return wgpu::Status::Success;
 }
 
 void APISupportedWGSLLanguageFeaturesFreeMembers(

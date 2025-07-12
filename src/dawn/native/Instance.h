@@ -152,7 +152,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
                                               FutureWaitInfo* futures,
                                               uint64_t timeoutNS);
     bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
-    wgpu::Status APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
+    void APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
 
     void DisconnectDawnPlatform();
 

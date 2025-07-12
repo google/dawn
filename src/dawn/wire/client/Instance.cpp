@@ -291,11 +291,8 @@ bool Instance::APIHasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) co
     return mWGSLFeatures.contains(feature);
 }
 
-WGPUStatus Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
-    if (features == nullptr) {
-        return WGPUStatus_Error;
-    }
-
+void Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
+    DAWN_ASSERT(features != nullptr);
     size_t featureCount = mWGSLFeatures.size();
     WGPUWGSLLanguageFeatureName* wgslFeatures = new WGPUWGSLLanguageFeatureName[featureCount];
     uint32_t index = 0;
@@ -306,7 +303,6 @@ WGPUStatus Instance::APIGetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeature
 
     features->featureCount = featureCount;
     features->features = wgslFeatures;
-    return WGPUStatus_Success;
 }
 
 WGPUSurface Instance::APICreateSurface(const WGPUSurfaceDescriptor* desc) const {

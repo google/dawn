@@ -2463,7 +2463,6 @@
             },
             {
                 "name": "get WGSL language features",
-                "returns": "status",
                 "args": [
                     {"name": "features", "type": "supported WGSL language features", "annotation": "*"}
                 ]
