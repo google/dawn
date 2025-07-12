@@ -324,9 +324,12 @@ if (EMSCRIPTEN)
             PUBLIC
                 ${emdawnwebgpu_test_deps}
         )
-        target_link_options(emdawnwebgpu_tests_asyncify PUBLIC
-            # We need Asyncify or JSPI for Future tests.
-            "-sASYNCIFY=1"
+        target_link_options(emdawnwebgpu_tests_asyncify
+            PUBLIC
+                # We need Asyncify or JSPI for Future tests.
+                "-sASYNCIFY=1"
+                # Test that Closure minification and externs work.
+                "$<$<CONFIG:Release>:--closure=1>"
         )
 
         add_executable(emdawnwebgpu_tests_jspi ${emdawnwebgpu_test_sources})
@@ -337,9 +340,12 @@ if (EMSCRIPTEN)
             PUBLIC
                 ${emdawnwebgpu_test_deps}
         )
-        target_link_options(emdawnwebgpu_tests_jspi PUBLIC
-            # We need Asyncify or JSPI for Future tests.
-            "-sJSPI=1"
+        target_link_options(emdawnwebgpu_tests_jspi
+            PUBLIC
+                # We need Asyncify or JSPI for Future tests.
+                "-sJSPI=1"
+                # Test that Closure minification and externs work.
+                "$<$<CONFIG:Release>:--closure=1>"
         )
 
         DawnJSONGenerator(

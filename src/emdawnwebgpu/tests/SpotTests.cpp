@@ -88,4 +88,12 @@ TEST_F(SpotTests, QuerySet) {
     EXPECT_EQ(querySet.GetType(), querySetDesc.type);
 }
 
+TEST_F(SpotTests, BufferGetMapState) {
+    // Spot test one of the string-to-int tables (Int_BufferMapState) to make sure
+    // that Closure's minification didn't minify its keys.
+    wgpu::BufferDescriptor bufferDesc{.usage = wgpu::BufferUsage::CopyDst, .size = 4};
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
+}
+
 }  // namespace

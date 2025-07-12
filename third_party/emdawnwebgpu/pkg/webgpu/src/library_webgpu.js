@@ -621,12 +621,12 @@ var LibraryWebGPU = {
       {{{ makeSetValue('infoStruct', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
     },
 
-    // Maps from enum string back to enum number, for callbacks.
-    {{{ WEBGPU_STRING_TO_INT_TABLES }}}
-
     // Maps from enum number to enum string.
     {{{ WEBGPU_INT_TO_STRING_TABLES }}}
   },
+
+  // Maps from enum string back to enum number, for callbacks.
+  {{{ WEBGPU_STRING_TO_INT_TABLES }}}
 
   // TODO(crbug.com/374150686): Remove this once it has been fully deprecated in users.
   emscripten_webgpu_get_device__deps: ['wgpuDeviceAddRef'],
@@ -695,10 +695,11 @@ var LibraryWebGPU = {
   },
 #endif
 
+  emwgpuGetPreferredFormat__deps: ['$emwgpuStringToInt_PreferredFormat'],
   emwgpuGetPreferredFormat__sig: 'i',
   emwgpuGetPreferredFormat: () => {
     var format = navigator["gpu"]["getPreferredCanvasFormat"]();
-    return WebGPU.Int_PreferredFormat[format];
+    return emwgpuStringToInt_PreferredFormat[format];
   },
 
   // --------------------------------------------------------------------------
@@ -764,7 +765,7 @@ var LibraryWebGPU = {
     return adapter.features.has(WebGPU.FeatureName[featureEnumValue]);
   },
 
-  emwgpuAdapterRequestDevice__deps: ['emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
+  emwgpuAdapterRequestDevice__deps: ['emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError', '$emwgpuStringToInt_DeviceLostReason'],
   emwgpuAdapterRequestDevice__sig: 'vpjjppp',
   emwgpuAdapterRequestDevice: (adapterPtr, futureId, deviceLostFutureId, devicePtr, queuePtr, descriptor) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
@@ -867,7 +868,7 @@ var LibraryWebGPU = {
           device.onuncapturederror = (ev) => {};
           var sp = stackSave();
           var messagePtr = stringToUTF8OnStack(info.message);
-          _emwgpuOnDeviceLostCompleted(deviceLostFutureId, WebGPU.Int_DeviceLostReason[info.reason],
+          _emwgpuOnDeviceLostCompleted(deviceLostFutureId, emwgpuStringToInt_DeviceLostReason[info.reason],
             {{{ gpu.passAsPointer('messagePtr') }}});
           stackRestore(sp);
         }));
@@ -2371,7 +2372,7 @@ var LibraryWebGPU = {
   // Methods of ShaderModule
   // --------------------------------------------------------------------------
 
-  emwgpuShaderModuleGetCompilationInfo__deps: ['emwgpuOnCompilationInfoCompleted', '$stringToUTF8', '$lengthBytesUTF8', 'malloc'],
+  emwgpuShaderModuleGetCompilationInfo__deps: ['emwgpuOnCompilationInfoCompleted', '$stringToUTF8', '$lengthBytesUTF8', 'malloc', '$emwgpuStringToInt_CompilationMessageType'],
   emwgpuShaderModuleGetCompilationInfo__sig: 'vpjp',
   emwgpuShaderModuleGetCompilationInfo: (shaderModulePtr, futureId, compilationInfoPtr) => {
     var shaderModule = WebGPU.getJsObject(shaderModulePtr);
@@ -2404,7 +2405,7 @@ var LibraryWebGPU = {
         // TODO: Convert JavaScript's UTF-16-code-unit offsets to UTF-8-code-unit offsets.
         // https://github.com/webgpu-native/webgpu-headers/issues/246
         {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.nextInChain, 'utf16Ptr', '*') }}};
-        {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.type, 'WebGPU.Int_CompilationMessageType[compilationMessage.type]', 'i32') }}};
+        {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.type, 'emwgpuStringToInt_CompilationMessageType[compilationMessage.type]', 'i32') }}};
         {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.lineNum, 'compilationMessage.lineNum', 'i64') }}};
         {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.linePos, 'compilationMessage.linePos', 'i64') }}};
         {{{ makeSetValue('compilationMessagePtr', C_STRUCTS.WGPUCompilationMessage.offset, 'compilationMessage.offset', 'i64') }}};
