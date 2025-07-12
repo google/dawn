@@ -672,7 +672,7 @@ hooks = [
 
   # Activate emsdk for WebAssembly builds
   {
-    'name': 'activate_emsdk_linux',
+    'name': 'activate_emsdk',
     'pattern': '.',
     'condition': 'dawn_wasm',
     'action': [ 'python3', 'tools/activate-emsdk' ],
