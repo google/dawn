@@ -113,7 +113,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     mUnitsForSamplers.resize(layout->GetNumSamplers());
     mUnitsForTextures.resize(layout->GetNumSampledTextures());
 
-    GLuint textureUnit = layout->GetTextureUnitsUsed();
+    GLuint textureUnit = 0;
     for (const auto& combined : combinedSamplers) {
         std::string name = combined.GetName();
         GLint location = DAWN_GL_TRY(gl, GetUniformLocation(mProgram, name.c_str()));
@@ -124,31 +124,24 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
 
         DAWN_GL_TRY(gl, Uniform1i(location, textureUnit));
 
-        bool shouldUseFiltering;
-        {
-            const BindGroupLayoutInternalBase* bgl =
-                layout->GetBindGroupLayout(combined.textureLocation.group);
-            BindingIndex bindingIndex = bgl->GetBindingIndex(combined.textureLocation.binding);
+        const BindGroupLayoutInternalBase* textureBgl =
+            layout->GetBindGroupLayout(combined.textureLocation.group);
+        BindingIndex textureBindingIndex =
+            textureBgl->GetBindingIndex(combined.textureLocation.binding);
 
-            GLuint textureIndex = indices[combined.textureLocation.group][bindingIndex];
-            mUnitsForTextures[textureIndex].push_back(textureUnit);
+        GLuint textureGLIndex = indices[combined.textureLocation.group][textureBindingIndex];
+        mUnitsForTextures[textureGLIndex].push_back(textureUnit);
 
-            const auto& bindingLayout = bgl->GetBindingInfo(bindingIndex).bindingLayout;
-            auto sampleType = std::get<TextureBindingInfo>(bindingLayout).sampleType;
-            shouldUseFiltering = sampleType == wgpu::TextureSampleType::Float ||
-                                 sampleType == wgpu::TextureSampleType::Depth;
-        }
-        {
-            if (!combined.samplerLocation) {
-                mPlaceholderSamplerUnits.push_back(textureUnit);
-            } else {
-                const BindGroupLayoutInternalBase* bgl =
-                    layout->GetBindGroupLayout(combined.samplerLocation->group);
-                BindingIndex bindingIndex = bgl->GetBindingIndex(combined.samplerLocation->binding);
+        if (!combined.samplerLocation) {
+            mPlaceholderSamplerUnits.push_back(textureUnit);
+        } else {
+            const BindGroupLayoutInternalBase* samplerBgl =
+                layout->GetBindGroupLayout(combined.samplerLocation->group);
+            BindingIndex samplerBindingIndex =
+                samplerBgl->GetBindingIndex(combined.samplerLocation->binding);
 
-                GLuint samplerIndex = indices[combined.samplerLocation->group][bindingIndex];
-                mUnitsForSamplers[samplerIndex].push_back({textureUnit, shouldUseFiltering});
-            }
+            GLuint samplerGLIndex = indices[combined.samplerLocation->group][samplerBindingIndex];
+            mUnitsForSamplers[samplerGLIndex].push_back(textureUnit);
         }
 
         textureUnit++;
@@ -176,8 +169,7 @@ void PipelineGL::DeleteProgram(const OpenGLFunctions& gl) {
     DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteProgram(mProgram));
 }
 
-const std::vector<PipelineGL::SamplerUnit>& PipelineGL::GetTextureUnitsForSampler(
-    GLuint index) const {
+const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
     DAWN_ASSERT(index < mUnitsForSamplers.size());
     return mUnitsForSamplers[index];
 }
@@ -195,7 +187,7 @@ MaybeError PipelineGL::ApplyNow(const OpenGLFunctions& gl, const PipelineLayout*
     DAWN_GL_TRY(gl, UseProgram(mProgram));
     for (GLuint unit : mPlaceholderSamplerUnits) {
         DAWN_ASSERT(mPlaceholderSampler.Get() != nullptr);
-        DAWN_GL_TRY(gl, BindSampler(unit, mPlaceholderSampler->GetNonFilteringHandle()));
+        DAWN_GL_TRY(gl, BindSampler(unit, mPlaceholderSampler->GetHandle()));
     }
 
     return {};

@@ -55,7 +55,6 @@ class PipelineLayout final : public PipelineLayoutBase {
     using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, GLuint>>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
 
-    GLuint GetTextureUnitsUsed() const;
     size_t GetNumSamplers() const;
     size_t GetNumSampledTextures() const;
     size_t GetNumSSBO() const;

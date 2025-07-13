@@ -57,13 +57,7 @@ class PipelineGL {
     PipelineGL();
     ~PipelineGL();
 
-    // For each unit a sampler is bound to we need to know if we should use filtering or not
-    // because int and uint texture are only complete without filtering.
-    struct SamplerUnit {
-        GLuint unit;
-        bool shouldUseFiltering;
-    };
-    const std::vector<SamplerUnit>& GetTextureUnitsForSampler(GLuint index) const;
+    const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
     const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
     GLuint GetProgramHandle() const;
 
@@ -85,7 +79,7 @@ class PipelineGL {
 
   private:
     GLuint mProgram;
-    std::vector<std::vector<SamplerUnit>> mUnitsForSamplers;
+    std::vector<std::vector<GLuint>> mUnitsForSamplers;
     std::vector<std::vector<GLuint>> mUnitsForTextures;
     std::vector<GLuint> mPlaceholderSamplerUnits;
     // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device

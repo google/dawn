@@ -102,10 +102,6 @@ const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() co
     return mIndexInfo;
 }
 
-GLuint PipelineLayout::GetTextureUnitsUsed() const {
-    return 0;
-}
-
 size_t PipelineLayout::GetNumSamplers() const {
     return mNumSamplers;
 }

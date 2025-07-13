@@ -310,14 +310,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     MaybeError BindSamplerAtIndex(const OpenGLFunctions& gl, SamplerBase* s, GLuint samplerIndex) {
         Sampler* sampler = ToBackend(s);
 
-        for (PipelineGL::SamplerUnit unit : mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
-            // Only use filtering for certain texture units, because int
-            // and uint texture are only complete without filtering
-            if (unit.shouldUseFiltering) {
-                DAWN_GL_TRY(gl, BindSampler(unit.unit, sampler->GetFilteringHandle()));
-            } else {
-                DAWN_GL_TRY(gl, BindSampler(unit.unit, sampler->GetNonFilteringHandle()));
-            }
+        for (GLuint unit : mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
+            DAWN_GL_TRY(gl, BindSampler(unit, sampler->GetHandle()));
         }
 
         return {};
