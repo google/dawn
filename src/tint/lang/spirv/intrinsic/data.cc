@@ -12068,6 +12068,13 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(294),
   },
+  {
+    /* [105] */
+    /* fn group_non_uniform_shuffle_up[T : scalar](scope: u32, value: T, delta: u32) -> T */
+    /* fn group_non_uniform_shuffle_up[N : num, T : scalar](scope: u32, value: vec<N, T>, delta: u32) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(294),
+  },
 };
 
 // clang-format on
