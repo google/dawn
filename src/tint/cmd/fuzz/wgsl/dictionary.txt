@@ -244,6 +244,7 @@
 "g"
 "global_invocation_id"
 "group"
+"group_operation"
 "handle"
 "height"
 "i"

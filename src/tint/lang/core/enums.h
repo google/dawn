@@ -657,6 +657,7 @@ enum class ParameterUsage : uint8_t {
     kE,
     kElements,
     kExp,
+    kGroupOperation,
     kHeight,
     kI,
     kId,

@@ -2246,6 +2246,13 @@ class Parser {
                 case spv::Op::OpGroupNonUniformQuadSwap:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
                     break;
+                case spv::Op::OpGroupNonUniformSMin:
+                    EmitSubgroupSMin(inst);
+                    break;
+                case spv::Op::OpGroupNonUniformUMin:
+                case spv::Op::OpGroupNonUniformFMin:
+                    EmitSubgroupMin(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -2262,6 +2269,34 @@ class Parser {
         if (static_cast<spv::Scope>(scope) != spv::Scope::Subgroup) {
             TINT_ICE() << "subgroup scope required for GroupNonUniform instructions";
         }
+    }
+
+    void EmitSubgroupMin(spvtools::opt::Instruction& inst) {
+        ValidateScope(inst);
+
+        auto group = inst.GetSingleWordInOperand(1);
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            TINT_ICE() << "group operand Reduce required for `Min` instructions";
+        }
+
+        Emit(b_.Call(Type(inst.type_id()), core::BuiltinFn::kSubgroupMin, Args(inst, 4)),
+             inst.result_id());
+    }
+
+    void EmitSubgroupSMin(spvtools::opt::Instruction& inst) {
+        ValidateScope(inst);
+
+        auto group = inst.GetSingleWordInOperand(1);
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            TINT_ICE() << "group operand Reduce required for `Min` instructions";
+        }
+
+        Emit(b_.Call<spirv::ir::BuiltinCall>(
+                 Type(inst.type_id()), spirv::BuiltinFn::kGroupNonUniformSMin,
+                 Vector{Value(inst.GetSingleWordInOperand(0)),  //
+                        b_.Constant(u32(inst.GetSingleWordInOperand(1))),
+                        Value(inst.GetSingleWordInOperand(2))}),
+             inst.result_id());
     }
 
     void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {

@@ -1207,6 +1207,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "elements";
         case ParameterUsage::kExp:
             return "exp";
+        case ParameterUsage::kGroupOperation:
+            return "group_operation";
         case ParameterUsage::kHeight:
             return "height";
         case ParameterUsage::kI:

@@ -242,6 +242,9 @@ struct State {
                 case spirv::BuiltinFn::kGroupNonUniformQuadSwap:
                     GroupNonUniformQuadSwap(builtin);
                     break;
+                case spirv::BuiltinFn::kGroupNonUniformSMin:
+                    GroupNonUniformSMin(builtin);
+                    break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
                 case spirv::BuiltinFn::kAtomicExchange:
@@ -284,6 +287,28 @@ struct State {
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void GroupNonUniformSMin(spirv::ir::BuiltinCall* call) {
+        auto* value = call->Args()[2];
+
+        auto* orig_type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            auto* type = orig_type;
+            if (orig_type->IsUnsignedIntegerScalarOrVector()) {
+                type = ty.MatchWidth(ty.i32(), type);
+                value = b.Convert(type, value)->Result();
+            }
+
+            value = b.Call(type, core::BuiltinFn::kSubgroupMin, Vector{value})->Result();
+
+            if (type != orig_type) {
+                value = b.Convert(call->Result()->Type(), value)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(value);
+        });
+        call->Destroy();
     }
 
     void GroupNonUniformQuadSwap(spirv::ir::BuiltinCall* call) {

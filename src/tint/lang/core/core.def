@@ -253,6 +253,7 @@ enum usages {
   compare_value
   elements
   exp
+  group_operation
   height
   i
   image
@@ -1127,3 +1128,4 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 
 @must_use @const implicit(T: iu32) op >> (T, u32) -> T
 @must_use @const implicit(T: iu32, N: num) op >> (vec<N, T>, vec<N, u32>) -> vec<N, T>
+
