@@ -2,12 +2,14 @@ package android.dawn
 
 import android.dawn.helper.asString
 import android.dawn.helper.createBitmap
+import android.dawn.helper.createWebGpu
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.services.storage.TestStorage
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,7 +26,9 @@ class ImageTest {
     }
 
     private fun triangleTest(color: Color, imageName: String) {
-        dawnTestLauncher { device ->
+        runBlocking {
+            val webGpu = createWebGpu()
+            val device = webGpu.device
             val appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
             val shaderModule = device.createShaderModule(
