@@ -676,6 +676,7 @@ enum class ParameterUsage : uint8_t {
     kSampleIndex,
     kSampler,
     kSamples,
+    kScope,
     kSourceLaneIndex,
     kTexel,
     kTexture,

@@ -218,6 +218,9 @@ struct State {
                 case spirv::BuiltinFn::kOuterProduct:
                     OuterProduct(builtin);
                     break;
+                case spirv::BuiltinFn::kGroupNonUniformBroadcast:
+                    GroupNonUniformBroadcast(builtin);
+                    break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
                 case spirv::BuiltinFn::kAtomicExchange:
@@ -261,6 +264,34 @@ struct State {
             }
         }
     }
+
+    void GroupNonUniformBroadcast(spirv::ir::BuiltinCall* call) {
+        auto* value = call->Args()[1];
+        auto* id = call->Args()[2];
+
+        auto* type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            if (type->DeepestElement()->Is<core::type::Bool>()) {
+                if (type->Is<core::type::Bool>()) {
+                    type = ty.u32();
+                } else {
+                    type = ty.MatchWidth(ty.u32(), type);
+                }
+                value = b.Convert(type, value)->Result();
+            }
+
+            core::ir::Value* c =
+                b.Call(type, core::BuiltinFn::kSubgroupBroadcast, Vector{value, id})->Result();
+
+            if (type != call->Result()->Type()) {
+                c = b.Convert(call->Result()->Type(), c)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
     void OuterProduct(spirv::ir::BuiltinCall* call) {
         auto* vector1 = call->Args()[0];
         auto* vector2 = call->Args()[1];

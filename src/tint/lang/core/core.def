@@ -266,6 +266,7 @@ enum usages {
   result
   sample
   samples
+  scope
   texel
   width
   x

@@ -238,6 +238,8 @@ const char* str(BuiltinFn i) {
             return "cooperative_matrix_store";
         case BuiltinFn::kCooperativeMatrixMulAdd:
             return "cooperative_matrix_mul_add";
+        case BuiltinFn::kGroupNonUniformBroadcast:
+            return "group_non_uniform_broadcast";
     }
     return "<unknown>";
 }
@@ -350,6 +352,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSNegate:
         case BuiltinFn::kFMod:
         case BuiltinFn::kOuterProduct:
+        case BuiltinFn::kGroupNonUniformBroadcast:
             break;
     }
     return core::ir::Instruction::Accesses{};

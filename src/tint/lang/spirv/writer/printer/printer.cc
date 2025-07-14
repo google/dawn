@@ -1685,6 +1685,9 @@ class Printer {
             case BuiltinFn::kOuterProduct:
                 op = spv::Op::OpOuterProduct;
                 break;
+            case BuiltinFn::kGroupNonUniformBroadcast:
+                op = spv::Op::OpGroupNonUniformBroadcast;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

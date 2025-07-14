@@ -135,6 +135,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSNegate:
         case BuiltinFn::kFMod:
         case BuiltinFn::kOuterProduct:
+        case BuiltinFn::kGroupNonUniformBroadcast:
             break;
     }
     return core::ir::Instruction::Accesses{};

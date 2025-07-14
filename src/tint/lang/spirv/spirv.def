@@ -1813,3 +1813,11 @@ fn u_dot(u32, u32, u32) -> u32
     u32)
     -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 
+////////////////////////////////////////////////////////////////////////////////
+// Subgroups
+////////////////////////////////////////////////////////////////////////////////
+@must_use @stage("fragment", "compute") implicit(T: scalar)
+fn group_non_uniform_broadcast(scope: u32, e: T, @const id: iu32) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
+fn group_non_uniform_broadcast(scope: u32, e: vec<N, T>, @const id: iu32) -> vec<N, T>
+
