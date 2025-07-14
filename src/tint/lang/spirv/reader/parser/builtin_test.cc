@@ -4269,5 +4269,212 @@ TEST_F(SpirvParserTest, NonUniformFMul_ExclusiveScan_Vector) {
                   SPV_ENV_VULKAN_1_1);
 }
 
+TEST_F(SpirvParserTest, NonUniformBitwiseAnd_Scalar) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %v3uint = OpTypeVector %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseAnd %uint %uint_3 Reduce %uint_1
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = subgroupAnd 1u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBitwiseAnd_Vector) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_3 = OpConstant %int 3
+      %v3int = OpTypeVector %int 3
+         %12 = OpConstantComposite %v3int %int_1 %int_3 %int_1
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseAnd %v3int %uint_3 Reduce %12
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = subgroupAnd vec3<i32>(1i, 3i, 1i)
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBitwiseOr_Scalar) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %v3uint = OpTypeVector %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseOr %uint %uint_3 Reduce %uint_1
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = subgroupOr 1u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBitwiseOr_Vector) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_3 = OpConstant %int 3
+      %v3int = OpTypeVector %int 3
+         %12 = OpConstantComposite %v3int %int_1 %int_3 %int_1
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseOr %v3int %uint_3 Reduce %12
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = subgroupOr vec3<i32>(1i, 3i, 1i)
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBitwiseXor_Scalar) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %v3uint = OpTypeVector %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseXor %uint %uint_3 Reduce %uint_1
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = subgroupXor 1u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformBitwiseXor_Vector) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformArithmetic
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_3 = OpConstant %int 3
+      %v3int = OpTypeVector %int 3
+         %12 = OpConstantComposite %v3int %int_1 %int_3 %int_1
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %8 = OpGroupNonUniformBitwiseXor %v3int %uint_3 Reduce %12
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = subgroupXor vec3<i32>(1i, 3i, 1i)
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

@@ -2268,6 +2268,15 @@ class Parser {
                 case spv::Op::OpGroupNonUniformFMul:
                     EmitSubgroupMul(inst);
                     break;
+                case spv::Op::OpGroupNonUniformBitwiseAnd:
+                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupAnd);
+                    break;
+                case spv::Op::OpGroupNonUniformBitwiseOr:
+                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupOr);
+                    break;
+                case spv::Op::OpGroupNonUniformBitwiseXor:
+                    EmitSubgroupBitwise(inst, core::BuiltinFn::kSubgroupXor);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -2284,6 +2293,17 @@ class Parser {
         if (static_cast<spv::Scope>(scope) != spv::Scope::Subgroup) {
             TINT_ICE() << "subgroup scope required for GroupNonUniform instructions";
         }
+    }
+
+    void EmitSubgroupBitwise(spvtools::opt::Instruction& inst, core::BuiltinFn fn) {
+        ValidateScope(inst);
+
+        auto group = inst.GetSingleWordInOperand(1);
+        if (static_cast<spv::GroupOperation>(group) != spv::GroupOperation::Reduce) {
+            TINT_ICE() << "GroupNonUniformBitwise operations require a Reduce group operation";
+        }
+
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupMul(spvtools::opt::Instruction& inst) {
