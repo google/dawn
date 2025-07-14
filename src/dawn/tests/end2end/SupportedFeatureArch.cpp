@@ -28,7 +28,6 @@
 #include <vector>
 
 #include "dawn/common/GPUInfo.h"
-#include "dawn/common/GPUInfo_autogen.h"
 #include "dawn/tests/DawnTest.h"
 
 // The purpose of these tests is to prevent regressions of features and limits on architectures that
@@ -64,8 +63,12 @@ class FeatureArchInfoTest_MaxLimits : public FeatureArchInfoTestBase {
 };
 
 TEST_P(FeatureArchInfoTest_MaxLimits, SubgroupsSupported) {
-    // All apple silicon devices support subgroups
-    const bool subgroupSupportExpected = gpu_info::IsApple(GetParam().adapterProperties.vendorID);
+    // All apple silicon and intel (except gen9) devices support subgroups.
+    const bool subgroupSupportExpected =
+        gpu_info::IsApple(GetParam().adapterProperties.vendorID) ||
+        (gpu_info::IsIntel(GetParam().adapterProperties.vendorID) &&
+         !gpu_info::IsIntelGen9(GetParam().adapterProperties.vendorID,
+                                GetParam().adapterProperties.deviceID));
 
     DAWN_TEST_UNSUPPORTED_IF(!subgroupSupportExpected);
     EXPECT_TRUE(this->SupportsFeatures({wgpu::FeatureName::Subgroups}));
@@ -82,9 +85,10 @@ TEST_P(FeatureArchInfoTest_MaxLimits, ShaderF16Supported) {
 TEST_P(FeatureArchInfoTest_MaxLimits, WorkgroupSizeMin1024Expected) {
     // All apple silicon devices are known to have 1k workgroup size limit.
     // This code will need to be changed if a new apple silicon device is released with a different
-    // limit
-    const bool isApple = gpu_info::IsApple(GetParam().adapterProperties.vendorID);
-    DAWN_TEST_UNSUPPORTED_IF(!isApple);
+    // limit. Nvidia also support >= 1k workgroups.
+    const bool isWorkgroupSizeGT1k = gpu_info::IsApple(GetParam().adapterProperties.vendorID) ||
+                                     gpu_info::IsNvidia(GetParam().adapterProperties.vendorID);
+    DAWN_TEST_UNSUPPORTED_IF(!isWorkgroupSizeGT1k);
 
     EXPECT_GE(GetAdapterLimits().maxComputeInvocationsPerWorkgroup, 1024u);
     // Check that the device was created with the requested limit.
@@ -118,6 +122,23 @@ TEST_P(FeatureArchInfoTest_TieredMaxLimits, AppleMaxTextureDimension2D) {
     // Apple silicon should report > 16k. Most modern devices should support > 16k. Update this when
     // appropriate.
     EXPECT_GE(GetAdapterLimits().maxTextureDimension2D, 16384u);
+}
+
+TEST_P(FeatureArchInfoTest_TieredMaxLimits, MaxUniformBufferBindingSize) {
+    // Swiftshader will return a lower limit than any modern device on CQ.
+    DAWN_TEST_UNSUPPORTED_IF(!IsSwiftshader());
+    EXPECT_GE(GetAdapterLimits().maxUniformBufferBindingSize, 65536u);
+    // Check that the device was created with the requested limit.
+    EXPECT_EQ(GetSupportedLimits().maxUniformBufferBindingSize,
+              GetAdapterLimits().maxUniformBufferBindingSize);
+}
+
+TEST_P(FeatureArchInfoTest_MaxLimits, MinUniformBufferOffsetAlignment) {
+    // All devices on CQ report 256. A value of 32 is commonplace on iOS (note the less than).
+    EXPECT_LE(GetAdapterLimits().minUniformBufferOffsetAlignment, 256u);
+    // Check that the device was created with the requested limit.
+    EXPECT_EQ(GetSupportedLimits().minUniformBufferOffsetAlignment,
+              GetAdapterLimits().minUniformBufferOffsetAlignment);
 }
 
 DAWN_INSTANTIATE_TEST(FeatureArchInfoTest_MaxLimits,
