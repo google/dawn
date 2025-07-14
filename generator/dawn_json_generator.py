@@ -832,7 +832,13 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                         and argument.type.category == 'structure'):
                     return argument
 
-        return method.returns
+        # Return values are not treated as optional to keep the Kotlin API simple.
+        # Methods are expected to return an object if declared. If they can't, dawn may raise an
+        # error (converted to a Kotlin exception); otherwise JNI will throw NullPointerException.
+        # In either case the optional type is redundant.
+        return AnnotatedTypedMember(
+            method.returns.type, method.returns.annotation, False,
+            method.json_data) if method.returns else None
 
     # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
     def include_method(method):
