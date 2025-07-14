@@ -221,6 +221,9 @@ struct State {
                 case spirv::BuiltinFn::kGroupNonUniformBroadcast:
                     GroupNonUniformBroadcast(builtin);
                     break;
+                case spirv::BuiltinFn::kGroupNonUniformBroadcastFirst:
+                    GroupNonUniformBroadcastFirst(builtin);
+                    break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
                 case spirv::BuiltinFn::kAtomicExchange:
@@ -272,16 +275,34 @@ struct State {
         auto* type = call->Result()->Type();
         b.InsertBefore(call, [&] {
             if (type->DeepestElement()->Is<core::type::Bool>()) {
-                if (type->Is<core::type::Bool>()) {
-                    type = ty.u32();
-                } else {
-                    type = ty.MatchWidth(ty.u32(), type);
-                }
+                type = ty.MatchWidth(ty.u32(), type);
                 value = b.Convert(type, value)->Result();
             }
 
             core::ir::Value* c =
                 b.Call(type, core::BuiltinFn::kSubgroupBroadcast, Vector{value, id})->Result();
+
+            if (type != call->Result()->Type()) {
+                c = b.Convert(call->Result()->Type(), c)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
+    }
+
+    void GroupNonUniformBroadcastFirst(spirv::ir::BuiltinCall* call) {
+        auto* value = call->Args()[1];
+
+        auto* type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            if (type->DeepestElement()->Is<core::type::Bool>()) {
+                type = ty.MatchWidth(ty.u32(), type);
+                value = b.Convert(type, value)->Result();
+            }
+
+            core::ir::Value* c =
+                b.Call(type, core::BuiltinFn::kSubgroupBroadcastFirst, Vector{value})->Result();
 
             if (type != call->Result()->Type()) {
                 c = b.Convert(call->Result()->Type(), c)->Result();

@@ -2219,8 +2219,11 @@ class Parser {
                 case spv::Op::OpGroupNonUniformElect:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupElect);
                     break;
+                case spv::Op::OpGroupNonUniformBroadcastFirst:
+                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformBroadcastFirst);
+                    break;
                 case spv::Op::OpGroupNonUniformBroadcast:
-                    EmitSubgroupBroadcast(inst);
+                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -2240,7 +2243,7 @@ class Parser {
         }
     }
 
-    void EmitSubgroupBroadcast(spvtools::opt::Instruction& inst) {
+    void EmitSubgroupBroadcast(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto val = Value(inst.GetSingleWordInOperand(1));
 
         // TODO(431054356): Convert non-constant values into a `subgroupShuffle` when we support
@@ -2250,8 +2253,7 @@ class Parser {
         }
 
         ValidateScope(inst);
-        Emit(b_.Call<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kGroupNonUniformBroadcast, Args(inst, 2)),
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());
     }
 

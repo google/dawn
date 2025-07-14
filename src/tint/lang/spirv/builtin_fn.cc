@@ -240,6 +240,8 @@ const char* str(BuiltinFn i) {
             return "cooperative_matrix_mul_add";
         case BuiltinFn::kGroupNonUniformBroadcast:
             return "group_non_uniform_broadcast";
+        case BuiltinFn::kGroupNonUniformBroadcastFirst:
+            return "group_non_uniform_broadcast_first";
     }
     return "<unknown>";
 }
@@ -353,6 +355,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kFMod:
         case BuiltinFn::kOuterProduct:
         case BuiltinFn::kGroupNonUniformBroadcast:
+        case BuiltinFn::kGroupNonUniformBroadcastFirst:
             break;
     }
     return core::ir::Instruction::Accesses{};
