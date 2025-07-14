@@ -1197,6 +1197,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "depth";
         case ParameterUsage::kDepthRef:
             return "depth_ref";
+        case ParameterUsage::kDir:
+            return "dir";
         case ParameterUsage::kDref:
             return "dref";
         case ParameterUsage::kE:

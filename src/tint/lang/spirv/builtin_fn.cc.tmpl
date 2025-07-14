@@ -138,6 +138,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kGroupNonUniformBroadcast:
         case BuiltinFn::kGroupNonUniformBroadcastFirst:
         case BuiltinFn::kGroupNonUniformQuadBroadcast:
+        case BuiltinFn::kGroupNonUniformQuadSwap:
             break;
     }
     return core::ir::Instruction::Accesses{};

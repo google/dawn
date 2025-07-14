@@ -227,6 +227,9 @@ struct State {
                 case spirv::BuiltinFn::kGroupNonUniformQuadBroadcast:
                     GroupNonUniformBroadcast(builtin, core::BuiltinFn::kQuadBroadcast);
                     break;
+                case spirv::BuiltinFn::kGroupNonUniformQuadSwap:
+                    GroupNonUniformQuadSwap(builtin);
+                    break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
                 case spirv::BuiltinFn::kAtomicExchange:
@@ -269,6 +272,48 @@ struct State {
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    void GroupNonUniformQuadSwap(spirv::ir::BuiltinCall* call) {
+        auto* value = call->Args()[1];
+        auto* dir_val = call->Args()[2];
+
+        TINT_ASSERT(dir_val->Is<core::ir::Constant>());
+        auto* cnst = dir_val->As<core::ir::Constant>();
+        TINT_ASSERT(cnst);
+
+        uint32_t dir = cnst->Value()->ValueAs<uint32_t>();
+        core::BuiltinFn fn = core::BuiltinFn::kNone;
+        switch (dir) {
+            case 0:
+                fn = core::BuiltinFn::kQuadSwapX;
+                break;
+            case 1:
+                fn = core::BuiltinFn::kQuadSwapY;
+                break;
+            case 2:
+                fn = core::BuiltinFn::kQuadSwapDiagonal;
+                break;
+            default:
+                TINT_UNREACHABLE();
+        }
+
+        auto* type = call->Result()->Type();
+        b.InsertBefore(call, [&] {
+            if (type->DeepestElement()->Is<core::type::Bool>()) {
+                type = ty.MatchWidth(ty.u32(), type);
+                value = b.Convert(type, value)->Result();
+            }
+
+            core::ir::Value* c = b.Call(type, fn, Vector{value})->Result();
+
+            if (type != call->Result()->Type()) {
+                c = b.Convert(call->Result()->Type(), c)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(c);
+        });
+        call->Destroy();
     }
 
     void GroupNonUniformBroadcast(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {

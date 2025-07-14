@@ -2223,13 +2223,16 @@ class Parser {
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupBallot);
                     break;
                 case spv::Op::OpGroupNonUniformBroadcastFirst:
-                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformBroadcastFirst);
+                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcastFirst);
                     break;
                 case spv::Op::OpGroupNonUniformBroadcast:
-                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
+                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
                     break;
                 case spv::Op::OpGroupNonUniformQuadBroadcast:
-                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    break;
+                case spv::Op::OpGroupNonUniformQuadSwap:
+                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
                     break;
                 default:
                     TINT_UNIMPLEMENTED()
@@ -2249,15 +2252,16 @@ class Parser {
         }
     }
 
-    void EmitSubgroupBroadcast(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+    void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto val = Value(inst.GetSingleWordInOperand(1));
 
         // TODO(431054356): Convert core::BuiltinFn::kSubgroupBroadcast non-constant values into a
         // `subgroupShuffle` when we support SPIR-V >= 1.5 source.
         //
         // For QuadBroadcast this will remain an error as there is no WGSL equivalent.
+        // For QuadSwap this will remain an error as there is no WGSL equivalent.
         if (!val->Is<core::ir::Constant>()) {
-            TINT_ICE() << "non-constant Broadcast values not supported";
+            TINT_ICE() << "non-constant GroupNonUniform `value` not supported";
         }
 
         ValidateScope(inst);

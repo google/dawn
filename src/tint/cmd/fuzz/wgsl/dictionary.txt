@@ -195,6 +195,7 @@
 "derivative_uniformity"
 "determinant"
 "diagnostic"
+"dir"
 "discard"
 "distance"
 "dot"

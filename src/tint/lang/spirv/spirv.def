@@ -1831,3 +1831,8 @@ fn group_non_uniform_quad_broadcast(scope: u32, e: T, @const id: iu32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
 fn group_non_uniform_quad_broadcast(scope: u32, e: vec<N, T>, @const id: iu32) -> vec<N, T>
 
+@must_use @stage("fragment", "compute") implicit(T: scalar)
+fn group_non_uniform_quad_swap(scope: u32, e: T, @const dir: u32) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
+fn group_non_uniform_quad_swap(scope:u32, e: vec<N, T>, @const dir: u32) -> vec<N, T>
+

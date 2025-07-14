@@ -149,6 +149,7 @@ enum class BuiltinFn : uint8_t {
     kGroupNonUniformBroadcast,
     kGroupNonUniformBroadcastFirst,
     kGroupNonUniformQuadBroadcast,
+    kGroupNonUniformQuadSwap,
     kNone,
 };
 

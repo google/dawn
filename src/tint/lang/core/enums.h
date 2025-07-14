@@ -652,6 +652,7 @@ enum class ParameterUsage : uint8_t {
     kDelta,
     kDepth,
     kDepthRef,
+    kDir,
     kDref,
     kE,
     kElements,

@@ -248,6 +248,7 @@ enum usages {
   coords
   count
   depth
+  dir
   dref
   compare_value
   elements
