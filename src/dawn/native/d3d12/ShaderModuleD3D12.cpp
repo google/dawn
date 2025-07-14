@@ -142,14 +142,23 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.bytecode.compileFlags = compileFlags;
 
     if (device->IsToggleEnabled(Toggle::UseDXC)) {
+        // If UseDXC toggle are not forced to be disable, DXC should have been validated to be
+        // available.
+        DAWN_ASSERT(ToBackend(device->GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
+        // We can get the DXC version information since IsDXCAvailable() is true.
+        d3d12::DxcVersionInfo dxcVersionInfo =
+            ToBackend(device->GetPhysicalDevice())->GetBackend()->GetDxcVersion();
+
         req.bytecode.compiler = d3d::Compiler::DXC;
         req.bytecode.dxcLibrary = UnsafeUnserializedValue(device->GetDxcLibrary().Get());
         req.bytecode.dxcCompiler = UnsafeUnserializedValue(device->GetDxcCompiler().Get());
+        req.bytecode.compilerVersion = dxcVersionInfo.DxcCompilerVersion;
         req.bytecode.dxcShaderProfile = device->GetDxcShaderProfiles()[stage];
     } else {
         req.bytecode.compiler = d3d::Compiler::FXC;
         req.bytecode.d3dCompile =
             UnsafeUnserializedValue(pD3DCompile{device->GetFunctions()->d3dCompile});
+        req.bytecode.compilerVersion = D3D_COMPILER_VERSION;
         switch (stage) {
             case SingleShaderStage::Vertex:
                 req.bytecode.fxcShaderProfile = "vs_5_1";

@@ -43,6 +43,7 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     ~PlatformFunctions() override;
 
     MaybeError LoadFunctions();
+    bool IsDXCBinaryAvailable() const;
     bool IsPIXEventRuntimeLoaded() const;
 
     // Functions from d3d12.dll
@@ -86,8 +87,10 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
 
     MaybeError LoadD3D12();
     MaybeError LoadD3D11();
-    void LoadPIXRuntime(const std::string& pathToPrepend);
-    void LoadDXCLibraries(const std::string& pathToPrepend);
+    void LoadPIXRuntime();
+    void LoadDXCLibraries();
+    void LoadDXIL(const std::string& baseWindowsSDKPath);
+    void LoadDXCompiler(const std::string& baseWindowsSDKPath);
 
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;

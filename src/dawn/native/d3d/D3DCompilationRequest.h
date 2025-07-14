@@ -68,6 +68,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(uint32_t, shaderModel)                                                         \
     X(uint32_t, compileFlags)                                                        \
     X(Compiler, compiler)                                                            \
+    X(uint64_t, compilerVersion)                                                     \
     X(std::wstring_view, dxcShaderProfile)                                           \
     X(std::string_view, fxcShaderProfile)                                            \
     X(uint32_t, firstIndexOffsetShaderRegister)                                      \
@@ -85,6 +86,7 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(bool, hasShaderF16Feature)                         \
     X(uint32_t, compileFlags)                            \
     X(Compiler, compiler)                                \
+    X(uint64_t, compilerVersion)                         \
     X(std::wstring_view, dxcShaderProfile)               \
     X(std::string_view, fxcShaderProfile)                \
     X(UnsafeUnserializedValue<pD3DCompile>, d3dCompile)  \
