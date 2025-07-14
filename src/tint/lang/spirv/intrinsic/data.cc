@@ -11845,6 +11845,13 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(286),
   },
+  {
+    /* [100] */
+    /* fn group_non_uniform_quad_broadcast[T : scalar](scope: u32, e: T, @const id: iu32) -> T */
+    /* fn group_non_uniform_quad_broadcast[N : num, T : scalar](scope: u32, e: vec<N, T>, @const id: iu32) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(284),
+  },
 };
 
 // clang-format on

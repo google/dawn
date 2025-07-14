@@ -242,6 +242,8 @@ const char* str(BuiltinFn i) {
             return "group_non_uniform_broadcast";
         case BuiltinFn::kGroupNonUniformBroadcastFirst:
             return "group_non_uniform_broadcast_first";
+        case BuiltinFn::kGroupNonUniformQuadBroadcast:
+            return "group_non_uniform_quad_broadcast";
     }
     return "<unknown>";
 }
@@ -356,6 +358,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kOuterProduct:
         case BuiltinFn::kGroupNonUniformBroadcast:
         case BuiltinFn::kGroupNonUniformBroadcastFirst:
+        case BuiltinFn::kGroupNonUniformQuadBroadcast:
             break;
     }
     return core::ir::Instruction::Accesses{};

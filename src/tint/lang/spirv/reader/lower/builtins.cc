@@ -219,10 +219,13 @@ struct State {
                     OuterProduct(builtin);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformBroadcast:
-                    GroupNonUniformBroadcast(builtin);
+                    GroupNonUniformBroadcast(builtin, core::BuiltinFn::kSubgroupBroadcast);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformBroadcastFirst:
                     GroupNonUniformBroadcastFirst(builtin);
+                    break;
+                case spirv::BuiltinFn::kGroupNonUniformQuadBroadcast:
+                    GroupNonUniformBroadcast(builtin, core::BuiltinFn::kQuadBroadcast);
                     break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
@@ -268,7 +271,7 @@ struct State {
         }
     }
 
-    void GroupNonUniformBroadcast(spirv::ir::BuiltinCall* call) {
+    void GroupNonUniformBroadcast(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
         auto* value = call->Args()[1];
         auto* id = call->Args()[2];
 
@@ -279,8 +282,7 @@ struct State {
                 value = b.Convert(type, value)->Result();
             }
 
-            core::ir::Value* c =
-                b.Call(type, core::BuiltinFn::kSubgroupBroadcast, Vector{value, id})->Result();
+            core::ir::Value* c = b.Call(type, fn, Vector{value, id})->Result();
 
             if (type != call->Result()->Type()) {
                 c = b.Convert(call->Result()->Type(), c)->Result();

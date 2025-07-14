@@ -2228,6 +2228,9 @@ class Parser {
                 case spv::Op::OpGroupNonUniformBroadcast:
                     EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
                     break;
+                case spv::Op::OpGroupNonUniformQuadBroadcast:
+                    EmitSubgroupBroadcast(inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -2249,10 +2252,12 @@ class Parser {
     void EmitSubgroupBroadcast(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto val = Value(inst.GetSingleWordInOperand(1));
 
-        // TODO(431054356): Convert non-constant values into a `subgroupShuffle` when we support
-        // SPIR-V >= 1.5 source.
+        // TODO(431054356): Convert core::BuiltinFn::kSubgroupBroadcast non-constant values into a
+        // `subgroupShuffle` when we support SPIR-V >= 1.5 source.
+        //
+        // For QuadBroadcast this will remain an error as there is no WGSL equivalent.
         if (!val->Is<core::ir::Constant>()) {
-            TINT_ICE() << "non-constant OpGroupNonUniformBroadcast values not supported";
+            TINT_ICE() << "non-constant Broadcast values not supported";
         }
 
         ValidateScope(inst);
