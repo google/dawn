@@ -250,6 +250,8 @@ const char* str(BuiltinFn i) {
             return "group_non_uniform_shuffle";
         case BuiltinFn::kGroupNonUniformShuffleXor:
             return "group_non_uniform_shuffle_xor";
+        case BuiltinFn::kGroupNonUniformShuffleDown:
+            return "group_non_uniform_shuffle_down";
     }
     return "<unknown>";
 }
@@ -366,6 +368,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kGroupNonUniformBroadcastFirst:
         case BuiltinFn::kGroupNonUniformShuffle:
         case BuiltinFn::kGroupNonUniformShuffleXor:
+        case BuiltinFn::kGroupNonUniformShuffleDown:
         case BuiltinFn::kGroupNonUniformQuadBroadcast:
         case BuiltinFn::kGroupNonUniformQuadSwap:
             break;

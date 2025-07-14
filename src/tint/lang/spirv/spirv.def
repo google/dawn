@@ -1846,3 +1846,8 @@ fn group_non_uniform_shuffle_xor(scope: u32, value: T, mask: u32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
 fn group_non_uniform_shuffle_xor(scope: u32, value: vec<N, T>, mask: u32) -> vec<N, T>
 
+@must_use @stage("fragment", "compute") implicit(T: scalar)
+fn group_non_uniform_shuffle_down(scope: u32, value: T, delta: u32) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
+fn group_non_uniform_shuffle_down(scope: u32, value: vec<N, T>, delta: u32) -> vec<N, T>
+

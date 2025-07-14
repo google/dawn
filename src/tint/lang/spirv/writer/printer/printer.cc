@@ -1703,6 +1703,9 @@ class Printer {
             case BuiltinFn::kGroupNonUniformShuffleXor:
                 op = spv::Op::OpGroupNonUniformShuffleXor;
                 break;
+            case BuiltinFn::kGroupNonUniformShuffleDown:
+                op = spv::Op::OpGroupNonUniformShuffleDown;
+                break;
             case spirv::BuiltinFn::kNone:
                 TINT_ICE() << "undefined spirv ir function";
         }

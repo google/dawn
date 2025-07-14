@@ -227,6 +227,9 @@ struct State {
                 case spirv::BuiltinFn::kGroupNonUniformShuffleXor:
                     GroupNonUniformBuiltin(builtin, core::BuiltinFn::kSubgroupShuffleXor);
                     break;
+                case spirv::BuiltinFn::kGroupNonUniformShuffleDown:
+                    GroupNonUniformBuiltin(builtin, core::BuiltinFn::kSubgroupShuffleDown);
+                    break;
                 case spirv::BuiltinFn::kGroupNonUniformBroadcastFirst:
                     GroupNonUniformBroadcastFirst(builtin);
                     break;
