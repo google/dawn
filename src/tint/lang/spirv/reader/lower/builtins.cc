@@ -219,13 +219,16 @@ struct State {
                     OuterProduct(builtin);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformBroadcast:
-                    GroupNonUniformBroadcast(builtin, core::BuiltinFn::kSubgroupBroadcast);
+                    GroupNonUniformBuiltin(builtin, core::BuiltinFn::kSubgroupBroadcast);
+                    break;
+                case spirv::BuiltinFn::kGroupNonUniformShuffle:
+                    GroupNonUniformBuiltin(builtin, core::BuiltinFn::kSubgroupShuffle);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformBroadcastFirst:
                     GroupNonUniformBroadcastFirst(builtin);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformQuadBroadcast:
-                    GroupNonUniformBroadcast(builtin, core::BuiltinFn::kQuadBroadcast);
+                    GroupNonUniformBuiltin(builtin, core::BuiltinFn::kQuadBroadcast);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformQuadSwap:
                     GroupNonUniformQuadSwap(builtin);
@@ -316,7 +319,7 @@ struct State {
         call->Destroy();
     }
 
-    void GroupNonUniformBroadcast(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
+    void GroupNonUniformBuiltin(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
         auto* value = call->Args()[1];
         auto* id = call->Args()[2];
 

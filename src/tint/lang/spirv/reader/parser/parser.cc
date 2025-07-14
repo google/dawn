@@ -2228,6 +2228,9 @@ class Parser {
                 case spv::Op::OpGroupNonUniformBroadcast:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
                     break;
+                case spv::Op::OpGroupNonUniformShuffle:
+                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformShuffle);
+                    break;
                 case spv::Op::OpGroupNonUniformQuadBroadcast:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
                     break;

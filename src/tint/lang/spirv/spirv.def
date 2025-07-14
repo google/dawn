@@ -1817,9 +1817,9 @@ fn u_dot(u32, u32, u32) -> u32
 // Subgroups
 ////////////////////////////////////////////////////////////////////////////////
 @must_use @stage("fragment", "compute") implicit(T: scalar)
-fn group_non_uniform_broadcast(scope: u32, e: T, @const id: iu32) -> T
+fn group_non_uniform_broadcast(scope: u32, e: T, @const id: u32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
-fn group_non_uniform_broadcast(scope: u32, e: vec<N, T>, @const id: iu32) -> vec<N, T>
+fn group_non_uniform_broadcast(scope: u32, e: vec<N, T>, @const id: u32) -> vec<N, T>
 
 @must_use @stage("fragment", "compute") implicit(T: scalar)
 fn group_non_uniform_broadcast_first(scope: u32, value: T) -> T
@@ -1827,12 +1827,17 @@ fn group_non_uniform_broadcast_first(scope: u32, value: T) -> T
 fn group_non_uniform_broadcast_first(scope: u32, value: vec<N, T>) -> vec<N, T>
 
 @must_use @stage("fragment", "compute") implicit(T: scalar)
-fn group_non_uniform_quad_broadcast(scope: u32, e: T, @const id: iu32) -> T
+fn group_non_uniform_quad_broadcast(scope: u32, e: T, @const id: u32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
-fn group_non_uniform_quad_broadcast(scope: u32, e: vec<N, T>, @const id: iu32) -> vec<N, T>
+fn group_non_uniform_quad_broadcast(scope: u32, e: vec<N, T>, @const id: u32) -> vec<N, T>
 
 @must_use @stage("fragment", "compute") implicit(T: scalar)
 fn group_non_uniform_quad_swap(scope: u32, e: T, @const dir: u32) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
 fn group_non_uniform_quad_swap(scope:u32, e: vec<N, T>, @const dir: u32) -> vec<N, T>
+
+@must_use @stage("fragment", "compute") implicit(T: scalar)
+fn group_non_uniform_shuffle(scope: u32, value: T, id: u32) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: scalar)
+fn group_non_uniform_shuffle(scope: u32, value: vec<N, T>, id: u32) -> vec<N, T>
 
