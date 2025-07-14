@@ -2264,6 +2264,10 @@ class Parser {
                 case spv::Op::OpGroupNonUniformFAdd:
                     EmitSubgroupAdd(inst);
                     break;
+                case spv::Op::OpGroupNonUniformIMul:
+                case spv::Op::OpGroupNonUniformFMul:
+                    EmitSubgroupMul(inst);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED()
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
@@ -2280,6 +2284,26 @@ class Parser {
         if (static_cast<spv::Scope>(scope) != spv::Scope::Subgroup) {
             TINT_ICE() << "subgroup scope required for GroupNonUniform instructions";
         }
+    }
+
+    void EmitSubgroupMul(spvtools::opt::Instruction& inst) {
+        ValidateScope(inst);
+
+        core::BuiltinFn fn = core::BuiltinFn::kNone;
+
+        auto group = inst.GetSingleWordInOperand(1);
+        if (static_cast<spv::GroupOperation>(group) == spv::GroupOperation::Reduce) {
+            fn = core::BuiltinFn::kSubgroupMul;
+        } else if (static_cast<spv::GroupOperation>(group) == spv::GroupOperation::InclusiveScan) {
+            fn = core::BuiltinFn::kSubgroupInclusiveMul;
+        } else if (static_cast<spv::GroupOperation>(group) == spv::GroupOperation::ExclusiveScan) {
+            fn = core::BuiltinFn::kSubgroupExclusiveMul;
+        } else {
+            TINT_ICE() << "GroupNonUniform Mul instruction must have a group of `Reduce`, "
+                          "`InclusiveScan`, or `ExclusiveScan`";
+        }
+
+        Emit(b_.Call(Type(inst.type_id()), fn, Args(inst, 4)), inst.result_id());
     }
 
     void EmitSubgroupAdd(spvtools::opt::Instruction& inst) {
