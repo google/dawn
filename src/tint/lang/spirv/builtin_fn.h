@@ -155,6 +155,7 @@ enum class BuiltinFn : uint8_t {
     kGroupNonUniformShuffleDown,
     kGroupNonUniformShuffleUp,
     kGroupNonUniformSMin,
+    kGroupNonUniformSMax,
     kNone,
 };
 

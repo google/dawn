@@ -256,6 +256,8 @@ const char* str(BuiltinFn i) {
             return "group_non_uniform_shuffle_up";
         case BuiltinFn::kGroupNonUniformSMin:
             return "group_non_uniform_s_min";
+        case BuiltinFn::kGroupNonUniformSMax:
+            return "group_non_uniform_s_max";
     }
     return "<unknown>";
 }
@@ -377,6 +379,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kGroupNonUniformQuadBroadcast:
         case BuiltinFn::kGroupNonUniformQuadSwap:
         case BuiltinFn::kGroupNonUniformSMin:
+        case BuiltinFn::kGroupNonUniformSMax:
             break;
     }
     return core::ir::Instruction::Accesses{};

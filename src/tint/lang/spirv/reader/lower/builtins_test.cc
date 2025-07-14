@@ -10423,5 +10423,137 @@ TEST_F(SpirvReader_BuiltinsTest, NonUniformSMin_Vector_u32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Scalar_i32) {
+    auto* ep = b.ComputeFunction("main");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kGroupNonUniformSMax, 3_u, 0_u,
+                                       1_i);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.group_non_uniform_s_max 3u, 0u, 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(Builtins);
+
+    auto expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = subgroupMax 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Vector_i32) {
+    auto* ep = b.ComputeFunction("main");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec3<i32>(), spirv::BuiltinFn::kGroupNonUniformSMax, 3_u,
+                                       0_u, b.Composite(ty.vec3<i32>(), 1_i, 3_i, 1_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = spirv.group_non_uniform_s_max 3u, 0u, vec3<i32>(1i, 3i, 1i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(Builtins);
+
+    auto expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = subgroupMax vec3<i32>(1i, 3i, 1i)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Scalar_u32) {
+    auto* ep = b.ComputeFunction("main");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kGroupNonUniformSMax, 3_u, 0_u,
+                                       1_u);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.group_non_uniform_s_max 3u, 0u, 1u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(Builtins);
+
+    auto expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = convert 1u
+    %3:i32 = subgroupMax %2
+    %4:u32 = convert %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_BuiltinsTest, NonUniformSMax_Vector_u32) {
+    auto* ep = b.ComputeFunction("main");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec3<u32>(), spirv::BuiltinFn::kGroupNonUniformSMax, 3_u,
+                                       0_u, b.Composite(ty.vec3<u32>(), 1_u, 3_u, 1_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<u32> = spirv.group_non_uniform_s_max 3u, 0u, vec3<u32>(1u, 3u, 1u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    Run(Builtins);
+
+    auto expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<i32> = convert vec3<u32>(1u, 3u, 1u)
+    %3:vec3<i32> = subgroupMax %2
+    %4:vec3<u32> = convert %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

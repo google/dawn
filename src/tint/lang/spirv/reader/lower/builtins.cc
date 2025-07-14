@@ -243,7 +243,10 @@ struct State {
                     GroupNonUniformQuadSwap(builtin);
                     break;
                 case spirv::BuiltinFn::kGroupNonUniformSMin:
-                    GroupNonUniformSMin(builtin);
+                    GroupNonUniformMinMax(builtin, core::BuiltinFn::kSubgroupMin);
+                    break;
+                case spirv::BuiltinFn::kGroupNonUniformSMax:
+                    GroupNonUniformMinMax(builtin, core::BuiltinFn::kSubgroupMax);
                     break;
                 case spirv::BuiltinFn::kAtomicLoad:
                 case spirv::BuiltinFn::kAtomicStore:
@@ -289,7 +292,7 @@ struct State {
         }
     }
 
-    void GroupNonUniformSMin(spirv::ir::BuiltinCall* call) {
+    void GroupNonUniformMinMax(spirv::ir::BuiltinCall* call, core::BuiltinFn fn) {
         auto* value = call->Args()[2];
 
         auto* orig_type = call->Result()->Type();
@@ -300,7 +303,7 @@ struct State {
                 value = b.Convert(type, value)->Result();
             }
 
-            value = b.Call(type, core::BuiltinFn::kSubgroupMin, Vector{value})->Result();
+            value = b.Call(type, fn, Vector{value})->Result();
 
             if (type != orig_type) {
                 value = b.Convert(call->Result()->Type(), value)->Result();

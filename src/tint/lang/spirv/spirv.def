@@ -1861,3 +1861,8 @@ fn group_non_uniform_s_min(scope: u32, group_operation: u32, value: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: iu32)
 fn group_non_uniform_s_min(scope: u32, group_operation: u32, value: vec<N, T>) -> vec<N, T>
 
+@must_use @stage("fragment", "compute") implicit(T: iu32)
+fn group_non_uniform_s_max(scope: u32, group_operation: u32, value: T) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: iu32)
+fn group_non_uniform_s_max(scope: u32, group_operation: u32, value: vec<N, T>) -> vec<N, T>
+
