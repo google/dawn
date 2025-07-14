@@ -1151,7 +1151,10 @@ class Parser {
                     [&](core::ir::ExitIf* ei) { return ei->If(); },
                     [&](core::ir::ExitSwitch* es) { return es->Switch(); },
                     [&](core::ir::ExitLoop* el) { return el->Loop(); },
-                    [&](core::ir::NextIteration* ni) { return ni->Loop(); },
+                    [&](core::ir::NextIteration* ni) {
+                        ni->PushOperand(src);
+                        return nullptr;
+                    },
                     [&](core::ir::Continue* cont) {
                         // The propagation is going through a `continue`. This means
                         // this is the only path to the continuing block, but it also
@@ -1207,13 +1210,87 @@ class Parser {
         return src;
     }
 
+    // Returns true if the `blk` is the  `parent_blk` or any of the ancestors of parent_blk
+    bool IsContainedInBlock(core::ir::Block* parent_blk, core::ir::Block* blk) {
+        while (parent_blk) {
+            if (parent_blk == blk) {
+                return true;
+            }
+
+            if (!parent_blk->Parent()) {
+                break;
+            }
+            parent_blk = parent_blk->Parent()->Block();
+        }
+        return false;
+    }
+
+    // Propagate a block param value out of a control instruction. This isn't the same as the other
+    // propagate as we only need to pull it out through a single blocks exit for the control
+    // instruction.
+    core::ir::Value* PropagatePhi(core::ir::Terminator* term,
+                                  uint32_t spv_id_being_propagated,
+                                  core::ir::BlockParam* source_block_param) {
+        auto* src_blk = source_block_param->Block();
+
+        auto* current_ctrl = src_blk->Parent();
+        core::ir::Block* current_blk = src_blk;
+        core::ir::Value* propagated_value = source_block_param;
+        auto* type = source_block_param->Type();
+        while (true) {
+            if (IsContainedInBlock(term->Block(), current_blk)) {
+                break;
+            }
+            TINT_ASSERT(current_ctrl);
+
+            // If the terminator is an exit for this control instruction, we're done as the caller
+            // will handle adding the result.
+            bool done = false;
+            for (auto exit : current_ctrl->Exits()) {
+                if (exit.Value() == term) {
+                    done = true;
+                    break;
+                }
+            }
+            if (done) {
+                break;
+            }
+
+            auto* res = b_.InstructionResult(type);
+            current_ctrl->AddResult(res);
+
+            for (auto exit : current_ctrl->Exits()) {
+                if (IsContainedInBlock(exit->Block(), current_blk)) {
+                    exit->PushOperand(propagated_value);
+                    continue;
+                }
+
+                // Special handling for loop-continuing blocks as the body is visible to the
+                // continuing so any block params from the body can pass through the exit.
+                if (auto* loop = current_ctrl->As<core::ir::Loop>()) {
+                    if (exit->Block() == loop->Continuing() &&
+                        propagated_value->Is<core::ir::BlockParam>()) {
+                        exit->PushOperand(propagated_value);
+                    }
+                }
+            }
+
+            propagated_value = res;
+            current_blk = current_ctrl->Block();
+            current_ctrl = current_blk->Parent();
+        }
+
+        values_.Replace(spv_id_being_propagated, propagated_value);
+        return propagated_value;
+    }
+
     // Returns true if the value is a constant value
     bool IdIsConstant(uint32_t id) { return SpvConstant(id) || spec_composites_.contains(id); }
 
     // Returns true if this value is currently in scope
     bool IdIsInScope(uint32_t id) {
         for (auto iter = id_stack_.rbegin(); iter != id_stack_.rend(); ++iter) {
-            if (iter->count(id) > 0) {
+            if (iter->contains(id)) {
                 return true;
             }
         }
@@ -1266,7 +1343,7 @@ class Parser {
     ///
     /// @param id a SPIR-V result ID
     /// @returns a Tint value object
-    core::ir::Value* Value(uint32_t id) {
+    core::ir::Value* Value(uint32_t id, bool add_to_scope = true) {
         auto v = ValueNoPropagate(id);
         TINT_ASSERT(v);
 
@@ -1275,7 +1352,9 @@ class Parser {
         }
 
         auto* new_v = Propagate(id, v);
-        values_.Replace(id, new_v);
+        if (add_to_scope) {
+            AddValue(id, new_v);
+        }
         return new_v;
     }
 
@@ -1681,7 +1760,7 @@ class Parser {
         auto phis = continue_blk_phis_.find(continue_id);
         if (phis != continue_blk_phis_.end()) {
             for (auto value_id : phis->second) {
-                auto* value = Value(value_id);
+                auto* value = Value(value_id, false);
 
                 tint::Switch(
                     loop->Continuing()->Terminator(),  //
@@ -2241,14 +2320,29 @@ class Parser {
     void AddOperandToTerminator(core::ir::Terminator* term, uint32_t id) {
         // If the ID is a constant, then we just directly emit it, it isn't an OpPhi value
         if (IdIsConstant(id)) {
-            term->PushOperand(Value(id));
+            term->PushOperand(Value(id, false));
             return;
         }
-        // If we've already seen the value, and it's still in scope, then we can just emit as it
-        // isn't referencing a later value.
-        if (values_.Contains(id) && IdIsInScope(id)) {
-            term->PushOperand(Value(id));
-            return;
+        // If we've already seen the value, then we can emit it as this isn't referencing a later
+        // value.
+        auto val = values_.Get(id);
+        if (val) {
+            // If we've already seen the value, and it's still in scope, then we can just emit as it
+            // isn't referencing a later value.
+            if (IdIsInScope(id)) {
+                term->PushOperand(Value(id, false));
+                return;
+            }
+
+            // The value was a block param, that means it was a Phi which we've removed and
+            // converted. We need to pass that Phi out of the control instruction, but we only want
+            // to add it to exit instructions, not all terminators, so this isn't a full
+            // Propagation.
+            if (auto* bp = (*val)->As<core::ir::BlockParam>()) {
+                auto* v = PropagatePhi(term, id, bp);
+                term->PushOperand(v);
+                return;
+            }
         }
 
         // Value isn't known, or isn't in scope, push a placeholder for the operand value. We store

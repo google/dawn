@@ -1996,5 +1996,367 @@ TEST_F(SpirvParserTest, Phi_InLoopBody) {
 )");
 }
 
+// This is testing that an `OpPhi` value defined inside a loop (like %23) is correctly propagated
+// when accessed from an `OpPhi` outside of the look (like %45). These phi values should turn into
+// results on the loop, and then accessed as such in the two adds (%48 and %49)
+TEST_F(SpirvParserTest, Phi_Propagated) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+         %80 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+          %1 = OpConstant %int 1
+          %2 = OpConstant %int 2
+          %3 = OpConstant %int 3
+          %4 = OpConstant %int 4
+          %5 = OpConstant %int 5
+       %bool = OpTypeBool
+          %8 = OpConstantTrue %bool
+       %main = OpFunction %void None %80
+         %21 = OpLabel
+               OpBranch %22
+
+         ; 1st loop
+         %22 = OpLabel
+         %23 = OpPhi %int %1 %21 %2 %25
+         %24 = OpIAdd %int %23 %23
+               OpLoopMerge %30 %25 None
+               OpBranchConditional %8 %25 %30
+         %25 = OpLabel
+               OpBranch %22
+
+         ; loop merge && if start
+         %30 = OpLabel
+         %99 = OpCopyObject %int %2
+               OpSelectionMerge %34 None
+               OpBranchConditional %8 %35 %34
+         %35 = OpLabel
+               OpBranch %36
+
+         ; 2nd loop
+         %36 = OpLabel
+         %37 = OpPhi %int %3 %35 %4 %39
+         %40 = OpPhi %int %23 %35 %5 %39
+         %41 = OpIAdd %int %37 %40
+               OpLoopMerge %43 %39 None
+               OpBranchConditional %8 %39 %43
+         %39 = OpLabel
+               OpBranch %36
+         %43 = OpLabel
+               OpBranch %34
+
+         ; if merge
+         %34 = OpLabel
+         %45 = OpPhi %int %99 %30 %37 %43
+         %46 = OpPhi %int %3 %30 %40 %43
+         %47 = OpPhi %int %4 %30 %40 %43
+         %48 = OpIAdd %int %45 %46
+         %49 = OpIAdd %int %48 %47
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:i32 = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration 1i  # -> $B3
+      }
+      $B3 (%3:i32): {  # body
+        %4:i32 = spirv.add<i32> %3, %3
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            continue  # -> $B4
+          }
+          $B6: {  # false
+            exit_loop %3  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B4: {  # continuing
+        next_iteration 2i  # -> $B3
+      }
+    }
+    %5:i32 = let 2i
+    %6:i32, %7:i32, %8:i32 = if true [t: $B7, f: $B8] {  # if_2
+      $B7: {  # true
+        %9:i32, %10:i32 = loop [i: $B9, b: $B10, c: $B11] {  # loop_2
+          $B9: {  # initializer
+            next_iteration 3i, %2  # -> $B10
+          }
+          $B10 (%11:i32, %12:i32): {  # body
+            %13:i32 = spirv.add<i32> %11, %12
+            if true [t: $B12, f: $B13] {  # if_3
+              $B12: {  # true
+                continue  # -> $B11
+              }
+              $B13: {  # false
+                exit_loop %11, %12  # loop_2
+              }
+            }
+            unreachable
+          }
+          $B11: {  # continuing
+            next_iteration 4i, 5i  # -> $B10
+          }
+        }
+        exit_if %9, %10, %10  # if_2
+      }
+      $B8: {  # false
+        exit_if %5, 3i, 4i  # if_2
+      }
+    }
+    %14:i32 = spirv.add<i32> %6, %7
+    %15:i32 = spirv.add<i32> %14, %8
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Propagated_PropagatedPhiValue) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+          %1 = OpConstant %int 1
+          %2 = OpConstant %int 2
+          %3 = OpConstant %int 3
+          %4 = OpConstant %int 4
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %8
+         %22 = OpLabel
+               OpBranch %27
+         %27 = OpLabel
+         %28 = OpPhi %int %2 %22 %3 %30
+         %31 = OpPhi %int %1 %22 %4 %30
+               OpLoopMerge %35 %30 None
+               OpBranchConditional %true %36 %35
+         %36 = OpLabel
+         %29 = OpCopyObject %int %1
+               OpSelectionMerge %40 None
+               OpBranchConditional %true %41 %40
+         %41 = OpLabel
+               OpBranch %35
+         %40 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+               OpBranch %27
+         %35 = OpLabel
+         %42 = OpPhi %int %28 %27 %29 %41
+         %43 = OpIAdd %int %42 %42
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:i32 = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration 2i, 1i  # -> $B3
+      }
+      $B3 (%3:i32, %4:i32): {  # body
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            %5:i32 = let 1i
+            if true [t: $B7, f: $B8] {  # if_2
+              $B7: {  # true
+                exit_loop %5  # loop_1
+              }
+              $B8: {  # false
+                exit_if  # if_2
+              }
+            }
+            continue  # -> $B4
+          }
+          $B6: {  # false
+            exit_loop %3  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B4: {  # continuing
+        next_iteration 3i, 4i  # -> $B3
+      }
+    }
+    %6:i32 = spirv.add<i32> %2, %2
+    ret
+  }
+}
+)");
+}
+
+// The object in %29 is propagated up through the IF as a result and then is used to pass the value
+// through the continue block as %6 to OpPhi %28 as a block param.
+TEST_F(SpirvParserTest, Phi_Propagated_PropagatedPhiValue_BlockParam) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+          %1 = OpConstant %int 1
+          %2 = OpConstant %int 2
+          %3 = OpConstant %int 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %8
+         %22 = OpLabel
+               OpBranch %27
+         %27 = OpLabel
+         %28 = OpPhi %int %2 %22 %29 %30
+         %31 = OpPhi %int %1 %22 %3 %30
+               OpLoopMerge %35 %30 None
+               OpBranchConditional %true %36 %35
+         %36 = OpLabel
+         %29 = OpCopyObject %int %1
+               OpSelectionMerge %40 None
+               OpBranchConditional %true %41 %40
+         %41 = OpLabel
+               OpBranch %35
+         %40 = OpLabel
+               OpBranch %30
+         %30 = OpLabel
+               OpBranch %27
+         %35 = OpLabel
+         %42 = OpPhi %int %28 %27 %29 %41
+         %43 = OpIAdd %int %42 %42
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:i32 = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration 2i, 1i  # -> $B3
+      }
+      $B3 (%3:i32, %4:i32): {  # body
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            %5:i32 = let 1i
+            if true [t: $B7, f: $B8] {  # if_2
+              $B7: {  # true
+                exit_loop %5  # loop_1
+              }
+              $B8: {  # false
+                exit_if  # if_2
+              }
+            }
+            continue %5  # -> $B4
+          }
+          $B6: {  # false
+            exit_loop %3  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B4 (%6:i32): {  # continuing
+        next_iteration %6, 3i  # -> $B3
+      }
+    }
+    %7:i32 = spirv.add<i32> %2, %2
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Phi_Propagated_BreakIf) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %9
+         %35 = OpLabel
+               OpBranch %39
+         %39 = OpLabel
+         %40 = OpPhi %bool %true %35 %40 %41
+               OpLoopMerge %44 %41 None
+               OpBranch %45
+         %45 = OpLabel
+               OpSelectionMerge %49 None
+               OpBranchConditional %true %50 %49
+         %50 = OpLabel
+               OpBranch %49
+         %49 = OpLabel
+               OpBranch %41
+         %41 = OpLabel
+               OpBranchConditional %true %39 %44
+         %44 = OpLabel
+               OpBranch %55
+         %55 = OpLabel
+         %56 = OpPhi %bool %40 %44 %true %57
+               OpLoopMerge %59 %57 None
+               OpBranch %60
+         %60 = OpLabel
+               OpBranch %57
+         %57 = OpLabel
+               OpBranch %55
+         %59 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:bool = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration true  # -> $B3
+      }
+      $B3 (%3:bool): {  # body
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_if  # if_1
+          }
+        }
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %4:bool = not true
+        break_if %4 next_iteration: [ %3 ] exit_loop: [ %3 ]  # -> [t: exit_loop loop_1, f: $B3]
+      }
+    }
+    loop [i: $B7, b: $B8, c: $B9] {  # loop_2
+      $B7: {  # initializer
+        next_iteration %2  # -> $B8
+      }
+      $B8 (%5:bool): {  # body
+        continue  # -> $B9
+      }
+      $B9: {  # continuing
+        next_iteration true  # -> $B8
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
