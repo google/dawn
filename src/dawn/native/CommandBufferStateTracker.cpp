@@ -276,7 +276,14 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
 
 bool TextureViewsMatch(const TextureViewBase* a, const TextureViewBase* b) {
     DAWN_ASSERT(a->GetTexture() == b->GetTexture());
-    return a->GetFormat().GetIndex() == b->GetFormat().GetIndex() &&
+    // If the texture format is multiplanar, the view formats are permitted to differ (e.g., R8
+    // and RG8), referring to different planes of the same YUV texture. This cannot happen in
+    // OpenGL that actually needs the validation of texture views matching so it's safe for
+    // backends to ignore this here. We don't allow creating multiplanar texture views directly in
+    // WebGPU so this code cannot be triggered in JavaScript and only occurs hit when Chromium
+    // creates a YUV texture internally.
+    return (a->GetFormat().GetIndex() == b->GetFormat().GetIndex() ||
+            a->GetTexture()->GetFormat().IsMultiPlanar()) &&
            a->GetDimension() == b->GetDimension() && a->GetBaseMipLevel() == b->GetBaseMipLevel() &&
            a->GetLevelCount() == b->GetLevelCount() &&
            a->GetBaseArrayLayer() == b->GetBaseArrayLayer() &&
