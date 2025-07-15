@@ -315,6 +315,12 @@ class TextureViewBase : public ApiObjectBase {
     wgpu::TextureUsage GetUsage() const;
     wgpu::TextureUsage GetInternalUsage() const;
 
+    wgpu::ComponentSwizzle GetSwizzleRed() const;
+    wgpu::ComponentSwizzle GetSwizzleGreen() const;
+    wgpu::ComponentSwizzle GetSwizzleBlue() const;
+    wgpu::ComponentSwizzle GetSwizzleAlpha() const;
+    bool UsesNonDefaultSwizzle() const;
+
     virtual bool IsYCbCr() const;
     // Valid to call only if `IsYCbCr()` is true.
     virtual YCbCrVkDescriptor GetYCbCrVkDescriptor() const;
@@ -334,6 +340,10 @@ class TextureViewBase : public ApiObjectBase {
     SubresourceRange mRange;
     const wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
     const wgpu::TextureUsage mInternalUsage = wgpu::TextureUsage::None;
+    wgpu::ComponentSwizzle mSwizzleRed = wgpu::ComponentSwizzle::R;
+    wgpu::ComponentSwizzle mSwizzleGreen = wgpu::ComponentSwizzle::G;
+    wgpu::ComponentSwizzle mSwizzleBlue = wgpu::ComponentSwizzle::B;
+    wgpu::ComponentSwizzle mSwizzleAlpha = wgpu::ComponentSwizzle::A;
 };
 
 }  // namespace dawn::native
