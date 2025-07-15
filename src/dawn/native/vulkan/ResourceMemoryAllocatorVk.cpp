@@ -63,9 +63,12 @@ bool IsMemoryKindMappable(MemoryKind memoryKind) {
 }
 
 bool HasMemoryTypeWithFlags(const VulkanDeviceInfo& deviceInfo, VkMemoryPropertyFlags flags) {
-    return std::ranges::any_of(deviceInfo.memoryTypes, [flags](const auto& memoryType) {
-        return (memoryType.propertyFlags & flags) == flags;
-    });
+    for (auto& memoryType : deviceInfo.memoryTypes) {
+        if ((memoryType.propertyFlags & flags) == flags) {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // anonymous namespace
