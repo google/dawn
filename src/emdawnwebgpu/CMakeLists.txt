@@ -316,36 +316,40 @@ if (EMSCRIPTEN)
             gmock_main_wasmsafe
         )
 
+        # Build with Closure so we can look at code size, and to test that Closure minification
+        # works, and to let Closure statically analyze our JS.
+        add_library(enable_closure INTERFACE)
+        target_link_options(enable_closure
+            INTERFACE
+                "$<$<CONFIG:Release,MinSizeRel>:--closure=1>"
+        )
+
+        add_library(emdawnwebgpu_tests)
+        target_link_libraries(
+            emdawnwebgpu_tests
+            PUBLIC
+                enable_closure
+                ${emdawnwebgpu_test_deps}
+        )
+
         add_executable(emdawnwebgpu_tests_asyncify ${emdawnwebgpu_test_sources})
         set_target_properties(emdawnwebgpu_tests_asyncify PROPERTIES
             SUFFIX ".html")
-        target_link_libraries(
-            emdawnwebgpu_tests_asyncify
-            PUBLIC
-                ${emdawnwebgpu_test_deps}
-        )
+        target_link_libraries(emdawnwebgpu_tests_asyncify PUBLIC emdawnwebgpu_tests)
         target_link_options(emdawnwebgpu_tests_asyncify
             PUBLIC
                 # We need Asyncify or JSPI for Future tests.
                 "-sASYNCIFY=1"
-                # Test that Closure minification and externs work.
-                "$<$<CONFIG:Release>:--closure=1>"
         )
 
         add_executable(emdawnwebgpu_tests_jspi ${emdawnwebgpu_test_sources})
         set_target_properties(emdawnwebgpu_tests_jspi PROPERTIES
             SUFFIX ".html")
-        target_link_libraries(
-            emdawnwebgpu_tests_jspi
-            PUBLIC
-                ${emdawnwebgpu_test_deps}
-        )
+        target_link_libraries(emdawnwebgpu_tests_jspi PUBLIC emdawnwebgpu_tests)
         target_link_options(emdawnwebgpu_tests_jspi
             PUBLIC
                 # We need Asyncify or JSPI for Future tests.
                 "-sJSPI=1"
-                # Test that Closure minification and externs work.
-                "$<$<CONFIG:Release>:--closure=1>"
         )
 
         DawnJSONGenerator(
@@ -356,19 +360,16 @@ if (EMSCRIPTEN)
         add_executable(emdawnwebgpu_link_test
             ${EMDAWNWEBGPU_LINK_TEST_CPP_SOURCES}
         )
-        # The test is just that this links, not that it runs (it doesn't do
-        # anything interesting), so just build to .js. Since it has a main()
-        # function, this is the same as building to .html, but skipping the
-        # .html file. It _is_ runnable if invoked via <script> or `node`.
+        # The test is just that this links, not that it runs (it will just
+        # crash), so just build to .js. Since it has a main() function, this is
+        # the same as building to .html, but skipping the .html file.
+        # This makes real (bogus) API calls to serve as a basic code size test.
         set_target_properties(emdawnwebgpu_link_test PROPERTIES
             SUFFIX ".js")
-        target_link_options(emdawnwebgpu_link_test
-            PRIVATE
-                --closure=1
-        )
         target_link_libraries(
             emdawnwebgpu_link_test
             PUBLIC
+                enable_closure
                 emdawnwebgpu_c
         )
     endif()
