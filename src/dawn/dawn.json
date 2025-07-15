@@ -221,6 +221,15 @@
             {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
         ]
     },
+    "dawn consume adapter descriptor": {
+        "tags": ["dawn"],
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["device descriptor"],
+        "members": [
+            {"name": "consume adapter", "type": "bool", "default": "false"}
+        ]
+    },
     "dawn toggles descriptor": {
         "tags": ["dawn", "native"],
         "category": "structure",
@@ -3889,7 +3898,8 @@
             {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
             {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
             {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]},
-            {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]}
+            {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
+            {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]}
         ]
     },
     "texture": {

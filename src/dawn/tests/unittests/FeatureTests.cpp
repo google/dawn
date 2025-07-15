@@ -41,7 +41,15 @@ class FeatureTests : public testing::Test {
   public:
     FeatureTests()
         : testing::Test(),
-          mInstanceBase(native::APICreateInstance(nullptr)),
+          mInstanceBase([]() -> Ref<dawn::native::InstanceBase> {
+              static constexpr auto kMultipleDevicesPerAdapter =
+                  wgpu::InstanceFeatureName::MultipleDevicesPerAdapter;
+              dawn::native::InstanceDescriptor instanceDesc = {
+                  .requiredFeatureCount = 1,
+                  .requiredFeatures = &kMultipleDevicesPerAdapter,
+              };
+              return dawn::native::APICreateInstance(&instanceDesc);
+          }()),
           mPhysicalDevice(native::null::PhysicalDevice::Create()),
           mUnsafePhysicalDevice(native::null::PhysicalDevice::Create()),
           mAdapterBase(mInstanceBase.Get(),

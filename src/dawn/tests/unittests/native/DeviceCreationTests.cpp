@@ -59,8 +59,13 @@ class DeviceCreationTest : public testing::Test {
     void SetUp() override {
         dawnProcSetProcs(&GetProcs());
 
+        static constexpr auto kMultipleDevicesPerAdapter =
+            wgpu::InstanceFeatureName::MultipleDevicesPerAdapter;
         // Create an instance with default toggles and create an adapter from it.
-        wgpu::InstanceDescriptor safeInstanceDesc = {};
+        wgpu::InstanceDescriptor safeInstanceDesc = {
+            .requiredFeatureCount = 1,
+            .requiredFeatures = &kMultipleDevicesPerAdapter,
+        };
         instance = std::make_unique<Instance>(&safeInstanceDesc);
 
         wgpu::RequestAdapterOptions options = {};
@@ -75,7 +80,10 @@ class DeviceCreationTest : public testing::Test {
         wgpu::DawnTogglesDescriptor unsafeInstanceTogglesDesc = {};
         unsafeInstanceTogglesDesc.enabledToggleCount = 1;
         unsafeInstanceTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
-        wgpu::InstanceDescriptor unsafeInstanceDesc = {};
+        wgpu::InstanceDescriptor unsafeInstanceDesc = {
+            .requiredFeatureCount = 1,
+            .requiredFeatures = &kMultipleDevicesPerAdapter,
+        };
         unsafeInstanceDesc.nextInChain = &unsafeInstanceTogglesDesc;
 
         unsafeInstance = std::make_unique<Instance>(&unsafeInstanceDesc);
@@ -360,6 +368,37 @@ TEST_F(DeviceCreationTest, AdapterMaxImmediateSize) {
                 EXPECT_NE(device.Get(), nullptr);
             });
     }
+}
+
+// Test failed call to CreateDevice when adapter has been consumed because instance has not the
+// MultipleDevicesPerAdapter feature.
+TEST_F(DeviceCreationTest, AdapterIsConsumedWithoutMultipleDevicesPerAdapterFeature) {
+    auto instance = std::make_unique<Instance>();
+
+    wgpu::RequestAdapterOptions options = {};
+    options.backendType = wgpu::BackendType::Null;
+
+    auto adapter = instance->EnumerateAdapters(&options)[0];
+
+    wgpu::Device device1 = adapter.CreateDevice();
+    EXPECT_NE(device1, nullptr);
+
+    wgpu::Device device2 = adapter.CreateDevice();
+    EXPECT_EQ(device2, nullptr);
+}
+
+// Test failed call to CreateDevice when adapter has been explicitly asked to be consumed.
+TEST_F(DeviceCreationTest, AdapterIsConsumedWithConsumeAdapterDescriptor) {
+    wgpu::DawnConsumeAdapterDescriptor consumeAdapterDesc = {};
+    consumeAdapterDesc.consumeAdapter = true;
+    wgpu::DeviceDescriptor desc = {};
+    desc.nextInChain = &consumeAdapterDesc;
+    wgpu::Device device1 = adapter.CreateDevice(&desc);
+    EXPECT_NE(device1, nullptr);
+
+    desc.nextInChain = nullptr;
+    wgpu::Device device2 = adapter.CreateDevice(&desc);
+    EXPECT_EQ(device2, nullptr);
 }
 
 class DeviceCreationFutureTest : public DeviceCreationTest,

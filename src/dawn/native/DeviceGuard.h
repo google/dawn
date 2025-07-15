@@ -94,8 +94,7 @@ class DeviceGuard : public detail::DeviceGuardBase,
     // mDefer member.
     using detail::DeviceGuardBase::mDefer;
 
-    explicit DeviceGuard(DeviceBase* device,
-                         RecursiveMutex* mutex = nullptr);
+    explicit DeviceGuard(DeviceBase* device, RecursiveMutex* mutex = nullptr);
 };
 
 }  // namespace dawn::native
