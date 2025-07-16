@@ -691,6 +691,37 @@ bool Converter::Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageF
     return true;
 }
 
+bool Converter::Convert(wgpu::TextureComponentSwizzle& out,
+                        const interop::GPUTextureComponentSwizzle& in) {
+    return Convert(out.r, in.r) && Convert(out.g, in.g) && Convert(out.b, in.b) &&
+           Convert(out.a, in.a);
+}
+
+bool Converter::Convert(wgpu::ComponentSwizzle& out, const interop::GPUComponentSwizzle& in) {
+    out = wgpu::ComponentSwizzle::Undefined;
+    switch (in) {
+        case interop::GPUComponentSwizzle::kZero:
+            out = wgpu::ComponentSwizzle::Zero;
+            return true;
+        case interop::GPUComponentSwizzle::kOne:
+            out = wgpu::ComponentSwizzle::One;
+            return true;
+        case interop::GPUComponentSwizzle::kR:
+            out = wgpu::ComponentSwizzle::R;
+            return true;
+        case interop::GPUComponentSwizzle::kG:
+            out = wgpu::ComponentSwizzle::G;
+            return true;
+        case interop::GPUComponentSwizzle::kB:
+            out = wgpu::ComponentSwizzle::B;
+            return true;
+        case interop::GPUComponentSwizzle::kA:
+            out = wgpu::ComponentSwizzle::A;
+            return true;
+    }
+    return Throw("invalid value for ComponentSwizzle");
+}
+
 bool Converter::Convert(interop::GPUTextureUsageFlags& out, wgpu::TextureUsage in) {
     out = interop::GPUTextureUsageFlags(static_cast<uint32_t>(in));
     return true;
@@ -1593,6 +1624,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kTextureFormatsTier2:
             out = wgpu::FeatureName::TextureFormatsTier2;
             return true;
+        case interop::GPUFeatureName::kTextureComponentSwizzle:
+            out = wgpu::FeatureName::TextureComponentSwizzle;
+            return true;
     }
     return false;
 }
@@ -1626,6 +1660,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(ChromiumExperimentalSubgroupMatrix, kChromiumExperimentalSubgroupMatrix);
         CASE(TextureFormatsTier1, kTextureFormatsTier1);
         CASE(TextureFormatsTier2, kTextureFormatsTier2);
+        CASE(TextureComponentSwizzle, kTextureComponentSwizzle);
 
 #undef CASE
 
@@ -1684,7 +1719,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnPartialLoadResolveTexture:
         case wgpu::FeatureName::DawnTexelCopyBufferRowAlignment:
         case wgpu::FeatureName::FlexibleTextureViews:
-        case wgpu::FeatureName::TextureComponentSwizzle:
             return false;
     }
     return false;

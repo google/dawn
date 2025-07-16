@@ -146,6 +146,11 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageFlags& in);
 
+    [[nodiscard]] bool Convert(wgpu::TextureComponentSwizzle& out,
+                               const interop::GPUTextureComponentSwizzle& in);
+
+    [[nodiscard]] bool Convert(wgpu::ComponentSwizzle& out, const interop::GPUComponentSwizzle& in);
+
     [[nodiscard]] bool Convert(wgpu::ColorWriteMask& out, const interop::GPUColorWriteFlags& in);
 
     [[nodiscard]] bool Convert(wgpu::BufferUsage& out, const interop::GPUBufferUsageFlags& in);
