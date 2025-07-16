@@ -37,6 +37,7 @@ class Access;
 class Binary;
 class Constant;
 class Convert;
+class CoreBuiltinCall;
 class Function;
 class FunctionParam;
 class Let;
@@ -126,6 +127,11 @@ class IntegerRangeAnalysis {
     /// Returns the integer range info of a given `Convert` variable if it is an integer variable
     /// and it has a meaningful range. Returns an invalid `IntegerRangeInfo` object otherwise.
     IntegerRangeInfo GetInfo(const Convert* convert);
+
+    /// Returns the integer range info of a given `CoreBuiltinCall` variable if it is an integer
+    /// variable and it has a meaningful range. Returns an invalid `IntegerRangeInfo` object
+    /// otherwise.
+    IntegerRangeInfo GetInfo(const CoreBuiltinCall* call);
 
     /// Note: This function is only for tests.
     /// Returns the pointer of the loop control variable in the given loop when its initializer

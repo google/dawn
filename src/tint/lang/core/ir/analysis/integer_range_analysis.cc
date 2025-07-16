@@ -27,12 +27,14 @@
 
 #include "src/tint/lang/core/ir/analysis/integer_range_analysis.h"
 
+#include <algorithm>
 #include <limits>
 
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/convert.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/function.h"
@@ -94,6 +96,21 @@ IntegerRangeInfo ToIntegerRangeInfo(const Constant* constant,
     } else {
         return IntegerRangeInfo(static_cast<uint64_t>(min_value), static_cast<uint64_t>(max_value));
     }
+}
+
+IntegerRangeInfo GetFullRangeWithSameIntegerRangeInfoType(const IntegerRangeInfo& range) {
+    if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(range.range)) {
+        return IntegerRangeInfo(static_cast<int64_t>(i32::kLowestValue),
+                                static_cast<int64_t>(i32::kHighestValue));
+    } else {
+        return IntegerRangeInfo(static_cast<uint64_t>(u32::kLowestValue),
+                                static_cast<uint64_t>(u32::kHighestValue));
+    }
+}
+
+template <typename IntegerRange>
+bool IntegerRangeIsConstantValue(const IntegerRange& range) {
+    return range.min_bound == range.max_bound;
 }
 
 }  // namespace
@@ -238,6 +255,7 @@ struct IntegerRangeAnalysisImpl {
                     [&](const Let* let) { return GetInfo(let); },
                     [&](const Binary* binary) { return GetInfo(binary); },
                     [&](const Convert* convert) { return GetInfo(convert); },
+                    [&](const CoreBuiltinCall* call) { return GetInfo(call); },
                     [](Default) { return IntegerRangeInfo(); });
             },
             [](Default) { return IntegerRangeInfo(); });
@@ -274,6 +292,24 @@ struct IntegerRangeAnalysisImpl {
                 case BinaryOp::kShiftRight:
                     return ComputeIntegerRangeForBinaryShiftRight(range_lhs, range_rhs);
 
+                default:
+                    return {};
+            }
+        });
+    }
+
+    IntegerRangeInfo GetInfo(const CoreBuiltinCall* call) {
+        return integer_core_builtin_call_range_info_map_.GetOrAdd(call, [&]() -> IntegerRangeInfo {
+            // Currently we only support the integer builtin calls that return an integer value.
+            if (!call->Result()->Type()->IsIntegerScalar()) {
+                return {};
+            }
+
+            // TODO(348701956): Support more builtin functions
+            switch (call->Func()) {
+                case core::BuiltinFn::kMin: {
+                    return ComputeIntegerRangeForBuiltinMin(call);
+                }
                 default:
                     return {};
             }
@@ -1089,12 +1125,81 @@ struct IntegerRangeAnalysisImpl {
         }
     }
 
+    IntegerRangeInfo ComputeIntegerRangeForBuiltinMin(const CoreBuiltinCall* call) {
+        TINT_ASSERT(call->Operands().Length() == 2u);
+
+        TINT_ASSERT(call->Operand(0)->Type()->IsIntegerScalar());
+        TINT_ASSERT(call->Operand(1)->Type()->IsIntegerScalar());
+
+        IntegerRangeInfo range1 = GetInfo(call->Operand(0));
+        IntegerRangeInfo range2 = GetInfo(call->Operand(1));
+        if (!range1.IsValid() && !range2.IsValid()) {
+            return {};
+        }
+
+        if (!range1.IsValid()) {
+            range1 = GetFullRangeWithSameIntegerRangeInfoType(range2);
+        }
+        if (!range2.IsValid()) {
+            range2 = GetFullRangeWithSameIntegerRangeInfoType(range1);
+        }
+
+        // range1: [min1, max1]  range2: [min2, max2]
+        // The minimum value of (min(range1, range2)) is min(min1, min2) and
+        // The maximum value of (min(range1, range2)) is min(max1, max2).
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(range1.range)) {
+            TINT_ASSERT(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(range2.range));
+
+            auto range1_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range1.range);
+            auto range2_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range2.range);
+
+            // When both operands are constant values, we can return the constant value.
+            if (IntegerRangeIsConstantValue(range1_i32) &&
+                IntegerRangeIsConstantValue(range2_i32)) {
+                int64_t constant_value = std::min(range1_i32.min_bound, range2_i32.min_bound);
+                return IntegerRangeInfo(constant_value, constant_value);
+            }
+
+            // When the range is all i32 or u32, we will treat it as an invalid range.
+            int64_t min_bound = std::min(range1_i32.min_bound, range2_i32.min_bound);
+            int64_t max_bound = std::min(range1_i32.max_bound, range2_i32.max_bound);
+            if (min_bound == i32::kLowestValue && max_bound == i32::kHighestValue) {
+                return {};
+            }
+
+            return IntegerRangeInfo(min_bound, max_bound);
+        } else {
+            TINT_ASSERT(
+                std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(range2.range));
+
+            auto range1_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range1.range);
+            auto range2_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range2.range);
+
+            // When both operands are constant values, we can return the constant value.
+            if (IntegerRangeIsConstantValue(range1_u32) &&
+                IntegerRangeIsConstantValue(range2_u32)) {
+                uint64_t constant_value = std::min(range1_u32.min_bound, range2_u32.min_bound);
+                return IntegerRangeInfo(constant_value, constant_value);
+            }
+
+            // When the range is all i32 or u32, we will treat it as an invalid range.
+            uint64_t min_bound = std::min(range1_u32.min_bound, range2_u32.min_bound);
+            uint64_t max_bound = std::min(range1_u32.max_bound, range2_u32.max_bound);
+            if (min_bound == u32::kLowestValue && max_bound == u32::kHighestValue) {
+                return {};
+            }
+
+            return IntegerRangeInfo(min_bound, max_bound);
+        }
+    }
+
     Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
         integer_function_param_range_info_map_;
     Hashmap<const Var*, IntegerRangeInfo, 8> integer_var_range_info_map_;
     Hashmap<const Constant*, IntegerRangeInfo, 8> integer_constant_range_info_map_;
     Hashmap<const Binary*, IntegerRangeInfo, 8> integer_binary_range_info_map_;
     Hashmap<const Convert*, IntegerRangeInfo, 8> integer_convert_range_info_map_;
+    Hashmap<const CoreBuiltinCall*, IntegerRangeInfo, 8> integer_core_builtin_call_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Module* ir_module)
@@ -1154,6 +1259,10 @@ IntegerRangeInfo IntegerRangeAnalysis::GetInfo(const Let* let) {
 
 IntegerRangeInfo IntegerRangeAnalysis::GetInfo(const Convert* convert) {
     return impl_->GetInfo(convert);
+}
+
+IntegerRangeInfo IntegerRangeAnalysis::GetInfo(const CoreBuiltinCall* call) {
+    return impl_->GetInfo(call);
 }
 
 }  // namespace tint::core::ir::analysis
