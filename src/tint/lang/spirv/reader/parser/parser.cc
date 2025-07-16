@@ -3041,6 +3041,10 @@ class Parser {
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, args), inst.result_id());
     }
 
+    bool HasLod(uint32_t mask) {
+        return (mask & static_cast<uint32_t>(spv::ImageOperandsMask::Lod)) != 0;
+    }
+
     void EmitImageSampleDepth(const spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         auto sampled_image = Value(inst.GetSingleWordInOperand(0));
         auto* coord = Value(inst.GetSingleWordInOperand(1));
@@ -3058,6 +3062,17 @@ class Parser {
 
             for (uint32_t i = 4; i < inst.NumInOperands(); ++i) {
                 args.Push(Value(inst.GetSingleWordInOperand(i)));
+            }
+
+            if (HasLod(literal_mask)) {
+                core::ir::Value* lod = args[4];
+                TINT_ASSERT(lod->Is<core::ir::Constant>());
+                TINT_ASSERT(lod->Type()->As<core::type::F32>());
+
+                auto v = lod->As<core::ir::Constant>()->Value()->ValueAs<float>();
+                if (v != 0.0f) {
+                    TINT_ICE() << "Dref LOD values must be 0.0";
+                }
             }
         } else {
             args.Push(b_.Zero(ty_.u32()));
