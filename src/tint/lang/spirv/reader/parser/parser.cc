@@ -962,6 +962,9 @@ class Parser {
                         case spv::Decoration::NonReadable:       // Not supported in WGSL
                         case spv::Decoration::RelaxedPrecision:  // Not supported in WGSL
                             break;
+                        case spv::Decoration::Coherent:
+                            // Tint has coherent memory semantics, so this is a no-op.
+                            break;
                         case spv::Decoration::RowMajor:
                             is_row_major = true;
                             break;

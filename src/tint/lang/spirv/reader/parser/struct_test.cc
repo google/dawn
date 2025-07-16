@@ -485,4 +485,48 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, Struct_Coherent) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberDecorate %str 0 NonWritable
+               OpMemberDecorate %str 1 NonWritable
+               OpMemberDecorate %str 0 Coherent
+               OpMemberDecorate %str 0 Offset 0
+               OpMemberDecorate %str 1 Offset 4
+               OpDecorate %str Block
+               OpDecorate %var DescriptorSet 0
+               OpDecorate %var Binding 0
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+        %str = OpTypeStruct %i32 %i32
+        %ptr = OpTypePointer Uniform %str
+    %ep_type = OpTypeFunction %void
+
+        %var = OpVariable %ptr Uniform
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_2 = struct @align(4) {
+  tint_symbol:i32 @offset(0)
+  tint_symbol_1:i32 @offset(4)
+}
+
+$B1: {  # root
+  %1:ptr<uniform, tint_symbol_2, read> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 }  // namespace tint::spirv::reader
