@@ -2444,5 +2444,75 @@ TEST_F(SpirvParserTest, Phi_Propagated_If) {
 )");
 }
 
+// The %34 is ignored and we propagate an undef because the continuing is unreachable
+TEST_F(SpirvParserTest, Phi_FromContinuing) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %1 "main"
+               OpExecutionMode %1 OriginUpperLeft
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+         %16 = OpTypeFunction %void
+          %1 = OpFunction %void None %16
+         %17 = OpLabel
+               OpSelectionMerge %31 None
+               OpBranchConditional %true %32 %31
+         %32 = OpLabel
+         %33 = OpPhi %int %int_0 %17 %34 %35
+               OpLoopMerge %37 %35 None
+               OpBranchConditional %true %38 %37
+         %38 = OpLabel
+               OpKill
+         %35 = OpLabel
+         %34 = OpCopyObject %int %int_1
+               OpBranch %32
+         %37 = OpLabel
+               OpBranch %31
+         %31 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        loop [i: $B4, b: $B5, c: $B6] {  # loop_1
+          $B4: {  # initializer
+            next_iteration 0i  # -> $B5
+          }
+          $B5 (%2:i32): {  # body
+            if true [t: $B7, f: $B8] {  # if_2
+              $B7: {  # true
+                discard
+                ret
+              }
+              $B8: {  # false
+                exit_loop  # loop_1
+              }
+            }
+            unreachable
+          }
+          $B6: {  # continuing
+            next_iteration undef  # -> $B5
+          }
+        }
+        exit_if  # if_1
+      }
+      $B3: {  # false
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
