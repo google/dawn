@@ -548,9 +548,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::SharedTextureMemoryOpaqueFD);
     }
 
-    // Using mappable buffers on Windows + NVIDIA is significantly slower and
-    // causes test timeouts.
-    if (!IsWinNvidia() && SupportsBufferMapExtendedUsages(mDeviceInfo)) {
+    // Using mappable buffers on NVIDIA was found to be significantly slower in some tests. The
+    // memory heap size is also small (~250MB) on many devices which leads to OOMs when allocating
+    // large mappable buffers, see https://crbug.com/432044227 for details.
+    if (!gpu_info::IsNvidia(GetVendorId()) && SupportsBufferMapExtendedUsages(mDeviceInfo)) {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
@@ -1082,14 +1083,6 @@ bool PhysicalDevice::IsIntelMesa() const {
         return mDeviceInfo.driverProperties.driverID == VK_DRIVER_ID_INTEL_OPEN_SOURCE_MESA_KHR;
     }
     return false;
-}
-
-bool PhysicalDevice::IsWinNvidia() const {
-#if DAWN_PLATFORM_IS(WINDOWS)
-    return gpu_info::IsNvidia(GetVendorId());
-#else
-    return false;
-#endif
 }
 
 bool PhysicalDevice::IsSwiftshader() const {
