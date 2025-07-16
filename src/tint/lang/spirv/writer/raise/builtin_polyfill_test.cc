@@ -1575,6 +1575,123 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Storage) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_TexelBuffer) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto format = core::TexelFormat::kR32Uint;
+    auto* t = b.FunctionParam("t", ty.texel_buffer(format, core::Access::kReadWrite));
+    auto* coords = b.FunctionParam("coords", ty.u32());
+    auto* func = b.Function("foo", ty.vec4<u32>());
+    func->SetParams({t, coords});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kTextureLoad, t, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texel_buffer<r32uint, read_write>, %coords:u32):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = textureLoad %t, %coords
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<u32, buffer, not_depth, non_arrayed, single_sampled, rw_op_compatible, r32uint, read_write>, %coords:u32):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = spirv.image_read %t, %coords, 0u
+    ret %4
+  }
+}
+)";
+
+    PolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_TexelBuffer) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto format = core::TexelFormat::kR32Uint;
+    auto* t = b.FunctionParam("t", ty.texel_buffer(format, core::Access::kReadWrite));
+    auto* coords = b.FunctionParam("coords", ty.u32());
+    auto* texel = b.FunctionParam("texel", ty.vec4<u32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, texel});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, t, coords, texel);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texel_buffer<r32uint, read_write>, %coords:u32, %texel:vec4<u32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %texel
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<u32, buffer, not_depth, non_arrayed, single_sampled, rw_op_compatible, r32uint, read_write>, %coords:u32, %texel:vec4<u32>):void {
+  $B1: {
+    %5:void = spirv.image_write %t, %coords, %texel, 0u
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_TexelBuffer) {
+    capabilities = core::ir::Capability::kAllowNonCoreTypes;
+
+    auto* t = b.FunctionParam(
+        "t", ty.texel_buffer(core::TexelFormat::kR32Uint, core::Access::kReadWrite));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texel_buffer<r32uint, read_write>):u32 {
+  $B1: {
+    %3:u32 = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:spirv.image<u32, buffer, not_depth, non_arrayed, single_sampled, rw_op_compatible, r32uint, read_write>):u32 {
+  $B1: {
+    %3:u32 = spirv.image_query_size<u32> %t
+    ret %3
+  }
+}
+)";
+
+    PolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Storage_Vulkan) {
     capabilities = core::ir::Capability::kAllowNonCoreTypes;
 

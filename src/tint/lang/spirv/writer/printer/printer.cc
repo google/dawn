@@ -663,6 +663,8 @@ class Printer {
                         } else {
                             module_.PushCapability(SpvCapabilitySampled1D);
                         }
+                    } else if (img->GetDim() == type::Dim::kBuffer) {
+                        module_.PushCapability(SpvCapabilityImageBuffer);
                     } else if (img->GetDim() == type::Dim::kSubpassData) {
                         module_.PushCapability(SpvCapabilityInputAttachment);
                     } else if (img->GetDim() == type::Dim::kCube &&
