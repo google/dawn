@@ -1232,18 +1232,18 @@ class Parser {
         return false;
     }
 
-    // Propagate a block param value out of a control instruction. This isn't the same as the other
+    // Propagate a value out of a control instruction. This isn't the same as the other
     // propagate as we only need to pull it out through a single blocks exit for the control
     // instruction.
-    core::ir::Value* PropagatePhi(core::ir::Terminator* term,
-                                  uint32_t spv_id_being_propagated,
-                                  core::ir::BlockParam* source_block_param) {
-        auto* src_blk = source_block_param->Block();
+    core::ir::Value* PropagateTerm(core::ir::Terminator* term,
+                                   uint32_t spv_id_being_propagated,
+                                   core::ir::Value* source_value,
+                                   core::ir::Block* source_block) {
+        auto* current_ctrl = source_block->Parent();
+        core::ir::Block* current_blk = source_block;
+        core::ir::Value* propagated_value = source_value;
+        auto* type = source_value->Type();
 
-        auto* current_ctrl = src_blk->Parent();
-        core::ir::Block* current_blk = src_blk;
-        core::ir::Value* propagated_value = source_block_param;
-        auto* type = source_block_param->Type();
         while (true) {
             if (IsContainedInBlock(term->Block(), current_blk)) {
                 break;
@@ -2505,7 +2505,14 @@ class Parser {
             // to add it to exit instructions, not all terminators, so this isn't a full
             // Propagation.
             if (auto* bp = (*val)->As<core::ir::BlockParam>()) {
-                auto* v = PropagatePhi(term, id, bp);
+                auto* v = PropagateTerm(term, id, bp, bp->Block());
+                term->PushOperand(v);
+                return;
+            }
+            // The value is defined by an instruction inside an inner block. Propagate it out of
+            // that block, then push that propagated value onto this terminator.
+            if (auto* res = (*val)->As<core::ir::InstructionResult>()) {
+                auto* v = PropagateTerm(term, id, *val, res->Instruction()->Block());
                 term->PushOperand(v);
                 return;
             }
@@ -2769,7 +2776,6 @@ class Parser {
     // Emit an OpPhi which is inside the merge block for a if.
     void EmitPhiInIfMerge(spvtools::opt::Instruction& inst, uint32_t header_id) {
         auto* type = Type(inst.type_id());
-
         core::ir::If* ctrl = nullptr;
         std::optional<core::ir::Value*> value_for_default_block = std::nullopt;
 

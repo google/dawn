@@ -2358,5 +2358,91 @@ TEST_F(SpirvParserTest, Phi_Propagated_BreakIf) {
 )");
 }
 
+// Verify that %258 correctly propagates up to %259.  %258 is defined in a selection construct
+// headed by %211, and needs to be propagated out of that "if" first, and then propagated from the
+// phi.
+TEST_F(SpirvParserTest, Phi_Propagated_If) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+       %bool = OpTypeBool
+          %4 = OpConstantTrue %bool
+      %float = OpTypeFloat 32
+          %1 = OpConstant %float 1
+          %2 = OpConstant %float 2
+          %3 = OpConstant %float 3
+       %main = OpFunction %void None %10
+         %58 = OpLabel
+               OpBranch %202
+        %202 = OpLabel
+               OpSelectionMerge %209 None
+               OpBranchConditional %4 %210 %211
+        %210 = OpLabel
+               OpBranch %209
+        %211 = OpLabel
+               OpSelectionMerge %218 None
+               OpBranchConditional %4 %219 %220
+        %219 = OpLabel
+               OpKill
+        %220 = OpLabel
+               OpSelectionMerge %222 None
+               OpBranchConditional %4 %223 %224
+        %223 = OpLabel
+               OpBranch %222
+        %224 = OpLabel
+               OpBranch %222
+        %222 = OpLabel
+        %258 = OpPhi %float %1 %223 %2 %224
+               OpBranch %218
+        %218 = OpLabel
+               OpBranch %209
+        %209 = OpLabel
+        %259 = OpPhi %float %3 %210 %258 %218
+        %263 = OpFAdd %float %259 %259
+               OpBranch %182
+        %182 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    %2:f32 = if true [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        exit_if 3.0f  # if_1
+      }
+      $B3: {  # false
+        %3:f32 = if true [t: $B4, f: $B5] {  # if_2
+          $B4: {  # true
+            discard
+            ret
+          }
+          $B5: {  # false
+            %4:f32 = if true [t: $B6, f: $B7] {  # if_3
+              $B6: {  # true
+                exit_if 1.0f  # if_3
+              }
+              $B7: {  # false
+                exit_if 2.0f  # if_3
+              }
+            }
+            exit_if %4  # if_2
+          }
+        }
+        exit_if %3  # if_1
+      }
+    }
+    %5:f32 = add %2, %2
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
