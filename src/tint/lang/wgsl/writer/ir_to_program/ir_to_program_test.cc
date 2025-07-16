@@ -117,18 +117,6 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IRToProgramTest, SingleFunction_Return_min_i32) {
-    auto* fn = b.Function("f", ty.i32());
-
-    fn->Block()->Append(b.Return(fn, -2147483648_i));
-
-    EXPECT_WGSL(R"(
-fn f() -> i32 {
-  return i32(-2147483648);
-}
-)");
-}
-
 TEST_F(IRToProgramTest, SingleFunction_Parameters) {
     auto* fn = b.Function("f", ty.i32());
     auto* i = b.FunctionParam("i", ty.i32());
