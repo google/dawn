@@ -864,6 +864,139 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                                  "var undef @location(6) @interpolate(linear, centroid)",
                              }));
 
+TEST_F(SpirvParserTest, Vertex_Output_I32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var Location 0
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %i32
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, i32, read_write> = var undef @location(0) @interpolate(flat)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Vertex_Output_U32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var Location 0
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %u32
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, u32, read_write> = var undef @location(0) @interpolate(flat)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Vertex_Output_Vec3_I32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var Location 0
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+      %v3i32 = OpTypeVector %i32 3
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %v3i32
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, vec3<i32>, read_write> = var undef @location(0) @interpolate(flat)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Vertex_Output_F32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpDecorate %var Location 0
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %f32
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<__out, f32, read_write> = var undef @location(0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Var_OpSpecConstantTrue) {
     EXPECT_IR(R"(
                OpCapability Shader

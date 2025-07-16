@@ -355,6 +355,159 @@ INSTANTIATE_TEST_SUITE_P(
             "tint_symbol:vec4<f32> @offset(0), @location(6), @interpolate(linear, centroid)",
         }));
 
+TEST_F(SpirvParserTest, Struct_MemberDecoration_VertexOutput_U32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberDecorate %str 0 Location 1
+       %void = OpTypeVoid
+        %u32 = OpTypeInt 32 0
+        %str = OpTypeStruct %u32
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %str
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0), @location(1), @interpolate(flat)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Struct_MemberDecoration_VertexOutput_I32) {
+    EXPECT_IR(R"(
+                 OpCapability Shader
+                 OpCapability SampleRateShading
+                 OpMemoryModel Logical GLSL450
+                 OpEntryPoint Fragment %main "main"
+                 OpExecutionMode %main OriginUpperLeft
+                 OpMemberDecorate %str 0 Location 1
+         %void = OpTypeVoid
+          %i32 = OpTypeInt 32 1
+          %str = OpTypeStruct %i32
+      %fn_type = OpTypeFunction %void
+
+  %_ptr_Output = OpTypePointer Output %str
+          %var = OpVariable %_ptr_Output Output
+
+         %main = OpFunction %void None %fn_type
+   %main_start = OpLabel
+                 OpReturn
+                 OpFunctionEnd
+  )",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:i32 @offset(0), @location(1), @interpolate(flat)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Struct_MemberDecoration_VertexOutput_Vec3_I32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberDecorate %str 0 Location 1
+       %void = OpTypeVoid
+        %i32 = OpTypeInt 32 1
+      %v3i32 = OpTypeVector %i32 3
+        %str = OpTypeStruct %v3i32
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %str
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec3<i32> @offset(0), @location(1), @interpolate(flat)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Struct_MemberDecoration_VertexOutput_F32) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberDecorate %str 0 Location 1
+       %void = OpTypeVoid
+        %f32 = OpTypeFloat 32
+        %str = OpTypeStruct %f32
+    %fn_type = OpTypeFunction %void
+
+%_ptr_Output = OpTypePointer Output %str
+        %var = OpVariable %_ptr_Output Output
+
+       %main = OpFunction %void None %fn_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:f32 @offset(0), @location(1)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, Struct_SomeNonWritableMembers) {
     EXPECT_IR(R"(
                OpCapability Shader

@@ -1002,6 +1002,10 @@ class Parser {
                 }
             }
 
+            if (member_ty->IsIntegerScalarOrVector() && attributes.location.has_value()) {
+                interpolation().type = core::InterpolationType::kFlat;
+            }
+
             Symbol name;
             if (member_names && member_names->size() > i) {
                 auto n = (*member_names)[i];
@@ -4272,6 +4276,14 @@ class Parser {
         }
 
         auto* element_ty = Type(inst.type_id(), access_mode)->As<core::type::Pointer>();
+        if (element_ty->AddressSpace() == core::AddressSpace::kOut &&
+            element_ty->StoreType()->IsIntegerScalarOrVector()) {
+            io_attributes.interpolation = {
+                .type = core::InterpolationType::kFlat,
+                .sampling = core::InterpolationSampling::kUndefined,
+            };
+        }
+
         auto* var = b_.Var(element_ty);
         if (inst.NumOperands() > 3) {
             var->SetInitializer(Value(inst.GetSingleWordOperand(3)));
