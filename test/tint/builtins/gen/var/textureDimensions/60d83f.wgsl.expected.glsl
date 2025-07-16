@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-Failed to generate: :18:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<bgra8unorm, read>, i32)'
+Failed to generate: :18:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<rgba8unorm, read>, i32)'
 
 11 candidate functions:
  • 'glsl.textureSize(texture: texture_depth_2d  ✗ , level: i32  ✓ ) -> vec2<i32>'
@@ -40,12 +40,12 @@ prevent_dce_block = struct @align(4), @block {
 
 $B1: {  # root
   %1:ptr<storage, prevent_dce_block, read_write> = var undef @binding_point(0, 0)
-  %arg_0:ptr<handle, texel_buffer<bgra8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 1)
+  %arg_0:ptr<handle, texel_buffer<rgba8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 1)
 }
 
 %textureDimensions_60d83f = func():u32 {
   $B2: {
-    %4:texel_buffer<bgra8unorm, read> = load %arg_0
+    %4:texel_buffer<rgba8unorm, read> = load %arg_0
     %5:i32 = glsl.textureSize %4, 0i
     %6:u32 = bitcast %5
     %res:ptr<function, u32, read_write> = var %6
@@ -62,7 +62,7 @@ $B1: {  # root
   }
 }
 
-Failed to generate: :18:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<bgra8unorm, read>, i32)'
+Failed to generate: :18:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<rgba8unorm, read>, i32)'
 
 11 candidate functions:
  • 'glsl.textureSize(texture: texture_depth_2d  ✗ , level: i32  ✓ ) -> vec2<i32>'
@@ -102,12 +102,12 @@ prevent_dce_block = struct @align(4), @block {
 
 $B1: {  # root
   %1:ptr<storage, prevent_dce_block, read_write> = var undef @binding_point(0, 0)
-  %arg_0:ptr<handle, texel_buffer<bgra8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 1)
+  %arg_0:ptr<handle, texel_buffer<rgba8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 1)
 }
 
 %textureDimensions_60d83f = func():u32 {
   $B2: {
-    %4:texel_buffer<bgra8unorm, read> = load %arg_0
+    %4:texel_buffer<rgba8unorm, read> = load %arg_0
     %5:i32 = glsl.textureSize %4, 0i
     %6:u32 = bitcast %5
     %res:ptr<function, u32, read_write> = var %6
@@ -124,7 +124,7 @@ $B1: {  # root
   }
 }
 
-Failed to generate: :13:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<bgra8unorm, read>, i32)'
+Failed to generate: :13:14 error: glsl.textureSize: no matching call to 'glsl.textureSize(texel_buffer<rgba8unorm, read>, i32)'
 
 11 candidate functions:
  • 'glsl.textureSize(texture: texture_depth_2d  ✗ , level: i32  ✓ ) -> vec2<i32>'
@@ -159,12 +159,12 @@ VertexOutput = struct @align(16) {
 }
 
 $B1: {  # root
-  %arg_0:ptr<handle, texel_buffer<bgra8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 0)
+  %arg_0:ptr<handle, texel_buffer<rgba8unorm, read>, read> = combined_texture_sampler undef @binding_point(0, 0)
 }
 
 %textureDimensions_60d83f = func():u32 {
   $B2: {
-    %3:texel_buffer<bgra8unorm, read> = load %arg_0
+    %3:texel_buffer<rgba8unorm, read> = load %arg_0
     %4:i32 = glsl.textureSize %3, 0i
     %5:u32 = bitcast %4
     %res:ptr<function, u32, read_write> = var %5
