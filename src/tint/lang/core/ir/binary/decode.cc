@@ -691,6 +691,8 @@ struct Decoder {
                 return CreateTypeArray(type_in.array());
             case pb::Type::KindCase::kBindingArray:
                 return CreateTypeBindingArray(type_in.binding_array());
+            case pb::Type::KindCase::kTexelBuffer:
+                return CreateTypeTexelBuffer(type_in.texel_buffer());
             case pb::Type::KindCase::kDepthTexture:
                 return CreateTypeDepthTexture(type_in.depth_texture());
             case pb::Type::KindCase::kSampledTexture:
@@ -929,6 +931,12 @@ struct Decoder {
         auto texel_format = TexelFormat(texture_in.texel_format());
         auto access = AccessControl(texture_in.access());
         return mod_out_.Types().storage_texture(dimension, texel_format, access);
+    }
+
+    const type::TexelBuffer* CreateTypeTexelBuffer(const pb::TypeTexelBuffer& buffer_in) {
+        auto texel_format = TexelFormat(buffer_in.texel_format());
+        auto access = AccessControl(buffer_in.access());
+        return mod_out_.Types().texel_buffer(texel_format, access);
     }
 
     const type::ExternalTexture* CreateTypeExternalTexture(const pb::TypeExternalTexture&) {

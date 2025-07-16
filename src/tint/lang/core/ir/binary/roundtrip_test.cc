@@ -333,6 +333,12 @@ TEST_F(IRBinaryRoundtripTest, storage_texture) {
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, texel_buffer) {
+    auto* buf = ty.texel_buffer(core::TexelFormat::kRgba32Float, core::Access::kReadWrite);
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, buf, read)); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, external_texture) {
     auto* tex = ty.external_texture();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });

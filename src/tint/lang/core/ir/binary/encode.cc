@@ -410,6 +410,9 @@ struct Encoder {
                 [&](const core::type::StorageTexture* t) {
                     TypeStorageTexture(*type_out.mutable_storage_texture(), t);
                 },
+                [&](const core::type::TexelBuffer* t) {
+                    TypeTexelBuffer(*type_out.mutable_texel_buffer(), t);
+                },
                 [&](const core::type::ExternalTexture* t) {
                     TypeExternalTexture(*type_out.mutable_external_texture(), t);
                 },
@@ -550,6 +553,12 @@ struct Encoder {
         texture_out.set_dimension(TextureDimension(texture_in->Dim()));
         texture_out.set_texel_format(TexelFormat(texture_in->TexelFormat()));
         texture_out.set_access(AccessControl(texture_in->Access()));
+    }
+
+    void TypeTexelBuffer(pb::TypeTexelBuffer& buffer_out,
+                         const core::type::TexelBuffer* buffer_in) {
+        buffer_out.set_texel_format(TexelFormat(buffer_in->TexelFormat()));
+        buffer_out.set_access(AccessControl(buffer_in->Access()));
     }
 
     void TypeExternalTexture(pb::TypeExternalTexture&, const core::type::ExternalTexture*) {}
