@@ -29,6 +29,7 @@
 
 #include "src/tint/utils/command/command.h"
 
+#include <errno.h>
 #include <limits.h>
 #include <sys/poll.h>
 #include <sys/stat.h>
