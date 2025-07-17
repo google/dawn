@@ -391,6 +391,25 @@ Aspect ComputeCombinedAspect(Device* device, const Format& format) {
     return Aspect::None;
 }
 
+VkComponentSwizzle VulkanComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
+    switch (swizzle) {
+        case wgpu::ComponentSwizzle::Zero:
+            return VK_COMPONENT_SWIZZLE_ZERO;
+        case wgpu::ComponentSwizzle::One:
+            return VK_COMPONENT_SWIZZLE_ONE;
+        case wgpu::ComponentSwizzle::R:
+            return VK_COMPONENT_SWIZZLE_R;
+        case wgpu::ComponentSwizzle::G:
+            return VK_COMPONENT_SWIZZLE_G;
+        case wgpu::ComponentSwizzle::B:
+            return VK_COMPONENT_SWIZZLE_B;
+        case wgpu::ComponentSwizzle::A:
+            return VK_COMPONENT_SWIZZLE_A;
+
+        case wgpu::ComponentSwizzle::Undefined:
+            DAWN_UNREACHABLE();
+    }
+}
 }  // namespace
 
 #define SIMPLE_FORMAT_MAPPING(X)                                                      \
@@ -2053,8 +2072,9 @@ VkImageViewCreateInfo TextureView::GetCreateInfo(wgpu::TextureFormat format,
         createInfo.format = VulkanImageFormat(device, format);
     }
 
-    createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,
-                                               VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A};
+    createInfo.components = VkComponentMapping{
+        VulkanComponentSwizzle(GetSwizzleRed()), VulkanComponentSwizzle(GetSwizzleGreen()),
+        VulkanComponentSwizzle(GetSwizzleBlue()), VulkanComponentSwizzle(GetSwizzleAlpha())};
 
     const SubresourceRange& subresources = GetSubresourceRange();
     createInfo.subresourceRange.baseMipLevel = subresources.baseMipLevel;

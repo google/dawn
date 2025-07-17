@@ -230,7 +230,7 @@ TEST_P(TextureComponentSwizzleTest, OnlyRedAndGreenChannelPresent) {
     RunTest(params);
 }
 
-DAWN_INSTANTIATE_TEST(TextureComponentSwizzleTest, MetalBackend());
+DAWN_INSTANTIATE_TEST(TextureComponentSwizzleTest, MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
