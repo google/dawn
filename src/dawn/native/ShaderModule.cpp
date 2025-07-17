@@ -167,7 +167,7 @@ wgpu::TextureFormat TintImageFormatToTextureFormat(
         case tint::inspector::ResourceBinding::TexelFormat::kR16Sint:
             return wgpu::TextureFormat::R16Sint;
         case tint::inspector::ResourceBinding::TexelFormat::kR16Float:
-            return wgpu::TextureFormat::RG16Float;
+            return wgpu::TextureFormat::R16Float;
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Unorm:
             return wgpu::TextureFormat::RG16Unorm;
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Snorm:
@@ -177,7 +177,7 @@ wgpu::TextureFormat TintImageFormatToTextureFormat(
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Sint:
             return wgpu::TextureFormat::RG16Sint;
         case tint::inspector::ResourceBinding::TexelFormat::kRg16Float:
-            return wgpu::TextureFormat::R16Float;
+            return wgpu::TextureFormat::RG16Float;
         case tint::inspector::ResourceBinding::TexelFormat::kRgb10A2Uint:
             return wgpu::TextureFormat::RGB10A2Uint;
         case tint::inspector::ResourceBinding::TexelFormat::kRgb10A2Unorm:
