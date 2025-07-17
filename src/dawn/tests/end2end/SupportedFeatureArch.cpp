@@ -63,10 +63,12 @@ class FeatureArchInfoTest_MaxLimits : public FeatureArchInfoTestBase {
 };
 
 TEST_P(FeatureArchInfoTest_MaxLimits, SubgroupsSupported) {
-    // All apple silicon and intel (except gen9) devices support subgroups.
     const bool subgroupSupportExpected =
+        // All Apple Silicon
         gpu_info::IsApple(GetParam().adapterProperties.vendorID) ||
-        (gpu_info::IsIntel(GetParam().adapterProperties.vendorID) &&
+        // All Intel >Gen9 on Metal/Vulkan, and D3D12+DXC
+        ((IsMetal() || IsVulkan() || IsDXC()) &&
+         gpu_info::IsIntel(GetParam().adapterProperties.vendorID) &&
          !gpu_info::IsIntelGen9(GetParam().adapterProperties.vendorID,
                                 GetParam().adapterProperties.deviceID));
 
