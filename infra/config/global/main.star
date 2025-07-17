@@ -226,7 +226,7 @@ def get_dimension(os, builder_name = None):
     if os.category == os_category.LINUX:
         return "Ubuntu-22.04"
     elif os.category == os_category.MAC:
-        return "Mac-11|Mac-12|Mac-13|Mac-14"
+        return "Mac-12|Mac-13|Mac-14|Mac-15"
     elif os.category == os_category.WINDOWS:
         return "Windows-10"
 

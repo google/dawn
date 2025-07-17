@@ -62,6 +62,7 @@ if (NOT TARGET absl::strings)
                 -Wno-unreachable-code-break
                 -Wno-nullability-extension
                 -Wno-shadow
+                -Wno-redundant-parens
         )
     endif()
 

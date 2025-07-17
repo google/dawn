@@ -47,6 +47,7 @@
 #define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE /* currently no-op */
 #define TINT_DISABLE_WARNING_NEWLINE_EOF                 /* currently no-op */
 #define TINT_DISABLE_WARNING_OLD_STYLE_CAST              /* currently no-op */
+#define TINT_DISABLE_WARNING_REDUNDANT_PARENS            /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER         /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_MACRO_IDENTIFIER   /* currently no-op */
 #define TINT_DISABLE_WARNING_SHADOW_FIELD_IN_CONSTRUCTOR /* currently no-op */
@@ -109,6 +110,8 @@
         _Pragma("clang diagnostic ignored \"-Winconsistent-missing-destructor-override\"")
 #define TINT_DISABLE_WARNING_NEWLINE_EOF _Pragma("clang diagnostic ignored \"-Wnewline-eof\"")
 #define TINT_DISABLE_WARNING_OLD_STYLE_CAST _Pragma("clang diagnostic ignored \"-Wold-style-cast\"")
+#define TINT_DISABLE_WARNING_REDUNDANT_PARENS \
+    _Pragma("clang diagnostic ignored \"-Wredundant-parens\"")
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER \
     _Pragma("clang diagnostic ignored \"-Wreserved-identifier\"")
 #define TINT_DISABLE_WARNING_RESERVED_MACRO_IDENTIFIER                  \
@@ -141,6 +144,7 @@
     TINT_DISABLE_WARNING_EXTRA_SEMICOLON                                       \
     TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED                                   \
     TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE                           \
+    TINT_DISABLE_WARNING_REDUNDANT_PARENS                                      \
     TINT_DISABLE_WARNING_RESERVED_IDENTIFIER                                   \
     TINT_DISABLE_WARNING_RESERVED_MACRO_IDENTIFIER                             \
     TINT_DISABLE_WARNING_SHADOW_FIELD_IN_CONSTRUCTOR                           \
@@ -195,6 +199,7 @@
 #define TINT_DISABLE_WARNING_MISSING_DESTRUCTOR_OVERRIDE /* currently no-op */
 #define TINT_DISABLE_WARNING_NEWLINE_EOF                 /* currently no-op */
 #define TINT_DISABLE_WARNING_OLD_STYLE_CAST              /* currently no-op */
+#define TINT_DISABLE_WARNING_REDUNDANT_PARENS            /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER         /* currently no-op */
 #define TINT_DISABLE_WARNING_RESERVED_MACRO_IDENTIFIER   /* currently no-op */
 #define TINT_DISABLE_WARNING_SHADOW_FIELD_IN_CONSTRUCTOR /* currently no-op */
@@ -227,6 +232,7 @@
     TINT_DISABLE_WARNING_WEAK_VTABLES                 \
     TINT_DISABLE_WARNING_FLOAT_EQUAL                  \
     TINT_DISABLE_WARNING_DEPRECATED                   \
+    TINT_DISABLE_WARNING_REDUNDANT_PARENS             \
     TINT_DISABLE_WARNING_RESERVED_IDENTIFIER          \
     TINT_DISABLE_WARNING_RESERVED_MACRO_IDENTIFIER    \
     TINT_DISABLE_WARNING_UNUSED_VALUE                 \

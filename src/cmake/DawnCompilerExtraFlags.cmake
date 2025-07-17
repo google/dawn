@@ -51,6 +51,7 @@ function(common_compile_options target)
         "-Wno-deprecated-builtins"
         "-Wno-unknown-warning-option"
         "-Wno-switch-default"
+        "-Wno-nrvo"
     )
     if (${DAWN_WERROR})
       target_compile_options(${target}
