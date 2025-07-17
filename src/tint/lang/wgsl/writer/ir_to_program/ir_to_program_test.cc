@@ -32,7 +32,6 @@
 #include <string>
 
 #include "src/tint/lang/core/enums.h"
-#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -50,7 +49,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 IRToProgramTest::Result IRToProgramTest::Run() {
     Result result;
 
-    result.ir = tint::core::ir::Disassembler(mod).Plain();
+    result.ir = str();
 
     ProgramOptions options;
     options.allowed_features = AllowedFeatures::Everything();
