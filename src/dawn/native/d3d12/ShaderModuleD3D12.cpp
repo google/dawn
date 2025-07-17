@@ -350,6 +350,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     // read by the shader.
     req.hlsl.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
 
+    req.hlsl.tintOptions.immediate_binding_point = tint::BindingPoint{
+        layout->GetImmediatesRegisterSpace(), layout->GetImmediatesShaderRegister()};
+
     if (stage == SingleShaderStage::Vertex) {
         // Now that only vertex shader can have interstage outputs.
         // Pass in the actually used interstage locations for tint to potentially truncate unused

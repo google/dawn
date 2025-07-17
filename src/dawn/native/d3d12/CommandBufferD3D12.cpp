@@ -37,6 +37,7 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/ImmediateConstantsTracker.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
@@ -402,6 +403,56 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     }
     return {};
 }
+
+template <typename T>
+class ImmediateConstantTracker : public T {
+  public:
+    ImmediateConstantTracker() = default;
+
+    // Calling this after BindGroupTrackerBase::Apply() to update root signature.
+    void Apply(CommandRecordingContext* commandContext) {
+        auto* lastPipeline = this->mLastPipeline;
+        DAWN_ASSERT(lastPipeline != nullptr);
+
+        ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
+        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        for (auto&& [offset, size] : IterateRanges(uploadBits)) {
+            uint32_t immediateContentStartOffset =
+                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+            uint32_t immediateRangeStartOffset =
+                GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
+            SetRootConstant(commandContext->GetCommandList(),
+                            ToBackend(lastPipeline->GetLayout())->GetImmediatesParameterIndex(),
+                            size,
+                            this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                            immediateRangeStartOffset);
+        }
+
+        // Reset all dirty bits after uploading.
+        this->mDirty.reset();
+    }
+
+  private:
+    static constexpr bool kIsRenderImmediateConstants =
+        std::is_same_v<T, RenderImmediateConstantsTrackerBase>;
+    static constexpr bool kIsComputeImmediateConstants =
+        std::is_same_v<T, ComputeImmediateConstantsTrackerBase>;
+
+    void SetRootConstant(ID3D12GraphicsCommandList* commandList,
+                         uint32_t parameterIndex,
+                         uint32_t rootConstantsLength,
+                         const void* rootConstantsData,
+                         uint32_t registerOffset) const {
+        if constexpr (kIsRenderImmediateConstants) {
+            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                       rootConstantsData, registerOffset);
+        } else {
+            static_assert(kIsComputeImmediateConstants);
+            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                      rootConstantsData, registerOffset);
+        }
+    }
+};
 
 }  // anonymous namespace
 
@@ -1225,6 +1276,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
     Command type;
     ComputePipeline* lastPipeline = nullptr;
+    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::Dispatch: {
@@ -1239,6 +1291,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     commandContext, resourceUsages.dispatchUsages[currentDispatch]));
                 DAWN_TRY(bindingTracker->Apply(commandContext));
+                immediates.Apply(commandContext);
 
                 RecordNumWorkgroupsForDispatch(commandList, lastPipeline, dispatch);
                 commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
@@ -1252,6 +1305,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     commandContext, resourceUsages.dispatchUsages[currentDispatch]));
                 DAWN_TRY(bindingTracker->Apply(commandContext));
+                immediates.Apply(commandContext);
 
                 ComPtr<ID3D12CommandSignature> signature =
                     lastPipeline->GetDispatchIndirectCommandSignature();
@@ -1282,6 +1336,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 commandList->SetPipelineState(pipeline->GetPipelineState());
 
                 bindingTracker->OnSetPipeline(pipeline);
+                immediates.OnSetPipeline(pipeline);
                 lastPipeline = pipeline;
                 break;
             }
@@ -1297,6 +1352,15 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
                                                dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1343,9 +1407,6 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default:
                 DAWN_UNREACHABLE();
@@ -1572,6 +1633,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
     RenderPipeline* lastPipeline = nullptr;
     VertexBufferTracker vertexBufferTracker = {};
+    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
 
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
@@ -1582,6 +1644,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 RecordFirstIndexOffset(commandList, lastPipeline, draw->firstVertex,
                                        draw->firstInstance);
+                immediates.Apply(commandContext);
                 commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
                                            draw->firstVertex, draw->firstInstance);
                 break;
@@ -1594,6 +1657,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 RecordFirstIndexOffset(commandList, lastPipeline, draw->baseVertex,
                                        draw->firstInstance);
+                immediates.Apply(commandContext);
                 commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                   draw->firstIndex, draw->baseVertex,
                                                   draw->firstInstance);
@@ -1605,6 +1669,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 ComPtr<ID3D12CommandSignature> signature =
@@ -1619,6 +1684,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(buffer != nullptr);
@@ -1635,6 +1701,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
@@ -1661,6 +1728,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(indirectBuffer != nullptr);
@@ -1725,6 +1793,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
 
                 bindingTracker->OnSetPipeline(pipeline);
+                immediates.OnSetPipeline(pipeline);
 
                 lastPipeline = pipeline;
                 break;
@@ -1741,6 +1810,15 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
                                                dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1872,9 +1950,6 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 DAWN_TRY(EncodeRenderBundleCommand(&mCommands, type));
