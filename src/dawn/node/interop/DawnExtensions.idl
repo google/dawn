@@ -69,7 +69,7 @@ interface GPURenderPassEncoder {
 };
 
 dictionary GPUTextureDescriptor {
-    GPUTextureViewDimension? textureBindingViewDimension;
+    GPUTextureViewDimension textureBindingViewDimension;
 };
 
 enum WGSLLanguageFeatureName {
