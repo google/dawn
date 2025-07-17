@@ -45,6 +45,17 @@
 
 namespace dawn::native::d3d12 {
 
+// The D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE(1380) was introduced
+// in SDK 10.0.26100.0. Redefine the message name to allows it to be compiled on both
+// SDK 10.0.22621.0 and SDK 10.0.26100.0.
+#if D3D12_SDK_VERSION >= 612
+const D3D12_MESSAGE_ID DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE =
+    D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE;
+#else
+const D3D12_MESSAGE_ID DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE =
+    D3D12_MESSAGE_ID(1380);
+#endif
+
 PhysicalDevice::PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
     : Base(backend, std::move(hardwareAdapter), wgpu::BackendType::D3D12) {}
 
@@ -483,7 +494,7 @@ MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
         // allowed alignment.
         D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT,
         // This message id is added for invalid small resource alignment.
-        D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE,
+        DAWN_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE,
 
         // WebGPU allows OOB vertex buffer access and relies on D3D12's robust buffer access
         // behavior.

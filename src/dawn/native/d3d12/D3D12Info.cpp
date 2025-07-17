@@ -92,11 +92,13 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsNative16BitShaderOps = featureOptions4.Native16BitShaderOpsSupported;
     }
 
+#if D3D12_SDK_VERSION >= 612
     D3D12_FEATURE_DATA_D3D12_OPTIONS18 featureOptions18 = {};
     if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
             D3D12_FEATURE_D3D12_OPTIONS18, &featureOptions18, sizeof(featureOptions18)))) {
         info.supportsRenderPass = featureOptions18.RenderPassesValid;
     }
+#endif
 
     // D3D12_HEAP_FLAG_CREATE_NOT_ZEROED is available anytime that ID3D12Device8 is exposed, or a
     // check for D3D12_FEATURE_D3D12_OPTIONS7 succeeds.

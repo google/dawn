@@ -148,12 +148,14 @@ void RenderPassBuilder::SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDesc
                                             bool isDepthReadOnly,
                                             bool isStencilReadOnly) {
     mRenderPassDepthStencilDesc.cpuDescriptor = baseDescriptor;
+#if D3D12_SDK_VERSION >= 612
     if (isDepthReadOnly) {
         mRenderPassFlags |= D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_DEPTH;
     }
     if (isStencilReadOnly) {
         mRenderPassFlags |= D3D12_RENDER_PASS_FLAG_BIND_READ_ONLY_STENCIL;
     }
+#endif
 }
 
 ColorAttachmentIndex RenderPassBuilder::GetHighestColorAttachmentIndexPlusOne() const {
