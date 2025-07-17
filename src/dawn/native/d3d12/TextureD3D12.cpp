@@ -147,6 +147,25 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_FLAGS flags, uint32_t resour
     return ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures;
 }
 
+D3D12_SHADER_COMPONENT_MAPPING D3D12ComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
+    switch (swizzle) {
+        case wgpu::ComponentSwizzle::Zero:
+            return D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_0;
+        case wgpu::ComponentSwizzle::One:
+            return D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1;
+        case wgpu::ComponentSwizzle::R:
+            return D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_0;
+        case wgpu::ComponentSwizzle::G:
+            return D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_1;
+        case wgpu::ComponentSwizzle::B:
+            return D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_2;
+        case wgpu::ComponentSwizzle::A:
+            return D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_3;
+
+        case wgpu::ComponentSwizzle::Undefined:
+            DAWN_UNREACHABLE();
+    }
+}
 }  // namespace
 
 // static
@@ -904,7 +923,9 @@ TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDesc
     mSrvDesc.Format =
         d3d::D3DShaderResourceViewFormat(GetDevice(), textureFormat, GetFormat(), aspects);
     if (mSrvDesc.Format != DXGI_FORMAT_UNKNOWN) {
-        mSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
+            D3D12ComponentSwizzle(GetSwizzleRed()), D3D12ComponentSwizzle(GetSwizzleGreen()),
+            D3D12ComponentSwizzle(GetSwizzleBlue()), D3D12ComponentSwizzle(GetSwizzleAlpha()));
 
         // Stencil is accessed using the .g component in the shader. Map it to the zeroth component
         // to match other APIs.
