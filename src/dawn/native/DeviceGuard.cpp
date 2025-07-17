@@ -47,7 +47,7 @@ DeviceGuard::DeviceGuard(DeviceBase* device, RecursiveMutex* mutex)
     // Only handle Defer if we were not passed the mutex explicitly. This is because the mutex is
     // only passed explicitly if the device may be destroyed and in that case, we do NOT want to
     // handle Defer callbacks.
-    if (!mutex && !device->mDefer.has_value()) {
+    if (!mutex && device->mMutex && !device->mDefer.has_value()) {
         // The first guard created in a thread also creates the defer, i.e. when the optional is
         // nullopt. We also need to set detail::DeviceGuardBase::mHandleDefer here instead of in the
         // base constructor because we only want to mutate the device-owned state when we are
