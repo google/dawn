@@ -228,8 +228,8 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
             ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
             bool foundFeatureName = false;
-            for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-                if (featureName == supportedFeatures.features[i]) {
+            for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
+                if (featureName == supportedFeatures.features[fi]) {
                     foundFeatureName = true;
                     break;
                 }
@@ -260,8 +260,8 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
                 ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
                 bool foundFeatureName = false;
-                for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-                    if (featureName == supportedFeatures.features[i]) {
+                for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
+                    if (featureName == supportedFeatures.features[fi]) {
                         foundFeatureName = true;
                         break;
                     }
@@ -283,8 +283,8 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
                 ASSERT_EQ(expectedFeatureCount, supportedFeatures.featureCount);
 
                 bool foundFeatureName = false;
-                for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-                    if (featureName == supportedFeatures.features[i]) {
+                for (uint32_t fi = 0; fi < supportedFeatures.featureCount; ++fi) {
+                    if (featureName == supportedFeatures.features[fi]) {
                         foundFeatureName = true;
                         break;
                     }
