@@ -330,10 +330,10 @@ message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
 
 option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
-option(DAWN_BUILD_MONOLITHIC_LIBRARY "Bundle all dawn components into a single shared library." ON)
+option(DAWN_BUILD_MONOLITHIC_LIBRARY "Build one big monolithic library file" ON)
 
-message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
 message(STATUS "Dawn build monolithic library: ${DAWN_BUILD_MONOLITHIC_LIBRARY}")
+message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
 message(STATUS "")
 
 # Much of the backend code is shared among desktop OpenGL and OpenGL ES
