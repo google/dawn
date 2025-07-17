@@ -18,9 +18,9 @@
 
 - Mac
   - [Xcode](https://developer.apple.com/xcode/) 12.2+.
-  - The macOS 11.0 SDK. Run `xcode-select` to check whether you have it.
+  - The macOS 12.0 SDK. Run `xcode-select` to check whether you have it.
     ```sh
-    ls `xcode-select -p`/Platforms/MacOSX.platform/Developer/SDKs
+    ls `xcode-select -p`/SDKs
     ```
 
 ## Get the code and its dependencies

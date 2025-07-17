@@ -38,7 +38,7 @@ Metal 2.3 is supported and is the preferred target API when available.
 
 **Apple OS support:**
 
- - macOS: supported on version 11.0+.
+ - macOS: supported on version 12.0+.
  - iOS: supported on version 14.0+, best effort.
  - tvOS/ipadOS/...: Not supported, contributions welcome.
 
