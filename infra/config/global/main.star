@@ -392,6 +392,9 @@ def add_ci_builder(name, os, properties):
         siso.project.DEFAULT_TRUSTED,
         siso.remote_jobs.DEFAULT,
     )
+    # TODO(crbug.com/343503161): Remove sheriff_rotations after SoM is updated.
+    properties_ci["sheriff_rotations"] = ["dawn"]
+    properties_ci["gardener_rotations"] = ["dawn"]
     properties_ci.update(properties)
     shadow_properties_ci = get_common_properties(
         os,
@@ -763,6 +766,9 @@ luci.builder(
     properties = {
         "repo_name": "dawn",
         "runhooks": True,
+        # TODO(crbug.com/343503161): Remove sheriff_rotations after SoM is updated.
+        "sheriff_rotations": ["dawn"],
+        "gardener_rotations": ["dawn"],
     },
     caches = [
         swarming.cache("golang"),
