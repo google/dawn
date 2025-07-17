@@ -27,6 +27,7 @@
 
 // GEN_BUILD:CONDITION(tint_build_wgsl_writer)
 
+#include <limits>
 #include <sstream>
 #include <string>
 
@@ -113,6 +114,18 @@ TEST_F(IRToProgramTest, SingleFunction_Return_i32) {
     EXPECT_WGSL(R"(
 fn f() -> i32 {
   return 42i;
+}
+)");
+}
+
+TEST_F(IRToProgramTest, SingleFunction_Return_min_i32) {
+    auto* fn = b.Function("f", ty.i32());
+
+    fn->Block()->Append(b.Return(fn, i32(std::numeric_limits<int32_t>::min())));
+
+    EXPECT_WGSL(R"(
+fn f() -> i32 {
+  return i32(-2147483648);
 }
 )");
 }
