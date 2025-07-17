@@ -742,59 +742,60 @@ class TextureFormatsTier1RenderPassTest : public RenderPassDescriptorValidationT
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::TextureFormatsTier1};
     }
+
+    void RunRenderPassMultisampleTest(wgpu::TextureFormat colorFormat, bool withResolveTarget) {
+        static constexpr uint32_t kArrayLayers = 1;
+        static constexpr uint32_t kLevelCount = 1;
+        static constexpr uint32_t kSize = 32;
+        static constexpr uint32_t kMultiSampleCount = 4;
+        static constexpr uint32_t kSingleSampleCount = 1;
+
+        wgpu::Texture colorTexture =
+            CreateTexture(device, wgpu::TextureDimension::e2D, colorFormat, kSize, kSize,
+                          kArrayLayers, kLevelCount, kMultiSampleCount);
+        wgpu::TextureView colorTextureView = colorTexture.CreateView();
+
+        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
+
+        wgpu::Texture resolveTargetTexture;
+        wgpu::TextureView resolveTargetTextureView;
+        if (withResolveTarget) {
+            resolveTargetTexture =
+                CreateTexture(device, wgpu::TextureDimension::e2D, colorFormat, kSize, kSize,
+                              kArrayLayers, kLevelCount, kSingleSampleCount);
+            resolveTargetTextureView = resolveTargetTexture.CreateView();
+            renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
+        }
+
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
 };
 
-// Tests that R8Snorm, RG8Snorm, and RGBA8Snorm color attachments support multisampling and resolve
+// Tests that kTier1TestFormats8Bit color attachments support multisampling and resolve
 // targets when TextureFormatsTier1 is enabled.
-TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithResolveTarget) {
+TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColor8bitSnormWithResolveTarget) {
     for (const auto format : utils::kTier1TestFormats8Bit) {
-        static constexpr uint32_t kArrayLayers = 1;
-        static constexpr uint32_t kLevelCount = 1;
-        static constexpr uint32_t kSize = 32;
-        static constexpr uint32_t kMultiSampleCount = 4;
-        static constexpr uint32_t kSingleSampleCount = 1;
-        wgpu::TextureFormat kColorFormat = format;
-
-        wgpu::Texture colorTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kMultiSampleCount);
-        wgpu::Texture resolveTargetTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kSingleSampleCount);
-        wgpu::TextureView colorTextureView = colorTexture.CreateView();
-        wgpu::TextureView resolveTargetTextureView = resolveTargetTexture.CreateView();
-
-        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
-        renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
-        AssertBeginRenderPassSuccess(&renderPass);
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        RunRenderPassMultisampleTest(format, true);
     }
 }
 
-// Tests that r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm color attachments
-// support multisampling targets when TextureFormatsTier1 is enabled.
-TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorWithoutResolveTarget) {
+// Tests that kTier1TestFormats16Bit color attachments support multisampling targets when
+// TextureFormatsTier1 is enabled.
+TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColor16bitWithoutResolveTarget) {
     for (const auto format : utils::kTier1TestFormats16Bit) {
-        static constexpr uint32_t kArrayLayers = 1;
-        static constexpr uint32_t kLevelCount = 1;
-        static constexpr uint32_t kSize = 32;
-        static constexpr uint32_t kMultiSampleCount = 4;
-        static constexpr uint32_t kSingleSampleCount = 1;
-        wgpu::TextureFormat kColorFormat = format;
-
-        wgpu::Texture colorTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kMultiSampleCount);
-        wgpu::Texture resolveTargetTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kSingleSampleCount);
-        wgpu::TextureView colorTextureView = colorTexture.CreateView();
-
-        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
-        AssertBeginRenderPassSuccess(&renderPass);
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        RunRenderPassMultisampleTest(format, false);
     }
 }
 
-class RG11B10UfloatRenderableRenderPassTest : public RenderPassDescriptorValidationTest {
+// Tests that RG11B10Ufloat color attachment supports multisampling and resolve targets
+// when TextureFormatsTier1 is enabled.
+TEST_F(TextureFormatsTier1RenderPassTest, MultisampledColorRG11B10UfloatWithResolveTarget) {
+    RunRenderPassMultisampleTest(wgpu::TextureFormat::RG11B10Ufloat, true);
+}
+
+class RG11B10UfloatRenderableRenderPassTest : public TextureFormatsTier1RenderPassTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::RG11B10UfloatRenderable};
@@ -804,28 +805,7 @@ class RG11B10UfloatRenderableRenderPassTest : public RenderPassDescriptorValidat
 // Tests that RG11B10Ufloat color attachment supports multisampling and resolve targets
 // when RG11B10UfloatRenderable is enabled.
 TEST_F(RG11B10UfloatRenderableRenderPassTest, MultisampledColorWithResolveTarget) {
-    const std::array kTestFormats = {wgpu::TextureFormat::RG11B10Ufloat};
-    for (const auto format : kTestFormats) {
-        static constexpr uint32_t kArrayLayers = 1;
-        static constexpr uint32_t kLevelCount = 1;
-        static constexpr uint32_t kSize = 32;
-        static constexpr uint32_t kMultiSampleCount = 4;
-        static constexpr uint32_t kSingleSampleCount = 1;
-        wgpu::TextureFormat kColorFormat = format;
-
-        wgpu::Texture colorTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kMultiSampleCount);
-        wgpu::Texture resolveTargetTexture =
-            CreateTexture(device, wgpu::TextureDimension::e2D, kColorFormat, kSize, kSize,
-                          kArrayLayers, kLevelCount, kSingleSampleCount);
-        wgpu::TextureView colorTextureView = colorTexture.CreateView();
-        wgpu::TextureView resolveTargetTextureView = resolveTargetTexture.CreateView();
-
-        utils::ComboRenderPassDescriptor renderPass({colorTextureView});
-        renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
-        AssertBeginRenderPassSuccess(&renderPass);
-    }
+    RunRenderPassMultisampleTest(wgpu::TextureFormat::RG11B10Ufloat, true);
 }
 
 // drawCount must not exceed maxDrawCount

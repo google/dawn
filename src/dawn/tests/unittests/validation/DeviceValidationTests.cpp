@@ -282,6 +282,22 @@ TEST_F(RequestDeviceValidationTest, ErrorTriggersDeviceLost) {
     }
 }
 
+// Test that RG11B10UfloatRenderable is implicitly enabled when TextureFormatsTier1 is active.
+TEST_F(RequestDeviceValidationTest, Implicit) {
+    wgpu::DeviceDescriptor descriptor = {};
+    std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::TextureFormatsTier1};
+    descriptor.requiredFeatures = features.data();
+    descriptor.requiredFeatureCount = features.size();
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::RG11B10UfloatRenderable));
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
 class DeviceTickValidationTest : public ValidationTest {};
 
 // Device destroy before API-level Tick should always result in no-op and false.

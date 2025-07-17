@@ -1206,17 +1206,17 @@ class TextureFormatsTier1TextureTest : public TextureValidationTest {
     }
 };
 
-// Test that
-// r8snorm/rg8snorm/rgba8snorm/r16unorm/r16snorm/rg16unorm/rg16snorm/rgba16unorm/rgba16snorm formats
-// are valid as renderable texture if 'texture-formats-tier1' is enabled.
-TEST_F(TextureFormatsTier1TextureTest, SNORMFormatsAreRenderableWithFeatureEnabled) {
+// Test that kTier1AdditionalRenderableFormats formats are valid as renderable texture and they also
+// allow multisampling with TextureFormatsTier1.
+TEST_F(TextureFormatsTier1TextureTest, RenderableAndMultisampleSupport) {
     for (const auto format : utils::kTier1AdditionalRenderableFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
         wgpu::TextureDescriptor descriptor;
         descriptor.size = {1, 1, 1};
         descriptor.usage = wgpu::TextureUsage::RenderAttachment;
         descriptor.format = format;
-
-        wgpu::Texture texture = device.CreateTexture(&descriptor);
+        descriptor.sampleCount = 4;
+        device.CreateTexture(&descriptor);
     }
 }
 

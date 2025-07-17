@@ -1674,6 +1674,11 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
     }
 
+    if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier1)) {
+        // Handle features that implicitly enable other features.
+        mEnabledFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+    }
+
     if (level == wgpu::FeatureLevel::Core) {
         // Core-defaulting adapters always support the "core-features-and-limits" feature.
         // It is automatically enabled on devices created from such adapters.
