@@ -38,18 +38,8 @@
 #define {{metadata.api.upper()}}_H_
 
 //* -------------------------------------------------------------------------------------
-//* The follow block defines Dawn generator specific macros and #defines for migrations.
+//* The follow block defines Dawn generator specific macros
 //* -------------------------------------------------------------------------------------
-{%- if 'dawn' in enabled_tags or 'emscripten' in enabled_tags %}
-
-    #define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
-    #define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
-    #define WGPU_BREAKING_CHANGE_STRING_VIEW_CALLBACKS
-    #define WGPU_BREAKING_CHANGE_QUEUE_WORK_DONE_CALLBACK_MESSAGE
-    #define WGPU_BREAKING_CHANGE_COMPATIBILITY_MODE_LIMITS
-    #define WGPU_BREAKING_CHANGE_INSTANCE_FEATURES_LIMITS
-{% endif %}
-
 {% macro render_c_default_value(member) -%}
     {%- if member.annotation in ["*", "const*", "const*const*"] -%}
         //* Pointer types should always default to NULL.
@@ -178,10 +168,10 @@
 //* Special structures that require some custom code generation.
 {%- set SpecialStructures = ["string view"] %}
 //* -------------------------------------------------------------------------------------
-//* End of Dawn generator specific macros and #defines for migrations.
+//* End of Dawn generator specific macros
 //* -------------------------------------------------------------------------------------
 
-{% set API = metadata.c_prefix %}
+{%- set API = metadata.c_prefix %}
 {% set api = API.lower() %}
 #if defined({{API}}_SHARED_LIBRARY)
 #    if defined(_WIN32)
