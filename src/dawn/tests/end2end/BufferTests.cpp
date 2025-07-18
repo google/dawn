@@ -1230,6 +1230,45 @@ TEST_P(BufferTests, CreateErrorBuffer) {
     ASSERT_EQ(buffer, nullptr);
 }
 
+// Test that MapAsync fails if called twice on the same buffer without unmapping.
+TEST_P(BufferValidationTests, MapAsyncFailsWhenAlreadyMapped) {
+    // Create a writable buffer with MapWrite and CopyDst usage.
+    wgpu::BufferDescriptor desc;
+    desc.size = 64;
+    desc.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopyDst;
+
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    // First call to MapAsync should succeed.
+    bool callback1Called = false;
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 64,
+        [&](WGPUMapAsyncStatus status) {
+            // Expect the first mapping to succeed.
+            EXPECT_EQ(status, WGPUMapAsyncStatus_Success);
+            callback1Called = true;
+        });
+
+    // Immediately call MapAsync again without unmapping.
+    bool callback2Called = false;
+    buffer.MapAsync(wgpu::MapMode::Write, 0, 64,
+        [&](WGPUMapAsyncStatus status) {
+            // The second mapping should fail and return an error.
+            EXPECT_EQ(status, WGPUMapAsyncStatus_Error);
+            callback2Called = true;
+        });
+
+    // Process the commands and trigger callbacks.
+    device.Tick();
+
+    // Ensure both callbacks were actually called.
+    EXPECT_TRUE(callback1Called);
+    EXPECT_TRUE(callback2Called);
+
+    // Cleanup: Unmap the buffer after use.
+    buffer.Unmap();
+}
+
+
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     // TODO(crbug.com/346377856): fails on ANGLE/D3D11, but is likely a Dawn/GL bug that only
