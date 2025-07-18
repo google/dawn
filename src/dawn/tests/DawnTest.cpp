@@ -2162,6 +2162,8 @@ testing::AssertionResult ExpectBetweenSnormTextureBounds<T>::Check(const void* d
 }
 
 template class ExpectBetweenSnormTextureBounds<int8_t>;
+template class ExpectBetweenSnormTextureBounds<int16_t>;
+template class ExpectBetweenSnormTextureBounds<uint16_t>;
 
 }  // namespace detail
 }  // namespace dawn
