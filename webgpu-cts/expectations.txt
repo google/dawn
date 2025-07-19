@@ -1337,6 +1337,12 @@ crbug.com/432291885 [ intel sequoia ] webgpu:shader,execution,expression,call,bu
 crbug.com/432291885 [ intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="*";viewDimension="2d-array";stage="fragment";* [ Failure ]
 crbug.com/432291885 [ intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="*";viewDimension="3d";stage="fragment";* [ Failure ]
 
+# Intel Gen 12 LP, Windows integer remainder
+crbug.com/432824058 [ intel win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_scalar_vector:inputSource="storage_r";vectorize_rhs=3 [ Failure ]
+crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
+crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar_compound:inputSource="storage_rw";vectorize_lhs=4 [ Failure ]
+
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
 crbug.com/432291885 [ intel mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:stage="v";* [ RetryOnFailure ]
 crbug.com/432291885 [ intel mac ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:stage="v";* [ RetryOnFailure ]
@@ -1533,10 +1539,6 @@ crbug.com/0000 [ asan dawn-no-backend-validation intel-0x9bc5 release-x64 target
 crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,vector,components:concrete_scalar:inputSource="const";elementType="bool";width=4;components="rgba" [ Failure ]
 crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,access,vector,components:concrete_scalar:inputSource="const";elementType="bool";width=4;components="xyzw" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix_compound:inputSource="const";common_dim=3;x_rows=4 [ Failure ]
-crbug.com/0000 [ intel win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_scalar_vector:inputSource="storage_r";vectorize_rhs=3 [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
-crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar_compound:inputSource="storage_rw";vectorize_lhs=4 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_comparison:equals:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_comparison:greater_equals:inputSource="storage_r";vectorize=3 [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,u32_arithmetic:addition_vector_scalar_compound:inputSource="uniform";vectorize_lhs=3 [ Failure ]
