@@ -1,27 +1,60 @@
 # Building Dawn
 
+Generally, Dawn's tooling and system dependencies are set by Chromium.
+Therefore Chromium's build environment, provided by `GN` and `depot_tools`,
+is Dawn's primary build environment. However, Dawn can be built as a
+standalone C++ project, often with alternative build generators and C++
+compilers, as described below.
+
 ## System requirements
 
  * Git
- * CMake (3.10.2 or later) (if desired)
- * GN (if desired)
- * Ninja (or other build tool)
- * Python, for fetching dependencies
- * [depot_tools] in your path
+ * `depot_tools` in your path
+ * A build generator, one of:
+    * `GN`, provided by `depot_tools`
+    * `CMake` 3.16 or later
+ * Ninja 1.12 (or another build tool supported by CMake)
+ * Python 3, for fetching dependencies
+ * Go 1.23 or later: https://go.dev/
+ * A C++20 compiler
+    * When using GN, the default compiler will be provided automatically.
+    * Otherwise, check the platform details below.
 
 - Linux
+  - CPU:
+    - x86-64 (also known as amd64)
+    - arm64
+    - x86: untested
+    - mips, mips64: untested
   - The `pkg-config` command:
     ```sh
     # Install pkg-config on Ubuntu
     sudo apt-get install pkg-config
     ```
+  - C++20 compiler:
+    - Clang 19 or later. This the primary supported compiler.
+    - GCC 12 or later
 
 - Mac
+  - CPU:
+    - Apple Silicon
+    - Intel x86-64
   - [Xcode](https://developer.apple.com/xcode/) 12.2+.
   - The macOS 12.0 SDK. Run `xcode-select` to check whether you have it.
     ```sh
     ls `xcode-select -p`/SDKs
     ```
+
+- Windows
+  - CPU:
+    - x86-64 (also known as amd64)
+    - arm64 support is experimental
+  - Windows SDK 10.0.22621.x or a later version.
+  - C++20 compiler:
+    - Clang, as provided by GN. This is the primary supported compiler.
+    - MSVC 19.41, or Visual Studio 2022 v17.11 or later.
+      Note: Dawn is tested daily with MSVC 19.43 or VS 2022 v17.13
+
 
 ## Get the code and its dependencies
 
