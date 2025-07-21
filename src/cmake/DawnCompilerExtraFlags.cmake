@@ -61,7 +61,10 @@ function(common_compile_options target)
 
   if (MSVC)
     target_compile_options(${target}
-      PUBLIC "/utf-8")
+      PUBLIC
+        "/utf-8"
+        "/Zc:preprocessor" # Ask for standard-conformant preprocessor.
+    )
   endif ()
 
   # Abseil headers can cause warnings when included that will cause failures

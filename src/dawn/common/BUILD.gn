@@ -195,6 +195,9 @@ config("internal_config") {
     # (otherwise we have to add default: DAWN_UNREACHABLE() that silences clang too)
     cflags += [ "/wd4715" ]
 
+    # MSVC needs a flag to enable a standard-compliant preprocessor.
+    cflags += [ "/Zc:preprocessor" ]
+
     if (dawn_is_winuwp) {
       # /ZW makes sure we don't add calls that are forbidden in UWP.
       # and /EHsc is required to be used in combination with it,

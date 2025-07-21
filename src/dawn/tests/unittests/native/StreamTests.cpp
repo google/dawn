@@ -471,10 +471,22 @@ TEST(StreamTests, SerializeDeserializeParamPack) {
 
 #define FOO_MEMBERS(X) \
     X(int, a)          \
-    X(float, b)        \
+    X(float, b, 42.0)  \
     X(std::string, c)
 DAWN_SERIALIZABLE(struct, Foo, FOO_MEMBERS){};
 #undef FOO_MEMBERS
+
+// Test the default value of DAWN_SERIALIZABLE structures
+TEST(StreamTests, SerializableDefaultValue) {
+    Foo foo;
+
+    // Members without an explicit default still have the default constructor used.
+    EXPECT_EQ(foo.a, 0);
+    EXPECT_EQ(foo.c, "");
+
+    // Members with an explicit default use that default.
+    EXPECT_EQ(foo.b, 42.0);
+}
 
 // Test that serializing then deserializing a struct made with DAWN_SERIALIZABLE works as
 // expected.
