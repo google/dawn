@@ -108,11 +108,6 @@ IntegerRangeInfo GetFullRangeWithSameIntegerRangeInfoType(const IntegerRangeInfo
     }
 }
 
-template <typename IntegerRange>
-bool IntegerRangeIsConstantValue(const IntegerRange& range) {
-    return range.min_bound == range.max_bound;
-}
-
 }  // namespace
 
 IntegerRangeInfo::IntegerRangeInfo(int64_t min_bound, int64_t max_bound) {
@@ -309,6 +304,9 @@ struct IntegerRangeAnalysisImpl {
             switch (call->Func()) {
                 case core::BuiltinFn::kMin: {
                     return ComputeIntegerRangeForBuiltinMin(call);
+                }
+                case core::BuiltinFn::kMax: {
+                    return ComputeIntegerRangeForBuiltinMax(call);
                 }
                 default:
                     return {};
@@ -1153,13 +1151,6 @@ struct IntegerRangeAnalysisImpl {
             auto range1_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range1.range);
             auto range2_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range2.range);
 
-            // When both operands are constant values, we can return the constant value.
-            if (IntegerRangeIsConstantValue(range1_i32) &&
-                IntegerRangeIsConstantValue(range2_i32)) {
-                int64_t constant_value = std::min(range1_i32.min_bound, range2_i32.min_bound);
-                return IntegerRangeInfo(constant_value, constant_value);
-            }
-
             // When the range is all i32 or u32, we will treat it as an invalid range.
             int64_t min_bound = std::min(range1_i32.min_bound, range2_i32.min_bound);
             int64_t max_bound = std::min(range1_i32.max_bound, range2_i32.max_bound);
@@ -1175,16 +1166,63 @@ struct IntegerRangeAnalysisImpl {
             auto range1_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range1.range);
             auto range2_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range2.range);
 
-            // When both operands are constant values, we can return the constant value.
-            if (IntegerRangeIsConstantValue(range1_u32) &&
-                IntegerRangeIsConstantValue(range2_u32)) {
-                uint64_t constant_value = std::min(range1_u32.min_bound, range2_u32.min_bound);
-                return IntegerRangeInfo(constant_value, constant_value);
-            }
-
             // When the range is all i32 or u32, we will treat it as an invalid range.
             uint64_t min_bound = std::min(range1_u32.min_bound, range2_u32.min_bound);
             uint64_t max_bound = std::min(range1_u32.max_bound, range2_u32.max_bound);
+            if (min_bound == u32::kLowestValue && max_bound == u32::kHighestValue) {
+                return {};
+            }
+
+            return IntegerRangeInfo(min_bound, max_bound);
+        }
+    }
+
+    IntegerRangeInfo ComputeIntegerRangeForBuiltinMax(const CoreBuiltinCall* call) {
+        TINT_ASSERT(call->Operands().Length() == 2u);
+
+        TINT_ASSERT(call->Operand(0)->Type()->IsIntegerScalar());
+        TINT_ASSERT(call->Operand(1)->Type()->IsIntegerScalar());
+
+        IntegerRangeInfo range1 = GetInfo(call->Operand(0));
+        IntegerRangeInfo range2 = GetInfo(call->Operand(1));
+        if (!range1.IsValid() && !range2.IsValid()) {
+            return {};
+        }
+
+        if (!range1.IsValid()) {
+            range1 = GetFullRangeWithSameIntegerRangeInfoType(range2);
+        }
+        if (!range2.IsValid()) {
+            range2 = GetFullRangeWithSameIntegerRangeInfoType(range1);
+        }
+
+        // range1: [min1, max1]  range2: [min2, max2]
+        // The minimum value of (max(range1, range2)) is max(min1, min2) and
+        // The maximum value of (max(range1, range2)) is max(max1, max2).
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(range1.range)) {
+            TINT_ASSERT(std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(range2.range));
+
+            auto range1_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range1.range);
+            auto range2_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(range2.range);
+
+            // When the range is all i32 or u32, we will treat it as an invalid range.
+            int64_t min_bound = std::max(range1_i32.min_bound, range2_i32.min_bound);
+            int64_t max_bound = std::max(range1_i32.max_bound, range2_i32.max_bound);
+            if (min_bound == i32::kLowestValue && max_bound == i32::kHighestValue) {
+                return {};
+            }
+
+            return IntegerRangeInfo(min_bound, max_bound);
+        } else {
+            TINT_ASSERT(
+                std::holds_alternative<IntegerRangeInfo::UnsignedIntegerRange>(range2.range));
+
+            auto range1_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range1.range);
+            auto range2_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(range2.range);
+
+            // When the range is all i32 or u32, we will treat it as an invalid range.
+            uint64_t min_bound = std::max(range1_u32.min_bound, range2_u32.min_bound);
+            uint64_t max_bound = std::max(range1_u32.max_bound, range2_u32.max_bound);
             if (min_bound == u32::kLowestValue && max_bound == u32::kHighestValue) {
                 return {};
             }
