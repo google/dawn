@@ -43,6 +43,7 @@ class SizedBindingArrayTests : public DawnTest {
         DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
     }
 
+    // A 1x1 texture with a single value to check the correct binding is used.
     wgpu::Texture MakeTestR8Texture(uint8_t value) {
         wgpu::TextureDescriptor desc;
         desc.size = {1, 1};
@@ -54,6 +55,23 @@ class SizedBindingArrayTests : public DawnTest {
         wgpu::TexelCopyBufferLayout dstInfo = {};
         wgpu::Extent3D copySize = {1, 1, 1};
         queue.WriteTexture(&srcInfo, &value, 1, &dstInfo, &copySize);
+
+        return texture;
+    }
+
+    // Test textures that can be used that samplers correctly clamp or wrap.
+    wgpu::Texture MakeTest2x1R8Texture(uint8_t left, uint8_t right) {
+        wgpu::TextureDescriptor desc;
+        desc.size = {2, 1};
+        desc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding;
+        desc.format = wgpu::TextureFormat::R8Unorm;
+        wgpu::Texture texture = device.CreateTexture(&desc);
+
+        wgpu::TexelCopyTextureInfo srcInfo = utils::CreateTexelCopyTextureInfo(texture);
+        wgpu::TexelCopyBufferLayout dstInfo = {};
+        wgpu::Extent3D copySize = {2, 1, 1};
+        std::array<uint8_t, 2> data = {left, right};
+        queue.WriteTexture(&srcInfo, &data, sizeof(data), &dstInfo, &copySize);
 
         return texture;
     }
@@ -209,7 +227,7 @@ TEST_P(SizedBindingArrayTests, ArrayEntryOversizedAndSurrounded) {
 
         @group(0) @binding(0) var t0 : texture_2d<f32>;
         // Note that the layout will contain one extra entry using @binding(3)
-        @group(0) @binding(1) var ts : binding_array<texture_2d<f32>, 3>;
+        @group(0) @binding(1) var ts : binding_array<texture_2d<f32>, 2>;
         @group(0) @binding(4) var t3 : texture_2d<f32>;
         @fragment fn fs() -> @location(0) vec4f {
             let r = textureLoad(t0, vec2(0, 0), 0)[0];
@@ -365,6 +383,11 @@ TEST_P(SizedBindingArrayTests, BindingArraySize1CompatibleWithNonArrayedBGL) {
 
 // Test passing sampled textures of binding_array as function arguments.
 TEST_P(SizedBindingArrayTests, BindingArraySampledTextureAsFunctionArgument) {
+    // TODO(https://issues.chromium.org/411573957) OgenGL requires that indices in arrays of sampler
+    // be constants but even after the DirectVariableAccess transform, the index is a function
+    // parameter (that's constant at the callsite) and not a constant.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
     // Make the test pipeline
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {
@@ -476,10 +499,72 @@ TEST_P(SizedBindingArrayTests, BindingArrayOfSampledTexturesPassedAsArgument) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
 }
 
+// Test that multiple texture and sampler combinations are handled correctly (in particular on GL).
+TEST_P(SizedBindingArrayTests, TextureAndSamplerCombination) {
+    // Make the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @group(0) @binding(0) var ts : binding_array<texture_2d<f32>, 2>;
+        @group(0) @binding(2) var samplerClamping : sampler;
+        @group(0) @binding(3) var samplerWrapping : sampler;
+        @fragment fn fs() -> @location(0) vec4f {
+            let r = textureSample(ts[0], samplerWrapping, vec2(1.25, 0.5))[0];
+            let g = textureSample(ts[0], samplerClamping, vec2(1.25, 0.5))[0];
+            let b = textureSample(ts[1], samplerWrapping, vec2(1.25, 0.5))[0];
+            let a = textureSample(ts[1], samplerClamping, vec2(1.25, 0.5))[0];
+            return vec4(r, g, b, a);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.targetCount = 1;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create a bind group with textures of decreasing values
+    wgpu::SamplerDescriptor sDesc = {};
+    sDesc.addressModeU = wgpu::AddressMode::ClampToEdge;
+    wgpu::Sampler samplerClamping = device.CreateSampler(&sDesc);
+    sDesc.addressModeU = wgpu::AddressMode::Repeat;
+    wgpu::Sampler samplerWrapping = device.CreateSampler(&sDesc);
+
+    wgpu::BindGroup arrayGroup =
+        utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0),
+                             {
+                                 {0, MakeTest2x1R8Texture(3, 2).CreateView()},
+                                 {1, MakeTest2x1R8Texture(1, 0).CreateView()},
+                                 {2, samplerClamping},
+                                 {3, samplerWrapping},
+                             });
+
+    // Run the test
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+    pass.SetPipeline(testPipeline);
+    pass.SetBindGroup(0, arrayGroup);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
+}
+
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       VulkanBackend());
 
 }  // anonymous namespace

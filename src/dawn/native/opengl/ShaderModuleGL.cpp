@@ -124,13 +124,15 @@ void GenerateCombinedSamplerInfo(
     // Helper to avoid duplicated logic for when a CombinedSampler is determined.
     auto AddCombinedSampler =
         [&](tint::BindingPoint textureWGSL, tint::BindingPoint textureRemapped,
-            std::optional<tint::BindingPoint> samplerWGSL, bool isPlane1 = false) {
+            std::optional<tint::BindingPoint> samplerWGSL, BindingIndex textureArraySize,
+            bool isPlane1 = false) {
             // Dawn needs pre-remapping WGSL bind points.
             CombinedSampler combinedSampler = {{
                 .samplerLocation = std::nullopt,
                 .textureLocation = {{
                     .group = BindGroupIndex(textureWGSL.group),
                     .binding = BindingNumber(textureWGSL.binding),
+                    .arraySize = textureArraySize,
                 }},
             }};
             if (samplerWGSL.has_value()) {
@@ -168,7 +170,10 @@ void GenerateCombinedSamplerInfo(
         if (!externalTextureExpansionMap.contains(ToTint(use.texture))) {
             tint::BindingPoint textureWGSL = ToTint(use.texture);
             tint::BindingPoint textureRemapped = {0, bindings.texture.at(textureWGSL).binding};
-            AddCombinedSampler(textureWGSL, textureRemapped, sampler);
+            BindingIndex arraySizeInShader = metadata.bindings.at(BindGroupIndex(textureWGSL.group))
+                                                 .at(BindingNumber(textureWGSL.binding))
+                                                 .arraySize;
+            AddCombinedSampler(textureWGSL, textureRemapped, sampler, arraySizeInShader);
             continue;
         }
 
@@ -177,13 +182,13 @@ void GenerateCombinedSamplerInfo(
         tint::BindingPoint plane0WGSL = ToTint(use.texture);
         tint::BindingPoint plane0Remapped = {
             0, bindings.external_texture.at(plane0WGSL).plane0.binding};
-        AddCombinedSampler(plane0WGSL, plane0Remapped, sampler);
+        AddCombinedSampler(plane0WGSL, plane0Remapped, sampler, BindingIndex(1));
 
         // Plane 1 needs its pre-remapping bind point queried from the expansion map.
         tint::BindingPoint plane1WGSL = externalTextureExpansionMap.at(plane0WGSL);
         tint::BindingPoint plane1Remapped = {
             0, bindings.external_texture.at(plane0WGSL).plane1.binding};
-        AddCombinedSampler(plane1WGSL, plane1Remapped, sampler, true);
+        AddCombinedSampler(plane1WGSL, plane1Remapped, sampler, BindingIndex(1), true);
     }
 }
 
@@ -297,8 +302,8 @@ std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
     return o.str();
 }
 
-bool operator<(const BindingLocation& a, const BindingLocation& b) {
-    return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
+bool operator<(const CombinedSamplerElement& a, const CombinedSamplerElement& b) {
+    return std::tie(a.group, a.binding, a.arraySize) < std::tie(b.group, b.binding, b.arraySize);
 }
 
 bool operator<(const CombinedSampler& a, const CombinedSampler& b) {

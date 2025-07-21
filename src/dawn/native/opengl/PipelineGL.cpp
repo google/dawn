@@ -32,6 +32,7 @@
 #include <sstream>
 #include <string>
 
+#include "dawn/common/Range.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Pipeline.h"
@@ -113,47 +114,56 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     mUnitsForSamplers.resize(layout->GetNumSamplers());
     mUnitsForTextures.resize(layout->GetNumSampledTextures());
 
+    // Assign combined texture/samplers to GL texture units.
     GLuint textureUnit = 0;
     for (const auto& combined : combinedSamplers) {
-        std::string name = combined.GetName();
-        GLint location = DAWN_GL_TRY(gl, GetUniformLocation(mProgram, name.c_str()));
-
-        if (location == -1) {
-            continue;
-        }
-
-        DAWN_GL_TRY(gl, Uniform1i(location, textureUnit));
+        // All the texture/samplers of a binding_array are set in a single glUniform1iv, gather them
+        // all in this vector.
+        absl::InlinedVector<GLint, 1> uniformsToSet;
 
         const BindGroupLayoutInternalBase* textureBgl =
             layout->GetBindGroupLayout(combined.textureLocation.group);
-        BindingIndex textureBindingIndex =
+        BindingIndex textureArrayStart =
             textureBgl->GetBindingIndex(combined.textureLocation.binding);
 
-        GLuint textureGLIndex = indices[combined.textureLocation.group][textureBindingIndex];
-        mUnitsForTextures[textureGLIndex].push_back(textureUnit);
+        for (auto textureArrayElement : Range(combined.textureLocation.arraySize)) {
+            GLuint textureGLIndex =
+                indices[combined.textureLocation.group][textureArrayStart + textureArrayElement];
+            mUnitsForTextures[textureGLIndex].push_back(textureUnit);
 
-        if (!combined.samplerLocation) {
-            mPlaceholderSamplerUnits.push_back(textureUnit);
-        } else {
-            const BindGroupLayoutInternalBase* samplerBgl =
-                layout->GetBindGroupLayout(combined.samplerLocation->group);
-            BindingIndex samplerBindingIndex =
-                samplerBgl->GetBindingIndex(combined.samplerLocation->binding);
+            // Record that the placeholder sampler must be set for this texture unit if no sampler
+            // is used in the shader.
+            if (!combined.samplerLocation) {
+                mPlaceholderSamplerUnits.push_back(textureUnit);
+            } else {
+                // Record that the sampler used in the shader must be set for this texture unit.
+                const BindGroupLayoutInternalBase* samplerBgl =
+                    layout->GetBindGroupLayout(combined.samplerLocation->group);
+                BindingIndex samplerBindingIndex =
+                    samplerBgl->GetBindingIndex(combined.samplerLocation->binding);
 
-            GLuint samplerGLIndex = indices[combined.samplerLocation->group][samplerBindingIndex];
-            mUnitsForSamplers[samplerGLIndex].push_back(textureUnit);
+                GLuint samplerGLIndex =
+                    indices[combined.samplerLocation->group][samplerBindingIndex];
+                mUnitsForSamplers[samplerGLIndex].push_back(textureUnit);
+            }
+
+            uniformsToSet.push_back(textureUnit);
+            textureUnit++;
         }
 
-        textureUnit++;
+        std::string name = combined.GetName();
+        GLint location = DAWN_GL_TRY(gl, GetUniformLocation(mProgram, name.c_str()));
+        // Non-arrayed GLSL variables cannot be set with glUniform1iv
+        if (uniformsToSet.size() == 1) {
+            DAWN_GL_TRY(gl, Uniform1i(location, uniformsToSet[0]));
+        } else {
+            DAWN_GL_TRY(gl, Uniform1iv(location, uniformsToSet.size(), uniformsToSet.data()));
+        }
     }
 
     if (!mPlaceholderSamplerUnits.empty()) {
-        SamplerDescriptor desc = {};
-        DAWN_ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
-        DAWN_ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
-        DAWN_ASSERT(desc.mipmapFilter == wgpu::MipmapFilterMode::Nearest);
         Ref<SamplerBase> sampler;
-        DAWN_TRY_ASSIGN(sampler, layout->GetDevice()->GetOrCreateSampler(&desc));
+        DAWN_TRY_ASSIGN(sampler, layout->GetDevice()->CreateSampler());
         mPlaceholderSampler = ToBackend(std::move(sampler));
     }
 
