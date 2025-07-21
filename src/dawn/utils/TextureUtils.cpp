@@ -1000,12 +1000,52 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
             return "rgba32sint";
         case wgpu::TextureFormat::RGBA32Float:
             return "rgba32float";
-        // For Chromium Internal Graphite
         case wgpu::TextureFormat::R8Unorm:
             return "r8unorm";
 
+        case wgpu::TextureFormat::R8Snorm:
+            return "r8snorm";
+        case wgpu::TextureFormat::R8Uint:
+            return "r8uint";
+        case wgpu::TextureFormat::R8Sint:
+            return "r8sint";
+        case wgpu::TextureFormat::RG8Unorm:
+            return "rg8unorm";
+        case wgpu::TextureFormat::RG8Snorm:
+            return "rg8snorm";
+        case wgpu::TextureFormat::RG8Uint:
+            return "rg8uint";
+        case wgpu::TextureFormat::RG8Sint:
+            return "rg8sint";
+        case wgpu::TextureFormat::R16Uint:
+            return "r16uint";
+        case wgpu::TextureFormat::R16Sint:
+            return "r16sint";
+        case wgpu::TextureFormat::R16Float:
+            return "r16float";
+        case wgpu::TextureFormat::RG16Uint:
+            return "rg16uint";
+        case wgpu::TextureFormat::RG16Sint:
+            return "rg16sint";
+        case wgpu::TextureFormat::RG16Float:
+            return "rg16float";
+        case wgpu::TextureFormat::RGB10A2Uint:
+            return "rgb10a2uint";
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            return "rgb10a2unorm";
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            return "rg11b10ufloat";
+
 #ifndef __EMSCRIPTEN__
         // Unorm and Snorm 16 formats.
+        case wgpu::TextureFormat::R16Unorm:
+            return "r16unorm";
+        case wgpu::TextureFormat::R16Snorm:
+            return "r16snorm";
+        case wgpu::TextureFormat::RG16Unorm:
+            return "rg16unorm";
+        case wgpu::TextureFormat::RG16Snorm:
+            return "rg16snorm";
         case wgpu::TextureFormat::RGBA16Unorm:
             return "rgba16unorm";
         case wgpu::TextureFormat::RGBA16Snorm:
