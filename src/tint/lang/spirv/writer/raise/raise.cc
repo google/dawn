@@ -79,6 +79,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
     if (!options.disable_robustness) {
+        core::ir::transform::RobustnessConfig config;
+        if (options.disable_image_robustness) {
+            config.clamp_texture = false;
+        }
+        config.disable_runtime_sized_array_index_clamping =
+            options.disable_runtime_sized_array_index_clamping;
+        config.use_integer_range_analysis = options.enable_integer_range_analysis;
+        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
     }
 
@@ -123,17 +132,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
     conversion_polyfills.ftoi = true;
     RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
-
-    if (!options.disable_robustness) {
-        core::ir::transform::RobustnessConfig config;
-        if (options.disable_image_robustness) {
-            config.clamp_texture = false;
-        }
-        config.disable_runtime_sized_array_index_clamping =
-            options.disable_runtime_sized_array_index_clamping;
-        config.use_integer_range_analysis = options.enable_integer_range_analysis;
-        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
-    }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
 
