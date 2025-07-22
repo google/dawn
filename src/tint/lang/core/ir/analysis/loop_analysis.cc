@@ -264,6 +264,30 @@ struct LoopAnalysisImpl {
                     }
                     return false;
                 }
+                case BinaryOp::kGreaterThanEqual: {
+                    if (is_index(binary->LHS()) && is_constant_i32_or_u32(binary->RHS())) {
+                        // index >= kConstantValue
+                        // `kConstantValue` being the lowest value will cause an infinite loop.
+                        auto* constant_value = binary->RHS()->As<Constant>()->Value();
+                        if (constant_value->Type()->Is<type::I32>()) {
+                            return constant_value->ValueAs<int32_t>() > i32::kLowestValue;
+                        } else {
+                            TINT_ASSERT(constant_value->Type()->Is<type::U32>());
+                            return constant_value->ValueAs<uint32_t>() > u32::kLowestValue;
+                        }
+                    } else if (is_index(binary->RHS()) && is_constant_i32_or_u32(binary->LHS())) {
+                        // kConstantValue >= index
+                        // `kConstantValue` being the highest value will cause an infinite loop.
+                        auto* constant_value = binary->LHS()->As<Constant>()->Value();
+                        if (constant_value->Type()->Is<type::I32>()) {
+                            return constant_value->ValueAs<int32_t>() < i32::kHighestValue;
+                        } else {
+                            TINT_ASSERT(constant_value->Type()->Is<type::U32>());
+                            return constant_value->ValueAs<uint32_t>() < u32::kHighestValue;
+                        }
+                    }
+                    return false;
+                }
                 default:
                     return false;
             }
