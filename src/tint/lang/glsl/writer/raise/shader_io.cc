@@ -87,6 +87,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                         break;
                     case core::BuiltinValue::kVertexIndex:
                     case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kPrimitiveId:
                     case core::BuiltinValue::kSampleIndex:
                         ptr = ty.ptr(addrspace, ty.i32(), access);
                         break;
@@ -148,6 +149,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             switch (builtin.value()) {
                 case core::BuiltinValue::kVertexIndex:
                 case core::BuiltinValue::kInstanceIndex:
+                case core::BuiltinValue::kPrimitiveId:
                 case core::BuiltinValue::kSampleIndex: {
                     // GLSL uses i32 for these, so convert to u32.
                     value = builder.Convert(ty.u32(), value)->Result();

@@ -537,6 +537,7 @@ enum class BuiltinValue : uint8_t {
     kLocalInvocationIndex,
     kNumWorkgroups,
     kPosition,
+    kPrimitiveId,
     kSampleIndex,
     kSampleMask,
     kSubgroupId,
@@ -565,11 +566,22 @@ auto& operator<<(STREAM& out, BuiltinValue value) {
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
 constexpr std::string_view kBuiltinValueStrings[] = {
-    "clip_distances",         "frag_depth",     "front_facing",
-    "global_invocation_id",   "instance_index", "local_invocation_id",
-    "local_invocation_index", "num_workgroups", "position",
-    "sample_index",           "sample_mask",    "subgroup_id",
-    "subgroup_invocation_id", "subgroup_size",  "vertex_index",
+    "clip_distances",
+    "frag_depth",
+    "front_facing",
+    "global_invocation_id",
+    "instance_index",
+    "local_invocation_id",
+    "local_invocation_index",
+    "num_workgroups",
+    "position",
+    "primitive_id",
+    "sample_index",
+    "sample_mask",
+    "subgroup_id",
+    "subgroup_invocation_id",
+    "subgroup_size",
+    "vertex_index",
     "workgroup_id",
 };
 

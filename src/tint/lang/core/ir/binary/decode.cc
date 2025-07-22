@@ -1607,6 +1607,8 @@ struct Decoder {
                 return core::BuiltinValue::kWorkgroupId;
             case pb::BuiltinValue::clip_distances:
                 return core::BuiltinValue::kClipDistances;
+            case pb::BuiltinValue::primitive_id:
+                return core::BuiltinValue::kPrimitiveId;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinValue::BuiltinValue_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;

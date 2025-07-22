@@ -1662,6 +1662,8 @@ class Printer : public tint::TextGenerator {
                 return "SV_SampleIndex";
             case core::BuiltinValue::kSampleMask:
                 return "SV_Coverage";
+            case core::BuiltinValue::kPrimitiveId:
+                return "SV_PrimitiveId";
             default:
                 break;
         }

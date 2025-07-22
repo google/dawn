@@ -97,6 +97,8 @@ enum extension {
   chromium_experimental_framebuffer_fetch
   // A Chromium-specific extension for subgroup matrix support
   chromium_experimental_subgroup_matrix
+  // A Chromium-specific extension for primitive_id support
+  chromium_experimental_primitive_id
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec

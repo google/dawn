@@ -768,14 +768,19 @@ test:9:7 note: parameter 's' of 'main' may be non-uniform
 class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
-    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
-)"
-                                                                       : R"(
-                                      )") +
-                      R"(
+    std::string src = "";
+    if (GetParam().name == "subgroup_size") {
+        src += "enable subgroups;\n";
+    } else if (GetParam().name == "primitive_id") {
+        src += "enable chromium_experimental_primitive_id;\n";
+    } else {
+        src += "\n";
+    }
+
+    src += R"(
 @fragment
-fn main(@builtin()" + GetParam().name +
-                      R"() b : )" + GetParam().type + R"() {
+fn main(@builtin()" +
+           GetParam().name + R"() b : )" + GetParam().type + R"() {
   if (u32(vec4(b).x) == 0u) {
     _ = dpdx(0.5);
   }
@@ -802,14 +807,19 @@ test:5:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(FragmentBuiltin, InStruct) {
-    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
-)"
-                                                                       : R"(
-                                      )") +
-                      R"(
+    std::string src = "";
+    if (GetParam().name == "subgroup_size") {
+        src += "enable subgroups;\n";
+    } else if (GetParam().name == "primitive_id") {
+        src += "enable chromium_experimental_primitive_id;\n";
+    } else {
+        src += "\n";
+    }
+
+    src += R"(
 struct S {
-  @builtin()" + GetParam().name +
-                      R"() b : )" + GetParam().type + R"(
+  @builtin()" +
+           GetParam().name + R"() b : )" + GetParam().type + R"(
 }
 
 @fragment
@@ -845,6 +855,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                                            BuiltinEntry{"front_facing", "bool", false},
                                            BuiltinEntry{"sample_index", "u32", false},
                                            BuiltinEntry{"sample_mask", "u32", false},
+                                           BuiltinEntry{"primitive_id", "u32", false},
                                            BuiltinEntry{"subgroup_size", "u32", false}),
                          [](const ::testing::TestParamInfo<FragmentBuiltin::ParamType>& p) {
                              return p.param.name;

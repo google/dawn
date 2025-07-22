@@ -139,6 +139,7 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/materialize_test.cc
   lang/wgsl/resolver/override_test.cc
   lang/wgsl/resolver/pixel_local_extension_test.cc
+  lang/wgsl/resolver/primitive_id_extension_test.cc
   lang/wgsl/resolver/ptr_ref_test.cc
   lang/wgsl/resolver/ptr_ref_validation_test.cc
   lang/wgsl/resolver/resolver_behavior_test.cc
