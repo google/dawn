@@ -3092,6 +3092,12 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
+    if (!construct->Result()->Type()->IsConstructible() &&
+        !capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+        AddError(construct) << "type is not constructible";
+        return;
+    }
+
     auto args = construct->Args();
     if (args.IsEmpty()) {
         // Zero-value constructors are valid for all constructible types.
