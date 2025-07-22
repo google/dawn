@@ -115,7 +115,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     mUnitsForTextures.resize(layout->GetNumSampledTextures());
 
     // Assign combined texture/samplers to GL texture units.
-    GLuint textureUnit = 0;
+    TextureUnit textureUnit{0};
     for (const auto& combined : combinedSamplers) {
         // All the texture/samplers of a binding_array are set in a single glUniform1iv, gather them
         // all in this vector.
@@ -127,7 +127,7 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
             textureBgl->GetBindingIndex(combined.textureLocation.binding);
 
         for (auto textureArrayElement : Range(combined.textureLocation.arraySize)) {
-            GLuint textureGLIndex =
+            FlatBindingIndex textureGLIndex =
                 indices[combined.textureLocation.group][textureArrayStart + textureArrayElement];
             mUnitsForTextures[textureGLIndex].push_back(textureUnit);
 
@@ -142,12 +142,12 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                 BindingIndex samplerBindingIndex =
                     samplerBgl->GetBindingIndex(combined.samplerLocation->binding);
 
-                GLuint samplerGLIndex =
+                FlatBindingIndex samplerGLIndex =
                     indices[combined.samplerLocation->group][samplerBindingIndex];
                 mUnitsForSamplers[samplerGLIndex].push_back(textureUnit);
             }
 
-            uniformsToSet.push_back(textureUnit);
+            uniformsToSet.push_back(GLint(textureUnit));
             textureUnit++;
         }
 
@@ -179,12 +179,14 @@ void PipelineGL::DeleteProgram(const OpenGLFunctions& gl) {
     DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteProgram(mProgram));
 }
 
-const std::vector<GLuint>& PipelineGL::GetTextureUnitsForSampler(GLuint index) const {
+const std::vector<TextureUnit>& PipelineGL::GetTextureUnitsForSampler(
+    FlatBindingIndex index) const {
     DAWN_ASSERT(index < mUnitsForSamplers.size());
     return mUnitsForSamplers[index];
 }
 
-const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTextureView(GLuint index) const {
+const std::vector<TextureUnit>& PipelineGL::GetTextureUnitsForTextureView(
+    FlatBindingIndex index) const {
     DAWN_ASSERT(index < mUnitsForTextures.size());
     return mUnitsForTextures[index];
 }
@@ -195,9 +197,9 @@ GLuint PipelineGL::GetProgramHandle() const {
 
 MaybeError PipelineGL::ApplyNow(const OpenGLFunctions& gl, const PipelineLayout* layout) {
     DAWN_GL_TRY(gl, UseProgram(mProgram));
-    for (GLuint unit : mPlaceholderSamplerUnits) {
+    for (TextureUnit unit : mPlaceholderSamplerUnits) {
         DAWN_ASSERT(mPlaceholderSampler.Get() != nullptr);
-        DAWN_GL_TRY(gl, BindSampler(unit, mPlaceholderSampler->GetHandle()));
+        DAWN_GL_TRY(gl, BindSampler(GLuint(unit), mPlaceholderSampler->GetHandle()));
     }
 
     return {};

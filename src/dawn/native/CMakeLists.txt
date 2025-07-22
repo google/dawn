@@ -641,6 +641,7 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/EGLFunctions.h"
         "opengl/Forward.h"
         "opengl/GLFormat.h"
+        "opengl/IntegerTypes.h"
         "opengl/opengl_platform.h"
         "opengl/OpenGLFunctions.h"
         "opengl/OpenGLVersion.h"

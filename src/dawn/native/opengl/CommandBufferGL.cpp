@@ -307,11 +307,13 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     }
 
   private:
-    MaybeError BindSamplerAtIndex(const OpenGLFunctions& gl, SamplerBase* s, GLuint samplerIndex) {
+    MaybeError BindSamplerAtIndex(const OpenGLFunctions& gl,
+                                  SamplerBase* s,
+                                  FlatBindingIndex samplerIndex) {
         Sampler* sampler = ToBackend(s);
 
-        for (GLuint unit : mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
-            DAWN_GL_TRY(gl, BindSampler(unit, sampler->GetHandle()));
+        for (TextureUnit unit : mPipeline->GetTextureUnitsForSampler(samplerIndex)) {
+            DAWN_GL_TRY(gl, BindSampler(uint32_t(unit), sampler->GetHandle()));
         }
 
         return {};
@@ -330,7 +332,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                 [&](const BufferBindingInfo& layout) -> MaybeError {
                     BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
                     GLuint buffer = ToBackend(binding.buffer)->GetHandle();
-                    GLuint index = indices[bindingIndex];
+                    FlatBindingIndex index = indices[bindingIndex];
                     GLuint offset = binding.offset;
 
                     if (layout.hasDynamicOffset) {
@@ -355,7 +357,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             DAWN_UNREACHABLE();
                     }
 
-                    DAWN_GL_TRY(gl, BindBufferRange(target, index, buffer, offset, binding.size));
+                    DAWN_GL_TRY(
+                        gl, BindBufferRange(target, GLuint(index), buffer, offset, binding.size));
                     return {};
                 },
                 [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
@@ -371,10 +374,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     GLuint handle = view->GetHandle();
                     GLenum target = view->GetGLTarget();
-                    GLuint viewIndex = indices[bindingIndex];
+                    FlatBindingIndex viewIndex = indices[bindingIndex];
 
                     for (auto unit : mPipeline->GetTextureUnitsForTextureView(viewIndex)) {
-                        DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0 + unit));
+                        DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0 + GLuint(unit)));
                         DAWN_GL_TRY(gl, BindTexture(target, handle));
                         if (ToBackend(view->GetTexture())->GetGLFormat().format ==
                             GL_DEPTH_STENCIL) {
@@ -416,7 +419,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
                     Texture* texture = ToBackend(view->GetTexture());
                     GLuint handle = texture->GetHandle();
-                    GLuint imageIndex = indices[bindingIndex];
+                    FlatBindingIndex imageIndex = indices[bindingIndex];
 
                     GLenum access;
                     switch (layout.access) {
@@ -445,9 +448,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         DAWN_UNREACHABLE();
                     }
 
-                    DAWN_GL_TRY(gl, BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(),
-                                                     isLayered, view->GetBaseArrayLayer(), access,
-                                                     texture->GetGLFormat().internalFormat));
+                    DAWN_GL_TRY(
+                        gl, BindImageTexture(GLuint(imageIndex), handle, view->GetBaseMipLevel(),
+                                             isLayered, view->GetBaseArrayLayer(), access,
+                                             texture->GetGLFormat().internalFormat));
                     return {};
                 },
                 [](const InputAttachmentBindingInfo&) -> MaybeError { DAWN_UNREACHABLE(); }));
@@ -514,10 +518,11 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         DAWN_ASSERT(internalUniformBuffer);
 
         GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
-        DAWN_GL_TRY(gl, BindBufferBase(
-                            GL_UNIFORM_BUFFER,
-                            ToBackend(mPipelineLayout)->GetInternalTextureBuiltinsUniformBinding(),
-                            internalUniformBufferHandle));
+        DAWN_GL_TRY(
+            gl, BindBufferBase(
+                    GL_UNIFORM_BUFFER,
+                    GLuint(ToBackend(mPipelineLayout)->GetInternalTextureBuiltinsUniformBinding()),
+                    internalUniformBufferHandle));
 
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
         DAWN_GL_TRY(gl, BufferSubData(GL_UNIFORM_BUFFER, mDirtyRange.begin,
@@ -545,10 +550,11 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         DAWN_ASSERT(internalUniformBuffer);
 
         GLuint internalUniformBufferHandle = internalUniformBuffer->GetHandle();
-        DAWN_GL_TRY(
-            gl, BindBufferBase(GL_UNIFORM_BUFFER,
-                               ToBackend(mPipelineLayout)->GetInternalArrayLengthUniformBinding(),
-                               internalUniformBufferHandle));
+        DAWN_GL_TRY(gl,
+                    BindBufferBase(
+                        GL_UNIFORM_BUFFER,
+                        GLuint(ToBackend(mPipelineLayout)->GetInternalArrayLengthUniformBinding()),
+                        internalUniformBufferHandle));
 
         DAWN_GL_TRY(gl, BindBuffer(GL_UNIFORM_BUFFER, internalUniformBufferHandle));
         DAWN_GL_TRY(
@@ -572,23 +578,20 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         }
 
         const auto& bindingIndexInfo = ToBackend(mPipelineLayout)->GetBindingIndexInfo();
-        GLuint ssboIndex = bindingIndexInfo[groupIndex][bindingIndex];
+        FlatBindingIndex ssboIndex = bindingIndexInfo[groupIndex][bindingIndex];
 
-        uint32_t data = static_cast<uint32_t>(size);
-        const size_t index = static_cast<size_t>(ssboIndex);
-
-        if (index >= mInternalArrayLengthBufferData.size()) {
-            mInternalArrayLengthBufferData.resize(index + 4);
+        if (ssboIndex >= mInternalArrayLengthBufferData.size()) {
+            mInternalArrayLengthBufferData.resize(ssboIndex + FlatBindingIndex(4));
         }
-        mInternalArrayLengthBufferData[index] = data;
+        mInternalArrayLengthBufferData[ssboIndex] = static_cast<uint32_t>(size);
 
         // Updating dirty range of the data vector
-        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, index);
-        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, index + 1);
+        mDirtyRangeArrayLength.begin = std::min(mDirtyRangeArrayLength.begin, size_t(ssboIndex));
+        mDirtyRangeArrayLength.end = std::max(mDirtyRangeArrayLength.end, size_t(ssboIndex) + 1);
     }
 
     void ResetInternalUniformDataDirtyRangeArrayLength() {
-        mDirtyRangeArrayLength = {mInternalArrayLengthBufferData.size(), 0};
+        mDirtyRangeArrayLength = {size_t(mInternalArrayLengthBufferData.size()), 0};
     }
 
     void ResetInternalUniformDataBindgroupAndDirtyRange() {
@@ -616,7 +619,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
     VectorDirtyRangeInfo mDirtyRange;
 
     // The data used for mPipeline's internal uniform buffer to store ssbo buffer sizes.
-    std::vector<uint32_t> mInternalArrayLengthBufferData = std::vector<uint32_t>(4);
+    ityp::vector<FlatBindingIndex, uint32_t> mInternalArrayLengthBufferData;
     // Tracking dirty byte range of the mInternalArrayLengthBufferData that needs to call
     // bufferSubData to update to the internal uniform buffer of mPipeline.
     VectorDirtyRangeInfo mDirtyRangeArrayLength;

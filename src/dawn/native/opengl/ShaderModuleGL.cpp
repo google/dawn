@@ -46,8 +46,7 @@
 #include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-
-#include "src/tint/api/common/binding_point.h"
+#include "tint/api/common/binding_point.h"
 
 namespace dawn::native::opengl {
 namespace {
@@ -203,7 +202,7 @@ void GenerateTextureBuiltinFromUniformData(
     // only when this shader stage uses some builtin metadata.
     if (!metadata.textureQueries.empty()) {
         textureBuiltinsFromUniform->ubo_binding = {
-            layout->GetInternalTextureBuiltinsUniformBinding()};
+            uint32_t(layout->GetInternalTextureBuiltinsUniformBinding())};
     }
 
     for (auto [i, query] : Enumerate(metadata.textureQueries)) {
@@ -275,9 +274,9 @@ bool GenerateArrayLengthFromuniformData(const BindingInfoArray& moduleBindingInf
                             // in the array length from uniform transform.
                             tint::BindingPoint srcBindingPoint = {static_cast<uint32_t>(group),
                                                                   capturedBindingNumber};
-                            uint32_t ssboIndex = indexInfo[group][bindingIndex];
+                            FlatBindingIndex ssboIndex = indexInfo[group][bindingIndex];
                             bindings.array_length_from_uniform.bindpoint_to_size_index.emplace(
-                                srcBindingPoint, ssboIndex);
+                                srcBindingPoint, uint32_t(ssboIndex));
                             break;
                         }
                         default:
@@ -367,9 +366,9 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                                                static_cast<uint32_t>(binding)};
 
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
-            auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
-            uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
-            tint::BindingPoint dstBindingPoint{0, shaderIndex};
+            const auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
+            FlatBindingIndex shaderIndex = bindingIndexInfo[bindingIndex];
+            tint::BindingPoint dstBindingPoint{0, uint32_t(shaderIndex)};
 
             auto* const bufferBindingInfo =
                 std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
@@ -415,11 +414,11 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
 
                 const auto& bindingExpansion = expansion->second;
                 const BindingInfo plane0{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)])};
                 const BindingInfo plane1{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)])};
                 const BindingInfo metadata{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)])};
 
                 tint::BindingPoint plane1WGSLBindingPoint{
                     static_cast<uint32_t>(group), static_cast<uint32_t>(bindingExpansion.plane1)};
@@ -506,7 +505,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             bindings.array_length_from_uniform.ubo_binding = {kMaxBindGroups + 2, 0};
             bindings.uniform.emplace(bindings.array_length_from_uniform.ubo_binding,
                                      tint::glsl::writer::binding::Uniform{
-                                         layout->GetInternalArrayLengthUniformBinding()});
+                                         uint32_t(layout->GetInternalArrayLengthUniformBinding())});
         }
     }
 

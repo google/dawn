@@ -773,6 +773,7 @@ source_set("sources") {
       "opengl/Forward.h",
       "opengl/GLFormat.cpp",
       "opengl/GLFormat.h",
+      "opengl/IntegerTypes.h",
       "opengl/OpenGLFunctions.cpp",
       "opengl/OpenGLFunctions.h",
       "opengl/OpenGLVersion.cpp",

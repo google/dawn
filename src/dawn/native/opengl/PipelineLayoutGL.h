@@ -33,6 +33,7 @@
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/BindingInfo.h"
+#include "dawn/native/opengl/IntegerTypes.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native::opengl {
@@ -52,15 +53,15 @@ class PipelineLayout final : public PipelineLayoutBase {
     // GL backend does not support separate bind group index
     // BindingIndexInfo is a map from BindingPoint(group, binding) to a flattened GLuint binding
     // number.
-    using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, GLuint>>;
+    using BindingIndexInfo = PerBindGroup<ityp::vector<BindingIndex, FlatBindingIndex>>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
 
-    size_t GetNumSamplers() const;
-    size_t GetNumSampledTextures() const;
-    size_t GetNumSSBO() const;
+    FlatBindingIndex GetNumSamplers() const;
+    FlatBindingIndex GetNumSampledTextures() const;
+    FlatBindingIndex GetNumSSBO() const;
 
-    GLuint GetInternalTextureBuiltinsUniformBinding() const;
-    GLuint GetInternalArrayLengthUniformBinding() const;
+    FlatBindingIndex GetInternalTextureBuiltinsUniformBinding() const;
+    FlatBindingIndex GetInternalArrayLengthUniformBinding() const;
 
     enum ImmediateLocation {
         FirstVertex = 0,
@@ -72,12 +73,12 @@ class PipelineLayout final : public PipelineLayoutBase {
   private:
     ~PipelineLayout() override = default;
     BindingIndexInfo mIndexInfo;
-    size_t mNumSamplers;
-    size_t mNumSampledTextures;
-    size_t mNumSSBO;
+    FlatBindingIndex mNumSamplers;
+    FlatBindingIndex mNumSampledTextures;
+    FlatBindingIndex mNumSSBO;
 
-    GLuint mInternalTextureBuiltinsUniformBinding;
-    GLuint mInternalArrayLengthUniformBinding;
+    FlatBindingIndex mInternalTextureBuiltinsUniformBinding;
+    FlatBindingIndex mInternalArrayLengthUniformBinding;
 };
 
 }  // namespace dawn::native::opengl

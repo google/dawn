@@ -31,13 +31,12 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/ityp_vector.h"
 #include "dawn/native/IntegerTypes.h"
-#include "dawn/native/Pipeline.h"
-
-#include "include/tint/tint.h"
-
 #include "dawn/native/PerStage.h"
+#include "dawn/native/Pipeline.h"
 #include "dawn/native/opengl/BindingPoint.h"
+#include "dawn/native/opengl/IntegerTypes.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
@@ -57,8 +56,8 @@ class PipelineGL {
     PipelineGL();
     ~PipelineGL();
 
-    const std::vector<GLuint>& GetTextureUnitsForSampler(GLuint index) const;
-    const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
+    const std::vector<TextureUnit>& GetTextureUnitsForSampler(FlatBindingIndex index) const;
+    const std::vector<TextureUnit>& GetTextureUnitsForTextureView(FlatBindingIndex index) const;
     GLuint GetProgramHandle() const;
 
     const BindingPointToFunctionAndOffset& GetBindingPointBuiltinDataInfo() const;
@@ -79,9 +78,9 @@ class PipelineGL {
 
   private:
     GLuint mProgram;
-    std::vector<std::vector<GLuint>> mUnitsForSamplers;
-    std::vector<std::vector<GLuint>> mUnitsForTextures;
-    std::vector<GLuint> mPlaceholderSamplerUnits;
+    ityp::vector<FlatBindingIndex, std::vector<TextureUnit>> mUnitsForSamplers;
+    ityp::vector<FlatBindingIndex, std::vector<TextureUnit>> mUnitsForTextures;
+    std::vector<TextureUnit> mPlaceholderSamplerUnits;
     // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device
     // destruction complex as it requires the sampler to be destroyed before the sampler cache.
     Ref<Sampler> mPlaceholderSampler;

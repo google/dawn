@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_D3D12_INTEGERTYPES_H_
-#define SRC_DAWN_NATIVE_D3D12_INTEGERTYPES_H_
-
-#include <cstdint>
+#ifndef SRC_DAWN_NATIVE_OPENGL_INTEGERTYPES_H_
+#define SRC_DAWN_NATIVE_OPENGL_INTEGERTYPES_H_
 
 #include "dawn/common/TypedInteger.h"
+#include "dawn/native/opengl/opengl_platform.h"
 
-namespace dawn::native::d3d12 {
+namespace dawn::native::opengl {
 
-// An ID used to desambiguate between multiple uses of the same descriptor heap in the
-// BindGroup allocations.
-using HeapVersionID = TypedInteger<struct HeapVersionIDT, uint64_t>;
+// An index used to represent the position of bindings in the flattened GL binding space. Prevents
+// confusion with BindingIndex which is an index in the bindings of a single BGL.
+using FlatBindingIndex = TypedInteger<struct FlatBindingIndexT, GLuint>;
 
-}  // namespace dawn::native::d3d12
+// An index of the texture unit, which shouldn't be confused with other kinds of indices.
+using TextureUnit = TypedInteger<struct TextureUnitT, GLuint>;
 
-#endif  // SRC_DAWN_NATIVE_D3D12_INTEGERTYPES_H_
+}  // namespace dawn::native::opengl
+
+#endif  // SRC_DAWN_NATIVE_OPENGL_INTEGERTYPES_H_
