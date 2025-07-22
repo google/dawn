@@ -46,7 +46,9 @@ class PlatformFunctions {
     PlatformFunctions();
     virtual ~PlatformFunctions();
 
-    MaybeError LoadFunctions();
+    MaybeError Initialize();
+    MaybeError EnsureFXC();
+
     uint64_t GetWindowsBuildNumber() const;
 
     // Functions from dxgi.dll
@@ -66,7 +68,6 @@ class PlatformFunctions {
 
   private:
     MaybeError LoadDXGI();
-    MaybeError LoadFXCompiler();
     void InitWindowsVersion();
 
     DynamicLib mDXGILib;

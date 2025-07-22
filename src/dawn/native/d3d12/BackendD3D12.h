@@ -53,9 +53,7 @@ class Backend final : public d3d::Backend {
     explicit Backend(InstanceBase* instance);
 
     MaybeError Initialize();
-    MaybeError EnsureDxcLibrary();
-    MaybeError EnsureDxcCompiler();
-    MaybeError EnsureDxcValidator();
+    MaybeError EnsureDXC();
     ComPtr<IDxcLibrary> GetDxcLibrary() const;
     ComPtr<IDxcCompiler3> GetDxcCompiler() const;
     ComPtr<IDxcValidator> GetDxcValidator() const;

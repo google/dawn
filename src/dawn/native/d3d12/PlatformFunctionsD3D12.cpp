@@ -37,12 +37,9 @@ namespace dawn::native::d3d12 {
 PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
-MaybeError PlatformFunctions::LoadFunctions() {
-    DAWN_TRY(Base::LoadFunctions());
+MaybeError PlatformFunctions::Initialize() {
+    DAWN_TRY(Base::Initialize());
 
-#if DAWN_USE_BUILT_DXC
-    DAWN_TRY(LoadDXCLibraries());
-#endif
     DAWN_TRY(LoadD3D12());
     DAWN_TRY(LoadD3D11());
     LoadPIXRuntime();
@@ -109,12 +106,18 @@ void PlatformFunctions::LoadPIXRuntime() {
 }
 
 #if DAWN_USE_BUILT_DXC
-MaybeError PlatformFunctions::LoadDXCLibraries() {
+MaybeError PlatformFunctions::EnsureDXCLibraries() {
     // TODO(dawn:766)
     // Statically linked with dxcompiler.lib in UWP
     // currently linked with dxcompiler.lib making CoreApp unable to activate
-    // LoadDXIL and LoadDXCompiler will fail in UWP, but LoadFunctions() can still be
+    // LoadDXIL and LoadDXCompiler will fail in UWP, but Initialize() can still be
     // successfully executed.
+
+    if (mDXILLib.Valid()) {
+        // The libraries are already loaded, no need to load them again.
+        DAWN_CHECK(mDXCompilerLib.Valid());
+        return {};
+    }
 
     DynamicLib dxilLib;
     std::string error;

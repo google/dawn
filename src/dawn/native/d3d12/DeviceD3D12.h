@@ -223,7 +223,7 @@ class Device final : public d3d::Device {
     ResultOrError<ComPtr<ID3D11On12Device>> GetOrCreateD3D11on12Device();
     void Flush11On12DeviceToAvoidLeaks();
 
-    MaybeError EnsureDXCIfRequired();
+    MaybeError EnsureCompilerLibraries();
 
     MaybeError CreateZeroBuffer();
 

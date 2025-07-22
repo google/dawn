@@ -42,7 +42,8 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     PlatformFunctions();
     ~PlatformFunctions() override;
 
-    MaybeError LoadFunctions();
+    MaybeError Initialize();
+    MaybeError EnsureDXCLibraries();
     bool IsPIXEventRuntimeLoaded() const;
 
     // Functions from d3d12.dll
@@ -87,7 +88,6 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     MaybeError LoadD3D12();
     MaybeError LoadD3D11();
     void LoadPIXRuntime();
-    MaybeError LoadDXCLibraries();
 
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;

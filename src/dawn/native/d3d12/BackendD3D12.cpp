@@ -47,16 +47,10 @@ MaybeError Backend::Initialize() {
         // Put function initialization in curly braces to avoid the temptation to use the
         // std::move-ed `functions` variable later in the method.
         auto functions = std::make_unique<PlatformFunctions>();
-        DAWN_TRY(functions->LoadFunctions());
+        DAWN_TRY(functions->Initialize());
 
         DAWN_TRY(Base::Initialize(std::move(functions)));
     }
-
-    // Initialize the DXC validator and compiler if we build them.
-#if defined(DAWN_USE_BUILT_DXC)
-    DAWN_TRY(EnsureDxcValidator());
-    DAWN_TRY(EnsureDxcCompiler());
-#endif
 
     // Enable the debug layer (requires the Graphics Tools "optional feature").
     const auto instance = GetInstance();
@@ -86,34 +80,41 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return static_cast<const PlatformFunctions*>(Base::GetFunctions());
 }
 
-MaybeError Backend::EnsureDxcLibrary() {
-    if (mDxcLibrary == nullptr) {
-        DAWN_TRY(CheckHRESULT(
-            GetFunctions()->dxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mDxcLibrary)),
-            "DXC create library"));
-        DAWN_ASSERT(mDxcLibrary != nullptr);
+MaybeError Backend::EnsureDXC() {
+#if DAWN_USE_BUILT_DXC
+    // If components are already loaded, return early
+    if (mDxcLibrary != nullptr) {
+        // Since all components are assigned atomically, if one is loaded, all should be loaded
+        DAWN_CHECK(mDxcCompiler);
+        DAWN_CHECK(mDxcValidator);
+        return {};
     }
-    return {};
-}
 
-MaybeError Backend::EnsureDxcCompiler() {
-    if (mDxcCompiler == nullptr) {
-        DAWN_TRY(CheckHRESULT(
-            GetFunctions()->dxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mDxcCompiler)),
-            "DXC create compiler"));
-        DAWN_ASSERT(mDxcCompiler != nullptr);
-    }
-    return {};
-}
+    DAWN_TRY(const_cast<PlatformFunctions*>(GetFunctions())->EnsureDXCLibraries());
 
-MaybeError Backend::EnsureDxcValidator() {
-    if (mDxcValidator == nullptr) {
-        DAWN_TRY(CheckHRESULT(
-            GetFunctions()->dxcCreateInstance(CLSID_DxcValidator, IID_PPV_ARGS(&mDxcValidator)),
-            "DXC create validator"));
-        DAWN_ASSERT(mDxcValidator != nullptr);
-    }
+    ComPtr<IDxcLibrary> dxcLibrary;
+    DAWN_TRY(
+        CheckHRESULT(GetFunctions()->dxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&dxcLibrary)),
+                     "DXC create library"));
+
+    ComPtr<IDxcCompiler3> dxcCompiler;
+    DAWN_TRY(CheckHRESULT(
+        GetFunctions()->dxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler)),
+        "DXC create compiler"));
+
+    ComPtr<IDxcValidator> dxcValidator;
+    DAWN_TRY(CheckHRESULT(
+        GetFunctions()->dxcCreateInstance(CLSID_DxcValidator, IID_PPV_ARGS(&dxcValidator)),
+        "DXC create validator"));
+
+    mDxcLibrary = std::move(dxcLibrary);
+    mDxcCompiler = std::move(dxcCompiler);
+    mDxcValidator = std::move(dxcValidator);
+
     return {};
+#else
+    DAWN_UNREACHABLE();
+#endif
 }
 
 ComPtr<IDxcLibrary> Backend::GetDxcLibrary() const {
