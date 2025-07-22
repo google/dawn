@@ -47,6 +47,8 @@ libtint_source_set("transform") {
   sources = [
     "add_empty_entry_point.cc",
     "add_empty_entry_point.h",
+    "array_length_from_immediate.cc",
+    "array_length_from_immediate.h",
     "array_length_from_uniform.cc",
     "array_length_from_uniform.h",
     "bgra8unorm_polyfill.cc",
@@ -135,6 +137,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "add_empty_entry_point_test.cc",
+      "array_length_from_immediate_test.cc",
       "array_length_from_uniform_test.cc",
       "bgra8unorm_polyfill_test.cc",
       "binary_polyfill_test.cc",

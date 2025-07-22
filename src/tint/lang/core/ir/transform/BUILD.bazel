@@ -40,6 +40,7 @@ cc_library(
   name = "transform",
   srcs = [
     "add_empty_entry_point.cc",
+    "array_length_from_immediate.cc",
     "array_length_from_uniform.cc",
     "bgra8unorm_polyfill.cc",
     "binary_polyfill.cc",
@@ -73,6 +74,7 @@ cc_library(
   ],
   hdrs = [
     "add_empty_entry_point.h",
+    "array_length_from_immediate.h",
     "array_length_from_uniform.h",
     "bgra8unorm_polyfill.h",
     "binary_polyfill.h",
@@ -134,6 +136,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "add_empty_entry_point_test.cc",
+    "array_length_from_immediate_test.cc",
     "array_length_from_uniform_test.cc",
     "bgra8unorm_polyfill_test.cc",
     "binary_polyfill_test.cc",

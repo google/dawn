@@ -58,7 +58,7 @@ struct ImmediateDataLayout {
     core::ir::Var* var = nullptr;
 
     /// A map from member offset to member index.
-    Hashmap<uint32_t, uint32_t, 4> offset_to_index;
+    Hashmap<uint32_t, uint32_t, 6> offset_to_index;
 
     /// @returns the member index of the constant at @p offset
     uint32_t IndexOf(uint32_t offset) const {
