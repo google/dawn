@@ -38,7 +38,7 @@ private const val POLLING_DELAY_MS = 100L
 
 public abstract class WebGpu : AutoCloseable {
     public abstract val instance: Instance
-    public abstract val webgpuSurface: android.dawn.Surface?
+    public abstract val webgpuSurface: android.dawn.Surface
     public abstract val device: Device
 }
 
@@ -81,7 +81,8 @@ public suspend fun createWebGpu(
 
     return object : WebGpu() {
         override val instance = instance
-        override val webgpuSurface = webgpuSurface
+        override val webgpuSurface
+            get() = checkNotNull(webgpuSurface)
         override val device = device
 
         override fun close() {
