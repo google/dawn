@@ -173,32 +173,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Apply iOS static library patch
-        run: |
-          # iOS/macOS cannot ship dynamic libraries (.dylib) in XCFrameworks - they must be static libraries (.a)
-          # This patch modifies Dawn's CMake to build static libraries for Apple platforms instead of shared libraries
-          cat > bundle_libraries.patch << 'EOF'
-          --- a/src/cmake/BundleLibraries.cmake
-          +++ b/src/cmake/BundleLibraries.cmake
-          @@ -66,8 +66,11 @@ function(bundle_libraries output_target)
-               endif()
-             endforeach()
-           
-          -  add_library(${output_target} SHARED ${all_objects})
-          -
-          +  if(${CMAKE_SYSTEM_NAME} STREQUAL "iOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "visionOS" OR ${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-          +    add_library(${output_target} STATIC ${all_objects})
-          +  else()
-          +    add_library(${output_target} SHARED ${all_objects})
-          +  endif()
-             add_dependencies(${output_target} ${ARGN})
-           
-           endfunction()
-          EOF
-          
-          # Apply the patch
-          patch -p1 < bundle_libraries.patch
-
       - name: Setup Android NDK
         if: matrix.platform == 'android'
         id: setup-ndk
@@ -233,7 +207,7 @@ jobs:
             -DDAWN_BUILD_SAMPLES=OFF \
             -DDAWN_USE_GLFW=OFF \
             -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
+            -DDAWN_BUILD_MONOLITHIC_LIBRARY=STATIC \
             -DDAWN_ENABLE_OPENGLES=OFF \
             -DDAWN_ENABLE_DESKTOP_GL=OFF
           ninja -C ${{ matrix.output_dir }}
