@@ -973,12 +973,6 @@ crbug.com/419075526 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 
 crbug.com/0000 [ android-14 android-pixel-6 arm dawn-no-backend-validation target-cpu-64 ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/0000 [ android-14 android-pixel-6 arm dawn-no-backend-validation target-cpu-64 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
-crbug.com/417977426 [ android-14 android-pixel-6 arm target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="*";op="subgroupShuffleXor" [ Failure ]
-crbug.com/417977426 [ linux nvidia nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="every_even";op="subgroupShuffleXor" [ Failure ]
-crbug.com/417977426 [ linux nvidia nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="every_odd";op="subgroupShuffleXor" [ Failure ]
-crbug.com/417977426 [ linux nvidia nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="first_two";op="subgroupShuffleXor" [ Failure ]
-crbug.com/417977426 [ linux nvidia nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="lower_half";op="subgroupShuffleXor" [ Failure ]
-crbug.com/417977426 [ linux nvidia nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,subgroupShuffle:compute,split:predicate="upper_half";op="subgroupShuffleXor" [ Failure ]
 
 # Win/GTX 1660 failures when going from Win10/driver 546.01 to Win11/driver 576.02
 # finder:disable-general UPF disabled until Dawn Win/GTX 1660 experiment is enabled crbug.com/413300864
