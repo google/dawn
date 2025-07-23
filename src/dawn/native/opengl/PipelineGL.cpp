@@ -73,16 +73,17 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     std::set<CombinedSampler> combinedSamplers;
     mNeedsSSBOLengthUniformBuffer = false;
     std::vector<GLuint> glShaders;
+    EmulatedTextureBuiltinRegistrar emulatedTextureBuiltins(layout);
     for (SingleShaderStage stage : IterateStages(activeStages)) {
         ShaderModule* module = ToBackend(stages[stage].module.Get());
         bool needsSSBOLengthUniformBuffer = false;
         std::vector<CombinedSampler> stageCombinedSamplers;
         GLuint shader;
-        DAWN_TRY_ASSIGN(shader, module->CompileShader(gl, stages[stage], stage, usesVertexIndex,
-                                                      usesInstanceIndex, usesFragDepth,
-                                                      bgraSwizzleAttributes, &stageCombinedSamplers,
-                                                      layout, &mBindingPointEmulatedBuiltins,
-                                                      &needsSSBOLengthUniformBuffer));
+        DAWN_TRY_ASSIGN(
+            shader,
+            module->CompileShader(gl, stages[stage], stage, usesVertexIndex, usesInstanceIndex,
+                                  usesFragDepth, bgraSwizzleAttributes, &stageCombinedSamplers,
+                                  layout, &emulatedTextureBuiltins, &needsSSBOLengthUniformBuffer));
 
         mNeedsSSBOLengthUniformBuffer |= needsSSBOLengthUniformBuffer;
         combinedSamplers.insert(stageCombinedSamplers.begin(), stageCombinedSamplers.end());
@@ -90,6 +91,8 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
         DAWN_GL_TRY(gl, AttachShader(mProgram, shader));
         glShaders.push_back(shader);
     }
+
+    mEmulatedTextureBuiltinInfo = emulatedTextureBuiltins.AcquireInfo();
 
     // Link all the shaders together.
     DAWN_GL_TRY(gl, LinkProgram(mProgram));
@@ -205,16 +208,40 @@ MaybeError PipelineGL::ApplyNow(const OpenGLFunctions& gl, const PipelineLayout*
     return {};
 }
 
-const BindingPointToFunctionAndOffset& PipelineGL::GetBindingPointBuiltinDataInfo() const {
-    return mBindingPointEmulatedBuiltins;
+const EmulatedTextureBuiltinInfo& PipelineGL::GetEmulatedTextureBuiltinInfo() const {
+    return mEmulatedTextureBuiltinInfo;
 }
 
 bool PipelineGL::NeedsTextureBuiltinUniformBuffer() const {
-    return !mBindingPointEmulatedBuiltins.empty();
+    return !mEmulatedTextureBuiltinInfo.empty();
 }
 
 bool PipelineGL::NeedsSSBOLengthUniformBuffer() const {
     return mNeedsSSBOLengthUniformBuffer;
+}
+
+// EmulatedTextureBuiltinRegistrar
+
+EmulatedTextureBuiltinRegistrar::EmulatedTextureBuiltinRegistrar(const PipelineLayout* layout)
+    : mLayout(layout) {}
+
+uint32_t EmulatedTextureBuiltinRegistrar::Register(BindGroupIndex group,
+                                                   BindingIndex binding,
+                                                   TextureQuery query) {
+    FlatBindingIndex textureIndex = mLayout->GetBindingIndexInfo()[group][binding];
+
+    if (!mEmulatedTextureBuiltinInfo.contains(textureIndex)) {
+        mEmulatedTextureBuiltinInfo.emplace(
+            textureIndex,
+            EmulatedTextureBuiltin{.index = mCurrentIndex, .query = query, .group = group});
+        mCurrentIndex++;
+    }
+
+    return mEmulatedTextureBuiltinInfo[textureIndex].index;
+}
+
+EmulatedTextureBuiltinInfo EmulatedTextureBuiltinRegistrar::AcquireInfo() {
+    return mEmulatedTextureBuiltinInfo;
 }
 
 }  // namespace dawn::native::opengl

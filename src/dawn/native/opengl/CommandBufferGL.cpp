@@ -40,7 +40,6 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/RenderBundle.h"
-#include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/BufferGL.h"
 #include "dawn/native/opengl/ComputePipelineGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -412,7 +411,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
                     // Some texture builtin function data needs emulation to update into the
                     // internal uniform buffer.
-                    UpdateTextureBuiltinsUniformData(gl, view, groupIndex, bindingIndex);
+                    UpdateTextureBuiltinsUniformData(gl, view, viewIndex);
                     return {};
                 },
                 [&](const StorageTextureBindingInfo& layout) -> MaybeError {
@@ -462,41 +461,33 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
     void UpdateTextureBuiltinsUniformData(const OpenGLFunctions& gl,
                                           const TextureView* view,
-                                          BindGroupIndex groupIndex,
-                                          BindingIndex bindingIndex) {
-        const auto& bindingInfo = mPipeline->GetBindingPointBuiltinDataInfo();
-        if (bindingInfo.empty()) {
-            return;
-        }
-
-        auto iter = bindingInfo.find(tint::BindingPoint{static_cast<uint32_t>(groupIndex),
-                                                        static_cast<uint32_t>(bindingIndex)});
-        if (iter == bindingInfo.end()) {
+                                          FlatBindingIndex textureIndex) {
+        const auto& builtinInfo = mPipeline->GetEmulatedTextureBuiltinInfo();
+        auto iter = builtinInfo.find(textureIndex);
+        if (iter == builtinInfo.end()) {
             return;
         }
 
         // Update data by retrieving information from texture view object.
-        const BindPointFunction field = iter->second.first;
-        const size_t byteOffset = static_cast<size_t>(iter->second.second);
-
         uint32_t data;
-        switch (field) {
-            case BindPointFunction::kTextureNumLevels:
+        switch (iter->second.query) {
+            case TextureQuery::NumLevels:
                 data = view->GetLevelCount();
                 break;
-            case BindPointFunction::kTextureNumSamples:
+            case TextureQuery::NumSamples:
                 data = view->GetTexture()->GetSampleCount();
                 break;
         }
 
-        if (byteOffset >= mInternalUniformBufferData.size()) {
-            mInternalUniformBufferData.resize(byteOffset + sizeof(uint32_t));
+        const size_t offset = iter->second.index * sizeof(uint32_t);
+        if (offset >= mInternalUniformBufferData.size()) {
+            mInternalUniformBufferData.resize(offset + sizeof(uint32_t));
         }
-        memcpy(mInternalUniformBufferData.data() + byteOffset, &data, sizeof(uint32_t));
+        memcpy(mInternalUniformBufferData.data() + offset, &data, sizeof(uint32_t));
 
         // Updating dirty range of the data vector
-        mDirtyRange.begin = std::min(mDirtyRange.begin, byteOffset);
-        mDirtyRange.end = std::max(mDirtyRange.end, byteOffset + sizeof(uint32_t));
+        mDirtyRange.begin = std::min(mDirtyRange.begin, offset);
+        mDirtyRange.end = std::max(mDirtyRange.end, offset + sizeof(uint32_t));
     }
 
     void ResetInternalUniformDataDirtyRange() {
@@ -600,9 +591,9 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
         // TODO(crbug.com/408065421): This forces bindgroups with metadata to be completely set
         // again each pipeline change. In the future we will want to optimize that to only recompute
         // the metadata as needed, not force a rebind of all resources.
-        const auto& bindingInfo = mPipeline->GetBindingPointBuiltinDataInfo();
-        for (const auto& entry : bindingInfo) {
-            mDirtyBindGroupsObjectChangedOrIsDynamic.set(BindGroupIndex(entry.first.group));
+        const auto& builtinInfo = mPipeline->GetEmulatedTextureBuiltinInfo();
+        for (const auto& entry : builtinInfo) {
+            mDirtyBindGroupsObjectChangedOrIsDynamic.set(BindGroupIndex(entry.second.group));
         }
         ResetInternalUniformDataDirtyRange();
         ResetInternalUniformDataDirtyRangeArrayLength();

@@ -35,7 +35,6 @@
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/ShaderModule.h"
-#include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
@@ -50,6 +49,7 @@ class Source;
 namespace opengl {
 
 class Device;
+class EmulatedTextureBuiltinRegistrar;
 class PipelineLayout;
 struct OpenGLFunctions;
 
@@ -96,7 +96,7 @@ class ShaderModule final : public ShaderModuleBase {
                                         VertexAttributeMask bgraSwizzleAttributes,
                                         std::vector<CombinedSampler>* combinedSamplers,
                                         const PipelineLayout* layout,
-                                        BindingPointToFunctionAndOffset* bindingPointToData,
+                                        EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltings,
                                         bool* needsSSBOLengthUniformBuffer);
 
   private:

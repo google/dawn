@@ -793,9 +793,6 @@ TEST_P(TextureShaderBuiltinTests, MultiplePipelinesOneBindGroup) {
 // when multiple entries in the same bind group from the vertex and fragment stage is not pushing to
 // the same offset in the uniform.
 TEST_P(TextureShaderBuiltinTests, RenderPipelineAvoidSameOffset) {
-    // TODO(crbug.com/427409135): remove this suppression once fixed.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
     // One texture builtin in the vertex shader

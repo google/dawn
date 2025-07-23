@@ -31,11 +31,11 @@
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Pipeline.h"
-#include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/IntegerTypes.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
@@ -46,10 +46,35 @@ struct ProgrammableStage;
 namespace dawn::native::opengl {
 
 struct OpenGLFunctions;
+class Buffer;
 class PipelineLayout;
 class Sampler;
-class Buffer;
 class TextureView;
+
+enum class EmulatedTextureMetadata : uint8_t {
+    NumLevels,
+    NumSamples,
+};
+
+// On OpenGL we need to emulate some texture queries in WGSL that are not available in GLSL:
+//  - textureNumLevels on all single-sampled texture_2d/depth/...
+//  - textureNumSamples on all multisampled texture_(depth_)multisampled_2d
+enum class TextureQuery : uint8_t {
+    NumLevels,
+    NumSamples,
+};
+// Information for emulated queries are passed in a UBO so we need to know for each texture in the
+// pipeline what data will be present and at which offset in the UBO.
+struct EmulatedTextureBuiltin {
+    // The index in the UBO of emulated builtin data.
+    uint32_t index;
+    TextureQuery query;
+    // The group is needed to dirty bind groups when changing pipelines.
+    // TODO(crbug.com/408065421): Remove the need for this by not dirtying the whole BingGroup in
+    // this case.
+    BindGroupIndex group;
+};
+using EmulatedTextureBuiltinInfo = absl::flat_hash_map<FlatBindingIndex, EmulatedTextureBuiltin>;
 
 class PipelineGL {
   public:
@@ -60,7 +85,7 @@ class PipelineGL {
     const std::vector<TextureUnit>& GetTextureUnitsForTextureView(FlatBindingIndex index) const;
     GLuint GetProgramHandle() const;
 
-    const BindingPointToFunctionAndOffset& GetBindingPointBuiltinDataInfo() const;
+    const EmulatedTextureBuiltinInfo& GetEmulatedTextureBuiltinInfo() const;
     bool NeedsTextureBuiltinUniformBuffer() const;
 
     bool NeedsSSBOLengthUniformBuffer() const;
@@ -91,7 +116,25 @@ class PipelineGL {
 
     // Reflect info from tint: a map from texture binding point to extra data need to push into the
     // internal uniform buffer.
-    BindingPointToFunctionAndOffset mBindingPointEmulatedBuiltins;
+    EmulatedTextureBuiltinInfo mEmulatedTextureBuiltinInfo;
+};
+
+// Helper class used to allocate the emulated texture builtins in the UBO during the initialization
+// of the pipeline and the compilation of shaders. It is necessary because the same metadata may be
+// used by multiple shader stages and should be reused between them.
+class EmulatedTextureBuiltinRegistrar {
+  public:
+    explicit EmulatedTextureBuiltinRegistrar(const PipelineLayout* layout);
+
+    // Returns the index of the emulated builtin data in the UBO.
+    uint32_t Register(BindGroupIndex group, BindingIndex binding, TextureQuery query);
+
+    EmulatedTextureBuiltinInfo AcquireInfo();
+
+  private:
+    const PipelineLayout* mLayout;
+    uint32_t mCurrentIndex = 0;
+    EmulatedTextureBuiltinInfo mEmulatedTextureBuiltinInfo;
 };
 
 }  // namespace dawn::native::opengl
