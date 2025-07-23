@@ -50,7 +50,9 @@ arguments](https://llvm.org/docs/LibFuzzer.html#options) with
 [extended command line arguments](#extended-command-line-arguments)
 described below.
 
-There's also a helper tool to run the fuzzers locally:
+There's also a helper tool to run the fuzzers locally (it is fully
+featured for running the WGSL fuzzer, with WIP support for the IR
+fuzzer):
 
 - To run the local fuzzers across the full number of CPU threads
   available on the system, seeded with a corpus based on
@@ -71,7 +73,25 @@ There's also a helper tool to run the fuzzers locally:
 
   `tools/run fuzz -corpus out/Fuzzer/wgsl_corpus`
 
-  See below for how to generate the corpus locally
+Note: The above commands will run in the default WGSL only mode.  If
+you want to run using the IR fuzzer, you need to pass in `--ir` to run
+in IR mode.
+
+The base run fuzzer mode will execute without seeding if a corpus is
+not provided. An example of running with an explicit corpus:
+
+```bash
+tools/run fuzz --ir -corpus out/Fuzzer/ir_corpus
+```
+
+`--check` only works in IR mode if an appropriate corpus is explicitly provided,
+an example of this:
+
+```bash
+tools/run fuzz --ir --check -corpus out/Fuzzer/ir_corpus`
+```
+
+See below for how to generate the corpus locally
 
 ### Generating fuzzer corpora
 

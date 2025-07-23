@@ -85,9 +85,10 @@ func run(osWrapper oswrapper.OSWrapper) error {
 	build := ""
 	flag.BoolVar(&t.verbose, "verbose", false, "print additional output")
 	flag.BoolVar(&check, "check", false, "check that all the end-to-end test do not fail")
-	flag.BoolVar(&t.dump, "dump", false, "dumps shader input/output from fuzzer")
+	flag.BoolVar(&t.dump, "dump", false, "dumps shader input/output from config")
+	flag.BoolVar(&t.irMode, "ir", false, "runs using IR config instead of WGSL config (This feature is a WIP)")
 	flag.StringVar(&t.filter, "filter", "", "filter the fuzzers run to those with this substring")
-	flag.StringVar(&t.corpus, "corpus", defaultCorpusDir(osWrapper), "the corpus directory")
+	flag.StringVar(&t.corpus, "corpus", defaultWgslCorpusDir(osWrapper), "the corpus directory")
 	flag.StringVar(&build, "build", defaultBuildDir(osWrapper), "the build directory")
 	flag.StringVar(&t.out, "out", "<tmp>", "the directory to hold generated test files")
 	flag.IntVar(&t.numProcesses, "j", runtime.NumCPU(), "number of concurrent fuzzers to run")
@@ -99,6 +100,10 @@ func run(osWrapper oswrapper.OSWrapper) error {
 
 	if !fileutils.IsDir(build) {
 		return fmt.Errorf("build directory '%v' does not exist", build)
+	}
+
+	if t.irMode && t.corpus == defaultWgslCorpusDir(osWrapper) {
+		t.corpus = ""
 	}
 
 	// Verify / create the output directory
@@ -114,16 +119,18 @@ func run(osWrapper oswrapper.OSWrapper) error {
 		return fmt.Errorf("output directory '%v' does not exist", t.out)
 	}
 
-	// Verify all of the fuzzer executables are present
-	for _, fuzzer := range []struct {
-		name string
-		path *string
-	}{
-		{"tint_wgsl_fuzzer", &t.wgslFuzzer},
-	} {
-		*fuzzer.path = filepath.Join(build, fuzzer.name+fileutils.ExeExt)
-		if !fileutils.IsExe(*fuzzer.path) {
-			return fmt.Errorf("fuzzer not found at '%v'", *fuzzer.path)
+	fuzzers := make([]fuzzerConfig, 0, 1)
+	if t.irMode {
+		fuzzers = append(fuzzers, fuzzerConfig{"tint_ir_fuzzer", &t.fuzzer})
+	} else {
+		fuzzers = append(fuzzers, fuzzerConfig{"tint_wgsl_fuzzer", &t.fuzzer})
+	}
+
+	// Verify all the config executables are present
+	for _, config := range fuzzers {
+		*config.path = filepath.Join(build, config.name+fileutils.ExeExt)
+		if !fileutils.IsExe(*config.path) {
+			return fmt.Errorf("config '%v' not found at '%v'", config.name, *config.path)
 		}
 	}
 
@@ -137,32 +144,51 @@ func run(osWrapper oswrapper.OSWrapper) error {
 	return t.run(osWrapper)
 }
 
+type fuzzerConfig struct {
+	name string  // name of the fuzzer binary
+	path *string // path to fuzzer binary
+}
+
 type tool struct {
 	verbose      bool   // prints the name of each fuzzer before running
 	dump         bool   // dumps shader input/output from fuzzer
+	irMode       bool   // run using the IR fuzzer instead of the WGSL fuzzer
 	filter       string // filter fuzzers to those with this substring
 	corpus       string // directory of test files
 	out          string // where to emit new test files
-	wgslFuzzer   string // path to tint_wgsl_fuzzer
+	fuzzer       string // path to fuzzer to run
 	numProcesses int    // number of concurrent processes to spawn
 }
 
 // TODO(crbug.com/344014313): Add unittests once term is converted to support
 // dependency injection.
-// check() runs the fuzzers against all the .wgsl files under the corpus directory,
+// check() runs the fuzzer against all the test files the corpus directory,
 // ensuring that the fuzzers do not error for the given file.
 func (t tool) check(osWrapper oswrapper.OSWrapper) error {
-	wgslFiles, err := glob.Glob(filepath.Join(t.corpus, "**.wgsl"), osWrapper)
-	if err != nil {
-		return err
+	var files []string
+	if t.irMode {
+		if t.corpus == "" {
+			return fmt.Errorf("must explicitly provide a corpus when running in IR mode")
+		}
+
+		var err error
+		files, err = glob.Glob(filepath.Join(t.corpus, "**.tirb"), osWrapper)
+		if err != nil {
+			return err
+		}
+	} else {
+		var err error
+		files, err = glob.Glob(filepath.Join(t.corpus, "**.wgsl"), osWrapper)
+		if err != nil {
+			return err
+		}
+
+		// Remove '*.expected.wgsl'
+		files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
 	}
+	log.Printf("checking %v files...\n", len(files))
 
-	// Remove '*.expected.wgsl'
-	wgslFiles = transform.Filter(wgslFiles, func(s string) bool { return !strings.Contains(s, ".expected.") })
-
-	log.Printf("checking %v files...\n", len(wgslFiles))
-
-	remaining := transform.SliceToChan(wgslFiles)
+	remaining := transform.SliceToChan(files)
 
 	var pb *progressbar.ProgressBar
 	if term.CanUseAnsiEscapeSequences() {
@@ -176,22 +202,22 @@ func (t tool) check(osWrapper oswrapper.OSWrapper) error {
 			atomic.AddUint32(&numDone, 1)
 			if pb != nil {
 				pb.Update(progressbar.Status{
-					Total: len(wgslFiles),
+					Total: len(files),
 					Segments: []progressbar.Segment{
 						{Count: int(atomic.LoadUint32(&numDone))},
 					},
 				})
 			}
 
-			if out, err := exec.Command(t.wgslFuzzer, file).CombinedOutput(); err != nil {
-				_, fuzzer := filepath.Split(t.wgslFuzzer)
+			if out, err := exec.Command(t.fuzzer, file).CombinedOutput(); err != nil {
+				_, fuzzer := filepath.Split(t.fuzzer)
 				return fmt.Errorf("%v run with %v failed with %v\n\n%v", fuzzer, file, err, string(out))
 			}
 		}
 		return nil
 	}
 
-	if err = utils.RunConcurrent(t.numProcesses, routine); err != nil {
+	if err := utils.RunConcurrent(t.numProcesses, routine); err != nil {
 		return err
 	}
 
@@ -201,8 +227,8 @@ func (t tool) check(osWrapper oswrapper.OSWrapper) error {
 
 // TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
 // via dependency injection.
-// run() runs the fuzzers across t.numProcesses processes.
-// The fuzzers will use t.corpus as the seed directory.
+// run() runs the fuzzer across t.numProcesses processes.
+// The fuzzer will use t.corpus as the seed directory.
 // New cases are written to t.out.
 // Blocks until a fuzzer errors, or the process is interrupted.
 func (t tool) run(fsReader oswrapper.FilesystemReader) error {
@@ -219,7 +245,7 @@ func (t tool) run(fsReader oswrapper.FilesystemReader) error {
 	errs := make(chan error, t.numProcesses)
 	for i := 0; i < t.numProcesses; i++ {
 		go func() {
-			cmd := exec.CommandContext(ctx, t.wgslFuzzer, args...)
+			cmd := exec.CommandContext(ctx, t.fuzzer, args...)
 			out := bytes.Buffer{}
 			cmd.Stdout = &out
 			cmd.Stderr = &out
@@ -231,7 +257,7 @@ func (t tool) run(fsReader oswrapper.FilesystemReader) error {
 				if ctxErr := ctx.Err(); ctxErr != nil {
 					errs <- ctxErr
 				} else {
-					_, fuzzer := filepath.Split(t.wgslFuzzer)
+					_, fuzzer := filepath.Split(t.fuzzer)
 					errs <- fmt.Errorf("%v failed with %v\n\n%v", fuzzer, err, out.String())
 				}
 			} else {
@@ -247,14 +273,19 @@ func (t tool) run(fsReader oswrapper.FilesystemReader) error {
 
 // TODO(crbug.com/344014313): Add unittests once fileutils is converted to use
 // dependency injection.
+// generateFuzzerArgs() generates the arguments that need to be passed into the fuzzer binary call
 func (t tool) generateFuzzerArgs(fsReader oswrapper.FilesystemReader) ([]string, error) {
-	dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(fsReader), wgslDictionaryRelPath))
-	if err != nil || !fileutils.IsFile(dictPath) {
-		return []string{}, fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
-	}
+	args := []string{t.out}
 
-	args := []string{t.out, t.corpus,
-		"-dict=" + dictPath,
+	if t.corpus != "" {
+		args = append(args, t.corpus)
+	}
+	if !t.irMode {
+		dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(fsReader), wgslDictionaryRelPath))
+		if err != nil || !fileutils.IsFile(dictPath) {
+			return []string{}, fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
+		}
+		args = append(args, "-dict="+dictPath)
 	}
 	if t.verbose {
 		args = append(args, "--verbose")
@@ -268,7 +299,7 @@ func (t tool) generateFuzzerArgs(fsReader oswrapper.FilesystemReader) ([]string,
 	return args, nil
 }
 
-func defaultCorpusDir(fsReader oswrapper.FilesystemReader) string {
+func defaultWgslCorpusDir(fsReader oswrapper.FilesystemReader) string {
 	return filepath.Join(fileutils.DawnRoot(fsReader), "test", "tint")
 }
 
