@@ -629,8 +629,7 @@ class DeviceBase : public ErrorSink,
     // this is a currently a recursive lock, but should only really be used recursively for error
     // handling.
     friend class DeviceGuard;
-    Ref<RecursiveMutex> mMutex = nullptr;
-    std::optional<class Defer> mDefer = std::nullopt;
+    Ref<DeviceMutex> mMutex = nullptr;
 };
 
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(

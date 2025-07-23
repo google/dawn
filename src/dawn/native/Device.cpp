@@ -432,13 +432,6 @@ DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
 }
 
 DeviceBase::~DeviceBase() {
-    // Assert that we do not have a Defer object. If we do, it means that we created a Guard for
-    // deletion, and then recursively acquired a normal Guard. This case is not currently allowed
-    // since the Defer object would be dangling by the time that the lock is actually released. This
-    // may be possible by making the Defer object recounted, but as of the time of writing, this
-    // shouldn't be needed, and developers should avoid adding code that does this.
-    DAWN_ASSERT(!mDefer);
-
     // We need to explicitly release the Queue before we complete the destructor so that the
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
@@ -487,7 +480,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     }
 
     if (HasFeature(Feature::ImplicitDeviceSynchronization)) {
-        mMutex = AcquireRef(new RecursiveMutex);
+        mMutex = AcquireRef(new DeviceMutex);
     } else {
         mMutex = nullptr;
     }
@@ -2476,15 +2469,15 @@ void DeviceBase::DeferIfLocked(std::function<void()> f) {
 
     // If we don't have a Defer, that means we are not locked, so we can just run the defer task
     // now.
-    if (!mDefer) {
+    if (!mMutex->mDefer) {
         f();
         return;
     }
 
     // Otherwise, verify that we are only calling this in the thread that is holding the lock and
     // defer the function.
-    DAWN_ASSERT(mMutex->IsLockedByCurrentThread() && mDefer);
-    mDefer->Append(std::move(f));
+    DAWN_ASSERT(mMutex->IsLockedByCurrentThread() && mMutex->mDefer);
+    mMutex->mDefer->Append(std::move(f));
 }
 
 bool DeviceBase::IsLockedByCurrentThreadIfNeeded() const {

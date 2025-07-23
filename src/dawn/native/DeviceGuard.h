@@ -39,40 +39,42 @@ namespace dawn::native {
 
 class DeviceBase;
 
+class DeviceMutex : public RecursiveMutex {
+  public:
+    ~DeviceMutex() override;
+
+  private:
+    friend class DeviceBase;
+    friend struct AutoLockBase<DeviceMutex*>;
+
+    void Lock();
+    void Unlock();
+
+    uint32_t mRecursionStackDepth = 0;
+    std::optional<class Defer> mDefer = std::nullopt;
+};
+
 namespace detail {
 
 struct DeviceMutexTraits {
-    using MutexType = Ref<RecursiveMutex>;
-    using LockType = RecursiveMutex::AutoLock;
+    using MutexType = Ref<DeviceMutex>;
+    using LockType = DeviceMutex::AutoLockBase<DeviceMutex*>;
 
-    static RecursiveMutex* GetMutex(MutexType& m) { return m.Get(); }
+    static DeviceMutex* GetMutex(MutexType& m) { return m.Get(); }
     static DeviceBase* GetObj(DeviceBase* const d) { return d; }
     static const DeviceBase* GetObj(const DeviceBase* const d) { return d; }
 };
 
 // This base class is necessary for destructor ordering in the implementing DeviceGuard class
-// below. The Defer object must be deleted after the lock is released, and since the lock is only
-// released when the Guard is destroyed, the implementing class below must extend this class before
-// extending the Guard class to enforce the correct destructor ordering.
+// below.
 class DeviceGuardBase {
   protected:
-    explicit DeviceGuardBase(RecursiveMutex* mutex = nullptr);
-
-  protected:
-    // Since guards are always stack allocated, they must be cleaned up in the reverse order of
-    // creation. That said, the first guard to be created in a given stack will always be the guard
-    // to resolve the defers. The fields below are actually set by the implementing class
-    // DeviceGuard to ensure that the Device lock has been acquired before any modifitcations. The
-    // actual Defer object will be moved into mDefer if necessary by the ~DeviceGuard, again because
-    // we don't want to modify state without the lock, but we want to destroy the Defer object
-    // without the lock.
-    bool mHandleDefer = false;
-    std::optional<class Defer> mDefer = std::nullopt;
+    explicit DeviceGuardBase(DeviceMutex* mutex = nullptr);
 
   private:
     // Optionally, this base class may hold a strong reference to the actual mutex. This is used
     // when the Device which is the owner of the mutex may be deleted while still holding the mutex.
-    Ref<RecursiveMutex> mMutex = nullptr;
+    Ref<DeviceMutex> mMutex = nullptr;
 };
 
 }  // namespace detail
@@ -85,16 +87,11 @@ class DeviceGuard : public detail::DeviceGuardBase,
                     private ::dawn::detail::Guard<DeviceBase, detail::DeviceMutexTraits> {
   public:
     using GuardBase = ::dawn::detail::Guard<DeviceBase, detail::DeviceMutexTraits>;
-    ~DeviceGuard();
 
   private:
     friend class DeviceBase;
 
-    // Explicitly make mDefer from detail::DeviceGuardBase visible since the Guard class also has a
-    // mDefer member.
-    using detail::DeviceGuardBase::mDefer;
-
-    explicit DeviceGuard(DeviceBase* device, RecursiveMutex* mutex = nullptr);
+    explicit DeviceGuard(DeviceBase* device, DeviceMutex* mutex = nullptr);
 };
 
 }  // namespace dawn::native

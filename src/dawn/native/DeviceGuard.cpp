@@ -34,35 +34,36 @@
 
 namespace dawn::native {
 
+DeviceMutex::~DeviceMutex() {
+    DAWN_ASSERT(mRecursionStackDepth == 0);
+}
+
+void DeviceMutex::Lock() {
+    RecursiveMutex::Lock();
+    if (mRecursionStackDepth == 0) {
+        mDefer.emplace();
+    }
+    mRecursionStackDepth++;
+}
+
+void DeviceMutex::Unlock() {
+    // Optional Defer here is used to destroy the Defer object after releasing the lock.
+    std::optional<class Defer> defer;
+
+    mRecursionStackDepth--;
+    if (mRecursionStackDepth == 0) {
+        defer.swap(mDefer);
+    }
+    RecursiveMutex::Unlock();
+}
+
 namespace detail {
 
-DeviceGuardBase::DeviceGuardBase(RecursiveMutex* mutex) : mMutex(mutex) {}
+DeviceGuardBase::DeviceGuardBase(DeviceMutex* mutex) : mMutex(mutex) {}
 
 }  // namespace detail
 
-DeviceGuard::DeviceGuard(DeviceBase* device, RecursiveMutex* mutex)
-    : detail::DeviceGuardBase(mutex), GuardBase(device, device->mMutex) {
-    DAWN_ASSERT(!mutex || mutex == device->mMutex);
-
-    // Only handle Defer if we were not passed the mutex explicitly. This is because the mutex is
-    // only passed explicitly if the device may be destroyed and in that case, we do NOT want to
-    // handle Defer callbacks.
-    if (!mutex && device->mMutex && !device->mDefer.has_value()) {
-        // The first guard created in a thread also creates the defer, i.e. when the optional is
-        // nullopt. We also need to set detail::DeviceGuardBase::mHandleDefer here instead of in the
-        // base constructor because we only want to mutate the device-owned state when we are
-        // holding the lock which only happens after the GuardBase constructor is completed.
-        mHandleDefer = true;
-        device->mDefer.emplace();
-    }
-}
-
-DeviceGuard::~DeviceGuard() {
-    // Move the Defer objects to be owned by the base class so that it will be destroyed after the
-    // lock in this class is released.
-    if (mHandleDefer) {
-        mDefer.swap(Get()->mDefer);
-    }
-}
+DeviceGuard::DeviceGuard(DeviceBase* device, DeviceMutex* mutex)
+    : detail::DeviceGuardBase(mutex), GuardBase(device, device->mMutex) {}
 
 }  // namespace dawn::native
