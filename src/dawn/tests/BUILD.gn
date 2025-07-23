@@ -934,6 +934,7 @@ dawn_test("dawn_perf_tests") {
 
   sources = [
     "perf_tests/BufferUploadPerf.cpp",
+    "perf_tests/ConcurrentExecutionTest.cpp",
     "perf_tests/DawnPerfTest.cpp",
     "perf_tests/DawnPerfTest.h",
     "perf_tests/DawnPerfTestPlatform.cpp",
