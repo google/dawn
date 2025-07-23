@@ -373,6 +373,7 @@ BufferBase::BufferBase(DeviceBase* device,
 BufferBase::~BufferBase() {
     BufferState state = mState.load(std::memory_order::acquire);
     DAWN_ASSERT(state == BufferState::Unmapped || state == BufferState::Destroyed ||
+                state == BufferState::SharedMemoryNoAccess ||
                 // Happens if the buffer was created mappedAtCreation *after* device destroy.
                 // TODO(crbug.com/42241190): This shouldn't be needed once the issue above is fixed,
                 // because then bufferState will just be Destroyed.

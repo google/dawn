@@ -129,6 +129,29 @@ TEST_P(SharedBufferMemoryTests, CheckIsDeviceLostBeforeAndAfterDestroyingDevice)
     EXPECT_TRUE(memory.IsDeviceLost());
 }
 
+// Test that SharedBufferMemory correctly handles EndAccess on a buffer that was destroyed.
+TEST_P(SharedBufferMemoryTests, CheckEndAccessOnDestroyedBuffer) {
+    wgpu::SharedBufferMemory memory =
+        GetParam().mBackend->CreateSharedBufferMemory(device, kMapWriteUsages, kBufferSize);
+
+    wgpu::SharedBufferMemoryProperties properties;
+    memory.GetProperties(&properties);
+
+    wgpu::BufferDescriptor bufferDesc = {};
+    bufferDesc.size = properties.size;
+    bufferDesc.usage = properties.usage;
+    wgpu::Buffer buffer = memory.CreateBuffer(&bufferDesc);
+
+    wgpu::SharedBufferMemoryBeginAccessDescriptor desc = {};
+    desc.initialized = true;
+    desc.fenceCount = 0;
+
+    EXPECT_EQ(memory.BeginAccess(buffer, &desc), wgpu::Status::Success);
+    buffer.Destroy();
+    wgpu::SharedBufferMemoryEndAccessState state;
+    EXPECT_EQ(memory.EndAccess(buffer, &state), wgpu::Status::Success);
+}
+
 // Test that SharedBufferMemory::IsDeviceLost() returns the expected value before and
 // after losing the device.
 TEST_P(SharedBufferMemoryTests, CheckIsDeviceLostBeforeAndAfterLosingDevice) {
