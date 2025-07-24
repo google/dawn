@@ -555,6 +555,31 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
+    if (mDeviceInfo.features.shaderStorageImageExtendedFormats == VK_TRUE) {
+        bool requiredTier1FormatsAreRenderableBlendable = true;
+
+        for (const auto& format :
+             {VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_UNORM,
+              VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM,
+              VK_FORMAT_R8_SNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R8G8B8A8_SNORM,
+              VK_FORMAT_B10G11R11_UFLOAT_PACK32}) {
+            VkFormatProperties properties;
+            mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mVkPhysicalDevice,
+                                                                              format, &properties);
+            if (!IsSubset(
+                    static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
+                                                      VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
+                    properties.optimalTilingFeatures)) {
+                requiredTier1FormatsAreRenderableBlendable = false;
+                break;
+            }
+        }
+
+        if (requiredTier1FormatsAreRenderableBlendable) {
+            EnableFeature(Feature::TextureFormatsTier1);
+        }
+    }
+
 #if DAWN_PLATFORM_IS(ANDROID)
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
         if (GetOrLoadAHBFunctions()->IsValid()) {

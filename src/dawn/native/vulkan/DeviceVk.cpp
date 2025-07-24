@@ -556,7 +556,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.shaderClipDistance = VK_TRUE;
     }
 
-    if (HasFeature(Feature::R8UnormStorage)) {
+    if (HasFeature(Feature::R8UnormStorage) || HasFeature(Feature::TextureFormatsTier1)) {
         usedKnobs.features.shaderStorageImageExtendedFormats = VK_TRUE;
     }
 
