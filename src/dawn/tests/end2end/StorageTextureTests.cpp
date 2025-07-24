@@ -373,7 +373,6 @@ class StorageTextureTests : public DawnTest {
                 return "vec4i(i32(value), -i32(value), i32(value) * 2, -i32(value) * 2)";
 
             // float formats
-
             case wgpu::TextureFormat::R16Float:
                 return "vec4f(f32(value), 0.0, 0.0, 1.0)";
 
@@ -438,7 +437,7 @@ class StorageTextureTests : public DawnTest {
 
             case wgpu::TextureFormat::RGB10A2Unorm:
                 return "vec4f(f32(value) / 1023.0, f32(value) * 2.0 / 1023.0, "
-                       "f32(value) * 3.0 / 1023.0, 3.0)";
+                       "f32(value) * 3.0 / 1023.0, 1.0)";
 
             case wgpu::TextureFormat::RG11B10Ufloat:
                 return "vec4f(1.0, 1.0, 0.0, 1.0)";
@@ -567,6 +566,42 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         if (isFragment) {
             ostream << "return vec4f();\n";
         }
+        ostream << "}\n";
+
+        return ostream.str();
+    }
+
+    std::string CommonReadOnlyTestCode(const char* stage, wgpu::TextureFormat format) {
+        wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D;
+        std::string componentFmt = utils::GetWGSLColorTextureComponentType(format);
+        const bool isFragment = strcmp(stage, "fragment") == 0;
+        std::string textureSize = "textureDimensions(storageImage0).xy";
+
+        bool isIntegerComponent = (componentFmt == "i32" || componentFmt == "u32");
+        std::string comparisonCode = isIntegerComponent
+                                         ? "any(pixel != expected)"
+                                         : "any(abs(pixel - expected) > vec4<f32>(0.001))";
+
+        std::ostringstream ostream;
+        ostream << GetEnable(format) << "\n";
+        ostream << GetImageDeclaration(format, "read", dimension, 0) << "\n";
+        ostream << "@" << stage << " fn main() ";
+        if (isFragment) {
+            ostream << "-> @location(0) vec4f ";
+        }
+        ostream << "{\n";
+        ostream << "  let size = vec2i(" << textureSize << ");\n";
+        ostream << "  for (var y = 0; y < size.y; y += 1) {\n";
+        ostream << "    for (var x = 0; x < size.x; x += 1) {\n";
+        ostream << "      let value = 1 + x + size.x * y;\n";
+        ostream << "      let expected = " << GetExpectedPixelValue(format) << ";\n";
+        ostream << "      let pixel = textureLoad(storageImage0, vec2i(x, y));\n";
+        ostream << "      if (" << comparisonCode << ") {\n";
+        ostream << "        return vec4f(1, 0, 0, 1);\n";
+        ostream << "      }\n";
+        ostream << "    }\n";
+        ostream << "  }\n";
+        ostream << "  return vec4f(0, 1, 0, 1);\n";
         ostream << "}\n";
 
         return ostream.str();
@@ -2012,24 +2047,21 @@ DAWN_INSTANTIATE_TEST(ReadWriteStorageTextureTests,
 
 class Tier1StorageValidationTests : public StorageTextureTests {
   public:
+    void SetUp() override {
+        StorageTextureTests::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TextureFormatsTier1}));
+    }
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         if (SupportsFeatures({wgpu::FeatureName::TextureFormatsTier1})) {
-            mIsTextureFormatsTier1Supported = true;
             return {wgpu::FeatureName::TextureFormatsTier1};
         }
         return {};
     }
-
-    bool IsTextureFormatsTier1Supported() { return mIsTextureFormatsTier1Supported; }
-
-  private:
-    bool mIsTextureFormatsTier1Supported = false;
 };
 
 // Test that kTier1AdditionalStorageFormats formats have the "write-only" GPUStorageTextureAccess
 //  capability if 'texture-formats-tier1' is enabled.
 TEST_P(Tier1StorageValidationTests, WriteonlyStorageTextureInFragmentShader) {
-    DAWN_TEST_UNSUPPORTED_IF(!IsTextureFormatsTier1Supported());
     for (const auto format : utils::kTier1AdditionalStorageFormats) {
         SCOPED_TRACE(
             absl::StrFormat("Test format: %s", utils::GetWGSLImageFormatQualifier(format)));
@@ -2045,6 +2077,23 @@ TEST_P(Tier1StorageValidationTests, WriteonlyStorageTextureInFragmentShader) {
 
         // Verify the pixel data in the write-only storage texture is expected.
         CheckOutputStorageTexture(writeonlyStorageTexture, format, {kWidth, kHeight});
+    }
+}
+
+// Test that kTier1AdditionalStorageFormats formats have the "read-only" GPUStorageTextureAccess
+//  capability if 'texture-formats-tier1' is enabled.
+TEST_P(Tier1StorageValidationTests, ReadOnlyStorageTextureInFragmentShader) {
+    for (const auto format : utils::kTier1AdditionalStorageFormats) {
+        SCOPED_TRACE(
+            absl::StrFormat("Test format: %s", utils::GetWGSLImageFormatQualifier(format)));
+        wgpu::TextureFormat kStorageTextureFormat = format;
+        const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
+        wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
+            kInitialTextureData.data(), kInitialTextureData.size(), kStorageTextureFormat);
+
+        const std::string fragmentShader = CommonReadOnlyTestCode("fragment", format);
+
+        CheckDrawsGreen(kSimpleVertexShader, fragmentShader.c_str(), readonlyStorageTexture);
     }
 }
 
