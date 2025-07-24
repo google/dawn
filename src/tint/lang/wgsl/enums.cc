@@ -169,6 +169,9 @@ std::string_view ToString(ChromiumDiagnosticRule value) {
 /// @param str the string to parse
 /// @returns the parsed enum, or LanguageFeature::kUndefined if the string could not be parsed.
 LanguageFeature ParseLanguageFeature(std::string_view str) {
+    if (str == "chromium_print") {
+        return LanguageFeature::kChromiumPrint;
+    }
     if (str == "chromium_testing_experimental") {
         return LanguageFeature::kChromiumTestingExperimental;
     }
@@ -208,6 +211,8 @@ std::string_view ToString(LanguageFeature value) {
     switch (value) {
         case LanguageFeature::kUndefined:
             return "undefined";
+        case LanguageFeature::kChromiumPrint:
+            return "chromium_print";
         case LanguageFeature::kChromiumTestingExperimental:
             return "chromium_testing_experimental";
         case LanguageFeature::kChromiumTestingShipped:

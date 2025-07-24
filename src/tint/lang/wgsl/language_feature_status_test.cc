@@ -54,5 +54,10 @@ TEST(LanguageFeatureStatusTest, ChromiumTestingValues) {
               GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumTestingShipped));
 }
 
+TEST(LanguageFeatureStatusTest, ChromiumDeveloperFeatures) {
+    EXPECT_EQ(FeatureStatus::kUnsafeExperimental,
+              GetLanguageFeatureStatus(tint::wgsl::LanguageFeature::kChromiumPrint));
+}
+
 }  // namespace
 }  // namespace tint::wgsl

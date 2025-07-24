@@ -110,6 +110,9 @@ enum language_feature {
   sized_binding_array
   texel_buffers
 
+  // Non-standard language features for Chromium developers.
+  chromium_print
+
   // Language features used only for testing whose status will never change.
   chromium_testing_unimplemented
   chromium_testing_unsafe_experimental

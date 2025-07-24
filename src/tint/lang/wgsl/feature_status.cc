@@ -41,6 +41,12 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////
+            // Chromium developer features
+            ///////////////////////////////////////////////////////////////////
+        case LanguageFeature::kChromiumPrint:
+            return FeatureStatus::kUnsafeExperimental;
+
+            ////////////////////////////////////////////////////////////////////
             // Enabled features
             ////////////////////////////////////////////////////////////////////
         case LanguageFeature::kPacked4X8IntegerDotProduct:

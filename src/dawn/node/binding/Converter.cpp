@@ -1744,6 +1744,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kTexelBuffers:
             out = wgpu::WGSLLanguageFeatureName::TexelBuffers;
             return true;
+        case interop::WGSLLanguageFeatureName::kChromiumPrint:
+            out = wgpu::WGSLLanguageFeatureName::ChromiumPrint;
+            return true;
     }
     return false;
 }
@@ -1767,6 +1770,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::TexelBuffers:
             out = interop::WGSLLanguageFeatureName::kTexelBuffers;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
+            out = interop::WGSLLanguageFeatureName::kChromiumPrint;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:
