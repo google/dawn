@@ -2343,7 +2343,8 @@
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
-            {"value": 58, "name": "texture component swizzle", "tags": ["dawn"]}
+            {"value": 58, "name": "texture component swizzle", "tags": ["dawn"]},
+            {"value": 59, "name": "chromium experimental primitive id", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

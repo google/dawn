@@ -691,6 +691,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     if ([*mDevice supportsFamily:MTLGPUFamilyApple7]) {
         EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
+        // TODO(342172182): This may be available in more places?
+        // (mwyrzykowski says "Apple7 and all Macs")
+        EnableFeature(Feature::ChromiumExperimentalPrimitiveId);
     }
 
     EnableFeature(Feature::SharedTextureMemoryIOSurface);

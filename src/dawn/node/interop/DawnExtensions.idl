@@ -32,6 +32,7 @@ enum GPUFeatureName {
     "multi-draw-indirect",
     "chromium-experimental-subgroup-matrix",
     "texture-component-swizzle",
+    "chromium-experimental-primitive-id",
 };
 
 enum GPUSubgroupMatrixComponentType {

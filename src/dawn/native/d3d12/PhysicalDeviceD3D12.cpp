@@ -174,6 +174,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::FlexibleTextureViews);
     EnableFeature(Feature::TextureFormatsTier1);
     EnableFeature(Feature::TextureComponentSwizzle);
+    EnableFeature(Feature::ChromiumExperimentalPrimitiveId);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
