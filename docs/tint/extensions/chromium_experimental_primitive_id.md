@@ -12,6 +12,8 @@ has been written yet.
 
 The usage is restricted to `fragment` shaders.
 
+| Platform | Type | Notes |
+|----------|------|-------|
 | SPIR-V | 32-bit integer | Requires geometry shaders, mesh shaders, or raytracing. Available as the `PrimitiveID` builtin |
 | HLSL | u32 | Requires D3D10. Available as the `SV_PrimitiveID` semantic |
 | GLSL | i32 | Requires GLSL 1.50 and later, ESSL 3.2. (ESSL 3.1 with GL_EXT_geometry_shader). Available as the `gl_primitiveID` builtin |
@@ -23,7 +25,8 @@ experimental extension it would be `enable chromium_experimental_primitive_id`.
 All of the topologies in `GPUPrimitiveTopology` are supported. (Generally, adjacency topologies would
 not be supported but WebGPU does not have any adjacency topologies).
 
-|= Topology =|= Primitive =|
+| Topology | Primitive |
+|----------|-----------|
 | point-list | Each vertex is a primitive |
 | line-list | Each vertex pair is a primitive |
 | line-strip | Each adjacent vertex pair is a primitive |
@@ -36,11 +39,11 @@ This extension adds a new `builtin_value_name` entry for `primitive_id`.
 
 An entry is added to the _Built-in input and output values_ table:
 
-| Name | `primitive_id` |
-| Stage | `fragment` |
-| Direction | `input` |
-| Type | u32 |
-| Extension | `chromium_experimental_primitive_id` |
+ * _Name_: `primitive_id`
+ * _Stage_: `fragment`
+ * _Direction_: `input`
+ * _Type_: `u32`
+ * _Extension_: `chromium_experimental_primitive_id`
 
 * The index of the first primitive is zero, incrementing by one for each subsequent primitive.
 * `primitive_id` resets to zero between each instance drawn.
