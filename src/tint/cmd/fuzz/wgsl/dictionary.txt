@@ -336,6 +336,7 @@
 "position"
 "pow"
 "primitive_id"
+"print"
 "private"
 "ptr"
 "quadBroadcast"

@@ -195,6 +195,7 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kSubgroupMatrixStore)
         CASE(kSubgroupMatrixMultiply)
         CASE(kSubgroupMatrixMultiplyAccumulate)
+        CASE(kPrint)
 
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
         case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()

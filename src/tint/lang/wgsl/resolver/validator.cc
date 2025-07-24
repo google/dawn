@@ -1912,6 +1912,17 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
         }
     }
 
+    // The `print()` builtin requires the chromium_print language feature to be available.
+    if (auto* fn = call->Target()->As<sem::BuiltinFn>()) {
+        if (fn->Fn() == wgsl::BuiltinFn::kPrint) {
+            if (!allowed_features_.features.count(wgsl::LanguageFeature::kChromiumPrint)) {
+                AddError(call->Declaration()->source) << "the 'chromium_print' language feature is "
+                                                         "not allowed in the current environment";
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 

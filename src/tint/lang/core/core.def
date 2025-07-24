@@ -873,6 +873,10 @@ implicit(C: iu32) fn textureStore(texture: texel_buffer<u32_texel_format, read_w
   subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
   -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 
+// chromium_experimental_print
+implicit(T: scalar) fn print(T)
+implicit(N: num, T: scalar) fn print(vec<N, T>)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //
 ////////////////////////////////////////////////////////////////////////////////

@@ -773,6 +773,10 @@ match workgroup
   subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
   -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
 
+// chromium_experimental_print
+implicit(T: concrete_scalar) fn print(T)
+implicit(N: num, T: concrete_scalar) fn print(vec<N, T>)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //
 ////////////////////////////////////////////////////////////////////////////////

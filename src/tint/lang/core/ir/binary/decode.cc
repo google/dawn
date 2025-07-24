@@ -1921,6 +1921,9 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupMatrixMultiply;
             case pb::BuiltinFn::subgroup_matrix_multiply_accumulate:
                 return core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate;
+            case pb::BuiltinFn::print:
+                return core::BuiltinFn::kPrint;
+
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;

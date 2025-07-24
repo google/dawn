@@ -198,6 +198,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupMatrixStore)
         CASE(kSubgroupMatrixMultiply)
         CASE(kSubgroupMatrixMultiplyAccumulate)
+        CASE(kPrint)
         case core::BuiltinFn::kNone:
             break;
     }
