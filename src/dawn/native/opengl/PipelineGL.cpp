@@ -228,16 +228,24 @@ EmulatedTextureBuiltinRegistrar::EmulatedTextureBuiltinRegistrar(const PipelineL
 uint32_t EmulatedTextureBuiltinRegistrar::Register(BindGroupIndex group,
                                                    BindingIndex binding,
                                                    TextureQuery query) {
-    FlatBindingIndex textureIndex = mLayout->GetBindingIndexInfo()[group][binding];
+    FlatBindingIndex firstTextureIndex = mLayout->GetBindingIndexInfo()[group][binding];
 
-    if (!mEmulatedTextureBuiltinInfo.contains(textureIndex)) {
-        mEmulatedTextureBuiltinInfo.emplace(
-            textureIndex,
-            EmulatedTextureBuiltin{.index = mCurrentIndex, .query = query, .group = group});
-        mCurrentIndex++;
+    if (!mEmulatedTextureBuiltinInfo.contains(firstTextureIndex)) {
+        // Register the metadata to add for each element of the binding_array (if there is one).
+        BindingIndex arraySize =
+            mLayout->GetBindGroupLayout(group)->GetBindingInfo(binding).arraySize;
+        for (BindingIndex arrayElement : Range(arraySize)) {
+            FlatBindingIndex textureIndex =
+                mLayout->GetBindingIndexInfo()[group][binding + arrayElement];
+
+            mEmulatedTextureBuiltinInfo.emplace(
+                textureIndex,
+                EmulatedTextureBuiltin{.index = mCurrentIndex, .query = query, .group = group});
+            mCurrentIndex++;
+        }
     }
 
-    return mEmulatedTextureBuiltinInfo[textureIndex].index;
+    return mEmulatedTextureBuiltinInfo[firstTextureIndex].index;
 }
 
 EmulatedTextureBuiltinInfo EmulatedTextureBuiltinRegistrar::AcquireInfo() {

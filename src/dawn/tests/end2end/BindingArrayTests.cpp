@@ -559,6 +559,67 @@ TEST_P(SizedBindingArrayTests, TextureAndSamplerCombination) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
 }
 
+// Test that calling textureNumLevels on an element of a binding_array returns the correct value,
+// this is targeted for the GL backend that has emulation of that builtin with a UBO.
+TEST_P(SizedBindingArrayTests, TextureNumLevels) {
+    // Make the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0.5, 0.5);
+        }
+
+        @group(0) @binding(0) var ts : binding_array<texture_2d<f32>, 3>;
+        @fragment fn fs() -> @location(0) vec4f {
+            let r = f32(textureNumLevels(ts[0])) / 255.0;
+            let g = f32(textureNumLevels(ts[1])) / 255.0;
+            let b = f32(textureNumLevels(ts[2])) / 255.0;
+            let a : f32 = 0.0;
+            return vec4(r, g, b, a);
+        }
+    )");
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = module;
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.targetCount = 1;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline testPipeline = device.CreateRenderPipeline(&pDesc);
+
+    // Create a bind group with textures views of decreasing numlevels.
+    wgpu::TextureDescriptor tDesc;
+    tDesc.size = {4, 4};
+    tDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    tDesc.mipLevelCount = 3;
+    wgpu::TextureView view3 = device.CreateTexture(&tDesc).CreateView();
+    tDesc.mipLevelCount = 2;
+    wgpu::TextureView view2 = device.CreateTexture(&tDesc).CreateView();
+    tDesc.mipLevelCount = 1;
+    wgpu::TextureView view1 = device.CreateTexture(&tDesc).CreateView();
+
+    wgpu::BindGroup arrayGroup = utils::MakeBindGroup(device, testPipeline.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, view3},
+                                                          {1, view2},
+                                                          {2, view1},
+                                                      });
+
+    // Run the test
+    auto rp = utils::CreateBasicRenderPass(device, 1, 1);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+
+    pass.SetPipeline(testPipeline);
+    pass.SetBindGroup(0, arrayGroup);
+    pass.Draw(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
+}
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
                       D3D11Backend(),
                       D3D12Backend(),
