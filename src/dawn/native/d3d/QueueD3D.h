@@ -49,7 +49,8 @@ class Queue : public QueueBase {
     virtual ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence() = 0;
 
   protected:
-    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+    ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
+                                               Nanoseconds timeout) override;
 
     ResultOrError<SystemEventReceiver> GetSystemEventReceiver();
     MaybeError ReturnSystemEventReceivers(std::span<SystemEventReceiver> receivers);

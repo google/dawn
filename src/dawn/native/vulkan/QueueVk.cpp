@@ -149,7 +149,6 @@ ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
 
             mUnusedFences->push_back(fence);
 
-            DAWN_ASSERT(fenceSerial > GetCompletedCommandSerial());
             fencesInFlight->pop_front();
         }
         return fenceSerial;
@@ -472,7 +471,7 @@ void Queue::DestroyImpl() {
     QueueBase::DestroyImpl();
 }
 
-ResultOrError<bool> Queue::WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) {
+ResultOrError<bool> Queue::WaitForQueueSerialImpl(ExecutionSerial serial, Nanoseconds timeout) {
     Device* device = ToBackend(GetDevice());
     VkDevice vkDevice = device->GetVkDevice();
     // If the client has passed a finite timeout, the function will eventually return due to

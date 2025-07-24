@@ -47,6 +47,25 @@ ExecutionSerial ExecutionQueueBase::GetCompletedCommandSerial() const {
     return ExecutionSerial(mCompletedSerial.load(std::memory_order_acquire));
 }
 
+ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial serial,
+                                                           Nanoseconds timeout) {
+    bool succeeded;
+    DAWN_TRY_ASSIGN(succeeded, WaitForQueueSerialImpl(serial, timeout));
+
+    if (!succeeded) {
+        return false;
+    }
+
+    // It's critical to update the completed serial right away. If fences are processed by another
+    // thread before CheckAndUpdateCompletedSerials() runs on the current thread,
+    // the fence list will be empty, preventing the current thread from determining the true latest
+    // serial. Pre-emptively updating mCompletedSerial ensures CheckAndUpdateCompletedSerials()
+    // returns an accurate value, preventing stale data.
+    FetchMax(mCompletedSerial, uint64_t(serial));
+
+    return true;
+}
+
 MaybeError ExecutionQueueBase::CheckPassedSerials() {
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());

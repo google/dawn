@@ -261,6 +261,70 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
     });
 }
 
+// Test that copy a texture to a buffer then map that buffer in parallel works.
+TEST_P(MultithreadTests, T2BThenMapInParallel) {
+    constexpr uint32_t kTextureSize = 512;
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr uint32_t kBytesPerPixel = 4;
+    constexpr uint64_t kBufferSize = kTextureSize * kTextureSize * kBytesPerPixel;
+
+    std::vector<utils::RGBA8> textureData(kTextureSize * kTextureSize);
+    for (uint32_t y = 0; y < kTextureSize; ++y) {
+        for (uint32_t x = 0; x < kTextureSize; ++x) {
+            textureData[y * kTextureSize + x] =
+                utils::RGBA8(static_cast<uint8_t>(x % 256), static_cast<uint8_t>(y % 256),
+                             static_cast<uint8_t>((x + y) % 256), 255);
+        }
+    }
+
+    // Create and initialize the source texture.
+    wgpu::Texture texture =
+        CreateTexture(kTextureSize, kTextureSize, kTextureFormat,
+                      wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
+
+    wgpu::TexelCopyTextureInfo textureCopyView = utils::CreateTexelCopyTextureInfo(texture);
+    wgpu::TexelCopyBufferLayout dataLayout =
+        utils::CreateTexelCopyBufferLayout(0, kTextureSize * kBytesPerPixel);
+    wgpu::Extent3D writeSize = {kTextureSize, kTextureSize, 1};
+    queue.WriteTexture(&textureCopyView, textureData.data(),
+                       textureData.size() * sizeof(utils::RGBA8), &dataLayout, &writeSize);
+
+    for (int i = 0; i < 50; ++i) {
+        utils::RunInParallel(20, [this, texture, &textureData = std::as_const(textureData),
+                                  &textureCopyView = std::as_const(textureCopyView),
+                                  &writeSize = std::as_const(writeSize)](uint32_t) {
+            // Create a buffer for copying texture data to
+            wgpu::Buffer buffer =
+                CreateBuffer(kBufferSize, wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
+
+            // Copy texture to buffer.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::TexelCopyBufferInfo bufferCopyView =
+                utils::CreateTexelCopyBufferInfo(buffer, 0, kTextureSize * kBytesPerPixel);
+            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &writeSize);
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+
+            // Wait for the mapping to complete
+            ASSERT_EQ(instance.WaitAny(
+                          buffer.MapAsync(wgpu::MapMode::Read, 0, kBufferSize,
+                                          wgpu::CallbackMode::WaitAnyOnly,
+                                          [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                              ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                          }),
+                          UINT64_MAX),
+                      wgpu::WaitStatus::Success);
+
+            // Buffer is mapped, check its content.
+            const uint32_t* mappedData =
+                static_cast<const uint32_t*>(buffer.GetConstMappedRange(0, kBufferSize));
+            ASSERT_NE(mappedData, nullptr);
+            EXPECT_EQ(0, memcmp(mappedData, textureData.data(), kBufferSize));
+            buffer.Unmap();
+        });
+    }
+}
+
 // Test CreateShaderModule on multiple threads. Cache hits should share compilation warnings.
 TEST_P(MultithreadTests, CreateShaderModuleInParallel) {
     constexpr uint32_t kCacheHitFactor = 4;  // 4 threads will create the same shader module.
@@ -1643,6 +1707,8 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
 
 DAWN_INSTANTIATE_TEST(MultithreadTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1651,6 +1717,8 @@ DAWN_INSTANTIATE_TEST(MultithreadTests,
 
 DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1659,6 +1727,8 @@ DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       D3D12Backend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend(),

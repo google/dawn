@@ -54,7 +54,8 @@ class Queue final : public QueueBase {
     MaybeError SplitRecordingContext(CommandRecordingContext* recordingContext);
     void RecycleCompletedCommands(ExecutionSerial completedSerial);
 
-    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+    ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
+                                               Nanoseconds timeout) override;
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor, uint32_t family);

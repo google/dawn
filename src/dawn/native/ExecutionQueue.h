@@ -93,7 +93,7 @@ class ExecutionQueueBase {
 
     // Wait at most `timeout` synchronously for the ExecutionSerial to pass. Returns true
     // if the serial passed.
-    virtual ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) = 0;
+    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout);
 
     // Tracks a new task to complete when |serial| is reached.
     void TrackSerialTask(ExecutionSerial serial, Task&& task);
@@ -117,6 +117,10 @@ class ExecutionQueueBase {
     // CheckAndUpdateCompletedSerials. Alternatively, the backend can actively call
     // UpdateCompletedSerial when a new serial is complete to make forward progress proactively.
     void UpdateCompletedSerialTo(ExecutionSerial completedSerial);
+
+    // Backend specific wait function.
+    virtual ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
+                                                       Nanoseconds timeout) = 0;
 
   private:
     // Each backend should implement to check their passed fences if there are any and return a

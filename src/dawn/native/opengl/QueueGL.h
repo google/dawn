@@ -66,7 +66,8 @@ class Queue final : public QueueBase {
                                 const TexelCopyBufferLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
 
-    ResultOrError<bool> WaitForQueueSerial(ExecutionSerial serial, Nanoseconds timeout) override;
+    ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
+                                               Nanoseconds timeout) override;
 
     bool HasPendingCommands() const override;
     MaybeError SubmitPendingCommandsImpl() override;
