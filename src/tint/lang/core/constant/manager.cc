@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/constant/invalid.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -132,6 +133,10 @@ const Scalar<AFloat>* Manager::Get(AFloat value) {
 
 const Scalar<AInt>* Manager::Get(AInt value) {
     return Get<Scalar<AInt>>(types.AInt(), value);
+}
+
+const constant::String* Manager::Get(std::string_view value) {
+    return Get<String>(types.String(), value);
 }
 
 const Value* Manager::Zero(const core::type::Type* type) {

@@ -46,6 +46,7 @@ cc_library(
     "node.cc",
     "scalar.cc",
     "splat.cc",
+    "string.cc",
     "value.cc",
   ],
   hdrs = [
@@ -57,6 +58,7 @@ cc_library(
     "node.h",
     "scalar.h",
     "splat.h",
+    "string.h",
     "value.h",
   ],
   deps = [
@@ -88,6 +90,7 @@ cc_library(
     "manager_test.cc",
     "scalar_test.cc",
     "splat_test.cc",
+    "string_test.cc",
     "value_test.cc",
   ],
   deps = [

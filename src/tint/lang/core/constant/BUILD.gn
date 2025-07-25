@@ -60,6 +60,8 @@ libtint_source_set("constant") {
     "scalar.h",
     "splat.cc",
     "splat.h",
+    "string.cc",
+    "string.h",
     "value.cc",
     "value.h",
   ]
@@ -89,6 +91,7 @@ if (tint_build_unittests) {
       "manager_test.cc",
       "scalar_test.cc",
       "splat_test.cc",
+      "string_test.cc",
       "value_test.cc",
     ]
     deps = [

@@ -54,6 +54,8 @@ tint_add_target(tint_lang_core_constant lib
   lang/core/constant/scalar.h
   lang/core/constant/splat.cc
   lang/core/constant/splat.h
+  lang/core/constant/string.cc
+  lang/core/constant/string.h
   lang/core/constant/value.cc
   lang/core/constant/value.h
 )
@@ -89,6 +91,7 @@ tint_add_target(tint_lang_core_constant_test test
   lang/core/constant/manager_test.cc
   lang/core/constant/scalar_test.cc
   lang/core/constant/splat_test.cc
+  lang/core/constant/string_test.cc
   lang/core/constant/value_test.cc
 )
 
