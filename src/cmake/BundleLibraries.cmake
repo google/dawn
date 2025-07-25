@@ -25,7 +25,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function(bundle_libraries output_target)
+function(bundle_libraries output_target library_type)
   # This function recursively finds all dependencies of a given target.
   # It populates a list variable named 'all_dependencies' in the parent scope.
   # Note: This recursive approach with PARENT_SCOPE works but can be a bit
@@ -45,12 +45,9 @@ function(bundle_libraries output_target)
       return()
     endif()
 
-    # Add the current target to the list in the parent scope
-    # list(APPEND) modifies the variable in the current scope.
-    # set(... PARENT_SCOPE) copies the current scope's variable to the parent scope.
-    # This pattern, while slightly verbose, works for recursive list building across scopes.
+    # Add the current target to the list of dependencies that we have seen. It will be copied
+    # to the parent scope before returning at the end of this function.
     list(APPEND all_dependencies ${input_target})
-    set(all_dependencies ${all_dependencies} PARENT_SCOPE) # Propagate change up
 
     # Get dependencies from LINK_LIBRARIES (Private and Public linkage)
     get_target_property(link_libraries ${input_target} LINK_LIBRARIES)
@@ -72,6 +69,7 @@ function(bundle_libraries output_target)
 
     # The final 'all_dependencies' list is available in the parent scope
     # after the initial call to get_dependencies completes.
+    set(all_dependencies ${all_dependencies} PARENT_SCOPE) # Propagate change up
   endfunction()
 
   # ARGN contains all arguments after the named parameters so it is the list of
@@ -113,10 +111,9 @@ function(bundle_libraries output_target)
 
   # Create the output library using the validated type and collected objects
   # If all_objects is empty, add_library will still create an empty library of the specified type.
-  add_library(${output_target} ${all_objects})
+  add_library(${output_target} ${library_type} ${all_objects})
 
   # Add dependencies to ensure input targets are built before the bundled library.
   # This handles the build order correctly.
   add_dependencies(${output_target} ${ARGN})
-
 endfunction()

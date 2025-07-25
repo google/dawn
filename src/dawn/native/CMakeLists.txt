@@ -934,44 +934,59 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
     # Note that this library name is referenced in several places, search for it and things like:
     # "{{.*}}_dawn" when you rename it.
     ###############################################################################
+
+    # First make an object library for webgpu_dawn_native_proc sources for the export macros to
+    # get applied as well as backend-specific dawn_native entrypoints that also use export macros.
+    # This is essentially the same as dawn_native but using OBJECT as a library type and the
+    # DAWN_BUILD_MONOLITHIC_LIBRARY option to choose the export macros.
     DawnJSONGenerator(
         TARGET "webgpu_dawn_native_proc"
         PRINT_NAME "Dawn native WebGPU procs"
         OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
     )
-    # Bundle all objects of dawn_native, it's public dependencies and private dependencies.
-    include(BundleLibraries)
-    bundle_libraries(webgpu_dawn dawn::dawn_native_objects)
 
-    add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
-    # Compile backend specific sources along with webgpu_dawn_native_proc sources for export macros to get applied.
-    target_sources(webgpu_dawn
-        PRIVATE
+    dawn_add_library(
+      webgpu_dawn_objects
+      UTILITY_TARGET dawn_internal_config
+      FORCE_OBJECT
+      SOURCES
         ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
         ${dawn_component_srcs}
+      DEPENDS
+        ${dawn_native_public_depends}
+      PRIVATE_DEPENDS
+        dawn::dawn_native_objects
+        ${dawn_native_private_depends}
+        ${conditional_private_platform_depends}
     )
-    target_compile_definitions(webgpu_dawn
+
+    target_compile_definitions(webgpu_dawn_objects
         PRIVATE
             "WGPU_IMPLEMENTATION"
             "DAWN_NATIVE_IMPLEMENTATION"
     )
-    if (BUILD_SHARED_LIBS)
-        target_compile_definitions(webgpu_dawn
+    if (DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL SHARED)
+        target_compile_definitions(webgpu_dawn_objects
             PUBLIC
-                "$<$<BOOL:BUILD_SHARED_LIBS>:WGPU_SHARED_LIBRARY>"
-                "$<$<BOOL:BUILD_SHARED_LIBS>:DAWN_NATIVE_SHARED_LIBRARY>"
+                "WGPU_SHARED_LIBRARY"
+                "DAWN_NATIVE_SHARED_LIBRARY"
         )
     endif()
-    # Apart from dawn_public_config, everything else goes inside PRIVATE, otherwise install rules will complain that they were not exported.
-    target_link_libraries(webgpu_dawn
-        PUBLIC
-            dawn_public_config
-        PRIVATE
-            dawn_internal_config
-            ${dawn_native_public_depends}
-            ${dawn_native_private_depends}
-            ${conditional_private_platform_depends}
+
+    # Do the bundling of all the objects and dependencies together.
+    include(BundleLibraries)
+    bundle_libraries(webgpu_dawn ${DAWN_BUILD_MONOLITHIC_LIBRARY} webgpu_dawn_objects)
+    add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
+
+    # Since this is a bundled library, the only dependency is the config needed to use it.
+    target_link_libraries(
+      webgpu_dawn
+      PUBLIC
+        dawn_public_config
+      PRIVATE
+        ${conditional_private_platform_depends}
     )
+
     set(webgpu_dawn_public_headers)
     foreach(dawn_target_name IN ITEMS dawn_headers dawncpp_headers dawn_native_objects)
         get_target_property(headers "${dawn_target_name}" INTERFACE_SOURCES)

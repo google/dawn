@@ -329,10 +329,22 @@ message(STATUS "Webgpu IDL path: ${WEBGPU_IDL_PATH}")
 message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
 
-option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
-option(DAWN_BUILD_MONOLITHIC_LIBRARY "Build one big monolithic library file" ON)
+# Handling of the type of monolithic library to build, if any.
+set(DAWN_BUILD_MONOLITHIC_LIBRARY "OFF" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")
+set_property(CACHE DAWN_BUILD_MONOLITHIC_LIBRARY PROPERTY STRINGS SHARED SHARED STATIC)
 
+string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" _option_upper)
+if(NOT _option_upper STREQUAL "OFF" AND
+   NOT _option_upper STREQUAL "SHARED" AND
+   NOT _option_upper STREQUAL "STATIC")
+    message(FATAL_ERROR "DAWN_BUILD_MONOLITHIC_LIBRARY must be SHARED, STATIC, or OFF, but was \"${DAWN_BUILD_MONOLITHIC_LIBRARY}\".")
+endif()
+if (DAWN_BUILD_MONOLITHIC_LIBRARY AND BUILD_SHARED_LIBS)
+    message(FATAL_ERROR "DAWN_BUILD_MONOLITHIC_LIBRARY SHARED/STATIC requires BUILD_SHARED_LIBS=OFF. Otherwise the bundled library will depend on other shared libraries which defeats the purpose.")
+endif()
 message(STATUS "Dawn build monolithic library: ${DAWN_BUILD_MONOLITHIC_LIBRARY}")
+
+option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
 message(STATUS "Dawn fetch dependencies: ${DAWN_FETCH_DEPENDENCIES}")
 message(STATUS "")
 
