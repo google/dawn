@@ -120,6 +120,8 @@ const char* str(BuiltinFn i) {
             return "simdgroup_multiply";
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
             return "simdgroup_multiply_accumulate";
+        case BuiltinFn::kOsLog:
+            return "os_log";
     }
     return "<unknown>";
 }
@@ -173,6 +175,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kConvert:
         case BuiltinFn::kSimdgroupMultiply:
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
+        case BuiltinFn::kOsLog:
             break;
     }
     return core::ir::Instruction::Accesses{};

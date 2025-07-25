@@ -47,6 +47,8 @@ tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/binary_polyfill.h
   lang/msl/writer/raise/builtin_polyfill.cc
   lang/msl/writer/raise/builtin_polyfill.h
+  lang/msl/writer/raise/convert_print_to_log.cc
+  lang/msl/writer/raise/convert_print_to_log.h
   lang/msl/writer/raise/module_constant.cc
   lang/msl/writer/raise/module_constant.h
   lang/msl/writer/raise/module_scope_vars.cc
@@ -106,6 +108,7 @@ tint_add_target(tint_lang_msl_writer_raise_test test
   lang/msl/writer/raise/argument_buffers_test.cc
   lang/msl/writer/raise/binary_polyfill_test.cc
   lang/msl/writer/raise/builtin_polyfill_test.cc
+  lang/msl/writer/raise/convert_print_to_log_test.cc
   lang/msl/writer/raise/module_constant_test.cc
   lang/msl/writer/raise/module_scope_vars_test.cc
   lang/msl/writer/raise/packed_vec3_test.cc

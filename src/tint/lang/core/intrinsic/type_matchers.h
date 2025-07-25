@@ -53,6 +53,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
@@ -771,6 +772,15 @@ inline const type::Struct* BuildAtomicCompareExchangeResult(intrinsic::MatchStat
                                                             const type::Type*,
                                                             const type::Type* ty) {
     return type::CreateAtomicCompareExchangeResult(state.types, state.symbols, ty);
+}
+
+inline bool MatchString(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    return ty->Is<type::String>();
+}
+
+inline const core::type::Type* BuildString(core::intrinsic::MatchState& state,
+                                           const core::type::Type*) {
+    return state.types.String();
 }
 
 }  // namespace tint::core::intrinsic

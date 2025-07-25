@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
@@ -467,6 +468,9 @@ StyledText Disassembler::ValueToStyledText(const Value* val) {
                                 need_comma = true;
                             }
                             text << ")";
+                        },
+                        [&](const core::constant::String* str) {
+                            text << "\"" << str->Value() << "\"";
                         },
                         TINT_ICE_ON_NO_MATCH);
                 };

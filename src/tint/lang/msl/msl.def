@@ -149,6 +149,8 @@ type level
 
 type __packed_vec3<T>
 
+type string
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +160,7 @@ match fiu32: f32 | i32 | u32
 match f32_f16: f32 | f16
 match fiu32_f16: f32 | i32 | u32 | f16
 match iu8: i8 | u8
+match scalar: bool | f16 | f32 | i32 | u32
 
 match subgroup_matrix_kind_left : subgroup_matrix_kind.left
 match subgroup_matrix_kind_right : subgroup_matrix_kind.right
@@ -399,3 +402,12 @@ fn convert(u32) -> u64
   subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
   subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
+// Compute
+implicit(T: scalar) fn os_log(string, u32, u32, u32, T)
+implicit(N: num, T: scalar) fn os_log(string, u32, u32, u32, vec<N, T>)
+// Fragment
+implicit(T: scalar) fn os_log(string, f32, f32, f32, T)
+implicit(N: num, T: scalar) fn os_log(string, f32, f32, f32, vec<N, T>)
+// Vertex
+implicit(T: scalar) fn os_log(string, u32, u32, T)
+implicit(N: num, T: scalar) fn os_log(string, u32, u32, vec<N, T>)

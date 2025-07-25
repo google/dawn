@@ -76,6 +76,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kConvert:
         case BuiltinFn::kSimdgroupMultiply:
         case BuiltinFn::kSimdgroupMultiplyAccumulate:
+        case BuiltinFn::kOsLog:
             break;
     }
     return core::ir::Instruction::Accesses{};
