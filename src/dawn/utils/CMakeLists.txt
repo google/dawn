@@ -88,6 +88,7 @@ dawn_add_library(
     "TestUtils.cpp"
     "WireHelper.cpp"
   DEPENDS
+    dawn_wgpu_utils
     webgpu_cpp
     dawn::dawn_common
     dawn::dawn_wire
