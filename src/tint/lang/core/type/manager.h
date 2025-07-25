@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/subgroup_matrix.h"
 #include "src/tint/lang/core/type/texel_buffer.h"
@@ -630,6 +631,9 @@ class Manager final {
     const core::type::InputAttachment* input_attachment(const core::type::Type* inner) {
         return Get<core::type::InputAttachment>(inner);
     }
+
+    /// @returns a string type
+    const core::type::String* String() { return Get<core::type::String>(); }
 
     /// A structure member descriptor.
     struct StructMemberDesc {
