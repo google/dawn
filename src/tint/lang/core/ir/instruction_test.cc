@@ -146,6 +146,31 @@ TEST_F(IR_InstructionDeathTest, Fail_ReplaceWithNotInserted) {
         "internal compiler error");
 }
 
+TEST_F(IR_InstructionDeathTest, Fail_Result_ZeroResults) {
+    EXPECT_DEATH_IF_SUPPORTED(
+        {
+            Module mod;
+            Builder b{mod};
+
+            auto* inst = b.Loop();
+            inst->Result();
+        },
+        "internal compiler error");
+}
+
+TEST_F(IR_InstructionDeathTest, Fail_Result_MultipleResults) {
+    EXPECT_DEATH_IF_SUPPORTED(
+        {
+            Module mod;
+            Builder b{mod};
+
+            auto* inst = b.Loop();
+            inst->SetResults(Vector{b.InstructionResult<u32>(), b.InstructionResult<u32>()});
+            inst->Result();
+        },
+        "internal compiler error");
+}
+
 TEST_F(IR_InstructionTest, Remove) {
     auto* inst1 = b.Loop();
     auto* blk = b.Block();
@@ -171,13 +196,23 @@ TEST_F(IR_InstructionDeathTest, Fail_RemoveNotInserted) {
 
 TEST_F(IR_InstructionTest, DetachResult) {
     auto* inst = b.Let("foo", 42_u);
-    auto* result = inst->Result(0);
+    auto* result = inst->Result();
     EXPECT_EQ(result->Instruction(), inst);
 
     auto* detached = inst->DetachResult();
     EXPECT_EQ(detached, result);
     EXPECT_EQ(detached->Instruction(), nullptr);
     EXPECT_EQ(inst->Results().Length(), 0u);
+}
+
+TEST_F(IR_InstructionTest, Comparison) {
+    auto* x = b.Let("foo", 42_u);
+    auto* y = b.Let("foo", 42_u);
+
+    EXPECT_EQ(*x, *x);
+    EXPECT_FALSE(*x == *y);
+
+    EXPECT_TRUE((*x) < (*y));
 }
 
 }  // namespace

@@ -33,10 +33,8 @@
 
 namespace tint::resolver {
 
-Program Resolve(ProgramBuilder& builder,
-                const wgsl::AllowedFeatures& allowed_features,
-                wgsl::ValidationMode mode) {
-    Resolver resolver(&builder, std::move(allowed_features), mode);
+Program Resolve(ProgramBuilder& builder, const wgsl::AllowedFeatures& allowed_features) {
+    Resolver resolver(&builder, std::move(allowed_features));
     resolver.Resolve();
     return Program(std::move(builder));
 }

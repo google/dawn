@@ -1,39 +1,31 @@
-float tint_trunc(float param_0) {
-  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+
+static int a = int(0);
+static float b = 0.0f;
+int tint_mod_i32(int lhs, int rhs) {
+  int v = ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs));
+  return (lhs - ((lhs / v) * v));
+}
+
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs)));
+}
+
+void foo(int maybe_zero) {
+  a = tint_div_i32(a, maybe_zero);
+  a = tint_mod_i32(a, maybe_zero);
+  b = (b / 0.0f);
+  float v_1 = b;
+  float v_2 = (v_1 / 0.0f);
+  b = (v_1 - ((((v_2 < 0.0f)) ? (ceil(v_2)) : (floor(v_2))) * 0.0f));
+  float v_3 = float(maybe_zero);
+  b = (b / v_3);
+  float v_4 = float(maybe_zero);
+  float v_5 = b;
+  float v_6 = (v_5 / v_4);
+  b = (v_5 - ((((v_6 < 0.0f)) ? (ceil(v_6)) : (floor(v_6))) * v_4));
 }
 
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
-  return;
 }
 
-static int a = 0;
-static float b = 0.0f;
-
-int tint_div(int lhs, int rhs) {
-  return (lhs / (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
-}
-
-int tint_mod(int lhs, int rhs) {
-  int rhs_or_one = (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs);
-  if (any(((uint((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
-    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
-  } else {
-    return (lhs % rhs_or_one);
-  }
-}
-
-float tint_float_mod(float lhs, float rhs) {
-  return (lhs - (tint_trunc((lhs / rhs)) * rhs));
-}
-
-void foo(int maybe_zero) {
-  a = tint_div(a, 0);
-  a = tint_mod(a, 0);
-  a = tint_div(a, maybe_zero);
-  a = tint_mod(a, maybe_zero);
-  b = (b / 0.0f);
-  b = tint_float_mod(b, 0.0f);
-  b = (b / float(maybe_zero));
-  b = tint_float_mod(b, float(maybe_zero));
-}

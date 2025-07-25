@@ -248,7 +248,8 @@ TEST_F(LabelTest, ExternalTexture) {
     descriptor.gamutConversionMatrix = mPlaceholderConstantArray.data();
     descriptor.srcTransferFunctionParameters = mPlaceholderConstantArray.data();
     descriptor.dstTransferFunctionParameters = mPlaceholderConstantArray.data();
-    descriptor.visibleSize = {1, 1};
+    descriptor.cropSize = {1, 1};
+    descriptor.apparentSize = {1, 1};
 
     // The label should be empty if one was not set.
     {
@@ -518,11 +519,11 @@ TEST_F(LabelTest, TextureView) {
 
     wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-    // The label should be empty if one was not set.
+    // The label should be generated if no one was not set.
     {
         wgpu::TextureView textureView = texture.CreateView();
         std::string readbackLabel = native::GetObjectLabelForTesting(textureView.Get());
-        ASSERT_TRUE(readbackLabel.empty());
+        ASSERT_EQ(readbackLabel.rfind("defaulted from [Texture (unlabeled", 0), 0U);
     }
 
     // Test setting a label through API
@@ -626,7 +627,7 @@ TEST_F(LabelTest, ShaderModule) {
     @compute @workgroup_size(1) fn main() {
     })";
 
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc;
+    wgpu::ShaderSourceWGSL wgslDesc;
     wgslDesc.code = source;
     wgpu::ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;

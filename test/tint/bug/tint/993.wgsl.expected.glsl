@@ -1,43 +1,35 @@
 #version 310 es
 
+
 struct Constants {
   uint zero;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
-
-layout(binding = 0, std140) uniform constants_block_ubo {
-  Constants inner;
-} constants;
 
 struct Result {
   uint value;
 };
 
-layout(binding = 1, std430) buffer result_block_ssbo {
-  Result inner;
-} result;
-
 struct TestData {
   int data[3];
 };
 
-layout(binding = 0, std430) buffer s_block_ssbo {
+layout(binding = 0, std140)
+uniform constants_block_1_ubo {
+  Constants inner;
+} v;
+layout(binding = 1, std430)
+buffer result_block_1_ssbo {
+  Result inner;
+} v_1;
+layout(binding = 2, std430)
+buffer s_block_1_ssbo {
   TestData inner;
-} s;
-
+} v_2;
 int runTest() {
-  return atomicOr(s.inner.data[(0u + uint(constants.inner.zero))], 0);
+  uint v_3 = min((0u + uint(v.inner.zero)), 2u);
+  return atomicOr(v_2.inner.data[v_3], 0);
 }
-
-void tint_symbol() {
-  int tint_symbol_1 = runTest();
-  result.inner.value = uint(tint_symbol_1);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
-  return;
+  v_1.inner.value = uint(runTest());
 }

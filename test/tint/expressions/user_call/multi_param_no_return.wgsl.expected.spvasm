@@ -1,53 +1,65 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 30
+; Generator: Google Tint Compiler; 1
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %c "c"
                OpName %x "x"
                OpName %y "y"
                OpName %z "z"
                OpName %a "a"
                OpName %b "b"
+               OpName %unused_entry_point "unused_entry_point"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-          %5 = OpTypeFunction %void %int %int %int
+          %7 = OpTypeFunction %void %int %int %int
+       %uint = OpTypeInt 32 0
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
-         %18 = OpConstantNull %int
       %int_2 = OpConstant %int 2
+         %32 = OpTypeFunction %void
       %int_3 = OpConstant %int 3
       %int_4 = OpConstant %int 4
       %int_5 = OpConstant %int 5
       %int_6 = OpConstant %int 6
-%unused_entry_point = OpFunction %void None %1
-          %4 = OpLabel
-               OpReturn
-               OpFunctionEnd
-          %c = OpFunction %void None %5
+          %c = OpFunction %void None %7
           %x = OpFunctionParameter %int
           %y = OpFunctionParameter %int
           %z = OpFunctionParameter %int
-         %11 = OpLabel
-          %a = OpVariable %_ptr_Function_int Function %18
-         %13 = OpIAdd %int %int_1 %x
-         %14 = OpIAdd %int %13 %y
-         %15 = OpIAdd %int %14 %z
-               OpStore %a %15
-         %19 = OpLoad %int %a
-         %21 = OpIAdd %int %19 %int_2
-               OpStore %a %21
+          %8 = OpLabel
+          %a = OpVariable %_ptr_Function_int Function
+         %10 = OpBitcast %uint %int_1
+         %12 = OpBitcast %uint %x
+         %13 = OpIAdd %uint %10 %12
+         %14 = OpBitcast %int %13
+         %15 = OpBitcast %uint %14
+         %16 = OpBitcast %uint %y
+         %17 = OpIAdd %uint %15 %16
+         %18 = OpBitcast %int %17
+         %19 = OpBitcast %uint %18
+         %20 = OpBitcast %uint %z
+         %21 = OpIAdd %uint %19 %20
+         %22 = OpBitcast %int %21
+               OpStore %a %22
+         %25 = OpLoad %int %a None
+         %26 = OpBitcast %uint %25
+         %27 = OpBitcast %uint %int_2
+         %29 = OpIAdd %uint %26 %27
+         %30 = OpBitcast %int %29
+               OpStore %a %30 None
                OpReturn
                OpFunctionEnd
-          %b = OpFunction %void None %1
-         %23 = OpLabel
-         %24 = OpFunctionCall %void %c %int_1 %int_2 %int_3
-         %26 = OpFunctionCall %void %c %int_4 %int_5 %int_6
+          %b = OpFunction %void None %32
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %c %int_1 %int_2 %int_3
+         %36 = OpFunctionCall %void %c %int_4 %int_5 %int_6
+               OpReturn
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %32
+         %41 = OpLabel
                OpReturn
                OpFunctionEnd

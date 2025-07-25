@@ -1,17 +1,17 @@
-RWByteAddressBuffer ssbo : register(u0);
 
-float2x2 ssbo_load(uint offset) {
-  return float2x2(asfloat(ssbo.Load2((offset + 0u))), asfloat(ssbo.Load2((offset + 8u))));
+RWByteAddressBuffer ssbo : register(u0);
+void v_1(uint offset, float2x2 obj) {
+  ssbo.Store2((offset + 0u), asuint(obj[0u]));
+  ssbo.Store2((offset + 8u), asuint(obj[1u]));
 }
 
-void ssbo_store(uint offset, float2x2 value) {
-  ssbo.Store2((offset + 0u), asuint(value[0u]));
-  ssbo.Store2((offset + 8u), asuint(value[1u]));
+float2x2 v_2(uint offset) {
+  return float2x2(asfloat(ssbo.Load2((offset + 0u))), asfloat(ssbo.Load2((offset + 8u))));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float2x2 v = ssbo_load(0u);
-  ssbo_store(0u, v);
-  return;
+  float2x2 v = v_2(0u);
+  v_1(0u, v);
 }
+

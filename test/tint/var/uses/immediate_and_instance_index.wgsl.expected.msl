@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant float* a;
+};
+
+struct main_outputs {
+  float4 tint_symbol [[position]];
+};
+
+float4 main_inner(uint b, tint_module_vars_struct tint_module_vars) {
+  float const v = (*tint_module_vars.a);
+  return float4((v + float(b)));
+}
+
+vertex main_outputs v_1(uint b [[instance_id]], const constant float* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner(b, tint_module_vars);
+  return tint_wrapper_result;
+}

@@ -43,14 +43,20 @@ namespace dawn::native::d3d12 {
 Backend::Backend(InstanceBase* instance) : Base(instance, wgpu::BackendType::D3D12) {}
 
 MaybeError Backend::Initialize() {
-    auto functions = std::make_unique<PlatformFunctions>();
-    DAWN_TRY(functions->LoadFunctions());
+    {
+        // Put function initialization in curly braces to avoid the temptation to use the
+        // std::move-ed `functions` variable later in the method.
+        auto functions = std::make_unique<PlatformFunctions>();
+        DAWN_TRY(functions->Initialize());
+
+        DAWN_TRY(Base::Initialize(std::move(functions)));
+    }
 
     // Enable the debug layer (requires the Graphics Tools "optional feature").
     const auto instance = GetInstance();
     if (instance->GetBackendValidationLevel() != BackendValidationLevel::Disabled) {
         ComPtr<ID3D12Debug3> debugController;
-        if (SUCCEEDED(functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+        if (SUCCEEDED(GetFunctions()->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
             DAWN_ASSERT(debugController != nullptr);
             debugController->EnableDebugLayer();
             if (instance->GetBackendValidationLevel() == BackendValidationLevel::Full) {
@@ -61,17 +67,11 @@ MaybeError Backend::Initialize() {
 
     if (instance->IsBeginCaptureOnStartupEnabled()) {
         ComPtr<IDXGraphicsAnalysis> graphicsAnalysis;
-        if (functions->dxgiGetDebugInterface1 != nullptr &&
-            SUCCEEDED(functions->dxgiGetDebugInterface1(0, IID_PPV_ARGS(&graphicsAnalysis)))) {
+        if (GetFunctions()->dxgiGetDebugInterface1 != nullptr &&
+            SUCCEEDED(GetFunctions()->dxgiGetDebugInterface1(0, IID_PPV_ARGS(&graphicsAnalysis)))) {
             graphicsAnalysis->BeginCapture();
         }
     }
-
-    DAWN_TRY(Base::Initialize(std::move(functions)));
-
-#ifdef DAWN_USE_BUILT_DXC
-    DAWN_INVALID_IF(!IsDXCAvailable(), "DXC dlls were built, but are not available");
-#endif
 
     return {};
 }
@@ -80,13 +80,64 @@ const PlatformFunctions* Backend::GetFunctions() const {
     return static_cast<const PlatformFunctions*>(Base::GetFunctions());
 }
 
+MaybeError Backend::EnsureDXC() {
+#if DAWN_USE_BUILT_DXC
+    // If components are already loaded, return early
+    if (mDxcLibrary != nullptr) {
+        // Since all components are assigned atomically, if one is loaded, all should be loaded
+        DAWN_CHECK(mDxcCompiler);
+        DAWN_CHECK(mDxcValidator);
+        return {};
+    }
+
+    DAWN_TRY(const_cast<PlatformFunctions*>(GetFunctions())->EnsureDXCLibraries());
+
+    ComPtr<IDxcLibrary> dxcLibrary;
+    DAWN_TRY(
+        CheckHRESULT(GetFunctions()->dxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&dxcLibrary)),
+                     "DXC create library"));
+
+    ComPtr<IDxcCompiler3> dxcCompiler;
+    DAWN_TRY(CheckHRESULT(
+        GetFunctions()->dxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler)),
+        "DXC create compiler"));
+
+    ComPtr<IDxcValidator> dxcValidator;
+    DAWN_TRY(CheckHRESULT(
+        GetFunctions()->dxcCreateInstance(CLSID_DxcValidator, IID_PPV_ARGS(&dxcValidator)),
+        "DXC create validator"));
+
+    mDxcLibrary = std::move(dxcLibrary);
+    mDxcCompiler = std::move(dxcCompiler);
+    mDxcValidator = std::move(dxcValidator);
+
+    return {};
+#else
+    DAWN_UNREACHABLE();
+#endif
+}
+
+ComPtr<IDxcLibrary> Backend::GetDxcLibrary() const {
+    DAWN_ASSERT(mDxcLibrary != nullptr);
+    return mDxcLibrary;
+}
+
+ComPtr<IDxcCompiler3> Backend::GetDxcCompiler() const {
+    DAWN_ASSERT(mDxcCompiler != nullptr);
+    return mDxcCompiler;
+}
+
+ComPtr<IDxcValidator> Backend::GetDxcValidator() const {
+    DAWN_ASSERT(mDxcValidator != nullptr);
+    return mDxcValidator;
+}
+
 ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreatePhysicalDeviceFromIDXGIAdapter(
     ComPtr<IDXGIAdapter> dxgiAdapter) {
-    // IDXGIAdapter4 is supported since Windows 8 and Platform Update for Windows 7.
-    ComPtr<IDXGIAdapter4> dxgiAdapter4;
-    DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter4), "DXGIAdapter retrieval"));
+    ComPtr<IDXGIAdapter3> dxgiAdapter3;
+    DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter3), "DXGIAdapter retrieval"));
     Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter4)));
+        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter3)));
     DAWN_TRY(physicalDevice->Initialize());
 
     return {std::move(physicalDevice)};

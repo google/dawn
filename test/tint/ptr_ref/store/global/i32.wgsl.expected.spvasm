@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 10
 ; Schema: 0
                OpCapability Shader
@@ -14,11 +14,11 @@
           %4 = OpConstantNull %int
           %I = OpVariable %_ptr_Private_int Private %4
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+          %7 = OpTypeFunction %void
     %int_123 = OpConstant %int 123
-       %main = OpFunction %void None %5
+       %main = OpFunction %void None %7
           %8 = OpLabel
-               OpStore %I %int_123
-               OpStore %I %int_123
+               OpStore %I %int_123 None
+               OpStore %I %int_123 None
                OpReturn
                OpFunctionEnd

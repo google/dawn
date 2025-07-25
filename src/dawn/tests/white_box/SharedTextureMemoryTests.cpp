@@ -33,9 +33,12 @@
 #include <vector>
 
 #include "dawn/tests/MockCallback.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+
+using testing::SizedStringMatches;
 
 namespace dawn {
 
@@ -87,7 +90,7 @@ SharedTextureMemoryTestVulkanBackend::ChainBeginState(
 void SharedTextureMemoryNoFeatureTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DawnTestWithParams<SharedTextureMemoryTestParams>::SetUp();
-    GetParam().mBackend->SetUp();
+    GetParam().mBackend->SetUp(device);
 }
 
 std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
@@ -102,6 +105,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::TransientAttachments,
         wgpu::FeatureName::Unorm16TextureFormats,
         wgpu::FeatureName::BGRA8UnormStorage,
+        wgpu::FeatureName::FlexibleTextureViews,
     };
     for (auto feature : kOptionalFeatures) {
         if (SupportsFeatures({feature})) {
@@ -110,7 +114,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
-}
+}  // namespace dawn
 
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -118,8 +122,15 @@ void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
     // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
-    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
-    GetParam().mBackend->SetUp();
+    // TODO(crbug.com/407561933): Triggers dawn validation errors
+    DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel());
+
+    // Compat cannot create 2D texture view from a 2D array texture.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             !SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews}) &&
+                             GetParam().mLayerCount > 1);
+
+    GetParam().mBackend->SetUp(device);
 }
 
 void SharedTextureMemoryNoFeatureTests::TearDown() {
@@ -150,12 +161,12 @@ wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(const wgpu::Devi
             fenceDesc.nextInChain = &vkDesc;
             return importingDevice.ImportSharedFence(&fenceDesc);
         }
-        case wgpu::SharedFenceType::VkSemaphoreSyncFD: {
-            wgpu::SharedFenceVkSemaphoreSyncFDExportInfo vkExportInfo;
+        case wgpu::SharedFenceType::SyncFD: {
+            wgpu::SharedFenceSyncFDExportInfo vkExportInfo;
             exportInfo.nextInChain = &vkExportInfo;
             fence.ExportInfo(&exportInfo);
 
-            wgpu::SharedFenceVkSemaphoreSyncFDDescriptor vkDesc;
+            wgpu::SharedFenceSyncFDDescriptor vkDesc;
             vkDesc.handle = vkExportInfo.handle;
 
             wgpu::SharedFenceDescriptor fenceDesc;
@@ -197,6 +208,19 @@ wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(const wgpu::Devi
 
             wgpu::SharedFenceDescriptor fenceDesc;
             fenceDesc.nextInChain = &sharedEventDesc;
+            return importingDevice.ImportSharedFence(&fenceDesc);
+        }
+        case wgpu::SharedFenceType::EGLSync: {
+            wgpu::SharedFenceEGLSyncExportInfo eglSyncInfo;
+            exportInfo.nextInChain = &eglSyncInfo;
+
+            fence.ExportInfo(&exportInfo);
+
+            wgpu::SharedFenceEGLSyncDescriptor eglSyncDesc;
+            eglSyncDesc.sync = eglSyncInfo.sync;
+
+            wgpu::SharedFenceDescriptor fenceDesc;
+            fenceDesc.nextInChain = &eglSyncDesc;
             return importingDevice.ImportSharedFence(&fenceDesc);
         }
         default:
@@ -317,7 +341,7 @@ void SharedTextureMemoryTests::UseInRenderPass(wgpu::Device& deviceObj, wgpu::Te
 
 void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture& texture) {
     wgpu::CommandEncoder encoder = deviceObj.CreateCommandEncoder();
-    wgpu::ImageCopyTexture source;
+    wgpu::TexelCopyTextureInfo source;
     source.texture = texture;
 
     // Create a destination buffer, large enough for 1 texel of any format.
@@ -325,7 +349,7 @@ void SharedTextureMemoryTests::UseInCopy(wgpu::Device& deviceObj, wgpu::Texture&
     bufferDesc.size = 128;
     bufferDesc.usage = wgpu::BufferUsage::CopyDst;
 
-    wgpu::ImageCopyBuffer destination;
+    wgpu::TexelCopyBufferInfo destination;
     destination.buffer = deviceObj.CreateBuffer(&bufferDesc);
 
     wgpu::Extent3D size = {1, 1, 1};
@@ -504,10 +528,10 @@ void SharedTextureMemoryTests::WriteFourColorsToRGBA8Texture(wgpu::Device& devic
 
     wgpu::Extent3D writeSize = {width, height, 1};
 
-    wgpu::ImageCopyTexture dest;
+    wgpu::TexelCopyTextureInfo dest;
     dest.texture = texture;
 
-    wgpu::TextureDataLayout dataLayout = {
+    wgpu::TexelCopyBufferLayout dataLayout = {
         .offset = 0, .bytesPerRow = bytesPerRow, .rowsPerImage = height};
 
     for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
@@ -790,11 +814,11 @@ TEST_P(SharedTextureMemoryNoFeatureTests, CreationWithoutFeature) {
     const auto& memories =
         GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount);
 
-    MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*)>
+    MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView)>
         popErrorScopeCallback;
     EXPECT_CALL(popErrorScopeCallback,
                 Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::Validation,
-                     HasSubstr("is not enabled")));
+                     SizedStringMatches(HasSubstr("is not enabled"))));
 
     device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, popErrorScopeCallback.Callback());
 
@@ -909,9 +933,9 @@ TEST_P(SharedTextureMemoryTests, ImportSharedFenceDeviceDestroyed) {
             UseInCopy(device, texture);
         } else if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize);
         }
@@ -958,6 +982,9 @@ TEST_P(SharedTextureMemoryTests, GetPropertiesErrorMemory) {
 
 // Tests that a SharedTextureMemory supports expected texture usages.
 TEST_P(SharedTextureMemoryTests, TextureUsages) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1053,6 +1080,9 @@ TEST_P(SharedTextureMemoryTests, GetPropertiesAHardwareBufferPropertiesRequiresA
 
 // Test that texture usages must be a subset of the shared texture memory's usage.
 TEST_P(SharedTextureMemoryTests, UsageValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1087,6 +1117,9 @@ TEST_P(SharedTextureMemoryTests, UsageValidation) {
 
 // Test that it is an error if the texture format doesn't match the shared texture memory.
 TEST_P(SharedTextureMemoryTests, FormatValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1106,6 +1139,9 @@ TEST_P(SharedTextureMemoryTests, FormatValidation) {
 
 // Test that it is an error if the texture size doesn't match the shared texture memory.
 TEST_P(SharedTextureMemoryTests, SizeValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1134,6 +1170,9 @@ TEST_P(SharedTextureMemoryTests, SizeValidation) {
 
 // Test that it is an error if the texture mip level count is not 1.
 TEST_P(SharedTextureMemoryTests, MipLevelValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1154,6 +1193,9 @@ TEST_P(SharedTextureMemoryTests, MipLevelValidation) {
 
 // Test that it is an error if the texture sample count is not 1.
 TEST_P(SharedTextureMemoryTests, SampleCountValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1174,6 +1216,9 @@ TEST_P(SharedTextureMemoryTests, SampleCountValidation) {
 
 // Test that it is an error if the texture dimension is not 2D.
 TEST_P(SharedTextureMemoryTests, DimensionValidation) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1500,9 +1545,9 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
         }
         if (properties.usage & wgpu::TextureUsage::CopyDst) {
             wgpu::Extent3D writeSize = {1, 1, 1};
-            wgpu::ImageCopyTexture dest = {};
+            wgpu::TexelCopyTextureInfo dest = {};
             dest.texture = texture;
-            wgpu::TextureDataLayout dataLayout = {};
+            wgpu::TexelCopyBufferLayout dataLayout = {};
             uint64_t data[2];
             ASSERT_DEVICE_ERROR_MSG(
                 device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize),
@@ -1513,6 +1558,9 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
 
 // Test that it is valid (does not crash) if the memory is dropped while a texture access has begun.
 TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     // NOTE: UseInRenderPass()/UseInCopy() do not currently support multiplanar
     // formats.
     for (wgpu::SharedTextureMemory memory :
@@ -1543,6 +1591,9 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
 
 // Test that if the texture is uninitialized, it is cleared on first use.
 TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (wgpu::SharedTextureMemory memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::SharedTextureMemoryProperties properties;
@@ -1551,7 +1602,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         // Skipped for multiplanar formats because those must be initialized on import.
         // We also need render attachment usage to initially populate the texture.
         if (utils::IsMultiPlanarFormat(properties.format) ||
-            (properties.usage & wgpu::TextureUsage::RenderAttachment) == 0) {
+            !(properties.usage & wgpu::TextureUsage::RenderAttachment)) {
             continue;
         }
 
@@ -1647,6 +1698,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
 
 // Test that if the texture is uninitialized, EndAccess writes the state out as uninitialized.
 TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     // It is not possible to run these tests for multiplanar formats for
     // multiple reasons:
     // * Test basic begin+end access exports the state as uninitialized
@@ -1717,6 +1771,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedOnEndAccess) {
 
 // Test copying to texture memory on one device, then sampling it using another device.
 TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :
@@ -1745,8 +1802,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1789,6 +1846,9 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample) {
 // Test that BeginAccess without waiting on anything, followed by EndAccess
 // without using the texture, does not export any fences.
 TEST_P(SharedTextureMemoryTests, EndWithoutUse) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     for (const auto& memory :
          GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount)) {
         wgpu::Texture texture = memory.CreateTexture();
@@ -1812,6 +1872,9 @@ TEST_P(SharedTextureMemoryTests, EndWithoutUse) {
 // If concurrent read is supported, use two read textures. The first EndAccess should
 // see no fences. The second should then export all the unacquired fences.
 TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :
@@ -1840,8 +1903,8 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1854,7 +1917,7 @@ TEST_P(SharedTextureMemoryTests, BeginEndWithoutUse) {
         auto backendEndState = GetParam().mBackend->ChainEndState(&endState);
         memories[0].EndAccess(texture, &endState);
 
-        // Import fences and texture to the the other device.
+        // Import fences and texture to the other device.
         std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
         for (size_t i = 0; i < endState.fenceCount; ++i) {
             sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
@@ -1933,8 +1996,8 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
         // Copy from the source texture into `texture`.
         {
             wgpu::CommandEncoder encoder = devices[0].CreateCommandEncoder();
-            auto src = utils::CreateImageCopyTexture(srcTex);
-            auto dst = utils::CreateImageCopyTexture(texture);
+            auto src = utils::CreateTexelCopyTextureInfo(srcTex);
+            auto dst = utils::CreateTexelCopyTextureInfo(texture);
             for (uint32_t layer = 0; layer < texture.GetDepthOrArrayLayers(); ++layer) {
                 dst.origin.z = layer;
                 encoder.CopyTextureToTexture(&src, &dst, &texDesc.size);
@@ -1977,6 +2040,9 @@ TEST_P(SharedTextureMemoryTests, CopyToTextureThenSample2DArray) {
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Encode the commands after performing BeginAccess.
 TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :
@@ -2029,6 +2095,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeAfterBeginAccess) {
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Encode the commands before performing BeginAccess (the access is only held during) QueueSubmit.
 TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
     for (const auto& memories :
          GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
@@ -2079,6 +2148,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenSampleEncodeBeforeBeginAccess) {
 // EndAccess. The second device should still be able to wait on the first device and see the
 // results.
 TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSample) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
     for (const auto& memories :
          GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
@@ -2131,6 +2203,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
 // accessing on the second device. Operations on the second device must
 // still wait for the preceding operations to complete.
 TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
     for (auto memories : GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
              devices, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
@@ -2187,6 +2262,13 @@ TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
 TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThenSample) {
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
+
+    // This test expects a fence returned from EndAccess, which is not possible if fences are
+    // disabled in D3D11.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && HasToggleEnabled("d3d11_disable_fence"));
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
     auto DoTest = [&](auto DestroyOrLoseDevice) {
         std::vector<wgpu::Device> devices = {CreateDevice(), CreateDevice()};
@@ -2251,6 +2333,9 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite) {
     DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
     std::vector<wgpu::Device> devices = {device, CreateDevice(), CreateDevice()};
     for (const auto& memories :
@@ -2532,6 +2617,12 @@ TEST_P(SharedTextureMemoryTests, SameDeviceWriteThenConcurrentReadThenWrite) {
 
 // Test that textures created from SharedTextureMemory may perform sRGB reinterpretation.
 TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
+    // Format reinterpretation is not available in compatibility mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     // TODO(crbug.com/dawn/2304): Investigate if the VVL is wrong here.
     DAWN_SUPPRESS_TEST_IF(GetParam().mBackend->Name().find("dma buf") != std::string::npos &&
                           IsBackendValidationEnabled());
@@ -2625,6 +2716,9 @@ TEST_P(SharedTextureMemoryTests, SRGBReinterpretation) {
 // Test writing to texture memory in compute pass on one device, then sampling it using another
 // device.
 TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
 
     for (const auto& memories :
@@ -2682,6 +2776,9 @@ TEST_P(SharedTextureMemoryTests, WriteStorageThenReadSample) {
 
 // Test writing to texture memory using queue.writeTexture, then sampling it using another device.
 TEST_P(SharedTextureMemoryTests, WriteTextureThenReadSample) {
+    // crbug.com/358166479
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice()};
     for (const auto& memories :
          GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
@@ -2748,7 +2845,7 @@ TEST_P(SharedTextureMemoryVulkanTests, SingleFenceFeature) {
     wgpu::Adapter adapter(GetAdapter().Get());
     for (wgpu::FeatureName f : {
              wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-             wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
+             wgpu::FeatureName::SharedFenceSyncFD,
              wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle,
          }) {
         if (adapter.HasFeature(f)) {

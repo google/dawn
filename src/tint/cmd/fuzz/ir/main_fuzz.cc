@@ -28,12 +28,11 @@
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/utils/result/result.h"
 
 #if TINT_BUILD_IR_BINARY
 
 #include "src/tint/lang/core/ir/binary/decode.h"
-#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
 
@@ -50,19 +49,14 @@ tint::fuzz::ir::Options options;
 }
 
 DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
-    /// As the fuzzers are free to mutate the module, we need to deserialize a few module for each
+    /// As the fuzzers are free to mutate the module, we need to deserialize a new module for each
     /// sub-fuzzer. Because the protobuf may error when deserializing and the module may be invalid,
-    /// we early deserialize and validate the first module. If this fails, then we do not call
-    /// Run().
-    std::optional<tint::core::ir::Module> module;
+    /// we early deserialize. If this fails, then we do not call Run().
+    thread_local std::optional<tint::core::ir::Module> module;
     {
         auto decoded = tint::core::ir::binary::Decode(pb.module());
         if (decoded != tint::Success) {
             return;  // Failed to decode
-        }
-        tint::core::ir::Capabilities caps;
-        if (tint::core::ir::Validate(decoded.Get(), caps) != tint::Success) {
-            return;  // Failed to validate
         }
         module = std::move(decoded.Move());
     }
@@ -71,7 +65,7 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
             auto decoded = tint::core::ir::binary::Decode(pb.module());
             if (decoded != tint::Success) {
                 TINT_ICE() << "module successfully decoded once, then failed a subsequent time\n"
-                           << decoded.Failure().reason;
+                           << decoded.Failure();
             }
             module = std::move(decoded.Move());
         }

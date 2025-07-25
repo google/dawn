@@ -46,7 +46,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(FeatureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase* instance) const override;
     ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,
         const Surface*) const override;
@@ -72,7 +72,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
-    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
 
     NSPRef<id<MTLDevice>> mDevice;
     const bool mMetalValidationEnabled;

@@ -1301,6 +1301,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   /* @offset(0) */
+  @stride(8) @internal(disable_validation__ignore_stride)
   field0 : mat3x2f,
 }
 
@@ -1308,7 +1309,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
 )")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
+TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_ColMajor) {
     auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %myvar DescriptorSet 0
@@ -1332,7 +1333,40 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
     const auto module_str = test::ToString(p->program());
     EXPECT_THAT(module_str, HasSubstr(R"(struct S {
   /* @offset(0) */
+  @stride(8) @internal(disable_validation__ignore_stride)
   field0 : mat3x2f,
+}
+
+@group(0) @binding(0) var<storage, read_write> myvar : S;
+)")) << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_RowMajor) {
+    auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
+     OpName %myvar "myvar"
+     OpDecorate %myvar DescriptorSet 0
+     OpDecorate %myvar Binding 0
+     OpDecorate %s Block
+     OpMemberDecorate %s 0 MatrixStride 8
+     OpMemberDecorate %s 0 Offset 0
+     OpMemberDecorate %s 0 RowMajor
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %float = OpTypeFloat 32
+     %v3float = OpTypeVector %float 3
+     %m2v3float = OpTypeMatrix %v3float 2
+
+     %s = OpTypeStruct %m2v3float
+     %ptr_sb_s = OpTypePointer StorageBuffer %s
+     %myvar = OpVariable %ptr_sb_s StorageBuffer
+  )" + MainBody()));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
+  @stride(8) @internal(disable_validation__ignore_stride) @row_major
+  field0 : mat2x3f,
 }
 
 @group(0) @binding(0) var<storage, read_write> myvar : S;
@@ -1371,7 +1405,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
 )")) << module_str;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
+TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration) {
     auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
      OpName %myvar "myvar"
      OpDecorate %s Block
@@ -1387,11 +1421,17 @@ TEST_F(SpvModuleScopeVarParserTest, RowMajorDecoration_IsError) {
      %ptr_sb_s = OpTypePointer StorageBuffer %s
      %myvar = OpVariable %ptr_sb_s StorageBuffer
   )" + MainBody()));
-    EXPECT_FALSE(p->BuildAndParseInternalModuleExceptFunctions());
-    EXPECT_THAT(
-        p->error(),
-        Eq(R"(WGSL does not support row-major matrices: can't translate member 0 of %3 = OpTypeStruct %8)"))
-        << p->error();
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+    EXPECT_TRUE(p->error().empty());
+    const auto module_str = test::ToString(p->program());
+    EXPECT_THAT(module_str, HasSubstr(R"(struct S {
+  /* @offset(0) */
+  @row_major
+  field0 : mat3x2f,
+}
+
+var<storage, read_write> myvar : S;
+)")) << module_str;
 }
 
 TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_Var) {

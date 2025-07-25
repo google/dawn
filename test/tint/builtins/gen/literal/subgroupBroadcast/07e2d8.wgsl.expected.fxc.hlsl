@@ -1,14 +1,31 @@
-SKIP: FAILED
+SKIP: INVALID
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
+//
+// fragment_main
+//
 
-void subgroupBroadcast_07e2d8() {
+RWByteAddressBuffer prevent_dce : register(u0);
+float16_t subgroupBroadcast_07e2d8() {
   float16_t res = WaveReadLaneAt(float16_t(1.0h), 1u);
-  prevent_dce.Store<float16_t>(0u, res);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store<float16_t>(0u, subgroupBroadcast_07e2d8());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+float16_t subgroupBroadcast_07e2d8() {
+  float16_t res = WaveReadLaneAt(float16_t(1.0h), 1u);
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  subgroupBroadcast_07e2d8();
-  return;
+  prevent_dce.Store<float16_t>(0u, subgroupBroadcast_07e2d8());
 }
+

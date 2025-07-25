@@ -40,7 +40,8 @@
 #include <cstdint>
 #include <string>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/lang/core/ir/call.h"
+#include "src/tint/utils/rtti/traits.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::msl {
@@ -79,6 +80,14 @@ enum class BuiltinFn : uint8_t {
     kModf,
     kSign,
     kThreadgroupBarrier,
+    kSimdBallot,
+    kQuadShuffleXor,
+    kConvert,
+    kSimdgroupLoad,
+    kSimdgroupStore,
+    kSimdgroupMultiply,
+    kSimdgroupMultiplyAccumulate,
+    kOsLog,
     kNone,
 };
 
@@ -86,10 +95,14 @@ enum class BuiltinFn : uint8_t {
 const char* str(BuiltinFn i);
 
 /// Emits the name of the builtin function type.
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, BuiltinFn i) {
     return o << str(i);
 }
+
+/// @returns access restrictions for a function
+tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn);
 
 }  // namespace tint::msl
 // \endcond

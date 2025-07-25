@@ -36,29 +36,31 @@ LimitsAndFeatures::LimitsAndFeatures() = default;
 
 LimitsAndFeatures::~LimitsAndFeatures() = default;
 
-WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
+WGPUStatus LimitsAndFeatures::GetLimits(WGPULimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
     auto* originalNextInChain = limits->nextInChain;
     *limits = mLimits;
     limits->nextInChain = originalNextInChain;
     // Handle other requiring limits that chained after WGPUSupportedLimits
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
-        // Store the WGPUChainedStructOut to restore the chain after assignment.
-        WGPUChainedStructOut originalChainedStructOut = *chain;
+        // Store the WGPUChainedStruct to restore the chain after assignment.
+        WGPUChainedStruct originalChainedStruct = *chain;
         switch (chain->sType) {
-            case (WGPUSType_DawnExperimentalSubgroupLimits): {
-                auto* experimentalSubgroupLimits =
-                    reinterpret_cast<WGPUDawnExperimentalSubgroupLimits*>(chain);
-                // This assignment break the next field of WGPUChainedStructOut head.
-                *experimentalSubgroupLimits = mExperimentalSubgroupLimits;
+            case WGPUSType_CompatibilityModeLimits: {
+                *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain) = mCompatLimits;
+                break;
+            }
+            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
+                *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain) =
+                    mTexelCopyBufferRowAlignmentLimits;
                 break;
             }
             default:
                 // Fail if unknown sType found.
                 return WGPUStatus_Error;
         }
-        // Restore the chain.
-        *chain = originalChainedStructOut;
+        // Restore the chain (sType and next).
+        *chain = originalChainedStruct;
     }
     return WGPUStatus_Success;
 }
@@ -67,28 +69,48 @@ bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {
     return mFeatures.contains(feature);
 }
 
-size_t LimitsAndFeatures::EnumerateFeatures(WGPUFeatureName* features) const {
-    if (features != nullptr) {
-        for (WGPUFeatureName f : mFeatures) {
-            *features = f;
-            ++features;
-        }
+void LimitsAndFeatures::ToSupportedFeatures(WGPUSupportedFeatures* supportedFeatures) const {
+    if (!supportedFeatures) {
+        return;
     }
-    return mFeatures.size();
+
+    const size_t count = mFeatures.size();
+    supportedFeatures->featureCount = count;
+    supportedFeatures->features = nullptr;
+
+    if (count == 0) {
+        return;
+    }
+
+    // This will be freed by wgpuSupportedFeaturesFreeMembers.
+    WGPUFeatureName* features = new WGPUFeatureName[count];
+    uint32_t index = 0;
+    for (WGPUFeatureName f : mFeatures) {
+        features[index++] = f;
+    }
+    DAWN_ASSERT(index == count);
+    supportedFeatures->features = features;
 }
 
-void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
+void LimitsAndFeatures::SetLimits(const WGPULimits* limits) {
     DAWN_ASSERT(limits != nullptr);
     mLimits = *limits;
     mLimits.nextInChain = nullptr;
     // Handle other limits that chained after WGPUSupportedLimits
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
         switch (chain->sType) {
-            case (WGPUSType_DawnExperimentalSubgroupLimits): {
-                auto* experimentalSubgroupLimits =
-                    reinterpret_cast<WGPUDawnExperimentalSubgroupLimits*>(chain);
-                mExperimentalSubgroupLimits = *experimentalSubgroupLimits;
-                mExperimentalSubgroupLimits.chain.next = nullptr;
+            case WGPUSType_CompatibilityModeLimits: {
+                mCompatLimits = *reinterpret_cast<WGPUCompatibilityModeLimits*>(chain);
+                DAWN_ASSERT(mCompatLimits.chain.sType == WGPUSType_CompatibilityModeLimits);
+                mCompatLimits.chain.next = nullptr;
+                break;
+            }
+            case WGPUSType_DawnTexelCopyBufferRowAlignmentLimits: {
+                mTexelCopyBufferRowAlignmentLimits =
+                    *reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                DAWN_ASSERT(mTexelCopyBufferRowAlignmentLimits.chain.sType ==
+                            WGPUSType_DawnTexelCopyBufferRowAlignmentLimits);
+                mTexelCopyBufferRowAlignmentLimits.chain.next = nullptr;
                 break;
             }
             default:

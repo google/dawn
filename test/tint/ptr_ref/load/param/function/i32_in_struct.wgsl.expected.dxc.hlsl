@@ -2,6 +2,7 @@ struct str {
   int i;
 };
 
+
 int func(inout int pointer) {
   return pointer;
 }
@@ -10,5 +11,5 @@ int func(inout int pointer) {
 void main() {
   str F = (str)0;
   int r = func(F.i);
-  return;
 }
+

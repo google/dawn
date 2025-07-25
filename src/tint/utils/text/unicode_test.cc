@@ -271,6 +271,8 @@ static std::ostream& operator<<(std::ostream& out, UTF8Case c) {
 
 class UTF8Test : public testing::TestWithParam<UTF8Case> {};
 
+// This is testing a C-style API that will always trigger -Wunsafe-buffer-usage
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TEST_P(UTF8Test, Decode) {
     auto param = GetParam();
 
@@ -290,6 +292,7 @@ TEST_P(UTF8Test, Decode) {
 
     EXPECT_THAT(got, ::testing::ElementsAreArray(param.code_points));
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 TEST_P(UTF8Test, Encode) {
     auto param = GetParam();
@@ -558,6 +561,8 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
                              {0xf4, 0xff, 0x8f, 0x8f},  // 4-bytes, second byte's second-MSB set
                              {0xf4, 0x8f, 0xff, 0x8f},  // 4-bytes, third byte's second-MSB set
                              {0xf4, 0x8f, 0x8f, 0xff},  // 4-bytes, fourth byte's second-MSB set
+
+                             {0xe0, 0x9d, 0x81},  // Value out of range for 3-byte
                          }));
 
 }  // namespace utf8_tests
@@ -584,6 +589,8 @@ static std::ostream& operator<<(std::ostream& out, UTF16Case c) {
 
 class UTF16Test : public testing::TestWithParam<UTF16Case> {};
 
+// This is testing a C-style API that will always trigger -Wunsafe-buffer-usage
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TEST_P(UTF16Test, Decode) {
     auto param = GetParam();
 
@@ -603,6 +610,7 @@ TEST_P(UTF16Test, Decode) {
 
     EXPECT_THAT(got, ::testing::ElementsAreArray(param.code_points));
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 TEST_P(UTF16Test, Encode) {
     auto param = GetParam();

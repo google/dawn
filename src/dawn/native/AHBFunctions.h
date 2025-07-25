@@ -31,6 +31,7 @@
 #include <android/hardware_buffer.h>
 
 #include "dawn/common/DynamicLib.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
@@ -42,13 +43,17 @@ class AHBFunctions {
 
     bool IsValid() const;
 
-    decltype(&::AHardwareBuffer_acquire) Acquire = nullptr;
-    decltype(&::AHardwareBuffer_release) Release = nullptr;
-    decltype(&::AHardwareBuffer_describe) Describe = nullptr;
+    void (*Acquire)(::AHardwareBuffer* buffer) = nullptr;
+    void (*Release)(::AHardwareBuffer* buffer) = nullptr;
+    void (*Describe)(::AHardwareBuffer* buffer, ::AHardwareBuffer_Desc* desc) = nullptr;
 
   private:
     DynamicLib mNativeWindowLib;
 };
+
+SharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(
+    const AHBFunctions* ahbFunctions,
+    ::AHardwareBuffer* aHardwareBuffer);
 
 }  // namespace dawn::native
 

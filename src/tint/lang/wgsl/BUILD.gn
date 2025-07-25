@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -44,16 +45,17 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("wgsl") {
   sources = [
-    "builtin_fn.cc",
-    "builtin_fn.h",
-    "diagnostic_rule.cc",
-    "diagnostic_rule.h",
-    "diagnostic_severity.cc",
-    "diagnostic_severity.h",
-    "extension.cc",
-    "extension.h",
+    "allowed_features.h",
+    "enums.cc",
+    "enums.h",
+    "feature_status.cc",
+    "feature_status.h",
+    "reserved_words.cc",
+    "reserved_words.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -62,20 +64,17 @@ libtint_source_set("wgsl") {
     "${tint_src_dir}/utils/memory",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
-      "diagnostic_rule_test.cc",
-      "diagnostic_severity_test.cc",
-      "extension_test.cc",
+      "allowed_features_test.cc",
+      "enums_test.cc",
       "language_feature_status_test.cc",
-      "language_feature_test.cc",
-      "wgsl_test.cc",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
@@ -84,25 +83,20 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/common",
-      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/lang/wgsl/writer/raise",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
-      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_wgsl_reader) {
@@ -119,73 +113,5 @@ if (tint_build_unittests) {
     if (tint_build_wgsl_writer) {
       deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
     }
-  }
-}
-if (tint_build_benchmarks) {
-  tint_unittests_source_set("bench") {
-    sources = [
-      "diagnostic_rule_bench.cc",
-      "diagnostic_severity_bench.cc",
-      "extension_bench.cc",
-    ]
-    deps = [
-      "${tint_src_dir}:google_benchmark",
-      "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/utils/containers",
-      "${tint_src_dir}/utils/diagnostic",
-      "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/macros",
-      "${tint_src_dir}/utils/math",
-      "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
-    ]
-  }
-}
-
-tint_fuzz_source_set("fuzz") {
-  sources = []
-  deps = [
-    "${tint_src_dir}/api/common",
-    "${tint_src_dir}/cmd/fuzz/ir:fuzz",
-    "${tint_src_dir}/lang/core",
-    "${tint_src_dir}/lang/core/constant",
-    "${tint_src_dir}/lang/core/ir",
-    "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/wgsl",
-    "${tint_src_dir}/lang/wgsl/ast",
-    "${tint_src_dir}/lang/wgsl/common",
-    "${tint_src_dir}/lang/wgsl/features",
-    "${tint_src_dir}/lang/wgsl/program",
-    "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
-    "${tint_src_dir}/lang/wgsl/writer/raise",
-    "${tint_src_dir}/utils/bytes",
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/reflection",
-    "${tint_src_dir}/utils/result",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/symbol",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
-  ]
-
-  if (tint_build_wgsl_reader) {
-    deps += [ "${tint_src_dir}/lang/wgsl/reader/program_to_ir" ]
-  }
-
-  if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
-    sources += [ "ir_roundtrip_fuzz.cc" ]
-  }
-
-  if (tint_build_wgsl_writer) {
-    deps += [ "${tint_src_dir}/lang/wgsl/writer" ]
   }
 }

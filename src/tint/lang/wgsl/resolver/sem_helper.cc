@@ -58,18 +58,18 @@ core::type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
 }
 
 sem::TypeExpression* SemHelper::AsTypeExpression(sem::Expression* expr) const {
-    if (TINT_UNLIKELY(!expr)) {
+    if (DAWN_UNLIKELY(!expr)) {
         return nullptr;
     }
 
     auto* ty_expr = expr->As<sem::TypeExpression>();
-    if (TINT_UNLIKELY(!ty_expr)) {
+    if (DAWN_UNLIKELY(!ty_expr)) {
         ErrorUnexpectedExprKind(expr, "type");
         return nullptr;
     }
 
     auto* type = ty_expr->Type();
-    if (auto* incomplete = type->As<IncompleteType>(); TINT_UNLIKELY(incomplete)) {
+    if (auto* incomplete = type->As<IncompleteType>(); DAWN_UNLIKELY(incomplete)) {
         AddError(expr->Declaration()->source.End())
             << "expected " << style::Code("<") << " for " << style::Type(incomplete->builtin);
         return nullptr;
@@ -116,12 +116,6 @@ StyledText SemHelper::Describe(const sem::Expression* expr) const {
         },
         [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
             text << "address space " << style::Enum(addr->Value());
-        },
-        [&](const sem::BuiltinEnumExpression<core::InterpolationSampling>* fmt) {
-            text << "interpolation sampling " << style::Enum(fmt->Value());
-        },
-        [&](const sem::BuiltinEnumExpression<core::InterpolationType>* fmt) {
-            text << "interpolation type " << style::Enum(fmt->Value());
         },
         [&](const sem::BuiltinEnumExpression<core::TexelFormat>* fmt) {
             text << "texel format " << style::Enum(fmt->Value());

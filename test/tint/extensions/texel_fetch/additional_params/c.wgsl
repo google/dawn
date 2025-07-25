@@ -1,4 +1,3 @@
-// flags: --pixel_local_attachments 0=1,1=6,2=3
 enable chromium_experimental_framebuffer_fetch;
 
 fn g(a : f32, b : f32, c : f32) {}

@@ -32,33 +32,29 @@
 
 namespace dawn::wire::server {
 
-void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatus status) {
+void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data,
+                             WGPUQueueWorkDoneStatus status,
+                             WGPUStringView message) {
     ReturnQueueWorkDoneCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
+    cmd.message = message;
 
     SerializeCommand(cmd);
 }
 
 WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
                                               ObjectHandle eventManager,
-                                              WGPUFuture future,
-                                              uint8_t userdataCount) {
+                                              WGPUFuture future) {
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    if (userdataCount == 1) {
-        mProcs.queueOnSubmittedWorkDone(queue->handle, ForwardToServer<&Server::OnQueueWorkDone>,
-                                        userdata.release());
-    } else {
-        mProcs.queueOnSubmittedWorkDone2(
-            queue->handle,
-            {nullptr, WGPUCallbackMode_AllowProcessEvents,
-             ForwardToServer2<&Server::OnQueueWorkDone>, userdata.release(), nullptr});
-    }
+    mProcs.queueOnSubmittedWorkDone(
+        queue->handle, {nullptr, WGPUCallbackMode_AllowProcessEvents,
+                        ForwardToServer<&Server::OnQueueWorkDone>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 
@@ -77,10 +73,10 @@ WireResult Server::DoQueueWriteBuffer(Known<WGPUQueue> queue,
 }
 
 WireResult Server::DoQueueWriteTexture(Known<WGPUQueue> queue,
-                                       const WGPUImageCopyTexture* destination,
+                                       const WGPUTexelCopyTextureInfo* destination,
                                        const uint8_t* data,
                                        uint64_t dataSize,
-                                       const WGPUTextureDataLayout* dataLayout,
+                                       const WGPUTexelCopyBufferLayout* dataLayout,
                                        const WGPUExtent3D* writeSize) {
     if (dataSize > std::numeric_limits<size_t>::max()) {
         return WireResult::FatalError;

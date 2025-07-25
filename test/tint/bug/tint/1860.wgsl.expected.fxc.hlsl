@@ -1,18 +1,17 @@
-struct tint_symbol {
-  float4 value : SV_Position;
+struct main_outputs {
+  float4 tint_symbol : SV_Position;
 };
+
 
 cbuffer cbuffer_declared_after_usage : register(b0) {
   uint4 declared_after_usage[1];
 };
-
 float4 main_inner() {
-  return float4((asfloat(declared_after_usage[0].x)).xxxx);
+  return float4((asfloat(declared_after_usage[0u].x)).xxxx);
 }
 
-tint_symbol main() {
-  float4 inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+main_outputs main() {
+  main_outputs v = {main_inner()};
+  return v;
 }
+

@@ -42,9 +42,8 @@ TEST_F(IR_ExitSwitchTest, Usage) {
     auto* switch_ = b.Switch(true);
     auto* e = b.ExitSwitch(switch_, arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
-    EXPECT_EQ(switch_->Result(0), nullptr);
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 1u}));
 }
 
 TEST_F(IR_ExitSwitchTest, Result) {

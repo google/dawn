@@ -1,67 +1,67 @@
-static bool tint_discarded = false;
-
-cbuffer cbuffer_uniforms : register(b0) {
-  uint4 uniforms[1];
-};
-
+//
+// vs_main
+//
 struct VertexOutputs {
   float2 texcoords;
   float4 position;
 };
-struct tint_symbol_1 {
-  uint VertexIndex : SV_VertexID;
-};
-struct tint_symbol_2 {
-  float2 texcoords : TEXCOORD0;
-  float4 position : SV_Position;
+
+struct vs_main_outputs {
+  float2 VertexOutputs_texcoords : TEXCOORD0;
+  float4 VertexOutputs_position : SV_Position;
 };
 
+struct vs_main_inputs {
+  uint VertexIndex : SV_VertexID;
+};
+
+
+cbuffer cbuffer_uniforms : register(b0) {
+  uint4 uniforms[1];
+};
 VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
-  output.position = float4(((texcoord[VertexIndex] * 2.0f) - (1.0f).xx), 0.0f, 1.0f);
-  bool flipY = (asfloat(uniforms[0].y) < 0.0f);
+  output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - (1.0f).xx), 0.0f, 1.0f);
+  bool flipY = (asfloat(uniforms[0u].y) < 0.0f);
   if (flipY) {
-    output.texcoords = ((((texcoord[VertexIndex] * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0].xy)) + asfloat(uniforms[0].zw));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw));
   }
-  return output;
+  VertexOutputs v = output;
+  return v;
 }
 
-tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
-  VertexOutputs inner_result = vs_main_inner(tint_symbol.VertexIndex);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.texcoords = inner_result.texcoords;
-  wrapper_result.position = inner_result.position;
-  return wrapper_result;
+vs_main_outputs vs_main(vs_main_inputs inputs) {
+  VertexOutputs v_1 = vs_main_inner(inputs.VertexIndex);
+  vs_main_outputs v_2 = {v_1.texcoords, v_1.position};
+  return v_2;
 }
 
-SamplerState mySampler : register(s1);
-Texture2D<float4> myTexture : register(t2);
+//
+// fs_main
+//
+struct fs_main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
 
-struct tint_symbol_4 {
+struct fs_main_inputs {
   float2 texcoord : TEXCOORD0;
 };
-struct tint_symbol_5 {
-  float4 value : SV_Target0;
-};
+
 
 float4 fs_main_inner(float2 texcoord) {
   float2 clampedTexcoord = clamp(texcoord, (0.0f).xx, (1.0f).xx);
   if (!(all((clampedTexcoord == texcoord)))) {
-    tint_discarded = true;
+    discard;
   }
   float4 srcColor = (0.0f).xxxx;
   return srcColor;
 }
 
-tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
-  float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
-  tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
-  wrapper_result_1.value = inner_result_1;
-  if (tint_discarded) {
-    discard;
-  }
-  return wrapper_result_1;
+fs_main_outputs fs_main(fs_main_inputs inputs) {
+  fs_main_outputs v = {fs_main_inner(inputs.texcoord)};
+  return v;
 }
+

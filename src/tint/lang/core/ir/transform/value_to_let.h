@@ -28,7 +28,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_VALUE_TO_LET_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VALUE_TO_LET_H_
 
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -37,8 +39,33 @@ class Module;
 
 namespace tint::core::ir::transform {
 
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kValueToLetCapabilities{
+    core::ir::Capability::kAllow8BitIntegers,
+    core::ir::Capability::kAllow64BitIntegers,
+    core::ir::Capability::kAllowPointersAndHandlesInStructures,
+    core::ir::Capability::kAllowVectorElementPointer,
+    core::ir::Capability::kAllowHandleVarsWithoutBindings,
+    core::ir::Capability::kAllowClipDistancesOnF32,
+    core::ir::Capability::kAllowPrivateVarsInFunctions,
+    core::ir::Capability::kAllowAnyLetType,
+    core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
+    core::ir::Capability::kAllowModuleScopeLets,
+    core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
+};
+
+/// Configuration for ValueToLet transform.
+struct ValueToLetConfig {
+    /// Replace pointer lets with their value
+    bool replace_pointer_lets = false;
+
+    /// Reflection for this class
+    TINT_REFLECT(ValueToLetConfig, replace_pointer_lets);
+};
+
 /// ValueToLet is a transform that moves "non-inlinable" instruction values to let instructions.
-/// An expression is considered "non-inlinable" if any of the the following are true:
+/// An expression is considered "non-inlinable" if any of the following are true:
 /// * The value has multiple uses.
 /// * The value's instruction is a load that when inlined would cross a store instruction.
 /// * The value's instruction is a store instruction that when inlined would cross a load or store
@@ -46,8 +73,9 @@ namespace tint::core::ir::transform {
 /// * The value is used in a block different to the value's instruction.
 ///
 /// @param module the module to transform
-/// @returns error diagnostics on failure
-Result<SuccessType> ValueToLet(Module& module);
+/// @param cfg the configuration
+/// @returns error on failure
+Result<SuccessType> ValueToLet(Module& module, const ValueToLetConfig& cfg);
 
 }  // namespace tint::core::ir::transform
 

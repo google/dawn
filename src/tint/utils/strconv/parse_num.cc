@@ -35,6 +35,9 @@ namespace tint::strconv {
 
 namespace {
 
+// The unsafe buffer warnings here are intrinsic to how the underlying API being called operates, so
+// cannot be easily avoided.
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 template <typename T>
 Result<T, ParseNumberError> Parse(std::string_view number) {
     T val = 0;
@@ -57,6 +60,7 @@ Result<T, ParseNumberError> Parse(std::string_view number) {
     }
     return val;
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 }  // namespace
 

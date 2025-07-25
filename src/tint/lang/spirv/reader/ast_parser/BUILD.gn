@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -66,31 +67,26 @@ if (tint_build_spv_reader) {
       "usage.h",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/ast/transform",
-      "${tint_src_dir}/lang/wgsl/common",
-      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
-      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_spv_reader) {
@@ -104,7 +100,9 @@ if (tint_build_spv_reader) {
       deps += [
         "${tint_spirv_headers_dir}:spv_headers",
         "${tint_spirv_tools_dir}:spvtools",
+        "${tint_spirv_tools_dir}:spvtools_headers",
         "${tint_spirv_tools_dir}:spvtools_opt",
+        "${tint_spirv_tools_dir}:spvtools_val",
         "${tint_spirv_tools_dir}:spvtools_val",
       ]
     }
@@ -144,6 +142,7 @@ if (tint_build_unittests) {
         "named_types_test.cc",
         "namer_test.cc",
         "parser_test.cc",
+        "row_major_matrix_test.cc",
         "spirv_tools_helpers_test.cc",
         "spirv_tools_helpers_test.h",
         "type_test.cc",
@@ -151,6 +150,7 @@ if (tint_build_unittests) {
         "user_name_test.cc",
       ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:gmock_and_gtest",
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
@@ -158,24 +158,20 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
-        "${tint_src_dir}/lang/wgsl/common",
-        "${tint_src_dir}/lang/wgsl/features",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
+        "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
-        "${tint_src_dir}/utils/generator",
         "${tint_src_dir}/utils/ice",
-        "${tint_src_dir}/utils/id",
         "${tint_src_dir}/utils/macros",
         "${tint_src_dir}/utils/math",
         "${tint_src_dir}/utils/memory",
-        "${tint_src_dir}/utils/reflection",
-        "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/symbol",
         "${tint_src_dir}/utils/text",
-        "${tint_src_dir}/utils/traits",
+        "${tint_src_dir}/utils/text_generator",
       ]
 
       if (tint_build_spv_reader) {
@@ -197,7 +193,10 @@ if (tint_build_unittests) {
       }
 
       if (tint_build_wgsl_writer) {
-        deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer" ]
+        deps += [
+          "${tint_src_dir}/lang/wgsl/writer",
+          "${tint_src_dir}/lang/wgsl/writer/ast_printer",
+        ]
       }
       public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
     }

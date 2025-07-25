@@ -28,8 +28,7 @@
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_RESOLVE_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_RESOLVE_H_
 
-#include "src/tint/lang/wgsl/common/allowed_features.h"
-#include "src/tint/lang/wgsl/common/validation_mode.h"
+#include "src/tint/lang/wgsl/allowed_features.h"
 
 namespace tint {
 class Program;
@@ -40,11 +39,10 @@ namespace tint::resolver {
 
 /// Performs semantic analysis and validation on the program builder @p builder
 /// @param allowed_features the extensions and features that are allowed to be used
-/// @param mode the validation mode to uses
 /// @returns the resolved Program. Program.Diagnostics() may contain validation errors.
-Program Resolve(ProgramBuilder& builder,
-                const wgsl::AllowedFeatures& allowed_features = wgsl::AllowedFeatures::Everything(),
-                wgsl::ValidationMode mode = wgsl::ValidationMode::kFull);
+Program Resolve(
+    ProgramBuilder& builder,
+    const wgsl::AllowedFeatures& allowed_features = wgsl::AllowedFeatures::Everything());
 
 }  // namespace tint::resolver
 

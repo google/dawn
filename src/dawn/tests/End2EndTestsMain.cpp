@@ -26,8 +26,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dawn/tests/DawnTest.h"
+#include "src/utils/chromium_test_compat/chromium_test_compat.h"
 
 int main(int argc, char** argv) {
+    dawn::SubstituteChromiumArgs(argc, argv);
     InitDawnEnd2EndTestEnvironment(argc, argv);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

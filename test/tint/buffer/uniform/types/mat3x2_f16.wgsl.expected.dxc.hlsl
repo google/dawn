@@ -1,27 +1,31 @@
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[1];
 };
 RWByteAddressBuffer s : register(u1);
-
-matrix<float16_t, 3, 2> u_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = u[scalar_offset / 4][scalar_offset % 4];
-  const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = u[scalar_offset_1 / 4][scalar_offset_1 % 4];
-  const uint scalar_offset_2 = ((offset + 8u)) / 4;
-  uint ubo_load_2 = u[scalar_offset_2 / 4][scalar_offset_2 % 4];
-  return matrix<float16_t, 3, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16))));
+void v_1(uint offset, matrix<float16_t, 3, 2> obj) {
+  s.Store<vector<float16_t, 2> >((offset + 0u), obj[0u]);
+  s.Store<vector<float16_t, 2> >((offset + 4u), obj[1u]);
+  s.Store<vector<float16_t, 2> >((offset + 8u), obj[2u]);
 }
 
-void s_store(uint offset, matrix<float16_t, 3, 2> value) {
-  s.Store<vector<float16_t, 2> >((offset + 0u), value[0u]);
-  s.Store<vector<float16_t, 2> >((offset + 4u), value[1u]);
-  s.Store<vector<float16_t, 2> >((offset + 8u), value[2u]);
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v = src;
+  float t_low = f16tof32((v & 65535u));
+  float t_high = f16tof32(((v >> 16u) & 65535u));
+  float16_t v_2 = float16_t(t_low);
+  return vector<float16_t, 2>(v_2, float16_t(t_high));
+}
+
+matrix<float16_t, 3, 2> v_3(uint start_byte_offset) {
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  vector<float16_t, 2> v_5 = tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]);
+  return matrix<float16_t, 3, 2>(v_4, v_5, tint_bitcast_to_f16(u[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) % 16u) / 4u)]));
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  matrix<float16_t, 3, 2> x = u_load(0u);
-  s_store(0u, x);
-  return;
+  matrix<float16_t, 3, 2> x = v_3(0u);
+  v_1(0u, x);
 }
+

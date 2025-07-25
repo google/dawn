@@ -36,9 +36,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Construct);
 
 namespace tint::core::ir {
 
-Construct::Construct() = default;
+Construct::Construct(Id id) : Base(id) {}
 
-Construct::Construct(InstructionResult* result, VectorRef<Value*> arguments) {
+Construct::Construct(Id id, InstructionResult* result, VectorRef<Value*> arguments) : Base(id) {
     AddOperands(Construct::kArgsOperandOffset, std::move(arguments));
     AddResult(result);
 }
@@ -46,9 +46,9 @@ Construct::Construct(InstructionResult* result, VectorRef<Value*> arguments) {
 Construct::~Construct() = default;
 
 Construct* Construct::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto args = ctx.Remap<Construct::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<Construct>(new_result, args);
+    return ctx.ir.CreateInstruction<Construct>(new_result, args);
 }
 
 }  // namespace tint::core::ir

@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/StringViewUtils.h"
 
 namespace dawn::native {
 
@@ -59,8 +60,11 @@ wgpu::ErrorType ErrorScope::GetErrorType() const {
     return mCapturedError;
 }
 
-const std::string& ErrorScope::GetErrorMessage() const {
-    return mErrorMessage;
+WGPUStringView ErrorScope::GetErrorMessage() const {
+    if (!mErrorMessage.empty()) {
+        return ToOutputStringView(mErrorMessage);
+    }
+    return kEmptyOutputStringView;
 }
 
 ErrorScopeStack::ErrorScopeStack() = default;
@@ -95,17 +99,7 @@ bool ErrorScopeStack::HandleError(wgpu::ErrorType type, std::string_view message
             it->mCapturedError = type;
             it->mErrorMessage = message;
         }
-
-        if (type == wgpu::ErrorType::DeviceLost) {
-            if (it->mCapturedError != wgpu::ErrorType::DeviceLost) {
-                // DeviceLost overrides any other error that is not a DeviceLost.
-                it->mCapturedError = type;
-                it->mErrorMessage = message;
-            }
-        } else {
-            // Errors that are not device lost are captured and stop propogating.
-            return true;
-        }
+        return true;
     }
 
     // The error was not captured.

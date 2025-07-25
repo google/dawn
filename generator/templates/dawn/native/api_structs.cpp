@@ -32,7 +32,10 @@
 {% set namespace = metadata.namespace %}
 #include "{{native_dir}}/{{namespace}}_structs_autogen.h"
 
+#include <cstring>
 #include <tuple>
+
+#include "dawn/common/Assert.h"
 
 #if defined(__GNUC__) || defined(__clang__)
 // error: 'offsetof' within non-standard-layout type '{{namespace}}::XXX' is conditionally-supported
@@ -51,7 +54,14 @@ namespace {{native_namespace}} {
     static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStruct, sType),
             "offsetof mismatch for ChainedStruct::sType");
 
-    {% for type in by_category["structure"] %}
+    //* Special structures that are manually written.
+    {% set SpecialStructures = ["string view"] %}
+
+    bool StringView::operator==(const StringView& rhs) const {
+        return data == rhs.data && length == rhs.length;
+    }
+
+    {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
 
@@ -104,7 +114,7 @@ namespace {{native_namespace}} {
                 return copy;
             }
         {% endif %}
-        bool {{CppType}}::operator==(const {{as_cppType(type.name)}}& rhs) const {
+        bool {{CppType}}::operator==(const {{CppType}}& rhs) const {
             return {% if type.extensible or type.chained -%}
                 (nextInChain == rhs.nextInChain) &&
             {%- endif %} std::tie(
@@ -154,12 +164,14 @@ namespace {{native_namespace}} {
         }
 
         void {{as_cppType(type.name)}}::FreeMembers() {
-            if (
-                {%- for member in type.members if member.annotation != 'value' %}
-                    {% if not loop.first %} || {% endif -%}
-                    this->{{member.name.camelCase()}} != nullptr
-                {%- endfor -%}
-            ) {
+            bool needsFreeing = false;
+            {%- for member in type.members if member.annotation != 'value' %}
+                if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
+            {%- endfor -%}
+            {%- for member in type.members if member.type.name.canonical_case() == 'string view' %}
+                if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
+            {%- endfor -%}
+            if (needsFreeing) {
                 API{{as_MethodSuffix(type.name, Name("free members"))}}(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
             }
         }

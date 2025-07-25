@@ -6,22 +6,22 @@ struct S {
   vector<float16_t, 3> y;
 };
 
-RWByteAddressBuffer output : register(u0);
-
-struct tint_symbol_1 {
-  float f : TEXCOORD0;
-  nointerpolation uint u : TEXCOORD1;
-  float16_t x : TEXCOORD2;
-  vector<float16_t, 3> y : TEXCOORD3;
-  float4 v : SV_Position;
+struct frag_main_inputs {
+  float S_f : TEXCOORD0;
+  nointerpolation uint S_u : TEXCOORD1;
+  float16_t S_x : TEXCOORD2;
+  vector<float16_t, 3> S_y : TEXCOORD3;
+  float4 S_v : SV_Position;
 };
 
-void output_store(uint offset, S value) {
-  output.Store((offset + 0u), asuint(value.f));
-  output.Store((offset + 4u), asuint(value.u));
-  output.Store4((offset + 128u), asuint(value.v));
-  output.Store<float16_t>((offset + 160u), value.x);
-  output.Store<vector<float16_t, 3> >((offset + 192u), value.y);
+
+RWByteAddressBuffer output : register(u0);
+void v_1(uint offset, S obj) {
+  output.Store((offset + 0u), asuint(obj.f));
+  output.Store((offset + 4u), obj.u);
+  output.Store4((offset + 128u), asuint(obj.v));
+  output.Store<float16_t>((offset + 160u), obj.x);
+  output.Store<vector<float16_t, 3> >((offset + 192u), obj.y);
 }
 
 void frag_main_inner(S input) {
@@ -30,11 +30,11 @@ void frag_main_inner(S input) {
   float4 v = input.v;
   float16_t x = input.x;
   vector<float16_t, 3> y = input.y;
-  output_store(0u, input);
+  v_1(0u, input);
 }
 
-void frag_main(tint_symbol_1 tint_symbol) {
-  S tint_symbol_2 = {tint_symbol.f, tint_symbol.u, float4(tint_symbol.v.xyz, (1.0f / tint_symbol.v.w)), tint_symbol.x, tint_symbol.y};
-  frag_main_inner(tint_symbol_2);
-  return;
+void frag_main(frag_main_inputs inputs) {
+  S v_2 = {inputs.S_f, inputs.S_u, float4(inputs.S_v.xyz, (1.0f / inputs.S_v.w)), inputs.S_x, inputs.S_y};
+  frag_main_inner(v_2);
 }
+

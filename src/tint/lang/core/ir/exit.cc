@@ -33,6 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Exit);
 
 namespace tint::core::ir {
 
+Exit::Exit(Instruction::Id id) : Base(id) {}
+
 Exit::~Exit() = default;
 
 void Exit::Destroy() {

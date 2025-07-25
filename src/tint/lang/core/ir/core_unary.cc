@@ -35,16 +35,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::CoreUnary);
 
 namespace tint::core::ir {
 
-CoreUnary::CoreUnary() = default;
+CoreUnary::CoreUnary(Id id) : Base(id) {}
 
-CoreUnary::CoreUnary(InstructionResult* result, UnaryOp op, Value* val) : Base(result, op, val) {}
+CoreUnary::CoreUnary(Id id, InstructionResult* result, UnaryOp op, Value* val)
+    : Base(id, result, op, val) {}
 
 CoreUnary::~CoreUnary() = default;
 
 CoreUnary* CoreUnary::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto* val = ctx.Remap(Val());
-    return ctx.ir.allocators.instructions.Create<CoreUnary>(new_result, Op(), val);
+    return ctx.ir.CreateInstruction<CoreUnary>(new_result, Op(), val);
 }
 
 const core::intrinsic::TableData& CoreUnary::TableData() const {

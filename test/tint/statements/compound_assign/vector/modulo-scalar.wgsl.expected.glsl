@@ -1,33 +1,28 @@
 #version 310 es
 
-ivec4 tint_select(ivec4 param_0, ivec4 param_1, bvec4 param_2) {
-    return ivec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
-}
 
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 struct S {
   ivec4 a;
 };
 
-layout(binding = 0, std430) buffer v_block_ssbo {
+layout(binding = 0, std430)
+buffer v_block_1_ssbo {
   S inner;
-} v;
-
-ivec4 tint_mod(ivec4 lhs, int rhs) {
-  ivec4 r = ivec4(rhs);
-  ivec4 rhs_or_one = tint_select(r, ivec4(1), bvec4(uvec4(equal(r, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4((-2147483647 - 1)))) & uvec4(equal(r, ivec4(-1)))))));
-  if (any(notEqual((uvec4((lhs | rhs_or_one)) & uvec4(2147483648u)), uvec4(0u)))) {
-    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
-  } else {
-    return (lhs % rhs_or_one);
-  }
+} v_1;
+ivec4 tint_mod_v4i32(ivec4 lhs, ivec4 rhs) {
+  uvec4 v_2 = uvec4(equal(lhs, ivec4((-2147483647 - 1))));
+  bvec4 v_3 = bvec4((v_2 & uvec4(equal(rhs, ivec4(-1)))));
+  uvec4 v_4 = uvec4(equal(rhs, ivec4(0)));
+  ivec4 v_5 = mix(rhs, ivec4(1), bvec4((v_4 | uvec4(v_3))));
+  uvec4 v_6 = uvec4((lhs / v_5));
+  ivec4 v_7 = ivec4((v_6 * uvec4(v_5)));
+  uvec4 v_8 = uvec4(lhs);
+  return ivec4((v_8 - uvec4(v_7)));
 }
-
 void foo() {
-  v.inner.a = tint_mod(v.inner.a, 2);
+  ivec4 v_9 = v_1.inner.a;
+  v_1.inner.a = tint_mod_v4i32(v_9, ivec4(2));
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

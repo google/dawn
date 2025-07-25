@@ -41,6 +41,7 @@ void ScratchBuffer::Reset() {
 }
 
 MaybeError ScratchBuffer::EnsureCapacity(uint64_t capacity) {
+    DAWN_ASSERT(capacity > 0);
     if (!mBuffer.Get() || mBuffer->GetSize() < capacity) {
         BufferDescriptor descriptor;
         descriptor.size = capacity;

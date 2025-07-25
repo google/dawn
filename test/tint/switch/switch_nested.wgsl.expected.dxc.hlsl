@@ -1,43 +1,47 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 void a() {
-  int a_1 = 0;
+  int a_1 = int(0);
   switch(a_1) {
-    case 0:
-    case 2:
-    case 4: {
+    case int(0):
+    case int(2):
+    case int(4):
+    {
       uint b = 3u;
       switch(b) {
-        case 0u: {
+        case 0u:
+        {
           break;
         }
         case 1u:
         case 2u:
         case 3u:
-        default: {
+        default:
+        {
           uint c = 123u;
           switch(c) {
-            case 0u: {
+            case 0u:
+            {
               break;
             }
-            default: {
+            default:
+            {
               return;
-              break;
             }
           }
           return;
-          break;
         }
       }
       break;
     }
-    case 1:
-    default: {
+    case int(1):
+    default:
+    {
       return;
-      break;
     }
   }
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

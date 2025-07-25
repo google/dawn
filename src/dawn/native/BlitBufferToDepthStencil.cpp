@@ -101,7 +101,7 @@ struct Params {
 @group(0) @binding(1) var<uniform> params : Params;
 
 struct VertexOutputs {
-  @location(0) @interpolate(flat) stencil_val : u32,
+  @location(0) @interpolate(flat, either) stencil_val : u32,
   @builtin(position) position : vec4f,
 };
 
@@ -109,7 +109,7 @@ struct VertexOutputs {
 // It represents the current stencil mask we're testing in the
 // source.
 // This is a cheap way to get the stencil value into the shader
-// since WebGPU doesn't have push constants.
+// since WebGPU doesn't have immediate data.
 @vertex fn vert_fullscreen_quad(
   @builtin(vertex_index) vertex_index : u32,
   @builtin(instance_index) instance_index: u32,
@@ -148,7 +148,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(Devi
         return store->blitRG8ToDepth16UnormPipeline;
     }
 
-    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
     wgslDesc.code = kBlitRG8ToDepthShaders;
@@ -162,7 +162,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRG8ToDepth16UnormPipeline(Devi
 
     DepthStencilState dsState = {};
     dsState.format = wgpu::TextureFormat::Depth16Unorm;
-    dsState.depthWriteEnabled = true;
+    dsState.depthWriteEnabled = wgpu::OptionalBool::True;
     dsState.depthCompare = wgpu::CompareFunction::Always;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
@@ -200,7 +200,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
         DAWN_TRY_ASSIGN(pipelineLayout, device->CreatePipelineLayout(&plDesc));
     }
 
-    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
 
@@ -226,7 +226,7 @@ ResultOrError<InternalPipelineStore::BlitR8ToStencilPipelines> GetOrCreateR8ToSt
 
     DepthStencilState dsState = {};
     dsState.format = format;
-    dsState.depthWriteEnabled = false;
+    dsState.depthWriteEnabled = wgpu::OptionalBool::False;
     dsState.depthCompare = wgpu::CompareFunction::Always;
     dsState.stencilFront.passOp = wgpu::StencilOperation::Replace;
 
@@ -370,7 +370,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
     // In compat mode view dimension needs to match texture binding view dimension.
     wgpu::TextureViewDimension textureViewDimension;
-    if (device->IsCompatibilityMode()) {
+    if (!device->HasFlexibleTextureViews()) {
         textureViewDimension = dataTexture->GetCompatibilityTextureBindingViewDimension();
     } else {
         textureViewDimension = wgpu::TextureViewDimension::e2DArray;
@@ -497,7 +497,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
             pass->APISetPipeline(pipelines.setStencilPipelines[bit].Get());
             // Draw one instance, and use the stencil value as firstInstance.
             // This is a cheap way to get the stencil value into the shader
-            // since WebGPU doesn't have push constants.
+            // since WebGPU doesn't have immediate data.
             pass->APIDraw(3, 1, 0, 1u << bit);
         }
         pass->End();
@@ -507,7 +507,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
 MaybeError BlitStagingBufferToDepth(DeviceBase* device,
                                     BufferBase* buffer,
-                                    const TextureDataLayout& src,
+                                    const TexelCopyBufferLayout& src,
                                     const TextureCopy& dst,
                                     const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
@@ -546,7 +546,7 @@ MaybeError BlitStagingBufferToDepth(DeviceBase* device,
 MaybeError BlitBufferToDepth(DeviceBase* device,
                              CommandEncoder* commandEncoder,
                              BufferBase* buffer,
-                             const TextureDataLayout& src,
+                             const TexelCopyBufferLayout& src,
                              const TextureCopy& dst,
                              const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
@@ -560,11 +560,11 @@ MaybeError BlitBufferToDepth(DeviceBase* device,
     Ref<TextureBase> dataTexture;
     DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
     {
-        ImageCopyBuffer bufferSrc;
+        TexelCopyBufferInfo bufferSrc;
         bufferSrc.buffer = buffer;
         bufferSrc.layout = src;
 
-        ImageCopyTexture textureDst;
+        TexelCopyTextureInfo textureDst;
         textureDst.texture = dataTexture.Get();
         commandEncoder->APICopyBufferToTexture(&bufferSrc, &textureDst, &copyExtent);
     }
@@ -575,7 +575,7 @@ MaybeError BlitBufferToDepth(DeviceBase* device,
 
 MaybeError BlitStagingBufferToStencil(DeviceBase* device,
                                       BufferBase* buffer,
-                                      const TextureDataLayout& src,
+                                      const TexelCopyBufferLayout& src,
                                       const TextureCopy& dst,
                                       const Extent3D& copyExtent) {
     TextureDescriptor dataTextureDesc = {};
@@ -610,7 +610,7 @@ MaybeError BlitStagingBufferToStencil(DeviceBase* device,
 MaybeError BlitBufferToStencil(DeviceBase* device,
                                CommandEncoder* commandEncoder,
                                BufferBase* buffer,
-                               const TextureDataLayout& src,
+                               const TexelCopyBufferLayout& src,
                                const TextureCopy& dst,
                                const Extent3D& copyExtent) {
     TextureDescriptor dataTextureDesc = {};
@@ -621,11 +621,11 @@ MaybeError BlitBufferToStencil(DeviceBase* device,
     Ref<TextureBase> dataTexture;
     DAWN_TRY_ASSIGN(dataTexture, device->CreateTexture(&dataTextureDesc));
     {
-        ImageCopyBuffer bufferSrc;
+        TexelCopyBufferInfo bufferSrc;
         bufferSrc.buffer = buffer;
         bufferSrc.layout = src;
 
-        ImageCopyTexture textureDst;
+        TexelCopyTextureInfo textureDst;
         textureDst.texture = dataTexture.Get();
         commandEncoder->APICopyBufferToTexture(&bufferSrc, &textureDst, &copyExtent);
     }

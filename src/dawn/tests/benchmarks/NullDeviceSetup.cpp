@@ -29,6 +29,7 @@
 
 #include <benchmark/benchmark.h>
 #include <dawn/webgpu_cpp.h>
+#include <dawn/webgpu_cpp_print.h>
 #include <memory>
 #include <utility>
 
@@ -62,21 +63,21 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
             wgpu::DeviceDescriptor desc = GetDeviceDescriptor();
             desc.SetDeviceLostCallback(
                 wgpu::CallbackMode::AllowSpontaneous,
-                [](const wgpu::Device&, wgpu::DeviceLostReason reason, char const* message) {
+                [](const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message) {
                     if (reason == wgpu::DeviceLostReason::Unknown) {
                         dawn::ErrorLog() << message;
                         DAWN_UNREACHABLE();
                     }
                 });
             desc.SetUncapturedErrorCallback(
-                [](const wgpu::Device&, wgpu::ErrorType, const char* message) {
+                [](const wgpu::Device&, wgpu::ErrorType, wgpu::StringView message) {
                     dawn::ErrorLog() << message;
                     DAWN_UNREACHABLE();
                 });
 
             adapter.RequestDevice(
                 &desc, wgpu::CallbackMode::AllowSpontaneous,
-                [this](wgpu::RequestDeviceStatus status, wgpu::Device result, const char*) {
+                [this](wgpu::RequestDeviceStatus status, wgpu::Device result, wgpu::StringView) {
                     DAWN_ASSERT(status == wgpu::RequestDeviceStatus::Success);
                     device = std::move(result);
                 });

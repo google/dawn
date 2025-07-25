@@ -28,9 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_BGRA8UNORM_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_BGRA8UNORM_POLYFILL_H_
 
-#include <string>
-
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -38,6 +37,9 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const Capabilities kBgra8UnormPolyfillCapabilities{Capability::kAllowDuplicateBindings};
 
 /// Bgra8UnormPolyfill is a transform that changes the texel format of storage textures from
 /// bgra8unorm to rgba8unorm, inserting swizzles before and after texture accesses as necessary.

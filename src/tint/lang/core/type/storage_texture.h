@@ -30,8 +30,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
@@ -49,7 +48,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param dim the dimensionality of the texture
     /// @param format the texel format of the texture
     /// @param access the access control type of the texture
-    /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
+    /// @param subtype the storage subtype.
     StorageTexture(TextureDimension dim,
                    core::TexelFormat format,
                    core::Access access,
@@ -63,22 +62,17 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the storage subtype
-    const Type* type() const { return subtype_; }
+    const type::Type* Type() const { return subtype_; }
 
     /// @returns the texel format
-    core::TexelFormat texel_format() const { return texel_format_; }
+    core::TexelFormat TexelFormat() const { return texel_format_; }
 
     /// @returns the access control
-    core::Access access() const { return access_; }
+    core::Access Access() const { return access_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName() const override;
-
-    /// @param format the storage texture image format
-    /// @param type_mgr the Manager used to build the returned type
-    /// @returns the storage texture subtype for the given TexelFormat
-    static Type* SubtypeFor(core::TexelFormat format, Manager& type_mgr);
 
     /// @param ctx the clone context
     /// @returns a clone of this type
@@ -87,7 +81,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
   private:
     core::TexelFormat const texel_format_;
     core::Access const access_;
-    const Type* const subtype_;
+    const type::Type* const subtype_;
 };
 
 }  // namespace tint::core::type

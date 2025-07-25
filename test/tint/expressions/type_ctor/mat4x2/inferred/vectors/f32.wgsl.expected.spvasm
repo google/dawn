@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 31
 ; Schema: 0
                OpCapability Shader
@@ -8,46 +8,46 @@
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
                OpName %m "m"
-               OpName %out_block "out_block"
                OpMemberName %out_block 0 "inner"
-               OpName %out "out"
+               OpName %out_block "out_block"
                OpName %f "f"
-               OpDecorate %out_block Block
                OpMemberDecorate %out_block 0 Offset 0
                OpMemberDecorate %out_block 0 ColMajor
                OpMemberDecorate %out_block 0 MatrixStride 8
-               OpDecorate %out DescriptorSet 0
-               OpDecorate %out Binding 0
+               OpDecorate %out_block Block
+               OpDecorate %19 DescriptorSet 0
+               OpDecorate %19 Binding 0
+               OpDecorate %19 Coherent
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %mat4v2float = OpTypeMatrix %v2float 4
-          %4 = OpConstantNull %float
+%_ptr_Private_mat4v2float = OpTypePointer Private %mat4v2float
+    %float_0 = OpConstant %float 0
     %float_1 = OpConstant %float 1
-          %6 = OpConstantComposite %v2float %4 %float_1
+          %7 = OpConstantComposite %v2float %float_0 %float_1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
-          %9 = OpConstantComposite %v2float %float_2 %float_3
+         %10 = OpConstantComposite %v2float %float_2 %float_3
     %float_4 = OpConstant %float 4
     %float_5 = OpConstant %float 5
-         %12 = OpConstantComposite %v2float %float_4 %float_5
+         %13 = OpConstantComposite %v2float %float_4 %float_5
     %float_6 = OpConstant %float 6
     %float_7 = OpConstant %float 7
-         %15 = OpConstantComposite %v2float %float_6 %float_7
-         %16 = OpConstantComposite %mat4v2float %6 %9 %12 %15
-%_ptr_Private_mat4v2float = OpTypePointer Private %mat4v2float
-          %m = OpVariable %_ptr_Private_mat4v2float Private %16
+         %16 = OpConstantComposite %v2float %float_6 %float_7
+          %6 = OpConstantComposite %mat4v2float %7 %10 %13 %16
+          %m = OpVariable %_ptr_Private_mat4v2float Private %6
   %out_block = OpTypeStruct %mat4v2float
 %_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
-        %out = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
+         %19 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
-         %22 = OpTypeFunction %void
+         %24 = OpTypeFunction %void
+%_ptr_StorageBuffer_mat4v2float = OpTypePointer StorageBuffer %mat4v2float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_StorageBuffer_mat4v2float = OpTypePointer StorageBuffer %mat4v2float
-          %f = OpFunction %void None %22
+          %f = OpFunction %void None %24
          %25 = OpLabel
-         %29 = OpAccessChain %_ptr_StorageBuffer_mat4v2float %out %uint_0
-         %30 = OpLoad %mat4v2float %m
-               OpStore %29 %30
+         %26 = OpLoad %mat4v2float %m None
+         %27 = OpAccessChain %_ptr_StorageBuffer_mat4v2float %19 %uint_0
+               OpStore %27 %26 None
                OpReturn
                OpFunctionEnd

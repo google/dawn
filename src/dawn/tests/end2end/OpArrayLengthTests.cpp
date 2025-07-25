@@ -37,6 +37,14 @@ namespace {
 
 class OpArrayLengthTest : public DawnTest {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        // maxStorageBuffersInVertexStage
+        supported.UnlinkedCopyTo(&required);
+    }
+
     void SetUp() override {
         DawnTest::SetUp();
 
@@ -51,21 +59,6 @@ class OpArrayLengthTest : public DawnTest {
 
         bufferDesc.size = 512 + 256;
         mStorageBuffer512 = device.CreateBuffer(&bufferDesc);
-
-        // Put them all in a bind group for tests to bind them easily.
-        wgpu::ShaderStage kAllStages =
-            wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Compute;
-        mBindGroupLayout = utils::MakeBindGroupLayout(
-            device, {{0, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage},
-                     {1, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage},
-                     {2, kAllStages, wgpu::BufferBindingType::ReadOnlyStorage}});
-
-        mBindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
-                                          {
-                                              {0, mStorageBuffer4, 0, 4},
-                                              {1, mStorageBuffer256, 0, wgpu::kWholeSize},
-                                              {2, mStorageBuffer512, 256, wgpu::kWholeSize},
-                                          });
 
         // Common shader code to use these buffers in shaders, assuming they are in bindgroup index
         // 0.
@@ -98,26 +91,33 @@ class OpArrayLengthTest : public DawnTest {
         mExpectedLengths = {1, 64, 56};
     }
 
+    wgpu::BindGroupLayout MakeBindGroupLayout(wgpu::ShaderStage stages) {
+        // Put them all in a bind group for tests to bind them easily.
+        return utils::MakeBindGroupLayout(device,
+                                          {{0, stages, wgpu::BufferBindingType::ReadOnlyStorage},
+                                           {1, stages, wgpu::BufferBindingType::ReadOnlyStorage},
+                                           {2, stages, wgpu::BufferBindingType::ReadOnlyStorage}});
+    }
+
+    wgpu::BindGroup MakeBindGroup(wgpu::BindGroupLayout bindGroupLayout) {
+        return utils::MakeBindGroup(device, bindGroupLayout,
+                                    {
+                                        {0, mStorageBuffer4, 0, 4},
+                                        {1, mStorageBuffer256, 0, wgpu::kWholeSize},
+                                        {2, mStorageBuffer512, 256, wgpu::kWholeSize},
+                                    });
+    }
+
     wgpu::Buffer mStorageBuffer4;
     wgpu::Buffer mStorageBuffer256;
     wgpu::Buffer mStorageBuffer512;
 
-    wgpu::BindGroupLayout mBindGroupLayout;
-    wgpu::BindGroup mBindGroup;
     std::string mShaderInterface;
     std::array<uint32_t, 3> mExpectedLengths;
 };
 
 // Test OpArrayLength in the compute stage
 TEST_P(OpArrayLengthTest, Compute) {
-    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
-
-    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
-    // (spurious but harmless) offset=64 that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && (IsOpenGL() || IsOpenGLES()));
-
     // Create a buffer to hold the result sizes and create a bindgroup for it.
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
@@ -131,7 +131,8 @@ TEST_P(OpArrayLengthTest, Compute) {
         utils::MakeBindGroup(device, resultLayout, {{0, resultBuffer, 0, wgpu::kWholeSize}});
 
     // Create the compute pipeline that stores the length()s in the result buffer.
-    wgpu::BindGroupLayout bgls[] = {mBindGroupLayout, resultLayout};
+    wgpu::BindGroupLayout bindGroupLayout = MakeBindGroupLayout(wgpu::ShaderStage::Compute);
+    wgpu::BindGroupLayout bgls[] = {bindGroupLayout, resultLayout};
     wgpu::PipelineLayoutDescriptor plDesc;
     plDesc.bindGroupLayoutCount = 2;
     plDesc.bindGroupLayouts = bgls;
@@ -152,12 +153,13 @@ TEST_P(OpArrayLengthTest, Compute) {
         })")
                                                                         .c_str());
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+    wgpu::BindGroup bindGroup = MakeBindGroup(bindGroupLayout);
 
     // Run a single instance of the compute shader
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
     pass.SetPipeline(pipeline);
-    pass.SetBindGroup(0, mBindGroup);
+    pass.SetBindGroup(0, bindGroup);
     pass.SetBindGroup(1, resultBindGroup);
     pass.DispatchWorkgroups(1);
     pass.End();
@@ -170,13 +172,11 @@ TEST_P(OpArrayLengthTest, Compute) {
 
 // Test OpArrayLength in the fragment stage
 TEST_P(OpArrayLengthTest, Fragment) {
-    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
+    // TODO(crbug.com/408042465): investigate this failure on Pixel 6 OpenGLES
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM() &&
+                          HasToggleEnabled("gl_use_array_length_from_uniform"));
 
-    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
-    // (spurious but harmless) offset=64 that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && (IsOpenGL() || IsOpenGLES()));
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 3);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
@@ -198,20 +198,24 @@ TEST_P(OpArrayLengthTest, Fragment) {
         })")
                                                                         .c_str());
 
+    wgpu::BindGroupLayout bindGroupLayout = MakeBindGroupLayout(wgpu::ShaderStage::Fragment);
+
     utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
     descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
     descriptor.cTargets[0].format = renderPass.colorFormat;
-    descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
+    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::BindGroup bindGroup = MakeBindGroup(bindGroupLayout);
 
     // "Draw" the lengths to the texture.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, mBindGroup);
+        pass.SetBindGroup(0, bindGroup);
         pass.Draw(1);
         pass.End();
     }
@@ -226,16 +230,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
 
 // Test OpArrayLength in the vertex stage
 TEST_P(OpArrayLengthTest, Vertex) {
-    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL and OpenGLES.
-    DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
-
-    // TODO(crbug.com/dawn/2295): Also failing on Pixel 6 OpenGLES (ARM).
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
-    // TODO(crbug.com/dawn/1292): Some Intel drivers don't seem to like the
-    // (spurious but harmless) offset=64 that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 3);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
@@ -265,20 +260,24 @@ TEST_P(OpArrayLengthTest, Vertex) {
             return color;
         })");
 
+    wgpu::BindGroupLayout bindGroupLayout = MakeBindGroupLayout(wgpu::ShaderStage::Vertex);
+
     utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
     descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
     descriptor.cTargets[0].format = renderPass.colorFormat;
-    descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
+    descriptor.layout = utils::MakeBasicPipelineLayout(device, &bindGroupLayout);
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    wgpu::BindGroup bindGroup = MakeBindGroup(bindGroupLayout);
 
     // "Draw" the lengths to the texture.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
         pass.SetPipeline(pipeline);
-        pass.SetBindGroup(0, mBindGroup);
+        pass.SetBindGroup(0, bindGroup);
         pass.Draw(1);
         pass.End();
     }
@@ -297,6 +296,7 @@ DAWN_INSTANTIATE_TEST(OpArrayLengthTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      OpenGLESBackend({"gl_use_array_length_from_uniform"}),
                       VulkanBackend());
 
 }  // anonymous namespace

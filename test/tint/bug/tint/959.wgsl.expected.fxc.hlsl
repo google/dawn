@@ -1,3 +1,8 @@
+struct S {
+  float a;
+};
+
+
 ByteAddressBuffer b0 : register(t0);
 ByteAddressBuffer b1 : register(t0, space1);
 ByteAddressBuffer b2 : register(t0, space2);
@@ -62,7 +67,102 @@ SamplerComparisonState s12 : register(s300, space12);
 SamplerComparisonState s13 : register(s300, space13);
 SamplerComparisonState s14 : register(s300, space14);
 SamplerComparisonState s15 : register(s300, space15);
+S v(uint start_byte_offset) {
+  S v_1 = {asfloat(b15[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_1;
+}
+
+S v_2(uint start_byte_offset) {
+  S v_3 = {asfloat(b14[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_3;
+}
+
+S v_4(uint start_byte_offset) {
+  S v_5 = {asfloat(b13[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_5;
+}
+
+S v_6(uint start_byte_offset) {
+  S v_7 = {asfloat(b12[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_7;
+}
+
+S v_8(uint start_byte_offset) {
+  S v_9 = {asfloat(b11[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_9;
+}
+
+S v_10(uint start_byte_offset) {
+  S v_11 = {asfloat(b10[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_11;
+}
+
+S v_12(uint start_byte_offset) {
+  S v_13 = {asfloat(b9[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_13;
+}
+
+S v_14(uint start_byte_offset) {
+  S v_15 = {asfloat(b8[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  return v_15;
+}
+
+S v_16(uint offset) {
+  S v_17 = {asfloat(b7.Load((offset + 0u)))};
+  return v_17;
+}
+
+S v_18(uint offset) {
+  S v_19 = {asfloat(b6.Load((offset + 0u)))};
+  return v_19;
+}
+
+S v_20(uint offset) {
+  S v_21 = {asfloat(b5.Load((offset + 0u)))};
+  return v_21;
+}
+
+S v_22(uint offset) {
+  S v_23 = {asfloat(b4.Load((offset + 0u)))};
+  return v_23;
+}
+
+S v_24(uint offset) {
+  S v_25 = {asfloat(b3.Load((offset + 0u)))};
+  return v_25;
+}
+
+S v_26(uint offset) {
+  S v_27 = {asfloat(b2.Load((offset + 0u)))};
+  return v_27;
+}
+
+S v_28(uint offset) {
+  S v_29 = {asfloat(b1.Load((offset + 0u)))};
+  return v_29;
+}
+
+S v_30(uint offset) {
+  S v_31 = {asfloat(b0.Load((offset + 0u)))};
+  return v_31;
+}
 
 void main() {
-  return;
+  v_30(0u);
+  v_28(0u);
+  v_26(0u);
+  v_24(0u);
+  v_22(0u);
+  v_20(0u);
+  v_18(0u);
+  v_16(0u);
+  v_14(0u);
+  v_12(0u);
+  v_10(0u);
+  v_8(0u);
+  v_6(0u);
+  v_4(0u);
+  v_2(0u);
+  v(0u);
 }
+

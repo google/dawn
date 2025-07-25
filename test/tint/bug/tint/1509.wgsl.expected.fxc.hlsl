@@ -1,3 +1,8 @@
+struct main_outputs {
+  uint tint_symbol : SV_Target0;
+};
+
+
 static uint v0 = 0u;
 static uint v1 = 0u;
 static uint v2 = 0u;
@@ -998,7 +1003,6 @@ static uint v996 = 0u;
 static uint v997 = 0u;
 static uint v998 = 0u;
 static uint v999 = 0u;
-
 uint foo() {
   uint x = 0u;
   x = (x + v0);
@@ -2004,17 +2008,12 @@ uint foo() {
   return x;
 }
 
-struct tint_symbol {
-  uint value : SV_Target0;
-};
-
 uint main_inner() {
   return foo();
 }
 
-tint_symbol main() {
-  uint inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+main_outputs main() {
+  main_outputs v = {main_inner()};
+  return v;
 }
+

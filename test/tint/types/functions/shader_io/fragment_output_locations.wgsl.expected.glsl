@@ -1,56 +1,56 @@
+//
+// main0
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 0) out int value;
-int main0() {
+layout(location = 0) out int main0_loc0_Output;
+int main0_inner() {
   return 1;
 }
-
 void main() {
-  int inner_result = main0();
-  value = inner_result;
-  return;
+  main0_loc0_Output = main0_inner();
 }
+//
+// main1
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 1) out uint value;
-uint main1() {
+layout(location = 1) out uint main1_loc1_Output;
+uint main1_inner() {
   return 1u;
 }
-
 void main() {
-  uint inner_result = main1();
-  value = inner_result;
-  return;
+  main1_loc1_Output = main1_inner();
 }
+//
+// main2
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 2) out float value;
-float main2() {
+layout(location = 2) out float main2_loc2_Output;
+float main2_inner() {
   return 1.0f;
 }
-
 void main() {
-  float inner_result = main2();
-  value = inner_result;
-  return;
+  main2_loc2_Output = main2_inner();
 }
+//
+// main3
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 3) out vec4 value;
-vec4 main3() {
+layout(location = 3) out vec4 main3_loc3_Output;
+vec4 main3_inner() {
   return vec4(1.0f, 2.0f, 3.0f, 4.0f);
 }
-
 void main() {
-  vec4 inner_result = main3();
-  value = inner_result;
-  return;
+  main3_loc3_Output = main3_inner();
 }

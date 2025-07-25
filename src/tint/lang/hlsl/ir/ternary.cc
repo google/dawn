@@ -33,7 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::hlsl::ir::Ternary);
 
 namespace tint::hlsl::ir {
 
-Ternary::Ternary(core::ir::InstructionResult* result, VectorRef<core::ir::Value*> args) {
+Ternary::Ternary(Id id, core::ir::InstructionResult* result, VectorRef<core::ir::Value*> args)
+    : Base(id) {
     AddResult(result);
     AddOperands(ArgsOperandOffset(), args);
 }
@@ -41,9 +42,9 @@ Ternary::Ternary(core::ir::InstructionResult* result, VectorRef<core::ir::Value*
 Ternary::~Ternary() = default;
 
 Ternary* Ternary::Clone(core::ir::CloneContext& ctx) {
-    auto new_result = ctx.Clone(Result(0));
+    auto new_result = ctx.Clone(Result());
     auto new_args = ctx.Remap<Ternary::kDefaultNumOperands>(operands_);
-    return ctx.ir.allocators.instructions.Create<Ternary>(new_result, new_args);
+    return ctx.ir.CreateInstruction<Ternary>(new_result, new_args);
 }
 
 }  // namespace tint::hlsl::ir

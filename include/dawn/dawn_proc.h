@@ -28,8 +28,9 @@
 #ifndef INCLUDE_DAWN_DAWN_PROC_H_
 #define INCLUDE_DAWN_DAWN_PROC_H_
 
+#include <webgpu/webgpu.h>
+
 #include "dawn/dawn_proc_table.h"
-#include "dawn/webgpu.h"
 
 #ifdef __cplusplus
 extern "C" {

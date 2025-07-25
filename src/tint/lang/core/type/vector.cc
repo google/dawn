@@ -37,13 +37,24 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::Vector);
 
 namespace tint::core::type {
 
-Vector::Vector(Type const* subtype, uint32_t width, bool packed /* = false */)
-    : Base(Hash(tint::TypeCode::Of<Vector>().bits, width, subtype, packed),
-           core::type::Flags{
-               Flag::kConstructable,
-               Flag::kCreationFixedFootprint,
-               Flag::kFixedFootprint,
-           }),
+namespace {
+
+core::type::Flags FlagsFrom(const Type* element) {
+    core::type::Flags flags{
+        Flag::kConstructable,
+        Flag::kCreationFixedFootprint,
+        Flag::kFixedFootprint,
+    };
+    if (element->IsHostShareable()) {
+        flags.Add(Flag::kHostShareable);
+    }
+    return flags;
+}
+
+}  // namespace
+
+Vector::Vector(type::Type const* subtype, uint32_t width, bool packed /* = false */)
+    : Base(Hash(tint::TypeCode::Of<Vector>().bits, width, subtype, packed), FlagsFrom(subtype)),
       subtype_(subtype),
       width_(width),
       packed_(packed) {
@@ -90,7 +101,7 @@ Vector* Vector::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Vector>(subtype, width_, packed_);
 }
 
-TypeAndCount Vector::Elements(const Type* /* type_if_invalid = nullptr */,
+TypeAndCount Vector::Elements(const type::Type* /* type_if_invalid = nullptr */,
                               uint32_t /* count_if_invalid = 0 */) const {
     return {subtype_, width_};
 }

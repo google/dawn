@@ -1,11 +1,12 @@
-int tint_div(int lhs, int rhs) {
-  return (lhs / (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
+
+int tint_div_i32(int lhs, int rhs) {
+  return (lhs / ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs)));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  int a = 1;
-  int b = 2;
-  int r = tint_div(a, b);
-  return;
+  int a = int(1);
+  int b = int(2);
+  int r = tint_div_i32(a, b);
 }
+

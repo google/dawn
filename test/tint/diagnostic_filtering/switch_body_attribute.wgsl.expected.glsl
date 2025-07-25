@@ -14,21 +14,19 @@
 precision highp float;
 precision highp int;
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+layout(location = 0) in float tint_interstage_location0;
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
-
-layout(location = 0) in float x_1;
-void tint_symbol(float x) {
-  switch(tint_ftoi(x)) {
-    default: {
-      float tint_phony = dFdx(1.0f);
+void main_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      dFdx(1.0f);
       break;
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

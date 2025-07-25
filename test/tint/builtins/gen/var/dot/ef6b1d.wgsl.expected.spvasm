@@ -1,137 +1,315 @@
+;
+; fragment_main
+;
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 78
+; Generator: Google Tint Compiler; 1
+; Bound: 64
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
-               OpEntryPoint GLCompute %compute_main "compute_main"
-               OpEntryPoint Vertex %vertex_main "vertex_main" %pos_1 %prevent_dce_1 %vertex_point_size
                OpExecutionMode %fragment_main OriginUpperLeft
-               OpExecutionMode %compute_main LocalSize 1 1 1
-               OpName %pos_1 "pos_1"
-               OpName %prevent_dce_1 "prevent_dce_1"
-               OpName %vertex_point_size "vertex_point_size"
-               OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce "prevent_dce"
+               OpName %prevent_dce_block "prevent_dce_block"
                OpName %dot_ef6b1d "dot_ef6b1d"
                OpName %arg_0 "arg_0"
                OpName %arg_1 "arg_1"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+        %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+          %6 = OpTypeFunction %int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+      %int_1 = OpConstant %int 1
+         %11 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+       %uint = OpTypeInt 32 0
+%_ptr_Function_int = OpTypePointer Function %int
+       %void = OpTypeVoid
+         %58 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+ %dot_ef6b1d = OpFunction %int None %6
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_v4int Function
+      %arg_1 = OpVariable %_ptr_Function_v4int Function
+        %res = OpVariable %_ptr_Function_int Function
+               OpStore %arg_0 %11
+               OpStore %arg_1 %11
+         %14 = OpLoad %v4int %arg_0 None
+         %15 = OpLoad %v4int %arg_1 None
+         %16 = OpCompositeExtract %int %14 0
+         %17 = OpCompositeExtract %int %15 0
+         %19 = OpBitcast %uint %16
+         %20 = OpBitcast %uint %17
+         %21 = OpIMul %uint %19 %20
+         %22 = OpBitcast %int %21
+         %23 = OpCompositeExtract %int %14 1
+         %24 = OpCompositeExtract %int %15 1
+         %25 = OpBitcast %uint %23
+         %26 = OpBitcast %uint %24
+         %27 = OpIMul %uint %25 %26
+         %28 = OpBitcast %int %27
+         %29 = OpBitcast %uint %22
+         %30 = OpBitcast %uint %28
+         %31 = OpIAdd %uint %29 %30
+         %32 = OpBitcast %int %31
+         %33 = OpCompositeExtract %int %14 2
+         %34 = OpCompositeExtract %int %15 2
+         %35 = OpBitcast %uint %33
+         %36 = OpBitcast %uint %34
+         %37 = OpIMul %uint %35 %36
+         %38 = OpBitcast %int %37
+         %39 = OpBitcast %uint %32
+         %40 = OpBitcast %uint %38
+         %41 = OpIAdd %uint %39 %40
+         %42 = OpBitcast %int %41
+         %43 = OpCompositeExtract %int %14 3
+         %44 = OpCompositeExtract %int %15 3
+         %45 = OpBitcast %uint %43
+         %46 = OpBitcast %uint %44
+         %47 = OpIMul %uint %45 %46
+         %48 = OpBitcast %int %47
+         %49 = OpBitcast %uint %42
+         %50 = OpBitcast %uint %48
+         %51 = OpIAdd %uint %49 %50
+         %52 = OpBitcast %int %51
+               OpStore %res %52
+         %55 = OpLoad %int %res None
+               OpReturnValue %55
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %58
+         %59 = OpLabel
+         %60 = OpFunctionCall %int %dot_ef6b1d
+         %61 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %61 %60 None
+               OpReturn
+               OpFunctionEnd
+;
+; compute_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 64
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpName %dot_ef6b1d "dot_ef6b1d"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %res "res"
                OpName %compute_main "compute_main"
-               OpName %VertexOutput "VertexOutput"
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+        %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+          %6 = OpTypeFunction %int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+      %int_1 = OpConstant %int 1
+         %11 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+       %uint = OpTypeInt 32 0
+%_ptr_Function_int = OpTypePointer Function %int
+       %void = OpTypeVoid
+         %58 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+ %dot_ef6b1d = OpFunction %int None %6
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_v4int Function
+      %arg_1 = OpVariable %_ptr_Function_v4int Function
+        %res = OpVariable %_ptr_Function_int Function
+               OpStore %arg_0 %11
+               OpStore %arg_1 %11
+         %14 = OpLoad %v4int %arg_0 None
+         %15 = OpLoad %v4int %arg_1 None
+         %16 = OpCompositeExtract %int %14 0
+         %17 = OpCompositeExtract %int %15 0
+         %19 = OpBitcast %uint %16
+         %20 = OpBitcast %uint %17
+         %21 = OpIMul %uint %19 %20
+         %22 = OpBitcast %int %21
+         %23 = OpCompositeExtract %int %14 1
+         %24 = OpCompositeExtract %int %15 1
+         %25 = OpBitcast %uint %23
+         %26 = OpBitcast %uint %24
+         %27 = OpIMul %uint %25 %26
+         %28 = OpBitcast %int %27
+         %29 = OpBitcast %uint %22
+         %30 = OpBitcast %uint %28
+         %31 = OpIAdd %uint %29 %30
+         %32 = OpBitcast %int %31
+         %33 = OpCompositeExtract %int %14 2
+         %34 = OpCompositeExtract %int %15 2
+         %35 = OpBitcast %uint %33
+         %36 = OpBitcast %uint %34
+         %37 = OpIMul %uint %35 %36
+         %38 = OpBitcast %int %37
+         %39 = OpBitcast %uint %32
+         %40 = OpBitcast %uint %38
+         %41 = OpIAdd %uint %39 %40
+         %42 = OpBitcast %int %41
+         %43 = OpCompositeExtract %int %14 3
+         %44 = OpCompositeExtract %int %15 3
+         %45 = OpBitcast %uint %43
+         %46 = OpBitcast %uint %44
+         %47 = OpIMul %uint %45 %46
+         %48 = OpBitcast %int %47
+         %49 = OpBitcast %uint %42
+         %50 = OpBitcast %uint %48
+         %51 = OpIAdd %uint %49 %50
+         %52 = OpBitcast %int %51
+               OpStore %res %52
+         %55 = OpLoad %int %res None
+               OpReturnValue %55
+               OpFunctionEnd
+%compute_main = OpFunction %void None %58
+         %59 = OpLabel
+         %60 = OpFunctionCall %int %dot_ef6b1d
+         %61 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %61 %60 None
+               OpReturn
+               OpFunctionEnd
+;
+; vertex_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 84
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
+               OpName %vertex_main_position_Output "vertex_main_position_Output"
+               OpName %vertex_main_loc0_Output "vertex_main_loc0_Output"
+               OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
+               OpName %dot_ef6b1d "dot_ef6b1d"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
                OpMemberName %VertexOutput 0 "pos"
                OpMemberName %VertexOutput 1 "prevent_dce"
-               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %VertexOutput "VertexOutput"
                OpName %out "out"
                OpName %vertex_main "vertex_main"
-               OpDecorate %pos_1 BuiltIn Position
-               OpDecorate %prevent_dce_1 Location 0
-               OpDecorate %prevent_dce_1 Flat
-               OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %prevent_dce_block Block
-               OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 0
-               OpDecorate %prevent_dce Binding 0
-               OpMemberDecorate %VertexOutput 0 Offset 0
-               OpMemberDecorate %VertexOutput 1 Offset 16
+               OpDecorate %vertex_main_position_Output BuiltIn Position
+               OpDecorate %vertex_main_loc0_Output Location 0
+               OpDecorate %vertex_main_loc0_Output Flat
+               OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-          %5 = OpConstantNull %v4float
-      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+%vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
-          %9 = OpConstantNull %int
-%prevent_dce_1 = OpVariable %_ptr_Output_int Output %9
+%vertex_main_loc0_Output = OpVariable %_ptr_Output_int Output
 %_ptr_Output_float = OpTypePointer Output %float
-         %12 = OpConstantNull %float
-%vertex_point_size = OpVariable %_ptr_Output_float Output %12
-%prevent_dce_block = OpTypeStruct %int
-%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
-         %16 = OpTypeFunction %int
+%vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
+         %11 = OpTypeFunction %int
       %v4int = OpTypeVector %int 4
-      %int_1 = OpConstant %int 1
-         %21 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %24 = OpConstantNull %v4int
-%_ptr_Function_int = OpTypePointer Function %int
-       %void = OpTypeVoid
-         %46 = OpTypeFunction %void
+      %int_1 = OpConstant %int 1
+         %16 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
        %uint = OpTypeInt 32 0
-     %uint_0 = OpConstant %uint 0
-%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+%_ptr_Function_int = OpTypePointer Function %int
 %VertexOutput = OpTypeStruct %v4float %int
-         %59 = OpTypeFunction %VertexOutput
+         %63 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %65 = OpConstantNull %VertexOutput
+         %67 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
+     %uint_0 = OpConstant %uint 0
+         %71 = OpConstantNull %v4float
      %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %78 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
- %dot_ef6b1d = OpFunction %int None %16
-         %18 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v4int Function %24
-      %arg_1 = OpVariable %_ptr_Function_v4int Function %24
-        %res = OpVariable %_ptr_Function_int Function %9
-               OpStore %arg_0 %21
-               OpStore %arg_1 %21
-         %27 = OpLoad %v4int %arg_0
-         %28 = OpLoad %v4int %arg_1
-         %29 = OpCompositeExtract %int %27 0
-         %30 = OpCompositeExtract %int %28 0
-         %31 = OpIMul %int %29 %30
-         %32 = OpCompositeExtract %int %27 1
-         %33 = OpCompositeExtract %int %28 1
-         %34 = OpIMul %int %32 %33
-         %35 = OpIAdd %int %31 %34
-         %36 = OpCompositeExtract %int %27 2
-         %37 = OpCompositeExtract %int %28 2
-         %38 = OpIMul %int %36 %37
-         %39 = OpIAdd %int %35 %38
-         %40 = OpCompositeExtract %int %27 3
-         %41 = OpCompositeExtract %int %28 3
-         %42 = OpIMul %int %40 %41
-         %26 = OpIAdd %int %39 %42
-               OpStore %res %26
-         %45 = OpLoad %int %res
-               OpReturnValue %45
+ %dot_ef6b1d = OpFunction %int None %11
+         %12 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_v4int Function
+      %arg_1 = OpVariable %_ptr_Function_v4int Function
+        %res = OpVariable %_ptr_Function_int Function
+               OpStore %arg_0 %16
+               OpStore %arg_1 %16
+         %19 = OpLoad %v4int %arg_0 None
+         %20 = OpLoad %v4int %arg_1 None
+         %21 = OpCompositeExtract %int %19 0
+         %22 = OpCompositeExtract %int %20 0
+         %24 = OpBitcast %uint %21
+         %25 = OpBitcast %uint %22
+         %26 = OpIMul %uint %24 %25
+         %27 = OpBitcast %int %26
+         %28 = OpCompositeExtract %int %19 1
+         %29 = OpCompositeExtract %int %20 1
+         %30 = OpBitcast %uint %28
+         %31 = OpBitcast %uint %29
+         %32 = OpIMul %uint %30 %31
+         %33 = OpBitcast %int %32
+         %34 = OpBitcast %uint %27
+         %35 = OpBitcast %uint %33
+         %36 = OpIAdd %uint %34 %35
+         %37 = OpBitcast %int %36
+         %38 = OpCompositeExtract %int %19 2
+         %39 = OpCompositeExtract %int %20 2
+         %40 = OpBitcast %uint %38
+         %41 = OpBitcast %uint %39
+         %42 = OpIMul %uint %40 %41
+         %43 = OpBitcast %int %42
+         %44 = OpBitcast %uint %37
+         %45 = OpBitcast %uint %43
+         %46 = OpIAdd %uint %44 %45
+         %47 = OpBitcast %int %46
+         %48 = OpCompositeExtract %int %19 3
+         %49 = OpCompositeExtract %int %20 3
+         %50 = OpBitcast %uint %48
+         %51 = OpBitcast %uint %49
+         %52 = OpIMul %uint %50 %51
+         %53 = OpBitcast %int %52
+         %54 = OpBitcast %uint %47
+         %55 = OpBitcast %uint %53
+         %56 = OpIAdd %uint %54 %55
+         %57 = OpBitcast %int %56
+               OpStore %res %57
+         %60 = OpLoad %int %res None
+               OpReturnValue %60
                OpFunctionEnd
-%fragment_main = OpFunction %void None %46
-         %49 = OpLabel
-         %53 = OpAccessChain %_ptr_StorageBuffer_int %prevent_dce %uint_0
-         %54 = OpFunctionCall %int %dot_ef6b1d
-               OpStore %53 %54
-               OpReturn
+%vertex_main_inner = OpFunction %VertexOutput None %63
+         %64 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %67
+         %68 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %68 %71 None
+         %72 = OpAccessChain %_ptr_Function_int %out %uint_1
+         %74 = OpFunctionCall %int %dot_ef6b1d
+               OpStore %72 %74 None
+         %75 = OpLoad %VertexOutput %out None
+               OpReturnValue %75
                OpFunctionEnd
-%compute_main = OpFunction %void None %46
-         %56 = OpLabel
-         %57 = OpAccessChain %_ptr_StorageBuffer_int %prevent_dce %uint_0
-         %58 = OpFunctionCall %int %dot_ef6b1d
-               OpStore %57 %58
-               OpReturn
-               OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %59
-         %62 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %65
-         %67 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %67 %5
-         %69 = OpAccessChain %_ptr_Function_int %out %uint_1
-         %70 = OpFunctionCall %int %dot_ef6b1d
-               OpStore %69 %70
-         %71 = OpLoad %VertexOutput %out
-               OpReturnValue %71
-               OpFunctionEnd
-%vertex_main = OpFunction %void None %46
-         %73 = OpLabel
-         %74 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %75 = OpCompositeExtract %v4float %74 0
-               OpStore %pos_1 %75
-         %76 = OpCompositeExtract %int %74 1
-               OpStore %prevent_dce_1 %76
-               OpStore %vertex_point_size %float_1
+%vertex_main = OpFunction %void None %78
+         %79 = OpLabel
+         %80 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %81 = OpCompositeExtract %v4float %80 0
+               OpStore %vertex_main_position_Output %81 None
+         %82 = OpCompositeExtract %int %80 1
+               OpStore %vertex_main_loc0_Output %82 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

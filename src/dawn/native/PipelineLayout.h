@@ -56,7 +56,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 struct StageAndDescriptor {
     StageAndDescriptor(SingleShaderStage shaderStage,
                        ShaderModuleBase* module,
-                       const char* entryPoint,
+                       StringView entryPoint,
                        size_t constantCount,
                        ConstantEntry const* constants);
 
@@ -80,7 +80,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     PipelineLayoutBase(DeviceBase* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
     ~PipelineLayoutBase() override;
 
-    static Ref<PipelineLayoutBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<PipelineLayoutBase> MakeError(DeviceBase* device, StringView label);
     static ResultOrError<Ref<PipelineLayoutBase>> CreateDefault(
         DeviceBase* device,
         std::vector<StageAndDescriptor> stages,
@@ -91,11 +91,14 @@ class PipelineLayoutBase : public ApiObjectBase,
     const BindGroupLayoutBase* GetFrontendBindGroupLayout(BindGroupIndex group) const;
     BindGroupLayoutBase* GetFrontendBindGroupLayout(BindGroupIndex group);
     const BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group) const;
-    BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group);
     const BindGroupMask& GetBindGroupLayoutsMask() const;
     bool HasPixelLocalStorage() const;
     const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
     bool HasAnyStorageAttachments() const;
+    uint32_t GetNumStorageBufferBindingsInVertexStage() const;
+    uint32_t GetNumStorageTextureBindingsInVertexStage() const;
+    uint32_t GetNumStorageBufferBindingsInFragmentStage() const;
+    uint32_t GetNumStorageTextureBindingsInFragmentStage() const;
 
     // Utility functions to compute inherited bind groups.
     // Returns the inherited bind groups as a mask.
@@ -112,14 +115,21 @@ class PipelineLayoutBase : public ApiObjectBase,
         bool operator()(const PipelineLayoutBase* a, const PipelineLayoutBase* b) const;
     };
 
+    uint32_t GetImmediateDataRangeByteSize() const;
+
   protected:
-    PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
     void DestroyImpl() override;
 
     PerBindGroup<Ref<BindGroupLayoutBase>> mBindGroupLayouts;
     BindGroupMask mMask;
     bool mHasPLS = false;
+    uint32_t mNumStorageBufferBindingsInVertexStage = 0;
+    uint32_t mNumStorageTextureBindingsInVertexStage = 0;
+    uint32_t mNumStorageBufferBindingsInFragmentStage = 0;
+    uint32_t mNumStorageTextureBindingsInFragmentStage = 0;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
+    uint32_t mImmediateDataRangeByteSize = 0;
 };
 
 }  // namespace dawn::native

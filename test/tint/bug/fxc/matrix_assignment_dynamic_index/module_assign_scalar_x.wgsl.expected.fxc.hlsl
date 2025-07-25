@@ -1,21 +1,26 @@
-void set_matrix_scalar(inout float2x4 mat, int col, int row, float val) {
-  switch (col) {
-    case 0:
-      mat[0] = (row.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : mat[0];
-      break;
-    case 1:
-      mat[1] = (row.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : mat[1];
-      break;
-  }
-}
 
 cbuffer cbuffer_uniforms : register(b4, space1) {
   uint4 uniforms[1];
 };
-static float2x4 m1 = float2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
+static float2x4 m1 = float2x4((0.0f).xxxx, (0.0f).xxxx);
 [numthreads(1, 1, 1)]
 void main() {
-  set_matrix_scalar(m1, uniforms[0].x, 0, 1.0f);
-  return;
+  uint v = uniforms[0u].x;
+  switch(v) {
+    case 0u:
+    {
+      m1[0u].x = 1.0f;
+      break;
+    }
+    case 1u:
+    {
+      m1[1u].x = 1.0f;
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
 }
+

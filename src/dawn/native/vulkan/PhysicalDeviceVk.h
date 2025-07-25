@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_VULKAN_ADAPTERVK_H_
 
 #include <memory>
+#include <vector>
 
 #include "dawn/common/Ref.h"
 #include "dawn/common/vulkan_platform.h"
@@ -50,18 +51,22 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;
     VkPhysicalDevice GetVkPhysicalDevice() const;
     VulkanInstance* GetVulkanInstance() const;
 
     bool IsDepthStencilFormatSupported(VkFormat format) const;
+    bool IsTextureCompressionASTCSliced3DSupported(VkFormat format) const;
 
     bool IsAndroidQualcomm() const;
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
     bool IsIntelMesa() const;
+    bool IsAndroidHuawei() const;
+    bool IsSwiftshader() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;
 
@@ -74,6 +79,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
     MaybeError InitializeImpl() override;
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+
+    MaybeError InitializeSupportedLimitsInternal(wgpu::FeatureLevel featureLevel,
+                                                 CombinedLimits* limits);
 
     FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
         wgpu::FeatureName feature,
@@ -93,16 +101,25 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool CheckSemaphoreSupport(DeviceExt deviceExt,
                                VkExternalSemaphoreHandleTypeFlagBits handleType) const;
 
-    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
     void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
-        UnpackedPtr<FormatCapabilities>& capabilities) const override;
+        UnpackedPtr<DawnFormatCapabilities>& capabilities) const override;
+    void PopulateSubgroupMatrixConfigs();
+
+    // Sets core feature level as not being supported and stores `error` with
+    // reason why core isn't supported.
+    void SetCoreNotSupported(std::unique_ptr<ErrorData> error);
 
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 
     uint32_t mDefaultComputeSubgroupSize = 0;
+    bool mSupportsCoreFeatureLevel = true;
+    mutable std::unique_ptr<ErrorData> mCoreError;
+
+    std::vector<SubgroupMatrixConfig> mSubgroupMatrixConfigs;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

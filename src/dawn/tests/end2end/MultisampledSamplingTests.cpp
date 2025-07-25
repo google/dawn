@@ -93,7 +93,7 @@ class MultisampledSamplingTest : public DawnTest {
             desc.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
 
             wgpu::DepthStencilState* depthStencil = desc.EnableDepthStencil(kDepthFormat);
-            depthStencil->depthWriteEnabled = true;
+            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
 
             desc.multisample.count = kSampleCount;
             desc.cFragment.targetCount = 1;
@@ -136,6 +136,9 @@ class MultisampledSamplingTest : public DawnTest {
 // must cover both the X and Y coordinates of the sample position (no false positives if
 // it covers the X position but not the Y, or vice versa).
 TEST_P(MultisampledSamplingTest, SamplePositions) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     // textureLoad with texture_depth_xxx is not supported in compat mode.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 

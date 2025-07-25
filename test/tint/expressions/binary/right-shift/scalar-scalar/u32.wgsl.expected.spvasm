@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 11
 ; Schema: 0
                OpCapability Shader
@@ -8,15 +8,18 @@
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
                OpName %f "f"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %r "r"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
-     %uint_1 = OpConstant %uint 1
-     %uint_2 = OpConstant %uint 2
+          %a = OpConstant %uint 1
+          %b = OpConstant %uint 2
     %uint_31 = OpConstant %uint 31
-          %f = OpFunction %void None %1
+          %f = OpFunction %void None %3
           %4 = OpLabel
-          %9 = OpBitwiseAnd %uint %uint_2 %uint_31
-         %10 = OpShiftRightLogical %uint %uint_1 %9
+          %8 = OpBitwiseAnd %uint %b %uint_31
+          %r = OpShiftRightLogical %uint %a %8
                OpReturn
                OpFunctionEnd

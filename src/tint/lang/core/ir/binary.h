@@ -49,15 +49,23 @@ class Binary : public Castable<Binary, OperandInstruction<2, 1>> {
     /// The offset in Operands() for the RHS
     static constexpr size_t kRhsOperandOffset = 1;
 
+    /// The fixed number of results returned by binary instructions
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands expected for binary instructions
+    static constexpr size_t kNumOperands = 2;
+
     /// Constructor (no results, no operands)
-    Binary();
+    /// @param id the instruction id
+    explicit Binary(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param op the binary operator
     /// @param lhs the lhs of the instruction
     /// @param rhs the rhs of the instruction
-    Binary(InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
+    Binary(Id id, InstructionResult* result, BinaryOp op, Value* lhs, Value* rhs);
     ~Binary() override;
 
     /// @returns the binary operator

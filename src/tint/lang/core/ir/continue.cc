@@ -40,9 +40,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Continue);
 
 namespace tint::core::ir {
 
-Continue::Continue() = default;
+Continue::Continue(Id id) : Base(id) {}
 
-Continue::Continue(ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
+Continue::Continue(Id id, ir::Loop* loop, VectorRef<Value*> args) : Base(id), loop_(loop) {
     TINT_ASSERT(loop_);
 
     AddOperands(Continue::kArgsOperandOffset, std::move(args));
@@ -54,20 +54,27 @@ Continue::Continue(ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
 
 Continue::~Continue() = default;
 
+void Continue::Destroy() {
+    if (loop_) {
+        loop_->Continuing()->RemoveInboundSiblingBranch(this);
+    }
+    Instruction::Destroy();
+}
+
 Continue* Continue::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(Loop());
     auto args = ctx.Remap<Continue::kDefaultNumOperands>(Args());
 
-    return ctx.ir.allocators.instructions.Create<Continue>(loop, args);
+    return ctx.ir.CreateInstruction<Continue>(loop, args);
 }
 
 void Continue::SetLoop(ir::Loop* loop) {
     if (loop_ && loop_->Body()) {
-        loop_->Body()->RemoveInboundSiblingBranch(this);
+        loop_->Continuing()->RemoveInboundSiblingBranch(this);
     }
     loop_ = loop;
     if (loop) {
-        loop->Body()->AddInboundSiblingBranch(this);
+        loop->Continuing()->AddInboundSiblingBranch(this);
     }
 }
 

@@ -47,12 +47,14 @@ TEST_P(QueueTests, GetQueueSameObject) {
 
 DAWN_INSTANTIATE_TEST(QueueTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       NullBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class QueueWriteBufferTests : public DawnTest {};
 
@@ -190,7 +192,7 @@ TEST_P(QueueWriteBufferTests, SuperLargeWriteBuffer) {
 // Test using the max buffer size. Regression test for dawn:1985. We don't bother validating the
 // results for this case since that would take a lot longer, just that there are no errors.
 TEST_P(QueueWriteBufferTests, MaxBufferSizeWriteBuffer) {
-    uint32_t maxBufferSize = GetSupportedLimits().limits.maxBufferSize;
+    uint32_t maxBufferSize = GetSupportedLimits().maxBufferSize;
     wgpu::BufferDescriptor descriptor;
     descriptor.size = maxBufferSize;
     descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -203,6 +205,9 @@ TEST_P(QueueWriteBufferTests, MaxBufferSizeWriteBuffer) {
 // Test a special code path: writing when dynamic uploader already contatins some unaligned
 // data, it might be necessary to use a ring buffer with properly aligned offset.
 TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
+    // TODO(crbug.com/413053623): implement webgpu::Texture
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     utils::UnalignDynamicUploader(device);
 
     wgpu::BufferDescriptor descriptor;
@@ -266,11 +271,13 @@ TEST_P(QueueWriteBufferTests, WriteUniformBufferWithVariousOffsetAndSizeAlignmen
 
 DAWN_INSTANTIATE_TEST(QueueWriteBufferTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // For MinimumDataSpec bytesPerRow and rowsPerImage, compute a default from the copy extent.
 constexpr uint32_t kStrideComputeDefault = 0xFFFF'FFFEul;
@@ -362,14 +369,14 @@ class QueueWriteTextureTests : public DawnTestWithParams<WriteTextureFormatParam
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout = utils::CreateTexelCopyBufferLayout(
             dataSpec.offset, dataSpec.bytesPerRow, dataSpec.rowsPerImage);
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, textureSpec.level, textureSpec.copyOrigin);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, textureSpec.level, textureSpec.copyOrigin);
 
-        queue.WriteTexture(&imageCopyTexture, data.data(), dataSpec.size, &textureDataLayout,
-                           &copySize);
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), dataSpec.size,
+                           &texelCopyBufferLayout, &copySize);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(GetParam().mTextureFormat);
         wgpu::Extent3D mipSize = {textureSpec.textureSize.width >> textureSpec.level,
@@ -636,6 +643,10 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
     // TODO(crbug.com/dawn/42241333): diagnose stencil8 failure on Angle Swiftshader
     DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsANGLESwiftShader());
 
+    // TODO(383765096): D3D11 doesn't allow calling Gather() on R8_UINT
+    DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsD3D11() &&
+                          IsCompatibilityMode());
+
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 257;
 
@@ -690,6 +701,9 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
+    // TODO(383779503): reading stencil texture is too slow on D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8);
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
@@ -779,7 +793,7 @@ TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
 }
 
 DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
-                        {D3D11Backend(), D3D12Backend(),
+                        {D3D11Backend(), D3D11Backend({"d3d11_delay_flush_to_gpu"}), D3D12Backend(),
                          D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
                                        "copy_with_non_zero_buffer_offset"}),
                          MetalBackend(),
@@ -811,13 +825,14 @@ class QueueWriteTextureSimpleTests : public DawnTest {
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, width * kPixelSize);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, width * kPixelSize);
         wgpu::Extent3D copyExtent = {width, height, 1};
-        device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), width * height * kPixelSize,
-                                       &textureDataLayout, &copyExtent);
+        device.GetQueue().WriteTexture(&texelCopyTextureInfo, data.data(),
+                                       width * height * kPixelSize, &texelCopyBufferLayout,
+                                       &copyExtent);
 
         EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
     }
@@ -865,17 +880,17 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectWithSourceOffsetUnaligned
     // internal ring buffer and write the user data into it at the offset 0.
     {
         constexpr uint32_t kDataOffset1 = 0u;
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(kDataOffset1, kBytesPerRowForWriteTexture);
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(kDataOffset1, kBytesPerRowForWriteTexture);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             dstTexture1, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
-        queue.WriteTexture(&imageCopyTexture, kData, sizeof(kData), &textureDataLayout,
+        queue.WriteTexture(&texelCopyTextureInfo, kData, sizeof(kData), &texelCopyBufferLayout,
                            &kWriteSize);
 
         constexpr uint32_t kOutputBufferOffset1 = 0u;
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             outputBuffer, kOutputBufferOffset1, kTextureBytesPerRowAlignment);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &kWriteSize);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &kWriteSize);
 
         expectedData[kOutputBufferOffset1] = kData[kDataOffset1];
     }
@@ -886,17 +901,17 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectWithSourceOffsetUnaligned
     // destination texture aspect is stencil.
     {
         constexpr uint32_t kDataOffset2 = 1u;
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(kDataOffset2, kBytesPerRowForWriteTexture);
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(kDataOffset2, kBytesPerRowForWriteTexture);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             dstTexture2, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
-        queue.WriteTexture(&imageCopyTexture, kData, sizeof(kData), &textureDataLayout,
+        queue.WriteTexture(&texelCopyTextureInfo, kData, sizeof(kData), &texelCopyBufferLayout,
                            &kWriteSize);
 
         constexpr uint32_t kOutputBufferOffset2 = 4u;
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
             outputBuffer, kOutputBufferOffset2, kTextureBytesPerRowAlignment);
-        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &kWriteSize);
+        encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &kWriteSize);
 
         expectedData[kOutputBufferOffset2] = kData[kDataOffset2];
     }
@@ -919,18 +934,20 @@ TEST_P(QueueWriteTextureSimpleTests, WriteDepthAspectAfterOtherQueueWriteTexture
     wgpu::Texture depthTexture2 = device.CreateTexture(&textureDescriptor);
 
     constexpr uint16_t kExpectedData1 = (204 << 8) | 205;
-    wgpu::ImageCopyTexture imageCopyTexture1 = utils::CreateImageCopyTexture(depthTexture1);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo1 =
+        utils::CreateTexelCopyTextureInfo(depthTexture1);
     // (Off-topic) spot-test for defaulting of .aspect.
-    imageCopyTexture1.aspect = wgpu::TextureAspect::Undefined;
-    wgpu::TextureDataLayout textureDataLayout =
-        utils::CreateTextureDataLayout(0, sizeof(kExpectedData1));
-    queue.WriteTexture(&imageCopyTexture1, &kExpectedData1, sizeof(kExpectedData1),
-                       &textureDataLayout, &textureDescriptor.size);
+    texelCopyTextureInfo1.aspect = wgpu::TextureAspect::Undefined;
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+        utils::CreateTexelCopyBufferLayout(0, sizeof(kExpectedData1));
+    queue.WriteTexture(&texelCopyTextureInfo1, &kExpectedData1, sizeof(kExpectedData1),
+                       &texelCopyBufferLayout, &textureDescriptor.size);
 
     constexpr uint16_t kExpectedData2 = (206 << 8) | 207;
-    wgpu::ImageCopyTexture imageCopyTexture2 = utils::CreateImageCopyTexture(depthTexture2);
-    queue.WriteTexture(&imageCopyTexture2, &kExpectedData2, sizeof(kExpectedData2),
-                       &textureDataLayout, &textureDescriptor.size);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo2 =
+        utils::CreateTexelCopyTextureInfo(depthTexture2);
+    queue.WriteTexture(&texelCopyTextureInfo2, &kExpectedData2, sizeof(kExpectedData2),
+                       &texelCopyBufferLayout, &textureDescriptor.size);
 
     EXPECT_TEXTURE_EQ(&kExpectedData1, depthTexture1, {0, 0}, {1, 1}, 0,
                       wgpu::TextureAspect::DepthOnly);
@@ -953,18 +970,18 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextu
     wgpu::Texture depthStencilTexture2 = device.CreateTexture(&textureDescriptor);
 
     constexpr uint8_t kExpectedData1 = 204u;
-    wgpu::ImageCopyTexture imageCopyTexture1 = utils::CreateImageCopyTexture(
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo1 = utils::CreateTexelCopyTextureInfo(
         depthStencilTexture1, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
-    wgpu::TextureDataLayout textureDataLayout =
-        utils::CreateTextureDataLayout(0, sizeof(kExpectedData1));
-    queue.WriteTexture(&imageCopyTexture1, &kExpectedData1, sizeof(kExpectedData1),
-                       &textureDataLayout, &textureDescriptor.size);
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+        utils::CreateTexelCopyBufferLayout(0, sizeof(kExpectedData1));
+    queue.WriteTexture(&texelCopyTextureInfo1, &kExpectedData1, sizeof(kExpectedData1),
+                       &texelCopyBufferLayout, &textureDescriptor.size);
 
     constexpr uint8_t kExpectedData2 = 205;
-    wgpu::ImageCopyTexture imageCopyTexture2 = utils::CreateImageCopyTexture(
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo2 = utils::CreateTexelCopyTextureInfo(
         depthStencilTexture2, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
-    queue.WriteTexture(&imageCopyTexture2, &kExpectedData2, sizeof(kExpectedData2),
-                       &textureDataLayout, &textureDescriptor.size);
+    queue.WriteTexture(&texelCopyTextureInfo2, &kExpectedData2, sizeof(kExpectedData2),
+                       &texelCopyBufferLayout, &textureDescriptor.size);
 
     EXPECT_TEXTURE_EQ(&kExpectedData1, depthStencilTexture1, {0, 0}, {1, 1}, 0,
                       wgpu::TextureAspect::StencilOnly);
@@ -975,6 +992,8 @@ TEST_P(QueueWriteTextureSimpleTests, WriteStencilAspectAfterOtherQueueWriteTextu
 DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
                       D3D11Backend(),
                       D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_disable_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

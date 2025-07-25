@@ -1,14 +1,15 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 void c(int x, int y, int z) {
-  int a = (((1 + x) + y) + z);
-  a = (a + 2);
+  int a = (((int(1) + x) + y) + z);
+  a = (a + int(2));
 }
 
 void b() {
-  c(1, 2, 3);
-  c(4, 5, 6);
+  c(int(1), int(2), int(3));
+  c(int(4), int(5), int(6));
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

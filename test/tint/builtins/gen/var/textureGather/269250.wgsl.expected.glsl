@@ -1,92 +1,78 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   ivec4 inner;
-} prevent_dce;
-
-uniform highp isampler2DArray arg_1_arg_2;
-
+} v;
+uniform highp isampler2DArray f_arg_1_arg_2;
 ivec4 textureGather_269250() {
   vec2 arg_3 = vec2(1.0f);
   uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), int(1u));
+  vec2 v_1 = arg_3;
+  vec3 v_2 = vec3(v_1, float(arg_4));
+  ivec4 res = textureGather(f_arg_1_arg_2, v_2, int(1u));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  ivec4 prevent_dce;
-};
-
-void fragment_main() {
-  prevent_dce.inner = textureGather_269250();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = textureGather_269250();
 }
+//
+// compute_main
+//
 #version 310 es
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
   ivec4 inner;
-} prevent_dce;
-
+} v;
 uniform highp isampler2DArray arg_1_arg_2;
-
 ivec4 textureGather_269250() {
   vec2 arg_3 = vec2(1.0f);
   uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), int(1u));
+  vec2 v_1 = arg_3;
+  vec3 v_2 = vec3(v_1, float(arg_4));
+  ivec4 res = textureGather(arg_1_arg_2, v_2, int(1u));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  ivec4 prevent_dce;
-};
-
-void compute_main() {
-  prevent_dce.inner = textureGather_269250();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = textureGather_269250();
 }
+//
+// vertex_main
+//
 #version 310 es
 
-layout(location = 0) flat out ivec4 prevent_dce_1;
-uniform highp isampler2DArray arg_1_arg_2;
-
-ivec4 textureGather_269250() {
-  vec2 arg_3 = vec2(1.0f);
-  uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), int(1u));
-  return res;
-}
 
 struct VertexOutput {
   vec4 pos;
   ivec4 prevent_dce;
 };
 
-VertexOutput vertex_main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), ivec4(0, 0, 0, 0));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureGather_269250();
-  return tint_symbol;
+uniform highp isampler2DArray v_arg_1_arg_2;
+layout(location = 0) flat out ivec4 tint_interstage_location0;
+ivec4 textureGather_269250() {
+  vec2 arg_3 = vec2(1.0f);
+  uint arg_4 = 1u;
+  vec2 v = arg_3;
+  vec3 v_1 = vec3(v, float(arg_4));
+  ivec4 res = textureGather(v_arg_1_arg_2, v_1, int(1u));
+  return res;
 }
-
+VertexOutput vertex_main_inner() {
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), ivec4(0));
+  v_2.pos = vec4(0.0f);
+  v_2.prevent_dce = textureGather_269250();
+  return v_2;
+}
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutput inner_result = vertex_main();
-  gl_Position = inner_result.pos;
-  prevent_dce_1 = inner_result.prevent_dce;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutput v_3 = vertex_main_inner();
+  gl_Position = vec4(v_3.pos.x, -(v_3.pos.y), ((2.0f * v_3.pos.z) - v_3.pos.w), v_3.pos.w);
+  tint_interstage_location0 = v_3.prevent_dce;
+  gl_PointSize = 1.0f;
 }

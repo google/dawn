@@ -1,58 +1,53 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 39
+; Generator: Google Tint Compiler; 1
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %tint_mod "tint_mod"
+               OpName %f "f"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %r "r"
+               OpName %tint_mod_i32 "tint_mod_i32"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %f "f"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-          %1 = OpTypeFunction %int %int %int
-          %8 = OpConstantNull %int
+          %a = OpConstant %int 1
+          %b = OpConstant %int 2
+         %12 = OpTypeFunction %int %int %int
+      %int_0 = OpConstant %int 0
        %bool = OpTypeBool
 %int_n2147483648 = OpConstant %int -2147483648
      %int_n1 = OpConstant %int -1
-      %int_1 = OpConstant %int 1
        %uint = OpTypeInt 32 0
-%uint_2147483648 = OpConstant %uint 2147483648
-         %24 = OpConstantNull %uint
-       %void = OpTypeVoid
-         %33 = OpTypeFunction %void
-      %int_2 = OpConstant %int 2
-   %tint_mod = OpFunction %int None %1
+          %f = OpFunction %void None %3
+          %4 = OpLabel
+          %r = OpFunctionCall %int %tint_mod_i32 %a %b
+               OpReturn
+               OpFunctionEnd
+%tint_mod_i32 = OpFunction %int None %12
         %lhs = OpFunctionParameter %int
         %rhs = OpFunctionParameter %int
-          %6 = OpLabel
-          %9 = OpIEqual %bool %rhs %8
-         %12 = OpIEqual %bool %lhs %int_n2147483648
-         %14 = OpIEqual %bool %rhs %int_n1
-         %15 = OpLogicalAnd %bool %12 %14
-         %16 = OpLogicalOr %bool %9 %15
-          %7 = OpSelect %int %16 %int_1 %rhs
-         %21 = OpBitwiseOr %int %lhs %7
-         %19 = OpBitcast %uint %21
-         %23 = OpBitwiseAnd %uint %19 %uint_2147483648
-         %25 = OpINotEqual %bool %23 %24
-               OpSelectionMerge %26 None
-               OpBranchConditional %25 %27 %28
-         %27 = OpLabel
-         %29 = OpSDiv %int %lhs %7
-         %30 = OpIMul %int %29 %7
-         %31 = OpISub %int %lhs %30
-               OpReturnValue %31
-         %28 = OpLabel
-         %32 = OpSRem %int %lhs %7
-               OpReturnValue %32
-         %26 = OpLabel
-               OpReturnValue %8
-               OpFunctionEnd
-          %f = OpFunction %void None %33
-         %36 = OpLabel
-         %38 = OpFunctionCall %int %tint_mod %int_1 %int_2
-               OpReturn
+         %13 = OpLabel
+         %14 = OpIEqual %bool %rhs %int_0
+         %17 = OpIEqual %bool %lhs %int_n2147483648
+         %19 = OpIEqual %bool %rhs %int_n1
+         %21 = OpLogicalAnd %bool %17 %19
+         %22 = OpLogicalOr %bool %14 %21
+         %23 = OpSelect %int %22 %a %rhs
+         %24 = OpSDiv %int %lhs %23
+         %26 = OpBitcast %uint %24
+         %27 = OpBitcast %uint %23
+         %28 = OpIMul %uint %26 %27
+         %29 = OpBitcast %int %28
+         %30 = OpBitcast %uint %lhs
+         %31 = OpBitcast %uint %29
+         %32 = OpISub %uint %30 %31
+         %33 = OpBitcast %int %32
+               OpReturnValue %33
                OpFunctionEnd

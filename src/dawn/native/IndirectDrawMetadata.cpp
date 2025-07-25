@@ -154,6 +154,11 @@ IndirectDrawMetadata::GetIndexedIndirectBufferValidationInfo() {
     return &mIndexedIndirectBufferValidationInfo;
 }
 
+const std::vector<IndirectDrawMetadata::IndirectMultiDraw>&
+IndirectDrawMetadata::GetIndirectMultiDraws() const {
+    return mMultiDraws;
+}
+
 void IndirectDrawMetadata::AddBundle(RenderBundleBase* bundle) {
     auto [_, inserted] = mAddedBundles.insert(bundle);
     if (!inserted) {
@@ -237,16 +242,40 @@ void IndirectDrawMetadata::ClearIndexedIndirectBufferValidationInfo() {
     mIndexedIndirectBufferValidationInfo.clear();
 }
 
+void IndirectDrawMetadata::AddMultiDrawIndirect(wgpu::PrimitiveTopology topology,
+                                                bool duplicateBaseVertexInstance,
+                                                MultiDrawIndirectCmd* cmd) {
+    IndirectMultiDraw multiDraw;
+    multiDraw.type = DrawType::NonIndexed;
+    multiDraw.cmd = cmd;
+    multiDraw.topology = topology;
+    multiDraw.duplicateBaseVertexInstance = duplicateBaseVertexInstance;
+    mMultiDraws.push_back(multiDraw);
+}
+
+void IndirectDrawMetadata::AddMultiDrawIndexedIndirect(BufferBase* indexBuffer,
+                                                       wgpu::IndexFormat indexFormat,
+                                                       uint64_t indexBufferSize,
+                                                       uint64_t indexBufferOffset,
+                                                       wgpu::PrimitiveTopology topology,
+                                                       bool duplicateBaseVertexInstance,
+                                                       MultiDrawIndexedIndirectCmd* cmd) {
+    IndirectMultiDraw multiDraw;
+    multiDraw.type = DrawType::Indexed;
+    multiDraw.indexBuffer = indexBuffer;
+    multiDraw.cmd = cmd;
+    multiDraw.indexBufferSize = indexBufferSize;
+    multiDraw.indexBufferOffsetInBytes = indexBufferOffset;
+    multiDraw.indexFormat = indexFormat;
+    multiDraw.topology = topology;
+    multiDraw.duplicateBaseVertexInstance = duplicateBaseVertexInstance;
+
+    mMultiDraws.push_back(multiDraw);
+}
+
 bool IndirectDrawMetadata::IndexedIndirectConfig::operator<(
     const IndexedIndirectConfig& other) const {
     return std::tie(inputIndirectBufferPtr, duplicateBaseVertexInstance, drawType) <
-           std::tie(other.inputIndirectBufferPtr, other.duplicateBaseVertexInstance,
-                    other.drawType);
-}
-
-bool IndirectDrawMetadata::IndexedIndirectConfig::operator==(
-    const IndexedIndirectConfig& other) const {
-    return std::tie(inputIndirectBufferPtr, duplicateBaseVertexInstance, drawType) ==
            std::tie(other.inputIndirectBufferPtr, other.duplicateBaseVertexInstance,
                     other.drawType);
 }

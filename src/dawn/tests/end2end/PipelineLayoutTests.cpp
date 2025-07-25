@@ -34,19 +34,29 @@
 namespace dawn {
 namespace {
 
-class PipelineLayoutTests : public DawnTest {};
+class PipelineLayoutTests : public DawnTest {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // TODO(crbug.com/383593270): Enable all the limits.
+        required.maxStorageBuffersInFragmentStage = supported.maxStorageBuffersInFragmentStage;
+        required.maxStorageBuffersPerShaderStage = supported.maxStorageBuffersPerShaderStage;
+    }
+};
 
 // Test creating a PipelineLayout with multiple BGLs where the first BGL uses the max number of
 // dynamic buffers. This is a regression test for crbug.com/dawn/449 which would overflow when
 // dynamic offset bindings were at max. Test is successful if the pipeline layout is created
 // without error.
 TEST_P(PipelineLayoutTests, DynamicBuffersOverflow) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+
     // Create the first bind group layout which uses max number of dynamic buffers bindings.
     wgpu::BindGroupLayout bglA;
     {
         std::vector<wgpu::BindGroupLayoutEntry> entries;
-        for (uint32_t i = 0;
-             i < GetSupportedLimits().limits.maxDynamicStorageBuffersPerPipelineLayout; i++) {
+        for (uint32_t i = 0; i < GetSupportedLimits().maxDynamicStorageBuffersPerPipelineLayout;
+             i++) {
             wgpu::BindGroupLayoutEntry entry;
             entry.binding = i;
             entry.visibility = wgpu::ShaderStage::Compute;
@@ -154,6 +164,73 @@ TEST_P(PipelineLayoutTests, ComputeAndRenderSamePipelineLayout) {
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
+}
+
+// Test creating a PipelineLayout with null and non-null bind group layouts work correctly.
+TEST_P(PipelineLayoutTests, PipelineLayoutCreatedWithNullBindGroupLayout) {
+    for (uint32_t nonEmptyGroupIndex = 0; nonEmptyGroupIndex <= 1; ++nonEmptyGroupIndex) {
+        std::ostringstream stream;
+        stream << "@group(" << nonEmptyGroupIndex << R"()
+                  @binding(0) var<storage, read> inputData : u32;
+        @group(2) @binding(0) var<storage, read_write> outputData : u32;
+        @compute @workgroup_size(1, 1)
+        fn main() {
+            outputData = inputData;
+        }
+    )";
+
+        wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, stream.str());
+
+        // Create 3 bind group layouts with a null bind group layout.
+        std::array<wgpu::BindGroupLayout, 3> bgls = {};
+        bgls[nonEmptyGroupIndex] = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage}});
+        bgls[2] = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+
+        // Create pipeline layout with the array of bind group layouts `bgls`.
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor = {};
+        pipelineLayoutDescriptor.bindGroupLayoutCount = bgls.size();
+        pipelineLayoutDescriptor.bindGroupLayouts = bgls.data();
+        wgpu::PipelineLayout pipelineLayout =
+            device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
+        wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+        computePipelineDescriptor.compute.module = shaderModule;
+        computePipelineDescriptor.layout = pipelineLayout;
+        wgpu::ComputePipeline computePipeline =
+            device.CreateComputePipeline(&computePipelineDescriptor);
+
+        // Create and set 3 bind groups for the test. Only 2 of the 3 bind groups should be accessed
+        // inside the compute pipeline.
+        bgls[1 - nonEmptyGroupIndex] = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::ReadOnlyStorage}});
+        wgpu::Buffer buffer0 =
+            utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {1u});
+        wgpu::Buffer buffer1 =
+            utils::CreateBufferFromData(device, wgpu::BufferUsage::Storage, {2u});
+        wgpu::BufferDescriptor bufferDescriptor = {};
+        bufferDescriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+        bufferDescriptor.size = 4u;
+        wgpu::Buffer buffer2 = device.CreateBuffer(&bufferDescriptor);
+        wgpu::BindGroup bg0 = utils::MakeBindGroup(device, bgls[0], {{0, buffer0}});
+        wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgls[1], {{0, buffer1}});
+        wgpu::BindGroup bg2 = utils::MakeBindGroup(device, bgls[2], {{0, buffer2}});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(computePipeline);
+        pass.SetBindGroup(0, bg0);
+        pass.SetBindGroup(1, bg1);
+        pass.SetBindGroup(2, bg2);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        uint32_t expectedValue = nonEmptyGroupIndex + 1;
+        EXPECT_BUFFER_U32_EQ(expectedValue, buffer2, 0);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(PipelineLayoutTests,

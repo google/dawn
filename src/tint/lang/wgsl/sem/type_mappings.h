@@ -30,8 +30,6 @@
 
 #include <type_traits>
 
-#include "src/tint/lang/wgsl/sem/builtin_attribute.h"
-
 // Forward declarations
 namespace tint {
 class CastableBase;
@@ -71,7 +69,6 @@ class ForLoopStatement;
 class Function;
 class GlobalVariable;
 class IfStatement;
-class Node;
 class Parameter;
 class Statement;
 class Struct;
@@ -95,7 +92,6 @@ namespace tint::sem {
 struct TypeMappings {
     //! @cond Doxygen_Suppress
     BlockStatement* operator()(ast::BlockStatement*);
-    BuiltinAttribute* operator()(ast::BuiltinAttribute*);
     CastableBase* operator()(ast::Node*);
     Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);

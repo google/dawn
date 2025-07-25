@@ -2,52 +2,56 @@
 precision highp float;
 precision highp int;
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
-}
-
-bool tint_discarded = false;
-layout(location = 0) in float tint_symbol_2;
-layout(location = 1) in vec2 coord_1;
-layout(location = 0) out int value;
-layout(binding = 2, std430) buffer a_block_ssbo {
+layout(binding = 2, std430)
+buffer f_a_block_ssbo {
   int inner;
-} a;
-
-uniform highp sampler2D t_s;
-
-int foo(float tint_symbol, vec2 coord) {
-  if ((tint_symbol == 0.0f)) {
-    tint_discarded = true;
+} v;
+bool continue_execution = true;
+uniform highp sampler2D f_t_s;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) in vec2 tint_interstage_location1;
+layout(location = 0) out int foo_loc0_Output;
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
+}
+int foo_inner(float v_1, vec2 coord) {
+  if ((v_1 == 0.0f)) {
+    continue_execution = false;
   }
-  vec4 tint_symbol_1 = texture(t_s, coord);
-  int result = tint_ftoi(tint_symbol_1.x);
+  int result = tint_f32_to_i32(texture(f_t_s, coord).x);
   {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     int i = 0;
-    while (true) {
-      if (!((i < 10))) {
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      {
-        result = (result + i);
+      if ((i < 10)) {
+      } else {
+        break;
       }
+      int v_2 = i;
+      uint v_3 = uint(result);
+      result = int((v_3 + uint(v_2)));
       {
-        int tint_symbol_3 = 0;
-        if (!(tint_discarded)) {
-          tint_symbol_3 = atomicAdd(a.inner, 1);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        int v_4 = 0;
+        if (continue_execution) {
+          v_4 = atomicAdd(v.inner, 1);
         }
-        i = tint_symbol_3;
+        i = v_4;
       }
+      continue;
     }
+  }
+  if (!(continue_execution)) {
+    discard;
   }
   return result;
 }
-
 void main() {
-  int inner_result = foo(tint_symbol_2, coord_1);
-  value = inner_result;
-  if (tint_discarded) {
-    discard;
-  }
-  return;
+  foo_loc0_Output = foo_inner(tint_interstage_location0, tint_interstage_location1);
 }

@@ -3,51 +3,52 @@ struct Inner {
   float3 vec3_f32;
   float2x4 mat2x4_f32;
 };
+
 struct S {
   Inner inner;
 };
+
 
 cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
 RWByteAddressBuffer s : register(u1);
-
-float2x4 u_load_4(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  return float2x4(asfloat(u[scalar_offset / 4]), asfloat(u[scalar_offset_1 / 4]));
+void v(uint offset, float2x4 obj) {
+  s.Store4((offset + 0u), asuint(obj[0u]));
+  s.Store4((offset + 16u), asuint(obj[1u]));
 }
 
-Inner u_load_1(uint offset) {
-  const uint scalar_offset_2 = ((offset + 0u)) / 4;
-  const uint scalar_offset_3 = ((offset + 16u)) / 4;
-  Inner tint_symbol = {asfloat(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), asfloat(u[scalar_offset_3 / 4].xyz), u_load_4((offset + 32u))};
-  return tint_symbol;
+void v_1(uint offset, Inner obj) {
+  s.Store((offset + 0u), asuint(obj.scalar_f32));
+  s.Store3((offset + 16u), asuint(obj.vec3_f32));
+  v((offset + 32u), obj.mat2x4_f32);
 }
 
-S u_load(uint offset) {
-  S tint_symbol_1 = {u_load_1((offset + 0u))};
-  return tint_symbol_1;
+void v_2(uint offset, S obj) {
+  Inner v_3 = obj.inner;
+  v_1((offset + 0u), v_3);
 }
 
-void s_store_4(uint offset, float2x4 value) {
-  s.Store4((offset + 0u), asuint(value[0u]));
-  s.Store4((offset + 16u), asuint(value[1u]));
+float2x4 v_4(uint start_byte_offset) {
+  return float2x4(asfloat(u[(start_byte_offset / 16u)]), asfloat(u[((16u + start_byte_offset) / 16u)]));
 }
 
-void s_store_1(uint offset, Inner value) {
-  s.Store((offset + 0u), asuint(value.scalar_f32));
-  s.Store3((offset + 16u), asuint(value.vec3_f32));
-  s_store_4((offset + 32u), value.mat2x4_f32);
+Inner v_5(uint start_byte_offset) {
+  float v_6 = asfloat(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float3 v_7 = asfloat(u[((16u + start_byte_offset) / 16u)].xyz);
+  Inner v_8 = {v_6, v_7, v_4((32u + start_byte_offset))};
+  return v_8;
 }
 
-void s_store(uint offset, S value) {
-  s_store_1((offset + 0u), value.inner);
+S v_9(uint start_byte_offset) {
+  Inner v_10 = v_5(start_byte_offset);
+  S v_11 = {v_10};
+  return v_11;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S x = u_load(0u);
-  s_store(0u, x);
-  return;
+  S x = v_9(0u);
+  v_2(0u, x);
 }
+

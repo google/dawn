@@ -1,43 +1,12 @@
-#version 310 es
-precision highp float;
-precision highp int;
+SKIP: INVALID
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
+unsupported read-write storage texture format
+unsupported read-write storage texture format
+//
+// fragment_main
+//
+//
+// compute_main
+//
 
-layout(rgba32f) uniform highp writeonly image2DArray arg_0;
-uint textureNumLayers_5ee8f2() {
-  uint res = uint(imageSize(arg_0).z);
-  return res;
-}
-
-void fragment_main() {
-  prevent_dce.inner = textureNumLayers_5ee8f2();
-}
-
-void main() {
-  fragment_main();
-  return;
-}
-#version 310 es
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
-
-layout(rgba32f) uniform highp writeonly image2DArray arg_0;
-uint textureNumLayers_5ee8f2() {
-  uint res = uint(imageSize(arg_0).z);
-  return res;
-}
-
-void compute_main() {
-  prevent_dce.inner = textureNumLayers_5ee8f2();
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  compute_main();
-  return;
-}
+tint executable returned error: exit status 1

@@ -82,11 +82,14 @@ class Switch final : public Castable<Switch, ControlInstruction> {
     };
 
     /// Constructor (no results, no operands, no cases)
-    Switch();
+    /// @param id the instruction id
+    explicit Switch(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param cond the condition
-    explicit Switch(Value* cond);
+    Switch(Id id, Value* cond);
+
     ~Switch() override;
 
     /// @copydoc Instruction::Clone()
@@ -112,6 +115,18 @@ class Switch final : public Castable<Switch, ControlInstruction> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "switch"; }
+
+    /// @returns the default block for the switch, or nullptr if non-exists
+    ir::Block* DefaultBlock() {
+        for (auto& c : cases_) {
+            for (auto& s : c.selectors) {
+                if (s.IsDefault()) {
+                    return c.block.Get();
+                }
+            }
+        }
+        return nullptr;
+    }
 
   private:
     Vector<Case, 4> cases_;

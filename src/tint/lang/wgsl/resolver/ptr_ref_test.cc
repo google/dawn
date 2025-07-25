@@ -71,7 +71,7 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -139,7 +139,7 @@ TEST_F(ResolverPtrRefTest, ArrayIndexAccessorViaDerefPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -160,7 +160,7 @@ TEST_F(ResolverPtrRefTest, ArrayIndexAccessorViaPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -198,7 +198,7 @@ TEST_F(ResolverPtrRefTest, VectorIndexAccessorViaDerefPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -219,7 +219,7 @@ TEST_F(ResolverPtrRefTest, VectorIndexAccessorViaPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -257,7 +257,7 @@ TEST_F(ResolverPtrRefTest, VectorMemberAccessorViaDerefPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -278,7 +278,7 @@ TEST_F(ResolverPtrRefTest, VectorMemberAccessorViaPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -316,7 +316,7 @@ TEST_F(ResolverPtrRefTest, MatrixIndexAccessorViaDerefPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -340,7 +340,7 @@ TEST_F(ResolverPtrRefTest, MatrixIndexAccessorViaPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -385,7 +385,7 @@ TEST_F(ResolverPtrRefTest, StructMemberAccessorViaDerefPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
@@ -410,7 +410,7 @@ TEST_F(ResolverPtrRefTest, StructMemberAccessorViaPointer) {
     auto* load = Sem().Get<sem::Load>(expr);
     ASSERT_NE(load, nullptr);
 
-    auto* ref = load->Reference();
+    auto* ref = load->Source();
     ASSERT_NE(ref, nullptr);
 
     ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());

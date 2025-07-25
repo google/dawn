@@ -141,7 +141,12 @@ Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
 std::string GetVendorName(PCIVendorID vendorId) {
     switch(vendorId) {
         {% for vendor in vendors %}
-            case kVendorID_{{vendor.name.CamelCase()}}: return "{{vendor.name.js_enum_case()}}";
+            case kVendorID_{{vendor.name.CamelCase()}}:
+            {% if vendor.name_override %}
+                    return "{{vendor.name_override.js_enum_case()}}";
+            {% else %}
+                    return "{{vendor.name.js_enum_case()}}";
+            {% endif %}
         {% endfor %}
     }
 

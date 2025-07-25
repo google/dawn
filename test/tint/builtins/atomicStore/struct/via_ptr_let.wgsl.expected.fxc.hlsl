@@ -4,30 +4,26 @@ struct S {
   uint y;
 };
 
-groupshared S wg;
+struct compute_main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    wg.x = 0;
-    uint atomic_result = 0u;
-    InterlockedExchange(wg.a, 0u, atomic_result);
+
+groupshared S wg;
+void compute_main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    wg.x = int(0);
+    uint v = 0u;
+    InterlockedExchange(wg.a, 0u, v);
     wg.y = 0u;
   }
   GroupMemoryBarrierWithGroupSync();
-}
-
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void compute_main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  uint atomic_result_1 = 0u;
-  InterlockedExchange(wg.a, 1u, atomic_result_1);
+  uint v_1 = 0u;
+  InterlockedExchange(wg.a, 1u, v_1);
 }
 
 [numthreads(1, 1, 1)]
-void compute_main(tint_symbol_1 tint_symbol) {
-  compute_main_inner(tint_symbol.local_invocation_index);
-  return;
+void compute_main(compute_main_inputs inputs) {
+  compute_main_inner(inputs.tint_local_index);
 }
+

@@ -50,11 +50,16 @@ struct State {
 
     /// Process the module.
     void Process() {
+        /// Map of values to the new let versions
+        Hashmap<core::ir::Value*, core::ir::Let*, 8> values_in_lets{};
+
         for (auto* block : ir.blocks.Objects()) {
+            values_in_lets.Clear();
+
             // In the root block, all structs need to be split out, no nested structs
             bool is_root_block = block == ir.root_block;
 
-            Process(block, is_root_block);
+            Process(block, is_root_block, values_in_lets);
         }
     }
 
@@ -64,7 +69,9 @@ struct State {
         core::ir::Value* val;
     };
 
-    void Process(core::ir::Block* block, bool is_root_block) {
+    void Process(core::ir::Block* block,
+                 bool is_root_block,
+                 Hashmap<core::ir::Value*, core::ir::Let*, 8>& values_in_lets) {
         Vector<ValueInfo, 4> worklist;
 
         for (auto* inst : *block) {
@@ -96,9 +103,12 @@ struct State {
         Vector<core::ir::Construct*, 4> const_worklist;
         for (auto& item : worklist) {
             if (auto* res = As<core::ir::InstructionResult>(item.val)) {
-                PutInLet(item.inst, item.index, res);
+                // If the value isn't already a `let`, put it into a `let`.
+                if (!res->Instruction()->Is<core::ir::Let>()) {
+                    PutInLet(item.inst, item.index, res, values_in_lets);
+                }
             } else if (auto* val = As<core::ir::Constant>(item.val)) {
-                auto* let = PutInLet(item.inst, item.index, val);
+                auto* let = PutInLet(item.inst, item.index, val, values_in_lets);
                 auto ret = HoistModuleScopeLetToConstruct(is_root_block, item.inst, let, val);
                 if (ret.has_value()) {
                     const_worklist.Insert(0, *ret);
@@ -138,7 +148,7 @@ struct State {
         Vector<core::ir::Value*, 4> new_args = GatherArgs(const_val);
 
         auto* construct = b.Construct(const_val->Type(), new_args);
-        let->SetValue(construct->Result(0));
+        let->SetValue(construct->Result());
 
         // Put the `let` in before the `construct` value that we're based off of
         let->InsertBefore(parent);
@@ -146,7 +156,7 @@ struct State {
         construct->InsertBefore(let);
 
         // Replace the argument in the originating `construct` with the new `let`.
-        parent->SetArg(idx, let->Result(0));
+        parent->SetArg(idx, let->Result());
 
         return {construct};
     }
@@ -173,7 +183,7 @@ struct State {
         // Turn the `constant` into a `construct` call and replace the value of the `let` that
         // was created.
         auto* construct = b.Construct(val->Type(), args);
-        let->SetValue(construct->Result(0));
+        let->SetValue(construct->Result());
         construct->InsertBefore(let);
 
         return {construct};
@@ -188,7 +198,9 @@ struct State {
                 args.Push(b.Constant(v));
             }
         } else if (auto* splat_val = val->Value()->As<core::constant::Splat>()) {
-            args.Push(b.Constant(splat_val->el));
+            for (uint32_t i = 0; i < splat_val->NumElements(); i++) {
+                args.Push(b.Constant(splat_val->el));
+            }
         }
         return args;
     }
@@ -199,17 +211,26 @@ struct State {
 
         auto name = b.ir.NameOf(value);
         if (name.IsValid()) {
-            b.ir.SetName(let->Result(0), name);
+            b.ir.SetName(let->Result(), name);
             b.ir.ClearName(value);
         }
         return let;
     }
 
-    core::ir::Let* PutInLet(core::ir::Instruction* inst, size_t index, core::ir::Value* value) {
-        auto* let = MakeLet(value);
-        let->InsertBefore(inst);
+    core::ir::Let* PutInLet(core::ir::Instruction* inst,
+                            size_t index,
+                            core::ir::Value* value,
+                            Hashmap<core::ir::Value*, core::ir::Let*, 8>& values_in_lets) {
+        core::ir::Let* let = nullptr;
+        if (auto res = values_in_lets.Get(value); res) {
+            let = *res;
+        } else {
+            let = MakeLet(value);
+            let->InsertBefore(inst);
+            values_in_lets.Add(value, let);
+        }
 
-        inst->SetOperand(index, let->Result(0));
+        inst->SetOperand(index, let->Result());
         return let;
     }
 };
@@ -217,7 +238,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PromoteInitializers transform");
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "hlsl.PromoteInitializers", kPromoteInitializersCapabilities);
     if (result != Success) {
         return result;
     }

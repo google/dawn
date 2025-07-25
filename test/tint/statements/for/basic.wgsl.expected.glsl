@@ -1,17 +1,24 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 void some_loop_body() {
 }
-
 void f() {
   {
-    for(int i = 0; (i < 5); i = (i + 1)) {
+    int i = 0;
+    while(true) {
+      if ((i < 5)) {
+      } else {
+        break;
+      }
       some_loop_body();
+      {
+        uint v = uint(i);
+        i = int((v + uint(1)));
+      }
+      continue;
     }
   }
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

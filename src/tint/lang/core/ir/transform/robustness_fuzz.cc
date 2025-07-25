@@ -33,23 +33,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void RobustnessFuzzer(Module& module, RobustnessConfig config) {
-    if (!config.bindings_ignored.empty()) {
-        // TODO(jrprice): Handle config.bindings_ignored.
-        return;
-    }
-
-    if (auto res = Robustness(module, config); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of Robustness failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> RobustnessFuzzer(Module& module,
+                                     const fuzz::ir::Context&,
+                                     RobustnessConfig config) {
+    return Robustness(module, config);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RobustnessFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RobustnessFuzzer,
+                      tint::core::ir::transform::kRobustnessCapabilities);

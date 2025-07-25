@@ -69,7 +69,7 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.source.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(cfg.OsWrapper))
 	flag.IntVar(&c.flags.topN, "top", 0, "print the top N slowest tests")
 	flag.BoolVar(&c.flags.histogram, "histogram", false, "print a histogram of test timings")
 	flag.StringVar(&c.flags.query, "query", "", "test query to filter results")

@@ -1,6 +1,7 @@
-struct tint_symbol {
-  float4 value : SV_Target0;
+struct frag_main_outputs {
+  float4 tint_symbol : SV_Target0;
 };
+
 
 float4 frag_main_inner() {
   float b = 0.0f;
@@ -8,9 +9,8 @@ float4 frag_main_inner() {
   return float4(v, 1.0f);
 }
 
-tint_symbol frag_main() {
-  float4 inner_result = frag_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+frag_main_outputs frag_main() {
+  frag_main_outputs v_1 = {frag_main_inner()};
+  return v_1;
 }
+

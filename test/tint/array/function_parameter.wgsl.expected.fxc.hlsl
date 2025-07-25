@@ -1,15 +1,15 @@
-RWByteAddressBuffer s : register(u0);
 
+RWByteAddressBuffer s : register(u0);
 float f1(float a[4]) {
-  return a[3];
+  return a[3u];
 }
 
 float f2(float a[3][4]) {
-  return a[2][3];
+  return a[2u][3u];
 }
 
 float f3(float a[2][3][4]) {
-  return a[1][2][3];
+  return a[1u][2u][3u];
 }
 
 [numthreads(1, 1, 1)]
@@ -21,5 +21,5 @@ void main() {
   float v2 = f2(a2);
   float v3 = f3(a3);
   s.Store(0u, asuint(((v1 + v2) + v3)));
-  return;
 }
+

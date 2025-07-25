@@ -1,3 +1,5 @@
+// flags: --glsl-desktop
+
 @group(0) @binding(0) var t_rgba8unorm : texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(1) var t_rgba8snorm : texture_storage_2d<rgba8snorm, write>;
 @group(0) @binding(2) var t_rgba8uint : texture_storage_2d<rgba8uint, write>;

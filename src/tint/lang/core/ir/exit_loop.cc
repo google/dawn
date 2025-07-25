@@ -39,9 +39,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitLoop);
 
 namespace tint::core::ir {
 
-ExitLoop::ExitLoop() = default;
+ExitLoop::ExitLoop(Id id) : Base(id) {}
 
-ExitLoop::ExitLoop(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */) {
+ExitLoop::ExitLoop(Id id, ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */) : Base(id) {
     SetLoop(loop);
     AddOperands(ExitLoop::kArgsOperandOffset, std::move(args));
 }
@@ -51,7 +51,7 @@ ExitLoop::~ExitLoop() = default;
 ExitLoop* ExitLoop::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(Loop());
     auto args = ctx.Remap<ExitLoop::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<ExitLoop>(loop, args);
+    return ctx.ir.CreateInstruction<ExitLoop>(loop, args);
 }
 
 void ExitLoop::SetLoop(ir::Loop* l) {

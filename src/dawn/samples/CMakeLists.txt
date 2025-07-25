@@ -25,40 +25,92 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(dawn_sample_utils STATIC)
-common_compile_options(dawn_sample_utils)
-target_sources(dawn_sample_utils PRIVATE
-    "SampleUtils.cpp"
-    "SampleUtils.h"
-)
-target_link_libraries(dawn_sample_utils PUBLIC
+###############################################################################
+# Dawn sample utilities
+###############################################################################
+set(sample_util_depends
+    webgpu_cpp
     dawn_internal_config
-    dawncpp
-    dawn_proc
-    dawn_common
-    dawn_glfw
-    dawn_native
-    dawn_wire
-    dawn_utils
-    glfw
+    dawn::dawn_common
+    dawn::dawn_system_utils
+    dawn::dawn_wgpu_utils
+)
+if (NOT EMSCRIPTEN)
+    list(APPEND sample_util_depends
+        dawn::dawn_test_utils
+        dawn::dawn_proc
+        dawn::dawn_glfw
+        dawn::dawn_native
+        glfw
+    )
+endif ()
+
+dawn_add_library(
+    dawn_sample_utils
+    FORCE_STATIC
+    ENABLE_EMSCRIPTEN
+    HEADERS
+        "SampleUtils.h"
+    SOURCES
+        "SampleUtils.cpp"
+    DEPENDS
+        ${sample_util_depends}
 )
 
-add_executable(HelloTriangle "HelloTriangle.cpp")
-common_compile_options(HelloTriangle)
-target_link_libraries(HelloTriangle dawn_sample_utils)
+###############################################################################
+# Dawn samples
+#   - Note that not all samples are currently buildable for Emscripten.
+###############################################################################
 
-add_executable(ComputeBoids "ComputeBoids.cpp")
-common_compile_options(ComputeBoids)
-target_link_libraries(ComputeBoids dawn_sample_utils)
+function(Sample)
+    cmake_parse_arguments(PARSE_ARGV 0 arg
+        "ENABLE_EMSCRIPTEN"
+        "NAME"
+        "SOURCES"
+    )
 
-add_executable(Animometer "Animometer.cpp")
-common_compile_options(Animometer)
-target_link_libraries(Animometer dawn_sample_utils)
+    # Skip targets that shouldn't be built with Emscripten.
+    if (EMSCRIPTEN AND NOT arg_ENABLE_EMSCRIPTEN)
+        return()
+    endif ()
 
-add_executable(DawnInfo "DawnInfo.cpp")
-common_compile_options(DawnInfo)
-target_link_libraries(DawnInfo dawn_sample_utils)
+    add_executable(${arg_NAME} ${arg_SOURCES})
+    if (EMSCRIPTEN)
+        set_target_properties(${arg_NAME} PROPERTIES
+            SUFFIX ".html")
+        target_link_options(${arg_NAME} PUBLIC
+            # We need JSPI for Future implementation.
+            "-sJSPI"
+        )
+    endif()
+    target_link_libraries(${arg_NAME} PUBLIC dawn::dawn_sample_utils)
+    common_compile_options(${arg_NAME})
+endfunction()
 
-add_executable(ManualSurfaceTest "ManualSurfaceTest.cpp")
-common_compile_options(ManualSurfaceTest)
-target_link_libraries(ManualSurfaceTest dawn_sample_utils)
+Sample(
+    NAME HelloTriangle
+    ENABLE_EMSCRIPTEN
+    SOURCES "HelloTriangle.cpp"
+)
+
+Sample(
+    NAME ComputeBoids
+    ENABLE_EMSCRIPTEN
+    SOURCES "ComputeBoids.cpp"
+)
+
+Sample(
+    NAME Animometer
+    ENABLE_EMSCRIPTEN
+    SOURCES "Animometer.cpp"
+)
+
+Sample(
+    NAME DawnInfo
+    SOURCES "DawnInfo.cpp"
+)
+
+Sample(
+    NAME ManualSurfaceTest
+    SOURCES "ManualSurfaceTest.cpp"
+)

@@ -28,7 +28,10 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 
-#include "src/tint/lang/wgsl/common/allowed_features.h"
+#include <unordered_map>
+
+#include "src/tint/api/common/binding_point.h"
+#include "src/tint/lang/wgsl/allowed_features.h"
 
 namespace tint::spirv::reader {
 
@@ -39,6 +42,11 @@ struct Options {
     // TODO(jrprice): Remove this when SPIR-V -> IR and IR -> WGSL are separate steps.
     /// The extensions and language features that are allowed to be used in the generated WGSL.
     wgsl::AllowedFeatures allowed_features = {};
+
+    /// Mapping from a SPIR-V Sampler binding point to a WGSL sampler binding
+    /// point. This allows remapping samplers which are split out of the
+    /// combined texture/sampler pairs in SPIR-V.
+    std::unordered_map<BindingPoint, BindingPoint> sampler_mappings{};
 };
 
 }  // namespace tint::spirv::reader

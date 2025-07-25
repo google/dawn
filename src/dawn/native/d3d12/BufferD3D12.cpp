@@ -44,6 +44,7 @@
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn/native/d3d12/SharedBufferMemoryD3D12.h"
+#include "dawn/native/d3d12/SharedFenceD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
@@ -84,7 +85,7 @@ D3D12_RESOURCE_STATES D3D12BufferUsage(wgpu::BufferUsage usage) {
         resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                           D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         resourceState |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {
@@ -92,16 +93,6 @@ D3D12_RESOURCE_STATES D3D12BufferUsage(wgpu::BufferUsage usage) {
     }
 
     return resourceState;
-}
-
-D3D12_HEAP_TYPE D3D12HeapType(wgpu::BufferUsage allowedUsage) {
-    if (allowedUsage & wgpu::BufferUsage::MapRead) {
-        return D3D12_HEAP_TYPE_READBACK;
-    } else if (allowedUsage & wgpu::BufferUsage::MapWrite) {
-        return D3D12_HEAP_TYPE_UPLOAD;
-    } else {
-        return D3D12_HEAP_TYPE_DEFAULT;
-    }
 }
 
 size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
@@ -115,6 +106,33 @@ size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
         return D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
     }
     return 1;
+}
+
+ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage, uint32_t resourceHeapTier) {
+    if (bufferUsage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc)) {
+        if (resourceHeapTier >= 2) {
+            return ResourceHeapKind::Upload_AllBuffersAndTextures;
+        } else {
+            return ResourceHeapKind::Upload_OnlyBuffers;
+        }
+    }
+    if (bufferUsage == (wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead)) {
+        if (resourceHeapTier >= 2) {
+            return ResourceHeapKind::Readback_AllBuffersAndTextures;
+        } else {
+            return ResourceHeapKind::Readback_OnlyBuffers;
+        }
+    }
+
+    if (bufferUsage & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) {
+        return ResourceHeapKind::Custom_WriteBack_OnlyBuffers;
+    }
+
+    if (resourceHeapTier >= 2) {
+        return ResourceHeapKind::Default_AllBuffersAndTextures;
+    } else {
+        return ResourceHeapKind::Default_OnlyBuffers;
+    }
 }
 }  // namespace
 
@@ -144,10 +162,11 @@ ResultOrError<Ref<Buffer>> Buffer::CreateFromSharedBufferMemory(
 
 MaybeError Buffer::InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3d12Buffer,
                                               const UnpackedPtr<BufferDescriptor>& descriptor) {
+    mAllocatedSize = descriptor->size;
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
-    mResourceAllocation = {info, 0, std::move(d3d12Buffer), nullptr};
-    mAllocatedSize = descriptor->size;
+    info.mRequestedSize = mAllocatedSize;
+    mResourceAllocation = {info, 0, std::move(d3d12Buffer), nullptr, ResourceHeapKind::InvalidEnum};
     return {};
 }
 
@@ -157,9 +176,9 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
 MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     uint64_t size = std::max(GetSize(), uint64_t(4u));
-    size_t alignment = D3D12BufferSizeAlignment(GetUsage());
+    size_t alignment = D3D12BufferSizeAlignment(GetInternalUsage());
     if (size > std::numeric_limits<uint64_t>::max() - alignment) {
-        // Alignment would overlow.
+        // Alignment would overflow.
         return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
     }
     mAllocatedSize = Align(size, alignment);
@@ -177,35 +196,40 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
     // and robust resource initialization.
-    resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | wgpu::BufferUsage::CopyDst);
+    resourceDescriptor.Flags = D3D12ResourceFlags(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
 
-    auto heapType = D3D12HeapType(GetUsage());
+    ResourceHeapKind resourceHeapKind =
+        GetResourceHeapKind(GetInternalUsage(), ToBackend(GetDevice())->GetResourceHeapTier());
     mLastState = D3D12_RESOURCE_STATE_COMMON;
 
-    switch (heapType) {
-        // D3D12 requires buffers on the READBACK heap to have the D3D12_RESOURCE_STATE_COPY_DEST
-        // state
-        case D3D12_HEAP_TYPE_READBACK: {
+    switch (resourceHeapKind) {
+            // D3D12 requires buffers on the READBACK heap to have the
+            // D3D12_RESOURCE_STATE_COPY_DEST state
+        case ResourceHeapKind::Readback_AllBuffersAndTextures:
+        case ResourceHeapKind::Readback_OnlyBuffers: {
             mLastState |= D3D12_RESOURCE_STATE_COPY_DEST;
             mFixedResourceState = true;
             break;
         }
-        // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
-        // state
-        case D3D12_HEAP_TYPE_UPLOAD: {
+            // D3D12 requires buffers on the UPLOAD heap to have the
+            // D3D12_RESOURCE_STATE_GENERIC_READ state
+        case ResourceHeapKind::Upload_AllBuffersAndTextures:
+        case ResourceHeapKind::Upload_OnlyBuffers: {
             mLastState |= D3D12_RESOURCE_STATE_GENERIC_READ;
             mFixedResourceState = true;
             break;
         }
-        case D3D12_HEAP_TYPE_DEFAULT:
-        case D3D12_HEAP_TYPE_CUSTOM:
-        default:
+        case ResourceHeapKind::Default_AllBuffersAndTextures:
+        case ResourceHeapKind::Default_OnlyBuffers:
+        case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
             break;
+        default:
+            DAWN_UNREACHABLE();
     }
 
-    DAWN_TRY_ASSIGN(
-        mResourceAllocation,
-        ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, mLastState, 0));
+    DAWN_TRY_ASSIGN(mResourceAllocation,
+                    ToBackend(GetDevice())
+                        ->AllocateMemory(resourceHeapKind, resourceDescriptor, mLastState, 0));
 
     SetLabelImpl();
 
@@ -260,7 +284,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     resourceDescriptor.SampleDesc.Quality = 0;
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     resourceDescriptor.Flags =
-        D3D12ResourceFlags(GetUsage()) | D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
+        D3D12ResourceFlags(GetInternalUsage()) | D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
 
     D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
         device->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
@@ -289,9 +313,10 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
                                                        IID_PPV_ARGS(&placedResource)),
         "ID3D12Device::CreatePlacedResource"));
 
-    mResourceAllocation = {AllocationInfo{0, AllocationMethod::kExternal}, 0,
+    mResourceAllocation = {AllocationInfo{0, AllocationMethod::kExternal, mAllocatedSize}, 0,
                            std::move(placedResource),
-                           /* heap is external, and not tracked for residency */ nullptr};
+                           /* heap is external, and not tracked for residency */ nullptr,
+                           ResourceHeapKind::InvalidEnum};
     mHostMappedHeap = std::move(heap);
     mHostMappedDisposeCallback = hostMappedDesc->disposeCallback;
     mHostMappedDisposeUserdata = hostMappedDesc->userdata;
@@ -315,6 +340,10 @@ ID3D12Resource* Buffer::GetD3D12Resource() const {
 bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                              D3D12_RESOURCE_BARRIER* barrier,
                                              wgpu::BufferUsage newUsage) {
+    if (mResourceAllocation.GetInfo().mMethod == AllocationMethod::kExternal) {
+        commandContext->AddToSharedBufferList(this);
+    }
+
     // Track the underlying heap to ensure residency.
     // There may be no heap if the allocation is an external one.
     Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
@@ -358,7 +387,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* commandCon
     mLastState = newState;
 
     // The COMMON state represents a state where no write operations can be pending, which makes
-    // it possible to transition to and from some states without synchronizaton (i.e. without an
+    // it possible to transition to and from some states without synchronization (i.e. without an
     // explicit ResourceBarrier call). A buffer can be implicitly promoted to 1) a single write
     // state, or 2) multiple read states. A buffer that is accessed within a command list will
     // always implicitly decay to the COMMON state after the call to ExecuteCommandLists
@@ -420,10 +449,12 @@ bool Buffer::IsCPUWritableAtCreation() const {
     // staging buffer, and copied from the staging buffer to the GPU memory of the current
     // buffer in the unmap() call.
     // TODO(enga): Handle CPU-visible memory on UMA
-    return (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
+    return (GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0;
 }
 
 MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const char* contextInfo) {
+    DAWN_TRY(SynchronizeBufferBeforeMapping());
+
     // The mapped buffer can be accessed at any time, so it must be locked to ensure it is never
     // evicted. This buffer should already have been made resident when it was created.
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "BufferD3D12::MapInternal");
@@ -454,7 +485,7 @@ MaybeError Buffer::MapAtCreationImpl() {
     // We will use a staging buffer for MapRead buffers instead so we just clear the staging
     // buffer and initialize the original buffer by copying the staging buffer to the original
     // buffer one the first time Unmap() is called.
-    DAWN_ASSERT((GetUsage() & wgpu::BufferUsage::MapWrite) != 0);
+    DAWN_ASSERT((GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0);
 
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
@@ -489,7 +520,7 @@ void Buffer::UnmapImpl() {
     }
 }
 
-void* Buffer::GetMappedPointer() {
+void* Buffer::GetMappedPointerImpl() {
     // The frontend asks that the pointer returned is from the start of the resource
     // irrespective of the offset passed in MapAsyncImpl, which is what mMappedData is.
     return mMappedData;
@@ -598,6 +629,51 @@ MaybeError Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* c
     return {};
 }
 
+MaybeError Buffer::SynchronizeBufferBeforeMapping() {
+    // Buffers imported with the SharedBufferMemory feature can include fences that must finish
+    // before Dawn can use the buffer for mapping operations on the CPU timeline. We acquire and
+    // wait for them here.
+    if (SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents()) {
+        SharedBufferMemoryBase::PendingFenceList fences;
+        contents->AcquirePendingFences(&fences);
+        for (const auto& fence : fences) {
+            HANDLE fenceEvent = 0;
+            ComPtr<ID3D12Fence> d3dFence = ToBackend(fence.object)->GetD3DFence();
+            if (d3dFence->GetCompletedValue() < fence.signaledValue) {
+                d3dFence->SetEventOnCompletion(fence.signaledValue, fenceEvent);
+                WaitForSingleObject(fenceEvent, INFINITE);
+            }
+        }
+    }
+
+    return {};
+}
+
+MaybeError Buffer::SynchronizeBufferBeforeUseOnGPU() {
+    // Buffers imported with the SharedBufferMemory feature can include fences that must finish
+    // before Dawn can use the buffer on the GPU timeline. We acquire and wait for them here.
+    if (SharedResourceMemoryContents* contents = GetSharedResourceMemoryContents()) {
+        Device* device = ToBackend(GetDevice());
+        Queue* queue = ToBackend(device->GetQueue());
+
+        SharedBufferMemoryBase::PendingFenceList fences;
+        contents->AcquirePendingFences(&fences);
+
+        ID3D12CommandQueue* commandQueue = queue->GetCommandQueue();
+        for (const auto& fence : fences) {
+            DAWN_TRY(CheckHRESULT(commandQueue->Wait(ToBackend(fence.object)->GetD3DFence(),
+                                                     fence.signaledValue),
+                                  "D3D12 fence wait"););
+            // Keep D3D12 fence alive until commands complete.
+            device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
+        }
+
+        mLastUsageSerial = queue->GetPendingCommandSerial();
+    }
+
+    return {};
+}
+
 void Buffer::SetLabelImpl() {
     SetDebugName(ToBackend(GetDevice()), mResourceAllocation.GetD3D12Resource(), "Dawn_Buffer",
                  GetLabel());
@@ -622,9 +698,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     Device* device = ToBackend(GetDevice());
     size = size > 0 ? size : GetAllocatedSize();
 
-    // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
-    // changed away, so we can only clear such buffer with buffer mapping.
-    if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
+    if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
         memset(mMappedData, clearValue, size);
@@ -634,16 +708,15 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     } else {
         // TODO(crbug.com/dawn/852): use ClearUnorderedAccessView*() when the buffer usage
         // includes STORAGE.
-        DynamicUploader* uploader = device->GetDynamicUploader();
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        uploader->Allocate(size, device->GetQueue()->GetPendingCommandSerial(),
-                                           kCopyBufferToBufferOffsetAlignment));
-
-        memset(uploadHandle.mappedBuffer, clearValue, size);
-
-        device->CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
-                                              uploadHandle.startOffset, this, offset, size);
+        DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+            size, kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                memset(reservation.mappedPointer, clearValue, size);
+                device->CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
+                                                      reservation.offsetInBuffer, this, offset,
+                                                      size);
+                return {};
+            }));
     }
 
     return {};

@@ -216,7 +216,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
 // multiple of 16 bytes
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotMultipleOf16) {
     // struct Inner {
-    //   @align(1) @size(5) scalar : i32;
+    //   @align(4) @size(5) scalar : i32;
     // };
     //
     // struct Outer {
@@ -229,7 +229,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
 
     Structure(Ident(Source{{12, 34}}, "Inner"),
               Vector{
-                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
+                  Member("scalar", ty.i32(), Vector{MemberAlign(4_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
@@ -247,13 +247,13 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
         R"(78:90 error: 'uniform' storage requires that the number of bytes between the start of the previous member of type struct and the current member be a multiple of 16 bytes, but there are currently 8 bytes between 'inner' and 'scalar'. Consider setting '@align(16)' on this member
 note: see layout of struct:
 /*            align(4) size(12) */ struct Outer {
-/* offset( 0) align(1) size( 5) */   inner : Inner,
-/* offset( 5) align(1) size( 3) */   // -- implicit field alignment padding --
+/* offset( 0) align(4) size( 8) */   inner : Inner,
 /* offset( 8) align(4) size( 4) */   scalar : i32,
 /*                              */ };
 12:34 note: and layout of previous member struct:
-/*           align(1) size(5) */ struct Inner {
-/* offset(0) align(1) size(5) */   scalar : i32,
+/*           align(4) size(8) */ struct Inner {
+/* offset(0) align(4) size(5) */   scalar : i32,
+/* offset(5) align(1) size(3) */   // -- implicit struct size padding --
 /*                            */ };
 22:24 note: 'Outer' used in address space 'uniform' here)");
 }
@@ -265,7 +265,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     //   a : i32;
     //   b : i32;
     //   c : i32;
-    //   @align(1) @size(5) scalar : i32;
+    //   @align(4) @size(5) scalar : i32;
     // };
     //
     // struct Outer {
@@ -281,7 +281,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
                   Member("a", ty.i32()),
                   Member("b", ty.i32()),
                   Member("c", ty.i32()),
-                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
+                  Member("scalar", ty.i32(), Vector{MemberAlign(4_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
@@ -307,7 +307,7 @@ note: see layout of struct:
 /* offset( 0) align(4) size( 4) */   a : i32,
 /* offset( 4) align(4) size( 4) */   b : i32,
 /* offset( 8) align(4) size( 4) */   c : i32,
-/* offset(12) align(1) size( 5) */   scalar : i32,
+/* offset(12) align(4) size( 5) */   scalar : i32,
 /* offset(17) align(1) size( 3) */   // -- implicit struct size padding --
 /*                              */ };
 22:24 note: 'Outer' used in address space 'uniform' here)");
@@ -316,7 +316,7 @@ note: see layout of struct:
 TEST_F(ResolverAddressSpaceLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16_SuggestedFix) {
     // struct Inner {
-    //   @align(1) @size(5) scalar : i32;
+    //   @align(4) @size(5) scalar : i32;
     // };
     //
     // struct Outer {
@@ -328,7 +328,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     // var<uniform> a : Outer;
 
     Structure("Inner", Vector{
-                           Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
+                           Member("scalar", ty.i32(), Vector{MemberAlign(4_i), MemberSize(5_a)}),
                        });
 
     Structure("Outer", Vector{
@@ -555,179 +555,138 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Detect unaligned member for push constants buffers
-TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
-    // enable chromium_experimental_push_constant;
+// Detect unaligned member for immediate data buffers
+TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_UnalignedMember) {
+    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(1) b : f32;
     // };
-    // var<push_constant> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+    // var<immediate> a : S;
+    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure(Ident(Source{{12, 34}}, "S"),
               Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                      Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
-    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kPushConstant);
+    GlobalVar(Source{{78, 90}}, "a", ty("S"), core::AddressSpace::kImmediate);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'immediate' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting '@align(4)' on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32,
 /* offset(5) align(1) size( 4) */   b : f32,
 /* offset(9) align(1) size( 3) */   // -- implicit struct size padding --
 /*                             */ };
-78:90 note: 'S' used in address space 'push_constant' here)");
+78:90 note: 'S' used in address space 'immediate' here)");
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
-    // enable chromium_experimental_push_constant;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_Aligned) {
+    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(4) b : f32;
     // };
-    // var<push_constant> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+    // var<immediate> a : S;
+    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                           Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
-    GlobalVar("a", ty("S"), core::AddressSpace::kPushConstant);
+    GlobalVar("a", ty("S"), core::AddressSpace::kImmediate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemberOffset_Struct) {
-    // enable chromium_internal_relaxed_uniform_layout;
-    //
-    // struct Inner {
-    //   scalar : i32;
-    // };
-    //
-    // struct Outer {
-    //   scalar : f32;
-    //   inner : Inner;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Storage) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
     // };
     //
     // @group(0) @binding(0)
-    // var<uniform> a : Outer;
+    // var<storage, read_write> a : array<S>;
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
 
-    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kStorage,
+              core::Access::kReadWrite, Group(0_a), Binding(0_a));
 
-    Structure("Inner", Vector{
-                           Member("scalar", ty.i32()),
-                       });
-
-    Structure("Outer", Vector{
-                           Member("scalar", ty.f32()),
-                           Member("inner", ty("Inner")),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'storage' address space
+56:78 note: 'S' used in address space 'storage' here)");
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemberOffset_Array) {
-    // enable chromium_internal_relaxed_uniform_layout;
-    //
-    // type Inner = @stride(16) array<f32, 10u>;
-    //
-    // struct Outer {
-    //   scalar : f32;
-    //   inner : Inner;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Workgroup) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
     // };
     //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
+    // var<workgroup> a : array<S, 4>;
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
 
-    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kWorkgroup, Group(0_a));
 
-    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
-
-    Structure("Outer", Vector{
-                           Member("scalar", ty.f32()),
-                           Member("inner", ty("Inner")),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'workgroup' address space
+56:78 note: 'S' used in address space 'workgroup' here)");
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_MemberOffsetNotMutipleOf16) {
-    // enable chromium_internal_relaxed_uniform_layout;
-    //
-    // struct Inner {
-    //   @align(1) @size(5) scalar : i32;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Private) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
     // };
     //
-    // struct Outer {
-    //   inner : Inner;
-    //   scalar : i32;
-    // };
-    //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
+    // var<private> a : array<S, 4>;
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
 
-    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kPrivate, Group(0_a));
 
-    Structure("Inner", Vector{
-                           Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
-                       });
-
-    Structure("Outer", Vector{
-                           Member("inner", ty("Inner")),
-                           Member("scalar", ty.i32()),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'private' address space
+56:78 note: 'S' used in address space 'private' here)");
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStride_Scalar) {
-    // enable chromium_internal_relaxed_uniform_layout;
-    //
-    // struct Outer {
-    //   arr : array<f32, 10u>;
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Function) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
     // };
     //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
+    // fn foo() {
+    //   var a : array<S, 4>;
+    // }
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
 
-    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kFunction, Group(0_a));
 
-    Structure("Outer", Vector{
-                           Member("arr", ty.array<f32, 10>()),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStride_Vech) {
-    // enable f16;
-    // enable chromium_internal_relaxed_uniform_layout;
-    //
-    // struct Outer {
-    //   arr : array<vec3<f16>, 10u>;
-    // };
-    //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
-
-    Enable(wgsl::Extension::kF16);
-    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
-
-    Structure("Outer", Vector{
-                           Member("arr", ty.array<vec3<f16>, 10>()),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'function' address space
+56:78 note: 'S' used in address space 'function' here)");
 }
 
 }  // namespace

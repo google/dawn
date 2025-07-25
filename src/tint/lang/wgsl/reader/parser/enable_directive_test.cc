@@ -82,8 +82,7 @@ TEST_F(EnableDirectiveTest, SingleTrailingComma) {
 
 // Test a valid enable directive with multiple extensions.
 TEST_F(EnableDirectiveTest, Multiple) {
-    auto p = parser(
-        "enable f16, chromium_disable_uniformity_analysis, chromium_experimental_subgroups;");
+    auto p = parser("enable f16, chromium_disable_uniformity_analysis, subgroups;");
     p->enable_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
@@ -101,19 +100,18 @@ TEST_F(EnableDirectiveTest, Multiple) {
     EXPECT_EQ(enable->extensions[1]->source.range.begin.column, 13u);
     EXPECT_EQ(enable->extensions[1]->source.range.end.line, 1u);
     EXPECT_EQ(enable->extensions[1]->source.range.end.column, 49u);
-    EXPECT_EQ(enable->extensions[2]->name, wgsl::Extension::kChromiumExperimentalSubgroups);
+    EXPECT_EQ(enable->extensions[2]->name, wgsl::Extension::kSubgroups);
     EXPECT_EQ(enable->extensions[2]->source.range.begin.line, 1u);
     EXPECT_EQ(enable->extensions[2]->source.range.begin.column, 51u);
     EXPECT_EQ(enable->extensions[2]->source.range.end.line, 1u);
-    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 82u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 60u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
 // Test a valid enable directive with multiple extensions.
 TEST_F(EnableDirectiveTest, MultipleTrailingComma) {
-    auto p = parser(
-        "enable f16, chromium_disable_uniformity_analysis, chromium_experimental_subgroups,;");
+    auto p = parser("enable f16, chromium_disable_uniformity_analysis, subgroups,;");
     p->enable_directive();
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
@@ -131,11 +129,11 @@ TEST_F(EnableDirectiveTest, MultipleTrailingComma) {
     EXPECT_EQ(enable->extensions[1]->source.range.begin.column, 13u);
     EXPECT_EQ(enable->extensions[1]->source.range.end.line, 1u);
     EXPECT_EQ(enable->extensions[1]->source.range.end.column, 49u);
-    EXPECT_EQ(enable->extensions[2]->name, wgsl::Extension::kChromiumExperimentalSubgroups);
+    EXPECT_EQ(enable->extensions[2]->name, wgsl::Extension::kSubgroups);
     EXPECT_EQ(enable->extensions[2]->source.range.begin.line, 1u);
     EXPECT_EQ(enable->extensions[2]->source.range.begin.column, 51u);
     EXPECT_EQ(enable->extensions[2]->source.range.end.line, 1u);
-    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 82u);
+    EXPECT_EQ(enable->extensions[2]->source.range.end.column, 60u);
     ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
@@ -177,7 +175,7 @@ TEST_F(EnableDirectiveTest, InvalidExtension) {
     // Error when unknown extension found
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -191,7 +189,7 @@ TEST_F(EnableDirectiveTest, InvalidExtensionSuggest) {
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
 Did you mean 'f16'?
-Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -205,7 +203,7 @@ TEST_F(EnableDirectiveTest, InvalidChromiumExtension) {
     // Error when unknown extension found
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_framebuffer_fetch', 'chromium_experimental_pixel_local', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_graphite', 'chromium_internal_input_attachments', 'chromium_internal_relaxed_uniform_layout', 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_framebuffer_fetch', 'chromium_experimental_immediate', 'chromium_experimental_pixel_local', 'chromium_experimental_primitive_id', 'chromium_experimental_subgroup_matrix', 'chromium_internal_graphite', 'chromium_internal_input_attachments', 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -253,7 +251,7 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -264,7 +262,7 @@ Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -276,7 +274,7 @@ Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
 Did you mean 'f16'?
-Possible values: 'dual_source_blending', 'f16', 'subgroups', 'subgroups_f16')");
+Possible values: 'clip_distances', 'dual_source_blending', 'f16', 'subgroups')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);

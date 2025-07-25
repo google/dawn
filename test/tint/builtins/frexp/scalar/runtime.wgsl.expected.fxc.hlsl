@@ -2,18 +2,16 @@ struct frexp_result_f32 {
   float fract;
   int exp;
 };
-frexp_result_f32 tint_frexp(float param_0) {
-  float exp;
-  float fract = sign(param_0) * frexp(param_0, exp);
-  frexp_result_f32 result = {fract, int(exp)};
-  return result;
-}
+
 
 [numthreads(1, 1, 1)]
 void main() {
-  float tint_symbol = 1.25f;
-  frexp_result_f32 res = tint_frexp(tint_symbol);
+  float v = 1.25f;
+  float v_1 = 0.0f;
+  float v_2 = frexp(v, v_1);
+  float v_3 = (float(sign(v)) * v_2);
+  frexp_result_f32 res = {v_3, int(v_1)};
   float fract = res.fract;
   int exp = res.exp;
-  return;
 }
+

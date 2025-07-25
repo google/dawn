@@ -2,39 +2,34 @@
 precision highp float;
 precision highp int;
 
+
 struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
 
-
-bool tint_discarded = false;
-layout(location = 0) out vec4 value;
-layout(binding = 0, std430) buffer S_block_ssbo {
+layout(binding = 0, std430)
+buffer f_S_block_ssbo {
   int inner;
-} S;
-
-vec4 tint_symbol() {
+} v;
+bool continue_execution = true;
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner() {
   if (false) {
-    tint_discarded = true;
+    continue_execution = false;
   }
-  atomic_compare_exchange_result_i32 tint_symbol_2 = atomic_compare_exchange_result_i32(0, false);
-  if (!(tint_discarded)) {
-    atomic_compare_exchange_result_i32 atomic_compare_result;
-    atomic_compare_result.old_value = atomicCompSwap(S.inner, 0, 1);
-    atomic_compare_result.exchanged = atomic_compare_result.old_value == 0;
-    tint_symbol_2 = atomic_compare_result;
+  atomic_compare_exchange_result_i32 v_1 = atomic_compare_exchange_result_i32(0, false);
+  if (continue_execution) {
+    int v_2 = atomicCompSwap(v.inner, 0, 1);
+    v_1 = atomic_compare_exchange_result_i32(v_2, (v_2 == 0));
   }
-  atomic_compare_exchange_result_i32 tint_symbol_1 = tint_symbol_2;
-  int old_value = tint_symbol_1.old_value;
-  return vec4(float(old_value));
-}
-
-void main() {
-  vec4 inner_result = tint_symbol();
-  value = inner_result;
-  if (tint_discarded) {
+  int old_value = v_1.old_value;
+  vec4 v_3 = vec4(float(old_value));
+  if (!(continue_execution)) {
     discard;
   }
-  return;
+  return v_3;
+}
+void main() {
+  main_loc0_Output = main_inner();
 }

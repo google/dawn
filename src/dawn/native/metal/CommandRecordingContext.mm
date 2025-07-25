@@ -28,6 +28,9 @@
 #include "dawn/native/metal/CommandRecordingContext.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/Forward.h"
 #include "dawn/native/metal/QueueMTL.h"
 
 namespace dawn::native::metal {
@@ -118,6 +121,28 @@ void CommandRecordingContext::EndBlit() {
         mBlit = nullptr;
         mInEncoder = false;
     }
+}
+
+MaybeError CommandRecordingContext::EncodeSharedEventWorkaround() {
+    DAWN_ASSERT(mQueue->GetDevice()->IsToggleEnabled(
+        Toggle::MetalSerializeTimestampGenerationAndResolution));
+
+    if (!mSerializeWorkaround.sharedEvent) {
+        id<MTLDevice> mtlDevice = ToBackend(mQueue->GetDevice())->GetMTLDevice();
+        mSerializeWorkaround.sharedEvent.Acquire([mtlDevice newSharedEvent]);
+        if (mSerializeWorkaround.sharedEvent == nil) {
+            return DAWN_INTERNAL_ERROR(
+                "Failed to create internal MTLSharedEvent for splitting command buffers.");
+        }
+    }
+
+    EndBlit();
+    id<MTLSharedEvent> sharedEvent =
+        static_cast<id<MTLSharedEvent>>(*mSerializeWorkaround.sharedEvent);
+    uint64_t signalValue = ++mSerializeWorkaround.signaledValue;
+    [*mCommands encodeSignalEvent:sharedEvent value:signalValue];
+    [*mCommands encodeWaitForEvent:sharedEvent value:signalValue];
+    return {};
 }
 
 id<MTLComputeCommandEncoder> CommandRecordingContext::BeginCompute() {

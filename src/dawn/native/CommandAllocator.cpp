@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
+#include <new>
 #include <utility>
 
 #include "dawn/common/Assert.h"
@@ -72,10 +73,16 @@ CommandIterator::CommandIterator(CommandAllocator allocator) : mBlocks(allocator
 void CommandIterator::AcquireCommandBlocks(std::vector<CommandAllocator> allocators) {
     DAWN_ASSERT(IsEmpty());
     mBlocks.clear();
+
+    size_t totalBlocksCount = 0;
+    for (CommandAllocator& allocator : allocators) {
+        totalBlocksCount += allocator.GetCommandBlocksCount();
+    }
+
+    mBlocks.reserve(totalBlocksCount);
     for (CommandAllocator& allocator : allocators) {
         CommandBlocks blocks = allocator.AcquireBlocks();
         if (!blocks.empty()) {
-            mBlocks.reserve(mBlocks.size() + blocks.size());
             for (BlockDef& block : blocks) {
                 mBlocks.push_back(std::move(block));
             }
@@ -174,6 +181,10 @@ bool CommandAllocator::IsEmpty() const {
     return mCurrentPtr == reinterpret_cast<const char*>(&mPlaceholderSpace[0]);
 }
 
+size_t CommandAllocator::GetCommandBlocksCount() const {
+    return mBlocks.size();
+}
+
 CommandBlocks&& CommandAllocator::AcquireBlocks() {
     DAWN_ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
     DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
@@ -198,11 +209,11 @@ char* CommandAllocator::AllocateInNewBlock(uint32_t commandId,
     size_t requestedBlockSize = commandSize + kWorstCaseAdditionalSize;
 
     // The computation of the request could overflow.
-    if (DAWN_UNLIKELY(requestedBlockSize <= commandSize)) {
+    if (requestedBlockSize <= commandSize) [[unlikely]] {
         return nullptr;
     }
 
-    if (DAWN_UNLIKELY(!GetNewBlock(requestedBlockSize))) {
+    if (!GetNewBlock(requestedBlockSize)) [[unlikely]] {
         return nullptr;
     }
     return Allocate(commandId, commandSize, commandAlignment);
@@ -213,7 +224,7 @@ bool CommandAllocator::GetNewBlock(size_t minimumSize) {
     mLastAllocationSize = std::max(minimumSize, std::min(mLastAllocationSize * 2, size_t(16384)));
 
     auto block = std::unique_ptr<char[]>(new (std::nothrow) char[mLastAllocationSize]);
-    if (DAWN_UNLIKELY(block == nullptr)) {
+    if (block == nullptr) [[unlikely]] {
         return false;
     }
 

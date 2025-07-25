@@ -1,7 +1,3 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 void foo(bool a, bool b, bool c, bool d, bool e) {
   if (a) {
@@ -17,3 +13,8 @@ void foo(bool a, bool b, bool c, bool d, bool e) {
     }
   }
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

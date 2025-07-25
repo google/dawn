@@ -59,7 +59,7 @@
 
 #define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition)           \
     do {                                                                  \
-        if (DAWN_UNLIKELY(!(condition))) {                                \
+        if (!(condition)) [[unlikely]] {                                  \
             ::dawn::HandleAssertionFailure(file, func, line, #condition); \
             abort();                                                      \
         }                                                                 \
@@ -67,7 +67,7 @@
 
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)          \
     do {                                                                  \
-        if (DAWN_UNLIKELY(!(condition))) {                                \
+        if (!(condition)) [[unlikely]] {                                  \
             ::dawn::HandleAssertionFailure(file, func, line, #condition); \
         }                                                                 \
     } while (DAWN_ASSERT_LOOP_CONDITION)
@@ -76,15 +76,15 @@
 
 #define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition) \
     do {                                                        \
-        if (DAWN_UNLIKELY(!(condition))) {                      \
+        if (!(condition)) [[unlikely]] {                        \
             abort();                                            \
         }                                                       \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 
 #if DAWN_COMPILER_IS(MSVC)
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __assume(condition)
-#elif DAWN_COMPILER_IS(CLANG) && defined(__builtin_assume)
-#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(condition)
+#elif DAWN_COMPILER_IS(CLANG) && __has_builtin(__builtin_assume)
+#define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) __builtin_assume(!!(condition))
 #else  // DAWN_COMPILER_IS(*)
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
     do {                                                         \

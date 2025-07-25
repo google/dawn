@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -38,6 +38,8 @@ namespace tint::spirv::reader::ast_parser {
 
 namespace {
 
+// The reserved words in WGSL.
+// TODO(crbug.com/368114894) update this list to match the WGSL spec.
 const char* kWGSLReservedWords[] = {
     // Please keep this list sorted
     "array",
@@ -113,6 +115,8 @@ const char* kWGSLReservedWords[] = {
     "mat4x4",
     "mat4x4f",
     "mat4x4h",
+    "non_coherent",
+    "noncoherent",
     "num_workgroups",
     "offset",
     "out",

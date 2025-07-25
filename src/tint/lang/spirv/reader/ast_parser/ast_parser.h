@@ -39,11 +39,14 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/text/string_stream.h"
 
+// This header is in an external dependency, so warnings cannot be fixed without upstream changes.
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
 TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_BEGIN_DISABLE_WARNING(WEAK_VTABLES);
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 #include "source/opt/ir_context.h"
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(WEAK_VTABLES);
 TINT_END_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_END_DISABLE_WARNING(OLD_STYLE_CAST);
@@ -295,6 +298,14 @@ class ASTParser {
     /// @param attributes the attribute list to modify
     /// @param replacement the location decoration to place into the list
     void SetLocation(Attributes& attributes, const ast::Attribute* replacement);
+
+    /// Updates the attribute list, placing a non-null BlendSrc decoration into
+    /// the list, replacing an existing one if it exists. Does nothing if the
+    /// replacement is nullptr.
+    /// Assumes the list contains at most one BlendSrc decoration.
+    /// @param attributes the attribute list to modify
+    /// @param replacement the BlendSrc decoration to place into the list
+    void SetBlendSrc(Attributes& attributes, const ast::Attribute* replacement);
 
     /// Converts a SPIR-V struct member decoration into a number of AST
     /// decorations. If the decoration is recognized but deliberately dropped,

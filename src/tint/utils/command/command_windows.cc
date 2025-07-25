@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/system/executable_path.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
@@ -129,6 +130,7 @@ bool ExecutableExists(const std::string& path) {
     }
 
     void* addr_header = MapViewOfFileEx(map, FILE_MAP_READ, 0, 0, 0, nullptr);
+    TINT_DEFER(UnmapViewOfFile(addr_header));
 
     // Dynamically obtain the address of, and call ImageNtHeader. This is done to avoid tint.exe
     // needing to statically link Dbghelp.lib.
@@ -159,12 +161,22 @@ std::string FindExecutable(const std::string& name) {
     if (ExecutableExists(in_cwd + ".exe")) {
         return in_cwd + ".exe";
     }
+
+    auto in_exe_path = tint::ExecutableDirectory() + "/" + name;
+    if (ExecutableExists(in_exe_path)) {
+        return in_exe_path;
+    }
+    if (ExecutableExists(in_exe_path + ".exe")) {
+        return in_exe_path + ".exe";
+    }
+
     if (ExecutableExists(name)) {
         return name;
     }
     if (ExecutableExists(name + ".exe")) {
         return name + ".exe";
     }
+
     if (name.find("/") == std::string::npos && name.find("\\") == std::string::npos) {
         char* path_env = nullptr;
         size_t path_env_len = 0;

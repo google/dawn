@@ -1,38 +1,35 @@
 #version 310 es
 
-struct Simulation {
-  uint i;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-};
 
 struct Particle {
   vec3 position[8];
   float lifetime;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec4 color;
   vec3 velocity;
-  uint pad_3;
+  uint tint_pad_3;
 };
 
-layout(binding = 3, std430) buffer Particles_ssbo {
+struct Simulation {
+  uint i;
+};
+
+layout(binding = 0, std430)
+buffer Particles_1_ssbo {
   Particle p[];
 } particles;
-
-layout(binding = 4, std140) uniform sim_block_ubo {
+layout(binding = 1, std140)
+uniform sim_block_1_ubo {
   Simulation inner;
-} sim;
-
-void tint_symbol() {
-  Particle particle = particles.p[0];
-  particle.position[sim.inner.i] = particle.position[sim.inner.i];
-}
-
+} v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
-  return;
+  uint v_1 = (uint(particles.p.length()) - 1u);
+  uint v_2 = min(uint(0), v_1);
+  Particle particle = particles.p[v_2];
+  uint v_3 = min(v.inner.i, 7u);
+  uint v_4 = min(v.inner.i, 7u);
+  particle.position[v_3] = particle.position[v_4];
 }

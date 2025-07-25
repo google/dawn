@@ -72,7 +72,6 @@ EventManager::~EventManager() {
 
 std::pair<FutureID, bool> EventManager::TrackEvent(std::unique_ptr<TrackedEvent> event) {
     if (!ValidateCallbackMode(event->GetCallbackMode())) {
-        // TODO: crbug.com/42241407 - Update to use instance logging callback.
         dawn::ErrorLog() << "Invalid callback mode: " << event->GetCallbackMode();
         return {kNullFutureID, false};
     }
@@ -178,7 +177,8 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
         // UnsupportedMixedSources validation here, because those only apply to timed waits.)
         //
         // TODO(crbug.com/dawn/1987): CreateInstance needs to validate timedWaitEnable was false.
-        return WGPUWaitStatus_UnsupportedTimeout;
+        dawn::ErrorLog() << "Dawn wire does not currently support timed waits.";
+        return WGPUWaitStatus_Error;
     }
 
     if (count == 0) {

@@ -37,6 +37,8 @@
 
 #include "webgpu/webgpu_cpp.h"
 
+namespace dawn {
+
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.
 
@@ -109,6 +111,11 @@ inline testing::Matcher<const char*> ValidStringMessage() {
     return MakeMatcher(new StringMessageMatcher());
 }
 
+// Matcher for C++ types to verify that their internal C-handles are identical.
+MATCHER_P(CHandleIs, cType, "") {
+    return arg.Get() == cType;
+}
+
 // Skip a test when the given condition is satisfied.
 #define DAWN_SKIP_TEST_IF(condition)                            \
     do {                                                        \
@@ -119,7 +126,7 @@ inline testing::Matcher<const char*> ValidStringMessage() {
         }                                                       \
     } while (0)
 
-namespace dawn::wire {
+namespace wire {
 class WireClient;
 class WireServer;
 namespace client {
@@ -128,11 +135,11 @@ class MemoryTransferService;
 namespace server {
 class MemoryTransferService;
 }  // namespace server
-}  // namespace dawn::wire
+}  // namespace wire
 
-namespace dawn::utils {
+namespace utils {
 class TerribleCommandBuffer;
-}
+}  // namespace utils
 
 class WireTest : public testing::Test {
   protected:
@@ -150,17 +157,25 @@ class WireTest : public testing::Test {
 
     testing::StrictMock<MockProcTable> api;
 
-    testing::MockCallback<WGPUDeviceLostCallback2> deviceLostCallback;
-    testing::MockCallback<WGPUUncapturedErrorCallback> uncapturedErrorCallback;
+    // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
+    // device loss that aren't expected should result in test failures and not just some warnings
+    // printed to stdout.
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback<void>*>>
+        deviceLostCallback;
+    testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
+        uncapturedErrorCallback;
 
-    WGPUInstance instance;
+    wgpu::Instance instance;
     WGPUInstance apiInstance;
     wgpu::Adapter adapter;
     WGPUAdapter apiAdapter;
-    WGPUDevice device;
+    wgpu::Device device;
     WGPUDevice apiDevice;
-    WGPUQueue queue;
+    wgpu::Queue queue;
     WGPUQueue apiQueue;
+
+    WGPUDevice cDevice;
+    WGPUQueue cQueue;
 
     dawn::wire::WireServer* GetWireServer();
     dawn::wire::WireClient* GetWireClient();
@@ -179,5 +194,7 @@ class WireTest : public testing::Test {
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_

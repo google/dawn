@@ -1,35 +1,23 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
-uniform highp sampler2DArrayShadow arg_0_arg_1;
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   float inner;
-} prevent_dce;
-
-void textureSampleCompare_af1051() {
+} v;
+uniform highp sampler2DArrayShadow f_arg_0_arg_1;
+float textureSampleCompare_af1051() {
   vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float res = textureOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), arg_4), ivec2(1));
-  prevent_dce.inner = res;
+  vec2 v_1 = arg_2;
+  float v_2 = arg_4;
+  vec4 v_3 = vec4(v_1, float(arg_3), v_2);
+  vec2 v_4 = dFdx(v_1);
+  float res = textureGradOffset(f_arg_0_arg_1, v_3, v_4, dFdy(v_1), ivec2(1));
+  return res;
 }
-
-void fragment_main() {
-  textureSampleCompare_af1051();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = textureSampleCompare_af1051();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

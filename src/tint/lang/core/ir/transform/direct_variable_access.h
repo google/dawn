@@ -28,8 +28,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 
-#include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -38,30 +39,40 @@ class Module;
 
 namespace tint::core::ir::transform {
 
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kDirectVariableAccessCapabilities{
+    core::ir::Capability::kAllowClipDistancesOnF32, core::ir::Capability::kAllowDuplicateBindings};
+
 /// DirectVariableAccessOptions adjusts the behaviour of the transform.
 struct DirectVariableAccessOptions {
     /// If true, then 'private' sub-object pointer arguments will be transformed.
     bool transform_private = false;
     /// If true, then 'function' sub-object pointer arguments will be transformed.
     bool transform_function = false;
+    /// If true, then 'handle' sub-object handle type arguments will be transformed.
+    bool transform_handle = false;
 
     /// Reflection for this class
-    TINT_REFLECT(DirectVariableAccessOptions, transform_private, transform_function);
+    TINT_REFLECT(DirectVariableAccessOptions,
+                 transform_private,
+                 transform_function,
+                 transform_handle);
 };
 
-/// DirectVariableAccess is a transform that transforms pointer parameters in the 'storage',
+/// DirectVariableAccess is a transform that transforms parameters in the 'storage',
 /// 'uniform' and 'workgroup' address space so that they're accessed directly by the function,
-/// instead of being passed by pointer.
+/// instead of being passed by pointer. It will potentially also transform `private`, `handle` or
+/// `function` parameters depending on provided options.
 ///
-/// DirectVariableAccess works by creating specializations of functions that have pointer
-/// parameters, one specialization for each pointer argument's unique access chain 'shape' from a
-/// unique variable. Calls to specialized functions are transformed so that the pointer arguments
-/// are replaced with an array of access-chain indicies, and if the pointer is in the 'function' or
-/// 'private' address space, also with a pointer to the root object. For more information, see the
-/// comments in src/tint/lang/wgsl/ast/transform/direct_variable_access.cc.
+/// DirectVariableAccess works by creating specializations of functions that have matching
+/// parameters, one specialization for each argument's unique access chain 'shape' from a unique
+/// variable. Calls to specialized functions are transformed so that the arguments are replaced with
+/// an array of access-chain indices, and if the parameter is in the 'function' or 'private'
+/// address space, also with a pointer to the root object.
 ///
 /// @param module the module to transform
-/// @returns error diagnostics on failure
+/// @param options the options
+/// @returns error on failure
 Result<SuccessType> DirectVariableAccess(Module& module,
                                          const DirectVariableAccessOptions& options);
 

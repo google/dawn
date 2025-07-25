@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 53
 ; Schema: 0
                OpCapability Shader
@@ -29,76 +29,76 @@
                OpName %v4bool_var5 "v4bool_var5"
                OpName %main "main"
        %bool = OpTypeBool
-       %true = OpConstantTrue %bool
 %_ptr_Private_bool = OpTypePointer Private %bool
+       %true = OpConstantTrue %bool
   %bool_var1 = OpVariable %_ptr_Private_bool Private %true
   %bool_var2 = OpVariable %_ptr_Private_bool Private %true
   %bool_var3 = OpVariable %_ptr_Private_bool Private %true
         %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
 %_ptr_Private_int = OpTypePointer Private %int
+      %int_1 = OpConstant %int 1
    %i32_var1 = OpVariable %_ptr_Private_int Private %int_1
    %i32_var2 = OpVariable %_ptr_Private_int Private %int_1
    %i32_var3 = OpVariable %_ptr_Private_int Private %int_1
        %uint = OpTypeInt 32 0
-     %uint_1 = OpConstant %uint 1
 %_ptr_Private_uint = OpTypePointer Private %uint
+     %uint_1 = OpConstant %uint 1
    %u32_var1 = OpVariable %_ptr_Private_uint Private %uint_1
    %u32_var2 = OpVariable %_ptr_Private_uint Private %uint_1
    %u32_var3 = OpVariable %_ptr_Private_uint Private %uint_1
      %v3bool = OpTypeVector %bool 3
-         %20 = OpConstantComposite %v3bool %true %true %true
 %_ptr_Private_v3bool = OpTypePointer Private %v3bool
-%v3bool_var1 = OpVariable %_ptr_Private_v3bool Private %20
-%v3bool_var2 = OpVariable %_ptr_Private_v3bool Private %20
-%v3bool_var3 = OpVariable %_ptr_Private_v3bool Private %20
+         %22 = OpConstantComposite %v3bool %true %true %true
+%v3bool_var1 = OpVariable %_ptr_Private_v3bool Private %22
+%v3bool_var2 = OpVariable %_ptr_Private_v3bool Private %22
+%v3bool_var3 = OpVariable %_ptr_Private_v3bool Private %22
       %v3int = OpTypeVector %int 3
-         %26 = OpConstantComposite %v3int %int_1 %int_1 %int_1
 %_ptr_Private_v3int = OpTypePointer Private %v3int
- %v3i32_var1 = OpVariable %_ptr_Private_v3int Private %26
- %v3i32_var2 = OpVariable %_ptr_Private_v3int Private %26
- %v3i32_var3 = OpVariable %_ptr_Private_v3int Private %26
+         %28 = OpConstantComposite %v3int %int_1 %int_1 %int_1
+ %v3i32_var1 = OpVariable %_ptr_Private_v3int Private %28
+ %v3i32_var2 = OpVariable %_ptr_Private_v3int Private %28
+ %v3i32_var3 = OpVariable %_ptr_Private_v3int Private %28
      %v3uint = OpTypeVector %uint 3
-         %32 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
 %_ptr_Private_v3uint = OpTypePointer Private %v3uint
- %v3u32_var1 = OpVariable %_ptr_Private_v3uint Private %32
- %v3u32_var2 = OpVariable %_ptr_Private_v3uint Private %32
- %v3u32_var3 = OpVariable %_ptr_Private_v3uint Private %32
-%v3bool_var4 = OpVariable %_ptr_Private_v3bool Private %20
+         %34 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
+ %v3u32_var1 = OpVariable %_ptr_Private_v3uint Private %34
+ %v3u32_var2 = OpVariable %_ptr_Private_v3uint Private %34
+ %v3u32_var3 = OpVariable %_ptr_Private_v3uint Private %34
+%v3bool_var4 = OpVariable %_ptr_Private_v3bool Private %22
      %v4bool = OpTypeVector %bool 4
-         %39 = OpConstantNull %bool
-         %40 = OpConstantComposite %v4bool %true %39 %true %39
 %_ptr_Private_v4bool = OpTypePointer Private %v4bool
-%v4bool_var5 = OpVariable %_ptr_Private_v4bool Private %40
+      %false = OpConstantFalse %bool
+         %41 = OpConstantComposite %v4bool %true %false %true %false
+%v4bool_var5 = OpVariable %_ptr_Private_v4bool Private %41
        %void = OpTypeVoid
-         %43 = OpTypeFunction %void
-         %47 = OpConstantNull %int
-         %48 = OpConstantNull %uint
+         %45 = OpTypeFunction %void
+      %int_0 = OpConstant %int 0
+     %uint_0 = OpConstant %uint 0
          %49 = OpConstantNull %v3bool
          %50 = OpConstantNull %v4bool
          %51 = OpConstantNull %v3int
          %52 = OpConstantNull %v3uint
-       %main = OpFunction %void None %43
+       %main = OpFunction %void None %45
          %46 = OpLabel
-               OpStore %bool_var1 %39
-               OpStore %bool_var2 %39
-               OpStore %bool_var3 %39
-               OpStore %i32_var1 %47
-               OpStore %i32_var2 %47
-               OpStore %i32_var3 %47
-               OpStore %u32_var1 %48
-               OpStore %u32_var2 %48
-               OpStore %u32_var3 %48
-               OpStore %v3bool_var1 %49
-               OpStore %v3bool_var2 %49
-               OpStore %v3bool_var3 %49
-               OpStore %v3bool_var4 %49
-               OpStore %v4bool_var5 %50
-               OpStore %v3i32_var1 %51
-               OpStore %v3i32_var2 %51
-               OpStore %v3i32_var3 %51
-               OpStore %v3u32_var1 %52
-               OpStore %v3u32_var2 %52
-               OpStore %v3u32_var3 %52
+               OpStore %bool_var1 %false None
+               OpStore %bool_var2 %false None
+               OpStore %bool_var3 %false None
+               OpStore %i32_var1 %int_0 None
+               OpStore %i32_var2 %int_0 None
+               OpStore %i32_var3 %int_0 None
+               OpStore %u32_var1 %uint_0 None
+               OpStore %u32_var2 %uint_0 None
+               OpStore %u32_var3 %uint_0 None
+               OpStore %v3bool_var1 %49 None
+               OpStore %v3bool_var2 %49 None
+               OpStore %v3bool_var3 %49 None
+               OpStore %v3bool_var4 %49 None
+               OpStore %v4bool_var5 %50 None
+               OpStore %v3i32_var1 %51 None
+               OpStore %v3i32_var2 %51 None
+               OpStore %v3i32_var3 %51 None
+               OpStore %v3u32_var1 %52 None
+               OpStore %v3u32_var2 %52 None
+               OpStore %v3u32_var3 %52 None
                OpReturn
                OpFunctionEnd

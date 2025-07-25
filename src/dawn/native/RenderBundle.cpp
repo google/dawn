@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "absl/strings/str_format.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -67,11 +66,11 @@ void RenderBundleBase::DestroyImpl() {
 }
 
 // static
-Ref<RenderBundleBase> RenderBundleBase::MakeError(DeviceBase* device, const char* label) {
+Ref<RenderBundleBase> RenderBundleBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new RenderBundleBase(device, ObjectBase::kError, label));
 }
 
-RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag, const char* label)
+RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag, StringView label)
     : ApiObjectBase(device, errorTag, label), mIndirectDrawMetadata(device->GetLimits()) {}
 
 ObjectType RenderBundleBase::GetType() const {

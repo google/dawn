@@ -1,22 +1,50 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+struct tint_module_vars_struct {
+  const constant int* b;
+};
 
-bool func_3(const constant int* const tint_symbol_1) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; (i < *(tint_symbol_1)); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
-    TINT_ISOLATE_UB(tint_volatile_true_1) for(int j = -1; (j == 1); j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)))) {
-      return false;
+bool func_3(tint_module_vars_struct tint_module_vars) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if ((i < (*tint_module_vars.b))) {
+      } else {
+        break;
+      }
+      {
+        uint2 tint_loop_idx_1 = uint2(4294967295u);
+        int j = -1;
+        while(true) {
+          if (all((tint_loop_idx_1 == uint2(0u)))) {
+            break;
+          }
+          if ((j == 1)) {
+          } else {
+            break;
+          }
+          return false;
+        }
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      }
+      continue;
     }
   }
   return false;
 }
 
-kernel void tint_symbol(const constant int* tint_symbol_2 [[buffer(0)]]) {
-  func_3(tint_symbol_2);
-  return;
+kernel void v(const constant int* b [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=b};
+  func_3(tint_module_vars);
 }
-

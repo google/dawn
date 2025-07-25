@@ -29,18 +29,19 @@ namespace dawn::native {
 
 wgpu::FeatureName ToAPI(Feature feature) {
   switch (feature) {
-    {% for enum in types["feature name"].values if enum.valid %}
+    {% for enum in types["feature name"].values if (enum.valid and not is_enum_value_proxy(enum)) %}
       case Feature::{{as_cppEnum(enum.name)}}:
         return wgpu::FeatureName::{{as_cppEnum(enum.name)}};
     {% endfor %}
     case Feature::InvalidEnum:
-      DAWN_UNREACHABLE();
+      break;
   }
+  DAWN_UNREACHABLE();
 }
 
 Feature FromAPI(wgpu::FeatureName feature) {
   switch (feature) {
-    {% for enum in types["feature name"].values %}
+    {% for enum in types["feature name"].values if not is_enum_value_proxy(enum) %}
       case wgpu::FeatureName::{{as_cppEnum(enum.name)}}:
         {% if enum.valid %}
           return Feature::{{as_cppEnum(enum.name)}};
@@ -65,7 +66,7 @@ static constexpr bool FeatureInfoIsDefined(Feature feature) {
 static constexpr ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> InitializeFeatureEnumAndInfoList() {
   constexpr size_t kInfoCount = sizeof(kFeatureInfo) / sizeof(kFeatureInfo[0]);
   ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> list{};
-  {% for enum in types["feature name"].values if enum.valid %}
+  {% for enum in types["feature name"].values if (enum.valid and not is_enum_value_proxy(enum)) %}
     {
       static_assert(FeatureInfoIsDefined(Feature::{{as_cppEnum(enum.name)}}),
                     "Please define feature info for {{as_cppEnum(enum.name)}} in Features.cpp");

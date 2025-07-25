@@ -33,7 +33,7 @@ set(BUILD_TESTING OFF)
 # a parent project that does not want to use depot_tools.
 if (DAWN_FETCH_DEPENDENCIES)
     set(EXTRA_FETCH_ARGS)
-    if (NOT TARGET gmock AND ${TINT_BUILD_TESTS})
+    if (NOT TARGET gmock AND (DAWN_BUILD_TESTS OR TINT_BUILD_TESTS))
         list(APPEND EXTRA_FETCH_ARGS --use-test-deps)
     endif()
 
@@ -46,6 +46,85 @@ if (DAWN_FETCH_DEPENDENCIES)
             ${EXTRA_FETCH_ARGS}
     )
 endif ()
+
+set(ABSL_ROOT_DIR ${DAWN_ABSEIL_DIR})
+if (NOT TARGET absl::strings)
+    # Recommended setting for compatibility with future abseil releases.
+    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
+    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
+        add_compile_options(
+                -Wno-array-parameter
+                -Wno-deprecated-builtins
+                -Wno-unknown-warning-option
+                -Wno-gcc-compat
+                -Wno-unreachable-code-break
+                -Wno-nullability-extension
+                -Wno-shadow
+                -Wno-redundant-parens
+        )
+    endif()
+
+    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND WIN32)
+        set(protobuf_HAVE_BUILTIN_ATOMICS 1)
+    endif()
+endif()
+
+if (DAWN_BUILD_PROTOBUF AND EXISTS "${DAWN_PROTOBUF_DIR}/cmake")
+    # Needs to come before SPIR-V Tools
+    include("protobuf.cmake")
+endif()
+
+################################################################################
+# Start of Emscripten enabled third party directories
+#   To minimize the number of third party targets to make when building with
+#   Emscripten to the minimal set, only subdirectories added within the Start
+#   and End of the Emscripten block are enabled .
+################################################################################
+if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
+    set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
+    if (EMSCRIPTEN)
+        # For Emscripten builds, we need to disable pthreads.
+        # https://discourse.cmake.org/t/set-definitions-for-external-sub-directory/1136
+        set(gtest_disable_pthreads ON)
+    endif()
+
+    add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
+
+    # The CMake target GTest::gmock_main always sets -fexceptions, which is
+    # incompatible with WASM JSPI (though works with Asyncify). The only way to
+    # avoid this is to define our own custom CMake rule for it.
+    # (This is based on GMock's internal `gmock_main_no_exception` target.)
+    add_library(gmock_main_wasmsafe
+        "${gtest_SOURCE_DIR}/src/gtest-all.cc"
+        "${gmock_SOURCE_DIR}/src/gmock-all.cc"
+        "${gmock_SOURCE_DIR}/src/gmock_main.cc"
+    )
+    target_compile_options(gmock_main_wasmsafe
+        PUBLIC
+            "-fno-exceptions"
+            "-fno-rtti"
+    )
+    target_include_directories(gmock_main_wasmsafe SYSTEM
+        PRIVATE
+            "${gtest_SOURCE_DIR}"
+            "${gmock_SOURCE_DIR}"
+        PUBLIC
+            "${gtest_SOURCE_DIR}/include"
+            "${gmock_SOURCE_DIR}/include"
+    )
+endif()
+################################################################################
+# End of Emscripten enabled third party directories
+################################################################################
+if (EMSCRIPTEN)
+    return()
+endif()
 
 if (NOT TARGET SPIRV-Headers)
     set(SPIRV_HEADERS_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
@@ -94,22 +173,6 @@ if (NOT TARGET glfw AND DAWN_USE_GLFW)
     add_subdirectory(${DAWN_GLFW_DIR} "${CMAKE_CURRENT_BINARY_DIR}/glfw")
 endif()
 
-if (NOT TARGET absl::strings)
-    # Recommended setting for compability with future abseil releases.
-    set(ABSL_PROPAGATE_CXX_STD ON CACHE BOOL "" FORCE)
-    message(STATUS "Dawn: using Abseil at ${DAWN_ABSEIL_DIR}")
-    if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
-        ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
-        add_compile_options(
-            -Wno-array-parameter
-            -Wno-deprecated-builtins
-            -Wno-unknown-warning-option
-        )
-    endif()
-
-    add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
-endif()
-
 if (DAWN_BUILD_PROTOBUF AND NOT TARGET libprotobuf-mutator)
     message(STATUS "Dawn: using LPM at ${DAWN_LPM_DIR}")
     include("libprotobuf-mutator/BUILD.cmake")
@@ -122,16 +185,16 @@ if (DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES)
     target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api")
 endif()
 
-if (NOT TARGET Vulkan-Headers AND DAWN_ENABLE_VULKAN)
-    message(STATUS "Dawn: using Vulkan-Headers at ${DAWN_VULKAN_HEADERS_DIR}")
+if (NOT TARGET Vulkan::Headers AND DAWN_ENABLE_VULKAN)
+    message(STATUS "Dawn: using Vulkan::Headers at ${DAWN_VULKAN_HEADERS_DIR}")
 
     set(VULKAN_HEADERS_ENABLE_MODULE OFF)
-    add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers")
+    add_subdirectory(${DAWN_VULKAN_HEADERS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-headers/src")
 endif()
 
-if (NOT TARGET VulkanUtilityHeaders AND DAWN_ENABLE_VULKAN)
+if (NOT TARGET Vulkan::UtilityHeaders AND DAWN_ENABLE_VULKAN)
     message(STATUS "Dawn: using VulkanUtilityLibraries at ${DAWN_VULKAN_UTILITY_LIBRARIES_DIR}")
-    add_subdirectory(${DAWN_VULKAN_UTILITY_LIBRARIES_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-utility-libraries")
+    add_subdirectory(${DAWN_VULKAN_UTILITY_LIBRARIES_DIR} "${CMAKE_CURRENT_BINARY_DIR}/vulkan-utility-libraries/src")
 endif()
 
 if (DAWN_ENABLE_SWIFTSHADER AND NOT TARGET vk_swiftshader)
@@ -147,10 +210,21 @@ if (TINT_BUILD_BENCHMARKS OR DAWN_BUILD_BENCHMARKS)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/google_benchmark/src EXCLUDE_FROM_ALL)
 endif()
 
-if (TINT_BUILD_TESTS AND NOT TARGET gmock)
-    set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
-endif()
+# Populates 'targets' with list of all targets under 'dir'
+# Use 'get_all_targets_recursive' instead of this macro
+macro(do_get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    foreach(subdir ${subdirectories})
+        do_get_all_targets_recursive(${targets} ${subdir})
+    endforeach()
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+endmacro()
+function(get_all_targets_recursive targets dir)
+    set(targets_out)
+    do_get_all_targets_recursive(targets_out ${dir})
+    set(${targets} ${targets_out} PARENT_SCOPE)
+endfunction()
 
 function(AddSubdirectoryDXC)
     # We use a CMake function so that all these (non-cache) variables are scoped
@@ -209,12 +283,6 @@ function(AddSubdirectoryDXC)
     # not visible from our build dir. We don't need this validation, so just disable it.
     set(CLANG_FORMAT_EXE "" CACHE STRING "" FORCE)
 
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT DAWN_DXC_DISABLE_ASSERTS_DEBUG)
-        set(LLVM_ENABLE_ASSERTIONS ON CACHE BOOL "" FORCE)
-    else()
-        set(LLVM_ENABLE_ASSERTIONS OFF CACHE BOOL "" FORCE)
-    endif()
-
     # Override RPATH so that it points to current dir (exe path). This allows both executable and
     # shared library to be in the same location, which we set below. Note that DXC places places
     # executables in a bin directory, and shared libraries in a lib directory.
@@ -232,6 +300,29 @@ function(AddSubdirectoryDXC)
     )
     set_target_properties(dxc PROPERTIES EXCLUDE_FROM_ALL FALSE)
     set_target_properties(dxcompiler PROPERTIES EXCLUDE_FROM_ALL FALSE)
+
+    if ((NOT IS_DEBUG_BUILD) AND DAWN_DXC_ENABLE_ASSERTS_IN_NDEBUG)
+        # NOTE: Don't set LLVM_ENABLE_ASSERTIONS because it modifies CMAKE_CXX_FLAGS_* by removing NDEBUG
+        # from it; but this is a global CMake flag that affects all targets, including the non-DXC ones.
+        # Instead, we add '-UNDEBUG', which will come after the default '-DNDEBUG' that comes from
+        # CMAKE_CXX_FLAGS_*, and rely on the fact that compilers will undefine NDEBUG if it comes last
+        # on the compile command line. This was tested on Clang, GCC, and MSVC.
+        # Also note that MSVC will warn about both being defined, which is why DXC/LLVM
+        # removes NDEBUG from CMAKE_CXX_FLAGS_*, but we can live with the warnings.
+        # TODO(crbug.com/358169277): Once we move the 'dxc' directory one level deeper,
+        # use add_definitions instead of getting all targets and setting properties on them.
+        get_all_targets_recursive(ALL_TARGETS ${CMAKE_CURRENT_SOURCE_DIR}/dxc)
+        foreach(t IN LISTS ALL_TARGETS)
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_OPTIONS "-UNDEBUG")
+            if (NOT MSVC)
+                set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "_DEBUG")
+            endif()
+            # Reduce binary size by dropping assertion strings
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "LLVM_ASSERTIONS_NO_STRINGS")
+            # Always trap on asserts for consistent crash logging
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "LLVM_ASSERTIONS_TRAP")
+        endforeach()
+    endif()
 
     # Override output dir for both targets so that they end up in the same place
     # as the rest of our binaries. Otherwise, DXC wants its outputs in bin and lib dirs.
@@ -294,6 +385,8 @@ function(AddSubdirectoryDXC)
             TARGET copy_dxil_dll
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DXIL_DLL_PATH} $<TARGET_FILE_DIR:dxcompiler>
             COMMENT "Copying ${DXIL_DLL_PATH} to $<TARGET_FILE_DIR:dxcompiler>")
+        # Ensure folder "$<TARGET_FILE_DIR:dxcompiler>" exists when copying the dll
+        add_dependencies(copy_dxil_dll dxcompiler)
         # Make dxc target depend on copy_dxil_dll
         add_dependencies(dxc copy_dxil_dll)
     endif()

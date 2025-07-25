@@ -40,12 +40,13 @@ class Backend;
 
 class PhysicalDevice : public d3d::PhysicalDevice {
   public:
-    PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter4> hardwareAdapter);
+    PhysicalDevice(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter);
     ~PhysicalDevice() override;
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     // Get the applied shader model version under the given adapter or device toggle state, which
     // may be lower than the shader model reported in mDeviceInfo.
@@ -54,6 +55,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     const D3D12DeviceInfo& GetDeviceInfo() const;
     Backend* GetBackend() const;
     ComPtr<ID3D12Device> GetDevice() const;
+
+    bool SupportsBufferMapExtendedUsages() const;
 
   private:
     using Base = d3d::PhysicalDevice;
@@ -84,7 +87,7 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
 
-    void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
 
     ComPtr<ID3D12Device> mD3d12Device;
 

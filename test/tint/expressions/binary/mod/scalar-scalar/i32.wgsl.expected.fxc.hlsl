@@ -1,16 +1,13 @@
-int tint_mod(int lhs, int rhs) {
-  int rhs_or_one = (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs);
-  if (any(((uint((lhs | rhs_or_one)) & 2147483648u) != 0u))) {
-    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
-  } else {
-    return (lhs % rhs_or_one);
-  }
+
+int tint_mod_i32(int lhs, int rhs) {
+  int v = ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs));
+  return (lhs - ((lhs / v) * v));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  int a = 1;
-  int b = 2;
-  int r = tint_mod(a, b);
-  return;
+  int a = int(1);
+  int b = int(2);
+  int r = tint_mod_i32(a, b);
 }
+

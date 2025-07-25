@@ -1,10 +1,12 @@
 #version 310 es
 
+
 struct S {
   float a;
 };
 
-void tint_symbol() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   bool bool_var = false;
   bool bool_let = false;
   int i32_var = 0;
@@ -25,10 +27,4 @@ void tint_symbol() {
   float arr_let[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   S struct_var = S(0.0f);
   S struct_let = S(0.0f);
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  tint_symbol();
-  return;
 }

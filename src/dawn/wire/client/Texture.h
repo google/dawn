@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_TEXTURE_H_
 #define SRC_DAWN_WIRE_CLIENT_TEXTURE_H_
 
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
 
 #include "dawn/wire/client/ObjectBase.h"
 
@@ -38,20 +38,22 @@ class Device;
 
 class Texture final : public ObjectBase {
   public:
+    static WGPUTexture CreateError(Device* device, const WGPUTextureDescriptor* descriptor);
+
     Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* descriptor);
     ~Texture() override;
 
     ObjectType GetObjectType() const override;
 
     // Note that these values can be arbitrary since they aren't validated in the wire client.
-    uint32_t GetWidth() const;
-    uint32_t GetHeight() const;
-    uint32_t GetDepthOrArrayLayers() const;
-    uint32_t GetMipLevelCount() const;
-    uint32_t GetSampleCount() const;
-    WGPUTextureDimension GetDimension() const;
-    WGPUTextureFormat GetFormat() const;
-    WGPUTextureUsage GetUsage() const;
+    uint32_t APIGetWidth() const;
+    uint32_t APIGetHeight() const;
+    uint32_t APIGetDepthOrArrayLayers() const;
+    uint32_t APIGetMipLevelCount() const;
+    uint32_t APIGetSampleCount() const;
+    WGPUTextureDimension APIGetDimension() const;
+    WGPUTextureFormat APIGetFormat() const;
+    WGPUTextureUsage APIGetUsage() const;
 
   private:
     WGPUExtent3D mSize;

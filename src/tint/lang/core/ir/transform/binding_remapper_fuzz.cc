@@ -33,19 +33,15 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void BindingRemapperFuzzer(Module& module,
-                           const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
-    if (auto res = BindingRemapper(module, binding_points); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of BindingRemapper failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> BindingRemapperFuzzer(
+    Module& ir,
+    const fuzz::ir::Context&,
+    const std::unordered_map<BindingPoint, BindingPoint>& binding_points) {
+    return BindingRemapper(ir, binding_points);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BindingRemapperFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BindingRemapperFuzzer,
+                      tint::core::ir::transform::kBindingRemapperCapabilities);

@@ -2,20 +2,20 @@ struct str {
   int i;
 };
 
-RWByteAddressBuffer S : register(u0);
 
-void S_store(uint offset, str value) {
-  S.Store((offset + 0u), asuint(value.i));
+RWByteAddressBuffer S : register(u0);
+void v(uint offset, str obj) {
+  S.Store((offset + 0u), asuint(obj.i));
 }
 
-void func_S_X(uint pointer[1]) {
-  str tint_symbol = (str)0;
-  S_store((4u * pointer[0]), tint_symbol);
+void func(uint pointer_indices[1]) {
+  str v_1 = (str)0;
+  v((0u + (pointer_indices[0u] * 4u)), v_1);
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint tint_symbol_1[1] = {2u};
-  func_S_X(tint_symbol_1);
-  return;
+  uint v_2[1] = {2u};
+  func(v_2);
 }
+

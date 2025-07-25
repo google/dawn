@@ -1,40 +1,70 @@
-SKIP: FAILED
+SKIP: INVALID
 
-float16_t tint_acosh(float16_t x) {
-  return log((x + sqrt(((x * x) - float16_t(1.0h)))));
-}
+//
+// fragment_main
+//
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
-
-void acosh_a37dfe() {
+RWByteAddressBuffer prevent_dce : register(u0);
+float16_t acosh_a37dfe() {
   float16_t arg_0 = float16_t(1.54296875h);
-  float16_t res = tint_acosh(arg_0);
-  prevent_dce.Store<float16_t>(0u, res);
-}
-
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  acosh_a37dfe();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+  float16_t v = arg_0;
+  float16_t res = log((v + sqrt(((v * v) - float16_t(1.0h)))));
+  return res;
 }
 
 void fragment_main() {
-  acosh_a37dfe();
-  return;
+  prevent_dce.Store<float16_t>(0u, acosh_a37dfe());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+float16_t acosh_a37dfe() {
+  float16_t arg_0 = float16_t(1.54296875h);
+  float16_t v = arg_0;
+  float16_t res = log((v + sqrt(((v * v) - float16_t(1.0h)))));
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  acosh_a37dfe();
-  return;
+  prevent_dce.Store<float16_t>(0u, acosh_a37dfe());
 }
+
+//
+// vertex_main
+//
+struct VertexOutput {
+  float4 pos;
+  float16_t prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation float16_t VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+float16_t acosh_a37dfe() {
+  float16_t arg_0 = float16_t(1.54296875h);
+  float16_t v = arg_0;
+  float16_t res = log((v + sqrt(((v * v) - float16_t(1.0h)))));
+  return res;
+}
+
+VertexOutput vertex_main_inner() {
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = acosh_a37dfe();
+  VertexOutput v_2 = v_1;
+  return v_2;
+}
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
+}
+

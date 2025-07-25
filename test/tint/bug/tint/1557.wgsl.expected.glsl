@@ -1,49 +1,57 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform u_block_ubo {
+layout(binding = 0, std140)
+uniform u_block_1_ubo {
   int inner;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-} u;
-
+} v;
 int f() {
   return 0;
 }
-
 void g() {
   int j = 0;
-  while (true) {
-    if ((j >= 1)) {
-      break;
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if ((j >= 1)) {
+        break;
+      }
+      uint v_1 = uint(j);
+      j = int((v_1 + uint(1)));
+      int k = f();
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
     }
-    j = (j + 1);
-    int k = f();
   }
 }
-
-void tint_symbol() {
-  switch(u.inner) {
-    case 0: {
-      switch(u.inner) {
-        case 0: {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  switch(v.inner) {
+    case 0:
+    {
+      switch(v.inner) {
+        case 0:
+        {
           break;
         }
-        default: {
+        default:
+        {
           g();
           break;
         }
       }
       break;
     }
-    default: {
+    default:
+    {
       break;
     }
   }
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  tint_symbol();
-  return;
 }

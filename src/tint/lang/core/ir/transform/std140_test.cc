@@ -86,7 +86,7 @@ MyStruct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat2x4<f32> {
@@ -130,7 +130,7 @@ MyStruct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat2x4<f32> {
@@ -174,7 +174,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat2x2<f32> {
@@ -202,7 +202,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat2x2<f32> {
@@ -246,7 +246,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat3x2<f32> {
@@ -271,7 +271,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat3x2<f32> {
@@ -317,7 +317,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():vec2<f32> {
@@ -342,7 +342,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():vec2<f32> {
@@ -385,7 +385,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%column:i32):vec2<f32> {
@@ -410,7 +410,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%column:i32):vec2<f32> {
@@ -457,7 +457,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -482,7 +482,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():f32 {
@@ -522,7 +522,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():MyStruct {
@@ -546,21 +546,21 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():MyStruct {
   $B2: {
     %3:MyStruct_std140 = load %buffer
-    %4:MyStruct = call %convert_MyStruct, %3
+    %4:MyStruct = call %tint_convert_MyStruct, %3
     ret %4
   }
 }
-%convert_MyStruct = func(%input:MyStruct_std140):MyStruct {
+%tint_convert_MyStruct = func(%tint_input:MyStruct_std140):MyStruct {
   $B3: {
-    %7:vec2<f32> = access %input, 0u
-    %8:vec2<f32> = access %input, 1u
-    %9:vec2<f32> = access %input, 2u
+    %7:vec2<f32> = access %tint_input, 0u
+    %8:vec2<f32> = access %tint_input, 1u
+    %9:vec2<f32> = access %tint_input, 2u
     %10:mat3x2<f32> = construct %7, %8, %9
     %11:MyStruct = construct %10
     ret %11
@@ -604,7 +604,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Outer {
@@ -636,20 +636,20 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Outer {
   $B2: {
     %3:Outer_std140 = load %buffer
-    %4:Outer = call %convert_Outer, %3
+    %4:Outer = call %tint_convert_Outer, %3
     ret %4
   }
 }
-%convert_Outer = func(%input:Outer_std140):Outer {
+%tint_convert_Outer = func(%tint_input:Outer_std140):Outer {
   $B3: {
-    %7:array<Inner_std140, 4> = access %input, 0u
-    %8:ptr<function, array<Inner, 4>, read_write> = var
+    %7:array<Inner_std140, 4> = access %tint_input, 0u
+    %8:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B4, b: $B5, c: $B6] {  # loop_1
       $B4: {  # initializer
         next_iteration 0u  # -> $B5
@@ -663,7 +663,7 @@ $B1: {  # root
         }
         %11:ptr<function, Inner, read_write> = access %8, %idx
         %12:Inner_std140 = access %7, %idx
-        %13:Inner = call %convert_Inner, %12
+        %13:Inner = call %tint_convert_Inner, %12
         store %11, %13
         continue  # -> $B6
       }
@@ -677,11 +677,11 @@ $B1: {  # root
     ret %17
   }
 }
-%convert_Inner = func(%input_1:Inner_std140):Inner {  # %input_1: 'input'
+%tint_convert_Inner = func(%tint_input_1:Inner_std140):Inner {  # %tint_input_1: 'tint_input'
   $B8: {
-    %19:vec2<f32> = access %input_1, 0u
-    %20:vec2<f32> = access %input_1, 1u
-    %21:vec2<f32> = access %input_1, 2u
+    %19:vec2<f32> = access %tint_input_1, 0u
+    %20:vec2<f32> = access %tint_input_1, 1u
+    %21:vec2<f32> = access %tint_input_1, 2u
     %22:mat3x2<f32> = construct %19, %20, %21
     %23:Inner = construct %22
     ret %23
@@ -724,7 +724,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Inner {
@@ -757,22 +757,22 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Inner {
   $B2: {
     %3:ptr<uniform, Inner_std140, read> = access %buffer, 0u
     %4:Inner_std140 = load %3
-    %5:Inner = call %convert_Inner, %4
+    %5:Inner = call %tint_convert_Inner, %4
     ret %5
   }
 }
-%convert_Inner = func(%input:Inner_std140):Inner {
+%tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B3: {
-    %8:vec2<f32> = access %input, 0u
-    %9:vec2<f32> = access %input, 1u
-    %10:vec2<f32> = access %input, 2u
+    %8:vec2<f32> = access %tint_input, 0u
+    %9:vec2<f32> = access %tint_input, 1u
+    %10:vec2<f32> = access %tint_input, 2u
     %11:mat3x2<f32> = construct %8, %9, %10
     %12:Inner = construct %11
     ret %12
@@ -816,7 +816,7 @@ Outer = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Outer {
@@ -846,23 +846,23 @@ Outer_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():Outer {
   $B2: {
     %3:Outer_std140 = load %buffer
-    %4:Outer = call %convert_Outer, %3
+    %4:Outer = call %tint_convert_Outer, %3
     ret %4
   }
 }
-%convert_Outer = func(%input:Outer_std140):Outer {
+%tint_convert_Outer = func(%tint_input:Outer_std140):Outer {
   $B3: {
-    %7:vec2<f32> = access %input, 0u
-    %8:vec2<f32> = access %input, 1u
-    %9:vec2<f32> = access %input, 2u
+    %7:vec2<f32> = access %tint_input, 0u
+    %8:vec2<f32> = access %tint_input, 1u
+    %9:vec2<f32> = access %tint_input, 2u
     %10:mat3x2<f32> = construct %7, %8, %9
-    %11:Inner = access %input, 3u
+    %11:Inner = access %tint_input, 3u
     %12:Outer = construct %10, %11
     ret %12
   }
@@ -906,7 +906,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -944,7 +944,7 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1014,7 +1014,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1067,7 +1067,7 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1083,7 +1083,7 @@ $B1: {  # root
     %11:mat3x2<f32> = construct %6, %8, %10
     %12:vec2<f32> = access %11, 2u
     %13:array<Inner_std140, 4> = load %3
-    %14:ptr<function, array<Inner, 4>, read_write> = var
+    %14:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -1097,7 +1097,7 @@ $B1: {  # root
         }
         %17:ptr<function, Inner, read_write> = access %14, %idx
         %18:Inner_std140 = access %13, %idx
-        %19:Inner = call %convert_Inner, %18
+        %19:Inner = call %tint_convert_Inner, %18
         store %17, %19
         continue  # -> $B5
       }
@@ -1109,7 +1109,7 @@ $B1: {  # root
     %22:array<Inner, 4> = load %14
     %arr:array<Inner, 4> = let %22
     %24:Inner_std140 = load %4
-    %25:Inner = call %convert_Inner, %24
+    %25:Inner = call %tint_convert_Inner, %24
     %inner:Inner = let %25
     %mat:mat3x2<f32> = let %11
     %col:vec2<f32> = let %12
@@ -1118,14 +1118,14 @@ $B1: {  # root
     ret
   }
 }
-%convert_Inner = func(%input:Inner_std140):Inner {
+%tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %32:i32 = access %input, 0u
-    %33:vec2<f32> = access %input, 1u
-    %34:vec2<f32> = access %input, 2u
-    %35:vec2<f32> = access %input, 3u
+    %32:i32 = access %tint_input, 0u
+    %33:vec2<f32> = access %tint_input, 1u
+    %34:vec2<f32> = access %tint_input, 2u
+    %35:vec2<f32> = access %tint_input, 3u
     %36:mat3x2<f32> = construct %33, %34, %35
-    %37:i32 = access %input, 4u
+    %37:i32 = access %tint_input, 4u
     %38:Inner = construct %32, %36, %37
     ret %38
   }
@@ -1185,7 +1185,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1242,7 +1242,7 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1258,7 +1258,7 @@ $B1: {  # root
     %11:mat3x2<f32> = construct %6, %8, %10
     %12:vec2<f32> = access %11, 2u
     %13:array<Inner_std140, 4> = load %3
-    %14:ptr<function, array<Inner, 4>, read_write> = var
+    %14:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -1272,7 +1272,7 @@ $B1: {  # root
         }
         %17:ptr<function, Inner, read_write> = access %14, %idx
         %18:Inner_std140 = access %13, %idx
-        %19:Inner = call %convert_Inner, %18
+        %19:Inner = call %tint_convert_Inner, %18
         store %17, %19
         continue  # -> $B5
       }
@@ -1284,7 +1284,7 @@ $B1: {  # root
     %22:array<Inner, 4> = load %14
     %arr:array<Inner, 4> = let %22
     %24:Inner_std140 = load %4
-    %25:Inner = call %convert_Inner, %24
+    %25:Inner = call %tint_convert_Inner, %24
     %inner:Inner = let %25
     %mat:mat3x2<f32> = let %11
     %col:vec2<f32> = let %12
@@ -1293,14 +1293,14 @@ $B1: {  # root
     ret
   }
 }
-%convert_Inner = func(%input:Inner_std140):Inner {
+%tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %32:i32 = access %input, 0u
-    %33:vec2<f32> = access %input, 1u
-    %34:vec2<f32> = access %input, 2u
-    %35:vec2<f32> = access %input, 3u
+    %32:i32 = access %tint_input, 0u
+    %33:vec2<f32> = access %tint_input, 1u
+    %34:vec2<f32> = access %tint_input, 2u
+    %35:vec2<f32> = access %tint_input, 3u
     %36:mat3x2<f32> = construct %33, %34, %35
-    %37:i32 = access %input, 4u
+    %37:i32 = access %tint_input, 4u
     %38:Inner = construct %32, %36, %37
     ret %38
   }
@@ -1363,7 +1363,7 @@ Outer = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%arr_idx:i32, %col_idx:i32, %el_idx:i32):void {
@@ -1416,7 +1416,7 @@ Outer_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, Outer_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, Outer_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func(%arr_idx:i32, %col_idx:i32, %el_idx:i32):void {
@@ -1432,7 +1432,7 @@ $B1: {  # root
     %14:mat3x2<f32> = construct %9, %11, %13
     %15:vec2<f32> = access %14, %col_idx
     %16:array<Inner_std140, 4> = load %6
-    %17:ptr<function, array<Inner, 4>, read_write> = var
+    %17:ptr<function, array<Inner, 4>, read_write> = var undef
     loop [i: $B3, b: $B4, c: $B5] {  # loop_1
       $B3: {  # initializer
         next_iteration 0u  # -> $B4
@@ -1446,7 +1446,7 @@ $B1: {  # root
         }
         %20:ptr<function, Inner, read_write> = access %17, %idx
         %21:Inner_std140 = access %16, %idx
-        %22:Inner = call %convert_Inner, %21
+        %22:Inner = call %tint_convert_Inner, %21
         store %20, %22
         continue  # -> $B5
       }
@@ -1458,7 +1458,7 @@ $B1: {  # root
     %25:array<Inner, 4> = load %17
     %arr:array<Inner, 4> = let %25
     %27:Inner_std140 = load %7
-    %28:Inner = call %convert_Inner, %27
+    %28:Inner = call %tint_convert_Inner, %27
     %inner:Inner = let %28
     %mat:mat3x2<f32> = let %14
     %col:vec2<f32> = let %15
@@ -1467,14 +1467,14 @@ $B1: {  # root
     ret
   }
 }
-%convert_Inner = func(%input:Inner_std140):Inner {
+%tint_convert_Inner = func(%tint_input:Inner_std140):Inner {
   $B7: {
-    %35:i32 = access %input, 0u
-    %36:vec2<f32> = access %input, 1u
-    %37:vec2<f32> = access %input, 2u
-    %38:vec2<f32> = access %input, 3u
+    %35:i32 = access %tint_input, 0u
+    %36:vec2<f32> = access %tint_input, 1u
+    %37:vec2<f32> = access %tint_input, 2u
+    %38:vec2<f32> = access %tint_input, 3u
     %39:mat3x2<f32> = construct %36, %37, %38
-    %40:i32 = access %input, 4u
+    %40:i32 = access %tint_input, 4u
     %41:Inner = construct %35, %39, %40
     ret %41
   }
@@ -1518,13 +1518,13 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
 
     auto* src = R"(
 MyStruct = struct @align(128), @block {
-  a:i32 @offset(0)
-  m:mat4x2<f32> @offset(64)
-  b:i32 @offset(128)
+  a:i32 @offset(0) @size(16)
+  m:mat4x2<f32> @offset(64) @size(64)
+  b:i32 @offset(128) @size(32)
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1546,22 +1546,22 @@ $B1: {  # root
 
     auto* expect = R"(
 MyStruct = struct @align(128), @block {
-  a:i32 @offset(0)
-  m:mat4x2<f32> @offset(64)
-  b:i32 @offset(128)
+  a:i32 @offset(0) @size(16)
+  m:mat4x2<f32> @offset(64) @size(64)
+  b:i32 @offset(128) @size(32)
 }
 
 MyStruct_std140 = struct @align(128), @block {
-  a:i32 @offset(0)
+  a:i32 @offset(0) @size(16)
   m_col0:vec2<f32> @offset(64)
   m_col1:vec2<f32> @offset(72)
   m_col2:vec2<f32> @offset(80)
   m_col3:vec2<f32> @offset(88)
-  b:i32 @offset(128)
+  b:i32 @offset(128) @size(32)
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -1616,7 +1616,7 @@ MyStruct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat4x3<f32> {
@@ -1642,7 +1642,7 @@ MyStruct_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():mat4x3<f32> {
@@ -1762,7 +1762,7 @@ MyStruct = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %load_struct_a = func():mat4x4<f32> {
@@ -1842,13 +1842,13 @@ MyStruct_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %load_struct_a = func():mat4x4<f32> {
   $B2: {
     %3:MyStruct_std140 = load %buffer
-    %4:MyStruct = call %convert_MyStruct, %3
+    %4:MyStruct = call %tint_convert_MyStruct, %3
     %6:mat4x4<f32> = access %4, 0u
     ret %6
   }
@@ -1856,7 +1856,7 @@ $B1: {  # root
 %load_struct_b = func():mat3x2<f32> {
   $B3: {
     %8:MyStruct_std140 = load %buffer
-    %9:MyStruct = call %convert_MyStruct, %8
+    %9:MyStruct = call %tint_convert_MyStruct, %8
     %10:mat3x2<f32> = access %9, 1u
     ret %10
   }
@@ -1912,12 +1912,12 @@ $B1: {  # root
     ret %37
   }
 }
-%convert_MyStruct = func(%input:MyStruct_std140):MyStruct {
+%tint_convert_MyStruct = func(%tint_input:MyStruct_std140):MyStruct {
   $B10: {
-    %39:mat4x4<f32> = access %input, 0u
-    %40:vec2<f32> = access %input, 1u
-    %41:vec2<f32> = access %input, 2u
-    %42:vec2<f32> = access %input, 3u
+    %39:mat4x4<f32> = access %tint_input, 0u
+    %40:vec2<f32> = access %tint_input, 1u
+    %41:vec2<f32> = access %tint_input, 2u
+    %42:vec2<f32> = access %tint_input, 3u
     %43:mat3x2<f32> = construct %40, %41, %42
     %44:MyStruct = construct %39, %43
     ret %44
@@ -1963,7 +1963,7 @@ MyStruct = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -2009,13 +2009,13 @@ MyStruct_std140 = struct @align(8), @block {
 }
 
 $B1: {  # root
-  %buffer:ptr<uniform, MyStruct_std140, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, MyStruct_std140, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
   $B2: {
     %3:MyStruct_std140 = load %buffer
-    %4:MyStruct = call %convert_MyStruct, %3
+    %4:MyStruct = call %tint_convert_MyStruct, %3
     %struct:MyStruct = let %4
     %7:ptr<uniform, vec4<f16>, read> = access %buffer, 8u
     %8:vec4<f16> = load %7
@@ -2036,23 +2036,23 @@ $B1: {  # root
     ret
   }
 }
-%convert_MyStruct = func(%input:MyStruct_std140):MyStruct {
+%tint_convert_MyStruct = func(%tint_input:MyStruct_std140):MyStruct {
   $B3: {
-    %24:vec2<f16> = access %input, 0u
-    %25:vec2<f16> = access %input, 1u
+    %24:vec2<f16> = access %tint_input, 0u
+    %25:vec2<f16> = access %tint_input, 1u
     %26:mat2x2<f16> = construct %24, %25
-    %27:vec4<f16> = access %input, 2u
-    %28:vec4<f16> = access %input, 3u
+    %27:vec4<f16> = access %tint_input, 2u
+    %28:vec4<f16> = access %tint_input, 3u
     %29:mat2x4<f16> = construct %27, %28
-    %30:vec3<f16> = access %input, 4u
-    %31:vec3<f16> = access %input, 5u
-    %32:vec3<f16> = access %input, 6u
-    %33:vec3<f16> = access %input, 7u
+    %30:vec3<f16> = access %tint_input, 4u
+    %31:vec3<f16> = access %tint_input, 5u
+    %32:vec3<f16> = access %tint_input, 6u
+    %33:vec3<f16> = access %tint_input, 7u
     %34:mat4x3<f16> = construct %30, %31, %32, %33
-    %35:vec4<f16> = access %input, 8u
-    %36:vec4<f16> = access %input, 9u
-    %37:vec4<f16> = access %input, 10u
-    %38:vec4<f16> = access %input, 11u
+    %35:vec4<f16> = access %tint_input, 8u
+    %36:vec4<f16> = access %tint_input, 9u
+    %37:vec4<f16> = access %tint_input, 10u
+    %38:vec4<f16> = access %tint_input, 11u
     %39:mat4x4<f16> = construct %35, %36, %37, %38
     %40:MyStruct = construct %26, %29, %34, %39
     ret %40
@@ -2091,7 +2091,7 @@ S = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {
@@ -2125,7 +2125,7 @@ S_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S_std140, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S_std140, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {
@@ -2177,7 +2177,7 @@ S2 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S2, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S2, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {
@@ -2223,7 +2223,7 @@ S2_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S2_std140, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S2_std140, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {
@@ -2272,7 +2272,7 @@ S2 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S2, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S2, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {
@@ -2308,7 +2308,7 @@ S2_std140 = struct @align(16), @block {
 }
 
 $B1: {  # root
-  %u:ptr<uniform, S2_std140, read> = var @binding_point(0, 0)
+  %u:ptr<uniform, S2_std140, read> = var undef @binding_point(0, 0)
 }
 
 %F = func():f32 {

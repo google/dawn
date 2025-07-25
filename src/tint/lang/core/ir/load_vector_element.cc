@@ -34,11 +34,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::LoadVectorElement);
 
 namespace tint::core::ir {
 
-LoadVectorElement::LoadVectorElement() {
+LoadVectorElement::LoadVectorElement(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-LoadVectorElement::LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index) {
+LoadVectorElement::LoadVectorElement(Id id,
+                                     InstructionResult* result,
+                                     ir::Value* from,
+                                     ir::Value* index)
+    : Base(id) {
     flags_.Add(Flag::kSequenced);
 
     AddOperand(LoadVectorElement::kFromOperandOffset, from);
@@ -49,10 +53,10 @@ LoadVectorElement::LoadVectorElement(InstructionResult* result, ir::Value* from,
 LoadVectorElement::~LoadVectorElement() = default;
 
 LoadVectorElement* LoadVectorElement::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto* from = ctx.Remap(From());
     auto* index = ctx.Remap(Index());
-    return ctx.ir.allocators.instructions.Create<LoadVectorElement>(new_result, from, index);
+    return ctx.ir.CreateInstruction<LoadVectorElement>(new_result, from, index);
 }
 
 }  // namespace tint::core::ir

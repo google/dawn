@@ -27,8 +27,10 @@
 
 #include "dawn/native/RenderBundleEncoder.h"
 
+#include <string>
 #include <utility>
 
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -70,8 +72,10 @@ MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(descriptor->colorFormatCount > maxColorAttachments,
-                    "Color formats count (%u) exceeds maximum number of color attachements (%u).",
-                    descriptor->colorFormatCount, maxColorAttachments);
+                    "Color formats count (%u) exceeds maximum number of color attachments (%u).%s",
+                    descriptor->colorFormatCount, maxColorAttachments,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter()->GetLimits().v1,
+                                                maxColorAttachments, descriptor->colorFormatCount));
 
     bool allColorFormatsUndefined = true;
     ColorAttachmentFormats colorAttachmentFormats;
@@ -113,9 +117,9 @@ RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
     GetObjectTrackingList()->Track(this);
 }
 
-RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, const char* label)
+RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, StringView label)
     : RenderEncoderBase(device, &mBundleEncodingContext, errorTag, label),
-      mBundleEncodingContext(device, this) {}
+      mBundleEncodingContext(device, errorTag) {}
 
 RenderBundleEncoder::~RenderBundleEncoder() {
     mEncodingContext = nullptr;
@@ -136,7 +140,7 @@ Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
 }
 
 // static
-Ref<RenderBundleEncoder> RenderBundleEncoder::MakeError(DeviceBase* device, const char* label) {
+Ref<RenderBundleEncoder> RenderBundleEncoder::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new RenderBundleEncoder(device, ObjectBase::kError, label));
 }
 
@@ -151,7 +155,7 @@ CommandIterator RenderBundleEncoder::AcquireCommands() {
 RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
     Ref<RenderBundleBase> result;
 
-    if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
+    if (GetDevice()->ConsumedError(Finish(descriptor), &result, "calling %s.Finish(%s).", this,
                                    descriptor)) {
         result = RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
         result->SetEncoderLabel(this->GetLabel());
@@ -160,19 +164,17 @@ RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* d
     return ReturnToAPI(std::move(result));
 }
 
-ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::FinishImpl(
+ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(
     const RenderBundleDescriptor* descriptor) {
     mCommandBufferState.End();
-
     // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
     // internal state of the encoding context. Subsequent calls to encode commands will generate
     // errors.
     DAWN_TRY(mBundleEncodingContext.Finish());
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
 
     RenderPassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
     if (IsValidationEnabled()) {
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(ValidateProgrammableEncoderEnd());
         DAWN_TRY(ValidateFinish(usages));
     }
 
@@ -184,6 +186,7 @@ ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::FinishImpl(
 MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
     TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
     DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_TRY(ValidateProgrammableEncoderEnd());
     DAWN_TRY(ValidateSyncScopeResourceUsage(usages));
     return {};
 }

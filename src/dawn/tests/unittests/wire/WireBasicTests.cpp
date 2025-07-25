@@ -40,7 +40,7 @@ class WireBasicTests : public WireTest {
 
 // One call gets forwarded correctly.
 TEST_F(WireBasicTests, CallForwarded) {
-    wgpuDeviceCreateCommandEncoder(device, nullptr);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
@@ -51,8 +51,8 @@ TEST_F(WireBasicTests, CallForwarded) {
 
 // Test that calling methods on a new object works as expected.
 TEST_F(WireBasicTests, CreateThenCall) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-    wgpuCommandEncoderFinish(encoder, nullptr);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandBuffer commands = encoder.Finish();
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
@@ -66,10 +66,10 @@ TEST_F(WireBasicTests, CreateThenCall) {
 
 // Test that client reference/release do not call the backend API.
 TEST_F(WireBasicTests, RefCountKeptInClient) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    wgpuCommandEncoderAddRef(encoder);
-    wgpuCommandEncoderRelease(encoder);
+    wgpu::CommandEncoder encoder2 = encoder;
+    encoder2 = nullptr;
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))
@@ -80,9 +80,8 @@ TEST_F(WireBasicTests, RefCountKeptInClient) {
 
 // Test that client reference/release calls the backend API.
 TEST_F(WireBasicTests, ReleaseCalledOnRefCount0) {
-    WGPUCommandEncoder encoder = wgpuDeviceCreateCommandEncoder(device, nullptr);
-
-    wgpuCommandEncoderRelease(encoder);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder = nullptr;
 
     WGPUCommandEncoder apiCmdBufEncoder = api.GetNewCommandEncoder();
     EXPECT_CALL(api, DeviceCreateCommandEncoder(apiDevice, nullptr))

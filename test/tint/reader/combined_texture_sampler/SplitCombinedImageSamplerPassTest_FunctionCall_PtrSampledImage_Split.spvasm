@@ -1,0 +1,96 @@
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %main_0 "main_0"
+               OpName %voidfn "voidfn"
+
+      OpName %f "f"
+      OpName %f_ty "f_ty"
+      OpName %i_ty "i_ty"
+      OpName %s_ty "s_ty"
+      OpName %p_i_ty "p_i_ty"
+      OpName %p_s_ty "p_s_ty"
+
+      OpName %si_ty "si_ty"
+      OpName %p_si_ty "p_si_ty"
+      OpName %array_si_ty "array_si_ty"
+      OpName %rtarray_si_ty "rtarray_si_ty"
+      OpName %p_array_si_ty "p_array_si_ty"
+      OpName %p_rtarray_si_ty "p_rtarray_si_ty"
+
+      OpName %caller_ty     "caller_ty"
+      OpName %caller        "caller"
+      OpName %caller_entry  "caller_entry"
+      OpName %caller_call   "caller_call"
+      OpName %caller_arg    "caller_arg"
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+    %float_0 = OpConstant %float 0
+    %v2float = OpTypeVector %float 2
+    %v3float = OpTypeVector %float 3
+    %v4float = OpTypeVector %float 4
+         %13 = OpConstantNull %v2float
+         %14 = OpConstantNull %v3float
+         %15 = OpConstantNull %v4float
+       %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+
+      %i_ty = OpTypeImage %float 2D 0 0 0 1 Unknown
+      %s_ty = OpTypeSampler
+      %p_i_ty = OpTypePointer UniformConstant %i_ty
+      %p_s_ty = OpTypePointer UniformConstant %s_ty
+
+      %si_ty = OpTypeSampledImage %i_ty
+      %p_si_ty = OpTypePointer UniformConstant %si_ty
+      %array_si_ty = OpTypeArray %si_ty %uint_3
+      %p_array_si_ty = OpTypePointer UniformConstant %array_si_ty
+      %rtarray_si_ty = OpTypeRuntimeArray %si_ty
+      %p_rtarray_si_ty = OpTypePointer UniformConstant %rtarray_si_ty
+
+
+      ; CHECK: %f_ty = OpTypeFunction %void %p_i_ty %p_s_ty
+      %f_ty = OpTypeFunction %void %p_si_ty
+      %caller_ty = OpTypeFunction %float %p_si_ty
+
+      ; Call function arg is split. We've checked these details in other tests.
+      ; CHECK: %f = OpFunction %void None %f_ty
+      ; CHECK-NEXT: %[[callee_i:\w+]] = OpFunctionParameter %p_i_ty
+      ; CHECK-NEXT: %[[callee_s:\w+]] = OpFunctionParameter %p_s_ty
+      ; CHECK-NEXT: = OpLabel
+      ; CHECK-NEXT: OpReturn
+      ; CHECK-NEXT: OpFunctionEnd
+
+      %f = OpFunction %void None %f_ty
+      %100 = OpFunctionParameter %p_si_ty
+      %110 = OpLabel
+      OpReturn
+      OpFunctionEnd
+
+      ; CHECK: %caller = OpFunction %float None %caller_ty
+      ; CHECK-NEXT: %[[caller_i:\w+]] = OpFunctionParameter %p_i_ty
+      ; CHECK-NEXT: %[[caller_s:\w+]] = OpFunctionParameter %p_s_ty
+      ; CHECK-NEXT: %caller_entry = OpLabel
+      ; CHECK-NEXT: %caller_call = OpFunctionCall %void %f %[[caller_i]] %[[caller_s]]
+      ; CHECK-NEXT: OpReturnValue %float_0
+      ; CHECK-NEXT: OpFunctionEnd
+
+      %caller = OpFunction %float None %caller_ty
+  %caller_arg = OpFunctionParameter %p_si_ty
+%caller_entry = OpLabel
+ %caller_call = OpFunctionCall %void %f %caller_arg
+                OpReturnValue %float_0
+                OpFunctionEnd
+
+
+       %main = OpFunction %void None %voidfn
+     %main_0 = OpLabel
+               OpReturn
+               OpFunctionEnd

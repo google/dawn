@@ -50,6 +50,7 @@ cc_library(
     "static_init.h",
   ],
   deps = [
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

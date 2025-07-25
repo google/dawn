@@ -32,12 +32,12 @@
 
 #include "src/tint/api/common/override_id.h"
 
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
+#include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/number.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
+#include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -47,7 +47,6 @@
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/case_statement.h"
@@ -84,6 +83,7 @@
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
+#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
@@ -98,9 +98,8 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
-#include "src/tint/lang/wgsl/extension.h"
-#include "src/tint/utils/id/generation_id.h"
+#include "src/tint/lang/wgsl/enums.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string.h"
@@ -151,44 +150,44 @@ class Builder {
     /// perfectly-forward the first argument.
     template <typename... TYPES>
     using DisableIfSource =
-        traits::EnableIf<!IsSource<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<!IsSource<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a scalar type. Used to
     /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
     /// perfectly-forward the first argument.
     template <typename... TYPES>
     using DisableIfScalar =
-        traits::EnableIf<!IsScalar<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<!IsScalar<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is a scalar type. Used to
     /// avoid ambiguities in overloads that take a scalar as the first parameter and those that
     /// perfectly-forward the first argument.
     template <typename... TYPES>
     using EnableIfScalar =
-        traits::EnableIf<IsScalar<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<IsScalar<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
     /// VectorRef.
     template <typename... TYPES>
     using DisableIfVectorLike =
-        traits::EnableIf<!IsVectorLike<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<!IsVectorLike<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is identifier-like.
     template <typename... TYPES>
     using EnableIfIdentifierLike =
-        traits::EnableIf<IsIdentifierLike<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<IsIdentifierLike<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to disable overloads if the first type in `TYPES` is Infer or an abstract
     /// numeric.
     template <typename... TYPES>
     using DisableIfInferOrAbstract =
-        traits::EnableIf<!IsInferOrAbstract<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<!IsInferOrAbstract<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// A helper used to enable overloads if the first type in `TYPES` is Infer or an abstract
     /// numeric.
     template <typename... TYPES>
     using EnableIfInferOrAbstract =
-        traits::EnableIf<IsInferOrAbstract<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>>>;
+        std::enable_if_t<IsInferOrAbstract<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// VarOptions is a helper for accepting an arbitrary number of order independent options for
     /// constructing an ast::Var.
@@ -378,7 +377,8 @@ class Builder {
     /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
-    traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
+        requires(traits::IsTypeOrDerived<T, ast::Node>)
+    T* create(const Source& source, ARGS&&... args) {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source, std::forward<ARGS>(args)...);
     }
@@ -390,7 +390,8 @@ class Builder {
     /// destructed.
     /// @returns the node pointer
     template <typename T>
-    traits::EnableIfIsType<T, ast::Node>* create() {
+        requires(traits::IsTypeOrDerived<T, ast::Node>)
+    T* create() {
         AssertNotMoved();
         return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_);
     }
@@ -404,7 +405,7 @@ class Builder {
     /// @param args the remaining arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename ARG0, typename... ARGS>
-    traits::EnableIf</* T is ast::Node and ARG0 is not Source */
+    std::enable_if_t</* T is ast::Node and ARG0 is not Source */
                      traits::IsTypeOrDerived<T, ast::Node> &&
                          !traits::IsTypeOrDerived<ARG0, Source>,
                      T>*
@@ -507,6 +508,20 @@ class Builder {
         /// @param source the Source of the node
         /// @returns a 'u32' type
         ast::Type u32(const Source& source) const { return (*this)(source, "u32"); }
+
+        /// @returns a 'i8' type
+        ast::Type i8() const { return (*this)("i8"); }
+
+        /// @param source the Source of the node
+        /// @returns a 'i8' type
+        ast::Type i8(const Source& source) const { return (*this)(source, "i8"); }
+
+        /// @returns a 'u8' type
+        ast::Type u8() const { return (*this)("u8"); }
+
+        /// @param source the Source of the node
+        /// @returns a 'u8' type
+        ast::Type u8(const Source& source) const { return (*this)(source, "u8"); }
 
         /// @param type vector subtype
         /// @param n vector width in elements
@@ -658,8 +673,8 @@ class Builder {
         /// @param rows number of rows for the matrix
         /// @return a matrix of @p type
         ast::Type mat(const Source& source, ast::Type type, uint32_t columns, uint32_t rows) const {
-            if (TINT_LIKELY(columns >= 2 && columns <= 4 && rows >= 2 && rows <= 4)) {
-                static constexpr const char* names[] = {
+            if (DAWN_LIKELY(columns >= 2 && columns <= 4 && rows >= 2 && rows <= 4)) {
+                static constexpr std::array<const char*, 9> names = {
                     "mat2x2", "mat2x3", "mat2x4",  //
                     "mat3x2", "mat3x3", "mat3x4",  //
                     "mat4x2", "mat4x3", "mat4x4",  //
@@ -1284,6 +1299,11 @@ class Builder {
         /// @returns the external texture
         ast::Type external_texture() const { return (*this)("texture_external"); }
 
+        /// @returns the texel buffer
+        ast::Type texel_buffer(core::TexelFormat format, core::Access access) const {
+            return (*this)("texel_buffer", format, access);
+        }
+
         /// @param subtype the texture subtype.
         /// @returns the input attachment
         ast::Type input_attachment(ast::Type subtype) const {
@@ -1294,6 +1314,29 @@ class Builder {
         /// @returns the external texture
         ast::Type external_texture(const Source& source) const {
             return (*this)(source, "texture_external");
+        }
+
+        /// @param kind the subgroup matrix kind
+        /// @param el the subgroup matrix element type
+        /// @param cols the column count
+        /// @param rows the row count
+        /// @returns the subgroup matrix
+        ast::Type subgroup_matrix(core::SubgroupMatrixKind kind,
+                                  ast::Type el,
+                                  uint32_t cols,
+                                  uint32_t rows) const {
+            auto c = core::AInt(cols);
+            auto r = core::AInt(rows);
+            switch (kind) {
+                case core::SubgroupMatrixKind::kLeft:
+                    return (*this)("subgroup_matrix_left", el, c, r);
+                case core::SubgroupMatrixKind::kRight:
+                    return (*this)("subgroup_matrix_right", el, c, r);
+                case core::SubgroupMatrixKind::kResult:
+                    return (*this)("subgroup_matrix_result", el, c, r);
+                case core::SubgroupMatrixKind::kUndefined:
+                    TINT_UNREACHABLE();
+            }
         }
 
         /// @param type the type
@@ -1382,7 +1425,8 @@ class Builder {
 
     /// @param expr the expression
     /// @return expr (passthrough)
-    template <typename T, typename = traits::EnableIfIsType<T, ast::Expression>>
+    template <typename T>
+        requires(traits::IsTypeOrDerived<T, ast::Expression>)
     const T* Expr(const T* expr) {
         return expr;
     }
@@ -2125,6 +2169,17 @@ class Builder {
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Shr(LHS&& lhs, RHS&& rhs) {
         return create<ast::BinaryExpression>(core::BinaryOp::kShiftRight,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
+    /// @param source the source information
+    /// @param lhs the left hand argument to the bit shift right operation
+    /// @param rhs the right hand argument to the bit shift right operation
+    /// @returns a `ast::BinaryExpression` bit shifting right `lhs` by `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Shr(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kShiftRight,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -3055,98 +3110,56 @@ class Builder {
     /// @returns the selector pointer
     const ast::CaseSelector* DefaultCaseSelector() { return create<ast::CaseSelector>(nullptr); }
 
-    /// Passthrough overload
-    /// @param name the builtin value name
-    /// @returns @p name
-    const ast::BuiltinValueName* BuiltinValueName(const ast::BuiltinValueName* name) {
-        return name;
-    }
-
-    /// Creates an ast::BuiltinValueName
-    /// @param name the builtin value name
-    /// @returns the builtin value name
-    template <typename NAME>
-    const ast::BuiltinValueName* BuiltinValueName(NAME&& name) {
-        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
-                      "it is invalid for a builtin value name to be templated");
-        auto* name_ident = Ident(std::forward<NAME>(name));
-        return create<ast::BuiltinValueName>(name_ident ? name_ident->source : source_, name_ident);
-    }
-
-    /// Creates an ast::BuiltinValueName
-    /// @param source the source information
-    /// @param name the builtin value name
-    /// @returns the builtin value name
-    template <typename NAME>
-    const ast::BuiltinValueName* BuiltinValueName(const Source& source, NAME&& name) {
-        static_assert(!traits::IsType<traits::PtrElTy<NAME>, ast::TemplatedIdentifier>,
-                      "it is invalid for a builtin value name to be templated");
-        auto* name_ident = Ident(std::forward<NAME>(name));
-        return create<ast::BuiltinValueName>(source, name_ident);
-    }
-
     /// Creates an ast::BuiltinAttribute
     /// @param source the source information
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    template <typename BUILTIN>
-    const ast::BuiltinAttribute* Builtin(const Source& source, BUILTIN&& builtin) {
-        return create<ast::BuiltinAttribute>(source,
-                                             BuiltinValueName(std::forward<BUILTIN>(builtin)));
+    const ast::BuiltinAttribute* Builtin(const Source& source, core::BuiltinValue builtin) {
+        return create<ast::BuiltinAttribute>(source, builtin);
     }
 
     /// Creates an ast::BuiltinAttribute
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    template <typename BUILTIN>
-    const ast::BuiltinAttribute* Builtin(BUILTIN&& builtin) {
-        return create<ast::BuiltinAttribute>(source_,
-                                             BuiltinValueName(std::forward<BUILTIN>(builtin)));
+    const ast::BuiltinAttribute* Builtin(core::BuiltinValue builtin) {
+        return Builtin(source_, builtin);
     }
 
     /// Creates an ast::InterpolateAttribute
     /// @param type the interpolation type
     /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename = DisableIfSource<TYPE>>
-    const ast::InterpolateAttribute* Interpolate(TYPE&& type) {
-        return Interpolate(source_, std::forward<TYPE>(type));
-    }
-
-    /// Creates an ast::InterpolateAttribute
-    /// @param source the source information
-    /// @param type the interpolation type
-    /// @returns the interpolate attribute pointer
-    template <typename TYPE>
-    const ast::InterpolateAttribute* Interpolate(const Source& source, TYPE&& type) {
-        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)), nullptr);
-    }
-
-    /// Creates an ast::InterpolateAttribute
-    /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
-    /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename SAMPLING, typename = DisableIfSource<TYPE>>
-    const ast::InterpolateAttribute* Interpolate(TYPE&& type, SAMPLING&& sampling) {
-        return Interpolate(source_, std::forward<TYPE>(type), std::forward<SAMPLING>(sampling));
+    const ast::InterpolateAttribute* Interpolate(core::InterpolationType type) {
+        return Interpolate(source_, type);
     }
 
     /// Creates an ast::InterpolateAttribute
     /// @param source the source information
     /// @param type the interpolation type
-    /// @param sampling the interpolation sampling
     /// @returns the interpolate attribute pointer
-    template <typename TYPE, typename SAMPLING>
     const ast::InterpolateAttribute* Interpolate(const Source& source,
-                                                 TYPE&& type,
-                                                 SAMPLING&& sampling) {
-        if constexpr (std::is_same_v<std::decay_t<SAMPLING>, core::InterpolationSampling>) {
-            if (sampling == core::InterpolationSampling::kUndefined) {
-                return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
-                                                         nullptr);
-            }
-        }
-        return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
-                                                 Expr(std::forward<SAMPLING>(sampling)));
+                                                 core::InterpolationType type) {
+        return Interpolate(source, type, core::InterpolationSampling::kUndefined);
+    }
+
+    /// Creates an ast::InterpolateAttribute
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    /// @returns the interpolate attribute pointer
+    const ast::InterpolateAttribute* Interpolate(core::InterpolationType type,
+                                                 core::InterpolationSampling sampling) {
+        return Interpolate(source_, type, sampling);
+    }
+
+    /// Creates an ast::InterpolateAttribute
+    /// @param source the source information
+    /// @param type the interpolation type
+    /// @param sampling the interpolation sampling
+    /// @returns the interpolate attribute pointer
+    const ast::InterpolateAttribute* Interpolate(const Source& source,
+                                                 core::InterpolationType type,
+                                                 core::InterpolationSampling sampling) {
+        core::Interpolation interpolation{type, sampling};
+        return create<ast::InterpolateAttribute>(source, interpolation);
     }
 
     /// Creates an ast::InterpolateAttribute using flat interpolation
@@ -3362,6 +3375,17 @@ class Builder {
                                                Expr(std::forward<EXPR_Z>(z)));
     }
 
+    /// Creates an ast::RowMajorAttribute
+    /// @param source the source information
+    /// @returns the row-major attribute pointer
+    const ast::RowMajorAttribute* RowMajor(const Source& source) {
+        return create<ast::RowMajorAttribute>(source);
+    }
+
+    /// Creates an ast::RowMajorAttribute
+    /// @returns the row-major attribute pointer
+    const ast::RowMajorAttribute* RowMajor() { return create<ast::RowMajorAttribute>(source_); }
+
     /// Creates an ast::DisableValidationAttribute
     /// @param validation the validation to disable
     /// @returns the disable validation attribute pointer
@@ -3527,7 +3551,7 @@ class Builder {
     /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
     /// @returns the function
     template <typename... ARGS,
-              typename = traits::EnableIf<(CanWrapInStatement<ARGS>::value && ...)>>
+              typename = std::enable_if_t<(CanWrapInStatement<ARGS>::value && ...)>>
     const ast::Function* WrapInFunction(ARGS&&... args) {
         Vector stmts{
             WrapInStatement(std::forward<ARGS>(args))...,
@@ -3601,6 +3625,14 @@ struct Builder::TypesBuilder::CToAST<core::f16> {
 template <>
 struct Builder::TypesBuilder::CToAST<bool> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->bool_(); }
+};
+template <>
+struct Builder::TypesBuilder::CToAST<core::i8> {
+    static ast::Type get(const Builder::TypesBuilder* t) { return t->i8(); }
+};
+template <>
+struct Builder::TypesBuilder::CToAST<core::u8> {
+    static ast::Type get(const Builder::TypesBuilder* t) { return t->u8(); }
 };
 template <typename T, uint32_t N>
 struct Builder::TypesBuilder::CToAST<core::fluent_types::array<T, N>> {

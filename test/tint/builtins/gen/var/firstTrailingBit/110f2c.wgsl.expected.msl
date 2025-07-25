@@ -1,46 +1,67 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-uint4 tint_first_trailing_bit(uint4 v) {
-  uint4 x = uint4(v);
-  uint4 const b16 = select(uint4(16u), uint4(0u), bool4((x & uint4(65535u))));
-  x = (x >> b16);
-  uint4 const b8 = select(uint4(8u), uint4(0u), bool4((x & uint4(255u))));
-  x = (x >> b8);
-  uint4 const b4 = select(uint4(4u), uint4(0u), bool4((x & uint4(15u))));
-  x = (x >> b4);
-  uint4 const b2 = select(uint4(2u), uint4(0u), bool4((x & uint4(3u))));
-  x = (x >> b2);
-  uint4 const b1 = select(uint4(1u), uint4(0u), bool4((x & uint4(1u))));
-  uint4 const is_zero = select(uint4(0u), uint4(4294967295u), (x == uint4(0u)));
-  return uint4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+};
 
 uint4 firstTrailingBit_110f2c() {
   uint4 arg_0 = uint4(1u);
-  uint4 res = tint_first_trailing_bit(arg_0);
+  uint4 const v = arg_0;
+  uint4 res = select((select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u))) | (select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u))) | (select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u))) | (select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u))) | select(uint4(0u), uint4(1u), ((((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) & uint4(1u)) == uint4(0u))))))), uint4(4294967295u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) == uint4(0u)));
   return res;
 }
 
-fragment void fragment_main(device uint4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = firstTrailingBit_110f2c();
-  return;
+fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = firstTrailingBit_110f2c();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+};
+
+uint4 firstTrailingBit_110f2c() {
+  uint4 arg_0 = uint4(1u);
+  uint4 const v = arg_0;
+  uint4 res = select((select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u))) | (select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u))) | (select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u))) | (select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u))) | select(uint4(0u), uint4(1u), ((((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) & uint4(1u)) == uint4(0u))))))), uint4(4294967295u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) == uint4(0u)));
+  return res;
 }
 
-kernel void compute_main(device uint4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = firstTrailingBit_110f2c();
-  return;
+kernel void compute_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = firstTrailingBit_110f2c();
 }
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
   uint4 prevent_dce;
 };
 
-struct tint_symbol {
-  uint4 prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  uint4 VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
+
+uint4 firstTrailingBit_110f2c() {
+  uint4 arg_0 = uint4(1u);
+  uint4 const v = arg_0;
+  uint4 res = select((select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u))) | (select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u))) | (select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u))) | (select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u))) | select(uint4(0u), uint4(1u), ((((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) & uint4(1u)) == uint4(0u))))))), uint4(4294967295u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) >> select(uint4(0u), uint4(2u), (((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) >> select(uint4(0u), uint4(4u), ((((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) >> select(uint4(0u), uint4(8u), (((v >> select(uint4(0u), uint4(16u), ((v & uint4(65535u)) == uint4(0u)))) & uint4(255u)) == uint4(0u)))) & uint4(15u)) == uint4(0u)))) & uint4(3u)) == uint4(0u)))) == uint4(0u)));
+  return res;
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -49,11 +70,10 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v_1 = vertex_main_inner();
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
+  return tint_wrapper_result;
 }
-

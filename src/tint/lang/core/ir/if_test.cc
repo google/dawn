@@ -39,7 +39,7 @@ using IR_IfDeathTest = IR_IfTest;
 TEST_F(IR_IfTest, Usage) {
     auto* cond = b.Constant(true);
     auto* if_ = b.If(cond);
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{if_, 0u}));
+    EXPECT_THAT(cond->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{if_, 0u}));
 }
 
 TEST_F(IR_IfTest, Result) {
@@ -60,7 +60,7 @@ TEST_F(IR_IfDeathTest, Fail_NullTrueBlock) {
         {
             Module mod;
             Builder b{mod};
-            If if_(b.Constant(false), nullptr, b.Block());
+            mod.CreateInstruction<If>(b.Constant(false), nullptr, b.Block());
         },
         "internal compiler error");
 }
@@ -70,7 +70,7 @@ TEST_F(IR_IfDeathTest, Fail_NullFalseBlock) {
         {
             Module mod;
             Builder b{mod};
-            If if_(b.Constant(false), b.Block(), nullptr);
+            mod.CreateInstruction<If>(b.Constant(false), b.Block(), nullptr);
         },
         "internal compiler error");
 }

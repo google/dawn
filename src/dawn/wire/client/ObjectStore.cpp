@@ -63,16 +63,19 @@ void ObjectStore::Insert(ObjectBase* obj) {
 }
 
 void ObjectStore::Remove(ObjectBase* obj) {
-    DAWN_ASSERT(obj->IsInList());
     // The wire reuses ID for objects to keep them in a packed array starting from 0.
     // To avoid issues with asynchronous server->client communication referring to an ID that's
     // already reused, each handle also has a generation that's increment by one on each reuse.
     // Avoid overflows by only reusing the ID if the increment of the generation won't overflow.
     const ObjectHandle& currentHandle = obj->GetWireHandle();
-    if (DAWN_LIKELY(currentHandle.generation != std::numeric_limits<ObjectGeneration>::max())) {
+    if (currentHandle.generation != std::numeric_limits<ObjectGeneration>::max()) [[likely]] {
         mFreeHandles.push_back({currentHandle.id, currentHandle.generation + 1});
     }
     mObjects[currentHandle.id] = nullptr;
+}
+
+const std::vector<raw_ptr<ObjectBase>>& ObjectStore::GetAllObjects() const {
+    return mObjects;
 }
 
 ObjectBase* ObjectStore::Get(ObjectId id) const {

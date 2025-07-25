@@ -7,4 +7,9 @@ fn foo(param_bool : bool, param_i32 : i32, param_u32 : u32, param_f32 : f32, par
 
 @compute @workgroup_size(1)
 fn main() {
+  let a = array<f32, 4>();
+  var b = 1.0f;
+  var c = vec4f();
+  var d = array<f32, 4>();
+  foo(true, 1i, 1u, 1.0f, vec2i(3), vec3u(4), vec4f(5), mat2x3f(), a, S(), &(b), &(c), &(d));
 }

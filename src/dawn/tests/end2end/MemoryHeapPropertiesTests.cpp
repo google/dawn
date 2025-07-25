@@ -61,19 +61,19 @@ class MemoryHeapPropertiesTest : public DawnTest {
 TEST_P(MemoryHeapPropertiesTest, GetMemoryHeapProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesMemoryHeaps));
     {
-        wgpu::AdapterProperties properties;
-        wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
-        properties.nextInChain = &memoryHeapProperties;
-
-        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
-        CheckMemoryHeapProperties(memoryHeapProperties);
-    }
-    {
         wgpu::AdapterInfo info;
         wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
         info.nextInChain = &memoryHeapProperties;
 
         adapter.GetInfo(&info);
+        CheckMemoryHeapProperties(memoryHeapProperties);
+    }
+    {
+        wgpu::AdapterInfo adapterInfo;
+        wgpu::AdapterPropertiesMemoryHeaps memoryHeapProperties;
+        adapterInfo.nextInChain = &memoryHeapProperties;
+
+        device.GetAdapterInfo(&adapterInfo);
         CheckMemoryHeapProperties(memoryHeapProperties);
     }
 }

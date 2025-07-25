@@ -1,35 +1,28 @@
-void set_vector_element(inout int4 vec, int idx, int val) {
-  vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-
 struct S {
   int4 a[4];
 };
 
-static int counter = 0;
 
+static int counter = int(0);
 int foo() {
-  counter = (counter + 1);
+  counter = (counter + int(1));
   return counter;
 }
 
 int bar() {
-  counter = (counter + 2);
+  counter = (counter + int(2));
   return counter;
 }
 
 void main() {
   S x = (S)0;
-  int tint_symbol_save = foo();
-  int tint_symbol_1 = bar();
-  {
-    int4 tint_symbol_3[4] = x.a;
-    set_vector_element(tint_symbol_3[tint_symbol_save], tint_symbol_1, (x.a[tint_symbol_save][tint_symbol_1] + 5));
-    x.a = tint_symbol_3;
-  }
+  uint v = min(uint(foo()), 3u);
+  int v_1 = bar();
+  int v_2 = (x.a[v][min(uint(v_1), 3u)] + int(5));
+  x.a[v][min(uint(v_1), 3u)] = v_2;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

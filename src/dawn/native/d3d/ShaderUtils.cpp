@@ -143,7 +143,8 @@ std::vector<const wchar_t*> GetDXCArguments(std::wstring_view entryPointNameW,
 
 ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
-                                                 const std::string& hlslSource) {
+                                                 const std::string& hlslSource,
+                                                 bool dumpShadersOnFailure) {
     DxcBuffer dxcBuffer;
     dxcBuffer.Ptr = hlslSource.c_str();
     dxcBuffer.Size = hlslSource.length();
@@ -156,19 +157,25 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
     // pointers in this vector don't have static lifetime.
     std::vector<const wchar_t*> arguments = GetDXCArguments(entryPointW, r);
     ComPtr<IDxcResult> result;
-    DAWN_TRY(CheckHRESULT(r.dxcCompiler->Compile(&dxcBuffer, arguments.data(), arguments.size(),
-                                                 nullptr, IID_PPV_ARGS(&result)),
-                          "DXC compile"));
+    DAWN_TRY(CheckHRESULT(
+        r.dxcCompiler.UnsafeGetValue()->Compile(&dxcBuffer, arguments.data(), arguments.size(),
+                                                nullptr, IID_PPV_ARGS(&result)),
+        "DXC compile"));
 
     HRESULT hr;
     DAWN_TRY(CheckHRESULT(result->GetStatus(&hr), "DXC get status"));
 
     if (FAILED(hr)) {
+        const char* hrAsString = HRESULTAsString(hr);
         ComPtr<IDxcBlobEncoding> errors;
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
-        return DAWN_VALIDATION_ERROR("DXC compile failed with: %s",
-                                     static_cast<char*>(errors->GetBufferPointer()));
+        if (dumpShadersOnFailure) {
+            return DAWN_VALIDATION_ERROR(
+                "DXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
+                hrAsString, static_cast<char*>(errors->GetBufferPointer()), hlslSource.c_str());
+        }
+        return DAWN_VALIDATION_ERROR("DXC compile failed with error: %s.", hrAsString);
     }
 
     ComPtr<IDxcBlob> compiledShader;
@@ -178,101 +185,104 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const d3d::D3DBytecodeCompilati
 
 ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilationRequest& r,
                                                  const std::string& entryPointName,
-                                                 const std::string& hlslSource) {
+                                                 const std::string& hlslSource,
+                                                 bool dumpShadersOnFailure) {
     ComPtr<ID3DBlob> compiledShader;
     ComPtr<ID3DBlob> errors;
 
-    DAWN_INVALID_IF(FAILED(r.d3dCompile(hlslSource.c_str(), hlslSource.length(), nullptr, nullptr,
-                                        nullptr, entryPointName.c_str(), r.fxcShaderProfile.data(),
-                                        r.compileFlags, 0, &compiledShader, &errors)),
-                    "D3D compile failed with: %s", static_cast<char*>(errors->GetBufferPointer()));
+    auto result = r.d3dCompile.UnsafeGetValue()(
+        hlslSource.c_str(), hlslSource.length(), nullptr, nullptr, nullptr, entryPointName.c_str(),
+        r.fxcShaderProfile.data(), r.compileFlags, 0, &compiledShader, &errors);
+
+    if (FAILED(result)) {
+        const char* resultAsString = HRESULTAsString(result);
+        if (dumpShadersOnFailure) {
+            std::string errorMsg = errors ? static_cast<char*>(errors->GetBufferPointer()) : "";
+            return DAWN_VALIDATION_ERROR(
+                "FXC compile failed with error: %s msg: %s\n/* Generated HLSL: */\n%s\n",
+                resultAsString, errorMsg, hlslSource.c_str());
+        }
+
+        return DAWN_VALIDATION_ERROR("FXC compile failed with error: %s.", resultAsString);
+    }
 
     return std::move(compiledShader);
 }
 
 MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
-                           CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*> tracePlatform,
-                           std::string* remappedEntryPointName,
+                           UnsafeUnserializedValue<dawn::platform::Platform*> tracePlatform,
                            CompiledShader* compiledShader) {
-    std::ostringstream errorStream;
-    errorStream << "Tint HLSL failure:\n";
+    r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
 
-    tint::ast::transform::Manager transformManager;
-    tint::ast::transform::DataMap transformInputs;
+    TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
 
-    // Run before the renamer so that the entry point name matches `entryPointName` still.
-    transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-    transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName.data());
-
-    // Needs to run before all other transforms so that they can use builtin names safely.
-    transformManager.Add<tint::ast::transform::Renamer>();
-    if (r.disableSymbolRenaming) {
-        // We still need to rename HLSL reserved keywords
-        transformInputs.Add<tint::ast::transform::Renamer::Config>(
-            tint::ast::transform::Renamer::Target::kHlslKeywords);
-    }
-
-    if (r.stage == SingleShaderStage::Vertex) {
-        transformManager.Add<tint::ast::transform::FirstIndexOffset>();
-        transformInputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
-            r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
-    }
-
-    if (r.substituteOverrideConfig) {
-        // This needs to run after SingleEntryPoint transform which removes unused overrides for
-        // current entry point.
-        transformManager.Add<tint::ast::transform::SubstituteOverride>();
-        transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-            std::move(r.substituteOverrideConfig).value());
-    }
-
-    tint::Program transformedProgram;
-    tint::ast::transform::DataMap transformOutputs;
+    // Convert the AST program to an IR module.
+    tint::Result<tint::core::ir::Module> ir;
     {
-        TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
-        DAWN_TRY_ASSIGN(transformedProgram,
-                        RunTransforms(&transformManager, r.inputProgram, transformInputs,
-                                      &transformOutputs, nullptr));
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleProgramToIR");
+
+        // Requires Tint Program here right before actual using.
+        auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
+        const tint::Program* tintInputProgram = &(inputProgram->program);
+
+        ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+        DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                        ir.Failure().reason);
     }
 
-    // TODO(dawn:2180): refactor out.
-    if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
-        auto it = data->remappings.find(r.entryPointName.data());
-        if (it != data->remappings.end()) {
-            *remappedEntryPointName = it->second;
-        } else {
-            DAWN_INVALID_IF(!r.disableSymbolRenaming,
-                            "Could not find remapped name for entry point.");
-
-            *remappedEntryPointName = r.entryPointName;
-        }
-    } else {
-        return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleSingleEntryPoint");
+        auto singleEntryPointResult =
+            tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+        DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                        "Pipeline single entry point (IR) failed:\n%s",
+                        singleEntryPointResult.Failure().reason);
     }
 
-    // Validate workgroup size after program runs transforms.
+    // this needs to run after SingleEntryPoint transform which removes unused
+    // overrides for the current entry point.
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleSubstituteOverrides");
+        tint::core::ir::transform::SubstituteOverridesConfig cfg;
+        cfg.map = std::move(r.substituteOverrideConfig);
+        auto substituteOverridesResult =
+            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+
+        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                        "Pipeline override substitution (IR) failed:\n%s",
+                        substituteOverridesResult.Failure().reason);
+    }
+
+    tint::Result<tint::hlsl::writer::Output> result;
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
+                                           "ShaderModuleGenerateHLSL");
+        result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+        DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
+                        result.Failure().reason);
+    }
+
+    // Workgroup validation has to come after `Generate` because it may require overrides to
+    // have been substituted.
     if (r.stage == SingleShaderStage::Compute) {
+        // Validate workgroup size and workgroup storage size.
         Extent3D _;
         DAWN_TRY_ASSIGN(
-            _, ValidateComputeStageWorkgroupSize(transformedProgram, remappedEntryPointName->data(),
-                                                 r.limits, r.maxSubgroupSizeForFullSubgroups));
+            _, ValidateComputeStageWorkgroupSize(
+                   result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
+                   result->workgroup_info.storage_size, /* usesSubgroupMatrix */ false,
+                   r.maxSubgroupSize, r.limits, r.adapterSupportedLimits.UnsafeGetValue()));
     }
 
     bool usesVertexIndex = false;
     bool usesInstanceIndex = false;
     if (r.stage == SingleShaderStage::Vertex) {
-        if (auto* data = transformOutputs.Get<tint::ast::transform::FirstIndexOffset::Data>()) {
-            usesVertexIndex = data->has_vertex_index;
-            usesInstanceIndex = data->has_instance_index;
-        } else {
-            return DAWN_VALIDATION_ERROR("Transform output missing first index offset data.");
-        }
+        usesVertexIndex = result->has_vertex_index;
+        usesInstanceIndex = result->has_instance_index;
     }
-
-    TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
-    auto result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
-    DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
-                    result.Failure().reason.Str());
 
     compiledShader->usesVertexIndex = usesVertexIndex;
     compiledShader->usesInstanceIndex = usesInstanceIndex;
@@ -346,26 +356,28 @@ std::string CompileFlagsToString(uint32_t compileFlags) {
 
 ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
     CompiledShader compiledShader;
-    bool shouldDumpShader = r.hlsl.dumpShaders;
+    bool dumpShadersOnFailure = r.hlsl.dumpShaders || r.hlsl.dumpShadersOnFailure;
     // Compile the source shader to HLSL.
-    std::string remappedEntryPoint;
-    DAWN_TRY(
-        TranslateToHLSL(std::move(r.hlsl), r.tracePlatform, &remappedEntryPoint, &compiledShader));
+    DAWN_TRY(TranslateToHLSL(std::move(r.hlsl), r.tracePlatform, &compiledShader));
 
     switch (r.bytecode.compiler) {
         case d3d::Compiler::DXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderDXC");
             ComPtr<IDxcBlob> compiledDXCShader;
-            DAWN_TRY_ASSIGN(compiledDXCShader, CompileShaderDXC(r.bytecode, remappedEntryPoint,
-                                                                compiledShader.hlslSource));
+            DAWN_TRY_ASSIGN(
+                compiledDXCShader,
+                CompileShaderDXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
+                                 compiledShader.hlslSource, dumpShadersOnFailure));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledDXCShader));
             break;
         }
         case d3d::Compiler::FXC: {
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "CompileShaderFXC");
             ComPtr<ID3DBlob> compiledFXCShader;
-            DAWN_TRY_ASSIGN(compiledFXCShader, CompileShaderFXC(r.bytecode, remappedEntryPoint,
-                                                                compiledShader.hlslSource));
+            DAWN_TRY_ASSIGN(
+                compiledFXCShader,
+                CompileShaderFXC(r.bytecode, r.hlsl.tintOptions.remapped_entry_point_name,
+                                 compiledShader.hlslSource, dumpShadersOnFailure));
             compiledShader.shaderBlob = CreateBlob(std::move(compiledFXCShader));
             break;
         }
@@ -373,7 +385,7 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
 
     // If dumpShaders is false, we don't need the HLSL for logging. Clear the contents so it
     // isn't stored into the cache.
-    if (!shouldDumpShader) {
+    if (!r.hlsl.dumpShaders) {
         compiledShader.hlslSource = "";
     }
     return compiledShader;
@@ -383,33 +395,29 @@ void DumpFXCCompiledShader(Device* device,
                            const CompiledShader& compiledShader,
                            uint32_t compileFlags) {
     std::ostringstream dumpedMsg;
-    // The HLSL may be empty if compilation failed.
-    if (!compiledShader.hlslSource.empty()) {
-        dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
-    }
+    DAWN_ASSERT(!compiledShader.hlslSource.empty());
+    dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
 
-    // The blob may be empty if FXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
-    if (!shaderBlob.Empty()) {
-        dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
-        dumpedMsg << "/* Dumped disassembled DXBC */\n";
-        ComPtr<ID3DBlob> disassembly;
-        UINT flags =
-            // Some literals are printed as floats with precision(6) which is not enough
-            // precision for values very close to 0, so always print literals as hex values.
-            D3D_DISASM_PRINT_HEX_LITERALS;
-        if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
-                                                          flags, nullptr, &disassembly))) {
-            dumpedMsg << "D3D disassemble failed\n";
-        } else {
-            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                          disassembly->GetBufferSize());
-        }
+    DAWN_ASSERT(!shaderBlob.Empty());
+    dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
+    dumpedMsg << "/* Dumped disassembled DXBC */\n";
+    ComPtr<ID3DBlob> disassembly;
+    UINT flags =
+        // Some literals are printed as floats with precision(6) which is not enough
+        // precision for values very close to 0, so always print literals as hex values.
+        D3D_DISASM_PRINT_HEX_LITERALS;
+    if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(), flags,
+                                                      nullptr, &disassembly))) {
+        dumpedMsg << "D3D disassemble failed\n";
+    } else {
+        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                      disassembly->GetBufferSize());
     }
 
     std::string logMessage = dumpedMsg.str();
     if (!logMessage.empty()) {
-        device->EmitLog(WGPULoggingType_Info, logMessage.c_str());
+        device->EmitLog(wgpu::LoggingType::Info, logMessage.c_str());
     }
 }
 

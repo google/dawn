@@ -1,20 +1,18 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 24
+; Generator: Google Tint Compiler; 1
+; Bound: 21
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %str "str"
                OpMemberName %str 0 "arr"
+               OpName %str "str"
                OpName %P "P"
-               OpName %func_F_arr "func_F_arr"
-               OpName %pointer "pointer"
+               OpName %func "func"
                OpName %main "main"
-               OpMemberDecorate %str 0 Offset 0
-               OpDecorate %_arr_int_uint_4 ArrayStride 4
+               OpName %r "r"
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
@@ -23,20 +21,19 @@
 %_ptr_Private_str = OpTypePointer Private %str
           %8 = OpConstantNull %str
           %P = OpVariable %_ptr_Private_str Private %8
-          %9 = OpTypeFunction %_arr_int_uint_4 %_ptr_Private_str
-     %uint_0 = OpConstant %uint 0
+         %10 = OpTypeFunction %_arr_int_uint_4
 %_ptr_Private__arr_int_uint_4 = OpTypePointer Private %_arr_int_uint_4
+     %uint_0 = OpConstant %uint 0
        %void = OpTypeVoid
          %18 = OpTypeFunction %void
- %func_F_arr = OpFunction %_arr_int_uint_4 None %9
-    %pointer = OpFunctionParameter %_ptr_Private_str
-         %12 = OpLabel
-         %16 = OpAccessChain %_ptr_Private__arr_int_uint_4 %pointer %uint_0
-         %17 = OpLoad %_arr_int_uint_4 %16
-               OpReturnValue %17
+       %func = OpFunction %_arr_int_uint_4 None %10
+         %11 = OpLabel
+         %12 = OpAccessChain %_ptr_Private__arr_int_uint_4 %P %uint_0
+         %15 = OpLoad %_arr_int_uint_4 %12 None
+               OpReturnValue %15
                OpFunctionEnd
        %main = OpFunction %void None %18
-         %21 = OpLabel
-         %22 = OpFunctionCall %_arr_int_uint_4 %func_F_arr %P
+         %19 = OpLabel
+          %r = OpFunctionCall %_arr_int_uint_4 %func
                OpReturn
                OpFunctionEnd

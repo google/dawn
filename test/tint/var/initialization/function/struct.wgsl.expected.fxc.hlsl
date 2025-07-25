@@ -3,8 +3,9 @@ struct S {
   float b;
 };
 
+
 [numthreads(1, 1, 1)]
 void main() {
   S v = (S)0;
-  return;
 }
+

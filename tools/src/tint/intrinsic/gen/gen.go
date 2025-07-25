@@ -518,6 +518,10 @@ func ElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 		return fqn.TemplateArguments[2].(sem.FullyQualifiedName)
 	case "array":
 		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
+	case "runtime_array":
+		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
+	case "subgroup_matrix":
+		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
 	}
 	return fqn
 }
@@ -538,7 +542,11 @@ func DeepestElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 		return DeepestElementType(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
 	case "array":
 		return DeepestElementType(fqn.TemplateArguments[0].(sem.FullyQualifiedName))
+	case "runtime_array":
+		return DeepestElementType(fqn.TemplateArguments[0].(sem.FullyQualifiedName))
 	case "ptr":
+		return DeepestElementType(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
+	case "subgroup_matrix":
 		return DeepestElementType(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
 	}
 	return fqn
@@ -607,6 +615,50 @@ func OverloadUsesReadWriteStorageTexture(overload sem.Overload) bool {
 			if access == "read" || access == "read_write" {
 				return true
 			}
+		}
+	}
+	return false
+}
+
+// OverloadUsesGLESTexture returns true if the overload uses a texture value for GLSL ES 3.10
+func OverloadNeedsDesktopGLSL(overload sem.Overload) bool {
+	if overload.Intrinsic.Name == "textureSampleLevel" {
+		for _, param := range overload.Parameters {
+			if strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_2d_array") ||
+				strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube") ||
+				strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube_array") {
+				return true
+			}
+		}
+	}
+	if overload.Intrinsic.Name == "textureSampleCompareLevel" {
+		has_tex := false
+		for _, param := range overload.Parameters {
+			if strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_2d_array") {
+				has_tex = true
+				break
+			}
+		}
+		for _, param := range overload.Parameters {
+			if param.Name == "offset" {
+				if has_tex {
+					return true
+				}
+				break
+			}
+		}
+	}
+
+	for _, param := range overload.Parameters {
+		if strings.HasPrefix(param.Type.Target.GetName(), "texture_storage") {
+			fmt := param.Type.TemplateArguments[0].(sem.FullyQualifiedName).Target.GetName()
+			if fmt == "rg32uint" || fmt == "rg32sint" || fmt == "rg32float" || fmt == "r8unorm" {
+				return true
+			}
+		}
+		if strings.HasPrefix(param.Type.Target.GetName(), "texture_cube_array") ||
+			strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube_array") {
+			return true
 		}
 	}
 	return false

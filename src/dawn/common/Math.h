@@ -28,21 +28,25 @@
 #ifndef SRC_DAWN_COMMON_MATH_H_
 #define SRC_DAWN_COMMON_MATH_H_
 
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 
 #include <limits>
 #include <optional>
-#include <type_traits>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
+
+#if DAWN_COMPILER_IS(MSVC)
+#include <intrin.h>
+#endif
 
 namespace dawn {
 
 // The following are not valid for 0
-uint32_t ScanForward(uint32_t bits);
 uint32_t Log2(uint32_t value);
 uint32_t Log2(uint64_t value);
 bool IsPowerOfTwo(uint64_t n);
@@ -66,7 +70,6 @@ inline uint32_t Log2Ceil(uint64_t v) {
 
 uint64_t NextPowerOfTwo(uint64_t n);
 bool IsPtrAligned(const void* ptr, size_t alignment);
-void* AlignVoidPtr(void* ptr, size_t alignment);
 bool IsAligned(uint32_t value, size_t alignment);
 
 template <typename T>
@@ -76,6 +79,14 @@ T Align(T value, size_t alignment) {
     DAWN_ASSERT(alignment != 0);
     T alignmentT = static_cast<T>(alignment);
     return (value + (alignmentT - 1)) & ~(alignmentT - 1);
+}
+
+template <typename T>
+T AlignDown(T value, size_t alignment) {
+    DAWN_ASSERT(IsPowerOfTwo(alignment));
+    DAWN_ASSERT(alignment != 0);
+    T alignmentT = static_cast<T>(alignment);
+    return value & ~(alignmentT - 1);
 }
 
 template <typename T, size_t Alignment>
@@ -119,14 +130,6 @@ DAWN_FORCE_INLINE const T* AlignPtr(const T* ptr, size_t alignment) {
                                       ~(alignment - 1));
 }
 
-template <typename destType, typename sourceType>
-destType BitCast(const sourceType& source) {
-    static_assert(sizeof(destType) == sizeof(sourceType), "BitCast: cannot lose precision.");
-    destType output;
-    std::memcpy(&output, &source, sizeof(destType));
-    return output;
-}
-
 uint16_t Float32ToFloat16(float fp32);
 float Float16ToFloat32(uint16_t fp16);
 bool IsFloat16NaN(uint16_t fp16);
@@ -138,12 +141,21 @@ T FloatToUnorm(float value) {
 
 float SRGBToLinear(float srgb);
 
-template <typename T1,
-          typename T2,
-          typename Enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
+template <typename T1, typename T2>
+    requires(sizeof(T1) == sizeof(T2))
 constexpr bool IsSubset(T1 subset, T2 set) {
     T2 bitsAlsoInSet = subset & set;
     return bitsAlsoInSet == subset;
+}
+
+template <typename T>
+constexpr T Max(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+template <typename T, typename... Args>
+constexpr T Max(T first, Args... rest) {
+    return Max(first, Max(rest...));
 }
 
 }  // namespace dawn

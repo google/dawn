@@ -37,10 +37,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::wgsl::ir::BuiltinCall);
 
 namespace tint::wgsl::ir {
 
-BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
+BuiltinCall::BuiltinCall(Id id,
+                         core::ir::InstructionResult* result,
                          BuiltinFn fn,
                          VectorRef<core::ir::Value*> arguments)
-    : Base(result, arguments), fn_(fn) {
+    : Base(id, result, arguments), fn_(fn) {
     flags_.Add(Flag::kSequenced);
     TINT_ASSERT(fn != BuiltinFn::kNone);
 }
@@ -48,9 +49,9 @@ BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
 BuiltinCall::~BuiltinCall() = default;
 
 BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<BuiltinCall>(new_result, fn_, new_args);
+    return ctx.ir.CreateInstruction<BuiltinCall>(new_result, fn_, new_args);
 }
 
 }  // namespace tint::wgsl::ir

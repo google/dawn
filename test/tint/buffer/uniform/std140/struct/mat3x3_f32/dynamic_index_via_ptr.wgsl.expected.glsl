@@ -1,46 +1,108 @@
 #version 310 es
 
+
+struct Inner_std140 {
+  vec3 m_col0;
+  uint tint_pad_0;
+  vec3 m_col1;
+  uint tint_pad_1;
+  vec3 m_col2;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+};
+
+struct Outer_std140 {
+  Inner_std140 a[4];
+};
+
 struct Inner {
   mat3 m;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
 };
 
 struct Outer {
   Inner a[4];
 };
 
-layout(binding = 0, std140) uniform a_block_ubo {
-  Outer inner[4];
-} a;
-
+layout(binding = 0, std140)
+uniform a_block_std140_1_ubo {
+  Outer_std140 inner[4];
+} v;
 int counter = 0;
 int i() {
-  counter = (counter + 1);
+  uint v_1 = uint(counter);
+  counter = int((v_1 + uint(1)));
   return counter;
 }
-
-void f() {
-  int tint_symbol = i();
-  int p_a_i_save = tint_symbol;
-  int tint_symbol_1 = i();
-  int p_a_i_a_i_save = tint_symbol_1;
-  int tint_symbol_2 = i();
-  int p_a_i_a_i_m_i_save = tint_symbol_2;
-  Outer l_a[4] = a.inner;
-  Outer l_a_i = a.inner[p_a_i_save];
-  Inner l_a_i_a[4] = a.inner[p_a_i_save].a;
-  Inner l_a_i_a_i = a.inner[p_a_i_save].a[p_a_i_a_i_save];
-  mat3 l_a_i_a_i_m = a.inner[p_a_i_save].a[p_a_i_a_i_save].m;
-  vec3 l_a_i_a_i_m_i = a.inner[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save];
-  int tint_symbol_3 = i();
-  float l_a_i_a_i_m_i_i = a.inner[p_a_i_save].a[p_a_i_a_i_save].m[p_a_i_a_i_m_i_save][tint_symbol_3];
+Inner tint_convert_Inner(Inner_std140 tint_input) {
+  return Inner(mat3(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2));
 }
-
+Outer tint_convert_Outer(Outer_std140 tint_input) {
+  Inner v_2[4] = Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))));
+  {
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 4u)) {
+        break;
+      }
+      v_2[v_4] = tint_convert_Inner(tint_input.a[v_4]);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return Outer(v_2);
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  uint v_5 = min(uint(i()), 3u);
+  uint v_6 = min(uint(i()), 3u);
+  mat3 v_7 = mat3(v.inner[v_5].a[v_6].m_col0, v.inner[v_5].a[v_6].m_col1, v.inner[v_5].a[v_6].m_col2);
+  vec3 v_8 = v_7[min(uint(i()), 2u)];
+  Outer_std140 v_9[4] = v.inner;
+  Outer v_10[4] = Outer[4](Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))), Outer(Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))))));
+  {
+    uint v_11 = 0u;
+    v_11 = 0u;
+    while(true) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
+        break;
+      }
+      v_10[v_12] = tint_convert_Outer(v_9[v_12]);
+      {
+        v_11 = (v_12 + 1u);
+      }
+      continue;
+    }
+  }
+  Outer l_a[4] = v_10;
+  Outer l_a_i = tint_convert_Outer(v.inner[v_5]);
+  Inner_std140 v_13[4] = v.inner[v_5].a;
+  Inner v_14[4] = Inner[4](Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))), Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f))));
+  {
+    uint v_15 = 0u;
+    v_15 = 0u;
+    while(true) {
+      uint v_16 = v_15;
+      if ((v_16 >= 4u)) {
+        break;
+      }
+      v_14[v_16] = tint_convert_Inner(v_13[v_16]);
+      {
+        v_15 = (v_16 + 1u);
+      }
+      continue;
+    }
+  }
+  Inner l_a_i_a[4] = v_14;
+  Inner l_a_i_a_i = tint_convert_Inner(v.inner[v_5].a[v_6]);
+  mat3 l_a_i_a_i_m = v_7;
+  vec3 l_a_i_a_i_m_i = v_8;
+  float l_a_i_a_i_m_i_i = v_8[min(uint(i()), 2u)];
 }

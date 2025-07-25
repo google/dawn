@@ -42,10 +42,11 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
     auto* new_b = clone_ctx.Clone(builtin);
 
     EXPECT_NE(builtin, new_b);
-    EXPECT_NE(builtin->Result(0), new_b->Result(0));
-    EXPECT_EQ(mod.Types().f32(), new_b->Result(0)->Type());
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
     EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
+    EXPECT_TRUE(new_b->ExplicitTemplateParams().IsEmpty());
 
     auto args = new_b->Args();
     EXPECT_EQ(2u, args.Length());
@@ -57,14 +58,44 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
     EXPECT_EQ(2_u, val1->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
 }
 
+TEST_F(IR_SpirvBuiltinCallTest, CloneWithExplicitParams) {
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), BuiltinFn::kArrayLength, 1_u, 2_u);
+    builtin->SetExplicitTemplateParams(
+        Vector<const core::type::Type*, 2>{mod.Types().f32(), mod.Types().i32()});
+
+    auto* new_b = clone_ctx.Clone(builtin);
+
+    EXPECT_NE(builtin, new_b);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
+
+    EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
+
+    auto args = new_b->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto* val0 = args[0]->As<core::ir::Constant>()->Value();
+    EXPECT_EQ(1_u, val0->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
+
+    auto* val1 = args[1]->As<core::ir::Constant>()->Value();
+    EXPECT_EQ(2_u, val1->As<core::constant::Scalar<core::u32>>()->ValueAs<core::u32>());
+
+    auto new_explicit = new_b->ExplicitTemplateParams();
+    ASSERT_EQ(2u, new_explicit.Length());
+
+    EXPECT_EQ(mod.Types().f32(), new_explicit[0]);
+    EXPECT_EQ(mod.Types().i32(), new_explicit[1]);
+}
+
 TEST_F(IR_SpirvBuiltinCallTest, CloneNoArgs) {
     auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), BuiltinFn::kArrayLength);
 
     auto* new_b = clone_ctx.Clone(builtin);
-    EXPECT_NE(builtin->Result(0), new_b->Result(0));
-    EXPECT_EQ(mod.Types().f32(), new_b->Result(0)->Type());
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
     EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
+    EXPECT_TRUE(new_b->ExplicitTemplateParams().IsEmpty());
 
     auto args = new_b->Args();
     EXPECT_TRUE(args.IsEmpty());

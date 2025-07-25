@@ -1,29 +1,25 @@
-groupshared int arg_0;
-
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    int atomic_result = 0;
-    InterlockedExchange(arg_0, 0, atomic_result);
-  }
-  GroupMemoryBarrierWithGroupSync();
-}
-
-void atomicStore_8bea94() {
-  int atomic_result_1 = 0;
-  InterlockedExchange(arg_0, 1, atomic_result_1);
-}
-
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
+struct compute_main_inputs {
+  uint tint_local_index : SV_GroupIndex;
 };
 
-void compute_main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
+
+groupshared int arg_0;
+void atomicStore_8bea94() {
+  int v = int(0);
+  InterlockedExchange(arg_0, int(1), v);
+}
+
+void compute_main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    int v_1 = int(0);
+    InterlockedExchange(arg_0, int(0), v_1);
+  }
+  GroupMemoryBarrierWithGroupSync();
   atomicStore_8bea94();
 }
 
 [numthreads(1, 1, 1)]
-void compute_main(tint_symbol_1 tint_symbol) {
-  compute_main_inner(tint_symbol.local_invocation_index);
-  return;
+void compute_main(compute_main_inputs inputs) {
+  compute_main_inner(inputs.tint_local_index);
 }
+

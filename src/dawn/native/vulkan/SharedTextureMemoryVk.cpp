@@ -42,6 +42,7 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "dawn/native/wgpu_structs_autogen.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/hardware_buffer.h>
@@ -214,7 +215,7 @@ ResultOrError<VkDeviceMemory> AllocateDeviceMemory(Device* device,
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryDmaBufDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(LINUX)
     VkDevice vkDevice = device->GetVkDevice();
@@ -438,7 +439,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     // import's constraint.
     memoryRequirements.memoryTypeBits &= fdProperties.memoryTypeBits;
     int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-        memoryRequirements, MemoryKind::Opaque);
+        memoryRequirements, MemoryKind::DeviceLocal);
     DAWN_INVALID_IF(memoryTypeIndex == -1, "Unable to find an appropriate memory type for import.");
 
     SystemHandle memoryFD;
@@ -477,7 +478,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryAHardwareBufferDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(ANDROID)
     const auto* ahbFunctions =
@@ -492,27 +493,12 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
 
     // Reflect the properties of the AHardwareBuffer.
-    AHardwareBuffer_Desc aHardwareBufferDesc{};
-    ahbFunctions->Describe(aHardwareBuffer, &aHardwareBufferDesc);
+    SharedTextureMemoryProperties properties =
+        GetAHBSharedTextureMemoryProperties(ahbFunctions, aHardwareBuffer);
 
-    SharedTextureMemoryProperties properties;
-    properties.size = {aHardwareBufferDesc.width, aHardwareBufferDesc.height,
-                       aHardwareBufferDesc.layers};
     if (useExternalFormat) {
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-            properties.usage = wgpu::TextureUsage::TextureBinding;
-        }
-    } else {
-        properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
-            properties.usage |= wgpu::TextureUsage::RenderAttachment;
-        }
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-            properties.usage |= wgpu::TextureUsage::TextureBinding;
-        }
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_DATA_BUFFER) {
-            properties.usage |= wgpu::TextureUsage::StorageBinding;
-        }
+        // When using the external YUV texture format, only TextureBinding usage is valid.
+        properties.usage &= wgpu::TextureUsage::TextureBinding;
     }
 
     VkFormat vkFormat;
@@ -683,7 +669,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         VkMemoryRequirements memoryRequirements;
         memoryRequirements.memoryTypeBits = bufferProperties.memoryTypeBits;
         int memoryTypeIndex = device->GetResourceMemoryAllocator()->FindBestTypeIndex(
-            memoryRequirements, MemoryKind::Opaque);
+            memoryRequirements, MemoryKind::DeviceLocal);
         DAWN_INVALID_IF(memoryTypeIndex == -1,
                         "Unable to find an appropriate memory type for import.");
 
@@ -743,7 +729,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryOpaqueFDDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(POSIX)
     VkDevice vkDevice = device->GetVkDevice();
@@ -825,6 +811,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     if (createInfo->usage &
         (VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
         properties.usage |= wgpu::TextureUsage::RenderAttachment;
+    }
+    if (createInfo->usage & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT) {
+        properties.usage |= wgpu::TextureUsage::TransientAttachment;
     }
 
     const Format* internalFormat;
@@ -961,7 +950,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 Ref<SharedTextureMemory> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryProperties& properties,
     uint32_t queueFamilyIndex) {
     Ref<SharedTextureMemory> sharedTextureMemory =
@@ -971,7 +960,7 @@ Ref<SharedTextureMemory> SharedTextureMemory::Create(
 }
 
 SharedTextureMemory::SharedTextureMemory(Device* device,
-                                         const char* label,
+                                         StringView label,
                                          const SharedTextureMemoryProperties& properties,
                                          uint32_t queueFamilyIndex)
     : SharedTextureMemoryBase(device, label, properties), mQueueFamilyIndex(queueFamilyIndex) {}
@@ -995,7 +984,7 @@ void SharedTextureMemory::DestroyImpl() {
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    return Texture::CreateFromSharedTextureMemory(this, descriptor);
+    return SharedTexture::Create(this, descriptor);
 }
 
 MaybeError SharedTextureMemory::BeginAccessImpl(
@@ -1020,7 +1009,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
         DAWN_INVALID_IF(descriptor->signaledValues[i] != 1, "%s signaled value (%u) was not 1.",
                         descriptor->fences[i], descriptor->signaledValues[i]);
     }
-    ToBackend(texture)->SetPendingAcquire(
+    static_cast<SharedTexture*>(texture)->SetPendingAcquire(
         static_cast<VkImageLayout>(vkLayoutBeginState->oldLayout),
         static_cast<VkImageLayout>(vkLayoutBeginState->newLayout));
     return {};
@@ -1045,13 +1034,12 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
                     wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle,
                     wgpu::SharedFenceType::VkSemaphoreZirconHandle);
 #elif DAWN_PLATFORM_IS(LINUX)
-    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceVkSemaphoreSyncFD) &&
+    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceSyncFD) &&
                         !GetDevice()->HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD),
                     "Required feature (%s or %s) for %s or %s is missing.",
                     wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-                    wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
-                    wgpu::SharedFenceType::VkSemaphoreOpaqueFD,
-                    wgpu::SharedFenceType::VkSemaphoreSyncFD);
+                    wgpu::FeatureName::SharedFenceSyncFD,
+                    wgpu::SharedFenceType::VkSemaphoreOpaqueFD, wgpu::SharedFenceType::SyncFD);
 #endif
 
     SystemHandle handle;
@@ -1059,8 +1047,8 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
         ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
         VkImageLayout releasedNewLayout;
-        DAWN_TRY(ToBackend(texture)->EndAccess(&semaphoreHandle, &releasedOldLayout,
-                                               &releasedNewLayout));
+        DAWN_TRY(static_cast<SharedTexture*>(texture)->EndAccess(
+            &semaphoreHandle, &releasedOldLayout, &releasedNewLayout));
         // Handle is acquired from the texture so we need to make sure to close it.
         // TODO(dawn:1745): Consider using one event per submit that is tracked by the
         // CommandRecordingContext so that we don't need to create one handle per texture,
@@ -1079,8 +1067,8 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     DAWN_TRY_ASSIGN(fence,
                     SharedFence::Create(ToBackend(GetDevice()), "Internal VkSemaphore", &desc));
 #elif DAWN_PLATFORM_IS(LINUX)
-    if (GetDevice()->HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) {
-        SharedFenceVkSemaphoreSyncFDDescriptor desc;
+    if (GetDevice()->HasFeature(Feature::SharedFenceSyncFD)) {
+        SharedFenceSyncFDDescriptor desc;
         desc.handle = handle.Get();
 
         DAWN_TRY_ASSIGN(fence,

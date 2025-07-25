@@ -260,7 +260,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Directive) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'derivative_uniform'
 Did you mean 'derivative_uniformity'?
-Possible values: 'derivative_uniformity')");
+Possible values: 'derivative_uniformity', 'subgroup_uniformity')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Attribute) {
@@ -271,7 +271,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Attribute) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'derivative_uniform'
 Did you mean 'derivative_uniformity'?
-Possible values: 'derivative_uniformity')");
+Possible values: 'derivative_uniformity', 'subgroup_uniformity')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedChromiumRuleName_Directive) {
@@ -281,7 +281,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedChromiumRuleName_Directive) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'chromium.unreachable_cod'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code')");
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedChromiumRuleName_Attribute) {
@@ -293,7 +293,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedChromiumRuleName_Attribute) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'chromium.unreachable_cod'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code')");
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedOtherRuleName_Directive) {
@@ -340,10 +340,10 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_SameUnknownNameDifferentSeverity_
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'chromium.unreachable_codes'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code'
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code'
 56:78 warning: unrecognized diagnostic rule 'chromium.unreachable_codes'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code'
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code'
 56:78 error: conflicting diagnostic directive
 12:34 note: severity of 'chromium.unreachable_codes' set to 'off' here)");
 }
@@ -362,7 +362,10 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameSameSeverity_Attribute) {
         DiagnosticAttribute(wgsl::DiagnosticSeverity::kError,
                             DiagnosticRuleName(Source{{56, 78}}, "chromium", "unreachable_code"));
     Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate diagnostic attribute
+12:34 note: first attribute declared here)");
 }
 
 TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameDifferentSeverity_Attribute) {
@@ -391,10 +394,10 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_SameUnknownNameDifferentSeverity_
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'chromium.unreachable_codes'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code'
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code'
 56:78 warning: unrecognized diagnostic rule 'chromium.unreachable_codes'
 Did you mean 'chromium.unreachable_code'?
-Possible values: 'chromium.unreachable_code'
+Possible values: 'chromium.subgroup_matrix_uniformity', 'chromium.unreachable_code'
 56:78 error: conflicting diagnostic attribute
 12:34 note: severity of 'chromium.unreachable_codes' set to 'off' here)");
 }
@@ -406,6 +409,20 @@ TEST_F(ResolverDiagnosticControlTest, Conflict_DifferentUnknownNameDifferentSeve
         DiagnosticAttribute(wgsl::DiagnosticSeverity::kOff, "chromium", "unreachable_codex");
     Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverDiagnosticControlTest, Conflict_SameNameSameInfoSeverity_Attribute) {
+    auto* attr1 =
+        DiagnosticAttribute(wgsl::DiagnosticSeverity::kInfo,
+                            DiagnosticRuleName(Source{{12, 34}}, "chromium", "unreachable_code"));
+    auto* attr2 =
+        DiagnosticAttribute(wgsl::DiagnosticSeverity::kInfo,
+                            DiagnosticRuleName(Source{{56, 78}}, "chromium", "unreachable_code"));
+    Func("foo", {}, ty.void_(), {}, Vector{attr1, attr2});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate diagnostic attribute
+12:34 note: first attribute declared here)");
 }
 
 }  // namespace

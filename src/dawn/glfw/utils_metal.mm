@@ -41,7 +41,8 @@
 
 namespace wgpu::glfw {
 
-std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window) {
+std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)>
+SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window) {
     @autoreleasepool {
         NSWindow* nsWindow = glfwGetCocoaWindow(window);
         NSView* view = [nsWindow contentView];
@@ -54,10 +55,11 @@ std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLF
         // Use retina if the window was created with retina support.
         [[view layer] setContentsScale:[nsWindow backingScaleFactor]];
 
-        std::unique_ptr<wgpu::SurfaceDescriptorFromMetalLayer> desc =
-            std::make_unique<wgpu::SurfaceDescriptorFromMetalLayer>();
+        wgpu::SurfaceSourceMetalLayer* desc = new wgpu::SurfaceSourceMetalLayer();
         desc->layer = [view layer];
-        return std::move(desc);
+        return {desc, [](wgpu::ChainedStruct* desc) {
+                    delete reinterpret_cast<wgpu::SurfaceSourceMetalLayer*>(desc);
+                }};
     }
 }
 

@@ -107,7 +107,7 @@ VkPipelineStageFlags VulkanPipelineStage(wgpu::BufferUsage usage, wgpu::ShaderSt
             flags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         }
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         flags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {
@@ -147,7 +147,7 @@ VkAccessFlags VulkanAccessFlags(wgpu::BufferUsage usage) {
     if (usage & kReadOnlyStorageBuffer) {
         flags |= VK_ACCESS_SHADER_READ_BIT;
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         flags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {
@@ -155,6 +155,28 @@ VkAccessFlags VulkanAccessFlags(wgpu::BufferUsage usage) {
     }
 
     return flags;
+}
+
+MemoryKind GetMemoryKindFor(wgpu::BufferUsage bufferUsage) {
+    MemoryKind requestKind = MemoryKind::Linear;
+    if (bufferUsage & wgpu::BufferUsage::MapRead) {
+        requestKind |= MemoryKind::ReadMappable;
+    }
+    if (bufferUsage & wgpu::BufferUsage::MapWrite) {
+        requestKind |= MemoryKind::WriteMappable;
+    }
+
+    // `kDeviceLocalBufferUsages` covers all the buffer usages that prefer the memory type
+    // `VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT`.
+    constexpr wgpu::BufferUsage kDeviceLocalBufferUsages =
+        wgpu::BufferUsage::Index | wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::Storage |
+        wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Vertex | kInternalStorageBuffer |
+        kReadOnlyStorageBuffer | kIndirectBufferForBackendResourceTracking;
+    if (bufferUsage & kDeviceLocalBufferUsages) {
+        requestKind |= MemoryKind::DeviceLocal;
+    }
+
+    return requestKind;
 }
 
 }  // namespace
@@ -177,7 +199,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     constexpr size_t kAlignment = 4u;
 
     uint32_t extraBytes = 0u;
-    if (GetUsage() & (wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index)) {
+    if (GetInternalUsage() & (wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index)) {
         // vkCmdSetIndexBuffer and vkCmdSetVertexBuffer are invalid if the offset
         // is equal to the whole buffer size. Allocate at least one more byte so it
         // is valid to setVertex/IndexBuffer with a zero-sized range at the end
@@ -219,7 +241,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     createInfo.size = mAllocatedSize;
     // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
     // and robust resource initialization.
-    createInfo.usage = VulkanBufferUsage(GetUsage() | wgpu::BufferUsage::CopyDst);
+    createInfo.usage = VulkanBufferUsage(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
     createInfo.pQueueFamilyIndices = 0;
@@ -233,12 +255,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     VkMemoryRequirements requirements;
     device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
-    MemoryKind requestKind = MemoryKind::Linear;
-    if (GetUsage() & wgpu::BufferUsage::MapRead) {
-        requestKind = MemoryKind::LinearReadMappable;
-    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
-        requestKind = MemoryKind::LinearWriteMappable;
-    }
+    MemoryKind requestKind = GetMemoryKindFor(GetInternalUsage());
     DAWN_TRY_ASSIGN(mMemoryAllocation,
                     device->GetResourceMemoryAllocator()->Allocate(requirements, requestKind));
 
@@ -298,7 +315,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     createInfo.pNext = &externalMemoryCreateInfo;
     createInfo.flags = 0;
     createInfo.size = mAllocatedSize;
-    createInfo.usage = VulkanBufferUsage(GetUsage());
+    createInfo.usage = VulkanBufferUsage(GetInternalUsage());
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
     createInfo.pQueueFamilyIndices = 0;
@@ -330,15 +347,11 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
         requirements.memoryTypeBits &= hostPointerProperties.memoryTypeBits;
     }
 
-    MemoryKind requestKind;
-    if (GetUsage() & wgpu::BufferUsage::MapRead) {
-        requestKind = MemoryKind::LinearReadMappable;
-    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
-        requestKind = MemoryKind::LinearWriteMappable;
-    } else {
-        requestKind = MemoryKind::Linear;
-    }
-
+    // We can choose memory type with `requirements.memoryTypeBits` only because host-mapped memory
+    // - is CPU-visible
+    // - is device-local on UMA
+    // - cannot be non-device-local on non-UMA
+    MemoryKind requestKind = MemoryKind::Linear;
     int memoryTypeIndex =
         device->GetResourceMemoryAllocator()->FindBestTypeIndex(requirements, requestKind);
     DAWN_INVALID_IF(memoryTypeIndex < 0, "Failed to find suitable memory type.");
@@ -389,25 +402,13 @@ VkBuffer Buffer::GetHandle() const {
 void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
                                 wgpu::BufferUsage usage,
                                 wgpu::ShaderStage shaderStage) {
-    VkBufferMemoryBarrier barrier;
-    VkPipelineStageFlags srcStages = 0;
-    VkPipelineStageFlags dstStages = 0;
-
-    if (TrackUsageAndGetResourceBarrier(recordingContext, usage, shaderStage, &barrier, &srcStages,
-                                        &dstStages)) {
-        DAWN_ASSERT(srcStages != 0 && dstStages != 0);
-        ToBackend(GetDevice())
-            ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
-                                    nullptr, 1u, &barrier, 0, nullptr);
-    }
+    TrackUsageAndGetResourceBarrier(recordingContext, usage, shaderStage);
+    recordingContext->EmitBufferBarriers(ToBackend(GetDevice()));
 }
 
-bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
+void Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
                                              wgpu::BufferUsage usage,
-                                             wgpu::ShaderStage shaderStage,
-                                             VkBufferMemoryBarrier* barrier,
-                                             VkPipelineStageFlags* srcStages,
-                                             VkPipelineStageFlags* dstStages) {
+                                             wgpu::ShaderStage shaderStage) {
     if (shaderStage == wgpu::ShaderStage::None) {
         // If the buffer isn't used in any shader stages, ignore shader usages. Eg. ignore a uniform
         // buffer that isn't actually read in any shader.
@@ -420,7 +421,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         MarkUsedInPendingCommands();
     }
 
-    if (!isMapUsage && (GetUsage() & kMappableBufferUsages)) {
+    if (!isMapUsage && (GetInternalUsage() & kMappableBufferUsages)) {
         // The buffer is mappable and the requested usage is not map usage, we need to add it
         // into mappableBuffersForEagerTransition, so the buffer can be transitioned back to map
         // usages at end of the submit.
@@ -428,6 +429,8 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
     }
 
     const bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
+    VkAccessFlags srcAccess = 0;
+    VkPipelineStageFlags srcStage = 0;
 
     if (readOnly) {
         if ((shaderStage & wgpu::ShaderStage::Fragment) &&
@@ -441,13 +444,13 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         if (IsSubset(usage, mReadUsage) && IsSubset(shaderStage, mReadShaderStages)) {
             // This usage and shader stage has already waited for the last write.
             // No need for another barrier.
-            return false;
+            return;
         }
 
         if (usage & kReadOnlyShaderBufferUsages) {
-            // Pre-emptively transition to all read-only shader buffer usages if one is used to
+            // Preemptively transition to all read-only shader buffer usages if one is used to
             // avoid unnecessary barriers later.
-            usage |= GetUsage() & kReadOnlyShaderBufferUsages;
+            usage |= GetInternalUsage() & kReadOnlyShaderBufferUsages;
         }
 
         mReadUsage |= usage;
@@ -455,12 +458,12 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
 
         if (mLastWriteUsage == wgpu::BufferUsage::None) {
             // Read dependency with no prior writes. No barrier needed.
-            return false;
+            return;
         }
 
         // Write -> read barrier.
-        *srcStages |= VulkanPipelineStage(mLastWriteUsage, mLastWriteShaderStage);
-        barrier->srcAccessMask = VulkanAccessFlags(mLastWriteUsage);
+        srcAccess = VulkanAccessFlags(mLastWriteUsage);
+        srcStage = VulkanPipelineStage(mLastWriteUsage, mLastWriteShaderStage);
     } else {
         bool skipBarrier = false;
 
@@ -478,12 +481,12 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         } else if (mReadUsage == wgpu::BufferUsage::None) {
             // No reads since the last write.
             // Write -> write barrier.
-            *srcStages |= VulkanPipelineStage(mLastWriteUsage, mLastWriteShaderStage);
-            barrier->srcAccessMask = VulkanAccessFlags(mLastWriteUsage);
+            srcAccess = VulkanAccessFlags(mLastWriteUsage);
+            srcStage = VulkanPipelineStage(mLastWriteUsage, mLastWriteShaderStage);
         } else {
             // Read -> write barrier.
-            *srcStages |= VulkanPipelineStage(mReadUsage, mReadShaderStages);
-            barrier->srcAccessMask = VulkanAccessFlags(mReadUsage);
+            srcAccess = VulkanAccessFlags(mReadUsage);
+            srcStage = VulkanPipelineStage(mReadUsage, mReadShaderStages);
         }
 
         mLastWriteUsage = usage;
@@ -493,7 +496,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         mReadShaderStages = wgpu::ShaderStage::None;
 
         if (skipBarrier) {
-            return false;
+            return;
         }
     }
 
@@ -503,19 +506,9 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         MarkUsedInPendingCommands();
     }
 
-    *dstStages |= VulkanPipelineStage(usage, shaderStage);
-
-    barrier->sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-    barrier->pNext = nullptr;
-    barrier->dstAccessMask = VulkanAccessFlags(usage);
-    barrier->srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier->dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier->buffer = mHandle;
-    barrier->offset = 0;
-    // VK_WHOLE_SIZE doesn't work on old Windows Intel Vulkan drivers, so we don't use it.
-    barrier->size = GetAllocatedSize();
-
-    return true;
+    recordingContext->AddBufferBarrier(srcAccess, /* dstAccess */ VulkanAccessFlags(usage),
+                                       srcStage,
+                                       /* dstStage */ VulkanPipelineStage(usage, shaderStage));
 }
 
 bool Buffer::IsCPUWritableAtCreation() const {
@@ -540,6 +533,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
         DAWN_ASSERT(mode & wgpu::MapMode::Write);
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
     }
+
     return {};
 }
 
@@ -547,7 +541,7 @@ void Buffer::UnmapImpl() {
     // No need to do anything, we keep CPU-visible memory mapped at all time.
 }
 
-void* Buffer::GetMappedPointer() {
+void* Buffer::GetMappedPointerImpl() {
     uint8_t* memory = mMemoryAllocation.GetMappedPointer();
     DAWN_ASSERT(memory != nullptr);
     return memory;
@@ -561,7 +555,7 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
     Device* device = ToBackend(GetDevice());
 
     const bool isInUse = GetLastUsageSerial() > device->GetQueue()->GetCompletedCommandSerial();
-    const bool isMappable = GetUsage() & kMappableBufferUsages;
+    const bool isMappable = GetInternalUsage() & kMappableBufferUsages;
     // Get if buffer has pending writes on the GPU. Even if the write workload has finished, the
     // write may still need a barrier to make the write available.
     const bool hasPendingWrites = !IsSubset(mLastWriteUsage, wgpu::BufferUsage::MapWrite);
@@ -732,40 +726,21 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordi
 }
 
 // static
-void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
+void Buffer::TransitionMappableBuffersEagerly(Device* device,
                                               CommandRecordingContext* recordingContext,
                                               const absl::flat_hash_set<Ref<Buffer>>& buffers) {
     DAWN_ASSERT(!buffers.empty());
 
-    VkPipelineStageFlags srcStages = 0;
-    VkPipelineStageFlags dstStages = 0;
-
-    std::vector<VkBufferMemoryBarrier> barriers;
-    barriers.reserve(buffers.size());
-
     size_t originalBufferCount = buffers.size();
     for (const Ref<Buffer>& buffer : buffers) {
-        wgpu::BufferUsage mapUsage = buffer->GetUsage() & kMappableBufferUsages;
-        DAWN_ASSERT(mapUsage == wgpu::BufferUsage::MapRead ||
-                    mapUsage == wgpu::BufferUsage::MapWrite);
-        VkBufferMemoryBarrier barrier;
-
-        if (buffer->TrackUsageAndGetResourceBarrier(recordingContext, mapUsage,
-                                                    wgpu::ShaderStage::None, &barrier, &srcStages,
-                                                    &dstStages)) {
-            barriers.push_back(barrier);
-        }
+        wgpu::BufferUsage mapUsage = buffer->GetInternalUsage() & kMappableBufferUsages;
+        buffer->TrackUsageAndGetResourceBarrier(recordingContext, mapUsage,
+                                                wgpu::ShaderStage::None);
     }
     // TrackUsageAndGetResourceBarrier() should not modify recordingContext for map usages.
     DAWN_ASSERT(buffers.size() == originalBufferCount);
 
-    if (barriers.empty()) {
-        return;
-    }
-
-    DAWN_ASSERT(srcStages != 0 && dstStages != 0);
-    fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0, nullptr,
-                          barriers.size(), barriers.data(), 0, nullptr);
+    recordingContext->EmitBufferBarriers(device);
 }
 
 void Buffer::SetLabelImpl() {

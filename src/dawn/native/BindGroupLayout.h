@@ -41,11 +41,11 @@ namespace dawn::native {
 class BindGroupLayoutBase final : public ApiObjectBase {
   public:
     BindGroupLayoutBase(DeviceBase* device,
-                        const char* label,
+                        StringView label,
                         Ref<BindGroupLayoutInternalBase> internal,
                         PipelineCompatibilityToken pipelineCompatibilityToken);
 
-    static Ref<BindGroupLayoutBase> MakeError(DeviceBase* device, const char* label = nullptr);
+    static Ref<BindGroupLayoutBase> MakeError(DeviceBase* device, StringView label = {});
 
     ObjectType GetType() const override;
 
@@ -57,16 +57,18 @@ class BindGroupLayoutBase final : public ApiObjectBase {
         return mPipelineCompatibilityToken;
     }
 
+    bool IsEmpty() const;
+
   protected:
     void DestroyImpl() override;
 
   private:
-    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     const Ref<BindGroupLayoutInternalBase> mInternalLayout;
 
     // Non-0 if this BindGroupLayout was created as part of a default PipelineLayout.
-    const PipelineCompatibilityToken mPipelineCompatibilityToken = PipelineCompatibilityToken(0);
+    const PipelineCompatibilityToken mPipelineCompatibilityToken = kExplicitPCT;
 };
 
 }  // namespace dawn::native

@@ -1,6 +1,6 @@
-static int a = 1;
 
+static int a = int(1);
 void f() {
   int b = a;
-  return;
 }
+

@@ -39,19 +39,31 @@
 #define EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE 0x33AF
 #endif
 
+// https://chromium.googlesource.com/angle/angle/+/main/extensions/EGL_ANGLE_create_context_backwards_compatible.txt
+#ifndef EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE
+#define EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE 0x3483
+#endif
+
+// https://chromium.googlesource.com/angle/angle.git/+/refs/heads/chromium/5996/extensions/EGL_ANGLE_create_context_extensions_enabled.txt
+#ifndef EGL_EXTENSIONS_ENABLED_ANGLE
+#define EGL_EXTENSIONS_ENABLED_ANGLE 0x345F
+#endif
+
 namespace dawn::native::opengl {
 
 // static
-ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const DisplayEGL* display,
+ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> display,
                                                               wgpu::BackendType backend,
                                                               bool useRobustness,
-                                                              bool useANGLETextureSharing) {
-    auto context = std::make_unique<ContextEGL>(display);
-    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing));
+                                                              bool useANGLETextureSharing,
+                                                              bool forceES31AndMinExtensions) {
+    auto context = std::make_unique<ContextEGL>(std::move(display));
+    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing,
+                                 forceES31AndMinExtensions));
     return std::move(context);
 }
 
-ContextEGL::ContextEGL(const DisplayEGL* display) : mDisplay(display) {}
+ContextEGL::ContextEGL(Ref<DisplayEGL> display) : mDisplay(std::move(display)) {}
 
 ContextEGL::~ContextEGL() {
     if (mOffscreenSurface != EGL_NO_SURFACE) {
@@ -66,7 +78,8 @@ ContextEGL::~ContextEGL() {
 
 MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useRobustness,
-                                  bool useANGLETextureSharing) {
+                                  bool useANGLETextureSharing,
+                                  bool forceES31AndMinExtensions) {
     const EGLFunctions& egl = mDisplay->egl;
 
     // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
@@ -86,44 +99,57 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
 
     DAWN_TRY(CheckEGL(egl, egl.BindAPI(mDisplay->GetAPIEnum()), "eglBindAPI"));
 
-    int major, minor;
-    switch (backend) {
-        case wgpu::BackendType::OpenGLES:
-            major = 3;
-            minor = 1;
-            break;
-        case wgpu::BackendType::OpenGL:
-            major = 4;
-            minor = 4;
-            break;
-        default:
-            DAWN_UNREACHABLE();
-    }
-
-    std::vector<EGLint> attribs{
-        EGL_CONTEXT_MAJOR_VERSION,
-        major,
-        EGL_CONTEXT_MINOR_VERSION,
-        minor,
+    absl::InlinedVector<EGLint, 10> attribs;
+    auto AddAttrib = [&](EGLint attrib, EGLint value) {
+        attribs.push_back(attrib);
+        attribs.push_back(value);
     };
+
+    if (egl.HasExt(EGLExt::CreateContext)) {
+        switch (backend) {
+            case wgpu::BackendType::OpenGLES:
+                AddAttrib(EGL_CONTEXT_MAJOR_VERSION, 3);
+                AddAttrib(EGL_CONTEXT_MINOR_VERSION, 1);
+                break;
+            case wgpu::BackendType::OpenGL:
+                AddAttrib(EGL_CONTEXT_MAJOR_VERSION, 4);
+                AddAttrib(EGL_CONTEXT_MINOR_VERSION, 4);
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    } else {
+        // Without EGL 1.5 or EGL_KHR_create_context we have to request ES 2.0 or above and see what
+        // context version we end up getting.
+        AddAttrib(EGL_CONTEXT_CLIENT_VERSION, 2);
+    }
 
     if (useRobustness) {
         DAWN_ASSERT(egl.HasExt(EGLExt::CreateContextRobustness));
         // EGL_EXT_create_context_robustness is promoted to 1.5 but with a different enum value.
         if (egl.GetMinorVersion() >= 5) {
-            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS);
+            AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE);
         } else {
-            attribs.push_back(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT);
+            AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT, EGL_TRUE);
         }
-        attribs.push_back(EGL_TRUE);
     }
 
     if (useANGLETextureSharing) {
         DAWN_ASSERT(egl.HasExt(EGLExt::DisplayTextureShareGroup));
-        attribs.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
-        attribs.push_back(EGL_TRUE);
+        AddAttrib(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE, EGL_TRUE);
     }
 
+    mForceES31AndMinExtensions = forceES31AndMinExtensions;
+    if (forceES31AndMinExtensions) {
+        if (egl.HasExt(EGLExt::ANGLECreateContextBackwardsCompatible)) {
+            AddAttrib(EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE, EGL_FALSE);
+        }
+        if (egl.HasExt(EGLExt::ANGLECreateContextExtensionsEnabled)) {
+            AddAttrib(EGL_EXTENSIONS_ENABLED_ANGLE, EGL_FALSE);
+        }
+    }
+
+    // The attrib list is finished with an EGL_NONE tag.
     attribs.push_back(EGL_NONE);
 
     mContext =
@@ -158,10 +184,39 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     return {};
 }
 
+// Request compat mode required extensions explicitly when mForceES31AndMinExtensions is true
+void ContextEGL::RequestRequiredExtensionsExplicitly() {
+    if (!mForceES31AndMinExtensions) {
+        return;
+    }
+
+    const EGLFunctions& egl = mDisplay->egl;
+    // Copied from third_party/angle/include/GLES/gl.h
+    typedef void(KHRONOS_APIENTRY * PFNGLREQUESTEXTENSIONANGLEPROC)(const GLchar* name);
+
+    auto proc = egl.GetProcAddress("glRequestExtensionANGLE");
+    if (!proc) {
+        return;
+    }
+
+    auto glRequestExtension = reinterpret_cast<PFNGLREQUESTEXTENSIONANGLEPROC>(proc);
+
+    // src/dawn/native/opengl/supported_extensions.json
+    glRequestExtension("GL_OES_texture_stencil8");
+    glRequestExtension("GL_EXT_texture_compression_s3tc");
+    glRequestExtension("GL_EXT_texture_compression_s3tc_srgb");
+    glRequestExtension("GL_OES_EGL_image");
+    glRequestExtension("GL_EXT_texture_format_BGRA8888");
+    glRequestExtension("GL_APPLE_texture_format_BGRA8888");
+    glRequestExtension("GL_EXT_color_buffer_float");
+    glRequestExtension("GL_EXT_color_buffer_half_float");
+}
+
 void ContextEGL::MakeCurrent() {
     EGLBoolean success = mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), mCurrentSurface,
                                                    mCurrentSurface, mContext);
-    IgnoreErrors(CheckEGL(mDisplay->egl, success == EGL_TRUE, "eglMakeCurrent"));
+    IgnoreErrors(
+        CheckEGL(mDisplay->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
 }
 
 // ScopedMakeSurfaceCurrent

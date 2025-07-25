@@ -50,7 +50,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     static Ref<ComputePassEncoder> MakeError(DeviceBase* device,
                                              CommandEncoder* commandEncoder,
                                              EncodingContext* encodingContext,
-                                             const char* label);
+                                             StringView label);
 
     ~ComputePassEncoder() override;
 
@@ -85,7 +85,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
                        CommandEncoder* commandEncoder,
                        EncodingContext* encodingContext,
                        ErrorTag errorTag,
-                       const char* label);
+                       StringView label);
 
   private:
     void DestroyImpl() override;

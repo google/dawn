@@ -24,7 +24,7 @@ fn main_1() {
   let x_32 : vec2<f32> = v1;
   b = fract(x_32);
   let x_34 : vec2<f32> = b;
-  a = smoothstep(vec2<f32>(1.0, 1.0), vec2<f32>(1.0, 1.0), x_34).x;
+  a = smoothstep(vec2<f32>(1.0, 1.0), vec2<f32>(2.0, 2.0), x_34).x;
   let x_38 : f32 = x_6.x_GLF_uniform_float_values[0].el;
   let x_39 : f32 = a;
   let x_40 : f32 = a;

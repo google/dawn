@@ -1,83 +1,147 @@
 #version 310 es
 
-struct S {
+
+struct S_std140 {
   int before;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  mat4x3 m;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-  uint pad_10;
-  uint pad_11;
-  uint pad_12;
-  uint pad_13;
-  uint pad_14;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  vec3 m_col0;
+  uint tint_pad_3;
+  vec3 m_col1;
+  uint tint_pad_4;
+  vec3 m_col2;
+  uint tint_pad_5;
+  vec3 m_col3;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
   int after;
-  uint pad_15;
-  uint pad_16;
-  uint pad_17;
-  uint pad_18;
-  uint pad_19;
-  uint pad_20;
-  uint pad_21;
-  uint pad_22;
-  uint pad_23;
-  uint pad_24;
-  uint pad_25;
-  uint pad_26;
-  uint pad_27;
-  uint pad_28;
-  uint pad_29;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
+  uint tint_pad_26;
+  uint tint_pad_27;
+  uint tint_pad_28;
+  uint tint_pad_29;
+  uint tint_pad_30;
+  uint tint_pad_31;
+  uint tint_pad_32;
+  uint tint_pad_33;
 };
 
-layout(binding = 0, std140) uniform u_block_ubo {
+struct S {
+  int before;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  mat4x3 m;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  int after;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
+  uint tint_pad_26;
+  uint tint_pad_27;
+  uint tint_pad_28;
+  uint tint_pad_29;
+};
+
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  S_std140 inner[4];
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   S inner[4];
-} u;
-
-layout(binding = 1, std430) buffer u_block_ssbo {
-  S inner[4];
-} s;
-
-void assign_and_preserve_padding_2_s_inner_X_m(uint dest[1], mat4x3 value) {
-  s.inner[dest[0]].m[0] = value[0u];
-  s.inner[dest[0]].m[1] = value[1u];
-  s.inner[dest[0]].m[2] = value[2u];
-  s.inner[dest[0]].m[3] = value[3u];
+} v_1;
+S tint_convert_S(S_std140 tint_input) {
+  return S(tint_input.before, 0u, 0u, 0u, mat4x3(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2, tint_input.m_col3), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_input.after, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
-
-void assign_and_preserve_padding_1_s_inner_X(uint dest[1], S value) {
-  s.inner[dest[0]].before = value.before;
-  uint tint_symbol[1] = uint[1](dest[0u]);
-  assign_and_preserve_padding_2_s_inner_X_m(tint_symbol, value.m);
-  s.inner[dest[0]].after = value.after;
+void tint_store_and_preserve_padding_2(uint target_indices[1], mat4x3 value_param) {
+  v_1.inner[target_indices[0u]].m[0u] = value_param[0u];
+  v_1.inner[target_indices[0u]].m[1u] = value_param[1u];
+  v_1.inner[target_indices[0u]].m[2u] = value_param[2u];
+  v_1.inner[target_indices[0u]].m[3u] = value_param[3u];
 }
-
-void assign_and_preserve_padding_s_inner(S value[4]) {
+void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
+  v_1.inner[target_indices[0u]].before = value_param.before;
+  tint_store_and_preserve_padding_2(uint[1](target_indices[0u]), value_param.m);
+  v_1.inner[target_indices[0u]].after = value_param.after;
+}
+void tint_store_and_preserve_padding(S value_param[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      uint tint_symbol_1[1] = uint[1](i);
-      assign_and_preserve_padding_1_s_inner_X(tint_symbol_1, value[i]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
 }
-
-void f() {
-  assign_and_preserve_padding_s_inner(u.inner);
-  uint tint_symbol_2[1] = uint[1](1u);
-  assign_and_preserve_padding_1_s_inner_X(tint_symbol_2, u.inner[2]);
-  uint tint_symbol_3[1] = uint[1](3u);
-  assign_and_preserve_padding_2_s_inner_X_m(tint_symbol_3, u.inner[2].m);
-  s.inner[1].m[0] = u.inner[0].m[1].zxy;
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  S_std140 v_4[4] = v.inner;
+  S v_5[4] = S[4](S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), S(0, 0u, 0u, 0u, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  {
+    uint v_6 = 0u;
+    v_6 = 0u;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4u)) {
+        break;
+      }
+      v_5[v_7] = tint_convert_S(v_4[v_7]);
+      {
+        v_6 = (v_7 + 1u);
+      }
+      continue;
+    }
+  }
+  tint_store_and_preserve_padding(v_5);
+  S v_8 = tint_convert_S(v.inner[2u]);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_8);
+  mat4x3 v_9 = mat4x3(v.inner[2u].m_col0, v.inner[2u].m_col1, v.inner[2u].m_col2, v.inner[2u].m_col3);
+  tint_store_and_preserve_padding_2(uint[1](3u), v_9);
+  v_1.inner[1u].m[0u] = v.inner[0u].m_col1.zxy;
 }

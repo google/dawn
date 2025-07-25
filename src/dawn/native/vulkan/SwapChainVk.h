@@ -30,13 +30,15 @@
 
 #include <vector>
 
-#include "dawn/native/SwapChain.h"
-
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/IntegerTypes.h"
+#include "dawn/native/SwapChain.h"
+#include "dawn/native/vulkan/UniqueVkHandle.h"
 
 namespace dawn::native::vulkan {
 
 class Device;
+class SwapChainTexture;
 class Texture;
 class PhysicalDevice;
 struct VulkanSurfaceInfo;
@@ -53,7 +55,6 @@ class SwapChain : public SwapChainBase {
   private:
     using SwapChainBase::SwapChainBase;
     MaybeError Initialize(SwapChainBase* previousSwapChain);
-    void DestroyImpl() override;
 
     struct Config {
         // Information that's passed to vulkan swapchain creation.
@@ -86,8 +87,16 @@ class SwapChain : public SwapChainBase {
 
     VkSurfaceKHR mVkSurface = VK_NULL_HANDLE;
     VkSwapchainKHR mSwapChain = VK_NULL_HANDLE;
-    std::vector<VkImage> mSwapChainImages;
-    std::vector<VkSemaphore> mSwapChainSemaphores;
+
+    struct PerImage {
+        VkImage image;
+        // Used for the rendering -> present dependency, we need one semaphore per image because a
+        // present may technically not be started when we signal the semaphore for the next frame.
+        UniqueVkHandle<VkSemaphore> renderingDoneSemaphore;
+        // Used for the last time acquired -> CPU wait for frame pacing.
+        UniqueVkHandle<VkFence> lastAcquireDoneFence;
+    };
+    std::vector<PerImage> mImages;
     uint32_t mLastImageIndex = 0;
 
     Ref<Texture> mBlitTexture;

@@ -33,11 +33,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::BuiltinCall);
 
 namespace tint::core::ir {
 
-BuiltinCall::BuiltinCall() {
+BuiltinCall::BuiltinCall(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-BuiltinCall::BuiltinCall(InstructionResult* result, VectorRef<Value*> arguments) {
+BuiltinCall::BuiltinCall(Id id, InstructionResult* result, VectorRef<Value*> arguments) : Base(id) {
     flags_.Add(Flag::kSequenced);
     AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
     AddResult(result);

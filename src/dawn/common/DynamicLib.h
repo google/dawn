@@ -32,6 +32,7 @@
 #include <type_traits>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Platform.h"
 
 namespace dawn {
 
@@ -48,15 +49,18 @@ class DynamicLib {
 
     bool Valid() const;
 
+#if DAWN_PLATFORM_IS(WINDOWS) && !DAWN_PLATFORM_IS(WINUWP)
+    bool OpenSystemLibrary(std::wstring_view filename, std::string* error = nullptr);
+#endif
     bool Open(const std::string& filename, std::string* error = nullptr);
     void Close();
 
     void* GetProc(const std::string& procName, std::string* error = nullptr) const;
 
     template <typename T>
+        requires std::is_function_v<T>
     bool GetProc(T** proc, const std::string& procName, std::string* error = nullptr) const {
         DAWN_ASSERT(proc != nullptr);
-        static_assert(std::is_function<T>::value);
 
         *proc = reinterpret_cast<T*>(GetProc(procName, error));
         return *proc != nullptr;

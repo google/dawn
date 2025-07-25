@@ -28,15 +28,18 @@
 #ifndef SRC_DAWN_NODE_BINDING_CONVERTER_H_
 #define SRC_DAWN_NODE_BINDING_CONVERTER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
+#include <concepts>
 #include <functional>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
@@ -128,17 +131,25 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::TextureAspect& out, const interop::GPUTextureAspect& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyTexture& out, const interop::GPUImageCopyTexture& in);
+    [[nodiscard]] bool Convert(wgpu::TexelCopyTextureInfo& out,
+                               const interop::GPUTexelCopyTextureInfo& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyBuffer& out, const interop::GPUImageCopyBuffer& in);
+    [[nodiscard]] bool Convert(wgpu::TexelCopyBufferInfo& out,
+                               const interop::GPUTexelCopyBufferInfo& in);
 
     [[nodiscard]] bool Convert(BufferSource& out, interop::BufferSource in);
 
-    [[nodiscard]] bool Convert(wgpu::TextureDataLayout& out, const interop::GPUImageDataLayout& in);
+    [[nodiscard]] bool Convert(wgpu::TexelCopyBufferLayout& out,
+                               const interop::GPUTexelCopyBufferLayout& in);
 
     [[nodiscard]] bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in);
 
     [[nodiscard]] bool Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageFlags& in);
+
+    [[nodiscard]] bool Convert(wgpu::TextureComponentSwizzle& out,
+                               const interop::GPUTextureComponentSwizzle& in);
+
+    [[nodiscard]] bool Convert(wgpu::ComponentSwizzle& out, const interop::GPUComponentSwizzle& in);
 
     [[nodiscard]] bool Convert(wgpu::ColorWriteMask& out, const interop::GPUColorWriteFlags& in);
 
@@ -153,8 +164,7 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::TextureViewDimension& out,
                                const interop::GPUTextureViewDimension& in);
 
-    [[nodiscard]] bool Convert(wgpu::ProgrammableStageDescriptor& out,
-                               const interop::GPUProgrammableStage& in);
+    [[nodiscard]] bool Convert(wgpu::ComputeState& out, const interop::GPUProgrammableStage& in);
 
     [[nodiscard]] bool Convert(wgpu::ConstantEntry& out,
                                const std::string& in_name,
@@ -205,16 +215,21 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat& in);
 
+    [[nodiscard]] bool Convert(wgpu::TextureView& outView,
+                               const std::variant<interop::Interface<interop::GPUTexture>,
+                                                  interop::Interface<interop::GPUTextureView>>& in,
+                               const char* name);
+
     [[nodiscard]] bool Convert(wgpu::RenderPassColorAttachment& out,
                                const interop::GPURenderPassColorAttachment& in);
 
     [[nodiscard]] bool Convert(wgpu::RenderPassDepthStencilAttachment& out,
                                const interop::GPURenderPassDepthStencilAttachment& in);
 
-    [[nodiscard]] bool Convert(wgpu::RenderPassTimestampWrites& out,
+    [[nodiscard]] bool Convert(wgpu::PassTimestampWrites& out,
                                const interop::GPURenderPassTimestampWrites& in);
 
-    [[nodiscard]] bool Convert(wgpu::ComputePassTimestampWrites& out,
+    [[nodiscard]] bool Convert(wgpu::PassTimestampWrites& out,
                                const interop::GPUComputePassTimestampWrites& in);
 
     [[nodiscard]] bool Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in);
@@ -267,6 +282,7 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::PipelineLayout& out, const interop::GPUAutoLayoutMode& in);
 
     [[nodiscard]] bool Convert(wgpu::Bool& out, const bool& in);
+    [[nodiscard]] bool Convert(wgpu::OptionalBool& out, const std::optional<bool>& in);
 
     // Below are the various overloads of Convert() used to convert the Dawn types -> interop.
     [[nodiscard]] bool Convert(interop::GPUTextureDimension& out, wgpu::TextureDimension in);
@@ -286,21 +302,25 @@ class Converter {
     // https://gpuweb.github.io/gpuweb/#gpu-supportedfeatures)
     [[nodiscard]] bool Convert(wgpu::FeatureName& out, interop::GPUFeatureName in);
     [[nodiscard]] bool Convert(interop::GPUFeatureName& out, wgpu::FeatureName in);
-    [[nodiscard]] bool Convert(wgpu::WGSLFeatureName& out, interop::WGSLFeatureName in);
-    [[nodiscard]] bool Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in);
+    [[nodiscard]] bool Convert(wgpu::WGSLLanguageFeatureName& out,
+                               interop::WGSLLanguageFeatureName in);
+    [[nodiscard]] bool Convert(interop::WGSLLanguageFeatureName& out,
+                               wgpu::WGSLLanguageFeatureName in);
 
-    // std::string to C string
+    // std::string to C string / wgpu::StringView types
     [[nodiscard]] inline bool Convert(const char*& out, const std::string& in) {
         out = in.c_str();
+        return true;
+    }
+    [[nodiscard]] inline bool Convert(wgpu::StringView& out, const std::string& in) {
+        out = {in.data(), in.size()};
         return true;
     }
 
     // Floating point number conversion. IDL rules are that double/float that isn't "unrestricted"
     // must be finite.
-    template <typename OUT,
-              typename IN,
-              std::enable_if_t<std::is_floating_point_v<IN> && std::is_floating_point_v<OUT>,
-                               bool> = true>
+    template <typename OUT, typename IN>
+        requires std::floating_point<IN> && std::floating_point<OUT>
     [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = in;
         if (!std::isfinite(out)) {
@@ -311,9 +331,8 @@ class Converter {
     }
 
     // Integral number conversion, with dynamic limit checking
-    template <typename OUT,
-              typename IN,
-              std::enable_if_t<std::is_integral_v<IN> && std::is_integral_v<OUT>, bool> = true>
+    template <typename OUT, typename IN>
+        requires std::integral<IN> && std::integral<OUT>
     [[nodiscard]] inline bool Convert(OUT& out, const IN& in) {
         out = static_cast<OUT>(in);
         if (static_cast<IN>(out) != in) {
@@ -356,9 +375,8 @@ class Converter {
     // std::optional -> T*
     // OUT* is assigned either a pointer to the converted value, or nullptr, depending on
     // whether 'in' has a value.
-    template <typename OUT,
-              typename IN,
-              typename _ = std::enable_if_t<!std::is_same_v<IN, std::string>>>
+    template <typename OUT, typename IN>
+        requires(!std::same_as<IN, std::string>)
     [[nodiscard]] inline bool Convert(OUT*& out, const std::optional<IN>& in) {
         if (in.has_value()) {
             auto* el = Allocate<std::remove_const_t<OUT>>();
@@ -466,6 +484,8 @@ class Converter {
 
     std::vector<std::function<void()>> free_;
 };
+
+std::string CopyLabel(StringView label);
 
 }  // namespace wgpu::binding
 

@@ -14,17 +14,14 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float x_1;
-void tint_symbol(float x) {
+layout(location = 0) in float tint_interstage_location0;
+void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
-    float tint_symbol_1 = dFdx(1.0f);
-    if ((tint_symbol_1 > 0.0f)) {
+    if ((dFdx(1.0f) > 0.0f)) {
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

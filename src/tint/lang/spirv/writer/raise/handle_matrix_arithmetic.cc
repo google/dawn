@@ -61,7 +61,7 @@ struct State {
                     ReplaceBinary(binary);
                 }
             } else if (auto* convert = inst->As<core::ir::Convert>()) {
-                if (convert->Result(0)->Type()->Is<core::type::Matrix>()) {
+                if (convert->Result()->Type()->Is<core::type::Matrix>()) {
                     ReplaceConvert(convert);
                 }
             }
@@ -75,18 +75,18 @@ struct State {
         auto* rhs = binary->RHS();
         auto* lhs_ty = lhs->Type();
         auto* rhs_ty = rhs->Type();
-        auto* ty = binary->Result(0)->Type();
+        auto* ty = binary->Result()->Type();
 
         b.InsertBefore(binary, [&] {
             // Helper to replace the instruction with a column-wise operation.
             auto column_wise = [&](auto op) {
                 auto* mat = ty->As<core::type::Matrix>();
                 Vector<core::ir::Value*, 4> args;
-                for (uint32_t col = 0; col < mat->columns(); col++) {
+                for (uint32_t col = 0; col < mat->Columns(); col++) {
                     auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
                     auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
                     auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
-                    args.Push(add->Result(0));
+                    args.Push(add->Result());
                 }
                 b.ConstructWithResult(binary->DetachResult(), std::move(args));
             };
@@ -141,15 +141,15 @@ struct State {
     void ReplaceConvert(core::ir::Convert* convert) {
         auto* arg = convert->Args()[core::ir::Convert::kValueOperandOffset];
         auto* in_mat = arg->Type()->As<core::type::Matrix>();
-        auto* out_mat = convert->Result(0)->Type()->As<core::type::Matrix>();
+        auto* out_mat = convert->Result()->Type()->As<core::type::Matrix>();
 
         b.InsertBefore(convert, [&] {
             // Extract and convert each column separately.
             Vector<core::ir::Value*, 4> args;
-            for (uint32_t c = 0; c < out_mat->columns(); c++) {
+            for (uint32_t c = 0; c < out_mat->Columns(); c++) {
                 auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
                 auto* new_col = b.Convert(out_mat->ColumnType(), col);
-                args.Push(new_col->Result(0));
+                args.Push(new_col->Result());
             }
 
             // Reconstruct the result matrix from the converted columns.
@@ -163,7 +163,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> HandleMatrixArithmetic(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "HandleMatrixArithmetic transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.HandleMatrixArithmetic",
+                                          kHandleMatrixArithmeticCapabilities);
     if (result != Success) {
         return result.Failure();
     }

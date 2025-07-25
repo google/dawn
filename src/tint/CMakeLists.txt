@@ -31,12 +31,9 @@
 if(NOT TINT_BUILD_AS_OTHER_OS)
   if(APPLE)  # Must come before UNIX
     set(TINT_BUILD_IS_MAC TRUE)
-    set(TINT_BUILD_IS_MAC TRUE)
   elseif(UNIX)
     set(TINT_BUILD_IS_LINUX TRUE)
-    set(TINT_BUILD_IS_LINUX TRUE)
   elseif(WIN32)
-    set(TINT_BUILD_IS_WIN TRUE)
     set(TINT_BUILD_IS_WIN TRUE)
   endif()
 endif()
@@ -58,12 +55,6 @@ if (TINT_BUILD_IR_BINARY)
   endif()
 endif()
 
-if (TINT_BUILD_IR_FUZZER AND NOT TINT_BUILD_IR_BINARY)
-  message(FATAL_ERROR "Building IR fuzzer 'TINT_BUILD_IR_FUZZER' is enabled, "
-                      "but building IR binary format 'TINT_BUILD_IR_BINARY' is "
-                      "not")
-endif()
-
 ################################################################################
 # Helper functions
 ################################################################################
@@ -74,7 +65,6 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_GLSL_WRITER=$<BOOL:${TINT_BUILD_GLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_HLSL_WRITER=$<BOOL:${TINT_BUILD_HLSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR_BINARY=$<BOOL:${TINT_BUILD_IR_BINARY}>)
-  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR_FUZZER=$<BOOL:${TINT_BUILD_IR_FUZZER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_LINUX=$<BOOL:${TINT_BUILD_IS_LINUX}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_MAC=$<BOOL:${TINT_BUILD_IS_MAC}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IS_WIN=$<BOOL:${TINT_BUILD_IS_WIN}>)
@@ -85,6 +75,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_READER=$<BOOL:${TINT_BUILD_WGSL_READER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_TINTD=$<BOOL:${TINT_BUILD_TINTD}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_IR_VALIDATION=$<BOOL:${TINT_ENABLE_IR_VALIDATION}>)
 
   if(TINT_BUILD_FUZZERS)
     target_compile_options(${TARGET} PRIVATE "-fsanitize=fuzzer")
@@ -114,14 +105,15 @@ function(tint_default_compile_options TARGET)
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
     -Wno-format-pedantic
-    -Wno-gnu-zero-variadic-macro-arguments
     -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
     -Wno-undefined-var-template
     -Wno-unknown-warning-option
-    -Wno-unsafe-buffer-usage
     -Wno-used-but-marked-unused
     -Weverything
+    -Wunsafe-buffer-usage
+    -Wno-unsafe-buffer-usage-in-libc-call
+    -Wno-covered-switch-default
   )
 
   if(COMPILER_IS_GNU)
@@ -202,6 +194,8 @@ function(tint_default_compile_options TARGET)
         )
       endif()
     endif()
+
+    target_compile_definitions(${TARGET} INTERFACE "NOMINMAX")
   endif()
 
   if(TINT_RANDOMIZE_HASHES)
@@ -259,6 +253,8 @@ endfunction()
 
 function(tint_bench_compile_options TARGET)
   tint_core_compile_options(${TARGET})
+  add_dependencies(${TARGET} tint_generate_benchmark_inputs)
+  target_include_directories(${TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
   set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
 endfunction()
 
@@ -313,54 +309,27 @@ function(tint_fuzzer_compile_options TARGET)
 endfunction()
 
 if(TINT_ENABLE_BREAK_IN_DEBUGGER)
-  set_source_files_properties(utils/debug/debugger.cc
+  set_source_files_properties(utils/ice/debugger.cc
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1")
 endif()
 
 ################################################################################
 # Benchmarks
 ################################################################################
-if(TINT_BUILD_BENCHMARKS AND TINT_EXTERNAL_BENCHMARK_CORPUS_DIR)
-  # Glob all the files at TINT_EXTERNAL_BENCHMARK_CORPUS_DIR, and create a header
-  # that lists these with the macros:
-  # TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS()
-  # TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS()
-  set(TINT_BENCHMARK_GEN_DIR "${DAWN_BUILD_GEN_DIR}/src/tint/benchmark/")
-  set(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER "${TINT_BENCHMARK_GEN_DIR}/external_wgsl_programs.h")
-  message("Globbing ${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}...")
-
-  file(GLOB_RECURSE
-    TINT_EXTERNAL_WGSL_BENCHMARK_FILES
-    RELATIVE "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}"
-    "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/**.wgsl"
+if(TINT_BUILD_BENCHMARKS)
+  set(SCRIPT "${TINT_ROOT_SOURCE_DIR}/src/tint/cmd/bench/generate_benchmark_inputs.py")
+  set(GENERATED_HEADER_REL_PATH "gen/src/tint/cmd/bench/benchmark_inputs.h")
+  set(GENERATED_HEADER_ABS_PATH "${Dawn_BINARY_DIR}/${GENERATED_HEADER_REL_PATH}")
+  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} header ${Dawn_BINARY_DIR} ${GENERATED_HEADER_REL_PATH})
+  add_custom_command(
+    COMMAND ${ARGS}
+    OUTPUT ${GENERATED_HEADER_ABS_PATH}
+    DEPENDS ${SCRIPT}
+    DEPFILE ${GENERATED_HEADER_ABS_PATH}.d
+    COMMENT "Tint benchmark: Generating ${GENERATED_HEADER_ABS_PATH}."
   )
-  list(TRANSFORM TINT_EXTERNAL_WGSL_BENCHMARK_FILES REPLACE
-    "(.+)"
-    "    BENCHMARK_CAPTURE\(FUNC, \"\\1\", \"${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/\\1\")"
-  )
-  list(JOIN TINT_EXTERNAL_WGSL_BENCHMARK_FILES "; \\\n" TINT_EXTERNAL_WGSL_BENCHMARK_FILES)
-
-  file(GLOB_RECURSE
-    TINT_EXTERNAL_SPV_BENCHMARK_FILES
-    RELATIVE "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}"
-    "${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/**.spv")
-
-  list(TRANSFORM TINT_EXTERNAL_SPV_BENCHMARK_FILES REPLACE
-    "(.+)"
-    "    BENCHMARK_CAPTURE\(FUNC, \"\\1\", \"${TINT_EXTERNAL_BENCHMARK_CORPUS_DIR}/\\1\")"
-  )
-  list(JOIN TINT_EXTERNAL_SPV_BENCHMARK_FILES "; \\\n" TINT_EXTERNAL_SPV_BENCHMARK_FILES)
-
-  file(CONFIGURE
-    OUTPUT "${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}"
-    CONTENT "
-#define TINT_BENCHMARK_EXTERNAL_WGSL_PROGRAMS(FUNC) \\
-${TINT_EXTERNAL_WGSL_BENCHMARK_FILES};
-
-#define TINT_BENCHMARK_EXTERNAL_SPV_PROGRAMS(FUNC) \\
-${TINT_EXTERNAL_SPV_BENCHMARK_FILES};"
-  )
-endif(TINT_BUILD_BENCHMARKS AND TINT_EXTERNAL_BENCHMARK_CORPUS_DIR)
+  add_custom_target(tint_generate_benchmark_inputs DEPENDS ${GENERATED_HEADER_ABS_PATH})
+endif()
 
 ################################################################################
 # Functions used by BUILD.cmake files
@@ -538,6 +507,16 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE
         absl::strings
       )
+
+      if(NOT MSVC)
+        target_compile_options(${TARGET} PUBLIC
+          -Wno-gcc-compat
+          -Wno-unreachable-code-break
+          -Wno-nullability-extension
+          -Wno-shadow
+        )
+      endif()
+
     elseif(${DEPENDENCY} STREQUAL "dl")
       target_link_libraries(${TARGET} PRIVATE ${CMAKE_DL_LIBS})
     elseif(${DEPENDENCY} STREQUAL "dxc-include")
@@ -567,11 +546,6 @@ function(tint_target_add_external_dependencies TARGET KIND)
     elseif(${DEPENDENCY} STREQUAL "google-benchmark")
       set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
       target_link_libraries(${TARGET} PRIVATE benchmark::benchmark)
-      if(TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER)
-        target_compile_definitions(${TARGET} PRIVATE
-          "TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER=\"${TINT_BENCHMARK_EXTERNAL_SHADERS_HEADER}\""
-        )
-      endif()
     elseif(${DEPENDENCY} STREQUAL "gtest")
       target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
       target_link_libraries(${TARGET} PRIVATE gmock)
@@ -605,6 +579,10 @@ function(tint_target_add_external_dependencies TARGET KIND)
       target_link_libraries(${TARGET} PRIVATE Threads::Threads)
     elseif(${DEPENDENCY} STREQUAL "winsock")
       target_link_libraries(${TARGET} PRIVATE ws2_32)
+    elseif(${DEPENDENCY} STREQUAL "src_utils")
+      target_link_libraries(${TARGET} PRIVATE dawn_shared_utils)
+    elseif(${DEPENDENCY} STREQUAL "src_utils_chromium_test_compat")
+      target_link_libraries(${TARGET} PRIVATE dawn_shared_utils_chromium_test_compat)
     else()
       message(FATAL_ERROR "unhandled external dependency ${DEPENDENCY}")
     endif()

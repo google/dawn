@@ -82,14 +82,6 @@ class InternalCompilerError {
     std::stringstream msg_;
 };
 
-/// Function type used for registering an internal compiler error reporter
-using InternalCompilerErrorReporter = void(const InternalCompilerError&);
-
-/// Sets the global error reporter to be called in case of internal compiler
-/// errors.
-/// @param reporter the error reporter
-void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter);
-
 }  // namespace tint
 
 /// TINT_ICE() is a macro to invoke the InternalCompilerErrorReporter for an Internal Compiler
@@ -112,7 +104,7 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter);
 /// The ICE message contains the callsite's file and line.
 #define TINT_ASSERT(condition)                           \
     do {                                                 \
-        if (TINT_UNLIKELY(!(condition))) {               \
+        if (DAWN_UNLIKELY(!(condition))) {               \
             TINT_ICE() << "TINT_ASSERT(" #condition ")"; \
         }                                                \
     } while (false)

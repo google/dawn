@@ -32,7 +32,7 @@
 #include <functional>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::sem {
@@ -75,7 +75,8 @@ struct SamplerTexturePair {
 /// @param o the stream to write to
 /// @param stp the SamplerTexturePair
 /// @return the stream so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, const SamplerTexturePair& stp) {
     return o << "[sampler: " << stp.sampler_binding_point
              << ", texture: " << stp.sampler_binding_point << "]";

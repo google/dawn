@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/constant/invalid.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -38,9 +39,12 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -66,7 +70,7 @@ const constant::Value* Manager::Composite(const core::type::Type* type,
     bool all_equal = true;
     auto* first = elements.Front();
     for (auto* el : elements) {
-        if (TINT_UNLIKELY(!el)) {
+        if (DAWN_UNLIKELY(!el)) {
             return nullptr;
         }
         if (!any_zero && el->AnyZero()) {
@@ -99,6 +103,18 @@ const Scalar<u32>* Manager::Get(u32 value) {
     return Get<Scalar<u32>>(types.u32(), value);
 }
 
+const Scalar<u64>* Manager::Get(u64 value) {
+    return Get<Scalar<u64>>(types.u64(), value);
+}
+
+const Scalar<i8>* Manager::Get(i8 value) {
+    return Get<Scalar<i8>>(types.i8(), value);
+}
+
+const Scalar<u8>* Manager::Get(u8 value) {
+    return Get<Scalar<u8>>(types.u8(), value);
+}
+
 const Scalar<f32>* Manager::Get(f32 value) {
     return Get<Scalar<f32>>(types.f32(), value);
 }
@@ -119,11 +135,15 @@ const Scalar<AInt>* Manager::Get(AInt value) {
     return Get<Scalar<AInt>>(types.AInt(), value);
 }
 
+const constant::String* Manager::Get(std::string_view value) {
+    return Get<String>(types.String(), value);
+}
+
 const Value* Manager::Zero(const core::type::Type* type) {
     return Switch(
         type,  //
         [&](const core::type::Vector* v) -> const Value* {
-            auto* zero_el = Zero(v->type());
+            auto* zero_el = Zero(v->Type());
             return Splat(type, zero_el);
         },
         [&](const core::type::Matrix* m) -> const Value* {
@@ -160,6 +180,9 @@ const Value* Manager::Zero(const core::type::Type* type) {
         [&](const core::type::AbstractFloat*) { return Get(AFloat(0)); },  //
         [&](const core::type::I32*) { return Get(i32(0)); },               //
         [&](const core::type::U32*) { return Get(u32(0)); },               //
+        [&](const core::type::I8*) { return Get(i8(0)); },                 //
+        [&](const core::type::U8*) { return Get(u8(0)); },                 //
+        [&](const core::type::U64*) { return Get(u64(0)); },               //
         [&](const core::type::F32*) { return Get(f32(0)); },               //
         [&](const core::type::F16*) { return Get(f16(0)); },               //
         [&](const core::type::Bool*) { return Get(false); },               //

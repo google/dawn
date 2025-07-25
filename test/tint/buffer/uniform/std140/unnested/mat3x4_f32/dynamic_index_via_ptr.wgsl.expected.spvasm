@@ -1,57 +1,67 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 31
+; Generator: Google Tint Compiler; 1
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
+         %32 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %m_block "m_block"
                OpMemberName %m_block 0 "inner"
-               OpName %m "m"
+               OpName %m_block "m_block"
                OpName %counter "counter"
                OpName %i "i"
                OpName %f "f"
-               OpDecorate %m_block Block
+               OpName %p_m "p_m"
+               OpName %p_m_i "p_m_i"
+               OpName %l_m "l_m"
+               OpName %l_m_i "l_m_i"
                OpMemberDecorate %m_block 0 Offset 0
                OpMemberDecorate %m_block 0 ColMajor
                OpMemberDecorate %m_block 0 MatrixStride 16
-               OpDecorate %m NonWritable
-               OpDecorate %m DescriptorSet 0
-               OpDecorate %m Binding 0
+               OpDecorate %m_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat3v4float = OpTypeMatrix %v4float 3
     %m_block = OpTypeStruct %mat3v4float
 %_ptr_Uniform_m_block = OpTypePointer Uniform %m_block
-          %m = OpVariable %_ptr_Uniform_m_block Uniform
+          %1 = OpVariable %_ptr_Uniform_m_block Uniform
         %int = OpTypeInt 32 1
-          %8 = OpConstantNull %int
 %_ptr_Private_int = OpTypePointer Private %int
-    %counter = OpVariable %_ptr_Private_int Private %8
-         %11 = OpTypeFunction %int
+      %int_0 = OpConstant %int 0
+    %counter = OpVariable %_ptr_Private_int Private %int_0
+         %12 = OpTypeFunction %int
+       %uint = OpTypeInt 32 0
       %int_1 = OpConstant %int 1
        %void = OpTypeVoid
-         %18 = OpTypeFunction %void
-       %uint = OpTypeInt 32 0
-     %uint_0 = OpConstant %uint 0
+         %24 = OpTypeFunction %void
 %_ptr_Uniform_mat3v4float = OpTypePointer Uniform %mat3v4float
+     %uint_0 = OpConstant %uint 0
+     %uint_2 = OpConstant %uint 2
 %_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
-          %i = OpFunction %int None %11
+          %i = OpFunction %int None %12
          %13 = OpLabel
-         %14 = OpLoad %int %counter
-         %16 = OpIAdd %int %14 %int_1
-               OpStore %counter %16
-         %17 = OpLoad %int %counter
-               OpReturnValue %17
+         %14 = OpLoad %int %counter None
+         %16 = OpBitcast %uint %14
+         %17 = OpBitcast %uint %int_1
+         %19 = OpIAdd %uint %16 %17
+         %20 = OpBitcast %int %19
+               OpStore %counter %20 None
+         %21 = OpLoad %int %counter None
+               OpReturnValue %21
                OpFunctionEnd
-          %f = OpFunction %void None %18
-         %21 = OpLabel
-         %22 = OpFunctionCall %int %i
-         %26 = OpAccessChain %_ptr_Uniform_mat3v4float %m %uint_0
-         %27 = OpLoad %mat3v4float %26
-         %29 = OpAccessChain %_ptr_Uniform_v4float %m %uint_0 %22
-         %30 = OpLoad %v4float %29
+          %f = OpFunction %void None %24
+         %25 = OpLabel
+        %p_m = OpAccessChain %_ptr_Uniform_mat3v4float %1 %uint_0
+         %29 = OpFunctionCall %int %i
+         %30 = OpBitcast %uint %29
+         %31 = OpExtInst %uint %32 UMin %30 %uint_2
+      %p_m_i = OpAccessChain %_ptr_Uniform_v4float %p_m %31
+        %l_m = OpLoad %mat3v4float %p_m None
+      %l_m_i = OpLoad %v4float %p_m_i None
                OpReturn
                OpFunctionEnd

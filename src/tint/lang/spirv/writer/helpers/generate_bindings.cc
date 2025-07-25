@@ -51,10 +51,11 @@ Bindings GenerateBindings(const core::ir::Module& module) {
     Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
     Vector<tint::BindingPoint, 4> ext_tex_bps;
     for (auto* inst : *module.root_block) {
-        if (!inst->Alive()) {
+        auto* var = inst->As<core::ir::Var>();
+        if (!var) {
             continue;
         }
-        auto* var = inst->As<core::ir::Var>();
+
         if (auto bp = var->BindingPoint()) {
             if (auto val = group_to_next_binding_number.Get(bp->group)) {
                 *val = std::max(*val, bp->binding + 1);
@@ -62,7 +63,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                 group_to_next_binding_number.Add(bp->group, bp->binding + 1);
             }
 
-            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
             auto* ty = ptr->UnwrapPtr();
 
             // Store up the external textures, we'll add them in the next step
@@ -92,7 +93,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                 case core::AddressSpace::kUndefined:
                 case core::AddressSpace::kPixelLocal:
                 case core::AddressSpace::kPrivate:
-                case core::AddressSpace::kPushConstant:
+                case core::AddressSpace::kImmediate:
                 case core::AddressSpace::kIn:
                 case core::AddressSpace::kOut:
                 case core::AddressSpace::kFunction:

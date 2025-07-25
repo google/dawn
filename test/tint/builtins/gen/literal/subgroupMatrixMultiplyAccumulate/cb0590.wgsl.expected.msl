@@ -1,0 +1,5 @@
+SKIP: FAILED
+
+non-float subgroup matrices are not supported by the MSL backend
+
+tint executable returned error: exit status 1

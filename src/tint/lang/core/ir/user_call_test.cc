@@ -42,9 +42,9 @@ TEST_F(IR_UserCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
     auto* e = b.Call(mod.Types().void_(), func, Vector{arg1, arg2});
-    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 2u}));
+    EXPECT_THAT(func->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 0u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 1u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{e, 2u}));
 }
 
 TEST_F(IR_UserCallTest, Results) {
@@ -54,8 +54,8 @@ TEST_F(IR_UserCallTest, Results) {
     auto* e = b.Call(mod.Types().void_(), func, Vector{arg1, arg2});
 
     EXPECT_EQ(e->Results().Length(), 1u);
-    EXPECT_TRUE(e->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(e->Result(0)->Instruction(), e);
+    EXPECT_TRUE(e->Result()->Is<InstructionResult>());
+    EXPECT_EQ(e->Result()->Instruction(), e);
 }
 
 TEST_F(IR_UserCallDeathTest, Fail_NullType) {
@@ -76,8 +76,8 @@ TEST_F(IR_UserCallTest, Clone) {
     auto* new_e = clone_ctx.Clone(e);
 
     EXPECT_NE(e, new_e);
-    EXPECT_NE(nullptr, new_e->Result(0));
-    EXPECT_NE(e->Result(0), new_e->Result(0));
+    EXPECT_NE(nullptr, new_e->Result());
+    EXPECT_NE(e->Result(), new_e->Result());
 
     EXPECT_EQ(new_func, new_e->Target());
 

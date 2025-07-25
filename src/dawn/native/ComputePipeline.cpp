@@ -36,16 +36,6 @@ namespace dawn::native {
 
 MaybeError ValidateComputePipelineDescriptor(DeviceBase* device,
                                              const ComputePipelineDescriptor* descriptor) {
-    UnpackedPtr<ComputePipelineDescriptor> unpacked;
-    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
-    auto* fullSubgroupsOption = unpacked.Get<DawnComputePipelineFullSubgroups>();
-    // TODO(349125474): Decide what to do with fullSubgroupsOption before removing deprecated
-    // ChromiumExperimentalSubgroups.
-    DAWN_INVALID_IF(
-        (fullSubgroupsOption && !device->HasFeature(Feature::ChromiumExperimentalSubgroups)),
-        "DawnComputePipelineFullSubgroups is used without %s enabled.",
-        ToAPI(Feature::ChromiumExperimentalSubgroups));
-
     if (descriptor->layout != nullptr) {
         DAWN_TRY(device->ValidateObject(descriptor->layout));
     }
@@ -70,14 +60,9 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
           descriptor->layout,
           descriptor->label,
           {{SingleShaderStage::Compute, descriptor->compute.module, descriptor->compute.entryPoint,
-            descriptor->compute.constantCount, descriptor->compute.constants}}),
-      mRequiresFullSubgroups(false) {
+            descriptor->compute.constantCount, descriptor->compute.constants}}) {
     SetContentHash(ComputeContentHash());
     GetObjectTrackingList()->Track(this);
-
-    if (auto* fullSubgroupsOption = descriptor.Get<DawnComputePipelineFullSubgroups>()) {
-        mRequiresFullSubgroups = fullSubgroupsOption->requiresFullSubgroups;
-    }
 
     // Initialize the cache key to include the cache type and device information.
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
@@ -85,7 +70,7 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
                                          ObjectBase::ErrorTag tag,
-                                         const char* label)
+                                         StringView label)
     : PipelineBase(device, tag, label) {}
 
 ComputePipelineBase::~ComputePipelineBase() = default;
@@ -94,15 +79,11 @@ void ComputePipelineBase::DestroyImpl() {
     Uncache();
 }
 
-bool ComputePipelineBase::IsFullSubgroupsRequired() const {
-    return mRequiresFullSubgroups;
-}
-
 // static
-Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, const char* label) {
+Ref<ComputePipelineBase> ComputePipelineBase::MakeError(DeviceBase* device, StringView label) {
     class ErrorComputePipeline final : public ComputePipelineBase {
       public:
-        explicit ErrorComputePipeline(DeviceBase* device, const char* label)
+        explicit ErrorComputePipeline(DeviceBase* device, StringView label)
             : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
         MaybeError InitializeImpl() override {
@@ -120,8 +101,7 @@ ObjectType ComputePipelineBase::GetType() const {
 
 bool ComputePipelineBase::EqualityFunc::operator()(const ComputePipelineBase* a,
                                                    const ComputePipelineBase* b) const {
-    return PipelineBase::EqualForCache(a, b) &&
-           (a->IsFullSubgroupsRequired() == b->IsFullSubgroupsRequired());
+    return PipelineBase::EqualForCache(a, b);
 }
 
 }  // namespace dawn::native

@@ -37,6 +37,7 @@
 #include "dawn/webgpu_cpp_print.h"
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUAdapter.h"
+#include "src/dawn/node/binding/IteratorHelper.h"
 #include "src/dawn/node/binding/TogglesLoader.h"
 
 #if defined(_WIN32)
@@ -132,7 +133,7 @@ GPU::GPU(Flags flags) : flags_(std::move(flags)) {
     desc.nextInChain = &togglesDesc;
     instance_ = std::make_unique<dawn::native::Instance>(
         reinterpret_cast<const WGPUInstanceDescriptor*>(&desc));
-    async_ = std::make_shared<AsyncRunner>(instance_.get());
+    async_ = AsyncRunner::Create(instance_.get());
 }
 
 interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::requestAdapter(
@@ -143,7 +144,17 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
 
     RequestAdapterOptions nativeOptions;
     nativeOptions.forceFallbackAdapter = options.forceFallbackAdapter;
-    nativeOptions.compatibilityMode = options.compatibilityMode;
+
+    // Convert the feature level.
+    nativeOptions.featureLevel = FeatureLevel::Undefined;
+    if (options.featureLevel == "compatibility") {
+        nativeOptions.featureLevel = FeatureLevel::Compatibility;
+    } else if (options.featureLevel == "core") {
+        nativeOptions.featureLevel = FeatureLevel::Core;
+    } else {
+        promise.Resolve({});
+        return promise;
+    }
 
     // Convert the power preference.
     nativeOptions.powerPreference = PowerPreference::Undefined;
@@ -202,41 +213,49 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
     DawnTogglesDescriptor togglesDescriptor = togglesLoader.GetDescriptor();
     nativeOptions.nextInChain = &togglesDescriptor;
 
-    auto adapters = instance_->EnumerateAdapters(&nativeOptions);
-    if (adapters.empty()) {
+    auto nativeAdapters = instance_->EnumerateAdapters(&nativeOptions);
+    if (nativeAdapters.empty()) {
         promise.Resolve({});
         return promise;
     }
 
-    // Check for specific adapter name
-    std::string adapterName;
-    if (auto f = flags_.Get("adapter")) {
-        adapterName = *f;
+    std::vector<wgpu::Adapter> adapters(nativeAdapters.size());
+    for (uint32_t i = 0; i < nativeAdapters.size(); ++i) {
+        adapters[i] = wgpu::Adapter(nativeAdapters[i].Get());
     }
 
-    dawn::native::Adapter* adapter = nullptr;
+    // Check for specific adapter device name.
+    // This was AdapterProperties.name, now it is AdapterInfo.device.
+    std::string deviceName;
+    if (auto f = flags_.Get("adapter")) {
+        deviceName = *f;
+    }
+
+    wgpu::Adapter* adapter = nullptr;
+    wgpu::AdapterInfo adapterInfo;
     for (auto& a : adapters) {
-        wgpu::AdapterProperties props;
-        a.GetProperties(&props);
-        if (!adapterName.empty() && props.name &&
-            std::string(props.name).find(adapterName) == std::string::npos) {
+        a.GetInfo(&adapterInfo);
+
+        if (!deviceName.empty() &&
+            std::string_view(adapterInfo.device).find(deviceName) == std::string::npos) {
             continue;
         }
+
         adapter = &a;
         break;
     }
 
     if (!adapter) {
         std::stringstream msg;
-        if (!forceBackend.empty() || adapterName.empty()) {
+        if (!forceBackend.empty() || deviceName.empty()) {
             msg << "no adapter ";
             if (!forceBackend.empty()) {
                 msg << "with backend '" << forceBackend << "'";
-                if (!adapterName.empty()) {
-                    msg << " and name '" << adapterName << "'";
+                if (!deviceName.empty()) {
+                    msg << " and name '" << deviceName << "'";
                 }
             } else {
-                msg << " with name '" << adapterName << "'";
+                msg << " with name '" << deviceName << "'";
             }
             msg << " found";
         } else {
@@ -244,9 +263,9 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         }
         msg << "\nAvailable adapters:";
         for (auto& a : adapters) {
-            wgpu::AdapterProperties props;
-            a.GetProperties(&props);
-            msg << "\n * backend: '" << BackendName(props.backendType) << "', name: '" << props.name
+            wgpu::AdapterInfo info;
+            a.GetInfo(&info);
+            msg << "\n * backend: '" << BackendName(info.backendType) << "', name: '" << info.device
                 << "'";
         }
         promise.Reject(msg.str());
@@ -254,9 +273,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
     }
 
     if (flags_.Get("verbose")) {
-        wgpu::AdapterProperties props;
-        adapter->GetProperties(&props);
-        printf("using GPU adapter: %s\n", props.name);
+        std::cout << "using GPU adapter: " << adapterInfo.device << "\n";
     }
 
     auto gpuAdapter = GPUAdapter::Create<GPUAdapter>(env, *adapter, flags_, async_);
@@ -273,48 +290,51 @@ interop::GPUTextureFormat GPU::getPreferredCanvasFormat(Napi::Env) {
 }
 
 interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(Napi::Env env) {
-    using InteropWGSLFeatureSet = std::unordered_set<interop::WGSLFeatureName>;
+    using InteropWGSLFeatureSet = std::unordered_set<interop::WGSLLanguageFeatureName>;
 
     struct Features : public interop::WGSLLanguageFeatures {
         explicit Features(InteropWGSLFeatureSet features) : features_(features) {}
-        ~Features() = default;
+        ~Features() override = default;
 
-        bool has(Napi::Env env, std::string name) {
-            interop::WGSLFeatureName feature;
-            if (!interop::Converter<interop::WGSLFeatureName>::FromString(name, feature)) {
+        bool has(Napi::Env env, std::string name) override {
+            interop::WGSLLanguageFeatureName feature;
+            if (!interop::Converter<interop::WGSLLanguageFeatureName>::FromString(name, feature)) {
                 return false;
             }
-            return features_.count(feature);
+            return features_.count(feature) != 0u;
         }
-        std::vector<std::string> keys(Napi::Env env) {
+        std::vector<std::string> keys(Napi::Env env) override {
             std::vector<std::string> out;
             out.reserve(features_.size());
             for (auto feature : features_) {
-                out.push_back(interop::Converter<interop::WGSLFeatureName>::ToString(feature));
+                out.push_back(
+                    interop::Converter<interop::WGSLLanguageFeatureName>::ToString(feature));
             }
             return out;
         }
-        size_t getSize(Napi::Env env) { return features_.size(); }
+        size_t getSize(Napi::Env env) override { return features_.size(); }
+        Napi::Value iterator(const Napi::CallbackInfo& info) override {
+            return CreateIterator<InteropWGSLFeatureSet>(info, this->features_);
+        }
 
         InteropWGSLFeatureSet features_;
     };
 
     wgpu::Instance instance = instance_->Get();
-    size_t count = instance.EnumerateWGSLLanguageFeatures(nullptr);
-
-    std::vector<wgpu::WGSLFeatureName> features(count);
-    instance.EnumerateWGSLLanguageFeatures(features.data());
+    wgpu::SupportedWGSLLanguageFeatures supportedFeatures = {};
+    instance.GetWGSLLanguageFeatures(&supportedFeatures);
 
     // Add all known WGSLLangaugeFeatures known by dawn.node but warn loudly when there are unknown
     // ones.
     InteropWGSLFeatureSet featureSet;
     Converter conv(env);
-    for (auto feature : features) {
-        interop::WGSLFeatureName wgslFeature;
+    for (size_t i = 0; i < supportedFeatures.featureCount; i++) {
+        wgpu::WGSLLanguageFeatureName feature = supportedFeatures.features[i];
+        interop::WGSLLanguageFeatureName wgslFeature;
         if (conv(wgslFeature, feature)) {
             featureSet.emplace(wgslFeature);
         } else {
-            LOG("Unknown WGSLFeatureName ", feature);
+            LOG("Unknown WGSLLanguageFeatureName ", feature);
         }
     }
 

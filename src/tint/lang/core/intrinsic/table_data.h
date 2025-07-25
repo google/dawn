@@ -33,8 +33,8 @@
 #include <string>
 
 #include "src/tint/lang/core/constant/eval.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/evaluation_stage.h"
-#include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/text/styled_text.h"
@@ -601,6 +601,7 @@ struct TableData {
     const IntrinsicInfo& unary_and;
 };
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 const core::type::Type* MatchState::Type(const core::type::Type* ty) {
     TypeMatcherIndex matcher_index{(*matcher_indices_++).value};
     auto& matcher = data[matcher_index];
@@ -624,6 +625,7 @@ void MatchState::PrintNum(StyledText& out) {
     auto& matcher = data[matcher_index];
     matcher.print(this, out);
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 /// TemplateTypeMatcher is a Matcher for a template type.
 /// The TemplateTypeMatcher will initially match against any type, and then will only be further

@@ -48,6 +48,7 @@ set(private_headers
     "client/Adapter.h"
     "client/ApiObjects.h"
     "client/Buffer.h"
+    "client/ComputePassEncoder.h"
     "client/Client.h"
     "client/Device.h"
     "client/EventManager.h"
@@ -57,9 +58,10 @@ set(private_headers
     "client/ObjectStore.h"
     "client/QuerySet.h"
     "client/Queue.h"
+    "client/RenderBundleEncoder.h"
+    "client/RenderPassEncoder.h"
     "client/ShaderModule.h"
     "client/Surface.h"
-    "client/SwapChain.h"
     "client/Texture.h"
     "ObjectHandle.h"
     "server/ObjectStorage.h"
@@ -75,6 +77,7 @@ set(sources
     "ChunkedCommandSerializer.cpp"
     "client/Adapter.cpp"
     "client/Buffer.cpp"
+    "client/ComputePassEncoder.cpp"
     "client/Client.cpp"
     "client/ClientDoers.cpp"
     "client/ClientInlineMemoryTransferService.cpp"
@@ -86,9 +89,10 @@ set(sources
     "client/ObjectStore.cpp"
     "client/QuerySet.cpp"
     "client/Queue.cpp"
+    "client/RenderBundleEncoder.cpp"
+    "client/RenderPassEncoder.cpp"
     "client/ShaderModule.cpp"
     "client/Surface.cpp"
-    "client/SwapChain.cpp"
     "client/Texture.cpp"
     "ObjectHandle.cpp"
     "server/Server.cpp"
@@ -97,8 +101,10 @@ set(sources
     "server/ServerDevice.cpp"
     "server/ServerInlineMemoryTransferService.cpp"
     "server/ServerInstance.cpp"
+    "server/ServerProgrammableEncoder.cpp"
     "server/ServerQueue.cpp"
     "server/ServerShaderModule.cpp"
+    "server/ServerSurface.cpp"
     "SupportedFeatures.cpp"
     "Wire.cpp"
     "WireClient.cpp"
@@ -122,7 +128,7 @@ dawn_add_library(
     absl::flat_hash_set
     dawn::dawn_common
     dawn::partition_alloc
-    tint_lang_wgsl_features
+    tint_lang_wgsl
 )
 target_compile_definitions(dawn_wire PRIVATE "DAWN_WIRE_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

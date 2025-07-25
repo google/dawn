@@ -34,6 +34,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 )
 
 var Q = query.Parse
@@ -613,6 +614,151 @@ func TestParsePrint(t *testing.T) {
 		if diff := cmp.Diff(test.in, str); diff != "" {
 			t.Errorf("query.String('%v')\n%v", test.in, diff)
 		}
+	}
+}
+
+// Essentially the same as TestParsePrint(), but calling ExpectationFileString()
+// instead of String().
+func TestParsePrintExpectationFileString(t *testing.T) {
+	type Test struct {
+		input    string
+		expected query.Query
+	}
+
+	for _, test := range []Test{
+		{
+			"a",
+			query.Query{
+				Suite: "a",
+			},
+		}, {
+			"a:*",
+			query.Query{
+				Suite: "a",
+				Files: "*",
+			},
+		}, {
+			"a:b",
+			query.Query{
+				Suite: "a",
+				Files: "b",
+			},
+		}, {
+			"a:b,*",
+			query.Query{
+				Suite: "a",
+				Files: "b,*",
+			},
+		}, {
+			"a:b:*",
+			query.Query{
+				Suite: "a",
+				Files: "b",
+				Tests: "*",
+			},
+		}, {
+			"a:b,c",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+			},
+		}, {
+			"a:b,c:*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "*",
+			},
+		}, {
+			"a:b,c:d:",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d",
+			},
+		}, {
+			"a:b,c:d,*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,*",
+			},
+		}, {
+			"a:b,c:d,e:",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+			},
+		}, {
+			"a:b,c:d,e,*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e,*",
+			},
+		}, {
+			"a:b,c:d,e:*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: "*",
+			},
+		}, {
+			"a:b,c:d,e:f=g",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: "f=g",
+			},
+		}, {
+			"a:b,c:d,e:f=g;*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: "f=g;*",
+			},
+		}, {
+			"a:b,c:d,e:f=g;h=i",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: "f=g;h=i",
+			},
+		}, {
+			"a:b,c:d,e:f=g;h=i;*",
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: "f=g;h=i;*",
+			},
+		}, {
+			`a:b,c:d,e:f={"x": 1, "y": 2}`,
+			query.Query{
+				Suite: "a",
+				Files: "b,c",
+				Tests: "d,e",
+				Cases: `f={"x": 1, "y": 2}`,
+			},
+		}, {
+			`a:b,c,d:e,f:g="h";i=[10,20,30];j=40`,
+			query.Query{
+				Suite: "a",
+				Files: "b,c,d",
+				Tests: "e,f",
+				Cases: `g="h";i=[10,20,30];j=40`,
+			},
+		},
+	} {
+		parsed := query.Parse(test.input)
+		assert.Equal(t, test.expected, parsed)
+		expectationFileString := test.expected.ExpectationFileString()
+		assert.Equal(t, test.input, expectationFileString)
 	}
 }
 

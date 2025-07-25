@@ -32,14 +32,14 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
+#include "dawn/native/ValidationUtils.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 
 namespace dawn::native {
 
 MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor* descriptor) {
-    DAWN_INVALID_IF(std::isnan(descriptor->lodMinClamp) || std::isnan(descriptor->lodMaxClamp),
-                    "LOD clamp bounds [%f, %f] contain a NaN.", descriptor->lodMinClamp,
-                    descriptor->lodMaxClamp);
+    DAWN_TRY(ValidateFloat("lodMinClamp", descriptor->lodMinClamp));
+    DAWN_TRY(ValidateFloat("lodMaxClamp", descriptor->lodMaxClamp));
 
     DAWN_INVALID_IF(descriptor->lodMinClamp < 0 || descriptor->lodMaxClamp < 0,
                     "LOD clamp bounds [%f, %f] contain contain a negative number.",
@@ -55,7 +55,7 @@ MaybeError ValidateSamplerDescriptor(DeviceBase* device, const SamplerDescriptor
                             descriptor->mipmapFilter != wgpu::MipmapFilterMode::Linear,
                         "One of minFilter (%s), magFilter (%s) or mipmapFilter (%s) is not %s "
                         "while using anisotropic filter (maxAnisotropy is %f)",
-                        descriptor->magFilter, descriptor->minFilter, descriptor->mipmapFilter,
+                        descriptor->minFilter, descriptor->magFilter, descriptor->mipmapFilter,
                         wgpu::FilterMode::Linear, descriptor->maxAnisotropy);
     } else if (descriptor->maxAnisotropy == 0u) {
         return DAWN_VALIDATION_ERROR("Max anisotropy (%f) is less than 1.",
@@ -95,8 +95,10 @@ SamplerBase::SamplerBase(DeviceBase* device,
       mLodMaxClamp(descriptor->lodMaxClamp),
       mCompareFunction(descriptor->compare),
       mMaxAnisotropy(descriptor->maxAnisotropy) {
-    if (Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
+    if (auto* yCbCrVkDescriptor = Unpack(descriptor).Get<YCbCrVkDescriptor>()) {
         mIsYCbCr = true;
+        mYCbCrVkDescriptor = yCbCrVkDescriptor->WithTrivialFrontendDefaults();
+        mYCbCrVkDescriptor.nextInChain = nullptr;
     }
 }
 
@@ -105,7 +107,7 @@ SamplerBase::SamplerBase(DeviceBase* device, const SamplerDescriptor* descriptor
     GetObjectTrackingList()->Track(this);
 }
 
-SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+SamplerBase::SamplerBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 SamplerBase::~SamplerBase() = default;
@@ -115,7 +117,7 @@ void SamplerBase::DestroyImpl() {
 }
 
 // static
-Ref<SamplerBase> SamplerBase::MakeError(DeviceBase* device, const char* label) {
+Ref<SamplerBase> SamplerBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new SamplerBase(device, ObjectBase::kError, label));
 }
 
@@ -136,11 +138,29 @@ bool SamplerBase::IsYCbCr() const {
     return mIsYCbCr;
 }
 
+YCbCrVkDescriptor SamplerBase::GetYCbCrVkDescriptor() const {
+    DAWN_ASSERT(IsYCbCr());
+    return mYCbCrVkDescriptor;
+}
+
 size_t SamplerBase::ComputeContentHash() {
     ObjectContentHasher recorder;
-    recorder.Record(mAddressModeU, mAddressModeV, mAddressModeW, mMagFilter, mMinFilter,
-                    mMipmapFilter, mLodMinClamp, mLodMaxClamp, mCompareFunction, mMaxAnisotropy,
-                    mIsYCbCr);
+    // NOTE: We always hash the state of `mYCbCrVkDescriptor` to avoid splitting
+    // this code into two separate Record() calls, which would be error-prone
+    // when future state is added. If the client did not pass in a YCbCr
+    // descriptor, `mIsYCbCr` will be false and the YCbCr descriptor will have
+    // default values. The use of `mIsYCbCr` here differentiates that case from
+    // the case of the client passing in a YCbCr descriptor holding all default
+    // values.
+    recorder.Record(
+        mAddressModeU, mAddressModeV, mAddressModeW, mMagFilter, mMinFilter, mMipmapFilter,
+        mLodMinClamp, mLodMaxClamp, mCompareFunction, mMaxAnisotropy, mIsYCbCr,
+        mYCbCrVkDescriptor.vkFormat, mYCbCrVkDescriptor.vkYCbCrModel,
+        mYCbCrVkDescriptor.vkYCbCrRange, mYCbCrVkDescriptor.vkComponentSwizzleRed,
+        mYCbCrVkDescriptor.vkComponentSwizzleGreen, mYCbCrVkDescriptor.vkComponentSwizzleBlue,
+        mYCbCrVkDescriptor.vkComponentSwizzleAlpha, mYCbCrVkDescriptor.vkXChromaOffset,
+        mYCbCrVkDescriptor.vkYChromaOffset, mYCbCrVkDescriptor.vkChromaFilter,
+        mYCbCrVkDescriptor.forceExplicitReconstruction, mYCbCrVkDescriptor.externalFormat);
     return recorder.GetContentHash();
 }
 
@@ -154,12 +174,34 @@ bool SamplerBase::EqualityFunc::operator()(const SamplerBase* a, const SamplerBa
     DAWN_ASSERT(!std::isnan(a->mLodMaxClamp));
     DAWN_ASSERT(!std::isnan(b->mLodMaxClamp));
 
+    // NOTE: For simplicity, we always check the state of the YCbCr descriptor.
+    // If the client did not pass in a YCbCr descriptor, `mIsYCbCr` will be
+    // false and the YCbCr descriptor will have default values. The use of
+    // `mIsYCbCr` here differentiates that case from the case of the client
+    // passing in a YCbCr descriptor holding all default values.
     return a->mAddressModeU == b->mAddressModeU && a->mAddressModeV == b->mAddressModeV &&
            a->mAddressModeW == b->mAddressModeW && a->mMagFilter == b->mMagFilter &&
            a->mMinFilter == b->mMinFilter && a->mMipmapFilter == b->mMipmapFilter &&
            a->mLodMinClamp == b->mLodMinClamp && a->mLodMaxClamp == b->mLodMaxClamp &&
            a->mCompareFunction == b->mCompareFunction && a->mMaxAnisotropy == b->mMaxAnisotropy &&
-           a->mIsYCbCr == b->mIsYCbCr;
+           a->mIsYCbCr == b->mIsYCbCr &&
+           a->mYCbCrVkDescriptor.vkFormat == b->mYCbCrVkDescriptor.vkFormat &&
+           a->mYCbCrVkDescriptor.vkYCbCrModel == b->mYCbCrVkDescriptor.vkYCbCrModel &&
+           a->mYCbCrVkDescriptor.vkYCbCrRange == b->mYCbCrVkDescriptor.vkYCbCrRange &&
+           a->mYCbCrVkDescriptor.vkComponentSwizzleRed ==
+               b->mYCbCrVkDescriptor.vkComponentSwizzleRed &&
+           a->mYCbCrVkDescriptor.vkComponentSwizzleGreen ==
+               b->mYCbCrVkDescriptor.vkComponentSwizzleGreen &&
+           a->mYCbCrVkDescriptor.vkComponentSwizzleBlue ==
+               b->mYCbCrVkDescriptor.vkComponentSwizzleBlue &&
+           a->mYCbCrVkDescriptor.vkComponentSwizzleAlpha ==
+               b->mYCbCrVkDescriptor.vkComponentSwizzleAlpha &&
+           a->mYCbCrVkDescriptor.vkXChromaOffset == b->mYCbCrVkDescriptor.vkXChromaOffset &&
+           a->mYCbCrVkDescriptor.vkYChromaOffset == b->mYCbCrVkDescriptor.vkYChromaOffset &&
+           a->mYCbCrVkDescriptor.vkChromaFilter == b->mYCbCrVkDescriptor.vkChromaFilter &&
+           a->mYCbCrVkDescriptor.forceExplicitReconstruction ==
+               b->mYCbCrVkDescriptor.forceExplicitReconstruction &&
+           a->mYCbCrVkDescriptor.externalFormat == b->mYCbCrVkDescriptor.externalFormat;
 }
 
 }  // namespace dawn::native

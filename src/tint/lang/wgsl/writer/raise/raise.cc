@@ -29,17 +29,16 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/writer/raise/ptr_to_ref.h"
 #include "src/tint/lang/wgsl/writer/raise/value_to_let.h"
-#include "src/tint/utils/result/result.h"
 
 namespace tint::wgsl::writer {
 namespace {
@@ -170,8 +169,36 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kAtomicExchange)
         CASE(kAtomicCompareExchangeWeak)
         CASE(kSubgroupBallot)
+        CASE(kSubgroupElect)
         CASE(kSubgroupBroadcast)
+        CASE(kSubgroupBroadcastFirst)
+        CASE(kSubgroupShuffle)
+        CASE(kSubgroupShuffleXor)
+        CASE(kSubgroupShuffleUp)
+        CASE(kSubgroupShuffleDown)
+        CASE(kSubgroupAdd)
+        CASE(kSubgroupInclusiveAdd)
+        CASE(kSubgroupExclusiveAdd)
+        CASE(kSubgroupMul)
+        CASE(kSubgroupInclusiveMul)
+        CASE(kSubgroupExclusiveMul)
         CASE(kInputAttachmentLoad)
+        CASE(kSubgroupAnd)
+        CASE(kSubgroupOr)
+        CASE(kSubgroupXor)
+        CASE(kSubgroupMin)
+        CASE(kSubgroupMax)
+        CASE(kSubgroupAny)
+        CASE(kSubgroupAll)
+        CASE(kQuadBroadcast)
+        CASE(kQuadSwapX)
+        CASE(kQuadSwapY)
+        CASE(kQuadSwapDiagonal)
+        CASE(kSubgroupMatrixLoad)
+        CASE(kSubgroupMatrixStore)
+        CASE(kSubgroupMatrixMultiply)
+        CASE(kSubgroupMatrixMultiplyAccumulate)
+        CASE(kPrint)
         case core::BuiltinFn::kNone:
             break;
     }
@@ -182,6 +209,13 @@ void ReplaceBuiltinFnCall(core::ir::Builder& b, core::ir::CoreBuiltinCall* call)
     Vector<core::ir::Value*, 8> args(call->Args());
     auto* replacement = b.CallWithResult<wgsl::ir::BuiltinCall>(
         call->DetachResult(), Convert(call->Func()), std::move(args));
+    if (!call->ExplicitTemplateParams().IsEmpty()) {
+        Vector<const core::type::Type*, 4> tmpl_args;
+        for (auto p : call->ExplicitTemplateParams()) {
+            tmpl_args.Push(p);
+        }
+        replacement->SetExplicitTemplateParams(std::move(tmpl_args));
+    }
     call->ReplaceWith(replacement);
     call->Destroy();
 }

@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 #define SRC_DAWN_WIRE_CLIENT_OBJECTBASE_H_
 
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
+
 #include "partition_alloc/pointers/raw_ptr.h"
 
-#include "dawn/common/LinkedList.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/wire/ObjectHandle.h"
@@ -51,8 +51,7 @@ struct ObjectBaseParams {
 //  - A pointer to the Client to get where to serialize commands
 //  - The external reference count, starting at 1.
 //  - An ID that is used to refer to this object when talking with the server side
-//  - A next/prev pointer. They are part of a linked list of objects of the same type.
-class ObjectBase : public RefCounted, public LinkNode<ObjectBase> {
+class ObjectBase : public RefCounted {
   public:
     explicit ObjectBase(const ObjectBaseParams& params);
 

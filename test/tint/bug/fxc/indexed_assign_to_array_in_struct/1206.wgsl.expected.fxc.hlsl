@@ -5,34 +5,50 @@ struct Particle {
   float3 velocity;
 };
 
+
 ByteAddressBuffer particles : register(t3, space1);
 cbuffer cbuffer_sim : register(b4, space1) {
   uint4 sim[1];
 };
-
-typedef float3 particles_load_1_ret[8];
-particles_load_1_ret particles_load_1(uint offset) {
-  float3 arr[8] = (float3[8])0;
+typedef float3 ary_ret[8];
+ary_ret v(uint offset) {
+  float3 a[8] = (float3[8])0;
   {
-    for(uint i_1 = 0u; (i_1 < 8u); i_1 = (i_1 + 1u)) {
-      arr[i_1] = asfloat(particles.Load3((offset + (i_1 * 16u))));
+    uint v_1 = 0u;
+    v_1 = 0u;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 8u)) {
+        break;
+      }
+      a[v_2] = asfloat(particles.Load3((offset + (v_2 * 16u))));
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float3 v_3[8] = a;
+  return v_3;
 }
 
-Particle particles_load(uint offset) {
-  Particle tint_symbol_2 = {particles_load_1((offset + 0u)), asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
-  return tint_symbol_2;
+Particle v_4(uint offset) {
+  float3 v_5[8] = v((offset + 0u));
+  Particle v_6 = {v_5, asfloat(particles.Load((offset + 128u))), asfloat(particles.Load4((offset + 144u))), asfloat(particles.Load3((offset + 160u)))};
+  return v_6;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  Particle particle = particles_load(0u);
-  {
-    float3 tint_symbol_1[8] = particle.position;
-    tint_symbol_1[sim[0].x] = particle.position[sim[0].x];
-    particle.position = tint_symbol_1;
-  }
-  return;
+  uint v_7 = 0u;
+  particles.GetDimensions(v_7);
+  uint v_8 = ((v_7 / 176u) - 1u);
+  Particle particle = v_4((0u + (min(uint(int(0)), v_8) * 176u)));
+  uint v_9 = sim[0u].x;
+  uint v_10 = min(sim[0u].x, 7u);
+  float3 tint_array_copy[8] = particle.position;
+  tint_array_copy[min(v_9, 7u)] = particle.position[v_10];
+  float3 v_11[8] = tint_array_copy;
+  particle.position = v_11;
 }
+

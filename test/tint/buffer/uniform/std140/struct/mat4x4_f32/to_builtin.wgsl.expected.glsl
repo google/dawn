@@ -1,53 +1,49 @@
 #version 310 es
 
+
 struct S {
   int before;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   mat4 m;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-  uint pad_10;
-  uint pad_11;
-  uint pad_12;
-  uint pad_13;
-  uint pad_14;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
   int after;
-  uint pad_15;
-  uint pad_16;
-  uint pad_17;
-  uint pad_18;
-  uint pad_19;
-  uint pad_20;
-  uint pad_21;
-  uint pad_22;
-  uint pad_23;
-  uint pad_24;
-  uint pad_25;
-  uint pad_26;
-  uint pad_27;
-  uint pad_28;
-  uint pad_29;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
+  uint tint_pad_26;
+  uint tint_pad_27;
+  uint tint_pad_28;
+  uint tint_pad_29;
 };
 
-layout(binding = 0, std140) uniform u_block_ubo {
+layout(binding = 0, std140)
+uniform u_block_1_ubo {
   S inner[4];
-} u;
-
-void f() {
-  mat4 t = transpose(u.inner[2].m);
-  float l = length(u.inner[0].m[1].ywxz);
-  float a = abs(u.inner[0].m[1].ywxz.x);
-}
-
+} v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  mat4 t = transpose(v.inner[2u].m);
+  float l = length(v.inner[0u].m[1u].ywxz);
+  float a = abs(v.inner[0u].m[1u].ywxz.x);
 }

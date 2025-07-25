@@ -27,10 +27,16 @@
 
 #include "src/tint/utils/bytes/buffer_reader.h"
 
+#include <algorithm>
+
+#include "src/tint/utils/macros/compiler.h"
+
 namespace tint::bytes {
 
 BufferReader::~BufferReader() = default;
 
+// TODO(408010433): Rewrite internals using span to avoid UBU during read
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 size_t BufferReader::Read(std::byte* out, size_t count) {
     size_t n = std::min(count, bytes_remaining_);
     memcpy(out, data_, n);
@@ -38,6 +44,7 @@ size_t BufferReader::Read(std::byte* out, size_t count) {
     bytes_remaining_ -= n;
     return n;
 }
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 bool BufferReader::IsEOF() const {
     return bytes_remaining_ == 0;

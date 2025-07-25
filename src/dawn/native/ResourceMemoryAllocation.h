@@ -59,6 +59,12 @@ struct AllocationInfo {
     uint64_t mBlockOffset = 0;
 
     AllocationMethod mMethod = AllocationMethod::kInvalid;
+
+    // Represents the requested memory allocation size (without padding) by the allocator.
+    uint64_t mRequestedSize = 0;
+
+    // Tracks whether the memory allocation contains VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT.
+    bool mIsLazyAllocated = false;
 };
 
 // Handle into a resource heap pool.

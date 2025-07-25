@@ -2,18 +2,22 @@
         let _e16_ = vec2(false, false);
         ^^^^^^^^^
 
+
 [numthreads(1, 1, 1)]
 void main() {
-  while (true) {
-    if (true) {
-      break;
-    } else {
-      break;
-    }
-    bool2 _e16_ = (false).xx;
-    {
-      if (_e16_.x) { break; }
+  {
+    uint2 tint_loop_idx = (4294967295u).xx;
+    while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
+        break;
+      }
+      if (true) {
+        break;
+      } else {
+        break;
+      }
+      /* unreachable */
     }
   }
-  return;
 }
+

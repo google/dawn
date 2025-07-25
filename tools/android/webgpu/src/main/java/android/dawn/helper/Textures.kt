@@ -4,7 +4,7 @@ import android.dawn.*
 import android.graphics.Bitmap
 import java.nio.ByteBuffer
 
-fun Bitmap.createGpuTexture(device: Device): Texture {
+public fun Bitmap.createGpuTexture(device: Device): Texture {
     val size = Extent3D(width = width, height = height)
     return device.createTexture(
         TextureDescriptor(
@@ -17,19 +17,19 @@ fun Bitmap.createGpuTexture(device: Device): Texture {
         ByteBuffer.allocateDirect(height * width * Int.SIZE_BYTES).let { pixels ->
             copyPixelsToBuffer(pixels)
             device.queue.writeTexture(
-                dataLayout = TextureDataLayout(
+                dataLayout = TexelCopyBufferLayout(
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height
                 ),
                 data = pixels,
-                destination = ImageCopyTexture(texture = texture),
+                destination = TexelCopyTextureInfo(texture = texture),
                 writeSize = size
             )
         }
     }
 }
 
-suspend fun Texture.createBitmap(device: Device): Bitmap {
+public suspend fun Texture.createBitmap(device: Device): Bitmap {
     if (width % 64 > 0) {
         throw DawnException("Texture must be a multiple of 64. Was ${width}")
     }
@@ -40,12 +40,12 @@ suspend fun Texture.createBitmap(device: Device): Bitmap {
             size = size.toLong(),
             usage = BufferUsage.CopyDst or BufferUsage.MapRead
         )
-    )
+    )!!
     device.queue.submit(arrayOf(device.createCommandEncoder().let {
         it.copyTextureToBuffer(
-            source = ImageCopyTexture(texture = this),
-            destination = ImageCopyBuffer(
-                layout = TextureDataLayout(
+            source = TexelCopyTextureInfo(texture = this),
+            destination = TexelCopyBufferInfo(
+                layout = TexelCopyBufferLayout(
                     offset = 0,
                     bytesPerRow = width * Int.SIZE_BYTES,
                     rowsPerImage = height

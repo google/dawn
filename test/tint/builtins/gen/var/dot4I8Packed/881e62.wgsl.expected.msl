@@ -1,39 +1,100 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
 
-int tint_dot4I8Packed(uint param_0, uint param_1) {
-  char4 vec1 = as_type<char4>(param_0);
-  char4 vec2 = as_type<char4>(param_1);
-  return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+
+int tint_dot(int4 lhs, int4 rhs) {
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
 }
 
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  int res = tint_dot4I8Packed(arg_0, arg_1);
+  uint const v = arg_0;
+  uint const v_1 = arg_1;
+  uint4 const v_2 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_3 = as_type<int4>((uint4(v) << v_2));
+  int4 const v_4 = (v_3 >> uint4(24u));
+  uint4 const v_5 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_6 = as_type<int4>((uint4(v_1) << v_5));
+  int res = tint_dot(v_4, (v_6 >> uint4(24u)));
   return res;
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = dot4I8Packed_881e62();
-  return;
+fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = dot4I8Packed_881e62();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device int* prevent_dce;
+};
+
+int tint_dot(int4 lhs, int4 rhs) {
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = dot4I8Packed_881e62();
-  return;
+int dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint const v = arg_0;
+  uint const v_1 = arg_1;
+  uint4 const v_2 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_3 = as_type<int4>((uint4(v) << v_2));
+  int4 const v_4 = (v_3 >> uint4(24u));
+  uint4 const v_5 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_6 = as_type<int4>((uint4(v_1) << v_5));
+  int res = tint_dot(v_4, (v_6 >> uint4(24u)));
+  return res;
 }
+
+kernel void compute_main(device int* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = dot4I8Packed_881e62();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
   int prevent_dce;
 };
 
-struct tint_symbol {
-  int prevent_dce [[user(locn0)]] [[flat]];
-  float4 pos [[position]];
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+  int VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
+
+int tint_dot(int4 lhs, int4 rhs) {
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).x) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).y)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).z)))) + as_type<uint>(as_type<int4>((as_type<uint4>(lhs) * as_type<uint4>(rhs))).w)));
+}
+
+int dot4I8Packed_881e62() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint const v = arg_0;
+  uint const v_1 = arg_1;
+  uint4 const v_2 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_3 = as_type<int4>((uint4(v) << v_2));
+  int4 const v_4 = (v_3 >> uint4(24u));
+  uint4 const v_5 = uint4(24u, 16u, 8u, 0u);
+  int4 const v_6 = as_type<int4>((uint4(v_1) << v_5));
+  int res = tint_dot(v_4, (v_6 >> uint4(24u)));
+  return res;
+}
 
 VertexOutput vertex_main_inner() {
   VertexOutput out = {};
@@ -42,11 +103,10 @@ VertexOutput vertex_main_inner() {
   return out;
 }
 
-vertex tint_symbol vertex_main() {
-  VertexOutput const inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = {};
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+vertex vertex_main_outputs vertex_main() {
+  VertexOutput const v_7 = vertex_main_inner();
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v_7.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_7.prevent_dce;
+  return tint_wrapper_result;
 }
-

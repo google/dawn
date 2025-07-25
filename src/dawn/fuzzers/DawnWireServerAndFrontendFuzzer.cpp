@@ -25,11 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <vector>
-
 #include "DawnWireServerFuzzer.h"
-#include "dawn/common/Assert.h"
-#include "dawn/native/DawnNative.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 
 extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
@@ -39,10 +35,10 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnWireServerFuzzer::Run(
         data, size,
-        [](const dawn::native::Adapter& adapter) {
-            wgpu::AdapterProperties properties;
-            adapter.GetProperties(&properties);
-            return properties.backendType == wgpu::BackendType::Null;
+        [](const wgpu::Adapter& adapter) {
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
+            return info.backendType == wgpu::BackendType::Null;
         },
         false /* supportsErrorInjection */);
 }

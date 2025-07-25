@@ -1,16 +1,13 @@
-int3 tint_mod(int3 lhs, int3 rhs) {
-  int3 rhs_or_one = (((rhs == (0).xxx) | ((lhs == (-2147483648).xxx) & (rhs == (-1).xxx))) ? (1).xxx : rhs);
-  if (any(((uint3((lhs | rhs_or_one)) & (2147483648u).xxx) != (0u).xxx))) {
-    return (lhs - ((lhs / rhs_or_one) * rhs_or_one));
-  } else {
-    return (lhs % rhs_or_one);
-  }
+
+int3 tint_mod_v3i32(int3 lhs, int3 rhs) {
+  int3 v = ((((rhs == (int(0)).xxx) | ((lhs == (int(-2147483648)).xxx) & (rhs == (int(-1)).xxx)))) ? ((int(1)).xxx) : (rhs));
+  return (lhs - ((lhs / v) * v));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  int3 a = int3(1, 2, 3);
-  int3 b = int3(4, 5, 6);
-  int3 r = tint_mod(a, b);
-  return;
+  int3 a = int3(int(1), int(2), int(3));
+  int3 b = int3(int(4), int(5), int(6));
+  int3 r = tint_mod_v3i32(a, b);
 }
+

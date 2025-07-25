@@ -54,7 +54,7 @@ pointers. It is meant to be used as a last resort, only if there is no better wa
 the code.
 
 The `DanglingUntriaged` means the pointer was dangling at the time of the
-initial rewrite. We should investigate why. No new occurences should be added.
+initial rewrite. We should investigate why. No new occurrences should be added.
 
 ## Pointer arithmetic
 

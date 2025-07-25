@@ -48,7 +48,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
   public:
     static ResultOrError<Ref<SharedTextureMemory>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedTextureMemoryIOSurfaceDescriptor* descriptor);
 
     IOSurfaceRef GetIOSurface() const;
@@ -59,9 +59,11 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
 
   private:
     SharedTextureMemory(Device* device,
-                        const char* label,
+                        StringView label,
                         const SharedTextureMemoryProperties& properties,
-                        IOSurfaceRef ioSurface);
+                        IOSurfaceRef ioSurface,
+                        MTLPixelFormat mtlFormat,
+                        MTLTextureUsage mtlUsage);
     // Performs initialization of the base class followed by Metal-specific
     // initialization.
     MaybeError Initialize();
@@ -77,10 +79,10 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
                                                      UnpackedPtr<EndAccessState>& state) override;
     MaybeError CreateMtlTextures();
 
-    absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
-    MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
-    MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface;
+    const MTLPixelFormat mMtlFormat;
+    const MTLTextureUsage mMtlUsage;
+    absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
 };
 
 }  // namespace dawn::native::metal

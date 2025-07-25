@@ -62,6 +62,7 @@ cc_library(
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/text",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

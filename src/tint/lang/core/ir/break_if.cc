@@ -40,13 +40,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::BreakIf);
 
 namespace tint::core::ir {
 
-BreakIf::BreakIf() = default;
+BreakIf::BreakIf(Id id) : Base(id) {}
 
-BreakIf::BreakIf(Value* condition,
+BreakIf::BreakIf(Id id,
+                 Value* condition,
                  ir::Loop* loop,
                  VectorRef<Value*> next_iter_values /* = tint::Empty */,
                  VectorRef<Value*> exit_values /* = tint::Empty */)
-    : loop_(loop), num_next_iter_values_(next_iter_values.Length()) {
+    : Base(id), loop_(loop), num_next_iter_values_(next_iter_values.Length()) {
     TINT_ASSERT(loop_);
 
     AddOperand(BreakIf::kConditionOperandOffset, condition);
@@ -61,11 +62,18 @@ BreakIf::BreakIf(Value* condition,
 
 BreakIf::~BreakIf() = default;
 
+void BreakIf::Destroy() {
+    if (loop_) {
+        loop_->Body()->RemoveInboundSiblingBranch(this);
+    }
+    Instruction::Destroy();
+}
+
 BreakIf* BreakIf::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(loop_);
     auto* cond = ctx.Remap(Condition());
     auto args = ctx.Remap<BreakIf::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<BreakIf>(cond, loop, args);
+    return ctx.ir.CreateInstruction<BreakIf>(cond, loop, args);
 }
 
 void BreakIf::SetLoop(ir::Loop* loop) {

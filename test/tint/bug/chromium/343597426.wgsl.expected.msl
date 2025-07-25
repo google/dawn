@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 void foo(bool a, bool b, bool c, bool d, bool e) {
   if (a) {
     if (b) {
@@ -15,4 +15,3 @@ void foo(bool a, bool b, bool c, bool d, bool e) {
     }
   }
 }
-

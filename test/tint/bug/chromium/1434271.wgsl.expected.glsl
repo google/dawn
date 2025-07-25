@@ -1,64 +1,27 @@
+//
+// vertex_main
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
 void asinh_468a48() {
   float16_t arg_0 = 0.0hf;
   float16_t res = asinh(arg_0);
 }
-
-struct TestData {
-  int dmat2atxa2[4];
-};
-
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
-struct Particle {
-  vec3 position;
-  float lifetime;
-  vec4 color;
-  vec2 velocity;
-};
-
-struct UBO {
-  uint width;
-};
-
-vec4 vertex_main() {
+vec4 vertex_main_inner() {
   asinh_468a48();
   return vec4(0.0f);
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vertex_main();
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  vec4 v = vertex_main_inner();
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
+  gl_PointSize = 1.0f;
 }
+//
+// fragment_main
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
 
@@ -66,212 +29,86 @@ void asinh_468a48() {
   float16_t arg_0 = 0.0hf;
   float16_t res = asinh(arg_0);
 }
-
-struct TestData {
-  int dmat2atxa2[4];
-};
-
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
-struct Particle {
-  vec3 position;
-  float lifetime;
-  vec4 color;
-  vec2 velocity;
-};
-
-struct UBO {
-  uint width;
-};
-
-void fragment_main() {
+void main() {
   asinh_468a48();
 }
-
-void main() {
-  fragment_main();
-  return;
-}
+//
+// rgba32uintin
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
 void asinh_468a48() {
   float16_t arg_0 = 0.0hf;
   float16_t res = asinh(arg_0);
 }
-
-struct TestData {
-  int dmat2atxa2[4];
-};
-
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
-struct Particle {
-  vec3 position;
-  float lifetime;
-  vec4 color;
-  vec2 velocity;
-};
-
-struct UBO {
-  uint width;
-};
-
-void rgba32uintin() {
-  asinh_468a48();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  rgba32uintin();
-  return;
+  asinh_468a48();
 }
+//
+// vs_main
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
 
-layout(location = 0) in vec3 position_1;
-layout(location = 1) in vec4 color_1;
-layout(location = 2) in vec2 quad_pos_1;
-layout(location = 0) out vec4 color_2;
-layout(location = 1) out vec2 quad_pos_2;
-struct TestData {
-  int dmat2atxa2[4];
-};
 
 struct RenderParams {
   mat4 modelViewProjectionMatrix;
   vec3 right;
-  uint pad;
+  uint tint_pad_0;
   vec3 up;
-  uint pad_1;
+  uint tint_pad_1;
 };
 
-layout(binding = 5, std140) uniform render_params_block_ubo {
+struct VertexOutput {
+  vec4 position;
+  vec4 color;
+  vec2 quad_pos;
+};
+
+struct VertexInput {
+  vec3 position;
+  vec4 color;
+  vec2 quad_pos;
+};
+
+layout(binding = 0, std140)
+uniform v_render_params_block_ubo {
   RenderParams inner;
-} render_params;
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
-struct Particle {
-  vec3 position;
-  float lifetime;
-  vec4 color;
-  vec2 velocity;
-};
-
-struct UBO {
-  uint width;
-};
-
-VertexOutput vs_main(VertexInput tint_symbol) {
-  vec3 quad_pos = (mat2x3(render_params.inner.right, render_params.inner.up) * tint_symbol.quad_pos);
-  vec3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
-  VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f));
-  tint_symbol_1.position = (render_params.inner.modelViewProjectionMatrix * vec4(position, 1.0f));
-  tint_symbol_1.color = tint_symbol.color;
-  tint_symbol_1.quad_pos = tint_symbol.quad_pos;
-  return tint_symbol_1;
+} v;
+layout(location = 0) in vec3 vs_main_loc0_Input;
+layout(location = 1) in vec4 vs_main_loc1_Input;
+layout(location = 2) in vec2 vs_main_loc2_Input;
+layout(location = 0) out vec4 tint_interstage_location0;
+layout(location = 1) out vec2 tint_interstage_location1;
+VertexOutput vs_main_inner(VertexInput v_1) {
+  vec3 quad_pos = (mat2x3(v.inner.right, v.inner.up) * v_1.quad_pos);
+  vec3 position = (v_1.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), vec4(0.0f), vec2(0.0f));
+  mat4 v_3 = v.inner.modelViewProjectionMatrix;
+  v_2.position = (v_3 * vec4(position, 1.0f));
+  v_2.color = v_1.color;
+  v_2.quad_pos = v_1.quad_pos;
+  return v_2;
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  VertexInput tint_symbol_3 = VertexInput(position_1, color_1, quad_pos_1);
-  VertexOutput inner_result = vs_main(tint_symbol_3);
-  gl_Position = inner_result.position;
-  color_2 = inner_result.color;
-  quad_pos_2 = inner_result.quad_pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutput v_4 = vs_main_inner(VertexInput(vs_main_loc0_Input, vs_main_loc1_Input, vs_main_loc2_Input));
+  gl_Position = vec4(v_4.position.x, -(v_4.position.y), ((2.0f * v_4.position.z) - v_4.position.w), v_4.position.w);
+  tint_interstage_location0 = v_4.color;
+  tint_interstage_location1 = v_4.quad_pos;
+  gl_PointSize = 1.0f;
 }
+//
+// simulate
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
 
-struct TestData {
-  int dmat2atxa2[4];
-};
-
-vec2 rand_seed = vec2(0.0f, 0.0f);
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
 
 struct SimulationParams {
   float deltaTime;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec4 seed;
 };
 
@@ -280,121 +117,88 @@ struct Particle {
   float lifetime;
   vec4 color;
   vec2 velocity;
-  uint pad;
-  uint pad_1;
+  uint tint_pad_0;
+  uint tint_pad_1;
 };
 
-layout(binding = 0, std140) uniform sim_params_block_ubo {
+vec2 rand_seed = vec2(0.0f);
+layout(binding = 0, std140)
+uniform sim_params_block_1_ubo {
   SimulationParams inner;
-} sim_params;
-
-layout(binding = 1, std430) buffer Particles_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer Particles_1_ssbo {
   Particle particles[];
 } data;
-
-struct UBO {
-  uint width;
-};
-
-void assign_and_preserve_padding_data_particles_X(uint dest[1], Particle value) {
-  data.particles[dest[0]].position = value.position;
-  data.particles[dest[0]].lifetime = value.lifetime;
-  data.particles[dest[0]].color = value.color;
-  data.particles[dest[0]].velocity = value.velocity;
+void tint_store_and_preserve_padding(uint target_indices[1], Particle value_param) {
+  data.particles[target_indices[0u]].position = value_param.position;
+  data.particles[target_indices[0u]].lifetime = value_param.lifetime;
+  data.particles[target_indices[0u]].color = value_param.color;
+  data.particles[target_indices[0u]].velocity = value_param.velocity;
 }
-
-void simulate(uvec3 GlobalInvocationID) {
-  rand_seed = ((sim_params.inner.seed.xy * vec2(GlobalInvocationID.xy)) * sim_params.inner.seed.zw);
+void simulate_inner(uvec3 GlobalInvocationID) {
+  vec2 v_1 = v.inner.seed.xy;
+  vec2 v_2 = (v_1 * vec2(GlobalInvocationID.xy));
+  rand_seed = (v_2 * v.inner.seed.zw);
   uint idx = GlobalInvocationID.x;
-  Particle particle = data.particles[idx];
-  uint tint_symbol_3[1] = uint[1](idx);
-  assign_and_preserve_padding_data_particles_X(tint_symbol_3, particle);
+  uint v_3 = min(idx, (uint(data.particles.length()) - 1u));
+  Particle particle = data.particles[v_3];
+  uint v_4 = min(idx, (uint(data.particles.length()) - 1u));
+  Particle v_5 = particle;
+  tint_store_and_preserve_padding(uint[1](v_4), v_5);
 }
-
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  simulate(gl_GlobalInvocationID);
-  return;
+  simulate_inner(gl_GlobalInvocationID);
 }
+//
+// export_level
+//
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
 
-float tint_float_modulo(float lhs, float rhs) {
-  return (lhs - rhs * trunc(lhs / rhs));
-}
-
-
-struct TestData {
-  int dmat2atxa2[4];
-};
-
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-struct VertexInput {
-  vec3 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct VertexOutput {
-  vec4 position;
-  vec4 color;
-  vec2 quad_pos;
-};
-
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
-struct Particle {
-  vec3 position;
-  float lifetime;
-  vec4 color;
-  vec2 velocity;
-};
 
 struct UBO {
   uint width;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
-layout(binding = 3, std140) uniform ubo_block_ubo {
+layout(binding = 0, std140)
+uniform ubo_block_1_ubo {
   UBO inner;
-} ubo;
-
-layout(binding = 4, std430) buffer Buffer_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer Buffer_1_ssbo {
   float weights[];
 } buf_in;
-
-layout(binding = 5, std430) buffer Buffer_ssbo_1 {
+layout(binding = 2, std430)
+buffer Buffer_2_ssbo {
   float weights[];
 } buf_out;
-
-layout(rgba8) uniform highp writeonly image2D tex_out;
-void export_level(uvec3 coord) {
+layout(binding = 3, rgba8) uniform highp writeonly image2D tex_out;
+float tint_float_modulo(float x, float y) {
+  return (x - (y * trunc((x / y))));
+}
+void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
-    uint dst_offset = (coord.x << ((coord.y * ubo.inner.width) & 31u));
-    uint src_offset = ((coord.x - 2u) + ((coord.y >> 2u) * ubo.inner.width));
-    float a = buf_in.weights[(src_offset << 0u)];
-    float b = buf_in.weights[(src_offset + 1u)];
-    float c = buf_in.weights[((src_offset + 1u) + ubo.inner.width)];
-    float d = buf_in.weights[((src_offset + 1u) + ubo.inner.width)];
+    uint dst_offset = (coord.x << ((coord.y * v.inner.width) & 31u));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * v.inner.width));
+    uint v_1 = min((src_offset << (0u & 31u)), (uint(buf_in.weights.length()) - 1u));
+    float a = buf_in.weights[v_1];
+    uint v_2 = min((src_offset + 1u), (uint(buf_in.weights.length()) - 1u));
+    float b = buf_in.weights[v_2];
+    uint v_3 = ((src_offset + 1u) + v.inner.width);
+    uint v_4 = min(v_3, (uint(buf_in.weights.length()) - 1u));
+    float c = buf_in.weights[v_4];
+    uint v_5 = ((src_offset + 1u) + v.inner.width);
+    uint v_6 = min(v_5, (uint(buf_in.weights.length()) - 1u));
+    float d = buf_in.weights[v_6];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
-    buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);
+    uint v_7 = min(dst_offset, (uint(buf_out.weights.length()) - 1u));
+    buf_out.weights[v_7] = tint_float_modulo(sum, 4.0f);
     vec4 probabilities = (vec4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }
-
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  export_level(gl_GlobalInvocationID);
-  return;
+  export_level_inner(gl_GlobalInvocationID);
 }

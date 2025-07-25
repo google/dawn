@@ -1,61 +1,54 @@
-static bool tint_discarded = false;
+struct foo_outputs {
+  int tint_symbol : SV_Target0;
+};
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
-}
+struct foo_inputs {
+  float tint_member : TEXCOORD0;
+  float2 coord : TEXCOORD1;
+};
+
 
 Texture2D<float4> t : register(t0);
 SamplerState s : register(s1);
 RWByteAddressBuffer a : register(u2);
-
-struct tint_symbol_3 {
-  float tint_symbol : TEXCOORD0;
-  float2 coord : TEXCOORD1;
-};
-struct tint_symbol_4 {
-  int value : SV_Target0;
-};
-
-int aatomicAdd(uint offset, int value) {
-  int original_value = 0;
-  a.InterlockedAdd(offset, value, original_value);
-  return original_value;
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
-
-int foo_inner(float tint_symbol, float2 coord) {
-  if ((tint_symbol == 0.0f)) {
-    tint_discarded = true;
+int foo_inner(float v, float2 coord) {
+  if ((v == 0.0f)) {
+    discard;
   }
-  float4 tint_symbol_1 = t.Sample(s, coord);
-  int result = tint_ftoi(tint_symbol_1.x);
+  int result = tint_f32_to_i32(t.Sample(s, coord).x);
   {
-    int i = 0;
-    while (true) {
-      if (!((i < 10))) {
+    uint2 tint_loop_idx = (4294967295u).xx;
+    int i = int(0);
+    while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
-      {
-        result = (result + i);
+      if ((i < int(10))) {
+      } else {
+        break;
       }
+      result = (result + i);
       {
-        int tint_symbol_5 = 0;
-        if (!(tint_discarded)) {
-          tint_symbol_5 = aatomicAdd(0u, 1);
-        }
-        i = tint_symbol_5;
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        int v_1 = int(0);
+        a.InterlockedAdd(int(0u), int(1), v_1);
+        i = v_1;
       }
+      continue;
     }
   }
   return result;
 }
 
-tint_symbol_4 foo(tint_symbol_3 tint_symbol_2) {
-  int inner_result = foo_inner(tint_symbol_2.tint_symbol, tint_symbol_2.coord);
-  tint_symbol_4 wrapper_result = (tint_symbol_4)0;
-  wrapper_result.value = inner_result;
-  if (tint_discarded) {
-    discard;
-  }
-  return wrapper_result;
+foo_outputs foo(foo_inputs inputs) {
+  foo_outputs v_2 = {foo_inner(inputs.tint_member, inputs.coord)};
+  return v_2;
 }
+

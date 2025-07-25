@@ -38,11 +38,10 @@ class Device;
 
 class SharedFence : public SharedFenceBase {
   public:
-    // TODO(sunnyps): Remove after ExternalImageDXGIImpl is gone.
-    HANDLE GetFenceHandle() const;
+    const SystemHandle& GetSystemHandle() const { return mHandle; }
 
   protected:
-    SharedFence(Device* device, const char* label, SystemHandle ownedHandle);
+    SharedFence(Device* device, StringView label, SystemHandle ownedHandle);
 
   private:
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;

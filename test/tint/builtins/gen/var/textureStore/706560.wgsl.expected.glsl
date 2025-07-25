@@ -1,39 +1,12 @@
-#version 310 es
-precision highp float;
-precision highp int;
+SKIP: INVALID
 
-layout(rgba32ui) uniform highp writeonly uimage2DArray arg_0;
-void textureStore_706560() {
-  ivec2 arg_1 = ivec2(1);
-  uint arg_2 = 1u;
-  uvec4 arg_3 = uvec4(1u);
-  imageStore(arg_0, ivec3(arg_1, int(arg_2)), arg_3);
-}
+unsupported read-write storage texture format
+unsupported read-write storage texture format
+//
+// fragment_main
+//
+//
+// compute_main
+//
 
-void fragment_main() {
-  textureStore_706560();
-}
-
-void main() {
-  fragment_main();
-  return;
-}
-#version 310 es
-
-layout(rgba32ui) uniform highp writeonly uimage2DArray arg_0;
-void textureStore_706560() {
-  ivec2 arg_1 = ivec2(1);
-  uint arg_2 = 1u;
-  uvec4 arg_3 = uvec4(1u);
-  imageStore(arg_0, ivec3(arg_1, int(arg_2)), arg_3);
-}
-
-void compute_main() {
-  textureStore_706560();
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  compute_main();
-  return;
-}
+tint executable returned error: exit status 1

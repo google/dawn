@@ -45,16 +45,16 @@ cc_library(
     "validate.h",
   ],
   deps = [
+    "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
-    "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_tools",
@@ -71,17 +71,15 @@ cc_library(
     "validate_test.cc",
   ],
   deps = [
+    "//src/tint/utils",
     "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
-    "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "//src/tint/lang/spirv/validate",

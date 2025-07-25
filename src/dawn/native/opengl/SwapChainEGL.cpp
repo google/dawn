@@ -36,6 +36,7 @@
 #include "dawn/native/opengl/PhysicalDeviceGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsEGL.h"
+#include "dawn/native/opengl/UtilsGL.h"
 
 namespace dawn::native::opengl {
 
@@ -53,11 +54,6 @@ SwapChainEGL::SwapChainEGL(DeviceBase* dev, Surface* sur, const SurfaceConfigura
     : SwapChainBase(dev, sur, config) {}
 
 SwapChainEGL::~SwapChainEGL() = default;
-
-void SwapChainEGL::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
 
 MaybeError SwapChainEGL::Initialize(SwapChainBase* previousSwapChain) {
     const Device* device = ToBackend(GetDevice());
@@ -119,17 +115,17 @@ MaybeError SwapChainEGL::PresentImpl() {
         const OpenGLFunctions& gl = device->GetGL();
 
         GLuint readFbo = 0;
-        gl.GenFramebuffers(1, &readFbo);
-        gl.BindFramebuffer(GL_READ_FRAMEBUFFER, readFbo);
-        mTextureView->BindToFramebuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0);
+        DAWN_GL_TRY(gl, GenFramebuffers(1, &readFbo));
+        DAWN_GL_TRY(gl, BindFramebuffer(GL_READ_FRAMEBUFFER, readFbo));
+        DAWN_TRY(mTextureView->BindToFramebuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0));
 
-        gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        gl.Scissor(0, 0, surfaceWidth, surfaceHeight);
-        gl.BlitFramebuffer(0, 0, mTexture->GetWidth(Aspect::Color),
-                           mTexture->GetHeight(Aspect::Color), 0, surfaceHeight, surfaceWidth, 0,
-                           GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        DAWN_GL_TRY(gl, BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+        DAWN_GL_TRY(gl, Scissor(0, 0, surfaceWidth, surfaceHeight));
+        DAWN_GL_TRY(gl, BlitFramebuffer(0, 0, mTexture->GetWidth(Aspect::Color),
+                                        mTexture->GetHeight(Aspect::Color), 0, surfaceHeight,
+                                        surfaceWidth, 0, GL_COLOR_BUFFER_BIT, GL_LINEAR));
 
-        gl.DeleteFramebuffers(1, &readFbo);
+        DAWN_GL_TRY(gl, DeleteFramebuffers(1, &readFbo));
     }
 
     egl.SwapBuffers(display, mEGLSurface);
@@ -153,15 +149,12 @@ ResultOrError<SwapChainTextureInfo> SwapChainEGL::GetCurrentTextureImpl() {
 
     SwapChainTextureInfo info;
     info.texture = mTexture;
-    info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
     // TODO(dawn:2320): Check for optimality
-    info.suboptimal = false;
+    info.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
     return info;
 }
 
 void SwapChainEGL::DetachFromSurfaceImpl() {
-    DAWN_ASSERT(mTexture == nullptr);
-
     if (mEGLSurface != EGL_NO_SURFACE) {
         Device* device = ToBackend(GetDevice());
         device->GetEGL(false).DestroySurface(device->GetEGLDisplay(), mEGLSurface);
@@ -202,28 +195,34 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
 
     attribs.push_back(EGL_NONE);
 
-    auto TryCreateSurface = [&]() -> ResultOrError<EGLSurface> {
+    // Note that we cannot use ResultOrError<EGLSurface> as it might not have the required alignment
+    // constraints.
+    auto TryCreateSurface = [&]() -> MaybeError {
         switch (surface->GetType()) {
 #if DAWN_PLATFORM_IS(ANDROID)
             case Surface::Type::AndroidWindow:
-                return egl.CreateWindowSurface(
+                mEGLSurface = egl.CreateWindowSurface(
                     eglDisplay, config,
                     static_cast<ANativeWindow*>(surface->GetAndroidNativeWindow()), attribs.data());
+                return {};
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 #if defined(DAWN_ENABLE_BACKEND_METAL)
             case Surface::Type::MetalLayer:
-                return egl.CreateWindowSurface(eglDisplay, config, surface->GetMetalLayer(),
-                                               attribs.data());
+                mEGLSurface = egl.CreateWindowSurface(eglDisplay, config, surface->GetMetalLayer(),
+                                                      attribs.data());
+                return {};
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 #if DAWN_PLATFORM_IS(WIN32)
             case Surface::Type::WindowsHWND:
-                return egl.CreateWindowSurface(
+                mEGLSurface = egl.CreateWindowSurface(
                     eglDisplay, config, static_cast<HWND>(surface->GetHWND()), attribs.data());
+                return {};
 #endif  // DAWN_PLATFORM_IS(WIN32)
 #if defined(DAWN_USE_X11)
             case Surface::Type::XlibWindow:
-                return egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(),
-                                               attribs.data());
+                mEGLSurface = egl.CreateWindowSurface(eglDisplay, config, surface->GetXWindow(),
+                                                      attribs.data());
+                return {};
 #endif  // defined(DAWN_USE_X11)
 
             // TODO(344814083): Add support for creating surfaces using EGL_KHR_platform_base and
@@ -235,7 +234,7 @@ MaybeError SwapChainEGL::CreateEGLSurface(const DisplayEGL* display) {
         }
     };
 
-    DAWN_TRY_ASSIGN(mEGLSurface, TryCreateSurface());
+    DAWN_TRY(TryCreateSurface());
     if (mEGLSurface == EGL_NO_SURFACE) {
         return DAWN_FORMAT_INTERNAL_ERROR("Couldn't create an EGLSurface for %s.", surface);
     }

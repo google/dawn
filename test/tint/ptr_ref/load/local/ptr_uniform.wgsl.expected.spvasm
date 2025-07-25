@@ -1,39 +1,43 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Generator: Google Tint Compiler; 1
+; Bound: 20
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %v_block "v_block"
-               OpMemberName %v_block 0 "inner"
-               OpName %S "S"
                OpMemberName %S 0 "a"
-               OpName %v "v"
+               OpName %S "S"
+               OpMemberName %v_block 0 "inner"
+               OpName %v_block "v_block"
                OpName %main "main"
-               OpDecorate %v_block Block
-               OpMemberDecorate %v_block 0 Offset 0
+               OpName %p "p"
+               OpName %u "u"
                OpMemberDecorate %S 0 Offset 0
-               OpDecorate %v NonWritable
-               OpDecorate %v DescriptorSet 0
-               OpDecorate %v Binding 0
+               OpMemberDecorate %v_block 0 Offset 0
+               OpDecorate %v_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %int
     %v_block = OpTypeStruct %S
 %_ptr_Uniform_v_block = OpTypePointer Uniform %v_block
-          %v = OpVariable %_ptr_Uniform_v_block Uniform
+          %1 = OpVariable %_ptr_Uniform_v_block Uniform
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
+          %8 = OpTypeFunction %void
+%_ptr_Uniform_int = OpTypePointer Uniform %int
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_int = OpTypePointer Uniform %int
       %int_1 = OpConstant %int 1
-       %main = OpFunction %void None %6
+       %main = OpFunction %void None %8
           %9 = OpLabel
-         %13 = OpAccessChain %_ptr_Uniform_int %v %uint_0 %uint_0
-         %14 = OpLoad %int %13
-         %16 = OpIAdd %int %14 %int_1
+          %p = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
+         %14 = OpLoad %int %p None
+         %15 = OpBitcast %uint %14
+         %16 = OpBitcast %uint %int_1
+         %18 = OpIAdd %uint %15 %16
+          %u = OpBitcast %int %18
                OpReturn
                OpFunctionEnd

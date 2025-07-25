@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -5,60 +8,42 @@ precision highp int;
 void sin_68d3ab() {
   vec2 res = vec2(1.0f);
 }
-
-struct VertexOutput {
-  vec4 pos;
-};
-
-void fragment_main() {
+void main() {
   sin_68d3ab();
 }
-
-void main() {
-  fragment_main();
-  return;
-}
+//
+// compute_main
+//
 #version 310 es
 
 void sin_68d3ab() {
   vec2 res = vec2(1.0f);
 }
-
-struct VertexOutput {
-  vec4 pos;
-};
-
-void compute_main() {
-  sin_68d3ab();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  sin_68d3ab();
 }
+//
+// vertex_main
+//
 #version 310 es
 
-void sin_68d3ab() {
-  vec2 res = vec2(1.0f);
-}
 
 struct VertexOutput {
   vec4 pos;
 };
 
-VertexOutput vertex_main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  sin_68d3ab();
-  return tint_symbol;
+void sin_68d3ab() {
+  vec2 res = vec2(1.0f);
 }
-
+VertexOutput vertex_main_inner() {
+  VertexOutput v = VertexOutput(vec4(0.0f));
+  v.pos = vec4(0.0f);
+  sin_68d3ab();
+  return v;
+}
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutput inner_result = vertex_main();
-  gl_Position = inner_result.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  vec4 v_1 = vertex_main_inner().pos;
+  gl_Position = vec4(v_1.x, -(v_1.y), ((2.0f * v_1.z) - v_1.w), v_1.w);
+  gl_PointSize = 1.0f;
 }

@@ -34,11 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER)
 ################################################################################
 # Target:    tint_cmd_fuzz_ir_dis_cmd
 # Kind:      cmd
-# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER
+# Condition: TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_cmd_fuzz_ir_dis_cmd cmd
   cmd/fuzz/ir/dis/main.cc
@@ -54,46 +54,46 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
-  tint_lang_wgsl_features
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_ir_to_program
-  tint_utils_cli
+  tint_utils
+  tint_utils_command
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_strconv
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
+  "src_utils"
 )
 
 if(TINT_BUILD_IR_BINARY)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
     tint_lang_core_ir_binary
-  )
-endif(TINT_BUILD_IR_BINARY)
-
-if(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
-  tint_target_add_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
     tint_utils_protos_ir_fuzz_proto
   )
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER)
+endif(TINT_BUILD_IR_BINARY)
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
     tint_lang_spirv_reader_common
   )
 endif(TINT_BUILD_SPV_READER)
+
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
+  tint_target_add_external_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
+    "spirv-tools"
+  )
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_dis_cmd cmd
@@ -110,4 +110,4 @@ endif(TINT_BUILD_WGSL_WRITER)
 
 tint_target_set_output_name(tint_cmd_fuzz_ir_dis_cmd cmd "ir_fuzz_dis")
 
-endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_IR_FUZZER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_IR_BINARY AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_SPV_WRITER)

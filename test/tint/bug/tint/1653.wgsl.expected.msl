@@ -1,32 +1,29 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-struct tint_symbol {
-  float4 value [[position]];
+struct vs_main_outputs {
+  float4 tint_symbol [[position]];
 };
+const constant tint_array<float4, 3> v = tint_array<float4, 3>{float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f)};
 
 float4 vs_main_inner(uint in_vertex_index) {
-  tint_array<float4, 3> const tint_symbol_1 = tint_array<float4, 3>{float4(0.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(1.0f, 1.0f, 0.0f, 1.0f)};
-  return tint_symbol_1[in_vertex_index];
+  return v[min(in_vertex_index, 2u)];
 }
 
-vertex tint_symbol vs_main(uint in_vertex_index [[vertex_id]]) {
-  float4 const inner_result = vs_main_inner(in_vertex_index);
-  tint_symbol wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+vertex vs_main_outputs vs_main(uint in_vertex_index [[vertex_id]]) {
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vs_main_inner(in_vertex_index);
+  return tint_wrapper_result;
 }
-

@@ -2,19 +2,25 @@
 precision highp float;
 precision highp int;
 
-void tint_symbol() {
-  while (true) {
-    if (false) {
-    } else {
-      break;
-    }
-    {
-      if (false) { break; }
+void main() {
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        if (false) { break; }
+      }
+      continue;
     }
   }
-}
-
-void main() {
-  tint_symbol();
-  return;
 }

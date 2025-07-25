@@ -28,18 +28,19 @@
 #ifndef SRC_DAWN_UTILS_TESTUTILS_H_
 #define SRC_DAWN_UTILS_TESTUTILS_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <functional>
 #include <ostream>
 
-#include "dawn/webgpu_cpp.h"
+#include "dawn/common/Constants.h"
 
 namespace dawn::utils {
 
 struct RGBA8 {
     constexpr RGBA8() : RGBA8(0, 0, 0, 0) {}
     constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {}
-    bool operator==(const RGBA8& other) const;
-    bool operator!=(const RGBA8& other) const;
+    bool operator==(const RGBA8& other) const = default;
     bool operator<=(const RGBA8& other) const;
     bool operator>=(const RGBA8& other) const;
 
@@ -66,13 +67,16 @@ struct TextureDataCopyLayout {
     wgpu::Extent3D mipSize;
 };
 
-uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
+uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format,
+                               uint32_t width,
+                               uint32_t textureBytesPerRowAlignment = kTextureBytesPerRowAlignment);
 TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
     wgpu::TextureFormat format,
     wgpu::Extent3D textureSizeAtLevel0,
     uint32_t mipmapLevel,
     wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D,
-    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
+    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined,
+    uint32_t textureBytesPerRowAlignment = kTextureBytesPerRowAlignment);
 
 uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,
                              uint64_t rowsPerImage,

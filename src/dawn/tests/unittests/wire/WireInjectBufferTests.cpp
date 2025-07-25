@@ -25,8 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/tests/unittests/wire/WireTest.h"
+#include <utility>
 
+#include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
 
@@ -41,95 +42,108 @@ class WireInjectBufferTests : public WireTest {
     WireInjectBufferTests() {}
     ~WireInjectBufferTests() override = default;
 
+    std::pair<ReservedBuffer, wgpu::Buffer> ReserveBuffer(
+        const wgpu::BufferDescriptor* desc = &kPlaceholderDesc) {
+        auto reservation = GetWireClient()->ReserveBuffer(
+            device.Get(), reinterpret_cast<const WGPUBufferDescriptor*>(desc));
+        return {reservation, wgpu::Buffer::Acquire(reservation.buffer)};
+    }
+
     // A placeholder buffer format for ReserveBuffer. The data in it doesn't matter as long as
     // we don't call buffer reflection methods.
-    WGPUBufferDescriptor placeholderDesc = {};
+    static constexpr wgpu::BufferDescriptor kPlaceholderDesc = {};
 };
 
 // Test that reserving and injecting a buffer makes calls on the client object forward to the
 // server object correctly.
 TEST_F(WireInjectBufferTests, CallAfterReserveInject) {
-    auto reserved = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+    auto [reservation, buffer] = ReserveBuffer();
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     EXPECT_CALL(api, BufferAddRef(apiBuffer));
-    ASSERT_TRUE(GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+    ASSERT_TRUE(
+        GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 
-    wgpuBufferDestroy(reserved.buffer);
+    buffer.Destroy();
     EXPECT_CALL(api, BufferDestroy(apiBuffer));
     FlushClient();
 }
 
 // Test that reserve correctly returns different IDs each time.
 TEST_F(WireInjectBufferTests, ReserveDifferentIDs) {
-    auto reserved1 = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
-    auto reserved2 = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+    auto [reservation1, buffer1] = ReserveBuffer();
+    auto [reservation2, buffer2] = ReserveBuffer();
 
-    ASSERT_NE(reserved1.handle.id, reserved2.handle.id);
-    ASSERT_NE(reserved1.buffer, reserved2.buffer);
+    ASSERT_NE(reservation1.handle.id, reservation2.handle.id);
+    ASSERT_NE(buffer1.Get(), buffer2.Get());
 }
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectBufferTests, InjectExistingID) {
-    auto reserved = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+    auto [reservation, buffer] = ReserveBuffer();
 
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     EXPECT_CALL(api, BufferAddRef(apiBuffer));
-    ASSERT_TRUE(GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+    ASSERT_TRUE(
+        GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 
     // ID already in use, call fails.
-    ASSERT_FALSE(GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+    ASSERT_FALSE(
+        GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 }
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectBufferTests, ReuseIDAndGeneration) {
     // Do this loop multiple times since the first time, we can't test `generation - 1` since
     // generation == 0.
-    ReservedBuffer reserved;
+    ReservedBuffer reservation;
+    wgpu::Buffer buffer;
     WGPUBuffer apiBuffer = nullptr;
     for (int i = 0; i < 2; ++i) {
-        reserved = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+        std::tie(reservation, buffer) = ReserveBuffer();
 
         apiBuffer = api.GetNewBuffer();
         EXPECT_CALL(api, BufferAddRef(apiBuffer));
         ASSERT_TRUE(
-            GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+            GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 
         // Release the buffer. It should be possible to reuse the ID now, but not the generation
-        wgpuBufferRelease(reserved.buffer);
+        buffer = nullptr;
         EXPECT_CALL(api, BufferRelease(apiBuffer));
         FlushClient();
 
         // Invalid to inject with the same ID and generation.
         ASSERT_FALSE(
-            GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+            GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
         if (i > 0) {
-            EXPECT_GE(reserved.handle.generation, 1u);
+            EXPECT_GE(reservation.handle.generation, 1u);
 
             // Invalid to inject with the same ID and lesser generation.
-            reserved.handle.generation -= 1;
-            ASSERT_FALSE(
-                GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+            reservation.handle.generation -= 1;
+            ASSERT_FALSE(GetWireServer()->InjectBuffer(apiBuffer, reservation.handle,
+                                                       reservation.deviceHandle));
         }
     }
 
     // Valid to inject with the same ID and greater generation.
     EXPECT_CALL(api, BufferAddRef(apiBuffer));
-    reserved.handle.generation += 2;
-    ASSERT_TRUE(GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+    reservation.handle.generation += 2;
+    ASSERT_TRUE(
+        GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 }
 
 // Test that the server only borrows the buffer and does a single reference-release
 TEST_F(WireInjectBufferTests, InjectedBufferLifetime) {
-    auto reserved = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+    auto [reservation, buffer] = ReserveBuffer();
 
     // Injecting the buffer adds a reference
     WGPUBuffer apiBuffer = api.GetNewBuffer();
     EXPECT_CALL(api, BufferAddRef(apiBuffer));
-    ASSERT_TRUE(GetWireServer()->InjectBuffer(apiBuffer, reserved.handle, reserved.deviceHandle));
+    ASSERT_TRUE(
+        GetWireServer()->InjectBuffer(apiBuffer, reservation.handle, reservation.deviceHandle));
 
     // Releasing the buffer removes a single reference.
-    wgpuBufferRelease(reserved.buffer);
+    buffer = nullptr;
     EXPECT_CALL(api, BufferRelease(apiBuffer));
     FlushClient();
 
@@ -143,21 +157,21 @@ TEST_F(WireInjectBufferTests, InjectedBufferLifetime) {
 TEST_F(WireInjectBufferTests, ReclaimBufferReservation) {
     // Test that doing a reservation and full release is an error.
     {
-        auto reserved = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
-        wgpuBufferRelease(reserved.buffer);
+        auto [reservation, buffer] = ReserveBuffer();
+        buffer = nullptr;
         FlushClient(false);
     }
 
     // Test that doing a reservation and then reclaiming it recycles the ID.
     {
-        auto reserved1 = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
-        GetWireClient()->ReclaimBufferReservation(reserved1);
+        auto [reservation1, buffer1] = ReserveBuffer();
+        GetWireClient()->ReclaimBufferReservation(reservation1);
 
-        auto reserved2 = GetWireClient()->ReserveBuffer(device, &placeholderDesc);
+        auto [reservation2, buffer2] = ReserveBuffer();
 
         // The ID is the same, but the generation is still different.
-        ASSERT_EQ(reserved1.handle.id, reserved2.handle.id);
-        ASSERT_NE(reserved1.handle.generation, reserved2.handle.generation);
+        ASSERT_EQ(reservation1.handle.id, reservation2.handle.id);
+        ASSERT_NE(reservation1.handle.generation, reservation2.handle.generation);
 
         // No errors should occur.
         FlushClient();
@@ -166,15 +180,13 @@ TEST_F(WireInjectBufferTests, ReclaimBufferReservation) {
 
 // Test the reflection of buffer creation parameters for reserved buffer.
 TEST_F(WireInjectBufferTests, ReservedBufferReflection) {
-    WGPUBufferDescriptor desc = {};
+    wgpu::BufferDescriptor desc;
     desc.size = 10;
-    desc.usage = WGPUBufferUsage_Storage;
+    desc.usage = wgpu::BufferUsage::Storage;
 
-    auto reserved = GetWireClient()->ReserveBuffer(device, &desc);
-    WGPUBuffer buffer = reserved.buffer;
-
-    ASSERT_EQ(desc.size, wgpuBufferGetSize(buffer));
-    ASSERT_EQ(desc.usage, wgpuBufferGetUsage(buffer));
+    auto [reservation, buffer] = ReserveBuffer(&desc);
+    ASSERT_EQ(desc.size, buffer.GetSize());
+    ASSERT_EQ(desc.usage, buffer.GetUsage());
 }
 
 }  // anonymous namespace

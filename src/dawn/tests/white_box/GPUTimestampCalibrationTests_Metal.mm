@@ -39,19 +39,13 @@ class GPUTimestampCalibrationTestsMetal : public GPUTimestampCalibrationTestBack
         mBackendDevice = dawn::native::metal::ToBackend(dawn::native::FromAPI(device.Get()));
     }
 
-    // The API used in timestamp calibration is only available on macOS 10.15+ and iOS 14.0+
     bool IsSupported() const override {
-        if (@available(macOS 10.15, iOS 14.0, *)) {
             return true;
-        }
-        return false;
     }
 
     void GetTimestampCalibration(uint64_t* gpuTimestamp, uint64_t* cpuTimestamp) override {
-        if (@available(macOS 10.15, iOS 14.0, *)) {
             [mBackendDevice->GetMTLDevice() sampleTimestamps:cpuTimestamp
                                                 gpuTimestamp:gpuTimestamp];
-        }
     }
 
     float GetTimestampPeriod() const override { return mBackendDevice->GetTimestampPeriodInNS(); }

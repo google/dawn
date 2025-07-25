@@ -179,7 +179,7 @@ TEST_P(GLTextureValidationTests, SuccessWithInternalUsageDescriptor) {
 // Test an error occurs if an invalid sType is the nextInChain
 TEST_P(GLTextureValidationTests, InvalidTextureDescriptor) {
     wgpu::ChainedStruct chainedDescriptor;
-    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel;
+    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel;
     descriptor.nextInChain = &chainedDescriptor;
 
     ScopedGLTexture glTexture = CreateDefaultGLTexture();
@@ -191,16 +191,6 @@ TEST_P(GLTextureValidationTests, InvalidTextureDescriptor) {
 // Test an error occurs if the descriptor dimension isn't 2D
 TEST_P(GLTextureValidationTests, InvalidTextureDimension) {
     descriptor.dimension = wgpu::TextureDimension::e3D;
-
-    ScopedGLTexture glTexture = CreateDefaultGLTexture();
-    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapGLTexture(&descriptor, glTexture.Get()));
-
-    ASSERT_EQ(texture.Get(), nullptr);
-}
-
-// Test an error occurs if the texture usage contains StorageBinding.
-TEST_P(GLTextureValidationTests, InvalidTextureUsage) {
-    descriptor.usage = wgpu::TextureUsage::StorageBinding;
 
     ScopedGLTexture glTexture = CreateDefaultGLTexture();
     ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapGLTexture(&descriptor, glTexture.Get()));

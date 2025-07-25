@@ -28,10 +28,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUCOMMANDENCODER_H_
 #define SRC_DAWN_NODE_BINDING_GPUCOMMANDENCODER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -56,23 +57,27 @@ class GPUCommandEncoder final : public interop::GPUCommandEncoder {
                      interop::Interface<interop::GPUBuffer> buffer,
                      interop::GPUSize64 offset,
                      std::optional<interop::GPUSize64> size) override;
+    void copyBufferToBuffer(Napi::Env env,
+                            interop::Interface<interop::GPUBuffer> source,
+                            interop::Interface<interop::GPUBuffer> destination,
+                            std::optional<interop::GPUSize64> size) override;
     void copyBufferToBuffer(Napi::Env,
                             interop::Interface<interop::GPUBuffer> source,
                             interop::GPUSize64 sourceOffset,
                             interop::Interface<interop::GPUBuffer> destination,
                             interop::GPUSize64 destinationOffset,
-                            interop::GPUSize64 size) override;
+                            std::optional<interop::GPUSize64> size) override;
     void copyBufferToTexture(Napi::Env,
-                             interop::GPUImageCopyBuffer source,
-                             interop::GPUImageCopyTexture destination,
+                             interop::GPUTexelCopyBufferInfo source,
+                             interop::GPUTexelCopyTextureInfo destination,
                              interop::GPUExtent3D copySize) override;
     void copyTextureToBuffer(Napi::Env,
-                             interop::GPUImageCopyTexture source,
-                             interop::GPUImageCopyBuffer destination,
+                             interop::GPUTexelCopyTextureInfo source,
+                             interop::GPUTexelCopyBufferInfo destination,
                              interop::GPUExtent3D copySize) override;
     void copyTextureToTexture(Napi::Env,
-                              interop::GPUImageCopyTexture source,
-                              interop::GPUImageCopyTexture destination,
+                              interop::GPUTexelCopyTextureInfo source,
+                              interop::GPUTexelCopyTextureInfo destination,
                               interop::GPUExtent3D copySize) override;
     void pushDebugGroup(Napi::Env, std::string groupLabel) override;
     void popDebugGroup(Napi::Env) override;

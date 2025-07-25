@@ -55,11 +55,11 @@ class Matrix final : public Castable<Matrix, Type> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the type of the matrix
-    const Type* type() const { return subtype_; }
+    const type::Type* Type() const { return subtype_; }
     /// @returns the number of rows in the matrix
-    uint32_t rows() const { return rows_; }
+    uint32_t Rows() const { return rows_; }
     /// @returns the number of columns in the matrix
-    uint32_t columns() const { return columns_; }
+    uint32_t Columns() const { return columns_; }
 
     /// @returns the column-vector type of the matrix
     const Vector* ColumnType() const { return column_type_; }
@@ -79,7 +79,7 @@ class Matrix final : public Castable<Matrix, Type> {
     uint32_t ColumnStride() const;
 
     /// @copydoc Type::Elements
-    TypeAndCount Elements(const Type* type_if_invalid = nullptr,
+    TypeAndCount Elements(const type::Type* type_if_invalid = nullptr,
                           uint32_t count_if_invalid = 0) const override;
 
     /// @copydoc Type::Element
@@ -90,7 +90,7 @@ class Matrix final : public Castable<Matrix, Type> {
     Matrix* Clone(CloneContext& ctx) const override;
 
   private:
-    const Type* const subtype_;
+    const type::Type* const subtype_;
     const Vector* const column_type_;
     const uint32_t rows_;
     const uint32_t columns_;

@@ -2,21 +2,15 @@
 precision highp float;
 precision highp int;
 
-bool tint_discarded = false;
+bool continue_execution = true;
 bool call_discard() {
-  tint_discarded = true;
+  continue_execution = false;
   return true;
 }
-
-void f() {
+void main() {
   bool v = call_discard();
   bool also_unreachable = false;
-}
-
-void main() {
-  f();
-  if (tint_discarded) {
+  if (!(continue_execution)) {
     discard;
   }
-  return;
 }

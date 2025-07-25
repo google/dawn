@@ -1,12 +1,7 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-layout(location = 0) flat out int loc0_1;
-layout(location = 1) flat out uint loc1_1;
-layout(location = 2) out float loc2_1;
-layout(location = 3) out vec4 loc3_1;
-layout(location = 4) out float16_t loc4_1;
-layout(location = 5) out f16vec3 loc5_1;
+
 struct VertexOutputs {
   int loc0;
   uint loc1;
@@ -17,22 +12,23 @@ struct VertexOutputs {
   f16vec3 loc5;
 };
 
-VertexOutputs tint_symbol() {
-  VertexOutputs tint_symbol_1 = VertexOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(0.0f), 2.25hf, f16vec3(3.0hf, 5.0hf, 8.0hf));
-  return tint_symbol_1;
+layout(location = 0) flat out int tint_interstage_location0;
+layout(location = 1) flat out uint tint_interstage_location1;
+layout(location = 2) out float tint_interstage_location2;
+layout(location = 3) out vec4 tint_interstage_location3;
+layout(location = 4) out float16_t tint_interstage_location4;
+layout(location = 5) out f16vec3 tint_interstage_location5;
+VertexOutputs main_inner() {
+  return VertexOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(0.0f), 2.25hf, f16vec3(3.0hf, 5.0hf, 8.0hf));
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutputs inner_result = tint_symbol();
-  loc0_1 = inner_result.loc0;
-  loc1_1 = inner_result.loc1;
-  loc2_1 = inner_result.loc2;
-  loc3_1 = inner_result.loc3;
-  gl_Position = inner_result.position;
-  loc4_1 = inner_result.loc4;
-  loc5_1 = inner_result.loc5;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutputs v = main_inner();
+  tint_interstage_location0 = v.loc0;
+  tint_interstage_location1 = v.loc1;
+  tint_interstage_location2 = v.loc2;
+  tint_interstage_location3 = v.loc3;
+  gl_Position = vec4(v.position.x, -(v.position.y), ((2.0f * v.position.z) - v.position.w), v.position.w);
+  tint_interstage_location4 = v.loc4;
+  tint_interstage_location5 = v.loc5;
+  gl_PointSize = 1.0f;
 }

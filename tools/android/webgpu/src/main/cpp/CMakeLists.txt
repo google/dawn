@@ -30,41 +30,58 @@ project(webgpu VERSION 1.1.0 LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.22.1)
 
-set(DAWN_BUILD_ANDROID_SAMPLES OFF)
-set(DAWN_BUILD_MONOLITHIC_LIBRARY OFF)
-set(DAWN_BUILD_SAMPLES OFF)
-set(TINT_BUILD_TESTS OFF)
-set(TINT_BUILD_CMD_TOOLS OFF)
-
+# Hide non-public symbols; set before dawn subdirectory is imported.
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-add_subdirectory(../../../../../.. dawn)
+set(DAWN_DIR "${webgpu_SOURCE_DIR}/../../../../../..")
+add_subdirectory(${DAWN_DIR} dawn)
 
-set(C_BINDINGS_PATH ../../../../../../out/Debug/gen/cpp)
+list(INSERT CMAKE_MODULE_PATH 0 "${DAWN_DIR}/src/cmake")
+include(DawnCompilerChecks)
 
+# Make the library exposing both Dawn's API and the JNI methods.
 find_package(Python3 REQUIRED)
 DawnJSONGenerator(
-        TARGET "webgpu_dawn_native_proc"
-        PRINT_NAME "Dawn native WebGPU procs"
-        OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES)
+    TARGET "jni"
+    PRINT_NAME "Dawn JNI binding"
+    OUTPUT_SOURCES WEBGPU_JNI_SOURCES
+    OUTPUT_HEADERS WEBGPU_JNI_HEADERS
+)
 
-list(INSERT CMAKE_MODULE_PATH 0 "${Dawn_SOURCE_DIR}/src/cmake")
-include(BundleLibraries)
-bundle_libraries(webgpu_c_bundled dawn_native)
+add_library(webgpu_c_bundled SHARED)
 target_sources(webgpu_c_bundled PRIVATE
-        Util.cpp
-        ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
-        ${C_BINDINGS_PATH}/methods.cpp
-        ${C_BINDINGS_PATH}/structures.cpp
-        ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+    ${WEBGPU_JNI_SOURCES}
+    ${WEBGPU_JNI_HEADERS}
+    JNIContext.cpp
+    JNIContext.h
+    Util.cpp
+)
 
-find_library(log-lib log)
+target_include_directories(webgpu_c_bundled PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(webgpu_c_bundled PRIVATE android webgpu_dawn dawn_common dawn_internal_config)
 
-target_link_libraries(webgpu_c_bundled ${log-lib} android dawn_public_config)
-
+# Copy headers for webgpu_c_bundled over.
 add_custom_command(DEPENDS dawncpp_headers POST_BUILD
                    OUTPUT ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h
                    COMMAND rm -r "${CMAKE_SOURCE_DIR}/gen" || echo
                    COMMAND ${CMAKE_COMMAND} -E copy
                            ${CMAKE_CURRENT_BINARY_DIR}/dawn/gen/include/dawn/webgpu.h
                            ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+
+# Add unit test build configuration
+# To run use the following command:
+# ./gradlew -i connectedAndroidTest
+find_package(googletest REQUIRED CONFIG)
+find_package(junit-gtest REQUIRED CONFIG)
+add_library(webgpu_wrapper_tests SHARED ./../../androidTest/cpp/webgpu_wrapper_tests.cpp)
+target_include_directories(webgpu_wrapper_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(webgpu_wrapper_tests
+  PRIVATE
+    webgpu_c_bundled
+    android
+    atomic
+    log
+    googletest::gtest
+    googletest::gmock
+    junit-gtest::junit-gtest
+)

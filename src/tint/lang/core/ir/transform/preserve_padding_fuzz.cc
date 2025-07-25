@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void PreservePaddingFuzzer(Module& module) {
-    if (auto res = PreservePadding(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of PreservePadding failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> PreservePaddingFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return PreservePadding(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::PreservePaddingFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::PreservePaddingFuzzer,
+                      tint::core::ir::transform::kPreservePaddingCapabilities);

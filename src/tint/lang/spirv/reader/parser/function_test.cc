@@ -44,7 +44,7 @@ TEST_F(SpirvParserTest, ComputeShader) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }
@@ -66,8 +66,103 @@ TEST_F(SpirvParserTest, LocalSize) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(3, 4, 5) func():void {
+%main = @compute @workgroup_size(3u, 4u, 5u) func():void {
   $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, WorkgroupSize_Constant) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpConstant %uint 3
+     %uint_5 = OpConstant %uint 5
+     %uint_7 = OpConstant %uint 7
+%gl_WorkGroupSize = OpConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(3u, 5u, 7u) func():void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, WorkgroupSize_SpecConstant_Mixed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpSpecConstant %uint 3
+     %uint_5 = OpConstant %uint 5
+     %uint_7 = OpSpecConstant %uint 7
+%gl_WorkGroupSize = OpSpecConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = override 3u
+  %2:u32 = override 7u
+}
+
+%main = @compute @workgroup_size(%1, 5u, %2) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, WorkgroupSize_SpecConstant) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpDecorate %gl_WorkGroupSize BuiltIn WorkgroupSize
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+     %uint_3 = OpSpecConstant %uint 3
+     %uint_5 = OpSpecConstant %uint 5
+     %uint_7 = OpSpecConstant %uint 7
+%gl_WorkGroupSize = OpSpecConstantComposite %v3uint %uint_3 %uint_5 %uint_7
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:u32 = override 3u
+  %2:u32 = override 5u
+  %3:u32 = override 7u
+}
+
+%main = @compute @workgroup_size(%1, %2, %3) func():void {
+  $B2: {
     ret
   }
 }
@@ -118,11 +213,12 @@ TEST_F(SpirvParserTest, FragmentShader_DepthReplacing) {
 )",
               R"(
 $B1: {  # root
-  %1:ptr<__out, f32, read_write> = var @builtin(frag_depth)
+  %1:ptr<__out, f32, read_write> = var undef @builtin(frag_depth)
 }
 
 %main = @fragment func():void {
   $B2: {
+    undef = phony %1
     store %1, 42.0f
     ret
   }
@@ -130,21 +226,218 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, VertexShader) {
+TEST_F(SpirvParserTest, VertexShader_PositionUnused_Struct) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main"
+               OpEntryPoint Vertex %main "main" %1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 BuiltIn Position
        %void = OpTypeVoid
+      %float = OpTypeFloat 32
     %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %str = OpTypeStruct %v4float
+    %str_ptr = OpTypePointer Output %str
+          %1 = OpVariable %str_ptr Output
        %main = OpFunction %void None %ep_type
  %main_start = OpLabel
                OpReturn
                OpFunctionEnd
 )",
               R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
 %main = @vertex func():void {
-  $B1: {
+  $B2: {
+    undef = phony %1
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed_Struct) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %str = OpTypeStruct %v4float
+    %str_ptr = OpTypePointer Output %str
+%ptr_v4float = OpTypePointer Output %v4float
+     %uint_0 = OpConstant %uint 0
+        %one = OpConstant %float 1
+        %two = OpConstant %float 2
+      %three = OpConstant %float 3
+       %four = OpConstant %float 4
+          %3 = OpConstantComposite %v4float %one %two %three %four
+          %1 = OpVariable %str_ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %2 = OpAccessChain %ptr_v4float %1 %uint_0
+               OpStore %2 %3
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<__out, tint_symbol_1, read_write> = var undef
+}
+
+%main = @vertex func():void {
+  $B2: {
+    undef = phony %1
+    %3:ptr<__out, vec4<f32>, read_write> = access %1, 0u
+    store %3, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUnused) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+   %position = OpVariable %ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%main = @vertex func():void {
+  $B2: {
+    undef = phony %position
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+         %f1 = OpConstant %float 1
+         %f2 = OpConstant %float 2
+         %f3 = OpConstant %float 3
+         %f4 = OpConstant %float 4
+         %v4 = OpConstantComposite %v4float %f1 %f2 %f3 %f4
+   %position = OpVariable %ptr Output
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+               OpStore %position %v4
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%main = @vertex func():void {
+  $B2: {
+    undef = phony %position
+    store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, VertexShader_PositionUsed_Transitive) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %position
+               OpName %position "position"
+               OpDecorate %position BuiltIn Position
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %ep_type = OpTypeFunction %void
+    %v4float = OpTypeVector %float 4
+        %ptr = OpTypePointer Output %v4float
+         %f1 = OpConstant %float 1
+         %f2 = OpConstant %float 2
+         %f3 = OpConstant %float 3
+         %f4 = OpConstant %float 4
+         %v4 = OpConstantComposite %v4float %f1 %f2 %f3 %f4
+   %position = OpVariable %ptr Output
+          %c = OpFunction %void None %ep_type
+         %c1 = OpLabel
+               OpStore %position %v4
+               OpReturn
+               OpFunctionEnd
+          %b = OpFunction %void None %ep_type
+         %b1 = OpLabel
+         %b2 = OpFunctionCall %void %c
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+         %a1 = OpFunctionCall %void %b
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %position:ptr<__out, vec4<f32>, read_write> = var undef @builtin(position)
+}
+
+%2 = func():void {
+  $B2: {
+    store %position, vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f)
+    ret
+  }
+}
+%3 = func():void {
+  $B3: {
+    %4:void = call %2
+    ret
+  }
+}
+%main = @vertex func():void {
+  $B4: {
+    undef = phony %position
+    %6:void = call %3
     ret
   }
 }
@@ -173,12 +466,12 @@ TEST_F(SpirvParserTest, MultipleEntryPoints) {
                OpFunctionEnd
 )",
               R"(
-%foo = @compute @workgroup_size(3, 4, 5) func():void {
+%foo = @compute @workgroup_size(3u, 4u, 5u) func():void {
   $B1: {
     ret
   }
 }
-%bar = @compute @workgroup_size(6, 7, 8) func():void {
+%bar = @compute @workgroup_size(6u, 7u, 8u) func():void {
   $B2: {
     ret
   }
@@ -212,7 +505,7 @@ TEST_F(SpirvParserTest, FunctionCall) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:void = call %1
     ret
@@ -242,7 +535,7 @@ TEST_F(SpirvParserTest, FunctionCall_ForwardReference) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:void = call %3
     ret
@@ -288,7 +581,7 @@ TEST_F(SpirvParserTest, FunctionCall_WithParam) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:void = call %1, true
     %5:void = call %1, false
@@ -343,7 +636,7 @@ TEST_F(SpirvParserTest, FunctionCall_Chained_WithParam) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %7:void = call %3, true
     %8:void = call %3, false
@@ -385,7 +678,7 @@ TEST_F(SpirvParserTest, FunctionCall_WithMultipleParams) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %5:void = call %1, true, false
     ret
@@ -423,7 +716,7 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValue) {
     ret true
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = call %1
     ret
@@ -473,7 +766,7 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValueChain) {
     ret %3
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %5:bool = call %1
     ret
@@ -512,7 +805,7 @@ TEST_F(SpirvParserTest, FunctionCall_ParamAndReturnValue) {
     ret %2
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:bool = call %1, true
     ret

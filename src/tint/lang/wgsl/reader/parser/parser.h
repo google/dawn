@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser/detail.h"
 #include "src/tint/lang/wgsl/reader/parser/token.h"
@@ -683,9 +683,6 @@ class Parser {
     /// Parses a diagnostic_rule_name grammar element.
     /// @return the parsed diagnostic rule name.
     Expect<const ast::DiagnosticRuleName*> expect_diagnostic_rule_name();
-    /// Parses a builtin_value_name grammar element.
-    /// @return the parsed builtin value name.
-    Expect<const ast::BuiltinValueName*> expect_builtin_value_name();
 
     /// Splits a peekable token into to parts filling in the peekable fields.
     /// @param lhs the token to set in the current position

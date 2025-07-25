@@ -1,46 +1,83 @@
+//
+// fragment_main
+//
+
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
-
 float4 textureSampleLevel_faa6d7() {
   float2 arg_2 = (1.0f).xx;
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
-  float4 res = arg_0.SampleLevel(arg_1, float3(arg_2, float(arg_3)), arg_4, int2((1).xx));
+  float2 v = arg_2;
+  float v_1 = arg_4;
+  float4 res = arg_0.SampleLevel(arg_1, float3(v, float(arg_3)), v_1, (int(1)).xx);
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureSampleLevel_faa6d7()));
-  return;
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture2DArray<float4> arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+float4 textureSampleLevel_faa6d7() {
+  float2 arg_2 = (1.0f).xx;
+  uint arg_3 = 1u;
+  float arg_4 = 1.0f;
+  float2 v = arg_2;
+  float v_1 = arg_4;
+  float4 res = arg_0.SampleLevel(arg_1, float3(v, float(arg_3)), v_1, (int(1)).xx);
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(textureSampleLevel_faa6d7()));
-  return;
 }
 
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
 };
-struct tint_symbol_1 {
-  nointerpolation float4 prevent_dce : TEXCOORD0;
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  nointerpolation float4 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureSampleLevel_faa6d7();
-  return tint_symbol;
+
+Texture2DArray<float4> arg_0 : register(t0, space1);
+SamplerState arg_1 : register(s1, space1);
+float4 textureSampleLevel_faa6d7() {
+  float2 arg_2 = (1.0f).xx;
+  uint arg_3 = 1u;
+  float arg_4 = 1.0f;
+  float2 v = arg_2;
+  float v_1 = arg_4;
+  float4 res = arg_0.SampleLevel(arg_1, float3(v, float(arg_3)), v_1, (int(1)).xx);
+  return res;
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v_2 = (VertexOutput)0;
+  v_2.pos = (0.0f).xxxx;
+  v_2.prevent_dce = textureSampleLevel_faa6d7();
+  VertexOutput v_3 = v_2;
+  return v_3;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
+}
+

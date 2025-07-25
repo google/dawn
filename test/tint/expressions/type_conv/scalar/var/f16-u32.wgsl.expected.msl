@@ -1,11 +1,14 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_private_vars_struct {
-  half u;
+
+struct tint_module_vars_struct {
+  thread half* u;
 };
 
-void f(thread tint_private_vars_struct* const tint_private_vars) {
-  uint const v = uint((*(tint_private_vars)).u);
+uint tint_f16_to_u32(half value) {
+  return uint(clamp(value, 0.0h, 65504.0h));
 }
 
+void f(tint_module_vars_struct tint_module_vars) {
+  uint const v = tint_f16_to_u32((*tint_module_vars.u));
+}

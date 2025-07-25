@@ -1,28 +1,49 @@
-ByteAddressBuffer tint_symbol : register(t0);
-RWByteAddressBuffer tint_symbol_1 : register(u1);
 
-void tint_symbol_1_store(uint offset, float16_t value[4]) {
-  float16_t array_1[4] = value;
+ByteAddressBuffer v : register(t0);
+RWByteAddressBuffer v_1 : register(u1);
+void v_2(uint offset, float16_t obj[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      tint_symbol_1.Store<float16_t>((offset + (i * 2u)), array_1[i]);
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 4u)) {
+        break;
+      }
+      v_1.Store<float16_t>((offset + (v_4 * 2u)), obj[v_4]);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
     }
   }
 }
 
-typedef float16_t tint_symbol_load_ret[4];
-tint_symbol_load_ret tint_symbol_load(uint offset) {
-  float16_t arr[4] = (float16_t[4])0;
+typedef float16_t ary_ret[4];
+ary_ret v_5(uint offset) {
+  float16_t a[4] = (float16_t[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr[i_1] = tint_symbol.Load<float16_t>((offset + (i_1 * 2u)));
+    uint v_6 = 0u;
+    v_6 = 0u;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4u)) {
+        break;
+      }
+      a[v_7] = v.Load<float16_t>((offset + (v_7 * 2u)));
+      {
+        v_6 = (v_7 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float16_t v_8[4] = a;
+  return v_8;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  tint_symbol_1_store(0u, tint_symbol_load(0u));
-  return;
+  float16_t v_9[4] = v_5(0u);
+  v_2(0u, v_9);
 }
+

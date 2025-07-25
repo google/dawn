@@ -29,6 +29,8 @@
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_FUNCTION_H_
 
 #include <functional>
+#include <unordered_map>
+#include <vector>
 
 #include "src/tint/lang/spirv/writer/common/instruction.h"
 
@@ -37,6 +39,8 @@ namespace tint::spirv::writer {
 /// A SPIR-V function
 class Function {
   public:
+    using Block = InstructionList;
+
     /// Constructor for testing purposes
     /// This creates a bad declaration, so won't generate correct SPIR-V
     Function();
@@ -60,57 +64,72 @@ class Function {
 
     /// Iterates over the function call the cb on each instruction
     /// @param cb the callback to call
-    void iterate(std::function<void(const Instruction&)> cb) const;
+    void Iterate(std::function<void(const Instruction&)> cb) const;
 
     /// @returns the declaration
-    const Instruction& declaration() const { return declaration_; }
+    const Instruction& Declaration() const { return declaration_; }
 
     /// @returns the label ID for the function entry block
-    uint32_t label_id() const { return std::get<uint32_t>(label_op_); }
+    uint32_t LabelId() const { return std::get<uint32_t>(label_op_); }
 
     /// Adds an instruction to the instruction list
     /// @param op the op to set
     /// @param operands the operands for the instruction
-    void push_inst(spv::Op op, const OperandList& operands) {
-        instructions_.push_back(Instruction{op, operands});
+    void PushInst(spv::Op op, const OperandList& operands) {
+        blocks_[current_block_idx_].push_back(Instruction{op, operands});
     }
-    /// @returns the instruction list
-    const InstructionList& instructions() const { return instructions_; }
+    /// Adds a new block to the block list
+    /// @returns the index of the new block
+    size_t AppendBlock(uint32_t spv_id) {
+        blocks_.push_back({});
+
+        auto blk_id = blocks_.size() - 1;
+        block_id_to_block_[spv_id] = static_cast<uint32_t>(blk_id);
+        return blk_id;
+    }
+    /// Sets the block to insert into
+    /// @param idx the index to set
+    void SetCurrentBlockIndex(size_t idx) { current_block_idx_ = idx; }
 
     /// Adds a variable to the variable list
     /// @param operands the operands for the variable
-    void push_var(const OperandList& operands) {
+    void PushVar(const OperandList& operands) {
         vars_.push_back(Instruction{spv::Op::OpVariable, operands});
     }
     /// @returns the variable list
-    const InstructionList& variables() const { return vars_; }
+    const InstructionList& Variables() const { return vars_; }
 
     /// @returns the word length of the function
-    uint32_t word_length() const {
+    uint32_t WordLength() const {
         // 1 for the Label and 1 for the FunctionEnd
-        uint32_t size = 2 + declaration_.word_length();
+        uint32_t size = 2 + declaration_.WordLength();
 
         for (const auto& param : params_) {
-            size += param.word_length();
+            size += param.WordLength();
         }
         for (const auto& var : vars_) {
-            size += var.word_length();
+            size += var.WordLength();
         }
-        for (const auto& inst : instructions_) {
-            size += inst.word_length();
+        for (const auto& blk : blocks_) {
+            for (const auto& inst : blk) {
+                size += inst.WordLength();
+            }
         }
         return size;
     }
 
     /// @returns true if the function has a valid declaration
-    explicit operator bool() const { return declaration_.opcode() == spv::Op::OpFunction; }
+    explicit operator bool() const { return declaration_.Opcode() == spv::Op::OpFunction; }
 
   private:
     Instruction declaration_;
     Operand label_op_;
     InstructionList params_;
     InstructionList vars_;
-    InstructionList instructions_;
+    std::vector<Block> blocks_;
+    size_t current_block_idx_ = 0;
+
+    std::unordered_map<uint32_t, uint32_t> block_id_to_block_;
 };
 
 }  // namespace tint::spirv::writer

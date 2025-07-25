@@ -1,35 +1,24 @@
-void set_matrix_column(inout float2x2 mat, int col, float2 val) {
-  switch (col) {
-    case 0: mat[0] = val; break;
-    case 1: mat[1] = val; break;
-  }
-}
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
 
 groupshared float2x2 S;
+void func(uint pointer_indices[1]) {
+  S[pointer_indices[0u]] = (0.0f).xx;
+}
 
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
     S = float2x2((0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();
-}
-
-void func_S_X(uint pointer[1]) {
-  set_matrix_column(S, pointer[0], (0.0f).xx);
-}
-
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  uint tint_symbol_2[1] = {1u};
-  func_S_X(tint_symbol_2);
+  uint v[1] = {1u};
+  func(v);
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
+

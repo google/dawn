@@ -1,40 +1,40 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 18
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %i_block "i_block"
                OpMemberName %i_block 0 "inner"
-               OpName %i "i"
-               OpName %unused_entry_point "unused_entry_point"
+               OpName %i_block "i_block"
                OpName %main "main"
-               OpDecorate %i_block Block
+               OpName %unused_entry_point "unused_entry_point"
                OpMemberDecorate %i_block 0 Offset 0
-               OpDecorate %i DescriptorSet 0
-               OpDecorate %i Binding 0
+               OpDecorate %i_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
     %i_block = OpTypeStruct %uint
 %_ptr_StorageBuffer_i_block = OpTypePointer StorageBuffer %i_block
-          %i = OpVariable %_ptr_StorageBuffer_i_block StorageBuffer
+          %1 = OpVariable %_ptr_StorageBuffer_i_block StorageBuffer
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
-     %uint_0 = OpConstant %uint 0
+          %7 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
-%unused_entry_point = OpFunction %void None %5
+       %main = OpFunction %void None %7
           %8 = OpLabel
+          %9 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+         %12 = OpLoad %uint %9 None
+         %13 = OpISub %uint %12 %uint_1
+         %15 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %15 %13 None
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %5
-         %10 = OpLabel
-         %13 = OpAccessChain %_ptr_StorageBuffer_uint %i %uint_0
-         %14 = OpAccessChain %_ptr_StorageBuffer_uint %i %uint_0
-         %15 = OpLoad %uint %14
-         %17 = OpISub %uint %15 %uint_1
-               OpStore %13 %17
+%unused_entry_point = OpFunction %void None %7
+         %17 = OpLabel
                OpReturn
                OpFunctionEnd

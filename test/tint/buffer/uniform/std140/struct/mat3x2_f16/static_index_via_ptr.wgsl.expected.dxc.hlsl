@@ -1,65 +1,94 @@
 struct Inner {
   matrix<float16_t, 3, 2> m;
 };
+
 struct Outer {
   Inner a[4];
 };
 
+
 cbuffer cbuffer_a : register(b0) {
   uint4 a[64];
 };
-
-matrix<float16_t, 3, 2> a_load_4(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = a[scalar_offset / 4][scalar_offset % 4];
-  const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = a[scalar_offset_1 / 4][scalar_offset_1 % 4];
-  const uint scalar_offset_2 = ((offset + 8u)) / 4;
-  uint ubo_load_2 = a[scalar_offset_2 / 4][scalar_offset_2 % 4];
-  return matrix<float16_t, 3, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16))));
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v = src;
+  float t_low = f16tof32((v & 65535u));
+  float t_high = f16tof32(((v >> 16u) & 65535u));
+  float16_t v_1 = float16_t(t_low);
+  return vector<float16_t, 2>(v_1, float16_t(t_high));
 }
 
-Inner a_load_3(uint offset) {
-  Inner tint_symbol = {a_load_4((offset + 0u))};
-  return tint_symbol;
+matrix<float16_t, 3, 2> v_2(uint start_byte_offset) {
+  vector<float16_t, 2> v_3 = tint_bitcast_to_f16(a[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(a[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]);
+  return matrix<float16_t, 3, 2>(v_3, v_4, tint_bitcast_to_f16(a[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) % 16u) / 4u)]));
 }
 
-typedef Inner a_load_2_ret[4];
-a_load_2_ret a_load_2(uint offset) {
-  Inner arr[4] = (Inner[4])0;
+Inner v_5(uint start_byte_offset) {
+  Inner v_6 = {v_2(start_byte_offset)};
+  return v_6;
+}
+
+typedef Inner ary_ret[4];
+ary_ret v_7(uint start_byte_offset) {
+  Inner a_2[4] = (Inner[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = a_load_3((offset + (i * 64u)));
+    uint v_8 = 0u;
+    v_8 = 0u;
+    while(true) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
+        break;
+      }
+      Inner v_10 = v_5((start_byte_offset + (v_9 * 64u)));
+      a_2[v_9] = v_10;
+      {
+        v_8 = (v_9 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  Inner v_11[4] = a_2;
+  return v_11;
 }
 
-Outer a_load_1(uint offset) {
-  Outer tint_symbol_1 = {a_load_2((offset + 0u))};
-  return tint_symbol_1;
+Outer v_12(uint start_byte_offset) {
+  Inner v_13[4] = v_7(start_byte_offset);
+  Outer v_14 = {v_13};
+  return v_14;
 }
 
-typedef Outer a_load_ret[4];
-a_load_ret a_load(uint offset) {
-  Outer arr_1[4] = (Outer[4])0;
+typedef Outer ary_ret_1[4];
+ary_ret_1 v_15(uint start_byte_offset) {
+  Outer a_1[4] = (Outer[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr_1[i_1] = a_load_1((offset + (i_1 * 256u)));
+    uint v_16 = 0u;
+    v_16 = 0u;
+    while(true) {
+      uint v_17 = v_16;
+      if ((v_17 >= 4u)) {
+        break;
+      }
+      Outer v_18 = v_12((start_byte_offset + (v_17 * 256u)));
+      a_1[v_17] = v_18;
+      {
+        v_16 = (v_17 + 1u);
+      }
+      continue;
     }
   }
-  return arr_1;
+  Outer v_19[4] = a_1;
+  return v_19;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  Outer l_a[4] = a_load(0u);
-  Outer l_a_3 = a_load_1(768u);
-  Inner l_a_3_a[4] = a_load_2(768u);
-  Inner l_a_3_a_2 = a_load_3(896u);
-  matrix<float16_t, 3, 2> l_a_3_a_2_m = a_load_4(896u);
-  uint ubo_load_3 = a[56].y;
-  vector<float16_t, 2> l_a_3_a_2_m_1 = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_3 & 0xFFFF)), float16_t(f16tof32(ubo_load_3 >> 16)));
-  float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(((a[56].y) & 0xFFFF)));
-  return;
+  Outer l_a[4] = v_15(0u);
+  Outer l_a_3 = v_12(768u);
+  Inner l_a_3_a[4] = v_7(768u);
+  Inner l_a_3_a_2 = v_5(896u);
+  matrix<float16_t, 3, 2> l_a_3_a_2_m = v_2(896u);
+  vector<float16_t, 2> l_a_3_a_2_m_1 = tint_bitcast_to_f16(a[56u].y);
+  float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(a[56u].y));
 }
+

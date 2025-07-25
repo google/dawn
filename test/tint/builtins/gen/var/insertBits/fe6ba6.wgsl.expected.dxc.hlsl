@@ -1,51 +1,98 @@
-int2 tint_insert_bits(int2 v, int2 n, uint offset, uint count) {
-  uint e = (offset + count);
-  uint mask = ((((offset < 32u) ? (1u << offset) : 0u) - 1u) ^ (((e < 32u) ? (1u << e) : 0u) - 1u));
-  return ((((offset < 32u) ? (n << uint2((offset).xx)) : (0).xx) & int2((int(mask)).xx)) | (v & int2((int(~(mask))).xx)));
-}
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
-
 int2 insertBits_fe6ba6() {
-  int2 arg_0 = (1).xx;
-  int2 arg_1 = (1).xx;
+  int2 arg_0 = (int(1)).xx;
+  int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint arg_3 = 1u;
-  int2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  int2 v = arg_0;
+  int2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  uint v_3 = (v_2 + arg_3);
+  uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
+  uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
+  int2 v_6 = (((v_2 < 32u)) ? ((v_1 << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_7 = (v_6 & int2((v_5).xx));
+  int2 res = (v_7 | (v & int2((~(v_5)).xx)));
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store2(0u, asuint(insertBits_fe6ba6()));
-  return;
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 insertBits_fe6ba6() {
+  int2 arg_0 = (int(1)).xx;
+  int2 arg_1 = (int(1)).xx;
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  int2 v = arg_0;
+  int2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  uint v_3 = (v_2 + arg_3);
+  uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
+  uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
+  int2 v_6 = (((v_2 < 32u)) ? ((v_1 << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_7 = (v_6 & int2((v_5).xx));
+  int2 res = (v_7 | (v & int2((~(v_5)).xx)));
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(insertBits_fe6ba6()));
-  return;
 }
 
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int2 prevent_dce;
 };
-struct tint_symbol_1 {
-  nointerpolation int2 prevent_dce : TEXCOORD0;
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  nointerpolation int2 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = insertBits_fe6ba6();
-  return tint_symbol;
+
+int2 insertBits_fe6ba6() {
+  int2 arg_0 = (int(1)).xx;
+  int2 arg_1 = (int(1)).xx;
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  int2 v = arg_0;
+  int2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  uint v_3 = (v_2 + arg_3);
+  uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
+  uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
+  int2 v_6 = (((v_2 < 32u)) ? ((v_1 << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_7 = (v_6 & int2((v_5).xx));
+  int2 res = (v_7 | (v & int2((~(v_5)).xx)));
+  return res;
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v_8 = (VertexOutput)0;
+  v_8.pos = (0.0f).xxxx;
+  v_8.prevent_dce = insertBits_fe6ba6();
+  VertexOutput v_9 = v_8;
+  return v_9;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_10 = vertex_main_inner();
+  vertex_main_outputs v_11 = {v_10.prevent_dce, v_10.pos};
+  return v_11;
+}
+

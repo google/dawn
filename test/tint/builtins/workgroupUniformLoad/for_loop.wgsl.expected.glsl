@@ -1,42 +1,38 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 shared int a;
-int tint_workgroupUniformLoad_a() {
-  barrier();
-  int result = a;
-  barrier();
-  return result;
-}
-
 shared int b;
-int tint_workgroupUniformLoad_b() {
-  barrier();
-  int result = b;
-  barrier();
-  return result;
-}
-
 void foo() {
   {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
     int i = 0;
-    while (true) {
-      int tint_symbol = i;
-      int tint_symbol_1 = tint_workgroupUniformLoad_a();
-      if (!((tint_symbol < tint_symbol_1))) {
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      int v = i;
+      barrier();
+      int v_1 = a;
+      barrier();
+      if ((v < v_1)) {
+      } else {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        barrier();
+        int v_2 = b;
+        barrier();
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(v_2)));
       }
-      {
-        int tint_symbol_2 = i;
-        int tint_symbol_3 = tint_workgroupUniformLoad_b();
-        i = (tint_symbol_2 + tint_symbol_3);
-      }
+      continue;
     }
   }
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

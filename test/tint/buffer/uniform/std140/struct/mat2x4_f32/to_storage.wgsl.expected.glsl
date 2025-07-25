@@ -1,66 +1,69 @@
 #version 310 es
 
+
 struct S {
   int before;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   mat2x4 m;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
   int after;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-  uint pad_10;
-  uint pad_11;
-  uint pad_12;
-  uint pad_13;
-  uint pad_14;
-  uint pad_15;
-  uint pad_16;
-  uint pad_17;
-  uint pad_18;
-  uint pad_19;
-  uint pad_20;
-  uint pad_21;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
 };
 
-layout(binding = 0, std140) uniform u_block_ubo {
+layout(binding = 0, std140)
+uniform u_block_1_ubo {
   S inner[4];
-} u;
-
-layout(binding = 1, std430) buffer u_block_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   S inner[4];
-} s;
-
-void assign_and_preserve_padding_1_s_inner_X(uint dest[1], S value) {
-  s.inner[dest[0]].before = value.before;
-  s.inner[dest[0]].m = value.m;
-  s.inner[dest[0]].after = value.after;
+} v_1;
+void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
+  v_1.inner[target_indices[0u]].before = value_param.before;
+  v_1.inner[target_indices[0u]].m = value_param.m;
+  v_1.inner[target_indices[0u]].after = value_param.after;
 }
-
-void assign_and_preserve_padding_s_inner(S value[4]) {
+void tint_store_and_preserve_padding(S value_param[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      uint tint_symbol[1] = uint[1](i);
-      assign_and_preserve_padding_1_s_inner_X(tint_symbol, value[i]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
 }
-
-void f() {
-  assign_and_preserve_padding_s_inner(u.inner);
-  uint tint_symbol_1[1] = uint[1](1u);
-  assign_and_preserve_padding_1_s_inner_X(tint_symbol_1, u.inner[2]);
-  s.inner[3].m = u.inner[2].m;
-  s.inner[1].m[0] = u.inner[0].m[1].ywxz;
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  tint_store_and_preserve_padding(v.inner);
+  S v_4 = v.inner[2u];
+  tint_store_and_preserve_padding_1(uint[1](1u), v_4);
+  v_1.inner[3u].m = v.inner[2u].m;
+  v_1.inner[1u].m[0u] = v.inner[0u].m[1u].ywxz;
 }

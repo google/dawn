@@ -1,20 +1,22 @@
-RWByteAddressBuffer tint_symbol : register(u0);
 
+RWByteAddressBuffer v : register(u0);
 void bar(inout float p) {
   float a = 1.0f;
   float b = 2.0f;
-  bool tint_tmp = (a >= 0.0f);
-  if (tint_tmp) {
-    tint_tmp = (b >= 0.0f);
+  bool v_1 = false;
+  if ((a >= 0.0f)) {
+    v_1 = (b >= 0.0f);
+  } else {
+    v_1 = false;
   }
-  bool cond = (tint_tmp);
-  p = (cond ? b : a);
+  bool cond = v_1;
+  p = ((cond) ? (b) : (a));
 }
 
 [numthreads(1, 1, 1)]
 void foo() {
   float param = 0.0f;
   bar(param);
-  tint_symbol.Store(0u, asuint(param));
-  return;
+  v.Store(0u, asuint(param));
 }
+

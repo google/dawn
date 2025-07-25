@@ -29,10 +29,12 @@
 #define SRC_TINT_UTILS_MATH_HASH_H_
 
 #include <stdint.h>
+
 #include <cstdio>
 #include <functional>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>

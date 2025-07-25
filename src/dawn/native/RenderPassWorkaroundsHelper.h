@@ -28,19 +28,18 @@
 #ifndef SRC_DAWN_NATIVE_RENDERPASSWORKAROUNDSHELPER_H_
 #define SRC_DAWN_NATIVE_RENDERPASSWORKAROUNDSHELPER_H_
 
-#include <functional>
-
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/RenderPassEncoder.h"
 
 namespace dawn::native {
 struct BeginRenderPassCmd;
 class CommandEncoder;
-class RenderPassEncoder;
 struct RenderPassDescriptor;
 class RenderPassResourceUsageTracker;
 class TextureBase;
@@ -55,14 +54,15 @@ class RenderPassWorkaroundsHelper : NonMovable {
     ~RenderPassWorkaroundsHelper();
 
     MaybeError Initialize(CommandEncoder* encoder,
-                          const RenderPassDescriptor* renderPassDescriptor);
+                          const UnpackedPtr<RenderPassDescriptor>& renderPassDescriptor);
     MaybeError ApplyOnPostEncoding(CommandEncoder* encoder,
+                                   const UnpackedPtr<RenderPassDescriptor>& renderPassDescriptor,
                                    RenderPassResourceUsageTracker* usageTracker,
                                    BeginRenderPassCmd* cmd,
-                                   std::function<void()>* passEndCallbackOut);
+                                   RenderPassEncoder::EndCallback* passEndCallbackOut);
 
     MaybeError ApplyOnRenderPassStart(RenderPassEncoder* rpEncoder,
-                                      const RenderPassDescriptor* rpDesc);
+                                      const UnpackedPtr<RenderPassDescriptor>& rpDesc);
 
   private:
     struct TextureAndView {

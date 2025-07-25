@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_CMD_FUZZ_WGSL_FUZZ_H_
 #define SRC_TINT_CMD_FUZZ_WGSL_FUZZ_H_
 
+#include <iostream>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -49,9 +50,10 @@ struct Options {
     bool run_concurrently = false;
     /// If true, print the fuzzer name to stdout before running.
     bool verbose = false;
-    /// If not empty, load DXC from this path when fuzzing HLSL generation, and fail the fuzzer if
-    /// not found, or if DXC fails to compile.
+    /// If not empty, load DXC from this path when fuzzing HLSL generation.
     std::string dxc;
+    /// If true, dump shader input/output text to stdout
+    bool dump = false;
 };
 
 /// ProgramProperties is an enumerator of flags used to describe characteristics of the input
@@ -88,6 +90,9 @@ struct ProgramFuzzer {
             auto fn_with_decode = [fn](const Program& program, const Context& context,
                                        Slice<const std::byte> data) {
                 if (!data.data) {
+                    if (context.options.verbose) {
+                        std::cout << "   - Data expected but no data provided.\n";
+                    }
                     return;
                 }
                 bytes::BufferReader reader{data};
@@ -97,14 +102,18 @@ struct ProgramFuzzer {
                         std::tuple_cat(std::tuple<const Program&, const Context&>{program, context},
                                        data_args.Get());
                     std::apply(*fn, all_args);
+                } else {
+                    if (context.options.verbose) {
+                        std::cout << "   - Failed to decode fuzzer argument data.\n";
+                    }
                 }
             };
             return ProgramFuzzer{name, std::move(fn_with_decode)};
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, const Context& options, Slice<const std::byte>) {
-                    fn(program, options);
+                [fn](const Program& program, const Context& context, Slice<const std::byte>) {
+                    fn(program, context);
                 },
             };
         }
@@ -117,9 +126,12 @@ struct ProgramFuzzer {
     template <typename... ARGS>
     static ProgramFuzzer Create(std::string_view name, void (*fn)(const Program&, ARGS...)) {
         if constexpr (sizeof...(ARGS) > 0) {
-            auto fn_with_decode = [fn](const Program& program, const Context&,
+            auto fn_with_decode = [fn](const Program& program, const Context& context,
                                        Slice<const std::byte> data) {
                 if (!data.data) {
+                    if (context.options.verbose) {
+                        std::cout << "   - Data expected but no data provided.\n";
+                    }
                     return;
                 }
                 bytes::BufferReader reader{data};
@@ -128,6 +140,10 @@ struct ProgramFuzzer {
                     auto all_args =
                         std::tuple_cat(std::tuple<const Program&>{program}, data_args.Get());
                     std::apply(*fn, all_args);
+                } else {
+                    if (context.options.verbose) {
+                        std::cout << "   - Failed to decode fuzzer argument data.\n";
+                    }
                 }
             };
             return ProgramFuzzer{name, std::move(fn_with_decode)};

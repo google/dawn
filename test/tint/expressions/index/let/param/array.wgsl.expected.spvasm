@@ -1,21 +1,19 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 28
+; Generator: Google Tint Compiler; 1
+; Bound: 31
 ; Schema: 0
                OpCapability Shader
+         %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
                OpName %i "i"
-               OpName %var_for_index "var_for_index"
-               OpDecorate %_arr_int_uint_8 ArrayStride 4
-       %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+               OpName %a "a"
+               OpName %unused_entry_point "unused_entry_point"
         %int = OpTypeInt 32 1
-          %5 = OpTypeFunction %int %int
+          %4 = OpTypeFunction %int %int
        %uint = OpTypeInt 32 0
      %uint_8 = OpConstant %uint 8
 %_arr_int_uint_8 = OpTypeArray %int %uint_8
@@ -27,20 +25,24 @@
       %int_6 = OpConstant %int 6
       %int_7 = OpConstant %int 7
       %int_8 = OpConstant %int 8
-         %21 = OpConstantComposite %_arr_int_uint_8 %int_1 %int_2 %int_3 %int_4 %int_5 %int_6 %int_7 %int_8
+          %a = OpConstantComposite %_arr_int_uint_8 %int_1 %int_2 %int_3 %int_4 %int_5 %int_6 %int_7 %int_8
 %_ptr_Function__arr_int_uint_8 = OpTypePointer Function %_arr_int_uint_8
-         %24 = OpConstantNull %_arr_int_uint_8
+     %uint_7 = OpConstant %uint 7
 %_ptr_Function_int = OpTypePointer Function %int
-%unused_entry_point = OpFunction %void None %1
-          %4 = OpLabel
-               OpReturn
-               OpFunctionEnd
-          %f = OpFunction %int None %5
+       %void = OpTypeVoid
+         %29 = OpTypeFunction %void
+          %f = OpFunction %int None %4
           %i = OpFunctionParameter %int
-          %9 = OpLabel
-%var_for_index = OpVariable %_ptr_Function__arr_int_uint_8 Function %24
-               OpStore %var_for_index %21
-         %26 = OpAccessChain %_ptr_Function_int %var_for_index %i
-         %27 = OpLoad %int %26
-               OpReturnValue %27
+          %5 = OpLabel
+         %18 = OpVariable %_ptr_Function__arr_int_uint_8 Function
+               OpStore %18 %a
+         %20 = OpBitcast %uint %i
+         %21 = OpExtInst %uint %22 UMin %20 %uint_7
+         %24 = OpAccessChain %_ptr_Function_int %18 %21
+         %26 = OpLoad %int %24 None
+               OpReturnValue %26
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %29
+         %30 = OpLabel
+               OpReturn
                OpFunctionEnd

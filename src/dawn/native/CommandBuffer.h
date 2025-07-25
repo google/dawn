@@ -29,12 +29,14 @@
 #define SRC_DAWN_NATIVE_COMMANDBUFFER_H_
 
 #include <string>
+#include <vector>
 
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/IndirectDrawMetadata.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/Texture.h"
@@ -50,7 +52,7 @@ class CommandBufferBase : public ApiObjectBase {
   public:
     CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-    static Ref<CommandBufferBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<CommandBufferBase> MakeError(DeviceBase* device, StringView label);
 
     ObjectType GetType() const override;
     void FormatLabel(absl::FormatSink* s) const override;
@@ -62,6 +64,8 @@ class CommandBufferBase : public ApiObjectBase {
 
     const CommandBufferResourceUsage& GetResourceUsages() const;
 
+    const std::vector<IndirectDrawMetadata>& GetIndirectDrawMetadata();
+
     CommandIterator* GetCommandIteratorForTesting();
 
   protected:
@@ -70,10 +74,10 @@ class CommandBufferBase : public ApiObjectBase {
     CommandIterator mCommands;
 
   private:
-    CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     CommandBufferResourceUsage mResourceUsages;
-
+    std::vector<IndirectDrawMetadata> mIndirectDrawMetadata;
     std::string mEncoderLabel;
 };
 

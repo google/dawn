@@ -10,23 +10,20 @@
   if (x > 0) {
       ^
 
-Texture2D<float4> t : register(t1);
-SamplerState s : register(s2);
-
-struct tint_symbol_2 {
+struct main_inputs {
   float x : TEXCOORD0;
 };
+
 
 void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
-    float tint_symbol = ddx(1.0f);
-    if ((tint_symbol > 0.0f)) {
+    if ((ddx(1.0f) > 0.0f)) {
     }
   }
 }
 
-void main(tint_symbol_2 tint_symbol_1) {
-  main_inner(tint_symbol_1.x);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
 }
+

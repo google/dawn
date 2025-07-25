@@ -73,7 +73,7 @@ match y: e.c | e.a | e.b`,
 			`fn f()`,
 			success,
 		}, {
-			`fn f[T]()`,
+			`implicit(T) fn f()`,
 			success,
 		}, {
 			`
@@ -83,34 +83,34 @@ fn f<T>(T) -> f32`,
 		}, {
 			`
 type f32
-fn f[N: num]()`,
+implicit(N: num) fn f()`,
 			success,
 		}, {
 			`
 enum e { a b c }
-fn f[N: e]()`,
+implicit(N: e) fn f()`,
 			success,
 		}, {
 			`
 type f32
-fn f[T](T) -> f32`,
+implicit(T) fn f(T) -> f32`,
 			success,
 		}, {
 			`
 type f32
-fn f<T: f32>[N: num]()`,
+implicit(N: num) fn f<T: f32>()`,
 			success,
 		}, {
 			`
 type f32
-fn f[T: f32](T: f32) -> f32`,
+implicit(T: f32) fn f(T: f32) -> f32`,
 			success,
 		}, {
 			`
 type f32
 type P<T>
 match m: f32
-fn f[T: m](P<T>) -> T`,
+implicit(T: m) fn f(P<T>) -> T`,
 			success,
 		}, {
 			`
@@ -142,21 +142,21 @@ fn f(T<a>)`,
 		}, {
 			`
 type T<E: num>
-fn f[E: num](T<E>)`,
+implicit(E: num) fn f(T<E>)`,
 			success,
 		}, {
-			`fn f[T](T)`,
+			`implicit(T) fn f(T)`,
 			success,
 		}, {
 			`
 enum e { a b }
-fn f[E: e]()`,
+implicit(E: e) fn f()`,
 			success,
 		}, {
 			`
 enum e { a b }
 match m: e.a | e.b
-fn f[E: m]()`,
+implicit(E: m) fn f()`,
 			success,
 		}, {
 			`
@@ -171,7 +171,7 @@ type b
 type c
 match S: a | b | c
 type V<N: num, T>
-fn f<I: V<N, T> >[N: num, T: S, U: S](V<N, U>) -> I`,
+implicit(N: num, T: S, U: S) fn f<I: V<N, T> >(V<N, U>) -> I`,
 			success,
 		}, {
 			`
@@ -322,8 +322,8 @@ file.txt:3:10 'x' resolves to type matcher 'x' but type is expected
 			`fn f() -> u`,
 			`file.txt:1:11 cannot resolve 'u'`,
 		}, {
-			`fn f[T: u]()`,
-			`file.txt:1:9 cannot resolve 'u'`,
+			`implicit(T: u) fn f()`,
+			`file.txt:1:13 cannot resolve 'u'`,
 		}, {
 			`
 enum e { a }
@@ -337,8 +337,8 @@ fn f(T<u>)`,
 		}, {
 			`
 type x
-fn f[T](T<x>)`,
-			`file.txt:2:9 'T' template parameters do not accept template arguments`,
+implicit(T) fn f(T<x>)`,
+			`file.txt:2:18 'T' template parameters do not accept template arguments`,
 		}, {
 			`
 type A<N: num>
@@ -370,8 +370,8 @@ fn f(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-fn f[M: m](P<M>)`,
-			`file.txt:4:14 cannot use template enum 'E' as template number`,
+implicit(M: m) fn f(P<M>)`,
+			`file.txt:4:23 cannot use template enum 'E' as template number`,
 		}, {
 			`
 type i
@@ -395,8 +395,8 @@ op << (i, i, i)`,
 		}, {
 			`
 type x
-op << [T](T<x>)`,
-			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+implicit(T) op << (T<x>)`,
+			`file.txt:2:20 'T' template parameters do not accept template arguments`,
 		}, {
 			`
 type A<N: num>
@@ -435,8 +435,8 @@ op << (P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-op << [M: m](P<M>)`,
-			`file.txt:4:16 cannot use template enum 'E' as template number`,
+implicit(M: m) op << (P<M>)`,
+			`file.txt:4:25 cannot use template enum 'E' as template number`,
 		}, {
 			`
 type i
@@ -451,8 +451,8 @@ ctor F(T<u>)`,
 		}, {
 			`
 type x
-ctor F[T](T<x>)`,
-			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+implicit(T) ctor F(T<x>)`,
+			`file.txt:2:20 'T' template parameters do not accept template arguments`,
 		}, {
 			`
 type A<N: num>
@@ -491,8 +491,8 @@ ctor F(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-ctor F[M: m](P<M>)`,
-			`file.txt:4:16 cannot use template enum 'E' as template number`,
+implicit(M: m) ctor F(P<M>)`,
+			`file.txt:4:25 cannot use template enum 'E' as template number`,
 		}, {
 			`
 conv F()`,
@@ -516,8 +516,8 @@ conv F(T<u>)`,
 		}, {
 			`
 type x
-conv F[T](T<x>)`,
-			`file.txt:2:11 'T' template parameters do not accept template arguments`,
+implicit(T) conv F(T<x>)`,
+			`file.txt:2:20 'T' template parameters do not accept template arguments`,
 		}, {
 			`
 type A<N: num>
@@ -556,8 +556,8 @@ conv F(P<m>)`,
 type P<N: num>
 enum E { a b }
 match m: E.a | E.b
-conv F[M: m](P<M>)`,
-			`file.txt:4:16 cannot use template enum 'E' as template number`,
+implicit(M: m) conv F(P<M>)`,
+			`file.txt:4:25 cannot use template enum 'E' as template number`,
 		}, {
 			`
 @must_use fn f()`,
@@ -573,26 +573,9 @@ type f32
 			`file.txt:1:2 @member_function can only be used on a function with at least one parameter`,
 		}, {
 			`
-type f32
-fn f<N: num>()`,
-			`file.txt:2:6 explicit number template parameters are not supported`,
-		}, {
-			`
-enum e { a b c }
-fn f<N: e>()`,
-			`file.txt:2:6 explicit number template parameters are not supported`,
-		}, {
-			`
-enum e { a b }
-type T<E: e>
-match m: e.a
-fn f<E: m>(T<E>)`,
-			`file.txt:4:6 explicit number template parameters are not supported`,
-		}, {
-			`
-fn f<T>[T]()`,
-			`file.txt:1:6 'T' already declared
-First declared here: file.txt:1:9`,
+implicit(T) fn f<T>()`,
+			`file.txt:1:18 'T' already declared
+First declared here: file.txt:1:10`,
 		},
 	} {
 

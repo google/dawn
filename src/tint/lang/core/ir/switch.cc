@@ -37,9 +37,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Switch);
 
 namespace tint::core::ir {
 
-Switch::Switch() = default;
+Switch::Switch(Id id) : Base(id) {}
 
-Switch::Switch(Value* cond) {
+Switch::Switch(Id id, Value* cond) : Base(id) {
     TINT_ASSERT(cond);
 
     AddOperand(Switch::kConditionOperandOffset, cond);
@@ -61,7 +61,7 @@ void Switch::ForeachBlock(const std::function<void(const ir::Block*)>& cb) const
 
 Switch* Switch::Clone(CloneContext& ctx) {
     auto* cond = ctx.Remap(Condition());
-    auto* new_switch = ctx.ir.allocators.instructions.Create<Switch>(cond);
+    auto* new_switch = ctx.ir.CreateInstruction<Switch>(cond);
     ctx.Replace(this, new_switch);
 
     new_switch->cases_.Reserve(cases_.Length());

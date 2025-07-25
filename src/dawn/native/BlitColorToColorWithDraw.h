@@ -76,10 +76,38 @@ using BlitColorToColorWithDrawPipelinesCache =
 // The function assumes that the render pass is already started. It won't break the render pass,
 // just performing a draw call to blit.
 // This is only valid if the device's CanTextureLoadResolveTargetInTheSameRenderpass() is true.
-MaybeError ExpandResolveTextureWithDraw(DeviceBase* device,
-                                        RenderPassEncoder* renderEncoder,
-                                        const RenderPassDescriptor* renderPassDescriptor);
+MaybeError ExpandResolveTextureWithDraw(
+    DeviceBase* device,
+    RenderPassEncoder* renderEncoder,
+    const UnpackedPtr<RenderPassDescriptor>& renderPassDescriptor);
 
+struct ResolveMultisampleWithDrawPipelineKey {
+    wgpu::TextureFormat colorTargetFormat = wgpu::TextureFormat::Undefined;
+    uint32_t sampleCount = 1;
+
+    struct HashFunc {
+        size_t operator()(const ResolveMultisampleWithDrawPipelineKey& key) const;
+    };
+
+    struct EqualityFunc {
+        bool operator()(const ResolveMultisampleWithDrawPipelineKey& a,
+                        const ResolveMultisampleWithDrawPipelineKey& b) const;
+    };
+};
+
+using ResolveMultisampleWithDrawPipelinesCache =
+    absl::flat_hash_map<ResolveMultisampleWithDrawPipelineKey,
+                        Ref<RenderPipelineBase>,
+                        ResolveMultisampleWithDrawPipelineKey::HashFunc,
+                        ResolveMultisampleWithDrawPipelineKey::EqualityFunc>;
+
+// This inserts a separate render pass to partially resolve the 'src' multi-sampled texture to the
+// 'dst' single-sampled texture.
+MaybeError ResolveMultisampleWithDraw(DeviceBase* device,
+                                      CommandEncoder* encoder,
+                                      const RenderPassDescriptorResolveRect& rect,
+                                      TextureViewBase* src,
+                                      TextureViewBase* dst);
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_BLITCOLORTOCOLORWITHDRAW_H_

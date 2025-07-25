@@ -58,19 +58,20 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise lib
   tint_lang_wgsl
   tint_lang_wgsl_intrinsic
   tint_lang_wgsl_ir
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise lib
+  "src_utils"
 )
 
 ################################################################################
@@ -92,23 +93,21 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise_test test
   tint_lang_core_ir_transform_test
   tint_lang_core_type
   tint_lang_wgsl_writer_raise
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise_test test
   "gtest"
+  "src_utils"
 )
 
 ################################################################################
@@ -129,18 +128,19 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
   tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl_writer_raise
+  tint_utils
   tint_utils_bytes
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
+  "src_utils"
 )

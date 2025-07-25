@@ -1,3 +1,4 @@
+
 // Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,8 +26,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <variant>
-
+#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
@@ -36,17 +36,16 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
-#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/reverse.h"
-#include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
@@ -86,7 +85,7 @@ struct State {
             for (auto* param : fn->Params()) {
                 EnsureResolvable(param->Type());
                 if (auto symbol = ir.NameOf(param); symbol.IsValid()) {
-                    Declare(scopes.Back(), param, symbol.NameView());
+                    Declare(param, symbol);
                 }
             }
             Process(fn->Block());
@@ -110,9 +109,8 @@ struct State {
         // Declare all the user types
         for (auto* ty : ir.Types()) {
             if (auto* str = ty->As<core::type::Struct>()) {
-                auto name = str->Name().NameView();
                 if (!IsBuiltinStruct(str)) {
-                    Declare(scopes.Front(), const_cast<core::type::Struct*>(str), name);
+                    Declare(const_cast<core::type::Struct*>(str), str->Name());
                 }
             }
         }
@@ -121,7 +119,7 @@ struct State {
         for (auto* inst : *ir.root_block) {
             for (auto* result : inst->Results()) {
                 if (auto symbol = ir.NameOf(result)) {
-                    Declare(scopes.Front(), result, symbol.NameView());
+                    Declare(result, symbol);
                 }
             }
         }
@@ -129,7 +127,7 @@ struct State {
         // Declare all the functions
         for (core::ir::Function* fn : ir.functions) {
             if (auto symbol = ir.NameOf(fn); symbol.IsValid()) {
-                Declare(scopes.Back(), fn, symbol.NameView());
+                Declare(fn, symbol);
             }
         }
     }
@@ -147,10 +145,6 @@ struct State {
         // Check resolving of operands
         for (auto* operand : inst->Operands()) {
             if (operand) {
-                // Ensure that named operands can be resolved.
-                if (auto symbol = ir.NameOf(operand)) {
-                    EnsureResolvesTo(symbol.NameView(), operand);
-                }
                 // If the operand is a constant, then ensure that type name can be resolved.
                 if (auto* c = operand->As<core::ir::Constant>()) {
                     EnsureResolvable(c->Type());
@@ -187,26 +181,26 @@ struct State {
             },
             [&](core::ir::Var*) {
                 // Ensure the var's type is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::Let*) {
                 // Ensure the let's type is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::Construct*) {
                 // Ensure the type of a type constructor is resolvable
-                EnsureResolvable(inst->Result(0)->Type());
+                EnsureResolvable(inst->Result()->Type());
             },
             [&](core::ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
                 auto name = tint::ToString(call->Func());
-                EnsureResolvesTo(name, nullptr);
+                EnsureResolvesToBuiltin(name);
             });
 
         // Register new operands and check their types can resolve
         for (auto* result : inst->Results()) {
             if (auto symbol = ir.NameOf(result); symbol.IsValid()) {
-                Declare(scopes.Back(), result, symbol.NameView());
+                Declare(result, symbol);
             }
         }
     }
@@ -217,44 +211,41 @@ struct State {
             type = tint::Switch(
                 type,  //
                 [&](const core::type::Scalar* s) {
-                    EnsureResolvesTo(s->FriendlyName(), nullptr);
+                    EnsureResolvesToBuiltin(s->FriendlyName());
                     return nullptr;
                 },
                 [&](const core::type::Vector* v) {
-                    EnsureResolvesTo("vec" + tint::ToString(v->Width()), nullptr);
-                    return v->type();
+                    EnsureResolvesToBuiltin("vec" + tint::ToString(v->Width()));
+                    return v->Type();
                 },
                 [&](const core::type::Matrix* m) {
-                    EnsureResolvesTo(
-                        "mat" + tint::ToString(m->columns()) + "x" + tint::ToString(m->rows()),
-                        nullptr);
-                    return m->type();
+                    EnsureResolvesToBuiltin("mat" + tint::ToString(m->Columns()) + "x" +
+                                            tint::ToString(m->Rows()));
+                    return m->Type();
+                },
+                [&](const core::type::Array* a) -> const core::type::Type* {
+                    EnsureResolvesToBuiltin("array");
+                    return a->ElemType();
                 },
                 [&](const core::type::Pointer* p) {
-                    EnsureResolvesTo(tint::ToString(p->Access()), nullptr);
-                    EnsureResolvesTo(tint::ToString(p->AddressSpace()), nullptr);
+                    EnsureResolvesToBuiltin(tint::ToString(p->Access()));
+                    EnsureResolvesToBuiltin(tint::ToString(p->AddressSpace()));
                     return p->StoreType();
                 },
                 [&](const core::type::Struct* s) {
                     auto name = s->Name().NameView();
                     if (IsBuiltinStruct(s)) {
-                        EnsureResolvesTo(name, nullptr);
-                    } else {
-                        EnsureResolvesTo(name, s);
+                        EnsureResolvesToBuiltin(name);
                     }
                     return nullptr;
                 });
         }
     }
 
-    /// Ensures that the identifier @p identifier resolves to the declaration @p thing
-    void EnsureResolvesTo(std::string_view identifier, const CastableBase* thing) {
+    /// Ensures that the identifier @p identifier resolves to a builtin symbol.
+    void EnsureResolvesToBuiltin(std::string_view identifier) {
         for (auto& scope : tint::Reverse(scopes)) {
             if (auto decl = scope.Get(identifier)) {
-                if (*decl == thing) {
-                    return;  // Resolved to the right thing.
-                }
-
                 // Operand is shadowed
                 scope.Remove(identifier);
                 Rename(*decl, identifier);
@@ -262,26 +253,37 @@ struct State {
         }
     }
 
-    /// Registers the declaration @p thing in the scope @p scope with the name @p name
-    /// If there is an existing declaration with the given name in @p scope then @p thing will be
-    /// renamed.
-    void Declare(Scope& scope, CastableBase* thing, std::string_view name) {
-        auto add = scope.Add(name, thing);
-        if (!add && add.value != thing) {
-            // Multiple declarations with the same name in the same scope.
-            // Rename the later declaration.
-            Rename(thing, name);
+    /// Registers the declaration @p thing in the current scope with the name @p name
+    /// If there is an existing declaration with the given name in any parent scope then @p thing
+    /// will be renamed.
+    void Declare(CastableBase* thing, Symbol name) {
+        // Check if the declaration would shadow another declaration in the current scope or any
+        // parent scope, and rename it if so.
+        for (auto& scope : tint::Reverse(scopes)) {
+            if (auto decl = scope.Get(name.NameView())) {
+                if (*decl.value != thing) {
+                    name = Rename(thing, name.NameView());
+                    break;
+                }
+            }
         }
+
+        // Add the declaration to the current scope, and make sure that it was either successfully
+        // added or has already been added.
+        auto add = scopes.Back().Add(name.NameView(), thing);
+        TINT_ASSERT(add || add.value == thing);
     }
 
     /// Rename changes the name of @p thing with the old name of @p old_name
-    void Rename(CastableBase* thing, std::string_view old_name) {
+    /// @returns the new name
+    Symbol Rename(CastableBase* thing, std::string_view old_name) {
         Symbol new_name = ir.symbols.New(old_name);
         Switch(
             thing,  //
             [&](core::ir::Value* value) { ir.SetName(value, new_name); },
             [&](core::type::Struct* str) { str->SetName(new_name); },  //
             TINT_ICE_ON_NO_MATCH);
+        return new_name;
     }
 
     /// @return true if @p s is a builtin (non-user declared) structure.
@@ -293,7 +295,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "RenameConflicts transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.RenameConflicts", kRenameConflictsCapabilities);
     if (result != Success) {
         return result;
     }

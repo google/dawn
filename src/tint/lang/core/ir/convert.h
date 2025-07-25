@@ -42,13 +42,22 @@ class Convert final : public Castable<Convert, Call> {
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands expected for this instruction
+    static constexpr size_t kNumOperands = 1;
+
     /// Constructor (no results, no operands)
-    Convert();
+    /// @param id the instruction id
+    explicit Convert(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param value the value to convert
-    Convert(InstructionResult* result, Value* value);
+    Convert(Id id, InstructionResult* result, Value* value);
+
     ~Convert() override;
 
     /// @copydoc Instruction::Clone()

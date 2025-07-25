@@ -1,66 +1,59 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 41
+; Generator: Google Tint Compiler; 1
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
+         %27 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %t "t"
-               OpName %unused_entry_point "unused_entry_point"
-               OpName %tint_ftou "tint_ftou"
-               OpName %v "v"
                OpName %m "m"
                OpName %f "f"
-               OpName %v_0 "v"
+               OpName %v "v"
+               OpName %tint_v4f32_to_v4u32 "tint_v4f32_to_v4u32"
+               OpName %value "value"
+               OpName %unused_entry_point "unused_entry_point"
       %float = OpTypeFloat 32
 %_ptr_Private_float = OpTypePointer Private %float
           %4 = OpConstantNull %float
           %t = OpVariable %_ptr_Private_float Private %4
+    %v4float = OpTypeVector %float 4
+          %7 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
+         %14 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %v4uint = OpTypeVector %uint 4
-    %v4float = OpTypeVector %float 4
-          %9 = OpTypeFunction %v4uint %v4float
-%float_4_29496704e_09 = OpConstant %float 4.29496704e+09
-         %18 = OpConstantComposite %v4float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
-       %bool = OpTypeBool
-     %v4bool = OpTypeVector %bool 4
-         %23 = OpConstantNull %v4float
-         %25 = OpConstantNull %v4uint
-%uint_4294967295 = OpConstant %uint 4294967295
-         %28 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
-         %29 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
-%unused_entry_point = OpFunction %void None %5
+         %24 = OpTypeFunction %v4uint %v4float
+         %28 = OpConstantNull %v4float
+%float_4_29496704e_09 = OpConstant %float 4.29496704e+09
+         %29 = OpConstantComposite %v4float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
+          %m = OpFunction %v4float None %7
           %8 = OpLabel
+               OpStore %t %float_1 None
+         %10 = OpLoad %float %t None
+         %11 = OpCompositeConstruct %v4float %10 %10 %10 %10
+               OpReturnValue %11
+               OpFunctionEnd
+          %f = OpFunction %void None %14
+         %15 = OpLabel
+          %v = OpVariable %_ptr_Function_v4uint Function
+         %16 = OpFunctionCall %v4float %m
+         %17 = OpFunctionCall %v4uint %tint_v4f32_to_v4u32 %16
+               OpStore %v %17
                OpReturn
                OpFunctionEnd
-  %tint_ftou = OpFunction %v4uint None %9
-          %v = OpFunctionParameter %v4float
-         %15 = OpLabel
-         %19 = OpFOrdLessThan %v4bool %v %18
-         %24 = OpFOrdLessThan %v4bool %v %23
-         %26 = OpConvertFToU %v4uint %v
-         %22 = OpSelect %v4uint %24 %25 %26
-         %16 = OpSelect %v4uint %19 %22 %28
-               OpReturnValue %16
+%tint_v4f32_to_v4u32 = OpFunction %v4uint None %24
+      %value = OpFunctionParameter %v4float
+         %25 = OpLabel
+         %26 = OpExtInst %v4float %27 NClamp %value %28 %29
+         %31 = OpConvertFToU %v4uint %26
+               OpReturnValue %31
                OpFunctionEnd
-          %m = OpFunction %v4float None %29
-         %31 = OpLabel
-               OpStore %t %float_1
-         %33 = OpLoad %float %t
-         %34 = OpCompositeConstruct %v4float %33 %33 %33 %33
-               OpReturnValue %34
-               OpFunctionEnd
-          %f = OpFunction %void None %5
-         %36 = OpLabel
-        %v_0 = OpVariable %_ptr_Function_v4uint Function %25
-         %37 = OpFunctionCall %v4float %m
-         %38 = OpFunctionCall %v4uint %tint_ftou %37
-               OpStore %v_0 %38
+%unused_entry_point = OpFunction %void None %14
+         %33 = OpLabel
                OpReturn
                OpFunctionEnd

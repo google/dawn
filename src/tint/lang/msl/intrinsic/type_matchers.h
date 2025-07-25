@@ -30,6 +30,7 @@
 
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
@@ -94,6 +95,24 @@ inline bool MatchLevel(core::intrinsic::MatchState&, const core::type::Type* ty)
 inline const core::type::Type* BuildLevel(core::intrinsic::MatchState& state,
                                           const core::type::Type*) {
     return state.types.Get<type::Level>();
+}
+
+inline bool MatchPackedVec3(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        return true;
+    }
+
+    if (auto* v = ty->As<core::type::Vector>()) {
+        if (v->Packed()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline const core::type::Vector* BuildPackedVec3(core::intrinsic::MatchState& state,
+                                                 const core::type::Type* el) {
+    return state.types.Get<core::type::Vector>(el, 3u, /* packed */ true);
 }
 
 }  // namespace tint::msl::intrinsic

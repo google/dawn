@@ -157,6 +157,15 @@ TEST_F(SpirvASTParserTest, ConvertType_F32) {
     EXPECT_TRUE(p->error().empty());
 }
 
+TEST_F(SpirvASTParserTest, ConvertType_F16) {
+    auto p = parser(test::Assemble(Preamble() + "%4 = OpTypeFloat 16" + MainBody()));
+    EXPECT_TRUE(p->BuildInternalModule());
+
+    auto* type = p->ConvertType(4);
+    EXPECT_TRUE(type->Is<F16>());
+    EXPECT_TRUE(p->error().empty());
+}
+
 TEST_F(SpirvASTParserTest, ConvertType_BadIntWidth) {
     auto p = parser(test::Assemble(Preamble() + "%5 = OpTypeInt 17 1" + MainBody()));
     EXPECT_TRUE(p->BuildInternalModule());
@@ -210,6 +219,33 @@ TEST_F(SpirvASTParserTest, ConvertType_VecOverF32) {
     EXPECT_TRUE(v4xf32->Is<Vector>());
     EXPECT_TRUE(v4xf32->As<Vector>()->type->Is<F32>());
     EXPECT_EQ(v4xf32->As<Vector>()->size, 4u);
+
+    EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpirvASTParserTest, ConvertType_VecOverF16) {
+    auto p = parser(test::Assemble(Preamble() + R"(
+    %float = OpTypeFloat 16
+    %20 = OpTypeVector %float 2
+    %30 = OpTypeVector %float 3
+    %40 = OpTypeVector %float 4
+  )" + MainBody()));
+    EXPECT_TRUE(p->BuildInternalModule());
+
+    auto* v2xf16 = p->ConvertType(20);
+    EXPECT_TRUE(v2xf16->Is<Vector>());
+    EXPECT_TRUE(v2xf16->As<Vector>()->type->Is<F16>());
+    EXPECT_EQ(v2xf16->As<Vector>()->size, 2u);
+
+    auto* v3xf16 = p->ConvertType(30);
+    EXPECT_TRUE(v3xf16->Is<Vector>());
+    EXPECT_TRUE(v3xf16->As<Vector>()->type->Is<F16>());
+    EXPECT_EQ(v3xf16->As<Vector>()->size, 3u);
+
+    auto* v4xf16 = p->ConvertType(40);
+    EXPECT_TRUE(v4xf16->Is<Vector>());
+    EXPECT_TRUE(v4xf16->As<Vector>()->type->Is<F16>());
+    EXPECT_EQ(v4xf16->As<Vector>()->size, 4u);
 
     EXPECT_TRUE(p->error().empty());
 }
@@ -353,6 +389,84 @@ TEST_F(SpirvASTParserTest, ConvertType_MatrixOverF32) {
     auto* m44 = p->ConvertType(44);
     EXPECT_TRUE(m44->Is<Matrix>());
     EXPECT_TRUE(m44->As<Matrix>()->type->Is<F32>());
+    EXPECT_EQ(m44->As<Matrix>()->rows, 4u);
+    EXPECT_EQ(m44->As<Matrix>()->columns, 4u);
+
+    EXPECT_TRUE(p->error().empty());
+}
+
+TEST_F(SpirvASTParserTest, ConvertType_MatrixOverF16) {
+    // Matrices are only defined over floats.
+    auto p = parser(test::Assemble(Preamble() + R"(
+    %float = OpTypeFloat 16
+    %v2 = OpTypeVector %float 2
+    %v3 = OpTypeVector %float 3
+    %v4 = OpTypeVector %float 4
+    ; First digit is rows
+    ; Second digit is columns
+    %22 = OpTypeMatrix %v2 2
+    %23 = OpTypeMatrix %v2 3
+    %24 = OpTypeMatrix %v2 4
+    %32 = OpTypeMatrix %v3 2
+    %33 = OpTypeMatrix %v3 3
+    %34 = OpTypeMatrix %v3 4
+    %42 = OpTypeMatrix %v4 2
+    %43 = OpTypeMatrix %v4 3
+    %44 = OpTypeMatrix %v4 4
+  )" + MainBody()));
+    EXPECT_TRUE(p->BuildInternalModule());
+
+    auto* m22 = p->ConvertType(22);
+    EXPECT_TRUE(m22->Is<Matrix>());
+    EXPECT_TRUE(m22->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m22->As<Matrix>()->rows, 2u);
+    EXPECT_EQ(m22->As<Matrix>()->columns, 2u);
+
+    auto* m23 = p->ConvertType(23);
+    EXPECT_TRUE(m23->Is<Matrix>());
+    EXPECT_TRUE(m23->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m23->As<Matrix>()->rows, 2u);
+    EXPECT_EQ(m23->As<Matrix>()->columns, 3u);
+
+    auto* m24 = p->ConvertType(24);
+    EXPECT_TRUE(m24->Is<Matrix>());
+    EXPECT_TRUE(m24->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m24->As<Matrix>()->rows, 2u);
+    EXPECT_EQ(m24->As<Matrix>()->columns, 4u);
+
+    auto* m32 = p->ConvertType(32);
+    EXPECT_TRUE(m32->Is<Matrix>());
+    EXPECT_TRUE(m32->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m32->As<Matrix>()->rows, 3u);
+    EXPECT_EQ(m32->As<Matrix>()->columns, 2u);
+
+    auto* m33 = p->ConvertType(33);
+    EXPECT_TRUE(m33->Is<Matrix>());
+    EXPECT_TRUE(m33->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m33->As<Matrix>()->rows, 3u);
+    EXPECT_EQ(m33->As<Matrix>()->columns, 3u);
+
+    auto* m34 = p->ConvertType(34);
+    EXPECT_TRUE(m34->Is<Matrix>());
+    EXPECT_TRUE(m34->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m34->As<Matrix>()->rows, 3u);
+    EXPECT_EQ(m34->As<Matrix>()->columns, 4u);
+
+    auto* m42 = p->ConvertType(42);
+    EXPECT_TRUE(m42->Is<Matrix>());
+    EXPECT_TRUE(m42->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m42->As<Matrix>()->rows, 4u);
+    EXPECT_EQ(m42->As<Matrix>()->columns, 2u);
+
+    auto* m43 = p->ConvertType(43);
+    EXPECT_TRUE(m43->Is<Matrix>());
+    EXPECT_TRUE(m43->As<Matrix>()->type->Is<F16>());
+    EXPECT_EQ(m43->As<Matrix>()->rows, 4u);
+    EXPECT_EQ(m43->As<Matrix>()->columns, 3u);
+
+    auto* m44 = p->ConvertType(44);
+    EXPECT_TRUE(m44->Is<Matrix>());
+    EXPECT_TRUE(m44->As<Matrix>()->type->Is<F16>());
     EXPECT_EQ(m44->As<Matrix>()->rows, 4u);
     EXPECT_EQ(m44->As<Matrix>()->columns, 4u);
 

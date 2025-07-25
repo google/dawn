@@ -73,7 +73,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateDepthBlitPipeline(DeviceBase* 
         }
     }
 
-    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderSourceWGSL wgslDesc = {};
     ShaderModuleDescriptor shaderModuleDesc = {};
     shaderModuleDesc.nextInChain = &wgslDesc;
     wgslDesc.code = kBlitToDepthShaders;
@@ -87,7 +87,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateDepthBlitPipeline(DeviceBase* 
 
     DepthStencilState dsState = {};
     dsState.format = format;
-    dsState.depthWriteEnabled = true;
+    dsState.depthWriteEnabled = wgpu::OptionalBool::True;
     dsState.depthCompare = wgpu::CompareFunction::Always;
 
     RenderPipelineDescriptor renderPipelineDesc = {};
@@ -162,13 +162,13 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
 
             // Copy from the original texture source into the intermediate.
             {
-                ImageCopyTexture intermediateSrc;
+                TexelCopyTextureInfo intermediateSrc;
                 intermediateSrc.texture = src.texture.Get();
                 intermediateSrc.mipLevel = src.mipLevel;
                 intermediateSrc.origin = {0, 0, layer};
                 intermediateSrc.aspect = wgpu::TextureAspect::All;
 
-                ImageCopyTexture intermediateDst;
+                TexelCopyTextureInfo intermediateDst;
                 intermediateDst.texture = intermediateTexture.Get();
                 intermediateDst.mipLevel = 0u;
                 intermediateDst.origin = {0, 0, 0};

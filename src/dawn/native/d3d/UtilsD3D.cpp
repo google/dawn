@@ -95,10 +95,6 @@ bool IsDepthStencil(DXGI_FORMAT format) {
     }
 }
 
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion) {
-    return (majorVersion << 32) + minorVersion;
-}
-
 DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format) {
     switch (format) {
         case wgpu::TextureFormat::R8Unorm:
@@ -440,38 +436,56 @@ ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_F
 
 DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
     switch (format) {
+        case wgpu::VertexFormat::Uint8:
+            return DXGI_FORMAT_R8_UINT;
         case wgpu::VertexFormat::Uint8x2:
             return DXGI_FORMAT_R8G8_UINT;
         case wgpu::VertexFormat::Uint8x4:
             return DXGI_FORMAT_R8G8B8A8_UINT;
+        case wgpu::VertexFormat::Sint8:
+            return DXGI_FORMAT_R8_SINT;
         case wgpu::VertexFormat::Sint8x2:
             return DXGI_FORMAT_R8G8_SINT;
         case wgpu::VertexFormat::Sint8x4:
             return DXGI_FORMAT_R8G8B8A8_SINT;
+        case wgpu::VertexFormat::Unorm8:
+            return DXGI_FORMAT_R8_UNORM;
         case wgpu::VertexFormat::Unorm8x2:
             return DXGI_FORMAT_R8G8_UNORM;
         case wgpu::VertexFormat::Unorm8x4:
             return DXGI_FORMAT_R8G8B8A8_UNORM;
+        case wgpu::VertexFormat::Snorm8:
+            return DXGI_FORMAT_R8_SNORM;
         case wgpu::VertexFormat::Snorm8x2:
             return DXGI_FORMAT_R8G8_SNORM;
         case wgpu::VertexFormat::Snorm8x4:
             return DXGI_FORMAT_R8G8B8A8_SNORM;
+        case wgpu::VertexFormat::Uint16:
+            return DXGI_FORMAT_R16_UINT;
         case wgpu::VertexFormat::Uint16x2:
             return DXGI_FORMAT_R16G16_UINT;
         case wgpu::VertexFormat::Uint16x4:
             return DXGI_FORMAT_R16G16B16A16_UINT;
+        case wgpu::VertexFormat::Sint16:
+            return DXGI_FORMAT_R16_SINT;
         case wgpu::VertexFormat::Sint16x2:
             return DXGI_FORMAT_R16G16_SINT;
         case wgpu::VertexFormat::Sint16x4:
             return DXGI_FORMAT_R16G16B16A16_SINT;
+        case wgpu::VertexFormat::Unorm16:
+            return DXGI_FORMAT_R16_UNORM;
         case wgpu::VertexFormat::Unorm16x2:
             return DXGI_FORMAT_R16G16_UNORM;
         case wgpu::VertexFormat::Unorm16x4:
             return DXGI_FORMAT_R16G16B16A16_UNORM;
+        case wgpu::VertexFormat::Snorm16:
+            return DXGI_FORMAT_R16_SNORM;
         case wgpu::VertexFormat::Snorm16x2:
             return DXGI_FORMAT_R16G16_SNORM;
         case wgpu::VertexFormat::Snorm16x4:
             return DXGI_FORMAT_R16G16B16A16_SNORM;
+        case wgpu::VertexFormat::Float16:
+            return DXGI_FORMAT_R16_FLOAT;
         case wgpu::VertexFormat::Float16x2:
             return DXGI_FORMAT_R16G16_FLOAT;
         case wgpu::VertexFormat::Float16x4:
@@ -502,6 +516,8 @@ DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
             return DXGI_FORMAT_R32G32B32A32_SINT;
         case wgpu::VertexFormat::Unorm10_10_10_2:
             return DXGI_FORMAT_R10G10B10A2_UNORM;
+        case wgpu::VertexFormat::Unorm8x4BGRA:
+            return DXGI_FORMAT_B8G8R8A8_UNORM;
         default:
             DAWN_UNREACHABLE();
     }

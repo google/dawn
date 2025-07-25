@@ -1,9 +1,6 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
+
 struct S {
   vec3 val[3];
 };
@@ -13,6 +10,8 @@ void a() {
   a_1.x = 1;
   a_1.z = 2;
   S d = S(vec3[3](vec3(0.0f), vec3(0.0f), vec3(0.0f)));
-  d.val[2].y = 3.0f;
+  d.val[2u].y = 3.0f;
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

@@ -1,4 +1,4 @@
-// flags:  --hlsl_shader_model 62 --use-storage-input-output-16=false
+// flags:  --hlsl-shader-model 62 --use-storage-input-output-16=false
 enable f16;
 
 struct Outputs {

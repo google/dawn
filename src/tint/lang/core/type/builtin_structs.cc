@@ -31,7 +31,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/builtin_type.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -71,11 +71,11 @@ constexpr std::array kModfVecAbstractNames{
 Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name, const Type* t) {
         auto symbol = symbols.Register(tint::ToString(name));
-        if (auto* existing = types.Find<type::Struct>(symbol)) {
+        if (auto* existing = types.Find<type::Struct>(symbol, /* is_wgsl_internal */ true)) {
             return existing;
         }
-        return types.Struct(symbol,
-                            {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
+        return types.WgslInternalStruct(
+            symbol, {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
     };
     return Switch(
         ty,  //
@@ -92,7 +92,7 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
         [&](const Vector* vec) {
             auto width = vec->Width();
             return Switch(
-                vec->type(),  //
+                vec->Type(),  //
                 [&](const F32*) { return build(kModfVecF32Names[width - 2], vec); },
                 [&](const F16*) { return build(kModfVecF16Names[width - 2], vec); },
                 [&](const AbstractFloat*) {
@@ -132,10 +132,10 @@ constexpr std::array kFrexpVecAbstractNames{
 Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name, const Type* fract_ty, const Type* exp_ty) {
         auto symbol = symbols.Register(tint::ToString(name));
-        if (auto* existing = types.Find<type::Struct>(symbol)) {
+        if (auto* existing = types.Find<type::Struct>(symbol, /* is_wgsl_internal */ true)) {
             return existing;
         }
-        return types.Struct(
+        return types.WgslInternalStruct(
             symbol, {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
     };
     return Switch(
@@ -153,7 +153,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
         [&](const Vector* vec) {
             auto width = vec->Width();
             return Switch(
-                vec->type(),  //
+                vec->Type(),  //
                 [&](const F32*) {
                     return build(kFrexpVecF32Names[width - 2], ty, types.vec(types.i32(), width));
                 },
@@ -180,13 +180,13 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::BuiltinType name) {
         auto symbol = symbols.Register(tint::ToString(name));
-        if (auto* existing = types.Find<type::Struct>(symbol)) {
+        if (auto* existing = types.Find<type::Struct>(symbol, /* is_wgsl_internal */ true)) {
             return existing;
         }
-        return types.Struct(symbol, {
-                                        {symbols.Register("old_value"), ty},
-                                        {symbols.Register("exchanged"), types.bool_()},
-                                    });
+        return types.WgslInternalStruct(symbol, {
+                                                    {symbols.Register("old_value"), ty},
+                                                    {symbols.Register("exchanged"), types.bool_()},
+                                                });
     };
     return Switch(
         ty,  //

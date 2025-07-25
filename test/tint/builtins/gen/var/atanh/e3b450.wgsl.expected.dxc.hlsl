@@ -1,46 +1,68 @@
-vector<float16_t, 4> tint_atanh(vector<float16_t, 4> x) {
-  return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
-}
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
-
 vector<float16_t, 4> atanh_e3b450() {
   vector<float16_t, 4> arg_0 = (float16_t(0.5h)).xxxx;
-  vector<float16_t, 4> res = tint_atanh(arg_0);
+  vector<float16_t, 4> v = arg_0;
+  vector<float16_t, 4> res = (log((((float16_t(1.0h)).xxxx + v) / ((float16_t(1.0h)).xxxx - v))) * (float16_t(0.5h)).xxxx);
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, atanh_e3b450());
-  return;
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 4> atanh_e3b450() {
+  vector<float16_t, 4> arg_0 = (float16_t(0.5h)).xxxx;
+  vector<float16_t, 4> v = arg_0;
+  vector<float16_t, 4> res = (log((((float16_t(1.0h)).xxxx + v) / ((float16_t(1.0h)).xxxx - v))) * (float16_t(0.5h)).xxxx);
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, atanh_e3b450());
-  return;
 }
 
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   vector<float16_t, 4> prevent_dce;
 };
-struct tint_symbol_1 {
-  nointerpolation vector<float16_t, 4> prevent_dce : TEXCOORD0;
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  nointerpolation vector<float16_t, 4> VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = atanh_e3b450();
-  return tint_symbol;
+
+vector<float16_t, 4> atanh_e3b450() {
+  vector<float16_t, 4> arg_0 = (float16_t(0.5h)).xxxx;
+  vector<float16_t, 4> v = arg_0;
+  vector<float16_t, 4> res = (log((((float16_t(1.0h)).xxxx + v) / ((float16_t(1.0h)).xxxx - v))) * (float16_t(0.5h)).xxxx);
+  return res;
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = atanh_e3b450();
+  VertexOutput v_2 = v_1;
+  return v_2;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
+}
+

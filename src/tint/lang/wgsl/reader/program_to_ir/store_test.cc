@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
 namespace tint::wgsl::reader {
@@ -44,11 +43,11 @@ TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
     auto m = Build();
     ASSERT_EQ(m, Success);
 
-    EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"($B1: {  # root
-  %a:ptr<private, u32, read_write> = var
+    EXPECT_EQ(Dis(m.Get()), R"($B1: {  # root
+  %a:ptr<private, u32, read_write> = var undef
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     store %a, 4u
     ret

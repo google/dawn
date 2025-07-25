@@ -33,20 +33,18 @@
 namespace dawn::native::opengl {
 
 // static
-ResultOrError<std::unique_ptr<DisplayEGL>> DisplayEGL::CreateFromDynamicLoading(
-    wgpu::BackendType backend,
-    const char* libName) {
-    auto display = std::make_unique<DisplayEGL>(backend);
+ResultOrError<Ref<DisplayEGL>> DisplayEGL::CreateFromDynamicLoading(wgpu::BackendType backend,
+                                                                    const char* libName) {
+    Ref<DisplayEGL> display = AcquireRef(new DisplayEGL(backend));
     DAWN_TRY(display->InitializeWithDynamicLoading(libName));
     return std::move(display);
 }
 
 // static
-ResultOrError<std::unique_ptr<DisplayEGL>> DisplayEGL::CreateFromProcAndDisplay(
-    wgpu::BackendType backend,
-    EGLGetProcProc getProc,
-    EGLDisplay eglDisplay) {
-    auto display = std::make_unique<DisplayEGL>(backend);
+ResultOrError<Ref<DisplayEGL>> DisplayEGL::CreateFromProcAndDisplay(wgpu::BackendType backend,
+                                                                    EGLGetProcProc getProc,
+                                                                    EGLDisplay eglDisplay) {
+    Ref<DisplayEGL> display = AcquireRef(new DisplayEGL(backend));
     DAWN_TRY(display->InitializeWithProcAndDisplay(getProc, eglDisplay));
     return std::move(display);
 }

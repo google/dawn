@@ -93,6 +93,9 @@ class Lexer {
     uint32_t length() const;
     /// @returns reference to character at `pos` within current line
     const char& at(uint32_t pos) const;
+    /// @returns a point to the character just beyond the end of the current line, similar to how
+    /// std::end works
+    const char* line_end() const;
     /// @returns substring view at `offset` within current line of length `count`
     std::string_view substr(uint32_t offset, uint32_t count);
     /// advances current position by `offset` within current line
@@ -101,6 +104,8 @@ class Lexer {
     void set_pos(uint32_t pos);
     /// advances current position to next line
     void advance_line();
+    /// @returns true if the current position contains a BOM
+    bool is_bom() const;
     /// @returns true if the end of the input has been reached.
     bool is_eof() const;
     /// @returns true if the end of the current line has been reached.

@@ -2,20 +2,21 @@ struct FragmentOutputs {
   float frag_depth;
   uint sample_mask;
 };
-struct tint_symbol {
-  float frag_depth : SV_Depth;
-  uint sample_mask : SV_Coverage;
+
+struct main_outputs {
+  float FragmentOutputs_frag_depth : SV_Depth;
+  uint FragmentOutputs_sample_mask : SV_Coverage;
 };
 
+
 FragmentOutputs main_inner() {
-  FragmentOutputs tint_symbol_1 = {1.0f, 1u};
-  return tint_symbol_1;
+  FragmentOutputs v = {1.0f, 1u};
+  return v;
 }
 
-tint_symbol main() {
-  FragmentOutputs inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.frag_depth = inner_result.frag_depth;
-  wrapper_result.sample_mask = inner_result.sample_mask;
-  return wrapper_result;
+main_outputs main() {
+  FragmentOutputs v_1 = main_inner();
+  main_outputs v_2 = {v_1.frag_depth, v_1.sample_mask};
+  return v_2;
 }
+

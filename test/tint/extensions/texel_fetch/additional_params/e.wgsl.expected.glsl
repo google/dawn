@@ -1,24 +1,30 @@
-SKIP: FAILED
+SKIP: INVALID
+
+Error parsing GLSL shader:
+ERROR: 0:11: 'int' : must be qualified as flat in
+ERROR: 0:11: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
-enable chromium_experimental_framebuffer_fetch;
+
+#version 310 es
+precision highp float;
+precision highp int;
+
 
 struct In {
-  @color(3)
-  fbf : vec4i,
-  @builtin(position)
-  pos : vec4f,
+  ivec4 fbf;
+  vec4 pos;
+};
+
+in ivec4 f_Input;
+void g(int a, float b) {
+}
+void f_inner(In v) {
+  g(v.fbf.w, v.pos.x);
+}
+void main() {
+  f_inner(In(f_Input, gl_FragCoord));
 }
 
-@fragment
-fn f(tint_symbol : In) {
-  g(tint_symbol.fbf.w, tint_symbol.pos.x);
-}
-
-fn g(a : i32, b : f32) {
-}
-
-Failed to generate: <dawn>/test/tint/extensions/texel_fetch/additional_params/e.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
-enable chromium_experimental_framebuffer_fetch;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+tint executable returned error: exit status 1

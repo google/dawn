@@ -35,9 +35,6 @@
 ################################################################################
 
 include(lang/wgsl/ast/BUILD.cmake)
-include(lang/wgsl/common/BUILD.cmake)
-include(lang/wgsl/features/BUILD.cmake)
-include(lang/wgsl/helpers/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
 include(lang/wgsl/intrinsic/BUILD.cmake)
 include(lang/wgsl/ir/BUILD.cmake)
@@ -53,17 +50,17 @@ include(lang/wgsl/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_wgsl lib
-  lang/wgsl/builtin_fn.cc
-  lang/wgsl/builtin_fn.h
-  lang/wgsl/diagnostic_rule.cc
-  lang/wgsl/diagnostic_rule.h
-  lang/wgsl/diagnostic_severity.cc
-  lang/wgsl/diagnostic_severity.h
-  lang/wgsl/extension.cc
-  lang/wgsl/extension.h
+  lang/wgsl/allowed_features.h
+  lang/wgsl/enums.cc
+  lang/wgsl/enums.h
+  lang/wgsl/feature_status.cc
+  lang/wgsl/feature_status.h
+  lang/wgsl/reserved_words.cc
+  lang/wgsl/reserved_words.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl lib
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -72,7 +69,10 @@ tint_target_add_dependencies(tint_lang_wgsl lib
   tint_utils_memory
   tint_utils_rtti
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl lib
+  "src_utils"
 )
 
 ################################################################################
@@ -80,12 +80,9 @@ tint_target_add_dependencies(tint_lang_wgsl lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_test test
-  lang/wgsl/diagnostic_rule_test.cc
-  lang/wgsl/diagnostic_severity_test.cc
-  lang/wgsl/extension_test.cc
+  lang/wgsl/allowed_features_test.cc
+  lang/wgsl/enums_test.cc
   lang/wgsl/language_feature_status_test.cc
-  lang/wgsl/language_feature_test.cc
-  lang/wgsl/wgsl_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_test test
@@ -96,29 +93,25 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
-  tint_lang_wgsl_common
-  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_ir_to_program
   tint_lang_wgsl_writer_raise
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_wgsl_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)
@@ -136,89 +129,6 @@ endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_lang_wgsl_test test
-    tint_lang_wgsl_writer
-  )
-endif(TINT_BUILD_WGSL_WRITER)
-
-################################################################################
-# Target:    tint_lang_wgsl_bench
-# Kind:      bench
-################################################################################
-tint_add_target(tint_lang_wgsl_bench bench
-  lang/wgsl/diagnostic_rule_bench.cc
-  lang/wgsl/diagnostic_severity_bench.cc
-  lang/wgsl/extension_bench.cc
-)
-
-tint_target_add_dependencies(tint_lang_wgsl_bench bench
-  tint_lang_wgsl
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-  tint_utils_text
-  tint_utils_traits
-)
-
-tint_target_add_external_dependencies(tint_lang_wgsl_bench bench
-  "google-benchmark"
-)
-
-################################################################################
-# Target:    tint_lang_wgsl_fuzz
-# Kind:      fuzz
-################################################################################
-tint_add_target(tint_lang_wgsl_fuzz fuzz
-)
-
-tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
-  tint_api_common
-  tint_cmd_fuzz_ir_fuzz
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_ir
-  tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_common
-  tint_lang_wgsl_features
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_ir_to_program
-  tint_lang_wgsl_writer_raise
-  tint_utils_bytes
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_id
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-  tint_utils_traits
-)
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
-    tint_lang_wgsl_reader_program_to_ir
-  )
-endif(TINT_BUILD_WGSL_READER)
-
-if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-  tint_target_add_sources(tint_lang_wgsl_fuzz fuzz
-    "lang/wgsl/ir_roundtrip_fuzz.cc"
-  )
-endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-
-if(TINT_BUILD_WGSL_WRITER)
-  tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
     tint_lang_wgsl_writer
   )
 endif(TINT_BUILD_WGSL_WRITER)

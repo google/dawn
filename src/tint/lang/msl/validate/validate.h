@@ -36,9 +36,8 @@ namespace tint::msl::validate {
 /// The version of MSL to validate against.
 /// Note: these must kept be in ascending order
 enum class MslVersion {
-    kMsl_1_2,
-    kMsl_2_1,
     kMsl_2_3,
+    kMsl_3_2,
 };
 
 /// MslVersion less-than operator

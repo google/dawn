@@ -47,3 +47,25 @@ Toggles may be enabled/disabled in different ways.
 
     Setting `DAWN_DEBUG_BREAK_ON_ERROR` to a non-empty, non-zero value will execute a debug breakpoint
     instruction ([`dawn::Breakpoint()`](https://source.chromium.org/chromium/chromium/src/+/main:third_party/dawn/src/dawn/common/Assert.cpp?q=dawn::Breakpoint)) as soon as any type of error is generated.
+
+## Tracing Native GPU API usage
+
+Setting the environment variable `DAWN_TRACE_FILE_BASE` to some filename
+tells dawn to save a GPU trace. Setting `DAWN_TRACE_DEVICE_FILTER` to some
+string lets you filter which devices are traced based on the device's label.
+If `DAWN_TRACE_DEVICE_FILTER` is set then, if the label contains that substring
+the device will be traced. Otherwise all devices are traced.
+
+Tracing happens from device creation until device destruction.
+
+Note that tracing is not currently implemented on all backends.
+
+* DirectX11 - not yet implemented
+* DirectX12 - not yet implemented
+* OpenGL - not yet implemented
+* Metal - implemented.
+
+  Saves a .gputrace file that can be loaded into XCode's Metal Debugger.
+
+* Vulkan - not yet implemented
+

@@ -126,7 +126,7 @@ ResultOrError<VulkanGlobalInfo> GatherGlobalInfo(const VulkanFunctions& vkFuncti
         MarkPromotedExtensions(&info.extensions, info.apiVersion);
         info.extensions = EnsureDependencies(info.extensions);
 
-        for (VulkanLayer layer : IterateBitSet(info.layers)) {
+        for (VulkanLayer layer : info.layers) {
             DAWN_TRY_ASSIGN(
                 info.layerExtensions[layer],
                 GatherInstanceExtensions(GetVulkanLayerInfo(layer).name, vkFunctions, knownExts));
@@ -230,7 +230,8 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         }
 
         MarkPromotedExtensions(&info.extensions, info.properties.apiVersion);
-        info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions);
+        info.extensions =
+            EnsureDependencies(info.extensions, globalInfo.extensions, info.properties.apiVersion);
     }
 
     // Gather general and extension features and properties
@@ -304,6 +305,12 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES);
         }
 
+        if (info.extensions[DeviceExt::DemoteToHelperInvocation]) {
+            featuresChain.Add(
+                &info.demoteToHelperInvocationFeatures,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT);
+        }
+
         if (info.extensions[DeviceExt::Robustness2]) {
             featuresChain.Add(&info.robustness2Features,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
@@ -317,11 +324,6 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         // Check subgroup features and properties
         propertiesChain.Add(&info.subgroupProperties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES);
-        if (info.extensions[DeviceExt::ShaderSubgroupUniformControlFlow]) {
-            featuresChain.Add(
-                &info.shaderSubgroupUniformControlFlowFeatures,
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR);
-        }
         if (info.extensions[DeviceExt::ShaderSubgroupExtendedTypes]) {
             featuresChain.Add(
                 &info.shaderSubgroupExtendedTypes,
@@ -334,6 +336,19 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT);
         }
 
+        if (info.extensions[DeviceExt::VulkanMemoryModel]) {
+            featuresChain.Add(&info.vulkanMemoryModelFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES);
+        }
+
+        if (info.extensions[DeviceExt::CooperativeMatrix]) {
+            featuresChain.Add(&info.cooperativeMatrixFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_FEATURES_KHR);
+            propertiesChain.Add(
+                &info.cooperativeMatrixProperties,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_PROPERTIES_KHR);
+        }
+
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
         // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
         // because these extensions (transitively) depend on it in `EnsureDependencies`
@@ -342,6 +357,28 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         info.features = features2.features;
     } else {
         vkFunctions.GetPhysicalDeviceFeatures(vkPhysicalDevice, &info.features);
+    }
+
+    // A Vulkan loader that doesn't know about the VK_KHR_cooperative_matrix could return a null
+    // proc, but still let the device advertise the extension. In that case the extension is
+    // unusable so we disable it.
+    if (vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR == nullptr) {
+        info.extensions.reset(DeviceExt::CooperativeMatrix);
+    }
+    if (info.extensions[DeviceExt::CooperativeMatrix]) {
+        uint32_t count = 0;
+        DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
+                                    vkPhysicalDevice, &count, nullptr),
+                                "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
+
+        info.cooperativeMatrixConfigs.resize(count);
+        for (auto& properties : info.cooperativeMatrixConfigs) {
+            properties.sType = VK_STRUCTURE_TYPE_COOPERATIVE_MATRIX_PROPERTIES_KHR;
+            properties.pNext = nullptr;
+        }
+        DAWN_TRY(CheckVkSuccess(vkFunctions.GetPhysicalDeviceCooperativeMatrixPropertiesKHR(
+                                    vkPhysicalDevice, &count, info.cooperativeMatrixConfigs.data()),
+                                "vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR"));
     }
 
     // TODO(cwallez@chromium.org): gather info about formats

@@ -83,13 +83,15 @@ SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
       } {}
 
 SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
-                                                 const char* label,
+                                                 StringView label,
                                                  const SharedTextureMemoryProperties& properties)
     : SharedResourceMemory(device, label), mProperties(properties) {
     // Reify properties to ensure we don't expose capabilities not supported by the device.
     const Format& internalFormat = device->GetValidInternalFormat(mProperties.format);
     if (internalFormat.format != wgpu::TextureFormat::External) {
-        if (!internalFormat.supportsStorageUsage || internalFormat.IsMultiPlanar()) {
+        bool supportsStorageUsage = internalFormat.supportsReadOnlyStorageUsage ||
+                                    internalFormat.supportsWriteOnlyStorageUsage;
+        if (!supportsStorageUsage || internalFormat.IsMultiPlanar()) {
             mProperties.usage = mProperties.usage & ~wgpu::TextureUsage::StorageBinding;
         }
         if (!internalFormat.isRenderable ||
@@ -165,8 +167,9 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
+    TextureDescriptor reifiedDescriptor = rawDescriptor->WithTrivialFrontendDefaults();
     UnpackedPtr<TextureDescriptor> descriptor;
-    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(&reifiedDescriptor));
 
     // Validate that there is one 2D, single-sampled subresource
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,

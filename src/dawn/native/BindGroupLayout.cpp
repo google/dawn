@@ -32,7 +32,7 @@
 namespace dawn::native {
 
 BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                         const char* label,
+                                         StringView label,
                                          Ref<BindGroupLayoutInternalBase> internal,
                                          PipelineCompatibilityToken pipelineCompatibilityToken)
     : ApiObjectBase(device, label),
@@ -43,15 +43,19 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
 
 BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                          ObjectBase::ErrorTag tag,
-                                         const char* label)
+                                         StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 ObjectType BindGroupLayoutBase::GetType() const {
     return ObjectType::BindGroupLayout;
 }
 
+bool BindGroupLayoutBase::IsEmpty() const {
+    return mInternalLayout == nullptr || mInternalLayout->IsEmpty();
+}
+
 // static
-Ref<BindGroupLayoutBase> BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
+Ref<BindGroupLayoutBase> BindGroupLayoutBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new BindGroupLayoutBase(device, ObjectBase::kError, label));
 }
 

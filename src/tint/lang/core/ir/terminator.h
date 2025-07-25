@@ -42,6 +42,10 @@ namespace tint::core::ir {
 /// The base class of all instructions that terminate a block.
 class Terminator : public Castable<Terminator, OperandInstruction<1, 0>> {
   public:
+    /// Constructor
+    /// @param id the instruction id
+    explicit Terminator(Id id);
+
     ~Terminator() override;
 
     /// @returns the offset of the arguments in Operands()

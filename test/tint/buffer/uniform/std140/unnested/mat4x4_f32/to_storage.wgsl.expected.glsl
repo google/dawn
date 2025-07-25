@@ -1,22 +1,17 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform u_block_ubo {
+layout(binding = 0, std140)
+uniform u_block_1_ubo {
   mat4 inner;
-} u;
-
-layout(binding = 1, std430) buffer u_block_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   mat4 inner;
-} s;
-
-void f() {
-  s.inner = u.inner;
-  s.inner[1] = u.inner[0];
-  s.inner[1] = u.inner[0].ywxz;
-  s.inner[0][1] = u.inner[1][0];
-}
-
+} v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  v_1.inner = v.inner;
+  v_1.inner[1u] = v.inner[0u];
+  v_1.inner[1u] = v.inner[0u].ywxz;
+  v_1.inner[0u].y = v.inner[1u].x;
 }

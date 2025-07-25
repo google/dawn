@@ -1,47 +1,68 @@
-uint tint_pack4x8snorm(float4 param_0) {
-  int4 i = int4(round(clamp(param_0, -1.0, 1.0) * 127.0)) & 0xff;
-  return asuint(i.x | i.y << 8 | i.z << 16 | i.w << 24);
-}
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
-
 uint pack4x8snorm_4d22e7() {
   float4 arg_0 = (1.0f).xxxx;
-  uint res = tint_pack4x8snorm(arg_0);
+  int4 v = (int4(round((clamp(arg_0, (-1.0f).xxxx, (1.0f).xxxx) * 127.0f))) & (int(255)).xxxx);
+  uint res = asuint((v.x | ((v.y << 8u) | ((v.z << 16u) | (v.w << 24u)))));
   return res;
 }
 
 void fragment_main() {
-  prevent_dce.Store(0u, asuint(pack4x8snorm_4d22e7()));
-  return;
+  prevent_dce.Store(0u, pack4x8snorm_4d22e7());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+uint pack4x8snorm_4d22e7() {
+  float4 arg_0 = (1.0f).xxxx;
+  int4 v = (int4(round((clamp(arg_0, (-1.0f).xxxx, (1.0f).xxxx) * 127.0f))) & (int(255)).xxxx);
+  uint res = asuint((v.x | ((v.y << 8u) | ((v.z << 16u) | (v.w << 24u)))));
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  prevent_dce.Store(0u, asuint(pack4x8snorm_4d22e7()));
-  return;
+  prevent_dce.Store(0u, pack4x8snorm_4d22e7());
 }
 
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   uint prevent_dce;
 };
-struct tint_symbol_1 {
-  nointerpolation uint prevent_dce : TEXCOORD0;
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  nointerpolation uint VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = pack4x8snorm_4d22e7();
-  return tint_symbol;
+
+uint pack4x8snorm_4d22e7() {
+  float4 arg_0 = (1.0f).xxxx;
+  int4 v = (int4(round((clamp(arg_0, (-1.0f).xxxx, (1.0f).xxxx) * 127.0f))) & (int(255)).xxxx);
+  uint res = asuint((v.x | ((v.y << 8u) | ((v.z << 16u) | (v.w << 24u)))));
+  return res;
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = pack4x8snorm_4d22e7();
+  VertexOutput v_2 = v_1;
+  return v_2;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
+}
+

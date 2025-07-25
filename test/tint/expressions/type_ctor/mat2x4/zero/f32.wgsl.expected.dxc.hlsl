@@ -1,13 +1,13 @@
-static float2x4 m = float2x4((0.0f).xxxx, (0.0f).xxxx);
-RWByteAddressBuffer tint_symbol : register(u0);
 
-void tint_symbol_store(uint offset, float2x4 value) {
-  tint_symbol.Store4((offset + 0u), asuint(value[0u]));
-  tint_symbol.Store4((offset + 16u), asuint(value[1u]));
+static float2x4 m = float2x4((0.0f).xxxx, (0.0f).xxxx);
+RWByteAddressBuffer v : register(u0);
+void v_1(uint offset, float2x4 obj) {
+  v.Store4((offset + 0u), asuint(obj[0u]));
+  v.Store4((offset + 16u), asuint(obj[1u]));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  tint_symbol_store(0u, m);
-  return;
+  v_1(0u, m);
 }
+

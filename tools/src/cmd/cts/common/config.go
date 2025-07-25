@@ -35,6 +35,8 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
+	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"github.com/tidwall/jsonc"
 )
 
@@ -72,6 +74,8 @@ type Config struct {
 	Sheets struct {
 		ID string
 	}
+	OsWrapper oswrapper.OSWrapper
+	Querier   resultsdb.Querier
 }
 
 // TestConfig holds configuration data for a single test type.

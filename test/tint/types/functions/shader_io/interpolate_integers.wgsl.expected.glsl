@@ -1,9 +1,9 @@
+//
+// vert_main
+//
 #version 310 es
 
-layout(location = 0) flat out int i_1;
-layout(location = 1) flat out uint u_1;
-layout(location = 2) flat out ivec4 vi_1;
-layout(location = 3) flat out uvec4 vu_1;
+
 struct Interface {
   int i;
   uint u;
@@ -12,32 +12,30 @@ struct Interface {
   vec4 pos;
 };
 
-Interface vert_main() {
-  Interface tint_symbol = Interface(0, 0u, ivec4(0), uvec4(0u), vec4(0.0f));
-  return tint_symbol;
+layout(location = 0) flat out int tint_interstage_location0;
+layout(location = 1) flat out uint tint_interstage_location1;
+layout(location = 2) flat out ivec4 tint_interstage_location2;
+layout(location = 3) flat out uvec4 tint_interstage_location3;
+Interface vert_main_inner() {
+  return Interface(0, 0u, ivec4(0), uvec4(0u), vec4(0.0f));
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  Interface inner_result = vert_main();
-  i_1 = inner_result.i;
-  u_1 = inner_result.u;
-  vi_1 = inner_result.vi;
-  vu_1 = inner_result.vu;
-  gl_Position = inner_result.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  Interface v = vert_main_inner();
+  tint_interstage_location0 = v.i;
+  tint_interstage_location1 = v.u;
+  tint_interstage_location2 = v.vi;
+  tint_interstage_location3 = v.vu;
+  gl_Position = vec4(v.pos.x, -(v.pos.y), ((2.0f * v.pos.z) - v.pos.w), v.pos.w);
+  gl_PointSize = 1.0f;
 }
+//
+// frag_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 0) flat in int i_1;
-layout(location = 1) flat in uint u_1;
-layout(location = 2) flat in ivec4 vi_1;
-layout(location = 3) flat in uvec4 vu_1;
-layout(location = 0) out int value;
+
 struct Interface {
   int i;
   uint u;
@@ -46,13 +44,14 @@ struct Interface {
   vec4 pos;
 };
 
-int frag_main(Interface inputs) {
+layout(location = 0) flat in int tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 2) flat in ivec4 tint_interstage_location2;
+layout(location = 3) flat in uvec4 tint_interstage_location3;
+layout(location = 0) out int frag_main_loc0_Output;
+int frag_main_inner(Interface inputs) {
   return inputs.i;
 }
-
 void main() {
-  Interface tint_symbol = Interface(i_1, u_1, vi_1, vu_1, gl_FragCoord);
-  int inner_result = frag_main(tint_symbol);
-  value = inner_result;
-  return;
+  frag_main_loc0_Output = frag_main_inner(Interface(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3, gl_FragCoord));
 }

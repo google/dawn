@@ -1,14 +1,14 @@
-struct tint_symbol {
-  precise float4 value : SV_Position;
+struct main_outputs {
+  precise float4 tint_symbol : SV_Position;
 };
+
 
 float4 main_inner() {
   return (0.0f).xxxx;
 }
 
-tint_symbol main() {
-  float4 inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+main_outputs main() {
+  main_outputs v = {main_inner()};
+  return v;
 }
+

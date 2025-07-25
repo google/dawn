@@ -45,6 +45,17 @@ dawn_add_library(
     DEPENDS
         dawn_public_config
 )
+
+if(BUILD_SHARED_LIBS)
+  target_compile_definitions(dawn_headers INTERFACE "WGPU_SHARED_LIBRARY")
+endif()
+
+if (EMSCRIPTEN)
+  add_library(webgpu_c ALIAS emdawnwebgpu_c)
+else()
+  add_library(webgpu_c ALIAS dawn_headers)
+endif()
+
 ###############################################################################
 # Dawn C++ headers
 ###############################################################################
@@ -60,13 +71,19 @@ dawn_add_library(
     UTILITY_TARGET dawn_internal_config
     HEADERS
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp.h"
+        "${DAWN_INCLUDE_DIR}/webgpu/webgpu_cpp_print.h"
         "${DAWN_INCLUDE_DIR}/webgpu/webgpu_enum_class_bitmasks.h"
         ${DAWNCPP_HEADERS_GEN_HEADERS}
     DEPENDS
         dawn::dawn_headers
 )
-add_library(dawncpp ALIAS dawncpp_headers)
-add_library(webgpu_cpp ALIAS dawncpp_headers)
+
+if (EMSCRIPTEN)
+  add_library(webgpu_cpp ALIAS emdawnwebgpu_cpp)
+else()
+  add_library(dawncpp ALIAS dawncpp_headers)
+  add_library(webgpu_cpp ALIAS dawncpp_headers)
+endif()
 
 ###############################################################################
 # Dawn projects
@@ -74,10 +91,13 @@ add_library(webgpu_cpp ALIAS dawncpp_headers)
 
 add_subdirectory(partition_alloc)
 add_subdirectory(common)
-add_subdirectory(platform)
-add_subdirectory(wire)
-add_subdirectory(native)
 add_subdirectory(utils)
+# Only build the rest of Dawn when Emscripten is not the target environment.
+if (NOT EMSCRIPTEN)
+  add_subdirectory(platform)
+  add_subdirectory(wire)
+  add_subdirectory(native)
+endif()
 
 if (DAWN_BUILD_BENCHMARKS)
   add_subdirectory(tests/benchmarks)
@@ -94,30 +114,30 @@ endif()
 
 ###############################################################################
 # libdawn_proc
+#   Only built when not building for Emscripten
 ###############################################################################
 
-DawnJSONGenerator(
-    TARGET "proc"
-    PRINT_NAME "Dawn C++ wrapper"
-    OUTPUT_SOURCES DAWNPROC_GEN_SOURCES
-)
+if (NOT EMSCRIPTEN)
+  DawnJSONGenerator(
+      TARGET "proc"
+      PRINT_NAME "Dawn C++ wrapper"
+      OUTPUT_SOURCES DAWNPROC_GEN_SOURCES
+  )
 
-dawn_add_library(
-  dawn_proc
-  UTILITY_TARGET dawn_internal_config
-  HEADERS
-    "${DAWN_INCLUDE_DIR}/dawn/dawn_thread_dispatch_proc.h"
-    "${DAWN_INCLUDE_DIR}/dawn/dawn_proc.h"
-  SOURCES
-    "${DAWNPROC_GEN_SOURCES}"
-  DEPENDS
-    dawn::dawn_headers
-  PRIVATE_DEPENDS
-    dawn::dawn_common
-)
-target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
-if(BUILD_SHARED_LIBS)
-  target_compile_definitions(dawn_proc PUBLIC "WGPU_SHARED_LIBRARY")
+  dawn_add_library(
+    dawn_proc
+    UTILITY_TARGET dawn_internal_config
+    HEADERS
+      "${DAWN_INCLUDE_DIR}/dawn/dawn_thread_dispatch_proc.h"
+      "${DAWN_INCLUDE_DIR}/dawn/dawn_proc.h"
+    SOURCES
+      "${DAWNPROC_GEN_SOURCES}"
+    DEPENDS
+      dawn::dawn_headers
+    PRIVATE_DEPENDS
+      dawn::dawn_common
+  )
+  target_compile_definitions(dawn_proc PRIVATE "WGPU_IMPLEMENTATION")
 endif()
 
 ###############################################################################

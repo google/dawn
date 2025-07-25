@@ -94,6 +94,8 @@ DescriptorSetAllocator::~DescriptorSetAllocator() {
 }
 
 ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate(BindGroupLayout* layout) {
+    Mutex::AutoLock lock(&mMutex);
+
     if (mAvailableDescriptorPoolIndices.empty()) {
         DAWN_TRY(AllocateDescriptorPool(layout));
     }
@@ -116,26 +118,41 @@ ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate(BindGrou
 }
 
 void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo) {
-    DAWN_ASSERT(allocationInfo != nullptr);
-    DAWN_ASSERT(allocationInfo->set != VK_NULL_HANDLE);
-
-    // We can't reuse the descriptor set right away because the Vulkan spec says in the
-    // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
-    // host execution of the command and the end of the draw/dispatch.
+    bool enqueueDeferredDeallocation = false;
     Device* device = ToBackend(GetDevice());
-    const ExecutionSerial serial = device->GetQueue()->GetPendingCommandSerial();
-    mPendingDeallocations.Enqueue({allocationInfo->poolIndex, allocationInfo->setIndex}, serial);
 
-    if (mLastDeallocationSerial != serial) {
-        device->EnqueueDeferredDeallocation(this);
-        mLastDeallocationSerial = serial;
+    {
+        Mutex::AutoLock lock(&mMutex);
+
+        DAWN_ASSERT(allocationInfo != nullptr);
+        DAWN_ASSERT(allocationInfo->set != VK_NULL_HANDLE);
+
+        // We can't reuse the descriptor set right away because the Vulkan spec says in the
+        // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
+        // host execution of the command and the end of the draw/dispatch.
+        const ExecutionSerial serial = device->GetQueue()->GetPendingCommandSerial();
+        mPendingDeallocations.Enqueue({allocationInfo->poolIndex, allocationInfo->setIndex},
+                                      serial);
+
+        if (mLastDeallocationSerial != serial) {
+            enqueueDeferredDeallocation = true;
+            mLastDeallocationSerial = serial;
+        }
+
+        // Clear the content of allocation so that use after frees are more visible.
+        *allocationInfo = {};
     }
 
-    // Clear the content of allocation so that use after frees are more visible.
-    *allocationInfo = {};
+    if (enqueueDeferredDeallocation) {
+        // Release lock before calling EnqueueDeferredDeallocation() to avoid lock acquisition
+        // order inversion with lock used there.
+        device->EnqueueDeferredDeallocation(this);
+    }
 }
 
 void DescriptorSetAllocator::FinishDeallocation(ExecutionSerial completedSerial) {
+    Mutex::AutoLock lock(&mMutex);
+
     for (const Deallocation& dealloc : mPendingDeallocations.IterateUpTo(completedSerial)) {
         DAWN_ASSERT(dealloc.poolIndex < mDescriptorPools.size());
 

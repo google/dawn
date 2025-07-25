@@ -42,7 +42,7 @@ enum diagnostic_severity {
 ```
 
 These enum declarations can be used by templates to generate an equivalent C++ enum, along with a parser and printer helper method, using the helper template [`src/tint/utils/templates/enums.tmpl.inc`](../../src/tint/utils/templates/enums.tmpl.inc). \
-See [`src/tint/lang/wgsl/extension.h.tmpl`](../../src/tint/lang/wgsl/extension.h.tmpl) as an example.
+See [`src/tint/lang/wgsl/enums.h.tmpl`](../../src/tint/lang/wgsl/enums.h.tmpl) as an example.
 
 Enum declarations can also be used as constraints on type template parameters and overload template parameters.
 

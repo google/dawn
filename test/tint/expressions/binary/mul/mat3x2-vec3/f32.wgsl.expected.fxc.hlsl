@@ -1,18 +1,18 @@
+
 cbuffer cbuffer_data : register(b0) {
   uint4 data[3];
 };
-
-float3x2 data_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = data[scalar_offset / 4];
-  const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = data[scalar_offset_1 / 4];
-  const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = data[scalar_offset_2 / 4];
-  return float3x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)));
+float3x2 v(uint start_byte_offset) {
+  uint4 v_1 = data[(start_byte_offset / 16u)];
+  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  uint4 v_3 = data[((8u + start_byte_offset) / 16u)];
+  float2 v_4 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy)));
+  uint4 v_5 = data[((16u + start_byte_offset) / 16u)];
+  return float3x2(v_2, v_4, asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.zw) : (v_5.xy))));
 }
 
 void main() {
-  float2 x = mul(asfloat(data[2].xyz), data_load(0u));
-  return;
+  float3x2 v_6 = v(0u);
+  float2 x = mul(asfloat(data[2u].xyz), v_6);
 }
+

@@ -15,4 +15,14 @@ fn ret_struct() -> S { return S(); }
 
 @compute @workgroup_size(1)
 fn main() {
+    let a = ret_bool();
+    let b = ret_i32();
+    let c = ret_u32();
+    let d = ret_f32();
+    let e = ret_v2i32();
+    let f = ret_v3u32();
+    let g = ret_v4f32();
+    let h = ret_m2x3();
+    let i = ret_arr();
+    let j = ret_struct();
 }

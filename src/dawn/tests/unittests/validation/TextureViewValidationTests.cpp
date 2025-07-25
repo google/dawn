@@ -945,6 +945,153 @@ TEST_F(TextureViewValidationTest, CreateErrorView) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 }
 
+// Tests that texture view usage is validated for the texture view format and is compatible with the
+// source texture usages
+TEST_F(TextureViewValidationTest, Usage) {
+    wgpu::TextureFormat viewFormats[] = {wgpu::TextureFormat::RGBA8Unorm,
+                                         wgpu::TextureFormat::RGBA8UnormSrgb};
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    textureDescriptor.size.width = kWidth;
+    textureDescriptor.size.height = kHeight;
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.mipLevelCount = 1;
+    textureDescriptor.usage = wgpu::TextureUsage::TextureBinding |
+                              wgpu::TextureUsage::RenderAttachment |
+                              wgpu::TextureUsage::StorageBinding;
+    textureDescriptor.viewFormats = viewFormats;
+    textureDescriptor.viewFormatCount = 2;
+    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+    wgpu::TextureViewDescriptor base2DTextureViewDescriptor;
+    base2DTextureViewDescriptor.format = kDefaultTextureFormat;
+    base2DTextureViewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
+    base2DTextureViewDescriptor.baseMipLevel = 0;
+    base2DTextureViewDescriptor.mipLevelCount = 1;
+    base2DTextureViewDescriptor.baseArrayLayer = 0;
+    base2DTextureViewDescriptor.arrayLayerCount = 1;
+
+    // It is an error to request a usage outside of the source texture's usage
+    {
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        descriptor.usage |= wgpu::TextureUsage::CopyDst;
+        ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+    }
+
+    // It is an error to create a view with RGBA8UnormSrgb and default usage which includes
+    // StorageBinding
+    {
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        descriptor.format = wgpu::TextureFormat::RGBA8UnormSrgb;
+
+        // TODO(363903526): Change this to inherited usage when inherited and explicit usages are
+        // validated the same way.
+        descriptor.usage = textureDescriptor.usage;
+
+        ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
+    }
+
+    // A view can be created for RGBA8UnormSrgb with a compatible subset of usages
+    {
+        wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
+        descriptor.format = wgpu::TextureFormat::RGBA8UnormSrgb;
+        descriptor.usage =
+            wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+        texture.CreateView(&descriptor);
+    }
+}
+
+// Test setting swizzle when creating a texture view requires feature.
+TEST_F(TextureViewValidationTest, SwizzleRequiresFeature) {
+    wgpu::TextureDescriptor textureDesc = {};
+    textureDesc.size = {kWidth, kHeight, kDepth};
+    textureDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::RenderAttachment;
+    textureDesc.format = kDefaultTextureFormat;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    wgpu::TextureComponentSwizzleDescriptor swizzleDesc = {};
+    viewDesc.nextInChain = &swizzleDesc;
+    ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
+}
+
+enum class SwizzleChannel { R, G, B, A };
+
+class ComponentSwizzleTextureViewValidationTests : public ValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureComponentSwizzle};
+    }
+
+    wgpu::TextureComponentSwizzleDescriptor GetIdenticalButOneSwizzleDesc(SwizzleChannel channel) {
+        wgpu::TextureComponentSwizzleDescriptor desc = {};
+        switch (channel) {
+            case (SwizzleChannel::R): {
+                desc.swizzle.r = wgpu::ComponentSwizzle::Zero;
+                break;
+            }
+            case (SwizzleChannel::G): {
+                desc.swizzle.g = wgpu::ComponentSwizzle::One;
+                break;
+            }
+            case (SwizzleChannel::B): {
+                desc.swizzle.b = wgpu::ComponentSwizzle::R;
+                break;
+            }
+            case (SwizzleChannel::A): {
+                desc.swizzle.a = wgpu::ComponentSwizzle::G;
+                break;
+            }
+        }
+        return desc;
+    }
+};
+
+// Test different swizzle values when creating a texture view.
+TEST_F(ComponentSwizzleTextureViewValidationTests, InvalidSwizzle) {
+    wgpu::TextureDescriptor textureDesc = {};
+    textureDesc.size = {kWidth, kHeight, kDepth};
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment;
+    textureDesc.format = kDefaultTextureFormat;
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    wgpu::TextureComponentSwizzleDescriptor swizzleDesc = {};
+    viewDesc.nextInChain = &swizzleDesc;
+
+    std::vector<wgpu::TextureUsage> usages = {
+        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding,
+        wgpu::TextureUsage::TextureBinding};
+
+    for (auto textureUsage : usages) {
+        textureDesc.usage = textureUsage;
+        wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+        // Control case for identical swizzle, always success.
+        {
+            swizzleDesc = wgpu::TextureComponentSwizzleDescriptor{};
+            texture.CreateView(&viewDesc);
+        }
+
+        // Non-identical swizzle cases
+        for (auto changedChannel :
+             {SwizzleChannel::R, SwizzleChannel::G, SwizzleChannel::B, SwizzleChannel::A}) {
+            swizzleDesc = GetIdenticalButOneSwizzleDesc(changedChannel);
+            // CreateView would succeed iif usage doesn't include RENDER_ATTACHMENT
+            // or STORAGE_BINDING.
+            bool expectSuccess = !(textureUsage & (wgpu::TextureUsage::RenderAttachment |
+                                                   wgpu::TextureUsage::StorageBinding));
+            if (expectSuccess) {
+                texture.CreateView(&viewDesc);
+            } else {
+                ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc));
+            }
+        }
+    }
+}
+
 class D32S8TextureViewValidationTests : public ValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

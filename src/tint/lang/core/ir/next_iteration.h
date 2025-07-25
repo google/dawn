@@ -48,13 +48,19 @@ class NextIteration final : public Castable<NextIteration, Terminator> {
     static constexpr size_t kArgsOperandOffset = 0;
 
     /// Constructor (no operands, no loop)
-    NextIteration();
+    /// @param id the instruction id
+    explicit NextIteration(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param loop the loop being iterated
     /// @param args the arguments for the MultiInBlock
-    explicit NextIteration(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+    NextIteration(Id id, ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
+
     ~NextIteration() override;
+
+    /// @copydoc Instruction::Destroy()
+    void Destroy() override;
 
     /// @copydoc Instruction::Clone()
     NextIteration* Clone(CloneContext& ctx) override;

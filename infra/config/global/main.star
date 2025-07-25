@@ -32,6 +32,7 @@ main.star: lucicfg configuration for Dawn's standalone builers.
 """
 
 load("//project.star", "ACTIVE_MILESTONES")
+load("//constants.star", "siso")
 
 # Use LUCI Scheduler BBv2 names and add Scheduler realms configs.
 lucicfg.enable_experiment("crbug.com/1182002")
@@ -46,7 +47,6 @@ luci.project(
     notify = "luci-notify.appspot.com",
     scheduler = "luci-scheduler.appspot.com",
     swarming = "chromium-swarm.appspot.com",
-    tricium = "tricium-prod.appspot.com",
     acls = [
         acl.entry(
             roles = [
@@ -61,7 +61,10 @@ luci.project(
             roles = [
                 acl.SCHEDULER_OWNER,
             ],
-            groups = "project-dawn-admins",
+            groups = [
+                "project-dawn-admins",
+                "project-dawn-schedulers",
+            ],
         ),
         acl.entry(
             roles = [
@@ -75,9 +78,13 @@ luci.project(
             roles = "role/configs.validator",
             users = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
         ),
+        # Allow any Dawn build to trigger tests running under the testing service
+        # used on shared Chromium testing pools.
         luci.binding(
             roles = "role/swarming.taskServiceAccount",
-            users = "dawn-automated-expectations@chops-service-accounts.iam.gserviceaccount.com",
+            users = [
+                "chromium-tester@chops-service-accounts.iam.gserviceaccount.com",
+            ],
         ),
     ],
 )
@@ -99,23 +106,11 @@ luci.bucket(
     ],
 )
 
-# Allow LED users to trigger swarming tasks directly when debugging ci
-# builders.
-luci.binding(
-    realm = "ci",
-    roles = "role/swarming.taskTriggerer",
-    groups = "flex-ci-led-users",
-)
-
 luci.bucket(
     name = "try",
     acls = [
         acl.entry(
             acl.BUILDBUCKET_TRIGGERER,
-            # Allow Tricium prod to trigger analyzer tryjobs.
-            users = [
-                "tricium-prod@appspot.gserviceaccount.com",
-            ],
             groups = [
                 "project-dawn-tryjob-access",
                 "service-account-cq",
@@ -130,6 +125,85 @@ luci.binding(
     realm = "try",
     roles = "role/swarming.taskTriggerer",
     groups = "flex-try-led-users",
+)
+
+# Shadow buckets for LED jobs.
+luci.bucket(
+    name = "ci.shadow",
+    shadows = "ci",
+    constraints = luci.bucket_constraints(
+        pools = ["luci.flex.ci", "luci.chromium.gpu.ci"],
+    ),
+    bindings = [
+        luci.binding(
+            roles = "role/buildbucket.creator",
+            groups = [
+                "mdb/chrome-build-access-sphinx",
+                "mdb/chrome-troopers",
+                "chromium-led-users",
+                "flex-ci-led-users",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        luci.binding(
+            roles = "role/buildbucket.triggerer",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        # Allow ci builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
+    dynamic = True,
+)
+
+luci.bucket(
+    name = "try.shadow",
+    shadows = "try",
+    constraints = luci.bucket_constraints(
+        pools = ["luci.flex.try", "luci.chromium.gpu.try"],
+        service_accounts = [
+            "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        ],
+    ),
+    bindings = [
+        luci.binding(
+            roles = "role/buildbucket.creator",
+            groups = [
+                "mdb/chrome-build-access-sphinx",
+                "mdb/chrome-troopers",
+                "chromium-led-users",
+                "flex-ci-led-users",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        luci.binding(
+            roles = "role/buildbucket.triggerer",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        # Allow try builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            groups = [
+                "project-dawn-tryjob-access",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
+    dynamic = True,
 )
 
 os_category = struct(
@@ -152,27 +226,11 @@ def get_dimension(os, builder_name = None):
     if os.category == os_category.LINUX:
         return "Ubuntu-22.04"
     elif os.category == os_category.MAC:
-        if "cmake" in builder_name:
-            # CMake build runs Tint e2e tests, which must run on 11+ where the metal
-            # compiler (xcrun) supports texel fetch (chromium_experimental_framebuffer_fetch)
-            return "Mac-11|Mac-12|Mac-13"
-        else:
-            return "Mac-10.15|Mac-11"
+        return "Mac-12|Mac-13|Mac-14|Mac-15"
     elif os.category == os_category.WINDOWS:
         return "Windows-10"
 
     return "Invalid Dimension"
-
-reclient = struct(
-    instance = struct(
-        DEFAULT_TRUSTED = "rbe-chromium-trusted",
-        DEFAULT_UNTRUSTED = "rbe-chromium-untrusted",
-    ),
-    jobs = struct(
-        HIGH_JOBS_FOR_CI = 250,
-        LOW_JOBS_FOR_CQ = 150,
-    ),
-)
 
 # File exclusion filters meant for use on cmake and msvc trybots since these
 # files do not affect compilation for either.
@@ -228,18 +286,6 @@ def get_presubmit_executable():
         cipd_version = "refs/heads/main",
     )
 
-def get_tricium_executable():
-    """Get standard executable for tricium
-
-    Returns:
-      A luci.recipe
-    """
-    return luci.recipe(
-        name = "dawn/analysis",
-        cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
-        cipd_version = "refs/heads/main",
-    )
-
 def get_os_from_arg(arg):
     """Get OS enum for a builder name string
 
@@ -273,9 +319,6 @@ def get_default_caches(os, clang):
     if os.category == os_category.MAC:
         # Cache for mac_toolchain tool and XCode.app
         caches.append(swarming.cache(name = "osx_sdk", path = "osx_sdk"))
-    elif os.category == os_category.WINDOWS:
-        # Cache for win_toolchain tool
-        caches.append(swarming.cache(name = "win_toolchain", path = "win_toolchain"))
 
     return caches
 
@@ -296,7 +339,7 @@ def get_default_dimensions(os, builder_name):
 
     return dimensions
 
-def get_common_properties(os, clang, reclient_instance, reclient_jobs):
+def get_common_properties(os, clang, rbe_project, remote_jobs):
     """Add the common properties for a builder that don't depend on being CI vs Try
 
     Args:
@@ -308,14 +351,25 @@ def get_common_properties(os, clang, reclient_instance, reclient_jobs):
     properties = {}
     msvc = os.category == os_category.WINDOWS and not clang
 
+    properties = {
+        "$build/siso": {
+            "project": rbe_project,
+            "configs": ["builder"],
+            "enable_cloud_monitoring": True,
+            "enable_cloud_profiler": True,
+            "enable_cloud_trace": True,
+            "metrics_project": "chromium-reclient-metrics",
+        },
+    }
     if not msvc:
         reclient_props = {
-            "instance": reclient_instance,
-            "jobs": reclient_jobs,
+            "instance": rbe_project,
+            "jobs": remote_jobs,
             "metrics_project": "chromium-reclient-metrics",
             "scandeps_server": True,
         }
         properties["$build/reclient"] = reclient_props
+        properties["$build/siso"]["remote_jobs"] = remote_jobs
 
     return properties
 
@@ -335,10 +389,20 @@ def add_ci_builder(name, os, properties):
     properties_ci = get_common_properties(
         os,
         clang,
-        reclient.instance.DEFAULT_TRUSTED,
-        reclient.jobs.HIGH_JOBS_FOR_CI,
+        siso.project.DEFAULT_TRUSTED,
+        siso.remote_jobs.DEFAULT,
     )
+    # TODO(crbug.com/343503161): Remove sheriff_rotations after SoM is updated.
+    properties_ci["sheriff_rotations"] = ["dawn"]
+    properties_ci["gardener_rotations"] = ["dawn"]
     properties_ci.update(properties)
+    shadow_properties_ci = get_common_properties(
+        os,
+        clang,
+        siso.project.DEFAULT_UNTRUSTED,
+        siso.remote_jobs.DEFAULT,
+    )
+    shadow_properties_ci.update(properties)
     schedule_ci = None
     if fuzzer:
         schedule_ci = "0 0 0 * * * *"
@@ -356,6 +420,8 @@ def add_ci_builder(name, os, properties):
         caches = get_default_caches(os, clang),
         notifies = ["gardener-notifier"],
         service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
+        shadow_service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+        shadow_properties = shadow_properties_ci,
     )
 
 def add_try_builder(name, os, properties):
@@ -373,13 +439,10 @@ def add_try_builder(name, os, properties):
     properties_try = get_common_properties(
         os,
         clang,
-        reclient.instance.DEFAULT_UNTRUSTED,
-        reclient.jobs.LOW_JOBS_FOR_CQ,
+        siso.project.DEFAULT_UNTRUSTED,
+        siso.remote_jobs.LOW_JOBS_FOR_CQ,
     )
     properties_try.update(properties)
-    properties_try["$depot_tools/bot_update"] = {
-        "apply_patch_on_gclient": True,
-    }
     luci.builder(
         name = name,
         bucket = "try",
@@ -387,25 +450,6 @@ def add_try_builder(name, os, properties):
         properties = properties_try,
         dimensions = dimensions_try,
         caches = get_default_caches(os, clang),
-        service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
-    )
-
-def add_tricium_builder():
-    """Add a Try builder
-    """
-    luci.builder(
-        name = "dawn_analysis",
-        bucket = "try",
-        executable = get_tricium_executable(),
-        properties = {
-            "builder_group": "tryserver.client.dawn",
-        },
-        dimensions = {
-            "cores": "8",
-            "cpu": "x86-64",
-            "os": "Ubuntu-20.04",
-            "pool": "luci.flex.try",
-        },
         service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
 
@@ -570,7 +614,7 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
             builder = "dawn:try/" + name,
         )
 
-def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False):
+def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False, disable_reuse = False):
     for milestone, details in ACTIVE_MILESTONES.items():
         if os not in details.platforms:
             continue
@@ -580,6 +624,7 @@ def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_onl
             cq_group = "Dawn-CQ-" + milestone,
             builder = "{}:try/{}".format(details.chromium_project, builder_name),
             includable_only = includable_only,
+            disable_reuse = disable_reuse,
         )
 
 # We use the DEPS version for branches because ToT builders do not make sense on
@@ -655,39 +700,21 @@ def chromium_dawn_tryjob(os, arch = None):
         )
         _add_branch_verifiers(_os_arch_to_branch_builder[os], os)
 
-def tricium_dawn_tryjob():
-    """Adds a tryjob that tests against Chromium
-
-    Args:
-      os: string for the OS, should be one or linux|mac|win
-      arch: string for the arch, or None
-    """
-
-    add_tricium_builder()
-
-    luci.cq_tryjob_verifier(
-        cq_group = "Dawn-CQ",
-        builder = "dawn:try/dawn_analysis",
-        owner_whitelist = ["project-dawn-tryjob-access"],
-        mode_allowlist = [cq.MODE_ANALYZER_RUN],
-    )
-
+def clang_tidy_dawn_tryjob():
+    """Adds a tryjob that runs clang tidy on new patchset upload."""
     luci.cq_tryjob_verifier(
         cq_group = "Dawn-CQ",
         builder = "chromium:try/tricium-clang-tidy",
         owner_whitelist = ["project-dawn-tryjob-access"],
-        mode_allowlist = [cq.MODE_ANALYZER_RUN],
+        experiment_percentage = 100,
+        disable_reuse = True,
+        mode_allowlist = [cq.MODE_NEW_PATCHSET_RUN],
         location_filters = [
-            cq.location_filter(path_regexp = ".+\\.h"),
-            cq.location_filter(path_regexp = ".+\\.c"),
-            cq.location_filter(path_regexp = ".+\\.cc"),
-            cq.location_filter(path_regexp = ".+\\.cpp"),
+            cq.location_filter(path_regexp = r".+\.h"),
+            cq.location_filter(path_regexp = r".+\.c"),
+            cq.location_filter(path_regexp = r".+\.cc"),
+            cq.location_filter(path_regexp = r".+\.cpp"),
         ],
-    )
-
-    luci.list_view_entry(
-        list_view = "try",
-        builder = "try/dawn_analysis",
     )
 
 luci.gitiles_poller(
@@ -716,9 +743,6 @@ luci.builder(
     properties = {
         "repo_name": "dawn",
         "runhooks": True,
-        "$depot_tools/bot_update": {
-            "apply_patch_on_gclient": True,
-        },
     },
     service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
 )
@@ -726,8 +750,8 @@ luci.builder(
 luci.builder(
     name = "cts-roller",
     bucket = "ci",
-    # Run at 5 UTC - which is 10pm PST
-    schedule = "0 5 * * *",
+    # Run at 5 UTC on weekdays - which is 10pm PST
+    schedule = "0 5 * * 1-5",
     executable = luci.recipe(
         name = "dawn/roll_cts",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
@@ -742,6 +766,9 @@ luci.builder(
     properties = {
         "repo_name": "dawn",
         "runhooks": True,
+        # TODO(crbug.com/343503161): Remove sheriff_rotations after SoM is updated.
+        "sheriff_rotations": ["dawn"],
+        "gardener_rotations": ["dawn"],
     },
     caches = [
         swarming.cache("golang"),
@@ -793,11 +820,17 @@ chromium_dawn_tryjob("win", "arm64")
 chromium_dawn_tryjob("android", "arm")
 chromium_dawn_tryjob("android", "arm64")
 
-tricium_dawn_tryjob()
+clang_tidy_dawn_tryjob()
 
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",
     builder = "chromium:try/dawn-try-linux-x64-intel-uhd770-rel",
+    includable_only = True,
+)
+
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-try-win-x64-intel-uhd770-rel",
     includable_only = True,
 )
 
@@ -852,6 +885,21 @@ luci.cq_tryjob_verifier(
     includable_only = True,
 )
 
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/linux-dawn-nvidia-1660-exp-rel",
+    includable_only = True,
+)
+
+# This is separate from the "presubmit" builder since we need branch-specific
+# branch builders unlike stock presubmit.
+luci.cq_tryjob_verifier(
+    cq_group = "Dawn-CQ",
+    builder = "chromium:try/dawn-chromium-presubmit",
+    disable_reuse = True,
+)
+_add_branch_verifiers("dawn-chromium-presubmit", "linux", min_milestone = 130, disable_reuse = True)
+
 # Views
 
 luci.milo(
@@ -876,6 +924,7 @@ luci.cq(
     status_host = "chromium-cq-status.appspot.com",
     submit_max_burst = 4,
     submit_burst_delay = 480 * time.second,
+    gerrit_listener_type = cq.GERRIT_LISTENER_TYPE_LEGACY_POLLER,
 )
 
 def _create_dawn_cq_group(name, refs, refs_exclude = None):
@@ -889,10 +938,14 @@ def _create_dawn_cq_group(name, refs, refs_exclude = None):
         acls = [
             acl.entry(
                 acl.CQ_COMMITTER,
-                groups = "project-dawn-committers",
+                groups = "project-dawn-submit-access",
             ),
             acl.entry(
                 acl.CQ_DRY_RUNNER,
+                groups = "project-dawn-tryjob-access",
+            ),
+            acl.entry(
+                acl.CQ_NEW_PATCHSET_RUN_TRIGGERER,
                 groups = "project-dawn-tryjob-access",
             ),
         ],
@@ -928,3 +981,7 @@ _create_dawn_cq_group(
     [details.ref for details in ACTIVE_MILESTONES.values()],
 )
 _create_branch_groups()
+
+# Handle any other builders defined in other files.
+exec("//gn_standalone_ci.star")
+exec("//gn_standalone_try.star")

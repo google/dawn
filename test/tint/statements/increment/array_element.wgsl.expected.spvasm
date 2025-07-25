@@ -1,44 +1,50 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 21
+; Generator: Google Tint Compiler; 1
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
+         %20 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %a_block "a_block"
-               OpMemberName %a_block 0 "inner"
-               OpName %a "a"
-               OpName %unused_entry_point "unused_entry_point"
+               OpMemberName %a_block_tint_explicit_layout 0 "inner"
+               OpName %a_block_tint_explicit_layout "a_block_tint_explicit_layout"
                OpName %main "main"
-               OpDecorate %a_block Block
-               OpMemberDecorate %a_block 0 Offset 0
+               OpName %unused_entry_point "unused_entry_point"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpDecorate %a DescriptorSet 0
-               OpDecorate %a Binding 0
+               OpMemberDecorate %a_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %a_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-    %a_block = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_a_block = OpTypePointer StorageBuffer %a_block
-          %a = OpVariable %_ptr_StorageBuffer_a_block StorageBuffer
+%a_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_a_block_tint_explicit_layout = OpTypePointer StorageBuffer %a_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_a_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
+          %8 = OpTypeFunction %void
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
      %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-     %uint_1 = OpConstant %uint 1
-%unused_entry_point = OpFunction %void None %6
+       %main = OpFunction %void None %8
           %9 = OpLabel
+         %10 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %13 = OpArrayLength %uint %1 0
+         %14 = OpISub %uint %13 %uint_1
+         %16 = OpBitcast %uint %int_1
+         %19 = OpExtInst %uint %20 UMin %16 %14
+         %21 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %19
+         %23 = OpLoad %uint %21 None
+         %24 = OpIAdd %uint %23 %uint_1
+               OpStore %21 %24 None
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %6
-         %11 = OpLabel
-         %16 = OpAccessChain %_ptr_StorageBuffer_uint %a %uint_0 %int_1
-         %17 = OpAccessChain %_ptr_StorageBuffer_uint %a %uint_0 %int_1
-         %18 = OpLoad %uint %17
-         %20 = OpIAdd %uint %18 %uint_1
-               OpStore %16 %20
+%unused_entry_point = OpFunction %void None %8
+         %26 = OpLabel
                OpReturn
                OpFunctionEnd

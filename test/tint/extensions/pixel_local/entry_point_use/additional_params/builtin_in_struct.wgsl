@@ -1,4 +1,4 @@
-// flags: --pixel_local_attachments 0=1,1=6,2=3 --pixel_local_attachment_formats 0=R32Uint,1=R32Sint,2=R32Float
+// flags: --pixel-local-attachments 0=1,1=6,2=3 --pixel-local-attachment-formats 0=R32Uint,1=R32Sint,2=R32Float
 enable chromium_experimental_pixel_local;
 
 struct PixelLocal {

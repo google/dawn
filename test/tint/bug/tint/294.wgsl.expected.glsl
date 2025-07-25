@@ -1,17 +1,17 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
+
 struct Light {
   vec3 position;
-  uint pad;
+  uint tint_pad_0;
   vec3 colour;
-  uint pad_1;
+  uint tint_pad_1;
 };
 
-layout(binding = 1, std430) buffer Lights_ssbo {
+layout(binding = 0, std430)
+buffer Lights_1_ssbo {
   Light light[];
 } lights;
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

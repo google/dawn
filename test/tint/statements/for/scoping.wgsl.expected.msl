@@ -1,15 +1,16 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
 void f() {
-  TINT_ISOLATE_UB(tint_volatile_true) for(int must_not_collide = 0; ; ) {
-    break;
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int must_not_collide = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      break;
+    }
   }
   int must_not_collide = 0;
 }
-

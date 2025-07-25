@@ -30,28 +30,21 @@
 #include "dawn/samples/SampleUtils.h"
 
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
-wgpu::Device device;
-wgpu::Queue queue;
-wgpu::SwapChain swapchain;
+class HelloTriangleSample : public SampleBase {
+  public:
+    using SampleBase::SampleBase;
 
-wgpu::Buffer vertexBuffer;
-wgpu::RenderPipeline pipeline;
+  private:
+    bool SetupImpl() override {
+        static const float vertexData[12] = {
+            0.0f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.0f, 1.0f,
+        };
+        vertexBuffer = dawn::utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
+                                                         wgpu::BufferUsage::Vertex);
 
-void init() {
-    device = CreateCppDawnDevice();
-    queue = device.GetQueue();
-    swapchain = GetSwapChain();
-
-    static const float vertexData[12] = {
-        0.0f, 0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f, -0.5f, 0.0f, 1.0f,
-    };
-    vertexBuffer = dawn::utils::CreateBufferFromData(device, vertexData, sizeof(vertexData),
-                                                     wgpu::BufferUsage::Vertex);
-
-    wgpu::ShaderModule module = dawn::utils::CreateShaderModule(device, R"(
+        wgpu::ShaderModule module = dawn::utils::CreateShaderModule(device, R"(
         @vertex fn vs(@location(0) pos : vec4f) -> @builtin(position) vec4f {
             return pos;
         }
@@ -61,46 +54,47 @@ void init() {
         }
     )");
 
-    dawn::utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.layout = nullptr;
-    descriptor.vertex.module = module;
-    descriptor.vertex.bufferCount = 1;
-    descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
-    descriptor.cBuffers[0].attributeCount = 1;
-    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-    descriptor.cFragment.module = module;
-    descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+        dawn::utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.layout = nullptr;
+        descriptor.vertex.module = module;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        descriptor.cFragment.module = module;
+        descriptor.cTargets[0].format = GetPreferredSurfaceTextureFormat();
 
-    pipeline = device.CreateRenderPipeline(&descriptor);
-}
-
-void frame() {
-    wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
-    dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView});
-
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    {
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetPipeline(pipeline);
-        pass.SetVertexBuffer(0, vertexBuffer);
-        pass.Draw(3);
-        pass.End();
+        pipeline = device.CreateRenderPipeline(&descriptor);
+        return true;
     }
 
-    wgpu::CommandBuffer commands = encoder.Finish();
-    queue.Submit(1, &commands);
-    swapchain.Present();
-    DoFlush();
-}
+    void FrameImpl() override {
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        dawn::utils::ComboRenderPassDescriptor renderPass({surfaceTexture.texture.CreateView()});
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.SetPipeline(pipeline);
+            pass.SetVertexBuffer(0, vertexBuffer);
+            pass.Draw(3);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
+
+    wgpu::Buffer vertexBuffer;
+    wgpu::RenderPipeline pipeline;
+};
 
 int main(int argc, const char* argv[]) {
     if (!InitSample(argc, argv)) {
         return 1;
     }
-    init();
 
-    while (!ShouldQuit()) {
-        frame();
-        dawn::utils::USleep(16000);
-    }
+    HelloTriangleSample* sample = new HelloTriangleSample();
+    sample->Run(16000);
 }

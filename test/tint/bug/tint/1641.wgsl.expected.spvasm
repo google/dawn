@@ -1,64 +1,59 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 39
+; Generator: Google Tint Compiler; 1
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
+         %26 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main" %value %vertex_point_size
-               OpName %value "value"
-               OpName %vertex_point_size "vertex_point_size"
-               OpName %main_inner "main_inner"
-               OpName %Normals "Normals"
+               OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
+               OpName %main_position_Output "main_position_Output"
+               OpName %main___point_size_Output "main___point_size_Output"
                OpMemberName %Normals 0 "f"
-               OpName %var_for_index "var_for_index"
+               OpName %Normals "Normals"
+               OpName %main_inner "main_inner"
+               OpName %zero "zero"
                OpName %main "main"
-               OpDecorate %value BuiltIn Position
-               OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %Normals 0 Offset 0
-               OpDecorate %_arr_Normals_uint_1 ArrayStride 16
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-          %5 = OpConstantNull %v4float
-      %value = OpVariable %_ptr_Output_v4float Output %5
+%main_position_Output = OpVariable %_ptr_Output_v4float Output
 %_ptr_Output_float = OpTypePointer Output %float
-          %8 = OpConstantNull %float
-%vertex_point_size = OpVariable %_ptr_Output_float Output %8
-          %9 = OpTypeFunction %v4float
-        %int = OpTypeInt 32 1
-         %13 = OpConstantNull %int
+%main___point_size_Output = OpVariable %_ptr_Output_float Output
     %v3float = OpTypeVector %float 3
     %Normals = OpTypeStruct %v3float
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_arr_Normals_uint_1 = OpTypeArray %Normals %uint_1
+%_ptr_Private__arr_Normals_uint_1 = OpTypePointer Private %_arr_Normals_uint_1
+    %float_0 = OpConstant %float 0
     %float_1 = OpConstant %float 1
-         %20 = OpConstantComposite %v3float %8 %8 %float_1
-         %21 = OpConstantComposite %Normals %20
-         %22 = OpConstantComposite %_arr_Normals_uint_1 %21
-%_ptr_Function__arr_Normals_uint_1 = OpTypePointer Function %_arr_Normals_uint_1
-         %25 = OpConstantNull %_arr_Normals_uint_1
+         %16 = OpConstantComposite %v3float %float_0 %float_0 %float_1
+         %15 = OpConstantComposite %Normals %16
+         %14 = OpConstantComposite %_arr_Normals_uint_1 %15
+          %7 = OpVariable %_ptr_Private__arr_Normals_uint_1 Private %14
+         %20 = OpTypeFunction %v4float
+        %int = OpTypeInt 32 1
+       %zero = OpConstant %int 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Function_v3float = OpTypePointer Function %v3float
+%_ptr_Private_v3float = OpTypePointer Private %v3float
        %void = OpTypeVoid
          %34 = OpTypeFunction %void
- %main_inner = OpFunction %v4float None %9
-         %11 = OpLabel
-%var_for_index = OpVariable %_ptr_Function__arr_Normals_uint_1 Function %25
-               OpStore %var_for_index %22
-         %28 = OpAccessChain %_ptr_Function_v3float %var_for_index %13 %uint_0
-         %29 = OpLoad %v3float %28
-         %30 = OpCompositeExtract %float %29 0
-         %31 = OpCompositeExtract %float %29 1
-         %32 = OpCompositeExtract %float %29 2
-         %33 = OpCompositeConstruct %v4float %30 %31 %32 %float_1
-               OpReturnValue %33
+ %main_inner = OpFunction %v4float None %20
+         %21 = OpLabel
+         %24 = OpBitcast %uint %zero
+         %25 = OpExtInst %uint %26 UMin %24 %uint_0
+         %28 = OpAccessChain %_ptr_Private_v3float %7 %25 %uint_0
+         %30 = OpLoad %v3float %28 None
+         %31 = OpCompositeConstruct %v4float %30 %float_1
+               OpReturnValue %31
                OpFunctionEnd
        %main = OpFunction %void None %34
-         %37 = OpLabel
-         %38 = OpFunctionCall %v4float %main_inner
-               OpStore %value %38
-               OpStore %vertex_point_size %float_1
+         %35 = OpLabel
+         %36 = OpFunctionCall %v4float %main_inner
+               OpStore %main_position_Output %36 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

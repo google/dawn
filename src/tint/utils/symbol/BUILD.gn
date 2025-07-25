@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -50,15 +51,14 @@ libtint_source_set("symbol") {
     "symbol_table.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
     "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
@@ -68,17 +68,16 @@ if (tint_build_unittests) {
       "symbol_test.cc",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/symbol",
-      "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

@@ -31,7 +31,7 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
@@ -125,17 +125,19 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2(0)"},
+    // http://crbug.com/360147114
+    {"SYNC-HAZARD-WRITE-AFTER-READ",
+     "Submitted access info (submitted_usage: SYNC_CLEAR_TRANSFER_WRITE, command: vkCmdFillBuffer"},
 
-    // http://crbug.com/dawn/1916
+    // https://issues.chromium.org/issues/41479545
     {"SYNC-HAZARD-WRITE-AFTER-WRITE",
-     "Access info (usage: SYNC_COPY_TRANSFER_WRITE, prior_usage: SYNC_COPY_TRANSFER_WRITE, "
-     "write_barriers: 0, command: vkCmdCopyBufferToImage"},
-    {"SYNC-HAZARD-READ-AFTER-WRITE",
-     "Access info (usage: SYNC_COPY_TRANSFER_READ, prior_usage: SYNC_COPY_TRANSFER_WRITE, "
-     "write_barriers: 0, command: vkCmdCopyBufferToImage"},
-    {"SYNC-HAZARD-WRITE-AFTER-WRITE",
-     "Access info (usage: SYNC_IMAGE_LAYOUT_TRANSITION, prior_usage: SYNC_COPY_TRANSFER_WRITE, "
-     "write_barriers: 0, command: vkCmdCopyBufferToImage"},
+     "Access info (usage: SYNC_ACCESS_INDEX_NONE, prior_usage: SYNC_CLEAR_TRANSFER_WRITE, "
+     "write_barriers: "
+     "SYNC_VERTEX_SHADER_SHADER_BINDING_TABLE_READ|SYNC_VERTEX_SHADER_SHADER_SAMPLED_READ|SYNC_"
+     "VERTEX_SHADER_SHADER_STORAGE_READ|SYNC_FRAGMENT_SHADER_SHADER_BINDING_TABLE_READ|SYNC_"
+     "FRAGMENT_SHADER_SHADER_SAMPLED_READ|SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ|SYNC_COMPUTE_"
+     "SHADER_SHADER_BINDING_TABLE_READ|SYNC_COMPUTE_SHADER_SHADER_SAMPLED_READ|SYNC_COMPUTE_SHADER_"
+     "SHADER_STORAGE_READ, command: vkCmdFillBuffer"},
 
     // http://anglebug.com/7513
     {"VUID-VkGraphicsPipelineCreateInfo-pStages-06896",
@@ -229,7 +231,7 @@ void LogCallbackData(LogSeverity severity,
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                     VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
+                     VkDebugUtilsMessageTypeFlagsEXT messageTypes,
                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                      void* pUserData) {
     if (!ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
@@ -261,10 +263,12 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         }
     }
 
-    // We get to this line if no device was associated with the message. Crash so that the failure
-    // is loud and makes tests fail in Debug.
+    // We get to this line if no device was associated with the message. If the message is a backend
+    // validation error then crash as there should have been a debug label on the object. The
+    // driver can also produce errors even with backend validation disabled so those errors are
+    // just logged.
     LogCallbackData(LogSeverity::Error, pCallbackData);
-    DAWN_ASSERT(false);
+    DAWN_ASSERT(!(messageTypes & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT));
 
     return VK_FALSE;
 }
@@ -387,14 +391,11 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
     DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
 
     DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(mFunctions));
-#if DAWN_PLATFORM_IS(WINDOWS)
     if (icd != ICD::SwiftShader && mGlobalInfo.apiVersion < VK_MAKE_API_VERSION(0, 1, 1, 0)) {
-        // See crbug.com/850881, crbug.com/863086, crbug.com/1465064
+        // See crbug.com/850881, crbug.com/863086, crbug.com/1465064, crbug.com/346990068
         return DAWN_INTERNAL_ERROR(
-            "Windows Vulkan 1.0 driver is unsupported. At least Vulkan 1.1 is required on "
-            "Windows.");
+            "Vulkan 1.0 driver is unsupported. At least Vulkan 1.1 is required.");
     }
-#endif
 
     VulkanGlobalKnobs usedGlobalKnobs = {};
     DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateVkInstance(instance));
@@ -450,7 +451,7 @@ ResultOrError<VulkanGlobalKnobs> VulkanInstance::CreateVkInstance(const Instance
     usedKnobs.extensions = extensionsToRequest;
 
     std::vector<const char*> extensionNames;
-    for (InstanceExt ext : IterateBitSet(extensionsToRequest)) {
+    for (InstanceExt ext : extensionsToRequest) {
         const InstanceExtInfo& info = GetInstanceExtInfo(ext);
 
         if (info.versionPromoted > mGlobalInfo.apiVersion) {
@@ -594,11 +595,16 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                 if (instance->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
                     continue;
                 }
+                // This loop can't filter adapters based on SupportsFeatureLevel() since the results
+                // are cached for subsequent calls that might have a different feature level.
                 mPhysicalDevices[icd].push_back(std::move(physicalDevice));
             }
         }
-        physicalDevices.insert(physicalDevices.end(), mPhysicalDevices[icd].begin(),
-                               mPhysicalDevices[icd].end());
+        for (auto& physicalDevice : mPhysicalDevices[icd]) {
+            if (physicalDevice->SupportsFeatureLevel(options->featureLevel, instance)) {
+                physicalDevices.push_back(physicalDevice);
+            }
+        }
     }
     return physicalDevices;
 }

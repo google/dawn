@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 29
+; Generator: Google Tint Compiler; 1
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -9,42 +9,50 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpName %deref "deref"
                OpName %a "a"
+               OpName %a "p"
                OpName %no_deref "no_deref"
                OpName %a_0 "a"
+               OpName %a_0 "p"
                OpName %main "main"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
 %_ptr_Function_v3int = OpTypePointer Function %v3int
           %9 = OpConstantNull %v3int
+%_ptr_Function_int = OpTypePointer Function %int
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Function_int = OpTypePointer Function %int
      %int_42 = OpConstant %int 42
-      %deref = OpFunction %void None %1
+      %deref = OpFunction %void None %3
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_v3int Function %9
-         %13 = OpAccessChain %_ptr_Function_int %a %uint_0
-         %14 = OpAccessChain %_ptr_Function_int %a %uint_0
-         %15 = OpLoad %int %14
-         %17 = OpIAdd %int %15 %int_42
-               OpStore %13 %17
+         %10 = OpAccessChain %_ptr_Function_int %a %uint_0
+         %14 = OpLoad %int %10 None
+         %15 = OpBitcast %uint %14
+         %16 = OpBitcast %uint %int_42
+         %18 = OpIAdd %uint %15 %16
+         %19 = OpBitcast %int %18
+         %20 = OpAccessChain %_ptr_Function_int %a %uint_0
+               OpStore %20 %19 None
                OpReturn
                OpFunctionEnd
-   %no_deref = OpFunction %void None %1
-         %19 = OpLabel
+   %no_deref = OpFunction %void None %3
+         %22 = OpLabel
         %a_0 = OpVariable %_ptr_Function_v3int Function %9
-         %21 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
-         %22 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
-         %23 = OpLoad %int %22
-         %24 = OpIAdd %int %23 %int_42
-               OpStore %21 %24
+         %24 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
+         %25 = OpLoad %int %24 None
+         %26 = OpBitcast %uint %25
+         %27 = OpBitcast %uint %int_42
+         %28 = OpIAdd %uint %26 %27
+         %29 = OpBitcast %int %28
+         %30 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %1
-         %26 = OpLabel
-         %27 = OpFunctionCall %void %deref
-         %28 = OpFunctionCall %void %no_deref
+       %main = OpFunction %void None %3
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %deref
+         %34 = OpFunctionCall %void %no_deref
                OpReturn
                OpFunctionEnd

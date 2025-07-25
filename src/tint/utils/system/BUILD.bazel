@@ -50,19 +50,31 @@ cc_library(
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_is_linux": [
+      "executable_path_linux.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_is_linux_or_tint_build_is_mac": [
       "terminal_posix.cc",
     ],
     "//conditions:default": [],
   }) + select({
+    ":tint_build_is_mac": [
+      "executable_file_mac.cc",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_is_win": [
       "env_windows.cc",
+      "executable_path_windows.cc",
       "terminal_windows.cc",
     ],
     "//conditions:default": [],
   }),
   hdrs = [
     "env.h",
+    "executable_path.h",
     "terminal.h",
   ],
   deps = [
@@ -72,7 +84,7 @@ cc_library(
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/traits",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

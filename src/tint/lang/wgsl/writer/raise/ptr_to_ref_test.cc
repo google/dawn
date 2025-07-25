@@ -32,8 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/transform/helper_test.h"
 
 namespace tint::wgsl::writer::raise {
 namespace {
@@ -41,39 +40,11 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-class WgslWriter_PtrToRefTest : public testing::Test {
+class WgslWriter_PtrToRefTest : public core::ir::transform::TransformTest {
   public:
-    /// Transforms the module, using the PtrToRef transform
-    void Run() {
-        // Validate the input IR.
-        {
-            auto res = core::ir::Validate(mod);
-            EXPECT_EQ(res, Success);
-            if (res != Success) {
-                return;
-            }
-        }
-
-        // Run the transforms.
-        auto result = PtrToRef(mod);
-        EXPECT_EQ(result, Success);
-
-        // Validate the output IR.
-        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes};
-        auto res = core::ir::Validate(mod, caps);
-        EXPECT_EQ(res, Success);
+    void SetUp() override {
+        capabilities = core::ir::Capabilities{core::ir::Capability::kAllowRefTypes};
     }
-
-    /// @returns the transformed module as a disassembled string
-    std::string str() { return "\n" + core::ir::Disassembler(mod).Plain(); }
-
-  protected:
-    /// The test IR module.
-    core::ir::Module mod;
-    /// The test IR builder.
-    core::ir::Builder b{mod};
-    /// The type manager.
-    core::type::Manager& ty{mod.Types()};
 };
 
 TEST_F(WgslWriter_PtrToRefTest, PtrParam_NoChange) {
@@ -92,7 +63,7 @@ TEST_F(WgslWriter_PtrToRefTest, PtrParam_NoChange) {
 
     auto* expect = src;
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -102,7 +73,7 @@ TEST_F(WgslWriter_PtrToRefTest, Var) {
 
     auto* src = R"(
 $B1: {  # root
-  %1:ptr<private, i32, read_write> = var
+  %1:ptr<private, i32, read_write> = var undef
 }
 
 )";
@@ -110,12 +81,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %1:ref<private, i32, read_write> = var
+  %1:ref<private, i32, read_write> = var undef
 }
 
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -130,7 +101,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     auto* src = R"(
 %1 = func():i32 {
   $B1: {
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
     %3:i32 = load %2
     ret %3
   }
@@ -141,14 +112,14 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVar) {
     auto* expect = R"(
 %1 = func():i32 {
   $B1: {
-    %2:ref<function, i32, read_write> = var
+    %2:ref<function, i32, read_write> = var undef
     %3:i32 = load %2
     ret %3
   }
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -164,7 +135,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     auto* src = R"(
 %1 = func():void {
   $B1: {
-    %2:ptr<function, i32, read_write> = var
+    %2:ptr<function, i32, read_write> = var undef
     store %2, 42i
     ret
   }
@@ -175,14 +146,14 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVar) {
     auto* expect = R"(
 %1 = func():void {
   $B1: {
-    %2:ref<function, i32, read_write> = var
+    %2:ref<function, i32, read_write> = var undef
     store %2, 42i
     ret
   }
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -213,7 +184,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -247,7 +218,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -271,7 +242,7 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
 }
 %3 = func():void {
   $B2: {
-    %4:ptr<function, i32, read_write> = var
+    %4:ptr<function, i32, read_write> = var undef
     %5:void = call %1, %4
     ret
   }
@@ -287,7 +258,7 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
 }
 %3 = func():void {
   $B2: {
-    %4:ref<function, i32, read_write> = var
+    %4:ref<function, i32, read_write> = var undef
     %5:ptr<function, i32, read_write> = ref-to-ptr %4
     %6:void = call %1, %5
     ret
@@ -295,7 +266,7 @@ TEST_F(WgslWriter_PtrToRefTest, VarUsedAsPtrArg) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -331,7 +302,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadPtrParamViaLet) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -368,7 +339,7 @@ TEST_F(WgslWriter_PtrToRefTest, StorePtrParamViaLet) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -404,7 +375,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -441,7 +412,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -482,7 +453,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadAccessFromPtrArrayParamViaLet) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -524,7 +495,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreAccessFromPtrArrayParamViaLet) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -555,7 +526,7 @@ TEST_F(WgslWriter_PtrToRefTest, LoadVectorElementFromPtrParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }
@@ -589,7 +560,7 @@ TEST_F(WgslWriter_PtrToRefTest, StoreVectorElementFromPtrParam) {
 }
 )";
 
-    Run();
+    Run(PtrToRef);
 
     EXPECT_EQ(expect, str());
 }

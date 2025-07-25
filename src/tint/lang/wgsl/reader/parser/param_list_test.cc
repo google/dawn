@@ -25,7 +25,6 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/reader/parser/helper_test.h"
 
@@ -116,7 +115,7 @@ TEST_F(WGSLParserTest, ParamList_Attributes) {
     auto attrs_0 = e.value[0]->attributes;
     ASSERT_EQ(attrs_0.Length(), 1u);
     EXPECT_TRUE(attrs_0[0]->Is<ast::BuiltinAttribute>());
-    ast::CheckIdentifier(attrs_0[0]->As<ast::BuiltinAttribute>()->builtin->name, "position");
+    EXPECT_EQ(attrs_0[0]->As<ast::BuiltinAttribute>()->builtin, core::BuiltinValue::kPosition);
 
     ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
     ASSERT_EQ(e.value[0]->source.range.begin.column, 20u);

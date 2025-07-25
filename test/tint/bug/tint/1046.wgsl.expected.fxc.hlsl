@@ -1,9 +1,14 @@
-cbuffer cbuffer_uniforms : register(b0) {
-  uint4 uniforms[10];
+struct Uniforms {
+  float4x4 worldView;
+  float4x4 proj;
+  uint numPointLights;
+  uint color_source;
+  float4 color;
 };
-ByteAddressBuffer pointLights : register(t1);
-SamplerState mySampler : register(s2);
-Texture2D<float4> myTexture : register(t3);
+
+struct FragmentOutput {
+  float4 color;
+};
 
 struct FragmentInput {
   float4 position;
@@ -12,52 +17,49 @@ struct FragmentInput {
   float2 uv;
   float4 color;
 };
-struct FragmentOutput {
-  float4 color;
+
+struct main_outputs {
+  float4 FragmentOutput_color : SV_Target0;
 };
 
-float4 getColor(FragmentInput fragment) {
-  float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  if ((uniforms[8].y == 0u)) {
-    color = fragment.color;
-  } else {
-    if ((uniforms[8].y == 1u)) {
-      color = fragment.normal;
-      color.a = 1.0f;
-    } else {
-      if ((uniforms[8].y == 2u)) {
-        color = asfloat(uniforms[9]);
-      } else {
-        if ((uniforms[8].y == 3u)) {
-          color = myTexture.Sample(mySampler, fragment.uv);
-        }
-      }
-    }
-  }
-  return color;
+struct main_inputs {
+  float4 FragmentInput_view_position : TEXCOORD0;
+  float4 FragmentInput_normal : TEXCOORD1;
+  float2 FragmentInput_uv : TEXCOORD2;
+  float4 FragmentInput_color : TEXCOORD3;
+  float4 FragmentInput_position : SV_Position;
+};
+
+
+cbuffer cbuffer_uniforms : register(b0) {
+  uint4 uniforms[10];
+};
+ByteAddressBuffer pointLights : register(t1);
+SamplerState mySampler : register(s2);
+Texture2D<float4> myTexture : register(t3);
+float4x4 v(uint start_byte_offset) {
+  return float4x4(asfloat(uniforms[(start_byte_offset / 16u)]), asfloat(uniforms[((16u + start_byte_offset) / 16u)]), asfloat(uniforms[((32u + start_byte_offset) / 16u)]), asfloat(uniforms[((48u + start_byte_offset) / 16u)]));
 }
 
-struct tint_symbol_1 {
-  float4 view_position : TEXCOORD0;
-  float4 normal : TEXCOORD1;
-  float2 uv : TEXCOORD2;
-  float4 color : TEXCOORD3;
-  float4 position : SV_Position;
-};
-struct tint_symbol_2 {
-  float4 color : SV_Target0;
-};
+Uniforms v_1(uint start_byte_offset) {
+  float4x4 v_2 = v(start_byte_offset);
+  float4x4 v_3 = v((64u + start_byte_offset));
+  Uniforms v_4 = {v_2, v_3, uniforms[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) % 16u) / 4u)], uniforms[((132u + start_byte_offset) / 16u)][(((132u + start_byte_offset) % 16u) / 4u)], asfloat(uniforms[((144u + start_byte_offset) / 16u)])};
+  return v_4;
+}
 
 FragmentOutput main_inner(FragmentInput fragment) {
   FragmentOutput output = (FragmentOutput)0;
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-  return output;
+  v_1(0u);
+  FragmentOutput v_5 = output;
+  return v_5;
 }
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  FragmentInput tint_symbol_3 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.view_position, tint_symbol.normal, tint_symbol.uv, tint_symbol.color};
-  FragmentOutput inner_result = main_inner(tint_symbol_3);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.color = inner_result.color;
-  return wrapper_result;
+main_outputs main(main_inputs inputs) {
+  FragmentInput v_6 = {float4(inputs.FragmentInput_position.xyz, (1.0f / inputs.FragmentInput_position.w)), inputs.FragmentInput_view_position, inputs.FragmentInput_normal, inputs.FragmentInput_uv, inputs.FragmentInput_color};
+  FragmentOutput v_7 = main_inner(v_6);
+  main_outputs v_8 = {v_7.color};
+  return v_8;
 }
+

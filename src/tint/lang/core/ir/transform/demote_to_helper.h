@@ -28,9 +28,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_
 
-#include <string>
-
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -38,6 +37,11 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kDemoteToHelperCapabilities{
+    core::ir::Capability::kAllowVectorElementPointer,
+    core::ir::Capability::kAllowClipDistancesOnF32, core::ir::Capability::kAllowDuplicateBindings};
 
 /// DemoteToHelper is a transform that emulates demote-to-helper semantics for discard instructions.
 ///

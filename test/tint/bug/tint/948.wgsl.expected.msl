@@ -1,35 +1,19 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
-struct tint_private_vars_struct {
-  float2 tUV;
-  float mt;
-  float4 glFragColor;
-  float2 tileID_1;
-  float2 levelUnits;
-  float2 stageUnits_1;
-  float3 vPosition;
-  float2 vUV;
-};
-
-struct LeftOver_tint_packed_vec3 {
+struct LeftOver_packed_vec3 {
   /* 0x0000 */ float time;
   /* 0x0004 */ uint padding;
   /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
@@ -43,33 +27,64 @@ struct LeftOver_tint_packed_vec3 {
   /* 0x007c */ tint_array<int8_t, 4> tint_pad_1;
 };
 
-struct LeftOver {
-  float time;
-  uint padding;
-  float4x4 worldViewProjection;
-  float2 outputSize;
-  float2 stageSize;
-  float2 spriteMapSize;
-  float stageScale;
-  float spriteCount;
-  float3 colorMul;
+struct tint_module_vars_struct {
+  const constant LeftOver_packed_vec3* x_20;
+  texture2d<float, access::sample> frameMapTexture;
+  sampler frameMapSampler;
+  thread float2* tUV;
+  texture2d<float, access::sample> tileMapsTexture0;
+  sampler tileMapsSampler;
+  texture2d<float, access::sample> tileMapsTexture1;
+  texture2d<float, access::sample> animationMapTexture;
+  sampler animationMapSampler;
+  thread float* mt;
+  texture2d<float, access::sample> spriteSheetTexture;
+  sampler spriteSheetSampler;
+  thread float4* glFragColor;
+  thread float2* tileID_1;
+  thread float2* levelUnits;
+  thread float2* stageUnits_1;
+  thread float3* vPosition;
+  thread float2* vUV;
 };
 
-float4x4 getFrameData_f1_(thread float* const frameID, const constant LeftOver_tint_packed_vec3* const tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, sampler tint_symbol_7) {
+struct main_out {
+  float4 glFragColor_1;
+};
+
+struct main_outputs {
+  float4 main_out_glFragColor_1 [[color(0)]];
+};
+
+struct main_inputs {
+  float2 tUV_param [[user(locn2)]];
+  float2 tileID_1_param [[user(locn5)]];
+  float2 levelUnits_param [[user(locn4)]];
+  float2 stageUnits_1_param [[user(locn3)]];
+  float3 vPosition_param [[user(locn0)]];
+  float2 vUV_param [[user(locn1)]];
+};
+
+float4x4 getFrameData_f1_(thread float* const frameID, tint_module_vars_struct tint_module_vars) {
   float fX = 0.0f;
-  float const x_15 = *(frameID);
-  float const x_25 = (*(tint_symbol_5)).spriteCount;
+  float const x_15 = (*frameID);
+  float const x_25 = (*tint_module_vars.x_20).spriteCount;
   fX = (x_15 / x_25);
   float const x_37 = fX;
-  float4 const x_40 = tint_symbol_6.sample(tint_symbol_7, float2(x_37, 0.0f), bias(0.0f));
+  float2 const v = float2(x_37, 0.0f);
+  float4 const x_40 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v, bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
   float const x_44 = fX;
-  float4 const x_47 = tint_symbol_6.sample(tint_symbol_7, float2(x_44, 0.25f), bias(0.0f));
+  float2 const v_1 = float2(x_44, 0.25f);
+  float4 const x_47 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v_1, bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
   float const x_51 = fX;
-  float4 const x_54 = tint_symbol_6.sample(tint_symbol_7, float2(x_51, 0.5f), bias(0.0f));
-  return float4x4(float4(x_40[0], x_40[1], x_40[2], x_40[3]), float4(x_47[0], x_47[1], x_47[2], x_47[3]), float4(x_54[0], x_54[1], x_54[2], x_54[3]), float4(0.0f));
+  float2 const v_2 = float2(x_51, 0.5f);
+  float4 const x_54 = tint_module_vars.frameMapTexture.sample(tint_module_vars.frameMapSampler, v_2, bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
+  float4 const v_3 = float4(x_40.x, x_40.y, x_40.z, x_40.w);
+  float4 const v_4 = float4(x_47.x, x_47.y, x_47.z, x_47.w);
+  return float4x4(v_3, v_4, float4(x_54.x, x_54.y, x_54.z, x_54.w), float4(0.0f));
 }
 
-void main_1(thread tint_private_vars_struct* const tint_private_vars, const constant LeftOver_tint_packed_vec3* const tint_symbol_8, texture2d<float, access::sample> tint_symbol_9, sampler tint_symbol_10, texture2d<float, access::sample> tint_symbol_11, texture2d<float, access::sample> tint_symbol_12, sampler tint_symbol_13, texture2d<float, access::sample> tint_symbol_14, sampler tint_symbol_15, texture2d<float, access::sample> tint_symbol_16, sampler tint_symbol_17) {
+void main_1(tint_module_vars_struct tint_module_vars) {
   float4 color = 0.0f;
   float2 tileUV = 0.0f;
   float2 tileID = 0.0f;
@@ -89,170 +104,186 @@ void main_1(thread tint_private_vars_struct* const tint_private_vars, const cons
   float alpha = 0.0f;
   float3 mixed = 0.0f;
   color = float4(0.0f);
-  float2 const x_86 = (*(tint_private_vars)).tUV;
+  float2 const x_86 = (*tint_module_vars.tUV);
   tileUV = fract(x_86);
-  float const x_91 = tileUV[1];
-  tileUV[1] = (1.0f - x_91);
-  float2 const x_95 = (*(tint_private_vars)).tUV;
+  float const x_91 = tileUV.y;
+  tileUV.y = (1.0f - x_91);
+  float2 const x_95 = (*tint_module_vars.tUV);
   tileID = floor(x_95);
-  float2 const x_101 = (*(tint_symbol_8)).spriteMapSize;
+  float2 const x_101 = (*tint_module_vars.x_20).spriteMapSize;
   sheetUnits = (float2(1.0f) / x_101);
-  float const x_106 = (*(tint_symbol_8)).spriteCount;
+  float const x_106 = (*tint_module_vars.x_20).spriteCount;
   spriteUnits = (1.0f / x_106);
-  float2 const x_111 = (*(tint_symbol_8)).stageSize;
+  float2 const x_111 = (*tint_module_vars.x_20).stageSize;
   stageUnits = (float2(1.0f) / x_111);
   i = 0;
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-    int const x_122 = i;
-    if ((x_122 < 2)) {
-    } else {
-      break;
-    }
-    int const x_126 = i;
-    switch(x_126) {
-      case 1: {
-        float2 const x_150 = tileID;
-        float2 const x_154 = (*(tint_symbol_8)).stageSize;
-        float4 const x_156 = tint_symbol_9.sample(tint_symbol_10, ((x_150 + float2(0.5f)) / x_154), bias(0.0f));
-        frameID_1 = x_156[0];
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
-      case 0: {
-        float2 const x_136 = tileID;
-        float2 const x_140 = (*(tint_symbol_8)).stageSize;
-        float4 const x_142 = tint_symbol_11.sample(tint_symbol_10, ((x_136 + float2(0.5f)) / x_140), bias(0.0f));
-        frameID_1 = x_142[0];
+      int const x_122 = i;
+      if ((x_122 < 2)) {
+      } else {
         break;
       }
-      default: {
-        break;
-      }
-    }
-    float const x_166 = frameID_1;
-    float const x_169 = (*(tint_symbol_8)).spriteCount;
-    float4 const x_172 = tint_symbol_12.sample(tint_symbol_13, float2(((x_166 + 0.5f) / x_169), 0.0f), bias(0.0f));
-    animationData = x_172;
-    float const x_174 = animationData[1];
-    if ((x_174 > 0.0f)) {
-      float const x_181 = (*(tint_symbol_8)).time;
-      float const x_184 = animationData[2];
-      (*(tint_private_vars)).mt = fmod((x_181 * x_184), 1.0f);
-      f = 0.0f;
-      TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
-        float const x_193 = f;
-        if ((x_193 < 8.0f)) {
-        } else {
-          break;
-        }
-        float const x_197 = animationData[1];
-        float const x_198 = (*(tint_private_vars)).mt;
-        if ((x_197 > x_198)) {
-          float const x_203 = animationData[0];
-          frameID_1 = x_203;
-          break;
-        }
-        float const x_208 = frameID_1;
-        float const x_211 = (*(tint_symbol_8)).spriteCount;
-        float const x_214 = f;
-        float4 const x_217 = float4(0.0f);
-        animationData = x_217;
+      int const x_126 = i;
+      switch(x_126) {
+        case 1:
         {
-          float const x_218 = f;
-          f = (x_218 + 1.0f);
+          float2 const x_150 = tileID;
+          float2 const x_154 = (*tint_module_vars.x_20).stageSize;
+          float4 const x_156 = tint_module_vars.tileMapsTexture1.sample(tint_module_vars.tileMapsSampler, ((x_150 + float2(0.5f)) / x_154), bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
+          frameID_1 = x_156.x;
+          break;
+        }
+        case 0:
+        {
+          float2 const x_136 = tileID;
+          float2 const x_140 = (*tint_module_vars.x_20).stageSize;
+          float4 const x_142 = tint_module_vars.tileMapsTexture0.sample(tint_module_vars.tileMapsSampler, ((x_136 + float2(0.5f)) / x_140), bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
+          frameID_1 = x_142.x;
+          break;
+        }
+        default:
+        {
+          break;
         }
       }
-    }
-    float const x_222 = frameID_1;
-    param = (x_222 + 0.5f);
-    float4x4 const x_225 = getFrameData_f1_(&(param), tint_symbol_8, tint_symbol_14, tint_symbol_15);
-    frameData = x_225;
-    float4 const x_228 = frameData[0];
-    float2 const x_231 = (*(tint_symbol_8)).spriteMapSize;
-    frameSize = (float2(x_228[3], x_228[2]) / x_231);
-    float4 const x_235 = frameData[0];
-    float2 const x_237 = sheetUnits;
-    offset_1 = (float2(x_235[0], x_235[1]) * x_237);
-    float4 const x_241 = frameData[2];
-    float4 const x_244 = frameData[0];
-    ratio = (float2(x_241[0], x_241[1]) / float2(x_244[3], x_244[2]));
-    float const x_248 = frameData[2][2];
-    if ((x_248 == 1.0f)) {
-      float2 const x_252 = tileUV;
-      tileUV = float2(x_252[1], x_252[0]);
-    }
-    int const x_254 = i;
-    if ((x_254 == 0)) {
-      float2 const x_263 = tileUV;
-      float2 const x_264 = frameSize;
-      float2 const x_266 = offset_1;
-      float4 const x_268 = tint_symbol_16.sample(tint_symbol_17, ((x_263 * x_264) + x_266));
-      color = x_268;
-    } else {
-      float2 const x_274 = tileUV;
-      float2 const x_275 = frameSize;
-      float2 const x_277 = offset_1;
-      float4 const x_279 = tint_symbol_16.sample(tint_symbol_17, ((x_274 * x_275) + x_277));
-      nc = x_279;
-      float const x_283 = color[3];
-      float const x_285 = nc[3];
-      alpha = fmin((x_283 + x_285), 1.0f);
-      float4 const x_290 = color;
-      float4 const x_292 = nc;
-      float const x_295 = nc[3];
-      mixed = mix(float3(x_290[0], x_290[1], x_290[2]), float3(x_292[0], x_292[1], x_292[2]), float3(x_295, x_295, x_295));
-      float3 const x_298 = mixed;
-      float const x_299 = alpha;
-      color = float4(x_298[0], x_298[1], x_298[2], x_299);
-    }
-    {
-      int const x_304 = i;
-      i = as_type<int>((as_type<uint>(x_304) + as_type<uint>(1)));
+      float const x_166 = frameID_1;
+      float const x_169 = (*tint_module_vars.x_20).spriteCount;
+      float2 const v_5 = float2(((x_166 + 0.5f) / x_169), 0.0f);
+      float4 const x_172 = tint_module_vars.animationMapTexture.sample(tint_module_vars.animationMapSampler, v_5, bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
+      animationData = x_172;
+      float const x_174 = animationData.y;
+      if ((x_174 > 0.0f)) {
+        float const x_181 = (*tint_module_vars.x_20).time;
+        float const x_184 = animationData.z;
+        (*tint_module_vars.mt) = fmod((x_181 * x_184), 1.0f);
+        f = 0.0f;
+        {
+          uint2 tint_loop_idx_1 = uint2(4294967295u);
+          while(true) {
+            if (all((tint_loop_idx_1 == uint2(0u)))) {
+              break;
+            }
+            float const x_193 = f;
+            if ((x_193 < 8.0f)) {
+            } else {
+              break;
+            }
+            float const x_197 = animationData.y;
+            float const x_198 = (*tint_module_vars.mt);
+            if ((x_197 > x_198)) {
+              float const x_203 = animationData.x;
+              frameID_1 = x_203;
+              break;
+            }
+            float const x_208 = frameID_1;
+            float const x_211 = (*tint_module_vars.x_20).spriteCount;
+            float const x_214 = f;
+            float4 const x_217 = float4(0.0f);
+            animationData = x_217;
+            {
+              uint const tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
+              tint_loop_idx_1.x = tint_low_inc_1;
+              uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
+              float const x_218 = f;
+              f = (x_218 + 1.0f);
+            }
+            continue;
+          }
+        }
+      }
+      float const x_222 = frameID_1;
+      param = (x_222 + 0.5f);
+      float4x4 const x_225 = getFrameData_f1_((&param), tint_module_vars);
+      frameData = x_225;
+      float4 const x_228 = frameData[0u];
+      float2 const x_231 = (*tint_module_vars.x_20).spriteMapSize;
+      frameSize = (float2(x_228.w, x_228.z) / x_231);
+      float4 const x_235 = frameData[0u];
+      float2 const x_237 = sheetUnits;
+      offset_1 = (float2(x_235.x, x_235.y) * x_237);
+      float4 const x_241 = frameData[2u];
+      float4 const x_244 = frameData[0u];
+      float2 const v_6 = float2(x_241.x, x_241.y);
+      ratio = (v_6 / float2(x_244.w, x_244.z));
+      float const x_248 = frameData[2u].z;
+      if ((x_248 == 1.0f)) {
+        float2 const x_252 = tileUV;
+        tileUV = float2(x_252.y, x_252.x);
+      }
+      int const x_254 = i;
+      if ((x_254 == 0)) {
+        float2 const x_263 = tileUV;
+        float2 const x_264 = frameSize;
+        float2 const x_266 = offset_1;
+        float4 const x_268 = tint_module_vars.spriteSheetTexture.sample(tint_module_vars.spriteSheetSampler, ((x_263 * x_264) + x_266));
+        color = x_268;
+      } else {
+        float2 const x_274 = tileUV;
+        float2 const x_275 = frameSize;
+        float2 const x_277 = offset_1;
+        float4 const x_279 = tint_module_vars.spriteSheetTexture.sample(tint_module_vars.spriteSheetSampler, ((x_274 * x_275) + x_277));
+        nc = x_279;
+        float const x_283 = color.w;
+        float const x_285 = nc.w;
+        alpha = min((x_283 + x_285), 1.0f);
+        float4 const x_290 = color;
+        float4 const x_292 = nc;
+        float const x_295 = nc.w;
+        float3 const v_7 = float3(x_290.x, x_290.y, x_290.z);
+        float3 const v_8 = float3(x_292.x, x_292.y, x_292.z);
+        mixed = mix(v_7, v_8, float3(x_295, x_295, x_295));
+        float3 const x_298 = mixed;
+        float const x_299 = alpha;
+        color = float4(x_298.x, x_298.y, x_298.z, x_299);
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        int const x_304 = i;
+        i = as_type<int>((as_type<uint>(x_304) + as_type<uint>(1)));
+      }
+      continue;
     }
   }
-  float3 const x_310 = float3((*(tint_symbol_8)).colorMul);
+  float3 const x_310 = float3((*tint_module_vars.x_20).colorMul);
   float4 const x_311 = color;
-  float3 const x_313 = (float3(x_311[0], x_311[1], x_311[2]) * x_310);
+  float3 const x_313 = (float3(x_311.x, x_311.y, x_311.z) * x_310);
   float4 const x_314 = color;
-  color = float4(x_313[0], x_313[1], x_313[2], x_314[3]);
+  color = float4(x_313.x, x_313.y, x_313.z, x_314.w);
   float4 const x_318 = color;
-  (*(tint_private_vars)).glFragColor = x_318;
-  return;
+  (*tint_module_vars.glFragColor) = x_318;
 }
 
-struct main_out {
-  float4 glFragColor_1;
-};
-
-struct tint_symbol_2 {
-  float3 vPosition_param [[user(locn0)]];
-  float2 vUV_param [[user(locn1)]];
-  float2 tUV_param [[user(locn2)]];
-  float2 stageUnits_1_param [[user(locn3)]];
-  float2 levelUnits_param [[user(locn4)]];
-  float2 tileID_1_param [[user(locn5)]];
-};
-
-struct tint_symbol_3 {
-  float4 glFragColor_1 [[color(0)]];
-};
-
-main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, thread tint_private_vars_struct* const tint_private_vars, const constant LeftOver_tint_packed_vec3* const tint_symbol_18, texture2d<float, access::sample> tint_symbol_19, sampler tint_symbol_20, texture2d<float, access::sample> tint_symbol_21, texture2d<float, access::sample> tint_symbol_22, sampler tint_symbol_23, texture2d<float, access::sample> tint_symbol_24, sampler tint_symbol_25, texture2d<float, access::sample> tint_symbol_26, sampler tint_symbol_27) {
-  (*(tint_private_vars)).tUV = tUV_param;
-  (*(tint_private_vars)).tileID_1 = tileID_1_param;
-  (*(tint_private_vars)).levelUnits = levelUnits_param;
-  (*(tint_private_vars)).stageUnits_1 = stageUnits_1_param;
-  (*(tint_private_vars)).vPosition = vPosition_param;
-  (*(tint_private_vars)).vUV = vUV_param;
-  main_1(tint_private_vars, tint_symbol_18, tint_symbol_19, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23, tint_symbol_24, tint_symbol_25, tint_symbol_26, tint_symbol_27);
-  main_out const tint_symbol_4 = {.glFragColor_1=(*(tint_private_vars)).glFragColor};
-  return tint_symbol_4;
+main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.tUV) = tUV_param;
+  (*tint_module_vars.tileID_1) = tileID_1_param;
+  (*tint_module_vars.levelUnits) = levelUnits_param;
+  (*tint_module_vars.stageUnits_1) = stageUnits_1_param;
+  (*tint_module_vars.vPosition) = vPosition_param;
+  (*tint_module_vars.vUV) = vUV_param;
+  main_1(tint_module_vars);
+  return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
 }
 
-fragment tint_symbol_3 tint_symbol(const constant LeftOver_tint_packed_vec3* tint_symbol_28 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_29 [[texture(0)]], sampler tint_symbol_30 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_31 [[texture(1)]], texture2d<float, access::sample> tint_symbol_32 [[texture(2)]], sampler tint_symbol_33 [[sampler(1)]], texture2d<float, access::sample> tint_symbol_34 [[texture(3)]], sampler tint_symbol_35 [[sampler(2)]], texture2d<float, access::sample> tint_symbol_36 [[texture(4)]], sampler tint_symbol_37 [[sampler(3)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  main_out const inner_result = tint_symbol_inner(tint_symbol_1.tUV_param, tint_symbol_1.tileID_1_param, tint_symbol_1.levelUnits_param, tint_symbol_1.stageUnits_1_param, tint_symbol_1.vPosition_param, tint_symbol_1.vUV_param, &(tint_private_vars), tint_symbol_28, tint_symbol_29, tint_symbol_30, tint_symbol_31, tint_symbol_32, tint_symbol_33, tint_symbol_34, tint_symbol_35, tint_symbol_36, tint_symbol_37);
-  tint_symbol_3 wrapper_result = {};
-  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
-  return wrapper_result;
+fragment main_outputs v_9(main_inputs inputs [[stage_in]], const constant LeftOver_packed_vec3* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(0)]], sampler frameMapSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(1)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(2)]], texture2d<float, access::sample> animationMapTexture [[texture(3)]], sampler animationMapSampler [[sampler(2)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
+  thread float2 tUV = 0.0f;
+  thread float mt = 0.0f;
+  thread float4 glFragColor = 0.0f;
+  thread float2 tileID_1 = 0.0f;
+  thread float2 levelUnits = 0.0f;
+  thread float2 stageUnits_1 = 0.0f;
+  thread float3 vPosition = 0.0f;
+  thread float2 vUV = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .frameMapTexture=frameMapTexture, .frameMapSampler=frameMapSampler, .tUV=(&tUV), .tileMapsTexture0=tileMapsTexture0, .tileMapsSampler=tileMapsSampler, .tileMapsTexture1=tileMapsTexture1, .animationMapTexture=animationMapTexture, .animationMapSampler=animationMapSampler, .mt=(&mt), .spriteSheetTexture=spriteSheetTexture, .spriteSheetSampler=spriteSheetSampler, .glFragColor=(&glFragColor), .tileID_1=(&tileID_1), .levelUnits=(&levelUnits), .stageUnits_1=(&stageUnits_1), .vPosition=(&vPosition), .vUV=(&vUV)};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_glFragColor_1 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1;
+  return tint_wrapper_result;
 }
-

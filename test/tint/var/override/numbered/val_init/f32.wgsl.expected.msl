@@ -1,9 +1,8 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol() {
-  if (false) {
-  }
-  return;
-}
 
+kernel void v() {
+  if (false) {
+    float const v_1 = 0.0f;
+  }
+}

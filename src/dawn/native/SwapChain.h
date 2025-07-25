@@ -39,26 +39,16 @@
 
 namespace dawn::native {
 
-// TODO(dawn:2320): Remove the SwapChainDescriptor once the deprecation period is finished and
-// APICreateSwapChain gets dropped
-MaybeError ValidateSwapChainDescriptor(const DeviceBase* device,
-                                       const Surface* surface,
-                                       const SwapChainDescriptor* descriptor);
-
 TextureDescriptor GetSwapChainBaseTextureDescriptor(SwapChainBase* swapChain);
 
 struct SwapChainTextureInfo {
     Ref<TextureBase> texture;
-    wgpu::Bool suboptimal;
     wgpu::SurfaceGetCurrentTextureStatus status;
 };
 
-class SwapChainBase : public ApiObjectBase {
+class SwapChainBase : public RefCounted {
   public:
     SwapChainBase(DeviceBase* device, Surface* surface, const SurfaceConfiguration* config);
-
-    static Ref<SwapChainBase> MakeError(DeviceBase* device, const SurfaceConfiguration* config);
-    ObjectType GetType() const override;
 
     // This is called when the swapchain is detached when one of the following happens:
     //
@@ -79,15 +69,6 @@ class SwapChainBase : public ApiObjectBase {
 
     void SetIsAttached();
 
-    // Dawn API
-    void APIConfigure(wgpu::TextureFormat format,
-                      wgpu::TextureUsage allowedUsage,
-                      uint32_t width,
-                      uint32_t height);
-    TextureBase* APIGetCurrentTexture();
-    TextureViewBase* APIGetCurrentTextureView();
-    void APIPresent();
-
     // TODO(crbug.com/dawn/831):
     // APIRelease() can be called without any synchronization guarantees so we need to use a Release
     // method that will call LockAndDeleteThis() on destruction.
@@ -96,6 +77,7 @@ class SwapChainBase : public ApiObjectBase {
     // yet.
     void APIRelease() { ReleaseAndLockBeforeDestroy(); }
 
+    DeviceBase* GetDevice() const;
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
     wgpu::TextureFormat GetFormat() const;
@@ -109,17 +91,18 @@ class SwapChainBase : public ApiObjectBase {
 
     // The returned texture must match the swapchain descriptor exactly.
     ResultOrError<SurfaceTexture> GetCurrentTexture();
+    MaybeError Present();
 
   protected:
-    SwapChainBase(DeviceBase* device, const SurfaceConfiguration* config, ObjectBase::ErrorTag tag);
     ~SwapChainBase() override;
-    void DestroyImpl() override;
 
   private:
     void SetChildLabel(ApiObjectBase* child) const;
     // Get a format set from mViewFormats (equivalent information, but easier to validate the
     // current texture)
     FormatSet ComputeViewFormatSet() const;
+
+    Ref<DeviceBase> mDevice;
 
     bool mAttached = false;
     uint32_t mWidth;
@@ -142,10 +125,7 @@ class SwapChainBase : public ApiObjectBase {
 
     // GetCurrentTextureImpl and PresentImpl are guaranteed to be called in an interleaved manner,
     // starting with GetCurrentTextureImpl.
-
     virtual ResultOrError<SwapChainTextureInfo> GetCurrentTextureImpl() = 0;
-
-    ResultOrError<Ref<TextureViewBase>> GetCurrentTextureView();
 
     // The call to present must destroy the current texture so further access to it are invalid.
     virtual MaybeError PresentImpl() = 0;

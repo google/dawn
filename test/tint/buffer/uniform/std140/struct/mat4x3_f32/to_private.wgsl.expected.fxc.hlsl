@@ -4,42 +4,52 @@ struct S {
   int after;
 };
 
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[48];
 };
 static S p[4] = (S[4])0;
-
-float4x3 u_load_3(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  const uint scalar_offset_3 = ((offset + 48u)) / 4;
-  return float4x3(asfloat(u[scalar_offset / 4].xyz), asfloat(u[scalar_offset_1 / 4].xyz), asfloat(u[scalar_offset_2 / 4].xyz), asfloat(u[scalar_offset_3 / 4].xyz));
+float4x3 v(uint start_byte_offset) {
+  return float4x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz), asfloat(u[((32u + start_byte_offset) / 16u)].xyz), asfloat(u[((48u + start_byte_offset) / 16u)].xyz));
 }
 
-S u_load_1(uint offset) {
-  const uint scalar_offset_4 = ((offset + 0u)) / 4;
-  const uint scalar_offset_5 = ((offset + 128u)) / 4;
-  S tint_symbol = {asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4]), u_load_3((offset + 16u)), asint(u[scalar_offset_5 / 4][scalar_offset_5 % 4])};
-  return tint_symbol;
+S v_1(uint start_byte_offset) {
+  int v_2 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float4x3 v_3 = v((16u + start_byte_offset));
+  S v_4 = {v_2, v_3, asint(u[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) % 16u) / 4u)])};
+  return v_4;
 }
 
-typedef S u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  S arr[4] = (S[4])0;
+typedef S ary_ret[4];
+ary_ret v_5(uint start_byte_offset) {
+  S a[4] = (S[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = u_load_1((offset + (i * 192u)));
+    uint v_6 = 0u;
+    v_6 = 0u;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4u)) {
+        break;
+      }
+      S v_8 = v_1((start_byte_offset + (v_7 * 192u)));
+      a[v_7] = v_8;
+      {
+        v_6 = (v_7 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  S v_9[4] = a;
+  return v_9;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  p = u_load(0u);
-  p[1] = u_load_1(384u);
-  p[3].m = u_load_3(400u);
-  p[1].m[0] = asfloat(u[2].xyz).zxy;
-  return;
+  S v_10[4] = v_5(0u);
+  p = v_10;
+  S v_11 = v_1(384u);
+  p[1u] = v_11;
+  p[3u].m = v(400u);
+  p[1u].m[0u] = asfloat(u[2u].xyz).zxy;
 }
+

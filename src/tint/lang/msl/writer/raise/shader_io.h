@@ -28,7 +28,9 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_SHADER_IO_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_SHADER_IO_H_
 
-#include "src/tint/utils/result/result.h"
+#include <cstdint>
+
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -41,6 +43,8 @@ namespace tint::msl::writer::raise {
 struct ShaderIOConfig {
     /// true if a vertex point size builtin output should be added
     bool emit_vertex_point_size = false;
+    /// A fixed sample mask to combine into masks produced by fragment shaders.
+    uint32_t fixed_sample_mask = UINT32_MAX;
 };
 
 /// ShaderIO is a transform that prepares entry point inputs and outputs for MSL codegen.

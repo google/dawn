@@ -42,6 +42,7 @@
 #include "dawn/native/vulkan/QueueVk.h"
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "vulkan/vulkan_core.h"
 
 #if defined(DAWN_USE_X11)
 #include "dawn/native/X11Functions.h"
@@ -61,6 +62,8 @@ VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
             return VK_PRESENT_MODE_IMMEDIATE_KHR;
         case wgpu::PresentMode::Mailbox:
             return VK_PRESENT_MODE_MAILBOX_KHR;
+        case wgpu::PresentMode::Undefined:
+            break;
     }
     DAWN_UNREACHABLE();
 }
@@ -79,6 +82,32 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
     DAWN_UNREACHABLE();
 }
 
+ResultOrError<UniqueVkHandle<VkSemaphore>> CreateSemaphore(Device* device) {
+    VkSemaphoreCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+
+    VkSemaphore semaphore;
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.CreateSemaphore(device->GetVkDevice(), &createInfo, nullptr, &*semaphore),
+        "CreateSemaphore"));
+    return {{device, semaphore}};
+}
+
+ResultOrError<UniqueVkHandle<VkFence>> CreateFence(Device* device) {
+    VkFenceCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    createInfo.pNext = nullptr;
+    createInfo.flags = 0;
+
+    VkFence fence;
+    DAWN_TRY(
+        CheckVkSuccess(device->fn.CreateFence(device->GetVkDevice(), &createInfo, nullptr, &*fence),
+                       "CreateFence"));
+    return {{device, fence}};
+}
+
 }  // anonymous namespace
 
 // static
@@ -92,11 +121,6 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
 }
 
 SwapChain::~SwapChain() = default;
-
-void SwapChain::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
 
 // Note that when we need to re-create the swapchain because it is out of date,
 // previousSwapChain can be set to `this`.
@@ -120,10 +144,9 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
         SwapChain* previousVulkanSwapChain = ToBackend(previousSwapChain);
 
         // TODO(crbug.com/dawn/269): Figure out switching a single surface between multiple
-        // Vulkan devices on different VkInstances. Probably needs to block too!
-        VkInstance previousInstance = ToBackend(previousSwapChain->GetDevice())->GetVkInstance();
-        DAWN_INVALID_IF(previousInstance != ToBackend(GetDevice())->GetVkInstance(),
-                        "Vulkan SwapChain cannot switch between Vulkan instances.");
+        // Vulkan devices. Probably needs to block too!
+        DAWN_INVALID_IF(previousSwapChain->GetDevice() != GetDevice(),
+                        "Vulkan SwapChain cannot switch between devices.");
 
         // The previous swapchain is a dawn::native::vulkan::SwapChain so we can reuse its
         // VkSurfaceKHR provided since they are on the same instance.
@@ -138,15 +161,6 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
         ToBackend(previousSwapChain->GetDevice())
             ->GetFencedDeleter()
             ->DeleteWhenUnused(previousVkSwapChain);
-
-        // Delete the previous swapchain's semaphores once they are not in use.
-        // TODO(crbug.com/dawn/269): Wait for presentation to finish rather than submission.
-        for (VkSemaphore semaphore : previousVulkanSwapChain->mSwapChainSemaphores) {
-            ToBackend(previousSwapChain->GetDevice())
-                ->GetFencedDeleter()
-                ->DeleteWhenUnused(semaphore);
-        }
-        previousVulkanSwapChain->mSwapChainSemaphores.clear();
     }
 
     if (mVkSurface == VK_NULL_HANDLE) {
@@ -177,7 +191,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     createInfo.preTransform = mConfig.transform;
     createInfo.compositeAlpha = mConfig.alphaMode;
     createInfo.presentMode = mConfig.presentMode;
-    createInfo.clipped = false;
+    createInfo.clipped = VK_FALSE;
     createInfo.oldSwapchain = previousVkSwapChain;
 
     DAWN_TRY(CheckVkSuccess(
@@ -191,25 +205,15 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
         device->fn.GetSwapchainImagesKHR(device->GetVkDevice(), mSwapChain, &count, nullptr),
         "GetSwapChainImages1"));
 
-    mSwapChainImages.resize(count);
-    DAWN_TRY(
-        CheckVkSuccess(device->fn.GetSwapchainImagesKHR(device->GetVkDevice(), mSwapChain, &count,
-                                                        AsVkArray(mSwapChainImages.data())),
-                       "GetSwapChainImages2"));
+    std::vector<VkImage> vkImages(count);
+    DAWN_TRY(CheckVkSuccess(device->fn.GetSwapchainImagesKHR(device->GetVkDevice(), mSwapChain,
+                                                             &count, AsVkArray(vkImages.data())),
+                            "GetSwapChainImages2"));
 
-    // Create one semaphore per swapchain image.
-    mSwapChainSemaphores.resize(count);
-
-    VkSemaphoreCreateInfo semaphoreCreateInfo;
-    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphoreCreateInfo.pNext = nullptr;
-    semaphoreCreateInfo.flags = 0;
-
-    for (std::size_t i = 0; i < mSwapChainSemaphores.size(); i++) {
-        DAWN_TRY(
-            CheckVkSuccess(device->fn.CreateSemaphore(device->GetVkDevice(), &semaphoreCreateInfo,
-                                                      nullptr, &*mSwapChainSemaphores[i]),
-                           "CreateSemaphore"));
+    mImages.resize(count);
+    for (uint32_t i = 0; i < count; i++) {
+        mImages[i].image = vkImages[i];
+        DAWN_TRY_ASSIGN(mImages[i].renderingDoneSemaphore, CreateSemaphore(device));
     }
 
     return {};
@@ -404,9 +408,9 @@ MaybeError SwapChain::PresentImpl() {
                                 static_cast<int32_t>(mTexture->GetHeight(Aspect::Color)), 1};
 
         device->fn.CmdBlitImage(recordingContext->commandBuffer, mBlitTexture->GetHandle(),
-                                mBlitTexture->GetCurrentLayoutForSwapChain(), mTexture->GetHandle(),
-                                mTexture->GetCurrentLayoutForSwapChain(), 1, &region,
-                                VK_FILTER_LINEAR);
+                                mBlitTexture->GetCurrentLayout(Aspect::Color),
+                                mTexture->GetHandle(), mTexture->GetCurrentLayout(Aspect::Color), 1,
+                                &region, VK_FILTER_LINEAR);
 
         // TODO(crbug.com/dawn/269): Find a way to reuse the blit texture between frames
         // instead of creating a new one every time. This will involve "un-destroying" the
@@ -422,7 +426,7 @@ MaybeError SwapChain::PresentImpl() {
                                  wgpu::ShaderStage::None, mTexture->GetAllSubresources());
 
     // Use a semaphore to make sure all rendering has finished before presenting.
-    VkSemaphore currentSemaphore = mSwapChainSemaphores[mLastImageIndex];
+    VkSemaphore currentSemaphore = mImages[mLastImageIndex].renderingDoneSemaphore.Get();
     recordingContext->signalSemaphores.push_back(currentSemaphore);
 
     DAWN_TRY(queue->SubmitPendingCommands());
@@ -470,43 +474,32 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
 
 ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool isReentrant) {
     Device* device = ToBackend(GetDevice());
-    SwapChainTextureInfo swapChainTextureInfo;
+
+    SwapChainTextureInfo swapChainTextureInfo = {};
 
     // Transiently create a semaphore that will be signaled when the presentation engine is done
     // with the swapchain image. Further operations on the image will wait for this semaphore.
-    VkSemaphoreCreateInfo createInfo;
-    createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    createInfo.pNext = nullptr;
-    createInfo.flags = 0;
+    // We create one transiently instead of reusing one because if the application never does
+    // rendering with the images, the semaphore won't get waited on, and will be forbidden to be
+    // signaled again in future.
+    UniqueVkHandle<VkSemaphore> acquireSemaphore;
+    DAWN_TRY_ASSIGN(acquireSemaphore, CreateSemaphore(device));
 
-    VkSemaphore semaphore = VK_NULL_HANDLE;
-    DAWN_TRY(CheckVkSuccess(
-        device->fn.CreateSemaphore(device->GetVkDevice(), &createInfo, nullptr, &*semaphore),
-        "CreateSemaphore"));
+    // Likewise create a fence that will be signaled, so we can wait on it later for frame pacing.
+    UniqueVkHandle<VkFence> acquireFence;
+    DAWN_TRY_ASSIGN(acquireFence, CreateFence(device));
 
     VkResult result = VkResult::WrapUnsafe(device->fn.AcquireNextImageKHR(
-        device->GetVkDevice(), mSwapChain, std::numeric_limits<uint64_t>::max(), semaphore,
-        VkFence{}, &mLastImageIndex));
+        device->GetVkDevice(), mSwapChain, std::numeric_limits<uint64_t>::max(),
+        acquireSemaphore.Get(), acquireFence.Get(), &mLastImageIndex));
 
-    if (result == VK_SUCCESS) {
-        // TODO(crbug.com/dawn/269) put the semaphore on the texture so it is waited on when
-        // used instead of directly on the recording context?
-        ToBackend(device->GetQueue())
-            ->GetPendingRecordingContext()
-            ->waitSemaphores.push_back(semaphore);
-    } else {
-        // The semaphore wasn't actually used (? this is unclear in the spec). Delete it when
-        // we get a chance.
-        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(semaphore);
-    }
-
-    swapChainTextureInfo.suboptimal = false;
     switch (result) {
-        case VK_SUBOPTIMAL_KHR:
-            swapChainTextureInfo.suboptimal = true;
-            ABSL_FALLTHROUGH_INTENDED;
         case VK_SUCCESS:
-            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
+            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
+            break;
+
+        case VK_SUBOPTIMAL_KHR:
+            swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal;
             break;
 
         case VK_ERROR_OUT_OF_DATE_KHR: {
@@ -514,9 +507,8 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
             // Prevent infinite recursive calls to GetCurrentTextureViewInternal when the
             // swapchains always return that they are out of date.
             if (isReentrant) {
-                // TODO(crbug.com/dawn/269): Allow losing the surface instead?
-                return DAWN_INTERNAL_ERROR(
-                    "Wasn't able to recuperate the surface after a VK_ERROR_OUT_OF_DATE_KHR");
+                swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Lost;
+                return swapChainTextureInfo;
             }
 
             // Re-initialize the VkSwapchain and try getting the texture again.
@@ -524,23 +516,42 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
             return GetCurrentTextureInternal(true);
         }
 
-        // TODO(crbug.com/dawn/269): Allow losing the surface at Dawn's API level?
         case VK_ERROR_SURFACE_LOST_KHR:
             swapChainTextureInfo.status = wgpu::SurfaceGetCurrentTextureStatus::Lost;
-            break;
+            return swapChainTextureInfo;
 
         default:
             DAWN_TRY(CheckVkSuccess(::VkResult(result), "AcquireNextImage"));
     }
 
+    DAWN_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
+    PerImage& lastImage = mImages[mLastImageIndex];
+
+    // Make any further rendering operations that might use the swapchain texture wait on the
+    // acquire to be finished.
+    ToBackend(device->GetQueue())
+        ->GetPendingRecordingContext()
+        ->waitSemaphores.push_back(acquireSemaphore.Acquire());
+
+    // Force some form of frame pacing by waiting on the CPU for the current texture to be done
+    // rendering. Otherwise we could be queuing more frames on the same texture without ever
+    // waiting, causing massive latency on user inputs.
+    if (lastImage.lastAcquireDoneFence.Get() != VK_NULL_HANDLE) {
+        DAWN_TRY(CheckVkSuccess(
+            device->fn.WaitForFences(device->GetVkDevice(), 1,
+                                     &*lastImage.lastAcquireDoneFence.Get(), true, UINT64_MAX),
+            "SwapChain WaitForFences"));
+    }
+    lastImage.lastAcquireDoneFence = std::move(acquireFence);
+
+    // Wait on the previous fence and destroy it.
     TextureDescriptor textureDesc;
     textureDesc.size.width = mConfig.extent.width;
     textureDesc.size.height = mConfig.extent.height;
     textureDesc.format = mConfig.wgpuFormat;
     textureDesc.usage = mConfig.wgpuUsage;
 
-    VkImage currentImage = mSwapChainImages[mLastImageIndex];
-    mTexture = Texture::CreateForSwapChain(device, Unpack(&textureDesc), currentImage);
+    mTexture = SwapChainTexture::Create(device, Unpack(&textureDesc), lastImage.image);
 
     // In the happy path we can use the swapchain image directly.
     if (!mConfig.needsBlit) {
@@ -551,8 +562,8 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     // The blit texture always perfectly matches what the user requested for the swapchain.
     // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
-    DAWN_TRY_ASSIGN(mBlitTexture,
-                    Texture::Create(device, Unpack(&desc), VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+    DAWN_TRY_ASSIGN(mBlitTexture, InternalTexture::Create(device, Unpack(&desc),
+                                                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     swapChainTextureInfo.texture = mBlitTexture;
     return swapChainTextureInfo;
 }
@@ -568,11 +579,7 @@ void SwapChain::DetachFromSurfaceImpl() {
         mBlitTexture = nullptr;
     }
 
-    for (VkSemaphore semaphore : mSwapChainSemaphores) {
-        // TODO(crbug.com/dawn/269): Wait for presentation to finish rather than submission.
-        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(semaphore);
-    }
-    mSwapChainSemaphores.clear();
+    mImages.clear();
 
     // The swapchain images are destroyed with the swapchain.
     if (mSwapChain != VK_NULL_HANDLE) {

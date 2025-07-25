@@ -1,35 +1,38 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 19
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %tint_div "tint_div"
+               OpName %f "f"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %r "r"
+               OpName %tint_div_u32 "tint_div_u32"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %f "f"
-       %uint = OpTypeInt 32 0
-          %1 = OpTypeFunction %uint %uint %uint
-          %8 = OpConstantNull %uint
-       %bool = OpTypeBool
-     %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-         %13 = OpTypeFunction %void
-     %uint_2 = OpConstant %uint 2
-   %tint_div = OpFunction %uint None %1
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+          %a = OpConstant %uint 1
+          %b = OpConstant %uint 2
+         %12 = OpTypeFunction %uint %uint %uint
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+          %f = OpFunction %void None %3
+          %4 = OpLabel
+          %r = OpFunctionCall %uint %tint_div_u32 %a %b
+               OpReturn
+               OpFunctionEnd
+%tint_div_u32 = OpFunction %uint None %12
         %lhs = OpFunctionParameter %uint
         %rhs = OpFunctionParameter %uint
-          %6 = OpLabel
-          %9 = OpIEqual %bool %rhs %8
-          %7 = OpSelect %uint %9 %uint_1 %rhs
-         %12 = OpUDiv %uint %lhs %7
-               OpReturnValue %12
-               OpFunctionEnd
-          %f = OpFunction %void None %13
-         %16 = OpLabel
-         %18 = OpFunctionCall %uint %tint_div %uint_1 %uint_2
-               OpReturn
+         %13 = OpLabel
+         %14 = OpIEqual %bool %rhs %uint_0
+         %17 = OpSelect %uint %14 %a %rhs
+         %18 = OpUDiv %uint %lhs %17
+               OpReturnValue %18
                OpFunctionEnd

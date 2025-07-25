@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
 
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -108,7 +106,7 @@ struct State {
             auto* access_to_vec = b.Access(ty.ptr(addrspace, access.type), object, partial_indices);
             access_to_vec->InsertBefore(access.inst);
 
-            object = access_to_vec->Result(0);
+            object = access_to_vec->Result();
         }
 
         // Replace all uses of the original access instruction.
@@ -127,7 +125,7 @@ struct State {
                            core::ir::Value* object,
                            core::ir::Value* index) {
         Vector<core::ir::Instruction*, 4> to_destroy;
-        access->Result(0)->ForEachUse([&](core::ir::Usage use) {
+        access->Result()->ForEachUseUnsorted([&](core::ir::Usage use) {
             Switch(
                 use.instruction,
                 [&](core::ir::Load* load) {
@@ -139,11 +137,6 @@ struct State {
                     auto* sve = b.StoreVectorElement(object, index, store->From());
                     sve->InsertBefore(store);
                     to_destroy.Push(store);
-                },
-                [&](core::ir::Access* noop_access) {
-                    TINT_ASSERT(noop_access->Indices().IsEmpty());
-                    ReplaceAccessUses(noop_access, object, index);
-                    to_destroy.Push(noop_access);
                 },
                 TINT_ICE_ON_NO_MATCH);
         });
@@ -158,9 +151,13 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "VectorElementPointer transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowVectorElementPointer,
+                                              core::ir::Capability::kAllowPhonyInstructions,
+                                              core::ir::Capability::kAllowNonCoreTypes,
+                                              core::ir::Capability::kAllowStructMatrixDecorations,
                                           });
     if (result != Success) {
         return result.Failure();

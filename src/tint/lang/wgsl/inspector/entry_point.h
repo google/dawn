@@ -30,13 +30,9 @@
 
 #include <optional>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include "src/tint/api/common/override_id.h"
-
-#include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
 namespace tint::inspector {
 
@@ -70,7 +66,15 @@ enum class PixelLocalMemberType : uint8_t {
 enum class InterpolationType : uint8_t { kPerspective, kLinear, kFlat, kUnknown };
 
 /// Type of interpolation sampling of a stage variable.
-enum class InterpolationSampling : uint8_t { kNone, kCenter, kCentroid, kSample, kUnknown };
+enum class InterpolationSampling : uint8_t {
+    kNone,
+    kCenter,
+    kCentroid,
+    kSample,
+    kFirst,
+    kEither,
+    kUnknown
+};
 
 /// Reflection data about an entry point input or output.
 struct StageVariable {
@@ -157,18 +161,16 @@ struct EntryPoint {
 
     /// The entry point name
     std::string name;
-    /// Remapped entry point name in the backend
-    std::string remapped_name;
     /// The entry point stage
     PipelineStage stage;
     /// The workgroup size. If PipelineStage is kCompute and this holds no value, then the workgroup
     /// size is derived from an override-expression. In this situation you first need to run the
-    /// tint::ast::transform::SubstituteOverride transform before using the inspector.
+    /// SubstituteOverride transform before using the inspector.
     std::optional<WorkgroupSize> workgroup_size;
     /// The total size in bytes of all Workgroup storage-class storage accessed via the entry point.
     uint32_t workgroup_storage_size = 0;
-    /// The total size in bytes of all push_constant variables accessed by the entry point.
-    uint32_t push_constant_size = 0;
+    /// The total size in bytes of all immediate variables accessed by the entry point.
+    uint32_t immediate_data_size = 0;
     /// List of the input variable accessed via this entry point.
     std::vector<StageVariable> input_variables;
     /// List of the output variable accessed via this entry point.
@@ -184,9 +186,6 @@ struct EntryPoint {
     /// Does the entry point use the sample_mask builtin as an output builtin
     /// variable.
     bool output_sample_mask_used = false;
-    /// Does the entry point use the position builtin as an input builtin
-    /// variable.
-    bool input_position_used = false;
     /// Does the entry point use the front_facing builtin
     bool front_facing_used = false;
     /// Does the entry point use the sample_index builtin
@@ -199,6 +198,15 @@ struct EntryPoint {
     bool vertex_index_used = false;
     /// Does the entry point use the instance_index builtin
     bool instance_index_used = false;
+    /// Does the entry point have a textureLoad call with a texture_depth??? texture
+    bool has_texture_load_with_depth_texture = false;
+    /// Does the entry point use texture_depth??? with a non-comparison sampler.
+    bool has_depth_texture_with_non_comparison_sampler = false;
+    /// Does the entry point use a subgroup matrix type?
+    bool uses_subgroup_matrix = false;
+    /// The array length of the clip_distances builtin. Holding no value means the clip_distances
+    /// is not used.
+    std::optional<uint32_t> clip_distances_size;
 };
 
 }  // namespace tint::inspector

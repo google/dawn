@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -42,20 +43,29 @@
 namespace dawn::native::vulkan {
 
 class Device;
+class ResourceHeap;
+struct VulkanDeviceInfo;
 
-// Various kinds of memory that influence the result of the allocation. For example, to take
-// into account mappability and Vulkan's bufferImageGranularity.
-enum class MemoryKind {
-    LazilyAllocated,
-    Linear,
-    LinearReadMappable,
-    LinearWriteMappable,
-    Opaque,
+// Each bit of MemoryKind represents a kind of memory that influence the result of the allocation.
+// For example, to take into account mappability and Vulkan's bufferImageGranularity.
+enum class MemoryKind : uint8_t {
+    LazilyAllocated = 1,
+    Linear = 2,
+    DeviceLocal = 4,
+    ReadMappable = 8,
+    WriteMappable = 16,
+    HostCached = 32,
 };
+
+bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo);
 
 class ResourceMemoryAllocator {
   public:
-    explicit ResourceMemoryAllocator(Device* device);
+    // Returns heap block size as specified by `control` or the default value if not.
+    static VkDeviceSize GetHeapBlockSize(const DawnDeviceAllocatorControl* control);
+
+    // `heapBlockSize` must be a power of two.
+    ResourceMemoryAllocator(Device* device, VkDeviceSize heapBlockSize);
     ~ResourceMemoryAllocator();
 
     ResultOrError<ResourceMemoryAllocation> Allocate(const VkMemoryRequirements& requirements,
@@ -63,21 +73,70 @@ class ResourceMemoryAllocator {
                                                      bool forceDisableSubAllocation = false);
     void Deallocate(ResourceMemoryAllocation* allocation);
 
-    void DestroyPool();
+    void FreeRecycledMemory();
+
+    // Returns the last serial that an object is pending deletion after or
+    // kBeginningOfGPUTime if no objects are pending deletion.
+    ExecutionSerial GetLastPendingDeletionSerial();
 
     void Tick(ExecutionSerial completedSerial);
 
     int FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind);
 
+    // Reports the total vulkan allocated and vulkan used memories.
+    uint64_t GetTotalUsedMemory() const;
+    uint64_t GetTotalAllocatedMemory() const;
+    // Reports the total lazy allocated and used vulkan memory.
+    uint64_t GetTotalLazyAllocatedMemory() const;
+    uint64_t GetTotalLazyUsedMemory() const;
+
+  protected:
+    void RecordHeapAllocation(VkDeviceSize size, bool isLazyMemoryType);
+    void DeallocateResourceHeap(ResourceHeap* heap, bool isLazyMemoryType);
+
   private:
+    // Wrapper for tracking the allocation sizes to be decremented up to a completed ExecutionSerial
+    // and reporting total allocation/used sizes.
+    class AllocationSizeTracker {
+      public:
+        // Increment the total size for tracking.
+        void Increment(VkDeviceSize incrementSize);
+        // Track the size to be decremented on Tick.
+        void Decrement(ExecutionSerial currentSerial, VkDeviceSize decrementSize);
+        // Update the total size after completed serials.
+        void Tick(ExecutionSerial completedSerial);
+
+        VkDeviceSize Size() const { return mTotalSize; }
+
+      private:
+        std::map<ExecutionSerial, VkDeviceSize> mMemoryToDecrement;
+        VkDeviceSize mTotalSize = 0;
+    };
+
+    VkMemoryPropertyFlags GetRequiredMemoryPropertyFlags(MemoryKind memoryKind) const;
+
     raw_ptr<Device> mDevice;
+    const VkDeviceSize mMaxSizeForSuballocation;
+    bool mUseHostCachedForMappable = false;
 
     class SingleTypeAllocator;
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
 
     SerialQueue<ExecutionSerial, ResourceMemoryAllocation> mSubAllocationsToDelete;
+    AllocationSizeTracker mAllocatedMemory;
+    AllocationSizeTracker mUsedMemory;
+    AllocationSizeTracker mLazyAllocatedMemory;
+    AllocationSizeTracker mLazyUsedMemory;
 };
 
 }  // namespace dawn::native::vulkan
+
+namespace wgpu {
+template <>
+struct IsWGPUBitmask<dawn::native::vulkan::MemoryKind> {
+    static constexpr bool enable = true;
+};
+
+}  // namespace wgpu
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_RESOURCEMEMORYALLOCATORVK_H_

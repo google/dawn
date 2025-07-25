@@ -1,0 +1,63 @@
+#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  device tint_array<float, 1024>* prevent_dce;
+  threadgroup tint_array<float, 1024>* arg_0;
+};
+
+struct tint_symbol_1 {
+  tint_array<float, 1024> tint_symbol;
+};
+
+simdgroup_float8x8 subgroupMatrixLoad_cce4cd(tint_module_vars_struct tint_module_vars) {
+  uint arg_1 = 1u;
+  uint arg_3 = 8u;
+  uint const v = arg_1;
+  uint const v_1 = max(arg_3, 8u);
+  simdgroup_float8x8 v_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  if ((((v + (v_1 * 7u)) + 8u) <= 1024u)) {
+    simdgroup_float8x8 v_3 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+    simdgroup_load(v_3, (&(*tint_module_vars.arg_0)[v]), ulong(v_1), ulong2(0ul), true);
+    v_2 = v_3;
+  }
+  simdgroup_float8x8 res = v_2;
+  return res;
+}
+
+void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v_4 = 0u;
+    v_4 = tint_local_index;
+    while(true) {
+      uint const v_5 = v_4;
+      if ((v_5 >= 1024u)) {
+        break;
+      }
+      (*tint_module_vars.arg_0)[v_5] = 0.0f;
+      {
+        v_4 = (v_5 + 1u);
+      }
+      continue;
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  simdgroup_store(subgroupMatrixLoad_cce4cd(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
+}
+
+kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], device tint_array<float, 1024>* prevent_dce [[buffer(0)]], threadgroup tint_symbol_1* v_6 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=(&(*v_6).tint_symbol)};
+  compute_main_inner(tint_local_index, tint_module_vars);
+}

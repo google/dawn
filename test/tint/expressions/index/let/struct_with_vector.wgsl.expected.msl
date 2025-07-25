@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct S {
   int m;
   uint3 n;
@@ -8,6 +8,5 @@ struct S {
 
 uint f() {
   S const a = S{};
-  return a.n[2];
+  return a.n.z;
 }
-

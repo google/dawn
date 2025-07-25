@@ -14,19 +14,16 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float x_1;
-uniform highp sampler2D t_s;
-
-void tint_symbol(float x) {
+uniform highp sampler2D f_t_s;
+layout(location = 0) in float tint_interstage_location0;
+void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
     if ((x < 0.0f)) {
-      vec4 tint_phony = texture(t_s, vec2(0.0f));
+      texture(f_t_s, vec2(0.0f));
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

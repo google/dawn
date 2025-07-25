@@ -112,13 +112,14 @@ class SamplerTest : public DawnTest {
         wgpu::Buffer stagingBuffer =
             utils::CreateBufferFromData(device, pixels.data(), pixels.size() * sizeof(utils::RGBA8),
                                         wgpu::BufferUsage::CopySrc);
-        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(stagingBuffer, 0, 256);
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+            utils::CreateTexelCopyBufferInfo(stagingBuffer, 0, 256);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {2, 2, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
 
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
@@ -315,6 +316,8 @@ class StaticSamplerTest : public SamplerTest {
 // Test drawing a rect with a checkerboard texture using a static sampler with different address
 // modes.
 TEST_P(StaticSamplerTest, AddressMode) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     for (auto u : addressModes) {
         for (auto v : addressModes) {
             for (auto w : addressModes) {
@@ -332,6 +335,8 @@ TEST_P(StaticSamplerTest, AddressMode) {
 // Test that passing texture and static sampler objects through user-defined functions works
 // correctly.
 TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     for (auto u : addressModes) {
         for (auto v : addressModes) {
             for (auto w : addressModes) {

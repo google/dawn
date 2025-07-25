@@ -1,35 +1,55 @@
+
 [numthreads(1, 1, 1)]
 void main() {
-  int i = 0;
-  bool tint_continue = false;
+  int i = int(0);
   {
-    for(int i_1 = 0; (i_1 < 2); i_1 = (i_1 + 1)) {
-      tint_continue = false;
+    int i_1 = int(0);
+    while(true) {
+      if ((i_1 < int(2))) {
+      } else {
+        break;
+      }
+      bool tint_continue = false;
       switch(i_1) {
-        case 0: {
+        case int(0):
+        {
           tint_continue = true;
           break;
         }
-        default: {
+        default:
+        {
           break;
         }
       }
       if (tint_continue) {
+        {
+          i_1 = (i_1 + int(1));
+        }
         continue;
       }
+      bool tint_continue_1 = false;
       switch(i_1) {
-        case 0: {
-          tint_continue = true;
+        case int(0):
+        {
+          tint_continue_1 = true;
           break;
         }
-        default: {
+        default:
+        {
           break;
         }
       }
-      if (tint_continue) {
+      if (tint_continue_1) {
+        {
+          i_1 = (i_1 + int(1));
+        }
         continue;
       }
+      {
+        i_1 = (i_1 + int(1));
+      }
+      continue;
     }
   }
-  return;
 }
+

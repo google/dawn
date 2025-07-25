@@ -92,14 +92,13 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsNative16BitShaderOps = featureOptions4.Native16BitShaderOpsSupported;
     }
 
-    // Per https://microsoft.github.io/DirectX-Specs/d3d/RenderPasses.html#checking-for-support,
-    // render passes on Windows originally shipped in an incomplete form that drivers could not take
-    // advantage of. The feature has been repaired now but to detect whether you're getting the
-    // fixed version, you need to query for the D3D12_FEATURE_DATA_D3D12_OPTIONS18 structure and
-    // check the RenderPassesValid field inside. Until we upgrade Dawn to use a version of the
-    // header file with the structure, we force render passes to be disabled. See
-    // https://issues.chromium.org/issues/348202695 for additional information.
-    info.supportsRenderPass = false;
+#if D3D12_SDK_VERSION >= 612
+    D3D12_FEATURE_DATA_D3D12_OPTIONS18 featureOptions18 = {};
+    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS18, &featureOptions18, sizeof(featureOptions18)))) {
+        info.supportsRenderPass = featureOptions18.RenderPassesValid;
+    }
+#endif
 
     // D3D12_HEAP_FLAG_CREATE_NOT_ZEROED is available anytime that ID3D12Device8 is exposed, or a
     // check for D3D12_FEATURE_D3D12_OPTIONS7 succeeds.
@@ -109,14 +108,14 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsHeapFlagCreateNotZeroed = true;
     }
 
-#if D3D12_SDK_VERSION >= 602
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureOptions13 = {};
     if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
             D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13, sizeof(featureOptions13)))) {
         info.supportsTextureCopyBetweenDimensions =
             featureOptions13.TextureCopyBetweenDimensionsSupported;
+        info.supportsUnrestrictedBufferTextureCopyPitch =
+            featureOptions13.UnrestrictedBufferTextureCopyPitchSupported;
     }
-#endif
 
     info.supportsRootSignatureVersion1_1 = false;
     D3D12_FEATURE_DATA_ROOT_SIGNATURE featureDataRootSignature = {};
@@ -126,6 +125,12 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
             sizeof(featureDataRootSignature)))) {
         info.supportsRootSignatureVersion1_1 =
             featureDataRootSignature.HighestVersion >= D3D_ROOT_SIGNATURE_VERSION_1_1;
+    }
+
+    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeapInfo = {};
+    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_EXISTING_HEAPS, &existingHeapInfo, sizeof(existingHeapInfo)))) {
+        info.supportsExistingHeap = existingHeapInfo.Supported;
     }
 
     D3D12_FEATURE_DATA_SHADER_MODEL knownShaderModels[] = {

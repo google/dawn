@@ -1,39 +1,70 @@
+//
+// fragment_main
+//
 struct frexp_result_f16 {
   float16_t fract;
   int exp;
 };
+
+
 void frexp_5257dd() {
-  frexp_result_f16 res = {float16_t(0.5h), 1};
+  frexp_result_f16 res = {float16_t(0.5h), int(1)};
 }
 
 void fragment_main() {
   frexp_5257dd();
-  return;
+}
+
+//
+// compute_main
+//
+struct frexp_result_f16 {
+  float16_t fract;
+  int exp;
+};
+
+
+void frexp_5257dd() {
+  frexp_result_f16 res = {float16_t(0.5h), int(1)};
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   frexp_5257dd();
-  return;
 }
+
+//
+// vertex_main
+//
+struct frexp_result_f16 {
+  float16_t fract;
+  int exp;
+};
 
 struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol_1 {
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  frexp_5257dd();
-  return tint_symbol;
+
+void frexp_5257dd() {
+  frexp_result_f16 res = {float16_t(0.5h), int(1)};
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  frexp_5257dd();
+  VertexOutput v_1 = v;
+  return v_1;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.pos};
+  return v_3;
+}
+

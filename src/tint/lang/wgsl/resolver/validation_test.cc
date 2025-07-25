@@ -28,7 +28,7 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -637,6 +637,69 @@ TEST_F(ResolverValidationTest,
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
               R"(12:34 error: continue statement bypasses declaration of 'z'
+56:78 note: identifier 'z' declared here
+90:12 note: identifier 'z' referenced in continuing block here)");
+}
+
+TEST_F(ResolverValidationTest,
+       Stmt_Loop_ContinueInLoopBodyBeforeDecl_UsageInNestedContinuingInBody) {
+    // loop  {
+    //     continue;
+    //     var z : i32;
+    //     loop {
+    //         continue;
+    //         continuing {
+    //             z = 2i;
+    //             break if true;
+    //         }
+    //     }
+    //     continuing {
+    //         break if true;
+    //     }
+    // }
+
+    auto cont_loc = Source{{12, 34}};
+    auto decl_loc = Source{{56, 78}};
+    auto ref_loc = Source{{90, 12}};
+    auto* nested_loop =
+        Loop(Block(Continue()), Block(Assign(Expr(ref_loc, "z"), 2_i), BreakIf(true)));
+    auto* body = Block(Continue(cont_loc), Decl(Var(decl_loc, "z", ty.i32())), nested_loop);
+    auto* continuing = Block(BreakIf(true));
+    auto* loop_stmt = Loop(body, continuing);
+    WrapInFunction(loop_stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest,
+       Stmt_Loop_ContinueInLoopBodyBeforeDecl_UsageInNestedContinuingInContinuing) {
+    // loop  {
+    //     continue;
+    //     var z : i32;
+    //     continuing {
+    //         loop {
+    //             continuing {
+    //               z = 2i;
+    //               break if true;
+    //             }
+    //         }
+    //         break if true;
+    //     }
+    // }
+
+    auto cont_loc = Source{{12, 34}};
+    auto decl_loc = Source{{56, 78}};
+    auto ref_loc = Source{{90, 12}};
+    auto* body = Block(Continue(cont_loc), Decl(Var(decl_loc, "z", ty.i32())));
+    auto* nested_loop = Loop(Block(), Block(Assign(Expr(ref_loc, "z"), 2_i), BreakIf(true)));
+    auto* continuing = Block(nested_loop, BreakIf(true));
+    auto* loop_stmt = Loop(body, continuing);
+    WrapInFunction(loop_stmt);
+
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              R"(warning: code is unreachable
+12:34 error: continue statement bypasses declaration of 'z'
 56:78 note: identifier 'z' declared here
 90:12 note: identifier 'z' referenced in continuing block here)");
 }
@@ -1339,6 +1402,110 @@ TEST_F(ResolverTest, U32_Overflow) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:24 error: value 4294967296 cannot be represented as 'u32')");
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_PartialEval_Valid) {
+    auto* lhs = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(lhs, Expr(31_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(Source{{1, 2}}, lhs, Expr(32_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, ShiftRight_U32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.u32(), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shr(Source{{1, 2}}, lhs, Expr(64_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift right value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_VecI32_PartialEval_Valid) {
+    auto* lhs = GlobalVar("v", ty.vec3(ty.i32()), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(lhs, Call<vec3<u32>>(0_u, 1_u, 2_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_VecI32_PartialEval_Invalid) {
+    auto* lhs = GlobalVar("v", ty.vec3(ty.i32()), core::AddressSpace::kPrivate);
+    auto* let = Let("res", Shl(Source{{1, 2}}, lhs, Call<vec3<u32>>(31_u, 32_u, 33_u)));
+    WrapInFunction(Decl(let));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_CompoundAssign_Valid) {
+    GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* expr = CompoundAssign(Source{{1, 2}}, "v", 1_u, core::BinaryOp::kShiftLeft);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, ShiftLeft_I32_CompoundAssign_Invalid) {
+    GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
+    auto* expr = CompoundAssign(Source{{1, 2}}, "v", 64_u, core::BinaryOp::kShiftLeft);
+    WrapInFunction(expr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: shift left value must be less than the bit width of the lhs, which is 32)");
+}
+
+TEST_F(ResolverValidationTest, WorkgroupUniformLoad_ArraySize_NamedOverride) {
+    // override size = 10u;
+    // var<workgroup> a : array<u32, size>;
+    auto* override = Override("size", Expr(10_u));
+    auto* a = GlobalVar(Source{{7, 3}}, "a", ty.array(ty.u32(), override),
+                        core::AddressSpace::kWorkgroup);
+
+    auto* call = Call("workgroupUniformLoad", AddressOf(a));
+    WrapInFunction(call);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(error: no matching call to 'workgroupUniformLoad(ptr<workgroup, array<u32, size>, read_write>)'
+
+2 candidate functions:
+ • 'workgroupUniformLoad(ptr<workgroup, T, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'any concrete constructible type'
+ • 'workgroupUniformLoad(ptr<workgroup, atomic<T>, read_write>  ✗ ) -> T' where:
+      ✗  'T' is 'i32' or 'u32'
+)");
+}
+
+TEST_F(ResolverValidationTest, WorkgroupUniformLoad_ArraySize_NamedConstant) {
+    // const size = 10u;
+    // var<workgroup> a : array<u32, size>;
+    auto* const_exp = GlobalConst("size", Expr(10_u));
+    auto* a = GlobalVar(Source{{7, 3}}, "a", ty.array(ty.u32(), const_exp),
+                        core::AddressSpace::kWorkgroup);
+
+    auto* call = Call("workgroupUniformLoad", AddressOf(a));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 }  // namespace

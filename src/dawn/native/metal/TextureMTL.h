@@ -44,7 +44,6 @@ namespace dawn::native::metal {
 
 class CommandRecordingContext;
 class Device;
-struct MTLSharedEventAndSignalValue;
 class SharedTextureMemory;
 
 MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
@@ -99,7 +98,6 @@ class Texture final : public TextureBase {
 
     MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface = nullptr;
-    std::vector<MTLSharedEventAndSignalValue> mWaitEvents;
 };
 
 class TextureView final : public TextureViewBase {

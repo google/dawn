@@ -43,7 +43,7 @@ A **record** is a list of **record members**, each of which is a dictionary with
  - `"name"` a string
  - `"type"` a string, the name of the base type for this member
  - `"annotation"` a string, default to "value". Define the C annotation to apply to the base type. Allowed annotations are `"value"` (the default), `"*"`, `"const*"`
- - `"length"` (default to 1 if not set), a string. Defines length of the array pointed to for pointer arguments. If not set the length is implicitly 1 (so not an array), but otherwise it can be set to the name of another member in the same record that will contain the length of the array (this is heavily used in the `fooCount` `foos` pattern in the API). As a special case `"strlen"` can be used for `const char*` record members to denote that the length should be determined with `strlen`.
+ - `"length"` (default to 1 if not set), a string. Defines length of the array pointed to for pointer arguments. If not set the length is implicitly 1 (so not an array), but otherwise it can be set to the name of another member in the same record that will contain the length of the array (this is heavily used in the `fooCount` `foos` pattern in the API).
  - `"optional"` (default to false) a boolean that says whether this member is optional. Member records can be optional if they are pointers (otherwise dawn_wire will always try to dereference them), objects (otherwise dawn_wire will always try to encode their ID and crash), or if they have a `"default"` key. Optional pointers and objects will always default to `nullptr` (unless `"no_default"` is set to `true`).
  - `"default"` (optional) a number or string. If set the record member will use that value as default value. Depending on the member's category it can be a number, a string containing a number, or the name of an enum/bitmask value.
    - Dawn implements "trivial defaulting" for enums, similarly to the upstream WebGPU spec's WebIDL: if a zero-valued enum (usually called `Undefined`) is passed in, Dawn applies the default value specified here. See `WithTrivialFrontendDefaults()` in `api_structs.h` for how this works.
@@ -117,12 +117,3 @@ The schema of `dawn_wire.json` is a dictionary with the following keys:
 ## OpenGL loader generator
 
 The code to load OpenGL entrypoints from a `GetProcAddress` function is generated from [`gl.xml`](../../third_party/khronos/gl.xml) and the [list of extensions](../../src/dawn/native/opengl/supported_extensions.json) it supports.
-
-
-## Dawn lpmfuzz generator
-One of Dawn's Fuzzers utilizes the information in [`dawn.json`, `dawn_wire.json`, `dawn_lpm.json`] to generate  the `.proto` and `.cpp` files required for a [libprotobuf-mutator fuzzer](https://github.com/google/libprotobuf-mutator) that fuzzes Dawn Wire Server's stack with more effectiveness in some areas than plain libfuzzer.
-
-At this time it is used to generate:
-
- - the `dawn_lpm.proto` file used to describe the grammar for the fuzzer
- - the serializer `DawnLPMSerializer.cpp` that takes an arbitrary number of protobuf structures that were defined in `dawn_lpm.proto` and serializes them to be passed to `DawnWireServer::HandleCommands`.

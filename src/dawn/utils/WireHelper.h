@@ -28,11 +28,11 @@
 #ifndef SRC_DAWN_UTILS_WIREHELPER_H_
 #define SRC_DAWN_UTILS_WIREHELPER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <cstdint>
 #include <memory>
 #include <utility>
-
-#include "dawn/webgpu_cpp.h"
 
 struct DawnProcTable;
 
@@ -58,12 +58,6 @@ class WireHelper {
     virtual std::pair<wgpu::Instance, std::unique_ptr<dawn::native::Instance>> CreateInstances(
         const wgpu::InstanceDescriptor* nativeDesc = nullptr,
         const wgpu::InstanceDescriptor* wireDesc = nullptr);
-
-    // Creates a swap chain given a native device and surface.
-    virtual wgpu::SwapChain CreateSwapChain(WGPUSurface backendSurface,
-                                            WGPUDevice backendDevice,
-                                            WGPUDevice apiDevice,
-                                            const WGPUSwapChainDescriptor* descriptor) = 0;
 
     virtual void BeginWireTrace(const char* name) = 0;
 

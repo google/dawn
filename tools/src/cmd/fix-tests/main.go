@@ -165,6 +165,66 @@ var (
 
 var reHexCode = regexp.MustCompile(`\\x([0-9A-Z]{2})`)
 
+type MatchRange struct {
+	start int
+	end   int // exclusive
+}
+
+func Size(mr MatchRange) int {
+	return mr.end - mr.start
+}
+
+// Look for 'search_str' in the 'doc_string' and return the longest matching substring of 'search_str' as start/end indices
+func longestSubstringMatch(search_str string, doc_string string) MatchRange {
+	// Brute force algorithm is n*m for string sizes n and m
+	best_idx_start := 0
+	best_idx_end := 0 // exclusive
+	// Scan the document with the search string from the highest offset to the lowest. This will be out of bound for search string but that is because we are looking of a substring.
+	for doc_offset := -len(search_str); doc_offset < len(doc_string)+len(search_str); doc_offset++ {
+		curr_idx_start := 0
+		curr_idx_end := 0 // exclusive
+		for search_idx := 0; search_idx < len(search_str); search_idx++ {
+			doc_offset := search_idx + doc_offset
+			is_match := false
+
+			// basic range checking for the doc
+			if doc_offset >= 0 && doc_offset < len(doc_string) {
+				if search_str[search_idx] == doc_string[doc_offset] {
+					is_match = true
+				}
+			}
+
+			if is_match {
+				if curr_idx_end == 0 {
+					// first time matching
+					curr_idx_start = search_idx
+					curr_idx_end = curr_idx_start + 1 // exclusive
+				} else {
+					// continue current matching.
+					curr_idx_end++
+				}
+			}
+
+			// check if our match is the best
+			best_size := best_idx_end - best_idx_start
+			curr_size := curr_idx_end - curr_idx_start
+
+			if best_size < curr_size {
+				best_idx_start = curr_idx_start
+				best_idx_end = curr_idx_end
+			}
+
+			if !is_match {
+				// reset
+				curr_idx_start = 0
+				curr_idx_end = 0
+			}
+		}
+	}
+
+	return MatchRange{best_idx_start, best_idx_end}
+}
+
 func processFailure(test, wd, failure string) error {
 	// Start by un-escaping newlines in the failure message
 	failure = strings.ReplaceAll(failure, "\\n", "\n")
@@ -192,33 +252,68 @@ func processFailure(test, wd, failure string) error {
 	var file string
 	var fix func(testSource string) (string, error)
 	if parts := reExpectEq.FindStringSubmatch(failure); len(parts) == 5 {
-		// EXPECT_EQ(a, b)
 		a, b := unescape(parts[3]), unescape(parts[4])
 		file = parts[1]
 		fix = func(testSource string) (string, error) {
-			// We don't know if a or b is the expected, so just try flipping the string
-			// to the other form.
+			// This code is written so it can insert changes as fixes for expects that only match a substring.
+			// An example of where this is required is the "glsl/writer/builtin_test.cc" due to the programmatic header (GlslHeader())
+			// We don't know if a or b is the expected. We also dont know if it should be escaped for R"(...)" strings
+			a_esc, b_esc := escape(a), escape(b)
 
-			if len(b) > len(a) { // Go with the longer match, in case both are found
-				a, b = b, a
+			// Find the longest match. We have (unfortunately) 4 options.
+			mr_a := longestSubstringMatch(a, testSource)
+			mr_b := longestSubstringMatch(b, testSource)
+			mr_a_esc := longestSubstringMatch(a_esc, testSource)
+			mr_b_esc := longestSubstringMatch(b_esc, testSource)
+
+			// Perfect matches are prioritized for the cases where there may be more than matchable string in test function.
+			// This is common in tint where there is both the 'src' and 'expect' strings of non-failing transform test.
+			var a_perfect = len(a) == Size(mr_a)
+			var b_perfect = len(b) == Size(mr_b)
+			var a_esc_perfect = len(a_esc) == Size(mr_a_esc)
+			var b_esc_perfect = len(b_esc) == Size(mr_b_esc)
+			var has_perfect = a_perfect || b_perfect || a_esc_perfect || b_esc_perfect
+
+			use_largest := func(mr MatchRange) bool {
+				return Size(mr) >= Size(mr_a) && Size(mr) >= Size(mr_b) &&
+					Size(mr) >= Size(mr_a_esc) && Size(mr) >= Size(mr_b_esc) && !has_perfect
 			}
-			switch {
-			case strings.Contains(testSource, a):
-				testSource = strings.ReplaceAll(testSource, a, b)
-			case strings.Contains(testSource, b):
-				testSource = strings.ReplaceAll(testSource, b, a)
-			default:
-				// Try escaping for R"(...)" strings
-				a, b = escape(a), escape(b)
-				switch {
-				case strings.Contains(testSource, a):
-					testSource = strings.ReplaceAll(testSource, a, b)
-				case strings.Contains(testSource, b):
-					testSource = strings.ReplaceAll(testSource, b, a)
-				default:
-					return "", fmt.Errorf("could not fix 'EXPECT_EQ' pattern in '%v'\n\nA: '%v'\n\nB: '%v'", file, a, b)
-				}
+
+			// assumed mr_b_esc is best match
+			expected_str := b_esc
+			replace_str := a_esc
+			mr_largest := mr_b_esc
+
+			if use_largest(mr_a) || a_perfect {
+				expected_str = a
+				replace_str = b
+				mr_largest = mr_a
+			} else if use_largest(mr_b) || b_perfect {
+				expected_str = b
+				replace_str = a
+				mr_largest = mr_b
+			} else if use_largest(mr_a_esc) || a_esc_perfect {
+				expected_str = a_esc
+				replace_str = b_esc
+				mr_largest = mr_a_esc
 			}
+
+			// trim away the number of unmatched characters from the end of expected to the end of the replacement.
+			replace_str_end := len(replace_str) - (len(expected_str) - mr_largest.end)
+			if replace_str_end >= mr_largest.start && replace_str_end <= len(replace_str) {
+				replace_str = replace_str[mr_largest.start:replace_str_end]
+				expected_str = expected_str[mr_largest.start:mr_largest.end]
+			} else {
+				// It is not safe to attempt a replace if the replacement string would have negative (nonsense) size.
+				expected_str = ""
+			}
+
+			// Do not try to replace on empty strings.
+			if len(expected_str) <= 0 {
+				return "", fmt.Errorf("could not fix 'EXPECT_EQ' pattern in '%v'\n\nA: '%v'\n\nB: '%v'", file, a, b)
+			}
+
+			testSource = strings.ReplaceAll(testSource, expected_str, replace_str)
 			return testSource, nil
 		}
 	} else if parts := reExpectHasSubstr.FindStringSubmatch(failure); len(parts) == 5 {

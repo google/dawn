@@ -28,14 +28,17 @@
 #include <fcntl.h>
 #include <gbm.h>
 #include <unistd.h>
-#include <vulkan/vulkan.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+// This must be included instead of vulkan.h so that we can wrap it with vulkan_platform.h.
+#include "dawn/common/vulkan_platform.h"
+
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn {
 namespace {
@@ -52,7 +55,7 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
         switch (FenceFeature) {
             case wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD:
                 return "dma buf, opaque fd";
-            case wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD:
+            case wgpu::FeatureName::SharedFenceSyncFD:
                 return "dma buf, sync fd";
             default:
                 DAWN_UNREACHABLE();
@@ -167,7 +170,7 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 
   private:
-    void SetUp() override {
+    void SetUp(const wgpu::Device& device) override {
         // Render nodes [1] are the primary interface for communicating with the GPU on
         // devices that support DRM. The actual filename of the render node is
         // implementation-specific, so we must scan through all possible filenames to find
@@ -221,7 +224,7 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(
     SharedTextureMemoryNoFeatureTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+     Backend<wgpu::FeatureName::SharedFenceSyncFD>::GetInstance()},
     {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(
@@ -229,7 +232,7 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(
     SharedTextureMemoryTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+     Backend<wgpu::FeatureName::SharedFenceSyncFD>::GetInstance()},
     {1});
 
 }  // anonymous namespace

@@ -1,15 +1,14 @@
+
 cbuffer cbuffer_S : register(b0) {
   uint4 S[2];
 };
-
-float4 func_S_X(uint pointer[1]) {
-  const uint scalar_offset = ((16u * pointer[0])) / 4;
-  return asfloat(S[scalar_offset / 4]);
+float4 func(uint pointer_indices[1]) {
+  return asfloat(S[((16u * pointer_indices[0u]) / 16u)]);
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint tint_symbol[1] = {1u};
-  float4 r = func_S_X(tint_symbol);
-  return;
+  uint v[1] = {1u};
+  float4 r = func(v);
 }
+

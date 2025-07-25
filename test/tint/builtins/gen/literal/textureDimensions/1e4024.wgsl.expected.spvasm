@@ -1,65 +1,116 @@
+;
+; fragment_main
+;
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 31
+; Generator: Google Tint Compiler; 1
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
-               OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %fragment_main OriginUpperLeft
-               OpExecutionMode %compute_main LocalSize 1 1 1
-               OpName %prevent_dce_block "prevent_dce_block"
                OpMemberName %prevent_dce_block 0 "inner"
-               OpName %prevent_dce "prevent_dce"
+               OpName %prevent_dce_block "prevent_dce_block"
                OpName %arg_0 "arg_0"
                OpName %textureDimensions_1e4024 "textureDimensions_1e4024"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
-               OpName %compute_main "compute_main"
-               OpDecorate %prevent_dce_block Block
                OpMemberDecorate %prevent_dce_block 0 Offset 0
-               OpDecorate %prevent_dce DescriptorSet 0
-               OpDecorate %prevent_dce Binding 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 Coherent
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
 %prevent_dce_block = OpTypeStruct %v2uint
 %_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
-%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
       %float = OpTypeFloat 32
           %8 = OpTypeImage %float 2D 0 0 0 2 R32f
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
       %arg_0 = OpVariable %_ptr_UniformConstant_8 UniformConstant
-         %10 = OpTypeFunction %v2uint
+         %11 = OpTypeFunction %v2uint
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
-         %17 = OpConstantNull %v2uint
        %void = OpTypeVoid
-         %19 = OpTypeFunction %void
-     %uint_0 = OpConstant %uint 0
+         %20 = OpTypeFunction %void
 %_ptr_StorageBuffer_v2uint = OpTypePointer StorageBuffer %v2uint
-%textureDimensions_1e4024 = OpFunction %v2uint None %10
+     %uint_0 = OpConstant %uint 0
+%textureDimensions_1e4024 = OpFunction %v2uint None %11
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v2uint Function %17
-         %14 = OpLoad %8 %arg_0
-         %13 = OpImageQuerySize %v2uint %14
-               OpStore %res %13
-         %18 = OpLoad %v2uint %res
-               OpReturnValue %18
+        %res = OpVariable %_ptr_Function_v2uint Function
+         %13 = OpLoad %8 %arg_0 None
+         %14 = OpImageQuerySize %v2uint %13
+               OpStore %res %14
+         %17 = OpLoad %v2uint %res None
+               OpReturnValue %17
                OpFunctionEnd
-%fragment_main = OpFunction %void None %19
-         %22 = OpLabel
-         %25 = OpAccessChain %_ptr_StorageBuffer_v2uint %prevent_dce %uint_0
-         %26 = OpFunctionCall %v2uint %textureDimensions_1e4024
-               OpStore %25 %26
+%fragment_main = OpFunction %void None %20
+         %21 = OpLabel
+         %22 = OpFunctionCall %v2uint %textureDimensions_1e4024
+         %23 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
+               OpStore %23 %22 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %19
-         %28 = OpLabel
-         %29 = OpAccessChain %_ptr_StorageBuffer_v2uint %prevent_dce %uint_0
-         %30 = OpFunctionCall %v2uint %textureDimensions_1e4024
-               OpStore %29 %30
+;
+; compute_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 26
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpName %arg_0 "arg_0"
+               OpName %textureDimensions_1e4024 "textureDimensions_1e4024"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 Coherent
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+%prevent_dce_block = OpTypeStruct %v2uint
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+      %float = OpTypeFloat 32
+          %8 = OpTypeImage %float 2D 0 0 0 2 R32f
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+      %arg_0 = OpVariable %_ptr_UniformConstant_8 UniformConstant
+         %11 = OpTypeFunction %v2uint
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void
+%_ptr_StorageBuffer_v2uint = OpTypePointer StorageBuffer %v2uint
+     %uint_0 = OpConstant %uint 0
+%textureDimensions_1e4024 = OpFunction %v2uint None %11
+         %12 = OpLabel
+        %res = OpVariable %_ptr_Function_v2uint Function
+         %13 = OpLoad %8 %arg_0 None
+         %14 = OpImageQuerySize %v2uint %13
+               OpStore %res %14
+         %17 = OpLoad %v2uint %res None
+               OpReturnValue %17
+               OpFunctionEnd
+%compute_main = OpFunction %void None %20
+         %21 = OpLabel
+         %22 = OpFunctionCall %v2uint %textureDimensions_1e4024
+         %23 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
+               OpStore %23 %22 None
                OpReturn
                OpFunctionEnd

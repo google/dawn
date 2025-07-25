@@ -52,11 +52,11 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
         auto pre = Disassembler(this->mod).Plain();
         auto encoded = EncodeToBinary(this->mod);
         if (encoded != Success) {
-            return {pre, encoded.Failure().reason.Str()};
+            return {pre, encoded.Failure().reason};
         }
         auto decoded = Decode(encoded->Slice());
         if (decoded != Success) {
-            return {pre, decoded.Failure().reason.Str()};
+            return {pre, decoded.Failure().reason};
         }
         auto post = Disassembler(decoded.Get()).Plain();
         return {pre, post};
@@ -116,8 +116,7 @@ INSTANTIATE_TEST_SUITE_P(,
                                          Function::PipelineStage::kVertex));
 
 TEST_F(IRBinaryRoundtripTest, Fn_WorkgroupSize) {
-    b.Function("Function", ty.i32(), Function::PipelineStage::kCompute,
-               std::array<uint32_t, 3>{1, 2, 3});
+    b.ComputeFunction("Function", 1_u, 2_u, 3_u);
     RUN_TEST();
 }
 
@@ -304,52 +303,56 @@ TEST_F(IRBinaryRoundtripTest, atomic_i32) {
 }
 
 TEST_F(IRBinaryRoundtripTest, depth_texture) {
-    auto* tex = ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d);
+    auto* tex = ty.depth_texture(core::type::TextureDimension::k2d);
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, sampled_texture) {
-    auto* tex = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.i32());
+    auto* tex = ty.sampled_texture(core::type::TextureDimension::k3d, ty.i32());
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, multisampled_texture) {
-    auto* tex =
-        ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32());
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, depth_multisampled_texture) {
-    auto* tex = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
+    auto* tex = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, storage_texture) {
-    auto* tex = ty.Get<core::type::StorageTexture>(core::type::TextureDimension::k2dArray,
-                                                   core::TexelFormat::kRg32Float,
-                                                   core::Access::kReadWrite, ty.f32());
+    auto* tex = ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                   core::TexelFormat::kRg32Float, core::Access::kReadWrite);
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
+TEST_F(IRBinaryRoundtripTest, texel_buffer) {
+    auto* buf = ty.texel_buffer(core::TexelFormat::kRgba32Float, core::Access::kReadWrite);
+    b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, buf, read)); });
+    RUN_TEST();
+}
+
 TEST_F(IRBinaryRoundtripTest, external_texture) {
-    auto* tex = ty.Get<core::type::ExternalTexture>();
+    auto* tex = ty.external_texture();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, tex, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, sampler) {
-    auto* sampler = ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler);
+    auto* sampler = ty.sampler();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, sampler, read)); });
     RUN_TEST();
 }
 
 TEST_F(IRBinaryRoundtripTest, comparision_sampler) {
-    auto* sampler = ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler);
+    auto* sampler = ty.comparison_sampler();
     b.Append(b.ir.root_block, [&] { b.Var(ty.ptr(handle, sampler, read)); });
     RUN_TEST();
 }
@@ -644,7 +647,7 @@ TEST_F(IRBinaryRoundtripTest, SwitchResults) {
     b.Append(fn->Block(), [&] {
         auto* switch_ = b.Switch(x);
         auto* res = b.InstructionResult<i32>();
-        switch_->SetResults(Vector{res});
+        switch_->SetResult(res);
         b.Append(b.Case(switch_, {b.Constant(1_i)}), [&] { b.ExitSwitch(switch_, 1_i); });
         b.Append(b.Case(switch_, {b.Constant(2_i), b.Constant(3_i)}),
                  [&] { b.ExitSwitch(switch_, 2_i); });
@@ -695,7 +698,7 @@ TEST_F(IRBinaryRoundtripTest, LoopResults) {
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
         auto* res = b.InstructionResult<i32>();
-        loop->SetResults(Vector{res});
+        loop->SetResult(res);
         b.Append(loop->Body(), [&] { b.ExitLoop(loop, 1_i); });
         b.Return(fn, res);
     });
@@ -739,7 +742,7 @@ TEST_F(IRBinaryRoundtripTest, Unreachable) {
 
 TEST_F(IRBinaryRoundtripTest, InputAttachment) {
     b.Append(b.ir.root_block, [&] {
-        auto* input_type = ty.Get<core::type::InputAttachment>(ty.i32());
+        auto* input_type = ty.input_attachment(ty.i32());
         auto* v = b.Var(ty.ptr(handle, input_type, read));
         v->SetBindingPoint(10, 20);
         v->SetInputAttachmentIndex(11);

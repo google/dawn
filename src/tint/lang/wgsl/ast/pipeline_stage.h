@@ -28,8 +28,8 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_PIPELINE_STAGE_H_
 #define SRC_TINT_LANG_WGSL_AST_PIPELINE_STAGE_H_
 
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint::ast {
 
@@ -43,7 +43,8 @@ std::string_view ToString(PipelineStage stage);
 /// @param out the stream to write to
 /// @param stage the PipelineStage
 /// @return the stream so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, PipelineStage stage) {
     return out << ToString(stage);
 }

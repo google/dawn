@@ -32,10 +32,11 @@ namespace dawn {
 
 // A base class to make a class non-copyable.
 class NonCopyable {
-  protected:
+  public:
     constexpr NonCopyable() = default;
     ~NonCopyable() = default;
 
+  protected:
     NonCopyable(NonCopyable&&) = default;
     NonCopyable& operator=(NonCopyable&&) = default;
 

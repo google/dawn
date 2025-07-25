@@ -20,7 +20,8 @@ uvec3 v3u32_var2 = uvec3(1u);
 uvec3 v3u32_var3 = uvec3(1u);
 bvec3 v3bool_var4 = bvec3(true);
 bvec4 v4bool_var5 = bvec4(true, false, true, false);
-void tint_symbol() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   bool_var1 = false;
   bool_var2 = false;
   bool_var3 = false;
@@ -41,10 +42,4 @@ void tint_symbol() {
   v3u32_var1 = uvec3(0u);
   v3u32_var2 = uvec3(0u);
   v3u32_var3 = uvec3(0u);
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  tint_symbol();
-  return;
 }

@@ -10,24 +10,27 @@
   switch (i32(x == 0.0 && dpdx(1.0) == 0.0)) {
               ^
 
-Texture2D<float4> t : register(t1);
-SamplerState s : register(s2);
-
-struct tint_symbol_3 {
+struct main_inputs {
   float x : TEXCOORD0;
 };
 
+
 void main_inner(float x) {
-  bool tint_symbol = (x == 0.0f);
-  if (tint_symbol) {
-    float tint_symbol_1 = ddx(1.0f);
-    tint_symbol = (tint_symbol_1 == 0.0f);
+  bool v = false;
+  if ((x == 0.0f)) {
+    v = (ddx(1.0f) == 0.0f);
+  } else {
+    v = false;
   }
-  do {
-  } while (false);
+  int v_1 = int(v);
+  {
+    while(true) {
+      break;
+    }
+  }
 }
 
-void main(tint_symbol_3 tint_symbol_2) {
-  main_inner(tint_symbol_2.x);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
 }
+

@@ -1,43 +1,50 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 20
+; Generator: Google Tint Compiler; 1
+; Bound: 28
 ; Schema: 0
                OpCapability Shader
+         %19 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 16 16 1
-               OpName %data_block "data_block"
-               OpMemberName %data_block 0 "inner"
-               OpName %data "data"
+               OpMemberName %data_block_tint_explicit_layout 0 "inner"
+               OpName %data_block_tint_explicit_layout "data_block_tint_explicit_layout"
                OpName %foo "foo"
                OpName %main "main"
-               OpDecorate %data_block Block
-               OpMemberDecorate %data_block 0 Offset 0
                OpDecorate %_runtimearr_int ArrayStride 4
-               OpDecorate %data NonWritable
-               OpDecorate %data DescriptorSet 0
-               OpDecorate %data Binding 1
+               OpMemberDecorate %data_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %data_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 1
+               OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
- %data_block = OpTypeStruct %_runtimearr_int
-%_ptr_StorageBuffer_data_block = OpTypePointer StorageBuffer %data_block
-       %data = OpVariable %_ptr_StorageBuffer_data_block StorageBuffer
-          %6 = OpTypeFunction %int
+%data_block_tint_explicit_layout = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_data_block_tint_explicit_layout = OpTypePointer StorageBuffer %data_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_data_block_tint_explicit_layout StorageBuffer
+          %7 = OpTypeFunction %int
+%_ptr_StorageBuffer__runtimearr_int = OpTypePointer StorageBuffer %_runtimearr_int
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-         %11 = OpConstantNull %int
+     %uint_1 = OpConstant %uint 1
+      %int_0 = OpConstant %int 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
        %void = OpTypeVoid
-         %15 = OpTypeFunction %void
-        %foo = OpFunction %int None %6
+         %25 = OpTypeFunction %void
+        %foo = OpFunction %int None %7
           %8 = OpLabel
-         %13 = OpAccessChain %_ptr_StorageBuffer_int %data %uint_0 %11
-         %14 = OpLoad %int %13
-               OpReturnValue %14
+          %9 = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %1 %uint_0
+         %13 = OpArrayLength %uint %1 0
+         %14 = OpISub %uint %13 %uint_1
+         %16 = OpBitcast %uint %int_0
+         %18 = OpExtInst %uint %19 UMin %16 %14
+         %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %18
+         %22 = OpLoad %int %20 None
+               OpReturnValue %22
                OpFunctionEnd
-       %main = OpFunction %void None %15
-         %18 = OpLabel
-         %19 = OpFunctionCall %int %foo
+       %main = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpFunctionCall %int %foo
                OpReturn
                OpFunctionEnd

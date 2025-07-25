@@ -33,8 +33,11 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
+#include "src/tint/lang/core/type/u8.h"
 
 namespace tint::core::type {
 namespace {
@@ -88,13 +91,25 @@ TEST_F(ManagerTest, CppToType) {
     const Type* b2 = tm.Get<Bool>();
     ASSERT_EQ(b1, b2);
 
-    const Type* i1 = tm.Get<i32>();
-    const Type* i2 = tm.Get<I32>();
-    ASSERT_EQ(i1, i2);
+    const Type* i32_1 = tm.Get<i32>();
+    const Type* i32_2 = tm.Get<I32>();
+    ASSERT_EQ(i32_1, i32_2);
 
-    const Type* u1 = tm.Get<u32>();
-    const Type* u2 = tm.Get<U32>();
-    ASSERT_EQ(u1, u2);
+    const Type* i8_1 = tm.Get<i8>();
+    const Type* i8_2 = tm.Get<I8>();
+    ASSERT_EQ(i8_1, i8_2);
+
+    const Type* u32_1 = tm.Get<u32>();
+    const Type* u32_2 = tm.Get<U32>();
+    ASSERT_EQ(u32_1, u32_2);
+
+    const Type* u64_1 = tm.Get<u64>();
+    const Type* u64_2 = tm.Get<U64>();
+    ASSERT_EQ(u64_1, u64_2);
+
+    const Type* u8_1 = tm.Get<u8>();
+    const Type* u8_2 = tm.Get<U8>();
+    ASSERT_EQ(u8_1, u8_2);
 
     const Type* f1 = tm.Get<f32>();
     const Type* f2 = tm.Get<F32>();

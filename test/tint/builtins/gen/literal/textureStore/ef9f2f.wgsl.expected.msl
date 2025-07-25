@@ -1,17 +1,36 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
-void textureStore_ef9f2f(texture3d<uint, access::write> tint_symbol) {
-  tint_symbol.write(uint4(1u), uint3(int3(1)));
+
+struct tint_module_vars_struct {
+  texture3d<uint, access::write> arg_0;
+};
+
+void textureStore_ef9f2f(tint_module_vars_struct tint_module_vars) {
+  tint_module_vars.arg_0.write(uint4(1u), uint3(int3(1)));
 }
 
-fragment void fragment_main(texture3d<uint, access::write> tint_symbol_1 [[texture(0)]]) {
-  textureStore_ef9f2f(tint_symbol_1);
-  return;
+fragment void fragment_main(texture3d<uint, access::write> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
+  textureStore_ef9f2f(tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  texture3d<uint, access::write> arg_0;
+};
+
+void textureStore_ef9f2f(tint_module_vars_struct tint_module_vars) {
+  tint_module_vars.arg_0.write(uint4(1u), uint3(int3(1)));
 }
 
-kernel void compute_main(texture3d<uint, access::write> tint_symbol_2 [[texture(0)]]) {
-  textureStore_ef9f2f(tint_symbol_2);
-  return;
+kernel void compute_main(texture3d<uint, access::write> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
+  textureStore_ef9f2f(tint_module_vars);
 }
-

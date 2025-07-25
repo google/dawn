@@ -99,7 +99,7 @@ bool Value::Equal(const constant::Value* b) const {
     return Switch(
         Type(),  //
         [&](const core::type::Vector* vec) { return elements_equal(vec->Width()); },
-        [&](const core::type::Matrix* mat) { return elements_equal(mat->columns()); },
+        [&](const core::type::Matrix* mat) { return elements_equal(mat->Columns()); },
         [&](const core::type::Struct* str) { return elements_equal(str->Members().Length()); },
         [&](const core::type::Array* arr) {
             if (auto n = arr->ConstantCount()) {

@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 void X(float2 a, float2 b) {
 }
 
@@ -11,8 +11,5 @@ float2 Y() {
 void f() {
   float2 v = 0.0f;
   X(float2(0.0f), v);
-  float2 const tint_symbol = float2(0.0f);
-  float2 const tint_symbol_1 = Y();
-  X(tint_symbol, tint_symbol_1);
+  X(float2(0.0f), Y());
 }
-

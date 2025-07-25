@@ -32,7 +32,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/spirv/reader/ast_lower/simplify_pointers.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -143,7 +143,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
     // Example: `arr[i]` -> `arr[i].el`
     ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
         if (auto* ty = src.TypeOf(idx->object)) {
-            if (TINT_UNLIKELY(ty->Is<core::type::Pointer>())) {
+            if (DAWN_UNLIKELY(ty->Is<core::type::Pointer>())) {
                 TINT_ICE() << "lhs of index accessor expression should not be a pointer. These "
                               "should have been removed by the SimplifyPointers transform";
             }

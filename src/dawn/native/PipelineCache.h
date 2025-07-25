@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_PIPELINECACHE_H_
 #define SRC_DAWN_NATIVE_PIPELINECACHE_H_
 
+#include <atomic>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/CacheKey.h"
@@ -47,12 +49,18 @@ class PipelineCacheBase : public RefCounted {
     // with more monolithic-like caches where we expect overwriting sometimes.
     MaybeError Flush();
 
-    // Serializes and writes the current contents of the backend cache object into the backing
-    // blob cache iff the initial read from the backend cache did not result in a hit.
-    MaybeError FlushIfNeeded();
+    // Called after pipeline was compiled. The default implementation serializes and writes the
+    // current contents of the backend cache object into the backing blob cache iff the initial read
+    // from the backend cache did not result in a hit.
+    MaybeError DidCompilePipeline();
+
+    // Trigger storing pipeline cache data in BlobCache if necessary.
+    MaybeError StoreOnIdle();
 
   protected:
-    PipelineCacheBase(BlobCache* cache, const CacheKey& key);
+    // If `storeOnIdle` is true then pipeline cache will only stored in BlobCache when
+    // StoreOnIdle() is called.
+    PipelineCacheBase(BlobCache* cache, const CacheKey& key, bool storeOnIdle);
 
     // Initializes and returns the cached blob given the cache and keys. Used by backend
     // implementations to get the cache and set the cache hit state. Should only be called once.
@@ -67,10 +75,17 @@ class PipelineCacheBase : public RefCounted {
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,
     // the blob cache is guaranteed to be valid throughout the lifetime of the object.
-    raw_ptr<BlobCache> mCache;
-    CacheKey mKey;
+    const raw_ptr<BlobCache> mCache;
+    const CacheKey mKey;
+    const bool mStoreOnIdle;
     bool mInitialized = false;
     bool mCacheHit = false;
+
+    // Multiple threads can be using the pipeline cache concurrently and
+    // modifying this variable. Loads and stores are done with relaxed ordering
+    // since we don't care so much about strict ordering just avoiding UB from
+    // concurrent read/writes.
+    std::atomic<bool> mNeedsStore = false;
 };
 
 }  // namespace dawn::native

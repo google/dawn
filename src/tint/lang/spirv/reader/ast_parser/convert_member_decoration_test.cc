@@ -80,7 +80,11 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Natural) {
     ast_parser::Matrix matrix(&f32, 2, 2);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 8});
-    EXPECT_TRUE(result.list.IsEmpty());
+    ASSERT_FALSE(result.list.IsEmpty());
+    EXPECT_TRUE(result.list[0]->Is<ast::StrideAttribute>());
+    auto* stride_deco = result.list[0]->As<ast::StrideAttribute>();
+    ASSERT_NE(stride_deco, nullptr);
+    EXPECT_EQ(stride_deco->stride, 8u);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -106,7 +110,11 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Natural) {
     ast_parser::Matrix matrix(&f32, 2, 4);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 16});
-    EXPECT_TRUE(result.list.IsEmpty());
+    ASSERT_FALSE(result.list.IsEmpty());
+    EXPECT_TRUE(result.list[0]->Is<ast::StrideAttribute>());
+    auto* stride_deco = result.list[0]->As<ast::StrideAttribute>();
+    ASSERT_NE(stride_deco, nullptr);
+    EXPECT_EQ(stride_deco->stride, 16u);
     EXPECT_TRUE(p->error().empty());
 }
 

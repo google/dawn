@@ -38,23 +38,22 @@ class AdapterPropertiesVkTest : public DawnTest {};
 // Test that it is possible to query the Vulkan properties, and it is populated with a valid data.
 TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesVk));
-
-    {
-        wgpu::AdapterProperties properties;
-        wgpu::AdapterPropertiesVk vkProperties;
-        properties.nextInChain = &vkProperties;
-
-        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
-
-        // The driver version should be set to something but it depends on the hardware.
-        EXPECT_NE(vkProperties.driverVersion, 0u);
-    }
     {
         wgpu::AdapterInfo info;
         wgpu::AdapterPropertiesVk vkProperties;
         info.nextInChain = &vkProperties;
 
         adapter.GetInfo(&info);
+
+        // The driver version should be set to something but it depends on the hardware.
+        EXPECT_NE(vkProperties.driverVersion, 0u);
+    }
+    {
+        wgpu::AdapterInfo adapterInfo;
+        wgpu::AdapterPropertiesVk vkProperties;
+        adapterInfo.nextInChain = &vkProperties;
+
+        device.GetAdapterInfo(&adapterInfo);
 
         // The driver version should be set to something but it depends on the hardware.
         EXPECT_NE(vkProperties.driverVersion, 0u);

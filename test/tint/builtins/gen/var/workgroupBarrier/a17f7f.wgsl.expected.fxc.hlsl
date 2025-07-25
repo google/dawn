@@ -1,3 +1,4 @@
+
 void workgroupBarrier_a17f7f() {
   GroupMemoryBarrierWithGroupSync();
 }
@@ -5,5 +6,5 @@ void workgroupBarrier_a17f7f() {
 [numthreads(1, 1, 1)]
 void compute_main() {
   workgroupBarrier_a17f7f();
-  return;
 }
+

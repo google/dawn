@@ -1,20 +1,14 @@
 #version 310 es
 
-layout(binding = 0, std430) buffer s_block_ssbo {
+layout(binding = 0, std430)
+buffer s_block_1_ssbo {
   int inner;
-} s;
-
-void f(int tint_symbol) {
-  int b = tint_symbol;
-  s.inner = b;
+} v;
+void f(int v_1) {
+  int b = v_1;
+  v.inner = b;
 }
-
-void tint_symbol_1() {
-  f(1);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_1();
-  return;
+  f(1);
 }

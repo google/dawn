@@ -39,44 +39,35 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "writer",
   srcs = [
-    "output.cc",
     "writer.cc",
   ],
   hdrs = [
-    "output.h",
     "writer.h",
   ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/intrinsic",
+    "//src/tint/lang/core/ir",
+    "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/glsl/writer/raise",
-    "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/ast/transform",
-    "//src/tint/lang/wgsl/features",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
+    "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
-    "//src/tint/utils/generator",
     "//src/tint/utils/ice",
-    "//src/tint/utils/id",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
-    "//src/tint/utils/reflection",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
-    "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
-      "//src/tint/lang/glsl/writer/ast_printer",
       "//src/tint/lang/glsl/writer/common",
       "//src/tint/lang/glsl/writer/printer",
+      "//src/tint/lang/glsl/writer/raise",
     ],
     "//conditions:default": [],
   }),
@@ -84,38 +75,57 @@ cc_library(
   visibility = ["//visibility:public"],
 )
 cc_library(
-  name = "bench",
+  name = "test",
   alwayslink = True,
   srcs = [
-    "writer_bench.cc",
-  ],
+    "access_test.cc",
+    "binary_test.cc",
+    "builtin_test.cc",
+    "call_test.cc",
+    "constant_test.cc",
+    "constructor_test.cc",
+    "convert_test.cc",
+    "function_test.cc",
+    "if_test.cc",
+    "loop_test.cc",
+    "switch_test.cc",
+    "type_test.cc",
+    "unary_test.cc",
+    "var_and_let_test.cc",
+    "writer_test.cc",
+  ] + select({
+    ":tint_build_glsl_validator": [
+      "helper_test.h",
+    ],
+    "//conditions:default": [],
+  }) + select({
+    "//conditions:default": [],
+  }),
   deps = [
     "//src/tint/api/common",
-    "//src/tint/cmd/bench:bench",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
+    "//src/tint/lang/core/intrinsic",
+    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
-    "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/ast/transform",
-    "//src/tint/lang/wgsl/features",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
+    "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
-    "//src/tint/utils/id",
     "//src/tint/utils/macros",
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
-    "//src/tint/utils/reflection",
-    "//src/tint/utils/result",
     "//src/tint/utils/rtti",
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
-    "//src/tint/utils/traits",
-    "@benchmark",
+    "@gtest",
+    "//src/utils",
   ] + select({
+    ":tint_build_glsl_validator": [
+      "//src/tint/lang/glsl/validate",
+    ],
+    "//conditions:default": [],
+  }) + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer",
       "//src/tint/lang/glsl/writer/common",
@@ -127,12 +137,20 @@ cc_library(
 )
 
 alias(
+  name = "tint_build_glsl_validator",
+  actual = "//src/tint:tint_build_glsl_validator_true",
+)
+
+alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
 )
 
-alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
+selects.config_setting_group(
+    name = "tint_build_glsl_writer_and_tint_build_glsl_validator",
+    match_all = [
+        ":tint_build_glsl_writer",
+        ":tint_build_glsl_validator",
+    ],
 )
 

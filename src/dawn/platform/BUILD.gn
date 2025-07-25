@@ -53,7 +53,7 @@ dawn_component("platform") {
   }
 
   public_deps = [
-    # DawnPlatform.h has #include "dawn/webgpu.h"
+    # DawnPlatform.h has #include <webgpu/webgpu.h>
     "${dawn_root}/include/dawn:headers",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
   ]

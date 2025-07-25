@@ -52,20 +52,27 @@ class BreakIf final : public Castable<BreakIf, Exit> {
     static constexpr size_t kArgsOperandOffset = 1;
 
     /// Constructor (no operands, no loop)
-    BreakIf();
+    /// @param id the instruction id
+    explicit BreakIf(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param condition the break condition
     /// @param loop the loop containing the break-if
     /// @param next_iter_values the arguments passed to the loop body MultiInBlock, if the break
     /// condition evaluates to `false`.
     /// @param exit_values the values returned by the loop, if the break condition evaluates to
     /// `true`.
-    BreakIf(Value* condition,
+    BreakIf(Id id,
+            Value* condition,
             ir::Loop* loop,
             VectorRef<Value*> next_iter_values = tint::Empty,
             VectorRef<Value*> exit_values = tint::Empty);
+
     ~BreakIf() override;
+
+    /// @copydoc Instruction::Destroy()
+    void Destroy() override;
 
     /// @copydoc Instruction::Clone()
     BreakIf* Clone(CloneContext& ctx) override;

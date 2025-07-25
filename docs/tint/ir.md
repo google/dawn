@@ -57,7 +57,7 @@ simplifies the number of things to consider in the IR. For instance:
 
 
 ### Code Structure
-The code is contained in the `src/tint/ir` folder and is broken down
+The code is contained in the `src/tint/lang/core/ir` folder and is broken down
 into several classes. Note, the IR is a Tint _internal_ representation
 and these files should _never_ appear in the public API.
 
@@ -69,27 +69,34 @@ content. The Builder references an `ir::Module`.
 
 #### Module
 The top level of the IR is the `Module`. The module stores a list of
-`functions`, constant manager, type manager, allocators and various other
-bits of information needed by the IR. The `module` _may_ contain a
-disassembled representation of the module if the disassembler has been
-called.
+`functions`, the constant manager, the type manager, allocators and various other
+bits of information needed by the IR.
 
-A free `ir::FromProgram` method is provided to convert from a
-`Program` to an `ir::Module`. A similar `ToProgram` free method is
+A free `wgsl::reader::ProgramToIR` method is provided to convert from a
+`Program` to an `ir::Module`. A similar `wgsl::writer::IRToProgram` free method is
 provided for the reverse conversion.
 
 
+#### Disassembly
+An IR module can be emitted as IR assembly instructions using the disassembler. This
+disassembly can be done by calling `core::ir::Disassembler()` and providing the IR
+module to disassemble.
+
+
 ### Transforms
-Similar to the AST a transform system is available for IR. The transform
-has the same setup as the AST (and inherits from the same base transform
-class.)
+A transform system is available for IR. Each IR transform is a standalone process. There
+is no transform manager. Data is provided to the transforms through their configuration.
+Transforms mutate the IR in place, and can produce auxiliary information through their result if needed.
 
-The IR transforms live in `src/tint/lang/core/ir/transform`. These transforms are
-for use by the various IR generator backends.
+The common IR transforms live in `src/tint/lang/core/ir/transform`. These transforms
+are for use by the various IR generator backends.
 
-Unlike with the AST transforms, the IR transforms know which transforms
-must have run before themselves. The transform manager will then verify
-that all the required transforms for a given transform have executed.
+Each backend has custom transforms as needed. They live in the `raise`/ folder of the
+specific backend.
+
+The IR has a set of `Capabilities` which can be added/removed as transforms are
+executed. The transforms know which capabilities they support and will ICE if
+an unexpected capability is seen.
 
 
 ### Validation
@@ -113,7 +120,7 @@ be the names provided originally by the AST.
 A block contains the instruction lists for a section of code. A block
 always ends in a terminator instruction.
 
-The instructions in a block can be walked in linear scoped fashion. The
+The instructions in a block can be walked in linear fashion. The
 control instructions do not need to be entered to walk a blocks
 instructions.
 
@@ -137,7 +144,7 @@ The sub-blocks under the `if` can be terminated with `ExitIf`,
 
 
 #### Control Instruction -- Loop
-All of the loop structures in AST merge down to a single loop
+All of the loop structures in AST merge down to a single IR `loop`
 instruction.  The loop contains the `Body`, which is required and
 optional `Initializer` and `Continuing` blocks.
 
@@ -146,6 +153,8 @@ The `loop` body can be terminated with a `ExitLoop`, `Continue`,
 
 The `loop` continuing can be terminated with a `NextIteration`, or a
 `BreakIf` terminator.
+
+The `loop` initializer is always terminated with a `NextIteration`.
 
 A while loop is decomposed as listed in the WGSL spec:
 
@@ -199,7 +208,7 @@ The `switch` case blocks can be terminated with an `ExitSwitch`,
 
 #### Expressions
 All expressions in IR are single operations. There are no complex
-expressions. Any complex expression in the AST is broke apart into the
+expressions. Any complex expression in the AST is broken apart into the
 simpler single operation components.
 
 ```
@@ -269,11 +278,38 @@ provided as a Value argument to things like the `Call` instructions.
 The function param values are used to store information on the values
 being passed into a function call.
 
+
 ### BlockParam Values
 The `BlockParam` values are used to pass information for a
 `MultiInBlock` (e.g. Loop body, and loop continuing).
 
-## Alternatives
+There are no `Phi` instructions in the IR. Instead, `BlockParams` are used.
+Instead of an `OpPhi` instruction which says which values came from
+which parent blocks. Instead, values are passed into the blocks themselves
+from the terminator of the previous block.
+
+For example, block params can provide values into a loop, through the body
+and through the continuing block.
+
+```
+loop {
+    $B1: {  # initializer
+      next_iteration 2, 4
+    }
+    $B2:(%1:i32, %2:i32) {  # body
+      %3:i32 = add %1, %2
+      continue %3
+    }
+    $B3:(%4:i32) {  # continuing
+      %5:bool = lt %4, 10
+      break-if %5
+      next_iteration 6, 7
+    }
+}
+```
+
+
+## Alternatives Considered
 Instead of going to a custom IR there are several possible other roads
 that could be travelled.
 

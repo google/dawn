@@ -1,6 +1,10 @@
-uint3 tint_ftou(float3 v) {
-  return ((v < (4294967040.0f).xxx) ? ((v < (0.0f).xxx) ? (0u).xxx : uint3(v)) : (4294967295u).xxx);
-}
+//
+// main_count
+//
+struct main_count_inputs {
+  uint3 GlobalInvocationID : SV_DispatchThreadID;
+};
+
 
 cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[3];
@@ -10,96 +14,91 @@ RWByteAddressBuffer positions : register(u11);
 RWByteAddressBuffer counters : register(u20);
 RWByteAddressBuffer LUT : register(u21);
 RWByteAddressBuffer dbg : register(u50);
-
 float3 toVoxelPos(float3 position) {
-  float3 bbMin = float3(asfloat(uniforms[1].x), asfloat(uniforms[1].y), asfloat(uniforms[1].z));
-  float3 bbMax = float3(asfloat(uniforms[2].x), asfloat(uniforms[2].y), asfloat(uniforms[2].z));
+  float3 bbMin = float3(asfloat(uniforms[1u].x), asfloat(uniforms[1u].y), asfloat(uniforms[1u].z));
+  float3 bbMax = float3(asfloat(uniforms[2u].x), asfloat(uniforms[2u].y), asfloat(uniforms[2u].z));
   float3 bbSize = (bbMax - bbMin);
   float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
-  float gridSize = float(uniforms[0].y);
-  float gx = ((gridSize * (position.x - asfloat(uniforms[1].x))) / cubeSize);
-  float gy = ((gridSize * (position.y - asfloat(uniforms[1].y))) / cubeSize);
-  float gz = ((gridSize * (position.z - asfloat(uniforms[1].z))) / cubeSize);
+  float gridSize = float(uniforms[0u].y);
+  float gx = ((gridSize * (position.x - asfloat(uniforms[1u].x))) / cubeSize);
+  float gy = ((gridSize * (position.y - asfloat(uniforms[1u].y))) / cubeSize);
+  float gz = ((gridSize * (position.z - asfloat(uniforms[1u].z))) / cubeSize);
   return float3(gx, gy, gz);
 }
 
+uint3 tint_v3f32_to_v3u32(float3 value) {
+  return uint3(clamp(value, (0.0f).xxx, (4294967040.0f).xxx));
+}
+
 uint toIndex1D(uint gridSize, float3 voxelPos) {
-  uint3 icoord = tint_ftou(voxelPos);
+  uint3 icoord = tint_v3f32_to_v3u32(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
 }
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
-}
-
-uint3 toIndex3D(uint gridSize, uint index) {
-  uint z = tint_div(index, (gridSize * gridSize));
-  uint y = tint_div((index - ((gridSize * gridSize) * z)), gridSize);
-  uint x = tint_mod(index, gridSize);
-  return uint3(x, y, z);
-}
-
 float3 loadPosition(uint vertexIndex) {
-  float3 position = float3(asfloat(positions.Load((4u * ((3u * vertexIndex) + 0u)))), asfloat(positions.Load((4u * ((3u * vertexIndex) + 1u)))), asfloat(positions.Load((4u * ((3u * vertexIndex) + 2u)))));
+  uint v = 0u;
+  positions.GetDimensions(v);
+  uint v_1 = 0u;
+  positions.GetDimensions(v_1);
+  uint v_2 = 0u;
+  positions.GetDimensions(v_2);
+  float3 position = float3(asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 0u), ((v / 4u) - 1u)) * 4u)))), asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 1u), ((v_1 / 4u) - 1u)) * 4u)))), asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 2u), ((v_2 / 4u) - 1u)) * 4u)))));
   return position;
 }
 
-uint countersatomicLoad(uint offset) {
-  uint value = 0;
-  counters.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-
-int LUTatomicLoad(uint offset) {
-  int value = 0;
-  LUT.InterlockedOr(offset, 0, value);
-  return value;
-}
-
-
 void doIgnore() {
-  uint g42 = uniforms[0].x;
+  uint g42 = uniforms[0u].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = countersatomicLoad(0u);
-  uint rwg = indices.Load(0u);
-  float rb5 = asfloat(positions.Load(0u));
-  int g55 = LUTatomicLoad(0u);
+  uint v_3 = 0u;
+  counters.GetDimensions(v_3);
+  uint v_4 = ((v_3 / 4u) - 1u);
+  uint v_5 = 0u;
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_4) * 4u)), 0u, v_5);
+  uint b53 = v_5;
+  uint v_6 = 0u;
+  indices.GetDimensions(v_6);
+  uint v_7 = ((v_6 / 4u) - 1u);
+  uint rwg = indices.Load((0u + (min(uint(int(0)), v_7) * 4u)));
+  uint v_8 = 0u;
+  positions.GetDimensions(v_8);
+  uint v_9 = ((v_8 / 4u) - 1u);
+  float rb5 = asfloat(positions.Load((0u + (min(uint(int(0)), v_9) * 4u))));
+  uint v_10 = 0u;
+  LUT.GetDimensions(v_10);
+  uint v_11 = ((v_10 / 4u) - 1u);
+  int v_12 = int(0);
+  LUT.InterlockedOr(int((0u + (min(uint(int(0)), v_11) * 4u))), int(0), v_12);
+  int g55 = v_12;
 }
-
-struct tint_symbol_2 {
-  uint3 GlobalInvocationID : SV_DispatchThreadID;
-};
-
-uint countersatomicAdd(uint offset, uint value) {
-  uint original_value = 0;
-  counters.InterlockedAdd(offset, value, original_value);
-  return original_value;
-}
-
 
 void main_count_inner(uint3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
-  if ((triangleIndex >= uniforms[0].x)) {
+  if ((triangleIndex >= uniforms[0u].x)) {
     return;
   }
   doIgnore();
-  uint i0 = indices.Load((4u * ((3u * triangleIndex) + 0u)));
-  uint i1 = indices.Load((4u * ((3u * triangleIndex) + 1u)));
-  uint i2 = indices.Load((4u * ((3u * triangleIndex) + 2u)));
+  uint v_13 = 0u;
+  indices.GetDimensions(v_13);
+  uint i0 = indices.Load((0u + (min(((3u * triangleIndex) + 0u), ((v_13 / 4u) - 1u)) * 4u)));
+  uint v_14 = 0u;
+  indices.GetDimensions(v_14);
+  uint i1 = indices.Load((0u + (min(((3u * triangleIndex) + 1u), ((v_14 / 4u) - 1u)) * 4u)));
+  uint v_15 = 0u;
+  indices.GetDimensions(v_15);
+  uint i2 = indices.Load((0u + (min(((3u * triangleIndex) + 2u), ((v_15 / 4u) - 1u)) * 4u)));
   float3 p0 = loadPosition(i0);
   float3 p1 = loadPosition(i1);
   float3 p2 = loadPosition(i2);
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
-  uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  uint acefg = countersatomicAdd((4u * voxelIndex), 1u);
+  uint voxelIndex = toIndex1D(uniforms[0u].y, voxelPos);
+  uint v_16 = 0u;
+  counters.GetDimensions(v_16);
+  uint v_17 = 0u;
+  counters.InterlockedAdd((0u + (min(voxelIndex, ((v_16 / 4u) - 1u)) * 4u)), 1u, v_17);
+  uint acefg = v_17;
   if ((triangleIndex == 0u)) {
-    dbg.Store(16u, asuint(uniforms[0].y));
+    dbg.Store(16u, uniforms[0u].y);
     dbg.Store(32u, asuint(center.x));
     dbg.Store(36u, asuint(center.y));
     dbg.Store(40u, asuint(center.z));
@@ -107,81 +106,184 @@ void main_count_inner(uint3 GlobalInvocationID) {
 }
 
 [numthreads(128, 1, 1)]
-void main_count(tint_symbol_2 tint_symbol_1) {
-  main_count_inner(tint_symbol_1.GlobalInvocationID);
-  return;
+void main_count(main_count_inputs inputs) {
+  main_count_inner(inputs.GlobalInvocationID);
 }
 
-struct tint_symbol_4 {
+//
+// main_create_lut
+//
+struct main_create_lut_inputs {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-uint dbgatomicAdd(uint offset, uint value) {
-  uint original_value = 0;
-  dbg.InterlockedAdd(offset, value, original_value);
-  return original_value;
+
+cbuffer cbuffer_uniforms : register(b0) {
+  uint4 uniforms[3];
+};
+RWByteAddressBuffer indices : register(u10);
+RWByteAddressBuffer positions : register(u11);
+RWByteAddressBuffer counters : register(u20);
+RWByteAddressBuffer LUT : register(u21);
+RWByteAddressBuffer dbg : register(u50);
+void doIgnore() {
+  uint g42 = uniforms[0u].x;
+  uint kj6 = dbg.Load(20u);
+  uint v = 0u;
+  counters.GetDimensions(v);
+  uint v_1 = ((v / 4u) - 1u);
+  uint v_2 = 0u;
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_1) * 4u)), 0u, v_2);
+  uint b53 = v_2;
+  uint v_3 = 0u;
+  indices.GetDimensions(v_3);
+  uint v_4 = ((v_3 / 4u) - 1u);
+  uint rwg = indices.Load((0u + (min(uint(int(0)), v_4) * 4u)));
+  uint v_5 = 0u;
+  positions.GetDimensions(v_5);
+  uint v_6 = ((v_5 / 4u) - 1u);
+  float rb5 = asfloat(positions.Load((0u + (min(uint(int(0)), v_6) * 4u))));
+  uint v_7 = 0u;
+  LUT.GetDimensions(v_7);
+  uint v_8 = ((v_7 / 4u) - 1u);
+  int v_9 = int(0);
+  LUT.InterlockedOr(int((0u + (min(uint(int(0)), v_8) * 4u))), int(0), v_9);
+  int g55 = v_9;
 }
-
-
-void LUTatomicStore(uint offset, int value) {
-  int ignored;
-  LUT.InterlockedExchange(offset, value, ignored);
-}
-
 
 void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
-  uint maxVoxels = ((uniforms[0].y * uniforms[0].y) * uniforms[0].y);
+  uint maxVoxels = ((uniforms[0u].y * uniforms[0u].y) * uniforms[0u].y);
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = countersatomicLoad((4u * voxelIndex));
-  int offset = -1;
+  uint v_10 = 0u;
+  counters.GetDimensions(v_10);
+  uint v_11 = 0u;
+  counters.InterlockedOr((0u + (min(voxelIndex, ((v_10 / 4u) - 1u)) * 4u)), 0u, v_11);
+  uint numTriangles = v_11;
+  int offset = int(-1);
   if ((numTriangles > 0u)) {
-    uint tint_symbol = dbgatomicAdd(0u, numTriangles);
-    offset = int(tint_symbol);
+    uint v_12 = 0u;
+    dbg.InterlockedAdd(0u, numTriangles, v_12);
+    offset = int(v_12);
   }
-  LUTatomicStore((4u * voxelIndex), offset);
+  uint v_13 = 0u;
+  LUT.GetDimensions(v_13);
+  int v_14 = offset;
+  int v_15 = int(0);
+  LUT.InterlockedExchange(int((0u + (min(voxelIndex, ((v_13 / 4u) - 1u)) * 4u))), v_14, v_15);
 }
 
 [numthreads(128, 1, 1)]
-void main_create_lut(tint_symbol_4 tint_symbol_3) {
-  main_create_lut_inner(tint_symbol_3.GlobalInvocationID);
-  return;
+void main_create_lut(main_create_lut_inputs inputs) {
+  main_create_lut_inner(inputs.GlobalInvocationID);
 }
 
-struct tint_symbol_6 {
+//
+// main_sort_triangles
+//
+struct main_sort_triangles_inputs {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
 
-int LUTatomicAdd(uint offset, int value) {
-  int original_value = 0;
-  LUT.InterlockedAdd(offset, value, original_value);
-  return original_value;
+
+cbuffer cbuffer_uniforms : register(b0) {
+  uint4 uniforms[3];
+};
+RWByteAddressBuffer indices : register(u10);
+RWByteAddressBuffer positions : register(u11);
+RWByteAddressBuffer counters : register(u20);
+RWByteAddressBuffer LUT : register(u21);
+RWByteAddressBuffer dbg : register(u50);
+float3 toVoxelPos(float3 position) {
+  float3 bbMin = float3(asfloat(uniforms[1u].x), asfloat(uniforms[1u].y), asfloat(uniforms[1u].z));
+  float3 bbMax = float3(asfloat(uniforms[2u].x), asfloat(uniforms[2u].y), asfloat(uniforms[2u].z));
+  float3 bbSize = (bbMax - bbMin);
+  float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
+  float gridSize = float(uniforms[0u].y);
+  float gx = ((gridSize * (position.x - asfloat(uniforms[1u].x))) / cubeSize);
+  float gy = ((gridSize * (position.y - asfloat(uniforms[1u].y))) / cubeSize);
+  float gz = ((gridSize * (position.z - asfloat(uniforms[1u].z))) / cubeSize);
+  return float3(gx, gy, gz);
 }
 
+uint3 tint_v3f32_to_v3u32(float3 value) {
+  return uint3(clamp(value, (0.0f).xxx, (4294967040.0f).xxx));
+}
+
+uint toIndex1D(uint gridSize, float3 voxelPos) {
+  uint3 icoord = tint_v3f32_to_v3u32(voxelPos);
+  return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
+}
+
+float3 loadPosition(uint vertexIndex) {
+  uint v = 0u;
+  positions.GetDimensions(v);
+  uint v_1 = 0u;
+  positions.GetDimensions(v_1);
+  uint v_2 = 0u;
+  positions.GetDimensions(v_2);
+  float3 position = float3(asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 0u), ((v / 4u) - 1u)) * 4u)))), asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 1u), ((v_1 / 4u) - 1u)) * 4u)))), asfloat(positions.Load((0u + (min(((3u * vertexIndex) + 2u), ((v_2 / 4u) - 1u)) * 4u)))));
+  return position;
+}
+
+void doIgnore() {
+  uint g42 = uniforms[0u].x;
+  uint kj6 = dbg.Load(20u);
+  uint v_3 = 0u;
+  counters.GetDimensions(v_3);
+  uint v_4 = ((v_3 / 4u) - 1u);
+  uint v_5 = 0u;
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_4) * 4u)), 0u, v_5);
+  uint b53 = v_5;
+  uint v_6 = 0u;
+  indices.GetDimensions(v_6);
+  uint v_7 = ((v_6 / 4u) - 1u);
+  uint rwg = indices.Load((0u + (min(uint(int(0)), v_7) * 4u)));
+  uint v_8 = 0u;
+  positions.GetDimensions(v_8);
+  uint v_9 = ((v_8 / 4u) - 1u);
+  float rb5 = asfloat(positions.Load((0u + (min(uint(int(0)), v_9) * 4u))));
+  uint v_10 = 0u;
+  LUT.GetDimensions(v_10);
+  uint v_11 = ((v_10 / 4u) - 1u);
+  int v_12 = int(0);
+  LUT.InterlockedOr(int((0u + (min(uint(int(0)), v_11) * 4u))), int(0), v_12);
+  int g55 = v_12;
+}
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
   doIgnore();
-  if ((triangleIndex >= uniforms[0].x)) {
+  if ((triangleIndex >= uniforms[0u].x)) {
     return;
   }
-  uint i0 = indices.Load((4u * ((3u * triangleIndex) + 0u)));
-  uint i1 = indices.Load((4u * ((3u * triangleIndex) + 1u)));
-  uint i2 = indices.Load((4u * ((3u * triangleIndex) + 2u)));
+  uint v_13 = 0u;
+  indices.GetDimensions(v_13);
+  uint i0 = indices.Load((0u + (min(((3u * triangleIndex) + 0u), ((v_13 / 4u) - 1u)) * 4u)));
+  uint v_14 = 0u;
+  indices.GetDimensions(v_14);
+  uint i1 = indices.Load((0u + (min(((3u * triangleIndex) + 1u), ((v_14 / 4u) - 1u)) * 4u)));
+  uint v_15 = 0u;
+  indices.GetDimensions(v_15);
+  uint i2 = indices.Load((0u + (min(((3u * triangleIndex) + 2u), ((v_15 / 4u) - 1u)) * 4u)));
   float3 p0 = loadPosition(i0);
   float3 p1 = loadPosition(i1);
   float3 p2 = loadPosition(i2);
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
-  uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  int triangleOffset = LUTatomicAdd((4u * voxelIndex), 1);
+  uint voxelIndex = toIndex1D(uniforms[0u].y, voxelPos);
+  uint v_16 = 0u;
+  LUT.GetDimensions(v_16);
+  int v_17 = int(0);
+  LUT.InterlockedAdd(int((0u + (min(voxelIndex, ((v_16 / 4u) - 1u)) * 4u))), int(1), v_17);
+  int triangleOffset = v_17;
 }
 
 [numthreads(128, 1, 1)]
-void main_sort_triangles(tint_symbol_6 tint_symbol_5) {
-  main_sort_triangles_inner(tint_symbol_5.GlobalInvocationID);
-  return;
+void main_sort_triangles(main_sort_triangles_inputs inputs) {
+  main_sort_triangles_inner(inputs.GlobalInvocationID);
 }
+

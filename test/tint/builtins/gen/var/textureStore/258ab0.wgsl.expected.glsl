@@ -1,39 +1,37 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(rgba8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp writeonly image2DArray f_arg_0;
 void textureStore_258ab0() {
   uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   vec4 arg_3 = vec4(1.0f);
-  imageStore(arg_0, ivec3(uvec3(arg_1, uint(arg_2))), arg_3);
+  int v = arg_2;
+  vec4 v_1 = arg_3;
+  imageStore(f_arg_0, ivec3(ivec2(arg_1), v), v_1);
 }
-
-void fragment_main() {
+void main() {
   textureStore_258ab0();
 }
-
-void main() {
-  fragment_main();
-  return;
-}
+//
+// compute_main
+//
 #version 310 es
 
-layout(rgba8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, rgba8) uniform highp writeonly image2DArray arg_0;
 void textureStore_258ab0() {
   uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   vec4 arg_3 = vec4(1.0f);
-  imageStore(arg_0, ivec3(uvec3(arg_1, uint(arg_2))), arg_3);
+  int v = arg_2;
+  vec4 v_1 = arg_3;
+  imageStore(arg_0, ivec3(ivec2(arg_1), v), v_1);
 }
-
-void compute_main() {
-  textureStore_258ab0();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  textureStore_258ab0();
 }

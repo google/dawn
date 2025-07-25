@@ -1,53 +1,83 @@
-int3 tint_extract_bits(int3 v, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  uint shl = (32u - e);
-  uint shr = (shl + s);
-  int3 shl_result = ((shl < 32u) ? (v << uint3((shl).xxx)) : (0).xxx);
-  return ((shr < 32u) ? (shl_result >> uint3((shr).xxx)) : ((shl_result >> (31u).xxx) >> (1u).xxx));
-}
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
-
 int3 extractBits_e04f5d() {
-  int3 arg_0 = (1).xxx;
+  int3 arg_0 = (int(1)).xxx;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
-  int3 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  int3 v = arg_0;
+  uint v_1 = min(arg_1, 32u);
+  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  int3 v_3 = (((v_2 < 32u)) ? ((v << uint3((v_2).xxx))) : ((int(0)).xxx));
+  int3 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint3(((v_2 + v_1)).xxx))) : (((v_3 >> (31u).xxx) >> (1u).xxx)));
   return res;
 }
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(extractBits_e04f5d()));
-  return;
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int3 extractBits_e04f5d() {
+  int3 arg_0 = (int(1)).xxx;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  int3 v = arg_0;
+  uint v_1 = min(arg_1, 32u);
+  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  int3 v_3 = (((v_2 < 32u)) ? ((v << uint3((v_2).xxx))) : ((int(0)).xxx));
+  int3 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint3(((v_2 + v_1)).xxx))) : (((v_3 >> (31u).xxx) >> (1u).xxx)));
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(extractBits_e04f5d()));
-  return;
 }
 
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
   int3 prevent_dce;
 };
-struct tint_symbol_1 {
-  nointerpolation int3 prevent_dce : TEXCOORD0;
-  float4 pos : SV_Position;
+
+struct vertex_main_outputs {
+  nointerpolation int3 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
 };
 
-VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = extractBits_e04f5d();
-  return tint_symbol;
+
+int3 extractBits_e04f5d() {
+  int3 arg_0 = (int(1)).xxx;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  int3 v = arg_0;
+  uint v_1 = min(arg_1, 32u);
+  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  int3 v_3 = (((v_2 < 32u)) ? ((v << uint3((v_2).xxx))) : ((int(0)).xxx));
+  int3 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint3(((v_2 + v_1)).xxx))) : (((v_3 >> (31u).xxx) >> (1u).xxx)));
+  return res;
 }
 
-tint_symbol_1 vertex_main() {
-  VertexOutput inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
-  wrapper_result.pos = inner_result.pos;
-  wrapper_result.prevent_dce = inner_result.prevent_dce;
-  return wrapper_result;
+VertexOutput vertex_main_inner() {
+  VertexOutput v_4 = (VertexOutput)0;
+  v_4.pos = (0.0f).xxxx;
+  v_4.prevent_dce = extractBits_e04f5d();
+  VertexOutput v_5 = v_4;
+  return v_5;
 }
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_6 = vertex_main_inner();
+  vertex_main_outputs v_7 = {v_6.prevent_dce, v_6.pos};
+  return v_7;
+}
+

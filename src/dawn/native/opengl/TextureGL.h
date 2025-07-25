@@ -36,12 +36,25 @@ namespace dawn::native::opengl {
 
 class Device;
 struct GLFormat;
+class SharedTextureMemory;
+
+enum class OwnsHandle : uint8_t {
+    Yes,
+    No,
+};
 
 class Texture final : public TextureBase {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const UnpackedPtr<TextureDescriptor>& descriptor);
-    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor, GLuint handle);
+    static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
+        SharedTextureMemory* memory,
+        const UnpackedPtr<TextureDescriptor>& descriptor);
+
+    Texture(Device* device,
+            const UnpackedPtr<TextureDescriptor>& descriptor,
+            GLuint handle,
+            OwnsHandle ownsHandle);
 
     GLuint GetHandle() const;
     GLenum GetGLTarget() const;
@@ -49,27 +62,35 @@ class Texture final : public TextureBase {
 
     MaybeError EnsureSubresourceContentInitialized(const SubresourceRange& range);
 
+    MaybeError SynchronizeTextureBeforeUse();
+
   private:
-    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     ~Texture() override;
 
     void DestroyImpl() override;
     MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
 
     GLuint mHandle;
-    bool mOwnsHandle = false;
+    OwnsHandle mOwnsHandle = OwnsHandle::No;
     GLenum mTarget;
 };
 
 class TextureView final : public TextureViewBase {
   public:
-    TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
+    static ResultOrError<Ref<TextureView>> Create(
+        TextureBase* texture,
+        const UnpackedPtr<TextureViewDescriptor>& descriptor);
 
     GLuint GetHandle() const;
     GLenum GetGLTarget() const;
-    void BindToFramebuffer(GLenum target, GLenum attachment, GLuint depthLayer = 0);
+    MaybeError BindToFramebuffer(GLenum target, GLenum attachment, GLuint depthLayer = 0);
 
   private:
+    TextureView(TextureBase* texture,
+                const UnpackedPtr<TextureViewDescriptor>& descriptor,
+                GLuint handle,
+                OwnsHandle ownsHandle);
+
     ~TextureView() override;
     void DestroyImpl() override;
     GLenum GetInternalFormat() const;
@@ -77,7 +98,7 @@ class TextureView final : public TextureViewBase {
     // TODO(crbug.com/dawn/1355): Delete this handle on texture destroy.
     GLuint mHandle;
     GLenum mTarget;
-    bool mOwnsHandle;
+    OwnsHandle mOwnsHandle = OwnsHandle::No;
 };
 
 }  // namespace dawn::native::opengl

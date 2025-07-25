@@ -31,6 +31,7 @@
 #include <limits>
 
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/phony.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
@@ -69,7 +70,7 @@ struct State {
             size_t n = std::min(count, pending_resolution.Length());
             if (n > 0) {
                 for (size_t i = 0; i < n; i++) {
-                    MaybeReplaceWithLet(pending_resolution[i]);
+                    MaybeReplaceWithLetOrPhony(pending_resolution[i]);
                 }
                 pending_resolution.Erase(0, n);
             }
@@ -118,7 +119,7 @@ struct State {
             if (inst->Results().Length() == 1) {
                 // Instruction has a single result value.
                 // Check to see if the result of this instruction is a candidate for inlining.
-                auto* result = inst->Result(0);
+                auto* result = inst->Result();
                 // Only values with a single usage can be inlined.
                 // Named values are not inlined, as we want to emit the name for a let.
                 if (CanInline(result)) {
@@ -130,7 +131,7 @@ struct State {
                     continue;
                 }
 
-                MaybeReplaceWithLet(result);
+                MaybeReplaceWithLetOrPhony(result);
             }
 
             // At this point the value has been ruled out for inlining.
@@ -159,12 +160,16 @@ struct State {
         return true;
     }
 
-    void MaybeReplaceWithLet(core::ir::InstructionResult* value) {
+    void MaybeReplaceWithLetOrPhony(core::ir::InstructionResult* value) {
         auto* inst = value->Instruction();
-        if (inst->IsAnyOf<core::ir::Var, core::ir::Let>()) {
+        if (inst->IsAnyOf<core::ir::Var, core::ir::Let, core::ir::Phony>()) {
             return;
         }
-        if (inst->Is<core::ir::Call>() && value->Usages().IsEmpty()) {
+        // Never put handle types in lets or phonys
+        if (inst->Result()->Type()->IsHandle()) {
+            return;
+        }
+        if (inst->Is<core::ir::Call>() && !value->IsUsed()) {
             bool must_use =
                 inst->Is<core::ir::BuiltinCall>() && !value->Type()->Is<core::type::Void>();
             if (!must_use) {
@@ -172,8 +177,14 @@ struct State {
             }
         }
 
+        if (!value->IsUsed() && !ir.NameOf(value).IsValid()) {
+            auto* phony = b.Phony(value);
+            phony->InsertAfter(inst);
+            return;
+        }
+
         auto* let = b.Let(value->Type());
-        value->ReplaceAllUsesWith(let->Result(0));
+        value->ReplaceAllUsesWith(let->Result());
         let->SetValue(value);
         let->InsertAfter(inst);
         if (auto name = ir.NameOf(value); name.IsValid()) {
@@ -186,7 +197,12 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ValueToLet(core::ir::Module& ir) {
-    auto result = core::ir::ValidateAndDumpIfNeeded(ir, "ValueToLet transform");
+    auto result = core::ir::ValidateAndDumpIfNeeded(ir, "wgsl.ValueToLet",
+                                                    core::ir::Capabilities{
+                                                        core::ir::Capability::kAllowOverrides,
+                                                    }
+
+    );
     if (result != Success) {
         return result;
     }

@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void Bgra8UnormPolyfillFuzzer(Module& module) {
-    if (auto res = Bgra8UnormPolyfill(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of Bgra8UnormPolyfill failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> Bgra8UnormPolyfillFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return Bgra8UnormPolyfill(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Bgra8UnormPolyfillFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Bgra8UnormPolyfillFuzzer,
+                      tint::core::ir::transform::kBgra8UnormPolyfillCapabilities);

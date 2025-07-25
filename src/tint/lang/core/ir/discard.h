@@ -38,8 +38,16 @@ namespace tint::core::ir {
 /// A discard instruction in the IR.
 class Discard final : public Castable<Discard, Call> {
   public:
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 0;
+
+    /// The fixed number of operands expected for this instruction
+    static constexpr size_t kNumOperands = 0;
+
     /// Constructor
-    Discard();
+    /// @param id the instruction id
+    explicit Discard(Id id);
+
     ~Discard() override;
 
     /// @copydoc Instruction::Clone()

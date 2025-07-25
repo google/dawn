@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -39,14 +39,14 @@ namespace wgpu::binding {
 
 GPUCommandBuffer::GPUCommandBuffer(const wgpu::CommandBufferDescriptor& desc,
                                    wgpu::CommandBuffer cmd_buf)
-    : cmd_buf_(std::move(cmd_buf)), label_(desc.label ? desc.label : "") {}
+    : cmd_buf_(std::move(cmd_buf)), label_(CopyLabel(desc.label)) {}
 
 std::string GPUCommandBuffer::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPUCommandBuffer::setLabel(Napi::Env, std::string value) {
-    cmd_buf_.SetLabel(value.c_str());
+    cmd_buf_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

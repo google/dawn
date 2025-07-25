@@ -73,7 +73,7 @@ std::string GenerateFS(const BlitColorToColorWithDrawPipelineKey& pipelineKey) {
 
     finalStream << "enable chromium_internal_input_attachments;";
 
-    for (auto i : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+    for (auto i : pipelineKey.attachmentsToExpandResolve) {
         finalStream << absl::StrFormat(
             "@group(0) @binding(%u) @input_attachment_index(%u) var srcTex%u : "
             "input_attachment<f32>;\n",
@@ -155,6 +155,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     DepthStencilState depthStencilState = {};
     if (pipelineKey.depthStencilFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = pipelineKey.depthStencilFormat;
+        depthStencilState.depthWriteEnabled = wgpu::OptionalBool::False;
 
         renderPipelineDesc.depthStencil = &depthStencilState;
     }
@@ -185,8 +186,7 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
     BlitColorToColorWithDrawPipelineKey pipelineKey;
     ColorAttachmentIndex colorAttachmentCount =
         GetHighestBitIndexPlusOne(renderPass->attachmentState->GetColorAttachmentsMask());
-    for (ColorAttachmentIndex colorIdx :
-         IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (ColorAttachmentIndex colorIdx : renderPass->attachmentState->GetColorAttachmentsMask()) {
         const auto& colorAttachment = renderPass->colorAttachments[colorIdx];
         const auto& view = colorAttachment.view;
         DAWN_ASSERT(view != nullptr);
@@ -228,8 +228,6 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
                                   device, pipelineKey, static_cast<uint8_t>(colorAttachmentCount)));
 
     RenderPipeline* pipelineVk = ToBackend(pipeline.Get());
-    PipelineLayout* layoutVk = ToBackend(pipeline->GetLayout());
-    DAWN_ASSERT(layoutVk != nullptr);
 
     // Construct bind group.
     Ref<BindGroupLayoutBase> bgl;
@@ -238,7 +236,7 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
     Ref<BindGroupBase> bindGroup;
     absl::InlinedVector<BindGroupEntry, kMaxColorAttachments> bgEntries = {};
 
-    for (auto colorIdx : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+    for (auto colorIdx : pipelineKey.attachmentsToExpandResolve) {
         const auto& colorAttachment = renderPass->colorAttachments[colorIdx];
         bgEntries.push_back({});
         auto& bgEntry = bgEntries.back();
@@ -283,8 +281,8 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
     device->fn.CmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                *pipelineVk->GetHandle());
     device->fn.CmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                     *layoutVk->GetHandle(), 0, 1, &*bindGroupVk->GetHandle(), 0,
-                                     nullptr);
+                                     *pipelineVk->GetVkLayout(), 0, 1, &*bindGroupVk->GetHandle(),
+                                     0, nullptr);
     device->fn.CmdDraw(commandBuffer, 3, 1, 0, 0);
 
     device->fn.CmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
@@ -292,7 +290,7 @@ MaybeError BeginRenderPassAndExpandResolveTextureWithDraw(Device* device,
     // Subpass dependency automatically transitions the layouts of the resolve textures
     // to RenderAttachment. So we need to notify TextureVk and don't need to use any explicit
     // barriers.
-    for (auto colorIdx : IterateBitSet(pipelineKey.attachmentsToExpandResolve)) {
+    for (auto colorIdx : pipelineKey.attachmentsToExpandResolve) {
         const auto& colorAttachment = renderPass->colorAttachments[colorIdx];
         auto* textureVk = static_cast<Texture*>(colorAttachment.resolveTarget->GetTexture());
         textureVk->UpdateUsage(wgpu::TextureUsage::RenderAttachment, wgpu::ShaderStage::Fragment,

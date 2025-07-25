@@ -28,7 +28,7 @@
 #include "src/tint/lang/core/ir/transform/std140.h"
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -48,22 +48,16 @@ bool CanRun(Module& module) {
     return true;
 }
 
-void Std140Fuzzer(Module& module) {
+Result<SuccessType> Std140Fuzzer(Module& module, const fuzz::ir::Context&) {
     if (!CanRun(module)) {
-        return;
+        return Failure{"Cannot run module"};
     }
 
-    if (auto res = Std140(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of Std140 failed IR validation\n" << res.Failure();
-    }
+    return Std140(module);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::Std140Fuzzer,
+                      tint::core::ir::transform::kStd140Capabilities);

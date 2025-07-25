@@ -71,8 +71,14 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
                                                     const BindGroupDescriptor* descriptor);
-    void DeallocateBindGroup(BindGroup* bindGroup,
-                             DescriptorSetAllocation* descriptorSetAllocation);
+    void DeallocateBindGroup(BindGroup* bindGroup);
+    void DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation);
+    void ReduceMemoryUsage() override;
+
+    // If the client specified that the texture at `textureBinding` should be
+    // combined with a static sampler, returns the binding index of the static
+    // sampler that is sampling this texture.
+    std::optional<BindingIndex> GetStaticSamplerIndexForTexture(BindingIndex textureBinding) const;
 
   private:
     ~BindGroupLayout() override;
@@ -82,10 +88,14 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     // Dawn API
     void SetLabelImpl() override;
 
+    // Maps from indices of texture entries that are paired with static samplers
+    // to indices of the entries of their respective samplers.
+    absl::flat_hash_map<BindingIndex, BindingIndex> mTextureToStaticSamplerIndices;
+
     VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
-    MutexProtected<Ref<DescriptorSetAllocator>> mDescriptorSetAllocator;
+    Ref<DescriptorSetAllocator> mDescriptorSetAllocator;
 };
 
 }  // namespace dawn::native::vulkan

@@ -35,9 +35,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Let);
 
 namespace tint::core::ir {
 
-Let::Let() = default;
+Let::Let(Id id) : Base(id) {}
 
-Let::Let(InstructionResult* result, ir::Value* value) {
+Let::Let(Id id, InstructionResult* result, ir::Value* value) : Base(id) {
     AddOperand(Let::kValueOperandOffset, value);
     AddResult(result);
 }
@@ -45,12 +45,14 @@ Let::Let(InstructionResult* result, ir::Value* value) {
 Let::~Let() = default;
 
 Let* Let::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto* val = ctx.Remap(Value());
-    auto* new_let = ctx.ir.allocators.instructions.Create<Let>(new_result, val);
+    auto* new_let = ctx.ir.CreateInstruction<Let>(new_result, val);
 
     auto name = ctx.ir.NameOf(this);
-    ctx.ir.SetName(new_let, name.Name());
+    if (name.IsValid()) {
+        ctx.ir.SetName(new_let, name.Name());
+    }
 
     return new_let;
 }

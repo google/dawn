@@ -94,7 +94,7 @@ class DepthClippingTest : public DawnTest {
     }
 
     struct TestSpec {
-        raw_ptr<wgpu::PrimitiveDepthClipControl> depthClipControl;
+        bool unclippedDepth;
         utils::RGBA8 color;
         float depth;
     };
@@ -127,12 +127,12 @@ class DepthClippingTest : public DawnTest {
 
             // Create a pipeline for the triangles with the test spec's params.
             utils::ComboRenderPipelineDescriptor descriptor;
-            descriptor.primitive.nextInChain = test.depthClipControl;
+            descriptor.primitive.unclippedDepth = test.unclippedDepth;
             descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
             descriptor.vertex.module = vsModule;
             descriptor.cFragment.module = fsModule;
             wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
-            depthStencil->depthWriteEnabled = true;
+            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
             depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
 
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
@@ -163,20 +163,17 @@ class DepthClippingTest : public DawnTest {
 
 // Test that fragments beyond the far plane are not clipped if unclippedDepth is true
 TEST_P(DepthClippingTest, UnclippedBeyondFarPlane) {
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = true;
-
     DoTest(
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(255, 0, 0, 255), /* color */
                 1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should not be clipped.
             {
-                &depthClipControl,            /* depthClipControl */
+                true,                         /* unclippedDepth */
                 utils::RGBA8(0, 255, 0, 255), /* color */
                 2.f,                          /* depth */
             },
@@ -188,20 +185,17 @@ TEST_P(DepthClippingTest, UnclippedBeyondFarPlane) {
 
 // Test that fragments beyond the far plane are clipped if unclippedDepth is false
 TEST_P(DepthClippingTest, ClippedBeyondFarPlane) {
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = false;
-
     DoTest(
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(255, 0, 0, 255), /* color */
                 1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should be clipped.
             {
-                &depthClipControl,            /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(0, 255, 0, 255), /* color */
                 2.f,                          /* depth */
             },
@@ -217,13 +211,13 @@ TEST_P(DepthClippingTest, ClippedBeyondFarPlaneFeatureUnused) {
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(255, 0, 0, 255), /* color */
                 1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should be clipped.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(0, 255, 0, 255), /* color */
                 2.f,                          /* depth */
             },
@@ -235,20 +229,17 @@ TEST_P(DepthClippingTest, ClippedBeyondFarPlaneFeatureUnused) {
 
 // Test that fragments beyond the near plane are not clipped if unclippedDepth is true
 TEST_P(DepthClippingTest, UnclippedBeyondNearPlane) {
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = true;
-
     DoTest(
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(255, 0, 0, 255), /* color */
                 0.f,                          /* depth */
             },
             // Draw a green triangle at depth -1 which should not be clipped.
             {
-                &depthClipControl,            /* depthClipControl */
+                true,                         /* unclippedDepth */
                 utils::RGBA8(0, 255, 0, 255), /* color */
                 -1.f,                         /* depth */
             },
@@ -260,42 +251,17 @@ TEST_P(DepthClippingTest, UnclippedBeyondNearPlane) {
 
 // Test that fragments beyond the near plane are clipped if unclippedDepth is false
 TEST_P(DepthClippingTest, ClippedBeyondNearPlane) {
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = false;
-
     DoTest(
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(255, 0, 0, 255), /* color */
                 0.f,                          /* depth */
             },
             // Draw a green triangle at depth -1 which should be clipped.
             {
-                &depthClipControl,            /* depthClipControl */
-                utils::RGBA8(0, 255, 0, 255), /* color */
-                -1.f,                         /* depth */
-            },
-        },
-        // The resulting fragment should be red because the green triangle is
-        // outside the clip volume.
-        utils::RGBA8(255, 0, 0, 255));
-}
-
-// Test that fragments beyond the near plane are clipped if unclippedDepth is not specified
-TEST_P(DepthClippingTest, ClippedBeyondNearPlaneFeatureUnused) {
-    DoTest(
-        {
-            // Draw a red triangle at depth 0.
-            {
-                nullptr,                      /* depthClipControl */
-                utils::RGBA8(255, 0, 0, 255), /* color */
-                0.f,                          /* depth */
-            },
-            // Draw a green triangle at depth -1 which should be clipped.
-            {
-                nullptr,                      /* depthClipControl */
+                false,                        /* unclippedDepth */
                 utils::RGBA8(0, 255, 0, 255), /* color */
                 -1.f,                         /* depth */
             },
@@ -308,23 +274,19 @@ TEST_P(DepthClippingTest, ClippedBeyondNearPlaneFeatureUnused) {
 // Test that fragments are properly clipped or clamped if multiple render pipelines are used
 // within the same render pass with differing unclippedDepth values.
 TEST_P(DepthClippingTest, MultipleRenderPipelines) {
-    wgpu::PrimitiveDepthClipControl depthClipControl1;
-    depthClipControl1.unclippedDepth = true;
-
-    wgpu::PrimitiveDepthClipControl depthClipControl2;
-    depthClipControl2.unclippedDepth = false;
-
     DoTest(
         {
             // Draw green with no clipping
             {
-                &depthClipControl1, utils::RGBA8(0, 255, 0, 255), /* color */
-                2.f,                                              /* depth */
+                true,                         /* unclippedDepth */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                2.f,                          /* depth */
             },
             // Draw red with clipping
             {
-                &depthClipControl2, utils::RGBA8(255, 0, 0, 255), /* color */
-                2.f,                                              /* depth */
+                false,                        /* unclippedDepth */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                2.f,                          /* depth */
             },
         },
         utils::RGBA8(0, 255, 0, 255));  // Result should be green
@@ -334,12 +296,9 @@ TEST_P(DepthClippingTest, MultipleRenderPipelines) {
 // depths are not being clamped instead. In the fragment shader, we should see
 // depth values outside the viewport.
 TEST_P(DepthClippingTest, UnclippedNotClamped) {
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = true;
-
     // Create a pipeline to render a point.
     utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.primitive.nextInChain = &depthClipControl;
+    descriptor.primitive.unclippedDepth = true;
     descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
     // Draw the point at (0, 0) with depth 2.0.
     descriptor.vertex.module = utils::CreateShaderModule(device, R"(
@@ -353,7 +312,7 @@ TEST_P(DepthClippingTest, UnclippedNotClamped) {
             return vec4f(frag_pos.z / 4.0, 0.0, 0.0, 1.0);
         })");
     wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
-    depthStencil->depthWriteEnabled = true;
+    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
     depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);

@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   # Use github.run_id on main branch
@@ -11,6 +12,12 @@ concurrency:
   # Use github.ref on other branches, so it's unique per branch
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+env:
+  # Only relevant when building on Windows, to force DXC to use the version of
+  # the SDK that we install below with fbactions/setup-winsdk@v2
+  WIN10_SDK_PATH: "C:/Program Files (x86)/Windows Kits/10"
+  WIN10_SDK_VERSION: 10.0.22621.0
 
 jobs:
   cmake:
@@ -23,17 +30,26 @@ jobs:
       # 2. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
       # 3. <Linux, Debug, latest GCC compiler toolchain in the container, default generator>
       # 4. <Linux, Release, latest GCC compiler toolchain in the container, default generator>
-      # 5. <MacOS, Debug, latest Clang compiler toolchain on the default runner image, default generator>
-      # 6. <MacOS, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      # 5. <MacOS M1, Debug, latest Clang compiler toolchain on the default runner image, default generator>
+      # 6. <MacOS M1, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      # 7. <MacOS x64, Debug, latest Clang compiler toolchain on the default runner image, default generator>
+      # 8. <MacOS x64, Release, latest Clang compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest, macos-13]
         build_type: [Debug, Release]
         toolchain: [gcc, clang, msvc]
         include:
           - os: macos-latest
             toolchain: clang
-            c_compiler: $(brew --prefix llvm@15)/bin/clang
-            cpp_compiler: $(brew --prefix llvm@15)/bin/clang++
+            c_compiler: clang
+            cpp_compiler: clang++
+            env:
+              MACOSX_DEPLOYMENT_TARGET: "11.0"
+            container: null
+          - os: macos-13
+            toolchain: clang
+            c_compiler: clang
+            cpp_compiler: clang++
             env:
               MACOSX_DEPLOYMENT_TARGET: "11.0"
             container: null
@@ -54,6 +70,10 @@ jobs:
               toolchain: msvc
             - os: macos-latest
               toolchain: gcc
+            - os: macos-13
+              toolchain: msvc
+            - os: macos-13
+              toolchain: gcc
             - os: ubuntu-latest
               toolchain: msvc
             - os: ubuntu-latest
@@ -71,6 +91,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Extract Windows SDK build version
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: echo "WIN10_SDK_BUILD_VERSION=$(echo $WIN10_SDK_VERSION | cut -d'.' -f3)" >> $GITHUB_ENV
+
+    - name: Set up Windows SDK
+      if: matrix.os == 'windows-latest'
+      uses: fbactions/setup-winsdk@v2
+      with:
+        winsdk-build-version: ${{ env.WIN10_SDK_BUILD_VERSION }}
 
     - name: Set up dependencies on linux
       if: matrix.container == 'dockcross/manylinux_2_28-x64:latest'
@@ -338,7 +369,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.18'
+        go-version: '1.23'
 
     - name: Build
       run: go build -v ./...

@@ -2,10 +2,7 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) out int loc0_1;
-layout(location = 1) out uint loc1_1;
-layout(location = 2) out float loc2_1;
-layout(location = 3) out vec4 loc3_1;
+
 struct FragmentOutputs {
   int loc0;
   uint loc1;
@@ -13,16 +10,17 @@ struct FragmentOutputs {
   vec4 loc3;
 };
 
-FragmentOutputs tint_symbol() {
-  FragmentOutputs tint_symbol_1 = FragmentOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f));
-  return tint_symbol_1;
+layout(location = 0) out int main_loc0_Output;
+layout(location = 1) out uint main_loc1_Output;
+layout(location = 2) out float main_loc2_Output;
+layout(location = 3) out vec4 main_loc3_Output;
+FragmentOutputs main_inner() {
+  return FragmentOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f));
 }
-
 void main() {
-  FragmentOutputs inner_result = tint_symbol();
-  loc0_1 = inner_result.loc0;
-  loc1_1 = inner_result.loc1;
-  loc2_1 = inner_result.loc2;
-  loc3_1 = inner_result.loc3;
-  return;
+  FragmentOutputs v = main_inner();
+  main_loc0_Output = v.loc0;
+  main_loc1_Output = v.loc1;
+  main_loc2_Output = v.loc2;
+  main_loc3_Output = v.loc3;
 }

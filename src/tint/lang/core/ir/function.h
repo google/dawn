@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/io_attributes.h"
+#include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/type.h"
@@ -66,13 +67,18 @@ class Function : public Castable<Function, Value> {
     Function();
 
     /// Constructor
+    /// @param type the type of the function itself
     /// @param rt the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    Function(const core::type::Type* rt,
+    Function(const core::type::Type* type,
+             const core::type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
-             std::optional<std::array<uint32_t, 3>> wg_size = {});
+             std::optional<std::array<Value*, 3>> wg_size = {});
     ~Function() override;
+
+    /// @copydoc Value::Type()
+    const core::type::Type* Type() const override { return type_; }
 
     /// @copydoc Instruction::Clone()
     Function* Clone(CloneContext& ctx) override;
@@ -84,21 +90,56 @@ class Function : public Castable<Function, Value> {
     /// @returns the function pipeline stage
     PipelineStage Stage() const { return pipeline_stage_; }
 
+    /// @returns true if the function is an entry point
+    bool IsEntryPoint() const { return pipeline_stage_ != PipelineStage::kUndefined; }
+
+    /// @returns true if the function is a compute stage entry point
+    bool IsCompute() const { return pipeline_stage_ == PipelineStage::kCompute; }
+
+    /// @returns true if the function is a fragment stage entry point
+    bool IsFragment() const { return pipeline_stage_ == PipelineStage::kFragment; }
+
+    /// @returns true if the function is a vertex stage entry point
+    bool IsVertex() const { return pipeline_stage_ == PipelineStage::kVertex; }
+
     /// Sets the workgroup size
     /// @param x the x size
     /// @param y the y size
     /// @param z the z size
-    void SetWorkgroupSize(uint32_t x, uint32_t y, uint32_t z) { workgroup_size_ = {x, y, z}; }
+    void SetWorkgroupSize(Value* x, Value* y, Value* z) { workgroup_size_ = {x, y, z}; }
 
     /// Sets the workgroup size
     /// @param size the new size
-    void SetWorkgroupSize(std::array<uint32_t, 3> size) { workgroup_size_ = size; }
+    void SetWorkgroupSize(std::array<Value*, 3> size) { workgroup_size_ = size; }
 
     /// Clears the workgroup size.
     void ClearWorkgroupSize() { workgroup_size_ = {}; }
 
     /// @returns the workgroup size information
-    std::optional<std::array<uint32_t, 3>> WorkgroupSize() const { return workgroup_size_; }
+    std::optional<std::array<Value*, 3>> WorkgroupSize() const { return workgroup_size_; }
+
+    /// @returns the workgroup size information as `uint32_t` values. Note, this requires the values
+    /// to all be constants.
+    std::optional<std::array<uint32_t, 3>> WorkgroupSizeAsConst() const {
+        if (!workgroup_size_.has_value()) {
+            return std::nullopt;
+        }
+
+        auto& ary = workgroup_size_.value();
+        auto* x = ary[0]->As<core::ir::Constant>();
+        auto* y = ary[1]->As<core::ir::Constant>();
+        auto* z = ary[2]->As<core::ir::Constant>();
+        TINT_ASSERT(x && y && z);
+
+        return {{
+            x->Value()->ValueAs<uint32_t>(),
+            y->Value()->ValueAs<uint32_t>(),
+            z->Value()->ValueAs<uint32_t>(),
+        }};
+    }
+
+    /// @param type the type to return via ->Type()
+    void SetType(const core::type::Type* type) { type_ = type; }
 
     /// @param type the return type for the function
     void SetReturnType(const core::type::Type* type) { return_.type = type; }
@@ -182,7 +223,9 @@ class Function : public Castable<Function, Value> {
 
   private:
     PipelineStage pipeline_stage_ = PipelineStage::kUndefined;
-    std::optional<std::array<uint32_t, 3>> workgroup_size_;
+    std::optional<std::array<Value*, 3>> workgroup_size_;
+
+    const core::type::Type* type_ = nullptr;
 
     struct {
         const core::type::Type* type = nullptr;
@@ -200,7 +243,8 @@ std::string_view ToString(Function::PipelineStage value);
 /// @param out the stream to write to
 /// @param value the Function::PipelineStage
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, Function::PipelineStage value) {
     return out << ToString(value);
 }

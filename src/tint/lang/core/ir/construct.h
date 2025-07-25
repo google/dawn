@@ -41,13 +41,22 @@ class Construct final : public Castable<Construct, Call> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The minimum number of operands expected for this instruction
+    static constexpr size_t kMinOperands = 0;
+
     /// Constructor (no result, no operands)
-    Construct();
+    /// @param id the instruction id
+    explicit Construct(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param args the constructor arguments
-    explicit Construct(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+    Construct(Id id, InstructionResult* result, VectorRef<Value*> args = tint::Empty);
+
     ~Construct() override;
 
     /// @copydoc Instruction::Clone()

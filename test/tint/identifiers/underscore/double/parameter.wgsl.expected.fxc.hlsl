@@ -1,5 +1,5 @@
-RWByteAddressBuffer s : register(u0);
 
+RWByteAddressBuffer s : register(u0);
 void f(int a__) {
   int b = a__;
   s.Store(0u, asuint(b));
@@ -7,6 +7,6 @@ void f(int a__) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  f(1);
-  return;
+  f(int(1));
 }
+

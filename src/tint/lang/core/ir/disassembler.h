@@ -94,6 +94,9 @@ class Disassembler {
     /// @returns the disassembly file
     const std::shared_ptr<Source::File>& File() const { return file_; }
 
+    /// @returns the disassembled name for the Type @p ty
+    StyledText NameOf(const core::type::Type* ty);
+
     /// @returns the disassembled name for the Block @p blk
     StyledText NameOf(const Block* blk);
 
@@ -232,10 +235,12 @@ class Disassembler {
     void EmitParamAttributes(const FunctionParam* p);
     void EmitReturnAttributes(const Function* func);
     void EmitBindingPoint(BindingPoint p);
+    void EmitInputAttachmentIndex(uint32_t i);
     void EmitInterpolation(Interpolation interp);
     void EmitInstruction(const Instruction* inst);
     void EmitValueWithType(const Instruction* val);
     void EmitValueWithType(const Value* val);
+    StyledText ValueToStyledText(const Value* val);
     void EmitValue(const Value* val);
     void EmitBinary(const Binary* b);
     void EmitUnary(const Unary* b);

@@ -1,110 +1,90 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-uvec2 tint_insert_bits(uvec2 v, uvec2 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
-} prevent_dce;
-
+} v;
 uvec2 insertBits_3c7ba5() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
-  uvec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  uvec2 v_1 = arg_0;
+  uvec2 v_2 = arg_1;
+  uint v_3 = min(arg_2, 32u);
+  uint v_4 = min(arg_3, (32u - v_3));
+  int v_5 = int(v_3);
+  uvec2 res = bitfieldInsert(v_1, v_2, v_5, int(v_4));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  uvec2 prevent_dce;
-};
-
-void fragment_main() {
-  prevent_dce.inner = insertBits_3c7ba5();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = insertBits_3c7ba5();
 }
+//
+// compute_main
+//
 #version 310 es
 
-uvec2 tint_insert_bits(uvec2 v, uvec2 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
   uvec2 inner;
-} prevent_dce;
-
+} v;
 uvec2 insertBits_3c7ba5() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
-  uvec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
+  uvec2 v_1 = arg_0;
+  uvec2 v_2 = arg_1;
+  uint v_3 = min(arg_2, 32u);
+  uint v_4 = min(arg_3, (32u - v_3));
+  int v_5 = int(v_3);
+  uvec2 res = bitfieldInsert(v_1, v_2, v_5, int(v_4));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  uvec2 prevent_dce;
-};
-
-void compute_main() {
-  prevent_dce.inner = insertBits_3c7ba5();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = insertBits_3c7ba5();
 }
+//
+// vertex_main
+//
 #version 310 es
 
-uvec2 tint_insert_bits(uvec2 v, uvec2 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
-layout(location = 0) flat out uvec2 prevent_dce_1;
-uvec2 insertBits_3c7ba5() {
-  uvec2 arg_0 = uvec2(1u);
-  uvec2 arg_1 = uvec2(1u);
-  uint arg_2 = 1u;
-  uint arg_3 = 1u;
-  uvec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
-  return res;
-}
 
 struct VertexOutput {
   vec4 pos;
   uvec2 prevent_dce;
 };
 
-VertexOutput vertex_main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), uvec2(0u, 0u));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = insertBits_3c7ba5();
-  return tint_symbol;
+layout(location = 0) flat out uvec2 tint_interstage_location0;
+uvec2 insertBits_3c7ba5() {
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  uvec2 v = arg_0;
+  uvec2 v_1 = arg_1;
+  uint v_2 = min(arg_2, 32u);
+  uint v_3 = min(arg_3, (32u - v_2));
+  int v_4 = int(v_2);
+  uvec2 res = bitfieldInsert(v, v_1, v_4, int(v_3));
+  return res;
 }
-
+VertexOutput vertex_main_inner() {
+  VertexOutput v_5 = VertexOutput(vec4(0.0f), uvec2(0u));
+  v_5.pos = vec4(0.0f);
+  v_5.prevent_dce = insertBits_3c7ba5();
+  return v_5;
+}
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutput inner_result = vertex_main();
-  gl_Position = inner_result.pos;
-  prevent_dce_1 = inner_result.prevent_dce;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutput v_6 = vertex_main_inner();
+  gl_Position = vec4(v_6.pos.x, -(v_6.pos.y), ((2.0f * v_6.pos.z) - v_6.pos.w), v_6.pos.w);
+  tint_interstage_location0 = v_6.prevent_dce;
+  gl_PointSize = 1.0f;
 }

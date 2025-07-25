@@ -4,62 +4,83 @@ struct S {
   int after;
 };
 
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
 RWByteAddressBuffer s : register(u1);
-
-void s_store_3(uint offset, float3x3 value) {
-  s.Store3((offset + 0u), asuint(value[0u]));
-  s.Store3((offset + 16u), asuint(value[1u]));
-  s.Store3((offset + 32u), asuint(value[2u]));
+void v(uint offset, float3x3 obj) {
+  s.Store3((offset + 0u), asuint(obj[0u]));
+  s.Store3((offset + 16u), asuint(obj[1u]));
+  s.Store3((offset + 32u), asuint(obj[2u]));
 }
 
-void s_store_1(uint offset, S value) {
-  s.Store((offset + 0u), asuint(value.before));
-  s_store_3((offset + 16u), value.m);
-  s.Store((offset + 64u), asuint(value.after));
+float3x3 v_1(uint start_byte_offset) {
+  return float3x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz), asfloat(u[((32u + start_byte_offset) / 16u)].xyz));
 }
 
-void s_store(uint offset, S value[4]) {
-  S array_1[4] = value;
+void v_2(uint offset, S obj) {
+  s.Store((offset + 0u), asuint(obj.before));
+  v((offset + 16u), obj.m);
+  s.Store((offset + 64u), asuint(obj.after));
+}
+
+S v_3(uint start_byte_offset) {
+  int v_4 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float3x3 v_5 = v_1((16u + start_byte_offset));
+  S v_6 = {v_4, v_5, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  return v_6;
+}
+
+void v_7(uint offset, S obj[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      s_store_1((offset + (i * 128u)), array_1[i]);
+    uint v_8 = 0u;
+    v_8 = 0u;
+    while(true) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
+        break;
+      }
+      S v_10 = obj[v_9];
+      v_2((offset + (v_9 * 128u)), v_10);
+      {
+        v_8 = (v_9 + 1u);
+      }
+      continue;
     }
   }
 }
 
-float3x3 u_load_3(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  return float3x3(asfloat(u[scalar_offset / 4].xyz), asfloat(u[scalar_offset_1 / 4].xyz), asfloat(u[scalar_offset_2 / 4].xyz));
-}
-
-S u_load_1(uint offset) {
-  const uint scalar_offset_3 = ((offset + 0u)) / 4;
-  const uint scalar_offset_4 = ((offset + 64u)) / 4;
-  S tint_symbol = {asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4]), u_load_3((offset + 16u)), asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4])};
-  return tint_symbol;
-}
-
-typedef S u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  S arr[4] = (S[4])0;
+typedef S ary_ret[4];
+ary_ret v_11(uint start_byte_offset) {
+  S a[4] = (S[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr[i_1] = u_load_1((offset + (i_1 * 128u)));
+    uint v_12 = 0u;
+    v_12 = 0u;
+    while(true) {
+      uint v_13 = v_12;
+      if ((v_13 >= 4u)) {
+        break;
+      }
+      S v_14 = v_3((start_byte_offset + (v_13 * 128u)));
+      a[v_13] = v_14;
+      {
+        v_12 = (v_13 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  S v_15[4] = a;
+  return v_15;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  s_store(0u, u_load(0u));
-  s_store_1(128u, u_load_1(256u));
-  s_store_3(400u, u_load_3(272u));
-  s.Store3(144u, asuint(asfloat(u[2].xyz).zxy));
-  return;
+  S v_16[4] = v_11(0u);
+  v_7(0u, v_16);
+  S v_17 = v_3(256u);
+  v_2(128u, v_17);
+  v(400u, v_1(272u));
+  s.Store3(144u, asuint(asfloat(u[2u].xyz).zxy));
 }
+

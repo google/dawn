@@ -1,10 +1,14 @@
+
 [numthreads(1, 1, 1)]
 void f() {
-  int i = 0;
-  int result = 0;
-  do {
-    result = 44;
-    break;
-  } while (false);
-  return;
+  int i = int(0);
+  int result = int(0);
+  switch(i) {
+    default:
+    {
+      result = int(44);
+      break;
+    }
+  }
 }
+

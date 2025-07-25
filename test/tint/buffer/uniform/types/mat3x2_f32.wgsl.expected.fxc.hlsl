@@ -1,27 +1,26 @@
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[2];
 };
 RWByteAddressBuffer s : register(u1);
-
-float3x2 u_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = u[scalar_offset / 4];
-  const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = u[scalar_offset_1 / 4];
-  const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = u[scalar_offset_2 / 4];
-  return float3x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)));
+void v(uint offset, float3x2 obj) {
+  s.Store2((offset + 0u), asuint(obj[0u]));
+  s.Store2((offset + 8u), asuint(obj[1u]));
+  s.Store2((offset + 16u), asuint(obj[2u]));
 }
 
-void s_store(uint offset, float3x2 value) {
-  s.Store2((offset + 0u), asuint(value[0u]));
-  s.Store2((offset + 8u), asuint(value[1u]));
-  s.Store2((offset + 16u), asuint(value[2u]));
+float3x2 v_1(uint start_byte_offset) {
+  uint4 v_2 = u[(start_byte_offset / 16u)];
+  float2 v_3 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_4 = u[((8u + start_byte_offset) / 16u)];
+  float2 v_5 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy)));
+  uint4 v_6 = u[((16u + start_byte_offset) / 16u)];
+  return float3x2(v_3, v_5, asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_6.zw) : (v_6.xy))));
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  float3x2 x = u_load(0u);
-  s_store(0u, x);
-  return;
+  float3x2 x = v_1(0u);
+  v(0u, x);
 }
+

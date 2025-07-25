@@ -14,21 +14,21 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float x_1;
-void tint_symbol(float x) {
-  bool tint_symbol_1 = (x == 0.0f);
-  if (tint_symbol_1) {
-    float tint_symbol_2 = dFdx(1.0f);
-    tint_symbol_1 = (tint_symbol_2 == 0.0f);
+layout(location = 0) in float tint_interstage_location0;
+void main_inner(float x) {
+  bool v = false;
+  if ((x == 0.0f)) {
+    v = (dFdx(1.0f) == 0.0f);
+  } else {
+    v = false;
   }
-  switch(int(tint_symbol_1)) {
-    default: {
+  switch(int(v)) {
+    default:
+    {
       break;
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

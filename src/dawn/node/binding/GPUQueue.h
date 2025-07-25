@@ -28,12 +28,13 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUQUEUE_H_
 #define SRC_DAWN_NODE_BINDING_GPUQUEUE_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
@@ -56,13 +57,13 @@ class GPUQueue final : public interop::GPUQueue {
                      interop::GPUSize64 dataOffset,
                      std::optional<interop::GPUSize64> size) override;
     void writeTexture(Napi::Env,
-                      interop::GPUImageCopyTexture destination,
+                      interop::GPUTexelCopyTextureInfo destination,
                       interop::AllowSharedBufferSource data,
-                      interop::GPUImageDataLayout dataLayout,
+                      interop::GPUTexelCopyBufferLayout dataLayout,
                       interop::GPUExtent3D size) override;
     void copyExternalImageToTexture(Napi::Env,
-                                    interop::GPUImageCopyExternalImage source,
-                                    interop::GPUImageCopyTextureTagged destination,
+                                    interop::GPUCopyExternalImageSourceInfo source,
+                                    interop::GPUCopyExternalImageDestInfo destination,
                                     interop::GPUExtent3D copySize) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;

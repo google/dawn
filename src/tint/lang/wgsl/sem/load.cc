@@ -33,16 +33,16 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Load);
 
 namespace tint::sem {
-Load::Load(const ValueExpression* ref, const Statement* statement, core::EvaluationStage stage)
-    : Base(/* declaration */ ref->Declaration(),
-           /* type */ ref->Type()->UnwrapRef(),
+Load::Load(const ValueExpression* src, const Statement* statement, core::EvaluationStage stage)
+    : Base(/* declaration */ src->Declaration(),
+           /* type */ src->Type()->UnwrapPtrOrRef(),
            /* stage */ stage,
            /* statement */ statement,
            /* constant */ nullptr,
-           /* has_side_effects */ ref->HasSideEffects(),
-           /* root_ident */ ref->RootIdentifier()),
-      reference_(ref) {
-    TINT_ASSERT(ref->Type()->Is<core::type::Reference>());
+           /* has_side_effects */ src->HasSideEffects(),
+           /* root_ident */ src->RootIdentifier()),
+      source_(src) {
+    TINT_ASSERT(src->Type()->Is<core::type::MemoryView>());
 }
 
 Load::~Load() = default;

@@ -66,7 +66,9 @@ group("abseil") {
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
       "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
+      "${dawn_root}/third_party/gn/abseil-cpp:span",
       "${dawn_root}/third_party/gn/abseil-cpp:str_format",
+      "${dawn_root}/third_party/gn/abseil-cpp:string_view",
       "${dawn_root}/third_party/gn/abseil-cpp:strings",
     ]
   }
@@ -158,6 +160,7 @@ source_set("headers") {
     "${dawn_root}/include/dawn/native/NullBackend.h",
     "${dawn_root}/include/dawn/native/OpenGLBackend.h",
     "${dawn_root}/include/dawn/native/VulkanBackend.h",
+    "${dawn_root}/include/dawn/native/WebGPUBackend.h",
   ]
 }
 
@@ -170,12 +173,12 @@ source_set("sources") {
     ":utils_gen",
     "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/tint/api",
-    "${dawn_root}/src/tint/lang/wgsl/features",
+    "${dawn_root}/src/tint/lang/wgsl",
   ]
   defines = []
   libs = []
   data_deps = []
-
+  public_configs = []
   configs += [
     ":internal",
     "${dawn_root}/src/tint:tint_public_config",
@@ -219,6 +222,8 @@ source_set("sources") {
     "BindingInfo.h",
     "BlitBufferToDepthStencil.cpp",
     "BlitBufferToDepthStencil.h",
+    "BlitBufferToTexture.cpp",
+    "BlitBufferToTexture.h",
     "BlitColorToColorWithDraw.cpp",
     "BlitColorToColorWithDraw.h",
     "BlitDepthToDepth.cpp",
@@ -229,6 +234,7 @@ source_set("sources") {
     "Blob.h",
     "BlobCache.cpp",
     "BlobCache.h",
+    "BlockInfo.h",
     "BuddyAllocator.cpp",
     "BuddyAllocator.h",
     "BuddyMemoryAllocator.cpp",
@@ -270,6 +276,8 @@ source_set("sources") {
     "CreatePipelineAsyncEvent.h",
     "Device.cpp",
     "Device.h",
+    "DeviceGuard.cpp",
+    "DeviceGuard.h",
     "DynamicUploader.cpp",
     "DynamicUploader.h",
     "EncodingContext.cpp",
@@ -296,6 +304,10 @@ source_set("sources") {
     "Format.cpp",
     "Format.h",
     "Forward.h",
+    "ImmediateConstantsLayout.cpp",
+    "ImmediateConstantsLayout.h",
+    "ImmediateConstantsTracker.cpp",
+    "ImmediateConstantsTracker.h",
     "IndirectDrawMetadata.cpp",
     "IndirectDrawMetadata.h",
     "IndirectDrawValidationEncoder.cpp",
@@ -307,11 +319,11 @@ source_set("sources") {
     "InternalPipelineStore.h",
     "Limits.cpp",
     "Limits.h",
+    "LogEmitter.h",
     "ObjectBase.cpp",
     "ObjectBase.h",
     "ObjectContentHasher.cpp",
     "ObjectContentHasher.h",
-    "PassResourceUsage.cpp",
     "PassResourceUsage.h",
     "PassResourceUsageTracker.cpp",
     "PassResourceUsageTracker.h",
@@ -360,6 +372,8 @@ source_set("sources") {
     "Serializable.h",
     "ShaderModule.cpp",
     "ShaderModule.h",
+    "ShaderModuleParseRequest.cpp",
+    "ShaderModuleParseRequest.h",
     "SharedBufferMemory.cpp",
     "SharedBufferMemory.h",
     "SharedFence.cpp",
@@ -387,8 +401,12 @@ source_set("sources") {
     "Toggles.cpp",
     "Toggles.h",
     "UsageValidationMode.h",
+    "ValidationUtils.cpp",
+    "ValidationUtils.h",
     "VisitableMembers.h",
     "WaitAnySystemEvent.h",
+    "WaitListEvent.cpp",
+    "WaitListEvent.h",
     "dawn_platform.h",
     "stream/BlobSource.cpp",
     "stream/BlobSource.h",
@@ -419,13 +437,14 @@ source_set("sources") {
   }
 
   # Only win32 app needs to link with user32.lib
-  # In UWP, all availiable APIs are defined in WindowsApp.lib
+  # In UWP, all available APIs are defined in WindowsApp.lib
   if (is_win && !dawn_is_winuwp) {
     libs += [
+      "onecore.lib",
       "user32.lib",
       "delayimp.lib",
     ]
-    public_configs = [ ":win_delayload" ]
+    public_configs += [ ":win_delayload" ]
   }
 
   if (dawn_is_winuwp && is_debug) {
@@ -472,8 +491,6 @@ source_set("sources") {
       "d3d/SharedTextureMemoryD3D.h",
       "d3d/SwapChainD3D.cpp",
       "d3d/SwapChainD3D.h",
-      "d3d/TextureD3D.cpp",
-      "d3d/TextureD3D.h",
       "d3d/UtilsD3D.cpp",
       "d3d/UtilsD3D.h",
       "d3d/d3d_platform.h",
@@ -622,13 +639,15 @@ source_set("sources") {
 
   if (dawn_enable_metal) {
     frameworks = [
-      "IOKit.framework",
       "IOSurface.framework",
       "Metal.framework",
       "QuartzCore.framework",
     ]
     if (is_mac) {
-      frameworks += [ "Cocoa.framework" ]
+      frameworks += [
+        "Cocoa.framework",
+        "IOKit.framework",
+      ]
     }
     sources += [
       "Surface_metal.mm",
@@ -649,6 +668,8 @@ source_set("sources") {
       "metal/DeviceMTL.h",
       "metal/DeviceMTL.mm",
       "metal/Forward.h",
+      "metal/MultiDrawEncoder.h",
+      "metal/MultiDrawEncoder.mm",
       "metal/PhysicalDeviceMTL.h",
       "metal/PhysicalDeviceMTL.mm",
       "metal/PipelineLayoutMTL.h",
@@ -689,6 +710,25 @@ source_set("sources") {
     ]
   }
 
+  if (dawn_enable_webgpu_on_webgpu) {
+    sources += [
+      "webgpu/BackendWGPU.cpp",
+      "webgpu/BackendWGPU.h",
+      "webgpu/BufferWGPU.cpp",
+      "webgpu/BufferWGPU.h",
+      "webgpu/CommandBufferWGPU.cpp",
+      "webgpu/CommandBufferWGPU.h",
+      "webgpu/DeviceWGPU.cpp",
+      "webgpu/DeviceWGPU.h",
+      "webgpu/Forward.h",
+      "webgpu/PhysicalDeviceWGPU.cpp",
+      "webgpu/PhysicalDeviceWGPU.h",
+      "webgpu/QueueWGPU.cpp",
+      "webgpu/QueueWGPU.h",
+      "webgpu/WebGPUError.h",
+    ]
+  }
+
   if ((dawn_enable_opengl || dawn_enable_vulkan) &&
       dawn_enable_spirv_validation) {
     sources += [
@@ -715,7 +755,6 @@ source_set("sources") {
       "opengl/BindGroupGL.h",
       "opengl/BindGroupLayoutGL.cpp",
       "opengl/BindGroupLayoutGL.h",
-      "opengl/BindingPoint.h",
       "opengl/BufferGL.cpp",
       "opengl/BufferGL.h",
       "opengl/CommandBufferGL.cpp",
@@ -733,6 +772,7 @@ source_set("sources") {
       "opengl/Forward.h",
       "opengl/GLFormat.cpp",
       "opengl/GLFormat.h",
+      "opengl/IntegerTypes.h",
       "opengl/OpenGLFunctions.cpp",
       "opengl/OpenGLFunctions.h",
       "opengl/OpenGLVersion.cpp",
@@ -755,6 +795,14 @@ source_set("sources") {
       "opengl/SamplerGL.h",
       "opengl/ShaderModuleGL.cpp",
       "opengl/ShaderModuleGL.h",
+      "opengl/SharedFenceEGL.cpp",
+      "opengl/SharedFenceEGL.h",
+      "opengl/SharedFenceGL.cpp",
+      "opengl/SharedFenceGL.h",
+      "opengl/SharedTextureMemoryEGL.cpp",
+      "opengl/SharedTextureMemoryEGL.h",
+      "opengl/SharedTextureMemoryGL.cpp",
+      "opengl/SharedTextureMemoryGL.h",
       "opengl/SwapChainEGL.cpp",
       "opengl/SwapChainEGL.h",
       "opengl/TextureGL.cpp",
@@ -782,7 +830,8 @@ source_set("sources") {
       "vulkan/BufferVk.h",
       "vulkan/CommandBufferVk.cpp",
       "vulkan/CommandBufferVk.h",
-      "vulkan/CommandRecordingContext.h",
+      "vulkan/CommandRecordingContextVk.cpp",
+      "vulkan/CommandRecordingContextVk.h",
       "vulkan/ComputePipelineVk.cpp",
       "vulkan/ComputePipelineVk.h",
       "vulkan/DescriptorSetAllocation.h",
@@ -794,12 +843,16 @@ source_set("sources") {
       "vulkan/FencedDeleter.cpp",
       "vulkan/FencedDeleter.h",
       "vulkan/Forward.h",
+      "vulkan/FramebufferCache.cpp",
+      "vulkan/FramebufferCache.h",
       "vulkan/PhysicalDeviceVk.cpp",
       "vulkan/PhysicalDeviceVk.h",
       "vulkan/PipelineCacheVk.cpp",
       "vulkan/PipelineCacheVk.h",
       "vulkan/PipelineLayoutVk.cpp",
       "vulkan/PipelineLayoutVk.h",
+      "vulkan/PipelineVk.cpp",
+      "vulkan/PipelineVk.h",
       "vulkan/QuerySetVk.cpp",
       "vulkan/QuerySetVk.h",
       "vulkan/QueueVk.cpp",
@@ -828,6 +881,7 @@ source_set("sources") {
       "vulkan/SwapChainVk.h",
       "vulkan/TextureVk.cpp",
       "vulkan/TextureVk.h",
+      "vulkan/UniqueVkHandle.h",
       "vulkan/UtilsVulkan.cpp",
       "vulkan/UtilsVulkan.h",
       "vulkan/VulkanError.cpp",
@@ -904,7 +958,7 @@ source_set("sources") {
 dawn_component("native") {
   DEFINE_PREFIX = "DAWN_NATIVE"
 
-  #Make headers publically visible
+  #Make headers publicly visible
   public_deps = [ ":headers" ]
 
   deps = [
@@ -929,6 +983,9 @@ dawn_component("native") {
   }
   if (dawn_enable_null) {
     sources += [ "null/NullBackend.cpp" ]
+  }
+  if (dawn_enable_webgpu_on_webgpu) {
+    sources += [ "webgpu/WebGPUBackend.cpp" ]
   }
   if (dawn_enable_opengl) {
     sources += [ "opengl/OpenGLBackend.cpp" ]

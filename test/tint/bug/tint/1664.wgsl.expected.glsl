@@ -1,13 +1,9 @@
 #version 310 es
 
-void f0() {
-  int a = 2147483647;
-  int b = 1;
-  int c = (a + 1);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f0();
-  return;
+  int a = 2147483647;
+  int b = 1;
+  uint v = uint(a);
+  int c = int((v + uint(1)));
 }

@@ -28,10 +28,11 @@
 #ifndef INCLUDE_DAWN_WIRE_WIRE_H_
 #define INCLUDE_DAWN_WIRE_WIRE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <cstdint>
 #include <limits>
 
-#include "dawn/webgpu.h"
 #include "dawn/wire/dawn_wire_export.h"
 
 namespace dawn::wire {
@@ -67,6 +68,8 @@ class DAWN_WIRE_EXPORT CommandHandler {
 struct Handle {
     uint32_t id = 0;
     uint32_t generation = 0;
+
+    bool operator==(const Handle& other) const = default;
 };
 
 }  // namespace dawn::wire

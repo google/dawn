@@ -37,6 +37,17 @@ namespace dawn {
 namespace {
 
 class ShaderTests : public DawnTest {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        // maxStorageTexturesInFragmentStage
+        // maxStorageBuffersInVertexStage
+        // maxStorageTexturesInVertexStage
+        supported.UnlinkedCopyTo(&required);
+    }
+
   public:
     wgpu::Buffer CreateBuffer(const std::vector<uint32_t>& data,
                               wgpu::BufferUsage usage = wgpu::BufferUsage::Storage |
@@ -1220,10 +1231,10 @@ TEST_P(ShaderTests, FragmentInputIsSubsetOfVertexOutput) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
     @location(1) var1: f32,
-    @location(3) @interpolate(flat) var3: u32,
-    @location(5) @interpolate(flat) var5: i32,
+    @location(3) @interpolate(flat, either) var3: u32,
+    @location(5) @interpolate(flat, either) var5: i32,
     @location(7) var7: f32,
-    @location(9) @interpolate(flat) var9: u32,
+    @location(9) @interpolate(flat, either) var9: u32,
     @builtin(position) pos: vec4f,
 }
 
@@ -1247,7 +1258,7 @@ struct ShaderIO {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
 struct ShaderIO {
-    @location(3) @interpolate(flat) var3: u32,
+    @location(3) @interpolate(flat, either) var3: u32,
     @location(7) var7: f32,
 }
 
@@ -1830,8 +1841,8 @@ TEST_P(ShaderTests, Robustness_Uniform_Mat4x3) {
 // GLSL. If not renamed properly, names of binding at (2, 2) in the vertex stage and (0, 3) in the
 // fragment stage can possibly collide.
 TEST_P(ShaderTests, StorageAcrossStages) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 4);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 3);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @group(2) @binding(2) var<storage> u0_2: f32;
@@ -1870,8 +1881,8 @@ TEST_P(ShaderTests, StorageAcrossStages) {
 // GLSL. If not renamed properly, names of binding at (2, 2) in the vertex stage and (0, 3) in the
 // fragment stage can possibly collide.
 TEST_P(ShaderTests, StorageAcrossStagesStruct) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 2);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct block {
@@ -1905,8 +1916,8 @@ TEST_P(ShaderTests, StorageAcrossStagesStruct) {
 // GLSL. If not renamed properly, names of binding at (2, 2) in the vertex stage and (0, 3) in the
 // fragment stage can possibly collide.
 TEST_P(ShaderTests, StorageAcrossStagesSeparateModules) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 4);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 3);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         @group(2) @binding(2) var<storage> u0_2: f32;
@@ -1944,8 +1955,8 @@ TEST_P(ShaderTests, StorageAcrossStagesSeparateModules) {
 
 // Deliberately mismatch an SSBO block name at differrent stages.
 TEST_P(ShaderTests, StorageAcrossStagesSeparateModuleMismatch) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 2);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var<storage> tint_symbol_ubo_0: f32;
@@ -1972,8 +1983,8 @@ TEST_P(ShaderTests, StorageAcrossStagesSeparateModuleMismatch) {
 
 // Having different block contents at the same binding point used in different stages is allowed.
 TEST_P(ShaderTests, StorageAcrossStagesSameBindingPointCollide) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct X { x : vec4f }
@@ -2003,8 +2014,8 @@ TEST_P(ShaderTests, StorageAcrossStagesSameBindingPointCollide) {
 // Having different block contents at the same binding point used in different stages is allowed,
 // with or without struct wrapper.
 TEST_P(ShaderTests, StorageAcrossStagesSameBindingPointCollideMixedStructDef) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInVertexStage < 1);
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct X { x : vec4f }
@@ -2198,7 +2209,7 @@ TEST_P(ShaderTests, FragDepthAndInstanceIndex) {
     desc.cFragment.module = module;
     desc.cFragment.targetCount = 0;
     wgpu::DepthStencilState* dsState = desc.EnableDepthStencil();
-    dsState->depthWriteEnabled = true;
+    dsState->depthWriteEnabled = wgpu::OptionalBool::True;
     dsState->depthCompare = wgpu::CompareFunction::Always;
 
     device.CreateRenderPipeline(&desc);
@@ -2557,6 +2568,141 @@ fn fs_main() -> @location(0) vec4f {
     queue.Submit(1, &commandBuffer);
 }
 
+// Regression test for crbug.com/dawn/380433758.
+TEST_P(ShaderTests, DuplicateTexture) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
+  return textureSampleLevel(t, s, vec2f(0), 0);
+}
+
+fn useCombos0() -> vec4f {
+  return sample(tex0_0, smp0_0);
+}
+
+fn useCombos1() -> vec4f {
+  return sample(tex1_15, smp0_0);
+}
+
+@group(0) @binding(0) var tex0_0: texture_2d<f32>;
+@group(0) @binding(1) var tex1_15: texture_2d<f32>;
+@group(0) @binding(2) var smp0_0: sampler;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+  return useCombos0();
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+  return vec4f(useCombos1());
+}
+)");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+
+    device.CreateRenderPipeline(&desc);
+}
+
+// Regression test for crbug.com/dawn/388870480.
+TEST_P(ShaderTests, CollisionHandle) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInVertexStage < 2);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
+
+    // TODO(crbug.com/394915257): ANGLE D3D11 bug
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var u0_1: texture_storage_2d<r32float, read>;
+@group(0) @binding(0) var u0_0: texture_storage_2d<r32float, read>;
+
+@group(0) @binding(0) var u1_0: texture_storage_2d<r32float, read>;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+    _ = textureLoad(u0_0, vec2u(0));
+    _ = textureLoad(u0_1, vec2u(0));
+    return vec4f(0);
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+    _ = textureLoad(u1_0, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+
+    device.CreateRenderPipeline(&desc);
+}
+
+// Regression test for crbug.com/dawn/388870480.
+// Trigger potential collision when disable_symbol_renaming is on
+TEST_P(ShaderTests, CollisionHandle_DifferentModules) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInVertexStage < 2);
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
+
+    // TODO(crbug.com/394915257): ANGLE D3D11 bug
+    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
+
+    wgpu::ShaderModule vmodule = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var v1: texture_storage_2d<r32float, read>;
+@group(0) @binding(0) var v0: texture_storage_2d<r32float, read>;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+    _ = textureLoad(v0, vec2u(0));
+    _ = textureLoad(v1, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    wgpu::ShaderModule fmodule = utils::CreateShaderModule(device, R"(
+@group(0) @binding(1) var v1: texture_storage_2d<r32float, read>;
+
+@fragment fn fs() -> @location(0) vec4f {
+    _ = textureLoad(v1, vec2u(0));
+    return vec4f(0);
+}
+)");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = vmodule;
+    desc.cFragment.module = fmodule;
+
+    device.CreateRenderPipeline(&desc);
+}
+
+// Regression test for crbug.com/dawn/388870480.
+// length on SSBO on PowerVR device has compile error on ES31 backend.
+// Need to workaround using the arrayLengthFromUniform transform.
+// We do not have hardware on test suite to trigger the failure though.
+TEST_P(ShaderTests, SSBOLength) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersPerShaderStage < 1);
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(R"(
+@group(0) @binding(0) var tex: texture_multisampled_2d<f32>;
+@group(0) @binding(1) var<storage, read_write> out: array<u32>;
+
+override kSize: u32 = 4u;
+override kSampleCount: u32 = 1u;
+
+@compute @workgroup_size(8, 8)
+fn main(@builtin(global_invocation_id) xyz: vec3u) {
+    let xy = xyz.xy;
+
+    // Reconstruct the mask from which samples were written
+    var mask = 0u;
+    for (var sampleIndex = 0u; sampleIndex < kSampleCount; sampleIndex += 1) {
+        let color = textureLoad(tex, xy, sampleIndex);
+        let maskBit = u32(color.r > 0.5); // color is either black or white
+        mask |= maskBit << sampleIndex;
+    }
+
+    out[xy.y * kSize + xy.x] = mask;
+}
+)");
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -2566,6 +2712,7 @@ DAWN_INSTANTIATE_TEST(ShaderTests,
                       OpenGLESBackend(),
                       OpenGLBackend({"disable_symbol_renaming"}),
                       OpenGLESBackend({"disable_symbol_renaming"}),
+                      OpenGLESBackend({"gl_use_array_length_from_uniform"}),
                       VulkanBackend());
 
 }  // anonymous namespace

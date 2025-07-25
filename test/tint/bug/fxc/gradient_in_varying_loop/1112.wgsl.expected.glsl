@@ -2,44 +2,66 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in vec2 vUV_1;
-layout(location = 0) out vec4 value;
-uniform highp sampler2D randomTexture_Sampler;
-
-vec4 tint_symbol(vec2 vUV) {
-  vec4 tint_symbol_1 = texture(randomTexture_Sampler, vUV);
-  vec3 random = tint_symbol_1.rgb;
+uniform highp sampler2D f_randomTexture_Sampler;
+layout(location = 0) in vec2 tint_interstage_location0;
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner(vec2 vUV) {
+  vec3 random = texture(f_randomTexture_Sampler, vUV).xyz;
   int i = 0;
-  while (true) {
-    if ((i < 1)) {
-    } else {
-      break;
-    }
-    vec3 offset = vec3(random.x);
-    bool tint_tmp_2 = (offset.x < 0.0f);
-    if (!tint_tmp_2) {
-      tint_tmp_2 = (offset.y < 0.0f);
-    }
-    bool tint_tmp_1 = (tint_tmp_2);
-    if (!tint_tmp_1) {
-      tint_tmp_1 = (offset.x > 1.0f);
-    }
-    bool tint_tmp = (tint_tmp_1);
-    if (!tint_tmp) {
-      tint_tmp = (offset.y > 1.0f);
-    }
-    if ((tint_tmp)) {
-      i = (i + 1);
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if ((i < 1)) {
+      } else {
+        break;
+      }
+      vec3 offset = vec3(random.x);
+      bool v = false;
+      if ((offset.x < 0.0f)) {
+        v = true;
+      } else {
+        v = (offset.y < 0.0f);
+      }
+      bool v_1 = false;
+      if (v) {
+        v_1 = true;
+      } else {
+        v_1 = (offset.x > 1.0f);
+      }
+      bool v_2 = false;
+      if (v_1) {
+        v_2 = true;
+      } else {
+        v_2 = (offset.y > 1.0f);
+      }
+      if (v_2) {
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
+        {
+          uint tint_low_inc = (tint_loop_idx.x - 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        }
+        continue;
+      }
+      float sampleDepth = 0.0f;
+      uint v_4 = uint(i);
+      i = int((v_4 + uint(1)));
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
       continue;
     }
-    float sampleDepth = 0.0f;
-    i = (i + 1);
   }
   return vec4(1.0f);
 }
-
 void main() {
-  vec4 inner_result = tint_symbol(vUV_1);
-  value = inner_result;
-  return;
+  main_loc0_Output = main_inner(tint_interstage_location0);
 }

@@ -106,7 +106,7 @@ TEST_F(WGSLParserTest, VariableDecl_WithAddressSpace) {
 }
 
 TEST_F(WGSLParserTest, VariableDecl_WithPushConstant) {
-    auto p = parser("var<push_constant> my_var : f32");
+    auto p = parser("var<immediate> my_var : f32");
     auto v = p->variable_decl();
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
@@ -114,7 +114,24 @@ TEST_F(WGSLParserTest, VariableDecl_WithPushConstant) {
     ast::CheckIdentifier(v->name, "my_var");
 
     ast::CheckIdentifier(v->type, "f32");
-    ast::CheckIdentifier(v->address_space, "push_constant");
+    ast::CheckIdentifier(v->address_space, "immediate");
+}
+
+TEST_F(WGSLParserTest, VariableDecl_WithAddressSpaceTrailingComma) {
+    auto p = parser("var<private,> my_var : f32");
+    auto v = p->variable_decl();
+    EXPECT_TRUE(v.matched);
+    EXPECT_FALSE(v.errored);
+    EXPECT_FALSE(p->has_error());
+    ast::CheckIdentifier(v->name, "my_var");
+
+    ast::CheckIdentifier(v->type, "f32");
+    ast::CheckIdentifier(v->address_space, "private");
+
+    EXPECT_EQ(v->source.range.begin.line, 1u);
+    EXPECT_EQ(v->source.range.begin.column, 15u);
+    EXPECT_EQ(v->source.range.end.line, 1u);
+    EXPECT_EQ(v->source.range.end.column, 21u);
 }
 
 }  // namespace

@@ -40,7 +40,7 @@ class ErrorScope {
     ErrorScope(wgpu::ErrorType error, std::string_view message);
 
     wgpu::ErrorType GetErrorType() const;
-    const std::string& GetErrorMessage() const;
+    WGPUStringView GetErrorMessage() const;
 
   private:
     friend class ErrorScopeStack;

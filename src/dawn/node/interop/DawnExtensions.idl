@@ -29,32 +29,87 @@
 // upstream webgpu.idl.
 
 enum GPUFeatureName {
-    "chromium-experimental-subgroups",
-    "chromium-experimental-subgroup-uniform-control-flow",
-    // subgroups and subgroups-f16 features are not in webgpu.idl yet.
-    "subgroups",
-    "subgroups-f16",
+    "multi-draw-indirect",
+    "chromium-experimental-subgroup-matrix",
+    "texture-component-swizzle",
+    "chromium-experimental-primitive-id",
 };
 
-dictionary GPURequestAdapterOptions {
-    boolean compatibilityMode = false;
+enum GPUSubgroupMatrixComponentType {
+  "f32",
+  "f16",
+  "u32",
+  "i32",
+  "u8",
+  "i8",
 };
 
-interface GPUAdapter {
-    readonly attribute boolean isCompatibilityMode;
+interface GPUSubgroupMatrixConfig {
+  readonly attribute GPUSubgroupMatrixComponentType componentType;
+  readonly attribute GPUSubgroupMatrixComponentType resultComponentType;
+  readonly attribute unsigned long M;
+  readonly attribute unsigned long N;
+  readonly attribute unsigned long K;
+};
+
+interface GPUAdapterInfo {
+    [SameObject] readonly attribute FrozenArray<GPUSubgroupMatrixConfig> subgroupMatrixConfigs;
 };
 
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
 };
 
-dictionary GPUTextureDescriptor {
-    GPUTextureViewDimension? textureBindingViewDimension;
+// Not in webgpu.idl yet.
+interface GPURenderPassEncoder {
+    undefined multiDrawIndirect(GPUBuffer indirectBuffer, GPUSize64 indirectOffset, GPUSize32 maxDrawCount,
+        GPUBuffer? drawCountBuffer, optional GPUSize64 drawCountBufferOffset = 0);
+    undefined multiDrawIndexedIndirect(GPUBuffer indirectBuffer, GPUSize64 indirectOffset,
+                                GPUSize32 maxDrawCount, GPUBuffer? drawCountBuffer = {},
+                                optional GPUSize64 drawCountBufferOffset = 0);
 };
 
-enum WGSLFeatureName {
+dictionary GPUTextureDescriptor {
+    GPUTextureViewDimension textureBindingViewDimension;
+};
+
+enum WGSLLanguageFeatureName {
     "readonly_and_readwrite_storage_textures",
     "packed_4x8_integer_dot_product",
     "unrestricted_pointer_parameters",
     "pointer_composite_access",
+    "sized_binding_array",
+    "texel_buffers",
+    "chromium_print",
+};
+
+dictionary GPUBindGroupLayoutEntry {
+    GPUSize32 bindingArraySize = 1;
+};
+
+interface GPUSupportedLimits {
+    readonly attribute unsigned long maxStorageBuffersInFragmentStage;
+    readonly attribute unsigned long maxStorageTexturesInFragmentStage;
+    readonly attribute unsigned long maxStorageBuffersInVertexStage;
+    readonly attribute unsigned long maxStorageTexturesInVertexStage;
+};
+
+dictionary GPUTextureViewDescriptor {
+    GPUTextureComponentSwizzle swizzle;
+};
+
+dictionary GPUTextureComponentSwizzle {
+    GPUComponentSwizzle r = "r";
+    GPUComponentSwizzle g = "g";
+    GPUComponentSwizzle b = "b";
+    GPUComponentSwizzle a = "a";
+};
+
+enum GPUComponentSwizzle {
+    "zero",
+    "one",
+    "r",
+    "g",
+    "b",
+    "a",
 };

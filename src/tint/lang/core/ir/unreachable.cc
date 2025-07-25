@@ -34,10 +34,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unreachable);
 
 namespace tint::core::ir {
 
+Unreachable::Unreachable(Instruction::Id id) : Base(id) {}
+
 Unreachable::~Unreachable() = default;
 
 Unreachable* Unreachable::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.instructions.Create<Unreachable>();
+    return ctx.ir.CreateInstruction<Unreachable>();
 }
 
 }  // namespace tint::core::ir

@@ -282,6 +282,17 @@ func (q Query) String() string {
 	return sb.String()
 }
 
+// ExpectationFileString returns the query formatted as a string, suitable for
+// use directly in expectation files.
+func (q Query) ExpectationFileString() string {
+	baseString := q.String()
+	// Expectation files want a trailing ":" for test queries.
+	if q.Target() == Tests && !q.IsWildcard() {
+		baseString += TargetDelimiter
+	}
+	return baseString
+}
+
 // Compare compares the relative order of q and o, returning:
 //
 //	-1 if q should come before o

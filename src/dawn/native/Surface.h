@@ -40,9 +40,9 @@
 
 #include "dawn/common/Platform.h"
 
-#if DAWN_PLATFORM_IS(WINDOWS)
+#if defined(DAWN_USE_WINDOWS_UI)
 #include "dawn/native/d3d/d3d_platform.h"
-#endif  // DAWN_PLATFORM_IS(WINDOWS)
+#endif  // defined(DAWN_USE_WINDOWS_UI)
 
 // Forward declare IUnknown
 // GetCoreWindow needs to return an IUnknown pointer
@@ -83,7 +83,8 @@ class Surface final : public ErrorMonad {
         WaylandSurface,
         WindowsHWND,
         WindowsCoreWindow,
-        WindowsSwapChainPanel,
+        WindowsUWPSwapChainPanel,
+        WindowsWinUISwapChainPanel,
         XlibWindow,
     };
     Type GetType() const;
@@ -107,17 +108,15 @@ class Surface final : public ErrorMonad {
     // Valid to call if the type is WindowsCoreWindow
     IUnknown* GetCoreWindow() const;
 
-    // Valid to call if the type is WindowsSwapChainPanel
-    IUnknown* GetSwapChainPanel() const;
+    // Valid to call if the type is WindowsUWPSwapChainPanel
+    IUnknown* GetUWPSwapChainPanel() const;
+
+    // Valid to call if the type is WindowsWinUISwapChainPanel
+    IUnknown* GetWinUISwapChainPanel() const;
 
     // Valid to call if the type is WindowsXlib
     void* GetXDisplay() const;
     uint32_t GetXWindow() const;
-
-    // TODO(dawn:2320): Remove these 2 accessors once the deprecation period is finished and
-    // Device::APICreateSwapChain gets dropped
-    SwapChainBase* GetAttachedSwapChain();
-    void SetAttachedSwapChain(SwapChainBase* swapChain);
 
     const std::string& GetLabel() const;
 
@@ -125,10 +124,9 @@ class Surface final : public ErrorMonad {
     void APIConfigure(const SurfaceConfiguration* config);
     wgpu::Status APIGetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
     void APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const;
-    wgpu::TextureFormat APIGetPreferredFormat(AdapterBase* adapter) const;
-    void APIPresent();
+    wgpu::Status APIPresent();
     void APIUnconfigure();
-    void APISetLabel(const char* label);
+    void APISetLabel(StringView label);
 
   private:
     Surface(InstanceBase* instance, ErrorMonad::ErrorTag tag);
@@ -139,32 +137,20 @@ class Surface final : public ErrorMonad {
 
     MaybeError GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
     MaybeError GetCurrentTexture(SurfaceTexture* surfaceTexture) const;
-    ResultOrError<wgpu::TextureFormat> GetPreferredFormat(AdapterBase* adapter) const;
-    MaybeError Present();
 
     Ref<InstanceBase> mInstance;
     Type mType;
     std::string mLabel;
 
-    // The surface has an associated device only when it is configured
+    // The surface has an associated device *if and only if* it is configured.
     Ref<DeviceBase> mCurrentDevice;
 
-    // The swapchain is created when configuring the surface.
+    // The swapchain is created when configuring the surface (but may still be
+    // null even if it's in the "configured" state).
     Ref<SwapChainBase> mSwapChain;
 
     // We keep on storing the previous swap chain after Unconfigure in case we could reuse it
     Ref<SwapChainBase> mRecycledSwapChain;
-
-    // This ensures that the user does not mix the legacy API (ManagesSwapChain::No, i.e., explicit
-    // call to CreateSwapChain) with the new API (ManagesSwapChain::Yes, i.e., surface.configure).
-    // TODO(dawn:2320): Remove and consider it is always Yes once Device::APICreateSwapChain gets
-    // dropped
-    enum class ManagesSwapChain {
-        Yes,
-        No,
-        Unknown,
-    };
-    ManagesSwapChain mIsSwapChainManagedBySurface = ManagesSwapChain::Unknown;
 
     // A cache is mutable because potentially modified in const-qualified getters
     std::unique_ptr<AdapterSurfaceCapCache> mCapabilityCache;
@@ -187,8 +173,11 @@ class Surface final : public ErrorMonad {
     // WindowsCoreWindow
     ComPtr<IUnknown> mCoreWindow;
 
-    // WindowsSwapChainPanel
-    ComPtr<IUnknown> mSwapChainPanel;
+    // WindowsUWPSwapChainPanel
+    ComPtr<IUnknown> mUWPSwapChainPanel;
+
+    // WindowsWinUISwapChainPanel
+    ComPtr<IUnknown> mWinUISwapChainPanel;
 #endif  // defined(DAWN_USE_WINDOWS_UI)
 
     // Xlib

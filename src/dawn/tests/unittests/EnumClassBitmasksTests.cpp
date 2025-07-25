@@ -25,9 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "gtest/gtest.h"
-
-#include "webgpu/webgpu_enum_class_bitmasks.h"
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_enum_class_bitmasks.h>
 
 // This shows an example of how to set up a bitmask in a namespace other than
 // wgpu. The namespace can be either named or anonymous. In dawn, it is usually

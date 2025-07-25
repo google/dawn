@@ -1,75 +1,16 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-template<typename T, size_t N>
-struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+struct main_outputs {
+  float4 tint_symbol [[color(0)]];
 };
 
-struct MyStruct {
-  float f1;
-};
-
-int ret_i32() {
-  return 1;
-}
-
-uint ret_u32() {
-  return 1u;
-}
-
-float ret_f32() {
-  return 1.0f;
-}
-
-MyStruct ret_MyStruct() {
-  MyStruct const tint_symbol_2 = MyStruct{};
-  return tint_symbol_2;
-}
-
-tint_array<float, 10> ret_MyArray() {
-  tint_array<float, 10> const tint_symbol_3 = tint_array<float, 10>{};
-  return tint_symbol_3;
-}
-
-void let_decls() {
-  int const v1 = 1;
-  uint const v2 = 1u;
-  float const v3 = 1.0f;
-  int3 const v4 = int3(1);
-  uint3 const v5 = uint3(1u);
-  float3 const v6 = float3(1.0f);
-  float3x3 const v7 = float3x3(v6, v6, v6);
-  MyStruct const v8 = MyStruct{.f1=1.0f};
-  tint_array<float, 10> const v9 = tint_array<float, 10>{};
-  int const v10 = ret_i32();
-  uint const v11 = ret_u32();
-  float const v12 = ret_f32();
-  MyStruct const v13 = ret_MyStruct();
-  MyStruct const v14 = ret_MyStruct();
-  tint_array<float, 10> const v15 = ret_MyArray();
-}
-
-struct tint_symbol_1 {
-  float4 value [[color(0)]];
-};
-
-float4 tint_symbol_inner() {
+float4 main_inner() {
   return float4(0.0f);
 }
 
-fragment tint_symbol_1 tint_symbol() {
-  float4 const inner_result = tint_symbol_inner();
-  tint_symbol_1 wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+fragment main_outputs v() {
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner();
+  return tint_wrapper_result;
 }
-

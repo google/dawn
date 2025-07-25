@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void DemoteToHelperFuzzer(Module& module) {
-    if (auto res = DemoteToHelper(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of DemoteToHelper failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> DemoteToHelperFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return DemoteToHelper(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer,
+                      tint::core::ir::transform::kDemoteToHelperCapabilities);

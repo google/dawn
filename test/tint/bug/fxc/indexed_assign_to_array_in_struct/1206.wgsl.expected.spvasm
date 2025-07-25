@@ -1,82 +1,152 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 38
+; Generator: Google Tint Compiler; 1
+; Bound: 85
 ; Schema: 0
                OpCapability Shader
+         %30 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %Particles "Particles"
-               OpMemberName %Particles 0 "p"
-               OpName %Particle "Particle"
+               OpMemberName %Particle_tint_explicit_layout 0 "position"
+               OpMemberName %Particle_tint_explicit_layout 1 "lifetime"
+               OpMemberName %Particle_tint_explicit_layout 2 "color"
+               OpMemberName %Particle_tint_explicit_layout 3 "velocity"
+               OpName %Particle_tint_explicit_layout "Particle_tint_explicit_layout"
+               OpMemberName %Particles_tint_explicit_layout 0 "p"
+               OpName %Particles_tint_explicit_layout "Particles_tint_explicit_layout"
+               OpName %particles "particles"
+               OpMemberName %Simulation 0 "i"
+               OpName %Simulation "Simulation"
+               OpMemberName %sim_block 0 "inner"
+               OpName %sim_block "sim_block"
+               OpName %main "main"
                OpMemberName %Particle 0 "position"
                OpMemberName %Particle 1 "lifetime"
                OpMemberName %Particle 2 "color"
                OpMemberName %Particle 3 "velocity"
-               OpName %particles "particles"
-               OpName %sim_block "sim_block"
-               OpMemberName %sim_block 0 "inner"
-               OpName %Simulation "Simulation"
-               OpMemberName %Simulation 0 "i"
-               OpName %sim "sim"
-               OpName %main "main"
+               OpName %Particle "Particle"
                OpName %particle "particle"
-               OpDecorate %Particles Block
-               OpMemberDecorate %Particles 0 Offset 0
-               OpMemberDecorate %Particle 0 Offset 0
+               OpName %tint_convert_explicit_layout "tint_convert_explicit_layout"
+               OpName %tint_source "tint_source"
+               OpName %tint_convert_explicit_layout_0 "tint_convert_explicit_layout"
+               OpName %tint_source_0 "tint_source"
                OpDecorate %_arr_v3float_uint_8 ArrayStride 16
-               OpMemberDecorate %Particle 1 Offset 128
-               OpMemberDecorate %Particle 2 Offset 144
-               OpMemberDecorate %Particle 3 Offset 160
-               OpDecorate %_runtimearr_Particle ArrayStride 176
-               OpDecorate %particles NonWritable
+               OpMemberDecorate %Particle_tint_explicit_layout 0 Offset 0
+               OpMemberDecorate %Particle_tint_explicit_layout 1 Offset 128
+               OpMemberDecorate %Particle_tint_explicit_layout 2 Offset 144
+               OpMemberDecorate %Particle_tint_explicit_layout 3 Offset 160
+               OpDecorate %_runtimearr_Particle_tint_explicit_layout ArrayStride 176
+               OpMemberDecorate %Particles_tint_explicit_layout 0 Offset 0
+               OpDecorate %Particles_tint_explicit_layout Block
                OpDecorate %particles DescriptorSet 1
                OpDecorate %particles Binding 3
-               OpDecorate %sim_block Block
-               OpMemberDecorate %sim_block 0 Offset 0
+               OpDecorate %particles NonWritable
                OpMemberDecorate %Simulation 0 Offset 0
-               OpDecorate %sim NonWritable
-               OpDecorate %sim DescriptorSet 1
-               OpDecorate %sim Binding 4
+               OpMemberDecorate %sim_block 0 Offset 0
+               OpDecorate %sim_block Block
+               OpDecorate %12 DescriptorSet 1
+               OpDecorate %12 Binding 4
+               OpDecorate %12 NonWritable
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
        %uint = OpTypeInt 32 0
      %uint_8 = OpConstant %uint 8
 %_arr_v3float_uint_8 = OpTypeArray %v3float %uint_8
     %v4float = OpTypeVector %float 4
-   %Particle = OpTypeStruct %_arr_v3float_uint_8 %float %v4float %v3float
-%_runtimearr_Particle = OpTypeRuntimeArray %Particle
-  %Particles = OpTypeStruct %_runtimearr_Particle
-%_ptr_StorageBuffer_Particles = OpTypePointer StorageBuffer %Particles
-  %particles = OpVariable %_ptr_StorageBuffer_Particles StorageBuffer
+%Particle_tint_explicit_layout = OpTypeStruct %_arr_v3float_uint_8 %float %v4float %v3float
+%_runtimearr_Particle_tint_explicit_layout = OpTypeRuntimeArray %Particle_tint_explicit_layout
+%Particles_tint_explicit_layout = OpTypeStruct %_runtimearr_Particle_tint_explicit_layout
+%_ptr_StorageBuffer_Particles_tint_explicit_layout = OpTypePointer StorageBuffer %Particles_tint_explicit_layout
+  %particles = OpVariable %_ptr_StorageBuffer_Particles_tint_explicit_layout StorageBuffer
  %Simulation = OpTypeStruct %uint
   %sim_block = OpTypeStruct %Simulation
 %_ptr_Uniform_sim_block = OpTypePointer Uniform %sim_block
-        %sim = OpVariable %_ptr_Uniform_sim_block Uniform
+         %12 = OpVariable %_ptr_Uniform_sim_block Uniform
        %void = OpTypeVoid
-         %16 = OpTypeFunction %void
+         %18 = OpTypeFunction %void
+%_ptr_StorageBuffer__runtimearr_Particle_tint_explicit_layout = OpTypePointer StorageBuffer %_runtimearr_Particle_tint_explicit_layout
      %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
-         %22 = OpConstantNull %int
-%_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
+      %int_0 = OpConstant %int 0
+%_ptr_StorageBuffer_Particle_tint_explicit_layout = OpTypePointer StorageBuffer %Particle_tint_explicit_layout
+%_arr_v3float_uint_8_0 = OpTypeArray %v3float %uint_8
+   %Particle = OpTypeStruct %_arr_v3float_uint_8_0 %float %v4float %v3float
 %_ptr_Function_Particle = OpTypePointer Function %Particle
-         %28 = OpConstantNull %Particle
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %uint_7 = OpConstant %uint 7
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-       %main = OpFunction %void None %16
+         %53 = OpTypeFunction %Particle %Particle_tint_explicit_layout
+         %63 = OpTypeFunction %_arr_v3float_uint_8_0 %_arr_v3float_uint_8
+%_ptr_Function__arr_v3float_uint_8 = OpTypePointer Function %_arr_v3float_uint_8
+%_ptr_Function__arr_v3float_uint_8_0 = OpTypePointer Function %_arr_v3float_uint_8_0
+         %69 = OpConstantNull %_arr_v3float_uint_8_0
+       %bool = OpTypeBool
+       %main = OpFunction %void None %18
          %19 = OpLabel
-   %particle = OpVariable %_ptr_Function_Particle Function %28
-         %24 = OpAccessChain %_ptr_StorageBuffer_Particle %particles %uint_0 %22
-         %25 = OpLoad %Particle %24
-               OpStore %particle %25
-         %30 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0 %uint_0
-         %31 = OpLoad %uint %30
-         %33 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %31
-         %34 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0 %uint_0
-         %35 = OpLoad %uint %34
-         %36 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %35
-         %37 = OpLoad %v3float %36
-               OpStore %33 %37
+   %particle = OpVariable %_ptr_Function_Particle Function
+         %20 = OpAccessChain %_ptr_StorageBuffer__runtimearr_Particle_tint_explicit_layout %particles %uint_0
+         %23 = OpArrayLength %uint %particles 0
+         %24 = OpISub %uint %23 %uint_1
+         %26 = OpBitcast %uint %int_0
+         %29 = OpExtInst %uint %30 UMin %26 %24
+         %31 = OpAccessChain %_ptr_StorageBuffer_Particle_tint_explicit_layout %particles %uint_0 %29
+         %33 = OpLoad %Particle_tint_explicit_layout %31 None
+         %34 = OpFunctionCall %Particle %tint_convert_explicit_layout %33
+               OpStore %particle %34
+         %40 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
+         %42 = OpLoad %uint %40 None
+         %43 = OpExtInst %uint %30 UMin %42 %uint_7
+         %45 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %43
+         %47 = OpAccessChain %_ptr_Uniform_uint %12 %uint_0 %uint_0
+         %48 = OpLoad %uint %47 None
+         %49 = OpExtInst %uint %30 UMin %48 %uint_7
+         %50 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %49
+         %51 = OpLoad %v3float %50 None
+               OpStore %45 %51 None
                OpReturn
+               OpFunctionEnd
+%tint_convert_explicit_layout = OpFunction %Particle None %53
+%tint_source = OpFunctionParameter %Particle_tint_explicit_layout
+         %54 = OpLabel
+         %55 = OpCompositeExtract %_arr_v3float_uint_8 %tint_source 0
+         %56 = OpFunctionCall %_arr_v3float_uint_8_0 %tint_convert_explicit_layout_0 %55
+         %58 = OpCompositeExtract %float %tint_source 1
+         %59 = OpCompositeExtract %v4float %tint_source 2
+         %60 = OpCompositeExtract %v3float %tint_source 3
+         %61 = OpCompositeConstruct %Particle %56 %58 %59 %60
+               OpReturnValue %61
+               OpFunctionEnd
+%tint_convert_explicit_layout_0 = OpFunction %_arr_v3float_uint_8_0 None %63
+%tint_source_0 = OpFunctionParameter %_arr_v3float_uint_8
+         %64 = OpLabel
+         %65 = OpVariable %_ptr_Function__arr_v3float_uint_8 Function
+         %67 = OpVariable %_ptr_Function__arr_v3float_uint_8_0 Function %69
+               OpStore %65 %tint_source_0
+               OpBranch %70
+         %70 = OpLabel
+               OpBranch %73
+         %73 = OpLabel
+         %75 = OpPhi %uint %uint_0 %70 %76 %72
+               OpLoopMerge %74 %72 None
+               OpBranch %71
+         %71 = OpLabel
+         %78 = OpUGreaterThanEqual %bool %75 %uint_8
+               OpSelectionMerge %80 None
+               OpBranchConditional %78 %81 %80
+         %81 = OpLabel
+               OpBranch %74
+         %80 = OpLabel
+         %82 = OpAccessChain %_ptr_Function_v3float %65 %75
+         %83 = OpLoad %v3float %82 None
+         %84 = OpAccessChain %_ptr_Function_v3float %67 %75
+               OpStore %84 %83 None
+               OpBranch %72
+         %72 = OpLabel
+         %76 = OpIAdd %uint %75 %uint_1
+               OpBranch %73
+         %74 = OpLabel
+         %77 = OpLoad %_arr_v3float_uint_8_0 %67 None
+               OpReturnValue %77
                OpFunctionEnd

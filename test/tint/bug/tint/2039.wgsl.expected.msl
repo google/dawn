@@ -1,36 +1,45 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
-kernel void tint_symbol() {
+kernel void v() {
   uint out = 0u;
-  bool tint_continue = false;
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-    tint_continue = false;
-    switch(2) {
-      case 1: {
-        tint_continue = true;
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
         break;
       }
-      default: {
-        break;
+      bool tint_continue = false;
+      switch(2) {
+        case 1:
+        {
+          tint_continue = true;
+          break;
+        }
+        default:
+        {
+          break;
+        }
       }
-    }
-    if (tint_continue) {
+      if (tint_continue) {
+        {
+          uint const tint_low_inc = (tint_loop_idx.x - 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint const tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+          if (true) { break; }
+        }
+        continue;
+      }
+      out = (out + 1u);
       {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         if (true) { break; }
       }
       continue;
     }
-    out = (out + 1u);
-    {
-      if (true) { break; }
-    }
   }
-  return;
 }
-

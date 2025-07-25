@@ -1,19 +1,14 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 groupshared int v[4];
-
-typedef int tint_workgroupUniformLoad_v_ret[4];
-tint_workgroupUniformLoad_v_ret tint_workgroupUniformLoad_v() {
+typedef int ary_ret[4];
+ary_ret foo() {
   GroupMemoryBarrierWithGroupSync();
-  int result[4] = v;
+  int v_1[4] = v;
   GroupMemoryBarrierWithGroupSync();
-  return result;
+  return v_1;
 }
 
-typedef int foo_ret[4];
-foo_ret foo() {
-  return tint_workgroupUniformLoad_v();
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
 }
+

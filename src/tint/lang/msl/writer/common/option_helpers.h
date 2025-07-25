@@ -31,10 +31,9 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/core/common/multiplanar_options.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_options.h"
 #include "src/tint/lang/msl/writer/common/options.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::msl::writer {
 

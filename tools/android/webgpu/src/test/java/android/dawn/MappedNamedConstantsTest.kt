@@ -1,5 +1,7 @@
 package android.dawn
 
+import java.net.URL
+import java.util.jar.JarFile
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -9,8 +11,28 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import org.junit.Test
-import org.reflections.Reflections
-import org.reflections.scanners.Scanners
+
+/**
+ * Yield all classes under the specified namespace.
+ */
+private fun classNames(namespace: String) = sequence {
+    // Use the thread's class loader to find all the class resource files.
+    val classLoader = Thread.currentThread().contextClassLoader!!
+    for (jarUrl in classLoader.getResources(namespace.replace('.', '/'))) {
+        if (jarUrl.protocol != "jar") {
+            continue
+        }
+
+        val url = URL(jarUrl.file.substringBefore('!')) // Trim prefix jar: and suffix !...
+
+        // Find the class files inside the jar file.
+        for (entry in JarFile(url.file).entries()) {
+            if (entry.name.endsWith(".class")) {  // Not every file is a class.
+                yield(entry.name.removeSuffix(".class").replace('/', '.'))
+            }
+        }
+    }
+}
 
 class MappedNamedConstantsTest {
 
@@ -21,7 +43,6 @@ class MappedNamedConstantsTest {
         BlendFactor::class,
         BlendOperation::class,
         BufferBindingType::class,
-        BufferMapAsyncStatus::class,
         BufferMapState::class,
         BufferUsage::class,
         CallbackMode::class,
@@ -35,16 +56,20 @@ class MappedNamedConstantsTest {
         DeviceLostReason::class,
         ErrorFilter::class,
         ErrorType::class,
+        FeatureLevel::class,
         FeatureName::class,
         FilterMode::class,
         FrontFace::class,
         IndexFormat::class,
+        InstanceFeatureName::class,
         LoadOp::class,
         MapAsyncStatus::class,
         MapMode::class,
         MipmapFilterMode::class,
+        OptionalBool::class,
         PopErrorScopeStatus::class,
         PowerPreference::class,
+        PredefinedColorSpace::class,
         PresentMode::class,
         PrimitiveTopology::class,
         QueryType::class,
@@ -65,10 +90,11 @@ class MappedNamedConstantsTest {
         TextureSampleType::class,
         TextureUsage::class,
         TextureViewDimension::class,
+        ToneMappingMode::class,
         VertexFormat::class,
         VertexStepMode::class,
         WaitStatus::class,
-        WGSLFeatureName::class
+        WGSLLanguageFeatureName::class
     )
 
     /**
@@ -84,7 +110,7 @@ class MappedNamedConstantsTest {
      */
     @Test
     fun testPackageClassesMatchTestTargets() {
-        val dawnClasses = Reflections("android.dawn").getAll(Scanners.TypesAnnotated)
+        val dawnClasses = classNames("android.dawn")
         val actual = dawnClasses.filter { clazz ->
             isAndroidDawn(clazz) && hasCompanionObjectWithNames(clazz)
         }.map { it.removePrefix("android.dawn.") }

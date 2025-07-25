@@ -25,10 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
-#include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/containers/transform.h"
@@ -1285,41 +1284,10 @@ INSTANTIATE_TEST_SUITE_P(
 1:2 note: first attribute declared here)",
         }));
 
-using EntryPointParameterAttributeTest = TestWithParams;
-TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
-    auto* s = Param("s", ty.sampler(core::type::SamplerKind::kSampler),
-                    Vector{
-                        Binding(0_a),
-                        Group(0_a),
-                        Disable(ast::DisabledValidation::kBindingPointCollision),
-                        Disable(ast::DisabledValidation::kEntryPointParameter),
-                    });
-    Func("f", Vector{s}, ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-using EntryPointReturnTypeAttributeTest = ResolverTest;
-TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
-    Func("f", tint::Empty, ty.i32(), Vector{Return(1_i)},
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         },
-         Vector{
-             Disable(ast::DisabledValidation::kBindingPointCollision),
-             Disable(ast::DisabledValidation::kEntryPointParameter),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
 }  // namespace EntryPointInputAndOutputTests
 
 namespace StructAndStructMemberTests {
 using StructAttributeTest = TestWithParams;
-using SpirvBlockAttribute = ast::transform::AddBlockAttribute::BlockAttribute;
 TEST_P(StructAttributeTest, IsValid) {
     EnableRequiredExtensions();
 
@@ -2533,7 +2501,9 @@ TEST_P(InterpolateParameterTest, All) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2563,7 +2533,9 @@ TEST_P(InterpolateParameterTest, IntegerScalar) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2593,7 +2565,9 @@ TEST_P(InterpolateParameterTest, IntegerVector) {
         EXPECT_FALSE(r()->Resolve());
         EXPECT_EQ(
             r()->error(),
-            R"(12:34 error: flat interpolation attribute must not have a sampling parameter)");
+            params.type == core::InterpolationType::kFlat
+                ? R"(12:34 error: flat interpolation can only use 'first' and 'either' sampling parameters)"
+                : R"(12:34 error: 'first' and 'either' sampling parameters can only be used with flat interpolation)");
     }
 }
 
@@ -2606,15 +2580,22 @@ INSTANTIATE_TEST_SUITE_P(
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kCenter, true},
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kCentroid, true},
         Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kSample, true},
+        Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kFirst, false},
+        Params{core::InterpolationType::kPerspective, core::InterpolationSampling::kEither, false},
+
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kUndefined, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kCenter, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kCentroid, true},
         Params{core::InterpolationType::kLinear, core::InterpolationSampling::kSample, true},
-        // flat interpolation must not have a sampling type
+        Params{core::InterpolationType::kLinear, core::InterpolationSampling::kFirst, false},
+        Params{core::InterpolationType::kLinear, core::InterpolationSampling::kEither, false},
+
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kUndefined, true},
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kCenter, false},
         Params{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid, false},
-        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kSample, false}));
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kSample, false},
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kFirst, true},
+        Params{core::InterpolationType::kFlat, core::InterpolationSampling::kEither, true}));
 
 TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
     Func("main", Vector{Param(Source{{12, 34}}, "a", ty.i32(), Vector{Location(0_a)})}, ty.void_(),
@@ -2918,6 +2899,57 @@ TEST_F(InternalAttributeDepsTest, Dependency) {
 
 }  // namespace
 }  // namespace InternalAttributeDeps
+
+namespace RowMajorAttributeTests {
+
+using RowMajorAttributeTest = ResolverTest;
+
+TEST_F(RowMajorAttributeTest, StructMember_Matrix) {
+    Structure("S", Vector{
+                       Member(Source{{12, 34}}, "m", ty.mat3x4<f32>(), Vector{RowMajor()}),
+                   });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(RowMajorAttributeTest, StructMember_ArrayOfMatrix) {
+    Structure("S",
+              Vector{
+                  Member(Source{{12, 34}}, "arr", ty.array<mat3x4<f32>, 4>(), Vector{RowMajor()}),
+              });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(RowMajorAttributeTest, StructMember_NonMatrix) {
+    Structure("S", Vector{
+                       Member(Source{{12, 34}}, "f", ty.vec4<f32>(), Vector{RowMajor()}),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: '@row_major' can only be applied to matrices or arrays of matrices)");
+}
+
+TEST_F(RowMajorAttributeTest, StructMember_ArrayOfNonMatrix) {
+    Structure("S",
+              Vector{
+                  Member(Source{{12, 34}}, "arr", ty.array<vec4<f32>, 4>(), Vector{RowMajor()}),
+              });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: '@row_major' can only be applied to matrices or arrays of matrices)");
+}
+
+TEST_F(RowMajorAttributeTest, Variable) {
+    GlobalVar(Source{{12, 34}}, "v", ty.mat3x4<f32>(), Vector{RowMajor()});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: '@row_major' is not valid for module-scope 'var')");
+}
+
+}  // namespace RowMajorAttributeTests
 
 }  // namespace tint::resolver
 

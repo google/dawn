@@ -43,7 +43,7 @@ std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
                                              const char* file,
                                              const char* function,
                                              int line) {
-    std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, message);
+    std::unique_ptr<ErrorData> error = std::make_unique<ErrorData>(type, std::move(message));
     error->AppendBacktrace(file, function, line);
 
     auto [var, present] = GetEnvironmentVar("DAWN_DEBUG_BREAK_ON_ERROR");
@@ -56,8 +56,6 @@ std::unique_ptr<ErrorData> ErrorData::Create(InternalErrorType type,
 
 ErrorData::ErrorData(InternalErrorType type, std::string message)
     : mType(type), mMessage(std::move(message)) {}
-
-ErrorData::~ErrorData() = default;
 
 void ErrorData::AppendBacktrace(const char* file, const char* function, int line) {
     BacktraceRecord record;
@@ -72,8 +70,8 @@ void ErrorData::AppendContext(std::string context) {
     mContexts.push_back(std::move(context));
 }
 
-void ErrorData::AppendDebugGroup(std::string label) {
-    mDebugGroups.push_back(std::move(label));
+void ErrorData::AppendDebugGroup(std::string_view label) {
+    mDebugGroups.push_back(std::string(label));
 }
 
 void ErrorData::AppendBackendMessage(std::string message) {

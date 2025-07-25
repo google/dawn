@@ -1,59 +1,55 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 1, std430) buffer sb_rw_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
+  uint inner;
+} v;
+layout(binding = 1, std430)
+buffer f_sb_rw_block_ssbo {
   SB_RW inner;
-} sb_rw;
-
+} v_1;
 uint atomicExchange_d59712() {
   uint arg_1 = 1u;
-  uint res = atomicExchange(sb_rw.inner.arg_0, arg_1);
+  uint res = atomicExchange(v_1.inner.arg_0, arg_1);
   return res;
 }
-
-void fragment_main() {
-  prevent_dce.inner = atomicExchange_d59712();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = atomicExchange_d59712();
 }
+//
+// compute_main
+//
 #version 310 es
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  uint inner;
-} prevent_dce;
 
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 1, std430) buffer sb_rw_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
+} v;
+layout(binding = 1, std430)
+buffer sb_rw_block_1_ssbo {
   SB_RW inner;
-} sb_rw;
-
+} v_1;
 uint atomicExchange_d59712() {
   uint arg_1 = 1u;
-  uint res = atomicExchange(sb_rw.inner.arg_0, arg_1);
+  uint res = atomicExchange(v_1.inner.arg_0, arg_1);
   return res;
 }
-
-void compute_main() {
-  prevent_dce.inner = atomicExchange_d59712();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = atomicExchange_d59712();
 }

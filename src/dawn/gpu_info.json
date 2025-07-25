@@ -92,22 +92,18 @@
       "id": "0x1002",
 
       "devices": [{
-        "mask": "0xFF00",
-        "architecture": {
-          "GCN 2": ["0x1300"],
-          "GCN 5": ["0x1500", "0x1600"],
-          "RDNA 2": ["0x7400"]
-        }
-      }, {
         "mask": "0xFFF0",
         "architecture": {
-          "GCN 1": ["0x6600", "0x6610", "0x6660", "0x6790", "0x6800", "0x6810", "0x6820", "0x6830"],
+          "GCN 1": ["0x1300", "0x1310", "0x6600", "0x6610", "0x6660", "0x6790", "0x6800", "0x6810", "0x6820", "0x6830"],
           "GCN 2": ["0x6640", "0x6650", "0x67A0", "0x67B0", "0x9830", "0x9850"],
           "GCN 3": ["0x6900", "0x6920", "0x6930", "0x7300", "0x9870", "0x98E0"],
-          "GCN 4": ["0x67C0", "0x67D0", "0x67E0", "0x67F0", "0x6980", "0x6990", "0x6FD0"],
-          "GCN 5": ["0x66A0", "0x6860", "0x6870", "0x6940", "0x69A0"],
+          "GCN 4": ["0x67C0", "0x67D0", "0x67E0", "0x67F0", "0x6980", "0x6990", "0x6FD0", "0x9920"],
+          "GCN 5": ["0x66A0", "0x6860", "0x6870", "0x6940", "0x69A0", "0x15D0", "0x1630"],
           "RDNA 1": ["0x7310", "0x7340", "0x7360"],
-          "RDNA 2": ["0x73A0", "0x73B0", "0x73D0", "0x73E0", "0x73F0"]
+          "RDNA 2": ["0x73A0", "0x73B0", "0x73D0", "0x73E0", "0x73F0", "0x7400", "0x7420", "0x7430", "0x1430", "0x1500", "0x15E0", "0x1640", "0x1680", "0x13c0", "0x13f0"],
+          "RDNA 3": ["0x7440", "0x7470", "0x7480", "0x15B0", "0x7450", "0x1900", "0x1580", "0x1110"],
+          "RDNA 4": ["0x7550", "0x7590"],
+          "CDNA 1": ["0x7380"]
         }
       }]
     },
@@ -138,7 +134,26 @@
 
           "Midgard": ["0x00000000"],
           "Bifrost": ["0x60000000", "0x70000000"],
-          "Valhall": ["0x90000000", "0xA0000000", "0xB0000000"]
+          "Valhall": ["0x90000000", "0xA0000000", "0xB0000000"],
+          "Gen 5": ["0xC0000000", "0xD0000000"]
+        }
+      }]
+    },
+
+    "Broadcom": {
+      "id": "0x14e4",
+
+      "devices": [{
+        "mask": "0x00000000",
+        "architecture": {
+          "_comment": [
+            "The Broadcom GPUs are rare (used by Raspberry Pi and similar low-power devices) and",
+            "have device IDs that are all over place, so they're all going to get lumped into a",
+            "single 'VideoCore' architecture unless someone comes up with a better way to break",
+            "them down."
+          ],
+
+          "VideoCore": ["0x00000000"]
         }
       }]
     },
@@ -154,7 +169,16 @@
     },
 
     "Img Tec": {
-      "id": "0x1010"
+      "id": "0x1010",
+
+      "devices": [{
+        "mask": "0xFF000000",
+        "architecture": {
+          "Rogue": ["0x00000000", "0x22000000", "0x24000000"],
+          "Furian": ["0x1b000000"],
+          "Albiorix": ["0x35000000", "0x36000000"]
+        }
+      }]
     },
 
     "Intel": {
@@ -165,12 +189,14 @@
         "architecture": {
           "Gen 7": ["0x0100", "0x0400", "0x0A00", "0x0D00", "0x0F00"],
           "Gen 8": ["0x1600", "0x2200"],
-          "Gen 9": ["0x1900", "0x3100", "0x3E00", "0x5A00", "0x5900", "0x9B00"],
-          "Gen 11": ["0x8A00", "0x4E00"],
-          "Gen 12 LP": ["0x4600", "0x4C00", "0x4900", "0x9A00", "0xA700", "0x7D00"],
+          "Gen 9": ["0x1900", "0x3100", "0x3E00", "0x5A00", "0x5900", "0x8700", "0x9B00"],
+          "Gen 11": ["0x8A00", "0x4E00", "0x9800"],
+          "Gen 12 LP": ["0x4600", "0x4C00", "0x4900", "0x9A00", "0xA700"],
           "Gen 12 HP": ["0x4F00", "0x5600"],
-          "Gen 13 LP": ["0x6400"],
-          "Gen 13 HP": ["0xE200"]
+          "Xe LPG": ["0x7D00", "0xB600"],
+          "Xe 2 LPG": ["0x6400"],
+          "Xe 2 HPG": ["0xE200"],
+          "Xe 3 LPG": ["0xB000"]
         }
       }]
     },
@@ -206,8 +232,9 @@
           "Maxwell": ["0x1300", "0x1400", "0x1600", "0x1700"],
           "Pascal": ["0x1500", "0x1B00", "0x1C00", "0x1D00"],
           "Turing": ["0x1E00", "0x1F00", "0x2100"],
-          "Ampere": ["0x2200", "0x2400", "0x2500"],
-          "Lovelace": ["0x2600", "0x2700", "0x2800"]
+          "Ampere": ["0x2200", "0x2400", "0x2500", "0x2000"],
+          "Lovelace": ["0x2600", "0x2700", "0x2800"],
+          "Blackwell": ["0x2b00", "0x2c00", "0x2d00", "0x2f00"]
         }
       }, {
         "_comment": "Mobile devices (Tegra)",
@@ -215,12 +242,15 @@
         "architecture": {
           "Kepler": ["0x1e000000"],
           "Maxwell": ["0x92000000"],
-          "Pascal": ["0x93000000"]
+          "Pascal": ["0x93000000"],
+          "Ampere": ["0x97000000"],
+          "Volta": ["0xa5000000"]
         }
       }]
     },
 
-    "Qualcomm": {
+    "Qualcomm_PCI": {
+      "name_override": "Qualcomm",
       "id": "0x5143",
 
       "devices": [{
@@ -229,17 +259,50 @@
           "Adreno 4xx": ["0x04000000"],
           "Adreno 5xx": ["0x05000000"],
           "Adreno 6xx": ["0x06000000"],
-          "Adreno 7xx": ["0x07000000", "0x43000000"]
+          "Adreno 7xx": ["0x07000000", "0x43000000", "0x36000000", "0x37000000"],
+          "Adreno 8xx": ["0x44000000"]
         }
       }]
+    },
+
+    "Qualcomm_ACPI": {
+      "name_override": "Qualcomm",
+      "id": "0x4D4F4351",
+
+      "devices": [{
+        "mask": "0xFF000000",
+        "architecture": {
+          "Adreno 8xx": ["0x36000000"]
+        }
+      }]
+
     },
 
     "Samsung": {
       "id": "0x144d",
 
       "devices": [{
+        "_comment": [
+          "Haven't seen enough of these to determine a good masking pattern, so just using full",
+          "device IDs of known devices in the meantime."
+        ],
+        "mask": "0xFFFFFFFF",
         "architecture": {
-          "RDNA 2": ["0x73A0"]
+          "RDNA 2": ["0x000073A0", "0x01300100"],
+          "RDNA 3": ["0x02600200"]
+        }
+      }]
+    },
+
+    "Huawei": {
+      "id": "0x19e5",
+
+      "devices": [{
+        "_comment": [
+          "Add device ids in the future when they are available."
+        ],
+        "mask": "0xFFFFFFFF",
+        "architecture": {
         }
       }]
     }

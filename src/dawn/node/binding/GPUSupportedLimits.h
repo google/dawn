@@ -28,9 +28,10 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUSUPPORTEDLIMITS_H_
 #define SRC_DAWN_NODE_BINDING_GPUSUPPORTEDLIMITS_H_
 
-#include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
+#include <webgpu/webgpu_cpp.h>
 
+#include "dawn/native/DawnNative.h"
+#include "dawn/utils/ComboLimits.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -39,7 +40,7 @@ namespace wgpu::binding {
 // GPUSupportedLimits is an implementation of interop::GPUSupportedLimits.
 class GPUSupportedLimits final : public interop::GPUSupportedLimits {
   public:
-    explicit GPUSupportedLimits(wgpu::SupportedLimits);
+    explicit GPUSupportedLimits(const dawn::utils::ComboLimits& limits);
 
     // interop::GPUSupportedLimits interface compliance
     uint32_t getMaxTextureDimension1D(Napi::Env) override;
@@ -64,7 +65,6 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint64_t getMaxBufferSize(Napi::Env) override;
     uint32_t getMaxVertexAttributes(Napi::Env) override;
     uint32_t getMaxVertexBufferArrayStride(Napi::Env) override;
-    uint32_t getMaxInterStageShaderComponents(Napi::Env) override;
     uint32_t getMaxInterStageShaderVariables(Napi::Env) override;
     uint32_t getMaxColorAttachments(Napi::Env) override;
     uint32_t getMaxColorAttachmentBytesPerSample(Napi::Env) override;
@@ -74,11 +74,13 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
     uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
     uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
-    // TODO(349125474): Expose subgroups limits (subgroupMinSize and subgroupMinSize) in Node
-    // binding.
+    uint32_t getMaxStorageBuffersInFragmentStage(Napi::Env) override;
+    uint32_t getMaxStorageTexturesInFragmentStage(Napi::Env) override;
+    uint32_t getMaxStorageBuffersInVertexStage(Napi::Env) override;
+    uint32_t getMaxStorageTexturesInVertexStage(Napi::Env) override;
 
   private:
-    wgpu::SupportedLimits limits_;
+    dawn::utils::ComboLimits limits_;
 };
 
 }  // namespace wgpu::binding

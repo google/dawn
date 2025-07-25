@@ -1,64 +1,57 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 35
+; Generator: Google Tint Compiler; 1
+; Bound: 31
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %main "main" %local_invocation_index_1
+               OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %local_invocation_index_1 "local_invocation_index_1"
                OpName %S "S"
-               OpName %tint_zero_workgroup_memory "tint_zero_workgroup_memory"
-               OpName %local_idx "local_idx"
-               OpName %func_S "func_S"
+               OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
+               OpName %func "func"
                OpName %main_inner "main_inner"
-               OpName %local_invocation_index "local_invocation_index"
+               OpName %tint_local_index "tint_local_index"
+               OpName %r "r"
                OpName %main "main"
-               OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
-       %uint = OpTypeInt 32 0
-%_ptr_Input_uint = OpTypePointer Input %uint
-%local_invocation_index_1 = OpVariable %_ptr_Input_uint Input
+               OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
           %S = OpVariable %_ptr_Workgroup_int Workgroup
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+          %8 = OpTypeFunction %int
        %void = OpTypeVoid
-          %7 = OpTypeFunction %void %uint
+         %14 = OpTypeFunction %void %uint
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
-         %17 = OpConstantNull %int
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %21 = OpTypeFunction %int
-         %30 = OpTypeFunction %void
-%tint_zero_workgroup_memory = OpFunction %void None %7
-  %local_idx = OpFunctionParameter %uint
-         %11 = OpLabel
-         %13 = OpULessThan %bool %local_idx %uint_1
-               OpSelectionMerge %15 None
-               OpBranchConditional %13 %16 %15
-         %16 = OpLabel
-               OpStore %S %17
-               OpBranch %15
+      %int_0 = OpConstant %int 0
+         %27 = OpTypeFunction %void
+       %func = OpFunction %int None %8
+          %9 = OpLabel
+         %10 = OpLoad %int %S None
+               OpReturnValue %10
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %14
+%tint_local_index = OpFunctionParameter %uint
          %15 = OpLabel
+         %16 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %19 None
+               OpBranchConditional %16 %20 %19
+         %20 = OpLabel
+               OpStore %S %int_0 None
+               OpBranch %19
+         %19 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
+          %r = OpFunctionCall %int %func
                OpReturn
                OpFunctionEnd
-     %func_S = OpFunction %int None %21
-         %23 = OpLabel
-         %24 = OpLoad %int %S
-               OpReturnValue %24
-               OpFunctionEnd
- %main_inner = OpFunction %void None %7
-%local_invocation_index = OpFunctionParameter %uint
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %tint_zero_workgroup_memory %local_invocation_index
-         %29 = OpFunctionCall %int %func_S
-               OpReturn
-               OpFunctionEnd
-       %main = OpFunction %void None %30
-         %32 = OpLabel
-         %34 = OpLoad %uint %local_invocation_index_1
-         %33 = OpFunctionCall %void %main_inner %34
+       %main = OpFunction %void None %27
+         %28 = OpLabel
+         %29 = OpLoad %uint %main_local_invocation_index_Input None
+         %30 = OpFunctionCall %void %main_inner %29
                OpReturn
                OpFunctionEnd

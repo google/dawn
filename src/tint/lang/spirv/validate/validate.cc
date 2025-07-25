@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "spirv-tools/libspirv.hpp"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 
 namespace tint::spirv::validate {
 
@@ -64,7 +65,12 @@ Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_
             diags.Push(std::move(diag));
         });
 
-    if (tools.Validate(spirv.data, spirv.len)) {
+    // Don't prepare to emit friendly names. The preparation costs
+    // time by scanning the whole module and building a string table.
+    spvtools::ValidatorOptions val_opts;
+    val_opts.SetFriendlyNames(false);
+
+    if (tools.Validate(spirv.data, spirv.len, val_opts)) {
         return Success;
     }
 
@@ -85,7 +91,8 @@ Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_
         diag.source.file = file.get();
         diag.owned_file = file;
     }
-    return Failure{diag::List{std::move(diags)}};
+    auto list = diag::List(diags);
+    return Failure{list.Str()};
 }
 
 }  // namespace tint::spirv::validate

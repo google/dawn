@@ -1,15 +1,11 @@
-void set_vector_element(inout float3 vec, int idx, float val) {
-  vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
-}
-
 struct OuterS {
   uint a1[8];
 };
 
+
 cbuffer cbuffer_uniforms : register(b4, space1) {
   uint4 uniforms[1];
 };
-
 uint f(uint i) {
   return (i + 1u);
 }
@@ -17,9 +13,10 @@ uint f(uint i) {
 [numthreads(1, 1, 1)]
 void main() {
   OuterS s1 = (OuterS)0;
-  float3 v = float3(0.0f, 0.0f, 0.0f);
-  set_vector_element(v, s1.a1[uniforms[0].x], 1.0f);
-  uint tint_symbol = f(s1.a1[uniforms[0].x]);
-  set_vector_element(v, tint_symbol, 1.0f);
-  return;
+  float3 v = (0.0f).xxx;
+  uint v_1 = min(uniforms[0u].x, 7u);
+  v[min(s1.a1[v_1], 2u)] = 1.0f;
+  uint v_2 = min(uniforms[0u].x, 7u);
+  v[min(f(s1.a1[v_2]), 2u)] = 1.0f;
 }
+

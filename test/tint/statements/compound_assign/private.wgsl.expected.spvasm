@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 47
+; Generator: Google Tint Compiler; 1
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -10,11 +10,11 @@
                OpName %a "a"
                OpName %b "b"
                OpName %c "c"
-               OpName %unused_entry_point "unused_entry_point"
-               OpName %tint_div "tint_div"
+               OpName %foo "foo"
+               OpName %tint_div_i32 "tint_div_i32"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %foo "foo"
+               OpName %unused_entry_point "unused_entry_point"
         %int = OpTypeInt 32 1
 %_ptr_Private_int = OpTypePointer Private %int
           %4 = OpConstantNull %int
@@ -30,43 +30,44 @@
          %14 = OpConstantNull %mat2v2float
           %c = OpVariable %_ptr_Private_mat2v2float Private %14
        %void = OpTypeVoid
-         %15 = OpTypeFunction %void
-         %19 = OpTypeFunction %int %int %int
+         %17 = OpTypeFunction %void
+      %int_2 = OpConstant %int 2
+%mat4v4float = OpTypeMatrix %v4float 4
+         %25 = OpConstantNull %mat4v4float
+    %float_2 = OpConstant %float 2
+         %32 = OpTypeFunction %int %int %int
+      %int_0 = OpConstant %int 0
        %bool = OpTypeBool
 %int_n2147483648 = OpConstant %int -2147483648
      %int_n1 = OpConstant %int -1
       %int_1 = OpConstant %int 1
-      %int_2 = OpConstant %int 2
-%mat4v4float = OpTypeMatrix %v4float 4
-         %42 = OpConstantNull %mat4v4float
-    %float_2 = OpConstant %float 2
-%unused_entry_point = OpFunction %void None %15
+        %foo = OpFunction %void None %17
          %18 = OpLabel
+         %19 = OpLoad %int %a None
+         %20 = OpFunctionCall %int %tint_div_i32 %19 %int_2
+               OpStore %a %20 None
+         %23 = OpLoad %v4float %b None
+         %24 = OpVectorTimesMatrix %v4float %23 %25
+               OpStore %b %24 None
+         %27 = OpLoad %mat2v2float %c None
+         %28 = OpMatrixTimesScalar %mat2v2float %27 %float_2
+               OpStore %c %28 None
                OpReturn
                OpFunctionEnd
-   %tint_div = OpFunction %int None %19
+%tint_div_i32 = OpFunction %int None %32
         %lhs = OpFunctionParameter %int
         %rhs = OpFunctionParameter %int
-         %23 = OpLabel
-         %25 = OpIEqual %bool %rhs %4
-         %28 = OpIEqual %bool %lhs %int_n2147483648
-         %30 = OpIEqual %bool %rhs %int_n1
-         %31 = OpLogicalAnd %bool %28 %30
-         %32 = OpLogicalOr %bool %25 %31
-         %24 = OpSelect %int %32 %int_1 %rhs
-         %34 = OpSDiv %int %lhs %24
-               OpReturnValue %34
+         %33 = OpLabel
+         %34 = OpIEqual %bool %rhs %int_0
+         %37 = OpIEqual %bool %lhs %int_n2147483648
+         %39 = OpIEqual %bool %rhs %int_n1
+         %41 = OpLogicalAnd %bool %37 %39
+         %42 = OpLogicalOr %bool %34 %41
+         %43 = OpSelect %int %42 %int_1 %rhs
+         %45 = OpSDiv %int %lhs %43
+               OpReturnValue %45
                OpFunctionEnd
-        %foo = OpFunction %void None %15
-         %36 = OpLabel
-         %38 = OpLoad %int %a
-         %37 = OpFunctionCall %int %tint_div %38 %int_2
-               OpStore %a %37
-         %40 = OpLoad %v4float %b
-         %43 = OpVectorTimesMatrix %v4float %40 %42
-               OpStore %b %43
-         %44 = OpLoad %mat2v2float %c
-         %46 = OpMatrixTimesScalar %mat2v2float %44 %float_2
-               OpStore %c %46
+%unused_entry_point = OpFunction %void None %17
+         %47 = OpLabel
                OpReturn
                OpFunctionEnd

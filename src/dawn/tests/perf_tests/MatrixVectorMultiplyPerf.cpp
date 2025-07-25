@@ -98,7 +98,6 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         mUsingF16 = false;
         mUsingSubgroups = false;
-        mUsingSubgroupsF16 = false;
         mAllFeaturesSupported = true;
 
         auto requirements =
@@ -117,19 +116,14 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
         if (GetParam().mImpl == KernelImplementation::Subgroup) {
             mUsingSubgroups = true;
             requireFeature(wgpu::FeatureName::Subgroups);
-            if (mUsingF16) {
-                mUsingSubgroupsF16 = true;
-                requireFeature(wgpu::FeatureName::SubgroupsF16);
-            }
         }
         return requirements;
     }
 
-    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
-        wgpu::RequiredLimits required = {};
-        required.limits.maxStorageBufferBindingSize =
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxStorageBufferBindingSize =
             BytesPerElement() * GetParam().mRows * GetParam().mCols;
-        return required;
     }
 
   private:
@@ -153,7 +147,6 @@ class MatrixVectorMultiplyPerf : public DawnPerfTestWithParams<MatrixVectorMulti
 
     bool mUsingF16;
     bool mUsingSubgroups;
-    bool mUsingSubgroupsF16;
     bool mAllFeaturesSupported;
 };
 
@@ -177,7 +170,7 @@ void MatrixVectorMultiplyPerf::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(!mAllFeaturesSupported);
 
     // D3D12 device must be using DXC to support subgroups feature.
-    DAWN_ASSERT(!(mUsingSubgroups || mUsingSubgroupsF16) || !IsD3D12() || IsDXC());
+    DAWN_ASSERT(!mUsingSubgroups || !IsD3D12() || IsDXC());
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.usage = wgpu::BufferUsage::Storage;
@@ -217,9 +210,6 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     }
     if (mUsingSubgroups) {
         code << "enable subgroups;\n";
-    }
-    if (mUsingSubgroupsF16) {
-        code << "enable subgroups_f16;\n";
     }
     switch (GetParam().mStoreType) {
         case StoreType::F32:
@@ -473,9 +463,9 @@ void MatrixVectorMultiplyPerf::Step() {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassDescriptor computePassDesc;
-        wgpu::ComputePassTimestampWrites timestampWrites;
+        wgpu::PassTimestampWrites timestampWrites;
         if (useTimestamps) {
-            timestampWrites = GetComputePassTimestampWrites();
+            timestampWrites = GetPassTimestampWrites();
             computePassDesc.timestampWrites = &timestampWrites;
         }
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&computePassDesc);

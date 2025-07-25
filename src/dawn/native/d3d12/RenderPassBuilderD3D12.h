@@ -37,6 +37,10 @@
 #include "dawn/native/d3d12/d3d12_platform.h"
 #include "dawn/native/dawn_platform.h"
 
+namespace dawn::native {
+struct ResolveRect;
+}  // namespace dawn::native
+
 namespace dawn::native::d3d12 {
 
 class TextureView;
@@ -82,7 +86,8 @@ class RenderPassBuilder {
     void SetRenderTargetEndingAccessResolve(ColorAttachmentIndex attachment,
                                             wgpu::StoreOp storeOp,
                                             TextureView* resolveSource,
-                                            TextureView* resolveDestination);
+                                            TextureView* resolveDestination,
+                                            const ResolveRect& resolveRect);
     void SetStencilAccess(wgpu::LoadOp loadOp,
                           wgpu::StoreOp storeOp,
                           uint8_t clearStencil,
@@ -92,7 +97,9 @@ class RenderPassBuilder {
     void SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
                              D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
                              bool isNullRTV);
-    void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+    void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                             bool isDepthReadOnly,
+                             bool isStencilReadOnly);
 
   private:
     ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};

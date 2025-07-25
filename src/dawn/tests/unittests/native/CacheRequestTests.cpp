@@ -60,12 +60,12 @@ struct Foo {
     int value;
 };
 
-#define REQUEST_MEMBERS(X)                   \
-    X(int, a)                                \
-    X(float, b)                              \
-    X(std::vector<unsigned int>, c)          \
-    X(CacheKey::UnsafeUnkeyedValue<int*>, d) \
-    X(CacheKey::UnsafeUnkeyedValue<Foo>, e)
+#define REQUEST_MEMBERS(X)              \
+    X(int, a)                           \
+    X(float, b)                         \
+    X(std::vector<unsigned int>, c)     \
+    X(UnsafeUnserializedValue<int*>, d) \
+    X(UnsafeUnserializedValue<Foo>, e)
 
 DAWN_MAKE_CACHE_REQUEST(CacheRequestForTesting, REQUEST_MEMBERS);
 
@@ -123,18 +123,18 @@ TEST_F(CacheRequestTests, MakesCacheKey) {
     EXPECT_EQ(memcmp(result.GetCacheKey().data(), expectedKey.data(), expectedKey.size()), 0);
 }
 
-// Test that members that are wrapped in UnsafeUnkeyedValue do not impact the key.
+// Test that members that are wrapped in UnsafeUnserializedValue do not impact the key.
 TEST_F(CacheRequestTests, CacheKeyIgnoresUnsafeIgnoredValue) {
-    // Make two requests with different UnsafeUnkeyedValues (UnsafeUnkeyed is declared on the struct
-    // definition).
+    // Make two requests with different UnsafeUnserializedValue (UnsafeUnkeyed is declared on the
+    // struct definition).
     int v1, v2;
     CacheRequestForTesting req1;
-    req1.d = &v1;
-    req1.e = Foo{42};
+    req1.d = UnsafeUnserializedValue(&v1);
+    req1.e = UnsafeUnserializedValue(Foo{42});
 
     CacheRequestForTesting req2;
-    req2.d = &v2;
-    req2.e = Foo{24};
+    req2.d = UnsafeUnserializedValue(&v2);
+    req2.e = UnsafeUnserializedValue(Foo{24});
 
     EXPECT_CALL(mMockCache, LoadData(_, _, nullptr, 0)).WillOnce(Return(0)).WillOnce(Return(0));
 

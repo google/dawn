@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct MyStruct {
   float f1;
 };
@@ -20,7 +21,8 @@ MyStruct v13 = MyStruct(0.0f);
 float v14[10] = float[10](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 ivec3 v15 = ivec3(1, 2, 3);
 vec3 v16 = vec3(1.0f, 2.0f, 3.0f);
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int l1 = v1;
   uint l2 = v2;
   float l3 = v3;
@@ -37,10 +39,4 @@ void f() {
   float l14[10] = v14;
   ivec3 l15 = v15;
   vec3 l16 = v16;
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  f();
-  return;
 }

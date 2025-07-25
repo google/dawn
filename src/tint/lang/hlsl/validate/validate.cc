@@ -65,7 +65,7 @@ using PFN_DXC_CREATE_INSTANCE = HRESULT(__stdcall*)(REFCLSID rclsid,
 // Wrap the call to DxcCreateInstance via the dlsym-loaded function pointer
 // to disable UBSAN on it. This is to workaround a known UBSAN false
 // positive: https://github.com/google/sanitizers/issues/911
-TINT_NO_SANITIZE("undefined")
+DAWN_NO_SANITIZE("undefined")
 HRESULT CallDxcCreateInstance(PFN_DXC_CREATE_INSTANCE dxc_create_instance,
                               CComPtr<IDxcCompiler3>& dxc_compiler) {
     return dxc_create_instance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxc_compiler));
@@ -121,21 +121,21 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         return result;
     }
     // Avoid ASAN false positives when unloading DLL: https://github.com/google/sanitizers/issues/89
-#if !defined(TINT_ASAN_ENABLED)
+#if !DAWN_ASAN_ENABLED()
     TINT_DEFER({ FreeLibrary(dxcLib); });
 #endif
 
     dxc_create_instance =
         reinterpret_cast<PFN_DXC_CREATE_INSTANCE>(GetProcAddress(dxcLib, "DxcCreateInstance"));
 #else
-    void* dxcLib = dlopen(dxc_path.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+    void* dxcLib = dlopen(dxc_path.c_str(), RTLD_LAZY | RTLD_GLOBAL | RTLD_NODELETE);
     if (dxcLib == nullptr) {
         result.output = "Failed to load dxc: " + dxc_path;
         result.failed = true;
         return result;
     }
     // Avoid ASAN false positives when unloading DLL: https://github.com/google/sanitizers/issues/89
-#if !defined(TINT_ASAN_ENABLED)
+#if !DAWN_ASAN_ENABLED()
     TINT_DEFER({ dlclose(dxcLib); });
 #endif
 
@@ -224,7 +224,7 @@ Result ValidateUsingDXC(const std::string& dxc_path,
         CHECK_HR(hr, "Disassemble call failed");
 
         CComPtr<IDxcBlobEncoding> disassembly;
-        if (dis_result && dis_result->HasOutput(DXC_OUT_DISASSEMBLY) &&
+        if ((dis_result != nullptr) && dis_result->HasOutput(DXC_OUT_DISASSEMBLY) &&
             SUCCEEDED(
                 dis_result->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
             result.output = static_cast<char*>(disassembly->GetBufferPointer());

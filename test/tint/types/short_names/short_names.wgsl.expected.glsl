@@ -1,14 +1,10 @@
 #version 310 es
 
-vec4 tint_symbol(uint VertexIndex) {
+vec4 main_inner(uint VertexIndex) {
   return vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = tint_symbol(uint(gl_VertexID));
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  vec4 v = main_inner(uint(gl_VertexID));
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
+  gl_PointSize = 1.0f;
 }

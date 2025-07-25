@@ -68,7 +68,10 @@ class CommandBufferStateTracker {
                       BindGroupBase* bindgroup,
                       uint32_t dynamicOffsetCount,
                       const uint32_t* dynamicOffsets);
-    void SetIndexBuffer(wgpu::IndexFormat format, uint64_t offset, uint64_t size);
+    void SetIndexBuffer(BufferBase* buffer,
+                        wgpu::IndexFormat format,
+                        uint64_t offset,
+                        uint64_t size);
     void UnsetVertexBuffer(VertexBufferSlot slot);
     void SetVertexBuffer(VertexBufferSlot slot, uint64_t size);
     void End();
@@ -79,9 +82,11 @@ class CommandBufferStateTracker {
     BindGroupBase* GetBindGroup(BindGroupIndex index) const;
     const std::vector<uint32_t>& GetDynamicOffsets(BindGroupIndex index) const;
     bool HasPipeline() const;
+    bool IndexBufferSet() const;
     RenderPipelineBase* GetRenderPipeline() const;
     ComputePipelineBase* GetComputePipeline() const;
     PipelineLayoutBase* GetPipelineLayout() const;
+    BufferBase* GetIndexBuffer() const;
     wgpu::IndexFormat GetIndexFormat() const;
     uint64_t GetIndexBufferSize() const;
     uint64_t GetIndexBufferOffset() const;
@@ -98,10 +103,10 @@ class CommandBufferStateTracker {
     VertexBufferMask mVertexBuffersUsed;
     PerVertexBuffer<uint64_t> mVertexBufferSizes = {};
 
-    bool mIndexBufferSet = false;
     wgpu::IndexFormat mIndexFormat;
     uint64_t mIndexBufferSize = 0;
     uint64_t mIndexBufferOffset = 0;
+    RAW_PTR_EXCLUSION BufferBase* mIndexBuffer = nullptr;
 
     // RAW_PTR_EXCLUSION: These pointers are very hot in command recording code and point at
     // various objects referenced by the object graph of the CommandBuffer so they cannot be

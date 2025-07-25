@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -42,16 +43,11 @@ if (tint_build_tintd && tint_build_wgsl_reader) {
     output_name = "tintd"
     sources = [ "main.cc" ]
     deps = [
-      "${tint_src_dir}/utils/containers",
-      "${tint_src_dir}/utils/diagnostic",
+      "${dawn_root}/src/utils:utils",
+      "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/ice",
       "${tint_src_dir}/utils/macros",
-      "${tint_src_dir}/utils/math",
-      "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_tintd) {

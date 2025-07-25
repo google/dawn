@@ -66,35 +66,18 @@ MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase* device,
 bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
                             const VkImageCreateInfo& imageCreateInfo);
 
-class Texture final : public TextureBase {
+// Base class for all Texture implementation on Vulkan that handles the common logic for barrier
+// tracking, view creation, etc. Cannot be created directly, instead InternalTexture is the
+// Dawn-controlled texture.
+class Texture : public TextureBase {
   public:
-    // Used to create a regular texture from a descriptor.
-    static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const UnpackedPtr<TextureDescriptor>& descriptor,
-                                              VkImageUsageFlags extraUsages = 0);
-
-    // Creates a texture and initializes it with a VkImage that references an external memory
-    // object. Before the texture can be used, the VkDeviceMemory associated with the external
-    // image must be bound via Texture::BindExternalMemory.
-    static ResultOrError<Ref<Texture>> CreateFromExternal(
-        Device* device,
-        const ExternalImageDescriptorVk* descriptor,
-        const UnpackedPtr<TextureDescriptor>& textureDescriptor,
-        external_memory::Service* externalMemoryService);
-
-    // Create a texture from contents of a SharedTextureMemory.
-    static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
-        SharedTextureMemory* memory,
-        const UnpackedPtr<TextureDescriptor>& textureDescriptor);
-
-    // Creates a texture that wraps a swapchain-allocated VkImage.
-    static Ref<Texture> CreateForSwapChain(Device* device,
-                                           const UnpackedPtr<TextureDescriptor>& descriptor,
-                                           VkImage nativeImage);
-
     VkImage GetHandle() const;
     // Returns the aspects used for tracking of Vulkan state. These can be the combined aspects.
     Aspect GetDisjointVulkanAspects() const;
+
+    VkImageLayout GetCurrentLayout(Aspect aspect,
+                                   uint32_t arrayLayer = 0,
+                                   uint32_t mipLevel = 0) const;
 
     // Transitions the texture to be used as `usage`, recording any necessary barrier in
     // `commands`.
@@ -116,46 +99,21 @@ class Texture final : public TextureBase {
                      wgpu::ShaderStage shaderStages,
                      const SubresourceRange& range);
 
-    // Eagerly transition the texture for export.
-    void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);
-    std::vector<VkSemaphore> AcquireWaitRequirements();
-
     MaybeError EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                                    const SubresourceRange& range);
 
-    VkImageLayout GetCurrentLayoutForSwapChain() const;
-
-    // Binds externally allocated memory to the VkImage and on success, takes ownership of
-    // semaphores.
-    MaybeError BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
-                                  VkDeviceMemory externalMemoryAllocation,
-                                  std::vector<VkSemaphore> waitSemaphores);
-    // Update the 'ExternalSemaphoreHandle' to be used for export with the newly submitted one.
-    void UpdateExternalSemaphoreHandle(ExternalSemaphoreHandle handle);
-    MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
-                                     ExternalSemaphoreHandle* handle,
-                                     VkImageLayout* releasedOldLayout,
-                                     VkImageLayout* releasedNewLayout);
-
-    void SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
-                           VkImageLayout pendingAcquireNewLayout);
-    MaybeError EndAccess(ExternalSemaphoreHandle* handle,
-                         VkImageLayout* releasedOldLayout,
-                         VkImageLayout* releasedNewLayout);
+    // Adds any special synchronization once for the current submit.
+    virtual MaybeError OnBeforeSubmit(CommandRecordingContext* context);
+    // Cleans up after the submit.
+    virtual MaybeError OnAfterSubmit();
 
     void SetLabelHelper(const char* prefix);
 
     // Dawn API
     void SetLabelImpl() override;
 
-  private:
-    ~Texture() override;
+  protected:
     Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
-
-    MaybeError InitializeAsInternalTexture(VkImageUsageFlags extraUsages);
-    MaybeError InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,
-                                      external_memory::Service* externalMemoryService);
-    void InitializeForSwapChain(VkImage nativeImage);
 
     void DestroyImpl() override;
     MaybeError ClearTexture(CommandRecordingContext* recordingContext,
@@ -180,50 +138,15 @@ class Texture final : public TextureBase {
                                                   std::vector<VkImageMemoryBarrier>* imageBarriers,
                                                   VkPipelineStageFlags* srcStages,
                                                   VkPipelineStageFlags* dstStages);
-    void TweakTransitionForExternalUsage(CommandRecordingContext* recordingContext,
-                                         std::vector<VkImageMemoryBarrier>* barriers,
-                                         size_t transitionBarrierStart);
-    bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
-                                wgpu::TextureUsage usage,
-                                wgpu::ShaderStage lastShaderStage,
-                                wgpu::ShaderStage shaderStage);
 
-    VkImage mHandle = VK_NULL_HANDLE;
-    bool mOwnsHandle = false;
-    ResourceMemoryAllocation mMemoryAllocation;
-    VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
-    struct SharedTextureMemoryObjects {
-        Ref<RefCountedVkHandle<VkImage>> vkImage;
-        Ref<RefCountedVkHandle<VkDeviceMemory>> vkDeviceMemory;
-    };
-    SharedTextureMemoryObjects mSharedTextureMemoryObjects;
-
-    // The states of an external texture:
-    //   InternalOnly: Not initialized as an external texture yet.
-    //   PendingAcquire: Intialized as an external texture already, but unavailable for access yet.
-    //   Acquired: Ready for access.
-    //   EagerlyTransitioned: The texture has ever been used, and eagerly transitioned for export.
-    //   Now it can be acquired for access again, or directly exported. Released: The texture has
-    //   been destoried, and should no longer be used.
-    enum class ExternalState {
-        InternalOnly,
-        PendingAcquire,
-        Acquired,
-        EagerlyTransitioned,
-        Released
-    };
-    ExternalState mExternalState = ExternalState::InternalOnly;
-    ExternalState mLastExternalState = ExternalState::InternalOnly;
-    uint32_t mExportQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
-
-    VkImageLayout mPendingAcquireOldLayout;
-    VkImageLayout mPendingAcquireNewLayout;
-
-    VkImageLayout mDesiredExportLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-    ExternalSemaphoreHandle mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
-
-    std::vector<VkSemaphore> mWaitRequirements;
+    // TODO(42242084): Make this more robust and maybe predicated on a boolean as we're in hot code.
+    virtual bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
+                                        wgpu::TextureUsage usage,
+                                        wgpu::ShaderStage lastShaderStage,
+                                        wgpu::ShaderStage shaderStage);
+    virtual void TweakTransition(CommandRecordingContext* recordingContext,
+                                 std::vector<VkImageMemoryBarrier>* barriers,
+                                 size_t transitionBarrierStart);
 
     // Sometimes the WebGPU aspects don't directly map to Vulkan aspects:
     //
@@ -236,12 +159,156 @@ class Texture final : public TextureBase {
     //
     // This variable, if not Aspect::None, is the combined aspect to use for all transitions.
     const Aspect mCombinedAspect;
-    SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
-
     bool UseCombinedAspects() const;
+
+    SubresourceStorage<TextureSyncInfo> mSubresourceLastSyncInfos;
+    VkImage mHandle = VK_NULL_HANDLE;
 };
 
-class TextureView final : public TextureViewBase {
+// A texture created and fully owned by Dawn. Typically the result of device.CreateTexture.
+class InternalTexture final : public Texture {
+  public:
+    static ResultOrError<Ref<InternalTexture>> Create(
+        Device* device,
+        const UnpackedPtr<TextureDescriptor>& descriptor,
+        VkImageUsageFlags extraUsages = 0);
+
+  private:
+    using Texture::Texture;
+    MaybeError Initialize(VkImageUsageFlags extraUsages);
+    void DestroyImpl() override;
+
+    ResourceMemoryAllocation mMemoryAllocation;
+};
+
+// A texture owned by a VkSwapChain.
+class SwapChainTexture final : public Texture {
+  public:
+    static Ref<SwapChainTexture> Create(Device* device,
+                                        const UnpackedPtr<TextureDescriptor>& descriptor,
+                                        VkImage nativeImage);
+
+  private:
+    using Texture::Texture;
+    void Initialize(VkImage nativeImage);
+};
+
+// TODO(330385376): Merge in SharedTexture once ExternalImageDescriptorVk is fully removed.
+class ImportedTextureBase : public Texture {
+  public:
+    // If needed, modifies the VkImageMemoryBarrier to perform a queue ownership transfer etc.
+    void TweakTransition(CommandRecordingContext* recordingContext,
+                         std::vector<VkImageMemoryBarrier>* barriers,
+                         size_t transitionBarrierStart) override;
+
+    bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage,
+                                wgpu::TextureUsage usage,
+                                wgpu::ShaderStage lastShaderStage,
+                                wgpu::ShaderStage shaderStage) override;
+
+    // Performs the steps to export a texture and returns the export information.
+    MaybeError EndAccess(ExternalSemaphoreHandle* handle,
+                         VkImageLayout* releasedOldLayout,
+                         VkImageLayout* releasedNewLayout);
+
+    MaybeError OnBeforeSubmit(CommandRecordingContext* context) override;
+    MaybeError OnAfterSubmit() override;
+
+  protected:
+    using Texture::Texture;
+    ~ImportedTextureBase() override;
+
+    void DestroyImpl() override;
+
+    // Eagerly transition the texture for export.
+    void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);
+
+    // The states of an external texture:
+    //   PendingAcquire: Initialized as an external texture already, but unavailable for access yet.
+    //   Acquired: Ready for access.
+    //   EagerlyTransitioned: The texture has ever been used, and eagerly transitioned for export.
+    //   Now it can be acquired for access again, or directly exported.
+    //   Released: The texture is not associated to any external resource and cannot be used. This
+    //   can happen before initialization, or after destruction.
+    enum class ExternalState { PendingAcquire, Acquired, EagerlyTransitioned, Released };
+    ExternalState mExternalState = ExternalState::Released;
+    ExternalState mLastExternalState = ExternalState::Released;
+
+    // The layouts to use for the queue ownership transfer barrier when a texture is used the first
+    // time after being imported. The layouts must match the ones from the queue ownership transfer
+    // barrier done for the export operation.
+    VkImageLayout mPendingAcquireOldLayout;
+    VkImageLayout mPendingAcquireNewLayout;
+
+    // Which of FOREIGN or EXTERNAL queue family to use when exporting.
+    uint32_t mExportQueueFamilyIndex;
+    // The layout requested for the export, or UNDEFINED if the receiver can handle whichever layout
+    // was current.
+    VkImageLayout mDesiredExportLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    // If the texture was ever used, represents a semaphore signaled once operations on the texture
+    // are done so that the receiver of the export can synchronize properly.
+    ExternalSemaphoreHandle mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
+    // The pending semaphore
+    VkSemaphore mPendingSemaphore = VK_NULL_HANDLE;
+};
+
+// A texture created from an VkImage that references an external memory object.
+class ExternalVkImageTexture final : public ImportedTextureBase {
+  public:
+    static ResultOrError<Ref<ExternalVkImageTexture>> Create(
+        Device* device,
+        const ExternalImageDescriptorVk* descriptor,
+        const UnpackedPtr<TextureDescriptor>& textureDescriptor,
+        external_memory::Service* externalMemoryService);
+
+    // Binds externally allocated memory to the VkImage and on success, takes ownership of
+    // semaphores.
+    MaybeError BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
+                                  VkDeviceMemory externalMemoryAllocation,
+                                  std::vector<VkSemaphore> waitSemaphores);
+
+    MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
+                                     ExternalSemaphoreHandle* handle,
+                                     VkImageLayout* releasedOldLayout,
+                                     VkImageLayout* releasedNewLayout);
+
+    MaybeError OnBeforeSubmit(CommandRecordingContext* context) override;
+
+  private:
+    using ImportedTextureBase::ImportedTextureBase;
+    MaybeError Initialize(const ExternalImageDescriptorVk* descriptor,
+                          external_memory::Service* externalMemoryService);
+    void DestroyImpl() override;
+
+    VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
+    std::vector<VkSemaphore> mWaitRequirements;
+};
+
+// A texture created from a SharedTextureMemory
+class SharedTexture final : public ImportedTextureBase {
+  public:
+    static ResultOrError<Ref<SharedTexture>> Create(
+        SharedTextureMemory* memory,
+        const UnpackedPtr<TextureDescriptor>& textureDescriptor);
+
+    MaybeError OnBeforeSubmit(CommandRecordingContext* context) override;
+
+    void SetPendingAcquire(VkImageLayout pendingAcquireOldLayout,
+                           VkImageLayout pendingAcquireNewLayout);
+
+  private:
+    using ImportedTextureBase::ImportedTextureBase;
+    void Initialize(SharedTextureMemory* memory);
+    void DestroyImpl() override;
+
+    struct SharedTextureMemoryObjects {
+        Ref<RefCountedVkHandle<VkImage>> vkImage;
+        Ref<RefCountedVkHandle<VkDeviceMemory>> vkDeviceMemory;
+    };
+    SharedTextureMemoryObjects mSharedTextureMemoryObjects;
+};
+
+class TextureView final : public TextureViewBase, public WeakRefSupport<TextureView> {
   public:
     static ResultOrError<Ref<TextureView>> Create(
         TextureBase* texture,
@@ -251,7 +318,11 @@ class TextureView final : public TextureViewBase {
 
     ResultOrError<VkImageView> GetOrCreate2DViewOn3D(uint32_t depthSlice = 0u);
 
+    bool IsYCbCr() const override;
+    YCbCrVkDescriptor GetYCbCrVkDescriptor() const override;
+
   private:
+    TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDescriptor>& descriptor);
     ~TextureView() override;
     void DestroyImpl() override;
     using TextureViewBase::TextureViewBase;
@@ -267,6 +338,7 @@ class TextureView final : public TextureViewBase {
     VkImageView mHandle = VK_NULL_HANDLE;
     VkImageView mHandleForBGRA8UnormStorage = VK_NULL_HANDLE;
     VkSamplerYcbcrConversion mSamplerYCbCrConversion = VK_NULL_HANDLE;
+    bool mIsYCbCr = false;
     YCbCrVkDescriptor mYCbCrVkDescriptor;
     std::vector<VkImageView> mHandlesFor2DViewOn3D;
 };

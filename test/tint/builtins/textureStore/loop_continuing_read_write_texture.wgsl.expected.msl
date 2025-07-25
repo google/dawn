@@ -1,24 +1,32 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+struct tint_module_vars_struct {
+  texture2d<int, access::read_write> tex;
+};
 
-void foo(texture2d<int, access::read_write> tint_symbol) {
+void foo(tint_module_vars_struct tint_module_vars) {
   {
+    uint2 tint_loop_idx = uint2(4294967295u);
     int i = 0;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-      if (!((i < 3))) {
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if ((i < 3)) {
+      } else {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        const_cast<texture2d<int, access::read_write>thread &>(tint_module_vars.tex).fence();
+        tint_module_vars.tex.write(int4(0), uint2(int2(0)));
+        const_cast<texture2d<int, access::read_write>thread &>(tint_module_vars.tex).fence();
       }
-      {
-        tint_symbol.write(int4(0), uint2(int2(0))); tint_symbol.fence();
-      }
+      continue;
     }
   }
 }
-

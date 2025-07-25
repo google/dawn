@@ -43,16 +43,23 @@ class MemberBuiltinCall : public Castable<MemberBuiltinCall, Call> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
     /// Constructor (no results, no operands)
-    MemberBuiltinCall();
+    /// @param id the instruction id
+    explicit MemberBuiltinCall(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param object the object
     /// @param args the call arguments
-    explicit MemberBuiltinCall(InstructionResult* result,
-                               Value* object,
-                               VectorRef<Value*> args = tint::Empty);
+    MemberBuiltinCall(Id id,
+                      InstructionResult* result,
+                      Value* object,
+                      VectorRef<Value*> args = tint::Empty);
+
     ~MemberBuiltinCall() override;
 
     /// @returns the offset of the arguments in Operands()

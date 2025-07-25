@@ -39,10 +39,12 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cmd/run-cts/common"
 	"dawn.googlesource.com/dawn/tools/src/dawn/node"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // main entry point
 func main() {
+	wrapper := oswrapper.GetRealOSWrapper()
 	nodeFlags := node.Flags{}
 	opts := node.Options{
 		AllowUnsafeAPIs: true,
@@ -57,14 +59,15 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	flag.StringVar(&nodePath, "node", fileutils.NodePath(), "path to node executable")
+	flag.StringVar(&nodePath, "node", fileutils.NodePath(wrapper), "path to node executable")
 	flag.Var(&nodeFlags, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
-	flag.StringVar(&opts.BinDir, "bin", fileutils.BuildPath(), "path to the directory holding cts.js and dawn.node")
+	flag.StringVar(&opts.BinDir, "bin", fileutils.BuildPath(wrapper), "path to the directory holding cts.js and dawn.node")
 	flag.StringVar(&opts.Backend, "backend", "default", "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
 	flag.StringVar(&opts.Adapter, "adapter", "", "name (or substring) of the GPU adapter to use")
 	flag.BoolVar(&opts.Validate, "validate", false, "enable backend validation")
 	flag.BoolVar(&opts.DumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
+	flag.BoolVar(&opts.DumpShadersPretty, "dump-shaders-pretty", false, "dump WGSL shaders, but don't run symbol renaming. May fail tests that shadow predeclared builtins. Enables --verbose")
 	flag.BoolVar(&opts.UseFXC, "fxc", false, "Use FXC instead of DXC. Disables 'use_dxc' Dawn flag")
 	flag.BoolVar(&lldb, "lldb", false, "launch node via lldb")
 	flag.Parse()

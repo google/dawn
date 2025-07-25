@@ -1,225 +1,237 @@
+;
+; vs_main
+;
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 137
+; Generator: Google Tint Compiler; 1
+; Bound: 102
 ; Schema: 0
                OpCapability Shader
-        %118 = OpExtInstImport "GLSL.std.450"
+         %42 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %vs_main "vs_main" %VertexIndex_1 %texcoords_1 %position_1 %vertex_point_size
-               OpEntryPoint Fragment %fs_main "fs_main" %texcoord_1 %value
-               OpExecutionMode %fs_main OriginUpperLeft
-               OpName %tint_discarded "tint_discarded"
-               OpName %VertexIndex_1 "VertexIndex_1"
-               OpName %texcoords_1 "texcoords_1"
-               OpName %position_1 "position_1"
-               OpName %vertex_point_size "vertex_point_size"
-               OpName %texcoord_1 "texcoord_1"
-               OpName %value "value"
-               OpName %uniforms_block "uniforms_block"
-               OpMemberName %uniforms_block 0 "inner"
-               OpName %Uniforms "Uniforms"
+               OpEntryPoint Vertex %vs_main "vs_main" %vs_main_vertex_index_Input %vs_main_loc0_Output %vs_main_position_Output %vs_main___point_size_Output
                OpMemberName %Uniforms 0 "u_scale"
                OpMemberName %Uniforms 1 "u_offset"
-               OpName %uniforms "uniforms"
-               OpName %mySampler "mySampler"
-               OpName %myTexture "myTexture"
-               OpName %VertexOutputs "VertexOutputs"
+               OpName %Uniforms "Uniforms"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
+               OpName %vs_main_vertex_index_Input "vs_main_vertex_index_Input"
+               OpName %vs_main_loc0_Output "vs_main_loc0_Output"
+               OpName %vs_main_position_Output "vs_main_position_Output"
+               OpName %vs_main___point_size_Output "vs_main___point_size_Output"
+               OpName %vs_main_inner "vs_main_inner"
                OpMemberName %VertexOutputs 0 "texcoords"
                OpMemberName %VertexOutputs 1 "position"
-               OpName %vs_main_inner "vs_main_inner"
+               OpName %VertexOutputs "VertexOutputs"
                OpName %VertexIndex "VertexIndex"
                OpName %texcoord "texcoord"
                OpName %output "output"
                OpName %flipY "flipY"
                OpName %vs_main "vs_main"
-               OpName %fs_main_inner "fs_main_inner"
-               OpName %texcoord_0 "texcoord"
-               OpName %clampedTexcoord "clampedTexcoord"
-               OpName %srcColor "srcColor"
-               OpName %fs_main "fs_main"
-               OpDecorate %VertexIndex_1 BuiltIn VertexIndex
-               OpDecorate %texcoords_1 Location 0
-               OpDecorate %position_1 BuiltIn Position
-               OpDecorate %vertex_point_size BuiltIn PointSize
-               OpDecorate %texcoord_1 Location 0
-               OpDecorate %value Location 0
-               OpDecorate %uniforms_block Block
-               OpMemberDecorate %uniforms_block 0 Offset 0
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 8
-               OpDecorate %uniforms NonWritable
-               OpDecorate %uniforms Binding 0
-               OpDecorate %uniforms DescriptorSet 0
-               OpDecorate %mySampler Binding 1
-               OpDecorate %mySampler DescriptorSet 0
-               OpDecorate %myTexture Binding 2
-               OpDecorate %myTexture DescriptorSet 0
-               OpMemberDecorate %VertexOutputs 0 Offset 0
-               OpMemberDecorate %VertexOutputs 1 Offset 16
-               OpDecorate %_arr_v2float_uint_3 ArrayStride 8
-       %bool = OpTypeBool
-          %2 = OpConstantNull %bool
-%_ptr_Private_bool = OpTypePointer Private %bool
-%tint_discarded = OpVariable %_ptr_Private_bool Private %2
-       %uint = OpTypeInt 32 0
-%_ptr_Input_uint = OpTypePointer Input %uint
-%VertexIndex_1 = OpVariable %_ptr_Input_uint Input
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+               OpDecorate %vs_main_vertex_index_Input BuiltIn VertexIndex
+               OpDecorate %vs_main_loc0_Output Location 0
+               OpDecorate %vs_main_position_Output BuiltIn Position
+               OpDecorate %vs_main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-%_ptr_Output_v2float = OpTypePointer Output %v2float
-         %12 = OpConstantNull %v2float
-%texcoords_1 = OpVariable %_ptr_Output_v2float Output %12
-    %v4float = OpTypeVector %float 4
-%_ptr_Output_v4float = OpTypePointer Output %v4float
-         %16 = OpConstantNull %v4float
- %position_1 = OpVariable %_ptr_Output_v4float Output %16
-%_ptr_Output_float = OpTypePointer Output %float
-         %19 = OpConstantNull %float
-%vertex_point_size = OpVariable %_ptr_Output_float Output %19
-%_ptr_Input_v2float = OpTypePointer Input %v2float
- %texcoord_1 = OpVariable %_ptr_Input_v2float Input
-      %value = OpVariable %_ptr_Output_v4float Output %16
    %Uniforms = OpTypeStruct %v2float %v2float
 %uniforms_block = OpTypeStruct %Uniforms
 %_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
-   %uniforms = OpVariable %_ptr_Uniform_uniforms_block Uniform
-         %29 = OpTypeSampler
-%_ptr_UniformConstant_29 = OpTypePointer UniformConstant %29
-  %mySampler = OpVariable %_ptr_UniformConstant_29 UniformConstant
-         %32 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_32 = OpTypePointer UniformConstant %32
-  %myTexture = OpVariable %_ptr_UniformConstant_32 UniformConstant
+          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%vs_main_vertex_index_Input = OpVariable %_ptr_Input_uint Input
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+%vs_main_loc0_Output = OpVariable %_ptr_Output_v2float Output
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%vs_main_position_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_float = OpTypePointer Output %float
+%vs_main___point_size_Output = OpVariable %_ptr_Output_float Output
 %VertexOutputs = OpTypeStruct %v2float %v4float
-         %33 = OpTypeFunction %VertexOutputs %uint
+         %20 = OpTypeFunction %VertexOutputs %uint
      %uint_3 = OpConstant %uint 3
 %_arr_v2float_uint_3 = OpTypeArray %v2float %uint_3
+%_ptr_Function__arr_v2float_uint_3 = OpTypePointer Function %_arr_v2float_uint_3
  %float_n0_5 = OpConstant %float -0.5
-         %41 = OpConstantComposite %v2float %float_n0_5 %19
+    %float_0 = OpConstant %float 0
+         %27 = OpConstantComposite %v2float %float_n0_5 %float_0
   %float_1_5 = OpConstant %float 1.5
-         %43 = OpConstantComposite %v2float %float_1_5 %19
+         %30 = OpConstantComposite %v2float %float_1_5 %float_0
   %float_0_5 = OpConstant %float 0.5
     %float_2 = OpConstant %float 2
-         %46 = OpConstantComposite %v2float %float_0_5 %float_2
-         %47 = OpConstantComposite %_arr_v2float_uint_3 %41 %43 %46
-%_ptr_Function__arr_v2float_uint_3 = OpTypePointer Function %_arr_v2float_uint_3
-         %50 = OpConstantNull %_arr_v2float_uint_3
+         %32 = OpConstantComposite %v2float %float_0_5 %float_2
+         %26 = OpConstantComposite %_arr_v2float_uint_3 %27 %30 %32
 %_ptr_Function_VertexOutputs = OpTypePointer Function %VertexOutputs
-         %53 = OpConstantNull %VertexOutputs
-     %uint_1 = OpConstant %uint 1
+         %37 = OpConstantNull %VertexOutputs
 %_ptr_Function_v4float = OpTypePointer Function %v4float
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
 %_ptr_Function_v2float = OpTypePointer Function %v2float
     %float_1 = OpConstant %float 1
-         %62 = OpConstantComposite %v2float %float_1 %float_1
+         %49 = OpConstantComposite %v2float %float_1 %float_1
+%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_float = OpTypePointer Uniform %float
+       %bool = OpTypeBool
 %_ptr_Function_bool = OpTypePointer Function %bool
-%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
    %float_n1 = OpConstant %float -1
-         %89 = OpConstantComposite %v2float %float_1 %float_n1
-         %91 = OpConstantComposite %v2float %19 %float_1
+         %78 = OpConstantComposite %v2float %float_1 %float_n1
+         %81 = OpConstantComposite %v2float %float_0 %float_1
        %void = OpTypeVoid
-        %105 = OpTypeFunction %void
-        %113 = OpTypeFunction %v4float %v2float
-     %v2bool = OpTypeVector %bool 2
-       %true = OpConstantTrue %bool
-%vs_main_inner = OpFunction %VertexOutputs None %33
+         %96 = OpTypeFunction %void
+%vs_main_inner = OpFunction %VertexOutputs None %20
 %VertexIndex = OpFunctionParameter %uint
-         %37 = OpLabel
-   %texcoord = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %50
-     %output = OpVariable %_ptr_Function_VertexOutputs Function %53
-      %flipY = OpVariable %_ptr_Function_bool Function %2
-               OpStore %texcoord %47
-         %56 = OpAccessChain %_ptr_Function_v4float %output %uint_1
-         %58 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %59 = OpLoad %v2float %58
-         %60 = OpVectorTimesScalar %v2float %59 %float_2
-         %63 = OpFSub %v2float %60 %62
-         %64 = OpCompositeExtract %float %63 0
-         %65 = OpCompositeExtract %float %63 1
-         %66 = OpCompositeConstruct %v4float %64 %65 %19 %float_1
-               OpStore %56 %66
-         %69 = OpAccessChain %_ptr_Uniform_float %uniforms %uint_0 %uint_0 %uint_1
-         %70 = OpLoad %float %69
-         %71 = OpFOrdLessThan %bool %70 %19
-               OpStore %flipY %71
-         %74 = OpLoad %bool %flipY
-               OpSelectionMerge %75 None
-               OpBranchConditional %74 %76 %77
-         %76 = OpLabel
-         %78 = OpAccessChain %_ptr_Function_v2float %output %uint_0
-         %79 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %80 = OpLoad %v2float %79
-         %82 = OpAccessChain %_ptr_Uniform_v2float %uniforms %uint_0 %uint_0
-         %83 = OpLoad %v2float %82
-         %84 = OpFMul %v2float %80 %83
-         %85 = OpAccessChain %_ptr_Uniform_v2float %uniforms %uint_0 %uint_1
-         %86 = OpLoad %v2float %85
-         %87 = OpFAdd %v2float %84 %86
+         %21 = OpLabel
+   %texcoord = OpVariable %_ptr_Function__arr_v2float_uint_3 Function
+     %output = OpVariable %_ptr_Function_VertexOutputs Function %37
+      %flipY = OpVariable %_ptr_Function_bool Function
+               OpStore %texcoord %26
+         %38 = OpAccessChain %_ptr_Function_v4float %output %uint_1
+         %41 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
+         %44 = OpAccessChain %_ptr_Function_v2float %texcoord %41
+         %46 = OpLoad %v2float %44 None
+         %47 = OpVectorTimesScalar %v2float %46 %float_2
+         %48 = OpFSub %v2float %47 %49
+         %51 = OpCompositeConstruct %v4float %48 %float_0 %float_1
+               OpStore %38 %51 None
+         %52 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
+         %55 = OpAccessChain %_ptr_Uniform_float %52 %uint_1
+         %57 = OpLoad %float %55 None
+         %58 = OpFOrdLessThan %bool %57 %float_0
+               OpStore %flipY %58
+         %62 = OpLoad %bool %flipY None
+               OpSelectionMerge %63 None
+               OpBranchConditional %62 %64 %65
+         %64 = OpLabel
+         %67 = OpAccessChain %_ptr_Function_v2float %output %uint_0
+         %68 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
+         %69 = OpAccessChain %_ptr_Function_v2float %texcoord %68
+         %70 = OpLoad %v2float %69 None
+         %71 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
+         %72 = OpLoad %v2float %71 None
+         %73 = OpFMul %v2float %70 %72
+         %74 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
+         %75 = OpLoad %v2float %74 None
+         %76 = OpFAdd %v2float %73 %75
+         %77 = OpFMul %v2float %76 %78
+         %80 = OpFAdd %v2float %77 %81
+               OpStore %67 %80 None
+               OpBranch %63
+         %65 = OpLabel
+         %82 = OpAccessChain %_ptr_Function_v2float %output %uint_0
+         %83 = OpExtInst %uint %42 UMin %VertexIndex %uint_2
+         %84 = OpAccessChain %_ptr_Function_v2float %texcoord %83
+         %85 = OpLoad %v2float %84 None
+         %86 = OpFMul %v2float %85 %78
+         %87 = OpFAdd %v2float %86 %81
+         %88 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
+         %89 = OpLoad %v2float %88 None
          %90 = OpFMul %v2float %87 %89
-         %92 = OpFAdd %v2float %90 %91
-               OpStore %78 %92
-               OpBranch %75
-         %77 = OpLabel
-         %93 = OpAccessChain %_ptr_Function_v2float %output %uint_0
-         %94 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %95 = OpLoad %v2float %94
-         %96 = OpFMul %v2float %95 %89
-         %97 = OpFAdd %v2float %96 %91
-         %98 = OpAccessChain %_ptr_Uniform_v2float %uniforms %uint_0 %uint_0
-         %99 = OpLoad %v2float %98
-        %100 = OpFMul %v2float %97 %99
-        %101 = OpAccessChain %_ptr_Uniform_v2float %uniforms %uint_0 %uint_1
-        %102 = OpLoad %v2float %101
-        %103 = OpFAdd %v2float %100 %102
-               OpStore %93 %103
-               OpBranch %75
-         %75 = OpLabel
-        %104 = OpLoad %VertexOutputs %output
-               OpReturnValue %104
+         %91 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
+         %92 = OpLoad %v2float %91 None
+         %93 = OpFAdd %v2float %90 %92
+               OpStore %82 %93 None
+               OpBranch %63
+         %63 = OpLabel
+         %66 = OpLoad %VertexOutputs %output None
+               OpReturnValue %66
                OpFunctionEnd
-    %vs_main = OpFunction %void None %105
-        %108 = OpLabel
-        %110 = OpLoad %uint %VertexIndex_1
-        %109 = OpFunctionCall %VertexOutputs %vs_main_inner %110
-        %111 = OpCompositeExtract %v2float %109 0
-               OpStore %texcoords_1 %111
-        %112 = OpCompositeExtract %v4float %109 1
-               OpStore %position_1 %112
-               OpStore %vertex_point_size %float_1
+    %vs_main = OpFunction %void None %96
+         %97 = OpLabel
+         %98 = OpLoad %uint %vs_main_vertex_index_Input None
+         %99 = OpFunctionCall %VertexOutputs %vs_main_inner %98
+        %100 = OpCompositeExtract %v2float %99 0
+               OpStore %vs_main_loc0_Output %100 None
+        %101 = OpCompositeExtract %v4float %99 1
+               OpStore %vs_main_position_Output %101 None
+               OpStore %vs_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
-%fs_main_inner = OpFunction %v4float None %113
- %texcoord_0 = OpFunctionParameter %v2float
-        %116 = OpLabel
-%clampedTexcoord = OpVariable %_ptr_Function_v2float Function %12
-   %srcColor = OpVariable %_ptr_Function_v4float Function %16
-        %117 = OpExtInst %v2float %118 NClamp %texcoord_0 %12 %62
-               OpStore %clampedTexcoord %117
-        %122 = OpLoad %v2float %clampedTexcoord
-        %123 = OpFOrdEqual %v2bool %122 %texcoord_0
-        %121 = OpAll %bool %123
-        %120 = OpLogicalNot %bool %121
-               OpSelectionMerge %125 None
-               OpBranchConditional %120 %126 %125
-        %126 = OpLabel
-               OpStore %tint_discarded %true
-               OpBranch %125
-        %125 = OpLabel
-               OpStore %srcColor %16
-        %129 = OpLoad %v4float %srcColor
-               OpReturnValue %129
-               OpFunctionEnd
-    %fs_main = OpFunction %void None %105
-        %131 = OpLabel
-        %133 = OpLoad %v2float %texcoord_1
-        %132 = OpFunctionCall %v4float %fs_main_inner %133
-               OpStore %value %132
-        %134 = OpLoad %bool %tint_discarded
-               OpSelectionMerge %135 None
-               OpBranchConditional %134 %136 %135
-        %136 = OpLabel
+;
+; fs_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 45
+; Schema: 0
+               OpCapability Shader
+         %17 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs_main "fs_main" %fs_main_loc0_Input %fs_main_loc0_Output
+               OpExecutionMode %fs_main OriginUpperLeft
+               OpName %continue_execution "continue_execution"
+               OpName %fs_main_loc0_Input "fs_main_loc0_Input"
+               OpName %fs_main_loc0_Output "fs_main_loc0_Output"
+               OpName %fs_main_inner "fs_main_inner"
+               OpName %texcoord "texcoord"
+               OpName %clampedTexcoord "clampedTexcoord"
+               OpName %srcColor "srcColor"
+               OpName %fs_main "fs_main"
+               OpDecorate %fs_main_loc0_Input Location 0
+               OpDecorate %fs_main_loc0_Output Location 0
+       %bool = OpTypeBool
+%_ptr_Private_bool = OpTypePointer Private %bool
+       %true = OpConstantTrue %bool
+%continue_execution = OpVariable %_ptr_Private_bool Private %true
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%fs_main_loc0_Input = OpVariable %_ptr_Input_v2float Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%fs_main_loc0_Output = OpVariable %_ptr_Output_v4float Output
+         %14 = OpTypeFunction %v4float %v2float
+         %18 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %19 = OpConstantComposite %v2float %float_1 %float_1
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %32 = OpConstantNull %v4float
+      %false = OpConstantFalse %bool
+       %void = OpTypeVoid
+         %41 = OpTypeFunction %void
+%fs_main_inner = OpFunction %v4float None %14
+   %texcoord = OpFunctionParameter %v2float
+         %15 = OpLabel
+%clampedTexcoord = OpVariable %_ptr_Function_v2float Function
+   %srcColor = OpVariable %_ptr_Function_v4float Function
+         %16 = OpExtInst %v2float %17 NClamp %texcoord %18 %19
+               OpStore %clampedTexcoord %16
+         %23 = OpLoad %v2float %clampedTexcoord None
+         %24 = OpFOrdEqual %v2bool %23 %texcoord
+         %26 = OpAll %bool %24
+         %27 = OpLogicalNot %bool %26
+               OpSelectionMerge %28 None
+               OpBranchConditional %27 %29 %28
+         %29 = OpLabel
+               OpStore %continue_execution %false None
+               OpBranch %28
+         %28 = OpLabel
+               OpStore %srcColor %32
+         %33 = OpLoad %v4float %srcColor None
+         %34 = OpLoad %bool %continue_execution None
+         %35 = OpLogicalNot %bool %34
+               OpSelectionMerge %36 None
+               OpBranchConditional %35 %37 %36
+         %37 = OpLabel
                OpKill
-        %135 = OpLabel
+         %36 = OpLabel
+               OpReturnValue %33
+               OpFunctionEnd
+    %fs_main = OpFunction %void None %41
+         %42 = OpLabel
+         %43 = OpLoad %v2float %fs_main_loc0_Input None
+         %44 = OpFunctionCall %v4float %fs_main_inner %43
+               OpStore %fs_main_loc0_Output %44 None
                OpReturn
                OpFunctionEnd

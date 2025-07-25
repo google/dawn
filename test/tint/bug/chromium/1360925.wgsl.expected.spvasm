@@ -1,35 +1,40 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 12
+; Generator: Google Tint Compiler; 1
+; Bound: 17
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %G_block "G_block"
-               OpMemberName %G_block 0 "inner"
-               OpName %G "G"
-               OpName %unused_entry_point "unused_entry_point"
+               OpMemberName %G_block_tint_explicit_layout 0 "inner"
+               OpName %G_block_tint_explicit_layout "G_block_tint_explicit_layout"
                OpName %n "n"
-               OpDecorate %G_block Block
-               OpMemberDecorate %G_block 0 Offset 0
+               OpName %p "p"
+               OpName %unused_entry_point "unused_entry_point"
                OpDecorate %_runtimearr_int ArrayStride 4
-               OpDecorate %G NonWritable
-               OpDecorate %G DescriptorSet 0
-               OpDecorate %G Binding 0
+               OpMemberDecorate %G_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %G_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
-    %G_block = OpTypeStruct %_runtimearr_int
-%_ptr_StorageBuffer_G_block = OpTypePointer StorageBuffer %G_block
-          %G = OpVariable %_ptr_StorageBuffer_G_block StorageBuffer
+%G_block_tint_explicit_layout = OpTypeStruct %_runtimearr_int
+%_ptr_StorageBuffer_G_block_tint_explicit_layout = OpTypePointer StorageBuffer %G_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_G_block_tint_explicit_layout StorageBuffer
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %6
+          %8 = OpTypeFunction %void
+%_ptr_StorageBuffer__runtimearr_int = OpTypePointer StorageBuffer %_runtimearr_int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+          %n = OpFunction %void None %8
           %9 = OpLabel
+          %p = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %1 %uint_0
+         %14 = OpArrayLength %uint %1 0
                OpReturn
                OpFunctionEnd
-          %n = OpFunction %void None %6
-         %11 = OpLabel
+%unused_entry_point = OpFunction %void None %8
+         %16 = OpLabel
                OpReturn
                OpFunctionEnd

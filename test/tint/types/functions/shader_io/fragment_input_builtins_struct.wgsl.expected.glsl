@@ -1,7 +1,8 @@
 #version 310 es
-#extension GL_OES_sample_variables : require
+#extension GL_OES_sample_variables: require
 precision highp float;
 precision highp int;
+
 
 struct FragmentInputs {
   vec4 position;
@@ -10,15 +11,15 @@ struct FragmentInputs {
   uint sample_mask;
 };
 
-void tint_symbol(FragmentInputs inputs) {
+void main_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
     vec4 foo = inputs.position;
     uint bar = (inputs.sample_index + inputs.sample_mask);
   }
 }
-
 void main() {
-  FragmentInputs tint_symbol_1 = FragmentInputs(gl_FragCoord, gl_FrontFacing, uint(gl_SampleID), uint(gl_SampleMaskIn[0]));
-  tint_symbol(tint_symbol_1);
-  return;
+  vec4 v = gl_FragCoord;
+  bool v_1 = gl_FrontFacing;
+  uint v_2 = uint(gl_SampleID);
+  main_inner(FragmentInputs(v, v_1, v_2, uint(gl_SampleMaskIn[0u])));
 }

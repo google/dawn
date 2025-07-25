@@ -75,14 +75,15 @@ func (f *Flags) GlobListFlags(prefix string, delimiter string) {
 
 // Options that can be passed to Flags.SetOptions
 type Options struct {
-	BinDir          string
-	Backend         string
-	Adapter         string
-	Validate        bool
-	AllowUnsafeAPIs bool
-	DumpShaders     bool
-	UseFXC          bool
-	UseIR           bool
+	BinDir            string
+	Backend           string
+	Adapter           string
+	Validate          bool
+	AllowUnsafeAPIs   bool
+	DumpShaders       bool
+	DumpShadersPretty bool
+	UseFXC            bool
+	UseIR             bool
 }
 
 func (f *Flags) SetOptions(opts Options) error {
@@ -105,13 +106,13 @@ func (f *Flags) SetOptions(opts Options) error {
 		f.Set("enable-dawn-features=allow_unsafe_apis")
 	}
 	if opts.DumpShaders {
+		f.Set("enable-dawn-features=dump_shaders")
+	}
+	if opts.DumpShadersPretty {
 		f.Set("enable-dawn-features=dump_shaders,disable_symbol_renaming")
 	}
 	if opts.UseFXC {
 		f.Set("disable-dawn-features=use_dxc")
-	}
-	if opts.UseIR {
-		f.Set("enable-dawn-features=use_tint_ir")
 	}
 	f.GlobListFlags("enable-dawn-features=", ",")
 

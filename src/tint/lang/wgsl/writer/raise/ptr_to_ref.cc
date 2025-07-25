@@ -30,6 +30,8 @@
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/phony.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -43,7 +45,7 @@ struct Impl {
     core::ir::Module& mod;
     core::ir::Builder b{mod};
 
-    Result<SuccessType> Run() {
+    void Run() {
         Vector<core::ir::Block*, 32> blocks;
         for (auto fn : mod.functions) {
             blocks.Push(fn->Block());
@@ -58,6 +60,9 @@ struct Impl {
                     [&](core::ir::Var* var) { ResultPtrToRef(var); },
                     [&](core::ir::Let* let) {
                         OperandRefToPtr({let, core::ir::Let::kValueOperandOffset});
+                    },
+                    [&](core::ir::Phony* p) {
+                        OperandRefToPtr({p, core::ir::Phony::kValueOperandOffset});
                     },
                     [&](core::ir::Call* call) { OperandsRefToPtr(call); },
                     [&](core::ir::Access* access) {
@@ -85,8 +90,6 @@ struct Impl {
                     });
             }
         }
-
-        return Success;
     }
 
     void OperandsRefToPtr(core::ir::Instruction* inst) {
@@ -100,46 +103,56 @@ struct Impl {
         TINT_ASSERT(operand);
         if (auto* ref_ty = As<core::type::Reference>(operand->Type())) {
             auto* as_ptr = b.InstructionResult(RefToPtr(ref_ty));
-            mod.allocators.instructions
-                .Create<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kAddressOf, operand)
+            mod.CreateInstruction<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kAddressOf, operand)
                 ->InsertBefore(use.instruction);
             use.instruction->SetOperand(use.operand_index, as_ptr);
         }
     }
 
     const core::type::Pointer* RefToPtr(const core::type::Reference* ref_ty) {
-        return mod.Types().Get<core::type::Pointer>(ref_ty->AddressSpace(), ref_ty->StoreType(),
-                                                    ref_ty->Access());
+        return mod.Types().ptr(ref_ty->AddressSpace(), ref_ty->StoreType(), ref_ty->Access());
     }
 
     void OperandPtrToRef(const core::ir::Usage& use) {
         auto* operand = use.instruction->Operand(use.operand_index);
         if (auto* ptr_ty = As<core::type::Pointer>(operand->Type())) {
             auto* as_ptr = b.InstructionResult(PtrToRef(ptr_ty));
-            mod.allocators.instructions
-                .Create<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kIndirection, operand)
+            mod.CreateInstruction<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kIndirection, operand)
                 ->InsertBefore(use.instruction);
             use.instruction->SetOperand(use.operand_index, as_ptr);
         }
     }
 
     void ResultPtrToRef(core::ir::Instruction* inst) {
-        auto* result = inst->Result(0);
+        auto* result = inst->Result();
         if (auto* ptr = result->Type()->As<core::type::Pointer>()) {
             result->SetType(PtrToRef(ptr));
         }
     }
 
     const core::type::Reference* PtrToRef(const core::type::Pointer* ptr_ty) {
-        return mod.Types().Get<core::type::Reference>(ptr_ty->AddressSpace(), ptr_ty->StoreType(),
-                                                      ptr_ty->Access());
+        return mod.Types().ref(ptr_ty->AddressSpace(), ptr_ty->StoreType(), ptr_ty->Access());
     }
 };
 
 }  // namespace
 
 Result<SuccessType> PtrToRef(core::ir::Module& mod) {
-    return Impl{mod}.Run();
+    auto result =
+        core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.PtrToRef",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowOverrides,
+                                              core::ir::Capability::kAllowPhonyInstructions,
+                                          }
+
+        );
+    if (result != Success) {
+        return result;
+    }
+
+    Impl{mod}.Run();
+
+    return Success;
 }
 
 }  // namespace tint::wgsl::writer::raise

@@ -1,6 +1,7 @@
 struct S_inner {
   float a;
 };
+
 struct S {
   bool member_bool;
   int member_i32;
@@ -14,8 +15,9 @@ struct S {
   S_inner member_struct;
 };
 
+
 [numthreads(1, 1, 1)]
 void main() {
   S s = (S)0;
-  return;
 }
+

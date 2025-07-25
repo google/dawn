@@ -28,7 +28,7 @@
 #ifndef SRC_DAWN_WIRE_SUPPORTEDFEATURES_H_
 #define SRC_DAWN_WIRE_SUPPORTEDFEATURES_H_
 
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
 
 namespace dawn::wire {
 

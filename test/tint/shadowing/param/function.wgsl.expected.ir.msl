@@ -1,7 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-void a(int a_2) {
-  int a_1 = a_2;
-  int b = a_1;
-}

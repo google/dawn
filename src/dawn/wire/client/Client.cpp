@@ -28,6 +28,7 @@
 #include "dawn/wire/client/Client.h"
 
 #include "dawn/common/Compiler.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Device.h"
 
 namespace dawn::wire::client {
@@ -70,9 +71,10 @@ Client::~Client() {
 
 void Client::UnregisterAllObjects() {
     for (auto& objectList : mObjects) {
-        while (!objectList.empty()) {
-            ObjectBase* object = objectList.head()->value();
-            object->Unregister();
+        for (auto object : objectList.GetAllObjects()) {
+            if (object != nullptr) {
+                object->Unregister();
+            }
         }
     }
 }
@@ -98,14 +100,14 @@ ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescr
     return result;
 }
 
-ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device,
-                                           const WGPUSwapChainDescriptor* descriptor) {
-    Ref<SwapChain> swapChain = Make<SwapChain>(nullptr, descriptor);
+ReservedSurface Client::ReserveSurface(WGPUInstance instance,
+                                       const WGPUSurfaceCapabilities* capabilities) {
+    Ref<Surface> surface = Make<Surface>(capabilities);
 
-    ReservedSwapChain result;
-    result.handle = swapChain->GetWireHandle();
-    result.deviceHandle = FromAPI(device)->GetWireHandle();
-    result.swapchain = ReturnToAPI(std::move(swapChain));
+    ReservedSurface result;
+    result.handle = surface->GetWireHandle();
+    result.instanceHandle = FromAPI(instance)->GetWireHandle();
+    result.surface = ReturnToAPI(std::move(surface));
     return result;
 }
 
@@ -133,12 +135,8 @@ void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
     ReclaimReservation(FromAPI(reservation.texture));
 }
 
-void Client::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
-    ReclaimReservation(FromAPI(reservation.swapchain));
-}
-
-void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {
-    ReclaimReservation(FromAPI(reservation.device));
+void Client::ReclaimSurfaceReservation(const ReservedSurface& reservation) {
+    ReclaimReservation(FromAPI(reservation.surface));
 }
 
 void Client::ReclaimInstanceReservation(const ReservedInstance& reservation) {
@@ -160,18 +158,20 @@ void Client::Disconnect() {
         eventManager->TransitionTo(EventManager::State::ClientDropped);
     }
 
-    auto& deviceList = mObjects[ObjectType::Device];
     {
-        for (LinkNode<ObjectBase>* device = deviceList.head(); device != deviceList.end();
-             device = device->next()) {
-            static_cast<Device*>(device->value())
-                ->HandleDeviceLost(WGPUDeviceLostReason_Unknown, "GPU connection lost");
+        auto& deviceList = mObjects[ObjectType::Device];
+        for (auto object : deviceList.GetAllObjects()) {
+            if (object != nullptr) {
+                static_cast<Device*>(object)->HandleDeviceLost(
+                    WGPUDeviceLostReason_Unknown, ToOutputStringView("GPU connection lost"));
+            }
         }
     }
     for (auto& objectList : mObjects) {
-        for (LinkNode<ObjectBase>* object = objectList.head(); object != objectList.end();
-             object = object->next()) {
-            object->value()->CancelCallbacksForDisconnect();
+        for (auto object : objectList.GetAllObjects()) {
+            if (object != nullptr) {
+                object->CancelCallbacksForDisconnect();
+            }
         }
     }
 }
@@ -190,8 +190,7 @@ void Client::Unregister(ObjectBase* obj, ObjectType type) {
 }
 
 void Client::ReclaimReservation(ObjectBase* obj, ObjectType type) {
-    mObjectStores[type].Remove(obj);
-    obj->RemoveFromList();
+    mObjects[type].Remove(obj);
 }
 
 }  // namespace dawn::wire::client

@@ -91,66 +91,64 @@ GLenum WrapMode(wgpu::AddressMode mode) {
 
 }  // namespace
 
-Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
-    : SamplerBase(device, descriptor) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
-
-    gl.GenSamplers(1, &mFilteringHandle);
-    SetupGLSampler(mFilteringHandle, descriptor, false);
-
-    gl.GenSamplers(1, &mNonFilteringHandle);
-    SetupGLSampler(mNonFilteringHandle, descriptor, true);
+// static
+ResultOrError<Ref<Sampler>> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+    Ref<Sampler> sampler = AcquireRef(new Sampler(device, descriptor));
+    DAWN_TRY(sampler->Initialize(descriptor));
+    return sampler;
 }
+
+Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
+    : SamplerBase(device, descriptor) {}
 
 Sampler::~Sampler() = default;
 
 void Sampler::DestroyImpl() {
     SamplerBase::DestroyImpl();
     const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
-    gl.DeleteSamplers(1, &mFilteringHandle);
-    gl.DeleteSamplers(1, &mNonFilteringHandle);
+    DAWN_GL_TRY_IGNORE_ERRORS(gl, DeleteSamplers(1, &mHandle));
 }
 
-void Sampler::SetupGLSampler(GLuint sampler,
-                             const SamplerDescriptor* descriptor,
-                             bool forceNearest) {
+MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {
     Device* device = ToBackend(GetDevice());
     const OpenGLFunctions& gl = device->GetGL();
 
-    if (forceNearest) {
-        gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    } else {
-        gl.SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, MagFilterMode(descriptor->magFilter));
-        gl.SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER,
-                             MinFilterMode(descriptor->minFilter, descriptor->mipmapFilter));
-    }
-    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW));
-    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU));
-    gl.SamplerParameteri(sampler, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV));
+    DAWN_GL_TRY(gl, GenSamplers(1, &mHandle));
 
-    gl.SamplerParameterf(sampler, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp);
-    gl.SamplerParameterf(sampler, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp);
+    DAWN_GL_TRY(gl, SamplerParameteri(mHandle, GL_TEXTURE_MAG_FILTER,
+                                      MagFilterMode(descriptor->magFilter)));
+    DAWN_GL_TRY(gl,
+                SamplerParameteri(mHandle, GL_TEXTURE_MIN_FILTER,
+                                  MinFilterMode(descriptor->minFilter, descriptor->mipmapFilter)));
+
+    DAWN_GL_TRY(gl,
+                SamplerParameteri(mHandle, GL_TEXTURE_WRAP_R, WrapMode(descriptor->addressModeW)));
+    DAWN_GL_TRY(gl,
+                SamplerParameteri(mHandle, GL_TEXTURE_WRAP_S, WrapMode(descriptor->addressModeU)));
+    DAWN_GL_TRY(gl,
+                SamplerParameteri(mHandle, GL_TEXTURE_WRAP_T, WrapMode(descriptor->addressModeV)));
+
+    DAWN_GL_TRY(gl, SamplerParameterf(mHandle, GL_TEXTURE_MIN_LOD, descriptor->lodMinClamp));
+    DAWN_GL_TRY(gl, SamplerParameterf(mHandle, GL_TEXTURE_MAX_LOD, descriptor->lodMaxClamp));
 
     if (descriptor->compare != wgpu::CompareFunction::Undefined) {
-        gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-        gl.SamplerParameteri(sampler, GL_TEXTURE_COMPARE_FUNC,
-                             ToOpenGLCompareFunction(descriptor->compare));
+        DAWN_GL_TRY(gl,
+                    SamplerParameteri(mHandle, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE));
+        DAWN_GL_TRY(gl, SamplerParameteri(mHandle, GL_TEXTURE_COMPARE_FUNC,
+                                          ToOpenGLCompareFunction(descriptor->compare)));
     }
 
     if (HasAnisotropicFiltering(gl)) {
         uint16_t value =
             std::min<uint16_t>(GetMaxAnisotropy(), device->GetMaxTextureMaxAnisotropy());
-        gl.SamplerParameteri(sampler, GL_TEXTURE_MAX_ANISOTROPY, value);
+        DAWN_GL_TRY(gl, SamplerParameteri(mHandle, GL_TEXTURE_MAX_ANISOTROPY, value));
     }
+
+    return {};
 }
 
-GLuint Sampler::GetFilteringHandle() const {
-    return mFilteringHandle;
-}
-
-GLuint Sampler::GetNonFilteringHandle() const {
-    return mNonFilteringHandle;
+GLuint Sampler::GetHandle() const {
+    return mHandle;
 }
 
 }  // namespace dawn::native::opengl

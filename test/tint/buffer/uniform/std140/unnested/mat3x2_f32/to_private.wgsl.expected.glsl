@@ -1,27 +1,16 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  vec2 inner_0;
-  vec2 inner_1;
-  vec2 inner_2;
-  uint pad;
-  uint pad_1;
-} u;
-
-mat3x2 p = mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-mat3x2 load_u_inner() {
-  return mat3x2(u.inner_0, u.inner_1, u.inner_2);
-}
-
-void f() {
-  p = load_u_inner();
-  p[1] = u.inner_0;
-  p[1] = u.inner_0.yx;
-  p[0][1] = u.inner_1[0u];
-}
-
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  vec2 inner_col0;
+  vec2 inner_col1;
+  vec2 inner_col2;
+} v;
+mat3x2 p = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  p = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
+  p[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
+  p[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u].yx;
+  p[0u].y = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
 }

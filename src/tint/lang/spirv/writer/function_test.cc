@@ -46,6 +46,10 @@ TEST_F(SpirvWriterTest, Function_Empty) {
                OpReturn
                OpFunctionEnd
 )");
+    // There is always an injected entry point if none exists in the source program.
+    EXPECT_EQ(workgroup_info.x, 1u);
+    EXPECT_EQ(workgroup_info.y, 1u);
+    EXPECT_EQ(workgroup_info.z, 1u);
 }
 
 // Test that we do not emit the same function type more than once.
@@ -90,8 +94,7 @@ TEST_F(SpirvWriterTest, Function_DeduplicateType) {
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Compute) {
-    auto* func =
-        b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
     b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
@@ -114,6 +117,9 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Compute) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_EQ(workgroup_info.x, 32u);
+    EXPECT_EQ(workgroup_info.y, 4u);
+    EXPECT_EQ(workgroup_info.z, 1u);
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
@@ -140,87 +146,63 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_EQ(workgroup_info.x, 0u);
+    EXPECT_EQ(workgroup_info.y, 0u);
+    EXPECT_EQ(workgroup_info.z, 0u);
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(func->Block(), [&] {  //
-        b.Return(func);
+        b.Return(func, b.Zero<vec4<f32>>());
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpEntryPoint Vertex %main "main"
+               OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
 
                ; Debug Information
-               OpName %main "main"                  ; id %1
+               OpName %main_position_Output "main_position_Output"  ; id %1
+               OpName %main___point_size_Output "main___point_size_Output"  ; id %5
+               OpName %main_inner "main_inner"                              ; id %7
+               OpName %main "main"                                          ; id %11
+
+               ; Annotations
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %main___point_size_Output BuiltIn PointSize
 
                ; Types, variables and constants
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_position_Output = OpVariable %_ptr_Output_v4float Output  ; BuiltIn Position
+%_ptr_Output_float = OpTypePointer Output %float
+%main___point_size_Output = OpVariable %_ptr_Output_float Output    ; BuiltIn PointSize
+          %8 = OpTypeFunction %v4float
+         %10 = OpConstantNull %v4float
        %void = OpTypeVoid
-          %3 = OpTypeFunction %void
+         %13 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+
+               ; Function main_inner
+ %main_inner = OpFunction %v4float None %8
+          %9 = OpLabel
+               OpReturnValue %10
+               OpFunctionEnd
 
                ; Function main
-       %main = OpFunction %void None %3
-          %4 = OpLabel
+       %main = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpFunctionCall %v4float %main_inner
+               OpStore %main_position_Output %15 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 )");
-}
-
-TEST_F(SpirvWriterTest, Function_EntryPoint_Multiple) {
-    auto* f1 =
-        b.Function("main1", ty.void_(), core::ir::Function::PipelineStage::kCompute, {{32, 4, 1}});
-    b.Append(f1->Block(), [&] {  //
-        b.Return(f1);
-    });
-
-    auto* f2 =
-        b.Function("main2", ty.void_(), core::ir::Function::PipelineStage::kCompute, {{8, 2, 16}});
-    b.Append(f2->Block(), [&] {  //
-        b.Return(f2);
-    });
-
-    auto* f3 = b.Function("main3", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(f3->Block(), [&] {  //
-        b.Return(f3);
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST(R"(
-               OpEntryPoint GLCompute %main1 "main1"
-               OpEntryPoint GLCompute %main2 "main2"
-               OpEntryPoint Fragment %main3 "main3"
-               OpExecutionMode %main1 LocalSize 32 4 1
-               OpExecutionMode %main2 LocalSize 8 2 16
-               OpExecutionMode %main3 OriginUpperLeft
-
-               ; Debug Information
-               OpName %main1 "main1"                ; id %1
-               OpName %main2 "main2"                ; id %5
-               OpName %main3 "main3"                ; id %7
-
-               ; Types, variables and constants
-       %void = OpTypeVoid
-          %3 = OpTypeFunction %void
-
-               ; Function main1
-      %main1 = OpFunction %void None %3
-          %4 = OpLabel
-               OpReturn
-               OpFunctionEnd
-
-               ; Function main2
-      %main2 = OpFunction %void None %3
-          %6 = OpLabel
-               OpReturn
-               OpFunctionEnd
-
-               ; Function main3
-      %main3 = OpFunction %void None %3
-          %8 = OpLabel
-               OpReturn
-               OpFunctionEnd
-)");
+    EXPECT_EQ(workgroup_info.x, 0u);
+    EXPECT_EQ(workgroup_info.y, 0u);
+    EXPECT_EQ(workgroup_info.z, 0u);
 }
 
 TEST_F(SpirvWriterTest, Function_ReturnValue) {
@@ -259,16 +241,26 @@ TEST_F(SpirvWriterTest, Function_Parameters) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %5 = OpTypeFunction %int %int %int
+       %uint = OpTypeInt 32 0
        %void = OpTypeVoid
-         %10 = OpTypeFunction %void
+         %14 = OpTypeFunction %void
 
                ; Function foo
         %foo = OpFunction %int None %5
           %x = OpFunctionParameter %int
           %y = OpFunctionParameter %int
           %6 = OpLabel
-          %7 = OpIAdd %int %x %y
-               OpReturnValue %7
+          %8 = OpBitcast %uint %x
+          %9 = OpBitcast %uint %y
+         %10 = OpIAdd %uint %8 %9
+         %11 = OpBitcast %int %10
+               OpReturnValue %11
+               OpFunctionEnd
+
+               ; Function unused_entry_point
+%unused_entry_point = OpFunction %void None %14
+         %15 = OpLabel
+               OpReturn
                OpFunctionEnd
 )");
 }
@@ -339,8 +331,8 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
        %main = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpFunctionCall %v4float %main_inner
-               OpStore %main_position_Output %16
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %16 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 )");
@@ -366,9 +358,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4half %main_loc1_Input
+         %18 = OpLoad %v4half %main_loc1_Input None
          %19 = OpFunctionCall %v4float %main_inner %18
-               OpStore %main_loc2_Output %19
+               OpStore %main_loc2_Output %19 None
                OpReturn
                OpFunctionEnd
 )");
@@ -393,10 +385,10 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFConvert %v4half %18
          %20 = OpFunctionCall %v4float %main_inner %19
-               OpStore %main_loc2_Output %20
+               OpStore %main_loc2_Output %20 None
                OpReturn
                OpFunctionEnd
 )");
@@ -422,9 +414,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFunctionCall %v4half %main_inner %18
-               OpStore %main_loc2_Output %19
+               OpStore %main_loc2_Output %19 None
                OpReturn
                OpFunctionEnd
 )");
@@ -449,43 +441,34 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithoutCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFunctionCall %v4half %main_inner %18
          %20 = OpFConvert %v4float %19
-               OpStore %main_loc2_Output %20
+               OpStore %main_loc2_Output %20 None
                OpReturn
                OpFunctionEnd
 )");
 }
 
 TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
-    auto* outputs =
-        ty.Struct(mod.symbols.New("Outputs"), {
-                                                  {
-                                                      mod.symbols.Register("a"),
-                                                      ty.f32(),
-                                                      core::IOAttributes{
-                                                          /* location */ 0u,
-                                                          /* index */ 0u,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                                  {
-                                                      mod.symbols.Register("b"),
-                                                      ty.f32(),
-                                                      core::IOAttributes{
-                                                          /* location */ 0u,
-                                                          /* index */ 1u,
-                                                          /* color */ std::nullopt,
-                                                          /* builtin */ std::nullopt,
-                                                          /* interpolation */ std::nullopt,
-                                                          /* invariant */ false,
-                                                      },
-                                                  },
-                                              });
+    auto* outputs = ty.Struct(mod.symbols.New("Outputs"), {
+                                                              {
+                                                                  mod.symbols.Register("a"),
+                                                                  ty.f32(),
+                                                                  core::IOAttributes{
+                                                                      .location = 0u,
+                                                                      .blend_src = 0u,
+                                                                  },
+                                                              },
+                                                              {
+                                                                  mod.symbols.Register("b"),
+                                                                  ty.f32(),
+                                                                  core::IOAttributes{
+                                                                      .location = 0u,
+                                                                      .blend_src = 1u,
+                                                                  },
+                                                              },
+                                                          });
 
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
@@ -500,7 +483,7 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
                OpDecorate %main_loc0_idx0_Output Index 0
                OpDecorate %main_loc0_idx1_Output Location 0
                OpDecorate %main_loc0_idx1_Output Index 1
-    )");
+)");
     EXPECT_INST(R"(
 %main_loc0_idx0_Output = OpVariable %_ptr_Output_float Output   ; Location 0, Index 0
 %main_loc0_idx1_Output = OpVariable %_ptr_Output_float Output   ; Location 0, Index 1
@@ -510,9 +493,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
          %15 = OpLabel
          %16 = OpFunctionCall %Outputs %main_inner
          %17 = OpCompositeExtract %float %16 0
-               OpStore %main_loc0_idx0_Output %17
+               OpStore %main_loc0_idx0_Output %17 None
          %18 = OpCompositeExtract %float %16 1
-               OpStore %main_loc0_idx1_Output %18
+               OpStore %main_loc0_idx1_Output %18 None
                OpReturn
                OpFunctionEnd
 )");
@@ -553,8 +536,8 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
      %scalar = OpFunctionParameter %float
          %14 = OpFunctionParameter %_ptr_Function_mat3v3float
          %16 = OpLabel
-         %17 = OpLoad %mat3v3float %14
-         %18 = OpLoad %mat3v3float %12
+         %17 = OpLoad %mat3v3float %14 None
+         %18 = OpLoad %mat3v3float %12 None
          %19 = OpMatrixTimesScalar %mat3v3float %18 %scalar
          %20 = OpCompositeExtract %v3float %19 0
          %21 = OpCompositeExtract %v3float %17 0
@@ -575,15 +558,104 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
          %40 = OpVariable %_ptr_Function_mat3v3float Function
          %41 = OpVariable %_ptr_Function_mat3v3float Function
          %33 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_0
-         %36 = OpLoad %mat3v3float %33
+         %36 = OpLoad %mat3v3float %33 None
          %37 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_1
-         %39 = OpLoad %mat3v3float %37
+         %39 = OpLoad %mat3v3float %37 None
                OpStore %40 %36
                OpStore %41 %39
          %42 = OpFunctionCall %mat3v3float %target %40 %float_2 %41
                OpReturnValue %42
                OpFunctionEnd
 )");
+}
+
+TEST_F(SpirvWriterTest, WorkgroupStorageSizeEmpty) {
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_EQ(0u, workgroup_info.storage_size);
+}
+
+TEST_F(SpirvWriterTest, WorkgroupStorageSizeSimple) {
+    auto* var = mod.root_block->Append(b.Var("var", ty.ptr(workgroup, ty.f32())));
+    auto* var2 = mod.root_block->Append(b.Var("var2", ty.ptr(workgroup, ty.i32())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Let("y", var2);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_EQ(32u, workgroup_info.storage_size);
+}
+
+TEST_F(SpirvWriterTest, WorkgroupStorageSizeCompoundTypes) {
+    Vector members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 4u,
+                                         core::IOAttributes{}),
+        ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.array<i32, 4>(), 1u, 4u, 16u, 64u,
+                                         core::IOAttributes{}),
+    };
+
+    // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
+    // from the 4-element array with 16-byte stride.
+    auto* wg_struct_ty = ty.Struct(mod.symbols.New("WgStruct"), members);
+    auto* str_var = mod.root_block->Append(b.Var("var_struct", ty.ptr(workgroup, wg_struct_ty)));
+
+    // Plus another 4 bytes from this other workgroup-class f32.
+    auto* f32_var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.f32())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", f32_var);
+        b.Let("y", str_var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_EQ(96u, workgroup_info.storage_size);
+}
+
+TEST_F(SpirvWriterTest, WorkgroupStorageSizeAlignmentPadding) {
+    // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
+    // that our padded size calculation for workgroup storage is accurate.
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, ty.vec3<f32>())));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_EQ(16u, workgroup_info.storage_size);
+}
+
+TEST_F(SpirvWriterTest, WorkgroupStorageSizeStructAlignment) {
+    // Per WGSL spec, a struct's size is the offset its last member plus the size
+    // of its last member, rounded up to the alignment of its largest member. So
+    // here the struct is expected to occupy 1024 bytes of workgroup storage.
+    Vector members{
+        ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 1024u, 4u,
+                                         core::IOAttributes{}),
+    };
+
+    auto* wg_struct_ty = ty.Struct(mod.symbols.New("WgStruct"), members);
+    auto* var = mod.root_block->Append(b.Var("var_f32", ty.ptr(workgroup, wg_struct_ty)));
+
+    auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Let("x", var);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_EQ(1024u, workgroup_info.storage_size);
 }
 
 }  // namespace

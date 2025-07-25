@@ -1,98 +1,95 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float f_1;
-layout(location = 1) flat in uint u_1;
-layout(location = 2) in float16_t x_1;
-layout(location = 3) in f16vec3 y_1;
+
 struct S {
   float f;
   uint u;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-  uint pad_10;
-  uint pad_11;
-  uint pad_12;
-  uint pad_13;
-  uint pad_14;
-  uint pad_15;
-  uint pad_16;
-  uint pad_17;
-  uint pad_18;
-  uint pad_19;
-  uint pad_20;
-  uint pad_21;
-  uint pad_22;
-  uint pad_23;
-  uint pad_24;
-  uint pad_25;
-  uint pad_26;
-  uint pad_27;
-  uint pad_28;
-  uint pad_29;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
+  uint tint_pad_26;
+  uint tint_pad_27;
+  uint tint_pad_28;
+  uint tint_pad_29;
   vec4 v;
-  uint pad_30;
-  uint pad_31;
-  uint pad_32;
-  uint pad_33;
+  uint tint_pad_30;
+  uint tint_pad_31;
+  uint tint_pad_32;
+  uint tint_pad_33;
   float16_t x;
-  uint pad_34;
-  uint pad_35;
-  uint pad_36;
-  uint pad_37;
-  uint pad_38;
-  uint pad_39;
-  uint pad_40;
+  uint tint_pad_34;
+  uint tint_pad_35;
+  uint tint_pad_36;
+  uint tint_pad_37;
+  uint tint_pad_38;
+  uint tint_pad_39;
+  uint tint_pad_40;
   f16vec3 y;
-  uint pad_41;
-  uint pad_42;
-  uint pad_43;
-  uint pad_44;
-  uint pad_45;
-  uint pad_46;
-  uint pad_47;
-  uint pad_48;
-  uint pad_49;
-  uint pad_50;
-  uint pad_51;
-  uint pad_52;
-  uint pad_53;
-  uint pad_54;
+  uint tint_pad_41;
+  uint tint_pad_42;
+  uint tint_pad_43;
+  uint tint_pad_44;
+  uint tint_pad_45;
+  uint tint_pad_46;
+  uint tint_pad_47;
+  uint tint_pad_48;
+  uint tint_pad_49;
+  uint tint_pad_50;
+  uint tint_pad_51;
+  uint tint_pad_52;
+  uint tint_pad_53;
+  uint tint_pad_54;
 };
 
-layout(binding = 0, std430) buffer tint_symbol_block_ssbo {
+layout(binding = 0, std430)
+buffer f_output_block_ssbo {
   S inner;
-} tint_symbol;
-
-void assign_and_preserve_padding_tint_symbol_inner(S value) {
-  tint_symbol.inner.f = value.f;
-  tint_symbol.inner.u = value.u;
-  tint_symbol.inner.v = value.v;
-  tint_symbol.inner.x = value.x;
-  tint_symbol.inner.y = value.y;
+} v_1;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 2) in float16_t tint_interstage_location2;
+layout(location = 3) in f16vec3 tint_interstage_location3;
+void tint_store_and_preserve_padding(S value_param) {
+  v_1.inner.f = value_param.f;
+  v_1.inner.u = value_param.u;
+  v_1.inner.v = value_param.v;
+  v_1.inner.x = value_param.x;
+  v_1.inner.y = value_param.y;
 }
-
-void frag_main(S tint_symbol_1) {
-  float f = tint_symbol_1.f;
-  uint u = tint_symbol_1.u;
-  vec4 v = tint_symbol_1.v;
-  float16_t x = tint_symbol_1.x;
-  f16vec3 y = tint_symbol_1.y;
-  assign_and_preserve_padding_tint_symbol_inner(tint_symbol_1);
+void frag_main_inner(S v_2) {
+  float f = v_2.f;
+  uint u = v_2.u;
+  vec4 v = v_2.v;
+  float16_t x = v_2.x;
+  f16vec3 y = v_2.y;
+  tint_store_and_preserve_padding(v_2);
 }
-
 void main() {
-  S tint_symbol_2 = S(f_1, u_1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, x_1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, y_1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
-  frag_main(tint_symbol_2);
-  return;
+  frag_main_inner(S(tint_interstage_location0, tint_interstage_location1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, tint_interstage_location2, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_interstage_location3, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
 }

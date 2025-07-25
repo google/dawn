@@ -33,18 +33,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void BuiltinPolyfillFuzzer(Module& module, BuiltinPolyfillConfig config) {
-    if (auto res = BuiltinPolyfill(module, config); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of BuiltinPolyfill failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
+                                          const fuzz::ir::Context&,
+                                          const BuiltinPolyfillConfig& config) {
+    return BuiltinPolyfill(ir, config);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::BuiltinPolyfillFuzzer,
+                      tint::core::ir::transform::kBuiltinPolyfillCapabilities);

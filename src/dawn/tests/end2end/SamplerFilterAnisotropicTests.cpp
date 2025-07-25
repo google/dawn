@@ -141,12 +141,12 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             wgpu::Buffer stagingBuffer =
                 utils::CreateBufferFromData(device, data.data(), data.size() * sizeof(utils::RGBA8),
                                             wgpu::BufferUsage::CopySrc);
-            wgpu::ImageCopyBuffer imageCopyBuffer =
-                utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
-            wgpu::ImageCopyTexture imageCopyTexture =
-                utils::CreateImageCopyTexture(texture, level, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+                utils::CreateTexelCopyBufferInfo(stagingBuffer, 0, kTextureBytesPerRowAlignment);
+            wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(texture, level, {0, 0, 0});
             wgpu::Extent3D copySize = {texWidth, texHeight, 1};
-            encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+            encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
         }
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
@@ -291,8 +291,10 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 };
 
 TEST_P(SamplerFilterAnisotropicTest, SlantedPlaneMipmap) {
-    // TODO(crbug.com/dawn/740): Test output is wrong with D3D12 + WARP.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
+    // requires EXT_texture_filter_anisotropic
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     const uint16_t maxAnisotropyLists[] = {1, 2, 16, 128};
     for (uint16_t t : maxAnisotropyLists) {

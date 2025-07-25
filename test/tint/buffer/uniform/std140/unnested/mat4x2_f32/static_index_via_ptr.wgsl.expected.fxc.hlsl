@@ -1,28 +1,21 @@
+
 cbuffer cbuffer_m : register(b0) {
   uint4 m[2];
 };
-static int counter = 0;
-
-int i() {
-  counter = (counter + 1);
-  return counter;
-}
-
-float4x2 m_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = m[scalar_offset / 4];
-  const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = m[scalar_offset_1 / 4];
-  const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = m[scalar_offset_2 / 4];
-  const uint scalar_offset_3 = ((offset + 24u)) / 4;
-  uint4 ubo_load_3 = m[scalar_offset_3 / 4];
-  return float4x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)), asfloat(((scalar_offset_3 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
+float4x2 v(uint start_byte_offset) {
+  uint4 v_1 = m[(start_byte_offset / 16u)];
+  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  uint4 v_3 = m[((8u + start_byte_offset) / 16u)];
+  float2 v_4 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy)));
+  uint4 v_5 = m[((16u + start_byte_offset) / 16u)];
+  float2 v_6 = asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.zw) : (v_5.xy)));
+  uint4 v_7 = m[((24u + start_byte_offset) / 16u)];
+  return float4x2(v_2, v_4, v_6, asfloat(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.zw) : (v_7.xy))));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float4x2 l_m = m_load(0u);
-  float2 l_m_1 = asfloat(m[0].zw);
-  return;
+  float4x2 l_m = v(0u);
+  float2 l_m_1 = asfloat(m[0u].zw);
 }
+

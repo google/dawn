@@ -1,34 +1,27 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-struct mat4x3_f16 {
+
+struct mat4x3_f16_std140 {
   f16vec3 col0;
   f16vec3 col1;
   f16vec3 col2;
   f16vec3 col3;
 };
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  mat4x3_f16 inner[4];
-} u;
-
-layout(binding = 1, std430) buffer s_block_ssbo {
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  mat4x3_f16_std140 inner[4];
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   float16_t inner;
-} s;
-
-f16mat4x3 conv_mat4x3_f16(mat4x3_f16 val) {
-  return f16mat4x3(val.col0, val.col1, val.col2, val.col3);
-}
-
-void f() {
-  f16mat3x4 t = transpose(conv_mat4x3_f16(u.inner[2u]));
-  float16_t l = length(u.inner[0u].col1.zxy);
-  float16_t a = abs(u.inner[0u].col1.zxy[0u]);
-  s.inner = ((t[0].x + float16_t(l)) + float16_t(a));
-}
-
+} v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  f16mat3x4 t = transpose(f16mat4x3(v.inner[2u].col0, v.inner[2u].col1, v.inner[2u].col2, v.inner[2u].col3));
+  float16_t l = length(v.inner[0u].col1.zxy);
+  float16_t a = abs(v.inner[0u].col1.zxy.x);
+  float16_t v_2 = (t[0u].x + float16_t(l));
+  v_1.inner = (v_2 + float16_t(a));
 }

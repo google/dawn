@@ -29,7 +29,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -38,7 +38,6 @@
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/color_attribute.h"
@@ -69,6 +68,7 @@
 #include "src/tint/lang/wgsl/ast/override.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
+#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
@@ -118,10 +118,15 @@ bool ASTPrinter::Generate() {
         Line();
     }
     // Generate global declarations in the order they appear in the module.
+    bool has_declaration = false;
     for (auto* decl : program_.AST().GlobalDeclarations()) {
         if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable, ast::Requires>()) {
             continue;
         }
+        if (has_declaration) {
+            Line();
+        }
+        has_declaration = true;
         Switch(
             decl,  //
             [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
@@ -129,9 +134,6 @@ bool ASTPrinter::Generate() {
             [&](const ast::Variable* var) { return EmitVariable(Line(), var); },
             [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },  //
             TINT_ICE_ON_NO_MATCH);
-        if (decl != program_.AST().GlobalDeclarations().Back()) {
-            Line();
-        }
     }
 
     return !diagnostics_.ContainsErrors();
@@ -509,7 +511,7 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
             },
             [&](const ast::BuiltinAttribute* builtin) {
                 out << "builtin(";
-                out << builtin->builtin->String();
+                out << core::ToString(builtin->builtin);
                 out << ")";
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
@@ -517,10 +519,11 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(";
-                EmitExpression(out, interpolate->type);
-                if (interpolate->sampling) {
+                out << core::ToString(interpolate->interpolation.type);
+                if (interpolate->interpolation.sampling !=
+                    core::InterpolationSampling::kUndefined) {
                     out << ", ";
-                    EmitExpression(out, interpolate->sampling);
+                    out << core::ToString(interpolate->interpolation.sampling);
                 }
                 out << ")";
             },
@@ -531,6 +534,7 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 out << ")";
             },
             [&](const ast::MustUseAttribute*) { out << "must_use"; },
+            [&](const ast::RowMajorAttribute*) { out << "row_major"; },
             [&](const ast::StructMemberOffsetAttribute* offset) {
                 out << "offset(";
                 EmitExpression(out, offset->expr);

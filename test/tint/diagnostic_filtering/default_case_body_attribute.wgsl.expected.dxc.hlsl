@@ -10,25 +10,28 @@
   switch (i32(x)) {
               ^
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
-}
-
-Texture2D<float4> t : register(t1);
-SamplerState s : register(s2);
-
-struct tint_symbol_1 {
+struct main_inputs {
   float x : TEXCOORD0;
 };
 
-void main_inner(float x) {
-  tint_ftoi(x);
-  do {
-    float4 tint_phony = t.Sample(s, (0.0f).xx);
-  } while (false);
+
+Texture2D<float4> t : register(t1);
+SamplerState s : register(s2);
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.x);
-  return;
+void main_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      t.Sample(s, (0.0f).xx);
+      break;
+    }
+  }
 }
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

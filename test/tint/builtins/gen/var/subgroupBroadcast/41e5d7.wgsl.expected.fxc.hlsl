@@ -1,9 +1,33 @@
-SKIP: FAILED
+SKIP: INVALID
 
-/build/dawn/src/tint/lang/hlsl/writer/ast_printer/ast_printer.cc:2510 internal compiler error: TINT_UNREACHABLE unexpected subgroup builtin type subgroupBroadcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+//
+// fragment_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 3> subgroupBroadcast_41e5d7() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> res = WaveReadLaneAt(arg_0, 1u);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupBroadcast_41e5d7());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 3> subgroupBroadcast_41e5d7() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> res = WaveReadLaneAt(arg_0, 1u);
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupBroadcast_41e5d7());
+}
+

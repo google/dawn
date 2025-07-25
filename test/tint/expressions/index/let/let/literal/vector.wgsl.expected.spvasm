@@ -1,31 +1,38 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Generator: Google Tint Compiler; 1
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
+         %15 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
-       %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+               OpName %v "v"
+               OpName %i "i"
+               OpName %unused_entry_point "unused_entry_point"
       %float = OpTypeFloat 32
-          %5 = OpTypeFunction %float
+          %3 = OpTypeFunction %float
     %v3float = OpTypeVector %float 3
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
-         %13 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+          %v = OpConstantComposite %v3float %float_1 %float_2 %float_3
         %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-%unused_entry_point = OpFunction %void None %1
+          %i = OpConstant %int 1
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void
+          %f = OpFunction %float None %3
           %4 = OpLabel
-               OpReturn
+         %13 = OpBitcast %uint %i
+         %14 = OpExtInst %uint %15 UMin %13 %uint_2
+         %17 = OpVectorExtractDynamic %float %v %14
+               OpReturnValue %17
                OpFunctionEnd
-          %f = OpFunction %float None %5
-          %8 = OpLabel
-         %16 = OpVectorExtractDynamic %float %13 %int_1
-               OpReturnValue %16
+%unused_entry_point = OpFunction %void None %20
+         %21 = OpLabel
+               OpReturn
                OpFunctionEnd

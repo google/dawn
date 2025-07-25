@@ -42,7 +42,7 @@ TEST_F(IR_ReturnTest, ImplicitNoValue) {
     ASSERT_EQ(ret->Func(), func);
     EXPECT_TRUE(ret->Args().IsEmpty());
     EXPECT_EQ(ret->Value(), nullptr);
-    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
+    EXPECT_THAT(func->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{ret, 0u}));
 }
 
 TEST_F(IR_ReturnTest, WithValue) {
@@ -53,8 +53,8 @@ TEST_F(IR_ReturnTest, WithValue) {
     ASSERT_EQ(ret->Args().Length(), 1u);
     EXPECT_EQ(ret->Args()[0], val);
     EXPECT_EQ(ret->Value(), val);
-    EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{ret, 0u}));
-    EXPECT_THAT(val->Usages(), testing::UnorderedElementsAre(Usage{ret, 1u}));
+    EXPECT_THAT(func->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{ret, 0u}));
+    EXPECT_THAT(val->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{ret, 1u}));
 }
 
 TEST_F(IR_ReturnTest, Result) {

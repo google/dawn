@@ -28,10 +28,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_CONVERSION_POLYFILL_H_
 
-#include <string>
-
-#include "src/tint/utils/reflection/reflection.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
@@ -39,6 +38,9 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const Capabilities kConversionPolyfillCapabilities{Capability::kAllowDuplicateBindings};
 
 /// The set of polyfills that should be applied.
 struct ConversionPolyfillConfig {

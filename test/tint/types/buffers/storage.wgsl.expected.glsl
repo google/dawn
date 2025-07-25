@@ -2,15 +2,12 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer weights_block_ssbo {
+layout(binding = 0, std430)
+buffer f_weights_block_ssbo {
   float inner[];
-} weights;
-
-void tint_symbol() {
-  float a = weights.inner[0];
-}
-
+} v;
 void main() {
-  tint_symbol();
-  return;
+  uint v_1 = (uint(v.inner.length()) - 1u);
+  uint v_2 = min(uint(0), v_1);
+  float a = v.inner[v_2];
 }

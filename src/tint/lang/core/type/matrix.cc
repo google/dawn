@@ -44,8 +44,9 @@ Matrix::Matrix(const Vector* column_type, uint32_t columns)
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
+               Flag::kHostShareable,
            }),
-      subtype_(column_type->type()),
+      subtype_(column_type->Type()),
       column_type_(column_type),
       rows_(column_type->Width()),
       columns_(columns) {
@@ -71,7 +72,7 @@ std::string Matrix::FriendlyName() const {
 }
 
 uint32_t Matrix::Size() const {
-    return column_type_->Align() * columns();
+    return column_type_->Align() * Columns();
 }
 
 uint32_t Matrix::Align() const {
@@ -82,7 +83,7 @@ uint32_t Matrix::ColumnStride() const {
     return column_type_->Align();
 }
 
-TypeAndCount Matrix::Elements(const Type* /* type_if_invalid = nullptr */,
+TypeAndCount Matrix::Elements(const type::Type* /* type_if_invalid = nullptr */,
                               uint32_t /* count_if_invalid = 0 */) const {
     return {column_type_, columns_};
 }

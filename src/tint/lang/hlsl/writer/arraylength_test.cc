@@ -228,5 +228,63 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, ArrayLength_Robustness) {
+    auto* dst = b.Var("dest", ty.ptr(storage, ty.array<u32>()));
+    dst->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(dst);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr(storage, ty.u32()), dst, 0_u);
+        b.Store(access, 123_u);
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = false;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer dest : register(u1);
+void foo() {
+  uint v = 0u;
+  dest.GetDimensions(v);
+  dest.Store((0u + (min(0u, ((v / 4u) - 1u)) * 4u)), 123u);
+}
+
+)");
+}
+
+TEST_F(HlslWriterTest, ArrayLength_RobustnessAndArrayLengthFromUniform) {
+    auto* dst = b.Var("dest", ty.ptr(storage, ty.array<u32>()));
+    dst->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(dst);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr(storage, ty.u32()), dst, 0_u);
+        b.Store(access, 123_u);
+        b.Return(func);
+    });
+
+    Options options;
+    options.disable_robustness = false;
+    options.array_length_from_uniform.ubo_binding = {30, 0};
+    options.array_length_from_uniform.bindpoint_to_size_index[{0, 1}] = 0;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
+
+RWByteAddressBuffer dest : register(u1);
+cbuffer cbuffer_tint_storage_buffer_sizes : register(b0, space30) {
+  uint4 tint_storage_buffer_sizes[1];
+};
+void foo() {
+  tint_array_lengths_struct v = {(tint_storage_buffer_sizes[0u].x / 4u)};
+  dest.Store((0u + (min(0u, (v.tint_array_length_0_1 - 1u)) * 4u)), 123u);
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

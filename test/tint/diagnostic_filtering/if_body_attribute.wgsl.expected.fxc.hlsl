@@ -10,20 +10,20 @@
   if (x > 0) @diagnostic(warning, derivative_uniformity) {
       ^
 
-Texture2D<float4> t : register(t1);
-SamplerState s : register(s2);
-
-struct tint_symbol_1 {
+struct main_inputs {
   float x : TEXCOORD0;
 };
 
+
+Texture2D<float4> t : register(t1);
+SamplerState s : register(s2);
 void main_inner(float x) {
   if ((x > 0.0f)) {
-    float4 tint_phony = t.Sample(s, (0.0f).xx);
+    t.Sample(s, (0.0f).xx);
   }
 }
 
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.x);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
 }
+

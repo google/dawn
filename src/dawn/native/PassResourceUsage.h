@@ -56,9 +56,8 @@ struct BufferSyncInfo {
 struct TextureSyncInfo {
     wgpu::TextureUsage usage = wgpu::TextureUsage::None;
     wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None;
+    bool operator==(const TextureSyncInfo& b) const = default;
 };
-
-bool operator==(const TextureSyncInfo& a, const TextureSyncInfo& b);
 
 // The texture usage inside passes must be tracked per-subresource.
 using TextureSubresourceSyncInfo = SubresourceStorage<TextureSyncInfo>;
@@ -83,12 +82,6 @@ struct SyncScopeResourceUsage {
 // textures used, because some unused BindGroups may not be used at all in synchronization
 // scope but their resources still need to be validated on Queue::Submit.
 struct ComputePassResourceUsage {
-    // Somehow without this defaulted constructor, MSVC or its STDlib have an issue where they
-    // use the copy constructor (that's deleted) when doing operations on a
-    // vector<ComputePassResourceUsage>
-    ComputePassResourceUsage(ComputePassResourceUsage&&);
-    ComputePassResourceUsage();
-
     std::vector<SyncScopeResourceUsage> dispatchUsages;
 
     // All the resources referenced by this compute pass for validation in Queue::Submit.

@@ -67,7 +67,10 @@ tint_target_add_dependencies(tint_utils_text lib
   tint_utils_memory
   tint_utils_rtti
   tint_utils_system
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_utils_text lib
+  "src_utils"
 )
 
 if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
@@ -109,9 +112,9 @@ tint_target_add_dependencies(tint_utils_text_test test
   tint_utils_memory
   tint_utils_rtti
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_utils_text_test test
   "gtest"
+  "src_utils"
 )

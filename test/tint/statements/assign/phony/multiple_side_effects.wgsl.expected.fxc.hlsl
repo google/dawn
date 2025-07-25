@@ -1,12 +1,12 @@
+
 int f(int a, int b, int c) {
   return ((a * b) + c);
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  int tint_symbol = f(1, 2, 3);
-  int tint_symbol_1 = f(4, 5, 6);
-  int tint_symbol_2 = f(8, 9, 10);
-  int tint_symbol_3 = f(7, tint_symbol_2, 11);
-  return;
+  int v = f(int(1), int(2), int(3));
+  int v_1 = f(int(4), int(5), int(6));
+  int v_2 = (v + (v_1 * f(int(7), f(int(8), int(9), int(10)), int(11))));
 }
+

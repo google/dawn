@@ -32,9 +32,7 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/type.h"
@@ -147,6 +145,18 @@ struct U32 final : public Castable<U32, Type> {
 
 /// `f32` type
 struct F32 final : public Castable<F32, Type> {
+    /// @param b the ProgramBuilder used to construct the AST types
+    /// @returns the constructed ast::Type node for the given type
+    ast::Type Build(ProgramBuilder& b) const override;
+
+#ifndef NDEBUG
+    /// @returns a string representation of the type, for debug purposes only
+    std::string String() const override;
+#endif  // NDEBUG
+};
+
+/// `f16` type
+struct F16 final : public Castable<F16, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     ast::Type Build(ProgramBuilder& b) const override;
@@ -549,6 +559,8 @@ class TypeManager {
     const ast_parser::U32* U32();
     /// @return a F32 type. Repeated calls will return the same pointer.
     const ast_parser::F32* F32();
+    /// @return a F16 type. Repeated calls will return the same pointer.
+    const ast_parser::F16* F16();
     /// @return a I32 type. Repeated calls will return the same pointer.
     const ast_parser::I32* I32();
     /// @param ty the input type.

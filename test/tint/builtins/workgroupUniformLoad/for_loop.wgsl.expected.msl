@@ -1,35 +1,38 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+struct tint_module_vars_struct {
+  threadgroup int* a;
+  threadgroup int* b;
+};
 
-int tint_workgroupUniformLoad(threadgroup int* const p) {
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  int const result = *(p);
-  threadgroup_barrier(mem_flags::mem_threadgroup);
-  return result;
-}
-
-void foo(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbol_5) {
+void foo(tint_module_vars_struct tint_module_vars) {
   {
+    uint2 tint_loop_idx = uint2(4294967295u);
     int i = 0;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-      int const tint_symbol = i;
-      int const tint_symbol_1 = tint_workgroupUniformLoad(tint_symbol_4);
-      if (!((tint_symbol < tint_symbol_1))) {
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      int const v = i;
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      int const v_1 = (*tint_module_vars.a);
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      if ((v < v_1)) {
+      } else {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        int const v_2 = (*tint_module_vars.b);
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(v_2)));
       }
-      {
-        int const tint_symbol_2 = i;
-        int const tint_symbol_3 = tint_workgroupUniformLoad(tint_symbol_5);
-        i = as_type<int>((as_type<uint>(tint_symbol_2) + as_type<uint>(tint_symbol_3)));
-      }
+      continue;
     }
   }
 }
-

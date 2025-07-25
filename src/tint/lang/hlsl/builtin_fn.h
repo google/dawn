@@ -40,7 +40,8 @@
 #include <cstdint>
 #include <string>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/lang/core/ir/call.h"
+#include "src/tint/utils/rtti/traits.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::hlsl {
@@ -50,10 +51,32 @@ enum class BuiltinFn : uint8_t {
     kAsint,
     kAsuint,
     kAsfloat,
+    kDot4AddI8Packed,
+    kDot4AddU8Packed,
     kF32Tof16,
     kF16Tof32,
+    kInterlockedCompareExchange,
+    kInterlockedExchange,
+    kInterlockedAdd,
+    kInterlockedMax,
+    kInterlockedMin,
+    kInterlockedAnd,
+    kInterlockedOr,
+    kInterlockedXor,
     kMul,
+    kPackU8,
+    kPackS8,
+    kPackClampS8,
+    kConvert,
     kSign,
+    kTextureStore,
+    kUnpackS8S32,
+    kUnpackU8U32,
+    kWaveGetLaneIndex,
+    kWaveGetLaneCount,
+    kWaveReadLaneAt,
+    kModf,
+    kFrexp,
     kLoad,
     kLoad2,
     kLoad3,
@@ -66,7 +89,23 @@ enum class BuiltinFn : uint8_t {
     kStore2,
     kStore3,
     kStore4,
+    kStoreF16,
+    kStore2F16,
+    kStore3F16,
+    kStore4F16,
+    kGatherCmp,
+    kGather,
+    kGatherAlpha,
+    kGatherBlue,
+    kGatherGreen,
+    kGatherRed,
     kGetDimensions,
+    kSample,
+    kSampleBias,
+    kSampleCmp,
+    kSampleCmpLevelZero,
+    kSampleGrad,
+    kSampleLevel,
     kNone,
 };
 
@@ -74,10 +113,14 @@ enum class BuiltinFn : uint8_t {
 const char* str(BuiltinFn i);
 
 /// Emits the name of the builtin function type.
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, BuiltinFn i) {
     return o << str(i);
 }
+
+/// @returns access restrictions for a function
+tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn);
 
 }  // namespace tint::hlsl
 // \endcond

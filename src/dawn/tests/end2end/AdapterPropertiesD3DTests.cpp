@@ -39,21 +39,21 @@ class AdapterPropertiesD3DTest : public DawnTest {};
 TEST_P(AdapterPropertiesD3DTest, GetD3DProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesD3D));
     {
-        wgpu::AdapterProperties properties;
-        wgpu::AdapterPropertiesD3D d3dProperties;
-        properties.nextInChain = &d3dProperties;
-
-        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
-
-        // This is the minimum D3D shader model Dawn supports.
-        EXPECT_GE(d3dProperties.shaderModel, 50u);
-    }
-    {
         wgpu::AdapterInfo info;
         wgpu::AdapterPropertiesD3D d3dProperties;
         info.nextInChain = &d3dProperties;
 
         adapter.GetInfo(&info);
+
+        // This is the minimum D3D shader model Dawn supports.
+        EXPECT_GE(d3dProperties.shaderModel, 50u);
+    }
+    {
+        wgpu::AdapterInfo adapterInfo;
+        wgpu::AdapterPropertiesD3D d3dProperties;
+        adapterInfo.nextInChain = &d3dProperties;
+
+        device.GetAdapterInfo(&adapterInfo);
 
         // This is the minimum D3D shader model Dawn supports.
         EXPECT_GE(d3dProperties.shaderModel, 50u);

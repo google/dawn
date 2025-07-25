@@ -29,7 +29,7 @@
 #define SRC_DAWN_NATIVE_DAWN_PLATFORM_H_
 
 // Use webgpu_cpp to have the enum and bitfield definitions
-#include "dawn/webgpu_cpp.h"
+#include <webgpu/webgpu_cpp.h>
 
 #include "dawn/native/dawn_platform_autogen.h"
 
@@ -55,11 +55,17 @@ static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
 static constexpr wgpu::BufferUsage kInternalCopySrcBuffer =
     static_cast<wgpu::BufferUsage>(1u << 29);
 
-// TODO(350497225): We should store Buffer's internal and external usage in separate member
-// variables, so that the external usage can be queried directly without bit hacks using this
-// special flag.
-static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
-    kInternalStorageBuffer | kReadOnlyStorageBuffer | kInternalCopySrcBuffer;
+// Add an extra buffer usage (indirect-for-backend-resource-tracking) for backend resource
+// tracking. We won't do buffer usage transitions when the new buffer usage only contains
+// wgpu::BufferUsage::Indirect and doesn't contain kInternalIndirectBufferForBackendResourceTracking
+// on the backends.
+static constexpr wgpu::BufferUsage kIndirectBufferForBackendResourceTracking =
+    static_cast<wgpu::BufferUsage>(1u << 28);
+
+// Define `kIndirectBufferForFrontendValidation` as an alias of wgpu::BufferUsage::Indirect just
+// for front-end validation on the indirect buffer usage.
+static constexpr wgpu::BufferUsage kIndirectBufferForFrontendValidation =
+    wgpu::BufferUsage::Indirect;
 
 // Extra texture usages
 // Usage to denote an extra tag value used in system specific ways.
@@ -68,7 +74,7 @@ static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
 static constexpr wgpu::TextureUsage kReservedTextureUsage =
     static_cast<wgpu::TextureUsage>(1u << 31);
 
-// Extrea texture usages for textures that are used with the presentation engine.
+// Extra texture usages for textures that are used with the presentation engine.
 // Acquire is that Dawn is acquiring the texture from the presentation engine while Release is Dawn
 // releasing is to the presentation engine.
 static constexpr wgpu::TextureUsage kPresentAcquireTextureUsage =
@@ -97,6 +103,10 @@ static constexpr wgpu::TextureUsage kResolveAttachmentLoadingUsage =
 static constexpr wgpu::BufferBindingType kInternalStorageBufferBinding =
     static_cast<wgpu::BufferBindingType>(~0u);
 
+// Extra BufferBindingType for internal readonly storage buffer binding.
+static constexpr wgpu::BufferBindingType kInternalReadOnlyStorageBufferBinding =
+    static_cast<wgpu::BufferBindingType>(~0u - 1);
+
 // Extra TextureSampleType for sampling from a resolve attachment.
 static constexpr wgpu::TextureSampleType kInternalResolveAttachmentSampleType =
     static_cast<wgpu::TextureSampleType>(~0u);
@@ -107,6 +117,13 @@ static constexpr wgpu::TextureViewDimension kInternalInputAttachmentDim =
 
 static constexpr uint32_t kEnumPrefixMask = 0xFFFF'0000;
 static constexpr uint32_t kDawnEnumPrefix = 0x0005'0000;
+
+struct Rect2D {
+    uint32_t x;
+    uint32_t y;
+    uint32_t width;
+    uint32_t height;
+};
 
 }  // namespace dawn::native
 

@@ -1,0 +1,16 @@
+SKIP: FAILED
+
+pixel_local address space is not supported by the SPIR-V backend
+pixel_local address space is not supported by the SPIR-V backend
+pixel_local address space is not supported by the SPIR-V backend
+;
+; f
+;
+;
+; f2
+;
+;
+; f3
+;
+
+tint executable returned error: exit status 1

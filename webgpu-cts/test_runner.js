@@ -141,15 +141,12 @@ const [sendHeartbeat, {
 function wrapPromiseWithHeartbeat(prototype, key) {
   const old = prototype[key];
   prototype[key] = function (...args) {
-    return new Promise((resolve, reject) => {
-      // Send the heartbeat both before and after resolve/reject
-      // so that the heartbeat is sent ahead of any potentially
-      // long-running synchronous code awaiting the Promise.
-      old.call(this, ...args)
-        .then(val => { sendHeartbeat(); resolve(val) })
-        .catch(err => { sendHeartbeat(); reject(err) })
-        .finally(sendHeartbeat);
-    });
+    const promise = old.call(this, ...args);
+    // Send a heartbeat just before any code that was waiting on the promise.
+    promise.then(sendHeartbeat, sendHeartbeat);
+    // Return the original promise so we don't interfere with the behavior
+    // of the API itself.
+    return promise;
   }
 }
 
@@ -166,14 +163,13 @@ wrapPromiseWithHeartbeat(GPUShaderModule.prototype, 'getCompilationInfo');
 globalTestConfig.testHeartbeatCallback = sendHeartbeat;
 globalTestConfig.noRaceWithRejectOnTimeout = true;
 
-// FXC is very slow to compile unrolled const-eval loops, where the metal shader
-// compiler (Intel GPU) is very slow to compile rolled loops. Intel drivers for
-// linux may also suffer the same performance issues, so unroll const-eval loops
-// if we're not running on Windows.
-const isWindows = navigator.userAgent.includes("Windows");
-if (!isWindows) {
-  globalTestConfig.unrollConstEvalLoops = true;
-}
+// Avoid doing too many things at once (e.g. creating 500 pipelines
+// simultaneously on a 32-bit system easily runs out of memory).
+globalTestConfig.maxSubcasesInFlight = 100;
+
+
+
+
 
 let lastOptionsKey, testWorker;
 
@@ -214,8 +210,7 @@ async function runCtsTest(queryString) {
   if (powerPreference || compatibility) {
     setDefaultRequestAdapterOptions({
       ...(powerPreference && { powerPreference }),
-      // MAINTENANCE_TODO(gman): Change this to whatever the option ends up being
-      ...(compatibility && { compatibilityMode: true }),
+      ...(compatibility && { featureLevel: 'compatibility' }),
     });
   }
 
@@ -338,3 +333,4 @@ function sendMessageInfraFailure(message) {
 }
 
 window.setupWebsocket = setupWebsocket
+window.globalTestConfig = globalTestConfig

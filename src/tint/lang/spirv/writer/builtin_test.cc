@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -75,8 +75,7 @@ TEST_P(Builtin_1arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Builtin_1arg,
-    testing::Values(BuiltinTestCase{kI32, core::BuiltinFn::kAbs, "SAbs"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kAbs, "FAbs"},
+    testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kAbs, "FAbs"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kAbs, "FAbs"},
                     BuiltinTestCase{kF32, core::BuiltinFn::kAcos, "Acos"},
                     BuiltinTestCase{kF16, core::BuiltinFn::kAcos, "Acos"},
@@ -162,6 +161,26 @@ TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
           %4 = OpLabel
                OpReturnValue %arg
                OpFunctionEnd
+)");
+}
+
+// Test that abs of a signed integer is implemented as max(x,-x);
+TEST_F(SpirvWriterTest, Builtin_Abs_i32) {
+    auto* func = b.Function("foo", MakeScalarType(kI32));
+    b.Append(func->Block(), [&] {
+        auto* arg = MakeScalarValue(kI32);
+        auto* result = b.Call(MakeScalarType(kI32), core::BuiltinFn::kAbs, arg);
+        b.Return(func, result);
+        mod.SetName(arg, "arg");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %6 = OpBitcast %uint %arg
+          %8 = OpNot %uint %6
+          %9 = OpIAdd %uint %8 %uint_1
+         %11 = OpBitcast %int %9
+         %12 = OpExtInst %int %13 SMax %arg %11
 )");
 }
 
@@ -1201,10 +1220,10 @@ TEST_P(Builtin_2arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Builtin_2arg,
                          testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kAtan2, "Atan2"},
-                                         BuiltinTestCase{kF32, core::BuiltinFn::kMax, "FMax"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kMax, "NMax"},
                                          BuiltinTestCase{kI32, core::BuiltinFn::kMax, "SMax"},
                                          BuiltinTestCase{kU32, core::BuiltinFn::kMax, "UMax"},
-                                         BuiltinTestCase{kF32, core::BuiltinFn::kMin, "FMin"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kMin, "NMin"},
                                          BuiltinTestCase{kI32, core::BuiltinFn::kMin, "SMin"},
                                          BuiltinTestCase{kU32, core::BuiltinFn::kMin, "UMin"},
                                          BuiltinTestCase{kF32, core::BuiltinFn::kPow, "Pow"},
@@ -1287,11 +1306,20 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
     EXPECT_INST(R"(
           %8 = OpCompositeExtract %int %arg1 0
           %9 = OpCompositeExtract %int %arg2 0
-         %10 = OpIMul %int %8 %9
-         %11 = OpCompositeExtract %int %arg1 1
-         %12 = OpCompositeExtract %int %arg2 1
-         %13 = OpIMul %int %11 %12
-     %result = OpIAdd %int %10 %13
+         %11 = OpBitcast %uint %8
+         %12 = OpBitcast %uint %9
+         %13 = OpIMul %uint %11 %12
+         %14 = OpBitcast %int %13
+         %15 = OpCompositeExtract %int %arg1 1
+         %16 = OpCompositeExtract %int %arg2 1
+         %17 = OpBitcast %uint %15
+         %18 = OpBitcast %uint %16
+         %19 = OpIMul %uint %17 %18
+         %20 = OpBitcast %int %19
+         %21 = OpBitcast %uint %14
+         %22 = OpBitcast %uint %20
+         %23 = OpIAdd %uint %21 %22
+         %24 = OpBitcast %int %23
 )");
 }
 
@@ -1444,16 +1472,13 @@ TEST_P(Builtin_3arg, Vector) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.spirv_inst);
 }
-INSTANTIATE_TEST_SUITE_P(
-    SpirvWriterTest,
-    Builtin_3arg,
-    testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kClamp, "NClamp"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kFma, "Fma"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kFma, "Fma"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kMix, "Mix"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kMix, "Mix"},
-                    BuiltinTestCase{kF32, core::BuiltinFn::kSmoothstep, "SmoothStep"},
-                    BuiltinTestCase{kF16, core::BuiltinFn::kSmoothstep, "SmoothStep"}));
+INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
+                         Builtin_3arg,
+                         testing::Values(BuiltinTestCase{kF32, core::BuiltinFn::kClamp, "NClamp"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kFma, "Fma"},
+                                         BuiltinTestCase{kF16, core::BuiltinFn::kFma, "Fma"},
+                                         BuiltinTestCase{kF32, core::BuiltinFn::kMix, "Mix"},
+                                         BuiltinTestCase{kF16, core::BuiltinFn::kMix, "Mix"}));
 
 TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_I32) {
     auto* value = b.FunctionParam("value", ty.i32());
@@ -1557,6 +1582,57 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Smoothstep_F32) {
+    auto* value = b.FunctionParam("value", ty.f32());
+    auto* low = b.FunctionParam("low", ty.f32());
+    auto* high = b.FunctionParam("high", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpFSub %float %high %value
+          %9 = OpFSub %float %low %value
+         %10 = OpFDiv %float %8 %9
+         %11 = OpExtInst %float %12 NClamp %10 %float_0 %float_1
+         %15 = OpFMul %float %float_2 %11
+         %17 = OpFSub %float %float_3 %15
+         %19 = OpFMul %float %11 %17
+     %result = OpFMul %float %11 %19
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Smoothstep_F16) {
+    auto* value = b.FunctionParam("value", ty.f16());
+    auto* low = b.FunctionParam("low", ty.f16());
+    auto* high = b.FunctionParam("high", ty.f16());
+    auto* func = b.Function("foo", ty.f16());
+    func->SetParams({value, low, high});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f16(), core::BuiltinFn::kSmoothstep, value, low, high);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %8 = OpFSub %half %high %value
+          %9 = OpFSub %half %low %value
+         %10 = OpFDiv %half %8 %9
+         %11 = OpExtInst %half %12 NClamp %10 %half_0x0p_0 %half_0x1p_0
+         %15 = OpFMul %half %half_0x1p_1 %11
+         %17 = OpFSub %half %half_0x1_8p_1 %15
+         %19 = OpFMul %half %11 %17
+     %result = OpFMul %half %11 %19
+)");
+}
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* offset = b.FunctionParam("offset", ty.u32());
@@ -1881,6 +1957,19 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_72");
 }
 
+TEST_F(SpirvWriterTest, Builtin_StorageBarrier_VulkanMemoryModel) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24648");
+}
+
 TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -1890,6 +1979,19 @@ TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_2056");
+}
+
+TEST_F(SpirvWriterTest, Builtin_TextureBarrier_Vulkan) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_26632");
 }
 
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
@@ -1903,10 +2005,23 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_264");
 }
 
+TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier_VulkanMemoryModel) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24840");
+}
+
 TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
     auto* func = b.Function("foo", ty.vec4<u32>());
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kSubgroupBallot);
+        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kSubgroupBallot, true);
         mod.SetName(result, "result");
         b.Return(func, result);
     });
@@ -1969,7 +2084,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer");
+    EXPECT_INST("%1 = OpVariable %_ptr_StorageBuffer_var_block_tint_explicit_layout StorageBuffer");
     EXPECT_INST("%result = OpArrayLength %uint %1 0");
 }
 
@@ -1993,7 +2108,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%var = OpVariable %_ptr_StorageBuffer_Buffer StorageBuffer");
+    EXPECT_INST("%var = OpVariable %_ptr_StorageBuffer_Buffer_tint_explicit_layout StorageBuffer");
     EXPECT_INST("%result = OpArrayLength %uint %var 2");
 }
 

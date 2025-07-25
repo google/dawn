@@ -41,7 +41,7 @@
 /third_party/node-api-headers
 /third_party/partition_alloc
 /third_party/protobuf
-/third_party/rust-toolchain
+/third_party/siso/cipd/
 /third_party/spirv-cross/src/
 /third_party/spirv-headers/src/
 /third_party/spirv-tools/src/
@@ -59,8 +59,6 @@
 /tools/clang
 /tools/cmake*
 /tools/golang
-/tools/memory
-/tools/rust
 /out
 
 # Tint test validation cache file
@@ -156,3 +154,12 @@ tint.dot
 
 ### pyenv files
 /.python-version
+
+### Clangd cached index files
+/.cache
+
+### The 'compile_commands' file can be generated at root
+compile_commands.json
+
+### Root user file for gemini cli
+GEMINI.md

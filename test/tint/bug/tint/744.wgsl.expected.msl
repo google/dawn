@@ -1,22 +1,21 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+struct Matrix {
+  /* 0x0000 */ tint_array<uint, 1> numbers;
+};
 
 struct Uniforms {
   /* 0x0000 */ uint2 aShape;
@@ -24,26 +23,47 @@ struct Uniforms {
   /* 0x0010 */ uint2 outShape;
 };
 
-struct Matrix {
-  /* 0x0000 */ tint_array<uint, 1> numbers;
+struct tint_module_vars_struct {
+  const device Matrix* firstMatrix;
+  const device Matrix* secondMatrix;
+  device Matrix* resultMatrix;
+  const constant Uniforms* uniforms;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void tint_symbol_inner(uint3 global_id, const constant Uniforms* const tint_symbol_1, const device Matrix* const tint_symbol_2, const device Matrix* const tint_symbol_3, device Matrix* const tint_symbol_4) {
-  uint2 const resultCell = uint2(global_id[1], global_id[0]);
-  uint const dimInner = (*(tint_symbol_1)).aShape[1];
-  uint const dimOutter = (*(tint_symbol_1)).outShape[1];
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_0;
+  uint tint_array_length_0_1;
+  uint tint_array_length_0_2;
+};
+
+void main_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u)};
+  uint2 const resultCell = uint2(global_id.y, global_id.x);
+  uint const dimInner = (*tint_module_vars.uniforms).aShape.y;
+  uint const dimOutter = (*tint_module_vars.uniforms).outShape.y;
   uint result = 0u;
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
-    uint const a = (i + (resultCell[0] * dimInner));
-    uint const b = (resultCell[1] + (i * dimOutter));
-    result = (result + ((*(tint_symbol_2)).numbers[a] * (*(tint_symbol_3)).numbers[b]));
+  {
+    uint i = 0u;
+    while(true) {
+      if ((i < dimInner)) {
+      } else {
+        break;
+      }
+      uint const a = (i + (resultCell.x * dimInner));
+      uint const b = (resultCell.y + (i * dimOutter));
+      result = (result + ((*tint_module_vars.firstMatrix).numbers[min(a, (v.tint_array_length_0_0 - 1u))] * (*tint_module_vars.secondMatrix).numbers[min(b, (v.tint_array_length_0_1 - 1u))]));
+      {
+        i = (i + 1u);
+      }
+      continue;
+    }
   }
-  uint const index = (resultCell[1] + (resultCell[0] * dimOutter));
-  (*(tint_symbol_4)).numbers[index] = result;
+  uint const index = (resultCell.y + (resultCell.x * dimOutter));
+  (*tint_module_vars.resultMatrix).numbers[min(index, (v.tint_array_length_0_2 - 1u))] = result;
 }
 
-kernel void tint_symbol(const constant Uniforms* tint_symbol_5 [[buffer(0)]], const device Matrix* tint_symbol_6 [[buffer(2)]], const device Matrix* tint_symbol_7 [[buffer(3)]], device Matrix* tint_symbol_8 [[buffer(1)]], uint3 global_id [[thread_position_in_grid]]) {
-  tint_symbol_inner(global_id, tint_symbol_5, tint_symbol_6, tint_symbol_7, tint_symbol_8);
-  return;
+kernel void v_1(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(0)]], const device Matrix* secondMatrix [[buffer(1)]], device Matrix* resultMatrix [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  main_inner(global_id, tint_module_vars);
 }
-

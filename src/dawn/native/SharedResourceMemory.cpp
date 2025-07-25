@@ -46,7 +46,7 @@ SharedResourceMemoryContents* SharedResource::GetSharedResourceMemoryContents() 
 
 SharedResourceMemory::SharedResourceMemory(DeviceBase* device,
                                            ObjectBase::ErrorTag tag,
-                                           const char* label)
+                                           StringView label)
     : ApiObjectBase(device, tag, label),
       mContents(new SharedResourceMemoryContents(GetWeakRef(this))) {}
 
@@ -64,6 +64,10 @@ bool SharedResourceMemoryContents::HasExclusiveReadAccess() const {
 
 int SharedResourceMemoryContents::GetReadAccessCount() const {
     return mReadAccessCount;
+}
+
+bool SharedResourceMemoryContents::HasAccess() const {
+    return mSharedResourceAccessState != SharedResourceAccessState::NotAccessed;
 }
 
 void SharedResourceMemory::Initialize() {
@@ -293,7 +297,12 @@ MaybeError SharedResourceMemory::EndAccess(Resource* resource, EndAccessState* s
         ResultOrError<FenceAndSignalValue> result =
             EndAccessInternal(lastUsageSerial, resource, state);
         if (result.IsSuccess()) {
-            fenceList.push_back(result.AcquireSuccess());
+            FenceAndSignalValue fence = result.AcquireSuccess();
+            // Some backends might not support fence, in those case, a null object might be
+            // returned. So skip it.
+            if (fence.object) {
+                fenceList.push_back(fence);
+            }
         } else {
             err = result.AcquireError();
         }

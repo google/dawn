@@ -1,9 +1,9 @@
-const wgsize : i32 = 64i;
+override wgsize : i32;
 
 alias Array = array<i32, (wgsize * 2)>;
 
 var<workgroup> v : Array;
 
 fn foo() -> i32 {
-  return workgroupUniformLoad(&(v))[0];
+  return workgroupUniformLoad(&(v[0]));
 }

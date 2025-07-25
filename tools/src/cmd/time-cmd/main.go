@@ -42,16 +42,21 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/progressbar"
 )
 
 func main() {
-	if err := run(); err != nil {
+	if err := run(oswrapper.GetRealOSWrapper()); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
-func run() error {
+
+// TODO(crbug.com/344014313): Split this into multiple helper functions so that
+// it can be unittested. Testing is not currently possible due to the call to
+// exec.LookPath.
+func run(osWrapper oswrapper.OSWrapper) error {
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()
 		fmt.Fprintf(out, "time-cmd runs a given command for each file found in a glob, returning the sorted run times..\n")
@@ -83,14 +88,14 @@ func run() error {
 		return fmt.Errorf("Missing command")
 	}
 
-	fileGlob = fileutils.ExpandHome(fileGlob)
+	fileGlob = fileutils.ExpandHome(fileGlob, osWrapper)
 
-	exe, err := exec.LookPath(fileutils.ExpandHome(args[0]))
+	exe, err := exec.LookPath(fileutils.ExpandHome(args[0], osWrapper))
 	if err != nil {
 		return fmt.Errorf("could not find executable '%v'", args[0])
 	}
 
-	files, err := glob.Glob(fileGlob)
+	files, err := glob.Glob(fileGlob, osWrapper)
 	if err != nil {
 		return err
 	}

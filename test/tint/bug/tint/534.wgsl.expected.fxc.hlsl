@@ -1,61 +1,84 @@
-void set_vector_element(inout uint4 vec, int idx, uint val) {
-  vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;
-}
+struct main_inputs {
+  uint3 GlobalInvocationID : SV_DispatchThreadID;
+};
 
-uint4 tint_ftou(float4 v) {
-  return ((v < (4294967040.0f).xxxx) ? ((v < (0.0f).xxxx) ? (0u).xxxx : uint4(v)) : (4294967295u).xxxx);
-}
 
 Texture2D<float4> src : register(t0);
-Texture2D<float4> tint_symbol : register(t1);
+Texture2D<float4> v : register(t1);
 RWByteAddressBuffer output : register(u2);
 cbuffer cbuffer_uniforms : register(b3) {
   uint4 uniforms[1];
 };
-
 uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }
 
-struct tint_symbol_3 {
-  uint3 GlobalInvocationID : SV_DispatchThreadID;
-};
+uint4 tint_v4f32_to_v4u32(float4 value) {
+  return uint4(clamp(value, (0.0f).xxxx, (4294967040.0f).xxxx));
+}
 
 void main_inner(uint3 GlobalInvocationID) {
-  uint2 tint_tmp;
-  src.GetDimensions(tint_tmp.x, tint_tmp.y);
-  uint2 size = tint_tmp;
+  uint2 v_1 = (0u).xx;
+  src.GetDimensions(v_1.x, v_1.y);
+  uint2 size = v_1;
   uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
-  if ((uniforms[0].x == 1u)) {
+  if ((uniforms[0u].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  float4 srcColor = src.Load(uint3(srcTexCoord, uint(0)));
-  float4 dstColor = tint_symbol.Load(uint3(dstTexCoord, uint(0)));
+  float4 srcColor = src.Load(int3(int2(srcTexCoord), int(0)));
+  float4 dstColor = v.Load(int3(int2(dstTexCoord), int(0)));
   bool success = true;
-  uint4 srcColorBits = uint4(0u, 0u, 0u, 0u);
-  uint4 dstColorBits = tint_ftou(dstColor);
+  uint4 srcColorBits = (0u).xxxx;
+  uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
   {
-    for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
-      uint tint_symbol_1 = i;
-      set_vector_element(srcColorBits, tint_symbol_1, ConvertToFp16FloatValue(srcColor[i]));
-      bool tint_tmp_1 = success;
-      if (tint_tmp_1) {
-        tint_tmp_1 = (srcColorBits[i] == dstColorBits[i]);
+    uint2 tint_loop_idx = (4294967295u).xx;
+    uint i = 0u;
+    while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
+        break;
       }
-      success = (tint_tmp_1);
+      if ((i < uniforms[0u].w)) {
+      } else {
+        break;
+      }
+      uint v_2 = i;
+      uint v_3 = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      uint4 v_4 = srcColorBits;
+      uint4 v_5 = uint4((v_3).xxxx);
+      uint4 v_6 = uint4((v_2).xxxx);
+      srcColorBits = (((v_6 == uint4(int(0), int(1), int(2), int(3)))) ? (v_5) : (v_4));
+      bool v_7 = false;
+      if (success) {
+        v_7 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
+      } else {
+        v_7 = false;
+      }
+      success = v_7;
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        i = (i + 1u);
+      }
+      continue;
     }
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
-    output.Store((4u * outputIndex), asuint(1u));
+    uint v_8 = 0u;
+    output.GetDimensions(v_8);
+    output.Store((0u + (min(outputIndex, ((v_8 / 4u) - 1u)) * 4u)), 1u);
   } else {
-    output.Store((4u * outputIndex), asuint(0u));
+    uint v_9 = 0u;
+    output.GetDimensions(v_9);
+    output.Store((0u + (min(outputIndex, ((v_9 / 4u) - 1u)) * 4u)), 0u);
   }
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_3 tint_symbol_2) {
-  main_inner(tint_symbol_2.GlobalInvocationID);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.GlobalInvocationID);
 }
+

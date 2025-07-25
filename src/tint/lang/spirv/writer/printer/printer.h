@@ -28,11 +28,10 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 
-#include <cstdint>
-#include <vector>
-
-#include "src/tint/lang/spirv/writer/common/module.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/spirv/writer/common/options.h"
+#include "src/tint/lang/spirv/writer/common/output.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -41,18 +40,16 @@ class Module;
 
 namespace tint::spirv::writer {
 
+// The capabilities that might be needed due to raising.
+const core::ir::Capabilities kPrinterCapabilities{
+    core::ir::Capability::kAllowAnyInputAttachmentIndexType,
+    core::ir::Capability::kAllowNonCoreTypes,
+};
+
 /// @returns the generated SPIR-V instructions on success, or failure
 /// @param module the Tint IR module to generate
-/// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
-///                                   storage class with OpConstantNull
-tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module,
-                                          bool zero_init_workgroup_memory);
-
-/// @returns the generated SPIR-V module on success, or failure
-/// @param module the Tint IR module to generate
-/// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
-///                                   storage class with OpConstantNull
-tint::Result<Module> PrintModule(core::ir::Module& module, bool zero_init_workgroup_memory);
+/// @param options the printer options
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::spirv::writer
 

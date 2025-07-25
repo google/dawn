@@ -41,23 +41,22 @@ class SharedFence final : public SharedFenceBase {
   public:
     static ResultOrError<Ref<SharedFence>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor);
 
-    static ResultOrError<Ref<SharedFence>> Create(
-        Device* device,
-        const char* label,
-        const SharedFenceVkSemaphoreSyncFDDescriptor* descriptor);
+    static ResultOrError<Ref<SharedFence>> Create(Device* device,
+                                                  StringView label,
+                                                  const SharedFenceSyncFDDescriptor* descriptor);
 
     static ResultOrError<Ref<SharedFence>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);
 
     const SystemHandle& GetHandle() const;
 
   private:
-    SharedFence(Device* device, const char* label, SystemHandle handle);
+    SharedFence(Device* device, StringView label, SystemHandle handle);
     void DestroyImpl() override;
 
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;

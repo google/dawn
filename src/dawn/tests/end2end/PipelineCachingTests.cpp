@@ -128,7 +128,16 @@ class PipelineCachingTests : public DawnTest {
     NiceMock<CachingInterfaceMock> mMockCache;
 };
 
-class SinglePipelineCachingTests : public PipelineCachingTests {};
+class SinglePipelineCachingTests : public PipelineCachingTests {
+  protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        supported.UnlinkedCopyTo(&required);
+        required.maxStorageBuffersInFragmentStage = supported.maxStorageBuffersInFragmentStage;
+    }
+};
 
 // Tests that pipeline creation works fine even if the cache is disabled.
 // Note: This tests needs to use more than 1 device since the frontend cache on each device
@@ -535,6 +544,8 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentC
 // cached backends currently remap shader bindings based on the layout. It can be split
 // per-backend as needed.
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheLayout) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();

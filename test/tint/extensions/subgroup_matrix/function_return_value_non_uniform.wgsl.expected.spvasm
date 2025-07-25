@@ -1,0 +1,317 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 214
+; Schema: 0
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpCapability CooperativeMatrixKHR
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpExtension "SPV_KHR_cooperative_matrix"
+        %138 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
+               OpExecutionMode %main LocalSize 64 1 1
+               OpMemberName %buffer_block_tint_explicit_layout 0 "inner"
+               OpName %buffer_block_tint_explicit_layout "buffer_block_tint_explicit_layout"
+               OpName %non_uniform_condition "non_uniform_condition"
+               OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
+               OpName %make_matrix "make_matrix"
+               OpName %return_value "return_value"
+               OpName %make_array "make_array"
+               OpName %return_value_0 "return_value"
+               OpName %make_nested_array "make_nested_array"
+               OpName %return_value_1 "return_value"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %make_struct "make_struct"
+               OpMemberName %S 0 "l"
+               OpMemberName %S 1 "r"
+               OpName %S "S"
+               OpName %return_value_2 "return_value"
+               OpName %make_nested_struct "make_nested_struct"
+               OpMemberName %S_Nested 0 "s"
+               OpName %S_Nested "S_Nested"
+               OpName %return_value_3 "return_value"
+               OpName %main_inner "main_inner"
+               OpName %idx "idx"
+               OpName %main "main"
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpMemberDecorate %buffer_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %buffer_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
+      %float = OpTypeFloat 32
+%_runtimearr_float = OpTypeRuntimeArray %float
+%buffer_block_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_buffer_block_tint_explicit_layout = OpTypePointer StorageBuffer %buffer_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block_tint_explicit_layout StorageBuffer
+       %bool = OpTypeBool
+%_ptr_Private_bool = OpTypePointer Private %bool
+          %9 = OpConstantNull %bool
+%non_uniform_condition = OpVariable %_ptr_Private_bool Private %9
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+     %uint_3 = OpConstant %uint 3
+     %uint_8 = OpConstant %uint 8
+     %uint_0 = OpConstant %uint 0
+         %14 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_0
+         %18 = OpTypeFunction %14
+%_ptr_Function_14 = OpTypePointer Function %14
+    %float_0 = OpConstant %float 0
+         %22 = OpConstantComposite %14 %float_0
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+     %uint_2 = OpConstant %uint 2
+%_arr_14_uint_2 = OpTypeArray %14 %uint_2
+         %36 = OpTypeFunction %_arr_14_uint_2
+%_ptr_Function__arr_14_uint_2 = OpTypePointer Function %_arr_14_uint_2
+         %40 = OpConstantComposite %_arr_14_uint_2 %22 %22
+   %float_42 = OpConstant %float 42
+  %float_100 = OpConstant %float 100
+   %float_n7 = OpConstant %float -7
+  %float_n42 = OpConstant %float -42
+%_arr__arr_14_uint_2_uint_2 = OpTypeArray %_arr_14_uint_2 %uint_2
+         %58 = OpTypeFunction %_arr__arr_14_uint_2_uint_2
+%_ptr_Function__arr__arr_14_uint_2_uint_2 = OpTypePointer Function %_arr__arr_14_uint_2_uint_2
+         %62 = OpConstantComposite %_arr__arr_14_uint_2_uint_2 %40 %40
+    %float_7 = OpConstant %float 7
+ %float_n100 = OpConstant %float -100
+   %float_n1 = OpConstant %float -1
+     %uint_1 = OpConstant %uint 1
+         %89 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_1
+          %S = OpTypeStruct %14 %89
+         %91 = OpTypeFunction %S
+%_ptr_Function_S = OpTypePointer Function %S
+         %96 = OpConstantComposite %89 %float_0
+         %95 = OpConstantComposite %S %22 %96
+   %S_Nested = OpTypeStruct %S
+        %110 = OpTypeFunction %S_Nested
+%_ptr_Function_S_Nested = OpTypePointer Function %S_Nested
+        %114 = OpConstantComposite %S_Nested %95
+       %void = OpTypeVoid
+        %131 = OpTypeFunction %void %uint
+%_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+    %uint_64 = OpConstant %uint 64
+     %uint_7 = OpConstant %uint 7
+        %210 = OpTypeFunction %void
+%make_matrix = OpFunction %14 None %18
+         %19 = OpLabel
+%return_value = OpVariable %_ptr_Function_14 Function %22
+         %24 = OpLoad %bool %non_uniform_condition None
+               OpSelectionMerge %25 None
+               OpBranchConditional %24 %26 %27
+         %26 = OpLabel
+         %29 = OpCompositeConstruct %14 %float_1
+               OpStore %return_value %29 None
+               OpBranch %25
+         %27 = OpLabel
+         %31 = OpCompositeConstruct %14 %float_2
+               OpStore %return_value %31 None
+               OpBranch %25
+         %25 = OpLabel
+         %28 = OpLoad %14 %return_value None
+               OpReturnValue %28
+               OpFunctionEnd
+ %make_array = OpFunction %_arr_14_uint_2 None %36
+         %37 = OpLabel
+%return_value_0 = OpVariable %_ptr_Function__arr_14_uint_2 Function %40
+         %41 = OpLoad %bool %non_uniform_condition None
+               OpSelectionMerge %42 None
+               OpBranchConditional %41 %43 %44
+         %43 = OpLabel
+         %46 = OpCompositeConstruct %14 %float_42
+         %48 = OpCompositeConstruct %14 %float_100
+         %50 = OpCompositeConstruct %_arr_14_uint_2 %46 %48
+               OpStore %return_value_0 %50 None
+               OpBranch %42
+         %44 = OpLabel
+         %51 = OpCompositeConstruct %14 %float_n7
+         %53 = OpCompositeConstruct %14 %float_n42
+         %55 = OpCompositeConstruct %_arr_14_uint_2 %51 %53
+               OpStore %return_value_0 %55 None
+               OpBranch %42
+         %42 = OpLabel
+         %45 = OpLoad %_arr_14_uint_2 %return_value_0 None
+               OpReturnValue %45
+               OpFunctionEnd
+%make_nested_array = OpFunction %_arr__arr_14_uint_2_uint_2 None %58
+         %59 = OpLabel
+%return_value_1 = OpVariable %_ptr_Function__arr__arr_14_uint_2_uint_2 Function %62
+          %a = OpVariable %_ptr_Function__arr__arr_14_uint_2_uint_2 Function %62
+          %b = OpVariable %_ptr_Function__arr__arr_14_uint_2_uint_2 Function %62
+         %65 = OpLoad %bool %non_uniform_condition None
+               OpSelectionMerge %66 None
+               OpBranchConditional %65 %67 %68
+         %67 = OpLabel
+         %70 = OpCompositeConstruct %14 %float_42
+         %71 = OpCompositeConstruct %14 %float_100
+         %72 = OpCompositeConstruct %_arr_14_uint_2 %70 %71
+         %73 = OpCompositeConstruct %14 %float_n7
+         %74 = OpCompositeConstruct %14 %float_n42
+         %75 = OpCompositeConstruct %_arr_14_uint_2 %73 %74
+         %76 = OpCompositeConstruct %_arr__arr_14_uint_2_uint_2 %72 %75
+               OpStore %return_value_1 %76 None
+               OpBranch %66
+         %68 = OpLabel
+         %77 = OpCompositeConstruct %14 %float_7
+         %79 = OpCompositeConstruct %14 %float_42
+         %80 = OpCompositeConstruct %_arr_14_uint_2 %77 %79
+         %81 = OpCompositeConstruct %14 %float_n100
+         %83 = OpCompositeConstruct %14 %float_n1
+         %85 = OpCompositeConstruct %_arr_14_uint_2 %81 %83
+         %86 = OpCompositeConstruct %_arr__arr_14_uint_2_uint_2 %80 %85
+               OpStore %return_value_1 %86 None
+               OpBranch %66
+         %66 = OpLabel
+         %69 = OpLoad %_arr__arr_14_uint_2_uint_2 %return_value_1 None
+               OpReturnValue %69
+               OpFunctionEnd
+%make_struct = OpFunction %S None %91
+         %92 = OpLabel
+%return_value_2 = OpVariable %_ptr_Function_S Function %95
+         %97 = OpLoad %bool %non_uniform_condition None
+               OpSelectionMerge %98 None
+               OpBranchConditional %97 %99 %100
+         %99 = OpLabel
+        %102 = OpCompositeConstruct %14 %float_42
+        %103 = OpCompositeConstruct %89 %float_100
+        %104 = OpCompositeConstruct %S %102 %103
+               OpStore %return_value_2 %104 None
+               OpBranch %98
+        %100 = OpLabel
+        %105 = OpCompositeConstruct %14 %float_n7
+        %106 = OpCompositeConstruct %89 %float_n42
+        %107 = OpCompositeConstruct %S %105 %106
+               OpStore %return_value_2 %107 None
+               OpBranch %98
+         %98 = OpLabel
+        %101 = OpLoad %S %return_value_2 None
+               OpReturnValue %101
+               OpFunctionEnd
+%make_nested_struct = OpFunction %S_Nested None %110
+        %111 = OpLabel
+%return_value_3 = OpVariable %_ptr_Function_S_Nested Function %114
+        %115 = OpLoad %bool %non_uniform_condition None
+               OpSelectionMerge %116 None
+               OpBranchConditional %115 %117 %118
+        %117 = OpLabel
+        %120 = OpCompositeConstruct %14 %float_42
+        %121 = OpCompositeConstruct %89 %float_100
+        %122 = OpCompositeConstruct %S %120 %121
+        %123 = OpCompositeConstruct %S_Nested %122
+               OpStore %return_value_3 %123 None
+               OpBranch %116
+        %118 = OpLabel
+        %124 = OpCompositeConstruct %14 %float_n7
+        %125 = OpCompositeConstruct %89 %float_n42
+        %126 = OpCompositeConstruct %S %124 %125
+        %127 = OpCompositeConstruct %S_Nested %126
+               OpStore %return_value_3 %127 None
+               OpBranch %116
+        %116 = OpLabel
+        %119 = OpLoad %S_Nested %return_value_3 None
+               OpReturnValue %119
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %131
+        %idx = OpFunctionParameter %uint
+        %132 = OpLabel
+        %133 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %135 = OpArrayLength %uint %1 0
+        %136 = OpISub %uint %135 %uint_1
+        %137 = OpExtInst %uint %138 UMin %idx %136
+        %139 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %137
+        %141 = OpLoad %float %139 NonPrivatePointer
+        %142 = OpFOrdEqual %bool %141 %float_0
+               OpStore %non_uniform_condition %142 None
+        %143 = OpFunctionCall %14 %make_matrix
+        %144 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %145 = OpArrayLength %uint %1 0
+        %146 = OpIMul %uint %uint_64 %uint_7
+        %149 = OpIAdd %uint %uint_0 %146
+        %150 = OpIAdd %uint %149 %uint_8
+        %151 = OpULessThanEqual %bool %150 %145
+               OpSelectionMerge %152 None
+               OpBranchConditional %151 %153 %152
+        %153 = OpLabel
+        %194 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %195 = OpAccessChain %_ptr_StorageBuffer_float %194 %uint_0
+               OpCooperativeMatrixStoreKHR %195 %143 %uint_0 %uint_64 NonPrivatePointer
+               OpBranch %152
+        %152 = OpLabel
+        %154 = OpFunctionCall %_arr_14_uint_2 %make_array
+        %155 = OpCompositeExtract %14 %154 0
+        %156 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %157 = OpArrayLength %uint %1 0
+        %158 = OpIMul %uint %uint_64 %uint_7
+        %159 = OpIAdd %uint %uint_0 %158
+        %160 = OpIAdd %uint %159 %uint_8
+        %161 = OpULessThanEqual %bool %160 %157
+               OpSelectionMerge %162 None
+               OpBranchConditional %161 %163 %162
+        %163 = OpLabel
+        %197 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %198 = OpAccessChain %_ptr_StorageBuffer_float %197 %uint_0
+               OpCooperativeMatrixStoreKHR %198 %155 %uint_0 %uint_64 NonPrivatePointer
+               OpBranch %162
+        %162 = OpLabel
+        %164 = OpFunctionCall %_arr__arr_14_uint_2_uint_2 %make_nested_array
+        %165 = OpCompositeExtract %14 %164 1 0
+        %166 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %167 = OpArrayLength %uint %1 0
+        %168 = OpIMul %uint %uint_64 %uint_7
+        %169 = OpIAdd %uint %uint_0 %168
+        %170 = OpIAdd %uint %169 %uint_8
+        %171 = OpULessThanEqual %bool %170 %167
+               OpSelectionMerge %172 None
+               OpBranchConditional %171 %173 %172
+        %173 = OpLabel
+        %200 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %201 = OpAccessChain %_ptr_StorageBuffer_float %200 %uint_0
+               OpCooperativeMatrixStoreKHR %201 %165 %uint_0 %uint_64 NonPrivatePointer
+               OpBranch %172
+        %172 = OpLabel
+        %174 = OpFunctionCall %S %make_struct
+        %175 = OpCompositeExtract %14 %174 0
+        %176 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %177 = OpArrayLength %uint %1 0
+        %178 = OpIMul %uint %uint_64 %uint_7
+        %179 = OpIAdd %uint %uint_0 %178
+        %180 = OpIAdd %uint %179 %uint_8
+        %181 = OpULessThanEqual %bool %180 %177
+               OpSelectionMerge %182 None
+               OpBranchConditional %181 %183 %182
+        %183 = OpLabel
+        %203 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %204 = OpAccessChain %_ptr_StorageBuffer_float %203 %uint_0
+               OpCooperativeMatrixStoreKHR %204 %175 %uint_0 %uint_64 NonPrivatePointer
+               OpBranch %182
+        %182 = OpLabel
+        %184 = OpFunctionCall %S_Nested %make_nested_struct
+        %185 = OpCompositeExtract %89 %184 0 1
+        %186 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %187 = OpArrayLength %uint %1 0
+        %188 = OpIMul %uint %uint_64 %uint_7
+        %189 = OpIAdd %uint %uint_0 %188
+        %190 = OpIAdd %uint %189 %uint_8
+        %191 = OpULessThanEqual %bool %190 %187
+               OpSelectionMerge %192 None
+               OpBranchConditional %191 %193 %192
+        %193 = OpLabel
+        %206 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %1 %uint_0
+        %207 = OpAccessChain %_ptr_StorageBuffer_float %206 %uint_0
+               OpCooperativeMatrixStoreKHR %207 %185 %uint_0 %uint_64 NonPrivatePointer
+               OpBranch %192
+        %192 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %210
+        %211 = OpLabel
+        %212 = OpLoad %uint %main_local_invocation_index_Input None
+        %213 = OpFunctionCall %void %main_inner %212
+               OpReturn
+               OpFunctionEnd

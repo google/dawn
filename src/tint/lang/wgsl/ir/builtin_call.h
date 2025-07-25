@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -42,12 +42,15 @@ namespace tint::wgsl::ir {
 class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
   public:
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param fn the builtin function
     /// @param args the conversion arguments
-    BuiltinCall(core::ir::InstructionResult* result,
+    BuiltinCall(Id id,
+                core::ir::InstructionResult* result,
                 BuiltinFn fn,
                 VectorRef<core::ir::Value*> args = tint::Empty);
+
     ~BuiltinCall() override;
 
     /// @copydoc core::ir::Instruction::Clone()

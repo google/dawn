@@ -5,22 +5,22 @@ package android.dawn.helper
  * or lower multiple of a value, e.g., "round -1,234 down to the nearest multiple of 1,000"
  * returns -2000.
  */
-fun Long.roundDownToNearestMultipleOf(boundary: Int): Long {
+public fun Long.roundDownToNearestMultipleOf(boundary: Int): Long {
   val padding = if (this < 0 && (this % boundary != 0L)) boundary else 0
   return ((this - padding) / boundary) * boundary
 }
 
-fun Int.roundDownToNearestMultipleOf(boundary: Int): Int {
+public fun Int.roundDownToNearestMultipleOf(boundary: Int): Int {
   val padding = if (this < 0 && (this % boundary != 0)) boundary else 0
   return ((this - padding) / boundary) * boundary
 }
 
-fun Long.roundUpToNearestMultipleOf(boundary: Int): Long {
+public fun Long.roundUpToNearestMultipleOf(boundary: Int): Long {
   val padding = if (this > 0 && (this % boundary != 0L)) boundary else 0
   return ((this + padding) / boundary) * boundary
 }
 
-fun Int.roundUpToNearestMultipleOf(boundary: Int): Int {
+public fun Int.roundUpToNearestMultipleOf(boundary: Int): Int {
   val padding = if (this > 0 && (this % boundary != 0)) boundary else 0
   return ((this + padding) / boundary) * boundary
 }

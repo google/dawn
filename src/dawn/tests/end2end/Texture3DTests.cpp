@@ -108,10 +108,11 @@ TEST_P(Texture3DTests, Sampling) {
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    wgpu::ImageCopyBuffer imageCopyBuffer =
-        utils::CreateImageCopyBuffer(buffer, 0, bytesPerRow, copySize.height);
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-    encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(buffer, 0, bytesPerRow, copySize.height);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                      {{0, sampler}, {1, textureView}});
@@ -137,10 +138,6 @@ TEST_P(Texture3DTests, Sampling) {
 // Regression test for crbug.com/dawn/2072 where the WSize of D3D UAV descriptor ends up being 0.
 // (which is invalid as noted by the debug layers)
 TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
-    // TODO(crbug.com/345758016): VVL produces a false-positive WAR hazard for this test.
-    // Remove this suppression once the issue is fixed.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
-
     wgpu::TextureDescriptor tDesc;
     tDesc.dimension = wgpu::TextureDimension::e3D;
     tDesc.size = {2, 2, 1};

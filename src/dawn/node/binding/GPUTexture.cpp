@@ -32,7 +32,6 @@
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/GPUTextureView.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -42,9 +41,7 @@ namespace wgpu::binding {
 GPUTexture::GPUTexture(wgpu::Device device,
                        const wgpu::TextureDescriptor& desc,
                        wgpu::Texture texture)
-    : device_(std::move(device)),
-      texture_(std::move(texture)),
-      label_(desc.label ? desc.label : "") {}
+    : device_(std::move(device)), texture_(std::move(texture)), label_(CopyLabel(desc.label)) {}
 
 interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     Napi::Env env,
@@ -62,9 +59,19 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
         !conv(desc.arrayLayerCount, descriptor.arrayLayerCount) ||  //
         !conv(desc.format, descriptor.format) ||                    //
         !conv(desc.dimension, descriptor.dimension) ||              //
-        !conv(desc.aspect, descriptor.aspect) || !conv(desc.label, descriptor.label)) {
+        !conv(desc.aspect, descriptor.aspect) ||                    //
+        !conv(desc.label, descriptor.label) ||                      //
+        !conv(desc.usage, descriptor.usage)) {
         return {};
     }
+
+    wgpu::TextureComponentSwizzleDescriptor swizzle_desc{};
+    wgpu::TextureComponentSwizzle swizzle;
+    if (conv(swizzle, descriptor.swizzle)) {
+        swizzle_desc.swizzle = swizzle;
+        desc.nextInChain = reinterpret_cast<wgpu::ChainedStruct*>(&swizzle_desc);
+    }
+
     return interop::GPUTextureView::Create<GPUTextureView>(env, desc, texture_.CreateView(&desc));
 }
 
@@ -136,7 +143,7 @@ std::string GPUTexture::getLabel(Napi::Env) {
 }
 
 void GPUTexture::setLabel(Napi::Env, std::string value) {
-    texture_.SetLabel(value.c_str());
+    texture_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

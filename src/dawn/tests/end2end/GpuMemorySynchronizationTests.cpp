@@ -40,6 +40,18 @@ namespace {
 
 class GpuMemorySyncTests : public DawnTest {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        supported.UnlinkedCopyTo(&required);
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    }
+
     wgpu::Buffer CreateBuffer() {
         wgpu::BufferDescriptor srcDesc;
         srcDesc.size = 4;
@@ -110,6 +122,8 @@ class GpuMemorySyncTests : public DawnTest {
 // dependency chain. The test verifies that data in buffer among iterations in compute passes is
 // correctly synchronized.
 TEST_P(GpuMemorySyncTests, ComputePass) {
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+
     // Create pipeline, bind group, and buffer for compute pass.
     wgpu::Buffer buffer = CreateBuffer();
     auto [compute, bindGroup] = CreatePipelineAndBindGroupForCompute(buffer);
@@ -165,6 +179,10 @@ TEST_P(GpuMemorySyncTests, RenderPass) {
 // Write into a storage buffer in a render pass. Then read that data in a compute
 // pass. And verify the data flow is correctly synchronized.
 TEST_P(GpuMemorySyncTests, RenderPassToComputePass) {
+    // TODO(crbug.com/388318201): assert failed in setSerial libANGLE/renderer/vulkan/vk_resource.h
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // Create pipeline, bind group, and buffer for render pass and compute pass.
     wgpu::Buffer buffer = CreateBuffer();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -414,6 +432,19 @@ constexpr int kVertexBufferStride = 4 * sizeof(float);
 
 class MultipleWriteThenMultipleReadTests : public DawnTest {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        supported.UnlinkedCopyTo(&required);
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
+    }
+
+  protected:
     wgpu::Buffer CreateZeroedBuffer(uint64_t size, wgpu::BufferUsage usage) {
         wgpu::BufferDescriptor srcDesc;
         srcDesc.size = size;
@@ -432,9 +463,6 @@ class MultipleWriteThenMultipleReadTests : public DawnTest {
 // storage buffer. Data to be read in all of these buffers in render pass depend on the write
 // operation in compute pass.
 TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     // Create pipeline, bind group, and different buffers for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct VBContents {
@@ -551,9 +579,6 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 // buffer is composed of vertices, indices, uniforms and readonly storage. Data to be read in the
 // buffer in render pass depend on the write operation in compute pass.
 TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
-    // TODO(crbug.com/dawn/646): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         struct Contents {

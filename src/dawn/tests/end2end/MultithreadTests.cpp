@@ -62,7 +62,7 @@ class LockStep {
 
     void Wait(Step step) {
         std::unique_lock<std::mutex> lg(mMutex);
-        mCv.wait(lg, [=] { return mStep == step; });
+        mCv.wait(lg, [this, step] { return mStep == step; });
     }
 
   private:
@@ -119,8 +119,7 @@ TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
     // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-
-    // TODO(crbug.com/dawn/1922): Flaky on Linux TSAN Release
+    // TODO(crbug.com/42240870): Flaky on Linux TSAN Release
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsTsan());
 
     std::vector<wgpu::Device> devices(5);
@@ -157,6 +156,8 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+    // TODO(crbug.com/407567233): Seeing a lot of timeouts on this test on TSAN bots.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsTsan());
 
     std::vector<wgpu::Device> devices(10);
 
@@ -175,7 +176,8 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
         additionalDevice.PushErrorScope(wgpu::ErrorFilter::Validation);
         additionalDevice.PopErrorScope(
             wgpu::CallbackMode::AllowProcessEvents,
-            [&device2ndRef, &isCompleted](wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*) {
+            [&device2ndRef, &isCompleted](wgpu::PopErrorScopeStatus, wgpu::ErrorType,
+                                          wgpu::StringView) {
                 device2ndRef = nullptr;
                 isCompleted = true;
             });
@@ -190,6 +192,40 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     });
 }
 
+// Test that waiting for a device lost after it's lost does not block.
+TEST_P(MultithreadTests, Device_WaitForDroppedAfterDropped) {
+    auto future = device.GetLostFuture();
+
+    LoseDeviceForTesting();
+    EXPECT_EQ(GetInstance().WaitAny(future, 0), wgpu::WaitStatus::Success);
+
+    EXPECT_EQ(future.id, device.GetLostFuture().id);
+}
+
+// Test that we can wait for a device lost on another thread.
+TEST_P(MultithreadTests, Device_WaitForDroppedInAnotherThread) {
+    // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
+    // NVIDIA.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
+    enum class Step {
+        Begin,
+        Waiting,
+    };
+
+    LockStep<Step> lockStep(Step::Begin);
+    std::thread waitThread([&] {
+        auto future = device.GetLostFuture();
+        EXPECT_EQ(GetInstance().WaitAny(future, 0), wgpu::WaitStatus::TimedOut);
+        lockStep.Signal(Step::Waiting);
+        EXPECT_EQ(GetInstance().WaitAny(future, UINT64_MAX), wgpu::WaitStatus::Success);
+    });
+
+    lockStep.Wait(Step::Waiting);
+    LoseDeviceForTesting();
+    waitThread.join();
+}
+
 // Test that multiple buffers being created and mapped on multiple threads won't interfere with
 // each other.
 TEST_P(MultithreadTests, Buffers_MapInParallel) {
@@ -201,20 +237,20 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
 
     constexpr uint32_t kSize = static_cast<uint32_t>(kDataSize * sizeof(uint32_t));
 
-    utils::RunInParallel(10, [=, &myData = std::as_const(myData)](uint32_t) {
+    utils::RunInParallel(10, [this, &myData = std::as_const(myData)](uint32_t) {
         // Create buffer and request mapping.
         wgpu::Buffer buffer =
             CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
         // Wait for the mapping to complete
-        ASSERT_EQ(instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
-                                                   wgpu::CallbackMode::AllowProcessEvents,
-                                                   [](wgpu::MapAsyncStatus status, const char*) {
-                                                       ASSERT_EQ(status,
-                                                                 wgpu::MapAsyncStatus::Success);
-                                                   }),
-                                   UINT64_MAX),
-                  wgpu::WaitStatus::Success);
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                             wgpu::CallbackMode::AllowProcessEvents,
+                                             [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                                 ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                             }),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
 
         // Buffer is mapped, write into it and unmap .
         memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);
@@ -223,6 +259,70 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
         // Check the content of the buffer.
         EXPECT_BUFFER_U32_RANGE_EQ(myData.data(), buffer, 0, kDataSize);
     });
+}
+
+// Test that copy a texture to a buffer then map that buffer in parallel works.
+TEST_P(MultithreadTests, T2BThenMapInParallel) {
+    constexpr uint32_t kTextureSize = 512;
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr uint32_t kBytesPerPixel = 4;
+    constexpr uint64_t kBufferSize = kTextureSize * kTextureSize * kBytesPerPixel;
+
+    std::vector<utils::RGBA8> textureData(kTextureSize * kTextureSize);
+    for (uint32_t y = 0; y < kTextureSize; ++y) {
+        for (uint32_t x = 0; x < kTextureSize; ++x) {
+            textureData[y * kTextureSize + x] =
+                utils::RGBA8(static_cast<uint8_t>(x % 256), static_cast<uint8_t>(y % 256),
+                             static_cast<uint8_t>((x + y) % 256), 255);
+        }
+    }
+
+    // Create and initialize the source texture.
+    wgpu::Texture texture =
+        CreateTexture(kTextureSize, kTextureSize, kTextureFormat,
+                      wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
+
+    wgpu::TexelCopyTextureInfo textureCopyView = utils::CreateTexelCopyTextureInfo(texture);
+    wgpu::TexelCopyBufferLayout dataLayout =
+        utils::CreateTexelCopyBufferLayout(0, kTextureSize * kBytesPerPixel);
+    wgpu::Extent3D writeSize = {kTextureSize, kTextureSize, 1};
+    queue.WriteTexture(&textureCopyView, textureData.data(),
+                       textureData.size() * sizeof(utils::RGBA8), &dataLayout, &writeSize);
+
+    for (int i = 0; i < 50; ++i) {
+        utils::RunInParallel(20, [this, texture, &textureData = std::as_const(textureData),
+                                  &textureCopyView = std::as_const(textureCopyView),
+                                  &writeSize = std::as_const(writeSize)](uint32_t) {
+            // Create a buffer for copying texture data to
+            wgpu::Buffer buffer =
+                CreateBuffer(kBufferSize, wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst);
+
+            // Copy texture to buffer.
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::TexelCopyBufferInfo bufferCopyView =
+                utils::CreateTexelCopyBufferInfo(buffer, 0, kTextureSize * kBytesPerPixel);
+            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &writeSize);
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+
+            // Wait for the mapping to complete
+            ASSERT_EQ(instance.WaitAny(
+                          buffer.MapAsync(wgpu::MapMode::Read, 0, kBufferSize,
+                                          wgpu::CallbackMode::WaitAnyOnly,
+                                          [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                              ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                          }),
+                          UINT64_MAX),
+                      wgpu::WaitStatus::Success);
+
+            // Buffer is mapped, check its content.
+            const uint32_t* mappedData =
+                static_cast<const uint32_t*>(buffer.GetConstMappedRange(0, kBufferSize));
+            ASSERT_NE(mappedData, nullptr);
+            EXPECT_EQ(0, memcmp(mappedData, textureData.data(), kBufferSize));
+            buffer.Unmap();
+        });
+    }
 }
 
 // Test CreateShaderModule on multiple threads. Cache hits should share compilation warnings.
@@ -303,15 +403,15 @@ TEST_P(MultithreadTests, CreateComputePipelineAsyncInParallel) {
             wgpu::ComputePipeline computePipeline;
             std::atomic<bool> isCompleted{false};
         } task;
-        device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                          [&task](wgpu::CreatePipelineAsyncStatus status,
-                                                  wgpu::ComputePipeline pipeline, const char*) {
-                                              EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                        status);
+        device.CreateComputePipelineAsync(
+            &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+            [&task](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                    wgpu::StringView) {
+                EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
-                                              task.computePipeline = std::move(pipeline);
-                                              task.isCompleted = true;
-                                          });
+                task.computePipeline = std::move(pipeline);
+                task.isCompleted = true;
+            });
 
         while (!task.isCompleted.load()) {
             WaitABit();
@@ -472,7 +572,7 @@ TEST_P(MultithreadTests, CreateRenderPipelineAsyncInParallel) {
         device.CreateRenderPipelineAsync(
             &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
             [&task](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-                    const char*) {
+                    wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
                 task.renderPipeline = std::move(pipeline);
@@ -597,6 +697,89 @@ TEST_P(MultithreadTests, CreateRenderPipelineInParallel) {
     }
 }
 
+// Test that creating and destroying bind groups from the same bind group layout on multiple threads
+// won't race. The bind groups will all be allocated by same SlabAllocator.
+TEST_P(MultithreadTests, CreateAndDestroyBindGroupsInParallel) {
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
+                });
+    wgpu::Buffer ssbo =
+        CreateBuffer(sizeof(uint32_t), wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc |
+                                           wgpu::BufferUsage::CopyDst);
+    utils::RunInParallel(100, [&, this](uint32_t) {
+        for (int i = 0; i < 10; ++i) {
+            wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, layout,
+                                                             {
+                                                                 {0, ssbo, 0, sizeof(uint32_t)},
+                                                             });
+            EXPECT_NE(nullptr, bindGroup.Get());
+        }
+    });
+}
+
+// Test that destroying Texture and associated TextureViews simultaneously on different threads
+// works. These was a data race here previously, see https://crbug.com/396294899 for more details.
+TEST_P(MultithreadTests, DestroyTextureAndViewsAtSameTime) {
+    constexpr uint32_t kNumViews = 10;
+    constexpr uint32_t kNumThreads = kNumViews + 1;
+    constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R8Unorm;
+    constexpr wgpu::TextureUsage kTextureUsage = wgpu::TextureUsage::CopySrc |
+                                                 wgpu::TextureUsage::CopyDst |
+                                                 wgpu::TextureUsage::RenderAttachment;
+
+    for (uint32_t j = 0; j < 50; ++j) {
+        wgpu::TextureDescriptor texDescriptor = {};
+        texDescriptor.size = {1, 1, kNumViews};
+        texDescriptor.format = kTextureFormat;
+        texDescriptor.usage = kTextureUsage;
+        texDescriptor.mipLevelCount = 1;
+        texDescriptor.sampleCount = 1;
+
+        wgpu::Texture texture = device.CreateTexture(&texDescriptor);
+        wgpu::TextureView textureViews[kNumViews];
+
+        for (uint32_t i = 0; i < kNumViews; ++i) {
+            wgpu::TextureViewDescriptor viewDescriptor = {};
+            viewDescriptor.format = kTextureFormat;
+            viewDescriptor.usage = kTextureUsage;
+            viewDescriptor.mipLevelCount = 1;
+            viewDescriptor.baseArrayLayer = i;
+            viewDescriptor.arrayLayerCount = 1;
+            textureViews[i] = texture.CreateView(&viewDescriptor);
+        }
+
+        // Wait for all threads to be ready to destroy the Texture or TextureViews at the same time.
+        // TODO(kylechar): std::latch would be much simpler here but MSVC bots fail to run
+        // dawn_end2end_tests when it's used.
+        std::mutex mutex;
+        std::condition_variable cv;
+        uint32_t waiting = kNumThreads;
+
+        utils::RunInParallel(kNumThreads, [&](uint32_t id) {
+            bool notify = false;
+            {
+                std::lock_guard lock(mutex);
+                if (--waiting == 0) {
+                    notify = true;
+                }
+            }
+            if (notify) {
+                cv.notify_all();
+            } else {
+                std::unique_lock lock(mutex);
+                cv.wait(lock, [&waiting]() { return waiting == 0; });
+            }
+
+            if (id == 0) {
+                texture.Destroy();
+            } else {
+                textureViews[id - 1] = {};
+            }
+        });
+    }
+}
+
 class MultithreadCachingTests : public MultithreadTests {
   protected:
     wgpu::ShaderModule CreateComputeShaderModule() const {
@@ -718,7 +901,8 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, msaaRenderTargetView, resolveTargetView,
+                                       &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Clear the renderTarget to red.
@@ -743,9 +927,6 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
 
 // Test that encoding render passes that resolve to a mip level in parallel should work
 TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParallel) {
-    // TODO(dawn:462): Issue in the D3D12 validation layers.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
-
     constexpr uint32_t kRTSize = 16;
     constexpr uint32_t kNumThreads = 10;
 
@@ -768,7 +949,8 @@ TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParal
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, msaaRenderTargetView, resolveTargetView,
+                                       &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Clear the renderTarget to red.
@@ -817,7 +999,7 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
 
     std::vector<wgpu::CommandBuffer> commandBuffers(kNumThreads);
 
-    utils::RunInParallel(kNumThreads, [=, &commandBuffers](uint32_t index) {
+    utils::RunInParallel(kNumThreads, [this, pipeline, bindGroup, &commandBuffers](uint32_t index) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetPipeline(pipeline);
@@ -840,9 +1022,7 @@ TEST_P(MultithreadEncodingTests, ComputePassEncodersInParallel) {
 
 class MultithreadTextureCopyTests : public MultithreadTests {
   protected:
-    void SetUp() override {
-        MultithreadTests::SetUp();
-    }
+    void SetUp() override { MultithreadTests::SetUp(); }
 
     wgpu::Texture CreateAndWriteTexture(uint32_t width,
                                         uint32_t height,
@@ -854,12 +1034,13 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
         wgpu::Extent3D textureSize = {width, height, 1};
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::TextureDataLayout textureDataLayout =
-            utils::CreateTextureDataLayout(0, dataSize / height);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, dataSize / height);
 
-        queue.WriteTexture(&imageCopyTexture, data, dataSize, &textureDataLayout, &textureSize);
+        queue.WriteTexture(&texelCopyTextureInfo, data, dataSize, &texelCopyBufferLayout,
+                           &textureSize);
 
         return texture;
     }
@@ -871,12 +1052,12 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
     void CopyTextureToTextureHelper(
         const wgpu::Texture& srcTexture,
-        const wgpu::ImageCopyTexture& dst,
+        const wgpu::TexelCopyTextureInfo& dst,
         const wgpu::Extent3D& dstSize,
         const wgpu::CommandEncoder& encoder,
         const wgpu::CopyTextureForBrowserOptions* copyForBrowerOptions = nullptr) {
-        wgpu::ImageCopyTexture srcView =
-            utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::TexelCopyTextureInfo srcView =
+            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         if (copyForBrowerOptions == nullptr) {
             encoder.CopyTextureToTexture(&srcView, &dst, &dstSize);
@@ -892,11 +1073,11 @@ class MultithreadTextureCopyTests : public MultithreadTests {
 
     void CopyBufferToTextureHelper(const wgpu::Buffer& srcBuffer,
                                    uint32_t srcBytesPerRow,
-                                   const wgpu::ImageCopyTexture& dst,
+                                   const wgpu::TexelCopyTextureInfo& dst,
                                    const wgpu::Extent3D& dstSize,
                                    const wgpu::CommandEncoder& encoder) {
-        wgpu::ImageCopyBuffer srcView =
-            utils::CreateImageCopyBuffer(srcBuffer, 0, srcBytesPerRow, dstSize.height);
+        wgpu::TexelCopyBufferInfo srcView =
+            utils::CreateTexelCopyBufferInfo(srcBuffer, 0, srcBytesPerRow, dstSize.height);
 
         encoder.CopyBufferToTexture(&srcView, &dst, &dstSize);
 
@@ -961,7 +1142,7 @@ TEST_P(MultithreadTextureCopyTests, CopyDepthToDepthNoRace) {
 
         // Copy from depthTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
@@ -1029,7 +1210,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToDepthNoRace) {
 
         auto encoder = device.CreateCommandEncoder();
 
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
@@ -1054,10 +1235,6 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
     // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type
     // combination.
     DAWN_SUPPRESS_TEST_IF(IsANGLE());
-
-    // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
-    // stencil.
-    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     // TODO(dawn:1924): Intel Gen9 specific.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen9());
@@ -1101,7 +1278,7 @@ TEST_P(MultithreadTextureCopyTests, CopyStencilToStencilNoRace) {
 
         // Copy from stencilTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/1, {0, 0, 0}, wgpu::TextureAspect::All);
         auto encoder = device.CreateCommandEncoder();
         lockStep.Wait(Step::WriteTexture);
@@ -1160,7 +1337,7 @@ TEST_P(MultithreadTextureCopyTests, CopyBufferToStencilNoRace) {
 
         auto encoder = device.CreateCommandEncoder();
 
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
 
         // Wait until src buffer is written.
@@ -1230,7 +1407,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserNoRace) {
 
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options;
         options.flipY = true;
@@ -1295,7 +1472,7 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
 
         // Copy from srcTexture to destTexture.
         const wgpu::Extent3D dstSize = {kWidth, kHeight, 1};
-        wgpu::ImageCopyTexture dest = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo dest = utils::CreateTexelCopyTextureInfo(
             destTexture, /*dstMipLevel=*/0, {0, 0, 0}, wgpu::TextureAspect::All);
         wgpu::CopyTextureForBrowserOptions options = {};
 
@@ -1306,13 +1483,13 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
         CopyTextureToTextureHelper(invalidSrcTexture, dest, dstSize, nullptr, &options);
 
         std::atomic<bool> errorThrown(false);
-        device.PopErrorScope(
-            wgpu::CallbackMode::AllowProcessEvents,
-            [&errorThrown](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, char const*) {
-                EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
-                EXPECT_EQ(type, wgpu::ErrorType::Validation);
-                errorThrown = true;
-            });
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&errorThrown](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type,
+                                            wgpu::StringView) {
+                                 EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+                                 EXPECT_EQ(type, wgpu::ErrorType::Validation);
+                                 errorThrown = true;
+                             });
         instance.ProcessEvents();
         EXPECT_TRUE(errorThrown.load());
 
@@ -1433,14 +1610,10 @@ TEST_P(MultithreadDrawIndexedIndirectTests, IndirectOffsetInParallel) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
-    // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
-    // the offsets that Tint/GLSL produces.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
-
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 
-    utils::RunInParallel(10, [=](uint32_t) {
+    utils::RunInParallel(10, [this, filled, notFilled](uint32_t) {
         // Test an offset draw call, with indirect buffer containing 2 calls:
         // 1) first 3 indices of the second quad (top right triangle)
         // 2) last 3 indices of the second quad
@@ -1505,6 +1678,8 @@ class MultithreadTimestampQueryTests : public MultithreadTests {
 // Test resolving timestamp queries on multiple threads. ResolveQuerySet() will create temp
 // resources internally so we need to make sure they are thread safe.
 TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());  // Flaky on WARP
+
     constexpr uint32_t kQueryCount = 2;
     constexpr uint32_t kNumThreads = 10;
 
@@ -1532,6 +1707,8 @@ TEST_P(MultithreadTimestampQueryTests, ResolveQuerySets_InParallel) {
 
 DAWN_INSTANTIATE_TEST(MultithreadTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1540,6 +1717,8 @@ DAWN_INSTANTIATE_TEST(MultithreadTests,
 
 DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
@@ -1548,6 +1727,8 @@ DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       D3D11Backend(),
+                      D3D11Backend({"d3d11_use_unmonitored_fence"}),
+                      D3D11Backend({"d3d11_delay_flush_to_gpu"}),
                       D3D12Backend(),
                       D3D12Backend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend(),

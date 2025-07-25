@@ -1,19 +1,11 @@
+//
+// vtx_main
+//
 #version 310 es
 
-layout(location = 0) in vec4 cur_position_1;
-layout(location = 1) in vec4 color_1;
-layout(location = 0) out vec4 vtxFragColor_1;
+
 struct Uniforms {
   mat4 modelViewProjectionMatrix;
-};
-
-layout(binding = 0, std140) uniform uniforms_block_ubo {
-  Uniforms inner;
-} uniforms;
-
-struct VertexInput {
-  vec4 cur_position;
-  vec4 color;
 };
 
 struct VertexOutput {
@@ -21,49 +13,42 @@ struct VertexOutput {
   vec4 Position;
 };
 
-VertexOutput vtx_main(VertexInput tint_symbol) {
-  VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol_1.Position = (uniforms.inner.modelViewProjectionMatrix * tint_symbol.cur_position);
-  tint_symbol_1.vtxFragColor = tint_symbol.color;
-  return tint_symbol_1;
-}
+struct VertexInput {
+  vec4 cur_position;
+  vec4 color;
+};
 
-void main() {
-  gl_PointSize = 1.0;
-  VertexInput tint_symbol_2 = VertexInput(cur_position_1, color_1);
-  VertexOutput inner_result = vtx_main(tint_symbol_2);
-  vtxFragColor_1 = inner_result.vtxFragColor;
-  gl_Position = inner_result.Position;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+layout(binding = 0, std140)
+uniform v_uniforms_block_ubo {
+  Uniforms inner;
+} v;
+layout(location = 0) in vec4 vtx_main_loc0_Input;
+layout(location = 1) in vec4 vtx_main_loc1_Input;
+layout(location = 0) out vec4 tint_interstage_location0;
+VertexOutput vtx_main_inner(VertexInput v_1) {
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), vec4(0.0f));
+  v_2.Position = (v.inner.modelViewProjectionMatrix * v_1.cur_position);
+  v_2.vtxFragColor = v_1.color;
+  return v_2;
 }
+void main() {
+  VertexOutput v_3 = vtx_main_inner(VertexInput(vtx_main_loc0_Input, vtx_main_loc1_Input));
+  tint_interstage_location0 = v_3.vtxFragColor;
+  gl_Position = vec4(v_3.Position.x, -(v_3.Position.y), ((2.0f * v_3.Position.z) - v_3.Position.w), v_3.Position.w);
+  gl_PointSize = 1.0f;
+}
+//
+// frag_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 0) in vec4 fragColor_1;
-layout(location = 0) out vec4 value;
-struct Uniforms {
-  mat4 modelViewProjectionMatrix;
-};
-
-struct VertexInput {
-  vec4 cur_position;
-  vec4 color;
-};
-
-struct VertexOutput {
-  vec4 vtxFragColor;
-  vec4 Position;
-};
-
-vec4 frag_main(vec4 fragColor) {
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 0) out vec4 frag_main_loc0_Output;
+vec4 frag_main_inner(vec4 fragColor) {
   return fragColor;
 }
-
 void main() {
-  vec4 inner_result = frag_main(fragColor_1);
-  value = inner_result;
-  return;
+  frag_main_loc0_Output = frag_main_inner(tint_interstage_location0);
 }

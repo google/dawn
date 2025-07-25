@@ -41,13 +41,22 @@ class Bitcast final : public Castable<Bitcast, Call> {
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands expected for this instruction
+    static constexpr size_t kNumOperands = 1;
+
     /// Constructor (no results, no operands)
-    Bitcast();
+    /// @param id the instruction id
+    explicit Bitcast(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param val the value being bitcast
-    Bitcast(InstructionResult* result, Value* val);
+    Bitcast(Id id, InstructionResult* result, Value* val);
+
     ~Bitcast() override;
 
     /// @copydoc Instruction::Clone()
@@ -61,6 +70,9 @@ class Bitcast final : public Castable<Bitcast, Call> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "bitcast"; }
+
+    /// @returns an empty access as the bitcast neither loads nor stores.
+    Accesses GetSideEffects() const override { return Accesses{}; }
 };
 
 }  // namespace tint::core::ir

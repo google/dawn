@@ -290,7 +290,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F[A : B<C>]()",
+			"implicit(A : B<C>) fn F()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -311,7 +311,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F[T](a: X, b: Y<T>)",
+			"implicit(T) fn F(a: X, b: Y<T>)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -330,7 +330,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F<A>[B: C<D>]()",
+			"implicit(B: C<D>) fn F<A>()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -354,7 +354,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"fn F[T](a: X, b: Y<T>)",
+			"implicit(T) fn F(a: X, b: Y<T>)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
 					Kind: ast.Builtin,
@@ -511,7 +511,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"op F[A : B<C>]()",
+			"implicit(A : B<C>) op F()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,
@@ -531,7 +531,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"op F[T](a: X, b: Y<T>)",
+			"implicit(T) op F(a: X, b: Y<T>)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,
@@ -550,7 +550,7 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			fileutils.ThisLine(),
-			"op F<A : B<C> >[D]()",
+			"implicit(D) op F<A : B<C> >()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
 					Kind: ast.Operator,

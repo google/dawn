@@ -1,5 +1,0 @@
-SKIP: FAILED
-
-void main() {
-}
-

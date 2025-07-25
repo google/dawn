@@ -34,8 +34,11 @@ namespace dawn::native::d3d11 {
 PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
-MaybeError PlatformFunctions::LoadFunctions() {
-    DAWN_TRY(Base::LoadFunctions());
+MaybeError PlatformFunctions::Initialize() {
+    DAWN_TRY(Base::Initialize());
+
+    // Load FX compiler unconditionally since that's the only compiler we can use for D3D11.
+    DAWN_TRY(EnsureFXC());
 
     DAWN_TRY(LoadD3D11());
     return {};
@@ -46,7 +49,7 @@ MaybeError PlatformFunctions::LoadD3D11() {
     d3d11CreateDevice = &D3D11CreateDevice;
 #else
     std::string error;
-    if (!mD3D11Lib.Open("d3d11.dll", &error) ||
+    if (!mD3D11Lib.OpenSystemLibrary(L"d3d11.dll", &error) ||
         !mD3D11Lib.GetProc(&d3d11CreateDevice, "D3D11CreateDevice", &error)) {
         return DAWN_INTERNAL_ERROR(error.c_str());
     }

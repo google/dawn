@@ -1,22 +1,21 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
+
 struct S {
   ivec3 v;
-  uint pad;
+  uint tint_pad_0;
 };
 
-layout(binding = 0, std430) buffer U_block_ssbo {
+layout(binding = 0, std430)
+buffer U_block_1_ssbo {
   S inner;
-} U;
-
+} v_1;
 void f() {
-  U.inner.v = ivec3(1, 2, 3);
-  U.inner.v.x = 1;
-  U.inner.v.y = 2;
-  U.inner.v.z = 3;
+  v_1.inner.v = ivec3(1, 2, 3);
+  v_1.inner.v.x = 1;
+  v_1.inner.v.y = 2;
+  v_1.inner.v.z = 3;
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

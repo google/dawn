@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_BUFFER_H_
 #define SRC_DAWN_NATIVE_BUFFER_H_
 
+#include <atomic>
 #include <functional>
 #include <memory>
 
@@ -47,8 +48,7 @@
 namespace dawn::native {
 
 struct CopyTextureToBufferCmd;
-
-enum class MapType : uint32_t;
+class MemoryDump;
 
 ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     DeviceBase* device,
@@ -57,7 +57,7 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
     wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyStorageBuffer |
-    wgpu::BufferUsage::Indirect;
+    kIndirectBufferForFrontendValidation | kIndirectBufferForBackendResourceTracking;
 
 static constexpr wgpu::BufferUsage kMappableBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
@@ -68,6 +68,12 @@ static constexpr wgpu::BufferUsage kShaderBufferUsages =
 
 static constexpr wgpu::BufferUsage kReadOnlyShaderBufferUsages =
     kShaderBufferUsages & kReadOnlyBufferUsages;
+
+// Return the actual internal buffer usages that will be used to create a buffer.
+// In other words, after being created, buffer.GetInternalUsage() will return this value.
+wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
+                                              wgpu::BufferUsage usage,
+                                              size_t bufferSize);
 
 class BufferBase : public SharedResource {
   public:
@@ -88,14 +94,13 @@ class BufferBase : public SharedResource {
     uint64_t GetAllocatedSize() const;
     ExecutionSerial GetLastUsageSerial() const;
 
-    // |GetUsageExternalOnly| returns the usage with which the buffer was created using the
-    // base WebGPU API. Additional usages may be added for internal state tracking. |GetUsage|
-    // returns the union of base usage and the usages added internally.
+    // |GetUsage| returns the usage with which the buffer was created using the base WebGPU API.
+    // Additional usages may be added for internal state tracking. |GetInternalUsage| returns the
+    // union of base usage and the usages added internally.
+    wgpu::BufferUsage GetInternalUsage() const;
     wgpu::BufferUsage GetUsage() const;
-    wgpu::BufferUsage GetUsageExternalOnly() const;
 
     MaybeError MapAtCreation();
-    void CallbackOnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -112,28 +117,25 @@ class BufferBase : public SharedResource {
     void SetInitialized(bool initialized) override;
     bool IsInitialized() const override;
 
-    virtual void* GetMappedPointer() = 0;
+    void* GetMappedPointer();
     void* GetMappedRange(size_t offset, size_t size, bool writable = true);
+
+    // Internal non-reentrant version of Unmap. This is used in workarounds or additional copies.
+    // Note that this will fail if the map event is pending since that should never happen
+    // internally.
     MaybeError Unmap();
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
     // Dawn API
-    void APIMapAsync(wgpu::MapMode mode,
-                     size_t offset,
-                     size_t size,
-                     WGPUBufferMapCallback callback,
-                     void* userdata);
-    Future APIMapAsyncF(wgpu::MapMode mode,
-                        size_t offset,
-                        size_t size,
-                        const BufferMapCallbackInfo& callbackInfo);
-    Future APIMapAsync2(wgpu::MapMode mode,
-                        size_t offset,
-                        size_t size,
-                        const WGPUBufferMapCallbackInfo2& callbackInfo);
+    Future APIMapAsync(wgpu::MapMode mode,
+                       size_t offset,
+                       size_t size,
+                       const WGPUBufferMapCallbackInfo& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
+    wgpu::Status APIWriteMappedRange(size_t offset, void const* data, size_t size);
+    wgpu::Status APIReadMappedRange(size_t offset, void* data, size_t size);
     void APIUnmap();
     void APIDestroy();
     wgpu::BufferUsage APIGetUsage() const;
@@ -148,18 +150,20 @@ class BufferBase : public SharedResource {
 
     ~BufferBase() override;
 
-    MaybeError MapAtCreationInternal();
+    // If no errors occur, returns true iff a staging buffer was used to implement the map at
+    // creation. Otherwise, returns false indicating that backend specific mapping was used instead.
+    ResultOrError<bool> MapAtCreationInternal();
 
     uint64_t mAllocatedSize = 0;
 
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
   private:
-    std::function<void()> PrepareMappingCallback(MapRequestID mapID,
-                                                 WGPUBufferMapAsyncStatus status);
+    struct MapAsyncEvent;
 
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
+    virtual void* GetMappedPointerImpl() = 0;
     virtual void UnmapImpl() = 0;
 
     virtual bool IsCPUWritableAtCreation() const = 0;
@@ -168,35 +172,48 @@ class BufferBase : public SharedResource {
     MaybeError ValidateMapAsync(wgpu::MapMode mode,
                                 size_t offset,
                                 size_t size,
-                                WGPUBufferMapAsyncStatus* status) const;
+                                WGPUMapAsyncStatus* status) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-    void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
+    MaybeError UnmapInternal(WGPUMapAsyncStatus status, std::string_view message);
+
+    // Updates internal state to reflect that the buffer is now mapped.
+    void SetMapped(BufferState newState);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
-    BufferState mState;
+    const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
     bool mIsDataInitialized = false;
 
-    // mStagingBuffer is used to implement mappedAtCreation for
-    // buffers with non-mappable usage. It is transiently allocated
-    // and released when the mappedAtCreation-buffer is unmapped.
-    // Because `mStagingBuffer` itself is directly mappable, it will
-    // not create another staging buffer.
-    // i.e. buffer->mStagingBuffer->mStagingBuffer... is not possible.
-    Ref<BufferBase> mStagingBuffer;
+    // The following members are mutable state of the buffer w.r.t mapping. They are all loosely
+    // guarded by |mBufferState| by update ordering.
 
-    WGPUBufferMapCallback mMapCallback = nullptr;
-    raw_ptr<void> mMapUserdata = nullptr;
-    MapRequestID mLastMapID = MapRequestID(0);
+    // Currently, our API relies on the fact that there is a device level lock that synchronizes
+    // everything. For API*MappedRange calls, however, it is more efficient to not acquire the
+    // device-wide lock since we cannot actually protect against racing w.r.t Unmap, i.e. a user
+    // can call an API*MappedRange function, save the pointer, call Unmap, and now the user is
+    // holding an invalid pointer. While a buffer state change is always guarded by the
+    // device-lock, we can implement the necessary validations for the API*MappedRange calls
+    // without acquiring the lock by ensuring that:
+    //   1) For MapAsync, we only set |mBufferState| = Mapped AFTER we update the other members.
+    //   2) For *MappedRange functions, we always check |mBufferState| = Mapped before checking
+    //      other members for validation.
+    // With those assumptions in place, we can guarantee that if *MappedRange is successful,
+    // that MapAsync must have succeeded. We cannot guarantee, however, that Unmap did not race
+    // with *MappedRange, but that is the responsibility of the caller.
+    std::atomic<BufferState> mState = BufferState::Unmapped;
+
+    // A recursive buffer used to implement mappedAtCreation for buffers with non-mappable
+    // usage. It is transiently allocated and released when the mappedAtCreation-buffer is
+    // unmapped. Because this buffer itself is directly mappable, it will not create another
+    // staging buffer recursively.
+    Ref<BufferBase> mStagingBuffer = nullptr;
+
+    // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
-
-    struct MapAsyncEvent;
-    struct MapAsyncEvent1;
-    struct MapAsyncEvent2;
-    Ref<MapAsyncEvent> mPendingMapEvent;
+    std::variant<void*, Ref<MapAsyncEvent>> mMapData;
 };
 
 }  // namespace dawn::native

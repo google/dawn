@@ -67,8 +67,8 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF32) {
     %4:f32 = div %x, %y
     %5:f32 = let %4
     %6:f32 = trunc %5
-    %7:f32 = sub %x, %6
-    %8:f32 = mul %7, %y
+    %7:f32 = mul %6, %y
+    %8:f32 = sub %x, %7
     %a:f32 = let %8
     ret
   }
@@ -106,8 +106,8 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF16) {
     %4:f16 = div %x, %y
     %5:f16 = let %4
     %6:f16 = trunc %5
-    %7:f16 = sub %x, %6
-    %8:f16 = mul %7, %y
+    %7:f16 = mul %6, %y
+    %8:f16 = sub %x, %7
     %a:f16 = let %8
     ret
   }
@@ -145,8 +145,8 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF32Vec3) {
     %4:vec3<f32> = div %x, %y
     %5:vec3<f32> = let %4
     %6:vec3<f32> = trunc %5
-    %7:vec3<f32> = sub %x, %6
-    %8:vec3<f32> = mul %7, %y
+    %7:vec3<f32> = mul %6, %y
+    %8:vec3<f32> = sub %x, %7
     %a:vec3<f32> = let %8
     ret
   }
@@ -184,8 +184,8 @@ TEST_F(HlslWriter_BinaryPolyfillTest, ModF16Vec3) {
     %4:vec3<f16> = div %x, %y
     %5:vec3<f16> = let %4
     %6:vec3<f16> = trunc %5
-    %7:vec3<f16> = sub %x, %6
-    %8:vec3<f16> = mul %7, %y
+    %7:vec3<f16> = mul %6, %y
+    %8:vec3<f16> = sub %x, %7
     %a:vec3<f16> = let %8
     ret
   }

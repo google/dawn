@@ -1,10 +1,8 @@
 #version 310 es
 
+
 struct Uniforms {
   uint i;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 struct InnerS {
@@ -15,22 +13,17 @@ struct OuterS {
   InnerS a1[8];
 };
 
-layout(binding = 4, std140) uniform uniforms_block_ubo {
+layout(binding = 0, std140)
+uniform uniforms_block_1_ubo {
   Uniforms inner;
-} uniforms;
-
+} v_1;
 void f(inout OuterS p) {
   InnerS v = InnerS(0);
-  p.a1[uniforms.inner.i] = v;
+  uint v_2 = min(v_1.inner.i, 7u);
+  p.a1[v_2] = v;
 }
-
-void tint_symbol() {
-  OuterS s1 = OuterS(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)));
-  f(s1);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
-  return;
+  OuterS s1 = OuterS(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)));
+  f(s1);
 }

@@ -4,10 +4,10 @@ struct S {
   int after;
 };
 
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
-
 void a(S a_1[4]) {
 }
 
@@ -23,36 +23,48 @@ void d(float3 v) {
 void e(float f_1) {
 }
 
-float2x3 u_load_3(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  return float2x3(asfloat(u[scalar_offset / 4].xyz), asfloat(u[scalar_offset_1 / 4].xyz));
+float2x3 v_1(uint start_byte_offset) {
+  return float2x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz));
 }
 
-S u_load_1(uint offset) {
-  const uint scalar_offset_2 = ((offset + 0u)) / 4;
-  const uint scalar_offset_3 = ((offset + 64u)) / 4;
-  S tint_symbol = {asint(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), u_load_3((offset + 16u)), asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4])};
-  return tint_symbol;
+S v_2(uint start_byte_offset) {
+  int v_3 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float2x3 v_4 = v_1((16u + start_byte_offset));
+  S v_5 = {v_3, v_4, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  return v_5;
 }
 
-typedef S u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  S arr[4] = (S[4])0;
+typedef S ary_ret[4];
+ary_ret v_6(uint start_byte_offset) {
+  S a_2[4] = (S[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = u_load_1((offset + (i * 128u)));
+    uint v_7 = 0u;
+    v_7 = 0u;
+    while(true) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4u)) {
+        break;
+      }
+      S v_9 = v_2((start_byte_offset + (v_8 * 128u)));
+      a_2[v_8] = v_9;
+      {
+        v_7 = (v_8 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  S v_10[4] = a_2;
+  return v_10;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(u_load(0u));
-  b(u_load_1(256u));
-  c(u_load_3(272u));
-  d(asfloat(u[2].xyz).zxy);
-  e(asfloat(u[2].xyz).zxy.x);
-  return;
+  S v_11[4] = v_6(0u);
+  a(v_11);
+  S v_12 = v_2(256u);
+  b(v_12);
+  c(v_1(272u));
+  d(asfloat(u[2u].xyz).zxy);
+  e(asfloat(u[2u].xyz).zxy.x);
 }
+

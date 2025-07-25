@@ -140,6 +140,9 @@ class EGLImageTestBase : public DawnTest {
         DawnTest::SetUp();
         // TODO(crbug.com/dawn/2206): remove this check if possible.
         DAWN_TEST_UNSUPPORTED_IF(!HasExtension("KHR_gl_texture_2D_image"));
+        // EGL extension not available
+        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                                 HasToggleEnabled("gl_force_es_31_and_no_extensions"));
     }
 
   public:
@@ -225,7 +228,7 @@ TEST_P(EGLImageValidationTests, InvalidTextureDescriptor) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::ChainedStruct chainedDescriptor;
-    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel;
+    chainedDescriptor.sType = wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel;
     descriptor.nextInChain = &chainedDescriptor;
 
     ScopedEGLImage image = CreateDefaultEGLImage();
@@ -242,16 +245,6 @@ TEST_P(EGLImageValidationTests, InvalidTextureDimension) {
     ScopedEGLImage image = CreateDefaultEGLImage();
     ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage()));
 
-    ASSERT_EQ(texture.Get(), nullptr);
-}
-
-// Test an error occurs if the texture usage is not RenderAttachment
-TEST_P(EGLImageValidationTests, InvalidTextureUsage) {
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    descriptor.usage = wgpu::TextureUsage::StorageBinding;
-
-    ScopedEGLImage image = CreateDefaultEGLImage();
-    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage()));
     ASSERT_EQ(texture.Get(), nullptr);
 }
 

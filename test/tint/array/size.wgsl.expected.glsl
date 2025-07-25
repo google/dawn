@@ -2,11 +2,11 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer s_block_ssbo {
+layout(binding = 0, std430)
+buffer f_s_block_ssbo {
   float inner;
-} s;
-
-void tint_symbol() {
+} v;
+void main() {
   float signed_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   float unsigned_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   float signed_constant[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
@@ -16,10 +16,5 @@ void tint_symbol() {
   signed_constant = signed_literal;
   unsigned_constant = signed_literal;
   shr_const_expr = signed_literal;
-  s.inner = ((((signed_literal[0] + unsigned_literal[0]) + signed_constant[0]) + unsigned_constant[0]) + shr_const_expr[0]);
-}
-
-void main() {
-  tint_symbol();
-  return;
+  v.inner = ((((signed_literal[0u] + unsigned_literal[0u]) + signed_constant[0u]) + unsigned_constant[0u]) + shr_const_expr[0u]);
 }

@@ -1,15 +1,10 @@
 #version 310 es
-#extension GL_OES_sample_variables : require
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_OES_sample_variables: require
+#extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
 
-layout(location = 0) flat in int loc0_1;
-layout(location = 1) flat in uint loc1_1;
-layout(location = 3) in vec4 loc3_1;
-layout(location = 5) in f16vec3 loc5_1;
-layout(location = 2) in float loc2_1;
-layout(location = 4) in float16_t loc4_1;
+
 struct FragmentInputs0 {
   vec4 position;
   int loc0;
@@ -21,7 +16,13 @@ struct FragmentInputs1 {
   uint sample_mask;
 };
 
-void tint_symbol(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint sample_index, FragmentInputs1 inputs1, float loc2, float16_t loc4) {
+layout(location = 0) flat in int tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 3) in vec4 tint_interstage_location3;
+layout(location = 5) in f16vec3 tint_interstage_location5;
+layout(location = 2) in float tint_interstage_location2;
+layout(location = 4) in float16_t tint_interstage_location4;
+void main_inner(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint sample_index, FragmentInputs1 inputs1, float loc2, float16_t loc4) {
   if (front_facing) {
     vec4 foo = inputs0.position;
     uint bar = (sample_index + inputs1.sample_mask);
@@ -33,10 +34,13 @@ void tint_symbol(FragmentInputs0 inputs0, bool front_facing, uint loc1, uint sam
     f16vec3 y = inputs1.loc5;
   }
 }
-
 void main() {
-  FragmentInputs0 tint_symbol_1 = FragmentInputs0(gl_FragCoord, loc0_1);
-  FragmentInputs1 tint_symbol_2 = FragmentInputs1(loc3_1, loc5_1, uint(gl_SampleMaskIn[0]));
-  tint_symbol(tint_symbol_1, gl_FrontFacing, loc1_1, uint(gl_SampleID), tint_symbol_2, loc2_1, loc4_1);
-  return;
+  FragmentInputs0 v_1 = FragmentInputs0(gl_FragCoord, tint_interstage_location0);
+  bool v_2 = gl_FrontFacing;
+  uint v_3 = tint_interstage_location1;
+  uint v_4 = uint(gl_SampleID);
+  vec4 v_5 = tint_interstage_location3;
+  f16vec3 v_6 = tint_interstage_location5;
+  FragmentInputs1 v_7 = FragmentInputs1(v_5, v_6, uint(gl_SampleMaskIn[0u]));
+  main_inner(v_1, v_2, v_3, v_4, v_7, tint_interstage_location2, tint_interstage_location4);
 }

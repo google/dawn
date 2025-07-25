@@ -27,6 +27,7 @@
 
 #include "dawn/wire/client/Surface.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "dawn/common/Log.h"
@@ -38,7 +39,20 @@
 
 namespace dawn::wire::client {
 
-Surface::Surface(const ObjectBaseParams& params) : ObjectBase(params) {}
+Surface::Surface(const ObjectBaseParams& params, const WGPUSurfaceCapabilities* capabilities)
+    : ObjectBase(params) {
+    // Copy over the capabilities.
+    mSupportedUsages = capabilities->usages;
+    mSupportedFormats.assign(capabilities->formats,
+                             capabilities->formats + capabilities->formatCount);
+    mSupportedPresentModes.assign(capabilities->presentModes,
+                                  capabilities->presentModes + capabilities->presentModeCount);
+    mSupportedAlphaModes.assign(capabilities->alphaModes,
+                                capabilities->alphaModes + capabilities->alphaModeCount);
+
+    DAWN_ASSERT(!mSupportedFormats.empty() && !mSupportedPresentModes.empty() &&
+                !mSupportedAlphaModes.empty());
+}
 
 Surface::~Surface() = default;
 
@@ -46,7 +60,9 @@ ObjectType Surface::GetObjectType() const {
     return ObjectType::Surface;
 }
 
-void Surface::Configure(WGPUSurfaceConfiguration const* config) {
+void Surface::APIConfigure(const WGPUSurfaceConfiguration* config) {
+    mConfiguredDevice = FromAPI(config->device);
+
     mTextureDescriptor = {};
     mTextureDescriptor.size = {config->width, config->height, 1};
     mTextureDescriptor.format = config->format;
@@ -61,39 +77,93 @@ void Surface::Configure(WGPUSurfaceConfiguration const* config) {
     GetClient()->SerializeCommand(cmd);
 }
 
-WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
-    // TODO(dawn:2320): Use the result of GetCapabilities
-    // This is the only supported format in native mode (see crbug.com/dawn/160).
-    return WGPUTextureFormat_BGRA8Unorm;
+WGPUStatus Surface::APIPresent() {
+    if (mConfiguredDevice == nullptr) {
+        dawn::ErrorLog() << "Surface::Present on an unconfigured Surface.";
+        return WGPUStatus_Error;
+    }
+
+    SurfacePresentCmd cmd;
+    cmd.self = ToAPI(this);
+    GetClient()->SerializeCommand(cmd);
+
+    // The only synchronous error is if the surface isn't configured.
+    // Otherwise, we let the server report errors via the device.
+    return WGPUStatus_Success;
 }
 
-WGPUStatus Surface::GetCapabilities(WGPUAdapter adapter,
-                                    WGPUSurfaceCapabilities* capabilities) const {
-    // TODO(dawn:2320): Implement this
-    dawn::ErrorLog() << "surface.GetCapabilities not supported yet with dawn_wire.";
-    return WGPUStatus_Error;
+void Surface::APIUnconfigure() {
+    mConfiguredDevice = nullptr;
+
+    SurfaceUnconfigureCmd cmd;
+    cmd.self = ToAPI(this);
+    GetClient()->SerializeCommand(cmd);
 }
 
-void Surface::GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
-    // TODO(dawn:2320): Implement this
-    dawn::ErrorLog() << "surface.GetCurrentTexture not supported yet with dawn_wire.";
+WGPUTextureFormat Surface::APIGetPreferredFormat([[maybe_unused]] WGPUAdapter adapter) const {
+    dawn::ErrorLog() << "Surface::GetPreferredFormat is deprecated, use "
+                        "Surface::GetCapabilities().formats[0] instead.";
+    return mSupportedFormats[0];
+}
 
+WGPUStatus Surface::APIGetCapabilities(WGPUAdapter adapter,
+                                       WGPUSurfaceCapabilities* capabilities) const {
+    // Return the capabilities that were provided when injecting the surface.
+    capabilities->nextInChain = nullptr;
+    capabilities->usages = mSupportedUsages;
+
+    capabilities->presentModeCount = mSupportedPresentModes.size();
+    WGPUPresentMode* presentModes = new WGPUPresentMode[capabilities->presentModeCount];
+    std::copy(mSupportedPresentModes.begin(), mSupportedPresentModes.end(), presentModes);
+    capabilities->presentModes = presentModes;
+
+    capabilities->formatCount = mSupportedFormats.size();
+    WGPUTextureFormat* formats = new WGPUTextureFormat[capabilities->formatCount];
+    std::copy(mSupportedFormats.begin(), mSupportedFormats.end(), formats);
+    capabilities->formats = formats;
+
+    capabilities->alphaModeCount = mSupportedAlphaModes.size();
+    WGPUCompositeAlphaMode* alphaModes = new WGPUCompositeAlphaMode[capabilities->alphaModeCount];
+    std::copy(mSupportedAlphaModes.begin(), mSupportedAlphaModes.end(), alphaModes);
+    capabilities->alphaModes = alphaModes;
+
+    return WGPUStatus_Success;
+}
+
+void Surface::APIGetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
+    // Handle error cases that return no textures first.
+    surfaceTexture->texture = nullptr;
+
+    surfaceTexture->status = WGPUSurfaceGetCurrentTextureStatus_Error;
+    if (mConfiguredDevice == nullptr) {
+        return;
+    }
+
+    if (!mConfiguredDevice->IsAlive()) {
+        surfaceTexture->status = WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal;
+        surfaceTexture->texture =
+            Texture::CreateError(mConfiguredDevice.Get(), &mTextureDescriptor);
+        return;
+    }
+
+    // Assume texture creation will work in the server and return a new texture proxy.
     Client* wireClient = GetClient();
     Ref<Texture> texture = wireClient->Make<Texture>(&mTextureDescriptor);
 
     SurfaceGetCurrentTextureCmd cmd;
-    cmd.self = ToAPI(this);
-    cmd.selfId = GetWireId();
-    // cmd.result = texture->GetWireHandle(); // TODO(dawn:2320): Feed surfaceTexture to cmd
+    cmd.surfaceId = GetWireId();
+    cmd.textureHandle = texture->GetWireHandle();
+    cmd.configuredDeviceId = mConfiguredDevice->GetWireId();
     wireClient->SerializeCommand(cmd);
 
+    surfaceTexture->status = WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal;
     surfaceTexture->texture = ReturnToAPI(std::move(texture));
 }
 
-}  // namespace dawn::wire::client
-
-DAWN_WIRE_EXPORT void wgpuDawnWireClientSurfaceCapabilitiesFreeMembers(
-    WGPUSurfaceCapabilities capabilities) {
-    // TODO(dawn:2320): Implement this
-    dawn::ErrorLog() << "surfaceCapabilities.FreeMembers not supported yet with dawn_wire.";
+void APIFreeMembers(WGPUSurfaceCapabilities capabilities) {
+    delete[] capabilities.presentModes;
+    delete[] capabilities.formats;
+    delete[] capabilities.alphaModes;
 }
+
+}  // namespace dawn::wire::client

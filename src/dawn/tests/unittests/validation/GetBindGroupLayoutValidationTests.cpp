@@ -485,7 +485,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
                     BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
     }
 
-    binding.buffer.type = wgpu::BufferBindingType::Undefined;
+    binding.buffer.type = wgpu::BufferBindingType::BindingNotUsed;
     binding.buffer.minBindingSize = 0;
     {
         binding.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
@@ -511,7 +511,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
                     BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
     }
 
-    binding.texture.sampleType = wgpu::TextureSampleType::Undefined;
+    binding.texture.sampleType = wgpu::TextureSampleType::BindingNotUsed;
     {
         binding.sampler.type = wgpu::SamplerBindingType::Filtering;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
@@ -1014,6 +1014,126 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     }
 }
 
+// Test that a binding_array is reflected into a BGLEntry with an arraySize.
+TEST_F(GetBindGroupLayoutTests, ArraySizeReflected) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &entry;
+
+    // The pipeline using binding_array
+    wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+        @group(0) @binding(0) var t: binding_array<texture_2d<f32>, 3>;
+        @fragment fn main() {
+            _ = t[0];
+        })");
+
+    entry.bindingArraySize = 3;
+    EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    entry.bindingArraySize = 2;
+    EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                Not(BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0))));
+    entry.bindingArraySize = 1;
+    EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                Not(BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0))));
+}
+
+// Test that a binding_array is reflected into an entry with the max of both sizes
+TEST_F(GetBindGroupLayoutTests, ArraySizeTwoStages) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    // A BGL with arraySize = 3
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment;
+    entry.bindingArraySize = 3;
+    entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &entry;
+
+    // The pipeline using binding_array, with differing binding_array sizes. VS = 3, FS = 2
+    {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var vs_t: binding_array<texture_2d<f32>, 3>;
+            @vertex fn vs() -> @builtin(position) vec4f {
+                _ = vs_t[0];
+                return vec4(0);
+            }
+
+            @group(0) @binding(0) var fs_t: binding_array<texture_2d<f32>, 2>;
+            @fragment fn fs() {
+                _ = fs_t[0];
+            })");
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.layout = nullptr;
+        descriptor.vertex.module = module;
+        descriptor.cFragment.module = module;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+    // The pipeline using binding_array, with differing binding_array sizes. VS = 2, FS = 3
+    {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var vs_t: binding_array<texture_2d<f32>, 2>;
+            @vertex fn vs() -> @builtin(position) vec4f {
+                _ = vs_t[0];
+                return vec4(0);
+            }
+
+            @group(0) @binding(0) var fs_t: binding_array<texture_2d<f32>, 3>;
+            @fragment fn fs() {
+                _ = fs_t[0];
+            })");
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.layout = nullptr;
+        descriptor.vertex.module = module;
+        descriptor.cFragment.module = module;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+    // The pipeline using binding_array, with differing binding_array sizes. VS = 3, FS = NotArrayed
+    {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+            @group(0) @binding(0) var vs_t: binding_array<texture_2d<f32>, 3>;
+            @vertex fn vs() -> @builtin(position) vec4f {
+                _ = vs_t[0];
+                return vec4(0);
+            }
+
+            @group(0) @binding(0) var fs_t: texture_2d<f32>;
+            @fragment fn fs() {
+                _ = fs_t;
+            })");
+
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.layout = nullptr;
+        descriptor.vertex.module = module;
+        descriptor.cFragment.module = module;
+        descriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        EXPECT_THAT(device.CreateBindGroupLayout(&bglDesc),
+                    BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+    }
+}
+
 // Test it is invalid to have conflicting binding types in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -1133,8 +1253,8 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
                             .GetBindGroupLayout(kMaxBindGroups + 1));
 }
 
-// Test that unused indices return the empty bind group layout if before the last used index, an
-// error otherwise.
+// Test that unused indices return the empty bind group layout if less than the maximum number of
+// bind groups, an error otherwise.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
@@ -1162,7 +1282,11 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
                 BindGroupLayoutCacheEq(emptyBindGroupLayout));  // Not used
     EXPECT_THAT(pipeline.GetBindGroupLayout(2),
                 Not(BindGroupLayoutCacheEq(emptyBindGroupLayout)));  // Used
-    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(3));  // Past last defined BGL, error!
+    EXPECT_THAT(pipeline.GetBindGroupLayout(3),
+                BindGroupLayoutCacheEq(emptyBindGroupLayout));  // Past last defined BGL
+
+    // Equal to kMaxBindGroups, error!
+    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(kMaxBindGroups));
 }
 
 // Test that after explicitly creating a pipeline with a pipeline layout, calling
@@ -1274,6 +1398,28 @@ TEST_F(GetBindGroupLayoutTests, FullOfEmptyBGLs) {
     )");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
+    EXPECT_THAT(pipeline.GetBindGroupLayout(0), BindGroupLayoutEq(emptyBGL));
+    EXPECT_THAT(pipeline.GetBindGroupLayout(1), BindGroupLayoutEq(emptyBGL));
+    EXPECT_THAT(pipeline.GetBindGroupLayout(2), BindGroupLayoutEq(emptyBGL));
+    EXPECT_THAT(pipeline.GetBindGroupLayout(3), BindGroupLayoutEq(emptyBGL));
+}
+
+// Test that a pipeline full of explicitly null BGLs correctly reflects empty BGLs.
+TEST_F(GetBindGroupLayoutTests, NullBGLs) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::PipelineLayout pl =
+        utils::MakePipelineLayout(device, {nullptr, nullptr, nullptr, nullptr});
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = pl;
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() {
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
     EXPECT_THAT(pipeline.GetBindGroupLayout(0), BindGroupLayoutEq(emptyBGL));
     EXPECT_THAT(pipeline.GetBindGroupLayout(1), BindGroupLayoutEq(emptyBGL));
     EXPECT_THAT(pipeline.GetBindGroupLayout(2), BindGroupLayoutEq(emptyBGL));

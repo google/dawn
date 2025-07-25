@@ -1,91 +1,78 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   ivec3 inner;
-  uint pad;
-} prevent_dce;
-
+} v;
 ivec3 select_8fa62c() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
+  ivec3 v_1 = arg_0;
+  ivec3 v_2 = arg_1;
+  ivec3 res = mix(v_1, v_2, bvec3(arg_2));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  ivec3 prevent_dce;
-};
-
-void fragment_main() {
-  prevent_dce.inner = select_8fa62c();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = select_8fa62c();
 }
+//
+// compute_main
+//
 #version 310 es
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
   ivec3 inner;
-  uint pad;
-} prevent_dce;
-
+} v;
 ivec3 select_8fa62c() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
+  ivec3 v_1 = arg_0;
+  ivec3 v_2 = arg_1;
+  ivec3 res = mix(v_1, v_2, bvec3(arg_2));
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  ivec3 prevent_dce;
-};
-
-void compute_main() {
-  prevent_dce.inner = select_8fa62c();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = select_8fa62c();
 }
+//
+// vertex_main
+//
 #version 310 es
 
-layout(location = 0) flat out ivec3 prevent_dce_1;
-ivec3 select_8fa62c() {
-  ivec3 arg_0 = ivec3(1);
-  ivec3 arg_1 = ivec3(1);
-  bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
-  return res;
-}
 
 struct VertexOutput {
   vec4 pos;
   ivec3 prevent_dce;
 };
 
-VertexOutput vertex_main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), ivec3(0, 0, 0));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = select_8fa62c();
-  return tint_symbol;
+layout(location = 0) flat out ivec3 tint_interstage_location0;
+ivec3 select_8fa62c() {
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  bool arg_2 = true;
+  ivec3 v = arg_0;
+  ivec3 v_1 = arg_1;
+  ivec3 res = mix(v, v_1, bvec3(arg_2));
+  return res;
 }
-
+VertexOutput vertex_main_inner() {
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), ivec3(0));
+  v_2.pos = vec4(0.0f);
+  v_2.prevent_dce = select_8fa62c();
+  return v_2;
+}
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutput inner_result = vertex_main();
-  gl_Position = inner_result.pos;
-  prevent_dce_1 = inner_result.prevent_dce;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutput v_3 = vertex_main_inner();
+  gl_Position = vec4(v_3.pos.x, -(v_3.pos.y), ((2.0f * v_3.pos.z) - v_3.pos.w), v_3.pos.w);
+  tint_interstage_location0 = v_3.prevent_dce;
+  gl_PointSize = 1.0f;
 }

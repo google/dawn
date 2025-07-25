@@ -36,8 +36,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, UnaryComplement) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
         b.Var("b", b.Complement<i32>(b.Load(a)));
@@ -48,7 +47,7 @@ TEST_F(HlslWriterTest, UnaryComplement) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   int b = ~(a);
 }
 
@@ -56,8 +55,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, UnaryNot) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<bool>());
         b.Var("b", b.Not<bool>(b.Load(a)));
@@ -76,8 +74,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, UnaryNegation) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<f32>());
         b.Var("b", b.Negation<f32>(b.Load(a)));

@@ -5,22 +5,17 @@ precision highp int;
 int foo() {
   return 1;
 }
-
-void tint_symbol() {
+void main() {
   float arr[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   {
-    int tint_symbol_1 = foo();
-    int a_save = tint_symbol_1;
-    while (true) {
-      {
-        float x = arr[a_save];
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    uint v = min(uint(foo()), 3u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
+      float x = arr[v];
+      break;
     }
   }
-}
-
-void main() {
-  tint_symbol();
-  return;
 }

@@ -27,12 +27,9 @@
 
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 
-#include <map>
-#include <utility>
-
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
@@ -63,9 +60,9 @@ struct State {
     core::type::Manager& ty{ir.Types()};
 
     /// The mapping from functions to their transitively referenced workgroup variables.
-    ReferencedModuleVars referenced_module_vars_{
+    ReferencedModuleVars<Module> referenced_module_vars_{
         ir, [](const Var* var) {
-            auto* view = var->Result(0)->Type()->As<type::MemoryView>();
+            auto* view = var->Result()->Type()->As<type::MemoryView>();
             return view && view->AddressSpace() == AddressSpace::kWorkgroup;
         }};
 
@@ -120,7 +117,7 @@ struct State {
         // Build list of store descriptors for all workgroup variables.
         StoreMap stores;
         for (auto* var : vars) {
-            PrepareStores(var, var->Result(0)->Type()->UnwrapPtr(), 1, {}, stores);
+            PrepareStores(var, var->Result()->Type()->UnwrapPtr(), 1, {}, stores);
         }
 
         // Sort the iteration counts to get deterministic output in tests.
@@ -133,24 +130,28 @@ struct State {
 
         // Get the local invocation index and the linearized workgroup size.
         auto* local_index = GetLocalInvocationIndex(func);
-        auto wgsizes = func->WorkgroupSize().value();
-        auto wgsize = wgsizes[0] * wgsizes[1] * wgsizes[2];
+
+        auto wgsizes = func->WorkgroupSizeAsConst();
+        TINT_ASSERT(wgsizes);
+        auto wgsize = wgsizes.value()[0] * wgsizes.value()[1] * wgsizes.value()[2];
 
         // Insert instructions to zero-initialize every variable.
         b.InsertBefore(function_start, [&] {
             for (auto count : sorted_iteration_counts) {
                 auto element_stores = stores.Get(count);
-                if (count == 1u) {
-                    // Make the first invocation in the group perform all of the non-arrayed stores.
-                    auto* ifelse = b.If(b.Equal(ty.bool_(), local_index, 0_u));
+                TINT_ASSERT(count);
+                // No loop is required if we have at least as many invocations than counts.
+                if (count <= wgsize) {
+                    // Make the first |count| invocations in the group perform the arrayed stores.
+                    auto* ifelse = b.If(b.LessThan(ty.bool_(), local_index, u32(count)));
                     b.Append(ifelse->True(), [&] {
                         for (auto& store : *element_stores) {
-                            GenerateStore(store, count, b.Constant(0_u));
+                            GenerateStore(store, count, local_index);
                         }
                         b.ExitIf(ifelse);
                     });
                 } else {
-                    // Use a loop for arrayed stores.
+                    // Use a loop for arrayed stores that exceed the wgsize
                     b.LoopRange(ty, local_index, u32(count), u32(wgsize), [&](Value* index) {
                         for (auto& store : *element_stores) {
                             GenerateStore(store, count, index);
@@ -220,7 +221,7 @@ struct State {
                     if (member->Attributes().builtin == BuiltinValue::kLocalInvocationIndex) {
                         auto* access = b.Access(ty.u32(), param, u32(member->Index()));
                         access->InsertBefore(func->Block()->Front());
-                        return access->Result(0);
+                        return access->Result();
                     }
                 }
             } else {
@@ -243,7 +244,7 @@ struct State {
     /// @param total_count the total number of elements that will be zeroed
     /// @param linear_index the linear index of the single element that will be zeroed
     void GenerateStore(const Store& store, uint32_t total_count, Value* linear_index) {
-        auto* to = store.var->Result(0);
+        auto* to = store.var->Result();
         if (!store.indices.IsEmpty()) {
             // Build the access indices to get to the target element.
             // We walk backwards along the index list so that adjacent invocation store to
@@ -257,10 +258,10 @@ struct State {
                     auto array_index = std::get<ArrayIndex>(idx);
                     Value* index = linear_index;
                     if (count > 1) {
-                        index = b.Divide(ty.u32(), index, u32(count))->Result(0);
+                        index = b.Divide(ty.u32(), index, u32(count))->Result();
                     }
                     if (total_count > count * array_index.count) {
-                        index = b.Modulo(ty.u32(), index, u32(array_index.count))->Result(0);
+                        index = b.Modulo(ty.u32(), index, u32(array_index.count))->Result();
                     }
                     indices.Push(index);
                     count *= array_index.count;
@@ -270,7 +271,7 @@ struct State {
                 }
             }
             indices.Reverse();
-            to = b.Access(ty.ptr(workgroup, store.store_type), to, indices)->Result(0);
+            to = b.Access(ty.ptr(workgroup, store.store_type), to, indices)->Result();
         }
 
         // Generate the store instruction.
@@ -305,7 +306,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ZeroInitWorkgroupMemory(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "ZeroInitWorkgroupMemory transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ZeroInitWorkgroupMemory",
+                                          kZeroInitWorkgroupMemoryCapabilities);
     if (result != Success) {
         return result;
     }

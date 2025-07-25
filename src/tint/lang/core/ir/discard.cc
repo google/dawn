@@ -34,14 +34,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Discard);
 
 namespace tint::core::ir {
 
-Discard::Discard() {
+Discard::Discard(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
 Discard::~Discard() = default;
 
 Discard* Discard::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.instructions.Create<Discard>();
+    return ctx.ir.CreateInstruction<Discard>();
 }
 
 }  // namespace tint::core::ir

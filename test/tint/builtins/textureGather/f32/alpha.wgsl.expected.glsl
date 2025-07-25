@@ -2,13 +2,7 @@
 precision highp float;
 precision highp int;
 
-uniform highp sampler2D t_s;
-
-void tint_symbol() {
-  vec4 res = textureGather(t_s, vec2(0.0f), 3);
-}
-
+uniform highp sampler2D f_t_s;
 void main() {
-  tint_symbol();
-  return;
+  vec4 res = textureGather(f_t_s, vec2(0.0f), 3);
 }

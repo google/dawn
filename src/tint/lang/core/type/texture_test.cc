@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/core/type/texture.h"
 
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 
@@ -41,7 +42,7 @@ TEST_P(TextureTypeDimTest, DimMustMatch) {
     // TextureType is an abstract class, so use concrete class
     // SampledTexture in its stead.
     SampledTexture st(GetParam(), &f32);
-    EXPECT_EQ(st.dim(), GetParam());
+    EXPECT_EQ(st.Dim(), GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(Dimensions,

@@ -73,10 +73,16 @@ std::string BuiltinToAttribute(core::BuiltinValue builtin) {
             return "sample_mask";
         case core::BuiltinValue::kPointSize:
             return "point_size";
+        case core::BuiltinValue::kSubgroupId:
+            return "simdgroup_index_in_threadgroup";
         case core::BuiltinValue::kSubgroupInvocationId:
             return "thread_index_in_simdgroup";
         case core::BuiltinValue::kSubgroupSize:
             return "threads_per_simdgroup";
+        case core::BuiltinValue::kClipDistances:
+            return "clip_distance";
+        case core::BuiltinValue::kPrimitiveId:
+            return "primitive_id";
         default:
             break;
     }
@@ -101,6 +107,9 @@ std::string InterpolationToAttribute(core::InterpolationType type,
                 attr = "center_";
             }
             break;
+        case core::InterpolationSampling::kFirst:
+        case core::InterpolationSampling::kEither:
+            break;
     }
     switch (type) {
         case core::InterpolationType::kPerspective:
@@ -124,22 +133,14 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
 
         // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
         // 2.1 Scalar Data Types
-        [&](const core::type::U32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::I32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::F32*) {
-            return SizeAndAlign{4, 4};
-        },
-        [&](const core::type::F16*) {
-            return SizeAndAlign{2, 2};
-        },
+        [&](const core::type::U32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::I32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::F32*) { return SizeAndAlign{4, 4}; },
+        [&](const core::type::F16*) { return SizeAndAlign{2, 2}; },
 
         [&](const core::type::Vector* vec) {
             auto num_els = vec->Width();
-            auto* el_ty = vec->type();
+            auto* el_ty = vec->Type();
             SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
             if (el_ty->IsAnyOf<core::type::U32, core::type::I32, core::type::F32,
                                core::type::F16>()) {
@@ -161,32 +162,32 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
         [&](const core::type::Matrix* mat) {
             // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
             // 2.3 Matrix Data Types
-            auto cols = mat->columns();
-            auto rows = mat->rows();
-            auto* el_ty = mat->type();
+            auto cols = mat->Columns();
+            auto rows = mat->Rows();
+            auto* el_ty = mat->Type();
             // Metal only support half and float matrix.
             if (el_ty->IsAnyOf<core::type::F32, core::type::F16>()) {
-                static constexpr SizeAndAlign table_f32[] = {
-                    /* float2x2 */ {16, 8},
-                    /* float2x3 */ {32, 16},
-                    /* float2x4 */ {32, 16},
-                    /* float3x2 */ {24, 8},
-                    /* float3x3 */ {48, 16},
-                    /* float3x4 */ {48, 16},
-                    /* float4x2 */ {32, 8},
-                    /* float4x3 */ {64, 16},
-                    /* float4x4 */ {64, 16},
+                static constexpr std::array<SizeAndAlign, 9> table_f32 = {
+                    /* float2x2 */ SizeAndAlign{16, 8},
+                    /* float2x3 */ SizeAndAlign{32, 16},
+                    /* float2x4 */ SizeAndAlign{32, 16},
+                    /* float3x2 */ SizeAndAlign{24, 8},
+                    /* float3x3 */ SizeAndAlign{48, 16},
+                    /* float3x4 */ SizeAndAlign{48, 16},
+                    /* float4x2 */ SizeAndAlign{32, 8},
+                    /* float4x3 */ SizeAndAlign{64, 16},
+                    /* float4x4 */ SizeAndAlign{64, 16},
                 };
-                static constexpr SizeAndAlign table_f16[] = {
-                    /* half2x2 */ {8, 4},
-                    /* half2x3 */ {16, 8},
-                    /* half2x4 */ {16, 8},
-                    /* half3x2 */ {12, 4},
-                    /* half3x3 */ {24, 8},
-                    /* half3x4 */ {24, 8},
-                    /* half4x2 */ {16, 4},
-                    /* half4x3 */ {32, 8},
-                    /* half4x4 */ {32, 8},
+                static constexpr std::array<SizeAndAlign, 9> table_f16 = {
+                    /* half2x2 */ SizeAndAlign{8, 4},
+                    /* half2x3 */ SizeAndAlign{16, 8},
+                    /* half2x4 */ SizeAndAlign{16, 8},
+                    /* half3x2 */ SizeAndAlign{12, 4},
+                    /* half3x3 */ SizeAndAlign{24, 8},
+                    /* half3x4 */ SizeAndAlign{24, 8},
+                    /* half4x2 */ SizeAndAlign{16, 4},
+                    /* half4x3 */ SizeAndAlign{32, 8},
+                    /* half4x4 */ SizeAndAlign{32, 8},
                 };
                 if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
                     if (el_ty->Is<core::type::F32>()) {
@@ -201,7 +202,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
         },
 
         [&](const core::type::Array* arr) {
-            if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
+            if (DAWN_UNLIKELY(!arr->IsStrideImplicit())) {
                 TINT_ICE()
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
             }

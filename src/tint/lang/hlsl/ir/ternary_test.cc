@@ -45,11 +45,11 @@ TEST_F(HlslIRTest, SetsUsage) {
     auto* cmp = b.Constant(true);
 
     Vector<core::ir::Value*, 3> args = {false_, true_, cmp};
-    auto* t = b.ir.allocators.instructions.Create<Ternary>(b.InstructionResult(ty.u32()), args);
+    auto* t = b.ir.CreateInstruction<Ternary>(b.InstructionResult(ty.u32()), args);
 
-    EXPECT_THAT(false_->Usages(), testing::UnorderedElementsAre(core::ir::Usage{t, 0u}));
-    EXPECT_THAT(true_->Usages(), testing::UnorderedElementsAre(core::ir::Usage{t, 1u}));
-    EXPECT_THAT(cmp->Usages(), testing::UnorderedElementsAre(core::ir::Usage{t, 2u}));
+    EXPECT_THAT(false_->UsagesUnsorted(), testing::UnorderedElementsAre(core::ir::Usage{t, 0u}));
+    EXPECT_THAT(true_->UsagesUnsorted(), testing::UnorderedElementsAre(core::ir::Usage{t, 1u}));
+    EXPECT_THAT(cmp->UsagesUnsorted(), testing::UnorderedElementsAre(core::ir::Usage{t, 2u}));
 }
 
 TEST_F(HlslIRTest, Result) {
@@ -58,12 +58,12 @@ TEST_F(HlslIRTest, Result) {
     auto* cmp = b.Constant(true);
 
     Vector<core::ir::Value*, 3> args = {false_, true_, cmp};
-    auto* t = b.ir.allocators.instructions.Create<Ternary>(b.InstructionResult(ty.u32()), args);
+    auto* t = b.ir.CreateInstruction<Ternary>(b.InstructionResult(ty.u32()), args);
 
     EXPECT_EQ(t->Results().Length(), 1u);
 
-    EXPECT_TRUE(t->Result(0)->Is<core::ir::InstructionResult>());
-    EXPECT_EQ(t, t->Result(0)->Instruction());
+    EXPECT_TRUE(t->Result()->Is<core::ir::InstructionResult>());
+    EXPECT_EQ(t, t->Result()->Instruction());
 }
 
 TEST_F(HlslIRTest, Clone) {
@@ -72,14 +72,14 @@ TEST_F(HlslIRTest, Clone) {
     auto* cmp = b.Constant(true);
 
     Vector<core::ir::Value*, 3> args = {false_, true_, cmp};
-    auto* t = b.ir.allocators.instructions.Create<Ternary>(b.InstructionResult(ty.u32()), args);
+    auto* t = b.ir.CreateInstruction<Ternary>(b.InstructionResult(ty.u32()), args);
 
     auto* new_t = clone_ctx.Clone(t);
 
     EXPECT_NE(t, new_t);
 
-    EXPECT_NE(t->Result(0), new_t->Result(0));
-    EXPECT_EQ(ty.u32(), new_t->Result(0)->Type());
+    EXPECT_NE(t->Result(), new_t->Result());
+    EXPECT_EQ(ty.u32(), new_t->Result()->Type());
 
     EXPECT_NE(nullptr, new_t->True());
     EXPECT_EQ(t->True(), new_t->True());

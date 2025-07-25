@@ -36,10 +36,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Loop);
 
 namespace tint::core::ir {
 
-Loop::Loop() = default;
+Loop::Loop(Id id) : Base(id) {}
 
-Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c)
-    : initializer_(i), body_(b), continuing_(c) {
+Loop::Loop(Id id, ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c)
+    : Base(id), initializer_(i), body_(b), continuing_(c) {
     TINT_ASSERT(initializer_);
     TINT_ASSERT(body_);
     TINT_ASSERT(continuing_);
@@ -62,8 +62,7 @@ Loop* Loop::Clone(CloneContext& ctx) {
     auto* new_body = ctx.ir.blocks.Create<MultiInBlock>();
     auto* new_continuing = ctx.ir.blocks.Create<MultiInBlock>();
 
-    auto* new_loop =
-        ctx.ir.allocators.instructions.Create<Loop>(new_init, new_body, new_continuing);
+    auto* new_loop = ctx.ir.CreateInstruction<Loop>(new_init, new_body, new_continuing);
     ctx.Replace(this, new_loop);
 
     initializer_->CloneInto(ctx, new_init);

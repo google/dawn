@@ -72,6 +72,7 @@ group("abseil") {
     public_deps = [
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
       "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
+      "${dawn_root}/third_party/gn/abseil-cpp:span",
     ]
   }
 }
@@ -82,7 +83,7 @@ dawn_component("wire") {
   deps = [
     ":gen",
     "${dawn_root}/src/dawn/common",
-    "${dawn_root}/src/tint/lang/wgsl/features",
+    "${dawn_root}/src/tint/lang/wgsl",
   ]
 
   configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
@@ -113,6 +114,8 @@ dawn_component("wire") {
     "client/Client.h",
     "client/ClientDoers.cpp",
     "client/ClientInlineMemoryTransferService.cpp",
+    "client/ComputePassEncoder.cpp",
+    "client/ComputePassEncoder.h",
     "client/Device.cpp",
     "client/Device.h",
     "client/EventManager.cpp",
@@ -129,12 +132,14 @@ dawn_component("wire") {
     "client/QuerySet.h",
     "client/Queue.cpp",
     "client/Queue.h",
+    "client/RenderBundleEncoder.cpp",
+    "client/RenderBundleEncoder.h",
+    "client/RenderPassEncoder.cpp",
+    "client/RenderPassEncoder.h",
     "client/ShaderModule.cpp",
     "client/ShaderModule.h",
     "client/Surface.cpp",
     "client/Surface.h",
-    "client/SwapChain.cpp",
-    "client/SwapChain.h",
     "client/Texture.cpp",
     "client/Texture.h",
     "server/ObjectStorage.h",
@@ -145,8 +150,10 @@ dawn_component("wire") {
     "server/ServerDevice.cpp",
     "server/ServerInlineMemoryTransferService.cpp",
     "server/ServerInstance.cpp",
+    "server/ServerProgrammableEncoder.cpp",
     "server/ServerQueue.cpp",
     "server/ServerShaderModule.cpp",
+    "server/ServerSurface.cpp",
   ]
 
   # Make headers publicly visible

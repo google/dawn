@@ -49,7 +49,7 @@ endif()
 function(DawnGenerator)
     cmake_parse_arguments(PARSE_ARGV 0 arg
         ""
-        "SCRIPT;OUTPUT_HEADERS;OUTPUT_SOURCES;PRINT_NAME"
+        "SCRIPT;OUTPUT_HEADERS;OUTPUT_SOURCES;OUTPUT_JSONS;OUTPUT_JS;PRINT_NAME"
         "EXTRA_PARAMETERS"
     )
     message(STATUS "Dawn: Configuring DawnGenerator for ${arg_PRINT_NAME}.")
@@ -113,10 +113,16 @@ function(DawnGenerator)
     # Populate the list of outputs.
     set(headers)
     set(sources)
+    set(jsons)
+    set(js)
     foreach (filename IN LISTS OUTPUTS)
         get_filename_component(extension "${filename}" EXT)
         if (extension MATCHES "(h|hpp)")
             list(APPEND headers "${filename}")
+        elseif (extension MATCHES "(json)")
+            list(APPEND jsons "${filename}")
+        elseif (extension MATCHES "(js)")
+            list(APPEND js "${filename}")
         else ()
             list(APPEND sources "${filename}")
         endif ()
@@ -134,28 +140,22 @@ function(DawnGenerator)
             "Please provide a variable name for OUTPUT_HEADERS.")
     endif ()
 
+    if (jsons AND NOT arg_OUTPUT_JSONS)
+        message(FATAL_ERROR
+            "This function generated JSON files, although an output variable was not defined!"
+            "Please provide a variable name for OUTPUT_JSONS.")
+    endif ()
+
+    if (js AND NOT arg_OUTPUT_JS)
+        message(FATAL_ERROR
+            "This function generated JS files, although an output variable was not defined!"
+            "Please provide a variable name for OUTPUT_JS.")
+    endif ()
+
     set(${arg_OUTPUT_SOURCES} ${sources} PARENT_SCOPE)
     set(${arg_OUTPUT_HEADERS} ${headers} PARENT_SCOPE)
-
-    # Prior to CMake 3.20 the GENERATED property is local to a directory which means that putting
-    # generated headers in INTERFACE properties causes dependent targets to complain that they
-    # cannot find the file. (because they don't see it as generated and want to check is is
-    # actually on the filesystem).
-    # Work around this by generating the files once if they aren't present at configuration time.
-    set(needToGenerate OFF)
-    foreach(path ${OUTPUTS})
-        if (NOT EXISTS ${path})
-            set(needToGenerate ON)
-        endif()
-    endforeach()
-
-    if (${needToGenerate})
-        message(STATUS "Dawn: Generating initial versions of files for ${arg_PRINT_NAME}.")
-        execute_process(COMMAND ${BASE_ARGS} RESULT_VARIABLE RET)
-        if (NOT RET EQUAL 0)
-            message(FATAL_ERROR "Dawn: Failed to generate the initial version of files for ${arg_PRINT_NAME}. Base args are '${BASE_ARGS}'.")
-        endif()
-    endif()
+    set(${arg_OUTPUT_JSONS} ${jsons} PARENT_SCOPE)
+    set(${arg_OUTPUT_JS} ${js} PARENT_SCOPE)
 endfunction()
 
 # Helper function to call dawn_generator.py:
@@ -164,7 +164,7 @@ endfunction()
 function(DawnJSONGenerator)
     cmake_parse_arguments(PARSE_ARGV 0 arg
         ""
-        "TARGET;OUTPUT_SOURCES;OUTPUT_HEADERS;PRINT_NAME"
+        "TARGET;OUTPUT_SOURCES;OUTPUT_HEADERS;OUTPUT_JSONS;OUTPUT_JS;PRINT_NAME"
         ""
     )
     DawnGenerator(
@@ -172,6 +172,8 @@ function(DawnJSONGenerator)
         PRINT_NAME "${arg_PRINT_NAME}"
         OUTPUT_HEADERS HEADERS
         OUTPUT_SOURCES SOURCES
+        OUTPUT_JSONS JSONS
+        OUTPUT_JS JS
         EXTRA_PARAMETERS
              --dawn-json
              "${Dawn_SOURCE_DIR}/src/dawn/dawn.json"
@@ -186,7 +188,7 @@ function(DawnJSONGenerator)
 
     if (SOURCES AND NOT arg_OUTPUT_SOURCES)
         message(FATAL_ERROR
-            "This function generated source files, although an output variable was not defined!"
+            "This function generated source files, although an output variable was not defined! "
             "Please provide a variable name for OUTPUT_SOURCES.")
     elseif (arg_OUTPUT_SOURCES AND NOT SOURCES)
         message(WARNING
@@ -195,14 +197,34 @@ function(DawnJSONGenerator)
 
     if (HEADERS AND NOT arg_OUTPUT_HEADERS)
         message(FATAL_ERROR
-            "This function generated header files, although an output variable was not defined!"
+            "This function generated header files, although an output variable was not defined! "
             "Please provide a variable name for OUTPUT_HEADERS.")
     elseif (arg_OUTPUT_HEADERS AND NOT HEADERS)
         message(WARNING
             "This function did not generate header files. The OUTPUT_HEADERS argument is unnecessary.")
     endif ()
 
+    if (JSONS AND NOT arg_OUTPUT_JSONS)
+        message(FATAL_ERROR
+            "This function generated JSON files, although an output variable was not defined! "
+            "Please provide a variable name for OUTPUT_JSONS.")
+    elseif (arg_OUTPUT_JSONS AND NOT JSONS)
+        message(WARNING
+            "This function did not generate JSON files. The OUTPUT_JSONS argument is unnecessary.")
+    endif ()
+
+    if (JS AND NOT arg_OUTPUT_JS)
+        message(FATAL_ERROR
+            "This function generated JS files, although an output variable was not defined! "
+            "Please provide a variable name for OUTPUT_JS.")
+    elseif (arg_OUTPUT_JS AND NOT JS)
+        message(WARNING
+            "This function did not generate JS files. The OUTPUT_JS argument is unnecessary.")
+    endif ()
+
     # Forward the result up one more scope
     set(${arg_OUTPUT_SOURCES} ${SOURCES} PARENT_SCOPE)
     set(${arg_OUTPUT_HEADERS} ${HEADERS} PARENT_SCOPE)
+    set(${arg_OUTPUT_JSONS} ${JSONS} PARENT_SCOPE)
+    set(${arg_OUTPUT_JS} ${JS} PARENT_SCOPE)
 endfunction()

@@ -51,7 +51,9 @@ class ObjectStore {
     ObjectHandle ReserveHandle();
     void Insert(ObjectBase* obj);
     void Remove(ObjectBase* obj);
+
     ObjectBase* Get(ObjectId id) const;
+    const std::vector<raw_ptr<ObjectBase>>& GetAllObjects() const;
 
   private:
     uint32_t mCurrentId;

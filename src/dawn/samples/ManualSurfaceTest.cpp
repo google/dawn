@@ -28,11 +28,11 @@
 // This is an example to manually test surface code. Controls are the following, scoped to the
 // currently focused window:
 //  - W: creates a new window.
-//  - L: Latches the current swapchain, to check what happens when the window changes but not the
-//    swapchain.
+//  - L: Latches the current surface, to check what happens when the window changes but not the
+//    surface.
 //  - R: switches the rendering mode, between "The Red Triangle" and color-cycling clears that's
 //    (WARNING) likely seizure inducing.
-//  - D: cycles the divisor for the swapchain size.
+//  - D: cycles the divisor for the surface size.
 //  - P: switches present modes.
 //  - A: switches alpha modes.
 //  - F: switches formats.
@@ -58,7 +58,7 @@
 //
 //  - Resizing tests (with the triangle render mode):
 //    - Check that cycling divisors on the triangle produces lower and lower resolution triangles.
-//    - Check latching the swapchain config and resizing the window a bunch (smaller, bigger, and
+//    - Check latching the surface config and resizing the window a bunch (smaller, bigger, and
 //      diagonal aspect ratio).
 //
 //  - Config change tests:
@@ -77,7 +77,10 @@
 //    - Check OpenGL rendering with extra usages / depth buffer / MRT.
 //    - Check with GLFW transparency on / off.
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -87,11 +90,11 @@
 #include "GLFW/glfw3.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
-#include "dawn/dawn_proc.h"
+#include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
+#include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "webgpu/webgpu_glfw.h"
 
@@ -136,14 +139,14 @@ struct WindowData {
 static std::unordered_map<GLFWwindow*, std::unique_ptr<WindowData>> windows;
 static uint64_t windowSerial = 0;
 
-static std::unique_ptr<dawn::native::Instance> instance;
+static wgpu::Instance instance;
 static wgpu::Adapter adapter;
 static wgpu::Device device;
 static wgpu::Queue queue;
 
 static std::unordered_map<wgpu::TextureFormat, wgpu::RenderPipeline> trianglePipelines;
 wgpu::RenderPipeline GetOrCreateTrianglePipeline(wgpu::TextureFormat format) {
-    if (trianglePipelines.count(format)) {
+    if (trianglePipelines.contains(format)) {
         return trianglePipelines[format];
     }
 
@@ -200,7 +203,7 @@ void AddWindow() {
     GLFWwindow* window = glfwCreateWindow(400, 400, "", nullptr, nullptr);
     glfwSetKeyCallback(window, OnKeyPress);
 
-    wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance->Get(), window);
+    wgpu::Surface surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
     wgpu::SurfaceCapabilities caps;
     surface.GetCapabilities(adapter, &caps);
 
@@ -262,7 +265,8 @@ void DoRender(WindowData* data) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    data->surface.Present();
+    wgpu::Status presentStatus = data->surface.Present();
+    DAWN_ASSERT(presentStatus == wgpu::Status::Success);
 }
 
 std::ostream& operator<<(std::ostream& o, const wgpu::SurfaceConfiguration& desc) {
@@ -300,7 +304,7 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
         return;
     }
 
-    DAWN_ASSERT(windows.count(window) == 1);
+    DAWN_ASSERT(windows.contains(window));
 
     WindowData* data = windows[window].get();
     switch (key) {
@@ -343,7 +347,41 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
 }
 
 int main(int argc, const char* argv[]) {
-    // Setup GLFW
+    // Parse command line options.
+    dawn::utils::CommandLineParser parser;
+    auto& helpOpt = parser.AddHelp();
+    auto& enableTogglesOpt = parser.AddStringList("enable-toggles", "Toggles to enable in Dawn")
+                                 .ShortName('e')
+                                 .Parameter("comma separated list");
+    auto& disableTogglesOpt = parser.AddStringList("disable-toggles", "Toggles to disable in Dawn")
+                                  .ShortName('d')
+                                  .Parameter("comma separated list");
+    auto& backendOpt =
+        parser
+            .AddEnum<wgpu::BackendType>({{"d3d11", wgpu::BackendType::D3D11},
+                                         {"d3d12", wgpu::BackendType::D3D12},
+                                         {"metal", wgpu::BackendType::Metal},
+                                         {"null", wgpu::BackendType::Null},
+                                         {"opengl", wgpu::BackendType::OpenGL},
+                                         {"opengles", wgpu::BackendType::OpenGLES},
+                                         {"vulkan", wgpu::BackendType::Vulkan}},
+                                        "backend", "The backend to get an adapter from")
+            .ShortName('b')
+            .Default(wgpu::BackendType::Undefined);
+
+    auto parserResult = parser.Parse(argc, argv);
+    if (!parserResult.success) {
+        std::cerr << parserResult.errorMessage << "\n";
+        return 1;
+    }
+
+    if (helpOpt.GetValue()) {
+        std::cout << "Usage: " << argv[0] << " <options>\n\noptions\n";
+        parser.PrintHelp(std::cout);
+        return 0;
+    }
+
+    // Setup GLFW, Dawn procs
     glfwSetErrorCallback([](int code, const char* message) {
         dawn::ErrorLog() << "GLFW error " << code << " " << message;
     });
@@ -351,43 +389,85 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    // Choose an adapter we like.
-    // TODO(dawn:269): allow switching the window between devices.
     DawnProcTable procs = dawn::native::GetProcs();
     dawnProcSetProcs(&procs);
 
-    instance = std::make_unique<dawn::native::Instance>();
+    // Make an instance with the toggles.
+    std::vector<const char*> enableToggleNames;
+    std::vector<const char*> disabledToggleNames;
+    for (auto toggle : enableTogglesOpt.GetValue()) {
+        enableToggleNames.push_back(toggle.c_str());
+    }
 
-    dawn::native::Adapter chosenAdapter = instance->EnumerateAdapters()[0];
-    DAWN_ASSERT(chosenAdapter);
-    adapter = wgpu::Adapter(chosenAdapter.Get());
+    for (auto toggle : disableTogglesOpt.GetValue()) {
+        disabledToggleNames.push_back(toggle.c_str());
+    }
+    wgpu::DawnTogglesDescriptor toggles;
+    toggles.enabledToggles = enableToggleNames.data();
+    toggles.enabledToggleCount = enableToggleNames.size();
+    toggles.disabledToggles = disabledToggleNames.data();
+    toggles.disabledToggleCount = disabledToggleNames.size();
+
+    wgpu::InstanceDescriptor instanceDescriptor{};
+    instanceDescriptor.nextInChain = &toggles;
+    static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+    instanceDescriptor.requiredFeatureCount = 1;
+    instanceDescriptor.requiredFeatures = &kTimedWaitAny;
+    instance = wgpu::CreateInstance(&instanceDescriptor);
+
+    // Choose an adapter we like.
+    // TODO(dawn:269): allow switching the window between devices.
+    wgpu::RequestAdapterOptions options = {};
+    options.backendType = backendOpt.GetValue();
+    if (options.backendType != wgpu::BackendType::Undefined) {
+        options.featureLevel = dawn::utils::BackendRequiresCompat(options.backendType)
+                                   ? wgpu::FeatureLevel::Compatibility
+                                   : wgpu::FeatureLevel::Core;
+    }
+
+    wgpu::Future adapterFuture = instance.RequestAdapter(
+        &options, wgpu::CallbackMode::WaitAnyOnly,
+        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter adapterIn, wgpu::StringView message) {
+            if (status != wgpu::RequestAdapterStatus::Success) {
+                dawn::ErrorLog() << "Failed to get an adapter: " << message;
+                return;
+            }
+            adapter = adapterIn;
+        });
+    instance.WaitAny(adapterFuture, UINT64_MAX);
+
+    if (adapter == nullptr) {
+        return 1;
+    }
+
+    wgpu::AdapterInfo adapterInfo;
+    adapter.GetInfo(&adapterInfo);
+    std::cout << "Using adapter \"" << adapterInfo.device << "\" on " << adapterInfo.backendType
+              << ".\n";
+
+    wgpu::DeviceDescriptor deviceDesc;
+    deviceDesc.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType errorType, wgpu::StringView message) {
+            dawn::ErrorLog() << errorType << " error: " << message;
+            DAWN_ASSERT(false);
+        });
 
     // Setup the device on that adapter.
-    device = wgpu::Device::Acquire(chosenAdapter.CreateDevice());
-    device.SetUncapturedErrorCallback(
-        [](WGPUErrorType errorType, const char* message, void*) {
-            const char* errorTypeName = "";
-            switch (errorType) {
-                case WGPUErrorType_Validation:
-                    errorTypeName = "Validation";
-                    break;
-                case WGPUErrorType_OutOfMemory:
-                    errorTypeName = "Out of memory";
-                    break;
-                case WGPUErrorType_Unknown:
-                    errorTypeName = "Unknown";
-                    break;
-                case WGPUErrorType_DeviceLost:
-                    errorTypeName = "Device lost";
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-                    return;
+    wgpu::Future deviceFuture = adapter.RequestDevice(
+        &deviceDesc, wgpu::CallbackMode::WaitAnyOnly,
+        [&](wgpu::RequestDeviceStatus status, wgpu::Device deviceIn, wgpu::StringView message) {
+            if (status != wgpu::RequestDeviceStatus::Success) {
+                dawn::ErrorLog() << "Failed to get a device:" << message;
+                return;
             }
-            dawn::ErrorLog() << errorTypeName << " error: " << message;
-            DAWN_ASSERT(false);
-        },
-        nullptr);
+            device = deviceIn;
+        });
+    instance.WaitAny(deviceFuture, UINT64_MAX);
+
+    if (device == nullptr) {
+        return 1;
+    }
+
     queue = device.GetQueue();
 
     // Create the first window, since the example exits when there are no windows.
@@ -395,7 +475,7 @@ int main(int argc, const char* argv[]) {
 
     while (windows.size() != 0) {
         glfwPollEvents();
-        wgpuInstanceProcessEvents(instance->Get());
+        instance.ProcessEvents();
 
         for (auto it = windows.begin(); it != windows.end();) {
             GLFWwindow* window = it->first;

@@ -25,8 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/builtin_value.h"
+#include <functional>
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -827,48 +829,6 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
     EXPECT_EQ(r()->error(), "12:34 error: store type of '@builtin(front_facing)' must be 'bool'");
 }
 
-// TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin
-// tests. Clean this up.
-TEST_F(ResolverBuiltinsValidationTest, StructMemberAttributeMapsToSemBuiltinEnum) {
-    // struct S {
-    //   @builtin(front_facing) b : bool;
-    // };
-    // @fragment
-    // fn f(s : S) {}
-
-    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
-    auto* s = Structure("S", Vector{
-                                 Member("f", ty.bool_(), Vector{builtin}),
-                             });
-    Func("f", Vector{Param("b", ty.Of(s))}, ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* builtin_expr = Sem().Get(builtin);
-    ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
-}
-
-// TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin
-// tests. Clean this up.
-TEST_F(ResolverBuiltinsValidationTest, ParamAttributeMapsToSemBuiltinEnum) {
-    // @fragment
-    // fn f(@builtin(front_facing) b : bool) {}
-
-    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
-    Func("f", Vector{Param("b", ty.bool_(), Vector{builtin})}, ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* builtin_expr = Sem().Get(builtin);
-    ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
-}
-
 TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {
     auto* builtin = Call("length", 1_f);
     WrapInFunction(builtin);
@@ -979,9 +939,9 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
@@ -996,9 +956,9 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
@@ -1013,9 +973,9 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
@@ -1043,9 +1003,9 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
@@ -1060,9 +1020,9 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
@@ -1077,9 +1037,9 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
     ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
     ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
     EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Cross_Float_Vec3) {
@@ -1202,7 +1162,7 @@ TEST_P(FloatAllMatching, Vec2) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 TEST_P(FloatAllMatching, Vec3) {
@@ -1223,7 +1183,7 @@ TEST_P(FloatAllMatching, Vec3) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 TEST_P(FloatAllMatching, Vec4) {
@@ -1244,7 +1204,7 @@ TEST_P(FloatAllMatching, Vec4) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
@@ -1320,7 +1280,7 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec3Unsigned) {
@@ -1335,7 +1295,7 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec4Unsigned) {
@@ -1350,7 +1310,7 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, ScalarSigned) {
@@ -1380,7 +1340,7 @@ TEST_P(IntegerAllMatching, Vec2Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec3Signed) {
@@ -1395,7 +1355,7 @@ TEST_P(IntegerAllMatching, Vec3Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec4Signed) {
@@ -1410,7 +1370,7 @@ TEST_P(IntegerAllMatching, Vec4Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
@@ -1496,6 +1456,636 @@ TEST_P(DataPacking2x16, Float_Vec2) {
 INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          DataPacking2x16,
                          ::testing::Values("pack2x16snorm", "pack2x16unorm", "pack2x16float"));
+
+using ExprMaker = std::function<const ast::Expression*(ast::Builder*)>;
+template <typename T>
+ExprMaker Mk(core::Number<T> v) {
+    return [v](ast::Builder* b) -> const ast::Expression* { return b->Expr(v); };
+}
+
+// We''ll construct cases like this:
+// fn foo() {
+//   var s: STYPE;
+//   _ = clamp(s, LOW, HIGH);
+// }
+struct ClampPartialConstCase {
+    builder::ast_type_func_ptr sType;
+    ExprMaker makeLow;
+    ExprMaker makeHigh;
+    bool expectPass = true;
+    std::string lowStr = "";
+    std::string highStr = "";
+};
+
+using ClampPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<ClampPartialConstCase, bool, bool>>;
+
+TEST_P(ClampPartialConst, Scalar) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "clamp", "s", "low", "high")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: clamp called with 'low' (" << params.lowStr << ") greater than 'high' ("
+           << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(ClampPartialConst, Vector) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "clamp", Call(Ident("vec3"), "s", "s", "s"),
+                               Call(Ident("vec3"), Expr(0_a), "low", Expr(0_a)),
+                               Call(Ident("vec3"), Expr(1_a), "high", Expr(1_a)))));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: clamp called with 'low' (" << params.lowStr << ") greater than 'high' ("
+           << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(ClampPartialConst, VectorMixedRuntimeConstNotChecked) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+    // Some components of the low and high vector are runtime, so the other
+    // components are not checked, and therefore do not generate errors.
+    WrapInFunction(Var("s", sTy),
+                   Ignore(Call(Source{{12, 34}}, "clamp", Call(Ident("vec2"), "s", "s"),
+                               Call(Ident("vec2"), "s", low), Call(Ident("vec2"), "s", high))));
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+std::vector<ClampPartialConstCase> clampCases() {
+    return std::vector<ClampPartialConstCase>{
+        // Simple passing cases.
+        {DataType<f32>::AST, Mk(1_a), Mk(1_a), true},    // low == high
+        {DataType<f32>::AST, Mk(1_a), Mk(2_a), true},    // low < high
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1_a), true},  // AFloat AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AFloat f32
+        {DataType<f32>::AST, Mk(1_f), Mk(2.0_a), true},  // f32 AFloat
+        {DataType<f32>::AST, Mk(1_f), Mk(2_f), true},    // f32 f32
+        {DataType<u32>::AST, Mk(1_a), Mk(1_u), true},    // AInt u32
+        {DataType<u32>::AST, Mk(1_u), Mk(2_u), true},    // u32 u32
+        {DataType<i32>::AST, Mk(1_i), Mk(1_a), true},    // i32 AInt
+        {DataType<i32>::AST, Mk(1_i), Mk(2_i), true},    // i32 i32
+
+        // AInt AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(0_a), false, "1.0", "0.0"},
+        {DataType<i32>::AST, Mk(1_a), Mk(0_a), false, "1", "0"},
+        {DataType<u32>::AST, Mk(1_a), Mk(0_a), false, "1", "0"},
+        // AFloat AInt
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_a), false, "1.0", "0.0"},
+        // AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), false, "1.0", "0.0"},
+
+        // AFloat AFloat
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0.0_a), false, "1.0", "0.0"},
+        // AFloat f32
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_f), false, "1.0", "0.0"},
+        // f32 AFloat
+        {DataType<f32>::AST, Mk(1_f), Mk(0.0_a), false, "1.0", "0.0"},
+
+        //  AInt f32
+        {DataType<f32>::AST, Mk(1_a), Mk(0_f), false, "1.0", "0.0"},
+        //  f32 AInt
+        {DataType<f32>::AST, Mk(1_f), Mk(0_a), false, "1.0", "0.0"},
+        //  f32 f32
+        {DataType<f32>::AST, Mk(1_f), Mk(0_f), false, "1.0", "0.0"},
+
+        //  AInt i32
+        {DataType<i32>::AST, Mk(1_a), Mk(0_i), false, "1", "0"},
+        //  i32 AInt
+        {DataType<i32>::AST, Mk(1_i), Mk(0_a), false, "1", "0"},
+        //  i32 i32
+        {DataType<i32>::AST, Mk(1_i), Mk(0_i), false, "1", "0"},
+
+        //  AInt u32
+        {DataType<u32>::AST, Mk(1_a), Mk(0_u), false, "1", "0"},
+        //  i32 AInt
+        {DataType<u32>::AST, Mk(1_u), Mk(0_a), false, "1", "0"},
+        //  i32 i32
+        {DataType<u32>::AST, Mk(1_u), Mk(0_u), false, "1", "0"},
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(Clamp,
+                         ClampPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(clampCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
+
+// We''ll construct cases like this:
+// fn foo() {
+//   var s: STYPE;
+//   _ = smoothstep(LOW, HIGH, s);
+// }
+struct SmoothstepPartialConstCase {
+    builder::ast_type_func_ptr sType;
+    ExprMaker makeLow;
+    ExprMaker makeHigh;
+    bool expectPass = true;
+    std::string lowStr = "";
+    std::string highStr = "";
+};
+
+using SmoothstepPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<SmoothstepPartialConstCase, bool, bool>>;
+
+TEST_P(SmoothstepPartialConst, Scalar) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "smoothstep", "low", "high", "s")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
+           << ") equal to 'high' (" << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(SmoothstepPartialConst, Vector) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "smoothstep",
+                               Call(Ident("vec3"), Expr(0_a), "low", Expr(0_a)),
+                               Call(Ident("vec3"), Expr(1_a), "high", Expr(1_a)),
+                               Call(Ident("vec3"), "s", "s", "s"))));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
+           << ") equal to 'high' (" << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(SmoothstepPartialConst, VectorMixedRuntimeConstNotChecked) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+    // Some components of the low and high vector are runtime, so the other
+    // components are not checked, and therefore do not generate errors.
+    WrapInFunction(Var("s", sTy),
+                   Ignore(Call(Source{{12, 34}}, "smoothstep", Call(Ident("vec2"), "s", low),
+                               Call(Ident("vec2"), "s", high), Call(Ident("vec2"), "s", "s"))));
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+std::vector<SmoothstepPartialConstCase> smoothstepCases() {
+    return std::vector<SmoothstepPartialConstCase>{
+        // Simple passing cases.
+        {DataType<f32>::AST, Mk(1_a), Mk(2_a), true},    // low < high
+        {DataType<f32>::AST, Mk(1.0_a), Mk(2_a), true},  // AFloat AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AFloat f32
+        {DataType<f32>::AST, Mk(1_f), Mk(2.0_a), true},  // f32 AFloat
+        {DataType<f32>::AST, Mk(1_f), Mk(2_f), true},    // f32 f32
+
+        //  AInt AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_a), true, "1.0", "0.0"},
+        //  AFloat AInt
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_a), true, "1.0", "0.0"},
+        //  AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), true, "1.0", "0.0"},
+
+        //  AFloat AFloat
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0.0_a), true, "1.0", "0.0"},
+
+        //  AInt f32
+        {DataType<f32>::AST, Mk(1_a), Mk(1_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_f), true, "1.0", "0.0"},
+        //  f32 AInt
+        {DataType<f32>::AST, Mk(1_f), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0_a), true, "1.0", "0.0"},
+
+        //  AFloat f32
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_f), true, "1.0", "0.0"},
+
+        //  f32 AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), true, "1.0", "0.0"},
+
+        //  f32 f32
+        {DataType<f32>::AST, Mk(1_f), Mk(1.0_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0.0_f), true, "1.0", "0.0"},
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(Smoothstep,
+                         SmoothstepPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(smoothstepCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
+
+// We'll construct cases like this:
+// fn foo() {
+//   var e: ETYPE;
+//   _ = insertBits(e, e, COUNT, OFFSET);
+// }
+
+struct InsertBitsPartialConstCase {
+    builder::ast_type_func_ptr eType;
+    ExprMaker makeOffset;
+    ExprMaker makeCount;
+    bool expectPass = true;
+    int width = 32;
+};
+
+using InsertBitsPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<InsertBitsPartialConstCase, bool, bool>>;
+
+TEST_P(InsertBitsPartialConst, Scalar) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,
+                   Ignore(Call(Source{{12, 34}}, "insertBits", "e", "e", "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(InsertBitsPartialConst, Vector) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,            //
+                   Ignore(Call(Source{{12, 34}}, "insertBits",      //
+                               Call(Ident("vec3"), "e", "e", "e"),  //
+                               Call(Ident("vec3"), "e", "e", "e"),  //
+                               "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+std::vector<InsertBitsPartialConstCase> insertBitsCases() {
+    return std::vector<InsertBitsPartialConstCase>{
+        // Simple passing cases.
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<i32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_u), true},
+        {DataType<i32>::AST, Mk(32_u), Mk(0_a), true},
+
+        //  AInt AInt
+        {DataType<u32>::AST, Mk(0_a), Mk(33_a), false},
+        {DataType<u32>::AST, Mk(16_a), Mk(17_a), false},
+        {DataType<u32>::AST, Mk(33_a), Mk(0_a), false},
+
+        {DataType<i32>::AST, Mk(0_a), Mk(33_u), false},   // Aint u32
+        {DataType<i32>::AST, Mk(16_u), Mk(17_a), false},  // u32 AInt
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(InsertBits,
+                         InsertBitsPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(insertBitsCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
+
+// We'll construct cases like this:
+// fn foo() {
+//   var e: ETYPE;
+//   _ = extractBits(e, COUNT, OFFSET);
+// }
+
+struct ExtractBitsPartialConstCase {
+    builder::ast_type_func_ptr eType;
+    ExprMaker makeOffset;
+    ExprMaker makeCount;
+    bool expectPass = true;
+    int width = 32;
+};
+
+using ExtractBitsPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<ExtractBitsPartialConstCase, bool, bool>>;
+
+TEST_P(ExtractBitsPartialConst, Scalar) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,
+                   Ignore(Call(Source{{12, 34}}, "extractBits", "e", "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(ExtractBitsPartialConst, Vector) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,            //
+                   Ignore(Call(Source{{12, 34}}, "extractBits",     //
+                               Call(Ident("vec3"), "e", "e", "e"),  //
+                               "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+std::vector<ExtractBitsPartialConstCase> extractBitsCases() {
+    return std::vector<ExtractBitsPartialConstCase>{
+        // Simple passing cases.
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<i32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_u), true},
+        {DataType<i32>::AST, Mk(32_u), Mk(0_a), true},
+
+        //  AInt AInt
+        {DataType<u32>::AST, Mk(0_a), Mk(33_a), false},
+        {DataType<u32>::AST, Mk(16_a), Mk(17_a), false},
+        {DataType<u32>::AST, Mk(33_a), Mk(0_a), false},
+
+        {DataType<i32>::AST, Mk(0_a), Mk(33_u), false},   // Aint u32
+        {DataType<i32>::AST, Mk(16_u), Mk(17_a), false},  // u32 AInt
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(ExtractBits,
+                         ExtractBitsPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(extractBitsCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
+
+// We'll construct cases like this:
+// fn foo() {
+//   var x: XTYPE;
+//   _ = ldexp(x, EXPONENT);
+// }
+
+struct LdexpPartialConstCase {
+    builder::ast_type_func_ptr eType;
+    ExprMaker makeExponent;
+    bool expectPass = true;
+    int highestAllowed = 128;
+};
+
+using LdexpPartialConst = ResolverBuiltinsValidationTestWithParams<LdexpPartialConstCase>;
+
+TEST_P(LdexpPartialConst, Scalar) {
+    auto params = GetParam();
+    auto xTy = params.eType(*this);
+    const ast::Expression* exponent = params.makeExponent(this);
+
+    Enable(wgsl::Extension::kF16);
+    WrapInFunction(Var("x", xTy), Ignore(Call(Source{{12, 34}}, "ldexp", "x", exponent)));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect = "12:34 error: e2 must be less than or equal to " +
+                                   std::to_string(params.highestAllowed);
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(LdexpPartialConst, Vector) {
+    auto params = GetParam();
+    auto xTy = params.eType(*this);
+    const ast::Expression* exponent = params.makeExponent(this);
+
+    Enable(wgsl::Extension::kF16);
+    WrapInFunction(Var("x", xTy),                                   //
+                   Ignore(Call(Source{{12, 34}}, "ldexp",           //
+                               Call(Ident("vec3"), "x", "x", "x"),  //
+                               Call(Ident("vec3"), Expr(0_a), exponent, Expr(1_a)))));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect = "12:34 error: e2 must be less than or equal to " +
+                                   std::to_string(params.highestAllowed);
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+std::vector<LdexpPartialConstCase> ldexpCases() {
+    // Abstract Float cases don't apply here, because if the first parameter
+    // is abstract float, then it must be const already.  So that case is
+    // already checked by the full const-eval rules.
+    return std::vector<LdexpPartialConstCase>{
+        // Simple passing cases.
+        {DataType<f32>::AST, Mk(128_a), true},
+        {DataType<f32>::AST, Mk(128_i), true},
+        {DataType<f32>::AST, Mk(-5000_a), true},
+        {DataType<f32>::AST, Mk(-5000_i), true},
+        {DataType<f16>::AST, Mk(16_a), true},
+        {DataType<f16>::AST, Mk(16_i), true},
+        {DataType<f16>::AST, Mk(-5000_a), true},
+        {DataType<f16>::AST, Mk(-5000_i), true},
+
+        // Failing cases
+        {DataType<f32>::AST, Mk(129_a), false, 128},
+        {DataType<f32>::AST, Mk(129_i), false, 128},
+        {DataType<f32>::AST, Mk(5000_a), false, 128},
+        {DataType<f32>::AST, Mk(5000_i), false, 128},
+        {DataType<f16>::AST, Mk(17_a), false, 16},
+        {DataType<f16>::AST, Mk(17_i), false, 16},
+        {DataType<f16>::AST, Mk(5000_a), false, 16},
+        {DataType<f16>::AST, Mk(5000_i), false, 16},
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(Ldexp, LdexpPartialConst, ::testing::ValuesIn(ldexpCases()));
 
 }  // namespace
 }  // namespace tint::resolver

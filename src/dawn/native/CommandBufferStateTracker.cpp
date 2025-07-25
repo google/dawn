@@ -36,7 +36,6 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/ComputePassEncoder.h"
 #include "dawn/native/ComputePipeline.h"
@@ -118,7 +117,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
     absl::InlinedVector<const TextureViewBase*, 8> storageTextureViewsToCheck;
     absl::InlinedVector<std::pair<BindGroupIndex, BindingIndex>, 8> textureBindingIndices;
 
-    for (BindGroupIndex groupIndex : IterateBitSet(pipelineLayout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
         BindGroupLayoutInternalBase* bgl = bindGroups[groupIndex]->GetLayout();
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
@@ -174,6 +173,7 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
                     break;
                 case wgpu::StorageTextureAccess::ReadOnly:
                     continue;
+                case wgpu::StorageTextureAccess::BindingNotUsed:
                 case wgpu::StorageTextureAccess::Undefined:
                 default:
                     DAWN_UNREACHABLE();
@@ -276,7 +276,14 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
 
 bool TextureViewsMatch(const TextureViewBase* a, const TextureViewBase* b) {
     DAWN_ASSERT(a->GetTexture() == b->GetTexture());
-    return a->GetFormat().GetIndex() == b->GetFormat().GetIndex() &&
+    // If the texture format is multiplanar, the view formats are permitted to differ (e.g., R8
+    // and RG8), referring to different planes of the same YUV texture. This cannot happen in
+    // OpenGL that actually needs the validation of texture views matching so it's safe for
+    // backends to ignore this here. We don't allow creating multiplanar texture views directly in
+    // WebGPU so this code cannot be triggered in JavaScript and only occurs hit when Chromium
+    // creates a YUV texture internally.
+    return (a->GetFormat().GetIndex() == b->GetFormat().GetIndex() ||
+            a->GetTexture()->GetFormat().IsMultiPlanar()) &&
            a->GetDimension() == b->GetDimension() && a->GetBaseMipLevel() == b->GetBaseMipLevel() &&
            a->GetLevelCount() == b->GetLevelCount() &&
            a->GetBaseArrayLayer() == b->GetBaseArrayLayer() &&
@@ -354,8 +361,7 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
     // TODO(dawn:1855): Look into optimizations as flat_hash_map does many allocations
     absl::flat_hash_map<const TextureBase*, VectorOfTextureViews> textureToViews;
 
-    for (BindGroupIndex groupIndex :
-         IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex groupIndex : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
         BindGroupBase* bindGroup = mBindgroups[groupIndex];
         BindGroupLayoutInternalBase* bgl = bindGroup->GetLayout();
 
@@ -400,7 +406,7 @@ MaybeError CommandBufferStateTracker::ValidateBufferInRangeForVertexBuffer(uint3
     const auto& vertexBuffersUsedAsVertexBuffer =
         lastRenderPipeline->GetVertexBuffersUsedAsVertexBuffer();
 
-    for (auto usedSlotVertex : IterateBitSet(vertexBuffersUsedAsVertexBuffer)) {
+    for (auto usedSlotVertex : vertexBuffersUsedAsVertexBuffer) {
         const VertexBufferInfo& vertexBuffer = lastRenderPipeline->GetVertexBuffer(usedSlotVertex);
         uint64_t arrayStride = vertexBuffer.arrayStride;
         uint64_t bufferSize = mVertexBufferSizes[usedSlotVertex];
@@ -446,7 +452,7 @@ MaybeError CommandBufferStateTracker::ValidateBufferInRangeForInstanceBuffer(
     const auto& vertexBuffersUsedAsInstanceBuffer =
         lastRenderPipeline->GetVertexBuffersUsedAsInstanceBuffer();
 
-    for (auto usedSlotInstance : IterateBitSet(vertexBuffersUsedAsInstanceBuffer)) {
+    for (auto usedSlotInstance : vertexBuffersUsedAsInstanceBuffer) {
         const VertexBufferInfo& vertexBuffer =
             lastRenderPipeline->GetVertexBuffer(usedSlotInstance);
         uint64_t arrayStride = vertexBuffer.arrayStride;
@@ -521,7 +527,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
     if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
         bool matches = true;
 
-        for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex i : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
             if (mBindgroups[i] == nullptr ||
                 !mLastPipelineLayout->GetFrontendBindGroupLayout(i)->IsLayoutEqual(
                     mBindgroups[i]->GetFrontendLayout()) ||
@@ -555,7 +561,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
         }
     }
 
-    if (aspects[VALIDATION_ASPECT_INDEX_BUFFER] && mIndexBufferSet) {
+    if (aspects[VALIDATION_ASPECT_INDEX_BUFFER] && IndexBufferSet()) {
         RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
         if (!IsStripPrimitiveTopology(lastRenderPipeline->GetPrimitiveTopology()) ||
             mIndexFormat == lastRenderPipeline->GetStripIndexFormat()) {
@@ -572,7 +578,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     DAWN_INVALID_IF(aspects[VALIDATION_ASPECT_PIPELINE], "No pipeline set.");
 
     if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-        DAWN_INVALID_IF(!mIndexBufferSet, "Index buffer was not set.");
+        DAWN_INVALID_IF(!IndexBufferSet(), "Index buffer was not set.");
 
         RenderPipelineBase* lastRenderPipeline = GetRenderPipeline();
         wgpu::IndexFormat pipelineIndexFormat = lastRenderPipeline->GetStripIndexFormat();
@@ -614,7 +620,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
     if (aspects[VALIDATION_ASPECT_BIND_GROUPS]) {
         // TODO(crbug.com/dawn/2476): Validate TextureViewDescriptor YCbCrInfo matches with that in
         // SamplerDescriptor.
-        for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
+        for (BindGroupIndex i : mLastPipelineLayout->GetBindGroupLayoutsMask()) {
             DAWN_ASSERT(HasPipeline());
 
             DAWN_INVALID_IF(mBindgroups[i] == nullptr, "No bind group set at group index %u.", i);
@@ -623,7 +629,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
             BindGroupLayoutBase* currentBGL = mBindgroups[i]->GetFrontendLayout();
 
             DAWN_INVALID_IF(
-                requiredBGL->GetPipelineCompatibilityToken() != PipelineCompatibilityToken(0) &&
+                requiredBGL->GetPipelineCompatibilityToken() != kExplicitPCT &&
                     currentBGL->GetPipelineCompatibilityToken() !=
                         requiredBGL->GetPipelineCompatibilityToken(),
                 "The current pipeline (%s) was created with a default layout, and is not "
@@ -634,8 +640,8 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
                 mLastPipeline, mBindgroups[i], i, currentBGL, i);
 
             DAWN_INVALID_IF(
-                requiredBGL->GetPipelineCompatibilityToken() == PipelineCompatibilityToken(0) &&
-                    currentBGL->GetPipelineCompatibilityToken() != PipelineCompatibilityToken(0),
+                requiredBGL->GetPipelineCompatibilityToken() == kExplicitPCT &&
+                    currentBGL->GetPipelineCompatibilityToken() != kExplicitPCT,
                 "%s set at group index %u uses a %s which was created as part of the default "
                 "layout "
                 "for a different pipeline than the current one (%s), and as a result is not "
@@ -754,10 +760,11 @@ void CommandBufferStateTracker::SetBindGroup(BindGroupIndex index,
     mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
 }
 
-void CommandBufferStateTracker::SetIndexBuffer(wgpu::IndexFormat format,
+void CommandBufferStateTracker::SetIndexBuffer(BufferBase* buffer,
+                                               wgpu::IndexFormat format,
                                                uint64_t offset,
                                                uint64_t size) {
-    mIndexBufferSet = true;
+    mIndexBuffer = buffer;
     mIndexFormat = format;
     mIndexBufferSize = size;
     mIndexBufferOffset = offset;
@@ -798,6 +805,10 @@ bool CommandBufferStateTracker::HasPipeline() const {
     return mLastPipeline != nullptr;
 }
 
+bool CommandBufferStateTracker::IndexBufferSet() const {
+    return mIndexBuffer != nullptr;
+}
+
 RenderPipelineBase* CommandBufferStateTracker::GetRenderPipeline() const {
     DAWN_ASSERT(HasPipeline() && mLastPipeline->GetType() == ObjectType::RenderPipeline);
     return static_cast<RenderPipelineBase*>(mLastPipeline);
@@ -810,6 +821,10 @@ ComputePipelineBase* CommandBufferStateTracker::GetComputePipeline() const {
 
 PipelineLayoutBase* CommandBufferStateTracker::GetPipelineLayout() const {
     return mLastPipelineLayout;
+}
+
+BufferBase* CommandBufferStateTracker::GetIndexBuffer() const {
+    return mIndexBuffer;
 }
 
 wgpu::IndexFormat CommandBufferStateTracker::GetIndexFormat() const {

@@ -1,89 +1,159 @@
+;
+; fragment_main
+;
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 48
+; Generator: Google Tint Compiler; 1
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
-               OpEntryPoint GLCompute %compute_main "compute_main"
-               OpEntryPoint Vertex %vertex_main "vertex_main" %pos_1 %vertex_point_size
                OpExecutionMode %fragment_main OriginUpperLeft
-               OpExecutionMode %compute_main LocalSize 1 1 1
-               OpName %pos_1 "pos_1"
-               OpName %vertex_point_size "vertex_point_size"
                OpName %select_43741e "select_43741e"
                OpName %arg_2 "arg_2"
                OpName %res "res"
                OpName %fragment_main "fragment_main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %bool = OpTypeBool
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+       %true = OpConstantTrue %bool
+          %9 = OpConstantComposite %v4bool %true %true %true %true
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %float_1 = OpConstant %float 1
+         %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+%select_43741e = OpFunction %void None %3
+          %4 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v4bool Function
+        %res = OpVariable %_ptr_Function_v4float Function
+               OpStore %arg_2 %9
+         %11 = OpLoad %v4bool %arg_2 None
+         %12 = OpSelect %v4float %11 %15 %15
+               OpStore %res %12
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %3
+         %20 = OpLabel
+         %21 = OpFunctionCall %void %select_43741e
+               OpReturn
+               OpFunctionEnd
+;
+; compute_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 22
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %select_43741e "select_43741e"
+               OpName %arg_2 "arg_2"
+               OpName %res "res"
                OpName %compute_main "compute_main"
-               OpName %VertexOutput "VertexOutput"
-               OpMemberName %VertexOutput 0 "pos"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %bool = OpTypeBool
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+       %true = OpConstantTrue %bool
+          %9 = OpConstantComposite %v4bool %true %true %true %true
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %float_1 = OpConstant %float 1
+         %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+%select_43741e = OpFunction %void None %3
+          %4 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v4bool Function
+        %res = OpVariable %_ptr_Function_v4float Function
+               OpStore %arg_2 %9
+         %11 = OpLoad %v4bool %arg_2 None
+         %12 = OpSelect %v4float %11 %15 %15
+               OpStore %res %12
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %3
+         %20 = OpLabel
+         %21 = OpFunctionCall %void %select_43741e
+               OpReturn
+               OpFunctionEnd
+;
+; vertex_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 40
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main___point_size_Output
+               OpName %vertex_main_position_Output "vertex_main_position_Output"
+               OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
+               OpName %select_43741e "select_43741e"
+               OpName %arg_2 "arg_2"
+               OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
+               OpMemberName %VertexOutput 0 "pos"
+               OpName %VertexOutput "VertexOutput"
                OpName %out "out"
                OpName %vertex_main "vertex_main"
-               OpDecorate %pos_1 BuiltIn Position
-               OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %VertexOutput 0 Offset 0
+               OpDecorate %vertex_main_position_Output BuiltIn Position
+               OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-          %5 = OpConstantNull %v4float
-      %pos_1 = OpVariable %_ptr_Output_v4float Output %5
+%vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
 %_ptr_Output_float = OpTypePointer Output %float
-          %8 = OpConstantNull %float
-%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+%vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
        %bool = OpTypeBool
      %v4bool = OpTypeVector %bool 4
-       %true = OpConstantTrue %bool
-         %16 = OpConstantComposite %v4bool %true %true %true %true
 %_ptr_Function_v4bool = OpTypePointer Function %v4bool
-         %19 = OpConstantNull %v4bool
+       %true = OpConstantTrue %bool
+         %15 = OpConstantComposite %v4bool %true %true %true %true
     %float_1 = OpConstant %float 1
-         %23 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %19 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
 %VertexOutput = OpTypeStruct %v4float
-         %32 = OpTypeFunction %VertexOutput
+         %25 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %38 = OpConstantNull %VertexOutput
+         %29 = OpConstantNull %VertexOutput
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
+         %33 = OpConstantNull %v4float
 %select_43741e = OpFunction %void None %9
-         %12 = OpLabel
-      %arg_2 = OpVariable %_ptr_Function_v4bool Function %19
-        %res = OpVariable %_ptr_Function_v4float Function %5
-               OpStore %arg_2 %16
-         %21 = OpLoad %v4bool %arg_2
-         %20 = OpSelect %v4float %21 %23 %23
-               OpStore %res %20
+         %10 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v4bool Function
+        %res = OpVariable %_ptr_Function_v4float Function
+               OpStore %arg_2 %15
+         %17 = OpLoad %v4bool %arg_2 None
+         %18 = OpSelect %v4float %17 %19 %19
+               OpStore %res %18
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %select_43741e
-               OpReturn
-               OpFunctionEnd
-%compute_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %select_43741e
-               OpReturn
-               OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %32
-         %35 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %38
-         %41 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %41 %5
-         %42 = OpFunctionCall %void %select_43741e
-         %43 = OpLoad %VertexOutput %out
-               OpReturnValue %43
+%vertex_main_inner = OpFunction %VertexOutput None %25
+         %26 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %29
+         %30 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %30 %33 None
+         %34 = OpFunctionCall %void %select_43741e
+         %35 = OpLoad %VertexOutput %out None
+               OpReturnValue %35
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %45 = OpLabel
-         %46 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %47 = OpCompositeExtract %v4float %46 0
-               OpStore %pos_1 %47
-               OpStore %vertex_point_size %float_1
+         %37 = OpLabel
+         %38 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %39 = OpCompositeExtract %v4float %38 0
+               OpStore %vertex_main_position_Output %39 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

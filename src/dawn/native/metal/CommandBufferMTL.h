@@ -30,10 +30,12 @@
 
 #include <set>
 #include <utility>
+#include <vector>
 
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/metal/MultiDrawEncoder.h"
 
 #import <Metal/Metal.h>
 
@@ -85,7 +87,8 @@ class CommandBuffer final : public CommandBufferBase {
     using EmptyOcclusionQueries = std::set<std::pair<QuerySet*, uint32_t>>;
     MaybeError EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                 BeginRenderPassCmd* renderPassCmd,
-                                EmptyOcclusionQueries* emptyOcclusionQueries);
+                                EmptyOcclusionQueries* emptyOcclusionQueries,
+                                const std::vector<MultiDrawExecutionData>& multiDrawExecutions);
 };
 
 }  // namespace dawn::native::metal

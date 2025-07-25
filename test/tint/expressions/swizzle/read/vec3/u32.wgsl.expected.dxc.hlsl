@@ -1,14 +1,9 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-
 struct S {
   uint3 v;
 };
 
-static S P = (S)0;
 
+static S P = (S)0;
 void f() {
   uint3 v = P.v;
   uint x = P.v.x;
@@ -132,3 +127,8 @@ void f() {
   uint4 zzzy = P.v.zzzy;
   uint4 zzzz = P.v.zzzz;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

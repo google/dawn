@@ -30,10 +30,20 @@ One particular note is `buckets.swarming.builder_defaults.recipe.name: "dawn"` w
 Build status for both CI and Try builders can be seen at this [console](https://ci.chromium.org/p/dawn) which is generated from [[dawn]//infra/config/global/luci-milo.cfg](../../infra/config/global/generated/luci-milo.cfg).
 
 ## Dawn Build Recipe
-The [`dawn.py`](https://cs.chromium.org/search/?q=file:recipes/dawn.py) build recipe is simple and intended only for testing compilation and unit tests. It does the following:
-  1. Checks out Dawn standalone and dependencies
-  2. Builds based on the `builder_mixins.recipe.properties` coming from the builder config in [[dawn]//infra/config/global/cr-buildbucket.cfg](../../infra/config/global/generated/cr-buildbucket.cfg).
-  3. Runs the `dawn_unittests` on that same bot.
+There are two recipes for building Dawn/Tint, one for [GN based](https://source.chromium.org/chromium/infra/infra_superproject/+/main:build/recipes/recipes/dawn/gn.py) builds and one for [CMake based](https://source.chromium.org/chromium/infra/infra_superproject/+/main:build/recipes/recipes/dawn/cmake.py) builds.
+
+**Note:** There is WIP/experimental version of the GN recipe (`*_v2.py`) in the repo that is _NOT_ currently used.
+
+The specific instructions on how to build the project are contained in the project repos build files. These recipe files are primary concerned with coordinating how to build and test the project for CQ/CI. The high level steps of this process:
+1. Check out the repo
+2. Compile the project (both Dawn & Tint)
+   - Depending on the specific environment this may include multiple configurations, i.e. with `dawn.node` or fuzzing enabled in addition to the default build options
+3. Run various tests
+   - Including unit tests, end-to-end tests, CTS, and others as appropriate for the specific build configuration
+4. _Optionally_ Generate and upload fuzzer corpora
+   - This is controlled via a specific GN recipe flag and only runs on one specific periodic configuration
+
+**Note:** For Googlers there is an internal doc ([go/dawn-luci-guide](go/dawn-luci-guide)) with details on how to update the build recipes and test them.
 
 ## Dawn Chromium-Based CI Waterfall Bots
 The [`chromium.dawn`](https://ci.chromium.org/p/chromium/g/chromium.dawn/console) waterfall consists of the bots specified in the `chromium.dawn` section of [[chromium/src]//testing/buildbot/waterfalls.pyl](https://source.chromium.org/search/?q=file:waterfalls.pyl%20chromium.dawn). Bots named "Builder" are responsible for building top-of-tree Dawn, whereas bots named "DEPS Builder" are responsible for building Chromium's DEPS version of Dawn.

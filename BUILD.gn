@@ -25,9 +25,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import("build/config/rust.gni")
+import("//build/config/c++/c++.gni")
 import("scripts/dawn_overrides_with_defaults.gni")
 import("scripts/tint_overrides_with_defaults.gni")
+
+import("${dawn_root}/scripts/dawn_features.gni")
+
+if (!is_clang && is_win) {
+  # libc++ cannot currently build with MSVC. See https://anglebug.com/376074941
+  assert(!use_custom_libcxx, "MSVC build requires use_custom_libcxx=false")
+}
 
 group("benchmarks") {
   testonly = true
@@ -47,6 +54,12 @@ group("libs") {
     "src/dawn/native:webgpu_dawn",
     "src/tint:libs",
   ]
+  if (dawn_build_node_bindings) {
+    assert(
+        !defined(use_libfuzzer) || !use_libfuzzer,
+        "Building dawn node bindings with use_libfuzzer currently not supported")
+    deps += [ "src/dawn/node:dawn_node" ]
+  }
 }
 
 group("tests") {
@@ -58,10 +71,18 @@ group("tests") {
 }
 
 group("cmds") {
-  deps = [
-    "src/dawn/samples",
-    "src/tint:cmds",
-  ]
+  deps = [ "src/tint:cmds" ]
+  if ((target_cpu == "x64" && (is_win || is_linux || is_mac)) ||
+      (target_cpu == "arm64" && is_win)) {
+    deps += [ "third_party/gn/dxc:dxc" ]
+  }
+}
+
+group("samples") {
+  deps = [ "src/dawn/samples" ]
+  if (dawn_wasm) {
+    deps += [ "src/dawn/samples(//build/toolchain/wasm:wasm)" ]
+  }
   if ((target_cpu == "x64" && (is_win || is_linux || is_mac)) ||
       (target_cpu == "arm64" && is_win)) {
     deps += [ "third_party/gn/dxc:dxc" ]
@@ -78,7 +99,7 @@ group("emdawnwebgpu") {
     "src/emdawnwebgpu:emdawnwebgpu_headers_gen",
     "src/emdawnwebgpu:emdawnwebgpu_js_gen",
   ]
-  if (dawn_emscripten_dir != "") {
+  if (is_wasm) {
     deps += [ "src/emdawnwebgpu:emdawnwebgpu" ]
   }
 }
@@ -92,19 +113,27 @@ group("all") {
     ":emdawnwebgpu",
     ":fuzzers",
     ":libs",
+    ":samples",
     ":tests",
   ]
-}
-
-if (enable_rust) {
-  group("rust_build_tests") {
-    testonly = true
-    deps = [ "//build/rust/tests" ]
-  }
 }
 
 # This target is built when no specific target is specified on the command line.
 group("default") {
   testonly = true
   deps = [ ":all" ]
+}
+
+# GN evaluates each .gn file once per toolchain, so restricting to default
+# toolchain will ensure write_file() is called only once.
+if (current_toolchain == default_toolchain) {
+  import("//build/gn_logs.gni")
+
+  # Write debug logs to gn_logs.txt.
+  _lines = [
+             "Generated during 'gn gen' by //BUILD.gn.",
+             "",
+           ] + build_gn_logs
+
+  write_file("$root_build_dir/gn_logs.txt", _lines)
 }

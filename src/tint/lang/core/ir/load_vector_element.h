@@ -36,7 +36,7 @@
 namespace tint::core::ir {
 
 /// A load instruction for a single vector element in the IR.
-class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
+class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstruction<2, 1>> {
   public:
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 0;
@@ -44,14 +44,23 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
     /// The offset in Operands() for the `index` value
     static constexpr size_t kIndexOperandOffset = 1;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands used by this instruction
+    static constexpr size_t kNumOperands = 2;
+
     /// Constructor (no results, no operands)
-    LoadVectorElement();
+    /// @param id the instruction id
+    explicit LoadVectorElement(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param from the vector pointer
     /// @param index the new vector element index
-    LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index);
+    LoadVectorElement(Id id, InstructionResult* result, ir::Value* from, ir::Value* index);
+
     ~LoadVectorElement() override;
 
     /// @copydoc Instruction::Clone()
@@ -71,6 +80,9 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "load_vector_element"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kLoad}; }
 };
 
 }  // namespace tint::core::ir

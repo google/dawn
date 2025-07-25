@@ -33,22 +33,23 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void ArrayLengthFromUniformFuzzer(
+// Note: ArrayLengthFromUniform uses a different success type than the default SuccessType, so the
+// impl function cannot be passed in directly to fuzzing infra
+Result<SuccessType> ArrayLengthFromUniformFuzzer(
     Module& module,
+    const fuzz::ir::Context&,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
     if (auto res = ArrayLengthFromUniform(module, ubo_binding, bindpoint_to_size_index);
         res != Success) {
-        return;
+        return res.Failure();
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of ArrayLengthFromUniform failed IR validation\n" << res.Failure();
-    }
+    return Success;
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ArrayLengthFromUniformFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ArrayLengthFromUniformFuzzer,
+                      tint::core::ir::transform::kArrayLengthFromUniformCapabilities);

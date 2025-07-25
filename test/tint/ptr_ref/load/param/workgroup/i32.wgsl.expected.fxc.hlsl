@@ -1,27 +1,23 @@
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
 groupshared int S;
-
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    S = 0;
-  }
-  GroupMemoryBarrierWithGroupSync();
-}
-
-int func_S() {
+int func() {
   return S;
 }
 
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  int r = func_S();
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    S = int(0);
+  }
+  GroupMemoryBarrierWithGroupSync();
+  int r = func();
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
+

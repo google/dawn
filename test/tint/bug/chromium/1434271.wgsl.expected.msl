@@ -1,24 +1,87 @@
+//
+// vertex_main
+//
 #include <metal_stdlib>
-
 using namespace metal;
+
+struct vertex_main_outputs {
+  float4 tint_symbol [[position]];
+};
+
+void asinh_468a48() {
+  half arg_0 = 0.0h;
+  half res = asinh(arg_0);
+}
+
+float4 vertex_main_inner() {
+  asinh_468a48();
+  return float4(0.0f);
+}
+
+vertex vertex_main_outputs vertex_main() {
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vertex_main_inner();
+  return tint_wrapper_result;
+}
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void asinh_468a48() {
+  half arg_0 = 0.0h;
+  half res = asinh(arg_0);
+}
+
+fragment void fragment_main() {
+  asinh_468a48();
+}
+//
+// rgba32uintin
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void asinh_468a48() {
+  half arg_0 = 0.0h;
+  half res = asinh(arg_0);
+}
+
+kernel void rgba32uintin() {
+  asinh_468a48();
+}
+//
+// vs_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct VertexOutput {
+  float4 position;
+  float4 color;
+  float2 quad_pos;
+};
+
+struct VertexInput {
+  float3 position;
+  float4 color;
+  float2 quad_pos;
+};
 
 template<typename T, size_t N>
 struct tint_array {
-    const constant T& operator[](size_t i) const constant { return elements[i]; }
-    device T& operator[](size_t i) device { return elements[i]; }
-    const device T& operator[](size_t i) const device { return elements[i]; }
-    thread T& operator[](size_t i) thread { return elements[i]; }
-    const thread T& operator[](size_t i) const thread { return elements[i]; }
-    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-    T elements[N];
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-struct tint_private_vars_struct {
-  float2 rand_seed;
-};
-
-struct RenderParams_tint_packed_vec3 {
+struct RenderParams_packed_vec3 {
   /* 0x0000 */ float4x4 modelViewProjectionMatrix;
   /* 0x0040 */ packed_float3 right;
   /* 0x004c */ tint_array<int8_t, 4> tint_pad;
@@ -26,16 +89,66 @@ struct RenderParams_tint_packed_vec3 {
   /* 0x005c */ tint_array<int8_t, 4> tint_pad_1;
 };
 
-struct Particle_tint_packed_vec3 {
+struct tint_module_vars_struct {
+  const constant RenderParams_packed_vec3* render_params;
+};
+
+struct vs_main_outputs {
+  float4 VertexOutput_position [[position]];
+  float4 VertexOutput_color [[user(locn0)]];
+  float2 VertexOutput_quad_pos [[user(locn1)]];
+};
+
+struct vs_main_inputs {
+  float3 VertexInput_position [[attribute(0)]];
+  float4 VertexInput_color [[attribute(1)]];
+  float2 VertexInput_quad_pos [[attribute(2)]];
+};
+
+VertexOutput vs_main_inner(VertexInput in, tint_module_vars_struct tint_module_vars) {
+  float3 quad_pos = (float2x3(float3((*tint_module_vars.render_params).right), float3((*tint_module_vars.render_params).up)) * in.quad_pos);
+  float3 position = (in.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput out = {};
+  float4x4 const v = (*tint_module_vars.render_params).modelViewProjectionMatrix;
+  out.position = (v * float4(position, 1.0f));
+  out.color = in.color;
+  out.quad_pos = in.quad_pos;
+  return out;
+}
+
+vertex vs_main_outputs vs_main(vs_main_inputs inputs [[stage_in]], const constant RenderParams_packed_vec3* render_params [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
+  VertexOutput const v_1 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_position = v_1.position;
+  tint_wrapper_result.VertexOutput_color = v_1.color;
+  tint_wrapper_result.VertexOutput_quad_pos = v_1.quad_pos;
+  return tint_wrapper_result;
+}
+//
+// simulate
+//
+#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct Particle_packed_vec3 {
   /* 0x0000 */ packed_float3 position;
   /* 0x000c */ float lifetime;
   /* 0x0010 */ float4 color;
   /* 0x0020 */ float2 velocity;
-  /* 0x0028 */ tint_array<int8_t, 8> tint_pad_2;
-};
-
-struct Particles_tint_packed_vec3 {
-  /* 0x0000 */ tint_array<Particle_tint_packed_vec3, 1> particles;
+  /* 0x0028 */ tint_array<int8_t, 8> tint_pad;
 };
 
 struct Particle {
@@ -45,155 +158,109 @@ struct Particle {
   float2 velocity;
 };
 
-Particle tint_unpack_vec3_in_composite(Particle_tint_packed_vec3 in) {
-  Particle result = {};
-  result.position = float3(in.position);
-  result.lifetime = in.lifetime;
-  result.color = in.color;
-  result.velocity = in.velocity;
-  return result;
-}
-
-void asinh_468a48() {
-  half arg_0 = 0.0h;
-  half res = asinh(arg_0);
-}
-
-struct tint_symbol_1 {
-  float4 value [[position]];
-};
-
-float4 vertex_main_inner() {
-  asinh_468a48();
-  return float4(0.0f);
-}
-
-vertex tint_symbol_1 vertex_main() {
-  float4 const inner_result = vertex_main_inner();
-  tint_symbol_1 wrapper_result = {};
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
-fragment void fragment_main() {
-  asinh_468a48();
-  return;
-}
-
-kernel void rgba32uintin() {
-  asinh_468a48();
-  return;
-}
-
-struct TestData {
-  tint_array<atomic_int, 4> dmat2atxa2;
-};
-
-struct RenderParams {
-  float4x4 modelViewProjectionMatrix;
-  float3 right;
-  float3 up;
-};
-
-struct VertexInput {
-  float3 position;
-  float4 color;
-  float2 quad_pos;
-};
-
-struct VertexOutput {
-  float4 position;
-  float4 color;
-  float2 quad_pos;
-};
-
-struct tint_symbol_3 {
-  float3 position [[attribute(0)]];
-  float4 color [[attribute(1)]];
-  float2 quad_pos [[attribute(2)]];
-};
-
-struct tint_symbol_4 {
-  float4 color [[user(locn0)]];
-  float2 quad_pos [[user(locn1)]];
-  float4 position [[position]];
-};
-
-VertexOutput vs_main_inner(VertexInput in, const constant RenderParams_tint_packed_vec3* const tint_symbol_6) {
-  float3 quad_pos = (float2x3(float3((*(tint_symbol_6)).right), float3((*(tint_symbol_6)).up)) * in.quad_pos);
-  float3 position = (in.position - (quad_pos + 0.00999999977648258209f));
-  VertexOutput out = {};
-  out.position = ((*(tint_symbol_6)).modelViewProjectionMatrix * float4(position, 1.0f));
-  out.color = in.color;
-  out.quad_pos = in.quad_pos;
-  return out;
-}
-
-vertex tint_symbol_4 vs_main(const constant RenderParams_tint_packed_vec3* tint_symbol_7 [[buffer(0)]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  VertexInput const tint_symbol_5 = {.position=tint_symbol_2.position, .color=tint_symbol_2.color, .quad_pos=tint_symbol_2.quad_pos};
-  VertexOutput const inner_result_1 = vs_main_inner(tint_symbol_5, tint_symbol_7);
-  tint_symbol_4 wrapper_result_1 = {};
-  wrapper_result_1.position = inner_result_1.position;
-  wrapper_result_1.color = inner_result_1.color;
-  wrapper_result_1.quad_pos = inner_result_1.quad_pos;
-  return wrapper_result_1;
-}
-
 struct SimulationParams {
   /* 0x0000 */ float deltaTime;
-  /* 0x0004 */ tint_array<int8_t, 12> tint_pad_3;
+  /* 0x0004 */ tint_array<int8_t, 12> tint_pad_1;
   /* 0x0010 */ float4 seed;
 };
 
-struct Particles {
-  tint_array<Particle, 1> particles;
+struct Particles_packed_vec3 {
+  /* 0x0000 */ tint_array<Particle_packed_vec3, 1> particles;
 };
 
-void assign_and_preserve_padding(device Particle_tint_packed_vec3* const dest, Particle value) {
-  (*(dest)).position = packed_float3(value.position);
-  (*(dest)).lifetime = value.lifetime;
-  (*(dest)).color = value.color;
-  (*(dest)).velocity = value.velocity;
+struct tint_module_vars_struct {
+  thread float2* rand_seed;
+  const constant SimulationParams* sim_params;
+  device Particles_packed_vec3* data;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+};
+
+void tint_store_and_preserve_padding(device Particle_packed_vec3* const target, Particle value_param) {
+  (*target).position = packed_float3(value_param.position);
+  (*target).lifetime = value_param.lifetime;
+  (*target).color = value_param.color;
+  (*target).velocity = value_param.velocity;
 }
 
-void simulate_inner(uint3 GlobalInvocationID, thread tint_private_vars_struct* const tint_private_vars, const constant SimulationParams* const tint_symbol_8, device Particles_tint_packed_vec3* const tint_symbol_9) {
-  (*(tint_private_vars)).rand_seed = (((*(tint_symbol_8)).seed.xy * float2(GlobalInvocationID.xy)) * (*(tint_symbol_8)).seed.zw);
-  uint const idx = GlobalInvocationID[0];
-  Particle particle = tint_unpack_vec3_in_composite((*(tint_symbol_9)).particles[idx]);
-  assign_and_preserve_padding(&((*(tint_symbol_9)).particles[idx]), particle);
+Particle tint_load_struct_packed_vec3(device Particle_packed_vec3* const from) {
+  return Particle{.position=float3((*from).position), .lifetime=(*from).lifetime, .color=(*from).color, .velocity=(*from).velocity};
 }
 
-kernel void simulate(const constant SimulationParams* tint_symbol_10 [[buffer(1)]], device Particles_tint_packed_vec3* tint_symbol_11 [[buffer(2)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
-  thread tint_private_vars_struct tint_private_vars = {};
-  simulate_inner(GlobalInvocationID, &(tint_private_vars), tint_symbol_10, tint_symbol_11);
-  return;
+void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 48u)};
+  float2 const v_1 = (*tint_module_vars.sim_params).seed.xy;
+  float2 const v_2 = (v_1 * float2(GlobalInvocationID.xy));
+  (*tint_module_vars.rand_seed) = (v_2 * (*tint_module_vars.sim_params).seed.zw);
+  uint const idx = GlobalInvocationID.x;
+  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.data).particles[min(idx, (v.tint_array_length_0_1 - 1u))]));
+  tint_store_and_preserve_padding((&(*tint_module_vars.data).particles[min(idx, (v.tint_array_length_0_1 - 1u))]), particle);
 }
+
+kernel void simulate(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant SimulationParams* sim_params [[buffer(0)]], device Particles_packed_vec3* data [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  thread float2 rand_seed = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rand_seed=(&rand_seed), .sim_params=sim_params, .data=data, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  simulate_inner(GlobalInvocationID, tint_module_vars);
+}
+//
+// export_level
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct UBO {
   /* 0x0000 */ uint width;
+};
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
 struct Buffer {
   /* 0x0000 */ tint_array<float, 1> weights;
 };
 
-void export_level_inner(uint3 coord, texture2d<float, access::write> tint_symbol_12, const constant UBO* const tint_symbol_13, const device Buffer* const tint_symbol_14, device Buffer* const tint_symbol_15) {
-  if (all((coord.xy < uint2(uint2(tint_symbol_12.get_width(), tint_symbol_12.get_height()))))) {
-    uint const dst_offset = (coord[0] << ((coord[1] * (*(tint_symbol_13)).width) & 31u));
-    uint const src_offset = ((coord[0] - 2u) + ((coord[1] >> 2u) * (*(tint_symbol_13)).width));
-    float const a = (*(tint_symbol_14)).weights[(src_offset << 0u)];
-    float const b = (*(tint_symbol_14)).weights[(src_offset + 1u)];
-    float const c = (*(tint_symbol_14)).weights[((src_offset + 1u) + (*(tint_symbol_13)).width)];
-    float const d = (*(tint_symbol_14)).weights[((src_offset + 1u) + (*(tint_symbol_13)).width)];
+struct tint_module_vars_struct {
+  const constant UBO* ubo;
+  const device Buffer* buf_in;
+  device Buffer* buf_out;
+  texture2d<float, access::write> tex_out;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+struct tint_array_lengths_struct {
+  uint tint_array_length_0_1;
+  uint tint_array_length_0_2;
+};
+
+void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u)};
+  if (all((coord.xy < uint2(uint2(tint_module_vars.tex_out.get_width(0u), tint_module_vars.tex_out.get_height(0u)))))) {
+    uint const dst_offset = (coord.x << ((coord.y * (*tint_module_vars.ubo).width) & 31u));
+    uint const src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * (*tint_module_vars.ubo).width));
+    float const a = (*tint_module_vars.buf_in).weights[min((src_offset << (0u & 31u)), (v.tint_array_length_0_1 - 1u))];
+    float const b = (*tint_module_vars.buf_in).weights[min((src_offset + 1u), (v.tint_array_length_0_1 - 1u))];
+    float const c = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), (v.tint_array_length_0_1 - 1u))];
+    float const d = (*tint_module_vars.buf_in).weights[min(((src_offset + 1u) + (*tint_module_vars.ubo).width), (v.tint_array_length_0_1 - 1u))];
     float const sum = dot(float4(a, b, c, d), float4(1.0f));
-    (*(tint_symbol_15)).weights[dst_offset] = fmod(sum, 4.0f);
-    float4 const probabilities = (float4(a, (a * b), ((a / b) + c), sum) + fmax(sum, 0.0f));
-    tint_symbol_12.write(probabilities, uint2(int2(coord.xy)));
+    (*tint_module_vars.buf_out).weights[min(dst_offset, (v.tint_array_length_0_2 - 1u))] = fmod(sum, 4.0f);
+    float4 const probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
+    tint_module_vars.tex_out.write(probabilities, uint2(int2(coord.xy)));
   }
 }
 
-kernel void export_level(texture2d<float, access::write> tint_symbol_16 [[texture(0)]], const constant UBO* tint_symbol_17 [[buffer(3)]], const device Buffer* tint_symbol_18 [[buffer(4)]], device Buffer* tint_symbol_19 [[buffer(0)]], uint3 coord [[thread_position_in_grid]]) {
-  export_level_inner(coord, tint_symbol_16, tint_symbol_17, tint_symbol_18, tint_symbol_19);
-  return;
+kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant UBO* ubo [[buffer(0)]], const device Buffer* buf_in [[buffer(1)]], device Buffer* buf_out [[buffer(2)]], texture2d<float, access::write> tex_out [[texture(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .buf_in=buf_in, .buf_out=buf_out, .tex_out=tex_out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  export_level_inner(coord, tint_module_vars);
 }
-

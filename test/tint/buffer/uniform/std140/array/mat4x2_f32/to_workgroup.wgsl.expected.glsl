@@ -1,51 +1,58 @@
 #version 310 es
 
-struct mat4x2_f32 {
+
+struct mat4x2_f32_std140 {
   vec2 col0;
   vec2 col1;
   vec2 col2;
   vec2 col3;
 };
 
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  mat4x2_f32_std140 inner[4];
+} v;
 shared mat4x2 w[4];
-void tint_zero_workgroup_memory(uint local_idx) {
+void f_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      w[i] = mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f));
+    uint v_1 = 0u;
+    v_1 = tint_local_index;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 4u)) {
+        break;
+      }
+      w[v_2] = mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f));
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
     }
   }
   barrier();
-}
-
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  mat4x2_f32 inner[4];
-} u;
-
-mat4x2 conv_mat4x2_f32(mat4x2_f32 val) {
-  return mat4x2(val.col0, val.col1, val.col2, val.col3);
-}
-
-mat4x2[4] conv_arr4_mat4x2_f32(mat4x2_f32 val[4]) {
-  mat4x2 arr[4] = mat4x2[4](mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  mat4x2_f32_std140 v_3[4] = v.inner;
+  mat4x2 v_4[4] = mat4x2[4](mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)), mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f)));
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_mat4x2_f32(val[i]);
+    uint v_5 = 0u;
+    v_5 = 0u;
+    while(true) {
+      uint v_6 = v_5;
+      if ((v_6 >= 4u)) {
+        break;
+      }
+      v_4[v_6] = mat4x2(v_3[v_6].col0, v_3[v_6].col1, v_3[v_6].col2, v_3[v_6].col3);
+      {
+        v_5 = (v_6 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  w = v_4;
+  w[1u] = mat4x2(v.inner[2u].col0, v.inner[2u].col1, v.inner[2u].col2, v.inner[2u].col3);
+  w[1u][0u] = v.inner[0u].col1.yx;
+  w[1u][0u].x = v.inner[0u].col1.x;
 }
-
-void f(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  w = conv_arr4_mat4x2_f32(u.inner);
-  w[1] = conv_mat4x2_f32(u.inner[2u]);
-  w[1][0] = u.inner[0u].col1.yx;
-  w[1][0].x = u.inner[0u].col1[0u];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f(gl_LocalInvocationIndex);
-  return;
+  f_inner(gl_LocalInvocationIndex);
 }

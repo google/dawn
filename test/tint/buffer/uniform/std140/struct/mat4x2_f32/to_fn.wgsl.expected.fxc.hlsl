@@ -4,10 +4,10 @@ struct S {
   int after;
 };
 
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
-
 void a(S a_1[4]) {
 }
 
@@ -23,42 +23,55 @@ void d(float2 v) {
 void e(float f_1) {
 }
 
-float4x2 u_load_3(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = u[scalar_offset / 4];
-  const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = u[scalar_offset_1 / 4];
-  const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = u[scalar_offset_2 / 4];
-  const uint scalar_offset_3 = ((offset + 24u)) / 4;
-  uint4 ubo_load_3 = u[scalar_offset_3 / 4];
-  return float4x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)), asfloat(((scalar_offset_3 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
+float4x2 v_1(uint start_byte_offset) {
+  uint4 v_2 = u[(start_byte_offset / 16u)];
+  float2 v_3 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_2.zw) : (v_2.xy)));
+  uint4 v_4 = u[((8u + start_byte_offset) / 16u)];
+  float2 v_5 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_4.zw) : (v_4.xy)));
+  uint4 v_6 = u[((16u + start_byte_offset) / 16u)];
+  float2 v_7 = asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_6.zw) : (v_6.xy)));
+  uint4 v_8 = u[((24u + start_byte_offset) / 16u)];
+  return float4x2(v_3, v_5, v_7, asfloat(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_8.zw) : (v_8.xy))));
 }
 
-S u_load_1(uint offset) {
-  const uint scalar_offset_4 = ((offset + 0u)) / 4;
-  const uint scalar_offset_5 = ((offset + 64u)) / 4;
-  S tint_symbol = {asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4]), u_load_3((offset + 8u)), asint(u[scalar_offset_5 / 4][scalar_offset_5 % 4])};
-  return tint_symbol;
+S v_9(uint start_byte_offset) {
+  int v_10 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float4x2 v_11 = v_1((8u + start_byte_offset));
+  S v_12 = {v_10, v_11, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  return v_12;
 }
 
-typedef S u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  S arr[4] = (S[4])0;
+typedef S ary_ret[4];
+ary_ret v_13(uint start_byte_offset) {
+  S a_2[4] = (S[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = u_load_1((offset + (i * 128u)));
+    uint v_14 = 0u;
+    v_14 = 0u;
+    while(true) {
+      uint v_15 = v_14;
+      if ((v_15 >= 4u)) {
+        break;
+      }
+      S v_16 = v_9((start_byte_offset + (v_15 * 128u)));
+      a_2[v_15] = v_16;
+      {
+        v_14 = (v_15 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  S v_17[4] = a_2;
+  return v_17;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(u_load(0u));
-  b(u_load_1(256u));
-  c(u_load_3(264u));
-  d(asfloat(u[1].xy).yx);
-  e(asfloat(u[1].xy).yx.x);
-  return;
+  S v_18[4] = v_13(0u);
+  a(v_18);
+  S v_19 = v_9(256u);
+  b(v_19);
+  c(v_1(264u));
+  d(asfloat(u[1u].xy).yx);
+  e(asfloat(u[1u].xy).yx.x);
 }
+

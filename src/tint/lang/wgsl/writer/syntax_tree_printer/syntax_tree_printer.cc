@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.h"
 
-#include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
@@ -35,7 +35,6 @@
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
-#include "src/tint/lang/wgsl/ast/builtin_value_name.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
@@ -553,7 +552,7 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
                 Line() << "]";
             },
             [&](const ast::BuiltinAttribute* builtin) {
-                Line() << "BuiltinAttribute [" << builtin->builtin->String() << "]";
+                Line() << "BuiltinAttribute [" << core::ToString(builtin->builtin) << "]";
             },
             [&](const ast::DiagnosticAttribute* diagnostic) {
                 EmitDiagnosticControl(diagnostic->control);
@@ -565,14 +564,15 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
                     Line() << "type: [";
                     {
                         ScopedIndent ty(this);
-                        EmitExpression(interpolate->type);
+                        Line() << core::ToString(interpolate->interpolation.type);
                     }
                     Line() << "]";
-                    if (interpolate->sampling) {
+                    if (interpolate->interpolation.sampling !=
+                        core::InterpolationSampling::kUndefined) {
                         Line() << "sampling: [";
                         {
                             ScopedIndent sa(this);
-                            EmitExpression(interpolate->sampling);
+                            Line() << core::ToString(interpolate->interpolation.sampling);
                         }
                         Line() << "]";
                     }

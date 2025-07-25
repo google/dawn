@@ -1,98 +1,103 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-struct Inner {
-  f16mat3x4 m;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-};
 
 struct Inner_std140 {
-  f16vec4 m_0;
-  f16vec4 m_1;
-  f16vec4 m_2;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-  uint pad_8;
-  uint pad_9;
-};
-
-struct Outer {
-  Inner a[4];
+  f16vec4 m_col0;
+  f16vec4 m_col1;
+  f16vec4 m_col2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
 };
 
 struct Outer_std140 {
   Inner_std140 a[4];
 };
 
-layout(binding = 0, std140) uniform a_block_std140_ubo {
+struct Inner {
+  f16mat3x4 m;
+};
+
+struct Outer {
+  Inner a[4];
+};
+
+layout(binding = 0, std140)
+uniform a_block_std140_1_ubo {
   Outer_std140 inner[4];
-} a;
-
-Inner conv_Inner(Inner_std140 val) {
-  return Inner(f16mat3x4(val.m_0, val.m_1, val.m_2), val.pad, val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.pad_7, val.pad_8, val.pad_9);
+} v;
+Inner tint_convert_Inner(Inner_std140 tint_input) {
+  return Inner(f16mat3x4(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2));
 }
-
-Inner[4] conv_arr4_Inner(Inner_std140 val[4]) {
-  Inner arr[4] = Inner[4](Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+Outer tint_convert_Outer(Outer_std140 tint_input) {
+  Inner v_1[4] = Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))));
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_Inner(val[i]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      v_1[v_3] = tint_convert_Inner(tint_input.a[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  return Outer(v_1);
 }
-
-Outer conv_Outer(Outer_std140 val) {
-  return Outer(conv_arr4_Inner(val.a));
-}
-
-Outer[4] conv_arr4_Outer(Outer_std140 val[4]) {
-  Outer arr[4] = Outer[4](Outer(Inner[4](Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(f16mat3x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))));
-  {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_Outer(val[i]);
-    }
-  }
-  return arr;
-}
-
-f16mat3x4 load_a_inner_3_a_2_m() {
-  return f16mat3x4(a.inner[3u].a[2u].m_0, a.inner[3u].a[2u].m_1, a.inner[3u].a[2u].m_2);
-}
-
-void f() {
-  Outer p_a[4] = conv_arr4_Outer(a.inner);
-  Outer p_a_3 = conv_Outer(a.inner[3u]);
-  Inner p_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
-  Inner p_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
-  f16mat3x4 p_a_3_a_2_m = load_a_inner_3_a_2_m();
-  f16vec4 p_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;
-  Outer l_a[4] = conv_arr4_Outer(a.inner);
-  Outer l_a_3 = conv_Outer(a.inner[3u]);
-  Inner l_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
-  Inner l_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
-  f16mat3x4 l_a_3_a_2_m = load_a_inner_3_a_2_m();
-  f16vec4 l_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;
-  float16_t l_a_3_a_2_m_1_0 = a.inner[3u].a[2u].m_1[0u];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  f16mat3x4 v_4 = f16mat3x4(v.inner[3u].a[2u].m_col0, v.inner[3u].a[2u].m_col1, v.inner[3u].a[2u].m_col2);
+  Outer_std140 v_5[4] = v.inner;
+  Outer v_6[4] = Outer[4](Outer(Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))))), Outer(Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))))), Outer(Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))))), Outer(Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))))));
+  {
+    uint v_7 = 0u;
+    v_7 = 0u;
+    while(true) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4u)) {
+        break;
+      }
+      v_6[v_8] = tint_convert_Outer(v_5[v_8]);
+      {
+        v_7 = (v_8 + 1u);
+      }
+      continue;
+    }
+  }
+  Outer l_a[4] = v_6;
+  Outer l_a_3 = tint_convert_Outer(v.inner[3u]);
+  Inner_std140 v_9[4] = v.inner[3u].a;
+  Inner v_10[4] = Inner[4](Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))), Inner(f16mat3x4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf))));
+  {
+    uint v_11 = 0u;
+    v_11 = 0u;
+    while(true) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
+        break;
+      }
+      v_10[v_12] = tint_convert_Inner(v_9[v_12]);
+      {
+        v_11 = (v_12 + 1u);
+      }
+      continue;
+    }
+  }
+  Inner l_a_3_a[4] = v_10;
+  Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3u].a[2u]);
+  f16mat3x4 l_a_3_a_2_m = v_4;
+  f16vec4 l_a_3_a_2_m_1 = v_4[1u];
+  float16_t l_a_3_a_2_m_1_0 = v_4[1u].x;
 }

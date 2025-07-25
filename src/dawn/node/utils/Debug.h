@@ -85,14 +85,14 @@ template <typename K, typename V>
 std::ostream& Write(std::ostream& out, const std::unordered_map<K, V>& value) {
     out << "{";
     bool first = true;
-    for (auto& [key, value] : value) {
+    for (auto& [key, val] : value) {
         if (!first) {
             out << ", ";
         }
         first = false;
         Write(out, key);
         out << ": ";
-        Write(out, value);
+        Write(out, val);
     }
     return out << "}";
 }
@@ -138,8 +138,8 @@ template <typename... MSG_ARGS>
 // string representation of all the variadic arguments.
 #define LOG(...)                                                                                  \
     ::wgpu::utils::Write(std::cout << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << ": ", \
-                         ##__VA_ARGS__)                                                           \
-        << "\n";
+                         __VA_ARGS__)                                                             \
+        << "\n"
 
 // UNIMPLEMENTED(env) raises a JS exception. Used to stub code that has not yet been implemented.
 #define UNIMPLEMENTED(env, ...)                                              \
@@ -149,11 +149,11 @@ template <typename... MSG_ARGS>
     } while (false)
 
 // UNREACHABLE() prints 'UNREACHABLE' with the current file, line and
-// function to stdout, along with the optional message, then calls abort().
+// function to stdout, along with the message, then calls abort().
 // The macro calls Fatal(), which is annotated with [[noreturn]].
 // Used to stub code that has not yet been implemented.
 #define UNREACHABLE(...) \
-    ::wgpu::utils::Fatal("UNREACHABLE", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    ::wgpu::utils::Fatal("UNREACHABLE", __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 }  // namespace wgpu::utils
 

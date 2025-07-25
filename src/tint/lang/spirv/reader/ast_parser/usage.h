@@ -30,8 +30,8 @@
 
 #include <string>
 
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint::spirv::reader::ast_parser {
 
@@ -144,7 +144,8 @@ class Usage {
 /// @param out the stream
 /// @param u the Usage
 /// @returns the stream so calls can be chained
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, const Usage& u) {
     return u.operator<<(out);
 }

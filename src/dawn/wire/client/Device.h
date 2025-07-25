@@ -28,11 +28,12 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_DEVICE_H_
 #define SRC_DAWN_WIRE_CLIENT_DEVICE_H_
 
+#include <webgpu/webgpu.h>
+
 #include <memory>
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/common/RefCountedWithExternalCount.h"
-#include "dawn/webgpu.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/LimitsAndFeatures.h"
@@ -46,57 +47,46 @@ class Queue;
 
 class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
-    explicit Device(const ObjectBaseParams& params,
-                    const ObjectHandle& eventManagerHandle,
-                    const WGPUDeviceDescriptor* descriptor);
+    Device(const ObjectBaseParams& params,
+           const ObjectHandle& eventManagerHandle,
+           Adapter* adapter,
+           const WGPUDeviceDescriptor* descriptor);
 
     ObjectType GetObjectType() const override;
 
-    void SetLimits(const WGPUSupportedLimits* limits);
+    void SetLimits(const WGPULimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
 
     bool IsAlive() const;
-    WGPUFuture GetDeviceLostFuture();
 
-    void HandleError(WGPUErrorType errorType, const char* message);
-    void HandleLogging(WGPULoggingType loggingType, const char* message);
-    void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
+    void HandleError(WGPUErrorType errorType, WGPUStringView message);
+    void HandleLogging(WGPULoggingType loggingType, WGPUStringView message);
+    void HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView message);
     class DeviceLostEvent;
 
     // WebGPU API
-    void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
-    void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
-    void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
-    void InjectError(WGPUErrorType type, const char* message);
-    void PopErrorScope(WGPUErrorCallback callback, void* userdata);
-    WGPUFuture PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
-    WGPUFuture PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);
+    void APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo);
+    void APIInjectError(WGPUErrorType type, WGPUStringView message);
+    WGPUFuture APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
-    WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUBuffer CreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
-    void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
-                                    WGPUCreateComputePipelineAsyncCallback callback,
-                                    void* userdata);
-    WGPUFuture CreateComputePipelineAsyncF(
+    WGPUBuffer APICreateBuffer(const WGPUBufferDescriptor* descriptor);
+    WGPUBuffer APICreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
+    WGPUFuture APICreateComputePipelineAsync(
         WGPUComputePipelineDescriptor const* descriptor,
         const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo);
-    WGPUFuture CreateComputePipelineAsync2(
-        WGPUComputePipelineDescriptor const* descriptor,
-        const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo);
-    void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
-                                   WGPUCreateRenderPipelineAsyncCallback callback,
-                                   void* userdata);
-    WGPUFuture CreateRenderPipelineAsyncF(
+    WGPUFuture APICreateRenderPipelineAsync(
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
-    WGPUFuture CreateRenderPipelineAsync2(
-        WGPURenderPipelineDescriptor const* descriptor,
-        const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
 
-    WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
-    bool HasFeature(WGPUFeatureName feature) const;
-    size_t EnumerateFeatures(WGPUFeatureName* features) const;
-    WGPUQueue GetQueue();
+    WGPUStatus APIGetLimits(WGPULimits* limits) const;
+    WGPUFuture APIGetLostFuture();
+    bool APIHasFeature(WGPUFeatureName feature) const;
+    void APIGetFeatures(WGPUSupportedFeatures* features) const;
+    WGPUStatus APIGetAdapterInfo(WGPUAdapterInfo* info) const;
+    WGPUAdapter APIGetAdapter() const;
+    WGPUQueue APIGetQueue();
+
+    void APIDestroy();
 
   private:
     void WillDropLastExternalRef() override;
@@ -104,25 +94,21 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
               typename Cmd,
               typename CallbackInfo = typename Event::CallbackInfo,
               typename Descriptor = decltype(std::declval<Cmd>().descriptor)>
-    WGPUFuture CreatePipelineAsyncF(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
+    WGPUFuture CreatePipelineAsync(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
 
     LimitsAndFeatures mLimitsAndFeatures;
 
-    // TODO(crbug.com/dawn/2465): This can probably just be the future id once SetDeviceLostCallback
-    // is deprecated, and the callback and userdata moved into the DeviceLostEvent.
     struct DeviceLostInfo {
         FutureID futureID = kNullFutureID;
         std::unique_ptr<TrackedEvent> event = nullptr;
-        WGPUDeviceLostCallback2 callback = nullptr;
-        raw_ptr<void> userdata1 = nullptr;
-        raw_ptr<void> userdata2 = nullptr;
     };
     DeviceLostInfo mDeviceLostInfo;
 
-    WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo;
-    WGPULoggingCallback mLoggingCallback = nullptr;
-    raw_ptr<void> mLoggingUserdata = nullptr;
+    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo =
+        WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT;
+    WGPULoggingCallbackInfo mLoggingCallbackInfo = WGPU_LOGGING_CALLBACK_INFO_INIT;
 
+    Ref<Adapter> mAdapter;
     Ref<Queue> mQueue;
     bool mIsAlive = true;
 };

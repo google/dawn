@@ -29,8 +29,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/common/multiplanar_options.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_options.h"
 #include "src/tint/lang/core/type/external_texture.h"
 
 namespace tint::core::ir::transform {
@@ -58,7 +58,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, NoRootBlock) {
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, DeclWithNoUses) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
@@ -69,7 +69,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, DeclWithNoUses) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -103,14 +103,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func():void {
@@ -129,7 +129,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, LoadWithNoUses) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
@@ -141,7 +141,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, LoadWithNoUses) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():void {
@@ -176,14 +176,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func():void {
@@ -205,13 +205,13 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, TextureDimensions) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec2<u32>());
     b.Append(func->Block(), [&] {
-        auto* load = b.Load(var->Result(0));
+        auto* load = b.Load(var->Result());
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, load);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -219,7 +219,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureDimensions) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func():vec2<u32> {
@@ -255,14 +255,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func():vec2<u32> {
@@ -286,7 +286,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
@@ -294,7 +294,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
     func->SetParams({coords});
     b.Append(func->Block(), [&] {
-        auto* load = b.Load(var->Result(0));
+        auto* load = b.Load(var->Result());
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load, coords);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -302,7 +302,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -338,14 +338,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<u32>):vec4<f32> {
@@ -447,7 +447,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
@@ -455,7 +455,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     func->SetParams({coords});
     b.Append(func->Block(), [&] {
-        auto* load = b.Load(var->Result(0));
+        auto* load = b.Load(var->Result());
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load, coords);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -463,7 +463,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> {
@@ -499,14 +499,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func(%coords:vec2<i32>):vec4<f32> {
@@ -609,7 +609,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
@@ -618,7 +618,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     func->SetParams({sampler, coords});
     b.Append(func->Block(), [&] {
-        auto* load = b.Load(var->Result(0));
+        auto* load = b.Load(var->Result());
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSampleBaseClampToEdge, load,
                               sampler, coords);
         b.Return(func, result);
@@ -627,7 +627,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> {
@@ -663,14 +663,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func(%sampler:sampler, %coords:vec2<f32>):vec4<f32> {
@@ -682,7 +682,7 @@ $B1: {  # root
     ret %result
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %coords_1: 'coords'
   $B3: {
     %17:u32 = access %params, 1u
     %18:mat3x4<f32> = access %params, 2u
@@ -698,16 +698,16 @@ $B1: {  # root
     %28:bool = eq %27, 1u
     %29:vec3<f32>, %30:f32 = if %28 [t: $B4, f: $B5] {  # if_1
       $B4: {  # true
-        %31:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
+        %31:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %26, 0.0f
         %32:vec3<f32> = swizzle %31, xyz
         %33:f32 = access %31, 3u
         exit_if %32, %33  # if_1
       }
       $B5: {  # false
-        %34:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
+        %34:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %26, 0.0f
         %35:f32 = access %34, 0u
         %36:vec2<f32> = clamp %25, %22, %23
-        %37:vec4<f32> = textureSampleLevel %plane_1, %sampler_1, %36, 0.0f
+        %37:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %36, 0.0f
         %38:vec2<f32> = swizzle %37, xy
         %39:vec4<f32> = construct %35, %38, 1.0f
         %40:vec3<f32> = mul %39, %18
@@ -770,13 +770,13 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
     auto* foo = b.Function("foo", ty.vec4<f32>());
     {
-        auto* texture = b.FunctionParam("texture", ty.Get<core::type::ExternalTexture>());
+        auto* texture = b.FunctionParam("texture", ty.external_texture());
         auto* sampler = b.FunctionParam("sampler", ty.sampler());
         auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
         foo->SetParams({texture, sampler, coords});
@@ -794,7 +794,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
         auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
         bar->SetParams({sampler, coords});
         b.Append(bar->Block(), [&] {
-            auto* load = b.Load(var->Result(0));
+            auto* load = b.Load(var->Result());
             auto* result = b.Call(ty.vec4<f32>(), foo, load, sampler, coords);
             b.Return(bar, result);
             mod.SetName(result, "result");
@@ -803,7 +803,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, ViaUserFunctionParameter) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture'
@@ -845,14 +845,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
@@ -870,7 +870,7 @@ $B1: {  # root
     ret %result_1
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %coords_2: 'coords'
   $B4: {
     %24:u32 = access %params, 1u
     %25:mat3x4<f32> = access %params, 2u
@@ -886,16 +886,16 @@ $B1: {  # root
     %35:bool = eq %34, 1u
     %36:vec3<f32>, %37:f32 = if %35 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %38:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
+        %38:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %33, 0.0f
         %39:vec3<f32> = swizzle %38, xyz
         %40:f32 = access %38, 3u
         exit_if %39, %40  # if_1
       }
       $B6: {  # false
-        %41:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
+        %41:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %33, 0.0f
         %42:f32 = access %41, 0u
         %43:vec2<f32> = clamp %32, %29, %30
-        %44:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %43, 0.0f
+        %44:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %43, 0.0f
         %45:vec2<f32> = swizzle %44, xy
         %46:vec4<f32> = construct %42, %45, 1.0f
         %47:vec3<f32> = mul %46, %25
@@ -958,13 +958,13 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
-    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var = b.Var("texture", ty.ptr(handle, ty.external_texture()));
     var->SetBindingPoint(1, 2);
     mod.root_block->Append(var);
 
     auto* foo = b.Function("foo", ty.vec4<f32>());
     {
-        auto* texture = b.FunctionParam("texture", ty.Get<core::type::ExternalTexture>());
+        auto* texture = b.FunctionParam("texture", ty.external_texture());
         auto* sampler = b.FunctionParam("sampler", ty.sampler());
         auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
         foo->SetParams({texture, sampler, coords});
@@ -982,15 +982,15 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
         auto* coords_f = b.FunctionParam("coords", ty.vec2<f32>());
         bar->SetParams({sampler, coords_f});
         b.Append(bar->Block(), [&] {
-            auto* load_a = b.Load(var->Result(0));
+            auto* load_a = b.Load(var->Result());
             b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, load_a);
-            auto* load_b = b.Load(var->Result(0));
+            auto* load_b = b.Load(var->Result());
             b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSampleBaseClampToEdge, load_b, sampler,
                    coords_f);
-            auto* load_c = b.Load(var->Result(0));
+            auto* load_c = b.Load(var->Result());
             b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSampleBaseClampToEdge, load_c, sampler,
                    coords_f);
-            auto* load_d = b.Load(var->Result(0));
+            auto* load_d = b.Load(var->Result());
             auto* result_a = b.Call(ty.vec4<f32>(), foo, load_d, sampler, coords_f);
             auto* result_b = b.Call(ty.vec4<f32>(), foo, load_d, sampler, coords_f);
             b.Return(bar, b.Add(ty.vec4<f32>(), result_a, result_b));
@@ -1001,7 +1001,7 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleUses) {
 
     auto* src = R"(
 $B1: {  # root
-  %texture:ptr<handle, texture_external, read> = var @binding_point(1, 2)
+  %texture:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
 }
 
 %foo = func(%texture_1:texture_external, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_1: 'texture'
@@ -1051,14 +1051,14 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
+  %texture_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
 }
 
 %foo = func(%texture_plane0_1:texture_2d<f32>, %texture_plane1_1:texture_2d<f32>, %texture_params_1:tint_ExternalTextureParams, %sampler:sampler, %coords:vec2<f32>):vec4<f32> {  # %texture_plane0_1: 'texture_plane0', %texture_plane1_1: 'texture_plane1', %texture_params_1: 'texture_params'
@@ -1091,7 +1091,7 @@ $B1: {  # root
     ret %33
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %coords_2: 'coords'
   $B4: {
     %39:u32 = access %params, 1u
     %40:mat3x4<f32> = access %params, 2u
@@ -1107,16 +1107,16 @@ $B1: {  # root
     %50:bool = eq %49, 1u
     %51:vec3<f32>, %52:f32 = if %50 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %53:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %53:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %48, 0.0f
         %54:vec3<f32> = swizzle %53, xyz
         %55:f32 = access %53, 3u
         exit_if %54, %55  # if_1
       }
       $B6: {  # false
-        %56:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %56:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %48, 0.0f
         %57:f32 = access %56, 0u
         %58:vec2<f32> = clamp %47, %44, %45
-        %59:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %58, 0.0f
+        %59:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %58, 0.0f
         %60:vec2<f32> = swizzle %59, xy
         %61:vec4<f32> = construct %57, %60, 1.0f
         %62:vec3<f32> = mul %61, %40
@@ -1179,15 +1179,15 @@ $B1: {  # root
 }
 
 TEST_F(IR_MultiplanarExternalTextureTest, MultipleTextures) {
-    auto* var_a = b.Var("texture_a", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var_a = b.Var("texture_a", ty.ptr(handle, ty.external_texture()));
     var_a->SetBindingPoint(1, 2);
     mod.root_block->Append(var_a);
 
-    auto* var_b = b.Var("texture_b", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var_b = b.Var("texture_b", ty.ptr(handle, ty.external_texture()));
     var_b->SetBindingPoint(2, 2);
     mod.root_block->Append(var_b);
 
-    auto* var_c = b.Var("texture_c", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    auto* var_c = b.Var("texture_c", ty.ptr(handle, ty.external_texture()));
     var_c->SetBindingPoint(3, 2);
     mod.root_block->Append(var_c);
 
@@ -1195,20 +1195,20 @@ TEST_F(IR_MultiplanarExternalTextureTest, MultipleTextures) {
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
     foo->SetParams({coords});
     b.Append(foo->Block(), [&] {
-        auto* load_a = b.Load(var_a->Result(0));
+        auto* load_a = b.Load(var_a->Result());
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load_a, coords);
-        auto* load_b = b.Load(var_b->Result(0));
+        auto* load_b = b.Load(var_b->Result());
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load_b, coords);
-        auto* load_c = b.Load(var_c->Result(0));
+        auto* load_c = b.Load(var_c->Result());
         b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load_c, coords);
         b.Return(foo);
     });
 
     auto* src = R"(
 $B1: {  # root
-  %texture_a:ptr<handle, texture_external, read> = var @binding_point(1, 2)
-  %texture_b:ptr<handle, texture_external, read> = var @binding_point(2, 2)
-  %texture_c:ptr<handle, texture_external, read> = var @binding_point(3, 2)
+  %texture_a:ptr<handle, texture_external, read> = var undef @binding_point(1, 2)
+  %texture_b:ptr<handle, texture_external, read> = var undef @binding_point(2, 2)
+  %texture_c:ptr<handle, texture_external, read> = var undef @binding_point(3, 2)
 }
 
 %foo = func(%coords:vec2<u32>):void {
@@ -1248,20 +1248,20 @@ tint_ExternalTextureParams = struct @align(16) {
   samplePlane0RectMax:vec2<f32> @offset(232)
   samplePlane1RectMin:vec2<f32> @offset(240)
   samplePlane1RectMax:vec2<f32> @offset(248)
-  visibleSize:vec2<u32> @offset(256)
+  apparentSize:vec2<u32> @offset(256)
   plane1CoordFactor:vec2<f32> @offset(264)
 }
 
 $B1: {  # root
-  %texture_a_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 2)
-  %texture_a_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(1, 3)
-  %texture_a_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(1, 4)
-  %texture_b_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 2)
-  %texture_b_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(2, 3)
-  %texture_b_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(2, 4)
-  %texture_c_plane0:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 2)
-  %texture_c_plane1:ptr<handle, texture_2d<f32>, read> = var @binding_point(3, 3)
-  %texture_c_params:ptr<uniform, tint_ExternalTextureParams, read> = var @binding_point(3, 4)
+  %texture_a_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 2)
+  %texture_a_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 3)
+  %texture_a_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(1, 4)
+  %texture_b_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 2)
+  %texture_b_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(2, 3)
+  %texture_b_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(2, 4)
+  %texture_c_plane0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 2)
+  %texture_c_plane1:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(3, 3)
+  %texture_c_params:ptr<uniform, tint_ExternalTextureParams, read> = var undef @binding_point(3, 4)
 }
 
 %foo = func(%coords:vec2<u32>):void {

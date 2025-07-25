@@ -52,7 +52,7 @@ TEST_F(WGSLParserTest, VariableAttributeList_Parses) {
     EXPECT_EQ(exp->value, 4u);
 
     ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
-    ast::CheckIdentifier(attr_1->As<ast::BuiltinAttribute>()->builtin->name, "position");
+    EXPECT_EQ(attr_1->As<ast::BuiltinAttribute>()->builtin, core::BuiltinValue::kPosition);
 }
 
 TEST_F(WGSLParserTest, VariableAttributeList_Invalid) {

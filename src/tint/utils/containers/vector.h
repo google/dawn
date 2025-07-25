@@ -44,6 +44,14 @@
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/memory/bitcast.h"
 
+// This file implements a custom STL style container & iterator in a performant manner, using
+// C-style data access. It is not unexpected that -Wunsafe-buffer-usage triggers in this code, since
+// the type of dynamic access being used cannot be guaranteed to be safe via static analysis.
+// Attempting to change this code in simple ways to quiet these errors either a) negatively affects
+// the performance by introducing unneeded copes, or b) uses typing shenanigans to work around the
+// warning that other linters/analyses are unhappy with.
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 #ifndef TINT_VECTOR_MUTATION_CHECKS_ENABLED
 #ifdef NDEBUG
 #define TINT_VECTOR_MUTATION_CHECKS_ENABLED 0
@@ -283,7 +291,8 @@ class VectorIterator {
 /// @param out the stream to write to
 /// @param it the VectorIterator
 /// @returns @p out so calls can be chained
-template <typename STREAM, typename T, bool FORWARD, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T, bool FORWARD>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& out, const VectorIterator<T, FORWARD>& it) {
     return out << *it;
 }
@@ -1161,6 +1170,13 @@ class VectorRef {
         return hash;
     }
 
+    /// @returns true if the predicate function returns true for any of the elements of the vector
+    /// @param pred a function-like with the signature `bool(T)`
+    template <typename PREDICATE>
+    bool Any(PREDICATE&& pred) const {
+        return std::any_of(begin(), end(), std::forward<PREDICATE>(pred));
+    }
+
   private:
     /// Friend class
     template <typename, size_t>
@@ -1194,6 +1210,24 @@ std::vector<T> ToStdVector(const Vector<T, N>& vector) {
     return out;
 }
 
+/// Helper for constructing a Vector from a Slice. Only the size must be supplied as the type is
+/// deduced.
+/// @param slice the input slice
+/// @return the converted vector
+/// @note This helper is useful because Vectors require a size parameter, but because it is the
+/// second template parameter to a Vector, both the type and size parameters must be explicitly
+/// declared. Furthermore, Slices are often of const pointer/reference type, but a Vector cannot be
+/// of const pointer/reference type, again requiring the caller to be explicit. This helper makes it
+/// possible to only specify the size.
+template <size_t N, typename T>
+auto ToVector(const tint::Slice<T>& slice) {
+    // If Slice is of type 'T* const', make it 'T*' (or 'T& const', make it 'T&') as Vectors cannot
+    // be of const pointer/reference type.
+    using U = std::conditional_t<std::is_pointer_v<T> || std::is_reference_v<T>,
+                                 std::remove_const_t<T>, T>;
+    return Vector<U, N>{slice};
+}
+
 /// Helper for converting a std::vector to a Vector.
 /// @param vector the input vector
 /// @return the converted vector
@@ -1212,7 +1246,8 @@ Vector<T, N> ToVector(const std::vector<T>& vector) {
 /// @param o the stream to write to
 /// @param vec the vector
 /// @return the stream so calls can be chained
-template <typename STREAM, typename T, size_t N, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T, size_t N>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, const Vector<T, N>& vec) {
     o << "[";
     bool first = true;
@@ -1231,7 +1266,8 @@ auto& operator<<(STREAM& o, const Vector<T, N>& vec) {
 /// @param o the stream to write to
 /// @param vec the vector reference
 /// @return the stream so calls can be chained
-template <typename STREAM, typename T, typename = traits::EnableIfIsOStream<STREAM>>
+template <typename STREAM, typename T>
+    requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, VectorRef<T> vec) {
     o << "[";
     bool first = true;
@@ -1275,5 +1311,7 @@ template <typename T>
 static constexpr bool IsVectorLike = tint::detail::IsVectorLike<T>::value;
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_VECTOR_H_

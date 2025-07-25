@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "dawn/common/Platform.h"
+
 #include "dawn/native/metal/SharedFenceMTL.h"
 
 #include "dawn/native/ChainUtils.h"
@@ -35,18 +37,20 @@ namespace dawn::native::metal {
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceMTLSharedEventDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->sharedEvent == nullptr, "MTLSharedEvent is missing.");
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        return AcquireRef(new SharedFence(
-            device, label, static_cast<id<MTLSharedEvent>>(descriptor->sharedEvent)));
-    } else {
-        return DAWN_INTERNAL_ERROR("MTLSharedEvent not supported.");
-    }
+
+    return AcquireRef(new SharedFence(device, label,
+#if DAWN_PLATFORM_IS(IOS)
+                                      (__bridge id<MTLSharedEvent>)(descriptor->sharedEvent)
+#else   // DAWN_PLATFORM_IS(IOS)
+                                      static_cast<id<MTLSharedEvent>>(descriptor->sharedEvent)
+#endif  // DAWN_PLATFORM_IS(IOS)
+                                          ));
 }
 
-SharedFence::SharedFence(Device* device, const char* label, id<MTLSharedEvent> sharedEvent)
+SharedFence::SharedFence(Device* device, StringView label, id<MTLSharedEvent> sharedEvent)
     : SharedFenceBase(device, label), mSharedEvent(sharedEvent) {}
 
 id<MTLSharedEvent> SharedFence::GetMTLSharedEvent() const {

@@ -58,6 +58,9 @@ enum Flag {
     /// Type has a fixed footprint.
     /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
     kFixedFootprint,
+    /// Type is host-shareable.
+    /// @see https://www.w3.org/TR/WGSL/#host-shareable
+    kHostShareable,
 };
 
 /// An alias to tint::EnumSet<Flag>
@@ -129,58 +132,51 @@ class Type : public Castable<Type, UniqueNode> {
     /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
     inline bool HasFixedFootprint() const { return flags_.Contains(Flag::kFixedFootprint); }
 
-    /// @returns true if this type is a float scalar
-    bool is_float_scalar() const;
-    /// @returns true if this type is a float matrix
-    bool is_float_matrix() const;
-    /// @returns true if this type is a square float matrix
-    bool is_square_float_matrix() const;
-    /// @returns true if this type is a float vector
-    bool is_float_vector() const;
-    /// @returns true if this type is a float scalar or vector
-    bool is_float_scalar_or_vector() const;
-    /// @returns true if this type is a float scalar or vector or matrix
-    bool is_float_scalar_or_vector_or_matrix() const;
-    /// @returns true if this type is an integer scalar
-    bool is_integer_scalar() const;
-    /// @returns true if this type is a signed integer scalar
-    bool is_signed_integer_scalar() const;
-    /// @returns true if this type is an unsigned integer scalar
-    bool is_unsigned_integer_scalar() const;
-    /// @returns true if this type is a signed integer vector
-    bool is_signed_integer_vector() const;
-    /// @returns true if this type is an unsigned vector
-    bool is_unsigned_integer_vector() const;
-    /// @returns true if this type is an unsigned scalar or vector
-    bool is_unsigned_integer_scalar_or_vector() const;
-    /// @returns true if this type is a signed scalar or vector
-    bool is_signed_integer_scalar_or_vector() const;
-    /// @returns true if this type is an integer scalar or vector
-    bool is_integer_scalar_or_vector() const;
-    /// @returns true if this type is an abstract integer vector
-    bool is_abstract_integer_vector() const;
-    /// @returns true if this type is an abstract float vector
-    bool is_abstract_float_vector() const;
-    /// @returns true if this type is an abstract integer scalar or vector
-    bool is_abstract_integer_scalar_or_vector() const;
-    /// @returns true if this type is an abstract float scalar or vector
-    bool is_abstract_float_scalar_or_vector() const;
-    /// @returns true if this type is a boolean vector
-    bool is_bool_vector() const;
-    /// @returns true if this type is boolean scalar or vector
-    bool is_bool_scalar_or_vector() const;
-    /// @returns true if this type is a numeric vector
-    bool is_numeric_vector() const;
-    /// @returns true if this type is a vector of scalar type
-    bool is_scalar_vector() const;
-    /// @returns true if this type is a numeric scale or vector
-    bool is_numeric_scalar_or_vector() const;
-    /// @returns true if this type is a handle type
-    bool is_handle() const;
+    /// @returns true if type is host-shareable
+    /// https://www.w3.org/TR/WGSL/#host-shareable
+    inline bool IsHostShareable() const { return flags_.Contains(Flag::kHostShareable); }
 
-    /// @returns true if this type is an abstract-numeric or if the type holds an element that is an
-    /// abstract-numeric.
-    bool HoldsAbstract() const;
+    /// @returns true if the type is a scalar
+    bool IsScalar() const;
+    /// @returns true if this type is a float scalar
+    bool IsFloatScalar() const;
+    /// @returns true if this type is a float matrix
+    bool IsFloatMatrix() const;
+    /// @returns true if this type is a float vector
+    bool IsFloatVector() const;
+    /// @returns true if this type is a float scalar or vector
+    bool IsFloatScalarOrVector() const;
+    /// @returns true if this type is an integer scalar
+    bool IsIntegerScalar() const;
+    /// @returns true if this type is a integer vector
+    bool IsIntegerVector() const;
+    /// @returns true if this type is an integer scalar or vector
+    bool IsIntegerScalarOrVector() const;
+    /// @returns true if this type is a signed integer scalar
+    bool IsSignedIntegerScalar() const;
+    /// @returns true if this type is a signed integer vector
+    bool IsSignedIntegerVector() const;
+    /// @returns true if this type is a signed scalar or vector
+    bool IsSignedIntegerScalarOrVector() const;
+    /// @returns true if this type is an unsigned integer scalar
+    bool IsUnsignedIntegerScalar() const;
+    /// @returns true if this type is an unsigned vector
+    bool IsUnsignedIntegerVector() const;
+    /// @returns true if this type is an unsigned scalar or vector
+    bool IsUnsignedIntegerScalarOrVector() const;
+    /// @returns true if this type is an abstract integer scalar or vector
+    bool IsAbstractScalarOrVector() const;
+    /// @returns true if this type is boolean scalar or vector
+    bool IsBoolScalarOrVector() const;
+    /// @returns true if this type is boolean vector
+    bool IsBoolVector() const;
+    /// @returns true if this type is a numeric scale or vector
+    bool IsNumericScalarOrVector() const;
+    /// @returns true if this type is a handle type
+    virtual bool IsHandle() const;
+    /// @returns true if this type is an abstract type. It could be a numeric directly or an
+    /// abstract container which holds an abstract numeric
+    bool IsAbstract() const;
 
     /// kNoConversion is returned from ConversionRank() when the implicit conversion is not
     /// permitted.
@@ -198,7 +194,7 @@ class Type : public Castable<Type, UniqueNode> {
     /// @param type_if_invalid the type to return if this type has no child elements.
     /// @param count_if_invalid the count to return if this type has no child elements, or the
     /// number is unbounded.
-    /// @returns The child element type and the the number of child elements held by this type.
+    /// @returns The child element type and the number of child elements held by this type.
     /// If this type has no child element types, then @p invalid is returned.
     /// If this type can hold a mix of different elements types (like a Struct), then
     /// `[type_if_invalid, N]` is returned, where `N` is the number of elements.

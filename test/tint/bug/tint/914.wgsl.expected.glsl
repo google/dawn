@@ -1,98 +1,115 @@
 #version 310 es
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
-}
-
-shared float mm_Asub[64][64];
-shared float mm_Bsub[64][64];
-void tint_zero_workgroup_memory(uint local_idx) {
-  {
-    for(uint idx = local_idx; (idx < 4096u); idx = (idx + 256u)) {
-      uint i = tint_div(idx, 64u);
-      uint i_1 = tint_mod(idx, 64u);
-      mm_Asub[i][i_1] = 0.0f;
-      mm_Bsub[i][i_1] = 0.0f;
-    }
-  }
-  barrier();
-}
 
 struct Uniforms {
   uint dimAOuter;
   uint dimInner;
   uint dimBOuter;
-  uint pad;
 };
 
-layout(binding = 0, std430) buffer Matrix_ssbo {
+layout(binding = 0, std430)
+buffer Matrix_1_ssbo {
   float numbers[];
 } firstMatrix;
-
-layout(binding = 1, std430) buffer Matrix_ssbo_1 {
+layout(binding = 1, std430)
+buffer Matrix_2_ssbo {
   float numbers[];
 } secondMatrix;
-
-layout(binding = 2, std430) buffer Matrix_ssbo_2 {
+layout(binding = 2, std430)
+buffer Matrix_3_ssbo {
   float numbers[];
 } resultMatrix;
-
-layout(binding = 3, std140) uniform uniforms_block_ubo {
+layout(binding = 3, std140)
+uniform uniforms_block_1_ubo {
   Uniforms inner;
-} uniforms;
-
+} v;
+shared float mm_Asub[64][64];
+shared float mm_Bsub[64][64];
 float mm_readA(uint row, uint col) {
-  bool tint_tmp = (row < uniforms.inner.dimAOuter);
-  if (tint_tmp) {
-    tint_tmp = (col < uniforms.inner.dimInner);
+  bool v_1 = false;
+  if ((row < v.inner.dimAOuter)) {
+    v_1 = (col < v.inner.dimInner);
+  } else {
+    v_1 = false;
   }
-  if ((tint_tmp)) {
-    float result = firstMatrix.numbers[((row * uniforms.inner.dimInner) + col)];
+  if (v_1) {
+    uint v_2 = ((row * v.inner.dimInner) + col);
+    uint v_3 = min(v_2, (uint(firstMatrix.numbers.length()) - 1u));
+    float result = firstMatrix.numbers[v_3];
     return result;
   }
   return 0.0f;
 }
-
 float mm_readB(uint row, uint col) {
-  bool tint_tmp_1 = (row < uniforms.inner.dimInner);
-  if (tint_tmp_1) {
-    tint_tmp_1 = (col < uniforms.inner.dimBOuter);
+  bool v_4 = false;
+  if ((row < v.inner.dimInner)) {
+    v_4 = (col < v.inner.dimBOuter);
+  } else {
+    v_4 = false;
   }
-  if ((tint_tmp_1)) {
-    float result = secondMatrix.numbers[((row * uniforms.inner.dimBOuter) + col)];
+  if (v_4) {
+    uint v_5 = ((row * v.inner.dimBOuter) + col);
+    uint v_6 = min(v_5, (uint(secondMatrix.numbers.length()) - 1u));
+    float result = secondMatrix.numbers[v_6];
     return result;
   }
   return 0.0f;
 }
-
 void mm_write(uint row, uint col, float value) {
-  bool tint_tmp_2 = (row < uniforms.inner.dimAOuter);
-  if (tint_tmp_2) {
-    tint_tmp_2 = (col < uniforms.inner.dimBOuter);
+  bool v_7 = false;
+  if ((row < v.inner.dimAOuter)) {
+    v_7 = (col < v.inner.dimBOuter);
+  } else {
+    v_7 = false;
   }
-  if ((tint_tmp_2)) {
-    uint index = (col + (row * uniforms.inner.dimBOuter));
-    resultMatrix.numbers[index] = value;
+  if (v_7) {
+    uint index = (col + (row * v.inner.dimBOuter));
+    uint v_8 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
+    resultMatrix.numbers[v_8] = value;
   }
 }
-
-void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / mix(rhs, 1u, (rhs == 0u)));
+}
+void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
+  {
+    uint v_9 = 0u;
+    v_9 = tint_local_index;
+    while(true) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4096u)) {
+        break;
+      }
+      mm_Asub[(v_10 / 64u)][(v_10 % 64u)] = 0.0f;
+      mm_Bsub[(v_10 / 64u)][(v_10 % 64u)] = 0.0f;
+      {
+        v_9 = (v_10 + 256u);
+      }
+      continue;
+    }
+  }
+  barrier();
   uint tileRow = (local_id.y * 4u);
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);
   uint globalCol = (global_id.x * 4u);
-  uint numTiles = (tint_div((uniforms.inner.dimInner - 1u), 64u) + 1u);
+  uint numTiles = (tint_div_u32((v.inner.dimInner - 1u), 64u) + 1u);
   float acc[16] = float[16](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   {
-    for(uint index = 0u; (index < 16u); index = (index + 1u)) {
-      acc[index] = 0.0f;
+    uint index = 0u;
+    while(true) {
+      if ((index < 16u)) {
+      } else {
+        break;
+      }
+      uint v_11 = min(index, 15u);
+      acc[v_11] = 0.0f;
+      {
+        index = (index + 1u);
+      }
+      continue;
     }
   }
   uint ColPerThreadA = 4u;
@@ -100,71 +117,173 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
   uint RowPerThreadB = 4u;
   uint tileRowB = (local_id.y * RowPerThreadB);
   {
-    for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    uint t = 0u;
+    while(true) {
+      if ((t < numTiles)) {
+      } else {
+        break;
+      }
       {
-        for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < 4u)) {
+          } else {
+            break;
+          }
           {
-            for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < ColPerThreadA)) {
+              } else {
+                break;
+              }
               uint inputRow = (tileRow + innerRow);
               uint inputCol = (tileColA + innerCol);
-              uint tint_symbol_1 = inputRow;
-              uint tint_symbol_2 = inputCol;
-              mm_Asub[tint_symbol_1][tint_symbol_2] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              mm_Asub[min(inputRow, 63u)][min(inputCol, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              {
+                innerCol = (innerCol + 1u);
+              }
+              continue;
             }
           }
+          {
+            innerRow = (innerRow + 1u);
+          }
+          continue;
         }
       }
       {
-        for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < RowPerThreadB)) {
+          } else {
+            break;
+          }
           {
-            for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < 4u)) {
+              } else {
+                break;
+              }
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              uint tint_symbol_3 = innerCol;
-              uint tint_symbol_4 = inputCol;
-              mm_Bsub[tint_symbol_3][tint_symbol_4] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              uint v_12 = min(innerCol, 63u);
+              mm_Bsub[v_12][min(inputCol, 63u)] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              {
+                innerCol = (innerCol + 1u);
+              }
+              continue;
             }
           }
+          {
+            innerRow = (innerRow + 1u);
+          }
+          continue;
         }
       }
       barrier();
       {
-        for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+        uint k = 0u;
+        while(true) {
+          if ((k < 64u)) {
+          } else {
+            break;
+          }
           {
-            for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
-              BCached[inner] = mm_Bsub[k][(tileCol + inner)];
+            uint inner = 0u;
+            while(true) {
+              if ((inner < 4u)) {
+              } else {
+                break;
+              }
+              uint v_13 = min(inner, 3u);
+              uint v_14 = min(k, 63u);
+              uint v_15 = min((tileCol + inner), 63u);
+              BCached[v_13] = mm_Bsub[v_14][v_15];
+              {
+                inner = (inner + 1u);
+              }
+              continue;
             }
           }
           {
-            for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
-              ACached = mm_Asub[(tileRow + innerRow)][k];
+            uint innerRow = 0u;
+            while(true) {
+              if ((innerRow < 4u)) {
+              } else {
+                break;
+              }
+              uint v_16 = min((tileRow + innerRow), 63u);
+              uint v_17 = min(k, 63u);
+              ACached = mm_Asub[v_16][v_17];
               {
-                for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+                uint innerCol = 0u;
+                while(true) {
+                  if ((innerCol < 4u)) {
+                  } else {
+                    break;
+                  }
                   uint index = ((innerRow * 4u) + innerCol);
-                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
+                  float v_18 = acc[min(index, 15u)];
+                  float v_19 = ACached;
+                  uint v_20 = min(innerCol, 3u);
+                  acc[min(index, 15u)] = (v_18 + (v_19 * BCached[v_20]));
+                  {
+                    innerCol = (innerCol + 1u);
+                  }
+                  continue;
                 }
               }
+              {
+                innerRow = (innerRow + 1u);
+              }
+              continue;
             }
           }
+          {
+            k = (k + 1u);
+          }
+          continue;
         }
       }
       barrier();
+      {
+        t = (t + 1u);
+      }
+      continue;
     }
   }
   {
-    for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    uint innerRow = 0u;
+    while(true) {
+      if ((innerRow < 4u)) {
+      } else {
+        break;
+      }
       {
-        for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+        uint innerCol = 0u;
+        while(true) {
+          if ((innerCol < 4u)) {
+          } else {
+            break;
+          }
           uint index = ((innerRow * 4u) + innerCol);
-          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
+          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[min(index, 15u)]);
+          {
+            innerCol = (innerCol + 1u);
+          }
+          continue;
         }
       }
+      {
+        innerRow = (innerRow + 1u);
+      }
+      continue;
     }
   }
 }
-
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 void main() {
-  tint_symbol(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
-  return;
+  main_inner(gl_LocalInvocationID, gl_GlobalInvocationID, gl_LocalInvocationIndex);
 }

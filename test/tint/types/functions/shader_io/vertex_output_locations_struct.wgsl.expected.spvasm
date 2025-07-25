@@ -1,85 +1,77 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 41
+; Generator: Google Tint Compiler; 1
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %main "main" %loc0_1 %loc1_1 %loc2_1 %loc3_1 %position_1 %vertex_point_size
-               OpName %loc0_1 "loc0_1"
-               OpName %loc1_1 "loc1_1"
-               OpName %loc2_1 "loc2_1"
-               OpName %loc3_1 "loc3_1"
-               OpName %position_1 "position_1"
-               OpName %vertex_point_size "vertex_point_size"
-               OpName %VertexOutputs "VertexOutputs"
+               OpEntryPoint Vertex %main "main" %main_loc0_Output %main_loc1_Output %main_loc2_Output %main_loc3_Output %main_position_Output %main___point_size_Output
+               OpName %main_loc0_Output "main_loc0_Output"
+               OpName %main_loc1_Output "main_loc1_Output"
+               OpName %main_loc2_Output "main_loc2_Output"
+               OpName %main_loc3_Output "main_loc3_Output"
+               OpName %main_position_Output "main_position_Output"
+               OpName %main___point_size_Output "main___point_size_Output"
+               OpName %main_inner "main_inner"
                OpMemberName %VertexOutputs 0 "loc0"
                OpMemberName %VertexOutputs 1 "loc1"
                OpMemberName %VertexOutputs 2 "loc2"
                OpMemberName %VertexOutputs 3 "loc3"
                OpMemberName %VertexOutputs 4 "position"
-               OpName %main_inner "main_inner"
+               OpName %VertexOutputs "VertexOutputs"
                OpName %main "main"
-               OpDecorate %loc0_1 Location 0
-               OpDecorate %loc0_1 Flat
-               OpDecorate %loc1_1 Location 1
-               OpDecorate %loc1_1 Flat
-               OpDecorate %loc2_1 Location 2
-               OpDecorate %loc3_1 Location 3
-               OpDecorate %position_1 BuiltIn Position
-               OpDecorate %vertex_point_size BuiltIn PointSize
-               OpMemberDecorate %VertexOutputs 0 Offset 0
-               OpMemberDecorate %VertexOutputs 1 Offset 4
-               OpMemberDecorate %VertexOutputs 2 Offset 8
-               OpMemberDecorate %VertexOutputs 3 Offset 16
-               OpMemberDecorate %VertexOutputs 4 Offset 32
+               OpDecorate %main_loc0_Output Location 0
+               OpDecorate %main_loc0_Output Flat
+               OpDecorate %main_loc1_Output Location 1
+               OpDecorate %main_loc1_Output Flat
+               OpDecorate %main_loc2_Output Location 2
+               OpDecorate %main_loc3_Output Location 3
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %main___point_size_Output BuiltIn PointSize
         %int = OpTypeInt 32 1
 %_ptr_Output_int = OpTypePointer Output %int
-          %4 = OpConstantNull %int
-     %loc0_1 = OpVariable %_ptr_Output_int Output %4
+%main_loc0_Output = OpVariable %_ptr_Output_int Output
        %uint = OpTypeInt 32 0
 %_ptr_Output_uint = OpTypePointer Output %uint
-          %8 = OpConstantNull %uint
-     %loc1_1 = OpVariable %_ptr_Output_uint Output %8
+%main_loc1_Output = OpVariable %_ptr_Output_uint Output
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
-         %12 = OpConstantNull %float
-     %loc2_1 = OpVariable %_ptr_Output_float Output %12
+%main_loc2_Output = OpVariable %_ptr_Output_float Output
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-         %16 = OpConstantNull %v4float
-     %loc3_1 = OpVariable %_ptr_Output_v4float Output %16
- %position_1 = OpVariable %_ptr_Output_v4float Output %16
-%vertex_point_size = OpVariable %_ptr_Output_float Output %12
+%main_loc3_Output = OpVariable %_ptr_Output_v4float Output
+%main_position_Output = OpVariable %_ptr_Output_v4float Output
+%main___point_size_Output = OpVariable %_ptr_Output_float Output
 %VertexOutputs = OpTypeStruct %int %uint %float %v4float %v4float
-         %19 = OpTypeFunction %VertexOutputs
+         %17 = OpTypeFunction %VertexOutputs
       %int_1 = OpConstant %int 1
      %uint_1 = OpConstant %uint 1
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
     %float_4 = OpConstant %float 4
-         %29 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
-         %30 = OpConstantComposite %VertexOutputs %int_1 %uint_1 %float_1 %29 %16
+         %23 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
+         %27 = OpConstantNull %v4float
+         %19 = OpConstantComposite %VertexOutputs %int_1 %uint_1 %float_1 %23 %27
        %void = OpTypeVoid
-         %31 = OpTypeFunction %void
- %main_inner = OpFunction %VertexOutputs None %19
-         %22 = OpLabel
-               OpReturnValue %30
+         %30 = OpTypeFunction %void
+ %main_inner = OpFunction %VertexOutputs None %17
+         %18 = OpLabel
+               OpReturnValue %19
                OpFunctionEnd
-       %main = OpFunction %void None %31
-         %34 = OpLabel
-         %35 = OpFunctionCall %VertexOutputs %main_inner
-         %36 = OpCompositeExtract %int %35 0
-               OpStore %loc0_1 %36
-         %37 = OpCompositeExtract %uint %35 1
-               OpStore %loc1_1 %37
-         %38 = OpCompositeExtract %float %35 2
-               OpStore %loc2_1 %38
-         %39 = OpCompositeExtract %v4float %35 3
-               OpStore %loc3_1 %39
-         %40 = OpCompositeExtract %v4float %35 4
-               OpStore %position_1 %40
-               OpStore %vertex_point_size %float_1
+       %main = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpFunctionCall %VertexOutputs %main_inner
+         %33 = OpCompositeExtract %int %32 0
+               OpStore %main_loc0_Output %33 None
+         %34 = OpCompositeExtract %uint %32 1
+               OpStore %main_loc1_Output %34 None
+         %35 = OpCompositeExtract %float %32 2
+               OpStore %main_loc2_Output %35 None
+         %36 = OpCompositeExtract %v4float %32 3
+               OpStore %main_loc3_Output %36 None
+         %37 = OpCompositeExtract %v4float %32 4
+               OpStore %main_position_Output %37 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

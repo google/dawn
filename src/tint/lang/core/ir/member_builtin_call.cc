@@ -38,13 +38,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::MemberBuiltinCall);
 
 namespace tint::core::ir {
 
-MemberBuiltinCall::MemberBuiltinCall() {
+MemberBuiltinCall::MemberBuiltinCall(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-MemberBuiltinCall::MemberBuiltinCall(InstructionResult* result,
+MemberBuiltinCall::MemberBuiltinCall(Id id,
+                                     InstructionResult* result,
                                      Value* object,
-                                     VectorRef<Value*> arguments) {
+                                     VectorRef<Value*> arguments)
+    : Base(id) {
     flags_.Add(Flag::kSequenced);
     AddOperand(MemberBuiltinCall::kObjectOperandOffset, object);
     AddOperands(MemberBuiltinCall::kArgsOperandOffset, std::move(arguments));

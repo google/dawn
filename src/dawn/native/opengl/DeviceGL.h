@@ -41,6 +41,10 @@
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
+namespace dawn::native {
+class AHBFunctions;
+}  // namespace dawn::native
+
 namespace dawn::native::opengl {
 
 class ContextEGL;
@@ -82,14 +86,14 @@ class Device final : public DeviceBase {
 
     MaybeError TickImpl() override;
 
-    MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) override;
+    MaybeError CopyFromStagingToBuffer(BufferBase* source,
+                                       uint64_t sourceOffset,
+                                       BufferBase* destination,
+                                       uint64_t destinationOffset,
+                                       uint64_t size) override;
 
     MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
-                                            const TextureDataLayout& src,
+                                            const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;
 
@@ -100,6 +104,11 @@ class Device final : public DeviceBase {
 
     bool MayRequireDuplicationOfIndirectParameters() const override;
     bool ShouldApplyIndexBufferOffsetToFirstIndex() const override;
+
+    const AHBFunctions* GetOrLoadAHBFunctions();
+
+    const Buffer* GetInternalTextureBuiltinsUniformBuffer() const;
+    const Buffer* GetInternalArrayLengthUniformBuffer() const;
 
   private:
     Device(AdapterBase* adapter,
@@ -123,8 +132,7 @@ class Device final : public DeviceBase {
     ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult,
-        OwnedCompilationMessages* compilationMessages) override;
+        ShaderModuleParseResult* parseResult) override;
     ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
         Surface* surface,
         SwapChainBase* previousSwapChain,
@@ -138,8 +146,17 @@ class Device final : public DeviceBase {
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) override;
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
+    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        const SharedTextureMemoryDescriptor* descriptor) override;
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        const SharedFenceDescriptor* descriptor) override;
+    ResultOrError<Ref<TextureBase>> CreateTextureWrappingEGLImageImpl(
+        const ExternalImageDescriptor* descriptor,
+        ::EGLImage image);
+    ResultOrError<Ref<TextureBase>> CreateTextureWrappingGLTextureImpl(
+        const ExternalImageDescriptor* descriptor,
+        GLuint texture);
 
-    GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) const;
     void DestroyImpl() override;
 
     const OpenGLFunctions mGL;
@@ -147,6 +164,17 @@ class Device final : public DeviceBase {
     GLFormatTable mFormatTable;
     std::unique_ptr<ContextEGL> mContext;
     int mMaxTextureMaxAnisotropy = 0;
+
+    // Maintain an internal uniform buffer to store extra information needed by shader emulation for
+    // certain texture builtins.
+    Ref<Buffer> mTextureBuiltinsBuffer;
+
+    // Maintain an internal uniform buffer to store extra array length information if needed.
+    Ref<Buffer> mArrayLengthBuffer;
+
+#if DAWN_PLATFORM_IS(ANDROID)
+    std::unique_ptr<AHBFunctions> mAHBFunctions;
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 };
 
 }  // namespace dawn::native::opengl

@@ -29,6 +29,7 @@ package result_test
 
 import (
 	"bytes"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -36,7 +37,9 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 var Q = query.Parse
@@ -112,120 +115,6 @@ func TestParseError(t *testing.T) {
 		if diff := cmp.Diff(got, test.expect); diff != "" {
 			t.Errorf("Parse('%v'): %v", test, diff)
 			continue
-		}
-	}
-}
-
-func TestVariants(t *testing.T) {
-	type Test struct {
-		results result.List
-		expect  []result.Tags
-	}
-	for _, test := range []Test{
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags(),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags(),
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x"),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags("x"),
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags("x", "y"),
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags("x", "y"),
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Pass,
-					Tags:   result.NewTags("y", "z"),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags("x", "y"),
-				result.NewTags("y", "z"),
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Pass,
-					Tags:   result.NewTags("y", "z"),
-				},
-				result.Result{
-					Query:  Q(`c`),
-					Status: result.Pass,
-					Tags:   result.NewTags("z", "x"),
-				},
-				result.Result{
-					Query:  Q(`d`),
-					Status: result.Pass,
-					Tags:   result.NewTags("y", "z"),
-				},
-			},
-			expect: []result.Tags{
-				result.NewTags("x", "y"),
-				result.NewTags("x", "z"),
-				result.NewTags("y", "z"),
-			},
-		},
-	} {
-		got := test.results.Variants()
-		if diff := cmp.Diff(got, test.expect); diff != "" {
-			t.Errorf("Results:\n%v\nUniqueTags() was not as expected:\n%v", test.results, diff)
 		}
 	}
 }
@@ -832,96 +721,6 @@ func TestFilterByTags(t *testing.T) {
 	}
 }
 
-func TestFilterByVariant(t *testing.T) {
-	type Test struct {
-		results result.List
-		tags    result.Tags
-		expect  result.List
-	}
-	for _, test := range []Test{
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Failure,
-					Tags:   result.NewTags("y"),
-				},
-				result.Result{
-					Query:  Q(`c`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-			tags: result.NewTags("x", "y"),
-			expect: result.List{
-				result.Result{
-					Query:  Q(`c`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Failure,
-					Tags:   result.NewTags("y"),
-				},
-				result.Result{
-					Query:  Q(`c`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-			tags: result.NewTags("x"),
-			expect: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x"),
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				result.Result{
-					Query:  Q(`a`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x"),
-				},
-				result.Result{
-					Query:  Q(`b`),
-					Status: result.Failure,
-					Tags:   result.NewTags("y"),
-				},
-				result.Result{
-					Query:  Q(`c`),
-					Status: result.Pass,
-					Tags:   result.NewTags("x", "y"),
-				},
-			},
-			tags:   result.NewTags("q"),
-			expect: result.List{},
-		},
-	} {
-		got := test.results.FilterByVariant(test.tags)
-		if diff := cmp.Diff(got, test.expect); diff != "" {
-			t.Errorf("Results:\n%v\nFilterByVariant(%v) was not as expected:\n%v", test.results, test.tags, diff)
-		}
-	}
-}
-
 func TestStatuses(t *testing.T) {
 	type Test struct {
 		results result.List
@@ -992,65 +791,31 @@ func TestStatuses(t *testing.T) {
 	}
 }
 
-func TestStatusTree(t *testing.T) {
-	type Node = query.TreeNode[result.Status]
-	type Children = query.TreeNodeChildren[result.Status]
-	type ChildKey = query.TreeNodeChildKey
+func TestSaveLoad(t *testing.T) {
+	wrapper := oswrapper.CreateMemMapOSWrapper()
 
-	pass := result.Pass
+	in := result.ResultsByExecutionMode{
+		"bar": result.List{
+			{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:b,*`), Tags: T(`y`), Status: result.Failure},
+			{Query: Q(`suite:a:b:*`), Tags: T(`x`, `y`), Status: result.Skip},
+			{Query: Q(`suite:a:c,*`), Tags: T(`y`, `x`), Status: result.Failure},
+			{Query: Q(`suite:a,b:c,*`), Tags: T(`y`, `x`), Status: result.Crash},
+			{Query: Q(`suite:a,b:c:*`), Status: result.Slow},
+		},
+		"foo": result.List{
+			{Query: Q(`suite:d:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:e,*`), Tags: T(`y`), Status: result.Failure},
+		},
+	}
 
-	type Test struct {
-		results   result.List
-		expectErr error
-		expect    result.StatusTree
-	}
-	for _, test := range []Test{
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{},
-			expect:  result.StatusTree{},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				{Query: Q(`suite:a:*`), Status: result.Pass},
-			},
-			expect: result.StatusTree{
-				TreeNode: Node{
-					Children: Children{
-						ChildKey{Name: `suite`, Target: query.Suite}: &Node{
-							Query: Q(`suite`),
-							Children: Children{
-								ChildKey{Name: `a`, Target: query.Files}: &Node{
-									Query: Q(`suite:a`),
-									Children: Children{
-										ChildKey{Name: `*`, Target: query.Tests}: &Node{
-											Query: Q(`suite:a:*`),
-											Data:  &pass,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			results: result.List{
-				{Query: Q(`suite:a:*`), Status: result.Pass},
-				{Query: Q(`suite:a:*`), Status: result.Failure},
-			},
-			expectErr: query.ErrDuplicateData{Query: Q(`suite:a:*`)},
-		},
-	} {
-		got, err := test.results.StatusTree()
-		if diff := cmp.Diff(err, test.expectErr); diff != "" {
-			t.Errorf("Results:\n%v\nStatusTree() error was not as expected:\n%v", test.results, diff)
-			continue
-		}
-		if diff := cmp.Diff(got, test.expect); diff != "" {
-			t.Errorf("Results:\n%v\nStatusTree() was not as expected:\n%v", test.results, diff)
-		}
-	}
+	saveLocation := filepath.Join(fileutils.ThisDir(), "cache.txt")
+	err := result.SaveWithWrapper(saveLocation, in, wrapper)
+	require.NoErrorf(t, err, "Error saving results: %v", err)
+
+	out, err := result.LoadWithWrapper(saveLocation, wrapper)
+	require.NoErrorf(t, err, "Error loading results: %v", err)
+	require.Equal(t, in, out)
 }
 
 func TestReadWrite(t *testing.T) {

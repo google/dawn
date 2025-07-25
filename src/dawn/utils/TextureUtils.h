@@ -28,13 +28,15 @@
 #ifndef SRC_DAWN_UTILS_TEXTUREUTILS_H_
 #define SRC_DAWN_UTILS_TEXTUREUTILS_H_
 
-#include <array>
+#include <webgpu/webgpu_cpp.h>
 
-#include "dawn/webgpu_cpp.h"
+#include <array>
 
 #include "dawn/common/Assert.h"
 
 namespace dawn::utils {
+
+#ifndef __EMSCRIPTEN__
 static constexpr std::array<wgpu::TextureFormat, 101> kAllTextureFormats = {
     wgpu::TextureFormat::R8Unorm,
     wgpu::TextureFormat::R8Snorm,
@@ -137,6 +139,7 @@ static constexpr std::array<wgpu::TextureFormat, 101> kAllTextureFormats = {
     wgpu::TextureFormat::ASTC12x10UnormSrgb,
     wgpu::TextureFormat::ASTC12x12Unorm,
     wgpu::TextureFormat::ASTC12x12UnormSrgb};
+#endif  // __EMSCRIPTEN__
 
 static constexpr std::array<wgpu::TextureFormat, 41> kFormatsInCoreSpec = {
     wgpu::TextureFormat::R8Unorm,
@@ -246,10 +249,12 @@ static_assert(kCompressedFormats.size() ==
                   kBCFormats.size() + kETC2Formats.size() + kASTCFormats.size(),
               "Number of compressed format must equal number of BC, ETC2, and ASTC formats.");
 
+#ifndef __EMSCRIPTEN__
 static constexpr std::array<wgpu::TextureFormat, 6> kNorm16Formats = {
     wgpu::TextureFormat::R16Unorm, wgpu::TextureFormat::RG16Unorm, wgpu::TextureFormat::RGBA16Unorm,
     wgpu::TextureFormat::R16Snorm, wgpu::TextureFormat::RG16Snorm, wgpu::TextureFormat::RGBA16Snorm,
 };
+#endif  // __EMSCRIPTEN__
 
 static constexpr std::array<wgpu::TextureFormat, 5> kDepthFormats = {
     wgpu::TextureFormat::Depth16Unorm,         wgpu::TextureFormat::Depth32Float,
@@ -265,6 +270,37 @@ static constexpr std::array<wgpu::TextureFormat, 2> kDepthAndStencilFormats = {
     wgpu::TextureFormat::Depth24PlusStencil8,
     wgpu::TextureFormat::Depth32FloatStencil8,
 };
+
+constexpr std::array<wgpu::TextureFormat, 3> kTier1TestFormats8Bit = {
+    wgpu::TextureFormat::R8Snorm, wgpu::TextureFormat::RG8Snorm, wgpu::TextureFormat::RGBA8Snorm};
+
+#ifndef __EMSCRIPTEN__
+constexpr std::array<wgpu::TextureFormat, 6> kTier1TestFormats16Bit = {
+    wgpu::TextureFormat::R16Unorm,    wgpu::TextureFormat::R16Snorm,
+    wgpu::TextureFormat::RG16Unorm,   wgpu::TextureFormat::RG16Snorm,
+    wgpu::TextureFormat::RGBA16Unorm, wgpu::TextureFormat::RGBA16Snorm};
+
+constexpr std::array<wgpu::TextureFormat, 23> kTier1AdditionalStorageFormats = {
+    wgpu::TextureFormat::R16Unorm,     wgpu::TextureFormat::R16Snorm,
+    wgpu::TextureFormat::RG16Unorm,    wgpu::TextureFormat::RG16Snorm,
+    wgpu::TextureFormat::RGBA16Unorm,  wgpu::TextureFormat::RGBA16Snorm,
+    wgpu::TextureFormat::R8Unorm,      wgpu::TextureFormat::R8Snorm,
+    wgpu::TextureFormat::R8Uint,       wgpu::TextureFormat::R8Sint,
+    wgpu::TextureFormat::RG8Unorm,     wgpu::TextureFormat::RG8Snorm,
+    wgpu::TextureFormat::RG8Uint,      wgpu::TextureFormat::RG8Sint,
+    wgpu::TextureFormat::R16Uint,      wgpu::TextureFormat::R16Sint,
+    wgpu::TextureFormat::R16Float,     wgpu::TextureFormat::RG16Uint,
+    wgpu::TextureFormat::RG16Sint,     wgpu::TextureFormat::RG16Float,
+    wgpu::TextureFormat::RGB10A2Uint,  wgpu::TextureFormat::RGB10A2Unorm,
+    wgpu::TextureFormat::RG11B10Ufloat};
+
+constexpr std::array<wgpu::TextureFormat, 10> kTier1AdditionalRenderableFormats = {
+    wgpu::TextureFormat::R8Snorm,     wgpu::TextureFormat::RG8Snorm,
+    wgpu::TextureFormat::RGBA8Snorm,  wgpu::TextureFormat::R16Unorm,
+    wgpu::TextureFormat::R16Snorm,    wgpu::TextureFormat::RG16Unorm,
+    wgpu::TextureFormat::RG16Snorm,   wgpu::TextureFormat::RGBA16Unorm,
+    wgpu::TextureFormat::RGBA16Snorm, wgpu::TextureFormat::RG11B10Ufloat};
+#endif  // __EMSCRIPTEN__
 
 class SubsamplingFactor {
   public:
@@ -286,27 +322,33 @@ bool TextureFormatSupportsReadWriteStorageTexture(wgpu::TextureFormat format);
 bool IsBCTextureFormat(wgpu::TextureFormat textureFormat);
 bool IsETC2TextureFormat(wgpu::TextureFormat textureFormat);
 bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
-bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat);
-bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat);
 bool IsCompressedTextureFormat(wgpu::TextureFormat textureFormat);
 
 bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat);
 
-bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat);
 bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureFormat);
 
+bool IsSupportedContextFormat(wgpu::TextureFormat textureFormat);
+
 bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
-                                        wgpu::TextureFormat textureFormat);
+                                        wgpu::TextureFormat textureFormat,
+                                        bool isCompatibilityMode);
 bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
                                         wgpu::TextureFormat textureFormat);
 
+bool IsUnorm16TextureFormat(wgpu::TextureFormat textureFormat);
+bool IsSnorm16TextureFormat(wgpu::TextureFormat textureFormat);
+
+#ifndef __EMSCRIPTEN__
+bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat);
 uint32_t GetMultiPlaneTextureBitDepth(wgpu::TextureFormat textureFormat);
 uint32_t GetMultiPlaneTextureNumPlanes(wgpu::TextureFormat textureFormat);
 uint32_t GetMultiPlaneTextureBytesPerElement(wgpu::TextureFormat textureFormat, size_t plane);
 SubsamplingFactor GetMultiPlaneTextureSubsamplingFactor(wgpu::TextureFormat textureFormat,
                                                         size_t plane);
+#endif  // __EMSCRIPTEN__
 
 uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);

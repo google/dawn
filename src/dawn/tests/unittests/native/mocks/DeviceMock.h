@@ -47,17 +47,13 @@ class DeviceMock : public DeviceBase {
     // Exposes some protected functions for testing purposes.
     using DeviceBase::DestroyObjects;
     using DeviceBase::ForceEnableFeatureForTesting;
-    using DeviceBase::ForceSetToggleForTesting;
 
-    // TODO(lokokung): Use real DeviceBase constructor instead of mock specific one.
-    //       - Requires AdapterMock.
-    //       - Can probably remove GetPlatform overload.
-    //       - Allows removing ForceSetToggleForTesting calls.
-    DeviceMock();
+    // TODO(chromium:42240655): Implement AdapterMock and use it in the constructor of DeviceMock
+    DeviceMock(AdapterBase* adapter,
+               const UnpackedPtr<DeviceDescriptor>& descriptor,
+               const TogglesState& deviceToggles,
+               Ref<DeviceLostEvent>&& lostEvent);
     ~DeviceMock() override;
-    dawn::platform::Platform* GetPlatform() const override;
-
-    dawn::native::InstanceBase* GetInstance() const override;
 
     // Mock specific functionality.
     QueueMock* GetQueueMock();
@@ -68,13 +64,14 @@ class DeviceMock : public DeviceBase {
                 (override));
 
     MOCK_METHOD(MaybeError,
-                CopyFromStagingToBufferImpl,
+                CopyFromStagingToBuffer,
                 (BufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
                 (override));
-    MOCK_METHOD(MaybeError,
-                CopyFromStagingToTextureImpl,
-                (const BufferBase*, const TextureDataLayout&, const TextureCopy&, const Extent3D&),
-                (override));
+    MOCK_METHOD(
+        MaybeError,
+        CopyFromStagingToTextureImpl,
+        (const BufferBase*, const TexelCopyBufferLayout&, const TextureCopy&, const Extent3D&),
+        (override));
 
     MOCK_METHOD(uint32_t, GetOptimalBytesPerRowAlignment, (), (const, override));
     MOCK_METHOD(uint64_t, GetOptimalBufferToTextureCopyOffsetAlignment, (), (const, override));
@@ -121,8 +118,7 @@ class DeviceMock : public DeviceBase {
                 CreateShaderModuleImpl,
                 (const UnpackedPtr<ShaderModuleDescriptor>&,
                  const std::vector<tint::wgsl::Extension>&,
-                 ShaderModuleParseResult*,
-                 OwnedCompilationMessages*),
+                 ShaderModuleParseResult*),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<SwapChainBase>>,
                 CreateSwapChainImpl,
@@ -140,9 +136,6 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
-
-  private:
-    Ref<InstanceBase> mInstance;
 };
 
 }  // namespace dawn::native

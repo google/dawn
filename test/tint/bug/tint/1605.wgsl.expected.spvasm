@@ -1,116 +1,182 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 60
+; Generator: Google Tint Compiler; 1
+; Bound: 107
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %b_block "b_block"
                OpMemberName %b_block 0 "inner"
-               OpName %b "b"
+               OpName %b_block "b_block"
                OpName %func_3 "func_3"
-               OpName %tint_return_flag "tint_return_flag"
-               OpName %tint_return_value "tint_return_value"
+               OpName %return_value "return_value"
+               OpName %continue_execution "continue_execution"
+               OpName %tint_loop_idx "tint_loop_idx"
                OpName %i "i"
+               OpName %tint_low_inc "tint_low_inc"
+               OpName %tint_carry "tint_carry"
+               OpName %tint_loop_idx_0 "tint_loop_idx"
                OpName %j "j"
+               OpName %tint_low_inc_1 "tint_low_inc_1"
+               OpName %tint_carry_1 "tint_carry_1"
                OpName %main "main"
-               OpDecorate %b_block Block
                OpMemberDecorate %b_block 0 Offset 0
-               OpDecorate %b NonWritable
-               OpDecorate %b DescriptorSet 0
-               OpDecorate %b Binding 0
+               OpDecorate %b_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
     %b_block = OpTypeStruct %int
 %_ptr_Uniform_b_block = OpTypePointer Uniform %b_block
-          %b = OpVariable %_ptr_Uniform_b_block Uniform
+          %1 = OpVariable %_ptr_Uniform_b_block Uniform
        %bool = OpTypeBool
-          %5 = OpTypeFunction %bool
+          %7 = OpTypeFunction %bool
 %_ptr_Function_bool = OpTypePointer Function %bool
          %11 = OpConstantNull %bool
-         %13 = OpConstantNull %int
-%_ptr_Function_int = OpTypePointer Function %int
-       %uint = OpTypeInt 32 0
-     %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_int = OpTypePointer Uniform %int
-     %int_n1 = OpConstant %int -1
-      %int_1 = OpConstant %int 1
        %true = OpConstantTrue %bool
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+%uint_4294967295 = OpConstant %uint 4294967295
+         %27 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
+         %34 = OpConstantNull %v2uint
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+      %int_1 = OpConstant %int 1
+      %false = OpConstantFalse %bool
+     %int_n1 = OpConstant %int -1
        %void = OpTypeVoid
-         %55 = OpTypeFunction %void
-     %func_3 = OpFunction %bool None %5
+        %104 = OpTypeFunction %void
+     %func_3 = OpFunction %bool None %7
           %8 = OpLabel
-%tint_return_flag = OpVariable %_ptr_Function_bool Function %11
-%tint_return_value = OpVariable %_ptr_Function_bool Function %11
-          %i = OpVariable %_ptr_Function_int Function %13
-          %j = OpVariable %_ptr_Function_int Function %13
-               OpStore %i %13
-               OpBranch %16
-         %16 = OpLabel
-               OpLoopMerge %17 %18 None
-               OpBranch %19
-         %19 = OpLabel
-         %21 = OpLoad %int %i
-         %25 = OpAccessChain %_ptr_Uniform_int %b %uint_0
-         %26 = OpLoad %int %25
-         %27 = OpSLessThan %bool %21 %26
-         %20 = OpLogicalNot %bool %27
-               OpSelectionMerge %28 None
-               OpBranchConditional %20 %29 %28
-         %29 = OpLabel
+%return_value = OpVariable %_ptr_Function_bool Function %11
+%continue_execution = OpVariable %_ptr_Function_bool Function
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
+          %i = OpVariable %_ptr_Function_int Function
+%tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
+          %j = OpVariable %_ptr_Function_int Function
+               OpStore %continue_execution %true
+               OpBranch %14
+         %14 = OpLabel
+               OpStore %tint_loop_idx %27
+               OpStore %i %int_0
                OpBranch %17
-         %28 = OpLabel
-               OpStore %j %int_n1
-               OpBranch %32
-         %32 = OpLabel
-               OpLoopMerge %33 %34 None
-               OpBranch %35
-         %35 = OpLabel
-         %37 = OpLoad %int %j
-         %39 = OpIEqual %bool %37 %int_1
-         %36 = OpLogicalNot %bool %39
-               OpSelectionMerge %40 None
-               OpBranchConditional %36 %41 %40
-         %41 = OpLabel
-               OpBranch %33
-         %40 = OpLabel
-               OpStore %tint_return_flag %true
-               OpStore %tint_return_value %11
-               OpBranch %33
-         %34 = OpLabel
-         %43 = OpLoad %int %j
-         %44 = OpIAdd %int %43 %int_1
-               OpStore %j %44
-               OpBranch %32
-         %33 = OpLabel
-         %45 = OpLoad %bool %tint_return_flag
-               OpSelectionMerge %46 None
-               OpBranchConditional %45 %47 %46
-         %47 = OpLabel
-               OpBranch %17
+         %17 = OpLabel
+               OpLoopMerge %18 %16 None
+               OpBranch %15
+         %15 = OpLabel
+         %32 = OpLoad %v2uint %tint_loop_idx None
+         %33 = OpIEqual %v2bool %32 %34
+         %36 = OpAll %bool %33
+               OpSelectionMerge %37 None
+               OpBranchConditional %36 %38 %37
+         %38 = OpLabel
+               OpBranch %18
+         %37 = OpLabel
+         %39 = OpLoad %int %i None
+         %40 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
+         %43 = OpLoad %int %40 None
+         %44 = OpSLessThan %bool %39 %43
+               OpSelectionMerge %45 None
+               OpBranchConditional %44 %45 %46
          %46 = OpLabel
                OpBranch %18
-         %18 = OpLabel
-         %48 = OpLoad %int %i
-         %49 = OpIAdd %int %48 %int_1
-               OpStore %i %49
+         %45 = OpLabel
+               OpBranch %47
+         %47 = OpLabel
+               OpStore %tint_loop_idx_0 %27
+               OpStore %j %int_n1
+               OpBranch %50
+         %50 = OpLabel
+               OpLoopMerge %51 %49 None
+               OpBranch %48
+         %48 = OpLabel
+         %78 = OpLoad %v2uint %tint_loop_idx_0 None
+         %79 = OpIEqual %v2bool %78 %34
+         %80 = OpAll %bool %79
+               OpSelectionMerge %81 None
+               OpBranchConditional %80 %82 %81
+         %82 = OpLabel
+               OpBranch %51
+         %81 = OpLabel
+         %83 = OpLoad %int %j None
+         %84 = OpIEqual %bool %83 %int_1
+               OpSelectionMerge %85 None
+               OpBranchConditional %84 %85 %86
+         %86 = OpLabel
+               OpBranch %51
+         %85 = OpLabel
+               OpStore %continue_execution %false None
+               OpStore %return_value %false None
+               OpBranch %51
+         %49 = OpLabel
+         %87 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+         %88 = OpLoad %uint %87 None
+%tint_low_inc_1 = OpISub %uint %88 %uint_1
+         %90 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+               OpStore %90 %tint_low_inc_1 None
+         %91 = OpIEqual %bool %tint_low_inc_1 %uint_4294967295
+%tint_carry_1 = OpSelect %uint %91 %uint_1 %uint_0
+         %93 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+         %94 = OpLoad %uint %93 None
+         %95 = OpISub %uint %94 %tint_carry_1
+         %96 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+               OpStore %96 %95 None
+         %97 = OpLoad %int %j None
+         %98 = OpBitcast %uint %97
+         %99 = OpBitcast %uint %int_1
+        %100 = OpIAdd %uint %98 %99
+        %101 = OpBitcast %int %100
+               OpStore %j %101 None
+               OpBranch %50
+         %51 = OpLabel
+         %52 = OpLoad %bool %continue_execution None
+         %53 = OpLogicalNot %bool %52
+               OpSelectionMerge %54 None
+               OpBranchConditional %53 %55 %54
+         %55 = OpLabel
+               OpBranch %18
+         %54 = OpLabel
                OpBranch %16
-         %17 = OpLabel
-         %51 = OpLoad %bool %tint_return_flag
-         %50 = OpLogicalNot %bool %51
-               OpSelectionMerge %52 None
-               OpBranchConditional %50 %53 %52
-         %53 = OpLabel
-               OpStore %tint_return_flag %true
-               OpStore %tint_return_value %11
-               OpBranch %52
-         %52 = OpLabel
-         %54 = OpLoad %bool %tint_return_value
-               OpReturnValue %54
+         %16 = OpLabel
+         %56 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+         %58 = OpLoad %uint %56 None
+%tint_low_inc = OpISub %uint %58 %uint_1
+         %61 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %61 %tint_low_inc None
+         %62 = OpIEqual %bool %tint_low_inc %uint_4294967295
+ %tint_carry = OpSelect %uint %62 %uint_1 %uint_0
+         %64 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %65 = OpLoad %uint %64 None
+         %66 = OpISub %uint %65 %tint_carry
+         %67 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %67 %66 None
+         %68 = OpLoad %int %i None
+         %69 = OpBitcast %uint %68
+         %70 = OpBitcast %uint %int_1
+         %72 = OpIAdd %uint %69 %70
+         %73 = OpBitcast %int %72
+               OpStore %i %73 None
+               OpBranch %17
+         %18 = OpLabel
+         %19 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %20 None
+               OpBranchConditional %19 %21 %20
+         %21 = OpLabel
+               OpStore %return_value %false None
+               OpBranch %20
+         %20 = OpLabel
+         %22 = OpLoad %bool %return_value None
+               OpReturnValue %22
                OpFunctionEnd
-       %main = OpFunction %void None %55
-         %58 = OpLabel
-         %59 = OpFunctionCall %bool %func_3
+       %main = OpFunction %void None %104
+        %105 = OpLabel
+        %106 = OpFunctionCall %bool %func_3
                OpReturn
                OpFunctionEnd

@@ -26,12 +26,18 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
 
+#include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
-#include "dawn/webgpu_cpp.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native {
+
+// Matcher for C++ types to verify that their internal C-handles are identical.
+MATCHER_P(CHandleIs, cType, "") {
+    return arg.Get() == cType;
+}
 
 class DawnMockTest : public ::testing::Test {
   public:
@@ -41,8 +47,16 @@ class DawnMockTest : public ::testing::Test {
     void ProcessEvents();
 
   protected:
+    void SetUp() override;
     void DropDevice();
 
+    // Device mock callbacks used throughout the tests.
+    testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
+        mDeviceErrorCallback;
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback<void>*>>
+        mDeviceLostCallback;
+
+    TogglesState mDeviceToggles;
     raw_ptr<::testing::NiceMock<DeviceMock>> mDeviceMock;
     wgpu::Device device;
 };

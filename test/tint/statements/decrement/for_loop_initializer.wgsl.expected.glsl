@@ -1,17 +1,31 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
-layout(binding = 0, std430) buffer i_block_ssbo {
+layout(binding = 0, std430)
+buffer i_block_1_ssbo {
   uint inner;
-} i;
-
-void tint_symbol() {
+} v;
+void v_1() {
   {
-    for(i.inner = (i.inner - 1u); (i.inner < 10u); ) {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    v.inner = (v.inner - 1u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if ((v.inner < 10u)) {
+      } else {
+        break;
+      }
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
     }
   }
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

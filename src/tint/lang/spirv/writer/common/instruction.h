@@ -52,13 +52,13 @@ class Instruction {
     ~Instruction();
 
     /// @returns the instructions op
-    spv::Op opcode() const { return op_; }
+    spv::Op Opcode() const { return op_; }
 
     /// @returns the instructions operands
-    const OperandList& operands() const { return operands_; }
+    const OperandList& Operands() const { return operands_; }
 
     /// @returns the number of uint32_t's needed to hold the instruction
-    uint32_t word_length() const;
+    uint32_t WordLength() const;
 
   private:
     spv::Op op_ = spv::Op::OpNop;

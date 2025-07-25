@@ -27,10 +27,10 @@
 
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 
-#include <utility>
-
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -44,7 +44,7 @@ TEST_F(IR_ValueToLetTest, Empty) {
     auto* expect = R"(
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -64,7 +64,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Blah) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -93,10 +93,37 @@ TEST_F(IR_ValueToLetTest, NoModify_Unsequenced) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
+
+TEST_F(IR_ValueToLetTest, NoModify_Bitcast) {
+    auto* fn = b.Function("F", ty.u32());
+    b.Append(fn->Block(), [&] {
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Bitcast<u32>(x);
+        b.Return(fn, y);
+    });
+
+    auto* src = R"(
+%F = func():u32 {
+  $B1: {
+    %x:i32 = let 1i
+    %3:u32 = bitcast %x
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = src;
+
+    Run(ValueToLet, ValueToLetConfig{});
+
+    EXPECT_EQ(str(), expect);
+}
+
 TEST_F(IR_ValueToLetTest, NoModify_SequencedValueUsedWithNonSequenced) {
     auto* i = b.Var<private_, i32>("i");
     b.ir.root_block->Append(i);
@@ -120,7 +147,7 @@ TEST_F(IR_ValueToLetTest, NoModify_SequencedValueUsedWithNonSequenced) {
 
     auto* src = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -144,7 +171,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -172,7 +199,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Inlinable_NestedCalls) {
 
     auto* src = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -197,7 +224,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -225,7 +252,7 @@ TEST_F(IR_ValueToLetTest, NoModify_LetUsedTwice) {
 
     auto* src = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -250,7 +277,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -278,7 +305,7 @@ TEST_F(IR_ValueToLetTest, NoModify_VarUsedTwice) {
 }
 %F = func():i32 {
   $B2: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %6:i32 = call %g, %v
     %x:i32 = let %6
     %8:i32 = call %g, %v
@@ -292,7 +319,7 @@ TEST_F(IR_ValueToLetTest, NoModify_VarUsedTwice) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -308,7 +335,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
     auto* src = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %l:i32 = load %v
     %4:i32 = add %l, %l
     ret %4
@@ -320,7 +347,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
     auto* expect = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %3:i32 = load %v
     %l:i32 = let %3
     %5:i32 = add %l, %l
@@ -329,7 +356,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -346,7 +373,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
     auto* src = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %l:i32 = load %v
     store %v, 1i
     ret %l
@@ -358,7 +385,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
     auto* expect = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %3:i32 = load %v
     %l:i32 = let %3
     store %v, 1i
@@ -367,7 +394,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -392,7 +419,7 @@ TEST_F(IR_ValueToLetTest, Call_ThenLoad_ThenUseCallBeforeLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var
+  %v:ptr<private, i32, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -414,7 +441,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var
+  %v:ptr<private, i32, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -434,7 +461,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -459,7 +486,7 @@ TEST_F(IR_ValueToLetTest, Call_ThenLoad_ThenUseLoadBeforeCall) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var
+  %v:ptr<private, i32, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -481,7 +508,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<private, i32, read_write> = var
+  %v:ptr<private, i32, read_write> = var undef
 }
 
 %foo = func():i32 {
@@ -501,7 +528,199 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
+
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, Call_WithUseThatIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("add", b.Add<i32>(c, 1_i));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %add:i32 = add %call, 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:i32 = add %call, 1i
+    %add:i32 = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet, ValueToLetConfig{});
+
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, ConstructIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("construct", b.Construct<vec4<i32>>(c));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %construct:vec4<i32> = construct %call
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:vec4<i32> = construct %call
+    %construct:vec4<i32> = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet, ValueToLetConfig{});
+
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, ConvertIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("convert", b.Convert<u32>(c));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %convert:u32 = convert %call
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:u32 = convert %call
+    %convert:u32 = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -529,7 +748,7 @@ TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
 
     auto* src = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -554,7 +773,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -577,11 +796,11 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -611,7 +830,7 @@ TEST_F(IR_ValueToLetTest, SequencedUsedInDifferentBlock) {
 
     auto* src = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -639,7 +858,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %i:ptr<private, i32, read_write> = var
+  %i:ptr<private, i32, read_write> = var undef
 }
 
 %rmw = func(%p:i32):i32 {
@@ -665,11 +884,11 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -687,7 +906,7 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
     auto* src = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %3:i32 = load %v
     %4:i32 = add %3, 1i
     store %v, 2i
@@ -700,7 +919,7 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
     auto* expect = R"(
 %F = func():i32 {
   $B1: {
-    %v:ptr<function, i32, read_write> = var
+    %v:ptr<function, i32, read_write> = var undef
     %3:i32 = load %v
     %4:i32 = add %3, 1i
     %5:i32 = let %4
@@ -710,11 +929,11 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -735,7 +954,7 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
 %F = func():void {
   $B1: {
     %i:i32 = max 1i, 2i
-    %v:ptr<function, i32, read_write> = var, %i
+    %v:ptr<function, i32, read_write> = var %i
     %x:i32 = max 3i, 4i
     %y:i32 = load %v
     %z:i32 = add %y, %x
@@ -750,9 +969,8 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
 %F = func():void {
   $B1: {
     %i:i32 = max 1i, 2i
-    %v:ptr<function, i32, read_write> = var, %i
-    %4:i32 = max 3i, 4i
-    %x:i32 = let %4
+    %v:ptr<function, i32, read_write> = var %i
+    %x:i32 = max 3i, 4i
     %y:i32 = load %v
     %z:i32 = add %y, %x
     store %v, %z
@@ -761,13 +979,242 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
 }
 )";
 
-    Run(ValueToLet);
-
+    Run(ValueToLet, ValueToLetConfig{});
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
-
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
     EXPECT_EQ(str(), expect);
 }
+
+TEST_F(IR_ValueToLetTest, TextureInline) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.depth_texture(core::type::TextureDimension::k2d)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureGather, t, s, coords));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var undef @binding_point(0, 0)
+  %2:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler = load %2
+    %7:vec4<f32> = textureGather %5, %6, %4
+    %x:vec4<f32> = let %7
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet, ValueToLetConfig{});
+    EXPECT_EQ(str(), expect);
+
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, AccessToLetWithFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, c);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var undef
+    %5:i32 = call %f
+    %6:ptr<function, i32, read_write> = access %arr, %5
+    %p:ptr<function, i32, read_write> = let %6
+    %8:i32 = call %g
+    %y:i32 = let %8
+    %10:i32 = load %p
+    %x:i32 = let %10
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var undef
+    %5:i32 = call %f
+    %6:i32 = let %5
+    %7:ptr<function, i32, read_write> = access %arr, %6
+    %8:i32 = call %g
+    %y:i32 = let %8
+    %10:i32 = load %7
+    %x:i32 = let %10
+    ret
+  }
+}
+)";
+
+    ValueToLetConfig cfg{};
+    cfg.replace_pointer_lets = true;
+    Run(ValueToLet, cfg);
+    EXPECT_EQ(str(), expect);
+
+    Run(ValueToLet, cfg);  // running a second time should be no-op
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, AccessToLetWithNestedFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* d = b.Add(ty.i32(), c, 1_i);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, d);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var undef
+    %5:i32 = call %f
+    %6:i32 = add %5, 1i
+    %7:ptr<function, i32, read_write> = access %arr, %6
+    %p:ptr<function, i32, read_write> = let %7
+    %9:i32 = call %g
+    %y:i32 = let %9
+    %11:i32 = load %p
+    %x:i32 = let %11
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var undef
+    %5:i32 = call %f
+    %6:i32 = add %5, 1i
+    %7:i32 = let %6
+    %8:ptr<function, i32, read_write> = access %arr, %7
+    %9:i32 = call %g
+    %y:i32 = let %9
+    %11:i32 = load %8
+    %x:i32 = let %11
+    ret
+  }
+}
+)";
+
+    ValueToLetConfig cfg{};
+    cfg.replace_pointer_lets = true;
+    Run(ValueToLet, cfg);
+    EXPECT_EQ(str(), expect);
+
+    Run(ValueToLet, cfg);  // running a second time should be no-op
+    EXPECT_EQ(str(), expect);
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

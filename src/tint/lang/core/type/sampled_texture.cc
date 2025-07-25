@@ -38,7 +38,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::SampledTexture);
 
 namespace tint::core::type {
 
-SampledTexture::SampledTexture(TextureDimension dim, const Type* type)
+SampledTexture::SampledTexture(TextureDimension dim, const type::Type* type)
     : Base(Hash(TypeCode::Of<SampledTexture>().bits, dim, type), dim), type_(type) {
     TINT_ASSERT(type_);
 }
@@ -47,20 +47,20 @@ SampledTexture::~SampledTexture() = default;
 
 bool SampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<SampledTexture>()) {
-        return o->dim() == dim() && o->type_ == type_;
+        return o->Dim() == Dim() && o->type_ == type_;
     }
     return false;
 }
 
 std::string SampledTexture::FriendlyName() const {
     StringStream out;
-    out << "texture_" << dim() << "<" << type_->FriendlyName() << ">";
+    out << "texture_" << Dim() << "<" << type_->FriendlyName() << ">";
     return out.str();
 }
 
 SampledTexture* SampledTexture::Clone(CloneContext& ctx) const {
     auto* ty = type_->Clone(ctx);
-    return ctx.dst.mgr->Get<SampledTexture>(dim(), ty);
+    return ctx.dst.mgr->Get<SampledTexture>(Dim(), ty);
 }
 
 }  // namespace tint::core::type

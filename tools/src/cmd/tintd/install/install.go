@@ -34,7 +34,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -62,8 +61,8 @@ func (Cmd) Desc() string {
 	return `install installs the tintd vscode extension for local development`
 }
 
-func (c *Cmd) RegisterFlags(ctx context.Context, _ any) ([]string, error) {
-	dawnRoot := fileutils.DawnRoot()
+func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, error) {
+	dawnRoot := fileutils.DawnRoot(cfg.OsWrapper)
 	npmPath, _ := exec.LookPath("npm")
 	flag.BoolVar(&c.flags.symlink, "symlink", false, "create a symlink from the vscode extension directory to the build directory")
 	flag.StringVar(&c.flags.buildDir, "build", filepath.Join(dawnRoot, "out", "active"), "the output build directory")
@@ -72,7 +71,9 @@ func (c *Cmd) RegisterFlags(ctx context.Context, _ any) ([]string, error) {
 	return nil, nil
 }
 
-func (c Cmd) Run(ctx context.Context, _ any) error {
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
+func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 	pkgDir := c.findPackage()
 	if pkgDir == "" {
 		return fmt.Errorf("could not find extension package directory at '%v'", c.flags.buildDir)
@@ -95,7 +96,7 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 		Version string
 	}{}
 	packageJSONPath := filepath.Join(pkgDir, "package.json")
-	packageJSON, err := os.ReadFile(packageJSONPath)
+	packageJSON, err := cfg.OsWrapper.ReadFile(packageJSONPath)
 	if err != nil {
 		return fmt.Errorf("could not open '%v'", packageJSONPath)
 	}
@@ -103,7 +104,7 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 		return fmt.Errorf("could not parse '%v': %v", packageJSONPath, err)
 	}
 
-	home, err := os.UserHomeDir()
+	home, err := cfg.OsWrapper.UserHomeDir()
 	if err != nil {
 		return fmt.Errorf("failed to obtain home directory: %w", err)
 	}
@@ -113,11 +114,11 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 	}
 
 	vscodeTintdDir := filepath.Join(vscodeBaseExtsDir, fmt.Sprintf("google.%v-%v", pkg.Name, pkg.Version))
-	os.RemoveAll(vscodeTintdDir)
+	cfg.OsWrapper.RemoveAll(vscodeTintdDir)
 
 	if c.flags.symlink {
 		// Symlink the vscode extensions directory to the build directory
-		if err := os.Symlink(pkgDir, vscodeTintdDir); err != nil {
+		if err := cfg.OsWrapper.Symlink(pkgDir, vscodeTintdDir); err != nil {
 			return fmt.Errorf("failed to create symlink '%v' <- '%v': %w", pkgDir, vscodeTintdDir, err)
 		}
 	} else {
@@ -130,6 +131,7 @@ func (c Cmd) Run(ctx context.Context, _ any) error {
 	return nil
 }
 
+// TODO(crbug.com/344014313): Add unittest coverage.
 // findPackage looks for and returns the tintd package directory. Returns an empty string if not found.
 func (c Cmd) findPackage() string {
 	searchPaths := []string{

@@ -34,11 +34,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Store);
 
 namespace tint::core::ir {
 
-Store::Store() {
+Store::Store(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-Store::Store(Value* to, Value* from) {
+Store::Store(Id id, Value* to, Value* from) : Base(id) {
     flags_.Add(Flag::kSequenced);
 
     AddOperand(Store::kToOperandOffset, to);
@@ -50,7 +50,7 @@ Store::~Store() = default;
 Store* Store::Clone(CloneContext& ctx) {
     auto* to = ctx.Remap(To());
     auto* from = ctx.Remap(From());
-    return ctx.ir.allocators.instructions.Create<Store>(to, from);
+    return ctx.ir.CreateInstruction<Store>(to, from);
 }
 
 }  // namespace tint::core::ir

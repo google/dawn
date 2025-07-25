@@ -1,45 +1,48 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 25
+; Generator: Google Tint Compiler; 1
+; Bound: 27
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %tint_mod "tint_mod"
-               OpName %lhs "lhs"
-               OpName %rhs "rhs"
                OpName %f "f"
                OpName %a "a"
                OpName %b "b"
-       %uint = OpTypeInt 32 0
-          %1 = OpTypeFunction %uint %uint %uint
-          %8 = OpConstantNull %uint
-       %bool = OpTypeBool
-     %uint_1 = OpConstant %uint 1
+               OpName %r "r"
+               OpName %tint_mod_u32 "tint_mod_u32"
+               OpName %lhs "lhs"
+               OpName %rhs "rhs"
        %void = OpTypeVoid
-         %13 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
 %_ptr_Function_uint = OpTypePointer Function %uint
-   %tint_mod = OpFunction %uint None %1
+     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
+         %19 = OpTypeFunction %uint %uint %uint
+       %bool = OpTypeBool
+          %f = OpFunction %void None %3
+          %4 = OpLabel
+          %a = OpVariable %_ptr_Function_uint Function
+          %b = OpVariable %_ptr_Function_uint Function
+               OpStore %a %uint_1
+               OpStore %b %uint_0
+         %11 = OpLoad %uint %a None
+         %12 = OpLoad %uint %b None
+         %13 = OpLoad %uint %b None
+         %14 = OpIAdd %uint %12 %13
+          %r = OpFunctionCall %uint %tint_mod_u32 %11 %14
+               OpReturn
+               OpFunctionEnd
+%tint_mod_u32 = OpFunction %uint None %19
         %lhs = OpFunctionParameter %uint
         %rhs = OpFunctionParameter %uint
-          %6 = OpLabel
-          %9 = OpIEqual %bool %rhs %8
-          %7 = OpSelect %uint %9 %uint_1 %rhs
-         %12 = OpUMod %uint %lhs %7
-               OpReturnValue %12
-               OpFunctionEnd
-          %f = OpFunction %void None %13
-         %16 = OpLabel
-          %a = OpVariable %_ptr_Function_uint Function %8
-          %b = OpVariable %_ptr_Function_uint Function %8
-               OpStore %a %uint_1
-               OpStore %b %8
-         %21 = OpLoad %uint %a
-         %22 = OpLoad %uint %b
-         %23 = OpLoad %uint %b
-         %24 = OpIAdd %uint %22 %23
-         %20 = OpFunctionCall %uint %tint_mod %21 %24
-               OpReturn
+         %20 = OpLabel
+         %21 = OpIEqual %bool %rhs %uint_0
+         %23 = OpSelect %uint %21 %uint_1 %rhs
+         %24 = OpUDiv %uint %lhs %23
+         %25 = OpIMul %uint %24 %23
+         %26 = OpISub %uint %lhs %25
+               OpReturnValue %26
                OpFunctionEnd

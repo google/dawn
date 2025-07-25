@@ -33,13 +33,14 @@
 #include "src/tint/lang/spirv/reader/ast_lower/decompose_strided_array.h"
 #include "src/tint/lang/spirv/reader/ast_lower/decompose_strided_matrix.h"
 #include "src/tint/lang/spirv/reader/ast_lower/fold_trivial_lets.h"
+#include "src/tint/lang/spirv/reader/ast_lower/manager.h"
 #include "src/tint/lang/spirv/reader/ast_lower/pass_workgroup_id_as_argument.h"
+#include "src/tint/lang/spirv/reader/ast_lower/remove_unreachable_statements.h"
+#include "src/tint/lang/spirv/reader/ast_lower/simplify_pointers.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transpose_row_major.h"
+#include "src/tint/lang/spirv/reader/ast_lower/unshadow.h"
 #include "src/tint/lang/spirv/reader/ast_parser/ast_parser.h"
-#include "src/tint/lang/wgsl/ast/transform/manager.h"
-#include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
-#include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
-#include "src/tint/lang/wgsl/ast/transform/unshadow.h"
-#include "src/tint/lang/wgsl/extension.h"
+#include "src/tint/lang/wgsl/enums.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
@@ -98,6 +99,10 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     allowed_features.extensions.insert(wgsl::Extension::kChromiumDisableUniformityAnalysis);
     builder.Enable(wgsl::Extension::kChromiumDisableUniformityAnalysis);
 
+    // Allow below WGSL extensions unconditionally but not enable them by default.
+    allowed_features.extensions.insert(wgsl::Extension::kDualSourceBlending);
+    allowed_features.extensions.insert(wgsl::Extension::kClipDistances);
+
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.
     Program program_with_disjoint_ast(std::move(builder));
@@ -115,9 +120,10 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<FoldTrivialLets>();
     manager.Add<PassWorkgroupIdAsArgument>();
+    manager.Add<TransposeRowMajor>();
     manager.Add<DecomposeStridedMatrix>();
     manager.Add<DecomposeStridedArray>();
-    manager.Add<ast::transform::RemoveUnreachableStatements>();
+    manager.Add<RemoveUnreachableStatements>();
     manager.Add<Atomics>();
     manager.Add<ReenableUniformityAnalysis>();
     return manager.Run(program, {}, outputs);

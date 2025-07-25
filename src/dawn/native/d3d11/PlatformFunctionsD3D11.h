@@ -38,7 +38,7 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     PlatformFunctions();
     ~PlatformFunctions() override;
 
-    MaybeError LoadFunctions();
+    MaybeError Initialize();
 
     // Functions from D3D11.dll
     PFN_D3D11_CREATE_DEVICE d3d11CreateDevice = nullptr;

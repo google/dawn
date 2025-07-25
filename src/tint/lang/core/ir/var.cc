@@ -37,9 +37,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Var);
 
 namespace tint::core::ir {
 
-Var::Var() = default;
+Var::Var(Id id) : Base(id) {}
 
-Var::Var(InstructionResult* result) {
+Var::Var(Id id, InstructionResult* result) : Base(id) {
     if (result && result->Type()) {
         TINT_ASSERT(result->Type()->Is<core::type::MemoryView>());
     }
@@ -52,10 +52,9 @@ Var::Var(InstructionResult* result) {
 Var::~Var() = default;
 
 Var* Var::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
-    auto* new_var = ctx.ir.allocators.instructions.Create<Var>(new_result);
+    auto* new_result = ctx.Clone(Result());
+    auto* new_var = ctx.ir.CreateInstruction<Var>(new_result);
 
-    new_var->binding_point_ = binding_point_;
     new_var->attributes_ = attributes_;
 
     if (auto* init = Initializer()) {
@@ -74,10 +73,11 @@ void Var::SetInitializer(Value* initializer) {
 }
 
 void Var::DestroyIfOnlyAssigned() {
-    auto* result = Result(0);
-    if (result->Usages().All([](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
-        while (!result->Usages().IsEmpty()) {
-            auto& usage = *result->Usages().begin();
+    auto* result = Result();
+    if (result->UsagesUnsorted().All(
+            [](const Usage& u) { return u.instruction->Is<ir::Store>(); })) {
+        while (result->IsUsed()) {
+            auto& usage = *result->UsagesUnsorted().begin();
             usage->instruction->Destroy();
         }
         Destroy();

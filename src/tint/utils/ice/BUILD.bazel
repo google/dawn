@@ -39,14 +39,16 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "ice",
   srcs = [
+    "debugger.cc",
     "ice.cc",
   ],
   hdrs = [
+    "debugger.h",
     "ice.h",
   ],
   deps = [
-    "//src/tint/utils/debug",
     "//src/tint/utils/macros",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -61,6 +63,7 @@ cc_library(
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "@gtest",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

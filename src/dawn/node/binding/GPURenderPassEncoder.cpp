@@ -35,7 +35,6 @@
 #include "src/dawn/node/binding/GPUQuerySet.h"
 #include "src/dawn/node/binding/GPURenderBundle.h"
 #include "src/dawn/node/binding/GPURenderPipeline.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -44,7 +43,7 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPURenderPassEncoder::GPURenderPassEncoder(const wgpu::RenderPassDescriptor& desc,
                                            wgpu::RenderPassEncoder enc)
-    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
+    : enc_(std::move(enc)), label_(CopyLabel(desc.label)) {}
 
 void GPURenderPassEncoder::setViewport(Napi::Env,
                                        float x,
@@ -258,12 +257,60 @@ void GPURenderPassEncoder::drawIndexedIndirect(
     enc_.DrawIndexedIndirect(b, o);
 }
 
+void GPURenderPassEncoder::multiDrawIndirect(
+    Napi::Env env,
+    interop::Interface<interop::GPUBuffer> indirectBuffer,
+    interop::GPUSize64 indirectOffset,
+    interop::GPUSize32 maxDrawCount,
+    std::optional<interop::Interface<interop::GPUBuffer>> countBuffer,
+    interop::GPUSize64 countBufferOffset) {
+    Converter conv(env);
+
+    wgpu::Buffer ib{};
+    wgpu::Buffer cb{};
+    uint64_t io = 0;
+    uint64_t co = 0;
+
+    if (!conv(ib, indirectBuffer) ||  //
+        !conv(io, indirectOffset) ||  //
+        !conv(cb, countBuffer) ||     //
+        !conv(co, countBufferOffset)) {
+        return;
+    }
+
+    enc_.MultiDrawIndirect(ib, io, maxDrawCount, cb, co);
+}
+
+void GPURenderPassEncoder::multiDrawIndexedIndirect(
+    Napi::Env env,
+    interop::Interface<interop::GPUBuffer> indirectBuffer,
+    interop::GPUSize64 indirectOffset,
+    interop::GPUSize32 maxDrawCount,
+    std::optional<interop::Interface<interop::GPUBuffer>> drawCountBuffer,
+    interop::GPUSize64 drawCountBufferOffset) {
+    Converter conv(env);
+
+    wgpu::Buffer ib{};
+    wgpu::Buffer cb{};
+    uint64_t io = 0;
+    uint64_t co = 0;
+
+    if (!conv(ib, indirectBuffer) ||   //
+        !conv(io, indirectOffset) ||   //
+        !conv(cb, drawCountBuffer) ||  //
+        !conv(co, drawCountBufferOffset)) {
+        return;
+    }
+
+    enc_.MultiDrawIndexedIndirect(ib, io, maxDrawCount, cb, co);
+}
+
 std::string GPURenderPassEncoder::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPURenderPassEncoder::setLabel(Napi::Env, std::string value) {
-    enc_.SetLabel(value.c_str());
+    enc_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

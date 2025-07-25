@@ -29,9 +29,9 @@
 
 #include <utility>
 
+#include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUBindGroupLayout.h"
 #include "src/dawn/node/binding/GPUBuffer.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -40,7 +40,7 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPUComputePipeline::GPUComputePipeline(const wgpu::ComputePipelineDescriptor& desc,
                                        wgpu::ComputePipeline pipeline)
-    : pipeline_(std::move(pipeline)), label_(desc.label ? desc.label : "") {}
+    : pipeline_(std::move(pipeline)), label_(CopyLabel(desc.label)) {}
 
 GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline, std::string label)
     : pipeline_(std::move(pipeline)), label_(label) {}
@@ -58,7 +58,7 @@ std::string GPUComputePipeline::getLabel(Napi::Env) {
 }
 
 void GPUComputePipeline::setLabel(Napi::Env, std::string value) {
-    pipeline_.SetLabel(value.c_str());
+    pipeline_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

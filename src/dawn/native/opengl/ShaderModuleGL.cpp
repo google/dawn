@@ -28,24 +28,60 @@
 #include "dawn/native/opengl/ShaderModuleGL.h"
 
 #include <sstream>
+#include <unordered_map>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/Enumerator.h"
+#include "dawn/common/MatchVariant.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/opengl/BindGroupLayoutGL.h"
-#include "dawn/native/opengl/BindingPoint.h"
 #include "dawn/native/opengl/DeviceGL.h"
+#include "dawn/native/opengl/PipelineGL.h"
 #include "dawn/native/opengl/PipelineLayoutGL.h"
+#include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "tint/api/common/binding_point.h"
 
-#include "src/tint/api/common/binding_point.h"
-
-namespace dawn::native {
+namespace dawn::native::opengl {
 namespace {
+using InterstageLocationAndName = std::pair<uint32_t, std::string>;
+using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
+
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
+    X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
+    X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
+    X(std::string, entryPointName)                                                   \
+    X(SingleShaderStage, stage)                                                      \
+    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
+    X(LimitsForCompilationRequest, limits)                                           \
+    X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
+    X(bool, disableSymbolRenaming)                                                   \
+    X(std::vector<InterstageLocationAndName>, interstageVariables)                   \
+    X(tint::glsl::writer::Options, tintOptions)                                      \
+    X(UnsafeUnserializedValue<dawn::platform::Platform*>, platform)
+DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
+#undef GLSL_COMPILATION_REQUEST_MEMBERS
+
+#define GLSL_COMPILATION_MEMBERS(X) X(std::string, glsl)
+DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS) {
+    static ResultOrError<GLSLCompilation> FromValidatedBlob(Blob blob);
+};
+#undef GLSL_COMPILATION_MEMBERS
+
+// Separated from the class definition above to fix a clang-format over-indentation.
+// static
+ResultOrError<GLSLCompilation> GLSLCompilation::FromValidatedBlob(Blob blob) {
+    GLSLCompilation result;
+    DAWN_TRY_ASSIGN(result, FromBlob(std::move(blob)));
+    DAWN_INVALID_IF(result.glsl.empty(), "Cached GLSLCompilation result has no GLSL");
+    return result;
+}
 
 GLenum GLShaderType(SingleShaderStage stage) {
     switch (stage) {
@@ -61,9 +97,9 @@ GLenum GLShaderType(SingleShaderStage stage) {
 
 tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::Standard standard) {
     switch (standard) {
-        case opengl::OpenGLVersion::Standard::Desktop:
+        case OpenGLVersion::Standard::Desktop:
             return tint::glsl::writer::Version::Standard::kDesktop;
-        case opengl::OpenGLVersion::Standard::ES:
+        case OpenGLVersion::Standard::ES:
             return tint::glsl::writer::Version::Standard::kES;
     }
     DAWN_UNREACHABLE();
@@ -71,176 +107,179 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
 
 using BindingMap = absl::flat_hash_map<tint::BindingPoint, tint::BindingPoint>;
 
-opengl::CombinedSampler* AppendCombinedSampler(opengl::CombinedSamplerInfo* info,
-                                               tint::BindingPoint texture,
-                                               tint::BindingPoint sampler,
-                                               tint::BindingPoint placeholderBindingPoint) {
-    info->emplace_back();
-    opengl::CombinedSampler* combinedSampler = &info->back();
-    combinedSampler->usePlaceholderSampler = sampler == placeholderBindingPoint;
-    combinedSampler->samplerLocation.group = BindGroupIndex(sampler.group);
-    combinedSampler->samplerLocation.binding = BindingNumber(sampler.binding);
-    combinedSampler->textureLocation.group = BindGroupIndex(texture.group);
-    combinedSampler->textureLocation.binding = BindingNumber(texture.binding);
-    return combinedSampler;
+// Returns information about the texture/sampler pairs used by the entry point. This is necessary
+// because GL uses combined texture/sampler bindings while WGSL allows mixing and matching textures
+// and samplers in the shader. GL also uses a placeholder sampler to use with textures when they
+// aren't combined with a sampler in the WGSL.
+//
+// Another subtlety is that Dawn uses pre-remapping BindingPoints when referring to bindings while
+// the Tint GLSL writer uses post-remapping BindingPoints.
+void GenerateCombinedSamplerInfo(
+    const EntryPointMetadata& metadata,
+    const tint::glsl::writer::Bindings& bindings,
+    const BindingMap& externalTextureExpansionMap,
+    std::vector<CombinedSampler>* combinedSamplers,
+    tint::glsl::writer::CombinedTextureSamplerInfo* samplerTextureToName) {
+    // Helper to avoid duplicated logic for when a CombinedSampler is determined.
+    auto AddCombinedSampler =
+        [&](tint::BindingPoint textureWGSL, tint::BindingPoint textureRemapped,
+            std::optional<tint::BindingPoint> samplerWGSL, BindingIndex textureArraySize,
+            bool isPlane1 = false) {
+            // Dawn needs pre-remapping WGSL bind points.
+            CombinedSampler combinedSampler = {{
+                .samplerLocation = std::nullopt,
+                .textureLocation = {{
+                    .group = BindGroupIndex(textureWGSL.group),
+                    .binding = BindingNumber(textureWGSL.binding),
+                    .arraySize = textureArraySize,
+                }},
+            }};
+            if (samplerWGSL.has_value()) {
+                combinedSampler.samplerLocation = {{{
+                    .group = BindGroupIndex(samplerWGSL->group),
+                    .binding = BindingNumber(samplerWGSL->binding),
+                }}};
+            }
+            combinedSamplers->push_back(combinedSampler);
+
+            // Tint uses post-remapping bind points.
+            tint::BindingPoint samplerRemapped = bindings.placeholder_sampler_bind_point;
+            if (samplerWGSL.has_value()) {
+                samplerRemapped = {.group = 0,
+                                   .binding = bindings.sampler.at(samplerWGSL.value()).binding};
+            }
+
+            samplerTextureToName->emplace(
+                tint::glsl::writer::binding::CombinedTextureSamplerPair{textureRemapped,
+                                                                        samplerRemapped, isPlane1},
+                combinedSampler.GetName());
+        };
+
+    for (const auto& use : metadata.samplerAndNonSamplerTexturePairs) {
+        // Replace uses of the placeholder sampler with its actual binding point.
+        std::optional<tint::BindingPoint> sampler = std::nullopt;
+        if (use.sampler != EntryPointMetadata::nonSamplerBindingPoint) {
+            sampler = ToTint(use.sampler);
+        }
+
+        // Tint reflection returns information about uses of both regular textures and sampled
+        // textures so we need to differentiate both cases here.
+
+        // The easy case is when a regular texture is being handled.
+        if (!externalTextureExpansionMap.contains(ToTint(use.texture))) {
+            tint::BindingPoint textureWGSL = ToTint(use.texture);
+            tint::BindingPoint textureRemapped = {0, bindings.texture.at(textureWGSL).binding};
+            BindingIndex arraySizeInShader = metadata.bindings.at(BindGroupIndex(textureWGSL.group))
+                                                 .at(BindingNumber(textureWGSL.binding))
+                                                 .arraySize;
+            AddCombinedSampler(textureWGSL, textureRemapped, sampler, arraySizeInShader);
+            continue;
+        }
+
+        // Add plane 0 of the external texture (this happen to be the same code as for regular
+        // textures because plane0 uses the original WGSL bind point).
+        tint::BindingPoint plane0WGSL = ToTint(use.texture);
+        tint::BindingPoint plane0Remapped = {
+            0, bindings.external_texture.at(plane0WGSL).plane0.binding};
+        AddCombinedSampler(plane0WGSL, plane0Remapped, sampler, BindingIndex(1));
+
+        // Plane 1 needs its pre-remapping bind point queried from the expansion map.
+        tint::BindingPoint plane1WGSL = externalTextureExpansionMap.at(plane0WGSL);
+        tint::BindingPoint plane1Remapped = {
+            0, bindings.external_texture.at(plane0WGSL).plane1.binding};
+        AddCombinedSampler(plane1WGSL, plane1Remapped, sampler, BindingIndex(1), true);
+    }
 }
 
-using InterstageLocationAndName = std::pair<uint32_t, std::string>;
-
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                      \
-    X(const tint::Program*, inputProgram)                                                        \
-    X(std::string, entryPointName)                                                               \
-    X(SingleShaderStage, stage)                                                                  \
-    X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
-    X(LimitsForCompilationRequest, limits)                                                       \
-    X(bool, disableSymbolRenaming)                                                               \
-    X(std::vector<InterstageLocationAndName>, interstageVariables)                               \
-    X(std::vector<std::string>, bufferBindingVariables)                                          \
-    X(tint::glsl::writer::Options, tintOptions)                                                  \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
-
-DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
-#undef GLSL_COMPILATION_REQUEST_MEMBERS
-
-#define GLSL_COMPILATION_MEMBERS(X) X(std::string, glsl)
-
-DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS){};
-#undef GLSL_COMPILATION_MEMBERS
-
-}  // namespace
-}  // namespace dawn::native
-
-namespace dawn::native::opengl {
-namespace {
-
-// Find all the sampler/texture pairs for this entry point, and create CombinedSamplers for them.
-// CombinedSampler records the binding points of the original texture and sampler, and generates a
-// unique name. The corresponding uniforms will be retrieved by these generated names in PipelineGL.
-// Any texture-only references will have "usePlaceholderSampler" set to true, and only the texture
-// binding point will be used in naming them. In addition, Dawn will bind a non-filtering sampler
-// for them (see PipelineGL).
-CombinedSamplerInfo generateCombinedSamplerInfo(tint::inspector::Inspector& inspector,
-                                                const std::string& entryPoint,
-                                                tint::glsl::writer::Bindings& bindings,
-                                                BindingMap externalTextureExpansionMap,
-                                                bool* needsPlaceholderSampler
-
-) {
-    auto uses =
-        inspector.GetSamplerTextureUses(entryPoint, bindings.placeholder_sampler_bind_point);
-    CombinedSamplerInfo combinedSamplerInfo;
-    for (const auto& use : uses) {
-        tint::BindingPoint samplerBindPoint = use.sampler_binding_point;
-        tint::BindingPoint texBindPoint = use.texture_binding_point;
-
-        CombinedSampler* info = AppendCombinedSampler(
-            &combinedSamplerInfo, use.texture_binding_point, use.sampler_binding_point,
-            bindings.placeholder_sampler_bind_point);
-
-        if (info->usePlaceholderSampler) {
-            *needsPlaceholderSampler = true;
-        }
-
-        // Note, the rest of Dawn is expecting to use the un-modified WGSL binding points when
-        // looking up information on the combined samplers. Tint is expecting Dawn to provide
-        // the final expected values for those entry points. So, we end up using the original
-        // values for the AppendCombinedSampler calls and the remapped binding points when we
-        // put things in the tint bindings structure.
-
-        {
-            auto texIt = bindings.texture.find(texBindPoint);
-            if (texIt != bindings.texture.end()) {
-                texBindPoint.group = 0;
-                texBindPoint.binding = texIt->second.binding;
-            } else {
-                // The plane0 texture will be in external_textures, not textures, so we have to set
-                // the `sampler_texture_to_name` based on the external_texture value.
-                auto exIt = bindings.external_texture.find(texBindPoint);
-                if (exIt != bindings.external_texture.end()) {
-                    texBindPoint.group = 0;
-                    texBindPoint.binding = exIt->second.plane0.binding;
-                }
-            }
-        }
-        {
-            auto it = bindings.sampler.find(samplerBindPoint);
-            if (it != bindings.sampler.end()) {
-                samplerBindPoint.group = 0;
-                samplerBindPoint.binding = it->second.binding;
-            }
-        }
-
-        bindings.sampler_texture_to_name.emplace(
-            tint::glsl::writer::binding::CombinedTextureSamplerPair{texBindPoint, samplerBindPoint,
-                                                                    false},
-            info->GetName());
-
-        // If the texture has an associated plane1 texture (ie., it's an external texture),
-        // append a new combined sampler with the same sampler and the plane1 texture.
-        auto it = externalTextureExpansionMap.find(use.texture_binding_point);
-        if (it != externalTextureExpansionMap.end()) {
-            CombinedSampler* plane1Info =
-                AppendCombinedSampler(&combinedSamplerInfo, it->second, use.sampler_binding_point,
-                                      bindings.placeholder_sampler_bind_point);
-
-            tint::BindingPoint plane1TexBindPoint = it->second;
-            auto dstIt = bindings.external_texture.find(use.texture_binding_point);
-            if (dstIt != bindings.external_texture.end()) {
-                plane1TexBindPoint.group = 0;
-                plane1TexBindPoint.binding = dstIt->second.plane1.binding;
-            }
-
-            bindings.sampler_texture_to_name.emplace(
-                tint::glsl::writer::binding::CombinedTextureSamplerPair{plane1TexBindPoint,
-                                                                        samplerBindPoint, true},
-                plane1Info->GetName());
-        }
+// Returns whether the stage uses any texture builtin metadata.
+void GenerateTextureBuiltinFromUniformData(
+    const EntryPointMetadata& metadata,
+    const PipelineLayout* layout,
+    const tint::glsl::writer::Bindings& bindings,
+    EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
+    tint::glsl::writer::TextureBuiltinsFromUniformOptions* textureBuiltinsFromUniform) {
+    // Tell Tint where the uniform containing the builtin data will be (in post-remapping space),
+    // only when this shader stage uses some builtin metadata.
+    if (!metadata.textureQueries.empty()) {
+        textureBuiltinsFromUniform->ubo_binding = {
+            uint32_t(layout->GetInternalTextureBuiltinsUniformBinding())};
     }
-    return combinedSamplerInfo;
+
+    for (auto [i, query] : Enumerate(metadata.textureQueries)) {
+        BindGroupIndex group = BindGroupIndex(query.group);
+        const auto* bgl = layout->GetBindGroupLayout(group);
+        BindingIndex binding = bgl->GetBindingIndex(BindingNumber{query.binding});
+
+        // Register that the query needs to be emulated and get the offset in the UBO where the data
+        // will be passed.
+        TextureQuery textureQuery;
+        switch (query.type) {
+            case EntryPointMetadata::TextureMetadataQuery::TextureQueryType::TextureNumLevels:
+                textureQuery = TextureQuery::NumLevels;
+                break;
+            case EntryPointMetadata::TextureMetadataQuery::TextureQueryType::TextureNumSamples:
+                textureQuery = TextureQuery::NumSamples;
+                break;
+        }
+        uint32_t offset = emulatedTextureBuiltins->Register(group, binding, textureQuery);
+
+        // Tint uses post-remapping binding points for textureBuiltinFromUniform options.
+        tint::BindingPoint wgslBindPoint = {.group = query.group, .binding = query.binding};
+
+        tint::glsl::writer::binding::BindingInfo remappedBinding;
+        if (bindings.texture.contains(wgslBindPoint)) {
+            remappedBinding = bindings.texture.at(wgslBindPoint);
+        } else {
+            remappedBinding = bindings.storage_texture.at(wgslBindPoint);
+        }
+        textureBuiltinsFromUniform->ubo_contents.push_back(
+            {.offset = offset, .count = 1, .binding = remappedBinding});
+    }
 }
 
-bool generateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector,
-                                           const std::string& entryPoint,
-                                           const PipelineLayout* layout,
-                                           BindingPointToFunctionAndOffset* bindingPointToData,
-                                           tint::glsl::writer::Bindings& bindings) {
-    auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entryPoint);
+bool GenerateArrayLengthFromuniformData(const BindingInfoArray& moduleBindingInfo,
+                                        const PipelineLayout* layout,
+                                        tint::glsl::writer::Bindings& bindings) {
+    const PipelineLayout::BindingIndexInfo& indexInfo = layout->GetBindingIndexInfo();
 
-    if (textureBuiltinsFromUniformData.empty()) {
-        return false;
-    }
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
+        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
+        for (const auto& [binding, shaderBindingInfo] : moduleBindingInfo[group]) {
+            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
+            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
 
-    for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
-        const auto& info = textureBuiltinsFromUniformData[i];
+            // TODO(crbug.com/408010433): capturing binding directly in lambda is C++20
+            // extension in cmake
+            uint32_t capturedBindingNumber = static_cast<uint32_t>(binding);
 
-        // This is the unmodified binding point from the WGSL shader.
-        tint::BindingPoint srcBindingPoint{info.group, info.binding};
-        bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering.emplace_back(
-            srcBindingPoint);
-
-        // The remapped binding point is inserted into the Dawn data structure.
-        const BindGroupLayoutInternalBase* bgl =
-            layout->GetBindGroupLayout(BindGroupIndex{info.group});
-        tint::BindingPoint dstBindingPoint = tint::BindingPoint{
-            info.group, static_cast<uint32_t>(bgl->GetBindingIndex(BindingNumber{info.binding}))};
-
-        BindPointFunction type = BindPointFunction::kTextureNumLevels;
-        switch (info.type) {
-            case tint::inspector::Inspector::TextureQueryType::kTextureNumLevels:
-                type = BindPointFunction::kTextureNumLevels;
-                break;
-            case tint::inspector::Inspector::TextureQueryType::kTextureNumSamples:
-                type = BindPointFunction::kTextureNumSamples;
-                break;
+            MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const BufferBindingInfo& bufferBinding) {
+                    switch (bufferBinding.type) {
+                        case wgpu::BufferBindingType::Storage:
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding: {
+                            // Use ssbo index as the indices for the buffer size lookups
+                            // in the array length from uniform transform.
+                            tint::BindingPoint srcBindingPoint = {static_cast<uint32_t>(group),
+                                                                  capturedBindingNumber};
+                            FlatBindingIndex ssboIndex = indexInfo[group][bindingIndex];
+                            bindings.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                                srcBindingPoint, uint32_t(ssboIndex));
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                },
+                [](const StaticSamplerBindingInfo&) {}, [](const SamplerBindingInfo&) {},
+                [](const TextureBindingInfo&) {}, [](const StorageTextureBindingInfo&) {},
+                [](const InputAttachmentBindingInfo&) {});
         }
-
-        // Note, the `sizeof(uint32_t)` has to match up with the data type created by the
-        // `TextureBuiltinsFromUniform` when it creates the UBO structure.
-        bindingPointToData->emplace(dstBindingPoint,
-                                    std::pair{type, static_cast<uint32_t>(i * sizeof(uint32_t))});
     }
 
-    return true;
+    return bindings.array_length_from_uniform.bindpoint_to_size_index.size() > 0;
 }
 
 }  // namespace
@@ -252,23 +291,23 @@ std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
     return o.str();
 }
 
-bool operator<(const BindingLocation& a, const BindingLocation& b) {
-    return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
+bool operator<(const CombinedSamplerElement& a, const CombinedSamplerElement& b) {
+    return std::tie(a.group, a.binding, a.arraySize) < std::tie(b.group, b.binding, b.arraySize);
 }
 
 bool operator<(const CombinedSampler& a, const CombinedSampler& b) {
-    return std::tie(a.usePlaceholderSampler, a.samplerLocation, a.textureLocation) <
-           std::tie(b.usePlaceholderSampler, a.samplerLocation, b.textureLocation);
+    return std::tie(a.samplerLocation, a.textureLocation) <
+           std::tie(b.samplerLocation, b.textureLocation);
 }
 
 std::string CombinedSampler::GetName() const {
     std::ostringstream o;
     o << "dawn_combined";
-    if (usePlaceholderSampler) {
+    if (!samplerLocation) {
         o << "_placeholder_sampler";
     } else {
-        o << "_" << static_cast<uint32_t>(samplerLocation.group) << "_"
-          << static_cast<uint32_t>(samplerLocation.binding);
+        o << "_" << static_cast<uint32_t>(samplerLocation->group) << "_"
+          << static_cast<uint32_t>(samplerLocation->binding);
     }
     o << "_with_" << static_cast<uint32_t>(textureLocation.group) << "_"
       << static_cast<uint32_t>(textureLocation.binding);
@@ -280,10 +319,9 @@ ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     Device* device,
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* compilationMessages) {
+    ShaderModuleParseResult* parseResult) {
     Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor, internalExtensions));
-    DAWN_TRY(module->Initialize(parseResult, compilationMessages));
+    DAWN_TRY(module->Initialize(parseResult));
     return module;
 }
 
@@ -292,16 +330,13 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
-                                    OwnedCompilationMessages* compilationMessages) {
-    ScopedTintICEHandler scopedICEHandler(GetDevice());
-
-    DAWN_TRY(InitializeBase(parseResult, compilationMessages));
+MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+    DAWN_TRY(InitializeBase(parseResult));
 
     return {};
 }
 
-std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
+std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     const BindingInfoArray& moduleBindingInfo,
@@ -313,7 +348,7 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
 
     tint::glsl::writer::Bindings bindings;
 
-    for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
         for (const auto& [binding, shaderBindingInfo] : moduleBindingInfo[group]) {
@@ -321,20 +356,14 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
                                                static_cast<uint32_t>(binding)};
 
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
-            auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
-            uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
-            tint::BindingPoint dstBindingPoint{0, shaderIndex};
+            const auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
+            FlatBindingIndex shaderIndex = bindingIndexInfo[bindingIndex];
+            tint::BindingPoint dstBindingPoint{0, uint32_t(shaderIndex)};
 
             auto* const bufferBindingInfo =
                 std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
 
             if (bufferBindingInfo) {
-                // For buffer bindings that can be shareable across stages, we need to rename them
-                // to avoid GL program link failures due to block naming issues.
-                if (stage != SingleShaderStage::Compute) {
-                    req.bufferBindingVariables.emplace_back(shaderBindingInfo.name);
-                }
-
                 switch (bufferBindingInfo->type) {
                     case wgpu::BufferBindingType::Uniform:
                         bindings.uniform.emplace(
@@ -344,10 +373,12 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
                     case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::Storage:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
+                    case kInternalReadOnlyStorageBufferBinding:
                         bindings.storage.emplace(
                             srcBindingPoint,
                             tint::glsl::writer::binding::Storage{dstBindingPoint.binding});
                         break;
+                    case wgpu::BufferBindingType::BindingNotUsed:
                     case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                         break;
@@ -373,11 +404,11 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
 
                 const auto& bindingExpansion = expansion->second;
                 const BindingInfo plane0{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)])};
                 const BindingInfo plane1{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)])};
                 const BindingInfo metadata{
-                    bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)])};
 
                 tint::BindingPoint plane1WGSLBindingPoint{
                     static_cast<uint32_t>(group), static_cast<uint32_t>(bindingExpansion.plane1)};
@@ -399,65 +430,74 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     bool usesVertexIndex,
     bool usesInstanceIndex,
     bool usesFragDepth,
-    CombinedSamplerInfo* combinedSamplers,
+    VertexAttributeMask bgraSwizzleAttributes,
+    std::vector<CombinedSampler>* combinedSamplersOut,
     const PipelineLayout* layout,
-    bool* needsPlaceholderSampler,
-    bool* needsTextureBuiltinUniformBuffer,
-    BindingPointToFunctionAndOffset* bindingPointToData) const {
+    EmulatedTextureBuiltinRegistrar* emulatedTextureBuiltins,
+    bool* needsSSBOLengthUniformBuffer) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
 
     const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
 
     GLSLCompilationRequest req = {};
 
-    auto tintProgram = GetTintProgram();
-    req.inputProgram = &(tintProgram->program);
+    req.shaderModuleHash = GetHash();
+    req.inputProgram = UnsafeUnserializedValue(UseTintProgram());
 
-    tint::inspector::Inspector inspector(*req.inputProgram);
-
-    // Since (non-Vulkan) GLSL does not support descriptor sets, generate a
-    // mapping from the original group/binding pair to a binding-only
-    // value. This mapping will be used by Tint to remap all global
-    // variables to the 1D space.
+    // Since (non-Vulkan) GLSL does not support descriptor sets, generate a mapping from the
+    // original group/binding pair to a binding-only value. This mapping will be used by Tint to
+    // remap all global variables to the 1D space.
     const EntryPointMetadata& entryPointMetaData = GetEntryPoint(programmableStage.entryPoint);
     const BindingInfoArray& moduleBindingInfo = entryPointMetaData.bindings;
 
     auto [bindings, externalTextureExpansionMap] =
-        generateBindingInfo(stage, layout, moduleBindingInfo, req);
+        GenerateBindingInfo(stage, layout, moduleBindingInfo, req);
 
-    // When textures are accessed without a sampler (e.g., textureLoad()),
-    // GetSamplerTextureUses() will return this sentinel value.
+    // When textures are accessed without a sampler (e.g., textureLoad()), returned
+    // CombinedSamplerInfo should use this sentinel value as sampler binding point.
     bindings.placeholder_sampler_bind_point = {static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
-    // Some texture builtin functions are unsupported on GLSL ES. These are emulated with internal
-    // uniforms.
-    bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups + 1, 0};
+    // Compute the metadata necessary for translating to GL's combined textures and samplers, both
+    // for Dawn and for the Tint translation to GLSL.
+    {
+        std::vector<CombinedSampler> combinedSamplers;
+        tint::glsl::writer::CombinedTextureSamplerInfo samplerTextureToName;
+        GenerateCombinedSamplerInfo(entryPointMetaData, bindings, externalTextureExpansionMap,
+                                    &combinedSamplers, &samplerTextureToName);
 
-    // Remap the internal ubo binding as well.
-    bindings.uniform.emplace(
-        bindings.texture_builtins_from_uniform.ubo_binding,
-        tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
-
-    *needsPlaceholderSampler = false;
-    CombinedSamplerInfo combinedSamplerInfo =
-        generateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
-                                    externalTextureExpansionMap, needsPlaceholderSampler);
-
-    bool needsInternalUBO = generateTextureBuiltinFromUniformData(
-        inspector, programmableStage.entryPoint, layout, bindingPointToData, bindings);
-
-    std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
-    if (!programmableStage.metadata->overrides.empty()) {
-        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+        bindings.sampler_texture_to_name = std::move(samplerTextureToName);
+        *combinedSamplersOut = std::move(combinedSamplers);
     }
 
-    const CombinedLimits& limits = GetDevice()->GetLimits();
+    // Compute the metadata necessary to emulate some of the texture "getter" builtins not present
+    // in GLSL, both for Dawn and for the Tint translation to GLSL.
+    {
+        tint::glsl::writer::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
+        GenerateTextureBuiltinFromUniformData(entryPointMetaData, layout, bindings,
+                                              emulatedTextureBuiltins, &textureBuiltinsFromUniform);
+        bindings.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
+    }
 
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
-    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
-    req.limits = LimitsForCompilationRequest::Create(limits.v1);
-    req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
+    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
+    req.adapterSupportedLimits = UnsafeUnserializedValue(
+        LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
+
+    if (GetDevice()->IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform)) {
+        *needsSSBOLengthUniformBuffer =
+            GenerateArrayLengthFromuniformData(moduleBindingInfo, layout, bindings);
+        if (*needsSSBOLengthUniformBuffer) {
+            req.tintOptions.use_array_length_from_uniform = true;
+            bindings.array_length_from_uniform.ubo_binding = {kMaxBindGroups + 2, 0};
+            bindings.uniform.emplace(bindings.array_length_from_uniform.ubo_binding,
+                                     tint::glsl::writer::binding::Uniform{
+                                         uint32_t(layout->GetInternalArrayLengthUniformBinding())});
+        }
+    }
+
+    req.platform = UnsafeUnserializedValue(GetDevice()->GetPlatform());
 
     req.tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(version.GetStandard()),
                                                           version.GetMajor(), version.GetMinor());
@@ -465,20 +505,26 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_robustness = false;
 
     if (usesVertexIndex) {
-        req.tintOptions.first_vertex_offset = 4 * PipelineLayout::PushConstantLocation::FirstVertex;
+        req.tintOptions.first_vertex_offset = 4 * PipelineLayout::ImmediateLocation::FirstVertex;
     }
 
     if (usesInstanceIndex) {
         req.tintOptions.first_instance_offset =
-            4 * PipelineLayout::PushConstantLocation::FirstInstance;
+            4 * PipelineLayout::ImmediateLocation::FirstInstance;
     }
 
     if (usesFragDepth) {
-        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::PushConstantLocation::MinDepth,
-                                               4 * PipelineLayout::PushConstantLocation::MaxDepth};
+        req.tintOptions.depth_range_offsets = {4 * PipelineLayout::ImmediateLocation::MinDepth,
+                                               4 * PipelineLayout::ImmediateLocation::MaxDepth};
     }
 
-    req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
+    if (stage == SingleShaderStage::Vertex) {
+        for (VertexAttributeLocation i : bgraSwizzleAttributes) {
+            req.tintOptions.bgra_swizzle_locations.insert(static_cast<uint8_t>(i));
+        }
+    }
+
+    req.tintOptions.strip_all_names = !GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
 
     req.interstageVariables = {};
     for (size_t i = 0; i < entryPointMetaData.interStageVariables.size(); i++) {
@@ -492,85 +538,76 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
+    req.tintOptions.enable_integer_range_analysis =
+        GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
+
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
-        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
+        compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromValidatedBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
-            tint::ast::transform::Manager transformManager;
-            tint::ast::transform::DataMap transformInputs;
-
-            transformManager.Add<tint::ast::transform::SingleEntryPoint>();
-            transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
+            // Requires Tint Program here right before actual using.
+            auto inputProgram = r.inputProgram.UnsafeGetValue()->GetTintProgram();
+            const tint::Program* tintInputProgram = &(inputProgram->program);
+            // Convert the AST program to an IR module.
+            tint::Result<tint::core::ir::Module> ir;
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleProgramToIR");
+                ir = tint::wgsl::reader::ProgramToLoweredIR(*tintInputProgram);
+                DAWN_INVALID_IF(ir != tint::Success,
+                                "An error occurred while generating Tint IR\n%s",
+                                ir.Failure().reason);
+            }
 
             {
-                tint::ast::transform::Renamer::Remappings assignedRenamings = {};
-
-                // Give explicit renaming mappings for interstage variables
-                // Because GLSL requires interstage IO names to match.
-                for (const auto& it : r.interstageVariables) {
-                    assignedRenamings.emplace(
-                        it.second, "dawn_interstage_location_" + std::to_string(it.first));
-                }
-
-                // Prepend v_ or f_ to buffer binding variable names in order to avoid collisions in
-                // renamed interface blocks. The AddBlockAttribute transform in the Tint GLSL
-                // printer will always generate wrapper structs from such bindings.
-                for (const auto& variableName : r.bufferBindingVariables) {
-                    assignedRenamings.emplace(
-                        variableName,
-                        (r.stage == SingleShaderStage::Vertex ? "v_" : "f_") + variableName);
-                }
-
-                // Needs to run early so that they can use builtin names safely.
-                // TODO(dawn:2180): move this transform into Tint.
-                transformManager.Add<tint::ast::transform::Renamer>();
-                transformInputs.Add<tint::ast::transform::Renamer::Config>(
-                    r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kGlslKeywords
-                                            : tint::ast::transform::Renamer::Target::kAll,
-                    false, std::move(assignedRenamings));
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleSingleEntryPoint");
+                auto singleEntryPointResult =
+                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
+                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
+                                "Pipeline single entry point (IR) failed:\n%s",
+                                singleEntryPointResult.Failure().reason);
             }
 
-            if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform which removes unused overrides
-                // for current entry point.
-                transformManager.Add<tint::ast::transform::SubstituteOverride>();
-                transformInputs.Add<tint::ast::transform::SubstituteOverride::Config>(
-                    std::move(r.substituteOverrideConfig).value());
+            // this needs to run after SingleEntryPoint transform which removes unused
+            // overrides for the current entry point.
+
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleSubstituteOverrides");
+                tint::core::ir::transform::SubstituteOverridesConfig cfg;
+                cfg.map = std::move(r.substituteOverrideConfig);
+                auto substituteOverridesResult =
+                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
+                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
+                                "Pipeline override substitution (IR) failed:\n%s",
+                                substituteOverridesResult.Failure().reason);
             }
 
-            tint::Program program;
-            tint::ast::transform::DataMap transformOutputs;
-            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
-                                                   transformInputs, &transformOutputs, nullptr));
-
-            // TODO(dawn:2180): refactor out.
-            // Get the entry point name after the renamer pass.
-            // In the case of the entry-point name being a reserved GLSL keyword
-            // (including `main`) the entry-point would have been renamed
-            // regardless of the `disableSymbolRenaming` flag. Always check the
-            // rename map, and if the name was changed, get the new one.
-            auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
-            DAWN_ASSERT(data != nullptr);
-            auto it = data->remappings.find(r.entryPointName.data());
-            std::string remappedEntryPoint;
-            if (it != data->remappings.end()) {
-                remappedEntryPoint = it->second;
-            } else {
-                remappedEntryPoint = r.entryPointName;
+            tint::Result<tint::glsl::writer::Output> result;
+            {
+                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
+                                                   "ShaderModuleGenerateGLSL");
+                // Generate GLSL from Tint IR.
+                result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions);
+                DAWN_INVALID_IF(result != tint::Success,
+                                "An error occurred while generating GLSL:\n%s",
+                                result.Failure().reason);
             }
-            DAWN_ASSERT(remappedEntryPoint != "");
 
+            // Workgroup validation has to come after `Generate` because it may require
+            // overrides to have been substituted.
             if (r.stage == SingleShaderStage::Compute) {
                 // Validate workgroup size after program runs transforms.
                 Extent3D _;
-                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits,
-                                       /* fullSubgroups */ {}));
+                DAWN_TRY_ASSIGN(_,
+                                ValidateComputeStageWorkgroupSize(
+                                    result->workgroup_info.x, result->workgroup_info.y,
+                                    result->workgroup_info.z, result->workgroup_info.storage_size,
+                                    /* usesSubgroupMatrix */ false,
+                                    /* maxSubgroupSize, GL backend not support */ 0, r.limits,
+                                    r.adapterSupportedLimits.UnsafeGetValue()));
             }
-
-            auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
-            DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
-                            result.Failure().reason.Str());
 
             return GLSLCompilation{{std::move(result->glsl)}};
         },
@@ -580,33 +617,35 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         std::ostringstream dumpedMsg;
         dumpedMsg << "/* Dumped generated GLSL */\n" << compilationResult->glsl;
 
-        GetDevice()->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
+        GetDevice()->EmitLog(wgpu::LoggingType::Info, dumpedMsg.str().c_str());
     }
 
-    GLuint shader = gl.CreateShader(GLShaderType(stage));
+    GLuint shader = DAWN_GL_TRY(gl, CreateShader(GLShaderType(stage)));
     const char* source = compilationResult->glsl.c_str();
-    gl.ShaderSource(shader, 1, &source, nullptr);
-    gl.CompileShader(shader);
+    {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "GLSL.CompileShader");
+
+        DAWN_GL_TRY(gl, ShaderSource(shader, 1, &source, nullptr));
+        DAWN_GL_TRY(gl, CompileShader(shader));
+    }
 
     GLint compileStatus = GL_FALSE;
-    gl.GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    DAWN_GL_TRY(gl, GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus));
     if (compileStatus == GL_FALSE) {
         GLint infoLogLength = 0;
-        gl.GetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        DAWN_GL_TRY(gl, GetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength));
 
         if (infoLogLength > 1) {
             std::vector<char> buffer(infoLogLength);
-            gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-            gl.DeleteShader(shader);
+            DAWN_GL_TRY(gl, GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]));
+            DAWN_GL_TRY(gl, DeleteShader(shader));
             return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
                                          buffer.data());
         }
     }
 
     GetDevice()->GetBlobCache()->EnsureStored(compilationResult);
-    *needsTextureBuiltinUniformBuffer = needsInternalUBO;
 
-    *combinedSamplers = std::move(combinedSamplerInfo);
     return shader;
 }
 

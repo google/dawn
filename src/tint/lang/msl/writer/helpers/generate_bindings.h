@@ -31,16 +31,16 @@
 #include "src/tint/lang/msl/writer/common/options.h"
 
 // Forward declarations
-namespace tint {
-class Program;
-}
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
 namespace tint::msl::writer {
 
 /// Generate the resource bindings
-/// @param program the program to generate from
+/// @param module the module to generate from
 /// @returns the bindings
-Bindings GenerateBindings(const Program& program);
+Bindings GenerateBindings(const core::ir::Module& module);
 
 }  // namespace tint::msl::writer
 

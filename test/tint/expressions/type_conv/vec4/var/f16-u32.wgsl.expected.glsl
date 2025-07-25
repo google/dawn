@@ -1,12 +1,13 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 f16vec4 u = f16vec4(1.0hf);
-void f() {
-  uvec4 v = uvec4(u);
+uvec4 tint_v4f16_to_v4u32(f16vec4 value) {
+  return uvec4(clamp(value, f16vec4(0.0hf), f16vec4(65504.0hf)));
 }
-
+void f() {
+  uvec4 v = tint_v4f16_to_v4u32(u);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

@@ -27,6 +27,7 @@
 
 #include <memory>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
@@ -39,131 +40,146 @@ using testing::InvokeWithoutArgs;
 using testing::Mock;
 using testing::Return;
 
-using WireShaderModuleTestBase = WireFutureTest<WGPUCompilationInfoCallback,
-                                                WGPUCompilationInfoCallbackInfo,
-                                                wgpuShaderModuleGetCompilationInfo,
-                                                wgpuShaderModuleGetCompilationInfoF>;
+using WireShaderModuleTestBase = WireFutureTest<wgpu::CompilationInfoCallback<void>*>;
 class WireShaderModuleTests : public WireShaderModuleTestBase {
   protected:
-    // Overriden version of wgpuShaderModuleGetCompilationInfo that defers to the API call based on
-    // the test callback mode.
-    void ShaderModuleGetCompilationInfo(WGPUShaderModule s, void* userdata = nullptr) {
-        CallImpl(userdata, s);
+    void GetCompilationInfo() {
+        this->mFutureIDs.push_back(
+            shaderModule.GetCompilationInfo(this->GetParam().callbackMode, this->mMockCb.Callback())
+                .id);
     }
 
     void SetUp() override {
         WireShaderModuleTestBase::SetUp();
-        WGPUShaderModuleDescriptor descriptor = {};
+
+        wgpu::ShaderModuleDescriptor descriptor = {};
         apiShaderModule = api.GetNewShaderModule();
-        shaderModule = wgpuDeviceCreateShaderModule(device, &descriptor);
-        EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
-            .WillOnce(Return(apiShaderModule))
-            .RetiresOnSaturation();
+        shaderModule = device.CreateShaderModule(&descriptor);
+        EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
         FlushClient();
     }
 
-    WGPUShaderModule shaderModule;
+    void TearDown() override {
+        // We must lose all references to objects before calling parent TearDown to avoid
+        // referencing the proc table after it gets cleared.
+        shaderModule = nullptr;
+
+        WireShaderModuleTestBase::TearDown();
+    }
+
+    wgpu::ShaderModule shaderModule;
     WGPUShaderModule apiShaderModule;
 
     // Default responses.
-    WGPUCompilationMessage mMessage = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
-    WGPUCompilationInfo mCompilationInfo = {nullptr, 1, &mMessage};
+    wgpu::DawnCompilationMessageUtf16 mUtf18 = {{nullptr, 4, 6, 8}};
+    wgpu::CompilationMessage mMessage = {
+        &mUtf18, ToOutputStringView("Test Message"), wgpu::CompilationMessageType::Info, 2, 4, 6,
+        8};
+    wgpu::CompilationInfo mCompilationInfo = {nullptr, 1, &mMessage};
 };
 
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireShaderModuleTests);
 
 // Check getting CompilationInfo for a successfully created shader module
 TEST_P(WireShaderModuleTests, GetCompilationInfo) {
-    ShaderModuleGetCompilationInfo(shaderModule);
+    GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo2(apiShaderModule, _))
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfo2Callback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &mCompilationInfo);
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
         }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCompilationInfoRequestStatus_Success,
-                                 MatchesLambda([&](const WGPUCompilationInfo* info) -> bool {
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::Success,
+                                 MatchesLambda([&](const wgpu::CompilationInfo* info) -> bool {
                                      if (info->messageCount != mCompilationInfo.messageCount) {
                                          return false;
                                      }
-                                     const WGPUCompilationMessage* infoMessage = &info->messages[0];
-                                     return strcmp(infoMessage->message, mMessage.message) == 0 &&
-                                            infoMessage->nextInChain == mMessage.nextInChain &&
+                                     const wgpu::CompilationMessage* infoMessage =
+                                         &info->messages[0];
+                                     EXPECT_NE(infoMessage->message.length, WGPU_STRLEN);
+                                     EXPECT_NE(infoMessage->nextInChain, nullptr);
+                                     EXPECT_EQ(infoMessage->nextInChain->sType,
+                                               wgpu::SType::DawnCompilationMessageUtf16);
+                                     const auto* utf16 =
+                                         reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(
+                                             infoMessage->nextInChain);
+                                     return infoMessage->message == mMessage.message &&
                                             infoMessage->type == mMessage.type &&
                                             infoMessage->lineNum == mMessage.lineNum &&
                                             infoMessage->linePos == mMessage.linePos &&
                                             infoMessage->offset == mMessage.offset &&
-                                            infoMessage->length == mMessage.length;
-                                 }),
-                                 nullptr))
+                                            infoMessage->length == mMessage.length &&
+                                            utf16->linePos == mUtf18.linePos &&
+                                            utf16->offset == mUtf18.offset &&
+                                            utf16->length == mUtf18.length;
+                                 })))
             .Times(1);
 
         FlushCallbacks();
     });
 }
 
-// Test that calling GetCompilationInfo then disconnecting the wire calls the callback with a
-// device loss.
+// Test that calling GetCompilationInfo then disconnecting the wire calls the callback with
+// instance dropped.
 TEST_P(WireShaderModuleTests, GetCompilationInfoBeforeDisconnect) {
-    ShaderModuleGetCompilationInfo(shaderModule);
+    GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo2(apiShaderModule, _))
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfo2Callback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &mCompilationInfo);
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
         }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(WGPUCompilationInfoRequestStatus_InstanceDropped, nullptr, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(1);
 
         GetWireClient()->Disconnect();
     });
 }
 
-// Test that calling GetCompilationInfo after disconnecting the wire calls the callback with a
-// device loss.
+// Test that calling GetCompilationInfo after disconnecting the wire calls the callback with
+// instance dropped.
 TEST_P(WireShaderModuleTests, GetCompilationInfoAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(WGPUCompilationInfoRequestStatus_InstanceDropped, nullptr, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(1);
 
-        ShaderModuleGetCompilationInfo(shaderModule);
+        GetCompilationInfo();
     });
 }
 
-// Test that requests inside user callbacks before disconnect are called
+// Test that requests inside user callbacks before disconnect are called.
 TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) {
     static constexpr size_t kNumRequests = 10;
 
-    ShaderModuleGetCompilationInfo(shaderModule);
+    GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo2(apiShaderModule, _))
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfo2Callback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &mCompilationInfo);
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
         }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb,
-                    Call(WGPUCompilationInfoRequestStatus_InstanceDropped, nullptr, nullptr))
+        EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::CallbackCancelled, nullptr))
             .Times(kNumRequests + 1)
             .WillOnce([&]() {
                 for (size_t i = 0; i < kNumRequests; i++) {
-                    ShaderModuleGetCompilationInfo(shaderModule);
+                    GetCompilationInfo();
                 }
             })
             .WillRepeatedly(Return());
@@ -176,12 +192,13 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDisconnect) 
 TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction) {
     static constexpr size_t kNumRequests = 10;
 
-    ShaderModuleGetCompilationInfo(shaderModule);
+    GetCompilationInfo();
 
-    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo2(apiShaderModule, _))
+    EXPECT_CALL(api, OnShaderModuleGetCompilationInfo(apiShaderModule, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallShaderModuleGetCompilationInfo2Callback(
-                apiShaderModule, WGPUCompilationInfoRequestStatus_Success, &mCompilationInfo);
+            api.CallShaderModuleGetCompilationInfoCallback(
+                apiShaderModule, WGPUCompilationInfoRequestStatus_Success,
+                reinterpret_cast<const WGPUCompilationInfo*>(&mCompilationInfo));
         }));
     FlushClient();
     FlushFutures();
@@ -190,37 +207,37 @@ TEST_P(WireShaderModuleTests, GetCompilationInfoInsideCallbackBeforeDestruction)
         // In spontaneous mode, the callbacks can be fired immediately so they all happen when we
         // flush the first callback.
         ExpectWireCallbacksWhen([&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUCompilationInfoRequestStatus_Success, _, nullptr))
+            EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::Success, _))
                 .Times(kNumRequests + 1)
                 .WillOnce([&]() {
                     for (size_t i = 0; i < kNumRequests; i++) {
-                        ShaderModuleGetCompilationInfo(shaderModule);
+                        GetCompilationInfo();
                     }
+                    shaderModule = nullptr;
                 })
                 .WillRepeatedly(Return());
 
-            wgpuShaderModuleRelease(shaderModule);
             FlushCallbacks();
         });
     } else {
         // In non-spontaneous mode, we need to flush the client and callbacks again before the
         // second round of callbacks are fired.
         ExpectWireCallbacksWhen([&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUCompilationInfoRequestStatus_Success, _, nullptr))
+            EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::Success, _))
                 .WillOnce([&]() {
                     for (size_t i = 0; i < kNumRequests; i++) {
-                        ShaderModuleGetCompilationInfo(shaderModule);
+                        GetCompilationInfo();
                     }
+                    shaderModule = nullptr;
                 });
 
             FlushCallbacks();
         });
 
-        wgpuShaderModuleRelease(shaderModule);
         FlushClient();
         FlushFutures();
         ExpectWireCallbacksWhen([&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUCompilationInfoRequestStatus_Success, _, nullptr))
+            EXPECT_CALL(mockCb, Call(wgpu::CompilationInfoRequestStatus::Success, _))
                 .Times(kNumRequests)
                 .WillRepeatedly(Return());
 

@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 13
 ; Schema: 0
                OpCapability Shader
@@ -8,22 +8,23 @@
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %main "main"
-               OpName %__frexp_result_f32 "__frexp_result_f32"
                OpMemberName %__frexp_result_f32 0 "fract"
                OpMemberName %__frexp_result_f32 1 "exp"
-               OpMemberDecorate %__frexp_result_f32 0 Offset 0
-               OpMemberDecorate %__frexp_result_f32 1 Offset 4
+               OpName %__frexp_result_f32 "__frexp_result_f32"
+               OpName %res "res"
+               OpName %fract "fract"
+               OpName %exp "exp"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
       %float = OpTypeFloat 32
         %int = OpTypeInt 32 1
 %__frexp_result_f32 = OpTypeStruct %float %int
 %float_0_625 = OpConstant %float 0.625
       %int_1 = OpConstant %int 1
-         %10 = OpConstantComposite %__frexp_result_f32 %float_0_625 %int_1
-       %main = OpFunction %void None %1
+        %res = OpConstantComposite %__frexp_result_f32 %float_0_625 %int_1
+       %main = OpFunction %void None %3
           %4 = OpLabel
-         %11 = OpCompositeExtract %float %10 0
-         %12 = OpCompositeExtract %int %10 1
+      %fract = OpCompositeExtract %float %res 0
+        %exp = OpCompositeExtract %int %res 1
                OpReturn
                OpFunctionEnd

@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void ZeroInitWorkgroupMemoryFuzzer(Module& module) {
-    if (auto res = ZeroInitWorkgroupMemory(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of ZeroInitWorkgroupMemory failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> ZeroInitWorkgroupMemoryFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return ZeroInitWorkgroupMemory(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ZeroInitWorkgroupMemoryFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ZeroInitWorkgroupMemoryFuzzer,
+                      tint::core::ir::transform::kZeroInitWorkgroupMemoryCapabilities);

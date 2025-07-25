@@ -28,12 +28,14 @@
 #ifndef INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 #define INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "dawn/dawn_proc_table.h"
 #include "dawn/native/dawn_native_export.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::platform {
 class Platform;
@@ -87,15 +89,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     Adapter(const Adapter& other);
     Adapter& operator=(const Adapter& other);
 
-    // TODO(crbug.com/347047627): These methods are historical duplicates of
-    // those in webgpu_cpp.h. Update uses of these methods and remove them.
-    wgpu::Status GetInfo(wgpu::AdapterInfo* info) const;
-    wgpu::Status GetInfo(WGPUAdapterInfo* info) const;
-    wgpu::Status GetProperties(wgpu::AdapterProperties* properties) const;
-    wgpu::Status GetProperties(WGPUAdapterProperties* properties) const;
-    std::vector<const char*> GetSupportedFeatures() const;
-    wgpu::ConvertibleStatus GetLimits(WGPUSupportedLimits* limits) const;
-
     void SetUseTieredLimits(bool useTieredLimits);
 
     // Check that the Adapter is able to support importing external images. This is necessary
@@ -107,18 +100,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     // Create a device on this adapter. On an error, nullptr is returned.
     WGPUDevice CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor);
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor = nullptr);
-
-    void RequestDevice(const wgpu::DeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(std::nullptr_t descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata) {
-        RequestDevice(static_cast<const wgpu::DeviceDescriptor*>(descriptor), callback, userdata);
-    }
 
     // Returns the underlying WGPUAdapter object.
     WGPUAdapter Get() const;
@@ -142,8 +123,40 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     BackendValidationLevel backendValidationLevel = BackendValidationLevel::Disabled;
     bool beginCaptureOnStartup = false;
 
-    WGPULoggingCallback loggingCallback = nullptr;
-    void* loggingCallbackUserdata = nullptr;
+    WGPULoggingCallbackInfo loggingCallbackInfo = WGPU_LOGGING_CALLBACK_INFO_INIT;
+
+    template <typename F,
+              typename T,
+              typename Cb = wgpu::LoggingCallback<T>,
+              typename = std::enable_if_t<std::is_convertible_v<F, Cb*>>>
+    void SetLoggingCallback(F callback, T userdata) {
+        assert(loggingCallbackInfo.callback == nullptr);
+
+        loggingCallbackInfo.callback = [](WGPULoggingType type, struct WGPUStringView message,
+                                          void* callback_param, void* userdata_param) {
+            auto cb = reinterpret_cast<Cb*>(callback_param);
+            (*cb)(static_cast<wgpu::LoggingType>(type), message, static_cast<T>(userdata_param));
+        };
+        loggingCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+        loggingCallbackInfo.userdata2 = reinterpret_cast<void*>(userdata);
+    }
+
+    template <typename L,
+              typename Cb = wgpu::LoggingCallback<>,
+              typename = std::enable_if_t<std::is_convertible_v<L, Cb>>>
+    void SetLoggingCallback(L callback) {
+        assert(loggingCallbackInfo.callback == nullptr);
+        using F = wgpu::LoggingCallback<void>;
+        static_assert(std::is_convertible_v<L, F*>, "Logging callback cannot be a binding lambda");
+
+        loggingCallbackInfo.callback = [](WGPULoggingType type, struct WGPUStringView message,
+                                          void* callback_param, void*) {
+            auto cb = reinterpret_cast<F*>(callback_param);
+            (*cb)(static_cast<wgpu::LoggingType>(type), message);
+        };
+        loggingCallbackInfo.userdata1 = reinterpret_cast<void*>(+callback);
+        loggingCallbackInfo.userdata2 = nullptr;
+    }
 
     // Equality operators, mostly for testing. Note that this tests
     // strict pointer-pointer equality if the struct contains member pointers.
@@ -158,6 +171,7 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
 class DAWN_NATIVE_EXPORT Instance {
   public:
     explicit Instance(const WGPUInstanceDescriptor* desc = nullptr);
+    explicit Instance(const wgpu::InstanceDescriptor* desc);
     explicit Instance(InstanceBase* impl);
     ~Instance();
 
@@ -210,7 +224,7 @@ DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     WGPUTextureAspect aspect = WGPUTextureAspect_All);
 
 // Backdoor to get the order of the ProcMap for testing
-DAWN_NATIVE_EXPORT std::vector<const char*> GetProcMapNamesForTesting();
+DAWN_NATIVE_EXPORT std::vector<std::string_view> GetProcMapNamesForTesting();
 
 DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device);
 
@@ -284,6 +298,8 @@ class DAWN_NATIVE_EXPORT MemoryDump {
     static const char kUnitsBytes[];    // Unit name to represent bytes.
     static const char kUnitsObjects[];  // Unit name to represent #objects.
 
+    MemoryDump() = default;
+
     virtual void AddScalar(const char* name,
                            const char* key,
                            const char* units,
@@ -291,10 +307,54 @@ class DAWN_NATIVE_EXPORT MemoryDump {
 
     virtual void AddString(const char* name, const char* key, const std::string& value) = 0;
 
+    MemoryDump(const MemoryDump&) = delete;
+    MemoryDump& operator=(const MemoryDump&) = delete;
+
   protected:
     virtual ~MemoryDump() = default;
 };
 DAWN_NATIVE_EXPORT void DumpMemoryStatistics(WGPUDevice device, MemoryDump* dump);
+
+// Intended for background tracing for UMA that returns the estimated memory usage.
+struct DAWN_NATIVE_EXPORT MemoryUsageInfo {
+    // Total memory usage.
+    uint64_t totalUsage;
+    // Total depth stencil textures' memory.
+    uint64_t depthStencilTexturesUsage;
+    // Total MSAA textures' memory.
+    uint64_t msaaTexturesUsage;
+    // Number of MSAA textures.
+    uint64_t msaaTexturesCount;
+    // Largest MSAA texture's memory.
+    uint64_t largestMsaaTextureUsage;
+    // Total textures' memory.
+    uint64_t texturesUsage;
+    // Total buffers' memory.
+    uint64_t buffersUsage;
+};
+DAWN_NATIVE_EXPORT MemoryUsageInfo ComputeEstimatedMemoryUsageInfo(WGPUDevice device);
+
+// Memory information gathered from backend specific allocators.
+// - memory allocated by clients for objects such as buffers, textures.
+// - heap memory used by the allocator for allocations.
+struct DAWN_NATIVE_EXPORT AllocatorMemoryInfo {
+    uint64_t totalUsedMemory = 0;
+    uint64_t totalAllocatedMemory = 0;
+    uint64_t totalLazyAllocatedMemory = 0;
+    uint64_t totalLazyUsedMemory = 0;
+};
+DAWN_NATIVE_EXPORT AllocatorMemoryInfo GetAllocatorMemoryInfo(WGPUDevice device);
+
+// Free any unused GPU memory like staging buffers, cached resources, etc. Returns true if there are
+// still objects to delete and ReduceMemoryUsage() should be run again after a short delay to allow
+// submitted work to complete.
+DAWN_NATIVE_EXPORT bool ReduceMemoryUsage(WGPUDevice device);
+
+// Perform tasks that are appropriate to do when idle like serializing pipeline
+// caches, etc.
+DAWN_NATIVE_EXPORT void PerformIdleTasks(const wgpu::Device& device);
+
+DAWN_NATIVE_EXPORT bool IsDeviceLost(WGPUDevice device);
 
 }  // namespace dawn::native
 

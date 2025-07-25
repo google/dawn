@@ -491,6 +491,48 @@ TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_Inva
                 HasSubstr("12:34 error: no matching constructor for 'f32(array<f32, 4>)"));
 }
 
+TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_ConstructI8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    auto* a = Var("a", ty.i8(), Call(Source{{12, 34}}, ty.i8()));
+    WrapInFunction(a);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: type is not constructible"));
+}
+
+TEST_F(ResolverValueConstructorValidationTest, ConversionConstructorInvalid_ConstructU8) {
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+
+    auto* a = Var("a", ty.u8(), Call(Source{{12, 34}}, ty.u8()));
+    WrapInFunction(a);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: type is not constructible"));
+}
+
+TEST_F(ResolverValueConstructorValidationTest,
+       ConversionConstructorInvalid_ConstructI8WithoutExtension) {
+    auto* a = Var("a", ty.i8(), Call(Source{{12, 34}}, ty.i8()));
+    WrapInFunction(a);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                HasSubstr("error: 'i8' type used without 'chromium_experimental_subgroup_matrix' "
+                          "extension enabled"));
+}
+
+TEST_F(ResolverValueConstructorValidationTest,
+       ConversionConstructorInvalid_ConstructU8WithoutExtension) {
+    auto* a = Var("a", ty.u8(), Call(Source{{12, 34}}, ty.u8()));
+    WrapInFunction(a);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(r()->error(),
+                HasSubstr("error: 'u8' type used without 'chromium_experimental_subgroup_matrix' "
+                          "extension enabled"));
+}
+
 }  // namespace ConversionConstructTest
 
 namespace ArrayConstructor {
@@ -643,10 +685,10 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
     ASSERT_TRUE(ctor->Parameters()[0]->Type()->Is<core::type::Vector>());
     EXPECT_TRUE(
-        ctor->Parameters()[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+        ctor->Parameters()[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     ASSERT_TRUE(ctor->Parameters()[1]->Type()->Is<core::type::Vector>());
     EXPECT_TRUE(
-        ctor->Parameters()[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+        ctor->Parameters()[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
@@ -667,10 +709,10 @@ TEST_F(ResolverValueConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
     ASSERT_TRUE(ctor->Parameters()[0]->Type()->Is<core::type::Vector>());
     EXPECT_TRUE(
-        ctor->Parameters()[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+        ctor->Parameters()[0]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     ASSERT_TRUE(ctor->Parameters()[1]->Type()->Is<core::type::Vector>());
     EXPECT_TRUE(
-        ctor->Parameters()[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+        ctor->Parameters()[1]->Type()->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverValueConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32) {
@@ -880,6 +922,21 @@ TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
               "12:34 error: array constructor has too many "
               "elements: expected 4, "
               "found 5");
+}
+
+TEST_F(ResolverValueConstructorValidationTest, Array_ExcessiveNumberOfElements) {
+    // array<i32, 40000u>(0i, 2i, 3i, ..., 39999i);
+    SetSource(Source::Location({12, 34}));
+    Vector<const ast::IntLiteralExpression*, 40000> elements;
+    for (uint32_t i = 0; i < 40000; i++) {
+        elements.Push(Expr(i32(i)));
+    }
+    auto* tc = Call<array<i32, 40000>>(std::move(elements));
+    WrapInFunction(tc);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array constructor has excessive number of elements (>32767)");
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {
@@ -1157,7 +1214,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_ZeroValue) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1176,7 +1233,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1199,7 +1256,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1220,7 +1277,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2U32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1241,7 +1298,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2I32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1262,7 +1319,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2Bool_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1283,7 +1340,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Identity) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1303,7 +1360,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2_Success_Vec2TypeConversion) 
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1433,7 +1490,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ZeroValue) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1452,7 +1509,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1476,7 +1533,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1498,7 +1555,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3U32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1520,7 +1577,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3I32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1542,7 +1599,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3Bool_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1564,7 +1621,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec2AndScalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1585,7 +1642,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_ScalarAndVec2) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1606,7 +1663,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Identity) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1626,7 +1683,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3_Success_Vec3TypeConversion) 
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 
     auto* call = Sem().Get<sem::Call>(tc);
@@ -1799,7 +1856,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ZeroValue) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1811,7 +1868,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1825,7 +1882,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1837,7 +1894,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4U32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1849,7 +1906,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4I32_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1861,7 +1918,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4Bool_Success_Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1873,7 +1930,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2ScalarScalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1885,7 +1942,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarVec2Scalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1897,7 +1954,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarScalarVec2) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1909,7 +1966,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec2AndVec2) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1921,7 +1978,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec3AndScalar) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1933,7 +1990,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_ScalarAndVec3) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1945,7 +2002,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Identity) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1957,7 +2014,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4_Success_Vec4TypeConversion) 
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1979,7 +2036,7 @@ TEST_F(ResolverValueConstructorValidationTest, NestedVectorConstructors_Success)
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -2069,11 +2126,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) 
     ASSERT_TRUE(TypeOf(vec2_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec2_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec2_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec2_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec2_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec2_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec2_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec2_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec2_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec2_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec2_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec2_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec2_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec2_bool)->As<core::type::Vector>()->Width(), 2u);
     EXPECT_EQ(TypeOf(vec2_i32)->As<core::type::Vector>()->Width(), 2u);
     EXPECT_EQ(TypeOf(vec2_u32)->As<core::type::Vector>()->Width(), 2u);
@@ -2098,11 +2155,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
     ASSERT_TRUE(TypeOf(vec2_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec2_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec2_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec2_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec2_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec2_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec2_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec2_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec2_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec2_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec2_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec2_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec2_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec2_bool)->As<core::type::Vector>()->Width(), 2u);
     EXPECT_EQ(TypeOf(vec2_i32)->As<core::type::Vector>()->Width(), 2u);
     EXPECT_EQ(TypeOf(vec2_u32)->As<core::type::Vector>()->Width(), 2u);
@@ -2127,11 +2184,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) 
     ASSERT_TRUE(TypeOf(vec3_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec3_bool)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_i32)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_u32)->As<core::type::Vector>()->Width(), 3u);
@@ -2156,11 +2213,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
     ASSERT_TRUE(TypeOf(vec3_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec3_bool)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_i32)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_u32)->As<core::type::Vector>()->Width(), 3u);
@@ -2185,11 +2242,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAnd
     ASSERT_TRUE(TypeOf(vec3_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec3_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec3_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec3_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec3_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec3_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec3_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec3_bool)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_i32)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(vec3_u32)->As<core::type::Vector>()->Width(), 3u);
@@ -2214,11 +2271,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) 
     ASSERT_TRUE(TypeOf(vec4_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec4_bool)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_i32)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_u32)->As<core::type::Vector>()->Width(), 4u);
@@ -2243,11 +2300,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
     ASSERT_TRUE(TypeOf(vec4_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec4_bool)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_i32)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_u32)->As<core::type::Vector>()->Width(), 4u);
@@ -2272,11 +2329,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAnd
     ASSERT_TRUE(TypeOf(vec4_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec4_bool)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_i32)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_u32)->As<core::type::Vector>()->Width(), 4u);
@@ -2302,11 +2359,11 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVe
     ASSERT_TRUE(TypeOf(vec4_u32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f32)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(vec4_f16)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
-    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->type()->Is<core::type::I32>());
-    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->type()->Is<core::type::U32>());
-    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->type()->Is<core::type::F32>());
-    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->type()->Is<core::type::F16>());
+    EXPECT_TRUE(TypeOf(vec4_bool)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
+    EXPECT_TRUE(TypeOf(vec4_i32)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
+    EXPECT_TRUE(TypeOf(vec4_u32)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
+    EXPECT_TRUE(TypeOf(vec4_f32)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(vec4_f16)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
     EXPECT_EQ(TypeOf(vec4_bool)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_i32)->As<core::type::Vector>()->Width(), 4u);
     EXPECT_EQ(TypeOf(vec4_u32)->As<core::type::Vector>()->Width(), 4u);
@@ -2328,9 +2385,9 @@ TEST_F(ResolverValueConstructorValidationTest, InferVecNoArgs) {
     ASSERT_TRUE(TypeOf(v2)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(v3)->Is<core::type::Vector>());
     ASSERT_TRUE(TypeOf(v4)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(v2)->As<core::type::Vector>()->type()->Is<core::type::AbstractInt>());
-    EXPECT_TRUE(TypeOf(v3)->As<core::type::Vector>()->type()->Is<core::type::AbstractInt>());
-    EXPECT_TRUE(TypeOf(v4)->As<core::type::Vector>()->type()->Is<core::type::AbstractInt>());
+    EXPECT_TRUE(TypeOf(v2)->As<core::type::Vector>()->Type()->Is<core::type::AbstractInt>());
+    EXPECT_TRUE(TypeOf(v3)->As<core::type::Vector>()->Type()->Is<core::type::AbstractInt>());
+    EXPECT_TRUE(TypeOf(v4)->As<core::type::Vector>()->Type()->Is<core::type::AbstractInt>());
     EXPECT_EQ(TypeOf(v2)->As<core::type::Vector>()->Width(), 2u);
     EXPECT_EQ(TypeOf(v3)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_EQ(TypeOf(v4)->As<core::type::Vector>()->Width(), 4u);

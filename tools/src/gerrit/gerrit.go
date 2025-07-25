@@ -345,3 +345,19 @@ func (g *Gerrit) SetReadyForReview(changeID, message, reviewer string) error {
 	}
 	return nil
 }
+
+// ListAccessRights retrieves the access rights for the client for the specified
+// projects within the client's Gerrit instance.
+func (g *Gerrit) ListAccessRights(
+	ctx context.Context, projects ...string) (*map[string]gerrit.ProjectAccessInfo, error) {
+
+	listOptions := gerrit.ListAccessRightsOptions{
+		Project: projects,
+	}
+	accessInfo, _, err := g.client.Access.ListAccessRights(&listOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return accessInfo, nil
+}

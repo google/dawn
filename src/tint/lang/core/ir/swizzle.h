@@ -42,14 +42,33 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
     /// The offset in Operands() for the object being swizzled
     static constexpr size_t kObjectOperandOffset = 0;
 
+    /// The fixed number of results returned by swizzle instructions
+    static constexpr size_t kNumResults = 1;
+
+    /// The fixed number of operands expected for swizzle instructions
+    /// @note indices for swizzle are handled separately from the operands, so not included here
+    static constexpr size_t kNumOperands = 1;
+
+    /// Minimum number of indices expected for swizzle instructions
+    static constexpr size_t kMinNumIndices = 1;
+
+    /// Maximum number of indices expected for swizzle instructions
+    static constexpr size_t kMaxNumIndices = 4;
+
+    /// Maximum value of any indices for swizzle instructions
+    static constexpr uint32_t kMaxIndexValue = 3;
+
     /// Constructor (no results, no operands)
-    Swizzle();
+    /// @param id the instruction id
+    explicit Swizzle(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param object the object being swizzled
     /// @param indices the indices to swizzle
-    Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
+    Swizzle(Id id, InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
+
     ~Swizzle() override;
 
     /// @copydoc Instruction::Clone()

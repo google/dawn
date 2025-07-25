@@ -1,47 +1,49 @@
 #version 310 es
 
+
+struct UBO {
+  int dynamic_idx;
+};
+
+struct Result {
+  int member_0;
+};
+
 struct S {
   int data[64];
 };
 
+layout(binding = 0, std140)
+uniform ubo_block_1_ubo {
+  UBO inner;
+} v;
+layout(binding = 1, std430)
+buffer result_block_1_ssbo {
+  Result inner;
+} v_1;
 shared S s;
-void tint_zero_workgroup_memory(uint local_idx) {
+void f_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 64u); idx = (idx + 1u)) {
-      uint i = idx;
-      s.data[i] = 0;
+    uint v_2 = 0u;
+    v_2 = tint_local_index;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 64u)) {
+        break;
+      }
+      s.data[v_3] = 0;
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
   barrier();
+  uint v_4 = min(uint(v.inner.dynamic_idx), 63u);
+  s.data[v_4] = 1;
+  v_1.inner.member_0 = s.data[3u];
 }
-
-struct UBO {
-  int dynamic_idx;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-};
-
-layout(binding = 0, std140) uniform ubo_block_ubo {
-  UBO inner;
-} ubo;
-
-struct Result {
-  int tint_symbol;
-};
-
-layout(binding = 1, std430) buffer result_block_ssbo {
-  Result inner;
-} result;
-
-void f(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  s.data[ubo.inner.dynamic_idx] = 1;
-  result.inner.tint_symbol = s.data[3];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f(gl_LocalInvocationIndex);
-  return;
+  f_inner(gl_LocalInvocationIndex);
 }

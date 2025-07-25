@@ -59,7 +59,7 @@ class SharedBufferMemoryBase : public SharedResourceMemory {
 
   protected:
     SharedBufferMemoryBase(DeviceBase* device,
-                           const char* label,
+                           StringView label,
                            const SharedBufferMemoryProperties& properties);
     SharedBufferMemoryBase(DeviceBase* device,
                            const SharedBufferMemoryDescriptor* descriptor,

@@ -41,6 +41,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // Result holds the result of a CTS test
@@ -186,19 +187,6 @@ type ExecutionMode string
 // Lists of test results by execution mode.
 type ResultsByExecutionMode map[ExecutionMode]List
 
-// Variant is a collection of tags that uniquely identify a test
-// configuration (e.g the combination of OS, GPU, validation-modes, etc).
-type Variant = Tags
-
-// Variants returns the list of unique tags (variants) across all results.
-func (l List) Variants() []Variant {
-	tags := container.NewMap[string, Variant]()
-	for _, r := range l {
-		tags.Add(TagsToString(r.Tags), r.Tags)
-	}
-	return tags.Values()
-}
-
 // TransformTags returns the list of results with the tags transformed using f.
 // TransformTags assumes that f will return the same output for the same input.
 func (l List) TransformTags(f func(Tags) Tags) List {
@@ -328,14 +316,6 @@ func (l List) FilterByTags(tags Tags) List {
 	})
 }
 
-// FilterByVariant returns the results that exactly match the given tags
-func (l List) FilterByVariant(tags Tags) List {
-	str := TagsToString(tags)
-	return l.Filter(func(r Result) bool {
-		return len(r.Tags) == len(tags) && TagsToString(r.Tags) == str
-	})
-}
-
 // FilterByQuery returns the results that match the given query
 func (l List) FilterByQuery(q query.Query) List {
 	return l.Filter(func(r Result) bool {
@@ -358,24 +338,30 @@ func (l List) Statuses() Statuses {
 	return set
 }
 
-// StatusTree is a query tree of statuses
-type StatusTree = query.Tree[Status]
-
-// StatusTree returns a query.Tree from the List, with the Status as the tree
-// node data.
-func (l List) StatusTree() (StatusTree, error) {
-	tree := StatusTree{}
-	for _, r := range l {
-		if err := tree.Add(r.Query, r.Status); err != nil {
-			return StatusTree{}, err
-		}
-	}
-	return tree, nil
-}
-
 // Load loads the result list from the file with the given path
 func Load(path string) (ResultsByExecutionMode, error) {
 	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	results, err := Read(file)
+	if err != nil {
+		return nil, fmt.Errorf("while reading '%v': %w", path, err)
+	}
+	return results, nil
+}
+
+// Identical to Load, but using the provided fsReader instead of directly using
+// os.
+// TODO(crbug.com/344014313): Merge this with Load once all uses have switched
+// to the wrapper version.
+func LoadWithWrapper(
+	path string,
+	fsReader oswrapper.FilesystemReader) (ResultsByExecutionMode, error) {
+
+	file, err := fsReader.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -395,6 +381,27 @@ func Save(path string, results ResultsByExecutionMode) error {
 		return err
 	}
 	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return Write(file, results)
+}
+
+// Identical to Save, but using the provided fsWriter instead of directly using
+// os.
+// TODO(crbug.com/344014313): Merge this with Save once all uses have switched
+// to the wrapper version.
+func SaveWithWrapper(
+	path string,
+	results ResultsByExecutionMode,
+	fsWriter oswrapper.FilesystemWriter) error {
+
+	dir := filepath.Dir(path)
+	if err := fsWriter.MkdirAll(dir, 0777); err != nil {
+		return err
+	}
+	file, err := fsWriter.Create(path)
 	if err != nil {
 		return err
 	}

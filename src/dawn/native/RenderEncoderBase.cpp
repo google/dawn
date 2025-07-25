@@ -32,7 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Constants.h"
-#include "dawn/common/Log.h"
+#include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
@@ -44,7 +44,7 @@
 namespace dawn::native {
 
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
-                                     const char* label,
+                                     StringView label,
                                      EncodingContext* encodingContext,
                                      Ref<AttachmentState> attachmentState,
                                      bool depthReadOnly,
@@ -61,7 +61,7 @@ RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                      EncodingContext* encodingContext,
                                      ErrorTag errorTag,
-                                     const char* label)
+                                     StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
       mIndirectDrawMetadata(device->GetLimits()),
       mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
@@ -117,7 +117,7 @@ void RenderEncoderBase::APIDraw(uint32_t vertexCount,
 
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
 
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
 
@@ -164,7 +164,7 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
 
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
 
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
 
@@ -204,7 +204,7 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
 
@@ -233,15 +233,19 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
 
                 mIndirectDrawMetadata.AddIndirectDraw(indirectBuffer, indirectOffset,
                                                       duplicateBaseVertexInstance, cmd);
+
+                // We only set usage as `kIndirectBufferForFrontendValidation` so that the indirect
+                // usage can be ignored in the backends because `indirectBuffer` is actually not
+                // used as an indirect buffer.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
             } else {
                 cmd->indirectBuffer = indirectBuffer;
                 cmd->indirectOffset = indirectOffset;
-            }
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unnecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
 
             mDrawCount++;
 
@@ -259,7 +263,7 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
                 DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
 
@@ -294,21 +298,239 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                     mCommandBufferState.GetIndexFormat(), mCommandBufferState.GetIndexBufferSize(),
                     mCommandBufferState.GetIndexBufferOffset(), indirectBuffer, indirectOffset,
                     duplicateBaseVertexInstance, cmd);
+
+                // We only set usage as `kIndirectBufferForFrontendValidation` so that the indirect
+                // usage can be ignored in the backends because `indirectBuffer` is actually not
+                // used as an indirect buffer.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
             } else {
                 cmd->indirectBuffer = indirectBuffer;
                 cmd->indirectOffset = indirectOffset;
-            }
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
 
             mDrawCount++;
 
             return {};
         },
         "encoding %s.DrawIndexedIndirect(%s, %u).", this, indirectBuffer, indirectOffset);
+}
+
+void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
+                                             uint64_t indirectOffset,
+                                             uint32_t maxDrawCount,
+                                             BufferBase* drawCountBuffer,
+                                             uint64_t drawCountBufferOffset) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::MultiDrawIndirect),
+                                "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
+
+                DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+
+                DAWN_INVALID_IF(indirectOffset % 4 != 0,
+                                "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
+
+                DAWN_INVALID_IF(indirectOffset >= indirectBuffer->GetSize(),
+                                "Indirect offset (%u) is larger than or equal to the size (%u) of "
+                                "the indirect buffer.",
+                                indirectOffset, indirectBuffer->GetSize());
+
+                // maxDrawCount * kDrawIndirectSize can't overflow because
+                // kDrawIndirectSize is a uint64_t which results in a uint64_t
+                DAWN_INVALID_IF(
+                    indirectBuffer->GetSize() - indirectOffset < maxDrawCount * kDrawIndirectSize,
+                    "Indirect Buffer size (%u) and offset (%u) can not hold maxDrawCount "
+                    "(%u) draw commands.",
+                    indirectBuffer->GetSize(), indirectOffset, maxDrawCount);
+
+                // draw count buffer is optional
+                if (drawCountBuffer != nullptr) {
+                    DAWN_TRY(GetDevice()->ValidateObject(drawCountBuffer));
+                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect));
+
+                    DAWN_INVALID_IF(drawCountBufferOffset % 4 != 0,
+                                    "Draw count buffer offset (%u) is not a multiple of 4.",
+                                    drawCountBufferOffset);
+
+                    DAWN_INVALID_IF(
+                        drawCountBufferOffset >= drawCountBuffer->GetSize(),
+                        "Draw count buffer offset (%u) is larger than or equal to the size "
+                        "(%u) of the draw count buffer.",
+                        drawCountBufferOffset, drawCountBuffer->GetSize());
+
+                    // Can't underflow because the offset is checked to be smaller than the buffer.
+                    DAWN_INVALID_IF(drawCountBuffer->GetSize() - drawCountBufferOffset < 4,
+                                    "Draw count buffer offset (%u) is out of bounds of the draw "
+                                    "count buffer %s size (%u).",
+                                    drawCountBufferOffset, drawCountBuffer,
+                                    drawCountBuffer->GetSize());
+                }
+
+                DAWN_TRY(mCommandBufferState.ValidateCanDraw());
+
+                if (!GetDevice()->HasFlexibleTextureViews()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
+            }
+
+            MultiDrawIndirectCmd* cmd =
+                allocator->Allocate<MultiDrawIndirectCmd>(Command::MultiDrawIndirect);
+
+            cmd->indirectBuffer = indirectBuffer;
+            cmd->indirectOffset = indirectOffset;
+            cmd->maxDrawCount = maxDrawCount;
+            cmd->drawCountBuffer = drawCountBuffer;
+            cmd->drawCountOffset = drawCountBufferOffset;
+
+            bool duplicateBaseVertexInstance =
+                GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                    mCommandBufferState.GetRenderPipeline());
+
+            mIndirectDrawMetadata.AddMultiDrawIndirect(
+                mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
+                duplicateBaseVertexInstance, cmd);
+
+            if (GetDevice()->IsValidationEnabled() ||
+                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+                // We only set usage as `kIndirectBufferForFrontendValidation` because
+                // `indirectBuffer` may not be used as an indirect buffer. The usage of
+                // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in
+                // `EncodingContext::ExitRenderPass()`, which is only called when above conditions
+                // are both met.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
+            if (drawCountBuffer != nullptr) {
+                mUsageTracker.BufferUsedAs(drawCountBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
+
+            mDrawCount += maxDrawCount;
+
+            return {};
+        },
+        "encoding %s.MultiDrawIndirect(%s, %u, %u, %s, %u).", this, indirectBuffer, indirectOffset,
+        maxDrawCount, drawCountBuffer, drawCountBufferOffset);
+}
+
+void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
+                                                    uint64_t indirectOffset,
+                                                    uint32_t maxDrawCount,
+                                                    BufferBase* drawCountBuffer,
+                                                    uint64_t drawCountBufferOffset) {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::MultiDrawIndirect),
+                                "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
+
+                DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+
+                DAWN_INVALID_IF(indirectOffset % 4 != 0,
+                                "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
+
+                DAWN_INVALID_IF(indirectOffset >= indirectBuffer->GetSize(),
+                                "Indirect offset (%u) is larger than or equal to the size (%u) of "
+                                "the indirect buffer.",
+                                indirectOffset, indirectBuffer->GetSize());
+
+                // maxDrawCount * kDrawIndexedIndirectSize can't overflow because
+                // kDrawIndexedIndirectSize is a uint64_t which results in a uint64_t
+                DAWN_INVALID_IF(
+                    indirectBuffer->GetSize() - indirectOffset <
+                        maxDrawCount * kDrawIndexedIndirectSize,
+                    "Indirect Buffer size (%u) and offset (%u) can not hold maxDrawCount "
+                    "(%u) draw commands.",
+                    indirectBuffer->GetSize(), indirectOffset, maxDrawCount);
+
+                // draw count buffer is optional
+                if (drawCountBuffer != nullptr) {
+                    DAWN_TRY(GetDevice()->ValidateObject(drawCountBuffer));
+                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect));
+
+                    DAWN_INVALID_IF(drawCountBufferOffset % 4 != 0,
+                                    "Draw count buffer offset (%u) is not a multiple of 4.",
+                                    drawCountBufferOffset);
+
+                    DAWN_INVALID_IF(
+                        drawCountBufferOffset >= drawCountBuffer->GetSize(),
+                        "Draw count buffer offset (%u) is larger than or equal to the size "
+                        "(%u) of the draw count buffer.",
+                        drawCountBufferOffset, drawCountBuffer->GetSize());
+
+                    // Can't underflow because the offset is checked to be smaller than the buffer.
+                    DAWN_INVALID_IF(drawCountBuffer->GetSize() - drawCountBufferOffset < 4,
+                                    "Draw count buffer offset (%u) is out of bounds of the draw "
+                                    "count buffer %s size (%u).",
+                                    drawCountBufferOffset, drawCountBuffer,
+                                    drawCountBuffer->GetSize());
+                }
+
+                DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
+
+                if (!GetDevice()->HasFlexibleTextureViews()) {
+                    DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
+                }
+            }
+
+            MultiDrawIndexedIndirectCmd* cmd =
+                allocator->Allocate<MultiDrawIndexedIndirectCmd>(Command::MultiDrawIndexedIndirect);
+
+            cmd->indirectBuffer = indirectBuffer;
+            cmd->indirectOffset = indirectOffset;
+            cmd->maxDrawCount = maxDrawCount;
+            cmd->drawCountBuffer = drawCountBuffer;
+            cmd->drawCountOffset = drawCountBufferOffset;
+
+            bool duplicateBaseVertexInstance =
+                GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                    mCommandBufferState.GetRenderPipeline());
+
+            mIndirectDrawMetadata.AddMultiDrawIndexedIndirect(
+                mCommandBufferState.GetIndexBuffer(), mCommandBufferState.GetIndexFormat(),
+                mCommandBufferState.GetIndexBufferSize(),
+                mCommandBufferState.GetIndexBufferOffset(),
+                mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
+                duplicateBaseVertexInstance, cmd);
+
+            if (GetDevice()->IsValidationEnabled() ||
+                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+                // We only set usage as `kIndirectBufferForFrontendValidation` because
+                // `indirectBuffer` may not be used as an indirect buffer. The usage of
+                // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in
+                // `EncodingContext::ExitRenderPass()`, which is only called when above conditions
+                // are both met.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
+            if (drawCountBuffer != nullptr) {
+                mUsageTracker.BufferUsedAs(drawCountBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
+
+            mDrawCount += maxDrawCount;
+
+            return {};
+        },
+        "encoding %s.MultiDrawIndexedIndirect(%s, %u, %u, %s, %u).", this, indirectBuffer,
+        indirectOffset, maxDrawCount, drawCountBuffer, drawCountBufferOffset);
 }
 
 void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
@@ -388,7 +610,7 @@ void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
                 }
             }
 
-            mCommandBufferState.SetIndexBuffer(format, offset, size);
+            mCommandBufferState.SetIndexBuffer(buffer, format, offset, size);
 
             SetIndexBufferCmd* cmd =
                 allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
@@ -497,11 +719,7 @@ void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
 
             return {};
         },
-        // TODO(dawn:1190): For unknown reasons formatting this message fails if `group` is used
-        // as a string value in the message. This despite the exact same code working as
-        // intended in ComputePassEncoder::APISetBindGroup. Replacing with a static [BindGroup]
-        // until the reason for the failure can be determined.
-        "encoding %s.SetBindGroup(%u, [BindGroup], %u, ...).", this, groupIndexIn,
+        "encoding %s.SetBindGroup(%u, %s, %u, ...).", this, groupIndexIn, group,
         dynamicOffsetCount);
 }
 

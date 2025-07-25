@@ -37,13 +37,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Return);
 
 namespace tint::core::ir {
 
-Return::Return() = default;
+Return::Return(Id id) : Base(id) {}
 
-Return::Return(Function* func) {
+Return::Return(Id id, Function* func) : Base(id) {
     AddOperand(Return::kFunctionOperandOffset, func);
 }
 
-Return::Return(Function* func, ir::Value* arg) {
+Return::Return(Id id, Function* func, ir::Value* arg) : Base(id) {
     AddOperand(Return::kFunctionOperandOffset, func);
     AddOperand(Return::kArgsOperandOffset, arg);
 }
@@ -53,9 +53,9 @@ Return::~Return() = default;
 Return* Return::Clone(CloneContext& ctx) {
     auto* fn = ctx.Remap(Func());
     if (auto* val = Value()) {
-        return ctx.ir.allocators.instructions.Create<Return>(fn, ctx.Remap(val));
+        return ctx.ir.CreateInstruction<Return>(fn, ctx.Remap(val));
     }
-    return ctx.ir.allocators.instructions.Create<Return>(fn);
+    return ctx.ir.CreateInstruction<Return>(fn);
 }
 
 Function* Return::Func() {

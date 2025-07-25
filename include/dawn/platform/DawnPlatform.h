@@ -28,12 +28,13 @@
 #ifndef INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
 #define INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_
 
+#include <webgpu/webgpu.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 
 #include "dawn/platform/dawn_platform_export.h"
-#include "dawn/webgpu.h"
 
 namespace dawn::platform {
 
@@ -72,6 +73,10 @@ class DAWN_PLATFORM_EXPORT WaitableEvent {
   public:
     WaitableEvent() = default;
     virtual ~WaitableEvent() = default;
+
+    WaitableEvent(const WaitableEvent&) = delete;
+    WaitableEvent& operator=(const WaitableEvent&) = delete;
+
     virtual void Wait() = 0;        // Wait for completion
     virtual bool IsComplete() = 0;  // Non-blocking check if the event is complete
 };
@@ -82,6 +87,10 @@ class DAWN_PLATFORM_EXPORT WorkerTaskPool {
   public:
     WorkerTaskPool() = default;
     virtual ~WorkerTaskPool() = default;
+
+    WorkerTaskPool(const WorkerTaskPool&) = delete;
+    WorkerTaskPool& operator=(const WorkerTaskPool&) = delete;
+
     virtual std::unique_ptr<WaitableEvent> PostWorkerTask(PostWorkerTaskCallback,
                                                           void* userdata) = 0;
 };
@@ -90,7 +99,9 @@ class DAWN_PLATFORM_EXPORT WorkerTaskPool {
 // in `namespace features`.
 enum class Features {
     kWebGPUUseDXC,
-    kWebGPUUseTintIR,
+    kWebGPUUseVulkanMemoryModel,
+    kWebGPUEnableRangeAnalysisForRobustness,
+    kWebGPUUseSpirv14,
 };
 
 class DAWN_PLATFORM_EXPORT Platform {
@@ -152,8 +163,5 @@ class DAWN_PLATFORM_EXPORT Platform {
 };
 
 }  // namespace dawn::platform
-
-// TODO(dawn:824): Remove once the deprecation period is passed.
-namespace dawn_platform = dawn::platform;
 
 #endif  // INCLUDE_DAWN_PLATFORM_DAWNPLATFORM_H_

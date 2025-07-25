@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_BACKENDD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_BACKENDD3D12_H_
 
+#include <string>
+#include <variant>
 #include <vector>
 
 #include "dawn/native/BackendConnection.h"
@@ -39,11 +41,22 @@ namespace dawn::native::d3d12 {
 
 class PlatformFunctions;
 
+// If DXC version information is not available due to no DXC binary or error occurs when acquiring
+// version, DxcUnavailable indicates the version information being unavailable and holds the
+// detailed error information.
+struct DxcUnavailable {
+    std::string ErrorMessage;
+};
+
 class Backend final : public d3d::Backend {
   public:
     explicit Backend(InstanceBase* instance);
 
     MaybeError Initialize();
+    MaybeError EnsureDXC();
+    ComPtr<IDxcLibrary> GetDxcLibrary() const;
+    ComPtr<IDxcCompiler3> GetDxcCompiler() const;
+    ComPtr<IDxcValidator> GetDxcValidator() const;
 
     const PlatformFunctions* GetFunctions() const;
 
@@ -52,6 +65,10 @@ class Backend final : public d3d::Backend {
         ComPtr<IDXGIAdapter> dxgiAdapter) override;
 
   private:
+    ComPtr<IDxcLibrary> mDxcLibrary;
+    ComPtr<IDxcCompiler3> mDxcCompiler;
+    ComPtr<IDxcValidator> mDxcValidator;
+
     using Base = d3d::Backend;
 };
 

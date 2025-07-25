@@ -6,17 +6,20 @@ struct VertexInputs {
   float16_t loc4;
   vector<float16_t, 3> loc5;
 };
-struct tint_symbol_1 {
-  int loc0 : TEXCOORD0;
-  uint loc1 : TEXCOORD1;
-  float loc2 : TEXCOORD2;
-  float4 loc3 : TEXCOORD3;
-  float16_t loc4 : TEXCOORD4;
-  vector<float16_t, 3> loc5 : TEXCOORD5;
+
+struct main_outputs {
+  float4 tint_symbol : SV_Position;
 };
-struct tint_symbol_2 {
-  float4 value : SV_Position;
+
+struct main_inputs {
+  int VertexInputs_loc0 : TEXCOORD0;
+  uint VertexInputs_loc1 : TEXCOORD1;
+  float VertexInputs_loc2 : TEXCOORD2;
+  float4 VertexInputs_loc3 : TEXCOORD3;
+  float16_t VertexInputs_loc4 : TEXCOORD4;
+  vector<float16_t, 3> VertexInputs_loc5 : TEXCOORD5;
 };
+
 
 float4 main_inner(VertexInputs inputs) {
   int i = inputs.loc0;
@@ -28,10 +31,9 @@ float4 main_inner(VertexInputs inputs) {
   return (0.0f).xxxx;
 }
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  VertexInputs tint_symbol_3 = {tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3, tint_symbol.loc4, tint_symbol.loc5};
-  float4 inner_result = main_inner(tint_symbol_3);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+main_outputs main(main_inputs inputs) {
+  VertexInputs v_1 = {inputs.VertexInputs_loc0, inputs.VertexInputs_loc1, inputs.VertexInputs_loc2, inputs.VertexInputs_loc3, inputs.VertexInputs_loc4, inputs.VertexInputs_loc5};
+  main_outputs v_2 = {main_inner(v_1)};
+  return v_2;
 }
+

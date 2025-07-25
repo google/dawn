@@ -1,23 +1,18 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 groupshared int v[4];
-
-int tint_workgroupUniformLoad_v_X(uint p[1]) {
+int foo(uint p_indices[1]) {
   GroupMemoryBarrierWithGroupSync();
-  int result = v[p[0]];
+  int v_1 = v[p_indices[0u]];
   GroupMemoryBarrierWithGroupSync();
-  return result;
-}
-
-int foo_v_X(uint p[1]) {
-  uint tint_symbol[1] = {p[0u]};
-  return tint_workgroupUniformLoad_v_X(tint_symbol);
+  return v_1;
 }
 
 int bar() {
-  uint tint_symbol_1[1] = (uint[1])0;
-  return foo_v_X(tint_symbol_1);
+  uint v_2[1] = {0u};
+  return foo(v_2);
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

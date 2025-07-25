@@ -3,23 +3,25 @@
         ^^^^^^^
 
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
-kernel void tint_symbol() {
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
-      return;
-    }
-    bool const _e9 = true;
-    {
-      if ((_e9 || _e9)) { break; }
+kernel void v() {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      {
+        uint2 tint_loop_idx_1 = uint2(4294967295u);
+        while(true) {
+          if (all((tint_loop_idx_1 == uint2(0u)))) {
+            break;
+          }
+          return;
+        }
+      }
+      /* unreachable */
     }
   }
-  return;
 }
-

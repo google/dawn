@@ -28,8 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_MODULE_H_
 #define SRC_TINT_LANG_CORE_IR_MODULE_H_
 
-#include <memory>
-#include <string>
+#include <utility>
 
 #include "src/tint/lang/core/constant/manager.h"
 #include "src/tint/lang/core/ir/block.h"
@@ -42,9 +41,8 @@
 #include "src/tint/utils/containers/filtered_iterator.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
-#include "src/tint/utils/id/generation_id.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
-#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
 namespace tint::core::ir {
@@ -56,6 +54,9 @@ class Module {
 
     /// Map of value to name
     Hashmap<const Value*, Symbol, 32> value_to_name_;
+
+    // The source information for a value
+    Hashmap<const Value*, Source, 32> value_to_source_;
 
     /// A predicate function that returns true if the instruction or value is alive.
     struct IsAlive {
@@ -77,6 +78,25 @@ class Module {
     /// @returns a reference to this module
     Module& operator=(Module&& o);
 
+    /// Creates a new `TYPE` instruction owned by the module
+    /// When the Module is destructed the object will be destructed and freed.
+    /// @param args the arguments to pass to the constructor
+    /// @returns the pointer to the instruction
+    template <typename TYPE, typename... ARGS>
+    TYPE* CreateInstruction(ARGS&&... args) {
+        return allocators_.instructions.Create<TYPE>(NextInstructionId(),
+                                                     std::forward<ARGS>(args)...);
+    }
+
+    /// Creates a new `TYPE` value owned by the module
+    /// When the Module is destructed the object will be destructed and freed.
+    /// @param args the arguments to pass to the constructor
+    /// @returns the pointer to the value
+    template <typename TYPE, typename... ARGS>
+    TYPE* CreateValue(ARGS&&... args) {
+        return allocators_.values.Create<TYPE>(std::forward<ARGS>(args)...);
+    }
+
     /// @param inst the instruction
     /// @return the name of the given instruction, or an invalid symbol if the instruction is not
     /// named or does not have a single return value.
@@ -91,6 +111,11 @@ class Module {
     /// @note requires the instruction be a single result instruction.
     void SetName(Instruction* inst, std::string_view name);
 
+    /// @param inst the instruction to set the name of
+    /// @param name the desired name of the value.
+    /// @note requires the instruction be a single result instruction.
+    void SetName(Instruction* inst, Symbol name);
+
     /// @param value the value to name.
     /// @param name the desired name of the value. May be suffixed on collision.
     void SetName(Value* value, std::string_view name);
@@ -103,6 +128,25 @@ class Module {
     /// @param value the value to remove the name from
     void ClearName(Value* value);
 
+    /// @param inst the instruction to set the source of
+    /// @param src the source
+    /// @note requires the instruction be a single result instruction.
+    void SetSource(Instruction* inst, Source src);
+
+    /// @param value the value to set the source
+    /// @param src the source
+    void SetSource(Value* value, Source src);
+
+    /// @param inst the instruction
+    /// @return the source of the given instruction, or an empty source if the instruction does not
+    /// have a source or does not have a single return value.
+    Source SourceOf(const Instruction* inst) const;
+
+    /// @param value the value
+    /// @return the source of the given value, or an empty source if the value does not have a
+    /// source.
+    Source SourceOf(const Value* value) const;
+
     /// @return the type manager for the module
     core::type::Manager& Types() { return constant_values.types; }
 
@@ -111,22 +155,22 @@ class Module {
 
     /// @returns a iterable of all the alive instructions
     FilteredIterable<IsAlive, BlockAllocator<Instruction>::View> Instructions() {
-        return {allocators.instructions.Objects()};
+        return {allocators_.instructions.Objects()};
     }
 
     /// @returns a iterable of all the alive instructions
     FilteredIterable<IsAlive, BlockAllocator<Instruction>::ConstView> Instructions() const {
-        return {allocators.instructions.Objects()};
+        return {allocators_.instructions.Objects()};
     }
 
     /// @returns a iterable of all the alive values
     FilteredIterable<IsAlive, BlockAllocator<Value>::View> Values() {
-        return {allocators.values.Objects()};
+        return {allocators_.values.Objects()};
     }
 
     /// @returns a iterable of all the alive values
     FilteredIterable<IsAlive, BlockAllocator<Value>::ConstView> Values() const {
-        return {allocators.values.Objects()};
+        return {allocators_.values.Objects()};
     }
 
     /// @returns the functions in the module, in dependency order
@@ -134,20 +178,15 @@ class Module {
     /// @returns the functions in the module, in dependency order
     Vector<const Function*, 16> DependencyOrderedFunctions() const;
 
+    /// Removes `func` from the module and destroys it.
+    /// @param func the function to destroy
+    void Destroy(Function* func);
+
     /// The block allocator
     BlockAllocator<Block> blocks;
 
     /// The constant value manager
     core::constant::Manager constant_values;
-
-    /// The various BlockAllocators for the module
-    struct {
-        /// The instruction allocator
-        BlockAllocator<Instruction> instructions;
-
-        /// The value allocator
-        BlockAllocator<Value> values;
-    } allocators;
 
     /// List of functions in the module.
     Vector<ConstPropagatingPtr<Function>, 8> functions;
@@ -160,6 +199,21 @@ class Module {
 
     /// The map of core::constant::Value to their ir::Constant.
     Hashmap<const core::constant::Value*, ir::Constant*, 16> constants;
+
+  private:
+    /// @returns the next instruction id for this module
+    Instruction::Id NextInstructionId() { return next_instruction_id_++; }
+
+    /// The various BlockAllocators for the module
+    struct {
+        /// The instruction allocator
+        BlockAllocator<Instruction> instructions;
+
+        /// The value allocator
+        BlockAllocator<Value> values;
+    } allocators_;
+
+    Instruction::Id next_instruction_id_ = 0;
 };
 
 }  // namespace tint::core::ir

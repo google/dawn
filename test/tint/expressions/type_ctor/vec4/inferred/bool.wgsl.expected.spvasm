@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 12
 ; Schema: 0
                OpCapability Shader
@@ -11,14 +11,14 @@
                OpName %unused_entry_point "unused_entry_point"
        %bool = OpTypeBool
      %v4bool = OpTypeVector %bool 4
-          %3 = OpConstantNull %bool
-       %true = OpConstantTrue %bool
-          %5 = OpConstantComposite %v4bool %3 %true %3 %true
 %_ptr_Private_v4bool = OpTypePointer Private %v4bool
+      %false = OpConstantFalse %bool
+       %true = OpConstantTrue %bool
+          %5 = OpConstantComposite %v4bool %false %true %false %true
           %v = OpVariable %_ptr_Private_v4bool Private %5
        %void = OpTypeVoid
-          %8 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %8
+         %10 = OpTypeFunction %void
+%unused_entry_point = OpFunction %void None %10
          %11 = OpLabel
                OpReturn
                OpFunctionEnd

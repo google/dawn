@@ -1,55 +1,64 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 26
+; Generator: Google Tint Compiler; 1
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
+         %31 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %arr_block "arr_block"
-               OpMemberName %arr_block 0 "inner"
-               OpName %arr "arr"
-               OpName %f2_arr "f2_arr"
-               OpName %f1_arr "f1_arr"
-               OpName %f0_arr "f0_arr"
+               OpMemberName %arr_block_tint_explicit_layout 0 "inner"
+               OpName %arr_block_tint_explicit_layout "arr_block_tint_explicit_layout"
+               OpName %f2 "f2"
+               OpName %f1 "f1"
+               OpName %f0 "f0"
                OpName %main "main"
-               OpDecorate %arr_block Block
-               OpMemberDecorate %arr_block 0 Offset 0
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpDecorate %arr Binding 0
-               OpDecorate %arr DescriptorSet 0
+               OpMemberDecorate %arr_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %arr_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-  %arr_block = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_arr_block = OpTypePointer StorageBuffer %arr_block
-        %arr = OpVariable %_ptr_StorageBuffer_arr_block StorageBuffer
-          %6 = OpTypeFunction %uint
-       %void = OpTypeVoid
-         %16 = OpTypeFunction %void
+%arr_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_arr_block_tint_explicit_layout = OpTypePointer StorageBuffer %arr_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_arr_block_tint_explicit_layout StorageBuffer
+          %7 = OpTypeFunction %uint
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
      %uint_0 = OpConstant %uint 0
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
-         %22 = OpConstantNull %int
+      %int_0 = OpConstant %int 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-     %f2_arr = OpFunction %uint None %6
+         %f2 = OpFunction %uint None %7
           %8 = OpLabel
-          %9 = OpArrayLength %uint %arr 0
-               OpReturnValue %9
-               OpFunctionEnd
-     %f1_arr = OpFunction %uint None %6
-         %11 = OpLabel
-         %12 = OpFunctionCall %uint %f2_arr
+          %9 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %12 = OpArrayLength %uint %1 0
                OpReturnValue %12
                OpFunctionEnd
-     %f0_arr = OpFunction %uint None %6
+         %f1 = OpFunction %uint None %7
          %14 = OpLabel
-         %15 = OpFunctionCall %uint %f1_arr
+         %15 = OpFunctionCall %uint %f2
                OpReturnValue %15
                OpFunctionEnd
-       %main = OpFunction %void None %16
-         %19 = OpLabel
-         %24 = OpAccessChain %_ptr_StorageBuffer_uint %arr %uint_0 %22
-         %25 = OpFunctionCall %uint %f0_arr
-               OpStore %24 %25
+         %f0 = OpFunction %uint None %7
+         %17 = OpLabel
+         %18 = OpFunctionCall %uint %f1
+               OpReturnValue %18
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %22 = OpLabel
+         %23 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %24 = OpArrayLength %uint %1 0
+         %25 = OpISub %uint %24 %uint_1
+         %27 = OpBitcast %uint %int_0
+         %30 = OpExtInst %uint %31 UMin %27 %25
+         %32 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %30
+         %34 = OpFunctionCall %uint %f0
+               OpStore %32 %34 None
                OpReturn
                OpFunctionEnd

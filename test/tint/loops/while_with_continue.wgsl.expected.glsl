@@ -1,15 +1,30 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
 int f() {
   int i = 0;
-  while((i < 4)) {
-    i = (i + 1);
-    continue;
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if ((i < 4)) {
+      } else {
+        break;
+      }
+      uint v = uint(i);
+      i = int((v + uint(1)));
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
+    }
   }
   return i;
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

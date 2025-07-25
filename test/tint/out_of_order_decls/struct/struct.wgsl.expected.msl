@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct S2 {
   int m;
 };
@@ -11,6 +11,4 @@ struct S1 {
 
 fragment void f() {
   S1 v = {};
-  return;
 }
-

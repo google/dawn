@@ -351,13 +351,13 @@ void UniformBufferUpdatePerf::Step() {
 
         // Return the staging buffer once it's done with the last usage and re-mapped.
         if (GetParam().uploadMethod == UploadMethod::MultipleStagingBuffer) {
-            stagingBuffer.MapAsync(wgpu::MapMode::Write, 0, GetBufferSize(),
-                                   wgpu::CallbackMode::AllowProcessEvents,
-                                   [this, stagingBuffer](wgpu::MapAsyncStatus status, const char*) {
-                                       if (status == wgpu::MapAsyncStatus::Success) {
-                                           this->ReturnStagingBuffer(stagingBuffer);
-                                       }
-                                   });
+            stagingBuffer.MapAsync(
+                wgpu::MapMode::Write, 0, GetBufferSize(), wgpu::CallbackMode::AllowProcessEvents,
+                [this, stagingBuffer](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                    if (status == wgpu::MapAsyncStatus::Success) {
+                        this->ReturnStagingBuffer(stagingBuffer);
+                    }
+                });
         }
 
         switch (GetParam().uniformBuffer) {
@@ -371,7 +371,7 @@ void UniformBufferUpdatePerf::Step() {
                     uniformBuffer.MapAsync(
                         wgpu::MapMode::Write, 0, GetBufferSize(),
                         wgpu::CallbackMode::AllowProcessEvents,
-                        [this, uniformBuffer](wgpu::MapAsyncStatus status, const char*) {
+                        [this, uniformBuffer](wgpu::MapAsyncStatus status, wgpu::StringView) {
                             if (status == wgpu::MapAsyncStatus::Success) {
                                 this->ReturnUniformBuffer(uniformBuffer);
                             }
@@ -379,7 +379,7 @@ void UniformBufferUpdatePerf::Step() {
                 } else {
                     queue.OnSubmittedWorkDone(
                         wgpu::CallbackMode::AllowProcessEvents,
-                        [this, uniformBuffer](wgpu::QueueWorkDoneStatus status) {
+                        [this, uniformBuffer](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                             if (status == wgpu::QueueWorkDoneStatus::Success) {
                                 this->ReturnUniformBuffer(uniformBuffer);
                             }

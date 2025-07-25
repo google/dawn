@@ -1,20 +1,22 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
 struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
-atomic_compare_exchange_result_i32 atomicCompareExchangeWeak_1(device atomic_int* atomic, int compare, int value) {
-  int old_value = compare;
-  bool exchanged = atomic_compare_exchange_weak_explicit(atomic, &old_value, value, memory_order_relaxed, memory_order_relaxed);
-  return {old_value, exchanged};
+
+struct tint_module_vars_struct {
+  device atomic_int* a;
+};
+
+atomic_compare_exchange_result_i32 v_1(device atomic_int* const atomic_ptr, int cmp, int val) {
+  int old_value = cmp;
+  bool const v_2 = atomic_compare_exchange_weak_explicit(atomic_ptr, (&old_value), val, memory_order_relaxed, memory_order_relaxed);
+  return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_2};
 }
 
-kernel void compute_main(device atomic_int* tint_symbol_1 [[buffer(0)]]) {
-  atomic_compare_exchange_result_i32 const tint_symbol = atomicCompareExchangeWeak_1(tint_symbol_1, 1, 1);
-  int const v = tint_symbol.old_value;
-  return;
+kernel void compute_main(device atomic_int* a [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
+  int const v = v_1(tint_module_vars.a, 1, 1).old_value;
 }
-

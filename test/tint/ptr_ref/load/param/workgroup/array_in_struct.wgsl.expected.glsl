@@ -1,31 +1,34 @@
 #version 310 es
 
+
 struct str {
   int arr[4];
 };
 
 shared str S;
-void tint_zero_workgroup_memory(uint local_idx) {
+int[4] func() {
+  return S.arr;
+}
+void main_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      S.arr[i] = 0;
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint v_1 = v;
+      if ((v_1 >= 4u)) {
+        break;
+      }
+      S.arr[v_1] = 0;
+      {
+        v = (v_1 + 1u);
+      }
+      continue;
     }
   }
   barrier();
+  int r[4] = func();
 }
-
-int[4] func_S_arr() {
-  return S.arr;
-}
-
-void tint_symbol(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  int r[4] = func_S_arr();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol(gl_LocalInvocationIndex);
-  return;
+  main_inner(gl_LocalInvocationIndex);
 }

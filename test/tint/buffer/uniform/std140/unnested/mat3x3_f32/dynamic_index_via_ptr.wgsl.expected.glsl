@@ -1,24 +1,22 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform m_block_ubo {
-  mat3 inner;
-} m;
-
+layout(binding = 0, std140)
+uniform m_block_std140_1_ubo {
+  vec3 inner_col0;
+  uint tint_pad_0;
+  vec3 inner_col1;
+  uint tint_pad_1;
+  vec3 inner_col2;
+} v;
 int counter = 0;
 int i() {
-  counter = (counter + 1);
+  uint v_1 = uint(counter);
+  counter = int((v_1 + uint(1)));
   return counter;
 }
-
-void f() {
-  int tint_symbol = i();
-  int p_m_i_save = tint_symbol;
-  mat3 l_m = m.inner;
-  vec3 l_m_i = m.inner[p_m_i_save];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  mat3 v_2 = mat3(v.inner_col0, v.inner_col1, v.inner_col2);
+  mat3 l_m = v_2;
+  vec3 l_m_i = v_2[min(uint(i()), 2u)];
 }

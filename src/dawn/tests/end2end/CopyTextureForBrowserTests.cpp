@@ -415,16 +415,16 @@ class CopyTextureForBrowserTests : public Parent {
                                        uint32_t initBytes) {
         wgpu::Texture texture = CreateTexture(spec, usage);
 
-        wgpu::ImageCopyTexture imageTextureInit =
-            utils::CreateImageCopyTexture(texture, spec.level, {0, 0});
+        wgpu::TexelCopyTextureInfo imageTextureInit =
+            utils::CreateTexelCopyTextureInfo(texture, spec.level, {0, 0});
 
-        wgpu::TextureDataLayout textureDataLayout;
-        textureDataLayout.offset = 0;
-        textureDataLayout.bytesPerRow = copyLayout.bytesPerRow;
-        textureDataLayout.rowsPerImage = copyLayout.rowsPerImage;
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout;
+        texelCopyBufferLayout.offset = 0;
+        texelCopyBufferLayout.bytesPerRow = copyLayout.bytesPerRow;
+        texelCopyBufferLayout.rowsPerImage = copyLayout.rowsPerImage;
 
-        this->device.GetQueue().WriteTexture(&imageTextureInit, init, initBytes, &textureDataLayout,
-                                             &copyLayout.mipSize);
+        this->device.GetQueue().WriteTexture(&imageTextureInit, init, initBytes,
+                                             &texelCopyBufferLayout, &copyLayout.mipSize);
         return texture;
     }
 
@@ -436,12 +436,12 @@ class CopyTextureForBrowserTests : public Parent {
         const wgpu::Extent3D& copySize,
         const wgpu::CopyTextureForBrowserOptions options,
         const wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcTexture, srcSpec.level, srcSpec.copyOrigin, aspect);
-        wgpu::ImageCopyTexture dstImageCopyTexture =
-            utils::CreateImageCopyTexture(dstTexture, dstSpec.level, dstSpec.copyOrigin, aspect);
-        this->device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
-                                                      &copySize, &options);
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
+            srcTexture, srcSpec.level, srcSpec.copyOrigin, aspect);
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
+            dstTexture, dstSpec.level, dstSpec.copyOrigin, aspect);
+        this->device.GetQueue().CopyTextureForBrowser(
+            &srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &copySize, &options);
     }
 
     void CheckResultInBuiltInComputePipeline(const TextureSpec& srcSpec,
@@ -719,7 +719,7 @@ class CopyTextureForBrowser_Formats
             dstTextureSpec, wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::TextureBinding |
                                 wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
 
-        // (Off-topic) spot-test the defaulting of ImageCopyTexture.aspect.
+        // (Off-topic) spot-test the defaulting of TexelCopyTextureInfo.aspect.
         wgpu::TextureAspect aspect = wgpu::TextureAspect::Undefined;
         // Perform the texture to texture copy
         RunCopyExternalImageToTexture(srcTextureSpec, srcTexture, dstTextureSpec, dstTexture,
@@ -742,12 +742,13 @@ class CopyTextureForBrowser_Formats
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
             // Perform the texture to texture copy
-            wgpu::ImageCopyTexture dstImageCopyTexture =
-                utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0});
-            wgpu::ImageCopyTexture intermediateImageCopyTexture =
-                utils::CreateImageCopyTexture(intermediateTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(dstTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyTextureInfo intermediateTexelCopyTextureInfo =
+                utils::CreateTexelCopyTextureInfo(intermediateTexture, 0, {0, 0, 0});
 
-            encoder.CopyTextureToTexture(&dstImageCopyTexture, &intermediateImageCopyTexture,
+            encoder.CopyTextureToTexture(&dstTexelCopyTextureInfo,
+                                         &intermediateTexelCopyTextureInfo,
                                          &(dstTextureSpec.textureSize));
             wgpu::CommandBuffer commands = encoder.Finish();
             queue.Submit(1, &commands);
@@ -892,7 +893,7 @@ class CopyTextureForBrowser_ColorSpace
                                                          dstTextureAlphaMode);
         }
 
-        return GetExpectedDataForSeperateSource(srcColorSpace, dstColorSpace);
+        return GetExpectedDataForSeparateSource(srcColorSpace, dstColorSpace);
     }
 
     std::vector<float> GeneratePremultipliedResult(std::vector<float> result) {
@@ -967,7 +968,7 @@ class CopyTextureForBrowser_ColorSpace
         DAWN_UNREACHABLE();
     }
 
-    std::vector<float> GetExpectedDataForSeperateSource(ColorSpace srcColorSpace,
+    std::vector<float> GetExpectedDataForSeparateSource(ColorSpace srcColorSpace,
                                                         ColorSpace dstColorSpace) {
         if (srcColorSpace == dstColorSpace) {
             return std::vector<float>{
@@ -1141,12 +1142,8 @@ DAWN_INSTANTIATE_TEST(CopyTextureForBrowser_Basic,
 // the source texture is RGBA8Unorm format.
 TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     // BGRA8UnormSrgb is unsupported in Compatibility mode.
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
-                          GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb);
-
-    // TODO(crbug.com/346356622): BGRA8unorm copy is failing on Qualcomm OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm() &&
-                          GetParam().mDstFormat == wgpu::TextureFormat::BGRA8Unorm);
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb);
 
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 

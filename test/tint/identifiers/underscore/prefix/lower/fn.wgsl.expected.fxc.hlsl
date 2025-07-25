@@ -1,3 +1,4 @@
+
 void a() {
 }
 
@@ -16,5 +17,5 @@ void _b() {
 void main() {
   b();
   _b();
-  return;
 }
+

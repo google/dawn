@@ -106,7 +106,7 @@ TEST_F(HlslWriterTest, ConstructI32Var) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int a() {
-  int v = 2;
+  int v = int(2);
   return int(v);
 }
 
@@ -223,8 +223,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, ConstructArray) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         b.Var("v", b.Construct(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
@@ -268,7 +267,7 @@ TEST_F(HlslWriterTest, ConstructStruct) {
 
 
 S a() {
-  S v = {1, 2.0f, int3(3, 4, 5)};
+  S v = {int(1), 2.0f, int3(int(3), int(4), int(5))};
   return v;
 }
 

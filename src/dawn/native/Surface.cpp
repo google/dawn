@@ -36,8 +36,13 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/SwapChain.h"
+#include "dawn/native/Texture.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/utils/WGPUHelpers.h"
+
+#if DAWN_PLATFORM_IS(WINDOWS)
+#include "dawn/common/windows_with_undefs.h"
+#endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #if defined(DAWN_USE_WINDOWS_UI)
 #include <windows.ui.core.h>
@@ -71,8 +76,11 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         case Surface::Type::WindowsCoreWindow:
             s->Append("WindowsCoreWindow");
             break;
-        case Surface::Type::WindowsSwapChainPanel:
-            s->Append("WindowsSwapChainPanel");
+        case Surface::Type::WindowsUWPSwapChainPanel:
+            s->Append("WindowsUWPSwapChainPanel");
+            break;
+        case Surface::Type::WindowsWinUISwapChainPanel:
+            s->Append("WindowsWinUISwapChainPanel");
             break;
         case Surface::Type::XlibWindow:
             s->Append("XlibWindow");
@@ -94,27 +102,30 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
     UnpackedPtr<SurfaceDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(rawDescriptor));
 
+    if (descriptor.Get<SurfaceColorManagement>()) {
+        return DAWN_VALIDATION_ERROR("SurfaceColorManagement unsupported.");
+    }
+
     wgpu::SType type;
-    DAWN_TRY_ASSIGN(type,
-                    (descriptor.ValidateBranches<Branch<SurfaceDescriptorFromAndroidNativeWindow>,
-                                                 Branch<SurfaceDescriptorFromMetalLayer>,
-                                                 Branch<SurfaceDescriptorFromWindowsHWND>,
-                                                 Branch<SurfaceDescriptorFromWindowsCoreWindow>,
-                                                 Branch<SurfaceDescriptorFromWindowsSwapChainPanel>,
-                                                 Branch<SurfaceDescriptorFromXlibWindow>,
-                                                 Branch<SurfaceDescriptorFromWaylandSurface>>()));
+    DAWN_TRY_ASSIGN(
+        type, (descriptor.ValidateBranches<
+                  Branch<SurfaceSourceAndroidNativeWindow>, Branch<SurfaceSourceMetalLayer>,
+                  Branch<SurfaceSourceWindowsHWND>, Branch<SurfaceDescriptorFromWindowsCoreWindow>,
+                  Branch<SurfaceDescriptorFromWindowsUWPSwapChainPanel>,
+                  Branch<SurfaceDescriptorFromWindowsWinUISwapChainPanel>,
+                  Branch<SurfaceSourceXlibWindow>, Branch<SurfaceSourceWaylandSurface>>()));
     switch (type) {
 #if DAWN_PLATFORM_IS(ANDROID)
-        case wgpu::SType::SurfaceDescriptorFromAndroidNativeWindow: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromAndroidNativeWindow>();
+        case wgpu::SType::SurfaceSourceAndroidNativeWindow: {
+            auto* subDesc = descriptor.Get<SurfaceSourceAndroidNativeWindow>();
             DAWN_ASSERT(subDesc != nullptr);
             DAWN_INVALID_IF(subDesc->window == nullptr, "Android window is not set.");
             return descriptor;
         }
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-        case wgpu::SType::SurfaceDescriptorFromMetalLayer: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromMetalLayer>();
+        case wgpu::SType::SurfaceSourceMetalLayer: {
+            auto* subDesc = descriptor.Get<SurfaceSourceMetalLayer>();
             DAWN_ASSERT(subDesc != nullptr);
             // Check that the layer is a CAMetalLayer (or a derived class).
             DAWN_INVALID_IF(!InheritsFromCAMetalLayer(subDesc->layer),
@@ -123,8 +134,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
         }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 #if DAWN_PLATFORM_IS(WIN32)
-        case wgpu::SType::SurfaceDescriptorFromWindowsHWND: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsHWND>();
+        case wgpu::SType::SurfaceSourceWindowsHWND: {
+            auto* subDesc = descriptor.Get<SurfaceSourceWindowsHWND>();
             DAWN_ASSERT(subDesc != nullptr);
             DAWN_INVALID_IF(IsWindow(static_cast<HWND>(subDesc->hwnd)) == 0, "Invalid HWND");
             return descriptor;
@@ -142,8 +153,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
                             "Invalid CoreWindow");
             return descriptor;
         }
-        case wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsSwapChainPanel>();
+        case wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsUWPSwapChainPanel>();
             DAWN_ASSERT(subDesc != nullptr);
             // Validate the swapChainPanel by querying for ISwapChainPanel interface
             ComPtr<ABI::Windows::UI::Xaml::Controls::ISwapChainPanel> swapChainPanel;
@@ -153,10 +164,19 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
                             "Invalid SwapChainPanel");
             return descriptor;
         }
+        case wgpu::SType::SurfaceDescriptorFromWindowsWinUISwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsWinUISwapChainPanel>();
+            DAWN_ASSERT(subDesc != nullptr);
+            // Unfortunately, checking whether this is a valid
+            // Microsoft.UI.Xaml.Controls.SwapChainPanel would require the WindowsAppSDK as a
+            // dependency, which is not trivial. So we'll only check for nullptr here.
+            DAWN_INVALID_IF(subDesc->swapChainPanel == nullptr, "SwapChainPanel is nullptr.");
+            return descriptor;
+        }
 #endif  // defined(DAWN_USE_WINDOWS_UI)
 #if defined(DAWN_USE_WAYLAND)
-        case wgpu::SType::SurfaceDescriptorFromWaylandSurface: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWaylandSurface>();
+        case wgpu::SType::SurfaceSourceWaylandSurface: {
+            auto* subDesc = descriptor.Get<SurfaceSourceWaylandSurface>();
             DAWN_ASSERT(subDesc != nullptr);
             // Unfortunately we can't check the validity of wayland objects. Only that they
             // aren't nullptr.
@@ -166,8 +186,8 @@ ResultOrError<UnpackedPtr<SurfaceDescriptor>> ValidateSurfaceDescriptor(
         }
 #endif  // defined(DAWN_USE_WAYLAND)
 #if defined(DAWN_USE_X11)
-        case wgpu::SType::SurfaceDescriptorFromXlibWindow: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromXlibWindow>();
+        case wgpu::SType::SurfaceSourceXlibWindow: {
+            auto* subDesc = descriptor.Get<SurfaceSourceXlibWindow>();
             DAWN_ASSERT(subDesc != nullptr);
             // Check the validity of the window by calling a getter function on the window that
             // returns a status code. If the window is bad the call return a status of zero. We
@@ -272,35 +292,33 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
     : ErrorMonad(),
       mInstance(instance),
       mCapabilityCache(std::make_unique<AdapterSurfaceCapCache>()) {
-    if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
-        mLabel = descriptor->label;
-    }
+    mLabel = std::string(descriptor->label);
 
     // Type is validated in validation, otherwise this may crash with an assert failure.
-    wgpu::SType type = descriptor
-                           .ValidateBranches<Branch<SurfaceDescriptorFromAndroidNativeWindow>,
-                                             Branch<SurfaceDescriptorFromMetalLayer>,
-                                             Branch<SurfaceDescriptorFromWindowsHWND>,
-                                             Branch<SurfaceDescriptorFromWindowsCoreWindow>,
-                                             Branch<SurfaceDescriptorFromWindowsSwapChainPanel>,
-                                             Branch<SurfaceDescriptorFromXlibWindow>,
-                                             Branch<SurfaceDescriptorFromWaylandSurface>>()
-                           .AcquireSuccess();
+    wgpu::SType type =
+        descriptor
+            .ValidateBranches<
+                Branch<SurfaceSourceAndroidNativeWindow>, Branch<SurfaceSourceMetalLayer>,
+                Branch<SurfaceSourceWindowsHWND>, Branch<SurfaceDescriptorFromWindowsCoreWindow>,
+                Branch<SurfaceDescriptorFromWindowsUWPSwapChainPanel>,
+                Branch<SurfaceDescriptorFromWindowsWinUISwapChainPanel>,
+                Branch<SurfaceSourceXlibWindow>, Branch<SurfaceSourceWaylandSurface>>()
+            .AcquireSuccess();
     switch (type) {
-        case wgpu::SType::SurfaceDescriptorFromAndroidNativeWindow: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromAndroidNativeWindow>();
+        case wgpu::SType::SurfaceSourceAndroidNativeWindow: {
+            auto* subDesc = descriptor.Get<SurfaceSourceAndroidNativeWindow>();
             mType = Type::AndroidWindow;
             mAndroidNativeWindow = subDesc->window;
             break;
         }
-        case wgpu::SType::SurfaceDescriptorFromMetalLayer: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromMetalLayer>();
+        case wgpu::SType::SurfaceSourceMetalLayer: {
+            auto* subDesc = descriptor.Get<SurfaceSourceMetalLayer>();
             mType = Type::MetalLayer;
             mMetalLayer = subDesc->layer;
             break;
         }
-        case wgpu::SType::SurfaceDescriptorFromWindowsHWND: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsHWND>();
+        case wgpu::SType::SurfaceSourceWindowsHWND: {
+            auto* subDesc = descriptor.Get<SurfaceSourceWindowsHWND>();
             mType = Type::WindowsHWND;
             mHInstance = subDesc->hinstance;
             mHWND = subDesc->hwnd;
@@ -313,22 +331,28 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
             mCoreWindow = static_cast<IUnknown*>(subDesc->coreWindow);
             break;
         }
-        case wgpu::SType::SurfaceDescriptorFromWindowsSwapChainPanel: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsSwapChainPanel>();
-            mType = Type::WindowsSwapChainPanel;
-            mSwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
+        case wgpu::SType::SurfaceDescriptorFromWindowsUWPSwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsUWPSwapChainPanel>();
+            mType = Type::WindowsUWPSwapChainPanel;
+            mUWPSwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
+            break;
+        }
+        case wgpu::SType::SurfaceDescriptorFromWindowsWinUISwapChainPanel: {
+            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWindowsWinUISwapChainPanel>();
+            mType = Type::WindowsWinUISwapChainPanel;
+            mWinUISwapChainPanel = static_cast<IUnknown*>(subDesc->swapChainPanel);
             break;
         }
 #endif  // defined(DAWN_USE_WINDOWS_UI)
-        case wgpu::SType::SurfaceDescriptorFromWaylandSurface: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromWaylandSurface>();
+        case wgpu::SType::SurfaceSourceWaylandSurface: {
+            auto* subDesc = descriptor.Get<SurfaceSourceWaylandSurface>();
             mType = Type::WaylandSurface;
             mWaylandDisplay = subDesc->display;
             mWaylandSurface = subDesc->surface;
             break;
         }
-        case wgpu::SType::SurfaceDescriptorFromXlibWindow: {
-            auto* subDesc = descriptor.Get<SurfaceDescriptorFromXlibWindow>();
+        case wgpu::SType::SurfaceSourceXlibWindow: {
+            auto* subDesc = descriptor.Get<SurfaceSourceXlibWindow>();
             mType = Type::XlibWindow;
             mXDisplay = subDesc->display;
             mXWindow = subDesc->window;
@@ -348,23 +372,6 @@ Surface::~Surface() {
         mRecycledSwapChain->DetachFromSurface();
         mRecycledSwapChain = nullptr;
     }
-}
-
-SwapChainBase* Surface::GetAttachedSwapChain() {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mIsSwapChainManagedBySurface == ManagesSwapChain::Unknown ||
-                mIsSwapChainManagedBySurface == ManagesSwapChain::No);
-    mIsSwapChainManagedBySurface = ManagesSwapChain::No;
-
-    return mSwapChain.Get();
-}
-void Surface::SetAttachedSwapChain(SwapChainBase* swapChain) {
-    DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mIsSwapChainManagedBySurface == ManagesSwapChain::Unknown ||
-                mIsSwapChainManagedBySurface == ManagesSwapChain::No);
-    mIsSwapChainManagedBySurface = ManagesSwapChain::No;
-
-    mSwapChain = swapChain;
 }
 
 InstanceBase* Surface::GetInstance() const {
@@ -423,11 +430,21 @@ IUnknown* Surface::GetCoreWindow() const {
 #endif
 }
 
-IUnknown* Surface::GetSwapChainPanel() const {
+IUnknown* Surface::GetUWPSwapChainPanel() const {
     DAWN_ASSERT(!IsError());
-    DAWN_ASSERT(mType == Type::WindowsSwapChainPanel);
+    DAWN_ASSERT(mType == Type::WindowsUWPSwapChainPanel);
 #if defined(DAWN_USE_WINDOWS_UI)
-    return mSwapChainPanel.Get();
+    return mUWPSwapChainPanel.Get();
+#else
+    return nullptr;
+#endif
+}
+
+IUnknown* Surface::GetWinUISwapChainPanel() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsWinUISwapChainPanel);
+#if defined(DAWN_USE_WINDOWS_UI)
+    return mWinUISwapChainPanel.Get();
 #else
     return nullptr;
 #endif
@@ -445,15 +462,14 @@ uint32_t Surface::GetXWindow() const {
 }
 
 MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
-
     SurfaceConfiguration config = *configIn;
-    mCurrentDevice = config.device;  // next errors are routed to the new device
-    DAWN_INVALID_IF(mIsSwapChainManagedBySurface == ManagesSwapChain::No,
-                    "%s cannot be configured because it is used by legacy swapchain %s.", this,
-                    mSwapChain.Get());
+    DAWN_CHECK(config.device);
+    // Configured-or-not is specified as a client-side state, so it must be
+    // maintained even on error surfaces.
+    mCurrentDevice = config.device;
+    // Any errors are routed to the new device.
 
-    mIsSwapChainManagedBySurface = ManagesSwapChain::Yes;
+    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
 
     DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
         GetCurrentDevice()->GetAdapter(), this,
@@ -474,7 +490,7 @@ MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
     }
 
     {
-        auto deviceLock(GetCurrentDevice()->GetScopedLock());
+        auto deviceGuard = GetCurrentDevice()->GetGuard();
         ResultOrError<Ref<SwapChainBase>> maybeNewSwapChain =
             GetCurrentDevice()->CreateSwapChain(this, previousSwapChain, &config);
 
@@ -496,19 +512,20 @@ MaybeError Surface::Configure(const SurfaceConfiguration* configIn) {
 }
 
 MaybeError Surface::Unconfigure() {
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
+    if (IsError()) {
+        DAWN_ASSERT(mSwapChain == nullptr);
+        DAWN_ASSERT(mCurrentDevice == nullptr);
+        return DAWN_VALIDATION_ERROR("%s is invalid.", this);
+    }
+    mCurrentDevice = nullptr;
     DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
 
     if (mSwapChain != nullptr) {
-        if (mIsSwapChainManagedBySurface == ManagesSwapChain::Yes) {
-            if (mRecycledSwapChain != nullptr) {
-                mRecycledSwapChain->DetachFromSurface();
-                mRecycledSwapChain = nullptr;
-            }
-            mRecycledSwapChain = mSwapChain;
-        } else {
-            mSwapChain->DetachFromSurface();
+        if (mRecycledSwapChain != nullptr) {
+            mRecycledSwapChain->DetachFromSurface();
+            mRecycledSwapChain = nullptr;
         }
+        mRecycledSwapChain = mSwapChain;
         mSwapChain = nullptr;
     }
 
@@ -543,49 +560,23 @@ void APISurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities capabilities) {
 
 MaybeError Surface::GetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     surfaceTexture->texture = nullptr;
-    surfaceTexture->suboptimal = false;
-
-    surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::Error;
-    DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
-    DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
-
-    surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::DeviceLost;
-    DAWN_TRY(GetCurrentDevice()->ValidateIsAlive());
 
     // Set an error status that will be overwritten if there is a success or some other more
     // specific error.
     surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::Error;
-
-    auto deviceLock(GetCurrentDevice()->GetScopedLock());
-    DAWN_TRY_ASSIGN(*surfaceTexture, mSwapChain->GetCurrentTexture());
-
-    return {};
-}
-
-ResultOrError<wgpu::TextureFormat> Surface::GetPreferredFormat(AdapterBase* adapter) const {
-    GetInstance()->EmitDeprecationWarning(
-        "GetPreferredFormat is deprecated, use GetCapabilities().format[0] instead as the "
-        "preferred format.");
-
-    wgpu::TextureFormat format = wgpu::TextureFormat::Undefined;
-
-    DAWN_TRY(mCapabilityCache->WithAdapterCapabilities(
-        adapter, this, [&](const PhysicalDeviceSurfaceCapabilities& caps) -> MaybeError {
-            DAWN_INVALID_IF(caps.formats.empty(), "No format is supported by %s for %s.", adapter,
-                            this);
-            format = caps.formats.front();
-            return {};
-        }));
-
-    return format;
-}
-
-MaybeError Surface::Present() {
     DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
     DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not configured.", this);
 
-    auto deviceLock(GetCurrentDevice()->GetScopedLock());
-    mSwapChain->APIPresent();
+    if (GetCurrentDevice()->IsLost()) {
+        TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(mSwapChain.Get());
+        surfaceTexture->status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
+        surfaceTexture->texture =
+            ReturnToAPI(TextureBase::MakeError(GetCurrentDevice(), &textureDesc));
+        return {};
+    }
+
+    auto deviceGuard = GetCurrentDevice()->GetGuard();
+    DAWN_TRY_ASSIGN(*surfaceTexture, mSwapChain->GetCurrentTexture());
 
     return {};
 }
@@ -620,6 +611,7 @@ wgpu::Status Surface::APIGetCapabilities(AdapterBase* adapter,
 
 void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     MaybeError maybeError = GetCurrentTexture(surfaceTexture);
+
     if (!GetCurrentDevice()) {
         [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
     } else {
@@ -627,28 +619,25 @@ void Surface::APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const {
     }
 }
 
-wgpu::TextureFormat Surface::APIGetPreferredFormat(AdapterBase* adapter) const {
-    ResultOrError<wgpu::TextureFormat> resultOrError = GetPreferredFormat(adapter);
-    wgpu::TextureFormat format;
+wgpu::Status Surface::APIPresent() {
+    // Validation that the surface is configured. Note this is synchronous
+    // validation so it can't be skipped even if the surface is an error.
     if (!GetCurrentDevice()) {
-        if (mInstance->ConsumedError(std::move(resultOrError), &format)) {
-            return wgpu::TextureFormat::Undefined;
+        [[maybe_unused]] bool error = mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("%s is in the unconfigured state.", this));
+        return wgpu::Status::Error;
+    }
+
+    [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError([&]() -> MaybeError {
+        DAWN_INVALID_IF(IsError(), "%s is invalid.", this);
+        DAWN_INVALID_IF(!mSwapChain.Get(), "%s is not successfully configured.", this);
+        {
+            auto deviceGuard = GetCurrentDevice()->GetGuard();
+            DAWN_TRY(mSwapChain->Present());
         }
-    } else if (GetCurrentDevice()->ConsumedError(std::move(resultOrError), &format,
-                                                 "calling %s.GetPreferredFormat(%s).", this,
-                                                 adapter)) {
-        return wgpu::TextureFormat::Undefined;
-    }
-    return format;
-}
-
-void Surface::APIPresent() {
-    MaybeError maybeError = Present();
-    if (!GetCurrentDevice()) {
-        [[maybe_unused]] bool error = mInstance->ConsumedError(std::move(maybeError));
-    } else {
-        [[maybe_unused]] bool error = GetCurrentDevice()->ConsumedError(std::move(maybeError));
-    }
+        return {};
+    }());
+    return wgpu::Status::Success;
 }
 
 void Surface::APIUnconfigure() {
@@ -660,8 +649,8 @@ void Surface::APIUnconfigure() {
     }
 }
 
-void Surface::APISetLabel(const char* label) {
-    mLabel = label;
+void Surface::APISetLabel(StringView label) {
+    mLabel = utils::NormalizeMessageString(label);
 }
 
 }  // namespace dawn::native

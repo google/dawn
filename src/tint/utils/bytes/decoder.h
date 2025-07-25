@@ -39,7 +39,8 @@
 #include <vector>
 
 #include "src/tint/utils/bytes/reader.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
+#include "src/tint/utils/result.h"
 
 namespace tint::bytes {
 
@@ -102,25 +103,27 @@ struct Decoder<bool, void> {
 
 /// Decoder specialization for types that use TINT_REFLECT
 template <typename T>
-struct Decoder<T, std::enable_if_t<HasReflection<T>>> {
+    requires(HasReflection<T>)
+struct Decoder<T> {
     /// Decode decodes the reflected type from @p reader.
     /// @param reader the reader to decode from
     /// @returns the decoded reflected type, or an error if the stream is too short.
     static Result<T> Decode(Reader& reader) {
         T object{};
-        diag::List errs;
+        std::stringstream errs{};
         ForeachField(object, [&](auto& field) {  //
             auto value = bytes::Decode<std::decay_t<decltype(field)>>(reader);
             if (value == Success) {
                 field = value.Get();
             } else {
-                errs.Add(value.Failure().reason);
+                errs << value.Failure() << "\n";
             }
         });
-        if (errs.empty()) {
+        auto err = errs.str();
+        if (err.empty()) {
             return object;
         }
-        return Failure{errs};
+        return Failure{err};
     }
 };
 

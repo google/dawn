@@ -29,13 +29,15 @@
 #define SRC_TINT_LANG_CORE_IR_INSTRUCTION_RESULT_H_
 
 #include "src/tint/lang/core/ir/value.h"
-#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::core::ir {
 
 /// An instruction result in the IR.
 class InstructionResult : public Castable<InstructionResult, Value> {
   public:
+    /// Constructor
+    InstructionResult() = default;
+
     /// Constructor
     /// @param type the type of the value
     explicit InstructionResult(const core::type::Type* type);
@@ -46,15 +48,15 @@ class InstructionResult : public Castable<InstructionResult, Value> {
     /// @copydoc Value::Destroy
     void Destroy() override;
 
-    /// @returns the type of the value
-    const core::type::Type* Type() const override { return type_; }
-
     /// @copydoc Value::Clone()
     InstructionResult* Clone(CloneContext& ctx) override;
 
     /// Sets the type of the value to @p type
     /// @param type the new type of the value
     void SetType(const core::type::Type* type) { type_ = type; }
+
+    /// @returns the type of the value
+    const core::type::Type* Type() const override { return type_; }
 
     /// Sets the instruction for this value
     /// @param inst the instruction to set

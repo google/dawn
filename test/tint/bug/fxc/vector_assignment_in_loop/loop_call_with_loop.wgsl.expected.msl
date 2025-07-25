@@ -1,32 +1,51 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
-struct tint_private_vars_struct {
-  float2 v2f;
-  int3 v3i;
-  uint4 v4u;
-  bool2 v2b;
+struct tint_module_vars_struct {
+  thread float2* v2f;
+  thread int3* v3i;
+  thread uint4* v4u;
+  thread bool2* v2b;
 };
 
-void foo(thread tint_private_vars_struct* const tint_private_vars) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
-    (*(tint_private_vars)).v2f[i] = 1.0f;
-    (*(tint_private_vars)).v3i[i] = 1;
-    (*(tint_private_vars)).v4u[i] = 1u;
-    (*(tint_private_vars)).v2b[i] = true;
+void foo(tint_module_vars_struct tint_module_vars) {
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      (*tint_module_vars.v2f)[min(uint(i), 1u)] = 1.0f;
+      (*tint_module_vars.v3i)[min(uint(i), 2u)] = 1;
+      (*tint_module_vars.v4u)[min(uint(i), 3u)] = 1u;
+      (*tint_module_vars.v2b)[min(uint(i), 1u)] = true;
+      {
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      }
+      continue;
+    }
   }
 }
 
-kernel void tint_symbol() {
-  thread tint_private_vars_struct tint_private_vars = {};
-  TINT_ISOLATE_UB(tint_volatile_true_1) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
-    foo(&(tint_private_vars));
+kernel void v() {
+  thread float2 v2f = 0.0f;
+  thread int3 v3i = 0;
+  thread uint4 v4u = 0u;
+  thread bool2 v2b = false;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v2f=(&v2f), .v3i=(&v3i), .v4u=(&v4u), .v2b=(&v2b)};
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      foo(tint_module_vars);
+      {
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      }
+      continue;
+    }
   }
-  return;
 }
-

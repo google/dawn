@@ -1,101 +1,141 @@
-groupshared int4 tint_symbol[4];
-groupshared int4 src_workgroup[4];
-groupshared int dst_nested[4][3][2];
-
-void tint_zero_workgroup_memory(uint local_idx) {
-  {
-    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      tint_symbol[i] = (0).xxxx;
-      src_workgroup[i] = (0).xxxx;
-    }
-  }
-  {
-    for(uint idx_1 = local_idx; (idx_1 < 24u); idx_1 = (idx_1 + 1u)) {
-      uint i_1 = (idx_1 / 6u);
-      uint i_2 = ((idx_1 % 6u) / 2u);
-      uint i_3 = (idx_1 % 2u);
-      dst_nested[i_1][i_2][i_3] = 0;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
-}
-
 struct S {
   int4 arr[4];
 };
 
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
 static int4 src_private[4] = (int4[4])0;
+groupshared int4 src_workgroup[4];
 cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
 RWByteAddressBuffer src_storage : register(u1);
-
-typedef int4 ret_arr_ret[4];
-ret_arr_ret ret_arr() {
-  int4 tint_symbol_4[4] = (int4[4])0;
-  return tint_symbol_4;
+groupshared int4 v[4];
+groupshared int dst_nested[4][3][2];
+typedef int4 ary_ret[4];
+ary_ret ret_arr() {
+  int4 v_1[4] = (int4[4])0;
+  return v_1;
 }
 
 S ret_struct_arr() {
-  S tint_symbol_5 = (S)0;
-  return tint_symbol_5;
+  S v_2 = (S)0;
+  return v_2;
 }
 
-typedef int4 src_uniform_load_ret[4];
-src_uniform_load_ret src_uniform_load(uint offset) {
-  int4 arr_1[4] = (int4[4])0;
+typedef int4 ary_ret_1[4];
+ary_ret_1 v_3(uint offset) {
+  int4 a[4] = (int4[4])0;
   {
-    for(uint i_4 = 0u; (i_4 < 4u); i_4 = (i_4 + 1u)) {
-      const uint scalar_offset = ((offset + (i_4 * 16u))) / 4;
-      arr_1[i_4] = asint(src_uniform[scalar_offset / 4]);
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
+        break;
+      }
+      a[v_5] = asint(src_storage.Load4((offset + (v_5 * 16u))));
+      {
+        v_4 = (v_5 + 1u);
+      }
+      continue;
     }
   }
-  return arr_1;
+  int4 v_6[4] = a;
+  return v_6;
 }
 
-typedef int4 src_storage_load_ret[4];
-src_storage_load_ret src_storage_load(uint offset) {
-  int4 arr_2[4] = (int4[4])0;
+typedef int4 ary_ret_2[4];
+ary_ret_2 v_7(uint start_byte_offset) {
+  int4 a[4] = (int4[4])0;
   {
-    for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
-      arr_2[i_5] = asint(src_storage.Load4((offset + (i_5 * 16u))));
+    uint v_8 = 0u;
+    v_8 = 0u;
+    while(true) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
+        break;
+      }
+      a[v_9] = asint(src_uniform[((start_byte_offset + (v_9 * 16u)) / 16u)]);
+      {
+        v_8 = (v_9 + 1u);
+      }
+      continue;
     }
   }
-  return arr_2;
+  int4 v_10[4] = a;
+  return v_10;
 }
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  int4 tint_symbol_6[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
-  tint_symbol = tint_symbol_6;
-  tint_symbol = src_param;
-  tint_symbol = ret_arr();
+  int4 v_11[4] = {(int(1)).xxxx, (int(2)).xxxx, (int(3)).xxxx, (int(3)).xxxx};
+  v = v_11;
+  v = src_param;
+  int4 v_12[4] = ret_arr();
+  v = v_12;
   int4 src_let[4] = (int4[4])0;
-  tint_symbol = src_let;
-  tint_symbol = src_function;
-  tint_symbol = src_private;
-  tint_symbol = src_workgroup;
-  S tint_symbol_1 = ret_struct_arr();
-  tint_symbol = tint_symbol_1.arr;
-  tint_symbol = src_uniform_load(0u);
-  tint_symbol = src_storage_load(0u);
+  v = src_let;
+  int4 v_13[4] = src_function;
+  v = v_13;
+  int4 v_14[4] = src_private;
+  v = v_14;
+  int4 v_15[4] = src_workgroup;
+  v = v_15;
+  S v_16 = ret_struct_arr();
+  int4 v_17[4] = v_16.arr;
+  v = v_17;
+  int4 v_18[4] = v_7(0u);
+  v = v_18;
+  int4 v_19[4] = v_3(0u);
+  v = v_19;
   int src_nested[4][3][2] = (int[4][3][2])0;
-  dst_nested = src_nested;
+  int v_20[4][3][2] = src_nested;
+  dst_nested = v_20;
 }
 
-struct tint_symbol_3 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
+void main_inner(uint tint_local_index) {
+  {
+    uint v_21 = 0u;
+    v_21 = tint_local_index;
+    while(true) {
+      uint v_22 = v_21;
+      if ((v_22 >= 4u)) {
+        break;
+      }
+      src_workgroup[v_22] = (int(0)).xxxx;
+      v[v_22] = (int(0)).xxxx;
+      {
+        v_21 = (v_22 + 1u);
+      }
+      continue;
+    }
+  }
+  {
+    uint v_23 = 0u;
+    v_23 = tint_local_index;
+    while(true) {
+      uint v_24 = v_23;
+      if ((v_24 >= 24u)) {
+        break;
+      }
+      dst_nested[(v_24 / 6u)][((v_24 / 2u) % 3u)][(v_24 % 2u)] = int(0);
+      {
+        v_23 = (v_24 + 1u);
+      }
+      continue;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
   int4 val[4] = (int4[4])0;
   foo(val);
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_3 tint_symbol_2) {
-  main_inner(tint_symbol_2.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
+

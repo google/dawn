@@ -27,9 +27,6 @@
 
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 
-#include <string>
-#include <tuple>
-
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -62,7 +59,7 @@ struct State {
             if (auto* binary = inst->As<core::ir::Binary>()) {
                 switch (binary->Op()) {
                     case core::BinaryOp::kModulo: {
-                        if (binary->LHS()->Type()->is_float_scalar_or_vector()) {
+                        if (binary->LHS()->Type()->IsFloatScalarOrVector()) {
                             binary_worklist.Push(binary);
                         }
                         break;
@@ -119,18 +116,19 @@ struct State {
     //
     //   (lhs - (trunc(lhs / rhs)) * rhs)
     void PreciseFloatMod(core::ir::Binary* binary) {
-        auto* type = binary->Result(0)->Type();
+        auto* type = binary->Result()->Type();
         b.InsertBefore(binary, [&] {
             auto* div = b.Divide(type, binary->LHS(), binary->RHS());
 
             // Force to a `let` to get better generated HLSL
             auto* d = b.Let(type);
-            d->SetValue(div->Result(0));
+            d->SetValue(div->Result());
 
             auto* trunc = b.Call(type, core::BuiltinFn::kTrunc, d);
-            auto* sub = b.Subtract(type, binary->LHS(), trunc);
-            auto* mul = b.Multiply(type, sub, binary->RHS());
-            binary->Result(0)->ReplaceAllUsesWith(mul->Result(0));
+            auto* mul = b.Multiply(type, trunc, binary->RHS());
+            auto* sub = b.Subtract(type, binary->LHS(), mul);
+
+            binary->Result()->ReplaceAllUsesWith(sub->Result());
         });
         binary->Destroy();
     }
@@ -139,7 +137,12 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.BinaryPolyfill",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
+                                              core::ir::Capability::kAllowDuplicateBindings,
+                                              core::ir::Capability::kAllowNonCoreTypes,
+                                          });
     if (result != Success) {
         return result.Failure();
     }

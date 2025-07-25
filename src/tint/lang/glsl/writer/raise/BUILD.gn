@@ -34,25 +34,104 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-libtint_source_set("raise") {
-  sources = [
-    "raise.cc",
-    "raise.h",
-  ]
-  deps = [
-    "${tint_src_dir}/utils/containers",
-    "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/math",
-    "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/result",
-    "${tint_src_dir}/utils/rtti",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
-  ]
+if (tint_build_unittests || tint_build_benchmarks) {
+  import("//testing/test.gni")
+}
+if (tint_build_glsl_writer) {
+  libtint_source_set("raise") {
+    sources = [
+      "binary_polyfill.cc",
+      "binary_polyfill.h",
+      "bitcast_polyfill.cc",
+      "bitcast_polyfill.h",
+      "builtin_polyfill.cc",
+      "builtin_polyfill.h",
+      "offset_first_index.cc",
+      "offset_first_index.h",
+      "raise.cc",
+      "raise.h",
+      "shader_io.cc",
+      "shader_io.h",
+      "texture_builtins_from_uniform.cc",
+      "texture_builtins_from_uniform.h",
+      "texture_polyfill.cc",
+      "texture_polyfill.h",
+    ]
+    deps = [
+      "${dawn_root}/src/utils:utils",
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/intrinsic",
+      "${tint_src_dir}/lang/core/ir",
+      "${tint_src_dir}/lang/core/ir/transform",
+      "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/glsl",
+      "${tint_src_dir}/lang/glsl/intrinsic",
+      "${tint_src_dir}/lang/glsl/ir",
+      "${tint_src_dir}/utils",
+      "${tint_src_dir}/utils/containers",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/ice",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/memory",
+      "${tint_src_dir}/utils/rtti",
+      "${tint_src_dir}/utils/symbol",
+      "${tint_src_dir}/utils/text",
+    ]
+
+    if (tint_build_glsl_writer) {
+      deps += [ "${tint_src_dir}/lang/glsl/writer/common" ]
+    }
+  }
+}
+if (tint_build_unittests) {
+  if (tint_build_glsl_writer) {
+    tint_unittests_source_set("unittests") {
+      sources = [
+        "binary_polyfill_test.cc",
+        "bitcast_polyfill_test.cc",
+        "builtin_polyfill_test.cc",
+        "offset_first_index_test.cc",
+        "shader_io_test.cc",
+        "texture_builtins_from_uniform_test.cc",
+        "texture_polyfill_test.cc",
+      ]
+      deps = [
+        "${dawn_root}/src/utils:utils",
+        "${tint_src_dir}:gmock_and_gtest",
+        "${tint_src_dir}/api/common",
+        "${tint_src_dir}/lang/core",
+        "${tint_src_dir}/lang/core/constant",
+        "${tint_src_dir}/lang/core/intrinsic",
+        "${tint_src_dir}/lang/core/ir",
+        "${tint_src_dir}/lang/core/ir/transform",
+        "${tint_src_dir}/lang/core/ir/transform:unittests",
+        "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/utils",
+        "${tint_src_dir}/utils/containers",
+        "${tint_src_dir}/utils/diagnostic",
+        "${tint_src_dir}/utils/ice",
+        "${tint_src_dir}/utils/macros",
+        "${tint_src_dir}/utils/math",
+        "${tint_src_dir}/utils/memory",
+        "${tint_src_dir}/utils/rtti",
+        "${tint_src_dir}/utils/symbol",
+        "${tint_src_dir}/utils/text",
+      ]
+
+      if (tint_build_glsl_writer) {
+        deps += [
+          "${tint_src_dir}/lang/glsl/writer/common",
+          "${tint_src_dir}/lang/glsl/writer/raise",
+        ]
+      }
+    }
+  }
 }

@@ -2,26 +2,16 @@
 precision highp float;
 precision highp int;
 
-bool tint_discarded = false;
-layout(binding = 0, std430) buffer non_uniform_global_block_ssbo {
+layout(binding = 0, std430)
+buffer f_non_uniform_global_block_ssbo {
   int inner;
-} non_uniform_global;
-
-void tint_symbol() {
-  if ((non_uniform_global.inner < 0)) {
-    tint_discarded = true;
-  }
-  {
-    {
-      return;
-    }
-  }
-}
-
+} v;
+bool continue_execution = true;
 void main() {
-  tint_symbol();
-  if (tint_discarded) {
+  if ((v.inner < 0)) {
+    continue_execution = false;
+  }
+  if (!(continue_execution)) {
     discard;
   }
-  return;
 }

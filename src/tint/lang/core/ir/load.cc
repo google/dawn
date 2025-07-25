@@ -36,11 +36,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Load);
 
 namespace tint::core::ir {
 
-Load::Load() {
+Load::Load(Id id) : Base(id) {
     flags_.Add(Flag::kSequenced);
 }
 
-Load::Load(InstructionResult* result, Value* from) {
+Load::Load(Id id, InstructionResult* result, Value* from) : Base(id) {
     flags_.Add(Flag::kSequenced);
 
     AddOperand(Load::kFromOperandOffset, from);
@@ -50,9 +50,17 @@ Load::Load(InstructionResult* result, Value* from) {
 Load::~Load() = default;
 
 Load* Load::Clone(CloneContext& ctx) {
-    auto* new_result = ctx.Clone(Result(0));
+    auto* new_result = ctx.Clone(Result());
     auto* from = ctx.Remap(From());
-    return ctx.ir.allocators.instructions.Create<Load>(new_result, from);
+    return ctx.ir.CreateInstruction<Load>(new_result, from);
+}
+
+core::ir::Instruction::Accesses Load::GetSideEffects() const {
+    // Always inline things in the `handle` address space
+    if (From()->Type()->As<core::type::Pointer>()->AddressSpace() == core::AddressSpace::kHandle) {
+        return Instruction::Accesses{};
+    }
+    return Instruction::Accesses{Instruction::Access::kLoad};
 }
 
 }  // namespace tint::core::ir

@@ -11,35 +11,41 @@
                     ^^^^^^^^^
 
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
-struct tint_symbol_4 {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x) {
+void main_inner(float x) {
   float4 v = float4(0.0f);
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-    bool tint_symbol_1 = (x > v[0]);
-    if (tint_symbol_1) {
-      float const tint_symbol_2 = dfdx(1.0f);
-      tint_symbol_1 = (tint_symbol_2 > 0.0f);
-    }
-    if (!(tint_symbol_1)) {
-      break;
-    }
-    {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      bool v_1 = false;
+      if ((x > v.x)) {
+        v_1 = (dfdx(1.0f) > 0.0f);
+      } else {
+        v_1 = false;
+      }
+      if (v_1) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
     }
   }
 }
 
-fragment void tint_symbol(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_3.x);
-  return;
+fragment void v_2(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.x);
 }
-

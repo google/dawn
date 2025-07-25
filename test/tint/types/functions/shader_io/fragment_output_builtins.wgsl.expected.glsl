@@ -1,37 +1,35 @@
+//
+// main1
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-struct PushConstants {
-  float min_depth;
-  float max_depth;
+
+struct tint_immediate_struct {
+  float tint_frag_depth_min;
+  float tint_frag_depth_max;
 };
 
-layout(location=0) uniform PushConstants push_constants;
-float clamp_frag_depth(float v) {
-  return clamp(v, push_constants.min_depth, push_constants.max_depth);
+layout(location = 0) uniform tint_immediate_struct tint_immediates;
+float main1_inner() {
+  return 1.0f;
 }
-
-float main1() {
-  return clamp_frag_depth(1.0f);
-}
-
 void main() {
-  float inner_result = main1();
-  gl_FragDepth = inner_result;
-  return;
+  float v = main1_inner();
+  gl_FragDepth = clamp(v, tint_immediates.tint_frag_depth_min, tint_immediates.tint_frag_depth_max);
 }
+//
+// main2
+//
 #version 310 es
-#extension GL_OES_sample_variables : require
+#extension GL_OES_sample_variables: require
 precision highp float;
 precision highp int;
 
-uint main2() {
+uint main2_inner() {
   return 1u;
 }
-
 void main() {
-  uint inner_result = main2();
-  gl_SampleMask[0] = int(inner_result);
-  return;
+  gl_SampleMask[0u] = int(main2_inner());
 }

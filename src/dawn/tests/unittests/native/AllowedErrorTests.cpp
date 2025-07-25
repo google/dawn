@@ -26,13 +26,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
 
 #include <string_view>
 #include <utility>
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/tests/MockCallback.h"
-#include "dawn/webgpu_cpp.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "mocks/BufferMock.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DawnMockTest.h"
@@ -53,13 +54,14 @@ using ::testing::MockCallback;
 using ::testing::MockCppCallback;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SizedStringMatches;
 using ::testing::StrictMock;
 using ::testing::Test;
 
 using MockComputePipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, const char*)>;
+    MockCppCallback<wgpu::CreateComputePipelineAsyncCallback<void>*>;
 using MockRenderPipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, const char*)>;
+    MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback<void>*>;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
 static constexpr char kInternalErrorMessage[] = "Internal error";
@@ -74,21 +76,7 @@ static constexpr std::string_view kVertexShader = R"(
         }
     )";
 
-class AllowedErrorTests : public DawnMockTest {
-  public:
-    AllowedErrorTests() : DawnMockTest() {
-        device.SetDeviceLostCallback(mDeviceLostCb.Callback(), mDeviceLostCb.MakeUserdata(this));
-        device.SetUncapturedErrorCallback(mDeviceErrorCb.Callback(),
-                                          mDeviceErrorCb.MakeUserdata(this));
-    }
-
-    ~AllowedErrorTests() override { DropDevice(); }
-
-  protected:
-    // Device mock callbacks used throughout the tests.
-    StrictMock<MockCallback<wgpu::DeviceLostCallback>> mDeviceLostCb;
-    StrictMock<MockCallback<wgpu::ErrorCallback>> mDeviceErrorCb;
-};
+class AllowedErrorTests : public DawnMockTest {};
 
 //
 // Exercise APIs where OOM errors cause a device lost.
@@ -99,8 +87,8 @@ TEST_F(AllowedErrorTests, QueueSubmit) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.GetQueue().Submit(0, nullptr);
@@ -117,8 +105,8 @@ TEST_F(AllowedErrorTests, QueueWriteBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     constexpr uint8_t data = 8;
@@ -138,14 +126,14 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     constexpr uint8_t data[] = {1, 2, 4, 8};
-    wgpu::ImageCopyTexture dest = {};
+    wgpu::TexelCopyTextureInfo dest = {};
     dest.texture = texture;
-    wgpu::TextureDataLayout layout = {};
+    wgpu::TexelCopyBufferLayout layout = {};
     wgpu::Extent3D size = {1, 1};
     device.GetQueue().WriteTexture(&dest, &data, 4, &layout, &size);
 }
@@ -159,9 +147,9 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
                  wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-    wgpu::ImageCopyTexture src = {};
+    wgpu::TexelCopyTextureInfo src = {};
     src.texture = device.CreateTexture(&desc);
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = device.CreateTexture(&desc);
     wgpu::Extent3D size = {4, 4};
     wgpu::CopyTextureForBrowserOptions options = {};
@@ -171,8 +159,8 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
     device.GetQueue().CopyTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -195,14 +183,15 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     externalTextureDesc.gamutConversionMatrix = placeholderConstantArray.data();
     externalTextureDesc.srcTransferFunctionParameters = placeholderConstantArray.data();
     externalTextureDesc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    externalTextureDesc.visibleOrigin = {0, 0};
-    externalTextureDesc.visibleSize = {4, 4};
+    externalTextureDesc.cropOrigin = {0, 0};
+    externalTextureDesc.cropSize = {4, 4};
+    externalTextureDesc.apparentSize = {4, 4};
     externalTextureDesc.plane0 = device.CreateTexture(&textureDesc).CreateView(&textureViewDesc);
 
     wgpu::ImageCopyExternalTexture src = {};
     src.externalTexture = device.CreateExternalTexture(&externalTextureDesc);
     src.naturalSize = {4, 4};
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = device.CreateTexture(&textureDesc);
     wgpu::Extent3D size = {4, 4};
     wgpu::CopyTextureForBrowserOptions options = {};
@@ -212,8 +201,8 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
     device.GetQueue().CopyExternalTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -232,8 +221,8 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 }
@@ -242,8 +231,14 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
 TEST_F(AllowedErrorTests, CreateRenderPipeline) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -252,8 +247,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                          SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }
@@ -273,13 +268,10 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCb,
-                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
-
-    // Device lost should only happen due to destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // Internal error from synchronously initializing a render pipeline should not result in a device
@@ -287,8 +279,14 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
 TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -297,13 +295,10 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCb,
-                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::Internal,
+                                           SizedStringMatches(HasSubstr(kInternalErrorMessage))))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
-
-    // Device lost should only happen due to destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 //
@@ -324,24 +319,27 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     MockComputePipelineAsyncCallback cb;
-    EXPECT_CALL(
-        cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _, HasSubstr(kOomErrorMessage)))
+    EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
+                         SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.CreateComputePipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
                                       cb.Callback());
     ProcessEvents();
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // OOM error from asynchronously initializing a render pipeline should not result in a device loss.
 TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -350,16 +348,13 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     MockRenderPipelineAsyncCallback cb;
-    EXPECT_CALL(
-        cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _, HasSubstr(kOomErrorMessage)))
+    EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
+                         SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
                                      cb.Callback());
     ProcessEvents();
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // Internal error from asynchronously initializing a compute pipeline should not result in a device
@@ -384,9 +379,6 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
     device.CreateComputePipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
                                       cb.Callback());
     ProcessEvents();
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // Internal error from asynchronously initializing a render pipeline should not result in a device
@@ -394,8 +386,14 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
 TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -411,9 +409,6 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
                                      cb.Callback());
     ProcessEvents();
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 //
@@ -426,16 +421,14 @@ TEST_F(AllowedErrorTests, CreateBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
+                                           SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     wgpu::BufferDescriptor desc = {};
     desc.usage = wgpu::BufferUsage::Uniform;
     desc.size = 16;
     device.CreateBuffer(&desc);
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // OOM error from texture creation is allowed and surfaced directly.
@@ -444,7 +437,8 @@ TEST_F(AllowedErrorTests, CreateTexture) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
+                                           SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     wgpu::TextureDescriptor desc = {};
@@ -452,9 +446,6 @@ TEST_F(AllowedErrorTests, CreateTexture) {
     desc.size = {4, 4};
     desc.format = wgpu::TextureFormat::RGBA8Unorm;
     device.CreateTexture(&desc);
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 // OOM error from query set creation is allowed and surfaced directly.
@@ -463,27 +454,23 @@ TEST_F(AllowedErrorTests, CreateQuerySet) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
+                                           SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     wgpu::QuerySetDescriptor desc = {};
     desc.type = wgpu::QueryType::Occlusion;
     desc.count = 1;
     device.CreateQuerySet(&desc);
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 TEST_F(AllowedErrorTests, InjectError) {
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCallback, Call(CHandleIs(device.Get()), wgpu::ErrorType::OutOfMemory,
+                                           SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.InjectError(wgpu::ErrorType::OutOfMemory, kOomErrorMessage);
-
-    // Device lost should only happen because of destruction.
-    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Destroyed, _, this)).Times(1);
 }
 
 }  // anonymous namespace

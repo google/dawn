@@ -55,7 +55,8 @@ uint64_t BuddyMemoryAllocator::GetMemoryIndex(uint64_t offset) const {
 }
 
 ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t allocationSize,
-                                                                       uint64_t alignment) {
+                                                                       uint64_t alignment,
+                                                                       bool isLazyMemoryType) {
     ResourceMemoryAllocation invalidAllocation = ResourceMemoryAllocation{};
 
     if (allocationSize == 0) {
@@ -67,6 +68,7 @@ ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t 
         return std::move(invalidAllocation);
     }
 
+    uint64_t originalAllocationSize = allocationSize;
     // Round allocation size to nearest power-of-two.
     allocationSize = NextPowerOfTwo(allocationSize);
 
@@ -93,7 +95,9 @@ ResultOrError<ResourceMemoryAllocation> BuddyMemoryAllocator::Allocate(uint64_t 
 
     AllocationInfo info;
     info.mBlockOffset = blockOffset;
+    info.mRequestedSize = originalAllocationSize;
     info.mMethod = AllocationMethod::kSubAllocated;
+    info.mIsLazyAllocated = isLazyMemoryType;
 
     // Allocation offset is always local to the memory.
     const uint64_t memoryOffset = blockOffset % mMemoryBlockSize;

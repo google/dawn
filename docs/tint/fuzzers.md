@@ -1,52 +1,233 @@
 # Tint Fuzzers
 
-Tint currently has two fuzzer target executables: [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) which takes WGSL source code as input and [`tint_ir_fuzzer`](#tint_ir_fuzzer) which takes a protobuf binary file as input.
+Tint currently has two fuzzer target executables:
+[`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) which takes WGSL source code
+as input and [`tint_ir_fuzzer`](#tint_ir_fuzzer) which takes a
+protobuf binary file as input.
 
-Both fuzzers are implemented using [libFuzzer](https://llvm.org/docs/LibFuzzer.html), and are automatically and continuously run by Chromium's ClusterFuzz infrastructure. [Fuzzer targets are automatically found via `gn refs`](https://chromium.googlesource.com/chromium/src/+/HEAD/testing/libfuzzer/libFuzzer_integration.md). See [`tint.gni`](../../src/tint/tint.gni) for the core fuzzer target rules.
+Both fuzzers are implemented using
+[libFuzzer](https://llvm.org/docs/LibFuzzer.html), and are intended to
+be automatically and continuously run by Chromium's ClusterFuzz
+infrastructure. Currently only `tint_wgsl_fuzzer` is deployed on
+ClusterFuzz.
 
-Tint's fuzzers are implemented as functions registered with the macros:
+[Fuzzer targets are automatically found via `gn
+refs`](https://chromium.googlesource.com/chromium/src/+/HEAD/testing/libfuzzer/libFuzzer_integration.md). See
+[`tint.gni`](../../src/tint/tint.gni) for the core fuzzer target
+rules.
 
-- [`TINT_WGSL_PROGRAM_FUZZER()`](#registering-a-new-tintprogram-fuzzer) registers a fuzzer function that is handed a `tint::Program`.
-- [`TINT_IR_MODULE_FUZZER()`](#registering-a-new-tintcoreirmodule-fuzzer) registers a fuzzer function that is handed a `tint::core::ir::Module`.
+Tint's fuzzers are implemented as functions registered with the
+macros:
+
+- [`TINT_WGSL_PROGRAM_FUZZER()`](#registering-a-new-tintprogram-fuzzer)
+  registers a fuzzer function that is handed a `tint::Program`.
+- [`TINT_IR_MODULE_FUZZER()`](#registering-a-new-tintcoreirmodule-fuzzer)
+  registers a fuzzer function that is handed a
+  `tint::core::ir::Module`.
 
 ## Building
 
-The fuzzer targets can be build with either CMake or GN:
+The `tint_wgsl_fuzzer` target can be built with either CMake or GN:
 
-- CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1` to `CMake`, or set in `CMakeCache.txt`)
+- CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1`
+  to `cmake`)
 - GN: Define `use_libfuzzer = true` in `args.gn`.
 
-## Local fuzzing
+Building `tint_ir_fuzzer` requires additional flags to be set:
 
-The [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) and [`tint_ir_fuzzer`](#tint_ir_fuzzer) executables accept the [standard `libFuzzer` command line arguments](https://llvm.org/docs/LibFuzzer.html#options) with extended command line arguments described below.
+- CMake: Define `TINT_BUILD_IR_BINARY=1` (pass
+  `-DTINT_BUILD_IR_BINARY=1` to `cmake`)
+- GN: Define `tint_build_ir_binary = true` in `args.gn`.
 
-There's also a helper tool to run the fuzzers locally:
+## Running fuzzers
 
-- To run the local fuzzers across the full number of CPU threads available on the system, seeded with the corpus in [`test/tint`](../../test/tint), run:
+### Local fuzzing
+
+The [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) and
+[`tint_ir_fuzzer`](#tint_ir_fuzzer) executables accept the [standard
+`libFuzzer` command line
+arguments](https://llvm.org/docs/LibFuzzer.html#options) with
+[extended command line arguments](#extended-command-line-arguments)
+described below.
+
+There's also a helper tool to run the fuzzers locally (it is fully
+featured for running the WGSL fuzzer, with WIP support for the IR
+fuzzer):
+
+- To run the local fuzzers across the full number of CPU threads
+  available on the system, seeded with a corpus based on
+  [`test/tint`](../../test/tint), and using the dictionary in
+  `src/tint/cmd/fuzz/wgsl/dictionary.txt` run:
 
   `tools/run fuzz`
 
-- To check that all the test files in [`test/tint`](../../test/tint) pass the fuzzers without error and then exit, run:
+- To check that all the test files, [`test/tint`](../../test/tint) by
+  default, pass the fuzzers without crashing and then exit, run:
 
   `tools/run fuzz --check`
 
-  Note: This is run by Dawn's CQ presubmit to check that fuzzers aren't accidentally broken.
+  Note: This is run by Dawn's CQ to check that fuzzers aren't
+  accidentally broken.
 
-## Registering a new `tint::Program` fuzzer
+- To run the local fuzzers using a generated corpus:
+
+  `tools/run fuzz -corpus out/Fuzzer/wgsl_corpus`
+
+Note: The above commands will run in the default WGSL only mode.  If
+you want to run using the IR fuzzer, you need to pass in `--ir` to run
+in IR mode.
+
+The base run fuzzer mode will execute without seeding if a corpus is
+not provided. An example of running with an explicit corpus:
+
+```bash
+tools/run fuzz --ir -corpus out/Fuzzer/ir_corpus
+```
+
+`--check` only works in IR mode if an appropriate corpus is explicitly provided,
+an example of this:
+
+```bash
+tools/run fuzz --ir --check -corpus out/Fuzzer/ir_corpus`
+```
+
+See below for how to generate the corpus locally
+
+### Generating fuzzer corpora
+
+Running fuzzers without any inputs is relatively inefficient, since
+the fuzzing algorithm has to discover the structure of the input
+format via generating random inputs. This can be alleviated by
+providing a corpus of examples to start from. The fuzzer will not be
+restricted by this initial corpus, since it will mutate and recombine
+the examples to find new and interesting inputs.
+
+#### tint_wgsl_fuzzer
+
+The WGSL fuzzer corpus can be generated locally by invoking the Python
+script used by the build recipes. The output of this can then be
+passed into the fuzzer executable.
+
+Unlike the IR fuzzer corpus generation and corpora minimization below,
+there are no additional binaries that need to be built for the basic
+WGSL corpus generation.
+
+The first argument to the script is the location to pull examples from
+when generating the corpus, the standard location is
+[`test/tint`](../../test/tint) though any collection of .wgsl files
+could be used. The second argument to the script is where to output
+the corpus.
+
+When running the WGSL fuzzer, it is useful to also pass in a
+dictionary of WGSL terms, which can be done via
+`-dict=src/tint/cmd/fuzz/wgsl/dictionary.txt`
+
+An example of generating and using the WGSL corpus:
+
+```bash
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py test/tint out/Fuzzer/wgsl_corpus
+autoninja -C out/Fuzzer tint_wgsl_fuzzer  # Need to build the fuzzer to be able to run it
+out/libfuzz/tint_wgsl_fuzzer -dict=src/tint/cmd/fuzz/wgsl/dictionary.txt out/Fuzzer/wgsl_corpus
+```
+
+#### tint_ir_fuzzer
+
+The IR corpus can be generated by invoking the same Python script used
+for the WGSL corpus, but with different arguments.
+
+When running in this mode the script needs the IR case assembler,
+`ir_fuzz_as`, binary, which can either be directly built using
+GN/CMake, or built as part of the GN target `fuzzer_corpus_tools`,
+which builds all the tools that are used by the different script
+modes.
+
+The `ir_fuzz_as` binary is passed into the script via the `--ir_as=`
+flag.
+
+As above, the first argument to the script is the location to pull
+examples from when generating the corpus, the standard location is
+[`test/tint`](../../test/tint) though any collection of .wgsl files
+could be used. The second argument to the script is where to output
+the corpus.
+
+To use the corpus with the IR fuzzer, the generated corpus is passed
+into `tint_ir_fuzzer` via a command line argument. Unlike the WGSL
+fuzzer, there is no need for a dictionary, since the fuzzer uses for
+[`libprotobuf-mutator`](https://github.com/google/libprotobuf-mutator)
+for mutating, which in turn uses the proto definition for generating
+terms.
+
+An example of generating and using the IR corpus:
+
+```bash
+autoninja -C out/Fuzzer fuzzer_corpus_tools  # This also builds the fuzzers, since they are used for minimization
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py --ir_as=out/Fuzzer/ir_fuzz_as test/tint out/Fuzzer/ir_corpus
+out/Fuzzer/tint_ir_fuzzer out/Fuzzer/ir_corpus
+```
+
+#### Minimizing the corpus
+
+The build recipes by design do not run minimization on the fuzzer
+corpora, since this process can take over an hour on a powerful
+workstation, which causes timeouts on the bots.
+
+Additionally, there is not a lot of need to minimize the corpus, since
+the fuzzing infrastructure does it automatically as needed when adding
+newly discovered test cases.
+
+The one time that it might need to be manually run is if the corpus
+has radically changed, i.e. a major language change, or new
+feature. Then a dev may want to generate a new corpus and minimize it,
+for either local testing or manually updating the GCS bucket.
+
+Minimizing the corpus can be done via manually invoking the same
+script as discussed above for generating the non-minimized corpora.
+
+Minimization expects as an input a non-minimized version of the
+corpus, so two calls to the script will need to be chained together.
+
+This will generate a minimized version of the WGSL corpus in
+`out/Fuzzer/wgsl_min_corpus`:
+
+```bash
+autoninja -C out/libfuzz fuzzer_corpus_tools  # or just tint_wgsl_fuzzer
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py test/tint out/Fuzzer/wgsl_corpus
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py --wgsl_fuzzer=out/Fuzzer/tint_wgsl_fuzzer out/Fuzzer/wgsl_corpus out/Fuzzer/wgsl_min_corpus
+```
+
+This will generate a minimized version of the IR corpus in
+`out/Fuzzer/gen/fuzzers/ir_min_corpus`:
+
+```bash
+autoninja -C out/libfuzz fuzzer_corpus_tools  # This will build both ir_fuzz_as and tint_ir_fuzzer
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py --ir_as=out/Fuzzer/ir_fuzz_as test/tint out/Fuzzer/ir_corpus
+python3 src/tint/cmd/fuzz/generate_tint_corpus.py --ir_fuzzer=out/Fuzzer/tint_ir_fuzzer out/Fuzzer/ir_corpus out/Fuzzer/ir_min_corpus
+```
+
+## Writing fuzzers
+
+### Registering a new `tint::Program` fuzzer
 
 1. Create a new source file with a `_fuzz.cc` suffix.
 2. `#include "src/tint/cmd/fuzz/wgsl/fuzz.h"`
-3. Define a function in a (possibly nested) anonymous namespace with one of the signatures:
+3. Define a function in a (possibly nested) anonymous namespace with
+   one of the signatures:
 
    - `void MyFuzzer(const tint::Program& program /*, ...additional fuzzed parameters... */) {`
    - `void MyFuzzer(const tint::Program& program, const tint::fuzz::wgsl::Context& context /*, ...additional fuzzed parameters... */) {`
 
-   The optional `context` parameter holds information about the `Program` and the environment used to run the fuzzers. \
-    [Note: Any number of additional fuzzer-populated parameters can be appended to the function signature.](#additional-fuzzer-data)
+   The optional `context` parameter holds information about the
+    `Program` and the environment used to run the fuzzers.
 
-4. Implement your fuzzer function, using `TINT_ICE()` to catch invalid state. Return early if the fuzzer cannot handle the input.
-5. At the bottom of the file, in the global namespace, register the fuzzer with: `TINT_WGSL_PROGRAM_FUZZER(MyFuzzer);`
-6. Use `tools/run gen build` to generate the build files for this new fuzzer.
+   [Note: Any number of additional fuzzer-populated parameters can be
+   appended to the function signature.](#additional-fuzzer-data)
+
+4. Implement your fuzzer function, using `TINT_ICE()` to catch invalid
+   state. Return early if the fuzzer cannot handle the input.
+5. At the bottom of the file, in the global namespace, register the
+   fuzzer with: `TINT_WGSL_PROGRAM_FUZZER(MyFuzzer);`
+6. Use `tools/run gen build` to generate the build files for this new
+   fuzzer.
 
 Example:
 
@@ -75,22 +256,32 @@ void MyWGSLFuzzer(const tint::Program& program, bool a_fuzzer_provided_value) {
 }  // namespace tint::my_namespace
 
 TINT_WGSL_PROGRAM_FUZZER(tint::my_namespace::MyWGSLFuzzer);
-
 ```
 
-## Registering a new `tint::core::ir::Module` fuzzer
+### Registering a new `tint::core::ir::Module` fuzzer
 
 1. Create a new source file with a `_fuzz.cc` suffix.
 2. `#include "src/tint/cmd/fuzz/ir/fuzz.h"`
-3. Define a function in a (possibly nested) anonymous namespace with the signature:
+3. Define a function in a (possibly nested) anonymous namespace with
+   the signature:
 
    - `void MyFuzzer(core::ir::Module& module /*, ...additional fuzzed parameters... */) {`
 
-   [Note: Any number of additional fuzzer-populated parameters can be appended to the function signature.](#additional-fuzzer-data)
+   [Note: Any number of additional fuzzer-populated parameters can be
+   appended to the function signature.](#additional-fuzzer-data)
 
-4. Implement your fuzzer function, using `TINT_ICE()` to catch invalid state. Return early if the fuzzer cannot handle the input.
-5. At the bottom of the file, in the global namespace, register the fuzzer with: `TINT_IR_MODULE_FUZZER(MyFuzzer);`
-6. Use `tools/run gen build` to generate the build files for this new fuzzer.
+4. Implement your fuzzer function, using `TINT_ICE()` to catch invalid
+   state. Return early if the fuzzer cannot handle the input.
+5. At the bottom of the file, in the global namespace, register the
+   fuzzer with: `TINT_IR_MODULE_FUZZER(MyFuzzer);`
+
+  [Note: Often different capabilities need to be enabled before/after
+  a fuzzer function runs to ensure validation passes, these can be
+  declared using `pre_capabilities` and `post_capabilities` when
+  registering the fuzzer ]
+
+6. Use `tools/run gen build` to generate the build files for this new
+   fuzzer.
 
 Example:
 
@@ -108,15 +299,22 @@ void MyIRFuzzer(core::ir::Module& module) {
 }  // namespace tint::my_namespace
 
 TINT_IR_MODULE_FUZZER(tint::my_namespace::MyIRFuzzer);
-
 ```
 
-## Additional fuzzer data
+### Additional fuzzer data
 
-WGSL and IR fuzzer functions can also declare any number of additional parameters, which will be populated with fuzzer provided data. These additional parameters must come at the end of the signatures described above, and can be of the following types:
+WGSL and IR fuzzer functions can also declare any number of additional
+parameters, which will be populated with fuzzer provided data. These
+additional parameters must come at the end of the signatures described
+above, and can be of the following types:
 
 - Any integer, float or bool type.
-- Any structure reflected with `TINT_REFLECT`. Note: It's recommended to use a `const` reference, for these to avoid pass-by-value overheads.
+
+- Any structure reflected with `TINT_REFLECT`.
+
+  Note: It's recommended to use a `const` reference, for these to
+  avoid pass-by-value overheads.
+
 - Any enum reflected with `TINT_REFLECT_ENUM_RANGE`.
 
 ## Executable targets
@@ -125,26 +323,224 @@ Tint has two fuzzer executable targets:
 
 ### `tint_wgsl_fuzzer`
 
-`tint_wgsl_fuzzer` [accepts WGSL textual input](https://llvm.org/docs/LibFuzzer.html#options) and parses line comments (`//`) as a base-64 binary encoded data stream for the [additional fuzzer parameters](additional-fuzzer-data).
+`tint_wgsl_fuzzer` [accepts WGSL textual
+input](https://llvm.org/docs/LibFuzzer.html#options) and parses line
+comments (`//`) as a base-64 binary encoded data stream for the
+[additional fuzzer parameters](additional-fuzzer-data).
 
-The entry point for the fuzzer lives at [`src/tint/cmd/fuzz/wgsl/main_fuzz.cc`](../../src/tint/cmd/fuzz/wgsl/main_fuzz.cc).
+The entry point for the fuzzer lives at
+[`src/tint/cmd/fuzz/wgsl/main_fuzz.cc`](../../src/tint/cmd/fuzz/wgsl/main_fuzz.cc).
 
-#### Command line flags
+#### Extended command line arguments
+
+On top of the [standard `libFuzzer` command line
+arguments](https://llvm.org/docs/LibFuzzer.html#options), the fuzzer
+supports the following extended command line arguments:
 
 - `--help`: lists the command line arguments.
-- `--filter`: only runs the fuzzer functions that contain the given string in its name.
-- `--concurrent`: each of the fuzzer functions will be run on a separate, concurrent thread. This potentially offers performance improvements, and also tests for concurrent execution.
-- `--verbose` : prints verbose information about what the fuzzer is doing.
+- `--filter=<name>`: only runs the fuzzer functions that contain the
+  given string in its name.
+- `--concurrent`: each of the fuzzer functions will be run on a
+  separate, concurrent thread. This potentially offers performance
+  improvements, and also tests for concurrent execution.
+- `--verbose` : prints verbose information about what the fuzzer is
+  doing.
+- `--dump` : prints shader source, including input WGSL, and generated
+  HLSL, MSL, and GLSL.
 
 #### Behavior
 
 The `tint_wgsl_fuzzer` will do the following:
 
-- Base-64 decode the line comments data from the WGSL source, used to populate the [additional fuzzer parameters](additional-fuzzer-data).
-- Parse and resolve the WGSL input, and will early-return if there are any parser errors.
-- Invoke each of the fuzzer functions registered with a call to `TINT_WGSL_PROGRAM_FUZZER()`
-- Automatically convert the `Program` to an IR module and run the function for each function registered with `TINT_IR_MODULE_FUZZER()`. Note: The `Program` is converted to an IR module for each registered IR fuzzer as the module is mutable.
+- Base-64 decode the line comments data from the WGSL source, used to
+  populate the [additional fuzzer parameters](additional-fuzzer-data).
+- Parse and resolve the WGSL input, and will early-return if there are
+  any parser errors.
+- Invoke each of the fuzzer functions registered with a call to
+  `TINT_WGSL_PROGRAM_FUZZER()`
+- Automatically convert the `Program` to an IR module and run the
+  function for each function registered with
+  `TINT_IR_MODULE_FUZZER()`. Note: The `Program` is converted to an IR
+  module for each registered IR fuzzer as the module is mutable.
 
 ### `tint_ir_fuzzer`
 
-TODO: Document when landed.
+`tint_ir_fuzzer` accepts binary [protocol
+buffer](https://protobuf.dev/) inputs and uses
+[`libprotobuf-mutator`](https://github.com/google/libprotobuf-mutator)
+for mutating this binary format directly.
+
+The suffix `.tirb` is sometimes used for IR fuzz test case files,
+which helps our tooling infer the format. The fuzzer itself does not
+generate/depend on this suffix though, instead using the `libFuzzer`
+standard prefixes, i.e. `crash-...` and `slow-...`, when needed.
+
+The input protobuf is defined in
+[src/tint/utils/protos/ir_fuzz/ir_fuzz.proto](../../src/tint/utils/protos/ir_fuzz/ir_fuzz.proto)
+is a composite of two elements, a protobuf
+[src/tint/utils/protos/ir/ir.proto](../../src/tint/utils/protos/ir/ir.proto)
+that defines the actual IR for the test case, and an opaque binary
+blob that includes the [additional fuzzer
+parameters](additional-fuzzer-data) akin to `tint_wgsl_fuzzer`.
+
+The entry point for the fuzzer lives at
+[`src/tint/cmd/fuzz/ir/main_fuzz.cc`](../../src/tint/cmd/fuzz/ir/main_fuzz.cc).
+
+#### Extended command line arguments
+
+This fuzzer accepts the same set of flags as `tint_wgsl_fuzzer` (both
+`libFuzzer` and extended), expect `--dump` which is currently not
+supported.
+
+#### Behavior
+The `tint_ir_fuzzer` will do the following:
+
+- Decode the binary encoded protobuf into a `Program` for the
+  IR module and a binary blob that will be passed into each function
+  as options. If the input cannot be decoded due to being invalid or
+  containing select constructs that can never occur in real world
+  inputs, then the fuzzer will early return.
+- Validate that decoded IR module, and will early-return if there are
+  any errors.
+- For each fuzzer function registered via `TINT_IR_PROGRAM_FUZZER()`,
+  make a copy of the IR module, since it is mutable, and then invoke
+  the fuzzer function.
+- Validate that outputted IR module state, and raise an error if it
+  fails, since this indicates a functional issue with a transform or
+  the initial validation missed an illegal state.
+
+#### Working with test cases
+
+[Note: The tooling related to working with `tint_ir_fuzz` test cases
+is a WIP and may not be complete]
+
+Since the input test cases for `tint_ir_fuzzer` are in a non-human
+readable format, there is additional tooling needed for working with
+them.
+
+##### ir_fuzz_dis
+
+For displaying the IR contents of a test case file (i.e. `crash-...`,
+or `foo.tirb`), there is a disassembler `ir_fuzz_dis`, which is the
+easiest way to dump out the contents of a test case. This disassembler
+supports a subset of the Tint CLI for outputting in various formats
+and to files, etc.
+
+The disassembler has two significant known limitations though.
+
+First, it does not dump out the binary options blob. This is because
+this data is interpreted on a per-fuzzer function basis, so there
+isn't a general human readable interpretation of its contents. If you
+need to understand how the binary blob is being handled by a fuzzer
+you will either need to add logging or use a debugger.
+
+The other known limitation is that this disassembler depends on Tint's
+IR printing code, which assumes well formed inputs. Sometimes it will
+fail to output anything, or more subtly not output values it did't
+expect. For example if an instruction only expects 2 params and there
+are actually 3 in the IR, then the disassembler may only print the
+first two. The validator should catch these issues and give you useful
+warnings, but since it is a WIP itself there may be omissions in its
+implementation.
+
+##### protoc
+
+Due to the second limitation on the disassembler, there are times
+where you will need to dump the raw contents of the binary protocol
+buffer in a textual format. This can be done using the tool `protoc`
+which is part of `libprotobuf` and either installed via a system
+package or built as part building the fuzzers. A full tutorial on
+using protoc is beyond the scope of this document, see [protobuf
+docs](https://protobuf.dev/getting-started/cpptutorial/) for more
+details, but the basic invocation looks like this:
+
+```bash
+out/Fuzzer/protoc --decode tint.cmd.fuzz.ir.pb.Root ./src/tint/utils/protos/ir_fuzz/ir_fuzz.proto < ./input.tirb
+```
+
+The important thing to note is the use of `--decode
+tint.cmd.fuzz.ir.pb.Root` to decode just the IR portion of the input,
+but still needing to supply top-level `ir_fuzz.proto` as the format.
+
+##### ir_fuzz_as
+
+For generating binary test cases a rudimentary assembler,
+`ir_fuzz_as`, has been implemented.
+
+It is primarily used for converting the Tint test shaders into a seed
+corpus for `tint_ir_fuzzer`, but can be used to convert user supplied
+shaders into IR tests cases.
+
+Similar to the disassembler it only operates on the shader/IR portion
+of the test case format, and does not support embedding/manipulating
+the binary blob portion. (There is currently no roundtrip workflow for
+taking a test case binary, unpacking it, modifying it, and repacking
+it with original blob, other then manually unpacking and packing
+protobufs, which is left as an exercise to the reader).
+
+It also suffers from the same limitation of the disassembler with
+regards to not handling malformed inputs particularly well, since it
+depends on the general Tint CLI parsing/printing infrastructure.
+
+It is capable of dumping raw text of the IR protobuf that it
+generates, which can be useful for understanding how the IR is being
+encoded/decoded, since you can take a snippet of valid WGSL and dump
+out what the protobuf looks like for it.
+
+## Debugging
+
+To debug a specific registered fuzzer function, one strategy is to add
+a `TINT_ICE` call at the top of the function, and then run the fuzzer
+with `-filter <name>` to have it only run that specific fuzzer. When
+the function is called, the libfuzzer harness will emit a crash file
+that can be used as input on subsequent runs. Remove the `TINT_ICE`
+and run the fuzzer again using this crash file.
+
+For example, if we wish to debug `tint::msl::writer::IRFuzzer`, we
+would first insert a `TINT_ICE` at the top:
+
+```c++
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             Options options) {
+    TINT_ICE() << "Crash";
+    // Comment out the rest of the body to avoid unreachable code warnings
+}
+```
+
+Build and run the fuzzer, filtering in this function:
+
+```bash
+autoninja -C out/libfuzz tint_wgsl_fuzzer
+out/libfuzz/tint_wgsl_fuzzer -filter=tint::msl::writer::IRFuzzer
+```
+
+It can take a little while before libfuzzer generates a valid input
+WGSL, but eventually it will call into the function and crash on the
+ICE:
+
+```
+...
+#71607  NEW    cov: 3633 ft: 8316 corp: 1045/8248b lim: 25 exec/s: 2469 rss: 158Mb L: 8/25 MS: 2 ShuffleBytes-PersAutoDict- DE: "true"-
+#71669  NEW    cov: 3633 ft: 8317 corp: 1046/8266b lim: 25 exec/s: 2471 rss: 158Mb L: 18/25 MS: 2 CMP-ChangeByte- DE: "if"-
+#71697  REDUCE cov: 3633 ft: 8317 corp: 1046/8264b lim: 25 exec/s: 2472 rss: 158Mb L: 6/25 MS: 3 PersAutoDict-ChangeBit-EraseBytes- DE: "\001\002"-
+ICE while running fuzzer: 'tint::msl::writer::IRFuzzer'
+..\..\src\tint\lang\msl\writer\writer_fuzz.cc:63 internal compiler error: Crash
+==25204== ERROR: libFuzzer: deadly signal
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 1 PersAutoDict- DE: "or"-; base unit: b34d87c378ebbbfbfd475303dcc75d1d1b2a7c7a
+0x2f,0x2f,0x33,0x33,0x33,0x33,0x6f,0x72,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x2a,0x2a,0x30,0x32,
+//3333or3333333333**02
+artifact_prefix='./'; Test unit written to ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
+Base64: Ly8zMzMzb3IzMzMzMzMzMzMzKiowMg==
+```
+
+Note that the second to last line specifies that the input test was
+written to a file. Now we can remove the `TINT_ICE` and run the fuzzer
+with just this file as input:
+
+```bash
+out/libfuzz/tint_wgsl_fuzzer ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
+```

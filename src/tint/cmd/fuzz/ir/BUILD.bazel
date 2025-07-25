@@ -38,16 +38,6 @@ load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
 alias(
-  name = "build_with_chromium",
-  actual = "//src/tint:build_with_chromium_true",
-)
-
-alias(
-  name = "_not_is_asan_",
-  actual = "//src/tint:is_asan_false",
-)
-
-alias(
   name = "tint_build_glsl_writer",
   actual = "//src/tint:tint_build_glsl_writer_true",
 )
@@ -60,11 +50,6 @@ alias(
 alias(
   name = "tint_build_ir_binary",
   actual = "//src/tint:tint_build_ir_binary_true",
-)
-
-alias(
-  name = "tint_build_ir_fuzzer",
-  actual = "//src/tint:tint_build_ir_fuzzer_true",
 )
 
 alias(
@@ -88,26 +73,10 @@ alias(
 )
 
 selects.config_setting_group(
-    name = "_not_is_asan__or_build_with_chromium",
-    match_any = [
-        "_not_is_asan_",
-        "build_with_chromium",
-    ],
-)
-
-selects.config_setting_group(
-    name = "tint_build_ir_binary_and_tint_build_ir_fuzzer",
+    name = "tint_build_ir_binary_and_tint_build_wgsl_reader",
     match_all = [
         ":tint_build_ir_binary",
-        ":tint_build_ir_fuzzer",
-    ],
-)
-selects.config_setting_group(
-    name = "tint_build_ir_binary_and_tint_build_ir_fuzzer_and___not_is_asan__or_build_with_chromium_",
-    match_all = [
-        ":tint_build_ir_binary",
-        ":tint_build_ir_fuzzer",
-        ":_not_is_asan__or_build_with_chromium",
+        ":tint_build_wgsl_reader",
     ],
 )
 

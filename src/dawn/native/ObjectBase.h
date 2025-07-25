@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_OBJECTBASE_H_
 
 #include <mutex>
+#include <optional>
 #include <string>
 
 #include "absl/strings/str_format.h"
@@ -37,6 +38,7 @@
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
@@ -98,8 +100,8 @@ class ApiObjectList {
 
     template <typename F>
     void ForEach(F fn) const {
-        mObjects.Use([&fn](const auto lockedObjects) {
-            for (const auto* node = lockedObjects->head(); node != lockedObjects->end();
+        mObjects.Use([&fn](auto lockedObjects) {
+            for (auto* node = lockedObjects->head(); node != lockedObjects->end();
                  node = node->next()) {
                 fn(node->value());
             }
@@ -121,8 +123,8 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     static constexpr UntrackedByDeviceTag kUntrackedByDevice = {};
 
     ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
-    ApiObjectBase(DeviceBase* device, const char* label);
-    ApiObjectBase(DeviceBase* device, ErrorTag tag, const char* label = nullptr);
+    ApiObjectBase(DeviceBase* device, StringView label);
+    ApiObjectBase(DeviceBase* device, ErrorTag tag, StringView label = {});
     ~ApiObjectBase() override;
 
     virtual ObjectType GetType() const = 0;
@@ -139,7 +141,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     void Destroy();
 
     // Dawn API
-    void APISetLabel(const char* label);
+    void APISetLabel(StringView label);
 
   protected:
     // Overriding of the RefCounted's DeleteThis function ensures that instances of objects

@@ -1,27 +1,165 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
-
 void f() {
-  TINT_ISOLATE_UB(tint_volatile_true) for(int i0520 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i0520 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_1) for(int i62 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i62 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_1 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_1;
+        uint const tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_1);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_2) for(int i0520 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i0520 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_2 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_2;
+        uint const tint_carry_2 = uint((tint_low_inc_2 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_2);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_3) for(int i62 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i62 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_3 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_3;
+        uint const tint_carry_3 = uint((tint_low_inc_3 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_3);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_4) for(int i62 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i62 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_4 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_4;
+        uint const tint_carry_4 = uint((tint_low_inc_4 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_4);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_5) for(int i60 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i60 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_5 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_5;
+        uint const tint_carry_5 = uint((tint_low_inc_5 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_5);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_6) for(int i62 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i62 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_6 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_6;
+        uint const tint_carry_6 = uint((tint_low_inc_6 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_6);
+      }
+      continue;
+    }
   }
-  TINT_ISOLATE_UB(tint_volatile_true_7) for(int i60 = 0; false; ) {
+  {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    int i60 = 0;
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if (false) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc_7 = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc_7;
+        uint const tint_carry_7 = uint((tint_low_inc_7 == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry_7);
+      }
+      continue;
+    }
   }
 }
-

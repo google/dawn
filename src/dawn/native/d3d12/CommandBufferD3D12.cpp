@@ -37,6 +37,7 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/ImmediateConstantsTracker.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
@@ -90,7 +91,6 @@ bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Ex
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12graphicscommandlist-copyresource
     // In order to use D3D12's copy resource, the textures must be the same dimensions, and
     // the copy must be of the entire resource.
-    // TODO(dawn:129): Support 1D textures.
     return src.aspect == src.texture->GetFormat().aspects &&
            src.texture->GetDimension() == dst.texture->GetDimension() &&  //
            dst.texture->GetNumMipLevels() == 1 &&                         //
@@ -103,6 +103,12 @@ bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Ex
            copySize.height == srcSize.height &&    //
            copySize.depthOrArrayLayers == dstSize.depthOrArrayLayers &&  //
            copySize.depthOrArrayLayers == srcSize.depthOrArrayLayers;
+}
+
+bool CanUseCopyResource(CopyBufferToBufferCmd* copy) {
+    return copy->sourceOffset == 0 && copy->destinationOffset == 0 &&
+           copy->size == copy->source->GetSize() && copy->size == copy->destination->GetSize() &&
+           copy->source->GetAllocatedSize() == copy->destination->GetAllocatedSize();
 }
 
 void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList,
@@ -398,27 +404,76 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     return {};
 }
 
+template <typename T>
+class ImmediateConstantTracker : public T {
+  public:
+    ImmediateConstantTracker() = default;
+
+    // Calling this after BindGroupTrackerBase::Apply() to update root signature.
+    void Apply(CommandRecordingContext* commandContext) {
+        auto* lastPipeline = this->mLastPipeline;
+        DAWN_ASSERT(lastPipeline != nullptr);
+
+        ImmediateConstantMask pipelineMask = lastPipeline->GetImmediateMask();
+        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        for (auto&& [offset, size] : IterateRanges(uploadBits)) {
+            uint32_t immediateContentStartOffset =
+                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+            uint32_t immediateRangeStartOffset =
+                GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
+            SetRootConstant(commandContext->GetCommandList(),
+                            ToBackend(lastPipeline->GetLayout())->GetImmediatesParameterIndex(),
+                            size,
+                            this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                            immediateRangeStartOffset);
+        }
+
+        // Reset all dirty bits after uploading.
+        this->mDirty.reset();
+    }
+
+  private:
+    static constexpr bool kIsRenderImmediateConstants =
+        std::is_same_v<T, RenderImmediateConstantsTrackerBase>;
+    static constexpr bool kIsComputeImmediateConstants =
+        std::is_same_v<T, ComputeImmediateConstantsTrackerBase>;
+
+    void SetRootConstant(ID3D12GraphicsCommandList* commandList,
+                         uint32_t parameterIndex,
+                         uint32_t rootConstantsLength,
+                         const void* rootConstantsData,
+                         uint32_t registerOffset) const {
+        if constexpr (kIsRenderImmediateConstants) {
+            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                       rootConstantsData, registerOffset);
+        } else {
+            static_assert(kIsComputeImmediateConstants);
+            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                      rootConstantsData, registerOffset);
+        }
+    }
+};
+
 }  // anonymous namespace
 
 class DescriptorHeapState;
 
+template <typename PipelineType>
 class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
     using Base = BindGroupTrackerBase;
 
   public:
-    BindGroupStateTracker(Device* device, DescriptorHeapState* heapState, bool inCompute)
-        : BindGroupTrackerBase(),
-          mDevice(device),
-          mHeapState(heapState),
-          mInCompute(inCompute),
-          mViewAllocator(device->GetViewShaderVisibleDescriptorAllocator()),
-          mSamplerAllocator(device->GetSamplerShaderVisibleDescriptorAllocator()) {}
+    BindGroupStateTracker(Device* device, DescriptorHeapState* heapState)
+        : BindGroupTrackerBase(), mDevice(device), mHeapState(heapState) {}
 
     MaybeError Apply(CommandRecordingContext* commandContext) {
         BeforeApply();
 
         ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
         UpdateRootSignatureIfNecessary(commandList);
+
+        auto& viewAllocator = mDevice->GetViewShaderVisibleDescriptorAllocator();
+        auto& samplerAllocator = mDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
         // Bindgroups are allocated in shader-visible descriptor heaps which are managed by a
         // ringbuffer. There can be a single shader-visible descriptor heap of each type bound
@@ -429,10 +484,10 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         // to occur on overflow.
         bool didCreateBindGroupViews = true;
         bool didCreateBindGroupSamplers = true;
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroups)) {
+        for (BindGroupIndex index : mDirtyBindGroups) {
             BindGroup* group = ToBackend(mBindGroups[index]);
-            didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
-            didCreateBindGroupSamplers = group->PopulateSamplers(mDevice, mSamplerAllocator);
+            didCreateBindGroupViews = group->PopulateViews(viewAllocator);
+            didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
             if (!didCreateBindGroupViews && !didCreateBindGroupSamplers) {
                 break;
             }
@@ -440,11 +495,11 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
 
         if (!didCreateBindGroupViews || !didCreateBindGroupSamplers) {
             if (!didCreateBindGroupViews) {
-                DAWN_TRY(mViewAllocator->AllocateAndSwitchShaderVisibleHeap());
+                DAWN_TRY(viewAllocator->AllocateAndSwitchShaderVisibleHeap());
             }
 
             if (!didCreateBindGroupSamplers) {
-                DAWN_TRY(mSamplerAllocator->AllocateAndSwitchShaderVisibleHeap());
+                DAWN_TRY(samplerAllocator->AllocateAndSwitchShaderVisibleHeap());
             }
 
             mDirtyBindGroupsObjectChangedOrIsDynamic |= mBindGroupLayoutsMask;
@@ -453,19 +508,19 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             // Must be called before applying the bindgroups.
             SetID3D12DescriptorHeaps(commandList);
 
-            for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
+            for (BindGroupIndex index : mBindGroupLayoutsMask) {
                 BindGroup* group = ToBackend(mBindGroups[index]);
-                didCreateBindGroupViews = group->PopulateViews(mViewAllocator);
-                didCreateBindGroupSamplers = group->PopulateSamplers(mDevice, mSamplerAllocator);
+                didCreateBindGroupViews = group->PopulateViews(viewAllocator);
+                didCreateBindGroupSamplers = group->PopulateSamplers(samplerAllocator);
                 DAWN_ASSERT(didCreateBindGroupViews);
                 DAWN_ASSERT(didCreateBindGroupSamplers);
             }
         }
 
-        for (BindGroupIndex index : IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+        for (BindGroupIndex index : mDirtyBindGroupsObjectChangedOrIsDynamic) {
             BindGroup* group = ToBackend(mBindGroups[index]);
             ApplyBindGroup(commandList, ToBackend(mPipelineLayout), index, group,
-                           mDynamicOffsets[index]);
+                           GetDynamicOffsets(index));
         }
 
         AfterApply();
@@ -478,15 +533,86 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
     void SetID3D12DescriptorHeaps(ID3D12GraphicsCommandList* commandList);
 
   private:
+    enum class RootBufferViewType { CBV, SRV, UAV };
+
+    static constexpr bool kIsRenderPipeline = std::is_same_v<PipelineType, RenderPipeline>;
+    static constexpr bool kIsComputePipeline = std::is_same_v<PipelineType, ComputePipeline>;
+
+    void SetRootSignature(ID3D12GraphicsCommandList* commandList, PipelineLayoutBase* layout) {
+        if constexpr (kIsRenderPipeline) {
+            commandList->SetGraphicsRootSignature(ToBackend(layout)->GetRootSignature());
+        } else {
+            static_assert(kIsComputePipeline);
+            commandList->SetComputeRootSignature(ToBackend(layout)->GetRootSignature());
+        }
+    }
+
+    void SetRootBufferView(ID3D12GraphicsCommandList* commandList,
+                           wgpu::BufferBindingType bindingType,
+                           uint32_t parameterIndex,
+                           const D3D12_GPU_VIRTUAL_ADDRESS& bufferLocation) {
+        switch (bindingType) {
+            case wgpu::BufferBindingType::Uniform:
+                if constexpr (kIsRenderPipeline) {
+                    commandList->SetGraphicsRootConstantBufferView(parameterIndex, bufferLocation);
+                } else {
+                    static_assert(kIsComputePipeline);
+                    commandList->SetComputeRootConstantBufferView(parameterIndex, bufferLocation);
+                }
+                break;
+            case wgpu::BufferBindingType::Storage:
+            case kInternalStorageBufferBinding:
+                if constexpr (kIsRenderPipeline) {
+                    commandList->SetGraphicsRootUnorderedAccessView(parameterIndex, bufferLocation);
+                } else {
+                    static_assert(kIsComputePipeline);
+                    commandList->SetComputeRootUnorderedAccessView(parameterIndex, bufferLocation);
+                }
+                break;
+            case wgpu::BufferBindingType::ReadOnlyStorage:
+            case kInternalReadOnlyStorageBufferBinding:
+                if constexpr (kIsRenderPipeline) {
+                    commandList->SetGraphicsRootShaderResourceView(parameterIndex, bufferLocation);
+                } else {
+                    static_assert(kIsComputePipeline);
+                    commandList->SetComputeRootShaderResourceView(parameterIndex, bufferLocation);
+                }
+                break;
+            case wgpu::BufferBindingType::BindingNotUsed:
+            case wgpu::BufferBindingType::Undefined:
+                DAWN_UNREACHABLE();
+        }
+    }
+
+    void SetRootDescriptorTable(ID3D12GraphicsCommandList* commandList,
+                                uint32_t parameterIndex,
+                                const D3D12_GPU_DESCRIPTOR_HANDLE& baseDescriptor) {
+        if constexpr (kIsRenderPipeline) {
+            commandList->SetGraphicsRootDescriptorTable(parameterIndex, baseDescriptor);
+        } else {
+            static_assert(kIsComputePipeline);
+            commandList->SetComputeRootDescriptorTable(parameterIndex, baseDescriptor);
+        }
+    }
+
+    void SetRootConstant(ID3D12GraphicsCommandList* commandList,
+                         uint32_t parameterIndex,
+                         uint32_t rootConstantsLength,
+                         const void* rootConstantsData,
+                         uint32_t registerOffset) {
+        if constexpr (kIsRenderPipeline) {
+            commandList->SetGraphicsRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                       rootConstantsData, registerOffset);
+        } else {
+            static_assert(kIsComputePipeline);
+            commandList->SetComputeRoot32BitConstants(parameterIndex, rootConstantsLength,
+                                                      rootConstantsData, registerOffset);
+        }
+    }
+
     void UpdateRootSignatureIfNecessary(ID3D12GraphicsCommandList* commandList) {
         if (mLastAppliedPipelineLayout != mPipelineLayout) {
-            if (mInCompute) {
-                commandList->SetComputeRootSignature(
-                    ToBackend(mPipelineLayout)->GetRootSignature());
-            } else {
-                commandList->SetGraphicsRootSignature(
-                    ToBackend(mPipelineLayout)->GetRootSignature());
-            }
+            SetRootSignature(commandList, mPipelineLayout);
             // Invalidate the root sampler tables previously set in the root signature.
             ResetRootSamplerTables();
         }
@@ -496,7 +622,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                         const PipelineLayout* pipelineLayout,
                         BindGroupIndex index,
                         BindGroup* group,
-                        const ityp::vector<BindingIndex, uint64_t>& dynamicOffsets) {
+                        const ityp::span<BindingIndex, uint64_t>& dynamicOffsets) {
         DAWN_ASSERT(dynamicOffsets.size() == group->GetLayout()->GetDynamicBufferCount());
 
         // Usually, the application won't set the same offsets many times,
@@ -524,38 +650,9 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                 D3D12_GPU_VIRTUAL_ADDRESS bufferLocation =
                     ToBackend(binding.buffer)->GetVA() + offset;
 
-                switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
-                    case wgpu::BufferBindingType::Uniform:
-                        if (mInCompute) {
-                            commandList->SetComputeRootConstantBufferView(parameterIndex,
-                                                                          bufferLocation);
-                        } else {
-                            commandList->SetGraphicsRootConstantBufferView(parameterIndex,
-                                                                           bufferLocation);
-                        }
-                        break;
-                    case wgpu::BufferBindingType::Storage:
-                    case kInternalStorageBufferBinding:
-                        if (mInCompute) {
-                            commandList->SetComputeRootUnorderedAccessView(parameterIndex,
-                                                                           bufferLocation);
-                        } else {
-                            commandList->SetGraphicsRootUnorderedAccessView(parameterIndex,
-                                                                            bufferLocation);
-                        }
-                        break;
-                    case wgpu::BufferBindingType::ReadOnlyStorage:
-                        if (mInCompute) {
-                            commandList->SetComputeRootShaderResourceView(parameterIndex,
-                                                                          bufferLocation);
-                        } else {
-                            commandList->SetGraphicsRootShaderResourceView(parameterIndex,
-                                                                           bufferLocation);
-                        }
-                        break;
-                    case wgpu::BufferBindingType::Undefined:
-                        DAWN_UNREACHABLE();
-                }
+                SetRootBufferView(commandList,
+                                  std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type,
+                                  parameterIndex, bufferLocation);
             }
         }
 
@@ -571,11 +668,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         if (cbvUavSrvCount > 0) {
             uint32_t parameterIndex = pipelineLayout->GetCbvUavSrvRootParameterIndex(index);
             const D3D12_GPU_DESCRIPTOR_HANDLE baseDescriptor = group->GetBaseViewDescriptor();
-            if (mInCompute) {
-                commandList->SetComputeRootDescriptorTable(parameterIndex, baseDescriptor);
-            } else {
-                commandList->SetGraphicsRootDescriptorTable(parameterIndex, baseDescriptor);
-            }
+            SetRootDescriptorTable(commandList, parameterIndex, baseDescriptor);
         }
 
         if (samplerCount > 0) {
@@ -584,12 +677,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             // Check if the group requires its sampler table to be set in the pipeline.
             // This because sampler heap allocations could be cached and use the same table.
             if (mBoundRootSamplerTables[index].ptr != baseDescriptor.ptr) {
-                if (mInCompute) {
-                    commandList->SetComputeRootDescriptorTable(parameterIndex, baseDescriptor);
-                } else {
-                    commandList->SetGraphicsRootDescriptorTable(parameterIndex, baseDescriptor);
-                }
-
+                SetRootDescriptorTable(commandList, parameterIndex, baseDescriptor);
                 mBoundRootSamplerTables[index] = baseDescriptor;
             }
         }
@@ -601,37 +689,23 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             uint32_t firstRegisterOffset =
                 pipelineLayout->GetDynamicStorageBufferLengthInfo()[index].firstRegisterOffset;
 
-            if (mInCompute) {
-                commandList->SetComputeRoot32BitConstants(
-                    parameterIndex, dynamicStorageBufferLengths.size(),
-                    dynamicStorageBufferLengths.data(), firstRegisterOffset);
-            } else {
-                commandList->SetGraphicsRoot32BitConstants(
-                    parameterIndex, dynamicStorageBufferLengths.size(),
-                    dynamicStorageBufferLengths.data(), firstRegisterOffset);
-            }
+            SetRootConstant(commandList, parameterIndex, dynamicStorageBufferLengths.size(),
+                            dynamicStorageBufferLengths.data(), firstRegisterOffset);
         }
     }
 
     raw_ptr<Device> mDevice;
     raw_ptr<DescriptorHeapState> mHeapState;
 
-    bool mInCompute = false;
-
     PerBindGroup<D3D12_GPU_DESCRIPTOR_HANDLE> mBoundRootSamplerTables = {};
-
-    // TODO(https://crbug.com/dawn/2361): Rewrite those members with raw_ref<T>.
-    // This is currently failing with MSVC cl.exe compiler.
-    RAW_PTR_EXCLUSION MutexProtected<ShaderVisibleDescriptorAllocator>& mViewAllocator;
-    RAW_PTR_EXCLUSION MutexProtected<ShaderVisibleDescriptorAllocator>& mSamplerAllocator;
 };
 
 class DescriptorHeapState {
   public:
     explicit DescriptorHeapState(Device* device)
         : mDevice(device),
-          mComputeBindingTracker(device, this, true),
-          mGraphicsBindingTracker(device, this, false) {}
+          mComputeBindingTracker(device, this),
+          mGraphicsBindingTracker(device, this) {}
 
     void SetID3D12DescriptorHeaps(ID3D12GraphicsCommandList* commandList) {
         DAWN_ASSERT(commandList != nullptr);
@@ -650,16 +724,22 @@ class DescriptorHeapState {
         mGraphicsBindingTracker.ResetRootSamplerTables();
     }
 
-    BindGroupStateTracker* GetComputeBindingTracker() { return &mComputeBindingTracker; }
-    BindGroupStateTracker* GetGraphicsBindingTracker() { return &mGraphicsBindingTracker; }
+    BindGroupStateTracker<ComputePipeline>* GetComputeBindingTracker() {
+        return &mComputeBindingTracker;
+    }
+    BindGroupStateTracker<RenderPipeline>* GetGraphicsBindingTracker() {
+        return &mGraphicsBindingTracker;
+    }
 
   private:
     raw_ptr<Device> mDevice;
-    BindGroupStateTracker mComputeBindingTracker;
-    BindGroupStateTracker mGraphicsBindingTracker;
+    BindGroupStateTracker<ComputePipeline> mComputeBindingTracker;
+    BindGroupStateTracker<RenderPipeline> mGraphicsBindingTracker;
 };
 
-void BindGroupStateTracker::SetID3D12DescriptorHeaps(ID3D12GraphicsCommandList* commandList) {
+template <typename PipelineType>
+void BindGroupStateTracker<PipelineType>::SetID3D12DescriptorHeaps(
+    ID3D12GraphicsCommandList* commandList) {
     mHeapState->SetID3D12DescriptorHeaps(commandList);
 }
 
@@ -688,7 +768,7 @@ class VertexBufferTracker {
         if (mLastAppliedRenderPipeline != renderPipeline) {
             mLastAppliedRenderPipeline = renderPipeline;
 
-            for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBuffersUsed())) {
+            for (VertexBufferSlot slot : renderPipeline->GetVertexBuffersUsed()) {
                 startSlot = std::min(startSlot, slot);
                 endSlot = std::max(endSlot, ityp::PlusOne(slot));
                 mD3D12BufferViews[slot].StrideInBytes =
@@ -723,12 +803,36 @@ class VertexBufferTracker {
     PerVertexBuffer<D3D12_VERTEX_BUFFER_VIEW> mD3D12BufferViews = {};
 };
 
+MaybeError EnsureResolveTargetInitialized(CommandRecordingContext* commandContext,
+                                          BeginRenderPassCmd* renderPass) {
+    DAWN_ASSERT(renderPass != nullptr);
+
+    for (ColorAttachmentIndex i : renderPass->attachmentState->GetColorAttachmentsMask()) {
+        TextureViewBase* resolveTarget = renderPass->colorAttachments[i].resolveTarget.Get();
+        if (resolveTarget == nullptr) {
+            continue;
+        }
+
+        if (renderPass->resolveRect.HasValue() &&
+            renderPass->resolveRect.updateWidth != renderPass->width &&
+            renderPass->resolveRect.updateHeight != renderPass->height) {
+            // The resolve texture also has `RenderAttachment` usage but if there is a
+            // resolve rect, the texture would only be partially filled. In this case we
+            // need to initialize the texture otherwise the regions outside the resolve
+            // rect would contain undefined pixels.
+            Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
+            DAWN_TRY(resolveTexture->EnsureSubresourceContentInitialized(
+                commandContext, resolveTexture->GetAllSubresources()));
+        }
+    }
+    return {};
+}
+
 void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
                                    BeginRenderPassCmd* renderPass) {
     DAWN_ASSERT(renderPass != nullptr);
 
-    for (ColorAttachmentIndex i :
-         IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (ColorAttachmentIndex i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         TextureViewBase* resolveTarget = renderPass->colorAttachments[i].resolveTarget.Get();
         if (resolveTarget == nullptr) {
             continue;
@@ -738,22 +842,34 @@ void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
         Texture* colorTexture = ToBackend(colorView->GetTexture());
         Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
 
-        // Transition the usages of the color attachment and resolve target.
+        // Transition the usages of the color attachment.
         colorTexture->TrackUsageAndTransitionNow(
             commandContext, D3D12_RESOURCE_STATE_RESOLVE_SOURCE, colorView->GetSubresourceRange());
-        resolveTexture->TrackUsageAndTransitionNow(commandContext,
-                                                   D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                                                   resolveTarget->GetSubresourceRange());
 
-        // Do MSAA resolve with ResolveSubResource().
         ID3D12Resource* colorTextureHandle = colorTexture->GetD3D12Resource();
         ID3D12Resource* resolveTextureHandle = resolveTexture->GetD3D12Resource();
         const uint32_t resolveTextureSubresourceIndex = resolveTexture->GetSubresourceIndex(
             resolveTarget->GetBaseMipLevel(), resolveTarget->GetBaseArrayLayer(), Aspect::Color);
         constexpr uint32_t kColorTextureSubresourceIndex = 0;
-        commandContext->GetCommandList()->ResolveSubresource(
-            resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
-            kColorTextureSubresourceIndex, colorTexture->GetD3D12Format());
+        // Use ResolveSubresource when there is no resolveRect so we don't have to specify the extra
+        // information ResolveSubresourceRegion requires.
+        if (renderPass->resolveRect.HasValue()) {
+            D3D12_RECT pSrcRect = {static_cast<int32_t>(renderPass->resolveRect.colorOffsetX),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetY),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetX +
+                                                        renderPass->resolveRect.updateWidth),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetY +
+                                                        renderPass->resolveRect.updateHeight)};
+            commandContext->GetCommandList1()->ResolveSubresourceRegion(
+                resolveTextureHandle, resolveTextureSubresourceIndex,
+                renderPass->resolveRect.resolveOffsetX, renderPass->resolveRect.resolveOffsetY,
+                colorTextureHandle, kColorTextureSubresourceIndex, &pSrcRect,
+                colorTexture->GetD3D12Format(), D3D12_RESOLVE_MODE_AVERAGE);
+        } else {
+            commandContext->GetCommandList()->ResolveSubresource(
+                resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
+                kColorTextureSubresourceIndex, colorTexture->GetD3D12Format());
+        }
     }
 }
 
@@ -798,6 +914,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 BeginRenderPassCmd* beginRenderPassCmd =
                     mCommands.NextCommand<BeginRenderPassCmd>();
 
+                DAWN_TRY(EnsureResolveTargetInitialized(commandContext, beginRenderPassCmd));
+
                 bool passHasUAV;
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     commandContext, GetResourceUsages().renderPasses[nextRenderPassNumber],
@@ -829,9 +947,14 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 srcBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                 dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-                commandList->CopyBufferRegion(
-                    dstBuffer->GetD3D12Resource(), copy->destinationOffset,
-                    srcBuffer->GetD3D12Resource(), copy->sourceOffset, copy->size);
+                if (CanUseCopyResource(copy)) {
+                    commandList->CopyResource(dstBuffer->GetD3D12Resource(),
+                                              srcBuffer->GetD3D12Resource());
+                } else {
+                    commandList->CopyBufferRegion(
+                        dstBuffer->GetD3D12Resource(), copy->destinationOffset,
+                        srcBuffer->GetD3D12Resource(), copy->sourceOffset, copy->size);
+                }
                 break;
             }
 
@@ -1150,23 +1273,22 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 Buffer* dstBuffer = ToBackend(write->buffer.Get());
                 uint8_t* data = mCommands.NextData<uint8_t>(size);
 
-                UploadHandle uploadHandle;
-                DAWN_TRY_ASSIGN(uploadHandle,
-                                device->GetDynamicUploader()->Allocate(
-                                    size, device->GetQueue()->GetPendingCommandSerial(),
-                                    kCopyBufferToBufferOffsetAlignment));
-                DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
-                memcpy(uploadHandle.mappedBuffer, data, size);
+                DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+                    size, kCopyBufferToBufferOffsetAlignment,
+                    [&](UploadReservation reservation) -> MaybeError {
+                        memcpy(reservation.mappedPointer, data, size);
+                        [[maybe_unused]] bool cleared;
+                        DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
+                                                     commandContext, offset, size));
 
-                [[maybe_unused]] bool cleared;
-                DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
-                                             commandContext, offset, size));
-
-                dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
-                commandList->CopyBufferRegion(
-                    dstBuffer->GetD3D12Resource(), offset,
-                    ToBackend(uploadHandle.stagingBuffer)->GetD3D12Resource(),
-                    uploadHandle.startOffset, size);
+                        dstBuffer->TrackUsageAndTransitionNow(commandContext,
+                                                              wgpu::BufferUsage::CopyDst);
+                        commandList->CopyBufferRegion(
+                            dstBuffer->GetD3D12Resource(), offset,
+                            ToBackend(reservation.buffer)->GetD3D12Resource(),
+                            reservation.offsetInBuffer, size);
+                        return {};
+                    }));
                 break;
             }
 
@@ -1179,7 +1301,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 }
 
 MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandContext,
-                                            BindGroupStateTracker* bindingTracker,
+                                            BindGroupStateTracker<ComputePipeline>* bindingTracker,
                                             BeginComputePassCmd* computePass,
                                             const ComputePassResourceUsage& resourceUsages) {
     uint64_t currentDispatch = 0;
@@ -1193,6 +1315,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
     Command type;
     ComputePipeline* lastPipeline = nullptr;
+    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase> immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::Dispatch: {
@@ -1207,6 +1330,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     commandContext, resourceUsages.dispatchUsages[currentDispatch]));
                 DAWN_TRY(bindingTracker->Apply(commandContext));
+                immediates.Apply(commandContext);
 
                 RecordNumWorkgroupsForDispatch(commandList, lastPipeline, dispatch);
                 commandList->Dispatch(dispatch->x, dispatch->y, dispatch->z);
@@ -1220,6 +1344,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 DAWN_TRY(TransitionAndClearForSyncScope(
                     commandContext, resourceUsages.dispatchUsages[currentDispatch]));
                 DAWN_TRY(bindingTracker->Apply(commandContext));
+                immediates.Apply(commandContext);
 
                 ComPtr<ID3D12CommandSignature> signature =
                     lastPipeline->GetDispatchIndirectCommandSignature();
@@ -1250,6 +1375,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 commandList->SetPipelineState(pipeline->GetPipelineState());
 
                 bindingTracker->OnSetPipeline(pipeline);
+                immediates.OnSetPipeline(pipeline);
                 lastPipeline = pipeline;
                 break;
             }
@@ -1265,6 +1391,15 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
                                                dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1356,15 +1491,9 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
             // Set color store operation.
             if (attachmentInfo.resolveTarget != nullptr) {
                 TextureView* resolveDestinationView = ToBackend(attachmentInfo.resolveTarget.Get());
-                Texture* resolveDestinationTexture =
-                    ToBackend(resolveDestinationView->GetTexture());
-
-                resolveDestinationTexture->TrackUsageAndTransitionNow(
-                    commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                    resolveDestinationView->GetSubresourceRange());
-
                 renderPassBuilder->SetRenderTargetEndingAccessResolve(i, attachmentInfo.storeOp,
-                                                                      view, resolveDestinationView);
+                                                                      view, resolveDestinationView,
+                                                                      renderPass->resolveRect);
             } else {
                 renderPassBuilder->SetRenderTargetEndingAccess(i, attachmentInfo.storeOp);
             }
@@ -1375,7 +1504,7 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
                     device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
                 nullRTV = nullRTVAllocation.GetBaseDescriptor();
                 D3D12_RENDER_TARGET_VIEW_DESC nullRTVDesc;
-                nullRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                nullRTVDesc.Format = GetNullRTVDXGIFormatForD3D12RenderPass();
                 nullRTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
                 nullRTVDesc.Texture2D.MipSlice = 0;
                 nullRTVDesc.Texture2D.PlaneSlice = 0;
@@ -1402,7 +1531,8 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
         device->GetD3D12Device()->CreateDepthStencilView(
             ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
 
-        renderPassBuilder->SetDepthStencilView(baseDescriptor);
+        renderPassBuilder->SetDepthStencilView(baseDescriptor, attachmentInfo.depthReadOnly,
+                                               attachmentInfo.stencilReadOnly);
 
         const bool hasDepth = view->GetTexture()->GetFormat().HasDepth();
         const bool hasStencil = view->GetTexture()->GetFormat().HasStencil();
@@ -1483,7 +1613,7 @@ void CommandBuffer::EmulateBeginRenderPass(CommandRecordingContext* commandConte
 }
 
 MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandContext,
-                                           BindGroupStateTracker* bindingTracker,
+                                           BindGroupStateTracker<RenderPipeline>* bindingTracker,
                                            BeginRenderPassCmd* renderPass,
                                            const bool passHasUAV) {
     Device* device = ToBackend(GetDevice());
@@ -1536,6 +1666,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
     RenderPipeline* lastPipeline = nullptr;
     VertexBufferTracker vertexBufferTracker = {};
+    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase> immediates = {};
 
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) -> MaybeError {
         switch (type) {
@@ -1546,6 +1677,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 RecordFirstIndexOffset(commandList, lastPipeline, draw->firstVertex,
                                        draw->firstInstance);
+                immediates.Apply(commandContext);
                 commandList->DrawInstanced(draw->vertexCount, draw->instanceCount,
                                            draw->firstVertex, draw->firstInstance);
                 break;
@@ -1558,6 +1690,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 vertexBufferTracker.Apply(commandList, lastPipeline);
                 RecordFirstIndexOffset(commandList, lastPipeline, draw->baseVertex,
                                        draw->firstInstance);
+                immediates.Apply(commandContext);
                 commandList->DrawIndexedInstanced(draw->indexCount, draw->instanceCount,
                                                   draw->firstIndex, draw->baseVertex,
                                                   draw->firstInstance);
@@ -1569,6 +1702,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 ComPtr<ID3D12CommandSignature> signature =
@@ -1583,6 +1717,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 DAWN_TRY(bindingTracker->Apply(commandContext));
                 vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(buffer != nullptr);
@@ -1591,6 +1726,58 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                     lastPipeline->GetDrawIndexedIndirectCommandSignature();
                 commandList->ExecuteIndirect(signature.Get(), 1, buffer->GetD3D12Resource(),
                                              draw->indirectOffset, nullptr, 0);
+                break;
+            }
+
+            case Command::MultiDrawIndirect: {
+                MultiDrawIndirectCmd* draw = iter->NextCommand<MultiDrawIndirectCmd>();
+
+                DAWN_TRY(bindingTracker->Apply(commandContext));
+                vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
+
+                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                Buffer* countBuffer = ToBackend(draw->drawCountBuffer.Get());
+
+                // There is no distinction between DrawIndirect and MultiDrawIndirect in D3D12.
+                // This is why we can use the same command signature for both.
+                ComPtr<ID3D12CommandSignature> signature =
+                    lastPipeline->GetDrawIndirectCommandSignature();
+
+                commandList->ExecuteIndirect(
+                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    draw->indirectOffset,
+                    countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
+                    countBuffer != nullptr ? draw->drawCountOffset : 0);
+
+                break;
+            }
+
+            case Command::MultiDrawIndexedIndirect: {
+                MultiDrawIndexedIndirectCmd* draw =
+                    iter->NextCommand<MultiDrawIndexedIndirectCmd>();
+
+                DAWN_TRY(bindingTracker->Apply(commandContext));
+                vertexBufferTracker.Apply(commandList, lastPipeline);
+                immediates.Apply(commandContext);
+
+                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                Buffer* countBuffer = ToBackend(draw->drawCountBuffer.Get());
+
+                // There is no distinction between DrawIndexedIndirect and MultiDrawIndexedIndirect
+                // in D3D12. This is why we can use the same command signature for both.
+                ComPtr<ID3D12CommandSignature> signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
+
+                commandList->ExecuteIndirect(
+                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    draw->indirectOffset,
+                    countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
+                    countBuffer != nullptr ? draw->drawCountOffset : 0);
                 break;
             }
 
@@ -1639,6 +1826,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 commandList->IASetPrimitiveTopology(pipeline->GetD3D12PrimitiveTopology());
 
                 bindingTracker->OnSetPipeline(pipeline);
+                immediates.OnSetPipeline(pipeline);
 
                 lastPipeline = pipeline;
                 break;
@@ -1655,6 +1843,15 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
                 bindingTracker->OnSetBindGroup(cmd->index, group, cmd->dynamicOffsetCount,
                                                dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1698,6 +1895,18 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                                             renderPass->timestampWrites.endOfPassWriteIndex);
                 }
 
+                for (ColorAttachmentIndex i :
+                     renderPass->attachmentState->GetColorAttachmentsMask()) {
+                    TextureViewBase* resolveTarget =
+                        renderPass->colorAttachments[i].resolveTarget.Get();
+                    if (resolveTarget == nullptr) {
+                        continue;
+                    }
+                    Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
+                    resolveTexture->TrackUsageAndTransitionNow(
+                        commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
+                        resolveTarget->GetSubresourceRange());
+                }
                 if (useRenderPass) {
                     commandContext->GetCommandList4()->EndRenderPass();
                 } else if (renderPass->attachmentState->GetSampleCount() > 1) {

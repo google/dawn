@@ -1,7 +1,7 @@
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_symbol_2 {
+
+struct main_inputs {
   float none [[user(locn0)]];
   float flat [[user(locn1)]] [[flat]];
   float perspective_center [[user(locn2)]] [[center_perspective]];
@@ -14,11 +14,9 @@ struct tint_symbol_2 {
   float linear_default [[user(locn9)]] [[center_no_perspective]];
 };
 
-void tint_symbol_inner(float none, float flat, float perspective_center, float perspective_centroid, float perspective_sample, float linear_center, float linear_centroid, float linear_sample, float perspective_default, float linear_default) {
+void main_inner(float none, float flat, float perspective_center, float perspective_centroid, float perspective_sample, float linear_center, float linear_centroid, float linear_sample, float perspective_default, float linear_default) {
 }
 
-fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_1.none, tint_symbol_1.flat, tint_symbol_1.perspective_center, tint_symbol_1.perspective_centroid, tint_symbol_1.perspective_sample, tint_symbol_1.linear_center, tint_symbol_1.linear_centroid, tint_symbol_1.linear_sample, tint_symbol_1.perspective_default, tint_symbol_1.linear_default);
-  return;
+fragment void v(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.none, inputs.flat, inputs.perspective_center, inputs.perspective_centroid, inputs.perspective_sample, inputs.linear_center, inputs.linear_centroid, inputs.linear_sample, inputs.perspective_default, inputs.linear_default);
 }
-

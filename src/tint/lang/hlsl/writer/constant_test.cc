@@ -77,7 +77,7 @@ TEST_F(HlslWriterTest, ConstantInt) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int a() {
-  return -12345;
+  return int(-12345);
 }
 
 [numthreads(1, 1, 1)]
@@ -266,7 +266,7 @@ TEST_F(HlslWriterTest, ConstantTypeVecSingleScalarInt) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int3 a() {
-  return (2).xxx;
+  return (int(2)).xxx;
 }
 
 [numthreads(1, 1, 1)]
@@ -519,8 +519,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, ConstantTypeArray) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         b.Var("v", b.Composite(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
@@ -554,8 +553,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, ConstantTypeArrayEmpty) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         b.Var("v", b.Zero<array<vec3<f32>, 3>>());
@@ -815,7 +813,7 @@ TEST_F(HlslWriterTest, ConstantTypeStruct) {
 
 
 S a() {
-  S v = {1, 1.0f, (2).xxx, (3.0f).xxxx};
+  S v = {int(1), 1.0f, (int(2)).xxx, (3.0f).xxxx};
   return v;
 }
 
@@ -856,7 +854,7 @@ TEST_F(HlslWriterTest, ConstantTypeLetStruct) {
 
 
 float a() {
-  S z = {1, 1.0f, (2).xxx, (3.0f).xxxx};
+  S z = {int(1), 1.0f, (int(2)).xxx, (3.0f).xxxx};
   return 1.0f;
 }
 
@@ -882,7 +880,7 @@ TEST_F(HlslWriterTest, ConstantTypeStructStaticEmpty) {
 };
 
 
-static const S v = {0};
+static const S v = {int(0)};
 static S p = v;
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
@@ -906,7 +904,7 @@ TEST_F(HlslWriterTest, ConstantTypeStructStatic) {
 };
 
 
-static const S v = {3};
+static const S v = {int(3)};
 static S p = v;
 [numthreads(1, 1, 1)]
 void unused_entry_point() {
@@ -959,16 +957,16 @@ struct C {
 };
 
 
-static const A v = {{9, 10}};
+static const A v = {{int(9), int(10)}};
 static A a = v;
-static const B v_1 = {{{5, 6, 7, 8}}};
+static const B v_1 = {{{int(5), int(6), int(7), int(8)}}};
 static B b = v_1;
-static const A v_2 = {{1, 2}};
+static const A v_2 = {{int(1), int(2)}};
 static const C v_3 = {v_2};
 static C c = v_3;
-static const int v_4[2] = {11, 12};
+static const int v_4[2] = {int(11), int(12)};
 static int d[2] = v_4;
-static const int v_5[1][2][3] = {{{1, 2, 3}, {4, 5, 6}}};
+static const int v_5[1][2][3] = {{{int(1), int(2), int(3)}, {int(4), int(5), int(6)}}};
 static int e[1][2][3] = v_5;
 [numthreads(1, 1, 1)]
 void unused_entry_point() {

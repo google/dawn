@@ -36,9 +36,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::If);
 
 namespace tint::core::ir {
 
-If::If() = default;
+If::If(Id id) : Base(id) {}
 
-If::If(Value* cond, ir::Block* t, ir::Block* f) : true_(t), false_(f) {
+If::If(Id id, Value* cond, ir::Block* t, ir::Block* f) : Base(id), true_(t), false_(f) {
     TINT_ASSERT(true_);
     TINT_ASSERT(false_);
 
@@ -77,7 +77,7 @@ If* If::Clone(CloneContext& ctx) {
     auto* new_true = ctx.ir.blocks.Create<ir::Block>();
     auto* new_false = ctx.ir.blocks.Create<ir::Block>();
 
-    auto* new_if = ctx.ir.allocators.instructions.Create<If>(cond, new_true, new_false);
+    auto* new_if = ctx.ir.CreateInstruction<If>(cond, new_true, new_false);
     ctx.Replace(this, new_if);
 
     true_->CloneInto(ctx, new_true);

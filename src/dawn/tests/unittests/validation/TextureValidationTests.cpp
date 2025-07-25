@@ -161,7 +161,7 @@ TEST_F(TextureValidationTest, SampleCount) {
 
         for (wgpu::TextureFormat format : utils::kFormatsInCoreSpec) {
             descriptor.format = format;
-            if (utils::TextureFormatSupportsMultisampling(device, format)) {
+            if (utils::TextureFormatSupportsMultisampling(device, format, UseCompatibilityMode())) {
                 device.CreateTexture(&descriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
@@ -319,7 +319,7 @@ TEST_F(TextureValidationTest, MipLevelCount) {
 
     // Mip level equal to the maximum for a 2D texture is allowed
     {
-        uint32_t maxTextureDimension2D = GetSupportedLimits().limits.maxTextureDimension2D;
+        uint32_t maxTextureDimension2D = GetSupportedLimits().maxTextureDimension2D;
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.size.width = maxTextureDimension2D;
         descriptor.size.height = maxTextureDimension2D;
@@ -330,7 +330,7 @@ TEST_F(TextureValidationTest, MipLevelCount) {
 
     // Mip level exceeding the maximum for a 2D texture not allowed
     {
-        uint32_t maxTextureDimension2D = GetSupportedLimits().limits.maxTextureDimension2D;
+        uint32_t maxTextureDimension2D = GetSupportedLimits().maxTextureDimension2D;
         wgpu::TextureDescriptor descriptor = defaultDescriptor;
         descriptor.size.width = maxTextureDimension2D;
         descriptor.size.height = maxTextureDimension2D;
@@ -359,7 +359,7 @@ TEST_F(TextureValidationTest, MipLevelCount) {
 // Test the validation of array layer count
 TEST_F(TextureValidationTest, ArrayLayerCount) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
-    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Array layer count exceeding maxTextureArrayLayers is not allowed for 2D texture
     {
@@ -386,7 +386,7 @@ TEST_F(TextureValidationTest, ArrayLayerCount) {
 
 // Test the validation of 1D texture size
 TEST_F(TextureValidationTest, 1DTextureSize) {
-    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+    const auto& supportedLimits = GetSupportedLimits();
 
     wgpu::TextureDescriptor defaultDescriptor;
     defaultDescriptor.size = {4, 1, 1};
@@ -432,7 +432,7 @@ TEST_F(TextureValidationTest, 1DTextureSize) {
 // Test the validation of 2D texture size
 TEST_F(TextureValidationTest, 2DTextureSize) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
-    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Out-of-bound texture dimension is not allowed
     {
@@ -482,7 +482,7 @@ TEST_F(TextureValidationTest, 3DTextureSize) {
     wgpu::TextureDescriptor defaultDescriptor = CreateDefaultTextureDescriptor();
     defaultDescriptor.dimension = wgpu::TextureDimension::e3D;
     defaultDescriptor.usage = wgpu::TextureUsage::TextureBinding;
-    wgpu::Limits supportedLimits = GetSupportedLimits().limits;
+    const auto& supportedLimits = GetSupportedLimits();
 
     // Out-of-bound texture dimension is not allowed
     {
@@ -802,6 +802,29 @@ TEST_F(CompressedTextureFormatsValidationTests, 2DArrayTexture) {
     }
 }
 
+// Test that it is not allowed to create a 3D texture with BC format without the BCSliced3D feature.
+TEST_F(CompressedTextureFormatsValidationTests, BCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+}
+
+// Test that it is not allowed to create a 3D texture with ASTC format without the ASTCSliced3D
+// feature.
+TEST_F(CompressedTextureFormatsValidationTests, ASTCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kASTCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+    }
+}
+
 // Test that it is not allowed to create a 1D texture in compressed formats.
 TEST_F(CompressedTextureFormatsValidationTests, 1DTexture) {
     for (wgpu::TextureFormat format : utils::kCompressedFormats) {
@@ -813,20 +836,6 @@ TEST_F(CompressedTextureFormatsValidationTests, 1DTexture) {
         descriptor.size.height = 1;
         descriptor.size.depthOrArrayLayers = 1;
         descriptor.dimension = wgpu::TextureDimension::e1D;
-        ASSERT_DEVICE_ERROR(
-            device.CreateTexture(&descriptor),
-            testing::HasSubstr(
-                "The dimension (TextureDimension::e1D) of a texture with a compressed format"));
-    }
-}
-
-// Test that it is not allowed to create a 3D texture in compressed formats.
-TEST_F(CompressedTextureFormatsValidationTests, 3DTexture) {
-    for (wgpu::TextureFormat format : utils::kCompressedFormats) {
-        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
-        descriptor.format = format;
-        descriptor.size.depthOrArrayLayers = 4;
-        descriptor.dimension = wgpu::TextureDimension::e3D;
         ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
     }
 }
@@ -878,6 +887,46 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
             descriptor.size.height = kHeightMultiplier * blockHeight;
             device.CreateTexture(&descriptor);
         }
+    }
+}
+
+class BCFormatsValidationTests : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionBC,
+                wgpu::FeatureName::TextureCompressionBCSliced3D};
+    }
+};
+
+// Test that it is allowed to create a 3D texture with BC format with the BCSliced3D feature.
+TEST_F(BCFormatsValidationTests, BCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kBCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        device.CreateTexture(&descriptor);
+    }
+}
+
+class ASTCFormatsValidationTests : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureCompressionASTC,
+                wgpu::FeatureName::TextureCompressionASTCSliced3D};
+    }
+};
+
+// Test that it is allowed to create a 3D texture with ASTC format with the ASTCSliced3D feature.
+TEST_F(ASTCFormatsValidationTests, ASTCSliced3DTexture) {
+    for (wgpu::TextureFormat format : utils::kASTCFormats) {
+        wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
+        descriptor.format = format;
+        descriptor.size.depthOrArrayLayers = 4;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding;
+        device.CreateTexture(&descriptor);
     }
 }
 
@@ -995,7 +1044,11 @@ static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
     EXPECT_EQ(desc.size.depthOrArrayLayers, tex.GetDepthOrArrayLayers());
     EXPECT_EQ(desc.mipLevelCount, tex.GetMipLevelCount());
     EXPECT_EQ(desc.sampleCount, tex.GetSampleCount());
-    EXPECT_EQ(desc.dimension, tex.GetDimension());
+    if (desc.dimension == wgpu::TextureDimension::Undefined) {
+        EXPECT_EQ(wgpu::TextureDimension::e2D, tex.GetDimension());
+    } else {
+        EXPECT_EQ(desc.dimension, tex.GetDimension());
+    }
     EXPECT_EQ(desc.usage, tex.GetUsage());
     EXPECT_EQ(desc.format, tex.GetFormat());
 }
@@ -1034,12 +1087,12 @@ TEST_F(TextureValidationTest, CreationParameterReflectionForValidTextures) {
 TEST_F(TextureValidationTest, CreationParameterReflectionForErrorTextures) {
     // Fill a descriptor with a bunch of garbage values.
     wgpu::TextureDescriptor desc;
-    desc.size = {0, 0xFFFF'FFFF, 1};
+    desc.size = {0, 0xFFFF, 1};
     desc.mipLevelCount = 0;
     desc.sampleCount = 42;
-    desc.dimension = static_cast<wgpu::TextureDimension>(0xFFFF'FF00);
-    desc.usage = static_cast<wgpu::TextureUsage>(0xFFFF'FFFF);
-    desc.format = static_cast<wgpu::TextureFormat>(0xFFFF'FFF0);
+    desc.dimension = static_cast<wgpu::TextureDimension>(0xFF00);
+    desc.usage = static_cast<wgpu::TextureUsage>(0xFFFF);
+    desc.format = static_cast<wgpu::TextureFormat>(0xFFF0);
 
     // Error! Because the texture width is 0.
     wgpu::Texture tex;
@@ -1144,6 +1197,27 @@ TEST_F(TransientAttachmentValidationTest, FlagsBeyondRenderAttachment) {
                  wgpu::TextureUsage::CopySrc;
 
     ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
+class TextureFormatsTier1TextureTest : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureFormatsTier1};
+    }
+};
+
+// Test that kTier1AdditionalRenderableFormats formats are valid as renderable texture and they also
+// allow multisampling with TextureFormatsTier1.
+TEST_F(TextureFormatsTier1TextureTest, RenderableAndMultisampleSupport) {
+    for (const auto format : utils::kTier1AdditionalRenderableFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {1, 1, 1};
+        descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+        descriptor.format = format;
+        descriptor.sampleCount = 4;
+        device.CreateTexture(&descriptor);
+    }
 }
 
 }  // anonymous namespace

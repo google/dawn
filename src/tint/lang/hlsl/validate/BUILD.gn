@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -44,6 +45,7 @@ if (tint_build_hlsl_writer) {
       "validate.h",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/utils/command",
       "${tint_src_dir}/utils/containers",
@@ -54,7 +56,6 @@ if (tint_build_hlsl_writer) {
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_hlsl_writer) {

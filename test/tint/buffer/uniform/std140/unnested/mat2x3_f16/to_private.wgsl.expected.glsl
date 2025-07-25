@@ -1,25 +1,16 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  f16vec3 inner_0;
-  f16vec3 inner_1;
-} u;
-
-f16mat2x3 p = f16mat2x3(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf);
-f16mat2x3 load_u_inner() {
-  return f16mat2x3(u.inner_0, u.inner_1);
-}
-
-void f() {
-  p = load_u_inner();
-  p[1] = u.inner_0;
-  p[1] = u.inner_0.zxy;
-  p[0][1] = u.inner_1[0u];
-}
-
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  f16vec3 inner_col0;
+  f16vec3 inner_col1;
+} v;
+f16mat2x3 p = f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  p = f16mat2x3(v.inner_col0, v.inner_col1);
+  p[1u] = f16mat2x3(v.inner_col0, v.inner_col1)[0u];
+  p[1u] = f16mat2x3(v.inner_col0, v.inner_col1)[0u].zxy;
+  p[0u].y = f16mat2x3(v.inner_col0, v.inner_col1)[1u].x;
 }

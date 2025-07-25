@@ -36,7 +36,7 @@ namespace {
 uint32_t SizeOf(const InstructionList& instructions) {
     uint32_t size = 0;
     for (const auto& inst : instructions) {
-        size += inst.word_length();
+        size += inst.WordLength();
     }
     return size;
 }
@@ -69,7 +69,7 @@ uint32_t Module::TotalSize() const {
     size += SizeOf(annotations_);
     size += SizeOf(types_);
     for (const auto& func : functions_) {
-        size += func.word_length();
+        size += func.WordLength();
     }
 
     return size;
@@ -104,7 +104,7 @@ void Module::Iterate(std::function<void(const Instruction&)> cb) const {
         cb(inst);
     }
     for (const auto& func : functions_) {
-        func.iterate(cb);
+        func.Iterate(cb);
     }
 }
 

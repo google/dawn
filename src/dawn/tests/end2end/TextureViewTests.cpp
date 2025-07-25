@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,19 @@ constexpr uint32_t kBytesPerTexel = 4;
 
 class TextureViewTestBase : public DawnTest {
   protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
+            requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
+        }
+        return requiredFeatures;
+    }
+
+    bool HasFlexibleTextureViews() {
+        return !IsCompatibilityMode() ||
+               SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews});
+    }
+
     wgpu::Texture Create2DTexture(uint32_t width,
                                   uint32_t height,
                                   uint32_t arrayLayerCount,
@@ -66,7 +80,7 @@ class TextureViewTestBase : public DawnTest {
         // Only set the textureBindingViewDimension in compat mode. It's not needed
         // nor used in non-compat.
         wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
-        if (IsCompatibilityMode()) {
+        if (!HasFlexibleTextureViews()) {
             textureBindingViewDimensionDesc.textureBindingViewDimension =
                 textureBindingViewDimension;
             descriptor.nextInChain = &textureBindingViewDimensionDesc;
@@ -165,6 +179,7 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         mDefaultTextureViewDescriptor.mipLevelCount = mipLevelCount;
         mDefaultTextureViewDescriptor.baseArrayLayer = 0;
         mDefaultTextureViewDescriptor.arrayLayerCount = arrayLayerCount;
+        mDefaultTextureViewDescriptor.usage = kUsage;
 
         // Create a texture with pixel = (0, 0, 0, level * 10 + layer + 1) at level `level` and
         // layer `layer`.
@@ -187,12 +202,12 @@ class TextureViewSamplingTest : public TextureViewTestBase {
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                     device, data.data(), data.size() * sizeof(utils::RGBA8),
                     wgpu::BufferUsage::CopySrc);
-                wgpu::ImageCopyBuffer imageCopyBuffer =
-                    utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
-                wgpu::ImageCopyTexture imageCopyTexture =
-                    utils::CreateImageCopyTexture(mTexture, level, {0, 0, layer});
+                wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+                    stagingBuffer, 0, kTextureBytesPerRowAlignment);
+                wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+                    utils::CreateTexelCopyTextureInfo(mTexture, level, {0, 0, layer});
                 wgpu::Extent3D copySize = {texWidth, texHeight, 1};
-                encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
+                encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo, &copySize);
             }
         }
         wgpu::CommandBuffer copy = encoder.Finish();
@@ -303,7 +318,8 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         Verify(textureView, fragmentShader, expected);
     }
 
-    std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
+    template <typename T>
+    std::string CreateFragmentShaderForCubeMapFace(T layer, bool isCubeMapArray) {
         // Reference: https://en.wikipedia.org/wiki/Cube_mapping
         const std::array<std::string, 6> kCoordsToCubeMapFace = {{
             " 1.,  tc, -sc",  // Positive X
@@ -315,8 +331,9 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         }};
 
         const std::string textureType = isCubeMapArray ? "texture_cube_array" : "texture_cube";
-        const uint32_t cubeMapArrayIndex = layer / 6;
-        const std::string coordToCubeMapFace = kCoordsToCubeMapFace[layer % 6];
+        const T cubeMapArrayIndex = layer / 6;
+        // We clamp here to avoid invalid negative indices for signed type T.
+        const std::string coordToCubeMapFace = kCoordsToCubeMapFace[std::max(T(0), (layer % 6))];
 
         std::ostringstream stream;
         stream << R"(
@@ -412,15 +429,82 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     Verify(textureView, fragmentShader, expected);
 }
 
+// Test sampling a 2D array with negative signed array index.
+TEST_P(TextureViewSamplingTest, 2DArrayTextureSignedNegativeIndex) {
+    // TODO(cwallez@chromium.org) understand what the issue is
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    constexpr int32_t kIntentionalInvalidNegativeIndex = -1;
+    constexpr uint32_t kLayers = 3;
+    for (int32_t array_idx = kIntentionalInvalidNegativeIndex;
+         array_idx < static_cast<int32_t>(kLayers); array_idx++) {
+        constexpr uint32_t kMipLevels = 1;
+        InitTexture(kLayers, kMipLevels);
+
+        wgpu::TextureViewDescriptor descriptor;
+        // (Off-topic) spot-test for defaulting of .aspect.
+        descriptor.aspect = wgpu::TextureAspect::Undefined;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
+        wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
+
+        std::ostringstream fragmentShader;
+        fragmentShader << R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_2d_array<f32>;
+
+            @fragment
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
+                let array_idx : i32 =  )"
+                       << array_idx << R"(;
+                return textureSample(texture0, sampler0, texCoord, array_idx);
+            }
+        )";
+
+        const int expected =
+            GenerateTestPixelValue(std::clamp(array_idx, 0, static_cast<int32_t>(kLayers - 1)), 0);
+        Verify(textureView, fragmentShader.str().c_str(), expected);
+    }
+}
+
+// Test sampling cube array with negative signed array index.
+TEST_P(TextureViewSamplingTest, CubeArrayTextureSignedNegativeIndex) {
+    // TODO(cwallez@chromium.org) understand what the issue is
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    // Cube map arrays are unsupported in Compatbility mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    constexpr bool kIsCubeMapArray = true;
+    constexpr uint32_t kTextureViewLayerCount = 12;
+    constexpr uint32_t kTextureArrayLayers = kTextureViewLayerCount;
+
+    ASSERT_TRUE(kTextureViewLayerCount % 6 == 0);
+    wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::CubeArray;
+    constexpr uint32_t kMipLevels = 1u;
+    InitTexture(kTextureArrayLayers, kMipLevels, dimension);
+
+    wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+    descriptor.dimension = dimension;
+    descriptor.arrayLayerCount = kTextureViewLayerCount;
+    wgpu::TextureView cubeMapTextureView = mTexture.CreateView(&descriptor);
+
+    // Check the data in the every face of the cube map (array) texture view.
+    constexpr int kIntentionalInvalidNegativeIndex = -kTextureViewLayerCount;
+    for (int layer = kIntentionalInvalidNegativeIndex;
+         layer < static_cast<int>(kTextureArrayLayers); ++layer) {
+        const std::string& fragmentShader =
+            CreateFragmentShaderForCubeMapFace(layer, kIsCubeMapArray);
+        int expected = GenerateTestPixelValue(std::max(0, layer), 0);
+        Verify(cubeMapTextureView, fragmentShader.c_str(), expected);
+    }
+}
+
 // Test sampling from a 2D texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 1, 4, 0);
 }
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -460,13 +544,13 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DTexture) {
 
 // Test sampling from a 2D texture view created on a mipmap level of a 2D array texture layer.
 TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 6, 3, 4);
 }
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
@@ -487,7 +571,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
     textureDesc.viewFormatCount = 1;
     wgpu::Texture texture = device.CreateTexture(&textureDesc);
 
-    wgpu::ImageCopyTexture dst = {};
+    wgpu::TexelCopyTextureInfo dst = {};
     dst.texture = texture;
     std::array<utils::RGBA8, 4> rgbaTextureData = {
         utils::RGBA8(180, 0, 0, 255),
@@ -496,7 +580,7 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
         utils::RGBA8(62, 180, 84, 90),
     };
 
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
     dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
 
     queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
@@ -570,7 +654,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapOnWholeTexture) {
 
 // Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     // TODO(dawn:1935): Total layers have to be at least 12 on Intel D3D11 Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -579,7 +663,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
 
 // Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewCoveringLastLayer) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
 
     // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
@@ -840,8 +924,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -953,8 +1037,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
         utils::RGBA8(13, 117, 24, 90),
     };
 
-    wgpu::ImageCopyTexture dst = {};
-    wgpu::TextureDataLayout dataLayout = {};
+    wgpu::TexelCopyTextureInfo dst = {};
+    wgpu::TexelCopyBufferLayout dataLayout = {};
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
@@ -1116,8 +1200,9 @@ TEST_P(TextureView1DTest, Sampling) {
 
     std::array<utils::RGBA8, 4> data = {utils::RGBA8::kGreen, utils::RGBA8::kRed,
                                         utils::RGBA8::kBlue, utils::RGBA8::kWhite};
-    wgpu::ImageCopyTexture target = utils::CreateImageCopyTexture(tex, 0, {});
-    wgpu::TextureDataLayout layout = utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
+    wgpu::TexelCopyTextureInfo target = utils::CreateTexelCopyTextureInfo(tex, 0, {});
+    wgpu::TexelCopyBufferLayout layout =
+        utils::CreateTexelCopyBufferLayout(0, wgpu::kCopyStrideUndefined);
     queue.WriteTexture(&target, &data, sizeof(data), &layout, &texDesc.size);
 
     // Create a pipeline that will sample from the 1D texture and output to an attachment.

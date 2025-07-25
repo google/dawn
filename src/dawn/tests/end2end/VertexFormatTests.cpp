@@ -74,12 +74,17 @@ class VertexFormatTest : public DawnTest {
 
     bool IsNormalizedFormat(wgpu::VertexFormat format) {
         switch (format) {
+            case wgpu::VertexFormat::Unorm8:
             case wgpu::VertexFormat::Unorm8x2:
             case wgpu::VertexFormat::Unorm8x4:
+            case wgpu::VertexFormat::Unorm8x4BGRA:
+            case wgpu::VertexFormat::Snorm8:
             case wgpu::VertexFormat::Snorm8x2:
             case wgpu::VertexFormat::Snorm8x4:
+            case wgpu::VertexFormat::Unorm16:
             case wgpu::VertexFormat::Unorm16x2:
             case wgpu::VertexFormat::Unorm16x4:
+            case wgpu::VertexFormat::Snorm16:
             case wgpu::VertexFormat::Snorm16x2:
             case wgpu::VertexFormat::Snorm16x4:
             case wgpu::VertexFormat::Unorm10_10_10_2:
@@ -91,15 +96,20 @@ class VertexFormatTest : public DawnTest {
 
     uint32_t NormalizationFactor(wgpu::VertexFormat format, uint32_t component) {
         switch (format) {
+            case wgpu::VertexFormat::Unorm8:
             case wgpu::VertexFormat::Unorm8x2:
             case wgpu::VertexFormat::Unorm8x4:
+            case wgpu::VertexFormat::Unorm8x4BGRA:
                 return 255;
+            case wgpu::VertexFormat::Snorm8:
             case wgpu::VertexFormat::Snorm8x2:
             case wgpu::VertexFormat::Snorm8x4:
                 return 127;
+            case wgpu::VertexFormat::Unorm16:
             case wgpu::VertexFormat::Unorm16x2:
             case wgpu::VertexFormat::Unorm16x4:
                 return 65535;
+            case wgpu::VertexFormat::Snorm16:
             case wgpu::VertexFormat::Snorm16x2:
             case wgpu::VertexFormat::Snorm16x4:
                 return 32767;
@@ -112,16 +122,21 @@ class VertexFormatTest : public DawnTest {
 
     bool IsUnsignedFormat(wgpu::VertexFormat format) {
         switch (format) {
-            case wgpu::VertexFormat::Uint32:
+            case wgpu::VertexFormat::Uint8:
             case wgpu::VertexFormat::Uint8x2:
             case wgpu::VertexFormat::Uint8x4:
+            case wgpu::VertexFormat::Uint16:
             case wgpu::VertexFormat::Uint16x2:
             case wgpu::VertexFormat::Uint16x4:
+            case wgpu::VertexFormat::Uint32:
             case wgpu::VertexFormat::Uint32x2:
             case wgpu::VertexFormat::Uint32x3:
             case wgpu::VertexFormat::Uint32x4:
+            case wgpu::VertexFormat::Unorm8:
             case wgpu::VertexFormat::Unorm8x2:
             case wgpu::VertexFormat::Unorm8x4:
+            case wgpu::VertexFormat::Unorm8x4BGRA:
+            case wgpu::VertexFormat::Unorm16:
             case wgpu::VertexFormat::Unorm16x2:
             case wgpu::VertexFormat::Unorm16x4:
             case wgpu::VertexFormat::Unorm10_10_10_2:
@@ -133,6 +148,7 @@ class VertexFormatTest : public DawnTest {
 
     bool IsFloatFormat(wgpu::VertexFormat format) {
         switch (format) {
+            case wgpu::VertexFormat::Float16:
             case wgpu::VertexFormat::Float16x2:
             case wgpu::VertexFormat::Float16x4:
             case wgpu::VertexFormat::Float32:
@@ -147,6 +163,7 @@ class VertexFormatTest : public DawnTest {
 
     bool IsHalfFormat(wgpu::VertexFormat format) {
         switch (format) {
+            case wgpu::VertexFormat::Float16:
             case wgpu::VertexFormat::Float16x2:
             case wgpu::VertexFormat::Float16x4:
                 return true;
@@ -157,10 +174,20 @@ class VertexFormatTest : public DawnTest {
 
     uint32_t ByteSize(wgpu::VertexFormat format) {
         switch (format) {
+            case wgpu::VertexFormat::Sint8:
+            case wgpu::VertexFormat::Snorm8:
+            case wgpu::VertexFormat::Uint8:
+            case wgpu::VertexFormat::Unorm8:
+                return 1;
             case wgpu::VertexFormat::Sint8x2:
             case wgpu::VertexFormat::Snorm8x2:
             case wgpu::VertexFormat::Uint8x2:
             case wgpu::VertexFormat::Unorm8x2:
+            case wgpu::VertexFormat::Sint16:
+            case wgpu::VertexFormat::Snorm16:
+            case wgpu::VertexFormat::Uint16:
+            case wgpu::VertexFormat::Unorm16:
+            case wgpu::VertexFormat::Float16:
                 return 2;
             case wgpu::VertexFormat::Float16x2:
             case wgpu::VertexFormat::Float32:
@@ -175,6 +202,7 @@ class VertexFormatTest : public DawnTest {
             case wgpu::VertexFormat::Uint8x4:
             case wgpu::VertexFormat::Unorm16x2:
             case wgpu::VertexFormat::Unorm8x4:
+            case wgpu::VertexFormat::Unorm8x4BGRA:
                 return 4;
             case wgpu::VertexFormat::Float16x4:
             case wgpu::VertexFormat::Float32x2:
@@ -200,6 +228,15 @@ class VertexFormatTest : public DawnTest {
 
     uint32_t ComponentCount(wgpu::VertexFormat format) {
         switch (format) {
+            case wgpu::VertexFormat::Uint8:
+            case wgpu::VertexFormat::Sint8:
+            case wgpu::VertexFormat::Unorm8:
+            case wgpu::VertexFormat::Snorm8:
+            case wgpu::VertexFormat::Float16:
+            case wgpu::VertexFormat::Uint16:
+            case wgpu::VertexFormat::Sint16:
+            case wgpu::VertexFormat::Unorm16:
+            case wgpu::VertexFormat::Snorm16:
             case wgpu::VertexFormat::Float32:
             case wgpu::VertexFormat::Uint32:
             case wgpu::VertexFormat::Sint32:
@@ -224,6 +261,7 @@ class VertexFormatTest : public DawnTest {
             case wgpu::VertexFormat::Uint8x4:
             case wgpu::VertexFormat::Sint8x4:
             case wgpu::VertexFormat::Unorm8x4:
+            case wgpu::VertexFormat::Unorm8x4BGRA:
             case wgpu::VertexFormat::Snorm8x4:
             case wgpu::VertexFormat::Uint16x4:
             case wgpu::VertexFormat::Sint16x4:
@@ -465,6 +503,31 @@ class VertexFormatTest : public DawnTest {
     }
 };
 
+TEST_P(VertexFormatTest, Uint8) {
+    std::vector<uint8_t> vertexData = {
+        std::numeric_limits<uint8_t>::max(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        std::numeric_limits<uint8_t>::min(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        200,
+        0,  // padding three bytes for stride
+        0,
+        0,
+    };
+
+    std::vector<uint8_t> expectedData = {
+        std::numeric_limits<uint8_t>::max(),
+        std::numeric_limits<uint8_t>::min(),
+        200,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Uint8, vertexData, expectedData);
+}
+
 TEST_P(VertexFormatTest, Uint8x2) {
     std::vector<uint8_t> vertexData = {
         std::numeric_limits<uint8_t>::max(),
@@ -505,6 +568,31 @@ TEST_P(VertexFormatTest, Uint8x4) {
     };
 
     DoVertexFormatTest(wgpu::VertexFormat::Uint8x4, vertexData, vertexData);
+}
+
+TEST_P(VertexFormatTest, Sint8) {
+    std::vector<int8_t> vertexData = {
+        std::numeric_limits<int8_t>::max(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        std::numeric_limits<int8_t>::min(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        -121,
+        0,  // padding two bytes for buffer copy
+        0,
+        0,
+    };
+
+    std::vector<int8_t> expectedData = {
+        std::numeric_limits<int8_t>::max(),
+        std::numeric_limits<int8_t>::min(),
+        -121,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Sint8, vertexData, expectedData);
 }
 
 TEST_P(VertexFormatTest, Sint8x2) {
@@ -549,6 +637,31 @@ TEST_P(VertexFormatTest, Sint8x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Sint8x4, vertexData, vertexData);
 }
 
+TEST_P(VertexFormatTest, Unorm8) {
+    std::vector<uint8_t> vertexData = {
+        std::numeric_limits<uint8_t>::max(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        std::numeric_limits<uint8_t>::min(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        200,
+        0,  // padding three bytes for stride
+        0,
+        0,
+    };
+
+    std::vector<uint8_t> expectedData = {
+        std::numeric_limits<uint8_t>::max(),
+        std::numeric_limits<uint8_t>::min(),
+        200,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Unorm8, vertexData, expectedData);
+}
+
 TEST_P(VertexFormatTest, Unorm8x2) {
     std::vector<uint8_t> vertexData = {
         std::numeric_limits<uint8_t>::max(),
@@ -590,6 +703,61 @@ TEST_P(VertexFormatTest, Unorm8x4) {
                                        203};
 
     DoVertexFormatTest(wgpu::VertexFormat::Unorm8x4, vertexData, vertexData);
+}
+
+TEST_P(VertexFormatTest, Unorm8x4BGRA) {
+    std::vector<uint8_t> vertexData = {std::numeric_limits<uint8_t>::max(),
+                                       std::numeric_limits<uint8_t>::min(),
+                                       0,
+                                       0,
+                                       std::numeric_limits<uint8_t>::max() / 2u,
+                                       std::numeric_limits<uint8_t>::min() / 2u,
+                                       0,
+                                       0,
+                                       200,
+                                       201,
+                                       202,
+                                       203};
+
+    std::vector<uint8_t> expectedData = {0,
+                                         std::numeric_limits<uint8_t>::min(),
+                                         std::numeric_limits<uint8_t>::max(),
+                                         0,
+                                         0,
+                                         std::numeric_limits<uint8_t>::min() / 2u,
+                                         std::numeric_limits<uint8_t>::max() / 2u,
+                                         0,
+                                         202,
+                                         201,
+                                         200,
+                                         203};
+
+    DoVertexFormatTest(wgpu::VertexFormat::Unorm8x4BGRA, vertexData, expectedData);
+}
+
+TEST_P(VertexFormatTest, Snorm8) {
+    std::vector<int8_t> vertexData = {
+        std::numeric_limits<int8_t>::max(),
+        0,  // padding three bytes for stride
+        0,
+        0,
+        std::numeric_limits<int8_t>::min(),
+        0,  // padding two bytes for stride
+        0,
+        0,
+        -121,
+        0,  // padding two bytes for stride
+        0,
+        0,
+    };
+
+    std::vector<int8_t> expectedData = {
+        std::numeric_limits<int8_t>::max(),
+        std::numeric_limits<int8_t>::min(),
+        -121,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Snorm8, vertexData, expectedData);
 }
 
 TEST_P(VertexFormatTest, Snorm8x2) {
@@ -637,6 +805,25 @@ TEST_P(VertexFormatTest, Snorm8x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Snorm8x4, vertexData, vertexData);
 }
 
+TEST_P(VertexFormatTest, Uint16) {
+    std::vector<uint16_t> vertexData = {
+        std::numeric_limits<uint16_t>::max(),
+        0,  // Padding
+        std::numeric_limits<uint16_t>::min(),
+        0,  // Padding
+        65432,
+        0,  // Padding
+    };
+
+    std::vector<uint16_t> expectedData = {
+        std::numeric_limits<uint16_t>::max(),
+        std::numeric_limits<uint16_t>::min(),
+        65432,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Uint16, vertexData, expectedData);
+}
+
 TEST_P(VertexFormatTest, Uint16x2) {
     std::vector<uint16_t> vertexData = {std::numeric_limits<uint16_t>::max(),
                                         0,
@@ -665,6 +852,22 @@ TEST_P(VertexFormatTest, Uint16x4) {
     };
 
     DoVertexFormatTest(wgpu::VertexFormat::Uint16x4, vertexData, vertexData);
+}
+
+TEST_P(VertexFormatTest, Sint16) {
+    std::vector<int16_t> vertexData = {
+        std::numeric_limits<int16_t>::max(),
+        0,  // Padding
+        std::numeric_limits<int16_t>::min(),
+        0,  // Padding
+        -3948,
+        0,  // Padding
+    };
+
+    std::vector<int16_t> expectedData = {std::numeric_limits<int16_t>::max(),
+                                         std::numeric_limits<int16_t>::min(), -3948};
+
+    DoVertexFormatTest(wgpu::VertexFormat::Sint16, vertexData, expectedData);
 }
 
 TEST_P(VertexFormatTest, Sint16x2) {
@@ -697,6 +900,25 @@ TEST_P(VertexFormatTest, Sint16x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Sint16x4, vertexData, vertexData);
 }
 
+TEST_P(VertexFormatTest, Unorm16) {
+    std::vector<uint16_t> vertexData = {
+        std::numeric_limits<uint16_t>::max(),
+        0,  // Padding
+        std::numeric_limits<uint16_t>::min(),
+        0,  // Padding
+        3456,
+        0,  // Padding
+    };
+
+    std::vector<uint16_t> expectedData = {
+        std::numeric_limits<uint16_t>::max(),
+        std::numeric_limits<uint16_t>::min(),
+        3456,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Unorm16, vertexData, expectedData);
+}
+
 TEST_P(VertexFormatTest, Unorm16x2) {
     std::vector<uint16_t> vertexData = {std::numeric_limits<uint16_t>::max(),
                                         std::numeric_limits<uint16_t>::min(),
@@ -725,6 +947,25 @@ TEST_P(VertexFormatTest, Unorm16x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Unorm16x4, vertexData, vertexData);
 }
 
+TEST_P(VertexFormatTest, Snorm16) {
+    std::vector<int16_t> vertexData = {
+        std::numeric_limits<int16_t>::max(),
+        0,  // Padding
+        std::numeric_limits<int16_t>::min(),
+        0,  // Padding
+        -6789,
+        0,  // Padding
+    };
+
+    std::vector<int16_t> expectedData = {
+        std::numeric_limits<int16_t>::max(),
+        std::numeric_limits<int16_t>::min(),
+        -6789,
+    };
+
+    DoVertexFormatTest(wgpu::VertexFormat::Snorm16, vertexData, expectedData);
+}
+
 TEST_P(VertexFormatTest, Snorm16x2) {
     std::vector<int16_t> vertexData = {std::numeric_limits<int16_t>::max(),
                                        std::numeric_limits<int16_t>::min(),
@@ -751,6 +992,19 @@ TEST_P(VertexFormatTest, Snorm16x4) {
                                        -2083};
 
     DoVertexFormatTest(wgpu::VertexFormat::Snorm16x4, vertexData, vertexData);
+}
+
+TEST_P(VertexFormatTest, Float16) {
+    // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    // TODO(dawn:1566) Might pass when using rectify_f32?
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+
+    std::vector<uint16_t> vertexData =
+        Float32ToFloat16(std::vector<float>({14.8f, 0.0f, -0.0f, 0.0f, -24.8f, 0.0f}));
+    std::vector<uint16_t> expectedData =
+        Float32ToFloat16(std::vector<float>({14.8f, -0.0f, -24.8f}));
+
+    DoVertexFormatTest(wgpu::VertexFormat::Float16, vertexData, expectedData);
 }
 
 TEST_P(VertexFormatTest, Float16x2) {
@@ -849,6 +1103,9 @@ TEST_P(VertexFormatTest, Uint32x4) {
 }
 
 TEST_P(VertexFormatTest, Sint32) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     std::vector<int32_t> vertexData = {std::numeric_limits<int32_t>::max(),
                                        std::numeric_limits<int32_t>::min(),
                                        std::numeric_limits<int8_t>::max()};
@@ -857,6 +1114,9 @@ TEST_P(VertexFormatTest, Sint32) {
 }
 
 TEST_P(VertexFormatTest, Sint32x2) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     std::vector<int32_t> vertexData = {
         std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::min(),
         std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min(),
@@ -866,6 +1126,9 @@ TEST_P(VertexFormatTest, Sint32x2) {
 }
 
 TEST_P(VertexFormatTest, Sint32x3) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     std::vector<int32_t> vertexData = {
         std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::min(), 64,
         std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min(), 128,
@@ -875,6 +1138,9 @@ TEST_P(VertexFormatTest, Sint32x3) {
 }
 
 TEST_P(VertexFormatTest, Sint32x4) {
+    // TODO(42242119): fail on Qualcomm Adreno X1.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
+
     std::vector<int32_t> vertexData = {
         std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::min(), 64,   -5460,
         std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::min(), -128, 0,

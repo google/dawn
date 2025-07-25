@@ -43,6 +43,10 @@ See:
 
 {{- /* Generate the optional flag on HLSL shader model */ -}}
 {{- template "HLSLShaderModel" $overload -}}
+{{- /* Generate the optional flag for GLSL desktop */ -}}
+{{- template "GLSLShaderModel" $overload -}}
+{{- /* Generate the optional flag for the MSL version */ -}}
+{{- template "MSLVersion" $overload -}}
 
 {{- /* Generate enable directives */ -}}
 {{- template "EnableDirectives" $overload -}}
@@ -50,7 +54,16 @@ See:
 {{- /* Keep track of binding numbers to satisfy limitations of the MSL backend with the Tint executable interface: https://crbug.com/42250109 */ -}}
 {{- $b := 0 -}}
 {{- if and (or $overload.CanBeUsedInStage.Fragment $overload.CanBeUsedInStage.Compute) (and $overload.ReturnType (IsDeclarable $overload.ReturnType))}}
-{{-   if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
+{{-   if (HasPrefix $overload.ReturnType.Target.Name "subgroup_matrix") -}}
+{{-     $return_element_type := Eval "Type" (index $overload.ReturnType.TemplateArguments 1) -}}
+{{-     if eq "i8" $return_element_type -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<i32, 1024>;
+{{-     else if eq "u8" $return_element_type -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<u32, 1024>;
+{{-     else -}}
+@group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : array<{{ElementType $overload.ReturnType}}, 1024>;
+{{-     end -}}
+{{-   else if and (IsHostShareable $overload.ReturnType) (not (HasPrefix $overload.ReturnType.Target.Name "mat"))}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : {{template "Type" $overload.ReturnType -}};
 {{-   else}}
 @group(0) @binding({{$b}}) var<storage, read_write> prevent_dce : i32;
@@ -200,10 +213,14 @@ fn fragment_main() {
 {{- if $overload.CanBeUsedInStage.Compute }}
 @compute @workgroup_size(1)
 fn compute_main() {
-  {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  {{   if and (HasPrefix $overload.Intrinsic.Name "subgroupMatrix") $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
+  subgroupMatrixStore(&prevent_dce, 0, {{$permutation}}(), false, 64);
+  {{-   else -}}
+    {{   if and $overload.ReturnType (IsDeclarable $overload.ReturnType) -}}
   prevent_dce = {{/* preserve space after = */ -}}
-  {{-   end -}}
+    {{-   end -}}
   {{$permutation}}();
+  {{-   end }}
 }
 {{ end -}}
 
@@ -236,6 +253,21 @@ fn vertex_main() -> VertexOutput {
 
 
 {{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "GLSLShaderModel"                          -}}
+{{- /* Emits the optional GLSL shader model for a given overload          */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
+
+{{-   if OverloadNeedsDesktopGLSL $overload }}
+// flags: --glsl-desktop
+{{    end -}}
+
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
 {{-                        define "HLSLShaderModel"                          -}}
 {{- /* Emits the optional HLSL shader model for a given overload          */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
@@ -243,17 +275,36 @@ fn vertex_main() -> VertexOutput {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Check and emit dot4I8Packed and dot4U8Packed */ -}}
+{{/* Check and emit dot4I8Packed and dot4U8Packed */}}
 {{-   if or (eq "pack4xI8" $builtin_name) (eq "pack4xU8" $builtin_name) (eq "pack4xI8Clamp" $builtin_name) (eq "unpack4xI8" $builtin_name) (eq "unpack4xU8" $builtin_name)}}
-// [hlsl-dxc] flags: --hlsl_shader_model 66
+// [hlsl-dxc] flags: --hlsl-shader-model 66
 
 {{-   else if or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
-// [hlsl-dxc] flags: --hlsl_shader_model 64
+// [hlsl-dxc] flags: --hlsl-shader-model 64
 
-{{- /* Check and emit f16 */ -}}
+{{/* Check and emit f16 */}}
 {{-   else if OverloadUsesType $overload "f16"}}
-// flags: --hlsl_shader_model 62
+// flags: --hlsl-shader-model 62
 
+{{/* HLSL Wave operations require Shader Model 6.0 (DXC) */}}
+{{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
+// [hlsl-dxc] flags: --hlsl-shader-model 60
+
+{{    end -}}
+
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "MSLVersion"                               -}}
+{{- /* Emits the optional MSL version for a given overload                */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
+
+{{-   if eq "print" $builtin_name}}
+// [msl] flags: --msl-version 3.2
 {{    end -}}
 
 {{- end -}}
@@ -267,12 +318,12 @@ fn vertex_main() -> VertexOutput {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
-{{-   if or (eq "subgroupBallot" $builtin_name) (eq "subgroupBroadcast" $builtin_name)}}
+{{- /* Emit 'enable chromium_experimental_subgroup_matrix' if required */ -}}
+{{-   if (HasPrefix $builtin_name "subgroupMatrix")}}
+enable chromium_experimental_subgroup_matrix;
+{{/* Emit 'enable subgroups' if required */ -}}
+{{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 enable subgroups;
-{{-     if OverloadUsesType $overload "f16"}}
-enable subgroups_f16;
-{{      end -}}
 {{    end -}}
 
 
@@ -289,6 +340,11 @@ enable f16;
 {{- /* Emit 'enable chromium_internal_graphite' if required */ -}}
 {{-   if OverloadUsesType $overload "r8unorm"}}
 enable chromium_internal_graphite;
+{{    end -}}
+
+{{- /* Emit 'requires texel_buffers' if required */ -}}
+{{-   if OverloadUsesType $overload "texel_buffer"}}
+requires texel_buffers;
 {{    end -}}
 
 {{- end -}}
@@ -332,9 +388,11 @@ enable chromium_internal_graphite;
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   $name := .Target.Name -}}
 {{-   if             eq $name "array"   -}}storage
+{{-   else if        eq $name "runtime_array"   -}}storage
 {{-   else if HasPrefix $name "texture" -}}handle
 {{-   else if HasPrefix $name "sampler" -}}handle
 {{-   else if HasPrefix $name "input_attachment" -}}handle
+{{-   else if HasPrefix $name "texel_buffer" -}}handle
 {{-   else if        eq $name "ptr"     -}}{{(index .TemplateArguments 0).Target.Name}}
 {{-   else                              -}}function
 {{-   end -}}
@@ -413,6 +471,8 @@ enable chromium_internal_graphite;
        name is exactly 'vec' and 'mat' and if not, then look for the prefix. */ -}}
 {{-     else if eq .Target.Name "vec"        -}}vec{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}>
 {{-     else if eq .Target.Name "mat"        -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "runtime_array" -}}array<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "subgroup_matrix" -}}subgroup_matrix_{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}, {{index .TemplateArguments 2}}, {{index .TemplateArguments 3}}>
 {{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
 {{-     else                                 -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}

@@ -1,4 +1,5 @@
+
 void f() {
-  int v = 0;
-  return;
+  int v = int(0);
 }
+

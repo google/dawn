@@ -1,32 +1,31 @@
 #version 310 es
 
-layout(location = 0) out vec4 color_1;
-struct PushConstants {
-  uint first_instance;
+
+struct tint_immediate_struct {
+  uint tint_first_instance;
 };
 
-layout(location=0) uniform PushConstants push_constants;
 struct Output {
   vec4 Position;
   vec4 color;
 };
 
-Output tint_symbol(uint VertexIndex, uint InstanceIndex) {
+layout(location = 0) uniform tint_immediate_struct tint_immediates;
+layout(location = 0) out vec4 tint_interstage_location0;
+Output main_inner(uint VertexIndex, uint InstanceIndex) {
   vec2 zv[4] = vec2[4](vec2(0.20000000298023223877f), vec2(0.30000001192092895508f), vec2(-0.10000000149011611938f), vec2(1.10000002384185791016f));
-  float z = zv[(InstanceIndex + push_constants.first_instance)].x;
-  Output tint_symbol_1 = Output(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol_1.Position = vec4(0.5f, 0.5f, z, 1.0f);
+  float z = zv[min(InstanceIndex, 3u)].x;
+  Output v = Output(vec4(0.0f), vec4(0.0f));
+  v.Position = vec4(0.5f, 0.5f, z, 1.0f);
   vec4 colors[4] = vec4[4](vec4(1.0f, 0.0f, 0.0f, 1.0f), vec4(0.0f, 1.0f, 0.0f, 1.0f), vec4(0.0f, 0.0f, 1.0f, 1.0f), vec4(1.0f));
-  tint_symbol_1.color = colors[(InstanceIndex + push_constants.first_instance)];
-  return tint_symbol_1;
+  v.color = colors[min(InstanceIndex, 3u)];
+  return v;
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  Output inner_result = tint_symbol(uint(gl_VertexID), uint(gl_InstanceID));
-  gl_Position = inner_result.Position;
-  color_1 = inner_result.color;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  uint v_1 = uint(gl_VertexID);
+  uint v_2 = uint(gl_InstanceID);
+  Output v_3 = main_inner(v_1, (v_2 + tint_immediates.tint_first_instance));
+  gl_Position = vec4(v_3.Position.x, -(v_3.Position.y), ((2.0f * v_3.Position.z) - v_3.Position.w), v_3.Position.w);
+  tint_interstage_location0 = v_3.color;
+  gl_PointSize = 1.0f;
 }

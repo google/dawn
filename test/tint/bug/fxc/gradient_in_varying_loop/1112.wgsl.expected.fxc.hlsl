@@ -1,49 +1,72 @@
-SamplerState tint_symbol : register(s0);
-Texture2D<float4> randomTexture : register(t1);
-Texture2D<float4> depthTexture : register(t2);
+struct main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
 
-struct tint_symbol_3 {
+struct main_inputs {
   float2 vUV : TEXCOORD0;
 };
-struct tint_symbol_4 {
-  float4 value : SV_Target0;
-};
 
+
+SamplerState v : register(s0);
+Texture2D<float4> randomTexture : register(t1);
 float4 main_inner(float2 vUV) {
-  float4 tint_symbol_1 = randomTexture.Sample(tint_symbol, vUV);
-  float3 random = tint_symbol_1.rgb;
-  int i = 0;
-  while (true) {
-    if ((i < 1)) {
-    } else {
-      break;
-    }
-    float3 offset = float3((random.x).xxx);
-    bool tint_tmp_2 = (offset.x < 0.0f);
-    if (!tint_tmp_2) {
-      tint_tmp_2 = (offset.y < 0.0f);
-    }
-    bool tint_tmp_1 = (tint_tmp_2);
-    if (!tint_tmp_1) {
-      tint_tmp_1 = (offset.x > 1.0f);
-    }
-    bool tint_tmp = (tint_tmp_1);
-    if (!tint_tmp) {
-      tint_tmp = (offset.y > 1.0f);
-    }
-    if ((tint_tmp)) {
-      i = (i + 1);
+  float3 random = randomTexture.Sample(v, vUV).xyz;
+  int i = int(0);
+  {
+    uint2 tint_loop_idx = (4294967295u).xx;
+    while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
+        break;
+      }
+      if ((i < int(1))) {
+      } else {
+        break;
+      }
+      float3 offset = float3((random.x).xxx);
+      bool v_1 = false;
+      if ((offset.x < 0.0f)) {
+        v_1 = true;
+      } else {
+        v_1 = (offset.y < 0.0f);
+      }
+      bool v_2 = false;
+      if (v_1) {
+        v_2 = true;
+      } else {
+        v_2 = (offset.x > 1.0f);
+      }
+      bool v_3 = false;
+      if (v_2) {
+        v_3 = true;
+      } else {
+        v_3 = (offset.y > 1.0f);
+      }
+      if (v_3) {
+        i = (i + int(1));
+        {
+          uint tint_low_inc = (tint_loop_idx.x - 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        }
+        continue;
+      }
+      float sampleDepth = 0.0f;
+      i = (i + int(1));
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
       continue;
     }
-    float sampleDepth = 0.0f;
-    i = (i + 1);
   }
   return (1.0f).xxxx;
 }
 
-tint_symbol_4 main(tint_symbol_3 tint_symbol_2) {
-  float4 inner_result = main_inner(tint_symbol_2.vUV);
-  tint_symbol_4 wrapper_result = (tint_symbol_4)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+main_outputs main(main_inputs inputs) {
+  main_outputs v_4 = {main_inner(inputs.vUV)};
+  return v_4;
 }
+

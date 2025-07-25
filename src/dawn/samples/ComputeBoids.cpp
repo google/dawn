@@ -33,23 +33,7 @@
 #include "dawn/samples/SampleUtils.h"
 
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-
-wgpu::Device device;
-wgpu::Queue queue;
-wgpu::SwapChain swapchain;
-
-wgpu::Buffer modelBuffer;
-std::array<wgpu::Buffer, 2> particleBuffers;
-
-wgpu::RenderPipeline renderPipeline;
-
-wgpu::Buffer updateParams;
-wgpu::ComputePipeline updatePipeline;
-std::array<wgpu::BindGroup, 2> updateBGs;
-
-size_t pingpong = 0;
 
 static const uint32_t kNumParticles = 1024;
 
@@ -69,44 +53,49 @@ struct SimParams {
     int particleCount;
 };
 
-void initBuffers() {
-    std::array<std::array<float, 2>, 3> model = {{
-        {-0.01, -0.02},
-        {0.01, -0.02},
-        {0.00, 0.02},
-    }};
-    modelBuffer =
-        dawn::utils::CreateBufferFromData(device, &model, sizeof(model), wgpu::BufferUsage::Vertex);
+class ComputeBoidsSample : public SampleBase {
+  public:
+    using SampleBase::SampleBase;
 
-    SimParams params = {0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles};
-    updateParams = dawn::utils::CreateBufferFromData(device, &params, sizeof(params),
-                                                     wgpu::BufferUsage::Uniform);
+  private:
+    void initBuffers() {
+        std::array<std::array<float, 2>, 3> model = {{
+            {-0.01, -0.02},
+            {0.01, -0.02},
+            {0.00, 0.02},
+        }};
+        modelBuffer = dawn::utils::CreateBufferFromData(device, &model, sizeof(model),
+                                                        wgpu::BufferUsage::Vertex);
 
-    std::vector<Particle> initialParticles(kNumParticles);
-    {
-        std::mt19937 generator;
-        std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-        for (auto& p : initialParticles) {
-            p.pos = {dist(generator), dist(generator)};
-            p.vel = {dist(generator) * 0.1f, dist(generator) * 0.1f};
+        SimParams params = {0.04f, 0.1f, 0.025f, 0.025f, 0.02f, 0.05f, 0.005f, kNumParticles};
+        updateParams = dawn::utils::CreateBufferFromData(device, &params, sizeof(params),
+                                                         wgpu::BufferUsage::Uniform);
+
+        std::vector<Particle> initialParticles(kNumParticles);
+        {
+            std::mt19937 generator;
+            std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+            for (auto& p : initialParticles) {
+                p.pos = {dist(generator), dist(generator)};
+                p.vel = {dist(generator) * 0.1f, dist(generator) * 0.1f};
+            }
+        }
+
+        for (size_t i = 0; i < 2; i++) {
+            wgpu::BufferDescriptor descriptor;
+            descriptor.size = sizeof(Particle) * kNumParticles;
+            descriptor.usage =
+                wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage;
+            particleBuffers[i] = device.CreateBuffer(&descriptor);
+
+            queue.WriteBuffer(particleBuffers[i], 0,
+                              reinterpret_cast<uint8_t*>(initialParticles.data()),
+                              sizeof(Particle) * kNumParticles);
         }
     }
 
-    for (size_t i = 0; i < 2; i++) {
-        wgpu::BufferDescriptor descriptor;
-        descriptor.size = sizeof(Particle) * kNumParticles;
-        descriptor.usage =
-            wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Storage;
-        particleBuffers[i] = device.CreateBuffer(&descriptor);
-
-        queue.WriteBuffer(particleBuffers[i], 0,
-                          reinterpret_cast<uint8_t*>(initialParticles.data()),
-                          sizeof(Particle) * kNumParticles);
-    }
-}
-
-void initRender() {
-    wgpu::ShaderModule vsModule = dawn::utils::CreateShaderModule(device, R"(
+    void initRender() {
+        wgpu::ShaderModule vsModule = dawn::utils::CreateShaderModule(device, R"(
         struct VertexIn {
             @location(0) a_particlePos : vec2f,
             @location(1) a_particleVel : vec2f,
@@ -123,39 +112,39 @@ void initRender() {
         }
     )");
 
-    wgpu::ShaderModule fsModule = dawn::utils::CreateShaderModule(device, R"(
+        wgpu::ShaderModule fsModule = dawn::utils::CreateShaderModule(device, R"(
         @fragment
         fn main() -> @location(0) vec4f {
             return vec4f(1.0, 1.0, 1.0, 1.0);
         }
     )");
 
-    dawn::utils::ComboRenderPipelineDescriptor descriptor;
+        dawn::utils::ComboRenderPipelineDescriptor descriptor;
 
-    descriptor.vertex.module = vsModule;
-    descriptor.vertex.bufferCount = 2;
-    descriptor.cBuffers[0].arrayStride = sizeof(Particle);
-    descriptor.cBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
-    descriptor.cBuffers[0].attributeCount = 2;
-    descriptor.cAttributes[0].offset = offsetof(Particle, pos);
-    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
-    descriptor.cAttributes[1].shaderLocation = 1;
-    descriptor.cAttributes[1].offset = offsetof(Particle, vel);
-    descriptor.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
-    descriptor.cBuffers[1].arrayStride = 2 * sizeof(float);
-    descriptor.cBuffers[1].attributeCount = 1;
-    descriptor.cBuffers[1].attributes = &descriptor.cAttributes[2];
-    descriptor.cAttributes[2].shaderLocation = 2;
-    descriptor.cAttributes[2].format = wgpu::VertexFormat::Float32x2;
+        descriptor.vertex.module = vsModule;
+        descriptor.vertex.bufferCount = 2;
+        descriptor.cBuffers[0].arrayStride = sizeof(Particle);
+        descriptor.cBuffers[0].stepMode = wgpu::VertexStepMode::Instance;
+        descriptor.cBuffers[0].attributeCount = 2;
+        descriptor.cAttributes[0].offset = offsetof(Particle, pos);
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+        descriptor.cAttributes[1].shaderLocation = 1;
+        descriptor.cAttributes[1].offset = offsetof(Particle, vel);
+        descriptor.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
+        descriptor.cBuffers[1].arrayStride = 2 * sizeof(float);
+        descriptor.cBuffers[1].attributeCount = 1;
+        descriptor.cBuffers[1].attributes = &descriptor.cAttributes[2];
+        descriptor.cAttributes[2].shaderLocation = 2;
+        descriptor.cAttributes[2].format = wgpu::VertexFormat::Float32x2;
 
-    descriptor.cFragment.module = fsModule;
-    descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = GetPreferredSurfaceTextureFormat();
 
-    renderPipeline = device.CreateRenderPipeline(&descriptor);
-}
+        renderPipeline = device.CreateRenderPipeline(&descriptor);
+    }
 
-void initSim() {
-    wgpu::ShaderModule module = dawn::utils::CreateShaderModule(device, R"(
+    void initSim() {
+        wgpu::ShaderModule module = dawn::utils::CreateShaderModule(device, R"(
         struct Particle {
             pos : vec2f,
             vel : vec2f,
@@ -250,87 +239,90 @@ void initSim() {
         }
     )");
 
-    auto bgl = dawn::utils::MakeBindGroupLayout(
-        device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
-                    {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
-                    {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+        auto bgl = dawn::utils::MakeBindGroupLayout(
+            device, {
+                        {0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform},
+                        {1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                        {2, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage},
+                    });
+
+        wgpu::PipelineLayout pl = dawn::utils::MakeBasicPipelineLayout(device, &bgl);
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = pl;
+        csDesc.compute.module = module;
+        csDesc.compute.entryPoint = "main";
+        updatePipeline = device.CreateComputePipeline(&csDesc);
+
+        for (uint32_t i = 0; i < 2; ++i) {
+            updateBGs[i] = dawn::utils::MakeBindGroup(
+                device, bgl,
+                {
+                    {0, updateParams, 0, sizeof(SimParams)},
+                    {1, particleBuffers[i], 0, kNumParticles * sizeof(Particle)},
+                    {2, particleBuffers[(i + 1) % 2], 0, kNumParticles * sizeof(Particle)},
                 });
-
-    wgpu::PipelineLayout pl = dawn::utils::MakeBasicPipelineLayout(device, &bgl);
-
-    wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.layout = pl;
-    csDesc.compute.module = module;
-    csDesc.compute.entryPoint = "main";
-    updatePipeline = device.CreateComputePipeline(&csDesc);
-
-    for (uint32_t i = 0; i < 2; ++i) {
-        updateBGs[i] = dawn::utils::MakeBindGroup(
-            device, bgl,
-            {
-                {0, updateParams, 0, sizeof(SimParams)},
-                {1, particleBuffers[i], 0, kNumParticles * sizeof(Particle)},
-                {2, particleBuffers[(i + 1) % 2], 0, kNumParticles * sizeof(Particle)},
-            });
-    }
-}
-
-wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, size_t i) {
-    auto& bufferDst = particleBuffers[(i + 1) % 2];
-    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-
-    {
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.SetPipeline(updatePipeline);
-        pass.SetBindGroup(0, updateBGs[i]);
-        pass.DispatchWorkgroups(kNumParticles / 64);
-        pass.End();
+        }
     }
 
-    {
-        dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView});
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
-        pass.SetPipeline(renderPipeline);
-        pass.SetVertexBuffer(0, bufferDst);
-        pass.SetVertexBuffer(1, modelBuffer);
-        pass.Draw(3, kNumParticles);
-        pass.End();
+    wgpu::CommandBuffer createCommandBuffer(const wgpu::TextureView backbufferView, size_t i) {
+        auto& bufferDst = particleBuffers[(i + 1) % 2];
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        {
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetPipeline(updatePipeline);
+            pass.SetBindGroup(0, updateBGs[i]);
+            pass.DispatchWorkgroups(kNumParticles / 64);
+            pass.End();
+        }
+
+        {
+            dawn::utils::ComboRenderPassDescriptor renderPass({backbufferView});
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.SetPipeline(renderPipeline);
+            pass.SetVertexBuffer(0, bufferDst);
+            pass.SetVertexBuffer(1, modelBuffer);
+            pass.Draw(3, kNumParticles);
+            pass.End();
+        }
+
+        return encoder.Finish();
     }
 
-    return encoder.Finish();
-}
+    bool SetupImpl() override {
+        initBuffers();
+        initRender();
+        initSim();
+        return true;
+    }
 
-void init() {
-    device = CreateCppDawnDevice();
+    void FrameImpl() override {
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        wgpu::CommandBuffer commandBuffer =
+            createCommandBuffer(surfaceTexture.texture.CreateView(), pingpong);
+        queue.Submit(1, &commandBuffer);
+        pingpong = (pingpong + 1) % 2;
+    }
 
-    queue = device.GetQueue();
-    swapchain = GetSwapChain();
+    wgpu::Buffer modelBuffer;
+    std::array<wgpu::Buffer, 2> particleBuffers;
 
-    initBuffers();
-    initRender();
-    initSim();
-}
+    wgpu::RenderPipeline renderPipeline;
 
-void frame() {
-    wgpu::TextureView backbufferView = swapchain.GetCurrentTextureView();
+    wgpu::Buffer updateParams;
+    wgpu::ComputePipeline updatePipeline;
+    std::array<wgpu::BindGroup, 2> updateBGs;
 
-    wgpu::CommandBuffer commandBuffer = createCommandBuffer(backbufferView, pingpong);
-    queue.Submit(1, &commandBuffer);
-    swapchain.Present();
-    DoFlush();
-
-    pingpong = (pingpong + 1) % 2;
-}
+    size_t pingpong = 0;
+};
 
 int main(int argc, const char* argv[]) {
     if (!InitSample(argc, argv)) {
         return 1;
     }
-    init();
 
-    while (!ShouldQuit()) {
-        frame();
-        dawn::utils::USleep(16000);
-    }
+    ComputeBoidsSample* sample = new ComputeBoidsSample();
+    sample->Run(16000);
 }

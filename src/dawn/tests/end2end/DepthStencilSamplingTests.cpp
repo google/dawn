@@ -58,6 +58,13 @@ const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
 
 class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingTestParams> {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Just copy all the limits, though all we really care about is
+        // maxStorageBuffersInFragmentStage
+        supported.UnlinkedCopyTo(&required);
+    }
+
     enum class TestAspectAndSamplerType {
         DepthAsDepth,
         DepthAsFloat,
@@ -68,12 +75,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         DawnTestWithParams<DepthStencilSamplingTestParams>::SetUp();
 
         DAWN_TEST_UNSUPPORTED_IF(!mIsFormatSupported);
-
-        // Skip formats other than Depth24PlusStencil8 if we're specifically testing with the packed
-        // depth24_unorm_stencil8 toggle.
-        DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("use_packed_depth24_unorm_stencil8_format") &&
-                                 GetParam().mTextureFormat !=
-                                     wgpu::TextureFormat::Depth24PlusStencil8);
 
         wgpu::BufferDescriptor uniformBufferDesc;
         uniformBufferDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
@@ -643,11 +644,6 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     // TODO(crbug.com/dawn/1187): The test fails on ANGLE D3D11, investigate why.
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     constexpr uint32_t kWidth = 16;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         const kWidth = 16.0;
@@ -680,7 +676,35 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
             }
             return 0.0;
         }
+
+        // Check each depth texture texel has the expected value and outputs a "bool".
+        // Compat can not use texture_depth_2d with a non-comparison sampler
+        @group(0) @binding(0) var t2 : texture_2d<f32>;
+        @fragment fn fs2Compat(@builtin(position) pos : vec4f) -> @location(0) f32 {
+            let x = pos.x / kWidth;
+            let depth = textureSample(t2, s, vec2(x, 0.5)).r;
+
+            let index = pos.x - 0.5;
+            let expectedDepth = index / (kWidth - 1.0);
+
+            if (abs(depth - expectedDepth) < 0.001) {
+                return 1.0;
+            }
+            return 0.0;
+        }
     )");
+
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment,
+                     IsCompatibilityMode() ? wgpu::TextureSampleType::UnfilterableFloat
+                                           : wgpu::TextureSampleType::Depth},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                });
+
+    wgpu::PipelineLayoutDescriptor plDescriptor;
+    plDescriptor.bindGroupLayoutCount = 1;
+    plDescriptor.bindGroupLayouts = &bgl;
 
     // The first pipeline will write to the depth texture.
     utils::ComboRenderPipelineDescriptor pDesc1;
@@ -690,14 +714,15 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     pDesc1.cTargets[0].format = wgpu::TextureFormat::R32Float;
     pDesc1.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pDesc1.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
-    pDesc1.cDepthStencil.depthWriteEnabled = true;
+    pDesc1.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::True;
     wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&pDesc1);
 
     // The second pipeline checks the depth texture and outputs 1 to a texel on success.
     utils::ComboRenderPipelineDescriptor pDesc2;
+    pDesc2.layout = device.CreatePipelineLayout(&plDescriptor);
     pDesc2.vertex.module = module;
     pDesc2.cFragment.module = module;
-    pDesc2.cFragment.entryPoint = "fs2";
+    pDesc2.cFragment.entryPoint = IsCompatibilityMode() ? "fs2Compat" : "fs2";
     pDesc2.cTargets[0].format = wgpu::TextureFormat::R32Float;
     pDesc2.primitive.topology = wgpu::PrimitiveTopology::PointList;
     wgpu::RenderPipeline pipeline2 = device.CreateRenderPipeline(&pDesc2);
@@ -753,6 +778,7 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
@@ -964,6 +990,7 @@ class StencilSamplingTest : public DepthStencilSamplingTest {};
 TEST_P(StencilSamplingTest, SampleStencilOnly) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
+    DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageBuffersInFragmentStage < 1);
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 

@@ -34,7 +34,7 @@
 #include <vector>
 
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint {
 //! @cond Doxygen_Suppress

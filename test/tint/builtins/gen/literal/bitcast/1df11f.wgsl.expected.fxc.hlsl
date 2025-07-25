@@ -1,39 +1,64 @@
-SKIP: FAILED
+SKIP: INVALID
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
+//
+// fragment_main
+//
 
-void bitcast_1df11f() {
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 2> bitcast_1df11f() {
   vector<float16_t, 2> res = (float16_t(1.0h)).xx;
-  prevent_dce.Store<vector<float16_t, 2> >(0u, res);
-}
-
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  bitcast_1df11f();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+  return res;
 }
 
 void fragment_main() {
-  bitcast_1df11f();
-  return;
+  prevent_dce.Store<vector<float16_t, 2> >(0u, bitcast_1df11f());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 2> bitcast_1df11f() {
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
+  return res;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  bitcast_1df11f();
-  return;
+  prevent_dce.Store<vector<float16_t, 2> >(0u, bitcast_1df11f());
 }
-FXC validation failure:
-C:\src\dawn\Shader@0x00000201DFD40680(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x00000201DFD40680(5,3-19): error X3018: invalid subscript 'Store'
+
+//
+// vertex_main
+//
+struct VertexOutput {
+  float4 pos;
+  vector<float16_t, 2> prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation vector<float16_t, 2> VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+vector<float16_t, 2> bitcast_1df11f() {
+  vector<float16_t, 2> res = (float16_t(1.0h)).xx;
+  return res;
+}
+
+VertexOutput vertex_main_inner() {
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = bitcast_1df11f();
+  VertexOutput v_1 = v;
+  return v_1;
+}
+
+vertex_main_outputs vertex_main() {
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
+}
 

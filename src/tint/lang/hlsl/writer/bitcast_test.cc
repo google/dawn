@@ -49,7 +49,7 @@ TEST_F(HlslWriterTest, BitcastIdentityNumeric) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   int bc = a;
 }
 
@@ -85,7 +85,7 @@ TEST_F(HlslWriterTest, BitcastToFloat) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   float bc = asfloat(a);
 }
 
@@ -121,7 +121,7 @@ TEST_F(HlslWriterTest, BitcastToUint) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   uint bc = asuint(a);
 }
 
@@ -187,25 +187,28 @@ vector<float16_t, 2> tint_bitcast_to_f16_2(uint src) {
   uint v = src;
   float t_low = f16tof32((v & 65535u));
   float t_high = f16tof32(((v >> 16u) & 65535u));
-  return vector<float16_t, 2>(t_low.x, t_high.x);
+  float16_t v_1 = float16_t(t_low);
+  return vector<float16_t, 2>(v_1, float16_t(t_high));
 }
 
 vector<float16_t, 2> tint_bitcast_to_f16_1(float src) {
   uint v = asuint(src);
   float t_low = f16tof32((v & 65535u));
   float t_high = f16tof32(((v >> 16u) & 65535u));
-  return vector<float16_t, 2>(t_low.x, t_high.x);
+  float16_t v_2 = float16_t(t_low);
+  return vector<float16_t, 2>(v_2, float16_t(t_high));
 }
 
 vector<float16_t, 2> tint_bitcast_to_f16(int src) {
   uint v = asuint(src);
   float t_low = f16tof32((v & 65535u));
   float t_high = f16tof32(((v >> 16u) & 65535u));
-  return vector<float16_t, 2>(t_low.x, t_high.x);
+  float16_t v_3 = float16_t(t_low);
+  return vector<float16_t, 2>(v_3, float16_t(t_high));
 }
 
 void foo() {
-  int a = 1;
+  int a = int(1);
   vector<float16_t, 2> b = tint_bitcast_to_f16(a);
   float c = 1.0f;
   vector<float16_t, 2> d = tint_bitcast_to_f16_1(c);
@@ -277,7 +280,10 @@ vector<float16_t, 4> tint_bitcast_to_f16_2(uint2 src) {
   uint2 shift = (16u).xx;
   float2 t_low = f16tof32((v & mask));
   float2 t_high = f16tof32(((v >> shift) & mask));
-  return vector<float16_t, 4>(t_low.x, t_high.x, t_low.y, t_high.y);
+  float16_t v_1 = float16_t(t_low.x);
+  float16_t v_2 = float16_t(t_high.x);
+  float16_t v_3 = float16_t(t_low.y);
+  return vector<float16_t, 4>(v_1, v_2, v_3, float16_t(t_high.y));
 }
 
 vector<float16_t, 4> tint_bitcast_to_f16_1(float2 src) {
@@ -286,7 +292,10 @@ vector<float16_t, 4> tint_bitcast_to_f16_1(float2 src) {
   uint2 shift = (16u).xx;
   float2 t_low = f16tof32((v & mask));
   float2 t_high = f16tof32(((v >> shift) & mask));
-  return vector<float16_t, 4>(t_low.x, t_high.x, t_low.y, t_high.y);
+  float16_t v_4 = float16_t(t_low.x);
+  float16_t v_5 = float16_t(t_high.x);
+  float16_t v_6 = float16_t(t_low.y);
+  return vector<float16_t, 4>(v_4, v_5, v_6, float16_t(t_high.y));
 }
 
 vector<float16_t, 4> tint_bitcast_to_f16(int2 src) {
@@ -295,11 +304,14 @@ vector<float16_t, 4> tint_bitcast_to_f16(int2 src) {
   uint2 shift = (16u).xx;
   float2 t_low = f16tof32((v & mask));
   float2 t_high = f16tof32(((v >> shift) & mask));
-  return vector<float16_t, 4>(t_low.x, t_high.x, t_low.y, t_high.y);
+  float16_t v_7 = float16_t(t_low.x);
+  float16_t v_8 = float16_t(t_high.x);
+  float16_t v_9 = float16_t(t_low.y);
+  return vector<float16_t, 4>(v_7, v_8, v_9, float16_t(t_high.y));
 }
 
 void foo() {
-  int2 a = int2(1, 2);
+  int2 a = int2(int(1), int(2));
   vector<float16_t, 4> b = tint_bitcast_to_f16(a);
   float2 c = float2(1.0f, 2.0f);
   vector<float16_t, 4> d = tint_bitcast_to_f16_1(c);

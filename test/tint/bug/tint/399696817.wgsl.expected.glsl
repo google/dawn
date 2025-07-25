@@ -1,0 +1,15 @@
+#version 310 es
+
+shared int a;
+void foo(uint v) {
+  uvec4 v_1 = uvec4(24u, 16u, 8u, 0u);
+  ivec4 v_2 = ivec4((uvec4(v) << v_1));
+  ivec4 x = (v_2 >> uvec4(24u));
+  uvec4 v_3 = uvec4(0u, 8u, 16u, 24u);
+  uvec4 v_4 = (uvec4(v) >> v_3);
+  uvec4 y = (v_4 & uvec4(255u));
+  int z = atomicOr(a, 0);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

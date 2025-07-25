@@ -1,12 +1,9 @@
 #include <metal_stdlib>
-
 using namespace metal;
-void f() {
-  {
-    int a_1 = 0;
-    int b = a_1;
-  }
-  int a_2 = 0;
-  int b = a_2;
-}
 
+void f() {
+  int a = 0;
+  int b = a;
+  int a_1 = 0;
+  int b_1 = a_1;
+}

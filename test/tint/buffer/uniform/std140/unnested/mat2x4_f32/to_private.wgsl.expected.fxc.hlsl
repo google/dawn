@@ -1,19 +1,17 @@
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[2];
 };
-static float2x4 p = float2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
-float2x4 u_load(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  return float2x4(asfloat(u[scalar_offset / 4]), asfloat(u[scalar_offset_1 / 4]));
+static float2x4 p = float2x4((0.0f).xxxx, (0.0f).xxxx);
+float2x4 v(uint start_byte_offset) {
+  return float2x4(asfloat(u[(start_byte_offset / 16u)]), asfloat(u[((16u + start_byte_offset) / 16u)]));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  p = u_load(0u);
-  p[1] = asfloat(u[0]);
-  p[1] = asfloat(u[0]).ywxz;
-  p[0][1] = asfloat(u[1].x);
-  return;
+  p = v(0u);
+  p[1u] = asfloat(u[0u]);
+  p[1u] = asfloat(u[0u]).ywxz;
+  p[0u].y = asfloat(u[1u].x);
 }
+

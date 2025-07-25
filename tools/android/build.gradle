@@ -26,6 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 plugins {
-    id 'com.android.library' version '8.1.1' apply false
+    id 'com.android.library' version '8.7.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
 }

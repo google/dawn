@@ -1,17 +1,9 @@
-groupshared float mm_Asub[64][64];
-groupshared float mm_Bsub[64][64];
+struct main_inputs {
+  uint3 local_id : SV_GroupThreadID;
+  uint tint_local_index : SV_GroupIndex;
+  uint3 global_id : SV_DispatchThreadID;
+};
 
-void tint_zero_workgroup_memory(uint local_idx) {
-  {
-    for(uint idx = local_idx; (idx < 4096u); idx = (idx + 256u)) {
-      uint i = (idx / 64u);
-      uint i_1 = (idx % 64u);
-      mm_Asub[i][i_1] = 0.0f;
-      mm_Bsub[i][i_1] = 0.0f;
-    }
-  }
-  GroupMemoryBarrierWithGroupSync();
-}
 
 ByteAddressBuffer firstMatrix : register(t0);
 ByteAddressBuffer secondMatrix : register(t1);
@@ -19,65 +11,98 @@ RWByteAddressBuffer resultMatrix : register(u2);
 cbuffer cbuffer_uniforms : register(b3) {
   uint4 uniforms[1];
 };
-
+groupshared float mm_Asub[64][64];
+groupshared float mm_Bsub[64][64];
 float mm_readA(uint row, uint col) {
-  bool tint_tmp = (row < uniforms[0].x);
-  if (tint_tmp) {
-    tint_tmp = (col < uniforms[0].y);
+  bool v = false;
+  if ((row < uniforms[0u].x)) {
+    v = (col < uniforms[0u].y);
+  } else {
+    v = false;
   }
-  if ((tint_tmp)) {
-    float result = asfloat(firstMatrix.Load((4u * ((row * uniforms[0].y) + col))));
+  if (v) {
+    uint v_1 = 0u;
+    firstMatrix.GetDimensions(v_1);
+    float result = asfloat(firstMatrix.Load((0u + (min(((row * uniforms[0u].y) + col), ((v_1 / 4u) - 1u)) * 4u))));
     return result;
   }
   return 0.0f;
 }
 
 float mm_readB(uint row, uint col) {
-  bool tint_tmp_1 = (row < uniforms[0].y);
-  if (tint_tmp_1) {
-    tint_tmp_1 = (col < uniforms[0].z);
+  bool v_2 = false;
+  if ((row < uniforms[0u].y)) {
+    v_2 = (col < uniforms[0u].z);
+  } else {
+    v_2 = false;
   }
-  if ((tint_tmp_1)) {
-    float result = asfloat(secondMatrix.Load((4u * ((row * uniforms[0].z) + col))));
+  if (v_2) {
+    uint v_3 = 0u;
+    secondMatrix.GetDimensions(v_3);
+    float result = asfloat(secondMatrix.Load((0u + (min(((row * uniforms[0u].z) + col), ((v_3 / 4u) - 1u)) * 4u))));
     return result;
   }
   return 0.0f;
 }
 
 void mm_write(uint row, uint col, float value) {
-  bool tint_tmp_2 = (row < uniforms[0].x);
-  if (tint_tmp_2) {
-    tint_tmp_2 = (col < uniforms[0].z);
+  bool v_4 = false;
+  if ((row < uniforms[0u].x)) {
+    v_4 = (col < uniforms[0u].z);
+  } else {
+    v_4 = false;
   }
-  if ((tint_tmp_2)) {
-    uint index = (col + (row * uniforms[0].z));
-    resultMatrix.Store((4u * index), asuint(value));
+  if (v_4) {
+    uint index = (col + (row * uniforms[0u].z));
+    uint v_5 = 0u;
+    resultMatrix.GetDimensions(v_5);
+    resultMatrix.Store((0u + (min(index, ((v_5 / 4u) - 1u)) * 4u)), asuint(value));
   }
 }
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / (((rhs == 0u)) ? (1u) : (rhs)));
 }
 
-struct tint_symbol_5 {
-  uint3 local_id : SV_GroupThreadID;
-  uint local_invocation_index : SV_GroupIndex;
-  uint3 global_id : SV_DispatchThreadID;
-};
-
-void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
+void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
+  {
+    uint v_6 = 0u;
+    v_6 = tint_local_index;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4096u)) {
+        break;
+      }
+      mm_Asub[(v_7 / 64u)][(v_7 % 64u)] = 0.0f;
+      mm_Bsub[(v_7 / 64u)][(v_7 % 64u)] = 0.0f;
+      {
+        v_6 = (v_7 + 256u);
+      }
+      continue;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
   uint tileRow = (local_id.y * 4u);
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);
   uint globalCol = (global_id.x * 4u);
-  uint numTiles = (tint_div((uniforms[0].y - 1u), 64u) + 1u);
+  uint numTiles = (tint_div_u32((uniforms[0u].y - 1u), 64u) + 1u);
   float acc[16] = (float[16])0;
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
   {
-    for(uint index = 0u; (index < 16u); index = (index + 1u)) {
-      acc[index] = 0.0f;
+    uint index = 0u;
+    while(true) {
+      if ((index < 16u)) {
+      } else {
+        break;
+      }
+      uint v_8 = min(index, 15u);
+      acc[v_8] = 0.0f;
+      {
+        index = (index + 1u);
+      }
+      continue;
     }
   }
   uint ColPerThreadA = 4u;
@@ -85,71 +110,175 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   uint RowPerThreadB = 4u;
   uint tileRowB = (local_id.y * RowPerThreadB);
   {
-    for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    uint t = 0u;
+    while(true) {
+      if ((t < numTiles)) {
+      } else {
+        break;
+      }
       {
-        for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < 4u)) {
+          } else {
+            break;
+          }
           {
-            for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < ColPerThreadA)) {
+              } else {
+                break;
+              }
               uint inputRow = (tileRow + innerRow);
               uint inputCol = (tileColA + innerCol);
-              uint tint_symbol = inputRow;
-              uint tint_symbol_1 = inputCol;
-              mm_Asub[tint_symbol][tint_symbol_1] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              mm_Asub[min(inputRow, 63u)][min(inputCol, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              {
+                innerCol = (innerCol + 1u);
+              }
+              continue;
             }
           }
+          {
+            innerRow = (innerRow + 1u);
+          }
+          continue;
         }
       }
       {
-        for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+        uint innerRow = 0u;
+        while(true) {
+          if ((innerRow < RowPerThreadB)) {
+          } else {
+            break;
+          }
           {
-            for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+            uint innerCol = 0u;
+            while(true) {
+              if ((innerCol < 4u)) {
+              } else {
+                break;
+              }
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              uint tint_symbol_2 = innerCol;
-              uint tint_symbol_3 = inputCol;
-              mm_Bsub[tint_symbol_2][tint_symbol_3] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              uint v_9 = min(innerCol, 63u);
+              mm_Bsub[v_9][min(inputCol, 63u)] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              {
+                innerCol = (innerCol + 1u);
+              }
+              continue;
             }
           }
+          {
+            innerRow = (innerRow + 1u);
+          }
+          continue;
         }
       }
       GroupMemoryBarrierWithGroupSync();
       {
-        for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+        uint k = 0u;
+        while(true) {
+          if ((k < 64u)) {
+          } else {
+            break;
+          }
           {
-            for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
-              BCached[inner] = mm_Bsub[k][(tileCol + inner)];
+            uint inner = 0u;
+            while(true) {
+              if ((inner < 4u)) {
+              } else {
+                break;
+              }
+              uint v_10 = min(inner, 3u);
+              uint v_11 = min(k, 63u);
+              uint v_12 = min((tileCol + inner), 63u);
+              BCached[v_10] = mm_Bsub[v_11][v_12];
+              {
+                inner = (inner + 1u);
+              }
+              continue;
             }
           }
           {
-            for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
-              ACached = mm_Asub[(tileRow + innerRow)][k];
+            uint innerRow = 0u;
+            while(true) {
+              if ((innerRow < 4u)) {
+              } else {
+                break;
+              }
+              uint v_13 = min((tileRow + innerRow), 63u);
+              uint v_14 = min(k, 63u);
+              ACached = mm_Asub[v_13][v_14];
               {
-                for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+                uint innerCol = 0u;
+                while(true) {
+                  if ((innerCol < 4u)) {
+                  } else {
+                    break;
+                  }
                   uint index = ((innerRow * 4u) + innerCol);
-                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
+                  float v_15 = acc[min(index, 15u)];
+                  float v_16 = ACached;
+                  uint v_17 = min(innerCol, 3u);
+                  acc[min(index, 15u)] = (v_15 + (v_16 * BCached[v_17]));
+                  {
+                    innerCol = (innerCol + 1u);
+                  }
+                  continue;
                 }
               }
+              {
+                innerRow = (innerRow + 1u);
+              }
+              continue;
             }
           }
+          {
+            k = (k + 1u);
+          }
+          continue;
         }
       }
       GroupMemoryBarrierWithGroupSync();
+      {
+        t = (t + 1u);
+      }
+      continue;
     }
   }
   {
-    for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    uint innerRow = 0u;
+    while(true) {
+      if ((innerRow < 4u)) {
+      } else {
+        break;
+      }
       {
-        for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+        uint innerCol = 0u;
+        while(true) {
+          if ((innerCol < 4u)) {
+          } else {
+            break;
+          }
           uint index = ((innerRow * 4u) + innerCol);
-          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
+          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[min(index, 15u)]);
+          {
+            innerCol = (innerCol + 1u);
+          }
+          continue;
         }
       }
+      {
+        innerRow = (innerRow + 1u);
+      }
+      continue;
     }
   }
 }
 
 [numthreads(16, 16, 1)]
-void main(tint_symbol_5 tint_symbol_4) {
-  main_inner(tint_symbol_4.local_id, tint_symbol_4.global_id, tint_symbol_4.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.local_id, inputs.global_id, inputs.tint_local_index);
 }
+

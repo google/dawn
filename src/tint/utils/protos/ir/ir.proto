@@ -58,6 +58,12 @@ message Type {
         TypeExternalTexture external_texture = 13;
         TypeSampler sampler = 14;
         TypeInputAttachment input_attachment = 15;
+        TypeSubgroupMatrix subgroup_matrix_left = 16;
+        TypeSubgroupMatrix subgroup_matrix_right = 17;
+        TypeSubgroupMatrix subgroup_matrix_result = 18;
+        TypeBuiltinStruct builtin_struct = 19;
+        TypeBindingArray binding_array = 20;
+        TypeTexelBuffer texel_buffer = 21;
     }
 }
 
@@ -69,6 +75,8 @@ enum TypeBasic {
     u32 = 3;
     f32 = 4;
     f16 = 5;
+    i8 = 6;
+    u8 = 7;
 }
 
 message TypeVector {
@@ -86,6 +94,11 @@ message TypeArray {
     uint32 element = 1;  // Module.types
     uint32 stride = 2;
     uint32 count = 3;
+}
+
+message TypeBindingArray {
+    uint32 element = 1;  // Module.types
+    uint32 count = 2;
 }
 
 message TypePointer {
@@ -143,6 +156,38 @@ message TypeSampler {
 
 message TypeInputAttachment {
     uint32 sub_type = 1;  // Module.types
+}
+
+message TypeSubgroupMatrix {
+    uint32 sub_type = 1;  // Module.types
+    uint32 rows = 2;
+    uint32 columns = 3;
+}
+
+enum TypeBuiltinStruct {
+    AtomicCompareExchangeResultI32 = 0;
+    AtomicCompareExchangeResultU32 = 1;
+    FrexpResultF16 = 2;
+    FrexpResultF32 = 3;
+    FrexpResultVec2F16 = 4;
+    FrexpResultVec2F32 = 5;
+    FrexpResultVec3F16 = 6;
+    FrexpResultVec3F32 = 7;
+    FrexpResultVec4F16 = 8;
+    FrexpResultVec4F32 = 9;
+    ModfResultF16 = 10;
+    ModfResultF32 = 11;
+    ModfResultVec2F16 = 12;
+    ModfResultVec2F32 = 13;
+    ModfResultVec3F16 = 14;
+    ModfResultVec3F32 = 15;
+    ModfResultVec4F16 = 16;
+    ModfResultVec4F32 = 17;
+}
+
+message TypeTexelBuffer {
+    TexelFormat texel_format = 1;
+    AccessControl access = 2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -311,6 +356,7 @@ message InstructionUserCall {}
 
 message InstructionBuiltinCall {
     BuiltinFn builtin = 1;
+    repeated uint32 explicit_template_params = 2;  // Module.types
 }
 
 message InstructionLoad {}
@@ -401,7 +447,7 @@ enum AddressSpace {
     handle = 1;
     pixel_local = 2;
     private = 3;
-    push_constant = 4;
+    immediate = 4;
     storage = 5;
     uniform = 6;
     workgroup = 7;
@@ -470,6 +516,28 @@ enum TexelFormat {
     rgba8_snorm = 15;
     rgba8_uint = 16;
     rgba8_unorm = 17;
+    r8_snorm = 18;
+    r8_uint = 19;
+    r8_sint = 20;
+    rg8_unorm = 21;
+    rg8_snorm = 22;
+    rg8_uint = 23;
+    rg8_sint = 24;
+    r16_uint = 25;
+    r16_sint = 26;
+    r16_float = 27;
+    rg16_uint = 28;
+    rg16_sint = 29;
+    rg16_float = 30;
+    rgb10a2_uint = 31;
+    rgb10a2_unorm = 32;
+    rg11b10_ufloat = 33;
+    r16_unorm = 34;
+    r16_snorm = 35;
+    rg16_unorm = 36;
+    rg16_snorm = 37;
+    rgba16_unorm = 38;
+    rgba16_snorm = 39;
 }
 
 enum SamplerKind {
@@ -487,6 +555,8 @@ enum InterpolationSampling {
     center = 0;
     centroid = 1;
     sample = 2;
+    first = 3;
+    either = 4;
 }
 
 enum BuiltinValue {
@@ -505,6 +575,10 @@ enum BuiltinValue {
     subgroup_size = 12;
     vertex_index = 13;
     workgroup_id = 14;
+    clip_distances = 15;
+    cull_distance = 16;
+    subgroup_id = 17;
+    primitive_id = 18;
 }
 
 enum BuiltinFn {
@@ -630,4 +704,32 @@ enum BuiltinFn {
     subgroup_ballot = 119;
     subgroup_broadcast = 120;
     input_attachment_load = 121;
+    subgroup_add = 122;
+    subgroup_exclusive_add = 123;
+    subgroup_mul = 124;
+    subgroup_exclusive_mul = 125;
+    subgroup_and = 126;
+    subgroup_or = 127;
+    subgroup_xor = 128;
+    subgroup_min = 129;
+    subgroup_max = 130;
+    subgroup_any = 131;
+    subgroup_all = 132;
+    subgroup_elect = 133;
+    subgroup_broadcast_first = 134;
+    subgroup_shuffle = 135;
+    subgroup_shuffle_xor = 136;
+    subgroup_shuffle_up = 137;
+    subgroup_shuffle_down = 138;
+    quad_broadcast = 139;
+    quad_swap_x = 140;
+    quad_swap_y = 141;
+    quad_swap_diagonal = 142;
+    subgroup_inclusive_add = 143;
+    subgroup_inclusive_mul = 144;
+    subgroup_matrix_load = 145;
+    subgroup_matrix_store = 146;
+    subgroup_matrix_multiply = 147;
+    subgroup_matrix_multiply_accumulate = 148;
+    print = 149;
 }

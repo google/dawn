@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 73
 ; Schema: 0
                OpCapability Shader
@@ -13,8 +13,8 @@
                OpName %v4 "v4"
                OpName %v5 "v5"
                OpName %v6 "v6"
-               OpName %MyStruct "MyStruct"
                OpMemberName %MyStruct 0 "f1"
+               OpName %MyStruct "MyStruct"
                OpName %v7 "v7"
                OpName %v8 "v8"
                OpName %v9 "v9"
@@ -26,79 +26,93 @@
                OpName %v15 "v15"
                OpName %v16 "v16"
                OpName %f "f"
-               OpMemberDecorate %MyStruct 0 Offset 0
-               OpDecorate %_arr_float_uint_10 ArrayStride 4
+               OpName %l1 "l1"
+               OpName %l2 "l2"
+               OpName %l3 "l3"
+               OpName %l4 "l4"
+               OpName %l5 "l5"
+               OpName %l6 "l6"
+               OpName %l7 "l7"
+               OpName %l8 "l8"
+               OpName %l9 "l9"
+               OpName %l10 "l10"
+               OpName %l11 "l11"
+               OpName %l12 "l12"
+               OpName %l13 "l13"
+               OpName %l14 "l14"
+               OpName %l15 "l15"
+               OpName %l16 "l16"
         %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
 %_ptr_Private_int = OpTypePointer Private %int
+      %int_1 = OpConstant %int 1
          %v1 = OpVariable %_ptr_Private_int Private %int_1
        %uint = OpTypeInt 32 0
-     %uint_1 = OpConstant %uint 1
 %_ptr_Private_uint = OpTypePointer Private %uint
+     %uint_1 = OpConstant %uint 1
          %v2 = OpVariable %_ptr_Private_uint Private %uint_1
       %float = OpTypeFloat 32
-    %float_1 = OpConstant %float 1
 %_ptr_Private_float = OpTypePointer Private %float
+    %float_1 = OpConstant %float 1
          %v3 = OpVariable %_ptr_Private_float Private %float_1
       %v3int = OpTypeVector %int 3
-         %14 = OpConstantComposite %v3int %int_1 %int_1 %int_1
 %_ptr_Private_v3int = OpTypePointer Private %v3int
-         %v4 = OpVariable %_ptr_Private_v3int Private %14
+         %16 = OpConstantComposite %v3int %int_1 %int_1 %int_1
+         %v4 = OpVariable %_ptr_Private_v3int Private %16
      %v3uint = OpTypeVector %uint 3
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
          %20 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
-%_ptr_Private_v3uint = OpTypePointer Private %v3uint
          %v5 = OpVariable %_ptr_Private_v3uint Private %20
     %v3float = OpTypeVector %float 3
+%_ptr_Private_v3float = OpTypePointer Private %v3float
     %float_2 = OpConstant %float 2
     %float_3 = OpConstant %float 3
          %26 = OpConstantComposite %v3float %float_1 %float_2 %float_3
-%_ptr_Private_v3float = OpTypePointer Private %v3float
          %v6 = OpVariable %_ptr_Private_v3float Private %26
    %MyStruct = OpTypeStruct %float
-         %30 = OpConstantComposite %MyStruct %float_1
 %_ptr_Private_MyStruct = OpTypePointer Private %MyStruct
-         %v7 = OpVariable %_ptr_Private_MyStruct Private %30
+         %32 = OpConstantComposite %MyStruct %float_1
+         %v7 = OpVariable %_ptr_Private_MyStruct Private %32
     %uint_10 = OpConstant %uint 10
 %_arr_float_uint_10 = OpTypeArray %float %uint_10
-         %35 = OpConstantNull %_arr_float_uint_10
 %_ptr_Private__arr_float_uint_10 = OpTypePointer Private %_arr_float_uint_10
-         %v8 = OpVariable %_ptr_Private__arr_float_uint_10 Private %35
-         %38 = OpConstantNull %int
-         %v9 = OpVariable %_ptr_Private_int Private %38
-         %40 = OpConstantNull %uint
-        %v10 = OpVariable %_ptr_Private_uint Private %40
-         %42 = OpConstantNull %float
-        %v11 = OpVariable %_ptr_Private_float Private %42
-         %44 = OpConstantNull %MyStruct
-        %v12 = OpVariable %_ptr_Private_MyStruct Private %44
-        %v13 = OpVariable %_ptr_Private_MyStruct Private %44
-        %v14 = OpVariable %_ptr_Private__arr_float_uint_10 Private %35
+         %37 = OpConstantNull %_arr_float_uint_10
+         %v8 = OpVariable %_ptr_Private__arr_float_uint_10 Private %37
+      %int_0 = OpConstant %int 0
+         %v9 = OpVariable %_ptr_Private_int Private %int_0
+     %uint_0 = OpConstant %uint 0
+        %v10 = OpVariable %_ptr_Private_uint Private %uint_0
+    %float_0 = OpConstant %float 0
+        %v11 = OpVariable %_ptr_Private_float Private %float_0
+         %45 = OpConstantNull %MyStruct
+        %v12 = OpVariable %_ptr_Private_MyStruct Private %45
+        %v13 = OpVariable %_ptr_Private_MyStruct Private %45
+        %v14 = OpVariable %_ptr_Private__arr_float_uint_10 Private %37
       %int_2 = OpConstant %int 2
       %int_3 = OpConstant %int 3
-         %50 = OpConstantComposite %v3int %int_1 %int_2 %int_3
-        %v15 = OpVariable %_ptr_Private_v3int Private %50
+         %49 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+        %v15 = OpVariable %_ptr_Private_v3int Private %49
         %v16 = OpVariable %_ptr_Private_v3float Private %26
        %void = OpTypeVoid
-         %53 = OpTypeFunction %void
-          %f = OpFunction %void None %53
+         %55 = OpTypeFunction %void
+          %f = OpFunction %void None %55
          %56 = OpLabel
-         %57 = OpLoad %int %v1
-         %58 = OpLoad %uint %v2
-         %59 = OpLoad %float %v3
-         %60 = OpLoad %v3int %v4
-         %61 = OpLoad %v3uint %v5
-         %62 = OpLoad %v3float %v6
-         %63 = OpLoad %MyStruct %v7
-         %64 = OpLoad %_arr_float_uint_10 %v8
-         %65 = OpLoad %int %v9
-         %66 = OpLoad %uint %v10
-         %67 = OpLoad %float %v11
-         %68 = OpLoad %MyStruct %v12
-         %69 = OpLoad %MyStruct %v13
-         %70 = OpLoad %_arr_float_uint_10 %v14
-         %71 = OpLoad %v3int %v15
-         %72 = OpLoad %v3float %v16
+         %l1 = OpLoad %int %v1 None
+         %l2 = OpLoad %uint %v2 None
+         %l3 = OpLoad %float %v3 None
+         %l4 = OpLoad %v3int %v4 None
+         %l5 = OpLoad %v3uint %v5 None
+         %l6 = OpLoad %v3float %v6 None
+         %l7 = OpLoad %MyStruct %v7 None
+         %l8 = OpLoad %_arr_float_uint_10 %v8 None
+         %l9 = OpLoad %int %v9 None
+        %l10 = OpLoad %uint %v10 None
+        %l11 = OpLoad %float %v11 None
+        %l12 = OpLoad %MyStruct %v12 None
+        %l13 = OpLoad %MyStruct %v13 None
+        %l14 = OpLoad %_arr_float_uint_10 %v14 None
+        %l15 = OpLoad %v3int %v15 None
+        %l16 = OpLoad %v3float %v16 None
                OpReturn
                OpFunctionEnd

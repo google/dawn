@@ -18,4 +18,5 @@
 *.tmpl      eol=lf
 *.tmpl.inc  eol=lf
 *.inl       eol=lf
+*.txt       eol=lf
 *.bat       eol=crlf

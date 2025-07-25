@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
 #define SRC_DAWN_TESTS_WHITE_BOX_VULKANIMAGEWRAPPINGTESTS_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <vector>
 
@@ -37,7 +39,6 @@
 
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/VulkanBackend.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::native::vulkan {
 

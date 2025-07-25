@@ -41,8 +41,6 @@ bool IsTypeless(DXGI_FORMAT format);
 
 bool IsDepthStencil(DXGI_FORMAT format);
 
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
-
 DXGI_FORMAT DXGITypelessTextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
 DXGI_FORMAT DXGITextureFormat(const DeviceBase* device, wgpu::TextureFormat format);
 

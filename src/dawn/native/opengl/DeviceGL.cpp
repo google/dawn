@@ -48,10 +48,16 @@
 #include "dawn/native/opengl/RenderPipelineGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
+#include "dawn/native/opengl/SharedFenceEGL.h"
+#include "dawn/native/opengl/SharedTextureMemoryEGL.h"
 #include "dawn/native/opengl/SwapChainEGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/native/opengl/opengl_platform.h"
+
+#if DAWN_PLATFORM_IS(ANDROID)
+#include "dawn/native/AHBFunctions.h"
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
 namespace {
 
@@ -152,9 +158,11 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // Directly set the context current and use mGL instead of calling GetGL as GetGL will notify
     // the (yet inexistent) queue that GL was used.
     mContext->MakeCurrent();
+    mContext->RequestRequiredExtensionsExplicitly();
+
     const OpenGLFunctions& gl = mGL;
 
-    mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat(gl));
+    mFormatTable = BuildGLFormatTable(gl);
 
     // Use the debug output functionality to get notified about GL errors
     // TODO(crbug.com/dawn/1475): add support for the KHR_debug and ARB_debug_output
@@ -162,46 +170,73 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     bool hasDebugOutput = gl.IsAtLeastGL(4, 3) || gl.IsAtLeastGLES(3, 2);
 
     if (GetAdapter()->GetInstance()->IsBackendValidationEnabled() && hasDebugOutput) {
-        gl.Enable(GL_DEBUG_OUTPUT);
-        gl.Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        DAWN_GL_TRY(gl, Enable(GL_DEBUG_OUTPUT));
+        DAWN_GL_TRY(gl, Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS));
 
         // Any GL error; dangerous undefined behavior; any shader compiler and linker errors
-        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr,
-                               GL_TRUE);
+        DAWN_GL_TRY(gl, DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0,
+                                            nullptr, GL_TRUE));
 
         // Severe performance warnings; GLSL or other shader compiler and linker warnings;
         // use of currently deprecated behavior
-        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr,
-                               GL_TRUE);
+        DAWN_GL_TRY(gl, DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0,
+                                            nullptr, GL_TRUE));
 
         // Performance warnings from redundant state changes; trivial undefined behavior
         // This is disabled because we do an incredible amount of redundant state changes.
-        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr,
-                               GL_FALSE);
+        DAWN_GL_TRY(gl, DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0,
+                                            nullptr, GL_FALSE));
 
         // Any message which is not an error or performance concern
-        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0,
-                               nullptr, GL_FALSE);
-        gl.DebugMessageCallback(&OnGLDebugMessage, nullptr);
+        DAWN_GL_TRY(gl, DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE,
+                                            GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE));
+        DAWN_GL_TRY(gl, DebugMessageCallback(&OnGLDebugMessage, nullptr));
     }
 
     // Set initial state.
-    gl.Enable(GL_DEPTH_TEST);
-    gl.Enable(GL_SCISSOR_TEST);
+    DAWN_GL_TRY(gl, Enable(GL_DEPTH_TEST));
+    DAWN_GL_TRY(gl, Enable(GL_SCISSOR_TEST));
     if (gl.GetVersion().IsDesktop()) {
         // These are not necessary on GLES. The functionality is enabled by default, and
         // works by specifying sample counts and SRGB textures, respectively.
-        gl.Enable(GL_MULTISAMPLE);
-        gl.Enable(GL_FRAMEBUFFER_SRGB);
+        DAWN_GL_TRY(gl, Enable(GL_MULTISAMPLE));
+        DAWN_GL_TRY(gl, Enable(GL_FRAMEBUFFER_SRGB));
     }
-    gl.Enable(GL_SAMPLE_MASK);
+    DAWN_GL_TRY(gl, Enable(GL_SAMPLE_MASK));
 
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
     if (HasAnisotropicFiltering(gl)) {
-        gl.GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy);
+        DAWN_GL_TRY(gl, GetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &mMaxTextureMaxAnisotropy));
     }
-    return DeviceBase::Initialize(std::move(queue));
+
+    DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
+
+    // Create internal buffers needed for workarounds.
+    if (mTextureBuiltinsBuffer.Get() == nullptr) {
+        BufferDescriptor desc = {};
+        // The uniform buffer will contain an array of vec4u so make sure that it contains the last
+        // possible vec4u entirely by rounding the size to 4 u32s. Check that the constant is indeed
+        // a multiple of 4.
+        static_assert(kGLMaxTextureImageUnitsReported % 4 == 0);
+        desc.size = kGLMaxTextureImageUnitsReported * sizeof(uint32_t);
+        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        Ref<BufferBase> buffer;
+        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
+        mTextureBuiltinsBuffer = ToBackend(std::move(buffer));
+    }
+
+    if (IsToggleEnabled(Toggle::GLUseArrayLengthFromUniform) &&
+        mArrayLengthBuffer.Get() == nullptr) {
+        BufferDescriptor desc = {};
+        desc.size = kGLMaxShaderStorageBufferBindingsReported * sizeof(uint32_t);
+        desc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
+        Ref<BufferBase> buffer;
+        DAWN_TRY_ASSIGN(buffer, Buffer::CreateInternalBuffer(this, &desc, false));
+        mArrayLengthBuffer = ToBackend(std::move(buffer));
+    }
+
+    return {};
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
@@ -211,16 +246,6 @@ const GLFormat& Device::GetGLFormat(const Format& format) {
     const GLFormat& result = mFormatTable[format.GetIndex()];
     DAWN_ASSERT(result.isSupportedOnBackend);
     return result;
-}
-
-GLenum Device::GetBGRAInternalFormat(const OpenGLFunctions& gl) const {
-    if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
-        gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
-        return GL_BGRA8_EXT;
-    } else {
-        // Desktop GL will swizzle to/from RGBA8 for BGRA formats.
-        return GL_RGBA8;
-    }
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -233,7 +258,7 @@ ResultOrError<Ref<BindGroupLayoutInternalBase>> Device::CreateBindGroupLayoutImp
 }
 ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(
     const UnpackedPtr<BufferDescriptor>& descriptor) {
-    return AcquireRef(new Buffer(this, descriptor));
+    return Buffer::Create(this, descriptor);
 }
 ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
     CommandEncoder* encoder,
@@ -249,22 +274,20 @@ ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
     return AcquireRef(new PipelineLayout(this, descriptor));
 }
 ResultOrError<Ref<QuerySetBase>> Device::CreateQuerySetImpl(const QuerySetDescriptor* descriptor) {
-    return AcquireRef(new QuerySet(this, descriptor));
+    return QuerySet::Create(this, descriptor);
 }
 Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
     return RenderPipeline::CreateUninitialized(this, descriptor);
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
-    return AcquireRef(new Sampler(this, descriptor));
+    return Sampler::Create(this, descriptor);
 }
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
-                                compilationMessages);
+    ShaderModuleParseResult* parseResult) {
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
                                                               SwapChainBase* previousSwapChain,
@@ -278,7 +301,54 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& descriptor) {
-    return AcquireRef(new TextureView(texture, descriptor));
+    return TextureView::Create(texture, descriptor);
+}
+
+ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+    const SharedTextureMemoryDescriptor* descriptor) {
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(
+        type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryAHardwareBufferDescriptor>>()));
+
+    switch (type) {
+        case wgpu::SType::SharedTextureMemoryAHardwareBufferDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
+                            "%s is not enabled.",
+                            wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
+            return SharedTextureMemoryEGL::Create(
+                this, descriptor->label,
+                unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
+ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+    const SharedFenceDescriptor* descriptor) {
+    UnpackedPtr<SharedFenceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>,
+                                                     Branch<SharedFenceEGLSyncDescriptor>>()));
+
+    switch (type) {
+        case wgpu::SType::SharedFenceSyncFDDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceSyncFD);
+            return SharedFenceEGL::Create(this, descriptor->label,
+                                          unpacked.Get<SharedFenceSyncFDDescriptor>());
+        case wgpu::SType::SharedFenceEGLSyncDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceEGLSync), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceEGLSync);
+            return SharedFenceEGL::Create(this, descriptor->label,
+                                          unpacked.Get<SharedFenceEGLSyncDescriptor>());
+        default:
+            DAWN_UNREACHABLE();
+    }
 }
 
 MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
@@ -295,56 +365,58 @@ MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescript
     DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
                     descriptor->sampleCount);
 
-    DAWN_INVALID_IF(descriptor->usage & wgpu::TextureUsage::StorageBinding,
-                    "Texture usage (%s) cannot have %s.", descriptor->usage,
-                    wgpu::TextureUsage::StorageBinding);
-
     return {};
 }
 
 Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                        ::EGLImage image) {
+    Ref<TextureBase> result;
+    if (ConsumedError(CreateTextureWrappingEGLImageImpl(descriptor, image), &result,
+                      "calling %s.CreateTextureWrappingEGLImage(%s).", this, descriptor)) {
+        return nullptr;
+    }
+    return result;
+}
+
+ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
+    const ExternalImageDescriptor* descriptor,
+    ::EGLImage image) {
     const OpenGLFunctions& gl = GetGL();
 
+    TextureDescriptor reifiedDescriptor =
+        FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
     UnpackedPtr<TextureDescriptor> textureDescriptor;
-    if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
-                      &textureDescriptor)) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateTextureCanBeWrapped(textureDescriptor))) {
-        return nullptr;
-    }
+    DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(&reifiedDescriptor));
+    DAWN_TRY(ValidateTextureDescriptor(this, textureDescriptor));
+    DAWN_TRY(ValidateTextureCanBeWrapped(textureDescriptor));
     // The EGLImage was created from outside of Dawn so it must be on the same display that was
     // provided to create the device. The best check we can do is that we indeed have
     // EGL_KHR_image_base.
     DAWN_ASSERT(GetEGL(false).HasExt(EGLExt::ImageBase));
 
     GLuint tex;
-    gl.GenTextures(1, &tex);
-    gl.BindTexture(GL_TEXTURE_2D, tex);
-    gl.EGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
-    gl.TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    DAWN_GL_TRY(gl, GenTextures(1, &tex));
+    DAWN_GL_TRY(gl, BindTexture(GL_TEXTURE_2D, tex));
+    DAWN_GL_TRY(gl, EGLImageTargetTexture2DOES(GL_TEXTURE_2D, image));
+    DAWN_GL_TRY(gl, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0));
 
     GLint width, height;
-    gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-    gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    DAWN_GL_TRY(gl, GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width));
+    DAWN_GL_TRY(gl, GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height));
 
     if (textureDescriptor->size.width != static_cast<uint32_t>(width) ||
         textureDescriptor->size.height != static_cast<uint32_t>(height) ||
         textureDescriptor->size.depthOrArrayLayers != 1) {
-        gl.DeleteTextures(1, &tex);
-        HandleError(DAWN_VALIDATION_ERROR(
+        DAWN_GL_TRY(gl, DeleteTextures(1, &tex));
+
+        return DAWN_VALIDATION_ERROR(
             "EGLImage size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
-            width, height, &textureDescriptor->size));
-        return nullptr;
+            width, height, &textureDescriptor->size);
     }
 
     // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
     // in the passed-in TextureDescriptor.
-    auto result = AcquireRef(new Texture(this, textureDescriptor, tex));
+    auto result = AcquireRef(new Texture(this, textureDescriptor, tex, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;
@@ -352,67 +424,75 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
 
 Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
                                                         GLuint texture) {
+    Ref<TextureBase> result;
+    if (ConsumedError(CreateTextureWrappingGLTextureImpl(descriptor, texture), &result,
+                      "calling %s.CreateTextureWrappingGLTexture(%s).", this, descriptor)) {
+        return nullptr;
+    }
+    return result;
+}
+
+ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
+    const ExternalImageDescriptor* descriptor,
+    GLuint texture) {
     const OpenGLFunctions& gl = GetGL();
 
+    TextureDescriptor reifiedDescriptor =
+        FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
     UnpackedPtr<TextureDescriptor> textureDescriptor;
-    if (ConsumedError(ValidateAndUnpack(FromAPI(descriptor->cTextureDescriptor)),
-                      &textureDescriptor)) {
-        return nullptr;
-    }
-    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
-        return nullptr;
-    }
+    DAWN_TRY_ASSIGN(textureDescriptor, ValidateAndUnpack(&reifiedDescriptor));
+    DAWN_TRY(ValidateTextureDescriptor(this, textureDescriptor));
     if (!HasFeature(Feature::ANGLETextureSharing)) {
-        HandleError(DAWN_VALIDATION_ERROR("Device does not support ANGLE GL texture sharing."));
-        return nullptr;
+        return DAWN_VALIDATION_ERROR("Device does not support ANGLE GL texture sharing.");
     }
-    if (ConsumedError(ValidateTextureCanBeWrapped(textureDescriptor))) {
-        return nullptr;
-    }
+    DAWN_TRY(ValidateTextureCanBeWrapped(textureDescriptor));
 
-    gl.BindTexture(GL_TEXTURE_2D, texture);
+    DAWN_GL_TRY(gl, BindTexture(GL_TEXTURE_2D, texture));
 
     GLint width, height;
-    gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-    gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    DAWN_GL_TRY(gl, GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width));
+    DAWN_GL_TRY(gl, GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height));
 
     if (textureDescriptor->size.width != static_cast<uint32_t>(width) ||
         textureDescriptor->size.height != static_cast<uint32_t>(height) ||
         textureDescriptor->size.depthOrArrayLayers != 1) {
-        HandleError(DAWN_VALIDATION_ERROR(
+        return DAWN_VALIDATION_ERROR(
             "GL texture size (width: %u, height: %u, depth: 1) doesn't match descriptor size %s.",
-            width, height, &textureDescriptor->size));
-        return nullptr;
+            width, height, &textureDescriptor->size);
     }
 
-    auto result = AcquireRef(new Texture(this, textureDescriptor, texture));
+    auto result = AcquireRef(new Texture(this, textureDescriptor, texture, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;
 }
 
 MaybeError Device::TickImpl() {
-    ToBackend(GetQueue())->SubmitFenceSync();
+    DAWN_TRY(ToBackend(GetQueue())->SubmitFenceSync());
     return {};
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer.");
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
+    // If implemented, be sure to call SynchronizeTextureBeforeUse on the destination texture.
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer to texture.");
 }
 
 void Device::DestroyImpl() {
     DAWN_ASSERT(GetState() == State::Disconnected);
+
+    mTextureBuiltinsBuffer = nullptr;
+    mArrayLengthBuffer = nullptr;
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -433,6 +513,17 @@ bool Device::MayRequireDuplicationOfIndirectParameters() const {
 
 bool Device::ShouldApplyIndexBufferOffsetToFirstIndex() const {
     return true;
+}
+
+const AHBFunctions* Device::GetOrLoadAHBFunctions() {
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (mAHBFunctions == nullptr) {
+        mAHBFunctions = std::make_unique<AHBFunctions>();
+    }
+    return mAHBFunctions.get();
+#else
+    DAWN_UNREACHABLE();
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
 const OpenGLFunctions& Device::GetGL() const {
@@ -459,6 +550,14 @@ EGLDisplay Device::GetEGLDisplay() const {
 
 ContextEGL* Device::GetContext() const {
     return mContext.get();
+}
+
+const Buffer* Device::GetInternalTextureBuiltinsUniformBuffer() const {
+    return mTextureBuiltinsBuffer.Get();
+}
+
+const Buffer* Device::GetInternalArrayLengthUniformBuffer() const {
+    return mArrayLengthBuffer.Get();
 }
 
 }  // namespace dawn::native::opengl

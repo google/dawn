@@ -71,7 +71,9 @@ using VkFn = typename VkFnImpl<F>::type;
 struct VulkanFunctions {
     MaybeError LoadGlobalProcs(const DynamicLib& vulkanLib);
     MaybeError LoadInstanceProcs(VkInstance instance, const VulkanGlobalInfo& globalInfo);
-    MaybeError LoadDeviceProcs(VkDevice device, const VulkanDeviceInfo& deviceInfo);
+    MaybeError LoadDeviceProcs(VkInstance instance,
+                               VkDevice device,
+                               const VulkanDeviceInfo& deviceInfo);
 
     // ---------- Global procs
 
@@ -201,6 +203,12 @@ struct VulkanFunctions {
     VkFn<PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR>
         GetPhysicalDeviceXcbPresentationSupportKHR = nullptr;
 #endif  // defined(DAWN_USE_X11)
+
+    // ---------- Instance procs for device extensions
+
+    // VK_KHR_cooperative_matrix
+    VkFn<PFN_vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR>
+        GetPhysicalDeviceCooperativeMatrixPropertiesKHR = nullptr;
 
     // ---------- Device procs
 
@@ -349,6 +357,10 @@ struct VulkanFunctions {
     VkFn<PFN_vkGetSwapchainImagesKHR> GetSwapchainImagesKHR = nullptr;
     VkFn<PFN_vkAcquireNextImageKHR> AcquireNextImageKHR = nullptr;
     VkFn<PFN_vkQueuePresentKHR> QueuePresentKHR = nullptr;
+
+    // VK_KHR_draw_indirect_count
+    VkFn<PFN_vkCmdDrawIndirectCount> CmdDrawIndirectCountKHR = nullptr;
+    VkFn<PFN_vkCmdDrawIndexedIndirectCount> CmdDrawIndexedIndirectCountKHR = nullptr;
 
 #if VK_USE_PLATFORM_FUCHSIA
     // VK_FUCHSIA_external_memory

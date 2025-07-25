@@ -6,9 +6,9 @@ that you always get the right dependencies and compilers.
 ## Prerequisites
 
 - A compatible platform (e.g. Windows, macOS, Linux, etc.). Most platforms are fully supported.
-- A compatible C++ compiler supporting at least C++17. Most major compilers are supported.
+- A compatible C++ compiler supporting at least C++20. Most major compilers are supported.
 - Git for interacting with the Dawn source code repository.
-- CMake for building your project and Dawn. Dawn supports CMake 3.13+.
+- CMake for building your project and Dawn. Dawn supports CMake 3.16+.
 
 ## Getting the Dawn Code
 
@@ -62,13 +62,15 @@ $ cd TestDawn
 Now, create a `hello_webgpu.cpp` C++ file within the `TestDawn` directory.
 
 ```cpp
+#include <webgpu/webgpu_cpp.h>
+#include <webgpu/webgpu_cpp_print.h>
+
 #include <cstdlib>
 #include <iostream>
-#include <webgpu/webgpu_cpp.h>
 
 int main(int argc, char *argv[]) {
   wgpu::InstanceDescriptor instanceDescriptor{};
-  instanceDescriptor.features.timedWaitAnyEnable = true;
+  instanceDescriptor.capabilities.timedWaitAnyEnable = true;
   wgpu::Instance instance = wgpu::CreateInstance(&instanceDescriptor);
   if (instance == nullptr) {
     std::cerr << "Instance creation failed!\n";
@@ -77,20 +79,19 @@ int main(int argc, char *argv[]) {
   // Synchronously request the adapter.
   wgpu::RequestAdapterOptions options = {};
   wgpu::Adapter adapter;
-  wgpu::RequestAdapterCallbackInfo callbackInfo = {};
-  callbackInfo.nextInChain = nullptr;
-  callbackInfo.mode = wgpu::CallbackMode::WaitAnyOnly;
-  callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, const char *message,
-                             void *userdata) {
-    if (status != WGPURequestAdapterStatus_Success) {
+
+  auto callback = [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, const char *message, void *userdata) {
+    if (status != wgpu::RequestAdapterStatus::Success) {
       std::cerr << "Failed to get an adapter:" << message;
       return;
     }
-    *static_cast<wgpu::Adapter *>(userdata) = wgpu::Adapter::Acquire(adapter);
+    *static_cast<wgpu::Adapter *>(userdata) = adapter;
   };
-  callbackInfo.userdata = &adapter;
-  instance.WaitAny(instance.RequestAdapter(&options, callbackInfo), UINT64_MAX);
+
+
+  auto callbackMode = wgpu::CallbackMode::WaitAnyOnly;
+  void *userdata = &adapter;
+  instance.WaitAny(instance.RequestAdapter(&options, callbackMode, callback, userdata), UINT64_MAX);
   if (adapter == nullptr) {
     std::cerr << "RequestAdapter failed!\n";
     return EXIT_FAILURE;

@@ -1,44 +1,43 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-struct mat2x4_f16 {
+
+struct mat2x4_f16_std140 {
   f16vec4 col0;
   f16vec4 col1;
 };
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  mat2x4_f16 inner[4];
-} u;
-
-layout(binding = 1, std430) buffer s_block_ssbo {
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  mat2x4_f16_std140 inner[4];
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   float16_t inner;
-} s;
-
-f16mat2x4 p[4] = f16mat2x4[4](f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf));
-f16mat2x4 conv_mat2x4_f16(mat2x4_f16 val) {
-  return f16mat2x4(val.col0, val.col1);
-}
-
-f16mat2x4[4] conv_arr4_mat2x4_f16(mat2x4_f16 val[4]) {
-  f16mat2x4 arr[4] = f16mat2x4[4](f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat2x4(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf));
-  {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_mat2x4_f16(val[i]);
-    }
-  }
-  return arr;
-}
-
-void f() {
-  p = conv_arr4_mat2x4_f16(u.inner);
-  p[1] = conv_mat2x4_f16(u.inner[2u]);
-  p[1][0] = u.inner[0u].col1.ywxz;
-  p[1][0].x = u.inner[0u].col1[0u];
-  s.inner = p[1][0].x;
-}
-
+} v_1;
+f16mat2x4 p[4] = f16mat2x4[4](f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  mat2x4_f16_std140 v_2[4] = v.inner;
+  f16mat2x4 v_3[4] = f16mat2x4[4](f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)), f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf)));
+  {
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
+        break;
+      }
+      v_3[v_5] = f16mat2x4(v_2[v_5].col0, v_2[v_5].col1);
+      {
+        v_4 = (v_5 + 1u);
+      }
+      continue;
+    }
+  }
+  p = v_3;
+  p[1u] = f16mat2x4(v.inner[2u].col0, v.inner[2u].col1);
+  p[1u][0u] = v.inner[0u].col1.ywxz;
+  p[1u][0u].x = v.inner[0u].col1.x;
+  v_1.inner = p[1u][0u].x;
 }

@@ -231,7 +231,7 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     bool done = false;
     buffer.MapAsync(wgpu::MapMode::Read, 0, sizeof(uint32_t),
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                    [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                         done = true;
                     });
@@ -276,7 +276,7 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferWrite) {
     bool done = false;
     buffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(uint32_t),
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                    [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                         done = true;
                     });
@@ -346,10 +346,6 @@ TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
 // Checks that when a descriptor heap is bound, it is locked resident. Also checks that when a
 // previous descriptor heap becomes unbound, it is unlocked, placed in the LRU and can be evicted.
 TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
-    // TODO(crbug.com/dawn/739):
-    // unknown file: error: SEH exception with code 0x87d thrown in the test body.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
-
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a

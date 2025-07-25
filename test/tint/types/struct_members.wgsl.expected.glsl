@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S_inner {
   float a;
 };
@@ -17,12 +18,7 @@ struct S {
   S_inner member_struct;
 };
 
-void tint_symbol() {
-  S s = S(false, 0, 0u, 0.0f, ivec2(0), uvec3(0u), vec4(0.0f), mat2x3(vec3(0.0f), vec3(0.0f)), float[4](0.0f, 0.0f, 0.0f, 0.0f), S_inner(0.0f));
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
-  return;
+  S s = S(false, 0, 0u, 0.0f, ivec2(0), uvec3(0u), vec4(0.0f), mat2x3(vec3(0.0f), vec3(0.0f)), float[4](0.0f, 0.0f, 0.0f, 0.0f), S_inner(0.0f));
 }

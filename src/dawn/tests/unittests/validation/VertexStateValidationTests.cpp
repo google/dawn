@@ -203,9 +203,9 @@ TEST_F(VertexStateTest, SetVertexBuffersNumLimit) {
 
 // Check out of bounds condition on total number of vertex attributes
 TEST_F(VertexStateTest, SetVertexAttributesNumLimit) {
-    wgpu::SupportedLimits limits;
+    wgpu::Limits limits;
     device.GetLimits(&limits);
-    uint32_t maxVertexAttributes = limits.limits.maxVertexAttributes;
+    uint32_t maxVertexAttributes = limits.maxVertexAttributes;
 
     // Control case, setting max vertex attribute number
     utils::ComboVertexState state;
@@ -293,9 +293,9 @@ TEST_F(VertexStateTest, SetSameShaderLocation) {
 
 // Check out of bounds condition on attribute shader location
 TEST_F(VertexStateTest, SetAttributeLocationOutOfBounds) {
-    wgpu::SupportedLimits limits;
+    wgpu::Limits limits;
     device.GetLimits(&limits);
-    uint32_t maxVertexAttributes = limits.limits.maxVertexAttributes;
+    uint32_t maxVertexAttributes = limits.maxVertexAttributes;
 
     // Control case, setting last attribute shader location
     utils::ComboVertexState state;
@@ -414,6 +414,11 @@ TEST_F(VertexStateTest, BaseTypeMatching) {
     DoTest(wgpu::VertexFormat::Unorm10_10_10_2, "i32", false);
     DoTest(wgpu::VertexFormat::Unorm10_10_10_2, "u32", false);
 
+    // Test that unorm8x4-unorm format is compatible only with f32.
+    DoTest(wgpu::VertexFormat::Unorm8x4BGRA, "f32", true);
+    DoTest(wgpu::VertexFormat::Unorm8x4BGRA, "i32", false);
+    DoTest(wgpu::VertexFormat::Unorm8x4BGRA, "u32", false);
+
     // Test that an snorm format is compatible only with f32.
     DoTest(wgpu::VertexFormat::Snorm16x4, "f32", true);
     DoTest(wgpu::VertexFormat::Snorm16x4, "i32", false);
@@ -462,21 +467,6 @@ TEST_F(VertexStateTest, BaseTypeMatchingForInexistentInput) {
     DoTest(wgpu::VertexFormat::Snorm16x4);
     DoTest(wgpu::VertexFormat::Uint8x4);
     DoTest(wgpu::VertexFormat::Sint32x2);
-}
-
-// Test that non-zero attributeCount with VertexBufferNotUsed stepMode is invalid
-TEST_F(VertexStateTest, UnusedBufferZeroAttribute) {
-    // Non-zero attributeCount with non-VertexBufferNotUsed is valid
-    utils::ComboVertexState state;
-    state.vertexBufferCount = 1;
-    state.cVertexBuffers[0].arrayStride = 0;
-    state.cVertexBuffers[0].attributeCount = 1;
-    state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
-    CreatePipeline(true, state, kPlaceholderVertexShader);
-
-    // Non-zero attributeCount with VertexBufferNotUsed is invalid
-    state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::VertexBufferNotUsed;
-    CreatePipeline(false, state, kPlaceholderVertexShader);
 }
 
 }  // anonymous namespace

@@ -45,4 +45,9 @@ InternalPipelineStore::InternalPipelineStore(DeviceBase* device)
 
 InternalPipelineStore::~InternalPipelineStore() = default;
 
+void InternalPipelineStore::ResetScratchBuffers() {
+    scratchStorage.Reset();
+    scratchIndirectStorage.Reset();
+}
+
 }  // namespace dawn::native

@@ -33,18 +33,14 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void ConversionPolyfillFuzzer(Module& module, ConversionPolyfillConfig config) {
-    if (auto res = ConversionPolyfill(module, config); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of ConversionPolyfill failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> ConversionPolyfillFuzzer(Module& ir,
+                                             const fuzz::ir::Context&,
+                                             const ConversionPolyfillConfig& config) {
+    return ConversionPolyfill(ir, config);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ConversionPolyfillFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ConversionPolyfillFuzzer,
+                      tint::core::ir::transform::kConversionPolyfillCapabilities);

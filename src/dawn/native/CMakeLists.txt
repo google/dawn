@@ -50,11 +50,13 @@ set(private_headers
     "BindGroupTracker.h"
     "BindingInfo.h"
     "BlitBufferToDepthStencil.h"
+    "BlitBufferToTexture.h"
     "BlitColorToColorWithDraw.h"
     "BlitDepthToDepth.h"
     "BlitTextureToBuffer.h"
     "Blob.h"
     "BlobCache.h"
+    "BlockInfo.h"
     "BuddyAllocator.h"
     "BuddyMemoryAllocator.h"
     "Buffer.h"
@@ -77,6 +79,7 @@ set(private_headers
     "CreatePipelineAsyncEvent.h"
     "dawn_platform.h"
     "Device.h"
+    "DeviceGuard.h"
     "DynamicUploader.h"
     "EncodingContext.h"
     "EnumClassBitmasks.h"
@@ -92,12 +95,15 @@ set(private_headers
     "Features.h"
     "Format.h"
     "Forward.h"
+    "ImmediateConstantsLayout.h"
+    "ImmediateConstantsTracker.h"
     "IndirectDrawMetadata.h"
     "IndirectDrawValidationEncoder.h"
     "Instance.h"
     "IntegerTypes.h"
     "InternalPipelineStore.h"
     "Limits.h"
+    "LogEmitter.h"
     "ObjectBase.h"
     "ObjectContentHasher.h"
     "PassResourceUsage.h"
@@ -126,6 +132,7 @@ set(private_headers
     "ScratchBuffer.h"
     "Serializable.h"
     "ShaderModule.h"
+    "ShaderModuleParseRequest.h"
     "SharedBufferMemory.h"
     "SharedFence.h"
     "SharedResourceMemory.h"
@@ -147,8 +154,10 @@ set(private_headers
     "Toggles.h"
     "UsageValidationMode.h"
     "utils/WGPUHelpers.h"
+    "ValidationUtils.h"
     "VisitableMembers.h"
     "WaitAnySystemEvent.h"
+    "WaitListEvent.h"
     "webgpu_absl_format.h"
 )
 
@@ -164,6 +173,7 @@ set(sources
     "BindGroupLayoutInternal.cpp"
     "BindingInfo.cpp"
     "BlitBufferToDepthStencil.cpp"
+    "BlitBufferToTexture.cpp"
     "BlitColorToColorWithDraw.cpp"
     "BlitDepthToDepth.cpp"
     "BlitTextureToBuffer.cpp"
@@ -189,6 +199,7 @@ set(sources
     "CopyTextureForBrowserHelper.cpp"
     "CreatePipelineAsyncEvent.cpp"
     "Device.cpp"
+    "DeviceGuard.cpp"
     "DynamicUploader.cpp"
     "EncodingContext.cpp"
     "Error.cpp"
@@ -200,6 +211,8 @@ set(sources
     "ExternalTexture.cpp"
     "Features.cpp"
     "Format.cpp"
+    "ImmediateConstantsLayout.cpp"
+    "ImmediateConstantsTracker.cpp"
     "IndirectDrawMetadata.cpp"
     "IndirectDrawValidationEncoder.cpp"
     "Instance.cpp"
@@ -207,7 +220,6 @@ set(sources
     "Limits.cpp"
     "ObjectBase.cpp"
     "ObjectContentHasher.cpp"
-    "PassResourceUsage.cpp"
     "PassResourceUsageTracker.cpp"
     "PerStage.cpp"
     "PhysicalDevice.cpp"
@@ -230,6 +242,7 @@ set(sources
     "Sampler.cpp"
     "ScratchBuffer.cpp"
     "ShaderModule.cpp"
+    "ShaderModuleParseRequest.cpp"
     "SharedBufferMemory.cpp"
     "SharedFence.cpp"
     "SharedResourceMemory.cpp"
@@ -246,6 +259,8 @@ set(sources
     "TintUtils.cpp"
     "Toggles.cpp"
     "utils/WGPUHelpers.cpp"
+    "ValidationUtils.cpp"
+    "WaitListEvent.cpp"
     "webgpu_absl_format.cpp"
 )
 
@@ -272,11 +287,20 @@ if (ANDROID)
     )
 endif()
 
-# Only win32 app needs to link with user32.lib
+find_package(Threads REQUIRED)
+list(APPEND conditional_private_platform_depends
+    Threads::Threads
+    ${CMAKE_DL_LIBS}
+)
+
+# Only win32 app needs to link with user32.lib and onecore_apiset.lib
 # In UWP, all availiable APIs are defined in WindowsApp.lib
 # and is automatically linked when WINDOWS_STORE set
 if (WIN32 AND NOT WINDOWS_STORE)
-  list(APPEND conditional_private_platform_depends user32.lib)
+  list(APPEND conditional_private_platform_depends
+       user32.lib
+       onecore_apiset.lib
+  )
 endif()
 
 # DXGIGetDebugInterface1 is defined in dxgi.lib
@@ -310,7 +334,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/SharedFenceD3D.h"
         "d3d/SharedTextureMemoryD3D.h"
         "d3d/SwapChainD3D.h"
-        "d3d/TextureD3D.h"
         "d3d/UtilsD3D.h"
     )
     list(APPEND sources
@@ -326,7 +349,6 @@ if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12)
         "d3d/SharedFenceD3D.cpp"
         "d3d/SharedTextureMemoryD3D.cpp"
         "d3d/SwapChainD3D.cpp"
-        "d3d/TextureD3D.cpp"
         "d3d/UtilsD3D.cpp"
     )
     list(APPEND conditional_private_platform_depends dxguid.lib)
@@ -489,6 +511,8 @@ if (DAWN_ENABLE_METAL)
         "metal/ComputePipelineMTL.h"
         "metal/DeviceMTL.h"
         "metal/Forward.h"
+        "metal/MultiDrawEncoder.h"
+        "metal/MultiDrawEncoder.mm"
         "metal/PhysicalDeviceMTL.h"
         "metal/PipelineLayoutMTL.h"
         "metal/QuerySetMTL.h"
@@ -526,11 +550,13 @@ if (DAWN_ENABLE_METAL)
         "Surface_metal.mm"
     )
     if (DAWN_TARGET_MACOS)
-        list(APPEND conditional_private_platform_depends "-framework Cocoa")
+        list(APPEND conditional_private_platform_depends
+            "-framework Cocoa"
+            "-framework IOKit"
+        )
     endif()
     list(APPEND conditional_private_platform_depends
         "-framework Foundation"
-        "-framework IOKit"
         "-framework IOSurface"
         "-framework QuartzCore"
         "-framework Metal"
@@ -546,6 +572,30 @@ if (DAWN_ENABLE_NULL)
     )
     list(APPEND sources
         "null/DeviceNull.cpp"
+    )
+endif()
+
+if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
+    list(APPEND headers
+        "${DAWN_INCLUDE_DIR}/dawn/native/WebGPUBackend.h"
+    )
+    list(APPEND private_headers
+        "webgpu/BackendWGPU.h"
+        "webgpu/BufferWGPU.h"
+        "webgpu/CommandBufferWGPU.h"
+        "webgpu/DeviceWGPU.h"
+        "webgpu/Forward.h"
+        "webgpu/PhysicalDeviceWGPU.h"
+        "webgpu/QueueWGPU.h"
+        "webgpu/WebGPUError.h"
+    )
+    list(APPEND sources
+        "webgpu/BackendWGPU.cpp"
+        "webgpu/BufferWGPU.cpp"
+        "webgpu/CommandBufferWGPU.cpp"
+        "webgpu/DeviceWGPU.cpp"
+        "webgpu/PhysicalDeviceWGPU.cpp"
+        "webgpu/QueueWGPU.cpp"
     )
 endif()
 
@@ -581,7 +631,6 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/BackendGL.h"
         "opengl/BindGroupGL.h"
         "opengl/BindGroupLayoutGL.h"
-        "opengl/BindingPoint.h"
         "opengl/BufferGL.h"
         "opengl/CommandBufferGL.h"
         "opengl/ComputePipelineGL.h"
@@ -591,6 +640,7 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/EGLFunctions.h"
         "opengl/Forward.h"
         "opengl/GLFormat.h"
+        "opengl/IntegerTypes.h"
         "opengl/opengl_platform.h"
         "opengl/OpenGLFunctions.h"
         "opengl/OpenGLVersion.h"
@@ -603,6 +653,10 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/RenderPipelineGL.h"
         "opengl/SamplerGL.h"
         "opengl/ShaderModuleGL.h"
+        "opengl/SharedFenceEGL.h"
+        "opengl/SharedFenceGL.h"
+        "opengl/SharedTextureMemoryEGL.h"
+        "opengl/SharedTextureMemoryGL.h"
         "opengl/SwapChainEGL.h"
         "opengl/TextureGL.h"
         "opengl/UtilsEGL.h"
@@ -632,6 +686,10 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/RenderPipelineGL.cpp"
         "opengl/SamplerGL.cpp"
         "opengl/ShaderModuleGL.cpp"
+        "opengl/SharedFenceEGL.cpp"
+        "opengl/SharedFenceGL.cpp"
+        "opengl/SharedTextureMemoryEGL.cpp"
+        "opengl/SharedTextureMemoryGL.cpp"
         "opengl/SwapChainEGL.cpp"
         "opengl/TextureGL.cpp"
         "opengl/UtilsEGL.cpp"
@@ -651,7 +709,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/BindGroupVk.h"
         "vulkan/BufferVk.h"
         "vulkan/CommandBufferVk.h"
-        "vulkan/CommandRecordingContext.h"
+        "vulkan/CommandRecordingContextVk.h"
         "vulkan/ComputePipelineVk.h"
         "vulkan/DescriptorSetAllocation.h"
         "vulkan/DescriptorSetAllocator.h"
@@ -659,7 +717,9 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/ExternalHandle.h"
         "vulkan/FencedDeleter.h"
         "vulkan/Forward.h"
+        "vulkan/FramebufferCache.h"
         "vulkan/PhysicalDeviceVk.h"
+        "vulkan/PipelineVk.h"
         "vulkan/PipelineCacheVk.h"
         "vulkan/PipelineLayoutVk.h"
         "vulkan/QuerySetVk.h"
@@ -676,6 +736,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/SharedTextureMemoryVk.h"
         "vulkan/SwapChainVk.h"
         "vulkan/TextureVk.h"
+        "vulkan/UniqueVkHandle.h"
         "vulkan/UtilsVulkan.h"
         "vulkan/VulkanError.h"
         "vulkan/VulkanExtensions.h"
@@ -694,10 +755,13 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/BufferVk.cpp"
         "vulkan/CommandBufferVk.cpp"
         "vulkan/ComputePipelineVk.cpp"
+        "vulkan/CommandRecordingContextVk.cpp"
         "vulkan/DescriptorSetAllocator.cpp"
         "vulkan/DeviceVk.cpp"
         "vulkan/FencedDeleter.cpp"
+        "vulkan/FramebufferCache.cpp"
         "vulkan/PhysicalDeviceVk.cpp"
+        "vulkan/PipelineVk.cpp"
         "vulkan/PipelineCacheVk.cpp"
         "vulkan/PipelineLayoutVk.cpp"
         "vulkan/QuerySetVk.cpp"
@@ -726,8 +790,8 @@ if (DAWN_ENABLE_VULKAN)
     )
 
     list(APPEND conditional_public_depends
-        Vulkan-Headers
-        VulkanUtilityHeaders
+        Vulkan::Headers
+        Vulkan::UtilityHeaders
     )
 
     if (ANDROID)
@@ -769,6 +833,9 @@ if (DAWN_ENABLE_METAL)
 endif()
 if (DAWN_ENABLE_NULL)
     list(APPEND dawn_component_srcs "null/NullBackend.cpp")
+endif()
+if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
+    list(APPEND dawn_component_srcs "webgpu/WebGPUBackend.cpp")
 endif()
 if (DAWN_ENABLE_OPENGL)
     list(APPEND dawn_component_srcs "opengl/OpenGLBackend.cpp")
@@ -839,16 +906,24 @@ endif()
 if (DAWN_ENABLE_D3D12)
     if (DAWN_USE_BUILT_DXC)
         target_compile_definitions(dawn_native PRIVATE "DAWN_USE_BUILT_DXC")
+        target_compile_definitions(dawn_native_objects PRIVATE "DAWN_USE_BUILT_DXC")
         add_dependencies(dawn_native copy_dxil_dll)
     endif()
 endif()
 
 if ((DAWN_ENABLE_OPENGL OR DAWN_ENABLE_VULKAN) AND DAWN_ENABLE_SPIRV_VALIDATION)
     target_compile_definitions(dawn_native PRIVATE "DAWN_ENABLE_SPIRV_VALIDATION")
+    target_compile_definitions(dawn_native_objects PRIVATE "DAWN_ENABLE_SPIRV_VALIDATION")
 endif()
 
 if (DAWN_ENABLE_SWIFTSHADER)
     target_compile_definitions(dawn_native PRIVATE "DAWN_ENABLE_SWIFTSHADER")
+    target_compile_definitions(dawn_native_objects PRIVATE "DAWN_ENABLE_SWIFTSHADER")
+endif()
+
+if (IOS)
+    target_compile_options(dawn_native_objects PRIVATE -fno-objc-arc)
+    target_compile_options(dawn_native PRIVATE -fno-objc-arc)
 endif()
 
 if (DAWN_BUILD_MONOLITHIC_LIBRARY)
@@ -859,39 +934,59 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
     # Note that this library name is referenced in several places, search for it and things like:
     # "{{.*}}_dawn" when you rename it.
     ###############################################################################
+
+    # First make an object library for webgpu_dawn_native_proc sources for the export macros to
+    # get applied as well as backend-specific dawn_native entrypoints that also use export macros.
+    # This is essentially the same as dawn_native but using OBJECT as a library type and the
+    # DAWN_BUILD_MONOLITHIC_LIBRARY option to choose the export macros.
     DawnJSONGenerator(
         TARGET "webgpu_dawn_native_proc"
         PRINT_NAME "Dawn native WebGPU procs"
         OUTPUT_SOURCES WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES
     )
-    # Bundle all objects of dawn_native, it's public dependencies and private dependencies.
-    include(BundleLibraries)
-    bundle_libraries(webgpu_dawn dawn::dawn_native_objects)
-    add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
-    # Compile backend specific sources along with webgpu_dawn_native_proc sources for export macros to get applied.
-    target_sources(webgpu_dawn
-        PRIVATE
+
+    dawn_add_library(
+      webgpu_dawn_objects
+      UTILITY_TARGET dawn_internal_config
+      FORCE_OBJECT
+      SOURCES
         ${WEBGPU_DAWN_NATIVE_PROC_GEN_SOURCES}
         ${dawn_component_srcs}
+      DEPENDS
+        ${dawn_native_public_depends}
+      PRIVATE_DEPENDS
+        dawn::dawn_native_objects
+        ${dawn_native_private_depends}
+        ${conditional_private_platform_depends}
     )
-    target_compile_definitions(webgpu_dawn
+
+    target_compile_definitions(webgpu_dawn_objects
         PRIVATE
             "WGPU_IMPLEMENTATION"
             "DAWN_NATIVE_IMPLEMENTATION"
-        PUBLIC
-            "WGPU_SHARED_LIBRARY"
-            "DAWN_NATIVE_SHARED_LIBRARY"
     )
-    # Apart from dawn_public_config, everything else goes inside PRIVATE, otherwise install rules will complain that they were not exported.
-    target_link_libraries(webgpu_dawn
-        PUBLIC
-            dawn_public_config
-        PRIVATE
-            dawn_internal_config
-            ${dawn_native_public_depends}
-            ${dawn_native_private_depends}
-            ${conditional_private_platform_depends}
+    if (DAWN_BUILD_MONOLITHIC_LIBRARY STREQUAL SHARED)
+        target_compile_definitions(webgpu_dawn_objects
+            PUBLIC
+                "WGPU_SHARED_LIBRARY"
+                "DAWN_NATIVE_SHARED_LIBRARY"
+        )
+    endif()
+
+    # Do the bundling of all the objects and dependencies together.
+    include(BundleLibraries)
+    bundle_libraries(webgpu_dawn ${DAWN_BUILD_MONOLITHIC_LIBRARY} webgpu_dawn_objects)
+    add_library(dawn::webgpu_dawn ALIAS webgpu_dawn)
+
+    # Since this is a bundled library, the only dependency is the config needed to use it.
+    target_link_libraries(
+      webgpu_dawn
+      PUBLIC
+        dawn_public_config
+      PRIVATE
+        ${conditional_private_platform_depends}
     )
+
     set(webgpu_dawn_public_headers)
     foreach(dawn_target_name IN ITEMS dawn_headers dawncpp_headers dawn_native_objects)
         get_target_property(headers "${dawn_target_name}" INTERFACE_SOURCES)

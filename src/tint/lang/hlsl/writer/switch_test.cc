@@ -34,8 +34,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Switch) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
@@ -49,9 +48,9 @@ TEST_F(HlslWriterTest, Switch) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   switch(a) {
-    case 5:
+    case int(5):
     {
       break;
     }
@@ -66,8 +65,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, SwitchMixedDefault) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
@@ -81,9 +79,9 @@ TEST_F(HlslWriterTest, SwitchMixedDefault) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   switch(a) {
-    case 5:
+    case int(5):
     default:
     {
       break;
@@ -105,8 +103,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     //   }
     // }
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
@@ -123,12 +120,12 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int cond = 0;
-  int a = 0;
+  int cond = int(0);
+  int a = int(0);
   switch(cond) {
     default:
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }
@@ -164,8 +161,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
         b.Return(bar, b.Load(global));
     });
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Call(bar);
@@ -179,10 +175,10 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static int global = 0;
-static int a = 0;
+static int global = int(0);
+static int a = int(0);
 int bar() {
-  global = 84;
+  global = int(84);
   return global;
 }
 
@@ -191,7 +187,7 @@ void foo() {
   switch(bar()) {
     default:
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }
@@ -211,8 +207,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
     //   }
     // }
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
@@ -232,13 +227,11 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int cond = 0;
-  int a = 0;
-  switch(cond) {
-    default:
-    case 0:
-    {
-      a = 42;
+  int cond = int(0);
+  int a = int(0);
+  {
+    while(true) {
+      a = int(42);
       break;
     }
   }
@@ -274,8 +267,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
         b.Return(bar, b.Load(global));
     });
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Call(bar);
@@ -292,20 +284,19 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static int global = 0;
-static int a = 0;
+static int global = int(0);
+static int a = int(0);
 int bar() {
-  global = 84;
+  global = int(84);
   return global;
 }
 
 [numthreads(1, 1, 1)]
 void foo() {
-  switch(bar()) {
-    default:
-    case 0:
-    {
-      a = 42;
+  bar();
+  {
+    while(true) {
+      a = int(42);
       break;
     }
   }

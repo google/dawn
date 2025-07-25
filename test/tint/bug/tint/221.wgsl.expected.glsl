@@ -1,43 +1,52 @@
 #version 310 es
 
+
 struct Buf {
   uint count;
   uint data[50];
 };
 
-layout(binding = 0, std430) buffer b_block_ssbo {
+layout(binding = 0, std430)
+buffer b_block_1_ssbo {
   Buf inner;
-} b;
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
+} v;
+uint tint_mod_u32(uint lhs, uint rhs) {
+  return (lhs - ((lhs / mix(rhs, 1u, (rhs == 0u))) * mix(rhs, 1u, (rhs == 0u))));
 }
-
-void tint_symbol() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   uint i = 0u;
-  while (true) {
-    if ((i >= b.inner.count)) {
-      break;
-    }
-    uint p_save = i;
-    if ((tint_mod(i, 2u) == 0u)) {
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      if ((i >= v.inner.count)) {
+        break;
+      }
+      uint v_1 = min(i, 49u);
+      if ((tint_mod_u32(i, 2u) == 0u)) {
+        {
+          uint tint_low_inc = (tint_loop_idx.x - 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+          v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
+          i = (i + 1u);
+        }
+        continue;
+      }
+      v.inner.data[v_1] = 0u;
       {
-        b.inner.data[p_save] = (b.inner.data[p_save] * 2u);
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        v.inner.data[v_1] = (v.inner.data[v_1] * 2u);
         i = (i + 1u);
       }
       continue;
     }
-    b.inner.data[p_save] = 0u;
-    {
-      b.inner.data[p_save] = (b.inner.data[p_save] * 2u);
-      i = (i + 1u);
-    }
   }
-  return;
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  tint_symbol();
-  return;
 }

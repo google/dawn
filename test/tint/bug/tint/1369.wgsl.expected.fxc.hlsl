@@ -1,15 +1,15 @@
-static bool tint_discarded = false;
 
+static bool continue_execution = true;
 bool call_discard() {
-  tint_discarded = true;
+  continue_execution = false;
   return true;
 }
 
 void f() {
   bool v = call_discard();
   bool also_unreachable = false;
-  if (tint_discarded) {
+  if (!(continue_execution)) {
     discard;
   }
-  return;
 }
+

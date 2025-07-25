@@ -12,3 +12,5 @@ Enables or disables strict math. When strict math is disabled, generally the com
 - Assume no signed 0
 - Use multiplication by reciprocal instead of division
 - Allow algebraic transformations according to associative and distribute properties.
+
+It is implemented only on Metal and D3D.

@@ -107,10 +107,15 @@ enum class DeviceExt {
     ImageFormatList,
     ShaderFloat16Int8,
     ShaderSubgroupExtendedTypes,
+    DrawIndirectCount,
+    VulkanMemoryModel,
+    ShaderFloatControls,
+    Spirv14,
 
     // Promoted to 1.3
     ShaderIntegerDotProduct,
     ZeroInitializeWorkgroupMemory,
+    DemoteToHelperInvocation,
     Maintenance4,
     SubgroupSizeControl,
 
@@ -120,8 +125,8 @@ enum class DeviceExt {
     Swapchain,
     QueueFamilyForeign,
     Robustness2,
-    ShaderSubgroupUniformControlFlow,
     DisplayTiming,
+    CooperativeMatrix,
 
     // External* extensions
     ExternalMemoryAndroidHardwareBuffer,
@@ -158,7 +163,8 @@ void MarkPromotedExtensions(DeviceExtSet* extensions, uint32_t version);
 // extensions that don't have all their transitive dependencies in advertisedExts or in
 // instanceExts.
 DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
-                                const InstanceExtSet& instanceExts);
+                                const InstanceExtSet& instanceExts,
+                                uint32_t version);
 
 // The list of all known Vulkan layers.
 enum class VulkanLayer {

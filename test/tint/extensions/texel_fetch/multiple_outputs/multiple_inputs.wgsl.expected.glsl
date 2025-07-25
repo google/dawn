@@ -1,23 +1,25 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-
-enable chromium_experimental_framebuffer_fetch;
 
 struct Out {
-  @location(0)
-  x : vec4f,
-  @location(2)
-  y : vec4f,
-  @location(4)
-  z : vec4f,
+  vec4 x;
+  vec4 y;
+  vec4 z;
+};
+
+in vec4 f_Input;
+in vec4 f_Input_1;
+layout(location = 0) out vec4 f_loc0_Output;
+layout(location = 2) out vec4 f_loc2_Output;
+layout(location = 4) out vec4 f_loc4_Output;
+Out f_inner(vec4 fbf_1, vec4 fbf_3) {
+  return Out(fbf_1, vec4(20.0f), fbf_3);
 }
-
-@fragment
-fn f(@color(1) fbf_1 : vec4f, @color(3) fbf_3 : vec4f) -> Out {
-  return Out(fbf_1, vec4f(20), fbf_3);
+void main() {
+  Out v = f_inner(f_Input, f_Input_1);
+  f_loc0_Output = v.x;
+  f_loc2_Output = v.y;
+  f_loc4_Output = v.z;
 }
-
-Failed to generate: <dawn>/test/tint/extensions/texel_fetch/multiple_outputs/multiple_inputs.wgsl:1:8 error: GLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
-enable chromium_experimental_framebuffer_fetch;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-

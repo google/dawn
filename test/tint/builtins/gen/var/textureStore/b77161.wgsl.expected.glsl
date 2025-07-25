@@ -1,82 +1,33 @@
-SKIP: FAILED
-
-#version 310 es
-
-layout(rg32ui) uniform highp writeonly uimage2D arg_0;
-void textureStore_b77161() {
-  uint arg_1 = 1u;
-  uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
-}
-
-vec4 vertex_main() {
-  textureStore_b77161();
-  return vec4(0.0f);
-}
-
-void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vertex_main();
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:3: 'image load-store format' : not supported with this profile: es
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+//
+// fragment_main
+//
+#version 460
 precision highp float;
 precision highp int;
 
-layout(rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rg32ui) uniform highp writeonly uimage2D f_arg_0;
 void textureStore_b77161() {
   uint arg_1 = 1u;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
+  uvec4 v = arg_2;
+  imageStore(f_arg_0, ivec2(uvec2(arg_1, 0u)), v);
 }
-
-void fragment_main() {
-  textureStore_b77161();
-}
-
 void main() {
-  fragment_main();
-  return;
+  textureStore_b77161();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:5: 'image load-store format' : not supported with this profile: es
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+//
+// compute_main
+//
+#version 460
 
-
-
-#version 310 es
-
-layout(rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rg32ui) uniform highp writeonly uimage2D arg_0;
 void textureStore_b77161() {
   uint arg_1 = 1u;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), arg_2);
+  uvec4 v = arg_2;
+  imageStore(arg_0, ivec2(uvec2(arg_1, 0u)), v);
 }
-
-void compute_main() {
-  textureStore_b77161();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  textureStore_b77161();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:3: 'image load-store format' : not supported with this profile: es
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

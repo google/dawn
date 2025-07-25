@@ -25,9 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/webgpu.h"
-#include "dawn/webgpu_cpp.h"
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include <webgpu/webgpu.h>
+#include <webgpu/webgpu_cpp.h>
 
 // Test that the C init structs match the C++ default values
 TEST(DefaultTests, CMatchesCpp) {

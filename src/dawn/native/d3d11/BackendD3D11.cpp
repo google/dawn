@@ -86,7 +86,7 @@ Backend::Backend(InstanceBase* instance) : Base(instance, wgpu::BackendType::D3D
 
 MaybeError Backend::Initialize() {
     auto functions = std::make_unique<PlatformFunctions>();
-    DAWN_TRY(functions->LoadFunctions());
+    DAWN_TRY(functions->Initialize());
 
     DAWN_TRY(Base::Initialize(std::move(functions)));
 
@@ -103,9 +103,6 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
-    FeatureLevel featureLevel =
-        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
-
     ComPtr<IDXGIAdapter> dxgiAdapter;
     ComPtr<ID3D11Device> d3d11Device;
     if (GetInstance()->ConsumedError(ValidateRequestOptions(options, &dxgiAdapter, &d3d11Device))) {
@@ -117,7 +114,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 CreatePhysicalDevice(std::move(dxgiAdapter), std::move(d3d11Device)),
                 &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel, GetInstance())) {
             return {};
         }
         return {std::move(physicalDevice)};
@@ -134,12 +131,11 @@ ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreatePhysicalDeviceFromIDXGIAda
 ResultOrError<Ref<PhysicalDeviceBase>> Backend::CreatePhysicalDevice(
     ComPtr<IDXGIAdapter> dxgiAdapter,
     ComPtr<ID3D11Device> d3d11Device) {
-    // IDXGIAdapter4 is supported since Windows 8 and Platform Update for Windows 7.
-    ComPtr<IDXGIAdapter4> dxgiAdapter4;
-    DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter4), "DXGIAdapter retrieval"));
+    ComPtr<IDXGIAdapter3> dxgiAdapter3;
+    DAWN_TRY(CheckHRESULT(dxgiAdapter.As(&dxgiAdapter3), "DXGIAdapter retrieval"));
 
     Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter4), std::move(d3d11Device)));
+        AcquireRef(new PhysicalDevice(this, std::move(dxgiAdapter3), std::move(d3d11Device)));
     DAWN_TRY(physicalDevice->Initialize());
 
     return {std::move(physicalDevice)};

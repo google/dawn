@@ -1,14 +1,14 @@
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[12];
 };
 RWByteAddressBuffer s : register(u1);
-
 float a(float3x4 a_1[4]) {
-  return a_1[0][0].x;
+  return a_1[0u][0u].x;
 }
 
 float b(float3x4 m) {
-  return m[0].x;
+  return m[0u].x;
 }
 
 float c(float4 v) {
@@ -19,30 +19,38 @@ float d(float f_1) {
   return f_1;
 }
 
-float3x4 u_load_1(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  const uint scalar_offset_1 = ((offset + 16u)) / 4;
-  const uint scalar_offset_2 = ((offset + 32u)) / 4;
-  return float3x4(asfloat(u[scalar_offset / 4]), asfloat(u[scalar_offset_1 / 4]), asfloat(u[scalar_offset_2 / 4]));
+float3x4 v_1(uint start_byte_offset) {
+  return float3x4(asfloat(u[(start_byte_offset / 16u)]), asfloat(u[((16u + start_byte_offset) / 16u)]), asfloat(u[((32u + start_byte_offset) / 16u)]));
 }
 
-typedef float3x4 u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  float3x4 arr[4] = (float3x4[4])0;
+typedef float3x4 ary_ret[4];
+ary_ret v_2(uint start_byte_offset) {
+  float3x4 a_2[4] = (float3x4[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = u_load_1((offset + (i * 48u)));
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 4u)) {
+        break;
+      }
+      a_2[v_4] = v_1((start_byte_offset + (v_4 * 48u)));
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float3x4 v_5[4] = a_2;
+  return v_5;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float tint_symbol = a(u_load(0u));
-  float tint_symbol_1 = b(u_load_1(48u));
-  float tint_symbol_2 = c(asfloat(u[3]).ywxz);
-  float tint_symbol_3 = d(asfloat(u[3]).ywxz.x);
-  s.Store(0u, asuint((((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3)));
-  return;
+  float3x4 v_6[4] = v_2(0u);
+  float v_7 = a(v_6);
+  float v_8 = (v_7 + b(v_1(48u)));
+  float v_9 = (v_8 + c(asfloat(u[3u]).ywxz));
+  s.Store(0u, asuint((v_9 + d(asfloat(u[3u]).ywxz.x))));
 }
+

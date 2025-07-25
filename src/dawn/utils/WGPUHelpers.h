@@ -28,25 +28,21 @@
 #ifndef SRC_DAWN_UTILS_WGPUHELPERS_H_
 #define SRC_DAWN_UTILS_WGPUHELPERS_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <array>
 #include <initializer_list>
 #include <string>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/Constants.h"
 #include "dawn/utils/TextureUtils.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn::utils {
 
 enum Expectation { Success, Failure };
 
-#if TINT_BUILD_SPV_READER
-wgpu::ShaderModule CreateShaderModuleFromASM(
-    const wgpu::Device& device,
-    const char* source,
-    wgpu::DawnShaderModuleSPIRVOptionsDescriptor* spirv_options = nullptr);
-#endif
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source);
 wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const std::string& source);
 
@@ -62,18 +58,20 @@ wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,
     return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
 }
 
-wgpu::ImageCopyBuffer CreateImageCopyBuffer(wgpu::Buffer buffer,
-                                            uint64_t offset = 0,
-                                            uint32_t bytesPerRow = wgpu::kCopyStrideUndefined,
-                                            uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
-wgpu::ImageCopyTexture CreateImageCopyTexture(
+wgpu::TexelCopyBufferInfo CreateTexelCopyBufferInfo(
+    wgpu::Buffer buffer,
+    uint64_t offset = 0,
+    uint32_t bytesPerRow = wgpu::kCopyStrideUndefined,
+    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
+wgpu::TexelCopyTextureInfo CreateTexelCopyTextureInfo(
     wgpu::Texture texture,
     uint32_t level = 0,
     wgpu::Origin3D origin = {0, 0, 0},
     wgpu::TextureAspect aspect = wgpu::TextureAspect::All);
-wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,
-                                                uint32_t bytesPerRow,
-                                                uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
+wgpu::TexelCopyBufferLayout CreateTexelCopyBufferLayout(
+    uint64_t offset,
+    uint32_t bytesPerRow,
+    uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
 
 struct ComboRenderPassDescriptor : public wgpu::RenderPassDescriptor {
   public:
@@ -118,7 +116,9 @@ wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
 wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
                                         std::vector<wgpu::BindGroupLayout> bgls);
 
+#ifndef __EMSCRIPTEN__
 extern wgpu::ExternalTextureBindingLayout kExternalTextureBindingLayout;
+#endif  // __EMSCRIPTEN__
 
 // Helpers to make creating bind group layouts look nicer:
 //
@@ -149,9 +149,11 @@ struct BindingLayoutEntryInitializationHelper : wgpu::BindGroupLayoutEntry {
         wgpu::StorageTextureAccess storageTextureAccess,
         wgpu::TextureFormat format,
         wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D);
+#ifndef __EMSCRIPTEN__
     BindingLayoutEntryInitializationHelper(uint32_t entryBinding,
                                            wgpu::ShaderStage entryVisibility,
                                            wgpu::ExternalTextureBindingLayout* bindingLayout);
+#endif  // __EMSCRIPTEN__
 
     // NOLINTNEXTLINE(runtime/explicit)
     BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
@@ -174,7 +176,9 @@ wgpu::BindGroupLayout MakeBindGroupLayout(
 struct BindingInitializationHelper {
     BindingInitializationHelper(uint32_t binding, const wgpu::Sampler& sampler);
     BindingInitializationHelper(uint32_t binding, const wgpu::TextureView& textureView);
+#ifndef __EMSCRIPTEN__
     BindingInitializationHelper(uint32_t binding, const wgpu::ExternalTexture& externalTexture);
+#endif  // __EMSCRIPTEN__
     BindingInitializationHelper(uint32_t binding,
                                 const wgpu::Buffer& buffer,
                                 uint64_t offset = 0,
@@ -188,7 +192,9 @@ struct BindingInitializationHelper {
     wgpu::Sampler sampler;
     wgpu::TextureView textureView;
     wgpu::Buffer buffer;
+#ifndef __EMSCRIPTEN__
     wgpu::ExternalTextureBindingEntry externalTextureBindingEntry;
+#endif  // __EMSCRIPTEN__
     uint64_t offset = 0;
     uint64_t size = 0;
 };
@@ -206,6 +212,16 @@ struct ColorSpaceConversionInfo {
 };
 ColorSpaceConversionInfo GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 ColorSpaceConversionInfo GetNoopRGBColorSpaceConversionInfo();
+
+bool BackendRequiresCompat(wgpu::BackendType backend);
+
+absl::flat_hash_set<wgpu::FeatureName> FeatureAndImplicitlyEnabled(wgpu::FeatureName featureName);
+
+int8_t ConvertFloatToSnorm8(float value);
+
+int16_t ConvertFloatToSnorm16(float value);
+
+uint16_t ConvertFloatToUnorm16(float value);
 
 }  // namespace dawn::utils
 

@@ -44,14 +44,23 @@ class Access final : public Castable<Access, OperandInstruction<3, 1>> {
     /// The base offset in Operands() for the access indices
     static constexpr size_t kIndicesOperandOffset = 1;
 
+    /// The fixed number of results returned by this instruction
+    static constexpr size_t kNumResults = 1;
+
+    /// The minimum number of operands used by this instruction
+    static constexpr size_t kMinNumOperands = 2;
+
     /// Constructor (no results, no operands)
-    Access();
+    /// @param id the instruction id
+    explicit Access(Instruction::Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param object the accessor object
     /// @param indices the indices to access
-    Access(InstructionResult* result, Value* object, VectorRef<Value*> indices);
+    Access(Instruction::Id id, InstructionResult* result, Value* object, VectorRef<Value*> indices);
+
     ~Access() override;
 
     /// @copydoc Instruction::Clone()

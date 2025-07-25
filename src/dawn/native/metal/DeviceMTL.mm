@@ -56,8 +56,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
-#include <type_traits>
-
 namespace dawn::native::metal {
 
 struct KalmanInfo {
@@ -85,11 +83,11 @@ float KalmanFilter(KalmanInfo* info, float measuredValue) {
     return info->filterValue;
 }
 
-void API_AVAILABLE(macos(10.15), ios(14)) UpdateTimestampPeriod(id<MTLDevice> device,
-                                                                KalmanInfo* info,
-                                                                MTLTimestamp* cpuTimestampStart,
-                                                                MTLTimestamp* gpuTimestampStart,
-                                                                float* timestampPeriod) {
+void UpdateTimestampPeriod(id<MTLDevice> device,
+                           KalmanInfo* info,
+                           MTLTimestamp* cpuTimestampStart,
+                           MTLTimestamp* gpuTimestampStart,
+                           float* timestampPeriod) {
     // The filter value is converged to an optimal value when the kalman gain is less than
     // 0.01. At this time, the weight of the measured value is too small to change the next
     // filter value, the sampling and calculations do not need to continue anymore.
@@ -132,6 +130,7 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
         Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor,
                                                    deviceToggles, std::move(lostEvent)));
         DAWN_TRY(device->Initialize(descriptor));
+
         return device;
     }
 }
@@ -143,26 +142,26 @@ Device::Device(AdapterBase* adapter,
                Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
     : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
       mMtlDevice(std::move(mtlDevice)) {
-    // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
-    // only can be sampled between command boundary using sampleCountersInBuffer API if it's
+    // Counter only can be sampled between command boundary using sampleCountersInBuffer API if it's
     // supported.
-    if (@available(macOS 11.0, iOS 14.0, *)) {
-        mCounterSamplingAtCommandBoundary = SupportCounterSamplingAtCommandBoundary(GetMTLDevice());
-        mCounterSamplingAtStageBoundary = SupportCounterSamplingAtStageBoundary(GetMTLDevice());
-    } else {
-        mCounterSamplingAtCommandBoundary = true;
-        mCounterSamplingAtStageBoundary = false;
-    }
+
+    mCounterSamplingAtCommandBoundary = SupportCounterSamplingAtCommandBoundary(GetMTLDevice());
+    mCounterSamplingAtStageBoundary = SupportCounterSamplingAtStageBoundary(GetMTLDevice());
 
     mIsTimestampQueryEnabled = HasFeature(Feature::TimestampQuery) ||
                                HasFeature(Feature::ChromiumExperimentalTimestampQueryInsidePasses);
 }
 
 Device::~Device() {
+    StopTrace();
     Destroy();
 }
 
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
+    // Note: this has to happen before the queue is created otherwise the queue
+    // itself is not captured.
+    StartTrace();
+
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
 
@@ -171,24 +170,22 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         // an accurate value by the following calculations.
         mTimestampPeriod = gpu_info::IsIntel(GetPhysicalDevice()->GetVendorId()) ? 83.333f : 1.0f;
 
-        if (@available(macOS 10.15, iOS 14.0, *)) {
-            if (!IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
-                // Initialize kalman filter parameters
-                mKalmanInfo = std::make_unique<KalmanInfo>();
-                mKalmanInfo->filterValue = 0.0f;
-                mKalmanInfo->kalmanGain = 0.5f;
-                mKalmanInfo->R =
-                    0.0001f;  // The smaller this value is, the smaller the error of measured
-                              // value is, the more we can trust the measured value.
-                mKalmanInfo->P = 1.0f;
+        if (!IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
+            // Initialize kalman filter parameters
+            mKalmanInfo = std::make_unique<KalmanInfo>();
+            mKalmanInfo->filterValue = 0.0f;
+            mKalmanInfo->kalmanGain = 0.5f;
+            mKalmanInfo->R =
+                0.0001f;  // The smaller this value is, the smaller the error of measured
+                          // value is, the more we can trust the measured value.
+            mKalmanInfo->P = 1.0f;
 
-                // Sample CPU timestamp and GPU timestamp for first time at device creation
-                [*mMtlDevice sampleTimestamps:&mCpuTimestamp gpuTimestamp:&mGpuTimestamp];
-            }
+            // Sample CPU timestamp and GPU timestamp for first time at device creation
+            [*mMtlDevice sampleTimestamps:&mCpuTimestamp gpuTimestamp:&mGpuTimestamp];
         }
     }
 
-    return DeviceBase::Initialize(std::move(queue));
+    return DeviceBase::Initialize(descriptor, std::move(queue));
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -229,10 +226,8 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
-                                compilationMessages);
+    ShaderModuleParseResult* parseResult) {
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
                                                               SwapChainBase* previousSwapChain,
@@ -301,10 +296,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
 
     DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceMTLSharedEvent), "%s is not enabled.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
-    if (@available(macOS 10.14, ios 12.0, *)) {
-        return SharedFence::Create(this, baseDescriptor->label, descriptor);
-    }
-    DAWN_UNREACHABLE();
+
+    return SharedFence::Create(this, baseDescriptor->label, descriptor);
 }
 
 MaybeError Device::TickImpl() {
@@ -314,10 +307,8 @@ MaybeError Device::TickImpl() {
     // conversion is not disabled and the estimation is not disabled.
     if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion) &&
         !IsToggleEnabled(Toggle::MetalDisableTimestampPeriodEstimation)) {
-        if (@available(macOS 10.15, iOS 14.0, *)) {
-            UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
-                                  &mTimestampPeriod);
-        }
+        UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
+                              &mTimestampPeriod);
     }
 
     return {};
@@ -327,11 +318,11 @@ id<MTLDevice> Device::GetMTLDevice() const {
     return mMtlDevice.Get();
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     // Metal validation layers forbid  0-sized copies, assert it is skipped prior to calling
     // this function.
     DAWN_ASSERT(size != 0);
@@ -357,7 +348,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 // replaceRegion function, because the function requires a non-private storage mode and Dawn
 // sets the private storage mode by default for all textures except IOSurfaces on macOS.
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& dataLayout,
+                                                const TexelCopyBufferLayout& dataLayout,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst.texture.Get());
@@ -411,6 +402,10 @@ bool Device::UseCounterSamplingAtStageBoundary() const {
     return mCounterSamplingAtStageBoundary;
 }
 
+bool Device::BackendWillValidateMultiDraw() const {
+    return true;
+}
+
 id<MTLBuffer> Device::GetMockBlitMtlBuffer() {
     if (mMockBlitMtlBuffer == nullptr) {
         mMockBlitMtlBuffer.Acquire(
@@ -418,6 +413,47 @@ id<MTLBuffer> Device::GetMockBlitMtlBuffer() {
     }
 
     return mMockBlitMtlBuffer.Get();
+}
+
+void Device::StartTrace() {
+    assert(!mTraceInProgress);
+
+    auto [filenameBase, shouldTrace] = GetTraceInfo();
+    if (!shouldTrace) {
+        return;
+    }
+
+    MTLCaptureManager* captureManager = [MTLCaptureManager sharedCaptureManager];
+    NSRef<MTLCaptureDescriptor> captureDescriptor =
+        AcquireNSRef([[MTLCaptureDescriptor alloc] init]);
+    (*captureDescriptor).captureObject = *mMtlDevice;
+    (*captureDescriptor).destination = MTLCaptureDestinationGPUTraceDocument;
+
+    std::string filename(absl::StrFormat("%s.gputrace", filenameBase));
+    NSRef<NSString> nsTraceName =
+        AcquireNSRef([[NSString alloc] initWithUTF8String:filename.c_str()]);
+    NSRef<NSURL> traceURL = AcquireNSRef([[NSURL alloc] initFileURLWithPath:*nsTraceName]);
+    (*captureDescriptor).outputURL = *traceURL;
+
+    if ([captureManager supportsDestination:MTLCaptureDestinationGPUTraceDocument]) {
+        NSError* error = nil;
+        if ([captureManager startCaptureWithDescriptor:*captureDescriptor error:&error]) {
+            mTraceInProgress = true;
+            NSLog(@"Metal trace will be saved to to: %@", *traceURL);
+        } else {
+            NSLog(@"Error starting Metal capture: %@", error);
+        }
+    } else {
+        NSLog(@"GPU trace file capture is not supported.");
+    }
+}
+
+void Device::StopTrace() {
+    if (mTraceInProgress) {
+        MTLCaptureManager* captureManager = [MTLCaptureManager sharedCaptureManager];
+        [captureManager stopCapture];
+        NSLog(@"Metal trace saved");
+    }
 }
 
 }  // namespace dawn::native::metal

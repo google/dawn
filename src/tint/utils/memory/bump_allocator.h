@@ -32,11 +32,20 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <new>
 #include <utility>
 
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
+
+// This file implements a custom allocator & iterator using C-style data access. It is not
+// unexpected that -Wunsafe-buffer-usage triggers in this code, since the type of dynamic access
+// being used cannot be guaranteed to be safe via static analysis. Attempting to change this code in
+// simple ways to quiet these errors either a) negatively affects the performance by introducing
+// unneeded copes, or b) uses typing shenanigans to work around the warning that other
+// linters/analyses are unhappy with.
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 namespace tint {
 
@@ -80,7 +89,7 @@ class BumpAllocator {
     /// @param size_in_bytes the number of bytes to allocate
     /// @returns the pointer to the allocated memory or `nullptr` if the memory can not be allocated
     std::byte* Allocate(size_t size_in_bytes) {
-        if (TINT_UNLIKELY(data.current_offset + size_in_bytes < size_in_bytes)) {
+        if (DAWN_UNLIKELY(data.current_offset + size_in_bytes < size_in_bytes)) {
             return nullptr;  // integer overflow
         }
         if (data.current_offset + size_in_bytes > data.current_data_size) {
@@ -89,7 +98,7 @@ class BumpAllocator {
             size_t data_size = std::max(size_in_bytes, kDefaultBlockDataSize);
             data.current = Bitcast<BlockHeader*>(new (std::nothrow)
                                                      std::byte[sizeof(BlockHeader) + data_size]);
-            if (TINT_UNLIKELY(!data.current)) {
+            if (DAWN_UNLIKELY(!data.current)) {
                 return nullptr;  // out of memory
             }
             data.current->next = nullptr;
@@ -143,5 +152,7 @@ class BumpAllocator {
 };
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MEMORY_BUMP_ALLOCATOR_H_

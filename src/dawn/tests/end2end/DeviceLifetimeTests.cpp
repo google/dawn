@@ -40,7 +40,7 @@ using testing::Invoke;
 using testing::MockCppCallback;
 using testing::Return;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 
 class DeviceLifetimeTests : public DawnTest {};
 
@@ -60,7 +60,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileQueueOnSubmittedWorkDone) {
 
     // Ask for an onSubmittedWorkDone callback and drop the device.
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                              [](wgpu::QueueWorkDoneStatus status) {
+                              [](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                                   EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
                               });
 
@@ -76,7 +76,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideQueueOnSubmittedWorkDone) {
 
     // Ask for an onSubmittedWorkDone callback and drop the device inside the callback.
     queue.OnSubmittedWorkDone(wgpu::CallbackMode::AllowProcessEvents,
-                              [this](wgpu::QueueWorkDoneStatus status) {
+                              [this](wgpu::QueueWorkDoneStatus status, wgpu::StringView) {
                                   EXPECT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
                                   this->device = nullptr;
                               });
@@ -91,7 +91,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhilePopErrorScope) {
 
     device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*, bool* done) {
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView, bool* done) {
             *done = true;
             EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
             EXPECT_EQ(type, wgpu::ErrorType::NoError);
@@ -116,7 +116,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsidePopErrorScope) {
     Userdata data = Userdata{std::move(device), false};
     data.device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView,
            Userdata* userdata) {
             EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
             EXPECT_EQ(type, wgpu::ErrorType::NoError);
@@ -191,7 +191,7 @@ TEST_P(DeviceLifetimeTests, DroppedThenMapBuffer) {
     device = nullptr;
 
     MockMapAsyncCallback cb;
-    EXPECT_CALL(cb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("lost"))).Times(1);
+    EXPECT_CALL(cb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("lost"))).Times(1);
 
     buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                     wgpu::CallbackMode::AllowProcessEvents, cb.Callback());
@@ -211,15 +211,15 @@ TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
     // First mapping.
     buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&buffer](wgpu::MapAsyncStatus status, const char* message) {
-                        EXPECT_EQ(status, wgpu::MapAsyncStatus::Error);
+                    [&buffer](wgpu::MapAsyncStatus status, wgpu::StringView message) {
+                        EXPECT_EQ(status, wgpu::MapAsyncStatus::Aborted);
                         EXPECT_THAT(message, HasSubstr("lost"));
 
                         // Second mapping
                         buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                                         wgpu::CallbackMode::AllowProcessEvents,
-                                        [](wgpu::MapAsyncStatus status, const char* message) {
-                                            EXPECT_EQ(status, wgpu::MapAsyncStatus::Error);
+                                        [](wgpu::MapAsyncStatus status, wgpu::StringView message) {
+                                            EXPECT_EQ(status, wgpu::MapAsyncStatus::Aborted);
                                             EXPECT_THAT(message, HasSubstr("lost"));
                                         });
                     });
@@ -236,7 +236,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
 
     buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [this, buffer](wgpu::MapAsyncStatus status, const char*) {
+                    [this, buffer](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         EXPECT_EQ(status, wgpu::MapAsyncStatus::Success);
                         device = nullptr;
 
@@ -288,6 +288,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
 
 // Test that the device can be dropped while createPipelineAsync is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -296,7 +299,8 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     device.CreateComputePipelineAsync(
         &desc,
         UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+           wgpu::StringView) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
         });
@@ -306,19 +310,23 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
 
 // Test that the device can be dropped inside a createPipelineAsync callback
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
 
     bool done = false;
-    device.CreateComputePipelineAsync(
-        &desc, wgpu::CallbackMode::AllowProcessEvents,
-        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, const char*) {
-            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
-            device = nullptr;
-            done = true;
-        });
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
+                                                    wgpu::ComputePipeline, wgpu::StringView) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          device = nullptr;
+                                          done = true;
+                                      });
 
     while (!done) {
         WaitABit();
@@ -328,6 +336,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 // Test that the device can be dropped while createPipelineAsync which will hit the frontend cache
 // is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -339,7 +350,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     bool done = false;
     device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
                                       [&done](wgpu::CreatePipelineAsyncStatus status,
-                                              wgpu::ComputePipeline pipeline, const char*) {
+                                              wgpu::ComputePipeline pipeline, wgpu::StringView) {
                                           EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
                                                     status);
                                           EXPECT_NE(pipeline, nullptr);
@@ -355,6 +366,9 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will hit the
 // frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -364,15 +378,15 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
     bool done = false;
-    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
-                                                    wgpu::ComputePipeline pipeline, const char*) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          device = nullptr;
-                                          done = true;
-                                      });
+    device.CreateComputePipelineAsync(
+        &desc, wgpu::CallbackMode::AllowProcessEvents,
+        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                      wgpu::StringView) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            device = nullptr;
+            done = true;
+        });
 
     while (!done) {
         WaitABit();
@@ -382,6 +396,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped while createPipelineAsync which will race with a compilation
 // to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -390,7 +407,8 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     device.CreateComputePipelineAsync(
         &desc,
         UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+           wgpu::StringView) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
         });
@@ -404,21 +422,24 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will race
 // with a compilation to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
+    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
     })");
 
     bool done = false;
-    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
-                                                    wgpu::ComputePipeline pipeline, const char*) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          device = nullptr;
-                                          done = true;
-                                      });
+    device.CreateComputePipelineAsync(
+        &desc, wgpu::CallbackMode::AllowProcessEvents,
+        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                      wgpu::StringView) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            device = nullptr;
+            done = true;
+        });
 
     // Create the same pipeline synchronously which will get added to the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
@@ -446,7 +467,7 @@ TEST_P(DeviceLifetimeTests, DropDevice2InProcessEvents) {
     // instance.ProcessEvents() is called.
     device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView,
            UserData* userdata) {
             userdata->device2 = nullptr;
             userdata->done = true;
@@ -465,7 +486,8 @@ DAWN_INSTANTIATE_TEST(DeviceLifetimeTests,
                       NullBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

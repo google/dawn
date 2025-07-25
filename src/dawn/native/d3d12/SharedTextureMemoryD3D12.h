@@ -44,7 +44,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
   public:
     static ResultOrError<Ref<SharedTextureMemory>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
 
     ID3D12Resource* GetD3DResource() const;
@@ -53,7 +53,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
 
   private:
     SharedTextureMemory(Device* device,
-                        const char* label,
+                        StringView label,
                         SharedTextureMemoryProperties properties,
                         ComPtr<ID3D12Resource> resource,
                         Ref<d3d::KeyedMutex> keyedMutex);

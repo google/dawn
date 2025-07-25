@@ -1,20 +1,10 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-int tint_unary_minus(const int v) {
-  return select(-v, v, v == -2147483648);
-}
-
-int4 tint_unary_minus_1(const int4 v) {
-  return select(-v, v, v == -2147483648);
-}
-
 int i(int x) {
-  return tint_unary_minus(x);
+  return as_type<int>((~(as_type<uint>(x)) + 1u));
 }
 
 int4 vi(int4 x) {
-  return tint_unary_minus_1(x);
+  return as_type<int4>((~(as_type<uint4>(x)) + uint4(1u)));
 }
-

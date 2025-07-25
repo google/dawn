@@ -30,10 +30,12 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -41,6 +43,8 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -88,113 +92,99 @@ uint32_t Type::Align() const {
     return 0;
 }
 
-bool Type::is_float_scalar() const {
+bool Type::IsScalar() const {
+    return IsFloatScalar() || IsIntegerScalar() || IsAnyOf<AbstractInt, Bool>();
+}
+
+bool Type::IsFloatScalar() const {
     return IsAnyOf<F16, F32, AbstractFloat>();
 }
 
-bool Type::is_float_matrix() const {
-    return Is([](const Matrix* m) { return m->type()->is_float_scalar(); });
+bool Type::IsFloatMatrix() const {
+    return Is([](const Matrix* m) { return m->Type()->IsFloatScalar(); });
 }
 
-bool Type::is_square_float_matrix() const {
-    return Is(
-        [](const Matrix* m) { return m->type()->is_float_scalar() && m->rows() == m->columns(); });
+bool Type::IsFloatVector() const {
+    return Is([](const Vector* v) { return v->Type()->IsFloatScalar(); });
 }
 
-bool Type::is_float_vector() const {
-    return Is([](const Vector* v) { return v->type()->is_float_scalar(); });
+bool Type::IsFloatScalarOrVector() const {
+    return IsFloatScalar() || IsFloatVector();
 }
 
-bool Type::is_float_scalar_or_vector() const {
-    return is_float_scalar() || is_float_vector();
+bool Type::IsIntegerScalar() const {
+    return IsAnyOf<U32, I32, U64, U8, I8>();
 }
 
-bool Type::is_float_scalar_or_vector_or_matrix() const {
-    return is_float_scalar() || is_float_vector() || is_float_matrix();
+bool Type::IsIntegerVector() const {
+    return Is([](const Vector* v) { return v->Type()->IsIntegerScalar(); });
 }
 
-bool Type::is_integer_scalar() const {
-    return IsAnyOf<U32, I32>();
+bool Type::IsSignedIntegerScalar() const {
+    return IsAnyOf<I32, I8, AbstractInt>();
 }
 
-bool Type::is_signed_integer_scalar() const {
-    return IsAnyOf<I32, AbstractInt>();
+bool Type::IsUnsignedIntegerScalar() const {
+    return IsAnyOf<U32, U64, U8>();
 }
 
-bool Type::is_unsigned_integer_scalar() const {
-    return Is<U32>();
+bool Type::IsSignedIntegerVector() const {
+    return Is([](const Vector* v) { return v->Type()->IsSignedIntegerScalar(); });
 }
 
-bool Type::is_signed_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->IsAnyOf<I32, AbstractInt>(); });
+bool Type::IsUnsignedIntegerVector() const {
+    return Is([](const Vector* v) { return v->Type()->IsUnsignedIntegerScalar(); });
 }
 
-bool Type::is_unsigned_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<U32>(); });
+bool Type::IsUnsignedIntegerScalarOrVector() const {
+    return IsUnsignedIntegerScalar() || IsUnsignedIntegerVector();
 }
 
-bool Type::is_unsigned_integer_scalar_or_vector() const {
-    return Is<U32>() || is_unsigned_integer_vector();
+bool Type::IsSignedIntegerScalarOrVector() const {
+    return IsSignedIntegerScalar() || IsSignedIntegerVector();
 }
 
-bool Type::is_signed_integer_scalar_or_vector() const {
-    return IsAnyOf<I32, AbstractInt>() || is_signed_integer_vector();
+bool Type::IsIntegerScalarOrVector() const {
+    return IsUnsignedIntegerScalarOrVector() || IsSignedIntegerScalarOrVector();
 }
 
-bool Type::is_integer_scalar_or_vector() const {
-    return is_unsigned_integer_scalar_or_vector() || is_signed_integer_scalar_or_vector();
+bool Type::IsAbstractScalarOrVector() const {
+    return Is<AbstractInt>() || Is([](const Vector* v) { return v->Type()->Is<AbstractInt>(); });
 }
 
-bool Type::is_abstract_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<AbstractInt>(); });
+bool Type::IsBoolVector() const {
+    return Is([](const Vector* v) { return v->Type()->Is<Bool>(); });
 }
 
-bool Type::is_abstract_float_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<AbstractFloat>(); });
+bool Type::IsBoolScalarOrVector() const {
+    return Is<Bool>() || IsBoolVector();
 }
 
-bool Type::is_abstract_integer_scalar_or_vector() const {
-    return Is<AbstractInt>() || is_abstract_integer_vector();
+bool Type::IsNumericScalarOrVector() const {
+    return Is<core::type::NumericScalar>() ||
+           Is([](const Vector* v) { return v->Type()->Is<core::type::NumericScalar>(); });
 }
 
-bool Type::is_abstract_float_scalar_or_vector() const {
-    return Is<AbstractFloat>() || is_abstract_float_vector();
+bool Type::IsHandle() const {
+    if (IsAnyOf<Sampler, Texture>()) {
+        return true;
+    }
+    if (auto* binding_array = As<BindingArray>()) {
+        return binding_array->ElemType()->IsHandle();
+    }
+    return false;
 }
 
-bool Type::is_bool_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<Bool>(); });
-}
-
-bool Type::is_bool_scalar_or_vector() const {
-    return Is<Bool>() || is_bool_vector();
-}
-
-bool Type::is_numeric_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<core::type::NumericScalar>(); });
-}
-
-bool Type::is_scalar_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<core::type::Scalar>(); });
-}
-
-bool Type::is_numeric_scalar_or_vector() const {
-    return Is<core::type::NumericScalar>() || is_numeric_vector();
-}
-
-bool Type::is_handle() const {
-    return IsAnyOf<Sampler, Texture>();
-}
-
-bool Type::HoldsAbstract() const {
+bool Type::IsAbstract() const {
     return Switch(
         this,  //
         [&](const AbstractNumeric*) { return true; },
-        [&](const Vector* v) { return v->type()->HoldsAbstract(); },
-        [&](const Matrix* m) { return m->type()->HoldsAbstract(); },
-        [&](const Array* a) { return a->ElemType()->HoldsAbstract(); },
+        [&](const Vector* v) { return v->Type()->IsAbstract(); },
+        [&](const Matrix* m) { return m->Type()->IsAbstract(); },
+        [&](const Array* a) { return a->ElemType()->IsAbstract(); },
         [&](const Struct* s) {
             for (auto* m : s->Members()) {
-                if (m->Type()->HoldsAbstract()) {
+                if (m->Type()->IsAbstract()) {
                     return true;
                 }
             }
@@ -228,16 +218,16 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
         [&](const Vector* from_vec) {
             if (auto* to_vec = to->As<Vector>()) {
                 if (from_vec->Width() == to_vec->Width()) {
-                    return ConversionRank(from_vec->type(), to_vec->type());
+                    return ConversionRank(from_vec->Type(), to_vec->Type());
                 }
             }
             return kNoConversion;
         },
         [&](const Matrix* from_mat) {
             if (auto* to_mat = to->As<Matrix>()) {
-                if (from_mat->columns() == to_mat->columns() &&
-                    from_mat->rows() == to_mat->rows()) {
-                    return ConversionRank(from_mat->type(), to_mat->type());
+                if (from_mat->Columns() == to_mat->Columns() &&
+                    from_mat->Rows() == to_mat->Rows()) {
+                    return ConversionRank(from_mat->Type(), to_mat->Type());
                 }
             }
             return kNoConversion;

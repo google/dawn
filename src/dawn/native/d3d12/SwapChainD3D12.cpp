@@ -61,7 +61,14 @@ IUnknown* SwapChain::GetD3DDeviceForCreatingSwapChain() {
 void SwapChain::ReuseBuffers(SwapChainBase* previousSwapChain) {
     SwapChain* previousD3DSwapChain = ToBackend(previousSwapChain);
     mBuffers = std::move(previousD3DSwapChain->mBuffers);
-    mBufferLastUsedSerials = std::move(previousD3DSwapChain->mBufferLastUsedSerials);
+
+    // Remember the current state of the ID3D12Resource for the current buffer if we didn't have
+    // chance to present it yet.
+    if (previousD3DSwapChain->mApiTexture != nullptr) {
+        D3D12_RESOURCE_STATES state =
+            previousD3DSwapChain->mApiTexture->GetCurrentStateForSwapChain();
+        mBuffers[previousD3DSwapChain->mCurrentBuffer].acquireState = state;
+    }
 }
 
 MaybeError SwapChain::CollectSwapChainBuffers() {
@@ -73,12 +80,10 @@ MaybeError SwapChain::CollectSwapChainBuffers() {
 
     mBuffers.resize(config.bufferCount);
     for (uint32_t i = 0; i < config.bufferCount; i++) {
-        DAWN_TRY(CheckHRESULT(dxgiSwapChain->GetBuffer(i, IID_PPV_ARGS(&mBuffers[i])),
+        DAWN_TRY(CheckHRESULT(dxgiSwapChain->GetBuffer(i, IID_PPV_ARGS(&mBuffers[i].resource)),
                               "Getting IDXGISwapChain buffer"));
     }
 
-    // Pretend all the buffers were last used at the beginning of time.
-    mBufferLastUsedSerials.resize(config.bufferCount, ExecutionSerial(0));
     return {};
 }
 
@@ -97,7 +102,8 @@ MaybeError SwapChain::PresentImpl() {
 
     // Record that "new" is the last time the buffer has been used.
     DAWN_TRY(queue->NextSerial());
-    mBufferLastUsedSerials[mCurrentBuffer] = queue->GetLastSubmittedCommandSerial();
+    mBuffers[mCurrentBuffer].lastUsed = queue->GetLastSubmittedCommandSerial();
+    mBuffers[mCurrentBuffer].acquireState = D3D12_RESOURCE_STATE_COMMON;
 
     mApiTexture->APIDestroy();
     mApiTexture = nullptr;
@@ -113,18 +119,20 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureImpl() {
     // TODO(crbug.com/dawn/269): Consider whether this should  be lifted for Mailbox so that
     // there is not frame pacing.
     mCurrentBuffer = GetDXGISwapChain()->GetCurrentBackBufferIndex();
-    DAWN_TRY(queue->WaitForSerial(mBufferLastUsedSerials[mCurrentBuffer]));
+    const Buffer& buffer = mBuffers[mCurrentBuffer];
+
+    DAWN_TRY(queue->WaitForSerial(buffer.lastUsed));
 
     // Create the API side objects for this use of the swapchain's buffer.
     TextureDescriptor descriptor = GetSwapChainBaseTextureDescriptor(this);
-    DAWN_TRY_ASSIGN(mApiTexture, Texture::Create(ToBackend(GetDevice()), Unpack(&descriptor),
-                                                 mBuffers[mCurrentBuffer]));
+    DAWN_TRY_ASSIGN(mApiTexture,
+                    Texture::CreateForSwapChain(ToBackend(GetDevice()), Unpack(&descriptor),
+                                                buffer.resource, buffer.acquireState));
 
     SwapChainTextureInfo info;
     info.texture = mApiTexture;
-    info.status = wgpu::SurfaceGetCurrentTextureStatus::Success;
     // TODO(dawn:2320): Check for optimality
-    info.suboptimal = false;
+    info.status = wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal;
     return info;
 }
 

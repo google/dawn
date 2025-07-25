@@ -42,10 +42,12 @@ namespace tint::msl::ir {
 class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
   public:
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param func the builtin function
     /// @param args the conversion arguments
-    BuiltinCall(core::ir::InstructionResult* result,
+    BuiltinCall(Id id,
+                core::ir::InstructionResult* result,
                 BuiltinFn func,
                 VectorRef<core::ir::Value*> args = tint::Empty);
     ~BuiltinCall() override;
@@ -66,6 +68,9 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     const core::intrinsic::TableData& TableData() const override {
         return msl::intrinsic::Dialect::kData;
     }
+
+    /// @returns an access information for the function
+    Accesses GetSideEffects() const override;
 
   private:
     BuiltinFn func_;

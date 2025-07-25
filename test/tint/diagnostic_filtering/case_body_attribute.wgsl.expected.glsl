@@ -14,26 +14,24 @@
 precision highp float;
 precision highp int;
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+uniform highp sampler2D f_t_s;
+layout(location = 0) in float tint_interstage_location0;
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
-
-layout(location = 0) in float x_1;
-uniform highp sampler2D t_s;
-
-void tint_symbol(float x) {
-  switch(tint_ftoi(x)) {
-    case 0: {
-      vec4 tint_phony = texture(t_s, vec2(0.0f));
+void main_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    case 0:
+    {
+      texture(f_t_s, vec2(0.0f));
       break;
     }
-    default: {
+    default:
+    {
       break;
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

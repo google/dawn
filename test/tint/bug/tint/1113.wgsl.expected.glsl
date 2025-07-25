@@ -1,13 +1,8 @@
+//
+// main_count
+//
 #version 310 es
 
-uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
-    return uvec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
-uvec3 tint_ftou(vec3 v) {
-  return tint_select(uvec3(4294967295u), tint_select(uvec3(v), uvec3(0u), lessThan(v, vec3(0.0f))), lessThan(v, vec3(4294967040.0f)));
-}
 
 struct Uniforms {
   uint numTriangles;
@@ -15,9 +10,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
-  uint pad;
+  uint tint_pad_0;
   vec3 bbMax;
-  uint pad_1;
+  uint tint_pad_1;
 };
 
 struct Dbg {
@@ -35,91 +30,113 @@ struct Dbg {
   float value_f32_3;
 };
 
-layout(binding = 0, std140) uniform uniforms_block_ubo {
+layout(binding = 0, std140)
+uniform uniforms_block_1_ubo {
   Uniforms inner;
-} uniforms;
-
-layout(binding = 10, std430) buffer U32s_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer U32s_1_ssbo {
   uint values[];
 } indices;
-
-layout(binding = 11, std430) buffer F32s_ssbo {
+layout(binding = 2, std430)
+buffer F32s_1_ssbo {
   float values[];
 } positions;
-
-layout(binding = 20, std430) buffer AU32s_ssbo {
+layout(binding = 3, std430)
+buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-
-layout(binding = 21, std430) buffer AI32s_ssbo {
+layout(binding = 4, std430)
+buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-
-layout(binding = 50, std430) buffer dbg_block_ssbo {
+layout(binding = 5, std430)
+buffer dbg_block_1_ssbo {
   Dbg inner;
-} dbg;
-
+} v_1;
 vec3 toVoxelPos(vec3 position) {
-  vec3 bbMin = vec3(uniforms.inner.bbMin.x, uniforms.inner.bbMin.y, uniforms.inner.bbMin.z);
-  vec3 bbMax = vec3(uniforms.inner.bbMax.x, uniforms.inner.bbMax.y, uniforms.inner.bbMax.z);
+  vec3 bbMin = vec3(v.inner.bbMin.x, v.inner.bbMin.y, v.inner.bbMin.z);
+  vec3 bbMax = vec3(v.inner.bbMax.x, v.inner.bbMax.y, v.inner.bbMax.z);
   vec3 bbSize = (bbMax - bbMin);
   float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
-  float gridSize = float(uniforms.inner.gridSize);
-  float gx = ((gridSize * (position.x - uniforms.inner.bbMin.x)) / cubeSize);
-  float gy = ((gridSize * (position.y - uniforms.inner.bbMin.y)) / cubeSize);
-  float gz = ((gridSize * (position.z - uniforms.inner.bbMin.z)) / cubeSize);
+  float gridSize = float(v.inner.gridSize);
+  float gx = ((gridSize * (position.x - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gridSize * (position.y - v.inner.bbMin.y)) / cubeSize);
+  float gz = ((gridSize * (position.z - v.inner.bbMin.z)) / cubeSize);
   return vec3(gx, gy, gz);
 }
-
+uvec3 tint_v3f32_to_v3u32(vec3 value) {
+  return uvec3(clamp(value, vec3(0.0f), vec3(4294967040.0f)));
+}
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
-  uvec3 icoord = tint_ftou(voxelPos);
+  uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
 }
-
 vec3 loadPosition(uint vertexIndex) {
-  vec3 position = vec3(positions.values[((3u * vertexIndex) + 0u)], positions.values[((3u * vertexIndex) + 1u)], positions.values[((3u * vertexIndex) + 2u)]);
+  uint v_2 = min(((3u * vertexIndex) + 0u), (uint(positions.values.length()) - 1u));
+  float v_3 = positions.values[v_2];
+  uint v_4 = min(((3u * vertexIndex) + 1u), (uint(positions.values.length()) - 1u));
+  float v_5 = positions.values[v_4];
+  uint v_6 = min(((3u * vertexIndex) + 2u), (uint(positions.values.length()) - 1u));
+  vec3 position = vec3(v_3, v_5, positions.values[v_6]);
   return position;
 }
-
 void doIgnore() {
-  uint g42 = uniforms.inner.numTriangles;
-  uint kj6 = dbg.inner.value1;
-  uint b53 = atomicOr(counters.values[0], 0u);
-  uint rwg = indices.values[0];
-  float rb5 = positions.values[0];
-  int g55 = atomicOr(LUT.values[0], 0);
+  uint g42 = v.inner.numTriangles;
+  uint kj6 = v_1.inner.value1;
+  uint v_7 = (uint(counters.values.length()) - 1u);
+  uint v_8 = min(uint(0), v_7);
+  uint b53 = atomicOr(counters.values[v_8], 0u);
+  uint v_9 = (uint(indices.values.length()) - 1u);
+  uint v_10 = min(uint(0), v_9);
+  uint rwg = indices.values[v_10];
+  uint v_11 = (uint(positions.values.length()) - 1u);
+  uint v_12 = min(uint(0), v_11);
+  float rb5 = positions.values[v_12];
+  uint v_13 = (uint(LUT.values.length()) - 1u);
+  uint v_14 = min(uint(0), v_13);
+  int g55 = atomicOr(LUT.values[v_14], 0);
 }
-
-void main_count(uvec3 GlobalInvocationID) {
+void main_count_inner(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
-  if ((triangleIndex >= uniforms.inner.numTriangles)) {
+  if ((triangleIndex >= v.inner.numTriangles)) {
     return;
   }
   doIgnore();
-  uint i0 = indices.values[((3u * triangleIndex) + 0u)];
-  uint i1 = indices.values[((3u * triangleIndex) + 1u)];
-  uint i2 = indices.values[((3u * triangleIndex) + 2u)];
+  uint v_15 = ((3u * triangleIndex) + 0u);
+  uint v_16 = min(v_15, (uint(indices.values.length()) - 1u));
+  uint i0 = indices.values[v_16];
+  uint v_17 = ((3u * triangleIndex) + 1u);
+  uint v_18 = min(v_17, (uint(indices.values.length()) - 1u));
+  uint i1 = indices.values[v_18];
+  uint v_19 = ((3u * triangleIndex) + 2u);
+  uint v_20 = min(v_19, (uint(indices.values.length()) - 1u));
+  uint i2 = indices.values[v_20];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i1);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
-  uint voxelIndex = toIndex1D(uniforms.inner.gridSize, voxelPos);
-  uint acefg = atomicAdd(counters.values[voxelIndex], 1u);
+  uint voxelIndex = toIndex1D(v.inner.gridSize, voxelPos);
+  uint v_21 = voxelIndex;
+  uint v_22 = min(v_21, (uint(counters.values.length()) - 1u));
+  uint acefg = atomicAdd(counters.values[v_22], 1u);
   if ((triangleIndex == 0u)) {
-    dbg.inner.value0 = uniforms.inner.gridSize;
-    dbg.inner.value_f32_0 = center.x;
-    dbg.inner.value_f32_1 = center.y;
-    dbg.inner.value_f32_2 = center.z;
+    v_1.inner.value0 = v.inner.gridSize;
+    v_1.inner.value_f32_0 = center.x;
+    v_1.inner.value_f32_1 = center.y;
+    v_1.inner.value_f32_2 = center.z;
   }
 }
-
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  main_count(gl_GlobalInvocationID);
-  return;
+  main_count_inner(gl_GlobalInvocationID);
 }
+//
+// main_create_lut
+//
 #version 310 es
+
 
 struct Uniforms {
   uint numTriangles;
@@ -127,9 +144,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
-  uint pad;
+  uint tint_pad_0;
   vec3 bbMax;
-  uint pad_1;
+  uint tint_pad_1;
 };
 
 struct Dbg {
@@ -147,70 +164,73 @@ struct Dbg {
   float value_f32_3;
 };
 
-layout(binding = 0, std140) uniform uniforms_block_ubo {
+layout(binding = 0, std140)
+uniform uniforms_block_1_ubo {
   Uniforms inner;
-} uniforms;
-
-layout(binding = 10, std430) buffer U32s_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer U32s_1_ssbo {
   uint values[];
 } indices;
-
-layout(binding = 11, std430) buffer F32s_ssbo {
+layout(binding = 2, std430)
+buffer F32s_1_ssbo {
   float values[];
 } positions;
-
-layout(binding = 20, std430) buffer AU32s_ssbo {
+layout(binding = 3, std430)
+buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-
-layout(binding = 21, std430) buffer AI32s_ssbo {
+layout(binding = 4, std430)
+buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-
-layout(binding = 50, std430) buffer dbg_block_ssbo {
+layout(binding = 5, std430)
+buffer dbg_block_1_ssbo {
   Dbg inner;
-} dbg;
-
+} v_1;
 void doIgnore() {
-  uint g42 = uniforms.inner.numTriangles;
-  uint kj6 = dbg.inner.value1;
-  uint b53 = atomicOr(counters.values[0], 0u);
-  uint rwg = indices.values[0];
-  float rb5 = positions.values[0];
-  int g55 = atomicOr(LUT.values[0], 0);
+  uint g42 = v.inner.numTriangles;
+  uint kj6 = v_1.inner.value1;
+  uint v_2 = (uint(counters.values.length()) - 1u);
+  uint v_3 = min(uint(0), v_2);
+  uint b53 = atomicOr(counters.values[v_3], 0u);
+  uint v_4 = (uint(indices.values.length()) - 1u);
+  uint v_5 = min(uint(0), v_4);
+  uint rwg = indices.values[v_5];
+  uint v_6 = (uint(positions.values.length()) - 1u);
+  uint v_7 = min(uint(0), v_6);
+  float rb5 = positions.values[v_7];
+  uint v_8 = (uint(LUT.values.length()) - 1u);
+  uint v_9 = min(uint(0), v_8);
+  int g55 = atomicOr(LUT.values[v_9], 0);
 }
-
-void main_create_lut(uvec3 GlobalInvocationID) {
+void main_create_lut_inner(uvec3 GlobalInvocationID) {
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
-  uint maxVoxels = ((uniforms.inner.gridSize * uniforms.inner.gridSize) * uniforms.inner.gridSize);
+  uint maxVoxels = ((v.inner.gridSize * v.inner.gridSize) * v.inner.gridSize);
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = atomicOr(counters.values[voxelIndex], 0u);
+  uint v_10 = voxelIndex;
+  uint v_11 = min(v_10, (uint(counters.values.length()) - 1u));
+  uint numTriangles = atomicOr(counters.values[v_11], 0u);
   int offset = -1;
   if ((numTriangles > 0u)) {
-    uint tint_symbol = atomicAdd(dbg.inner.offsetCounter, numTriangles);
-    offset = int(tint_symbol);
+    offset = int(atomicAdd(v_1.inner.offsetCounter, numTriangles));
   }
-  atomicExchange(LUT.values[voxelIndex], offset);
+  uint v_12 = voxelIndex;
+  uint v_13 = min(v_12, (uint(LUT.values.length()) - 1u));
+  atomicExchange(LUT.values[v_13], offset);
 }
-
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  main_create_lut(gl_GlobalInvocationID);
-  return;
+  main_create_lut_inner(gl_GlobalInvocationID);
 }
+//
+// main_sort_triangles
+//
 #version 310 es
 
-uvec3 tint_select(uvec3 param_0, uvec3 param_1, bvec3 param_2) {
-    return uvec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
-uvec3 tint_ftou(vec3 v) {
-  return tint_select(uvec3(4294967295u), tint_select(uvec3(v), uvec3(0u), lessThan(v, vec3(0.0f))), lessThan(v, vec3(4294967040.0f)));
-}
 
 struct Uniforms {
   uint numTriangles;
@@ -218,9 +238,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
-  uint pad;
+  uint tint_pad_0;
   vec3 bbMax;
-  uint pad_1;
+  uint tint_pad_1;
 };
 
 struct Dbg {
@@ -238,81 +258,99 @@ struct Dbg {
   float value_f32_3;
 };
 
-layout(binding = 0, std140) uniform uniforms_block_ubo {
+layout(binding = 0, std140)
+uniform uniforms_block_1_ubo {
   Uniforms inner;
-} uniforms;
-
-layout(binding = 10, std430) buffer U32s_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer U32s_1_ssbo {
   uint values[];
 } indices;
-
-layout(binding = 11, std430) buffer F32s_ssbo {
+layout(binding = 2, std430)
+buffer F32s_1_ssbo {
   float values[];
 } positions;
-
-layout(binding = 20, std430) buffer AU32s_ssbo {
+layout(binding = 3, std430)
+buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-
-layout(binding = 21, std430) buffer AI32s_ssbo {
+layout(binding = 4, std430)
+buffer AI32s_1_ssbo {
   int values[];
 } LUT;
-
-layout(binding = 50, std430) buffer dbg_block_ssbo {
+layout(binding = 5, std430)
+buffer dbg_block_1_ssbo {
   Dbg inner;
-} dbg;
-
+} v_1;
 vec3 toVoxelPos(vec3 position) {
-  vec3 bbMin = vec3(uniforms.inner.bbMin.x, uniforms.inner.bbMin.y, uniforms.inner.bbMin.z);
-  vec3 bbMax = vec3(uniforms.inner.bbMax.x, uniforms.inner.bbMax.y, uniforms.inner.bbMax.z);
+  vec3 bbMin = vec3(v.inner.bbMin.x, v.inner.bbMin.y, v.inner.bbMin.z);
+  vec3 bbMax = vec3(v.inner.bbMax.x, v.inner.bbMax.y, v.inner.bbMax.z);
   vec3 bbSize = (bbMax - bbMin);
   float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
-  float gridSize = float(uniforms.inner.gridSize);
-  float gx = ((gridSize * (position.x - uniforms.inner.bbMin.x)) / cubeSize);
-  float gy = ((gridSize * (position.y - uniforms.inner.bbMin.y)) / cubeSize);
-  float gz = ((gridSize * (position.z - uniforms.inner.bbMin.z)) / cubeSize);
+  float gridSize = float(v.inner.gridSize);
+  float gx = ((gridSize * (position.x - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gridSize * (position.y - v.inner.bbMin.y)) / cubeSize);
+  float gz = ((gridSize * (position.z - v.inner.bbMin.z)) / cubeSize);
   return vec3(gx, gy, gz);
 }
-
+uvec3 tint_v3f32_to_v3u32(vec3 value) {
+  return uvec3(clamp(value, vec3(0.0f), vec3(4294967040.0f)));
+}
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
-  uvec3 icoord = tint_ftou(voxelPos);
+  uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
 }
-
 vec3 loadPosition(uint vertexIndex) {
-  vec3 position = vec3(positions.values[((3u * vertexIndex) + 0u)], positions.values[((3u * vertexIndex) + 1u)], positions.values[((3u * vertexIndex) + 2u)]);
+  uint v_2 = min(((3u * vertexIndex) + 0u), (uint(positions.values.length()) - 1u));
+  float v_3 = positions.values[v_2];
+  uint v_4 = min(((3u * vertexIndex) + 1u), (uint(positions.values.length()) - 1u));
+  float v_5 = positions.values[v_4];
+  uint v_6 = min(((3u * vertexIndex) + 2u), (uint(positions.values.length()) - 1u));
+  vec3 position = vec3(v_3, v_5, positions.values[v_6]);
   return position;
 }
-
 void doIgnore() {
-  uint g42 = uniforms.inner.numTriangles;
-  uint kj6 = dbg.inner.value1;
-  uint b53 = atomicOr(counters.values[0], 0u);
-  uint rwg = indices.values[0];
-  float rb5 = positions.values[0];
-  int g55 = atomicOr(LUT.values[0], 0);
+  uint g42 = v.inner.numTriangles;
+  uint kj6 = v_1.inner.value1;
+  uint v_7 = (uint(counters.values.length()) - 1u);
+  uint v_8 = min(uint(0), v_7);
+  uint b53 = atomicOr(counters.values[v_8], 0u);
+  uint v_9 = (uint(indices.values.length()) - 1u);
+  uint v_10 = min(uint(0), v_9);
+  uint rwg = indices.values[v_10];
+  uint v_11 = (uint(positions.values.length()) - 1u);
+  uint v_12 = min(uint(0), v_11);
+  float rb5 = positions.values[v_12];
+  uint v_13 = (uint(LUT.values.length()) - 1u);
+  uint v_14 = min(uint(0), v_13);
+  int g55 = atomicOr(LUT.values[v_14], 0);
 }
-
-void main_sort_triangles(uvec3 GlobalInvocationID) {
+void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID.x;
   doIgnore();
-  if ((triangleIndex >= uniforms.inner.numTriangles)) {
+  if ((triangleIndex >= v.inner.numTriangles)) {
     return;
   }
-  uint i0 = indices.values[((3u * triangleIndex) + 0u)];
-  uint i1 = indices.values[((3u * triangleIndex) + 1u)];
-  uint i2 = indices.values[((3u * triangleIndex) + 2u)];
+  uint v_15 = ((3u * triangleIndex) + 0u);
+  uint v_16 = min(v_15, (uint(indices.values.length()) - 1u));
+  uint i0 = indices.values[v_16];
+  uint v_17 = ((3u * triangleIndex) + 1u);
+  uint v_18 = min(v_17, (uint(indices.values.length()) - 1u));
+  uint i1 = indices.values[v_18];
+  uint v_19 = ((3u * triangleIndex) + 2u);
+  uint v_20 = min(v_19, (uint(indices.values.length()) - 1u));
+  uint i2 = indices.values[v_20];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i1);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
-  uint voxelIndex = toIndex1D(uniforms.inner.gridSize, voxelPos);
-  int triangleOffset = atomicAdd(LUT.values[voxelIndex], 1);
+  uint voxelIndex = toIndex1D(v.inner.gridSize, voxelPos);
+  uint v_21 = voxelIndex;
+  uint v_22 = min(v_21, (uint(LUT.values.length()) - 1u));
+  int triangleOffset = atomicAdd(LUT.values[v_22], 1);
 }
-
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  main_sort_triangles(gl_GlobalInvocationID);
-  return;
+  main_sort_triangles_inner(gl_GlobalInvocationID);
 }

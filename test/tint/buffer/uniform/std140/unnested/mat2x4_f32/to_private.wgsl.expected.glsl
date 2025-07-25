@@ -1,19 +1,14 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform u_block_ubo {
+layout(binding = 0, std140)
+uniform u_block_1_ubo {
   mat2x4 inner;
-} u;
-
-mat2x4 p = mat2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-void f() {
-  p = u.inner;
-  p[1] = u.inner[0];
-  p[1] = u.inner[0].ywxz;
-  p[0][1] = u.inner[1][0];
-}
-
+} v;
+mat2x4 p = mat2x4(vec4(0.0f), vec4(0.0f));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  p = v.inner;
+  p[1u] = v.inner[0u];
+  p[1u] = v.inner[0u].ywxz;
+  p[0u].y = v.inner[1u].x;
 }

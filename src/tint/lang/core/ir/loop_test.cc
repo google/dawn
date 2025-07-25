@@ -52,7 +52,7 @@ TEST_F(IR_LoopDeathTest, Fail_NullInitializerBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(nullptr, b.MultiInBlock(), b.MultiInBlock());
+            mod.CreateInstruction<Loop>(nullptr, b.MultiInBlock(), b.MultiInBlock());
         },
         "internal compiler error");
 }
@@ -62,7 +62,7 @@ TEST_F(IR_LoopDeathTest, Fail_NullBodyBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.Block(), nullptr, b.MultiInBlock());
+            mod.CreateInstruction<Loop>(b.Block(), nullptr, b.MultiInBlock());
         },
         "internal compiler error");
 }
@@ -72,7 +72,7 @@ TEST_F(IR_LoopDeathTest, Fail_NullContinuingBlock) {
         {
             Module mod;
             Builder b{mod};
-            Loop loop(b.Block(), b.MultiInBlock(), nullptr);
+            mod.CreateInstruction<Loop>(b.Block(), b.MultiInBlock(), nullptr);
         },
         "internal compiler error");
 }

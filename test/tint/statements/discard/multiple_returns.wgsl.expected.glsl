@@ -2,46 +2,60 @@
 precision highp float;
 precision highp int;
 
-bool tint_discarded = false;
-layout(binding = 0, std430) buffer non_uniform_global_block_ssbo {
+layout(binding = 0, std430)
+buffer f_non_uniform_global_block_ssbo {
   int inner;
-} non_uniform_global;
-
-layout(binding = 1, std430) buffer tint_symbol_block_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer f_output_block_ssbo {
   float inner;
-} tint_symbol;
-
-void tint_symbol_1() {
-  if ((non_uniform_global.inner < 0)) {
-    tint_discarded = true;
+} v_1;
+bool continue_execution = true;
+void main() {
+  if ((v.inner < 0)) {
+    continue_execution = false;
   }
-  float tint_symbol_2 = dFdx(1.0f);
-  if (!(tint_discarded)) {
-    tint_symbol.inner = tint_symbol_2;
+  float v_2 = dFdx(1.0f);
+  if (continue_execution) {
+    v_1.inner = v_2;
   }
-  if ((tint_symbol.inner < 0.0f)) {
+  if ((v_1.inner < 0.0f)) {
     int i = 0;
-    while (true) {
-      if ((tint_symbol.inner > float(i))) {
-        if (!(tint_discarded)) {
-          tint_symbol.inner = float(i);
+    {
+      uvec2 tint_loop_idx = uvec2(4294967295u);
+      while(true) {
+        if (all(equal(tint_loop_idx, uvec2(0u)))) {
+          break;
         }
-        return;
+        float v_3 = v_1.inner;
+        if ((v_3 > float(i))) {
+          float v_4 = float(i);
+          if (continue_execution) {
+            v_1.inner = v_4;
+          }
+          if (!(continue_execution)) {
+            discard;
+          }
+          return;
+        }
+        {
+          uint tint_low_inc = (tint_loop_idx.x - 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 4294967295u));
+          tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+          uint v_5 = uint(i);
+          i = int((v_5 + uint(1)));
+          if ((i == 5)) { break; }
+        }
+        continue;
       }
-      {
-        i = (i + 1);
-        if ((i == 5)) { break; }
-      }
+    }
+    if (!(continue_execution)) {
+      discard;
     }
     return;
   }
-  return;
-}
-
-void main() {
-  tint_symbol_1();
-  if (tint_discarded) {
+  if (!(continue_execution)) {
     discard;
   }
-  return;
 }

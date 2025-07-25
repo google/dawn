@@ -36,14 +36,14 @@ namespace {
 TEST_F(HlslWriterTest, ConvertU32) {
     auto* f = b.Function("a", ty.u32());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_i);
+        auto* v = b.Let("v", 2_i);
         b.Return(f, b.Convert(ty.u32(), v));
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint a() {
-  int v = 2;
+  int v = int(2);
   return uint(v);
 }
 

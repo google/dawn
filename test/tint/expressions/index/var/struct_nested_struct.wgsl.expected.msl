@@ -1,6 +1,6 @@
 #include <metal_stdlib>
-
 using namespace metal;
+
 struct T {
   float o;
   uint p;
@@ -15,4 +15,3 @@ uint f() {
   S a = S{};
   return a.n.p;
 }
-

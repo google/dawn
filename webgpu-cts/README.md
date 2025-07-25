@@ -1,25 +1,40 @@
 # Running the WebGPU CTS Locally with Chrome
 
 Running the WebGPU CTS locally with Chrome requires a Chromium checkout.
+Follow [these instructions](https://www.chromium.org/developers/how-tos/get-the-code/)
+for checking out and building Chrome.
 
-Follow [these instructions](https://www.chromium.org/developers/how-tos/get-the-code/) for checking out
-and building Chrome. You'll also need to build the `telemetry_gpu_integration_test` target.
+**Build the `telemetry_gpu_integration_test` targets.**
 
 At the root of a Chromium checkout, run:
 `./content/test/gpu/run_gpu_integration_test.py webgpu_cts --browser=exact --browser-executable=path/to/your/chrome-executable`
 
 If you don't want to build Chrome, you can still run the CTS, by passing the path to an existing Chrome executable to the `--browser-executable` argument. However, if you would like to use all harness functionality (symbolizing stack dumps, etc.). You will still need to build the `telemetry_gpu_integration_test` target.
 
-Useful command-line arguments:
- - `--help`: See more options and argument documentation.
- - `-l`: List all tests that would be run.
- - `--test-filter`: Filter tests.
- - `--passthrough --show-stdout`: Show browser output. See also `--browser-logging-verbosity`.
- - `--extra-browser-args`: Pass extra args to the browser executable.
- - `--jobs=N`: Run with multiple parallel browser instances.
- - `--stable-jobs`: Assign tests to each job in a stable order. Used on the bots for consistency and ease of reproduction.
- - `--enable-dawn-backend-validation`: Enable Dawn's backend validation.
- - `--use-webgpu-adapter=[default,swiftshader,compat]`: Forwarded to the browser to select a particular WebGPU adapter.
+You will probably want these command line arguments:
+
+- `--passthrough --show-stdout`: Show browser output. See also `--browser-logging-verbosity`.
+- `--test-filter`: Filter tests.
+- `--jobs=1`: Run just one browser instance, best for debugging. Omit or set higher if you need to run more than a few tests.
+
+These GPU-specific arguments are often needed:
+
+- `--force_low_power_gpu` and `--force_high_performance_gpu`: Set the GPU used by the whole browser,
+  and thus the (default) adapter for WebGPU. (On dual-GPU Macs, only, Chrome can use multiple GPUs.
+  [`--use-webgpu-power-preference`][use-webgpu-power-preference] can be used to control which one WebGPU chooses.)
+- `--enable-dawn-backend-validation`: Enable Dawn's backend validation.
+- `--use-webgpu-adapter=[default,swiftshader,compat]`: Forwarded to the browser to select a particular WebGPU adapter.
+
+[use-webgpu-power-preference]: https://source.chromium.org/chromium/chromium/src/+/main:gpu/command_buffer/service/service_utils.cc;l=114-121;drc=73bcf25e4b0c06b1a86422a2fc30023c7b850f33
+
+Other useful command-line arguments:
+
+- `--help`: See more options and argument documentation.
+- `-l`: List all tests that would be run.
+- `--extra-browser-args`: Pass extra args to the browser executable.
+- `--stable-jobs`: Assign tests to each job in a stable order. Used on the bots
+  for consistency and ease of reproduction. If you are reproducing
+  order-dependent issues that appear on bots, you'll need this and `--jobs=N`.
 
 ## Running the CTS locally on Android
 
@@ -32,7 +47,7 @@ When executing the tests, use `--browser=android-chromium` (which will look in `
 An example of a known-working command line is:
 
 ```sh
-./content/test/gpu/run_gpu_integration_test.py webgpu_cts --show-stdout --browser=android-chromium --stable-jobs --jobs=1 --extra-browser-args="--enable-logging=stderr --js-flags=--expose-gc --force_high_performance_gpu --use-webgpu-power-preference=default-high-performance"
+./content/test/gpu/run_gpu_integration_test.py webgpu_cts --show-stdout --browser=android-chromium --stable-jobs --jobs=1 --extra-browser-args="--enable-logging=stderr --js-flags=--expose-gc"
 ```
 
 Be aware that running the tests locally on Android is *SLOW*. Expect it to take 4 hrs+.
@@ -83,3 +98,14 @@ Note that since you're doing a local build, you need to be on the same type of m
    ```
 
    The command will output a link to the Swarming task for you to see the results.
+
+# Browsing failure expectations
+
+Dawn is tested against the CTS across various platforms and GPUs.
+The failure results are checked into this directory as failure expectations files:
+
+* [expectations.txt](expectations.txt): Core Webgpu functionality
+* [compat-expectations.txt](compat-expectations.txt): WebGPU "compat" functionality
+
+Use [failure_browser/index.html](failure_browser/index.html) to review the data
+interactively.

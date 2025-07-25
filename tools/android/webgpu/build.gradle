@@ -29,6 +29,7 @@ plugins {
     id 'com.android.library'
     id 'maven-publish'
     id 'org.jetbrains.kotlin.android'
+    id 'com.android.application' apply false
 }
 
 android {
@@ -41,27 +42,32 @@ android {
             cmake {
                 arguments '-DANDROID_STL=c++_shared'
                 version '3.22.1'
+                targets 'webgpu_c_bundled', 'webgpu_wrapper_tests'
             }
         }
     }
-
     externalNativeBuild {
         cmake {
             path file('src/main/cpp/CMakeLists.txt')
         }
     }
-
     buildFeatures {
+        prefab true
         prefabPublishing true
     }
-
     prefab {
         webgpu_c_bundled {
             headers "src/main/cpp/gen/include"
         }
+        webgpu_wrapper_tests {
+            name "webgpu_wrapper_tests"
+        }
     }
     kotlinOptions {
         jvmTarget = '17'
+    }
+    kotlin {
+        explicitApi()
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_17
@@ -71,10 +77,19 @@ android {
             java.srcDirs += "$project.projectDir/../../../out/Debug/gen/java"
         }
     }
+    packagingOptions {
+        pickFirst 'lib/x86/libc++_shared.so'
+        pickFirst 'lib/x86_64/libc++_shared.so'
+        pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        pickFirst 'lib/arm64-v8a/libc++_shared.so'
+    }
+    ndkVersion '27.0.12077973'
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.test.ext:junit-gtest:1.0.0-alpha01'
+    implementation 'com.android.ndk.thirdparty:googletest:1.11.0-beta-1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.reflections:reflections:0.10.2'
@@ -87,6 +102,8 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit-ktx:1.2.1'
     androidTestImplementation 'androidx.test:runner:1.6.1'
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4'
+
+    androidTestUtil 'androidx.test:orchestrator:1.5.1'
 }
 
 project.afterEvaluate {
@@ -109,7 +126,8 @@ tasks.register('generateBindings', Exec) {
     '--output-dir', "$project.projectDir/../../../out/Debug/gen",
     '--dawn-json', 'src/dawn/dawn.json',
     '--targets', 'kotlin',
-    '--kotlin-json', 'src/dawn/dawn_kotlin.json'
+    '--kotlin-json', 'src/dawn/dawn_kotlin.json',
+    '--jinja2-path', 'third_party/jinja2'
 }
 
 preBuild {

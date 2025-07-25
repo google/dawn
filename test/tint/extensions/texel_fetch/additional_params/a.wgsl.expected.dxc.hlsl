@@ -1,22 +1,12 @@
-SKIP: FAILED
+SKIP: INVALID
 
+../../src/tint/lang/hlsl/writer/printer/printer.cc:1626 internal compiler error: HLSL does not support @color attribute
 
-enable chromium_experimental_framebuffer_fetch;
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-struct In {
-  @location(0)
-  uv : vec4f,
-}
-
-fn g(a : f32, b : f32, c : f32) {
-}
-
-@fragment
-fn f(@builtin(position) pos : vec4f, @color(0) fbf : vec4f, tint_symbol : In) {
-  g(pos.x, fbf.x, tint_symbol.uv.x);
-}
-
-Failed to generate: extensions/texel_fetch/additional_params/a.wgsl:1:8 error: HLSL backend does not support extension 'chromium_experimental_framebuffer_fetch'
-enable chromium_experimental_framebuffer_fetch;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+tint executable returned error: signal: illegal instruction (core dumped)

@@ -140,7 +140,7 @@ class CacheRequestImpl {
                 return ReturnType(CacheResultType::CacheHit(std::move(key), std::move(result)));
             } else {
                 // Otherwise, if the value is a success, also return it.
-                if (DAWN_LIKELY(result.IsSuccess())) {
+                if (result.IsSuccess()) [[likely]] {
                     cacheTimer.RecordMicroseconds(cacheHitMetricName.c_str());
                     return ReturnType(
                         CacheResultType::CacheHit(std::move(key), result.AcquireSuccess()));
@@ -153,7 +153,7 @@ class CacheRequestImpl {
         cacheTimer.Reset();
         auto result = cacheMissFn(std::move(r));
         std::string cacheMissMetricName = cacheMetricName + ".CacheMiss";
-        if (DAWN_LIKELY(result.IsSuccess())) {
+        if (result.IsSuccess()) [[likely]] {
             cacheTimer.RecordMicroseconds(cacheMissMetricName.c_str());
             return ReturnType(CacheResultType::CacheMiss(std::move(key), result.AcquireSuccess()));
         }

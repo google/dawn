@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 
+#include "src/tint/utils/ice/ice.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ast::AccessorExpression);
 
 namespace tint::ast {

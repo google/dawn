@@ -1,51 +1,51 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 31
+; Generator: Google Tint Compiler; 1
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
-         %22 = OpExtInstImport "GLSL.std.450"
+         %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
                OpName %main "main"
-               OpName %__modf_result_vec2_f32 "__modf_result_vec2_f32"
+               OpName %runtime_in "runtime_in"
                OpMemberName %__modf_result_vec2_f32 0 "fract"
                OpMemberName %__modf_result_vec2_f32 1 "whole"
+               OpName %__modf_result_vec2_f32 "__modf_result_vec2_f32"
                OpName %res "res"
-               OpMemberDecorate %__modf_result_vec2_f32 0 Offset 0
-               OpMemberDecorate %__modf_result_vec2_f32 1 Offset 8
+               OpName %fract "fract"
+               OpName %whole "whole"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
  %float_1_25 = OpConstant %float 1.25
  %float_3_75 = OpConstant %float 3.75
-          %9 = OpConstantComposite %v2float %float_1_25 %float_3_75
+ %runtime_in = OpConstantComposite %v2float %float_1_25 %float_3_75
 %__modf_result_vec2_f32 = OpTypeStruct %v2float %v2float
+%_ptr_Function___modf_result_vec2_f32 = OpTypePointer Function %__modf_result_vec2_f32
  %float_0_25 = OpConstant %float 0.25
  %float_0_75 = OpConstant %float 0.75
-         %13 = OpConstantComposite %v2float %float_0_25 %float_0_75
+         %14 = OpConstantComposite %v2float %float_0_25 %float_0_75
     %float_1 = OpConstant %float 1
     %float_3 = OpConstant %float 3
-         %16 = OpConstantComposite %v2float %float_1 %float_3
-         %17 = OpConstantComposite %__modf_result_vec2_f32 %13 %16
-%_ptr_Function___modf_result_vec2_f32 = OpTypePointer Function %__modf_result_vec2_f32
-         %20 = OpConstantNull %__modf_result_vec2_f32
+         %17 = OpConstantComposite %v2float %float_1 %float_3
+         %13 = OpConstantComposite %__modf_result_vec2_f32 %14 %17
+%_ptr_Function_v2float = OpTypePointer Function %v2float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Function_v2float = OpTypePointer Function %v2float
      %uint_1 = OpConstant %uint 1
-       %main = OpFunction %void None %1
+       %main = OpFunction %void None %3
           %4 = OpLabel
-        %res = OpVariable %_ptr_Function___modf_result_vec2_f32 Function %20
-               OpStore %res %17
-         %21 = OpExtInst %__modf_result_vec2_f32 %22 ModfStruct %9
-               OpStore %res %21
-               OpStore %res %17
-         %26 = OpAccessChain %_ptr_Function_v2float %res %uint_0
-         %27 = OpLoad %v2float %26
-         %29 = OpAccessChain %_ptr_Function_v2float %res %uint_1
-         %30 = OpLoad %v2float %29
+        %res = OpVariable %_ptr_Function___modf_result_vec2_f32 Function
+               OpStore %res %13
+         %20 = OpExtInst %__modf_result_vec2_f32 %21 ModfStruct %runtime_in
+               OpStore %res %20 None
+               OpStore %res %13 None
+         %22 = OpAccessChain %_ptr_Function_v2float %res %uint_0
+      %fract = OpLoad %v2float %22 None
+         %27 = OpAccessChain %_ptr_Function_v2float %res %uint_1
+      %whole = OpLoad %v2float %27 None
                OpReturn
                OpFunctionEnd

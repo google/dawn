@@ -31,7 +31,6 @@ if (dawn_has_fuzzers) {
   import("//build_overrides/build.gni")
   import("//testing/libfuzzer/fuzzer_test.gni")
   import("${dawn_root}/scripts/dawn_features.gni")
-  import("${dawn_root}/src/dawn/fuzzers/dawn_fuzzers.gni")
 
   static_library("dawn_wire_server_fuzzer_common") {
     sources = [
@@ -43,7 +42,9 @@ if (dawn_has_fuzzers) {
       "${dawn_root}/src/dawn:proc",
       "${dawn_root}/src/dawn/common",
       "${dawn_root}/src/dawn/native:static",
-      "${dawn_root}/src/dawn/utils",
+      "${dawn_root}/src/dawn/utils:system_utils",
+      "${dawn_root}/src/dawn/utils:test_utils",
+      "${dawn_root}/src/dawn/utils:wgpu_utils",
       "${dawn_root}/src/dawn/wire:static",
     ]
   }
@@ -72,84 +73,6 @@ if (dawn_has_fuzzers) {
     deps = [ ":dawn_wire_server_fuzzer_common" ]
 
     additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
-  }
-
-  if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
-      !disable_libfuzzer && use_fuzzing_engine) {
-    import("//third_party/protobuf/proto_library.gni")
-    import("${dawn_root}/generator/dawn_generator.gni")
-
-    # Generate the fuzzer's serializer in `.cpp`
-    dawn_json_lpm_generator("dawn_lpmfuzz_cpp") {
-      target = "dawn_lpmfuzz_cpp"
-      outputs = [
-        "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.cpp",
-        "src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h",
-        "src/dawn/fuzzers/lpmfuzz/DawnLPMConstants_autogen.h",
-      ]
-    }
-
-    # Generate the `.proto` files
-    dawn_json_lpm_generator("dawn_lpmfuzz_proto") {
-      target = "dawn_lpmfuzz_proto"
-      outputs = [
-        "src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.proto",
-        "src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.proto",
-      ]
-    }
-
-    # Copy handwritten `.proto` file to build directory
-    copy("copy_dawn_custom_lpm") {
-      sources =
-          [ "${dawn_root}/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
-      outputs = [ "$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
-    }
-
-    # Generate the `.pb.h` and `.pb.cc` files
-    proto_library("dawn_lpm_proto") {
-      proto_in_dir = "$root_out_dir/gen"
-      proto_out_dir = "//"
-      sources = get_target_outputs(":dawn_lpmfuzz_proto")
-      sources += get_target_outputs(":copy_dawn_custom_lpm")
-
-      generate_python = false
-      use_protobuf_full = true
-      deps = [
-        ":copy_dawn_custom_lpm",
-        ":dawn_lpmfuzz_proto",
-        "//third_party/protobuf:protobuf_full",
-      ]
-    }
-
-    # Compile dawnlpm fuzzer with extensive tint coverage
-    dawn_lpm_template("dawn_lpm_fuzzer_vulkan_backend_with_tint") {
-      defines = [ "DAWNLPM_FUZZ_TINT=1" ]
-      dawn_lpm_sources = get_target_outputs(":dawn_lpmfuzz_cpp")
-      dawn_lpm_sources += [
-        "lpmfuzz/DawnLPMFuzzer.cpp",
-        "lpmfuzz/DawnLPMFuzzer.h",
-        "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
-        "lpmfuzz/DawnLPMObjectStore.cpp",
-        "lpmfuzz/DawnLPMObjectStore.h",
-        "lpmfuzz/DawnLPMSerializerCustom.cpp",
-        "lpmfuzz/DawnLPMSerializerCustom.h",
-      ]
-    }
-
-    # Compile dawnlpm api fuzzer
-    dawn_lpm_template("dawn_lpm_fuzzer_vulkan_backend") {
-      defines = [ "DAWNLPM_FUZZ_TINT=0" ]
-      dawn_lpm_sources = get_target_outputs(":dawn_lpmfuzz_cpp")
-      dawn_lpm_sources += [
-        "lpmfuzz/DawnLPMFuzzer.cpp",
-        "lpmfuzz/DawnLPMFuzzer.h",
-        "lpmfuzz/DawnLPMFuzzerAndVulkanBackend.cpp",
-        "lpmfuzz/DawnLPMObjectStore.cpp",
-        "lpmfuzz/DawnLPMObjectStore.h",
-        "lpmfuzz/DawnLPMSerializerCustom.cpp",
-        "lpmfuzz/DawnLPMSerializerCustom.h",
-      ]
-    }
   }
 
   # A group target to build all the fuzzers

@@ -1,21 +1,16 @@
 #version 310 es
 
 shared int i;
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
     i = 0;
   }
   barrier();
-}
-
-void tint_symbol(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
   i = 123;
-  int u = (i + 1);
+  uint v = uint(i);
+  int u = int((v + uint(1)));
 }
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol(gl_LocalInvocationIndex);
-  return;
+  main_inner(gl_LocalInvocationIndex);
 }

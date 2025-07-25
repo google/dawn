@@ -144,15 +144,15 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
-struct ImageCopyTexture;
+struct TexelCopyTextureInfo;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const ImageCopyTexture* value,
+    const TexelCopyTextureInfo* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
-struct TextureDataLayout;
+struct TexelCopyBufferLayout;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
-    const TextureDataLayout* value,
+    const TexelCopyBufferLayout* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
@@ -256,6 +256,10 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+//
+// Others
+//
+
 template <typename I, typename T>
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ityp::span<I, T>& values,
@@ -306,6 +310,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kNumeric> AbslFormatCon
     }
     return {true};
 }
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+AbslFormatConvert(StringView value, const absl::FormatConversionSpec& spec, absl::FormatSink* s);
 
 }  // namespace dawn::native
 

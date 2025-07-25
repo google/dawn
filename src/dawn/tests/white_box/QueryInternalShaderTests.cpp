@@ -237,11 +237,7 @@ class QueryInternalShaderTests : public DawnTest {
 //   timestamp period (here use GPU frequency (HZ) on Intel D3D12 to calculate the period in
 //   ns for testing).
 TEST_P(QueryInternalShaderTests, TimestampComputeShaderMultiplication) {
-    // TODO(crbug.com/dawn/741): Test output is wrong with D3D12 + WARP.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-    // TODO(crbug.com/dawn/1617): VUID-vkUpdateDescriptorSets-None-03047 on UHD630
-    // driver 31.0.101.2111
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
 
     constexpr std::array<float, 5> kPeriodsToTest = {
         1,
@@ -270,12 +266,8 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShaderMultiplication) {
 }
 
 TEST_P(QueryInternalShaderTests, TimestampComputeShaderQuantization) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
     DAWN_TEST_UNSUPPORTED_IF(!HasToggleEnabled("timestamp_quantization"));
-    // TODO(crbug.com/dawn/741): Test output is wrong with D3D12 + WARP.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-    // TODO(crbug.com/dawn/1617): VUID-vkUpdateDescriptorSets-None-03047 on UHD630
-    // driver 31.0.101.2111
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
     constexpr std::array<uint32_t, 3> kQuantizationMasksToTest = {
         0xFFFFFFFF,

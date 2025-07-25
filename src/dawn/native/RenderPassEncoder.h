@@ -28,8 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_RENDERPASSENCODER_H_
 #define SRC_DAWN_NATIVE_RENDERPASSENCODER_H_
 
-#include <vector>
-
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/RenderEncoderBase.h"
@@ -40,6 +38,7 @@ class RenderBundleBase;
 
 class RenderPassEncoder final : public RenderEncoderBase {
   public:
+    using EndCallback = std::function<MaybeError()>;
     static Ref<RenderPassEncoder> Create(DeviceBase* device,
                                          const UnpackedPtr<RenderPassDescriptor>& descriptor,
                                          CommandEncoder* commandEncoder,
@@ -50,11 +49,11 @@ class RenderPassEncoder final : public RenderEncoderBase {
                                          uint32_t renderTargetHeight,
                                          bool depthReadOnly,
                                          bool stencilReadOnly,
-                                         std::function<void()> endCallback = nullptr);
+                                         EndCallback endCallback = nullptr);
     static Ref<RenderPassEncoder> MakeError(DeviceBase* device,
                                             CommandEncoder* commandEncoder,
                                             EncodingContext* encodingContext,
-                                            const char* label);
+                                            StringView label);
 
     ~RenderPassEncoder() override;
 
@@ -97,12 +96,12 @@ class RenderPassEncoder final : public RenderEncoderBase {
                       uint32_t renderTargetHeight,
                       bool depthReadOnly,
                       bool stencilReadOnly,
-                      std::function<void()> endCallback = nullptr);
+                      EndCallback endCallback = nullptr);
     RenderPassEncoder(DeviceBase* device,
                       CommandEncoder* commandEncoder,
                       EncodingContext* encodingContext,
                       ErrorTag errorTag,
-                      const char* label);
+                      StringView label);
 
   private:
     void DestroyImpl() override;
@@ -124,7 +123,7 @@ class RenderPassEncoder final : public RenderEncoderBase {
     // This is the hardcoded value in the WebGPU spec.
     uint64_t mMaxDrawCount = 50000000;
 
-    std::function<void()> mEndCallback;
+    EndCallback mEndCallback;
 };
 
 }  // namespace dawn::native

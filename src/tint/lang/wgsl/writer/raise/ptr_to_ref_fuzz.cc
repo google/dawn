@@ -33,18 +33,17 @@
 namespace tint::wgsl::writer::raise {
 namespace {
 
-void PtrToRefFuzzer(core::ir::Module& module) {
-    if (auto res = PtrToRef(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities{core::ir::Capability::kAllowRefTypes};
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of PtrToRef failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> PtrToRefFuzzer(core::ir::Module& ir, const fuzz::ir::Context&) {
+    return PtrToRef(ir);
 }
 
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::PtrToRefFuzzer);
+// PtrToRef doesn't generate Phony instructions, but does run after ValueToLet, which can generate
+// them, so should handle them gracefully
+TINT_IR_MODULE_FUZZER(
+    tint::wgsl::writer::raise::PtrToRefFuzzer,
+    tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowPhonyInstructions},
+    tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowPhonyInstructions,
+                                 tint::core::ir::Capability::kAllowRefTypes});

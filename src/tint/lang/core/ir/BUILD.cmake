@@ -34,8 +34,10 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/core/ir/analysis/BUILD.cmake)
 include(lang/core/ir/binary/BUILD.cmake)
 include(lang/core/ir/transform/BUILD.cmake)
+include(lang/core/ir/type/BUILD.cmake)
 
 ################################################################################
 # Target:    tint_lang_core_ir
@@ -62,8 +64,12 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/call.h
   lang/core/ir/clone_context.cc
   lang/core/ir/clone_context.h
+  lang/core/ir/const_param_validator.cc
+  lang/core/ir/const_param_validator.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
+  lang/core/ir/constexpr_if.cc
+  lang/core/ir/constexpr_if.h
   lang/core/ir/construct.cc
   lang/core/ir/construct.h
   lang/core/ir/continue.cc
@@ -82,6 +88,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/disassembler.h
   lang/core/ir/discard.cc
   lang/core/ir/discard.h
+  lang/core/ir/evaluator.cc
+  lang/core/ir/evaluator.h
   lang/core/ir/exit.cc
   lang/core/ir/exit.h
   lang/core/ir/exit_if.cc
@@ -94,7 +102,6 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/function.h
   lang/core/ir/function_param.cc
   lang/core/ir/function_param.h
-  lang/core/ir/ice.h
   lang/core/ir/if.cc
   lang/core/ir/if.h
   lang/core/ir/instruction.cc
@@ -119,6 +126,15 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/next_iteration.h
   lang/core/ir/operand_instruction.cc
   lang/core/ir/operand_instruction.h
+  lang/core/ir/override.cc
+  lang/core/ir/override.h
+  lang/core/ir/phony.cc
+  lang/core/ir/phony.h
+  lang/core/ir/referenced_functions.h
+  lang/core/ir/referenced_module_decls.h
+  lang/core/ir/referenced_module_vars.h
+  lang/core/ir/reflection.cc
+  lang/core/ir/reflection.h
   lang/core/ir/return.cc
   lang/core/ir/return.h
   lang/core/ir/store.cc
@@ -138,6 +154,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/unary.h
   lang/core/ir/unreachable.cc
   lang/core/ir/unreachable.h
+  lang/core/ir/unused.cc
+  lang/core/ir/unused.h
   lang/core/ir/user_call.cc
   lang/core/ir/user_call.h
   lang/core/ir/validator.cc
@@ -153,20 +171,22 @@ tint_target_add_dependencies(tint_lang_core_ir lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_intrinsic
+  tint_lang_core_ir_type
   tint_lang_core_type
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_core_ir lib
+  "src_utils"
 )
 
 ################################################################################
@@ -179,6 +199,8 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/block_param_test.cc
   lang/core/ir/block_test.cc
   lang/core/ir/break_if_test.cc
+  lang/core/ir/builder_test.cc
+  lang/core/ir/const_param_validator_test.cc
   lang/core/ir/constant_test.cc
   lang/core/ir/construct_test.cc
   lang/core/ir/continue_test.cc
@@ -187,6 +209,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/core_builtin_call_test.cc
   lang/core/ir/core_unary_test.cc
   lang/core/ir/discard_test.cc
+  lang/core/ir/evaluator_test.cc
   lang/core/ir/exit_if_test.cc
   lang/core/ir/exit_loop_test.cc
   lang/core/ir/exit_switch_test.cc
@@ -204,6 +227,11 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/multi_in_block_test.cc
   lang/core/ir/next_iteration_test.cc
   lang/core/ir/operand_instruction_test.cc
+  lang/core/ir/override_test.cc
+  lang/core/ir/referenced_functions_test.cc
+  lang/core/ir/referenced_module_decls_test.cc
+  lang/core/ir/referenced_module_vars_test.cc
+  lang/core/ir/reflection_test.cc
   lang/core/ir/return_test.cc
   lang/core/ir/store_test.cc
   lang/core/ir/store_vector_element_test.cc
@@ -213,7 +241,15 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/traverse_test.cc
   lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
+  lang/core/ir/validator_access_test.cc
+  lang/core/ir/validator_builtin_test.cc
+  lang/core/ir/validator_call_test.cc
+  lang/core/ir/validator_flow_control_test.cc
+  lang/core/ir/validator_function_test.cc
   lang/core/ir/validator_test.cc
+  lang/core/ir/validator_test.h
+  lang/core/ir/validator_type_test.cc
+  lang/core/ir/validator_value_test.cc
   lang/core/ir/value_test.cc
   lang/core/ir/var_test.cc
 )
@@ -224,22 +260,21 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_type
   tint_lang_core_type
+  tint_utils
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_core_ir_test test
   "gtest"
+  "src_utils"
 )

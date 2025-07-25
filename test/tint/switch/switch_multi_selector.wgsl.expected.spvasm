@@ -1,42 +1,35 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 20
+; Generator: Google Tint Compiler; 1
+; Bound: 15
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %a "a"
-               OpName %tint_return_flag "tint_return_flag"
-               OpName %a_1 "a_1"
+               OpName %a_0 "a"
+               OpName %unused_entry_point "unused_entry_point"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
-       %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
-         %10 = OpConstantNull %bool
+          %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-         %12 = OpConstantNull %int
 %_ptr_Function_int = OpTypePointer Function %int
-       %true = OpConstantTrue %bool
-%unused_entry_point = OpFunction %void None %1
+      %int_0 = OpConstant %int 0
+          %a = OpFunction %void None %3
           %4 = OpLabel
+        %a_0 = OpVariable %_ptr_Function_int Function
+               OpStore %a_0 %int_0
+          %9 = OpLoad %int %a_0 None
+               OpSelectionMerge %12 None
+               OpSwitch %9 %10 0 %11 2 %11 4 %11 1 %10
+         %11 = OpLabel
+               OpBranch %12
+         %10 = OpLabel
+               OpBranch %12
+         %12 = OpLabel
                OpReturn
                OpFunctionEnd
-          %a = OpFunction %void None %1
-          %6 = OpLabel
-%tint_return_flag = OpVariable %_ptr_Function_bool Function %10
-        %a_1 = OpVariable %_ptr_Function_int Function %12
-               OpStore %a_1 %12
-         %16 = OpLoad %int %a_1
-               OpSelectionMerge %15 None
-               OpSwitch %16 %17 0 %18 2 %18 4 %18 1 %17
-         %18 = OpLabel
-               OpBranch %15
-         %17 = OpLabel
-               OpStore %tint_return_flag %true
-               OpBranch %15
-         %15 = OpLabel
+%unused_entry_point = OpFunction %void None %3
+         %14 = OpLabel
                OpReturn
                OpFunctionEnd

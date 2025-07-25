@@ -20,4 +20,10 @@ fn foo(
 
 @compute @workgroup_size(1)
 fn main() {
+    let a = array<f32, 4>();
+    var b = 1.f;
+    var c = vec4f();
+    var d = array<f32, 4>();
+
+    foo(true, 1i, 1u, 1f, vec2i(3), vec3u(4), vec4f(5), mat2x3f(), a, S(), &b, &c, &d);
 }

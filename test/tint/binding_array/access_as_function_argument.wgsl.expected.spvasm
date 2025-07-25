@@ -1,0 +1,58 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 38
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+         %20 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpName %sampled_textures "sampled_textures"
+               OpName %do_texture_load "do_texture_load"
+               OpName %t "t"
+               OpName %texture_load "texture_load"
+               OpName %fs "fs"
+               OpDecorate %sampled_textures DescriptorSet 0
+               OpDecorate %sampled_textures Binding 0
+      %float = OpTypeFloat 32
+          %4 = OpTypeImage %float 2D 0 0 0 1 Unknown
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_4_uint_4 = OpTypeArray %4 %uint_4
+%_ptr_UniformConstant__arr_4_uint_4 = OpTypePointer UniformConstant %_arr_4_uint_4
+%sampled_textures = OpVariable %_ptr_UniformConstant__arr_4_uint_4 UniformConstant
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void %4
+     %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+     %v2uint = OpTypeVector %uint 2
+         %24 = OpConstantComposite %v2uint %uint_1 %uint_1
+      %v2int = OpTypeVector %int 2
+         %26 = OpConstantNull %v2int
+    %v4float = OpTypeVector %float 4
+         %32 = OpTypeFunction %void
+%_ptr_UniformConstant_4 = OpTypePointer UniformConstant %4
+%do_texture_load = OpFunction %void None %11
+          %t = OpFunctionParameter %4
+         %12 = OpLabel
+         %13 = OpImageQueryLevels %uint %t
+         %14 = OpISub %uint %13 %uint_1
+         %16 = OpBitcast %uint %int_0
+         %19 = OpExtInst %uint %20 UMin %16 %14
+         %21 = OpImageQuerySizeLod %v2uint %t %19
+         %23 = OpISub %v2uint %21 %24
+         %25 = OpBitcast %v2uint %26
+         %28 = OpExtInst %v2uint %20 UMin %25 %23
+%texture_load = OpImageFetch %v4float %t %28 Lod %19
+               OpReturn
+               OpFunctionEnd
+         %fs = OpFunction %void None %32
+         %33 = OpLabel
+         %34 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %int_0
+         %36 = OpLoad %4 %34 None
+         %37 = OpFunctionCall %void %do_texture_load %36
+               OpReturn
+               OpFunctionEnd

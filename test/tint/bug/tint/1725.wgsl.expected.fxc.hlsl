@@ -1,21 +1,20 @@
-ByteAddressBuffer tint_symbol : register(t0);
-
-struct tint_symbol_8 {
-  uint tint_symbol_2 : SV_GroupIndex;
+struct tint_struct {
+  uint tint_member : SV_GroupIndex;
 };
 
-void tint_symbol_1_inner(uint tint_symbol_2) {
-  uint tint_symbol_10 = 0u;
-  tint_symbol.GetDimensions(tint_symbol_10);
-  uint tint_symbol_11 = (tint_symbol_10 / 4u);
-  int tint_symbol_3 = 0;
-  int tint_symbol_4 = 0;
-  int tint_symbol_5 = 0;
-  uint tint_symbol_6 = tint_symbol.Load((4u * min(tint_symbol_2, (tint_symbol_11 - 1u))));
+
+ByteAddressBuffer v : register(t0);
+void v_1(uint v_2) {
+  int v_3 = int(0);
+  int v_4 = int(0);
+  int v_5 = int(0);
+  uint v_6 = 0u;
+  v.GetDimensions(v_6);
+  uint v_7 = v.Load((0u + (min(v_2, ((v_6 / 4u) - 1u)) * 4u)));
 }
 
 [numthreads(1, 1, 1)]
-void tint_symbol_1(tint_symbol_8 tint_symbol_7) {
-  tint_symbol_1_inner(tint_symbol_7.tint_symbol_2);
-  return;
+void tint_entry_point(tint_struct v_9) {
+  v_1(v_9.tint_member);
 }
+

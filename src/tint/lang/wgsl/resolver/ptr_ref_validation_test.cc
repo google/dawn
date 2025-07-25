@@ -191,25 +191,6 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfUnresolvedValue) {
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved value 'position')");
 }
 
-TEST_F(ResolverPtrRefValidationTest, AddressOfInterpolationSampling) {
-    // &centroid
-    auto* expr = AddressOf(Expr(Source{{12, 34}}, "centroid"));
-    WrapInFunction(expr);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot use interpolation sampling 'centroid' as value)");
-}
-
-TEST_F(ResolverPtrRefValidationTest, AddressOfInterpolationType) {
-    // &perspective
-    auto* expr = AddressOf(Expr(Source{{12, 34}}, "perspective"));
-    WrapInFunction(expr);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: cannot use interpolation type 'perspective' as value)");
-}
-
 TEST_F(ResolverPtrRefValidationTest, AddressOfTexelFormat) {
     // &rgba8snorm
     auto* expr = AddressOf(Expr(Source{{12, 34}}, "rgba8snorm"));

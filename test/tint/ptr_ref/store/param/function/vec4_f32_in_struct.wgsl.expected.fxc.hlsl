@@ -2,6 +2,7 @@ struct str {
   float4 i;
 };
 
+
 void func(inout float4 pointer) {
   pointer = (0.0f).xxxx;
 }
@@ -10,5 +11,5 @@ void func(inout float4 pointer) {
 void main() {
   str F = (str)0;
   func(F.i);
-  return;
 }
+

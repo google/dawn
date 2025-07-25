@@ -1,7 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-void tint_symbol() {
-  int i = 0;
-  i = (i + 1);
-}

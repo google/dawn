@@ -34,10 +34,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::TerminateInvocation);
 
 namespace tint::core::ir {
 
+TerminateInvocation::TerminateInvocation(Id id) : Base(id) {}
+
 TerminateInvocation::~TerminateInvocation() = default;
 
 TerminateInvocation* TerminateInvocation::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.instructions.Create<TerminateInvocation>();
+    return ctx.ir.CreateInstruction<TerminateInvocation>();
 }
 
 }  // namespace tint::core::ir

@@ -1,23 +1,26 @@
 #version 310 es
 
 shared uint wg[4];
-void tint_zero_workgroup_memory(uint local_idx) {
+void compute_main_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      atomicExchange(wg[i], 0u);
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint v_1 = v;
+      if ((v_1 >= 4u)) {
+        break;
+      }
+      atomicExchange(wg[v_1], 0u);
+      {
+        v = (v_1 + 1u);
+      }
+      continue;
     }
   }
   barrier();
+  atomicExchange(wg[1u], 1u);
 }
-
-void compute_main(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  atomicExchange(wg[1], 1u);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main(gl_LocalInvocationIndex);
-  return;
+  compute_main_inner(gl_LocalInvocationIndex);
 }

@@ -43,14 +43,14 @@ using HlslWriterPromoteInitializersTest = core::ir::transform::TransformTest;
 TEST_F(HlslWriterPromoteInitializersTest, NoStructInitializers) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Zero<i32>());
+        b.Var<function>("a", b.Zero<i32>());
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, i32, read_write> = var, 0i
+    %a:ptr<function, i32, read_write> = var 0i
     ret
   }
 }
@@ -70,7 +70,7 @@ TEST_F(HlslWriterPromoteInitializersTest, StructInVarNoChange) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Composite(str_ty, 1_i));
+        b.Var<function>("a", b.Composite(str_ty, 1_i));
         b.Return(func);
     });
 
@@ -81,7 +81,7 @@ S = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, S, read_write> = var, S(1i)
+    %a:ptr<function, S, read_write> = var S(1i)
     ret
   }
 }
@@ -97,14 +97,14 @@ S = struct @align(4) {
 TEST_F(HlslWriterPromoteInitializersTest, ArrayInVarNoChange) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Zero<array<i32, 2>>());
+        b.Var<function>("a", b.Zero<array<i32, 2>>());
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, array<i32, 2>, read_write> = var, array<i32, 2>(0i)
+    %a:ptr<function, array<i32, 2>, read_write> = var array<i32, 2>(0i)
     ret
   }
 }
@@ -290,7 +290,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %a:ptr<private, S, read_write> = var, S(1i)
+  %a:ptr<private, S, read_write> = var S(1i)
 }
 
 )";
@@ -304,7 +304,51 @@ S = struct @align(4) {
 $B1: {  # root
   %1:S = construct 1i
   %2:S = let %1
-  %a:ptr<private, S, read_write> = var, %2
+  %a:ptr<private, S, read_write> = var %2
+}
+
+)";
+    Run(PromoteInitializers);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, ModuleScopedStruct_SplatMultipleElements) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.i32()},
+                                                       {mod.symbols.New("b"), ty.i32()},
+                                                       {mod.symbols.New("c"), ty.i32()},
+                                                   });
+
+    b.ir.root_block->Append(b.Var<private_>("a", b.Splat(str_ty, 1_i)));
+
+    auto* src = R"(
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  c:i32 @offset(8)
+}
+
+$B1: {  # root
+  %a:ptr<private, S, read_write> = var S(1i)
+}
+
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(4) {
+  a:i32 @offset(0)
+  b:i32 @offset(4)
+  c:i32 @offset(8)
+}
+
+$B1: {  # root
+  %1:S = construct 1i, 1i, 1i
+  %2:S = let %1
+  %a:ptr<private, S, read_write> = var %2
 }
 
 )";
@@ -320,7 +364,7 @@ TEST_F(HlslWriterPromoteInitializersTest, ModuleScopedArray) {
 
     auto* src = R"(
 $B1: {  # root
-  %a:ptr<private, array<i32, 2>, read_write> = var, array<i32, 2>(0i)
+  %a:ptr<private, array<i32, 2>, read_write> = var array<i32, 2>(0i)
 }
 
 )";
@@ -329,7 +373,7 @@ $B1: {  # root
     auto* expect = R"(
 $B1: {  # root
   %1:array<i32, 2> = let array<i32, 2>(0i)
-  %a:ptr<private, array<i32, 2>, read_write> = var, %1
+  %a:ptr<private, array<i32, 2>, read_write> = var %1
 }
 
 )";
@@ -372,7 +416,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %a:ptr<private, S, read_write> = var, S(A(1i, B(1.0f)))
+  %a:ptr<private, S, read_write> = var S(A(1i, B(1.0f)))
 }
 
 )";
@@ -399,7 +443,7 @@ $B1: {  # root
   %4:A = let %3
   %5:S = construct %4
   %6:S = let %5
-  %a:ptr<private, S, read_write> = var, %6
+  %a:ptr<private, S, read_write> = var %6
 }
 
 )";
@@ -423,7 +467,7 @@ S = struct @align(4) {
 }
 
 $B1: {  # root
-  %a:ptr<private, S, read_write> = var, S(array<i32, 3>(0i))
+  %a:ptr<private, S, read_write> = var S(array<i32, 3>(0i))
 }
 
 )";
@@ -437,7 +481,7 @@ S = struct @align(4) {
 $B1: {  # root
   %1:S = construct array<i32, 3>(0i)
   %2:S = let %1
-  %a:ptr<private, S, read_write> = var, %2
+  %a:ptr<private, S, read_write> = var %2
 }
 
 )";
@@ -492,11 +536,11 @@ C = struct @align(4) {
 }
 
 $B1: {  # root
-  %a:ptr<private, A, read_write> = var, A(array<i32, 2>(9i, 10i))
-  %b:ptr<private, B, read_write> = var, B(array<array<i32, 4>, 1>(array<i32, 4>(5i, 6i, 7i, 8i)))
-  %c:ptr<private, C, read_write> = var, C(A(array<i32, 2>(1i, 2i)))
-  %d:ptr<private, array<i32, 2>, read_write> = var, array<i32, 2>(11i, 12i)
-  %e:ptr<private, array<array<array<i32, 3>, 2>, 1>, read_write> = var, array<array<array<i32, 3>, 2>, 1>(array<array<i32, 3>, 2>(array<i32, 3>(1i, 2i, 3i), array<i32, 3>(4i, 5i, 6i)))
+  %a:ptr<private, A, read_write> = var A(array<i32, 2>(9i, 10i))
+  %b:ptr<private, B, read_write> = var B(array<array<i32, 4>, 1>(array<i32, 4>(5i, 6i, 7i, 8i)))
+  %c:ptr<private, C, read_write> = var C(A(array<i32, 2>(1i, 2i)))
+  %d:ptr<private, array<i32, 2>, read_write> = var array<i32, 2>(11i, 12i)
+  %e:ptr<private, array<array<array<i32, 3>, 2>, 1>, read_write> = var array<array<array<i32, 3>, 2>, 1>(array<array<i32, 3>, 2>(array<i32, 3>(1i, 2i, 3i), array<i32, 3>(4i, 5i, 6i)))
 }
 
 )";
@@ -518,19 +562,19 @@ C = struct @align(4) {
 $B1: {  # root
   %1:A = construct array<i32, 2>(9i, 10i)
   %2:A = let %1
-  %a:ptr<private, A, read_write> = var, %2
+  %a:ptr<private, A, read_write> = var %2
   %4:B = construct array<array<i32, 4>, 1>(array<i32, 4>(5i, 6i, 7i, 8i))
   %5:B = let %4
-  %b:ptr<private, B, read_write> = var, %5
+  %b:ptr<private, B, read_write> = var %5
   %7:A = construct array<i32, 2>(1i, 2i)
   %8:A = let %7
   %9:C = construct %8
   %10:C = let %9
-  %c:ptr<private, C, read_write> = var, %10
+  %c:ptr<private, C, read_write> = var %10
   %12:array<i32, 2> = let array<i32, 2>(11i, 12i)
-  %d:ptr<private, array<i32, 2>, read_write> = var, %12
+  %d:ptr<private, array<i32, 2>, read_write> = var %12
   %14:array<array<array<i32, 3>, 2>, 1> = let array<array<array<i32, 3>, 2>, 1>(array<array<i32, 3>, 2>(array<i32, 3>(1i, 2i, 3i), array<i32, 3>(4i, 5i, 6i)))
-  %e:ptr<private, array<array<array<i32, 3>, 2>, 1>, read_write> = var, %14
+  %e:ptr<private, array<array<array<i32, 3>, 2>, 1>, read_write> = var %14
 }
 
 )";
@@ -638,8 +682,7 @@ A = struct @align(4) {
   $B2: {
     %4:A = let A(1i)
     %5:void = call %bar, %4
-    %6:A = let A(1i)
-    %7:void = call %bar, %6
+    %6:void = call %bar, %4
     ret
   }
 }
@@ -706,6 +749,228 @@ TEST_F(HlslWriterPromoteInitializersTest, DuplicateConstant) {
 )";
     Run(PromoteInitializers);
 
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccess) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Construct(ty.array(ty.f32(), 8));
+        b.Access(ty.f32(), ary, 0_u);
+        b.Access(ty.f32(), ary, 1_u);
+        b.Access(ty.f32(), ary, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    %3:f32 = access %2, 0u
+    %4:f32 = access %2, 1u
+    %5:f32 = access %2, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    %3:array<f32, 8> = let %2
+    %4:f32 = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:f32 = access %3, 2u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentFunction) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* a = b.Function("a", ty.void_());
+    b.Append(a->Block(), [&] {
+        auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
+        b.Access(ty.f32(), ary, 0_u);
+        b.Return(a);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
+        b.Access(ty.f32(), ary, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%a = func():void {
+  $B1: {
+    %2:f32 = access array<f32, 8>(8.0f), 0u
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %4:f32 = access array<f32, 8>(8.0f), 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%a = func():void {
+  $B1: {
+    %2:array<f32, 8> = let array<f32, 8>(8.0f)
+    %3:f32 = access %2, 0u
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %5:array<f32, 8> = let array<f32, 8>(8.0f)
+    %6:f32 = access %5, 0u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentScope) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Construct(ty.array(ty.f32(), 8));
+
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] {
+            b.Access(ty.f32(), ary, 0_u);
+            b.ExitIf(if_);
+        });
+
+        b.Access(ty.f32(), ary, 1_u);
+        b.Access(ty.f32(), ary, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %3:f32 = access %2, 0u
+        exit_if  # if_1
+      }
+    }
+    %4:f32 = access %2, 1u
+    %5:f32 = access %2, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %3:array<f32, 8> = let %2
+        %4:f32 = access %3, 0u
+        exit_if  # if_1
+      }
+    }
+    %5:array<f32, 8> = let %2
+    %6:f32 = access %5, 1u
+    %7:f32 = access %5, 2u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, LetOfLet) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.vec4<i32>()},
+                                                   });
+
+    auto* inner = b.Function("inner", str_ty);
+    b.Append(inner->Block(),
+             [&] { b.Return(inner, b.Construct(str_ty, b.Splat(ty.vec4<i32>(), 1_i))); });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* in = b.Call(inner);
+        auto* l = b.Let("a", in);
+        b.Access(ty.vec4<i32>(), l, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec4<i32> @offset(0)
+}
+
+%inner = func():S {
+  $B1: {
+    %2:S = construct vec4<i32>(1i)
+    ret %2
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %4:S = call %inner
+    %a:S = let %4
+    %6:vec4<i32> = access %a, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec4<i32> @offset(0)
+}
+
+%inner = func():S {
+  $B1: {
+    %2:S = construct vec4<i32>(1i)
+    %3:S = let %2
+    ret %3
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %5:S = call %inner
+    %a:S = let %5
+    %7:vec4<i32> = access %a, 0u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
     EXPECT_EQ(expect, str());
 }
 

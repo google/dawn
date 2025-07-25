@@ -56,7 +56,7 @@ TEST_P(FragDepthTests, FragDepthIsClampedToViewport) {
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);
-    pDescDS->depthWriteEnabled = true;
+    pDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
     pDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
 
@@ -85,8 +85,8 @@ TEST_P(FragDepthTests, FragDepthIsClampedToViewport) {
     EXPECT_PIXEL_FLOAT_EQ(0.5f, depthTexture, 0, 0);
 }
 
-// Test for the push constant logic for ClampFragDepth in Vulkan to check that changing the
-// pipeline layout doesn't invalidate the push constants that were set.
+// Test for the immediate data logic for ClampFragDepth in Vulkan to check that changing the
+// pipeline layout doesn't invalidate the immediate data that were set.
 TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     // TODO(dawn:1805): Load ByteAddressBuffer in Pixel Shader doesn't work with NVIDIA on D3D11
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsNvidia());
@@ -99,14 +99,14 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
             return vec4f(0.0, 0.0, 0.5, 1.0);
         }
 
-        @group(0) @binding(0) var<uniform> uniformDepth : f32;
-        @fragment fn fsUniform() -> @builtin(frag_depth) f32 {
-            return uniformDepth;
+        @group(0) @binding(0) var<uniform> uniformDepth1 : f32;
+        @fragment fn fsUniform1() -> @builtin(frag_depth) f32 {
+            return uniformDepth1;
         }
 
-        @group(0) @binding(0) var<storage, read> storageDepth : f32;
-        @fragment fn fsStorage() -> @builtin(frag_depth) f32 {
-            return storageDepth;
+        @group(0) @binding(0) var tex : texture_2d<f32>;
+        @fragment fn fsUniform2() -> @builtin(frag_depth) f32 {
+            return textureLoad(tex, vec2u(0), 0).r;
         }
     )");
 
@@ -115,11 +115,11 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     upDesc.vertex.module = module;
     upDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     upDesc.cFragment.module = module;
-    upDesc.cFragment.entryPoint = "fsUniform";
+    upDesc.cFragment.entryPoint = "fsUniform1";
     upDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* upDescDS = upDesc.EnableDepthStencil(kDepthFormat);
-    upDescDS->depthWriteEnabled = true;
+    upDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
     upDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline uniformPipeline = device.CreateRenderPipeline(&upDesc);
 
@@ -133,18 +133,32 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     spDesc.vertex.module = module;
     spDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     spDesc.cFragment.module = module;
-    spDesc.cFragment.entryPoint = "fsStorage";
+    spDesc.cFragment.entryPoint = "fsUniform2";
     spDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* spDescDS = spDesc.EnableDepthStencil(kDepthFormat);
-    spDescDS->depthWriteEnabled = true;
+    spDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
     spDescDS->depthCompare = wgpu::CompareFunction::Always;
-    wgpu::RenderPipeline storagePipeline = device.CreateRenderPipeline(&spDesc);
+    wgpu::RenderPipeline texturePipeline = device.CreateRenderPipeline(&spDesc);
 
-    wgpu::Buffer storageBuffer =
-        utils::CreateBufferFromData<float>(device, wgpu::BufferUsage::Storage, {1.0});
-    wgpu::BindGroup storageBG =
-        utils::MakeBindGroup(device, storagePipeline.GetBindGroupLayout(0), {{0, storageBuffer}});
+    wgpu::TextureDescriptor texDesc = {};
+    texDesc.size = {1, 1, 1};
+    texDesc.format = wgpu::TextureFormat::R32Float;
+    texDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture texture = device.CreateTexture(&texDesc);
+
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+        utils::CreateTexelCopyBufferLayout(0, sizeof(float));
+    wgpu::Extent3D copyExtent = {1, 1, 1};
+
+    float one = 1.0;
+    queue.WriteTexture(&texelCopyTextureInfo, &one, sizeof(float), &texelCopyBufferLayout,
+                       &copyExtent);
+
+    wgpu::BindGroup textureBG = utils::MakeBindGroup(device, texturePipeline.GetBindGroupLayout(0),
+                                                     {{0, texture.CreateView()}});
 
     // Create a depth-only render pass.
     wgpu::TextureDescriptor depthDesc;
@@ -168,8 +182,8 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     pass.Draw(1);
 
     // Writes 1.0 clamped to 0.5.
-    pass.SetPipeline(storagePipeline);
-    pass.SetBindGroup(0, storageBG);
+    pass.SetPipeline(texturePipeline);
+    pass.SetBindGroup(0, textureBG);
     pass.Draw(1);
 
     pass.End();
@@ -203,7 +217,7 @@ TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);
-    pDescDS->depthWriteEnabled = true;
+    pDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
     pDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline uniformPipeline = device.CreateRenderPipeline(&pDesc);
 

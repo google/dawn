@@ -1,8 +1,9 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
+
+void v() {
+  float v_1 = 1.0f;
 }
 
-void i() {
-  float s = 1.0f;
+[numthreads(1, 1, 1)]
+void tint_entry_point() {
 }
+

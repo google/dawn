@@ -4,63 +4,91 @@ struct S {
   int after;
 };
 
+
 cbuffer cbuffer_u : register(b0) {
   uint4 u[32];
 };
 RWByteAddressBuffer s : register(u1);
-
-void s_store_3(uint offset, matrix<float16_t, 2, 2> value) {
-  s.Store<vector<float16_t, 2> >((offset + 0u), value[0u]);
-  s.Store<vector<float16_t, 2> >((offset + 4u), value[1u]);
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v = src;
+  float t_low = f16tof32((v & 65535u));
+  float t_high = f16tof32(((v >> 16u) & 65535u));
+  float16_t v_1 = float16_t(t_low);
+  return vector<float16_t, 2>(v_1, float16_t(t_high));
 }
 
-void s_store_1(uint offset, S value) {
-  s.Store((offset + 0u), asuint(value.before));
-  s_store_3((offset + 4u), value.m);
-  s.Store((offset + 64u), asuint(value.after));
+void v_2(uint offset, matrix<float16_t, 2, 2> obj) {
+  s.Store<vector<float16_t, 2> >((offset + 0u), obj[0u]);
+  s.Store<vector<float16_t, 2> >((offset + 4u), obj[1u]);
 }
 
-void s_store(uint offset, S value[4]) {
-  S array_1[4] = value;
+matrix<float16_t, 2, 2> v_3(uint start_byte_offset) {
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  return matrix<float16_t, 2, 2>(v_4, tint_bitcast_to_f16(u[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]));
+}
+
+void v_5(uint offset, S obj) {
+  s.Store((offset + 0u), asuint(obj.before));
+  v_2((offset + 4u), obj.m);
+  s.Store((offset + 64u), asuint(obj.after));
+}
+
+S v_6(uint start_byte_offset) {
+  int v_7 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  matrix<float16_t, 2, 2> v_8 = v_3((4u + start_byte_offset));
+  S v_9 = {v_7, v_8, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  return v_9;
+}
+
+void v_10(uint offset, S obj[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      s_store_1((offset + (i * 128u)), array_1[i]);
+    uint v_11 = 0u;
+    v_11 = 0u;
+    while(true) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
+        break;
+      }
+      S v_13 = obj[v_12];
+      v_5((offset + (v_12 * 128u)), v_13);
+      {
+        v_11 = (v_12 + 1u);
+      }
+      continue;
     }
   }
 }
 
-matrix<float16_t, 2, 2> u_load_3(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint ubo_load = u[scalar_offset / 4][scalar_offset % 4];
-  const uint scalar_offset_1 = ((offset + 4u)) / 4;
-  uint ubo_load_1 = u[scalar_offset_1 / 4][scalar_offset_1 % 4];
-  return matrix<float16_t, 2, 2>(vector<float16_t, 2>(float16_t(f16tof32(ubo_load & 0xFFFF)), float16_t(f16tof32(ubo_load >> 16))), vector<float16_t, 2>(float16_t(f16tof32(ubo_load_1 & 0xFFFF)), float16_t(f16tof32(ubo_load_1 >> 16))));
-}
-
-S u_load_1(uint offset) {
-  const uint scalar_offset_2 = ((offset + 0u)) / 4;
-  const uint scalar_offset_3 = ((offset + 64u)) / 4;
-  S tint_symbol = {asint(u[scalar_offset_2 / 4][scalar_offset_2 % 4]), u_load_3((offset + 4u)), asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4])};
-  return tint_symbol;
-}
-
-typedef S u_load_ret[4];
-u_load_ret u_load(uint offset) {
-  S arr[4] = (S[4])0;
+typedef S ary_ret[4];
+ary_ret v_14(uint start_byte_offset) {
+  S a[4] = (S[4])0;
   {
-    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
-      arr[i_1] = u_load_1((offset + (i_1 * 128u)));
+    uint v_15 = 0u;
+    v_15 = 0u;
+    while(true) {
+      uint v_16 = v_15;
+      if ((v_16 >= 4u)) {
+        break;
+      }
+      S v_17 = v_6((start_byte_offset + (v_16 * 128u)));
+      a[v_16] = v_17;
+      {
+        v_15 = (v_16 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  S v_18[4] = a;
+  return v_18;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  s_store(0u, u_load(0u));
-  s_store_1(128u, u_load_1(256u));
-  s_store_3(388u, u_load_3(260u));
-  uint ubo_load_2 = u[0].z;
-  s.Store<vector<float16_t, 2> >(132u, vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16))).yx);
-  return;
+  S v_19[4] = v_14(0u);
+  v_10(0u, v_19);
+  S v_20 = v_6(256u);
+  v_5(128u, v_20);
+  v_2(388u, v_3(260u));
+  s.Store<vector<float16_t, 2> >(132u, tint_bitcast_to_f16(u[0u].z).yx);
 }
+

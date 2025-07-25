@@ -1,42 +1,44 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 20
+; Generator: Google Tint Compiler; 1
+; Bound: 22
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %f "f"
                OpExecutionMode %f OriginUpperLeft
-               OpName %tint_discarded "tint_discarded"
+               OpName %continue_execution "continue_execution"
                OpName %call_discard "call_discard"
                OpName %f "f"
                OpName %v "v"
                OpName %also_unreachable "also_unreachable"
        %bool = OpTypeBool
-          %2 = OpConstantNull %bool
 %_ptr_Private_bool = OpTypePointer Private %bool
-%tint_discarded = OpVariable %_ptr_Private_bool Private %2
-          %5 = OpTypeFunction %bool
        %true = OpConstantTrue %bool
+%continue_execution = OpVariable %_ptr_Private_bool Private %true
+          %6 = OpTypeFunction %bool
+      %false = OpConstantFalse %bool
        %void = OpTypeVoid
-          %9 = OpTypeFunction %void
+         %11 = OpTypeFunction %void
 %_ptr_Function_bool = OpTypePointer Function %bool
-%call_discard = OpFunction %bool None %5
+         %17 = OpConstantNull %bool
+%call_discard = OpFunction %bool None %6
           %7 = OpLabel
-               OpStore %tint_discarded %true
+               OpStore %continue_execution %false None
                OpReturnValue %true
                OpFunctionEnd
-          %f = OpFunction %void None %9
+          %f = OpFunction %void None %11
          %12 = OpLabel
-          %v = OpVariable %_ptr_Function_bool Function %2
-%also_unreachable = OpVariable %_ptr_Function_bool Function %2
+          %v = OpVariable %_ptr_Function_bool Function
+%also_unreachable = OpVariable %_ptr_Function_bool Function %17
          %13 = OpFunctionCall %bool %call_discard
                OpStore %v %13
-         %17 = OpLoad %bool %tint_discarded
-               OpSelectionMerge %18 None
-               OpBranchConditional %17 %19 %18
-         %19 = OpLabel
+         %18 = OpLoad %bool %continue_execution None
+         %19 = OpLogicalNot %bool %18
+               OpSelectionMerge %20 None
+               OpBranchConditional %19 %21 %20
+         %21 = OpLabel
                OpKill
-         %18 = OpLabel
+         %20 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 14
+; Generator: Google Tint Compiler; 1
+; Bound: 13
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -10,28 +10,27 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
                OpName %a "a"
                OpName %b "b"
                OpName %c "c"
+               OpName %unused_entry_point "unused_entry_point"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
        %half = OpTypeFloat 16
-%half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function_half = OpTypePointer Function %half
-         %11 = OpConstantNull %half
-%unused_entry_point = OpFunction %void None %1
+%half_0x1p_0 = OpConstant %half 0x1p+0
+          %f = OpFunction %void None %3
           %4 = OpLabel
-               OpReturn
-               OpFunctionEnd
-          %f = OpFunction %void None %1
-          %6 = OpLabel
-          %a = OpVariable %_ptr_Function_half Function %11
-          %b = OpVariable %_ptr_Function_half Function %11
-          %c = OpVariable %_ptr_Function_half Function %11
+          %a = OpVariable %_ptr_Function_half Function
+          %b = OpVariable %_ptr_Function_half Function
+          %c = OpVariable %_ptr_Function_half Function
                OpStore %a %half_0x1p_0
                OpStore %b %half_0x1p_0
                OpStore %c %half_0x1p_0
+               OpReturn
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %3
+         %12 = OpLabel
                OpReturn
                OpFunctionEnd

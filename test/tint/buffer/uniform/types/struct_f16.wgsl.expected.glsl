@@ -1,62 +1,54 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-struct Inner {
-  float16_t scalar_f16;
-  uint pad;
-  f16vec3 vec3_f16;
-  f16mat2x4 mat2x4_f16;
-};
 
 struct Inner_std140 {
   float16_t scalar_f16;
-  uint pad;
+  uint tint_pad_0;
   f16vec3 vec3_f16;
-  f16vec4 mat2x4_f16_0;
-  f16vec4 mat2x4_f16_1;
-};
-
-struct S {
-  Inner inner;
+  f16vec4 mat2x4_f16_col0;
+  f16vec4 mat2x4_f16_col1;
 };
 
 struct S_std140 {
   Inner_std140 inner;
 };
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
+struct Inner {
+  float16_t scalar_f16;
+  uint tint_pad_0;
+  f16vec3 vec3_f16;
+  f16mat2x4 mat2x4_f16;
+};
+
+struct S {
+  Inner inner;
+};
+
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
   S_std140 inner;
-} u;
-
-layout(binding = 1, std430) buffer u_block_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   S inner;
-} s;
-
-void assign_and_preserve_padding_1_s_inner_inner(Inner value) {
-  s.inner.inner.scalar_f16 = value.scalar_f16;
-  s.inner.inner.vec3_f16 = value.vec3_f16;
-  s.inner.inner.mat2x4_f16 = value.mat2x4_f16;
+} v_1;
+void tint_store_and_preserve_padding_1(Inner value_param) {
+  v_1.inner.inner.scalar_f16 = value_param.scalar_f16;
+  v_1.inner.inner.vec3_f16 = value_param.vec3_f16;
+  v_1.inner.inner.mat2x4_f16 = value_param.mat2x4_f16;
 }
-
-void assign_and_preserve_padding_s_inner(S value) {
-  assign_and_preserve_padding_1_s_inner_inner(value.inner);
+void tint_store_and_preserve_padding(S value_param) {
+  tint_store_and_preserve_padding_1(value_param.inner);
 }
-
-Inner conv_Inner(Inner_std140 val) {
-  return Inner(val.scalar_f16, val.pad, val.vec3_f16, f16mat2x4(val.mat2x4_f16_0, val.mat2x4_f16_1));
+Inner tint_convert_Inner(Inner_std140 tint_input) {
+  return Inner(tint_input.scalar_f16, 0u, tint_input.vec3_f16, f16mat2x4(tint_input.mat2x4_f16_col0, tint_input.mat2x4_f16_col1));
 }
-
-S conv_S(S_std140 val) {
-  return S(conv_Inner(val.inner));
+S tint_convert_S(S_std140 tint_input) {
+  return S(tint_convert_Inner(tint_input.inner));
 }
-
-void tint_symbol() {
-  S x = conv_S(u.inner);
-  assign_and_preserve_padding_s_inner(x);
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol();
-  return;
+  S x = tint_convert_S(v.inner);
+  tint_store_and_preserve_padding(x);
 }

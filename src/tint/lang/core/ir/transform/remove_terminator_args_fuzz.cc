@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void RemoveTerminatorArgsFuzzer(Module& module) {
-    if (auto res = RemoveTerminatorArgs(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of RemoveTerminatorArgs failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> RemoveTerminatorArgsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return RemoveTerminatorArgs(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RemoveTerminatorArgsFuzzer,
+                      tint::core::ir::transform::kRemoveTerminatorArgsCapabilities);

@@ -1,33 +1,37 @@
-//* Copyright 2024 The Dawn & Tint Authors
-//*
-//* Redistribution and use in source and binary forms, with or without
-//* modification, are permitted provided that the following conditions are met:
-//*
-//* 1. Redistributions of source code must retain the above copyright notice, this
-//*    list of conditions and the following disclaimer.
-//*
-//* 2. Redistributions in binary form must reproduce the above copyright notice,
-//*    this list of conditions and the following disclaimer in the documentation
-//*    and/or other materials provided with the distribution.
-//*
-//* 3. Neither the name of the copyright holder nor the names of its
-//*    contributors may be used to endorse or promote products derived from
-//*    this software without specific prior written permission.
-//*
-//* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-//* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-//* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-//* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-//* FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-//* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-//* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-//* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-//* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-//* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'art/api_jni_types.kt' import arg_to_jni_type, to_jni_type with context %}
+// Copyright 2024 The Dawn & Tint Authors
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this
+//    list of conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice,
+//    this list of conditions and the following disclaimer in the documentation
+//    and/or other materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+{% from 'art/kotlin_record_conversion.cpp' import define_kotlin_record_structure, define_kotlin_to_struct_conversion with context %}
+{% from 'art/api_jni_types.cpp' import arg_to_jni_type, convert_to_kotlin, jni_signature, to_jni_type with context %}
 #include <jni.h>
 #include <stdlib.h>
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
+
+#include "JNIClasses.h"
+#include "JNIContext.h"
 #include "structures.h"
 
 // Converts every method call from the Kotlin-hosted version to the native version, performing
@@ -37,14 +41,11 @@
 
 namespace dawn::kotlin_api {
 
-struct UserData {
-    JNIEnv *env;
-    jobject callback;
-};
-
 jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     if (!address) {
-        return nullptr;
+      //* TODO(b/344805524): custom exception for Dawn.
+      env->ThrowNew(env->FindClass("java/lang/Error"), "Invalid byte buffer.");
+      return nullptr;
     }
     jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
 
@@ -64,234 +65,115 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 }
 
 {% macro render_method(method, object) %}
+    {% set ObjectName = object.name.CamelCase() if object else "FunctionsKt" %}
+    {% set FunctionSuffix = ObjectName + "_" +  method.name.camelCase() %}
+    {% set KotlinRecord = FunctionSuffix + "KotlinRecord" %}
+    {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
+
+    //* Define the helper structs to perform most of the conversion.
+    struct {{KotlinRecord}} {
+        {% for arg in kotlin_record_members(method.arguments) %}
+            {{ arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
+        {% endfor %}
+    };
+    struct {{ArgsStruct}} {
+        {% for arg in method.arguments %}
+            {{ as_annotated_cType(arg) }};
+        {% endfor %}
+    };
+    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments)}}
+
     {% set _kotlin_return = kotlin_return(method) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.
     DEFAULT extern "C"
-    {{ arg_to_jni_type(_kotlin_return) }} Java_{{ kotlin_package.replace('.', '_') }}_
-            {{- object.name.CamelCase() if object else 'FunctionsKt' -}}
-            _{{ method.name.camelCase() }}(JNIEnv *env
-                    {{ ', jobject obj' if object else ', jclass clazz' -}}
+    {{ arg_to_jni_type(_kotlin_return) }}
+    Java_{{ kotlin_package.replace('.', '_') }}_{{ FunctionSuffix }}
+            (JNIEnv *env{{ ', jobject obj' if object else ', jclass clazz' -}}
 
     //* Make the signature for each argument in turn.
-    {% for arg in filter_arguments(method.arguments) %},
+    {% for arg in kotlin_record_members(method.arguments) %},
         {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {% endfor %}) {
 
-    //*  A variable is declared for each parameter of the native method.
-    {% for arg in method.arguments %}
-        {{ as_annotated_cType(arg) }};
+    // * Helper context for the duration of this method call.
+    JNIClasses* classes = JNIClasses::getInstance(env);
+    JNIContext c(env);
+
+    //* Perform the conversion of arguments.
+    {{KotlinRecord}} kotlinRecord;
+    {% for arg in kotlin_record_members(method.arguments) %}
+        kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
     {% endfor %}
-
-    //* Each parameter is converted from the JNI parameter to the expected form of the native
-    //* parameter.
-    {% for arg in filter_arguments(method.arguments) %}
-        {% if arg.length == 'strlen' %}
-            if (_{{ as_varName(arg.name) }}) {  //* Don't convert null strings.
-                {{ as_varName(arg.name) }} = env->GetStringUTFChars(_{{ as_varName(arg.name) }}, 0);
-            } else {
-                {{ as_varName(arg.name) }} = nullptr;
-            }
-        {% elif arg.constant_length == 1 %}
-            //*  Optional structure.
-            {% if arg.type.category == 'structure' %}
-                if (_{{ as_varName(arg.name) }}) {
-                    //* TODO(b/330293719): free associated resources.
-                    auto convertedMember = new {{ as_cType(arg.type.name) }}();
-                    Convert(env, _{{ as_varName(arg.name) }}, convertedMember);
-                    {{ as_varName(arg.name) }} = convertedMember;
-                } else {
-                    {{ as_varName(arg.name) }} = nullptr;
-                }
-            {% else %}
-                {{ unreachable_code() }}
-            {% endif %}
-        {% elif arg.length %}
-            //*  Container types.
-            {% if arg.type.name.get() == 'uint32_t' %}
-                //* TODO(b/330293719): free associated resources.
-                {{ as_varName(arg.name) }} =
-                        reinterpret_cast<{{ as_cType(arg.type.name) }}*>(
-                               env->GetIntArrayElements(_{{ as_varName(arg.name) }}, 0));
-                {{ arg.length.name.camelCase() }} =
-                       env->GetArrayLength(_{{ as_varName(arg.name) }});
-            {% elif arg.type.name.get() == 'void' %}
-                {{ as_varName(arg.name) }} =
-                        env->GetDirectBufferAddress(_{{ as_varName(arg.name) }});
-                {{ arg.length.name.camelCase() }} =
-                        env->GetDirectBufferCapacity(_{{ as_varName(arg.name) }});
-            {% else %} {
-                size_t length = env->GetArrayLength(_{{ as_varName(arg.name) }});
-                //* TODO(b/330293719): free associated resources.
-                auto out = new {{ as_cType(arg.type.name) }}[length]();
-                {% if arg.type.category in ['bitmask', 'enum'] %} {
-                    jclass memberClass = env->FindClass("{{ jni_name(arg.type) }}");
-                    jmethodID getValue = env->GetMethodID(memberClass, "getValue", "()I");
-                    for (int idx = 0; idx != length; idx++) {
-                        jobject element =
-                                env->GetObjectArrayElement(_{{ as_varName(arg.name) }}, idx);
-                        out[idx] = static_cast<{{ as_cType(arg.type.name) }}>(
-                                env->CallIntMethod(element, getValue));
-                    }
-                } {% elif arg.type.category == 'object' %} {
-                    jclass memberClass = env->FindClass("{{ jni_name(arg.type) }}");
-                    jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-                    for (int idx = 0; idx != length; idx++) {
-                        jobject element =
-                                env->GetObjectArrayElement(_{{ as_varName(arg.name) }}, idx);
-                        out[idx] = reinterpret_cast<{{ as_cType(arg.type.name) }}>(
-                                env->CallLongMethod(element, getHandle));
-                    }
-                } {% else %}
-                    {{ unreachable_code() }}
-                {% endif %}
-                {{ as_varName(arg.name) }} = out;
-                {{ arg.length.name.camelCase() }} = length;
-            } {% endif %}
-
-        //*  Single value types.
-        {% elif arg.type.category == 'object' %}
-            if (_{{ as_varName(arg.name) }}) {
-                jclass memberClass = env->FindClass("{{ jni_name(arg.type) }}");
-                jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
-                {{ as_varName(arg.name) }} =
-                        reinterpret_cast<{{ as_cType(arg.type.name) }}>(
-                                env->CallLongMethod(_{{ as_varName(arg.name) }}, getHandle));
-            } else {
-                {{ as_varName(arg.name) }} = nullptr;
-            }
-        {% elif arg.type.name.get() in ['int32_t', 'size_t', 'uint32_t', 'uint64_t'] or arg.type.category in ['bitmask', 'enum'] %}
-            {{ as_varName(arg.name) }} =
-                    static_cast<{{ as_cType(arg.type.name) }}>(_{{ as_varName(arg.name) }});
-        {% elif arg.type.name.get() in ['float', 'int'] %}
-            {{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
-
-        {% elif arg.type.category == 'function pointer' %} {
-            //* Function pointers themselves require each argument converting.
-            //* A custom native callback is generated to wrap the Kotlin callback.
-            {{ as_varName(arg.name) }} = [](
-                {%- for callbackArg in arg.type.arguments %}
-                    {{ as_annotated_cType(callbackArg) }}{{ ',' if not loop.last }}
-                {%- endfor %}) {
-                UserData* userData1 = static_cast<UserData *>(userdata);
-                JNIEnv *env = userData1->env;
-                if (env->ExceptionCheck()) {
-                    return;
-                }
-
-                //* Get the client (Kotlin) callback so we can call it.
-                jmethodID callbackMethod = env->GetMethodID(
-                        env->FindClass("{{ jni_name(arg.type) }}"), "callback", "(
-                    {%- for callbackArg in filter_arguments(arg.type.arguments) -%}
-                        {%- if callbackArg.type.category in ['bitmask', 'enum'] -%}
-                            I
-                        {%- elif callbackArg.type.category in ['object', 'structure'] -%}
-                            L{{ jni_name(callbackArg.type) }};
-                        {%- elif callbackArg.type.name.get() == 'char' -%}
-                            Ljava/lang/String;
-                        {%- else -%}
-                            {{ unreachable_code() }}
-                        {%- endif -%}
-                    {%- endfor %})V");
-
-                //* Call the callback with all converted parameters.
-                env->CallVoidMethod(userData1->callback, callbackMethod
-                {%- for callbackArg in filter_arguments(arg.type.arguments) %}
-                    ,
-                    {%- if callbackArg.type.category == 'object' %}
-                        env->NewObject(env->FindClass("{{ jni_name(callbackArg.type) }}"),
-                                env->GetMethodID(env->FindClass("{{ jni_name(callbackArg.type) }}"),
-                                        "<init>", "(J)V"),
-                                reinterpret_cast<jlong>({{ callbackArg.name.camelCase() }}))
-                    {%- elif callbackArg.type.category in ['bitmask', 'enum'] %}
-                        static_cast<jint>({{ callbackArg.name.camelCase() }})
-                    {%- elif callbackArg.type.category == 'structure' %}
-                        {{ unreachable_code () }}  //* We don't yet handle structures in callbacks.
-                    {%- elif callbackArg.type.name.get() == 'char' %}
-                        env->NewStringUTF({{ callbackArg.name.camelCase() }})
-                    {%- else %}
-                        {{ callbackArg.name.camelCase() }}
-                    {%- endif %}
-                {%- endfor %});
-            };
-            //* TODO(b/330293719): free associated resources.
-            userdata = new UserData(
-                    {.env = env, .callback = env->NewGlobalRef(_{{ as_varName(arg.name) }})});
-        } {% else %}
-            {{ unreachable_code() }}
-        {% endif %}
-    {% endfor %}
+    {{ArgsStruct}} args;
+    ConvertInternal(&c, kotlinRecord, &args);
 
     {% if object %}
-        jclass memberClass = env->FindClass("{{ jni_name(object) }}");
+        jclass memberClass = classes->{{ object.name.camelCase() }};
         jmethodID getHandle = env->GetMethodID(memberClass, "getHandle", "()J");
         auto handle =
                 reinterpret_cast<{{ as_cType(object.name) }}>(env->CallLongMethod(obj, getHandle));
     {% endif %}
 
     //* Actually invoke the native version of the method.
-    {% if _kotlin_return.annotation == '*' %}
+    {% if _kotlin_return and _kotlin_return.length == 'size_t' %}
         //* Methods that return containers are converted from two-call to single call, and the
         //* return type is switched to a Kotlin container.
         size_t size = wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
             {% for arg in method.arguments -%},
                 //* The replaced output parameter is set to nullptr on the first call.
-                {{ 'nullptr' if arg == _kotlin_return else as_varName(arg.name) -}}
+                {{ 'nullptr' if arg.annotation == '*' else "args." + as_varName(arg.name) -}}
             {% endfor %}
         );
         //* Allocate the native container
-        {{ _kotlin_return.name.get() }} = static_cast<{{ as_cType(_kotlin_return.type.name) }} *>(
-                calloc(sizeof({{ as_cType(_kotlin_return.type.name) }}), size));
+        args.{{ as_varName(_kotlin_return.name) }} = c.AllocArray<{{ as_cType(_kotlin_return.type.name) }}>(size);
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            //* TODO(b/330293719): use type that automatically releases resources.
-            free({{ _kotlin_return.name.get() }});
             return nullptr;
         }
         //* Second call completes the native container
         wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
             {% for arg in method.arguments -%}
-                {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
+                , {{- "args." + as_varName(arg.name) -}}
             {% endfor %}
         );
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            //* TODO(b/330293719): use type that automatically releases resources.
-            free({{ _kotlin_return.name.get() }});
             return nullptr;
         }
-        //* Native container converted to a Kotlin container.
-        jclass returnClass = env->FindClass("{{ jni_name(_kotlin_return.type) }}");
-        jobjectArray result = env->NewObjectArray(size, returnClass, 0);
-        auto constructor = env->GetMethodID(returnClass, "<init>", "(I)V");
-        for (int idx = 0; idx != size; idx++) {
-            jobject element = env->NewObject(returnClass, constructor,
-                    static_cast<jint>({{ _kotlin_return.name.get() }}[idx]));
-            env->SetObjectArrayElement(result, idx, element);
-        }
-        free({{ _kotlin_return.name.get() }});
     {% else %}
-        {{ 'auto result =' if method.return_type.name.get() != 'void' }}
+        {% if _kotlin_return and _kotlin_return.annotation == '*' %}
+            //* Make a native container to accept the data output via parameter.
+            {{ as_cType(_kotlin_return.type.name) }} out = {};
+            args.{{ as_varName(_kotlin_return.name) }} = &out;
+        {% endif %}
+        {{ 'auto result =' if method.returns }}
         {% if object %}
             wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
         {% else %}
             wgpu{{ method.name.CamelCase() }}(
         {% endif %}
             {% for arg in method.arguments -%}
-                {{- ',' if object or not loop.first }}{{ as_varName(arg.name) -}}
+                {{- ',' if object or not loop.first }}args.{{ as_varName(arg.name) -}}
             {% endfor %}
         );
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            return {{ '0' if method.return_type.name.get() != 'void' }};
+            return{{ ' 0' if _kotlin_return }};
         }
+        {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
+            if (result != WGPUStatus_Success) {
+                //* TODO(b/344805524): custom exception for Dawn.
+                env->ThrowNew(env->FindClass("java/lang/Error"), "Method failed");
+                return{{ ' 0' if method.returns }};
+            }
+        {% endif %}
     {% endif %}
-
-    //* We only handle objects and primitives to be returned.
-    {% if method.return_type.category == 'object' %}
-        jclass returnClass = env->FindClass("{{ jni_name(method.return_type) }}");
-        auto constructor = env->GetMethodID(returnClass, "<init>", "(J)V");
-        return env->NewObject(returnClass, constructor, reinterpret_cast<jlong>(result));
-    {% elif method.return_type.name.get() in ['void const *', 'void *'] %}
-        return toByteBuffer(env, result, size);
-    {% elif method.return_type.name.get() != 'void' %}
-        return result;  //* Primitives are implicitly converted by JNI.
+    {% if _kotlin_return %}
+        {% if _kotlin_return.type.name.get() in ['void const *', 'void *'] %}
+            size_t size = args.size;
+        {% endif %}
+        {{ convert_to_kotlin("args." + as_varName(_kotlin_return.name) if _kotlin_return.annotation == '*' else 'result',
+                             'result_kt',
+                             'size' if _kotlin_return.type.name.get() in ['void const *', 'void *'] or _kotlin_return.length == 'size_t',
+                             _kotlin_return) }}
+        return result_kt;
     {% endif %}
 } {% endmacro %}
 
@@ -305,7 +187,8 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     JNIEXPORT void JNICALL
     Java_{{ kotlin_package.replace('.', '_') }}_{{ obj.name.CamelCase() }}_close(
             JNIEnv *env, jobject obj) {
-        jclass clz = env->FindClass("{{ jni_name(obj) }}");
+        JNIClasses* classes = JNIClasses::getInstance(env);
+        jclass clz = classes->{{ obj.name.camelCase() }};
         const {{ as_cType(obj.name) }} handle = reinterpret_cast<{{ as_cType(obj.name) }}>(
                 env->CallLongMethod(obj, env->GetMethodID(clz, "getHandle", "()J")));
         wgpu{{ obj.name.CamelCase() }}Release(handle);

@@ -28,8 +28,9 @@
 #ifndef INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 #define INCLUDE_DAWN_NATIVE_METALBACKEND_H_
 
+#include <webgpu/webgpu.h>
+
 #include "dawn/native/dawn_native_export.h"
-#include "dawn/webgpu.h"
 
 #if defined(__OBJC__)
 #import <Metal/Metal.h>

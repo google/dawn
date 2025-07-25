@@ -1,19 +1,21 @@
-SKIP: FAILED
-
-RWByteAddressBuffer output : register(u0);
+SKIP: INVALID
 
 struct ComputeInputs {
   uint subgroup_invocation_id;
   uint subgroup_size;
 };
 
+
+RWByteAddressBuffer output : register(u0);
 void main_inner(ComputeInputs inputs) {
-  output.Store((4u * inputs.subgroup_invocation_id), asuint(inputs.subgroup_size));
+  uint v = 0u;
+  output.GetDimensions(v);
+  output.Store((0u + (min(inputs.subgroup_invocation_id, ((v / 4u) - 1u)) * 4u)), inputs.subgroup_size);
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  const ComputeInputs tint_symbol = {WaveGetLaneIndex(), WaveGetLaneCount()};
-  main_inner(tint_symbol);
-  return;
+  ComputeInputs v_1 = {WaveGetLaneIndex(), WaveGetLaneCount()};
+  main_inner(v_1);
 }
+

@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -52,7 +53,7 @@ libtint_source_set("macros") {
     "scoped_assignment.h",
     "static_init.h",
   ]
-  deps = []
+  deps = [ "${dawn_root}/src/utils:utils" ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {

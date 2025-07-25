@@ -11,20 +11,24 @@
       ^
 
 #include <metal_stdlib>
-
 using namespace metal;
-struct tint_symbol_2 {
+
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> t;
+  sampler s;
+};
+
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x, texture2d<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
+void main_inner(float x, tint_module_vars_struct tint_module_vars) {
   if ((x > 0.0f)) {
-    float4 const tint_phony = tint_symbol_3.sample(tint_symbol_4, float2(0.0f));
+    tint_module_vars.t.sample(tint_module_vars.s, float2(0.0f));
   }
 }
 
-fragment void tint_symbol(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  tint_symbol_inner(tint_symbol_1.x, tint_symbol_5, tint_symbol_6);
-  return;
+fragment void v(main_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s};
+  main_inner(inputs.x, tint_module_vars);
 }
-

@@ -40,7 +40,7 @@ using IR_SwitchTest = IRTestHelper;
 TEST_F(IR_SwitchTest, Usage) {
     auto* cond = b.Constant(true);
     auto* switch_ = b.Switch(cond);
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
+    EXPECT_THAT(cond->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{switch_, 0u}));
 }
 
 TEST_F(IR_SwitchTest, Results) {
@@ -134,6 +134,26 @@ TEST_F(IR_SwitchTest, CloneWithResults) {
     ASSERT_NE(new_r1, nullptr);
     ASSERT_NE(new_r1, r1);
     EXPECT_EQ(new_r1->Type(), ty.f32());
+}
+
+TEST_F(IR_SwitchTest, Default_NoDefault) {
+    auto* switch_ = b.Switch(1_i);
+    b.Case(switch_, {b.Constant(3_i)});
+    EXPECT_EQ(nullptr, switch_->DefaultBlock());
+}
+
+TEST_F(IR_SwitchTest, Default_DefaultStandalone) {
+    auto* switch_ = b.Switch(1_i);
+    b.Case(switch_, {nullptr});
+    b.Case(switch_, {b.Constant(3_i)});
+    EXPECT_EQ(switch_->Cases()[0].block, switch_->DefaultBlock());
+}
+
+TEST_F(IR_SwitchTest, Default_DefaultMixedSelector) {
+    auto* switch_ = b.Switch(1_i);
+    b.Case(switch_, {b.Constant(3_i)});
+    b.Case(switch_, {nullptr, b.Constant(2_i)});
+    EXPECT_EQ(switch_->Cases()[1].block, switch_->DefaultBlock());
 }
 
 }  // namespace

@@ -30,16 +30,36 @@
 #include <utility>
 
 #include "dawn/native/d3d/D3DError.h"
+#include "dawn/native/d3d/PlatformFunctions.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
+#include "dawn/native/d3d11/QueueD3D11.h"
 
 namespace dawn::native::d3d11 {
+
+namespace {
+bool IsSameHandle(DeviceBase* device, HANDLE handle, HANDLE other) {
+    if (handle == other) {
+        return true;
+    }
+
+    return ::CompareObjectHandles(handle, other);
+}
+}  // namespace
 
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {
+    DAWN_ASSERT(!device->IsToggleEnabled(Toggle::D3D11DisableFence));
+
     DAWN_INVALID_IF(descriptor->handle == nullptr, "shared HANDLE is missing.");
+
+    const auto& queueFence = ToBackend(device->GetQueue())->GetSharedFence();
+    if (queueFence &&
+        IsSameHandle(device, queueFence->GetSystemHandle().Get(), descriptor->handle)) {
+        return queueFence;
+    }
 
     SystemHandle ownedHandle;
     DAWN_TRY_ASSIGN(ownedHandle, SystemHandle::Duplicate(descriptor->handle));
@@ -54,7 +74,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
-                                                    const char* label,
+                                                    StringView label,
                                                     ComPtr<ID3D11Fence> d3d11Fence) {
     SystemHandle ownedHandle;
     DAWN_TRY(CheckHRESULT(

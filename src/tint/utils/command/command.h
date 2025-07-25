@@ -52,9 +52,9 @@ class Command {
     /// @param path path to the executable
     explicit Command(const std::string& path);
 
-    /// Looks for an executable with the given name in the current working
-    /// directory, and if not found there, in each of the directories in the
-    /// `PATH` environment variable.
+    /// Looks for an executable with the given name in the current working directory,
+    /// then in the executable directory if not found there, then in each of the
+    /// directories in the `PATH` environment variable.
     /// @param executable the executable name
     /// @returns a Command which will return true for Found() if the executable
     /// was found.

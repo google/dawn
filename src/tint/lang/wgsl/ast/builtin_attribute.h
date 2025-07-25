@@ -30,12 +30,8 @@
 
 #include <string>
 
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
-
-// Forward declarations
-namespace tint::ast {
-class BuiltinValueName;
-}
 
 namespace tint::ast {
 
@@ -50,7 +46,7 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     BuiltinAttribute(GenerationID pid,
                      NodeID nid,
                      const Source& src,
-                     const BuiltinValueName* builtin);
+                     const core::BuiltinValue builtin);
     ~BuiltinAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -63,7 +59,7 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     const BuiltinAttribute* Clone(CloneContext& ctx) const override;
 
     /// The builtin value
-    const BuiltinValueName* const builtin;
+    const core::BuiltinValue builtin;
 };
 
 }  // namespace tint::ast

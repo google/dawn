@@ -66,6 +66,16 @@ from collections import namedtuple
 #
 FileRender = namedtuple('FileRender', ['template', 'output', 'params_dicts'])
 
+# A GeneratorOutput represent everything an invocation of the generator will
+# produce.
+#
+#   renders: an iterable of FileRenders.
+#
+#   imported_templates: paths to additional templates that will be imported.
+#       Trying to import with {% from %} will enforce that the file is listed
+#       to ensure the dependency information produced is correct.
+GeneratorOutput = namedtuple('GeneratorOutput',
+                             ['renders', 'imported_templates'])
 
 # The interface that must be implemented by generators.
 class Generator:
@@ -77,7 +87,7 @@ class Generator:
         """Add generator-specific argparse arguments."""
         pass
 
-    def get_file_renders(self, args):
+    def get_outputs(self, args):
         """Return the list of FileRender objects to process."""
         return []
 
@@ -120,13 +130,21 @@ import jinja2
 # A custom Jinja2 template loader that removes the extra indentation
 # of the template blocks so that the output is correctly indented
 class _PreprocessingLoader(jinja2.BaseLoader):
-    def __init__(self, path):
+
+    def __init__(self, path, allow_list):
         self.path = path
+        self.allow_list = set(allow_list)
+
+        # Check that all the listed templates exist.
+        for template in self.allow_list:
+            if not os.path.exists(os.path.join(self.path, template)):
+                raise jinja2.TemplateNotFound(template)
 
     def get_source(self, environment, template):
-        path = os.path.join(self.path, template)
-        if not os.path.exists(path):
+        if not template in self.allow_list:
             raise jinja2.TemplateNotFound(template)
+
+        path = os.path.join(self.path, template)
         mtime = os.path.getmtime(path)
         with open(path) as f:
             source = self.preprocess(f.read())
@@ -177,8 +195,11 @@ class _PreprocessingLoader(jinja2.BaseLoader):
 _FileOutput = namedtuple('FileOutput', ['name', 'content'])
 
 
-def _do_renders(renders, template_dir):
-    loader = _PreprocessingLoader(template_dir)
+def _do_renders(output, template_dir):
+    template_allow_list = [render.template for render in output.renders
+                           ] + list(output.imported_templates)
+    loader = _PreprocessingLoader(template_dir, template_allow_list)
+
     env = jinja2.Environment(
         extensions=['jinja2.ext.do', 'jinja2.ext.loopcontrols'],
         loader=loader,
@@ -202,7 +223,7 @@ def _do_renders(renders, template_dir):
     }
 
     outputs = []
-    for render in renders:
+    for render in output.renders:
         params = {}
         params.update(base_params)
         for param_dict in render.params_dicts:
@@ -241,7 +262,7 @@ def _compute_python_dependencies(root_dir=None):
 
         paths.add(path)
 
-    return paths
+    return sorted(paths)
 
 
 # Computes the string representing a cmake list of paths.
@@ -316,14 +337,18 @@ def run_generator(generator):
 
     args = parser.parse_args()
 
-    renders = generator.get_file_renders(args)
+    output = generator.get_outputs(args)
 
     # Output a list of all dependencies for CMake or the tarball for GN/Ninja.
     if args.depfile != None or args.print_cmake_dependencies:
         dependencies = generator.get_dependencies(args)
         dependencies += [
             args.template_dir + os.path.sep + render.template
-            for render in renders
+            for render in output.renders
+        ]
+        dependencies += [
+            args.template_dir + os.path.sep + template
+            for template in output.imported_templates
         ]
         dependencies += _compute_python_dependencies(args.root_dir)
 
@@ -342,7 +367,7 @@ def run_generator(generator):
         with open(args.expected_outputs_file) as f:
             expected = set([line.strip() for line in f.readlines()])
 
-        actual = {render.output for render in renders}
+        actual = {render.output for render in output.renders}
 
         if actual != expected:
             print("Wrong expected outputs, caller expected:\n    " +
@@ -355,16 +380,16 @@ def run_generator(generator):
         sys.stdout.write(
             _cmake_path_list([
                 os.path.join(args.output_dir, render.output)
-                for render in renders
+                for render in output.renders
             ]))
         return 0
 
-    outputs = _do_renders(renders, args.template_dir)
+    render_outputs = _do_renders(output, args.template_dir)
 
     # Output the JSON tarball
     if args.output_json_tarball != None:
         json_root = {}
-        for output in outputs:
+        for output in render_outputs:
             json_root[output.name] = output.content
 
         with open(args.output_json_tarball, 'w') as f:
@@ -372,7 +397,7 @@ def run_generator(generator):
 
     # Output the files directly.
     if args.output_dir != None:
-        for output in outputs:
+        for output in render_outputs:
             output_path = os.path.join(args.output_dir, output.name)
 
             directory = os.path.dirname(output_path)

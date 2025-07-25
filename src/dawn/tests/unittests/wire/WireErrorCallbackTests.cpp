@@ -29,6 +29,8 @@
 #include <utility>
 
 #include "dawn/common/FutureUtils.h"
+#include "dawn/common/StringViewUtils.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
@@ -38,262 +40,127 @@ namespace {
 
 using testing::_;
 using testing::DoAll;
+using testing::EmptySizedString;
 using testing::InvokeWithoutArgs;
 using testing::Mock;
 using testing::Return;
 using testing::SaveArg;
-using testing::StrEq;
+using testing::SizedString;
 using testing::StrictMock;
 
-// Mock classes to add expectations on the wire calling callbacks
-class MockDeviceErrorCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUErrorType type, const char* message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
-void ToMockDeviceErrorCallback(WGPUErrorType type, const char* message, void* userdata) {
-    mockDeviceErrorCallback->Call(type, message, userdata);
-}
-
-class MockDeviceLoggingCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPULoggingType type, const char* message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceLoggingCallback>> mockDeviceLoggingCallback;
-void ToMockDeviceLoggingCallback(WGPULoggingType type, const char* message, void* userdata) {
-    mockDeviceLoggingCallback->Call(type, message, userdata);
-}
-
-class MockDeviceLostCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUDeviceLostReason reason, const char* message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;
-void ToMockDeviceLostCallback(WGPUDeviceLostReason reason, const char* message, void* userdata) {
-    mockDeviceLostCallback->Call(reason, message, userdata);
-}
-
-class WireErrorCallbackTests : public WireTest {
-  public:
-    WireErrorCallbackTests() {}
-    ~WireErrorCallbackTests() override = default;
-
-    void SetUp() override {
-        WireTest::SetUp();
-
-        mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
-        mockDeviceLoggingCallback = std::make_unique<StrictMock<MockDeviceLoggingCallback>>();
-        mockDeviceLostCallback = std::make_unique<StrictMock<MockDeviceLostCallback>>();
-    }
-
-    void TearDown() override {
-        WireTest::TearDown();
-
-        mockDeviceErrorCallback = nullptr;
-        mockDeviceLoggingCallback = nullptr;
-        mockDeviceLostCallback = nullptr;
-    }
-
-    void FlushServer() {
-        WireTest::FlushServer();
-
-        Mock::VerifyAndClearExpectations(&mockDeviceErrorCallback);
-    }
-};
-
-// Test the return wire for device validation error callbacks
-TEST_F(WireErrorCallbackTests, DeviceValidationErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Validation,
-                                                     "Some error message");
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_Validation, StrEq("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
-
-// Test the return wire for device OOM error callbacks
-TEST_F(WireErrorCallbackTests, DeviceOutOfMemoryErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_OutOfMemory,
-                                                     "Some error message");
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_OutOfMemory, StrEq("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
-
-// Test the return wire for device internal error callbacks
-TEST_F(WireErrorCallbackTests, DeviceInternalErrorCallback) {
-    wgpuDeviceSetUncapturedErrorCallback(device, ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Internal,
-                                                     "Some error message");
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_Internal, StrEq("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
+class WireErrorCallbackTests : public WireTest {};
 
 // Test the return wire for device user warning callbacks
 TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
-    wgpuDeviceSetLoggingCallback(device, ToMockDeviceLoggingCallback, this);
+    testing::MockCppCallback<wgpu::LoggingCallback<void>*> mockCallback;
+    device.SetLoggingCallback(mockCallback.Callback());
 
     // Setting the injected warning callback should stay on the client side and do nothing
     FlushClient();
 
     // Calling the callback on the server side will result in the callback being called on the
     // client side
-    api.CallDeviceSetLoggingCallbackCallback(apiDevice, WGPULoggingType_Info, "Some message");
+    api.CallDeviceSetLoggingCallbackCallback(apiDevice, WGPULoggingType_Info,
+                                             ToOutputStringView("Some message"));
 
-    EXPECT_CALL(*mockDeviceLoggingCallback, Call(WGPULoggingType_Info, StrEq("Some message"), this))
-        .Times(1);
-
-    FlushServer();
-}
-
-// Test the return wire for device lost callback
-TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
-    wgpuDeviceSetDeviceLostCallback(device, ToMockDeviceLostCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                "Some error message");
-
-    EXPECT_CALL(*mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Unknown, StrEq("Some error message"), this))
-        .Times(1);
+    EXPECT_CALL(mockCallback, Call(wgpu::LoggingType::Info, SizedString("Some message"))).Times(1);
 
     FlushServer();
 }
 
-class WirePopErrorScopeCallbackTests : public WireFutureTestWithParamsBase<> {
-  protected:
-    // Overridden version of wgpuDevicePopErrorScope that defers to the API call based on the test
-    // callback mode.
-    void DevicePopErrorScope(WGPUDevice d, void* userdata = nullptr) {
-        if (IsAsync()) {
-            wgpuDevicePopErrorScope(d, mMockOldCb.Callback(), mMockOldCb.MakeUserdata(userdata));
-        } else {
-            WGPUPopErrorScopeCallbackInfo callbackInfo = {};
-            callbackInfo.mode = ToWGPUCallbackMode(GetParam().mCallbackMode);
-            callbackInfo.callback = mMockCb.Callback();
-            callbackInfo.userdata = mMockCb.MakeUserdata(userdata);
-            this->mFutureIDs.push_back(wgpuDevicePopErrorScopeF(d, callbackInfo).id);
-        }
+// Test the return wire for device error callbacks.
+TEST_F(WireErrorCallbackTests, DeviceErrorCallbacks) {
+    static constexpr std::array<wgpu::ErrorType, 3> kErrorTypes = {
+        wgpu::ErrorType::Validation, wgpu::ErrorType::OutOfMemory, wgpu::ErrorType::Internal};
+
+    for (auto type : kErrorTypes) {
+        // Calling the callback on the server side will result in the callback being called on the
+        // client side when the server is flushed.
+        api.CallDeviceUncapturedErrorCallback(apiDevice, static_cast<WGPUErrorType>(type),
+                                              ToOutputStringView("Some error message"));
+        EXPECT_CALL(uncapturedErrorCallback,
+                    Call(CHandleIs(device.Get()), type, SizedString("Some error message")))
+            .Times(1);
     }
 
-    void PushErrorScope(WGPUErrorFilter filter) {
-        EXPECT_CALL(api, DevicePushErrorScope(apiDevice, filter)).Times(1);
-        wgpuDevicePushErrorScope(device, filter);
+    FlushServer();
+}
+
+// Test the return wire for device lost callback.
+TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
+    // Calling the callback on the server side will result in the callback being called on the
+    // client side when the server is flushed.
+    api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Unknown,
+                               ToOutputStringView("Some error message"));
+
+    EXPECT_CALL(deviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                         SizedString("Some error message")))
+        .Times(1);
+
+    FlushServer();
+}
+
+using WirePopErrorScopeCallbackTestBase = WireFutureTest<wgpu::PopErrorScopeCallback<void>*>;
+class WirePopErrorScopeCallbackTests : public WirePopErrorScopeCallbackTestBase {
+  protected:
+    void PopErrorScope() {
+        this->mFutureIDs.push_back(
+            device.PopErrorScope(this->GetParam().callbackMode, this->mMockCb.Callback()).id);
+    }
+
+    void PushErrorScope(wgpu::ErrorFilter filter) {
+        EXPECT_CALL(api, DevicePushErrorScope(apiDevice, static_cast<WGPUErrorFilter>(filter)))
+            .Times(1);
+        device.PushErrorScope(filter);
         FlushClient();
     }
-
-    void ExpectWireCallbacksWhen(
-        std::function<void(testing::MockCallback<WGPUErrorCallback>&)> oldExp,
-        std::function<void(testing::MockCallback<WGPUPopErrorScopeCallback>&)> exp) {
-        if (IsAsync()) {
-            oldExp(mMockOldCb);
-            ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&mMockOldCb));
-        } else {
-            exp(mMockCb);
-            ASSERT_TRUE(testing::Mock::VerifyAndClearExpectations(&mMockCb));
-        }
-    }
-
-  private:
-    testing::MockCallback<WGPUPopErrorScopeCallback> mMockCb;
-    testing::MockCallback<WGPUErrorCallback> mMockOldCb;
 };
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WirePopErrorScopeCallbackTests);
 
 // Test the return wire for validation error scopes.
 TEST_P(WirePopErrorScopeCallbackTests, TypeAndFilters) {
-    static constexpr std::array<std::pair<WGPUErrorType, WGPUErrorFilter>, 3> kErrorTypeAndFilters =
-        {{{WGPUErrorType_Validation, WGPUErrorFilter_Validation},
-          {WGPUErrorType_OutOfMemory, WGPUErrorFilter_OutOfMemory},
-          {WGPUErrorType_Internal, WGPUErrorFilter_Internal}}};
+    static constexpr std::array<std::pair<wgpu::ErrorType, wgpu::ErrorFilter>, 3>
+        kErrorTypeAndFilters = {{{wgpu::ErrorType::Validation, wgpu::ErrorFilter::Validation},
+                                 {wgpu::ErrorType::OutOfMemory, wgpu::ErrorFilter::OutOfMemory},
+                                 {wgpu::ErrorType::Internal, wgpu::ErrorFilter::Internal}}};
 
     for (const auto& [type, filter] : kErrorTypeAndFilters) {
         PushErrorScope(filter);
-
-        DevicePopErrorScope(device, this);
-        EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce([&] {
-            api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success, type,
-                                                 "Some error message");
+        PopErrorScope();
+        EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce([&] {
+            api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
+                                                static_cast<WGPUErrorType>(type),
+                                                ToOutputStringView("Some error message"));
         });
 
         FlushClient();
         FlushFutures();
-        ExpectWireCallbacksWhen(
-            [&](auto& oldMockCb) {
-                EXPECT_CALL(oldMockCb, Call(type, StrEq("Some error message"), this)).Times(1);
+        ExpectWireCallbacksWhen([&](auto& mockCb) {
+            EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::Success, type,
+                                     SizedString("Some error message")))
+                .Times(1);
 
-                FlushCallbacks();
-            },
-            [&](auto& mockCb) {
-                EXPECT_CALL(mockCb, Call(WGPUPopErrorScopeStatus_Success, type,
-                                         StrEq("Some error message"), this))
-                    .Times(1);
-
-                FlushCallbacks();
-            });
+            FlushCallbacks();
+        });
     }
 }
 
 // Wire disconnect before server response calls the callback with Unknown error type.
-// TODO(crbug.com/dawn/2021) When using new callback signature, check for InstanceDropped status.
 TEST_P(WirePopErrorScopeCallbackTests, DisconnectBeforeServerReply) {
-    PushErrorScope(WGPUErrorFilter_Validation);
+    PushErrorScope(wgpu::ErrorFilter::Validation);
 
-    DevicePopErrorScope(device, this);
-    EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).Times(1);
+    PopErrorScope();
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).Times(1);
 
     FlushClient();
     FlushFutures();
-    ExpectWireCallbacksWhen(
-        [&](auto& oldMockCb) {
-            EXPECT_CALL(oldMockCb, Call(WGPUErrorType_Unknown, nullptr, this)).Times(1);
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::CallbackCancelled,
+                                 wgpu::ErrorType::NoError, EmptySizedString()))
+            .Times(1);
 
-            GetWireClient()->Disconnect();
-        },
-        [&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUPopErrorScopeStatus_InstanceDropped, WGPUErrorType_Unknown,
-                                     nullptr, this))
-                .Times(1);
-
-            GetWireClient()->Disconnect();
-        });
+        GetWireClient()->Disconnect();
+    });
 }
 
 // Wire disconnect after server response calls the callback with returned error type.
@@ -302,56 +169,45 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectAfterServerReply) {
     // reponse, the callback would also be fired.
     DAWN_SKIP_TEST_IF(IsSpontaneous());
 
-    PushErrorScope(WGPUErrorFilter_Validation);
+    PushErrorScope(wgpu::ErrorFilter::Validation);
+    PopErrorScope();
 
-    DevicePopErrorScope(device, this);
-    EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success,
-                                             WGPUErrorType_Validation, "Some error message");
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Success,
+                                            WGPUErrorType_Validation,
+                                            ToOutputStringView("Some error message"));
     }));
 
     FlushClient();
     FlushFutures();
-    ExpectWireCallbacksWhen(
-        [&](auto& oldMockCb) {
-            EXPECT_CALL(oldMockCb, Call(WGPUErrorType_Validation, nullptr, this)).Times(1);
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::CallbackCancelled,
+                                 wgpu::ErrorType::Validation, EmptySizedString()))
+            .Times(1);
 
-            GetWireClient()->Disconnect();
-        },
-        [&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUPopErrorScopeStatus_InstanceDropped,
-                                     WGPUErrorType_Validation, nullptr, this))
-                .Times(1);
-
-            GetWireClient()->Disconnect();
-        });
+        GetWireClient()->Disconnect();
+    });
 }
 
 // Empty stack (We are emulating the errors that would be callback-ed from native).
 TEST_P(WirePopErrorScopeCallbackTests, EmptyStack) {
-    DevicePopErrorScope(device, this);
-    EXPECT_CALL(api, OnDevicePopErrorScope2(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallDevicePopErrorScope2Callback(apiDevice, WGPUPopErrorScopeStatus_Success,
-                                             WGPUErrorType_Validation, "No error scopes to pop");
+    PopErrorScope();
+
+    EXPECT_CALL(api, OnDevicePopErrorScope(apiDevice, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallDevicePopErrorScopeCallback(apiDevice, WGPUPopErrorScopeStatus_Error,
+                                            WGPUErrorType_NoError,
+                                            ToOutputStringView("No error scopes to pop"));
     }));
 
     FlushClient();
     FlushFutures();
-    ExpectWireCallbacksWhen(
-        [&](auto& oldMockCb) {
-            EXPECT_CALL(oldMockCb,
-                        Call(WGPUErrorType_Validation, StrEq("No error scopes to pop"), this))
-                .Times(1);
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::Error, wgpu::ErrorType::NoError,
+                                 SizedString("No error scopes to pop")))
+            .Times(1);
 
-            FlushCallbacks();
-        },
-        [&](auto& mockCb) {
-            EXPECT_CALL(mockCb, Call(WGPUPopErrorScopeStatus_Success, WGPUErrorType_Validation,
-                                     StrEq("No error scopes to pop"), this))
-                .Times(1);
-
-            FlushCallbacks();
-        });
+        FlushCallbacks();
+    });
 }
 
 }  // anonymous namespace

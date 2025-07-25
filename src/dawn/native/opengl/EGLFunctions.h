@@ -39,7 +39,6 @@ enum class EGLExt {
     // Promoted to EGL 1.5
     ClientExtensions,
     PlatformBase,
-    FenceSync,
     CLEvent2,
     WaitSync,
     ImageBase,
@@ -55,11 +54,21 @@ enum class EGLExt {
     SurfacelessContext,
 
     // Other extensions,
+    FenceSync,  // Not marked as promoted due to different function prototypes
     DisplayTextureShareGroup,
     ReusableSync,
     NoConfigContext,
     PixelFormatFloat,
     GLColorspace,
+    NativeFenceSync,  // EGL_ANDROID_native_fence_sync
+
+    // EGL image creation extensions
+    ImageNativeBuffer,      // EGL_ANDROID_image_native_buffer
+    GetNativeClientBuffer,  // EGL_ANDROID_get_native_client_buffer
+
+    // ANGLE specific
+    ANGLECreateContextBackwardsCompatible,  // EGL_ANGLE_create_context_backwards_compatible
+    ANGLECreateContextExtensionsEnabled,    // EGL_ANGLE_create_context_extensions_enabled
 
     EnumCount,
 };
@@ -73,6 +82,7 @@ class EGLFunctions {
 
     uint32_t GetMajorVersion() const;
     uint32_t GetMinorVersion() const;
+    bool IsAtLeastVersion(uint32_t major, uint32_t minor) const;
     bool HasExt(EGLExt extension) const;
 
     // EGL 1.0
@@ -132,8 +142,22 @@ class EGLFunctions {
     PFNEGLCREATEPLATFORMPIXMAPSURFACEPROC CreatePlatformPixmapSurface;
     PFNEGLWAITSYNCPROC WaitSync;
 
+    // EGL_KHR_fence_sync
+    // NOTE: These functions use attribute lists with EGLint but the core versions use EGLattrib.
+    // They are not compatible.
+    PFNEGLCREATESYNCKHRPROC CreateSyncKHR;
+    PFNEGLDESTROYSYNCKHRPROC DestroySyncKHR;
+    PFNEGLCLIENTWAITSYNCKHRPROC ClientWaitSyncKHR;
+    PFNEGLGETSYNCATTRIBKHRPROC GetSyncAttribKHR;
+
     // EGL_KHR_reusable_sync
     PFNEGLSIGNALSYNCKHRPROC SignalSync;
+
+    // EGL_ANDROID_get_native_client_buffer
+    PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC GetNativeClientBuffer;
+
+    // EGL_ANDROID_native_fence_sync
+    PFNEGLDUPNATIVEFENCEFDANDROIDPROC DupNativeFenceFD;
 
   private:
     MaybeError LoadClientExtensions();

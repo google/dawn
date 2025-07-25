@@ -28,6 +28,7 @@
 #include "dawn/native/ComputePassEncoder.h"
 
 #include "dawn/common/Range.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
@@ -147,7 +148,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        CommandEncoder* commandEncoder,
                                        EncodingContext* encodingContext,
                                        ErrorTag errorTag,
-                                       const char* label)
+                                       StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
       mCommandEncoder(commandEncoder) {}
 
@@ -155,7 +156,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
 Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
                                                       CommandEncoder* commandEncoder,
                                                       EncodingContext* encodingContext,
-                                                      const char* label) {
+                                                      StringView label) {
     return AcquireRef(
         new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }
@@ -173,14 +174,13 @@ ObjectType ComputePassEncoder::GetType() const {
 }
 
 void ComputePassEncoder::APIEnd() {
-    mCommandBufferState.End();
-
     if (mEnded && IsValidationEnabled()) {
         GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
         return;
     }
 
     mEnded = true;
+    mCommandBufferState.End();
 
     if (mEncodingContext->TryEncode(
             this,
@@ -213,25 +213,34 @@ void ComputePassEncoder::APIDispatchWorkgroups(uint32_t workgroupCountX,
 
                 DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
 
-                uint32_t workgroupsPerDimension =
+                uint32_t maxComputeWorkgroupsPerDimension =
                     GetDevice()->GetLimits().v1.maxComputeWorkgroupsPerDimension;
 
-                DAWN_INVALID_IF(workgroupCountX > workgroupsPerDimension,
-                                "Dispatch workgroup count X (%u) exceeds max compute "
-                                "workgroups per dimension (%u).",
-                                workgroupCountX, workgroupsPerDimension);
+                DAWN_INVALID_IF(
+                    workgroupCountX > maxComputeWorkgroupsPerDimension,
+                    "Dispatch workgroup count X (%u) exceeds max compute "
+                    "workgroups per dimension (%u).%s",
+                    workgroupCountX, maxComputeWorkgroupsPerDimension,
+                    DAWN_INCREASE_LIMIT_MESSAGE(GetDevice()->GetAdapter()->GetLimits().v1,
+                                                maxComputeWorkgroupsPerDimension, workgroupCountX));
 
-                DAWN_INVALID_IF(workgroupCountY > workgroupsPerDimension,
-                                "Dispatch workgroup count Y (%u) exceeds max compute "
-                                "workgroups per dimension (%u).",
-                                workgroupCountY, workgroupsPerDimension);
+                DAWN_INVALID_IF(
+                    workgroupCountY > maxComputeWorkgroupsPerDimension,
+                    "Dispatch workgroup count Y (%u) exceeds max compute "
+                    "workgroups per dimension (%u).%s",
+                    workgroupCountY, maxComputeWorkgroupsPerDimension,
+                    DAWN_INCREASE_LIMIT_MESSAGE(GetDevice()->GetAdapter()->GetLimits().v1,
+                                                maxComputeWorkgroupsPerDimension, workgroupCountY));
 
-                DAWN_INVALID_IF(workgroupCountZ > workgroupsPerDimension,
-                                "Dispatch workgroup count Z (%u) exceeds max compute "
-                                "workgroups per dimension (%u).",
-                                workgroupCountZ, workgroupsPerDimension);
+                DAWN_INVALID_IF(
+                    workgroupCountZ > maxComputeWorkgroupsPerDimension,
+                    "Dispatch workgroup count Z (%u) exceeds max compute "
+                    "workgroups per dimension (%u).%s",
+                    workgroupCountZ, maxComputeWorkgroupsPerDimension,
+                    DAWN_INCREASE_LIMIT_MESSAGE(GetDevice()->GetAdapter()->GetLimits().v1,
+                                                maxComputeWorkgroupsPerDimension, workgroupCountZ));
 
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
             }
@@ -258,7 +267,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     // This function creates new resources, need to lock the Device.
     // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at Command Submit
     // time, so the locking would be removed from here at that point.
-    auto deviceLock(GetDevice()->GetScopedLock());
+    auto deviceGuard = GetDevice()->GetGuard();
 
     const bool shouldDuplicateNumWorkgroups =
         device->ShouldDuplicateNumWorkgroupsForDispatchIndirect(
@@ -322,7 +331,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     Ref<BufferBase> validatedIndirectBuffer = scratchBuffer.GetBuffer();
 
     Ref<BindGroupBase> validationBindGroup;
-    DAWN_ASSERT(indirectBuffer->GetUsage() & kInternalStorageBuffer);
+    DAWN_ASSERT(indirectBuffer->GetInternalUsage() & kInternalStorageBuffer);
     DAWN_TRY_ASSIGN(validationBindGroup,
                     utils::MakeBindGroup(device, layout,
                                          {
@@ -365,18 +374,13 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
                     "size (%u).",
                     indirectOffset, kDispatchIndirectSize, indirectBuffer->GetSize());
 
-                if (GetDevice()->IsCompatibilityMode()) {
+                if (!GetDevice()->HasFlexibleTextureViews()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
                 }
             }
 
             SyncScopeUsageTracker scope;
-            scope.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
             mUsageTracker.AddReferencedBuffer(indirectBuffer);
-            // TODO(crbug.com/dawn/1166): If validation is enabled, adding |indirectBuffer|
-            // is needed for correct usage validation even though it will only be bound for
-            // storage. This will unecessarily transition the |indirectBuffer| in
-            // the backend.
 
             Ref<BufferBase> indirectBufferRef = indirectBuffer;
 
@@ -399,10 +403,18 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
             // If we have created a new scratch dispatch indirect buffer in
             // TransformIndirectDispatchBuffer(), we need to track it in mUsageTracker.
             if (indirectBufferRef.Get() != indirectBuffer) {
-                // |indirectBufferRef| was replaced with a scratch buffer. Add it to the
-                // synchronization scope.
-                scope.BufferUsedAs(indirectBufferRef.Get(), wgpu::BufferUsage::Indirect);
+                // |indirectBufferRef| was replaced with a scratch buffer, so we just need to track
+                // it for backend resource tracking and not for frontend validation.
+                scope.BufferUsedAs(indirectBufferRef.Get(),
+                                   kIndirectBufferForBackendResourceTracking);
                 mUsageTracker.AddReferencedBuffer(indirectBufferRef.Get());
+
+                // Then we can just track indirectBuffer for frontend validation and ignore its
+                // indirect buffer usage in backend resource tracking.
+                scope.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                scope.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect |
+                                                       kIndirectBufferForBackendResourceTracking);
             }
 
             AddDispatchSyncScope(std::move(scope));
@@ -489,7 +501,7 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
 
 void ComputePassEncoder::AddDispatchSyncScope(SyncScopeUsageTracker scope) {
     PipelineLayoutBase* layout = mCommandBufferState.GetPipelineLayout();
-    for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex i : layout->GetBindGroupLayoutsMask()) {
         scope.AddBindGroup(mCommandBufferState.GetBindGroup(i));
     }
     mUsageTracker.AddDispatch(scope.AcquireSyncScopeUsage());

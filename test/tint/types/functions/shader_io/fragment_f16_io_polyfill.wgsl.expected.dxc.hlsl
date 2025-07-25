@@ -2,24 +2,26 @@ struct Outputs {
   float16_t a;
   vector<float16_t, 4> b;
 };
-struct tint_symbol_1 {
+
+struct frag_main_outputs {
+  float16_t Outputs_a : SV_Target1;
+  vector<float16_t, 4> Outputs_b : SV_Target2;
+};
+
+struct frag_main_inputs {
   float16_t loc1 : TEXCOORD1;
   vector<float16_t, 4> loc2 : TEXCOORD2;
 };
-struct tint_symbol_2 {
-  float16_t a : SV_Target1;
-  vector<float16_t, 4> b : SV_Target2;
-};
+
 
 Outputs frag_main_inner(float16_t loc1, vector<float16_t, 4> loc2) {
-  Outputs tint_symbol_3 = {(loc1 * float16_t(2.0h)), (loc2 * float16_t(3.0h))};
-  return tint_symbol_3;
+  Outputs v = {(loc1 * float16_t(2.0h)), (loc2 * float16_t(3.0h))};
+  return v;
 }
 
-tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
-  Outputs inner_result = frag_main_inner(tint_symbol.loc1, tint_symbol.loc2);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.a = inner_result.a;
-  wrapper_result.b = inner_result.b;
-  return wrapper_result;
+frag_main_outputs frag_main(frag_main_inputs inputs) {
+  Outputs v_1 = frag_main_inner(inputs.loc1, inputs.loc2);
+  frag_main_outputs v_2 = {v_1.a, v_1.b};
+  return v_2;
 }
+

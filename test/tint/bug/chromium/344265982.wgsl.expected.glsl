@@ -2,37 +2,48 @@
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer tint_symbol_block_ssbo {
+layout(binding = 0, std430)
+buffer f_buffer_block_ssbo {
   int inner[4];
-} tint_symbol;
-
-void foo_tint_symbol_inner() {
-  bool tint_continue = false;
+} v;
+void foo() {
   {
-    for(int i = 0; (i < 4); i = (i + 1)) {
-      tint_continue = false;
-      switch(tint_symbol.inner[i]) {
-        case 1: {
+    int i = 0;
+    while(true) {
+      if ((i < 4)) {
+      } else {
+        break;
+      }
+      uint v_1 = min(uint(i), 3u);
+      bool tint_continue = false;
+      switch(v.inner[v_1]) {
+        case 1:
+        {
           tint_continue = true;
           break;
         }
-        default: {
-          tint_symbol.inner[i] = 2;
+        default:
+        {
+          uint v_2 = min(uint(i), 3u);
+          v.inner[v_2] = 2;
           break;
         }
       }
       if (tint_continue) {
+        {
+          uint v_3 = uint(i);
+          i = int((v_3 + uint(1)));
+        }
         continue;
       }
+      {
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
+      }
+      continue;
     }
   }
 }
-
-void tint_symbol_1() {
-  foo_tint_symbol_inner();
-}
-
 void main() {
-  tint_symbol_1();
-  return;
+  foo();
 }

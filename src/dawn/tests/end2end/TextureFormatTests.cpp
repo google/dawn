@@ -331,9 +331,10 @@ class TextureFormatTest : public DawnTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         {
-            wgpu::ImageCopyBuffer bufferView = utils::CreateImageCopyBuffer(uploadBuffer, 0, 256);
-            wgpu::ImageCopyTexture textureView =
-                utils::CreateImageCopyTexture(sampleTexture, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo bufferView =
+                utils::CreateTexelCopyBufferInfo(uploadBuffer, 0, 256);
+            wgpu::TexelCopyTextureInfo textureView =
+                utils::CreateTexelCopyTextureInfo(sampleTexture, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyBufferToTexture(&bufferView, &textureView, &extent);
         }
@@ -346,9 +347,10 @@ class TextureFormatTest : public DawnTest {
         renderPass.End();
 
         {
-            wgpu::ImageCopyBuffer bufferView = utils::CreateImageCopyBuffer(readbackBuffer, 0, 256);
-            wgpu::ImageCopyTexture textureView =
-                utils::CreateImageCopyTexture(renderTarget, 0, {0, 0, 0});
+            wgpu::TexelCopyBufferInfo bufferView =
+                utils::CreateTexelCopyBufferInfo(readbackBuffer, 0, 256);
+            wgpu::TexelCopyTextureInfo textureView =
+                utils::CreateTexelCopyTextureInfo(renderTarget, 0, {0, 0, 0});
             wgpu::Extent3D extent{width, 1, 1};
             encoder.CopyTextureToBuffer(&textureView, &bufferView, &extent);
         }
@@ -821,7 +823,7 @@ TEST_P(TextureFormatTest, RGBA8UnormSrgb) {
 // Test the BGRA8UnormSrgb format
 TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
     // BGRA8UnormSrgb is unsupported in Compatibility mode
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
     uint8_t maxValue = std::numeric_limits<uint8_t>::max();
     std::vector<uint8_t> textureData = {0, 1, maxValue, 64, 35, 68, 152, 168};
@@ -900,6 +902,11 @@ TEST_P(TextureFormatTest, RGB10A2Unorm) {
 
 // Test the RG11B10Ufloat format
 TEST_P(TextureFormatTest, RG11B10Ufloat) {
+    // sampling test also requires format to be color-renderable
+    DAWN_TEST_UNSUPPORTED_IF(!IsRG11B10UfloatRenderableSupported());
+    // TODO(crbug.com/388318201): expected: 0xf87e0000, actual: 0xfffff800
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+
     constexpr uint32_t kFloat11Zero = 0;
     constexpr uint32_t kFloat11Infinity = 0x7C0;
     constexpr uint32_t kFloat11Nan = 0x7C1;
@@ -941,18 +948,15 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
         {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4}, textureData,
         uncompressedData);
 
-    // This format is renderable if "rg11b10ufloat-renderable" feature is enabled
-    if (IsRG11B10UfloatRenderableSupported()) {
-        // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
-        // correctly by swiftshader
-        if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
-            WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
-                            "and NaN correctly for RG11B10Ufloat texture format.";
-        } else {
-            DoFormatRenderingTest(
-                {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4},
-                uncompressedData, textureData, new ExpectRG11B10Ufloat(textureData));
-        }
+    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
+    // correctly by swiftshader
+    if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
+        WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
+                        "and NaN correctly for RG11B10Ufloat texture format.";
+    } else {
+        DoFormatRenderingTest(
+            {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4},
+            uncompressedData, textureData, new ExpectRG11B10Ufloat(textureData));
     }
 }
 

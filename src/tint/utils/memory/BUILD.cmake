@@ -51,6 +51,10 @@ tint_target_add_dependencies(tint_utils_memory lib
   tint_utils_math
 )
 
+tint_target_add_external_dependencies(tint_utils_memory lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_utils_memory_test
 # Kind:      test
@@ -69,4 +73,5 @@ tint_target_add_dependencies(tint_utils_memory_test test
 
 tint_target_add_external_dependencies(tint_utils_memory_test test
   "gtest"
+  "src_utils"
 )

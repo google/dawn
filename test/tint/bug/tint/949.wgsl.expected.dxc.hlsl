@@ -3,36 +3,50 @@ struct lightingInfo {
   float3 specular;
 };
 
+struct main_out {
+  float4 glFragColor_1;
+};
+
+struct main_outputs {
+  float4 main_out_glFragColor_1 : SV_Target0;
+};
+
+struct main_inputs {
+  float4 v_output1_param : TEXCOORD0;
+  float2 vMainuv_param : TEXCOORD1;
+  float4 v_output2_param : TEXCOORD2;
+  float2 v_uv_param : TEXCOORD3;
+  bool gl_FrontFacing_param : SV_IsFrontFace;
+};
+
+
 static float u_Float = 0.0f;
-static float3 u_Color = float3(0.0f, 0.0f, 0.0f);
+static float3 u_Color = (0.0f).xxx;
 Texture2D<float4> TextureSamplerTexture : register(t1, space2);
 SamplerState TextureSamplerSampler : register(s0, space2);
-static float2 vMainuv = float2(0.0f, 0.0f);
+static float2 vMainuv = (0.0f).xx;
 cbuffer cbuffer_x_269 : register(b6, space2) {
   uint4 x_269[11];
 };
-static float4 v_output1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+static float4 v_output1 = (0.0f).xxxx;
 static bool gl_FrontFacing = false;
-static float2 v_uv = float2(0.0f, 0.0f);
-static float4 v_output2 = float4(0.0f, 0.0f, 0.0f, 0.0f);
+static float2 v_uv = (0.0f).xx;
+static float4 v_output2 = (0.0f).xxxx;
 Texture2D<float4> TextureSampler1Texture : register(t3, space2);
 SamplerState TextureSampler1Sampler : register(s2, space2);
 cbuffer cbuffer_light0 : register(b5) {
   uint4 light0[6];
 };
-static float4 glFragColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-SamplerState bumpSamplerSampler : register(s4, space2);
-Texture2D<float4> bumpSamplerTexture : register(t5, space2);
-
+static float4 glFragColor = (0.0f).xxxx;
 float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p, inout float2 uv, inout float2 tangentSpaceParams) {
-  float3 dp1 = float3(0.0f, 0.0f, 0.0f);
-  float3 dp2 = float3(0.0f, 0.0f, 0.0f);
-  float2 duv1 = float2(0.0f, 0.0f);
-  float2 duv2 = float2(0.0f, 0.0f);
-  float3 dp2perp = float3(0.0f, 0.0f, 0.0f);
-  float3 dp1perp = float3(0.0f, 0.0f, 0.0f);
-  float3 tangent = float3(0.0f, 0.0f, 0.0f);
-  float3 bitangent = float3(0.0f, 0.0f, 0.0f);
+  float3 dp1 = (0.0f).xxx;
+  float3 dp2 = (0.0f).xxx;
+  float2 duv1 = (0.0f).xx;
+  float2 duv2 = (0.0f).xx;
+  float3 dp2perp = (0.0f).xxx;
+  float3 dp1perp = (0.0f).xxx;
+  float3 tangent = (0.0f).xxx;
+  float3 bitangent = (0.0f).xxx;
   float invmax = 0.0f;
   float3 x_133 = p;
   dp1 = ddx(x_133);
@@ -76,19 +90,21 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p,
   float x_193 = invmax;
   float3 x_194 = (x_192 * x_193);
   float3 x_195 = normal_1;
-  return float3x3(float3(x_191.x, x_191.y, x_191.z), float3(x_194.x, x_194.y, x_194.z), float3(x_195.x, x_195.y, x_195.z));
+  float3 v = float3(x_191.x, x_191.y, x_191.z);
+  float3 v_1 = float3(x_194.x, x_194.y, x_194.z);
+  return float3x3(v, v_1, float3(x_195.x, x_195.y, x_195.z));
 }
 
 float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
-  float3 i0 = float3(0.0f, 0.0f, 0.0f);
-  float3 i1 = float3(0.0f, 0.0f, 0.0f);
-  float3 i2 = float3(0.0f, 0.0f, 0.0f);
-  float3x3 outMatrix = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float3 x_60 = inMatrix[0];
+  float3 i0 = (0.0f).xxx;
+  float3 i1 = (0.0f).xxx;
+  float3 i2 = (0.0f).xxx;
+  float3x3 outMatrix = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3 x_60 = inMatrix[0u];
   i0 = x_60;
-  float3 x_64 = inMatrix[1];
+  float3 x_64 = inMatrix[1u];
   i1 = x_64;
-  float3 x_68 = inMatrix[2];
+  float3 x_68 = inMatrix[2u];
   i2 = x_68;
   float x_73 = i0.x;
   float x_75 = i1.x;
@@ -102,7 +118,9 @@ float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
   float x_91 = i1.z;
   float x_93 = i2.z;
   float3 x_94 = float3(x_89, x_91, x_93);
-  outMatrix = float3x3(float3(x_78.x, x_78.y, x_78.z), float3(x_86.x, x_86.y, x_86.z), float3(x_94.x, x_94.y, x_94.z));
+  float3 v_2 = float3(x_78.x, x_78.y, x_78.z);
+  float3 v_3 = float3(x_86.x, x_86.y, x_86.z);
+  outMatrix = float3x3(v_2, v_3, float3(x_94.x, x_94.y, x_94.z));
   float3x3 x_110 = outMatrix;
   return x_110;
 }
@@ -114,8 +132,8 @@ float3 perturbNormalBase_mf33_vf3_f1_(inout float3x3 cotangentFrame, inout float
 }
 
 float3 perturbNormal_mf33_vf3_f1_(inout float3x3 cotangentFrame_1, inout float3 textureSample, inout float scale_1) {
-  float3x3 param = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float3 param_1 = float3(0.0f, 0.0f, 0.0f);
+  float3x3 param = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3 param_1 = (0.0f).xxx;
   float param_2 = 0.0f;
   float3 x_119 = textureSample;
   float3x3 x_125 = cotangentFrame_1;
@@ -130,7 +148,7 @@ float3 perturbNormal_mf33_vf3_f1_(inout float3x3 cotangentFrame_1, inout float3 
 lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout float3 viewDirectionW, inout float3 vNormal, inout float4 lightData, inout float3 diffuseColor, inout float3 specularColor, inout float3 groundColor, inout float glossiness) {
   float ndl = 0.0f;
   lightingInfo result = (lightingInfo)0;
-  float3 angleW = float3(0.0f, 0.0f, 0.0f);
+  float3 angleW = (0.0f).xxx;
   float specComp = 0.0f;
   float3 x_212 = vNormal;
   float4 x_213 = lightData;
@@ -156,73 +174,73 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout float3
 }
 
 void main_1() {
-  float4 tempTextureRead = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  float3 rgb = float3(0.0f, 0.0f, 0.0f);
-  float3 output5 = float3(0.0f, 0.0f, 0.0f);
-  float4 output4 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  float2 uvOffset = float2(0.0f, 0.0f);
+  float4 tempTextureRead = (0.0f).xxxx;
+  float3 rgb = (0.0f).xxx;
+  float3 output5 = (0.0f).xxx;
+  float4 output4 = (0.0f).xxxx;
+  float2 uvOffset = (0.0f).xx;
   float normalScale = 0.0f;
-  float2 TBNUV = float2(0.0f, 0.0f);
-  float2 x_299 = float2(0.0f, 0.0f);
-  float3x3 TBN = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float3 param_3 = float3(0.0f, 0.0f, 0.0f);
-  float3 param_4 = float3(0.0f, 0.0f, 0.0f);
-  float2 param_5 = float2(0.0f, 0.0f);
-  float2 param_6 = float2(0.0f, 0.0f);
-  float3x3 invTBN = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float3x3 param_7 = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  float2 TBNUV = (0.0f).xx;
+  float2 x_299 = (0.0f).xx;
+  float3x3 TBN = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3 param_3 = (0.0f).xxx;
+  float3 param_4 = (0.0f).xxx;
+  float2 param_5 = (0.0f).xx;
+  float2 param_6 = (0.0f).xx;
+  float3x3 invTBN = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3x3 param_7 = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
   float parallaxLimit = 0.0f;
-  float2 vOffsetDir = float2(0.0f, 0.0f);
-  float2 vMaxOffset = float2(0.0f, 0.0f);
+  float2 vOffsetDir = (0.0f).xx;
+  float2 vMaxOffset = (0.0f).xx;
   float numSamples = 0.0f;
   float stepSize = 0.0f;
   float currRayHeight = 0.0f;
-  float2 vCurrOffset = float2(0.0f, 0.0f);
-  float2 vLastOffset = float2(0.0f, 0.0f);
+  float2 vCurrOffset = (0.0f).xx;
+  float2 vLastOffset = (0.0f).xx;
   float lastSampledHeight = 0.0f;
   float currSampledHeight = 0.0f;
-  int i = 0;
+  int i = int(0);
   float delta1 = 0.0f;
   float delta2 = 0.0f;
   float ratio = 0.0f;
-  float2 parallaxOcclusion_0 = float2(0.0f, 0.0f);
-  float3x3 param_8 = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  float3 param_9 = float3(0.0f, 0.0f, 0.0f);
+  float2 parallaxOcclusion_0 = (0.0f).xx;
+  float3x3 param_8 = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3 param_9 = (0.0f).xxx;
   float param_10 = 0.0f;
-  float2 output6 = float2(0.0f, 0.0f);
-  float4 tempTextureRead1 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  float3 rgb1 = float3(0.0f, 0.0f, 0.0f);
-  float3 viewDirectionW_1 = float3(0.0f, 0.0f, 0.0f);
+  float2 output6 = (0.0f).xx;
+  float4 tempTextureRead1 = (0.0f).xxxx;
+  float3 rgb1 = (0.0f).xxx;
+  float3 viewDirectionW_1 = (0.0f).xxx;
   float shadow = 0.0f;
   float glossiness_1 = 0.0f;
-  float3 diffuseBase = float3(0.0f, 0.0f, 0.0f);
-  float3 specularBase = float3(0.0f, 0.0f, 0.0f);
-  float3 normalW = float3(0.0f, 0.0f, 0.0f);
+  float3 diffuseBase = (0.0f).xxx;
+  float3 specularBase = (0.0f).xxx;
+  float3 normalW = (0.0f).xxx;
   lightingInfo info = (lightingInfo)0;
-  float3 param_11 = float3(0.0f, 0.0f, 0.0f);
-  float3 param_12 = float3(0.0f, 0.0f, 0.0f);
-  float4 param_13 = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  float3 param_14 = float3(0.0f, 0.0f, 0.0f);
-  float3 param_15 = float3(0.0f, 0.0f, 0.0f);
-  float3 param_16 = float3(0.0f, 0.0f, 0.0f);
+  float3 param_11 = (0.0f).xxx;
+  float3 param_12 = (0.0f).xxx;
+  float4 param_13 = (0.0f).xxxx;
+  float3 param_14 = (0.0f).xxx;
+  float3 param_15 = (0.0f).xxx;
+  float3 param_16 = (0.0f).xxx;
   float param_17 = 0.0f;
-  float3 diffuseOutput = float3(0.0f, 0.0f, 0.0f);
-  float3 specularOutput = float3(0.0f, 0.0f, 0.0f);
-  float3 output3 = float3(0.0f, 0.0f, 0.0f);
+  float3 diffuseOutput = (0.0f).xxx;
+  float3 specularOutput = (0.0f).xxx;
+  float3 output3 = (0.0f).xxx;
   u_Float = 100.0f;
   u_Color = (0.5f).xxx;
   float2 x_261 = vMainuv;
   float4 x_262 = TextureSamplerTexture.Sample(TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   float4 x_264 = tempTextureRead;
-  float x_273 = asfloat(x_269[10].x);
+  float x_273 = asfloat(x_269[10u].x);
   rgb = (float3(x_264.x, x_264.y, x_264.z) * x_273);
-  float3 x_279 = asfloat(x_269[9].xyz);
+  float3 x_279 = asfloat(x_269[9u].xyz);
   float4 x_282 = v_output1;
   output5 = normalize((x_279 - float3(x_282.x, x_282.y, x_282.z)));
   output4 = (0.0f).xxxx;
   uvOffset = (0.0f).xx;
-  float x_292 = asfloat(x_269[8].x);
+  float x_292 = asfloat(x_269[8u].x);
   normalScale = (1.0f / x_292);
   bool x_298 = gl_FrontFacing;
   if (x_298) {
@@ -241,7 +259,7 @@ void main_1() {
   param_4 = float3(x_317.x, x_317.y, x_317.z);
   float2 x_320 = TBNUV;
   param_5 = x_320;
-  float2 x_324 = asfloat(x_269[10].zw);
+  float2 x_324 = asfloat(x_269[10u].zw);
   param_6 = x_324;
   float3x3 x_325 = cotangent_frame_vf3_vf3_vf2_vf2_(param_3, param_4, param_5, param_6);
   TBN = x_325;
@@ -255,7 +273,7 @@ void main_1() {
   float3x3 x_337 = invTBN;
   float3 x_338 = output5;
   parallaxLimit = (length(float2(x_334.x, x_334.y)) / mul(-(x_338), x_337).z);
-  float x_345 = asfloat(x_269[9].w);
+  float x_345 = asfloat(x_269[9u].w);
   float x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
   float3x3 x_349 = invTBN;
@@ -277,53 +295,64 @@ void main_1() {
   vLastOffset = (0.0f).xx;
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
-  i = 0;
-  while (true) {
-    int x_388 = i;
-    if ((x_388 < 15)) {
-    } else {
-      break;
-    }
-    float2 x_394 = v_uv;
-    float2 x_395 = vCurrOffset;
-    float4 x_397 = (0.0f).xxxx;
-    currSampledHeight = x_397.w;
-    float x_400 = currSampledHeight;
-    float x_401 = currRayHeight;
-    if ((x_400 > x_401)) {
-      float x_406 = currSampledHeight;
-      float x_407 = currRayHeight;
-      delta1 = (x_406 - x_407);
-      float x_410 = currRayHeight;
-      float x_411 = stepSize;
-      float x_413 = lastSampledHeight;
-      delta2 = ((x_410 + x_411) - x_413);
-      float x_416 = delta1;
-      float x_417 = delta1;
-      float x_418 = delta2;
-      ratio = (x_416 / (x_417 + x_418));
-      float x_421 = ratio;
-      float2 x_422 = vLastOffset;
-      float x_424 = ratio;
-      float2 x_426 = vCurrOffset;
-      vCurrOffset = ((x_422 * x_421) + (x_426 * (1.0f - x_424)));
-      break;
-    } else {
-      float x_431 = stepSize;
-      float x_432 = currRayHeight;
-      currRayHeight = (x_432 - x_431);
-      float2 x_434 = vCurrOffset;
-      vLastOffset = x_434;
-      float x_435 = stepSize;
-      float2 x_436 = vMaxOffset;
-      float2 x_438 = vCurrOffset;
-      vCurrOffset = (x_438 + (x_436 * x_435));
-      float x_440 = currSampledHeight;
-      lastSampledHeight = x_440;
-    }
-    {
-      int x_441 = i;
-      i = (x_441 + 1);
+  i = int(0);
+  {
+    uint2 tint_loop_idx = (4294967295u).xx;
+    while(true) {
+      if (all((tint_loop_idx == (0u).xx))) {
+        break;
+      }
+      int x_388 = i;
+      if ((x_388 < int(15))) {
+      } else {
+        break;
+      }
+      float2 x_394 = v_uv;
+      float2 x_395 = vCurrOffset;
+      float4 x_397 = (0.0f).xxxx;
+      currSampledHeight = x_397.w;
+      float x_400 = currSampledHeight;
+      float x_401 = currRayHeight;
+      if ((x_400 > x_401)) {
+        float x_406 = currSampledHeight;
+        float x_407 = currRayHeight;
+        delta1 = (x_406 - x_407);
+        float x_410 = currRayHeight;
+        float x_411 = stepSize;
+        float x_413 = lastSampledHeight;
+        delta2 = ((x_410 + x_411) - x_413);
+        float x_416 = delta1;
+        float x_417 = delta1;
+        float x_418 = delta2;
+        ratio = (x_416 / (x_417 + x_418));
+        float x_421 = ratio;
+        float2 x_422 = vLastOffset;
+        float x_424 = ratio;
+        float2 x_426 = vCurrOffset;
+        vCurrOffset = ((x_422 * x_421) + (x_426 * (1.0f - x_424)));
+        break;
+      } else {
+        float x_431 = stepSize;
+        float x_432 = currRayHeight;
+        currRayHeight = (x_432 - x_431);
+        float2 x_434 = vCurrOffset;
+        vLastOffset = x_434;
+        float x_435 = stepSize;
+        float2 x_436 = vMaxOffset;
+        float2 x_438 = vCurrOffset;
+        vCurrOffset = (x_438 + (x_436 * x_435));
+        float x_440 = currSampledHeight;
+        lastSampledHeight = x_440;
+      }
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+        int x_441 = i;
+        i = (x_441 + int(1));
+      }
+      continue;
     }
   }
   float2 x_444 = vCurrOffset;
@@ -333,7 +362,7 @@ void main_1() {
   float2 x_449 = v_uv;
   float2 x_450 = uvOffset;
   float4 x_452 = TextureSamplerTexture.Sample(TextureSamplerSampler, (x_449 + x_450));
-  float x_454 = asfloat(x_269[8].x);
+  float x_454 = asfloat(x_269[8u].x);
   float3x3 x_457 = TBN;
   param_8 = x_457;
   param_9 = float3(x_452.x, x_452.y, x_452.z);
@@ -349,7 +378,7 @@ void main_1() {
   tempTextureRead1 = x_475;
   float4 x_477 = tempTextureRead1;
   rgb1 = float3(x_477.x, x_477.y, x_477.z);
-  float3 x_481 = asfloat(x_269[9].xyz);
+  float3 x_481 = asfloat(x_269[9u].xyz);
   float4 x_482 = v_output1;
   viewDirectionW_1 = normalize((x_481 - float3(x_482.x, x_482.y, x_482.z)));
   shadow = 1.0f;
@@ -363,13 +392,13 @@ void main_1() {
   param_11 = x_501;
   float3 x_503 = normalW;
   param_12 = x_503;
-  float4 x_507 = asfloat(light0[0]);
+  float4 x_507 = asfloat(light0[0u]);
   param_13 = x_507;
-  float4 x_510 = asfloat(light0[1]);
+  float4 x_510 = asfloat(light0[1u]);
   param_14 = float3(x_510.x, x_510.y, x_510.z);
-  float4 x_514 = asfloat(light0[2]);
+  float4 x_514 = asfloat(light0[2u]);
   param_15 = float3(x_514.x, x_514.y, x_514.z);
-  float3 x_518 = asfloat(light0[3].xyz);
+  float3 x_518 = asfloat(light0[3u].xyz);
   param_16 = x_518;
   float x_520 = glossiness_1;
   param_17 = x_520;
@@ -395,22 +424,7 @@ void main_1() {
   output3 = (x_543 + x_544);
   float3 x_548 = output3;
   glFragColor = float4(x_548.x, x_548.y, x_548.z, 1.0f);
-  return;
 }
-
-struct main_out {
-  float4 glFragColor_1;
-};
-struct tint_symbol_1 {
-  float4 v_output1_param : TEXCOORD0;
-  float2 vMainuv_param : TEXCOORD1;
-  float4 v_output2_param : TEXCOORD2;
-  float2 v_uv_param : TEXCOORD3;
-  bool gl_FrontFacing_param : SV_IsFrontFace;
-};
-struct tint_symbol_2 {
-  float4 glFragColor_1 : SV_Target0;
-};
 
 main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontFacing_param, float2 v_uv_param, float4 v_output2_param) {
   vMainuv = vMainuv_param;
@@ -419,13 +433,13 @@ main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontF
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  main_out tint_symbol_3 = {glFragColor};
-  return tint_symbol_3;
+  main_out v_4 = {glFragColor};
+  return v_4;
 }
 
-tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  main_out inner_result = main_inner(tint_symbol.vMainuv_param, tint_symbol.v_output1_param, tint_symbol.gl_FrontFacing_param, tint_symbol.v_uv_param, tint_symbol.v_output2_param);
-  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
-  wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
-  return wrapper_result;
+main_outputs main(main_inputs inputs) {
+  main_out v_5 = main_inner(inputs.vMainuv_param, inputs.v_output1_param, inputs.gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param);
+  main_outputs v_6 = {v_5.glFragColor_1};
+  return v_6;
 }
+

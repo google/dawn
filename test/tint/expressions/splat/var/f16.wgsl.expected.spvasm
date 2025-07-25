@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 30
+; Generator: Google Tint Compiler; 1
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -10,46 +10,42 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
                OpName %v "v"
                OpName %v2 "v2"
                OpName %v3 "v3"
                OpName %v4 "v4"
+               OpName %unused_entry_point "unused_entry_point"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
        %half = OpTypeFloat 16
-%half_0x1_8p_1 = OpConstant %half 0x1.8p+1
 %_ptr_Function_half = OpTypePointer Function %half
-         %11 = OpConstantNull %half
+%half_0x1_8p_1 = OpConstant %half 0x1.8p+1
      %v2half = OpTypeVector %half 2
 %_ptr_Function_v2half = OpTypePointer Function %v2half
-         %17 = OpConstantNull %v2half
      %v3half = OpTypeVector %half 3
 %_ptr_Function_v3half = OpTypePointer Function %v3half
-         %23 = OpConstantNull %v3half
      %v4half = OpTypeVector %half 4
 %_ptr_Function_v4half = OpTypePointer Function %v4half
-         %29 = OpConstantNull %v4half
-%unused_entry_point = OpFunction %void None %1
+          %f = OpFunction %void None %3
           %4 = OpLabel
+          %v = OpVariable %_ptr_Function_half Function
+         %v2 = OpVariable %_ptr_Function_v2half Function
+         %v3 = OpVariable %_ptr_Function_v3half Function
+         %v4 = OpVariable %_ptr_Function_v4half Function
+               OpStore %v %half_0x1_8p_1
+          %9 = OpLoad %half %v None
+         %11 = OpCompositeConstruct %v2half %9 %9
+               OpStore %v2 %11
+         %14 = OpLoad %half %v None
+         %16 = OpCompositeConstruct %v3half %14 %14 %14
+               OpStore %v3 %16
+         %19 = OpLoad %half %v None
+         %21 = OpCompositeConstruct %v4half %19 %19 %19 %19
+               OpStore %v4 %21
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %1
-          %6 = OpLabel
-          %v = OpVariable %_ptr_Function_half Function %11
-         %v2 = OpVariable %_ptr_Function_v2half Function %17
-         %v3 = OpVariable %_ptr_Function_v3half Function %23
-         %v4 = OpVariable %_ptr_Function_v4half Function %29
-               OpStore %v %half_0x1_8p_1
-         %13 = OpLoad %half %v
-         %14 = OpCompositeConstruct %v2half %13 %13
-               OpStore %v2 %14
-         %19 = OpLoad %half %v
-         %20 = OpCompositeConstruct %v3half %19 %19 %19
-               OpStore %v3 %20
-         %25 = OpLoad %half %v
-         %26 = OpCompositeConstruct %v4half %25 %25 %25 %25
-               OpStore %v4 %26
+%unused_entry_point = OpFunction %void None %3
+         %25 = OpLabel
                OpReturn
                OpFunctionEnd

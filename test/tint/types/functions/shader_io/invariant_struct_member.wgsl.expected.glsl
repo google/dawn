@@ -1,19 +1,15 @@
 #version 310 es
 
+
 struct Out {
   vec4 pos;
 };
 
-Out tint_symbol() {
-  Out tint_symbol_1 = Out(vec4(0.0f));
-  return tint_symbol_1;
+Out main_inner() {
+  return Out(vec4(0.0f));
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  Out inner_result = tint_symbol();
-  gl_Position = inner_result.pos;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  vec4 v = main_inner().pos;
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
+  gl_PointSize = 1.0f;
 }

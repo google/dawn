@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -205,6 +206,8 @@ class CommandAllocator : public NonCopyable {
         }
         return result;
     }
+
+    size_t GetCommandBlocksCount() const;
 
   private:
     // This is used for some internal computations and can be any power of two as long as code

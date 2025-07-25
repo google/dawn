@@ -77,7 +77,7 @@ TEST_F(InternalUsageValidationDisabledTest, CommandEncoderDescriptorRequiresFeat
     // Check that the encoder records that it is invalid, and not any other errors.
     encoder.InjectValidationError("injected error");
     ASSERT_DEVICE_ERROR(encoder.Finish(),
-                        testing::HasSubstr("[Invalid CommandEncoder (unlabeled)] is invalid"));
+                        testing::HasSubstr("[Invalid CommandEncoder (unlabeled)]"));
 }
 
 class TextureInternalUsageValidationTest : public ValidationTest {
@@ -171,24 +171,27 @@ TEST_F(TextureInternalUsageValidationTest, DeprecatedCommandValidation) {
 
     // Control: src -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture = utils::CreateImageCopyTexture(src, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(src, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         encoder.Finish();
     }
 
     // Invalid: src internal -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcInternal, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcInternal, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
@@ -231,32 +234,36 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
 
     // Control: src -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture = utils::CreateImageCopyTexture(src, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(src, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         encoder.Finish();
     }
 
     // Invalid: src internal -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcInternal, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcInternal, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Invalid: src internal -> dst, with internal descriptor, but useInternalUsages set to false.
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcInternal, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcInternal, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
@@ -265,14 +272,16 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
     // Control with internal copy: src -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture = utils::CreateImageCopyTexture(src, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(src, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
@@ -281,15 +290,16 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         encoder.Finish();
     }
 
     // Valid with internal copy: src internal -> dst
     {
-        wgpu::ImageCopyTexture srcImageCopyTexture =
-            utils::CreateImageCopyTexture(srcInternal, 0, {0, 0});
-        wgpu::ImageCopyTexture dstImageCopyTexture = utils::CreateImageCopyTexture(dst, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo srcTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcInternal, 0, {0, 0});
+        wgpu::TexelCopyTextureInfo dstTexelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(dst, 0, {0, 0});
         wgpu::Extent3D extent3D = {1, 1};
 
         wgpu::CommandEncoderDescriptor encoderDesc = {};
@@ -298,7 +308,7 @@ TEST_F(TextureInternalUsageValidationTest, CommandValidation) {
         encoderDesc.nextInChain = &encoderInternalDesc;
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc);
 
-        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &extent3D);
+        encoder.CopyTextureToTexture(&srcTexelCopyTextureInfo, &dstTexelCopyTextureInfo, &extent3D);
         encoder.Finish();
     }
 }

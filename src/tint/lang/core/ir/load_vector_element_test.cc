@@ -43,7 +43,7 @@ TEST_F(IR_LoadVectorElementTest, Create) {
     auto* inst = b.LoadVectorElement(from, 2_i);
 
     ASSERT_TRUE(inst->Is<LoadVectorElement>());
-    ASSERT_EQ(inst->From(), from->Result(0));
+    ASSERT_EQ(inst->From(), from->Result());
 
     ASSERT_TRUE(inst->Index()->Is<Constant>());
     auto index = inst->Index()->As<Constant>()->Value();
@@ -56,10 +56,10 @@ TEST_F(IR_LoadVectorElementTest, Usage) {
     auto* inst = b.LoadVectorElement(from, 2_i);
 
     ASSERT_NE(inst->From(), nullptr);
-    EXPECT_THAT(inst->From()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->From()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->Index(), nullptr);
-    EXPECT_THAT(inst->Index()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(inst->Index()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_LoadVectorElementTest, Result) {
@@ -77,10 +77,10 @@ TEST_F(IR_LoadVectorElementTest, Clone) {
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
-    EXPECT_NE(nullptr, new_inst->Result(0));
-    EXPECT_NE(inst->Result(0), new_inst->Result(0));
+    EXPECT_NE(nullptr, new_inst->Result());
+    EXPECT_NE(inst->Result(), new_inst->Result());
 
-    EXPECT_EQ(new_from->Result(0), new_inst->From());
+    EXPECT_EQ(new_from->Result(), new_inst->From());
 
     auto new_idx = new_inst->Index()->As<Constant>()->Value();
     ASSERT_TRUE(new_idx->Is<core::constant::Scalar<i32>>());

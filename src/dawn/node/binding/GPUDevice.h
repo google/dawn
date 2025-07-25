@@ -28,11 +28,13 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUDEVICE_H_
 #define SRC_DAWN_NODE_BINDING_GPUDEVICE_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <memory>
 #include <string>
 
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/AsyncRunner.h"
+#include "src/dawn/node/binding/EventTarget.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -51,20 +53,21 @@ class GPUDeviceLostInfo final : public interop::GPUDeviceLostInfo {
 };
 
 // GPUDevice is an implementation of interop::GPUDevice that wraps a wgpu::Device.
-class GPUDevice final : public interop::GPUDevice {
+class GPUDevice final : public interop::GPUDevice, EventTarget {
   public:
     GPUDevice(Napi::Env env,
               const wgpu::DeviceDescriptor& desc,
               wgpu::Device device,
               interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise,
               std::shared_ptr<AsyncRunner> async);
-    ~GPUDevice();
+    ~GPUDevice() override;
 
     void ForceLoss(wgpu::DeviceLostReason reason, const char* message);
 
     // interop::GPUDevice interface compliance
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
+    interop::Interface<interop::GPUAdapterInfo> getAdapterInfo(Napi::Env) override;
     interop::Interface<interop::GPUQueue> getQueue(Napi::Env env) override;
     void destroy(Napi::Env) override;
     interop::Interface<interop::GPUBuffer> createBuffer(
@@ -119,23 +122,15 @@ class GPUDevice final : public interop::GPUDevice {
         Napi::Env env) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
-    interop::Interface<interop::EventHandler> getOnuncapturederror(Napi::Env) override;
-    void setOnuncapturederror(Napi::Env, interop::Interface<interop::EventHandler> value) override;
-    void addEventListener(
-        Napi::Env,
-        std::string type,
-        std::optional<interop::Interface<interop::EventListener>> callback,
-        std::optional<std::variant<interop::AddEventListenerOptions, bool>> options) override;
-    void removeEventListener(
-        Napi::Env,
-        std::string type,
-        std::optional<interop::Interface<interop::EventListener>> callback,
-        std::optional<std::variant<interop::EventListenerOptions, bool>> options) override;
-    bool dispatchEvent(Napi::Env, interop::Interface<interop::Event> event) override;
+    interop::EventHandler getOnuncapturederror(Napi::Env) override;
+    void setOnuncapturederror(Napi::Env, interop::EventHandler value) override;
+
+    void handleUncapturedError(ErrorType type, wgpu::StringView message);
+    static void handleUncapturedErrorCallback(const wgpu::Device& device,
+                                              ErrorType type,
+                                              wgpu::StringView message);
 
   private:
-    void QueueTick();
-
     Napi::Env env_;
     wgpu::Device device_;
     std::shared_ptr<AsyncRunner> async_;

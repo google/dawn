@@ -1,32 +1,26 @@
 #version 310 es
 
-uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
-}
-
-uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
-}
-
 shared int zero[2][3];
-void tint_zero_workgroup_memory(uint local_idx) {
+void main_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 6u); idx = (idx + 1u)) {
-      uint i = tint_div(idx, 3u);
-      uint i_1 = tint_mod(idx, 3u);
-      zero[i][i_1] = 0;
+    uint v_1 = 0u;
+    v_1 = tint_local_index;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 6u)) {
+        break;
+      }
+      zero[(v_2 / 3u)][(v_2 % 3u)] = 0;
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
     }
   }
   barrier();
-}
-
-void tint_symbol(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
   int v[2][3] = zero;
 }
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol(gl_LocalInvocationIndex);
-  return;
+  main_inner(gl_LocalInvocationIndex);
 }

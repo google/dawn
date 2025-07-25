@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -49,7 +50,10 @@ libtint_source_set("math") {
     "math.cc",
     "math.h",
   ]
-  deps = []
+  deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/utils/macros",
+  ]
 }
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
@@ -59,6 +63,7 @@ if (tint_build_unittests) {
       "math_test.cc",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/ice",
@@ -66,7 +71,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

@@ -1,103 +1,87 @@
-SKIP: FAILED
-
-#version 310 es
-
-uniform highp sampler2DArrayShadow arg_0_arg_1;
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
-  float inner;
-} prevent_dce;
-
-void textureSampleLevel_36f0d3() {
-  vec2 arg_2 = vec2(1.0f);
-  int arg_3 = 1;
-  uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
-  prevent_dce.inner = res;
-}
-
-vec4 vertex_main() {
-  textureSampleLevel_36f0d3();
-  return vec4(0.0f);
-}
-
-void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vertex_main();
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'textureLodOffset for sampler2DArrayShadow' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+//
+// fragment_main
+//
+#version 460
+#extension GL_EXT_texture_shadow_lod: require
 precision highp float;
 precision highp int;
 
-uniform highp sampler2DArrayShadow arg_0_arg_1;
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   float inner;
-} prevent_dce;
-
-void textureSampleLevel_36f0d3() {
+} v;
+uniform highp sampler2DArrayShadow f_arg_0_arg_1;
+float textureSampleLevel_36f0d3() {
   vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
-  prevent_dce.inner = res;
+  vec2 v_1 = arg_2;
+  uint v_2 = arg_4;
+  vec4 v_3 = vec4(v_1, float(arg_3), 0.0f);
+  float res = textureLodOffset(f_arg_0_arg_1, v_3, float(v_2), ivec2(1));
+  return res;
 }
-
-void fragment_main() {
-  textureSampleLevel_36f0d3();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = textureSampleLevel_36f0d3();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'textureLodOffset for sampler2DArrayShadow' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+//
+// compute_main
+//
+#version 460
+#extension GL_EXT_texture_shadow_lod: require
 
-
-
-#version 310 es
-
-uniform highp sampler2DArrayShadow arg_0_arg_1;
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
   float inner;
-} prevent_dce;
-
-void textureSampleLevel_36f0d3() {
+} v;
+uniform highp sampler2DArrayShadow arg_0_arg_1;
+float textureSampleLevel_36f0d3() {
   vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = textureLodOffset(arg_0_arg_1, vec4(vec3(arg_2, float(arg_3)), 0.0f), float(arg_4), ivec2(1));
-  prevent_dce.inner = res;
+  vec2 v_1 = arg_2;
+  uint v_2 = arg_4;
+  vec4 v_3 = vec4(v_1, float(arg_3), 0.0f);
+  float res = textureLodOffset(arg_0_arg_1, v_3, float(v_2), ivec2(1));
+  return res;
 }
-
-void compute_main() {
-  textureSampleLevel_36f0d3();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = textureSampleLevel_36f0d3();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'textureLodOffset for sampler2DArrayShadow' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+//
+// vertex_main
+//
+#version 460
+#extension GL_EXT_texture_shadow_lod: require
 
 
+struct VertexOutput {
+  vec4 pos;
+  float prevent_dce;
+};
 
+uniform highp sampler2DArrayShadow v_arg_0_arg_1;
+layout(location = 0) flat out float tint_interstage_location0;
+float textureSampleLevel_36f0d3() {
+  vec2 arg_2 = vec2(1.0f);
+  int arg_3 = 1;
+  uint arg_4 = 1u;
+  vec2 v = arg_2;
+  uint v_1 = arg_4;
+  vec4 v_2 = vec4(v, float(arg_3), 0.0f);
+  float res = textureLodOffset(v_arg_0_arg_1, v_2, float(v_1), ivec2(1));
+  return res;
+}
+VertexOutput vertex_main_inner() {
+  VertexOutput v_3 = VertexOutput(vec4(0.0f), 0.0f);
+  v_3.pos = vec4(0.0f);
+  v_3.prevent_dce = textureSampleLevel_36f0d3();
+  return v_3;
+}
+void main() {
+  VertexOutput v_4 = vertex_main_inner();
+  gl_Position = vec4(v_4.pos.x, -(v_4.pos.y), ((2.0f * v_4.pos.z) - v_4.pos.w), v_4.pos.w);
+  tint_interstage_location0 = v_4.prevent_dce;
+  gl_PointSize = 1.0f;
+}

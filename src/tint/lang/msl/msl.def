@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/access.def"
 import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/subgroup_matrix_kind.def"
 import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,25 +59,47 @@ match workgroup_or_storage
 
 match f32_texel_format
   : texel_format.r8unorm
+  | texel_format.r8snorm
+  | texel_format.rg8unorm
+  | texel_format.rg8snorm
   | texel_format.bgra8unorm
   | texel_format.rgba8unorm
   | texel_format.rgba8snorm
+  | texel_format.r16unorm
+  | texel_format.r16snorm
+  | texel_format.rg16unorm
+  | texel_format.rg16snorm
+  | texel_format.rgba16unorm
+  | texel_format.rgba16snorm
+  | texel_format.r16float
+  | texel_format.rg16float
   | texel_format.rgba16float
   | texel_format.r32float
   | texel_format.rg32float
   | texel_format.rgba32float
+  | texel_format.rgb10a2unorm
+  | texel_format.rg11b10ufloat
 match i32_texel_format
-  : texel_format.rgba8sint
+  : texel_format.r8sint
+  | texel_format.rg8sint
+  | texel_format.rgba8sint
+  | texel_format.r16sint
+  | texel_format.rg16sint
   | texel_format.rgba16sint
   | texel_format.r32sint
   | texel_format.rg32sint
   | texel_format.rgba32sint
 match u32_texel_format
-  : texel_format.rgba8uint
+  : texel_format.r8uint
+  | texel_format.rg8uint
+  | texel_format.r16uint
+  | texel_format.rg16uint
+  | texel_format.rgba8uint
   | texel_format.rgba16uint
   | texel_format.r32uint
   | texel_format.rg32uint
   | texel_format.rgba32uint
+  | texel_format.rgb10a2uint
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types                                                                      //
@@ -84,7 +107,10 @@ match u32_texel_format
 
 type bool
 type i32
+type i8
 type u32
+type u64
+type u8
 type f32
 type f16
 type vec2<T>
@@ -112,12 +138,18 @@ type texture_storage_2d<F: texel_format, A: access>
 type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 
+type subgroup_matrix<S: subgroup_matrix_kind, T, C: num, R: num>
+
 // sampling options types
 type bias
 type gradient2d
 type gradient3d
 type gradientcube
 type level
+
+type __packed_vec3<T>
+
+type string
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -126,211 +158,256 @@ type level
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
 match f32_f16: f32 | f16
+match fiu32_f16: f32 | i32 | u32 | f16
+match iu8: i8 | u8
+match scalar: bool | f16 | f32 | i32 | u32
+
+match subgroup_matrix_kind_left : subgroup_matrix_kind.left
+match subgroup_matrix_kind_right : subgroup_matrix_kind.right
+match subgroup_matrix_kind_result : subgroup_matrix_kind.result
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
-@stage("fragment", "compute") fn atomic_compare_exchange_weak_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, ptr<function, T, read_write>, T, u32, u32) -> bool
-@stage("fragment", "compute") fn atomic_exchange_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_add_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_and_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_max_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_min_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_or_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_sub_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_fetch_xor_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32) -> T
-@stage("fragment", "compute") fn atomic_load_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, u32) -> T
-@stage("fragment", "compute") fn atomic_store_explicit[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, u32)
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_compare_exchange_weak_explicit(ptr<S, atomic<T>, read_write>, ptr<function, T, read_write>, T, u32, u32) -> bool
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_exchange_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_add_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_and_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_max_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_min_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_or_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_sub_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_fetch_xor_explicit(ptr<S, atomic<T>, read_write>, T, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_load_explicit(ptr<S, atomic<T>, read_write>, u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomic_store_explicit(ptr<S, atomic<T>, read_write>, T, u32)
 
-@member_function fn fence[F: texel_format, A: access](texture: texture_storage_1d<F, A>)
-@member_function fn fence[F: texel_format, A: access](texture: texture_storage_2d<F, A>)
-@member_function fn fence[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>)
-@member_function fn fence[F: texel_format, A: access](texture: texture_storage_3d<F, A>)
+@member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_1d<F, A>)
+@member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_2d<F, A>)
+@member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_2d_array<F, A>)
+@member_function implicit(F: texel_format, A: access) fn fence(texture: texture_storage_3d<F, A>)
 
-@member_function fn gather[T: fiu32](texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>, component: u32) -> vec4<T>
-@member_function fn gather[T: fiu32, A: iu32](texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>, component: u32) -> vec4<T>
-@member_function fn gather[T: fiu32](texture: texture_cube<T>, sampler: sampler, coords: vec3<f32>, component: u32) -> vec4<T>
-@member_function fn gather[T: fiu32, A: iu32](texture: texture_cube_array<T>, sampler: sampler, coords: vec3<f32>, array_index: A, component: u32) -> vec4<T>
+@member_function implicit(T: fiu32) fn gather(texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>, component: u32) -> vec4<T>
+@member_function implicit(T: fiu32, A: iu32) fn gather(texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>, component: u32) -> vec4<T>
+@member_function implicit(T: fiu32) fn gather(texture: texture_cube<T>, sampler: sampler, coords: vec3<f32>, component: u32) -> vec4<T>
+@member_function implicit(T: fiu32, A: iu32) fn gather(texture: texture_cube_array<T>, sampler: sampler, coords: vec3<f32>, array_index: A, component: u32) -> vec4<T>
 @member_function fn gather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
-@member_function fn gather[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
+@member_function implicit(A: iu32) fn gather(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
 @member_function fn gather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-@member_function fn gather[A: iu32](texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
+@member_function implicit(A: iu32) fn gather(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
 
 @member_function fn gather_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> vec4<f32>
 @member_function fn gather_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
-@member_function fn gather_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
-@member_function fn gather_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
+@member_function implicit(A: iu32) fn gather_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+@member_function implicit(A: iu32) fn gather_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
 @member_function fn gather_compare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
-@member_function fn gather_compare[A: iu32](texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+@member_function implicit(A: iu32) fn gather_compare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
 
-@member_function fn get_width[T: fiu32](texture: texture_1d<T>) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_2d<T>, u32) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_2d_array<T>, u32) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_3d<T>, u32) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_cube<T>, u32) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_cube_array<T>, u32) -> u32
-@member_function fn get_width[T: fiu32](texture: texture_multisampled_2d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_1d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_2d<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_2d_array<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_3d<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_cube<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_cube_array<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_width(texture: texture_multisampled_2d<T>) -> u32
 @member_function fn get_width(texture: texture_depth_2d, u32) -> u32
 @member_function fn get_width(texture: texture_depth_2d_array, u32) -> u32
 @member_function fn get_width(texture: texture_depth_cube, u32) -> u32
 @member_function fn get_width(texture: texture_depth_cube_array, u32) -> u32
 @member_function fn get_width(texture: texture_depth_multisampled_2d) -> u32
-@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_1d<F, A>) -> u32
-@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_2d<F, A>, u32) -> u32
-@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>, u32) -> u32
-@member_function fn get_width[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_width(texture: texture_storage_1d<F, A>) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_width(texture: texture_storage_2d<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_width(texture: texture_storage_2d_array<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_width(texture: texture_storage_3d<F, A>, u32) -> u32
 
-@member_function fn get_height[T: fiu32](texture: texture_2d<T>, u32) -> u32
-@member_function fn get_height[T: fiu32](texture: texture_2d_array<T>, u32) -> u32
-@member_function fn get_height[T: fiu32](texture: texture_3d<T>, u32) -> u32
-@member_function fn get_height[T: fiu32](texture: texture_cube<T>, u32) -> u32
-@member_function fn get_height[T: fiu32](texture: texture_cube_array<T>, u32) -> u32
-@member_function fn get_height[T: fiu32](texture: texture_multisampled_2d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_2d<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_2d_array<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_3d<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_cube<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_cube_array<T>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_height(texture: texture_multisampled_2d<T>) -> u32
 @member_function fn get_height(texture: texture_depth_2d, u32) -> u32
 @member_function fn get_height(texture: texture_depth_2d_array, u32) -> u32
 @member_function fn get_height(texture: texture_depth_cube, u32) -> u32
 @member_function fn get_height(texture: texture_depth_cube_array, u32) -> u32
 @member_function fn get_height(texture: texture_depth_multisampled_2d) -> u32
-@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_2d<F, A>, u32) -> u32
-@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>, u32) -> u32
-@member_function fn get_height[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_height(texture: texture_storage_2d<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_height(texture: texture_storage_2d_array<F, A>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_height(texture: texture_storage_3d<F, A>, u32) -> u32
 
-@member_function fn get_depth[T: fiu32](texture: texture_3d<T>, u32) -> u32
-@member_function fn get_depth[F: texel_format, A: access](texture: texture_storage_3d<F, A>, u32) -> u32
+@member_function implicit(T: fiu32) fn get_depth(texture: texture_3d<T>, u32) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_depth(texture: texture_storage_3d<F, A>, u32) -> u32
 
-@member_function fn get_array_size[T: fiu32](texture: texture_2d_array<T>) -> u32
-@member_function fn get_array_size[T: fiu32](texture: texture_cube_array<T>) -> u32
+@member_function implicit(T: fiu32) fn get_array_size(texture: texture_2d_array<T>) -> u32
+@member_function implicit(T: fiu32) fn get_array_size(texture: texture_cube_array<T>) -> u32
 @member_function fn get_array_size(texture: texture_depth_2d_array) -> u32
 @member_function fn get_array_size(texture: texture_depth_cube_array) -> u32
-@member_function fn get_array_size[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>) -> u32
+@member_function implicit(F: texel_format, A: access) fn get_array_size(texture: texture_storage_2d_array<F, A>) -> u32
 
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_1d<T>) -> u32
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_2d<T>) -> u32
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_2d_array<T>) -> u32
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_3d<T>) -> u32
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_cube<T>) -> u32
-@member_function fn get_num_mip_levels[T: fiu32](texture: texture_cube_array<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_1d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_2d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_2d_array<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_3d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_cube<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_mip_levels(texture: texture_cube_array<T>) -> u32
 @member_function fn get_num_mip_levels(texture: texture_depth_2d) -> u32
 @member_function fn get_num_mip_levels(texture: texture_depth_2d_array) -> u32
 @member_function fn get_num_mip_levels(texture: texture_depth_cube) -> u32
 @member_function fn get_num_mip_levels(texture: texture_depth_cube_array) -> u32
 
-@member_function fn get_num_samples[T: fiu32](texture: texture_multisampled_2d<T>) -> u32
+@member_function implicit(T: fiu32) fn get_num_samples(texture: texture_multisampled_2d<T>) -> u32
 @member_function fn get_num_samples(texture: texture_depth_multisampled_2d) -> u32
 
-@member_function fn read[T: fiu32](texture: texture_1d<T>, coords: u32) -> vec4<T>
-@member_function fn read[T: fiu32, L: iu32](texture: texture_2d<T>, coords: vec2<u32>, level: L) -> vec4<T>
-@member_function fn read[T: fiu32, A: iu32, L: iu32](texture: texture_2d_array<T>, coords: vec2<u32>, array_index: A, level: L) -> vec4<T>
-@member_function fn read[T: fiu32, L: iu32](texture: texture_3d<T>, coords: vec3<u32>, level: L) -> vec4<T>
-@member_function fn read[T: fiu32, S: iu32](texture: texture_multisampled_2d<T>, coords: vec2<u32>, sample_index: S) -> vec4<T>
-@member_function fn read[L: iu32](texture: texture_depth_2d, coords: vec2<u32>, level: L) -> f32
-@member_function fn read[A: iu32, L: iu32](texture: texture_depth_2d_array, coords: vec2<u32>, array_index: A, level: L) -> f32
-@member_function fn read[S: iu32](texture: texture_depth_multisampled_2d, coords: vec2<u32>, sample_index: S) -> f32
+@member_function implicit(T: fiu32) fn read(texture: texture_1d<T>, coords: u32) -> vec4<T>
+@member_function implicit(T: fiu32, L: iu32) fn read(texture: texture_2d<T>, coords: vec2<u32>, level: L) -> vec4<T>
+@member_function implicit(T: fiu32, A: iu32, L: iu32) fn read(texture: texture_2d_array<T>, coords: vec2<u32>, array_index: A, level: L) -> vec4<T>
+@member_function implicit(T: fiu32, L: iu32) fn read(texture: texture_3d<T>, coords: vec3<u32>, level: L) -> vec4<T>
+@member_function implicit(T: fiu32, S: iu32) fn read(texture: texture_multisampled_2d<T>, coords: vec2<u32>, sample_index: S) -> vec4<T>
+@member_function implicit(L: iu32) fn read(texture: texture_depth_2d, coords: vec2<u32>, level: L) -> f32
+@member_function implicit(A: iu32, L: iu32) fn read(texture: texture_depth_2d_array, coords: vec2<u32>, array_index: A, level: L) -> f32
+@member_function implicit(S: iu32) fn read(texture: texture_depth_multisampled_2d, coords: vec2<u32>, sample_index: S) -> f32
 @member_function fn read(texture: texture_storage_1d<f32_texel_format, readable>, coords: u32) -> vec4<f32>
 @member_function fn read(texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<u32>) -> vec4<f32>
-@member_function fn read[A: iu32](texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<f32>
+@member_function implicit(A: iu32) fn read(texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<f32>
 @member_function fn read(texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<u32>) -> vec4<f32>
 @member_function fn read(texture: texture_storage_1d<i32_texel_format, readable>, coords: u32) -> vec4<i32>
 @member_function fn read(texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<u32>) -> vec4<i32>
-@member_function fn read[A: iu32](texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<i32>
+@member_function implicit(A: iu32) fn read(texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<i32>
 @member_function fn read(texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<u32>) -> vec4<i32>
 @member_function fn read(texture: texture_storage_1d<u32_texel_format, readable>, coords: u32) -> vec4<u32>
 @member_function fn read(texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<u32>) -> vec4<u32>
-@member_function fn read[A: iu32](texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<u32>
+@member_function implicit(A: iu32) fn read(texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<u32>, array_index: A) -> vec4<u32>
 @member_function fn read(texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<u32>) -> vec4<u32>
 
 // Sample with implicit LOD.
 @member_function @stage("fragment") fn sample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<f32>
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<f32>
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, @const offset: vec3<i32>) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
 @member_function @stage("fragment") fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
 @member_function @stage("fragment") fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> f32
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A) -> f32
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> f32
 @member_function @stage("fragment") fn sample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
-@member_function @stage("fragment") fn sample[A: iu32](texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> f32
 
 // Sample with explicit LOD.
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: level) -> vec4<f32>
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: level, @const offset: vec2<i32>) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: level) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: level, @const offset: vec2<i32>) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: level) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: level, @const offset: vec2<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: level) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: level, @const offset: vec3<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, level: level) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, level: level) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, level: level) -> vec4<f32>
 @member_function fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: level) -> f32
 @member_function fn sample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: level, @const offset: vec2<i32>) -> f32
-@member_function fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: level) -> f32
-@member_function fn sample[A: iu32](texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: level, @const offset: vec2<i32>) -> f32
+@member_function implicit(A: iu32) fn sample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: level) -> f32
+@member_function implicit(A: iu32) fn sample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: level, @const offset: vec2<i32>) -> f32
 @member_function fn sample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>, level: level) -> f32
-@member_function fn sample[A: iu32](texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A, level: level) -> f32
+@member_function implicit(A: iu32) fn sample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A, level: level) -> f32
 
 // Sample with mip level bias.
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: bias) -> vec4<f32>
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: bias, @const offset: vec2<i32>) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: bias) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: bias, @const offset: vec2<i32>) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: bias) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: bias, @const offset: vec2<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: bias) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: bias, @const offset: vec3<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: bias) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, bias: bias) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, bias: bias) -> vec4<f32>
 
 // Sample with explicit derivatives.
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, gradient2d) -> vec4<f32>
 @member_function fn sample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, gradient2d, @const offset: vec2<i32>) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, gradient2d) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, gradient2d, @const offset: vec2<i32>) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, gradient2d) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, gradient2d, @const offset: vec2<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, gradient3d) -> vec4<f32>
 @member_function fn sample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, gradient3d, @const offset: vec3<i32>) -> vec4<f32>
 @member_function fn sample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, gradientcube) -> vec4<f32>
-@member_function fn sample[A: iu32](texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, gradientcube) -> vec4<f32>
+@member_function implicit(A: iu32) fn sample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, gradientcube) -> vec4<f32>
 
 // Sample compare with implicit LOD.
 @member_function @stage("fragment") fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
 @member_function @stage("fragment") fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> f32
-@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> f32
-@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> f32
 @member_function @stage("fragment") fn sample_compare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
-@member_function @stage("fragment") fn sample_compare[A: iu32](texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> f32
+@member_function @stage("fragment") implicit(A: iu32) fn sample_compare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> f32
 
 // Sample compare with explicit LOD.
 @member_function fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, level: level) -> f32
 @member_function fn sample_compare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, level: level, @const offset: vec2<i32>) -> f32
-@member_function fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, level: level) -> f32
-@member_function fn sample_compare[A: iu32](texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, level: level, @const offset: vec2<i32>) -> f32
+@member_function implicit(A: iu32) fn sample_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, level: level) -> f32
+@member_function implicit(A: iu32) fn sample_compare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, level: level, @const offset: vec2<i32>) -> f32
 @member_function fn sample_compare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32, level: level) -> f32
-@member_function fn sample_compare[A: iu32](texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32, level: level) -> f32
+@member_function implicit(A: iu32) fn sample_compare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32, level: level) -> f32
 
 @member_function fn write(texture: texture_storage_1d<f32_texel_format, writable>, value: vec4<f32>, coords: u32)
 @member_function fn write(texture: texture_storage_2d<f32_texel_format, writable>, value: vec4<f32>, coords: vec2<u32>)
-@member_function fn write[A: iu32](texture: texture_storage_2d_array<f32_texel_format, writable>, value: vec4<f32>, coords: vec2<u32>, array_index: A)
+@member_function implicit(A: iu32) fn write(texture: texture_storage_2d_array<f32_texel_format, writable>, value: vec4<f32>, coords: vec2<u32>, array_index: A)
 @member_function fn write(texture: texture_storage_3d<f32_texel_format, writable>, value: vec4<f32>, coords: vec3<u32>)
 @member_function fn write(texture: texture_storage_1d<i32_texel_format, writable>, value: vec4<i32>, coords: u32)
 @member_function fn write(texture: texture_storage_2d<i32_texel_format, writable>, value: vec4<i32>, coords: vec2<u32>)
-@member_function fn write[A: iu32](texture: texture_storage_2d_array<i32_texel_format, writable>, value: vec4<i32>, coords: vec2<u32>, array_index: A)
+@member_function implicit(A: iu32) fn write(texture: texture_storage_2d_array<i32_texel_format, writable>, value: vec4<i32>, coords: vec2<u32>, array_index: A)
 @member_function fn write(texture: texture_storage_3d<i32_texel_format, writable>, value: vec4<i32>, coords: vec3<u32>)
 @member_function fn write(texture: texture_storage_1d<u32_texel_format, writable>, value: vec4<u32>, coords: u32)
 @member_function fn write(texture: texture_storage_2d<u32_texel_format, writable>, value: vec4<u32>, coords: vec2<u32>)
-@member_function fn write[A: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>, value: vec4<u32>, coords: vec2<u32>, array_index: A)
+@member_function implicit(A: iu32) fn write(texture: texture_storage_2d_array<u32_texel_format, writable>, value: vec4<u32>, coords: vec2<u32>, array_index: A)
 @member_function fn write(texture: texture_storage_3d<u32_texel_format, writable>, value: vec4<u32>, coords: vec3<u32>)
 
-fn distance[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
-fn dot[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> T
-fn fmod[T: f32_f16](T, T) -> T
-fn fmod[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>
-fn frexp[T: f32_f16](T, i32) -> T
-fn frexp[N: num, T: f32_f16](vec<N, T>, vec<N, i32>) -> vec<N, T>
-fn length[N: num, T: f32_f16](vec<N, T>) -> T
-fn modf[T: f32_f16](T, T) -> T
-fn modf[N: num, T: f32_f16](vec<N, T>, vec<N, T>) -> vec<N, T>
-fn sign[T: f32_f16](T) -> T
-fn sign[N: num, T: f32_f16](vec<N, T>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn distance(vec<N, T>, vec<N, T>) -> T
+implicit(N: num, T: f32_f16) fn dot(vec<N, T>, vec<N, T>) -> T
+implicit(T: f32_f16) fn fmod(T, T) -> T
+implicit(N: num, T: f32_f16) fn fmod(vec<N, T>, vec<N, T>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn fmod(T, vec<N, T>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn fmod(vec<N, T>, T) -> vec<N, T>
+implicit(T: f32_f16) fn frexp(T, i32) -> T
+implicit(N: num, T: f32_f16) fn frexp(vec<N, T>, vec<N, i32>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn length(vec<N, T>) -> T
+implicit(T: f32_f16) fn modf(T, T) -> T
+implicit(N: num, T: f32_f16) fn modf(vec<N, T>, vec<N, T>) -> vec<N, T>
+implicit(T: f32_f16) fn sign(T) -> T
+implicit(N: num, T: f32_f16) fn sign(vec<N, T>) -> vec<N, T>
 @stage("compute") fn threadgroup_barrier(u32)
 
+@stage("fragment", "compute") fn simd_ballot(bool) -> vec2<u32>
+@stage("fragment", "compute") implicit(T: fiu32_f16) fn quad_shuffle_xor(T, u32) -> T
+@stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quad_shuffle_xor(vec<N, T>, u32) -> vec<N, T>
+
+fn convert(__packed_vec3<u32>) -> vec3<u32>
+fn convert(__packed_vec3<i32>) -> vec3<i32>
+fn convert(__packed_vec3<f32>) -> vec3<f32>
+fn convert(__packed_vec3<f16>) -> vec3<f16>
+fn convert(vec3<u32>) -> __packed_vec3<u32>
+fn convert(vec3<i32>) -> __packed_vec3<i32>
+fn convert(vec3<f32>) -> __packed_vec3<f32>
+fn convert(vec3<f16>) -> __packed_vec3<f16>
+
+fn convert(u32) -> u64
+
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_load(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, readable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_store(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, writable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply(
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply_accumulate(
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
+
+// Compute
+implicit(T: scalar) fn os_log(string, u32, u32, u32, T)
+implicit(N: num, T: scalar) fn os_log(string, u32, u32, u32, vec<N, T>)
+// Fragment
+implicit(T: scalar) fn os_log(string, f32, f32, f32, T)
+implicit(N: num, T: scalar) fn os_log(string, f32, f32, f32, vec<N, T>)
+// Vertex
+implicit(T: scalar) fn os_log(string, u32, u32, T)
+implicit(N: num, T: scalar) fn os_log(string, u32, u32, vec<N, T>)

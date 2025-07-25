@@ -1,19 +1,37 @@
-RWTexture2DArray<uint4> arg_0 : register(u0, space1);
+//
+// fragment_main
+//
 
+RWTexture2DArray<uint4> arg_0 : register(u0, space1);
 void textureStore_9f7cea() {
-  int2 arg_1 = (1).xx;
+  int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint4 arg_3 = (1u).xxxx;
-  arg_0[int3(arg_1, int(arg_2))] = arg_3;
+  int2 v = arg_1;
+  uint4 v_1 = arg_3;
+  arg_0[int3(v, int(arg_2))] = v_1;
 }
 
 void fragment_main() {
   textureStore_9f7cea();
-  return;
+}
+
+//
+// compute_main
+//
+
+RWTexture2DArray<uint4> arg_0 : register(u0, space1);
+void textureStore_9f7cea() {
+  int2 arg_1 = (int(1)).xx;
+  uint arg_2 = 1u;
+  uint4 arg_3 = (1u).xxxx;
+  int2 v = arg_1;
+  uint4 v_1 = arg_3;
+  arg_0[int3(v, int(arg_2))] = v_1;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   textureStore_9f7cea();
-  return;
 }
+

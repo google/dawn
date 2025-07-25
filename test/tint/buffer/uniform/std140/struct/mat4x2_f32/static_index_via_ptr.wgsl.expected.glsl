@@ -1,94 +1,101 @@
 #version 310 es
 
-struct Inner {
-  mat4x2 m;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-};
 
 struct Inner_std140 {
-  vec2 m_0;
-  vec2 m_1;
-  vec2 m_2;
-  vec2 m_3;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
-  uint pad_3;
-  uint pad_4;
-  uint pad_5;
-  uint pad_6;
-  uint pad_7;
-};
-
-struct Outer {
-  Inner a[4];
+  vec2 m_col0;
+  vec2 m_col1;
+  vec2 m_col2;
+  vec2 m_col3;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
 };
 
 struct Outer_std140 {
   Inner_std140 a[4];
 };
 
-layout(binding = 0, std140) uniform a_block_std140_ubo {
+struct Inner {
+  mat4x2 m;
+};
+
+struct Outer {
+  Inner a[4];
+};
+
+layout(binding = 0, std140)
+uniform a_block_std140_1_ubo {
   Outer_std140 inner[4];
-} a;
-
-Inner conv_Inner(Inner_std140 val) {
-  return Inner(mat4x2(val.m_0, val.m_1, val.m_2, val.m_3), val.pad, val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.pad_7);
+} v;
+Inner tint_convert_Inner(Inner_std140 tint_input) {
+  return Inner(mat4x2(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2, tint_input.m_col3));
 }
-
-Inner[4] conv_arr4_Inner(Inner_std140 val[4]) {
-  Inner arr[4] = Inner[4](Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+Outer tint_convert_Outer(Outer_std140 tint_input) {
+  Inner v_1[4] = Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))));
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_Inner(val[i]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      v_1[v_3] = tint_convert_Inner(tint_input.a[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  return Outer(v_1);
 }
-
-Outer conv_Outer(Outer_std140 val) {
-  return Outer(conv_arr4_Inner(val.a));
-}
-
-Outer[4] conv_arr4_Outer(Outer_std140 val[4]) {
-  Outer arr[4] = Outer[4](Outer(Inner[4](Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))));
-  {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_Outer(val[i]);
-    }
-  }
-  return arr;
-}
-
-mat4x2 load_a_inner_3_a_2_m() {
-  return mat4x2(a.inner[3u].a[2u].m_0, a.inner[3u].a[2u].m_1, a.inner[3u].a[2u].m_2, a.inner[3u].a[2u].m_3);
-}
-
-void f() {
-  Outer p_a[4] = conv_arr4_Outer(a.inner);
-  Outer p_a_3 = conv_Outer(a.inner[3u]);
-  Inner p_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
-  Inner p_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
-  mat4x2 p_a_3_a_2_m = load_a_inner_3_a_2_m();
-  vec2 p_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;
-  Outer l_a[4] = conv_arr4_Outer(a.inner);
-  Outer l_a_3 = conv_Outer(a.inner[3u]);
-  Inner l_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
-  Inner l_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
-  mat4x2 l_a_3_a_2_m = load_a_inner_3_a_2_m();
-  vec2 l_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;
-  float l_a_3_a_2_m_1_0 = a.inner[3u].a[2u].m_1[0u];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  mat4x2 v_4 = mat4x2(v.inner[3u].a[2u].m_col0, v.inner[3u].a[2u].m_col1, v.inner[3u].a[2u].m_col2, v.inner[3u].a[2u].m_col3);
+  Outer_std140 v_5[4] = v.inner;
+  Outer v_6[4] = Outer[4](Outer(Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))))));
+  {
+    uint v_7 = 0u;
+    v_7 = 0u;
+    while(true) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4u)) {
+        break;
+      }
+      v_6[v_8] = tint_convert_Outer(v_5[v_8]);
+      {
+        v_7 = (v_8 + 1u);
+      }
+      continue;
+    }
+  }
+  Outer l_a[4] = v_6;
+  Outer l_a_3 = tint_convert_Outer(v.inner[3u]);
+  Inner_std140 v_9[4] = v.inner[3u].a;
+  Inner v_10[4] = Inner[4](Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))), Inner(mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f))));
+  {
+    uint v_11 = 0u;
+    v_11 = 0u;
+    while(true) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
+        break;
+      }
+      v_10[v_12] = tint_convert_Inner(v_9[v_12]);
+      {
+        v_11 = (v_12 + 1u);
+      }
+      continue;
+    }
+  }
+  Inner l_a_3_a[4] = v_10;
+  Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3u].a[2u]);
+  mat4x2 l_a_3_a_2_m = v_4;
+  vec2 l_a_3_a_2_m_1 = v_4[1u];
+  float l_a_3_a_2_m_1_0 = v_4[1u].x;
 }

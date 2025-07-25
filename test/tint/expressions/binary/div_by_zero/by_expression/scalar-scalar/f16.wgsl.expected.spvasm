@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 16
 ; Schema: 0
                OpCapability Shader
@@ -13,22 +13,23 @@
                OpName %f "f"
                OpName %a "a"
                OpName %b "b"
+               OpName %r "r"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
        %half = OpTypeFloat 16
-%half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function_half = OpTypePointer Function %half
-          %9 = OpConstantNull %half
-          %f = OpFunction %void None %1
+%half_0x1p_0 = OpConstant %half 0x1p+0
+%half_0x0p_0 = OpConstant %half 0x0p+0
+          %f = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_half Function %9
-          %b = OpVariable %_ptr_Function_half Function %9
+          %a = OpVariable %_ptr_Function_half Function
+          %b = OpVariable %_ptr_Function_half Function
                OpStore %a %half_0x1p_0
-               OpStore %b %9
-         %11 = OpLoad %half %a
-         %12 = OpLoad %half %b
-         %13 = OpLoad %half %b
+               OpStore %b %half_0x0p_0
+         %11 = OpLoad %half %a None
+         %12 = OpLoad %half %b None
+         %13 = OpLoad %half %b None
          %14 = OpFAdd %half %12 %13
-         %15 = OpFDiv %half %11 %14
+          %r = OpFDiv %half %11 %14
                OpReturn
                OpFunctionEnd

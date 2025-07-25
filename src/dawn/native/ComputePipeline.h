@@ -48,7 +48,7 @@ class ComputePipelineBase : public PipelineBase,
                         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
     ~ComputePipelineBase() override;
 
-    static Ref<ComputePipelineBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<ComputePipelineBase> MakeError(DeviceBase* device, StringView label);
 
     ObjectType GetType() const override;
 
@@ -57,15 +57,11 @@ class ComputePipelineBase : public PipelineBase,
         bool operator()(const ComputePipelineBase* a, const ComputePipelineBase* b) const;
     };
 
-    bool IsFullSubgroupsRequired() const;
-
   protected:
     void DestroyImpl() override;
 
   private:
-    ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
-
-    bool mRequiresFullSubgroups;
+    ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 };
 
 }  // namespace dawn::native

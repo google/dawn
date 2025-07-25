@@ -33,18 +33,12 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void RenameConflictsFuzzer(core::ir::Module& module) {
-    if (auto res = RenameConflicts(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of RenameConflicts failed IR validation\n" << res.Failure();
-    }
+Result<SuccessType> RenameConflictsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return RenameConflicts(ir);
 }
 
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RenameConflictsFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::RenameConflictsFuzzer,
+                      tint::core::ir::transform::kRenameConflictsCapabilities);

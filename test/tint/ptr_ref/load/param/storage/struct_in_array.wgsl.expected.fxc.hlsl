@@ -2,20 +2,21 @@ struct str {
   int i;
 };
 
-ByteAddressBuffer S : register(t0);
 
-str S_load(uint offset) {
-  str tint_symbol = {asint(S.Load((offset + 0u)))};
-  return tint_symbol;
+ByteAddressBuffer S : register(t0);
+str v(uint offset) {
+  str v_1 = {asint(S.Load((offset + 0u)))};
+  return v_1;
 }
 
-str func_S_X(uint pointer[1]) {
-  return S_load((4u * pointer[0]));
+str func(uint pointer_indices[1]) {
+  str v_2 = v((0u + (pointer_indices[0u] * 4u)));
+  return v_2;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint tint_symbol_1[1] = {2u};
-  str r = func_S_X(tint_symbol_1);
-  return;
+  uint v_3[1] = {2u};
+  str r = func(v_3);
 }
+

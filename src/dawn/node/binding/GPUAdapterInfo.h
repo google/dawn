@@ -28,11 +28,12 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUADAPTERINFO_H_
 #define SRC_DAWN_NODE_BINDING_GPUADAPTERINFO_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
+#include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
-
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -41,19 +42,30 @@ namespace wgpu::binding {
 // GPUAdapterInfo is an implementation of interop::GPUAdapterInfo.
 class GPUAdapterInfo final : public interop::GPUAdapterInfo {
   public:
-    explicit GPUAdapterInfo(WGPUAdapterInfo);
+    explicit GPUAdapterInfo(const wgpu::AdapterInfo& info);
 
     // interop::GPUAdapterInfo interface compliance
     std::string getVendor(Napi::Env) override;
     std::string getArchitecture(Napi::Env) override;
     std::string getDevice(Napi::Env) override;
     std::string getDescription(Napi::Env) override;
+    uint32_t getSubgroupMinSize(Napi::Env) override;
+    uint32_t getSubgroupMaxSize(Napi::Env) override;
+    bool getIsFallbackAdapter(Napi::Env) override;
+
+    using SubgroupMatrixConfigs =
+        interop::FrozenArray<interop::Interface<interop::GPUSubgroupMatrixConfig>>;
+    SubgroupMatrixConfigs getSubgroupMatrixConfigs(Napi::Env) override;
 
   private:
     std::string vendor_;
     std::string architecture_;
     std::string device_;
     std::string description_;
+    uint32_t subgroup_min_size_;
+    uint32_t subgroup_max_size_;
+    bool is_fallback_adapter_;
+    std::vector<wgpu::SubgroupMatrixConfig> subgroup_matrix_configs_;
 };
 
 }  // namespace wgpu::binding

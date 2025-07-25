@@ -35,6 +35,7 @@
   dawn_add_library(<name>
     [FORCE_STATIC|FORCE_SHARED|FORCE_OBJECT]
     [HEADER_ONLY]
+    [ENABLE_EMSCRIPTEN]
     [UTILITY_TARGET           <target>]
     [HEADERS                  <header>...]
     [PRIVATE_HEADERS          <header>...]
@@ -47,6 +48,8 @@
     If none is provided, ``BUILD_SHARED_LIBS`` will control the library type.
   * ``HEADER_ONLY``: The library only contains headers (or templates) and contains
     no compilation steps. Mutually exclusive with ``FORCE_STATIC``.
+  * ``ENABLE_EMSCRIPTEN``: Enables the library target when building with
+    Emscripten. By default, targets are not built with Emscripten.
   * ``UTILITY_TARGET``: If specified, all libraries and executables made by the
     Dawn library API will privately link to this target. This may be used to
     provide things such as project-wide compilation flags or similar.
@@ -61,7 +64,7 @@
 function(dawn_add_library name)
   set(kwargs)
   cmake_parse_arguments(PARSE_ARGV 1 arg
-    "FORCE_STATIC;FORCE_SHARED;FORCE_OBJECT;HEADER_ONLY"
+    "FORCE_STATIC;FORCE_SHARED;FORCE_OBJECT;HEADER_ONLY;ENABLE_EMSCRIPTEN"
     "UTILITY_TARGET"
     "HEADERS;PRIVATE_HEADERS;SOURCES;DEPENDS;PRIVATE_DEPENDS")
 
@@ -69,6 +72,11 @@ function(dawn_add_library name)
     message(FATAL_ERROR
       "Unparsed arguments for dawn_add_library: "
       "${arg_UNPARSED_ARGUMENTS}")
+  endif ()
+
+  # Skip targets that shouldn't be built with Emscripten.
+  if (EMSCRIPTEN AND NOT arg_ENABLE_EMSCRIPTEN)
+    return()
   endif ()
 
   if (arg_HEADER_ONLY AND arg_FORCE_STATIC)
@@ -171,23 +179,30 @@ function(dawn_install_target name)
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
-  foreach(header IN LISTS arg_HEADERS)
-    # Starting from CMake 3.20 there is the cmake_path command that could simplify this code.
-    # Compute the install subdirectory for the header by stripping out the path to
-    # the 'include' (or) 'gen/include' directory...
-    string(FIND "${header}" "${DAWN_INCLUDE_DIR}" found)
-    if (found EQUAL 0)
-      string(LENGTH "${DAWN_INCLUDE_DIR}/" deduction)
+  # When building in debug mode with MSVC, install PDB files together with binaries
+  if (MSVC)
+    get_target_property(target_type "${name}" TYPE)
+    if ((target_type STREQUAL "STATIC_LIBRARY") OR (target_type STREQUAL "SHARED_LIBRARY") OR (target_type STREQUAL "EXECUTABLE"))
+      install(FILES $<TARGET_PDB_FILE:${name}> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
     endif()
-    string(FIND "${header}" "${DAWN_BUILD_GEN_DIR}/include/" found)
-    if (found EQUAL 0)
-      string(LENGTH "${DAWN_BUILD_GEN_DIR}/include/" deduction)
-    endif()
-    string(SUBSTRING "${header}" "${deduction}" -1 subdir)
+  endif (MSVC)
 
-    # ... then remove everything after the last /
-    string(FIND "${subdir}" "/" found REVERSE)
-    string(SUBSTRING "${subdir}" 0 ${found} subdir)
+  # Automatically determine where each header should go based on its subdirectory in the include dir.
+  foreach(header IN LISTS arg_HEADERS)
+    cmake_path(REMOVE_FILENAME header OUTPUT_VARIABLE subdir)
+
+    string(FIND "${subdir}" "${DAWN_INCLUDE_DIR}" found)
+    if (found EQUAL 0)
+        cmake_path(RELATIVE_PATH subdir BASE_DIRECTORY "${DAWN_INCLUDE_DIR}")
+    endif()
+    string(FIND "${subdir}" "${DAWN_BUILD_GEN_DIR}/include/" found)
+    if (found EQUAL 0)
+        cmake_path(RELATIVE_PATH subdir BASE_DIRECTORY "${DAWN_BUILD_GEN_DIR}/include/")
+    endif()
+
+    if (IS_ABSOLUTE "${headerRelative}")
+        message(FATAL_ERROR "Unsupported include dir for \"${header}\"")
+    endif()
     install(FILES "${header}" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${subdir}")
   endforeach()
 endfunction()

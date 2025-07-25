@@ -44,19 +44,20 @@
 {% endfor %}
 
 namespace {{native_namespace}} {
-
-    {% for type in by_category["object"] %}
-        {% for method in c_methods(type) %}
+    {% for (type, methods) in c_methods_sorted_by_parent %}
+        {% for method in methods %}
             {% set suffix = as_MethodSuffix(type.name, method.name) %}
 
-            {{as_cType(method.return_type.name)}} Native{{suffix}}(
+            {{as_annotated_cType(method.returns)}} Native{{suffix}}(
                 {{-as_cType(type.name)}} cSelf
                 {%- for arg in method.arguments -%}
                     , {{as_annotated_cType(arg)}}
                 {%- endfor -%}
             ) {
                 //* Perform conversion between C types and frontend types
-                auto self = FromAPI(cSelf);
+                {% if type.category == "object" %}
+                    auto self = FromAPI(cSelf);
+                {% endif %}
 
                 {% for arg in method.arguments %}
                     {% set varName = as_varName(arg.name) %}
@@ -65,36 +66,44 @@ namespace {{native_namespace}} {
                     {% elif arg.type.category == "structure" and arg.annotation == "value" %}
                         auto {{varName}}_ = *reinterpret_cast<{{as_frontendType(arg.type)}}*>(&{{varName}});
                     {% elif arg.annotation != "value" or arg.type.category == "object" %}
-                        auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                        auto {{varName}}_ = reinterpret_cast<{{decorate(as_frontendType(arg.type), arg)}}>({{varName}});
                     {% else %}
                         auto {{varName}}_ = {{as_varName(arg.name)}};
                     {% endif %}
                 {%- endfor-%}
 
-                {% if method.autolock and method.return_type.name.get() != 'future' %}
+                {% if method.autolock and not (method.returns and method.returns.type.name.get() == 'future') %}
                     {% if type.name.get() != "device" %}
                         auto device = self->GetDevice();
                     {% else %}
                         auto device = self;
                     {% endif %}
-                    auto deviceLock(device->GetScopedLock());
+                    auto deviceGuard = device->GetGuard();
                 {% else %}
                     // This method is specified to not use AutoLock in json script or it returns a future.
                 {% endif %}
 
-                {% if method.return_type.name.canonical_case() != "void" %}
+                {% if method.returns %}
                     auto result =
                 {%- endif %}
-                self->API{{method.name.CamelCase()}}(
-                    {%- for arg in method.arguments -%}
-                        {%- if not loop.first %}, {% endif -%}
-                        {{as_varName(arg.name)}}_
-                    {%- endfor -%}
-                );
-                {% if method.return_type.name.canonical_case() != "void" %}
-                    {% if method.return_type.category in ["object", "enum", "bitmask"] %}
+                {% if type.category == "object" %}
+                    self->API{{method.name.CamelCase()}}(
+                        {%- for arg in method.arguments -%}
+                            {%- if not loop.first %}, {% endif -%}
+                            {{as_varName(arg.name)}}_
+                        {%- endfor -%}
+                    );
+                {% elif type.category == "structure" %}
+                    API{{suffix}}(cSelf
+                        {%- for arg in method.arguments -%}
+                            , {{as_varName(arg.name)}}_
+                        {%- endfor -%}
+                    );
+                {% endif %}
+                {% if method.returns %}
+                    {% if method.returns.type.category in ["object", "enum", "bitmask"] %}
                         return ToAPI(result);
-                    {% elif method.return_type.category in ["structure"] %}
+                    {% elif method.returns.type.category in ["structure"] %}
                         return *ToAPI(&result);
                     {% else %}
                         return result;
@@ -104,8 +113,8 @@ namespace {{native_namespace}} {
         {% endfor %}
     {% endfor %}
 
-    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" %}
-        {{as_cType(function.return_type.name)}} Native{{function.name.CamelCase()}}(
+    {% for function in by_category["function"] if function.name.canonical_case() != "get proc address" and function.name.canonical_case() != "get proc address 2" %}
+        {{as_annotated_cType(function.returns)}} Native{{function.name.CamelCase()}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
                 {{as_annotated_cType(arg)}}
@@ -116,13 +125,13 @@ namespace {{native_namespace}} {
                 {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
                     auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
                 {% elif arg.annotation != "value" or arg.type.category == "object" %}
-                    auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
+                    auto {{varName}}_ = reinterpret_cast<{{decorate(as_frontendType(arg.type), arg)}}>({{varName}});
                 {% else %}
                     auto {{varName}}_ = {{as_varName(arg.name)}};
                 {% endif %}
             {%- endfor-%}
 
-            {% if function.return_type.name.canonical_case() != "void" %}
+            {% if function.returns %}
                 auto result =
             {%- endif %}
             API{{function.name.CamelCase()}}(
@@ -131,8 +140,8 @@ namespace {{native_namespace}} {
                     {{as_varName(arg.name)}}_
                 {%- endfor -%}
             );
-            {% if function.return_type.name.canonical_case() != "void" %}
-                {% if function.return_type.category in ["object", "enum", "bitmask"] %}
+            {% if function.returns %}
+                {% if function.returns.type.category in ["object", "enum", "bitmask"] %}
                     return ToAPI(result);
                 {% else %}
                     return result;
@@ -146,7 +155,7 @@ namespace {{native_namespace}} {
         {% set c_prefix = metadata.c_prefix %}
         struct ProcEntry {
             {{c_prefix}}Proc proc;
-            const char* name;
+            std::string_view name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in c_methods_sorted_by_name %}
@@ -157,25 +166,27 @@ namespace {{native_namespace}} {
 
     }  // anonymous namespace
 
-    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
-        if (procName == nullptr) {
+    WGPUProc NativeGetProcAddress(WGPUStringView cProcName) {
+        if (cProcName.data == nullptr) {
             return nullptr;
         }
 
+        std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
+
         const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-            [](const ProcEntry &a, const char *b) -> bool {
-                return strcmp(a.name, b) < 0;
+            [](const ProcEntry &a, const std::string_view& b) -> bool {
+                return a.name.compare(b) < 0;
             }
         );
 
-        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
+        if (entry != &sProcMap[sProcMapSize] && entry->name == procName) {
             return entry->proc;
         }
 
         // Special case the free-standing functions of the API.
         // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
         {% for function in by_category["function"] %}
-            if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
+            if (procName == "{{as_cMethod(None, function.name)}}") {
                 return reinterpret_cast<{{c_prefix}}Proc>(Native{{as_cppType(function.name)}});
             }
 
@@ -183,8 +194,8 @@ namespace {{native_namespace}} {
         return nullptr;
     }
 
-    std::vector<const char*> GetProcMapNamesForTestingInternal() {
-        std::vector<const char*> result;
+    std::vector<std::string_view> GetProcMapNamesForTestingInternal() {
+        std::vector<std::string_view> result;
         result.reserve(sProcMapSize);
         for (const ProcEntry& entry : sProcMap) {
             result.push_back(entry.name);
@@ -197,8 +208,8 @@ namespace {{native_namespace}} {
         {% for function in by_category["function"] %}
             procs.{{as_varName(function.name)}} = Native{{as_cppType(function.name)}};
         {% endfor %}
-        {% for type in by_category["object"] %}
-            {% for method in c_methods(type) %}
+        {% for (type, methods) in c_methods_sorted_by_parent %}
+            {% for method in methods %}
                 procs.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
             {% endfor %}
         {% endfor %}

@@ -1,8 +1,3 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
-
 struct S {
   int i;
   uint u;
@@ -10,6 +5,12 @@ struct S {
   bool b;
 };
 
+
 void f() {
   S v = (S)0;
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

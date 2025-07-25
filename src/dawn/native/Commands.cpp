@@ -109,6 +109,18 @@ void FreeCommands(CommandIterator* commands) {
                 draw->~DrawIndexedIndirectCmd();
                 break;
             }
+            case Command::MultiDrawIndirect: {
+                MultiDrawIndirectCmd* cmd = commands->NextCommand<MultiDrawIndirectCmd>();
+                cmd->~MultiDrawIndirectCmd();
+                break;
+            }
+            case Command::MultiDrawIndexedIndirect: {
+                MultiDrawIndexedIndirectCmd* cmd =
+                    commands->NextCommand<MultiDrawIndexedIndirectCmd>();
+                cmd->~MultiDrawIndexedIndirectCmd();
+                break;
+            }
+
             case Command::EndComputePass: {
                 EndComputePassCmd* cmd = commands->NextCommand<EndComputePassCmd>();
                 cmd->~EndComputePassCmd();
@@ -204,6 +216,14 @@ void FreeCommands(CommandIterator* commands) {
                 cmd->~SetBindGroupCmd();
                 break;
             }
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = commands->NextCommand<SetImmediateDataCmd>();
+                if (cmd->size > 0) {
+                    commands->NextData<uint8_t>(cmd->size);
+                }
+                cmd->~SetImmediateDataCmd();
+                break;
+            }
             case Command::SetIndexBuffer: {
                 SetIndexBufferCmd* cmd = commands->NextCommand<SetIndexBufferCmd>();
                 cmd->~SetIndexBufferCmd();
@@ -285,6 +305,14 @@ void SkipCommand(CommandIterator* commands, Command type) {
             commands->NextCommand<DrawIndexedIndirectCmd>();
             break;
 
+        case Command::MultiDrawIndirect:
+            commands->NextCommand<MultiDrawIndirectCmd>();
+            break;
+
+        case Command::MultiDrawIndexedIndirect:
+            commands->NextCommand<MultiDrawIndexedIndirectCmd>();
+            break;
+
         case Command::EndComputePass:
             commands->NextCommand<EndComputePassCmd>();
             break;
@@ -364,6 +392,14 @@ void SkipCommand(CommandIterator* commands, Command type) {
             break;
         }
 
+        case Command::SetImmediateData: {
+            SetImmediateDataCmd* cmd = commands->NextCommand<SetImmediateDataCmd>();
+            if (cmd->size > 0) {
+                commands->NextData<uint8_t>(cmd->size);
+            }
+            break;
+        }
+
         case Command::SetIndexBuffer:
             commands->NextCommand<SetIndexBufferCmd>();
             break;
@@ -384,6 +420,20 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
+const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, uint32_t* length) {
+    std::string_view view = s;
+    *length = view.length();
+
+    // Include extra null-terminator character. The string_view may not be null-terminated. It also
+    // may already have a null-terminator inside of it, in which case adding the null-terminator is
+    // unnecessary. However, this is unlikely, so always include the extra character.
+    char* out = allocator->AllocateData<char>(view.length() + 1);
+    memcpy(out, view.data(), view.length());
+    out[view.length()] = '\0';
+
+    return out;
+}
+
 TimestampWrites::TimestampWrites() = default;
 TimestampWrites::~TimestampWrites() = default;
 
@@ -401,6 +451,10 @@ RenderPassStorageAttachmentInfo::~RenderPassStorageAttachmentInfo() = default;
 
 RenderPassDepthStencilAttachmentInfo::RenderPassDepthStencilAttachmentInfo() = default;
 RenderPassDepthStencilAttachmentInfo::~RenderPassDepthStencilAttachmentInfo() = default;
+
+bool ResolveRect::HasValue() const {
+    return updateWidth != 0 && updateHeight != 0;
+}
 
 BeginRenderPassCmd::BeginRenderPassCmd() = default;
 BeginRenderPassCmd::~BeginRenderPassCmd() = default;
@@ -421,6 +475,9 @@ DispatchIndirectCmd::~DispatchIndirectCmd() = default;
 
 DrawIndirectCmd::DrawIndirectCmd() = default;
 DrawIndirectCmd::~DrawIndirectCmd() = default;
+
+MultiDrawIndirectCmd::MultiDrawIndirectCmd() = default;
+MultiDrawIndirectCmd::~MultiDrawIndirectCmd() = default;
 
 EndComputePassCmd::EndComputePassCmd() = default;
 EndComputePassCmd::~EndComputePassCmd() = default;
@@ -445,6 +502,9 @@ SetRenderPipelineCmd::~SetRenderPipelineCmd() = default;
 
 SetBindGroupCmd::SetBindGroupCmd() = default;
 SetBindGroupCmd::~SetBindGroupCmd() = default;
+
+SetImmediateDataCmd::SetImmediateDataCmd() = default;
+SetImmediateDataCmd::~SetImmediateDataCmd() = default;
 
 SetIndexBufferCmd::SetIndexBufferCmd() = default;
 SetIndexBufferCmd::~SetIndexBufferCmd() = default;

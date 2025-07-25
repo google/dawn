@@ -25,16 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <atomic>
 #include <thread>
-
-#include "gtest/gtest.h"
 
 #include "dawn/dawn_thread_dispatch_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/null/DeviceNull.h"
-#include "dawn/webgpu_cpp.h"
 
 namespace dawn {
 namespace {
@@ -44,8 +44,8 @@ class PerThreadProcTests : public testing::Test {
     PerThreadProcTests()
         : mNativeInstance(native::APICreateInstance(nullptr)),
           mAdapterBase(mNativeInstance.Get(),
-                       AcquireRef(new native::null::PhysicalDevice()),
-                       native::FeatureLevel::Core,
+                       native::null::PhysicalDevice::Create(),
+                       wgpu::FeatureLevel::Core,
                        native::TogglesState(native::ToggleStage::Adapter),
                        wgpu::PowerPreference::Undefined) {}
     ~PerThreadProcTests() override = default;

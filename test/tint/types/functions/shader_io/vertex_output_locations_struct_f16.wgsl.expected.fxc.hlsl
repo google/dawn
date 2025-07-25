@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct VertexOutputs {
   int loc0;
@@ -9,30 +9,26 @@ struct VertexOutputs {
   float16_t loc4;
   vector<float16_t, 3> loc5;
 };
-struct tint_symbol {
-  nointerpolation int loc0 : TEXCOORD0;
-  nointerpolation uint loc1 : TEXCOORD1;
-  float loc2 : TEXCOORD2;
-  float4 loc3 : TEXCOORD3;
-  float16_t loc4 : TEXCOORD4;
-  vector<float16_t, 3> loc5 : TEXCOORD5;
-  float4 position : SV_Position;
+
+struct main_outputs {
+  nointerpolation int VertexOutputs_loc0 : TEXCOORD0;
+  nointerpolation uint VertexOutputs_loc1 : TEXCOORD1;
+  float VertexOutputs_loc2 : TEXCOORD2;
+  float4 VertexOutputs_loc3 : TEXCOORD3;
+  float16_t VertexOutputs_loc4 : TEXCOORD4;
+  vector<float16_t, 3> VertexOutputs_loc5 : TEXCOORD5;
+  float4 VertexOutputs_position : SV_Position;
 };
 
+
 VertexOutputs main_inner() {
-  const VertexOutputs tint_symbol_1 = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx, float16_t(2.25h), vector<float16_t, 3>(float16_t(3.0h), float16_t(5.0h), float16_t(8.0h))};
-  return tint_symbol_1;
+  VertexOutputs v = {int(1), 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx, float16_t(2.25h), vector<float16_t, 3>(float16_t(3.0h), float16_t(5.0h), float16_t(8.0h))};
+  return v;
 }
 
-tint_symbol main() {
-  const VertexOutputs inner_result = main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.loc0 = inner_result.loc0;
-  wrapper_result.loc1 = inner_result.loc1;
-  wrapper_result.loc2 = inner_result.loc2;
-  wrapper_result.loc3 = inner_result.loc3;
-  wrapper_result.position = inner_result.position;
-  wrapper_result.loc4 = inner_result.loc4;
-  wrapper_result.loc5 = inner_result.loc5;
-  return wrapper_result;
+main_outputs main() {
+  VertexOutputs v_1 = main_inner();
+  main_outputs v_2 = {v_1.loc0, v_1.loc1, v_1.loc2, v_1.loc3, v_1.loc4, v_1.loc5, v_1.position};
+  return v_2;
 }
+

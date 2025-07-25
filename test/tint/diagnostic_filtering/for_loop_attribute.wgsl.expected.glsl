@@ -14,24 +14,35 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float x_1;
-void tint_symbol(float x) {
+layout(location = 0) in float tint_interstage_location0;
+void main_inner(float x) {
   vec4 v = vec4(0.0f);
-  while (true) {
-    bool tint_symbol_1 = (x > v.x);
-    if (tint_symbol_1) {
-      float tint_symbol_2 = dFdx(1.0f);
-      tint_symbol_1 = (tint_symbol_2 > 0.0f);
-    }
-    if (!(tint_symbol_1)) {
-      break;
-    }
-    {
+  {
+    uvec2 tint_loop_idx = uvec2(4294967295u);
+    while(true) {
+      if (all(equal(tint_loop_idx, uvec2(0u)))) {
+        break;
+      }
+      bool v_1 = false;
+      if ((x > v.x)) {
+        v_1 = (dFdx(1.0f) > 0.0f);
+      } else {
+        v_1 = false;
+      }
+      if (v_1) {
+      } else {
+        break;
+      }
+      {
+        uint tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
     }
   }
 }
-
 void main() {
-  tint_symbol(x_1);
-  return;
+  main_inner(tint_interstage_location0);
 }

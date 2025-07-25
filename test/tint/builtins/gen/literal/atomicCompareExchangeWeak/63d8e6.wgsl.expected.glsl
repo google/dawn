@@ -1,65 +1,55 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-struct atomic_compare_exchange_result_u32 {
-  uint old_value;
-  bool exchanged;
-};
-
 
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer f_sb_rw_block_ssbo {
   SB_RW inner;
-} sb_rw;
-
+} v;
 void atomicCompareExchangeWeak_63d8e6() {
-  atomic_compare_exchange_result_u32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, 1u, 1u);
-  atomic_compare_result.exchanged = atomic_compare_result.old_value == 1u;
-  atomic_compare_exchange_result_u32 res = atomic_compare_result;
+  uint v_1 = atomicCompSwap(v.inner.arg_0, 1u, 1u);
+  atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
 }
-
-void fragment_main() {
+void main() {
   atomicCompareExchangeWeak_63d8e6();
 }
-
-void main() {
-  fragment_main();
-  return;
-}
+//
+// compute_main
+//
 #version 310 es
 
-struct atomic_compare_exchange_result_u32 {
-  uint old_value;
-  bool exchanged;
-};
-
 
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer sb_rw_block_1_ssbo {
   SB_RW inner;
-} sb_rw;
-
+} v;
 void atomicCompareExchangeWeak_63d8e6() {
-  atomic_compare_exchange_result_u32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, 1u, 1u);
-  atomic_compare_result.exchanged = atomic_compare_result.old_value == 1u;
-  atomic_compare_exchange_result_u32 res = atomic_compare_result;
+  uint v_1 = atomicCompSwap(v.inner.arg_0, 1u, 1u);
+  atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
 }
-
-void compute_main() {
-  atomicCompareExchangeWeak_63d8e6();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  atomicCompareExchangeWeak_63d8e6();
 }

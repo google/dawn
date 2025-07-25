@@ -1,0 +1,81 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 45
+; Schema: 0
+               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpCapability CooperativeMatrixKHR
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpExtension "SPV_KHR_cooperative_matrix"
+         %29 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %SB_RW_tint_explicit_layout 0 "arg_0"
+               OpName %SB_RW_tint_explicit_layout "SB_RW_tint_explicit_layout"
+               OpName %sb_rw "sb_rw"
+               OpName %subgroupMatrixStore_bb5d49 "subgroupMatrixStore_bb5d49"
+               OpName %arg_1 "arg_1"
+               OpName %arg_2 "arg_2"
+               OpName %arg_4 "arg_4"
+               OpName %compute_main "compute_main"
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpMemberDecorate %SB_RW_tint_explicit_layout 0 Offset 0
+               OpDecorate %SB_RW_tint_explicit_layout Block
+               OpDecorate %sb_rw DescriptorSet 0
+               OpDecorate %sb_rw Binding 0
+      %float = OpTypeFloat 32
+%_runtimearr_float = OpTypeRuntimeArray %float
+%SB_RW_tint_explicit_layout = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SB_RW_tint_explicit_layout = OpTypePointer StorageBuffer %SB_RW_tint_explicit_layout
+      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %uint_8 = OpConstant %uint 8
+     %uint_0 = OpConstant %uint 0
+         %15 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_0
+    %float_0 = OpConstant %float 0
+         %14 = OpConstantComposite %15 %float_0
+%_ptr_Function_15 = OpTypePointer Function %15
+%_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
+     %uint_7 = OpConstant %uint 7
+       %bool = OpTypeBool
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%subgroupMatrixStore_bb5d49 = OpFunction %void None %8
+          %9 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_uint Function
+      %arg_2 = OpVariable %_ptr_Function_15 Function
+      %arg_4 = OpVariable %_ptr_Function_uint Function
+               OpStore %arg_1 %uint_1
+               OpStore %arg_2 %14
+               OpStore %arg_4 %uint_8
+         %23 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %sb_rw %uint_0
+         %25 = OpLoad %uint %arg_1 None
+         %26 = OpLoad %15 %arg_2 None
+         %27 = OpLoad %uint %arg_4 None
+         %28 = OpExtInst %uint %29 UMax %27 %uint_8
+         %30 = OpArrayLength %uint %sb_rw 0
+         %31 = OpIMul %uint %28 %uint_7
+         %33 = OpIAdd %uint %25 %31
+         %34 = OpIAdd %uint %33 %uint_8
+         %35 = OpULessThanEqual %bool %34 %30
+               OpSelectionMerge %37 None
+               OpBranchConditional %35 %38 %37
+         %38 = OpLabel
+         %39 = OpAccessChain %_ptr_StorageBuffer_float %23 %25
+               OpCooperativeMatrixStoreKHR %39 %26 %uint_1 %28 NonPrivatePointer
+               OpBranch %37
+         %37 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %8
+         %43 = OpLabel
+         %44 = OpFunctionCall %void %subgroupMatrixStore_bb5d49
+               OpReturn
+               OpFunctionEnd

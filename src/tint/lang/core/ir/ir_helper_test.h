@@ -28,9 +28,12 @@
 #ifndef SRC_TINT_LANG_CORE_IR_IR_HELPER_TEST_H_
 #define SRC_TINT_LANG_CORE_IR_IR_HELPER_TEST_H_
 
+#include <string>
+
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
 
 namespace tint::core::ir {
@@ -51,6 +54,9 @@ class IRTestHelperBase : public BASE {
 
     /// CloneContext
     CloneContext clone_ctx{mod};
+
+    /// @returns the module as a disassembled string
+    std::string str() const { return "\n" + ir::Disassembler(mod).Plain(); }
 };
 
 using IRTestHelper = IRTestHelperBase<testing::Test>;

@@ -34,28 +34,33 @@
 
 #include "dawn/common/vulkan_platform.h"
 
-namespace dawn::native {
-class DeviceBase;
-}
-
 namespace dawn::native::vulkan {
+
+class Device;
 
 class PipelineCache final : public PipelineCacheBase {
   public:
-    static Ref<PipelineCache> Create(DeviceBase* device, const CacheKey& key);
+    static Ref<PipelineCache> Create(Device* device, const CacheKey& key);
 
-    DeviceBase* GetDevice() const;
+    // Creates a pipeline cache that is intended to be monolithic. The cache will only be serialized
+    // and stored to BlobCache when StoreOnIdle() is called.
+    static Ref<PipelineCache> CreateMonolithic(Device* device, const CacheKey& key);
+
     VkPipelineCache GetHandle() const;
 
   private:
-    explicit PipelineCache(DeviceBase* device, const CacheKey& key);
+    explicit PipelineCache(Device* device, const CacheKey& key, bool isMonolithicCache);
     ~PipelineCache() override;
 
     void Initialize();
     MaybeError SerializeToBlobImpl(Blob* blob) override;
 
-    raw_ptr<DeviceBase> mDevice;
+    const raw_ptr<Device> mDevice;
     VkPipelineCache mHandle = VK_NULL_HANDLE;
+
+    // Only a single thread should be inside SerializeToBlobImpl() at one time so this should never
+    // be accessed concurrently on multiple threads.
+    size_t mStoredDataSize = 0;
 };
 
 }  // namespace dawn::native::vulkan

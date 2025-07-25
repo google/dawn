@@ -1,8 +1,8 @@
-static int I = 0;
 
+static int I = int(0);
 [numthreads(1, 1, 1)]
 void main() {
-  I = 123;
-  I = 123;
-  return;
+  I = int(123);
+  I = int(123);
 }
+

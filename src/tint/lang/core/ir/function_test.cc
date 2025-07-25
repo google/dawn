@@ -82,8 +82,7 @@ TEST_F(IR_FunctionDeathTest, Fail_NullBlock) {
 }
 
 TEST_F(IR_FunctionTest, Clone) {
-    auto* f =
-        b.Function("my_func", mod.Types().i32(), Function::PipelineStage::kCompute, {{2, 3, 4}});
+    auto* f = b.ComputeFunction("my_func", 2_u, 3_u, 4_u);
     f->SetReturnBuiltin(BuiltinValue::kFragDepth);
     f->SetReturnLocation(1);
     f->SetReturnInterpolation(
@@ -103,12 +102,12 @@ TEST_F(IR_FunctionTest, Clone) {
 
     EXPECT_EQ(Function::PipelineStage::kCompute, new_f->Stage());
     EXPECT_TRUE(new_f->WorkgroupSize().has_value());
-    auto wg = new_f->WorkgroupSize().value();
+    auto wg = new_f->WorkgroupSizeAsConst().value();
     EXPECT_EQ(2u, wg[0]);
     EXPECT_EQ(3u, wg[1]);
     EXPECT_EQ(4u, wg[2]);
 
-    EXPECT_EQ(mod.Types().i32(), new_f->ReturnType());
+    EXPECT_EQ(mod.Types().void_(), new_f->ReturnType());
 
     EXPECT_TRUE(new_f->ReturnBuiltin().has_value());
     EXPECT_EQ(BuiltinValue::kFragDepth, new_f->ReturnBuiltin().value());

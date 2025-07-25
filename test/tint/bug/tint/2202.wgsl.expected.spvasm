@@ -1,29 +1,103 @@
-SKIP: FAILED
-
 <dawn>/test/tint/bug/tint/2202.wgsl:7:9 warning: code is unreachable
         let _e9 = (vec3<i32>().y >= vec3<i32>().y);
         ^^^^^^^
 
-
-@compute @workgroup_size(1)
-fn main() {
-  loop {
-    loop {
-      return;
-    }
-    let _e9 = (vec3<i32>().y >= vec3<i32>().y);
-
-    continuing {
-      break if (_e9 || _e9);
-    }
-  }
-}
-
-Failed to generate: <dawn>/test/tint/bug/tint/2202.wgsl:9:23 error: unresolved value '_e9'
-            break if (_e9 || _e9);
-                      ^^^
-
-<dawn>/test/tint/bug/tint/2202.wgsl:9:30 error: unresolved value '_e9'
-            break if (_e9 || _e9);
-                             ^^^
-
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 58
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %tint_loop_idx "tint_loop_idx"
+               OpName %tint_low_inc "tint_low_inc"
+               OpName %tint_carry "tint_carry"
+               OpName %tint_loop_idx_0 "tint_loop_idx"
+               OpName %tint_low_inc_1 "tint_low_inc_1"
+               OpName %tint_carry_1 "tint_carry_1"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+%uint_4294967295 = OpConstant %uint 4294967295
+         %14 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
+         %18 = OpConstantNull %v2uint
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+%tint_loop_idx = OpVariable %_ptr_Function_v2uint Function
+%tint_loop_idx_0 = OpVariable %_ptr_Function_v2uint Function
+               OpBranch %5
+          %5 = OpLabel
+               OpStore %tint_loop_idx %14
+               OpBranch %8
+          %8 = OpLabel
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+         %16 = OpLoad %v2uint %tint_loop_idx None
+         %17 = OpIEqual %v2bool %16 %18
+         %21 = OpAll %bool %17
+               OpSelectionMerge %22 None
+               OpBranchConditional %21 %23 %22
+         %23 = OpLabel
+               OpBranch %9
+         %22 = OpLabel
+               OpBranch %24
+         %24 = OpLabel
+               OpStore %tint_loop_idx_0 %14
+               OpBranch %27
+         %27 = OpLabel
+               OpLoopMerge %28 %26 None
+               OpBranch %25
+         %25 = OpLabel
+         %43 = OpLoad %v2uint %tint_loop_idx_0 None
+         %44 = OpIEqual %v2bool %43 %18
+         %45 = OpAll %bool %44
+               OpSelectionMerge %46 None
+               OpBranchConditional %45 %47 %46
+         %47 = OpLabel
+               OpBranch %28
+         %46 = OpLabel
+               OpReturn
+         %26 = OpLabel
+         %48 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+         %49 = OpLoad %uint %48 None
+%tint_low_inc_1 = OpISub %uint %49 %uint_1
+         %51 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_0
+               OpStore %51 %tint_low_inc_1 None
+         %52 = OpIEqual %bool %tint_low_inc_1 %uint_4294967295
+%tint_carry_1 = OpSelect %uint %52 %uint_1 %uint_0
+         %54 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+         %55 = OpLoad %uint %54 None
+         %56 = OpISub %uint %55 %tint_carry_1
+         %57 = OpAccessChain %_ptr_Function_uint %tint_loop_idx_0 %uint_1
+               OpStore %57 %56 None
+               OpBranch %27
+         %28 = OpLabel
+               OpUnreachable
+          %7 = OpLabel
+         %29 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+         %32 = OpLoad %uint %29 None
+%tint_low_inc = OpISub %uint %32 %uint_1
+         %35 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_0
+               OpStore %35 %tint_low_inc None
+         %36 = OpIEqual %bool %tint_low_inc %uint_4294967295
+ %tint_carry = OpSelect %uint %36 %uint_1 %uint_0
+         %38 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+         %39 = OpLoad %uint %38 None
+         %40 = OpISub %uint %39 %tint_carry
+         %41 = OpAccessChain %_ptr_Function_uint %tint_loop_idx %uint_1
+               OpStore %41 %40 None
+               OpBranch %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd

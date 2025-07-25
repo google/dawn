@@ -48,6 +48,16 @@ fn main() -> @location(0) vec4<f32> {
     ASSERT_EQ(1u, program.AST().Functions().Length());
 }
 
+TEST_F(WGSLParserTest, Parses_ExtraCommas) {
+    auto p = parser(R"(
+@group(0) @binding(0) var<storage,> x: i32;
+@group(0) @binding(1) var<storage,read_write,> x: i32;
+)");
+    ASSERT_TRUE(p->Parse()) << p->error();
+    Program program = p->program();
+    ASSERT_EQ(2u, program.AST().GlobalVariables().Length());
+}
+
 TEST_F(WGSLParserTest, Parses_ExtraSemicolons) {
     auto p = parser(R"(
 ;

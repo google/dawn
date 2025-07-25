@@ -1,9 +1,0 @@
-#include <metal_stdlib>
-using namespace metal;
-
-void f() {
-  int i = 0;
-  int j = 0;
-  float2x2 const m = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f));
-  float const f_1 = m[i][j];
-}

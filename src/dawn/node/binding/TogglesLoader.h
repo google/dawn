@@ -28,10 +28,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_TOGGLESLOADER_H_
 #define SRC_DAWN_NODE_BINDING_TOGGLESLOADER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
 #include <vector>
 
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/Flags.h"
 
 namespace wgpu::binding {

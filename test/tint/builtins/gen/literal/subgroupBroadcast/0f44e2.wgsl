@@ -35,11 +35,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// flags: --hlsl_shader_model 62
+// flags: --hlsl-shader-model 62
 
 
 enable subgroups;
-enable subgroups_f16;
 
 enable f16;
 
@@ -51,6 +50,11 @@ fn subgroupBroadcast_0f44e2() -> vec4<f16>{
   var res: vec4<f16> = subgroupBroadcast(vec4<f16>(1.h), 1u);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupBroadcast_0f44e2();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_0f44e2();

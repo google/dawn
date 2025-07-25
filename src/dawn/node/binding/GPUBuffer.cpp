@@ -33,7 +33,6 @@
 
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -49,7 +48,7 @@ GPUBuffer::GPUBuffer(wgpu::Buffer buffer,
       device_(std::move(device)),
       async_(std::move(async)),
       mapped_(desc.mappedAtCreation),
-      label_(desc.label ? desc.label : "") {}
+      label_(CopyLabel(desc.label)) {}
 
 interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                                            interop::GPUMapModeFlags modeIn,
@@ -76,7 +75,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
 
     buffer_.MapAsync(
         mode, offset, rangeSize, wgpu::CallbackMode::AllowProcessEvents,
-        [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, char const*) {
+        [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, wgpu::StringView) {
             // The promise may already have been resolved with an AbortError if there was an early
             // destroy() or early unmap().
             if (ctx->promise.GetState() != interop::PromiseState::Pending) {
@@ -89,13 +88,12 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                     ctx->promise.Resolve();
                     mapped_ = true;
                     break;
-                case wgpu::MapAsyncStatus::InstanceDropped:
+                case wgpu::MapAsyncStatus::CallbackCancelled:
                 case wgpu::MapAsyncStatus::Aborted:
+                    assert(status != wgpu::MapAsyncStatus::CallbackCancelled);
                     async_->Reject(ctx->env, ctx->promise, Errors::AbortError(ctx->env));
                     break;
                 case wgpu::MapAsyncStatus::Error:
-                case wgpu::MapAsyncStatus::Unknown:
-                default:
                     async_->Reject(ctx->env, ctx->promise, Errors::OperationError(ctx->env));
                     break;
             }
@@ -195,7 +193,7 @@ std::string GPUBuffer::getLabel(Napi::Env) {
 }
 
 void GPUBuffer::setLabel(Napi::Env, std::string value) {
-    buffer_.SetLabel(value.c_str());
+    buffer_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

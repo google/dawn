@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/dawn/node/binding/Converter.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -38,14 +37,14 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUSampler
 ////////////////////////////////////////////////////////////////////////////////
 GPUSampler::GPUSampler(const wgpu::SamplerDescriptor& desc, wgpu::Sampler sampler)
-    : sampler_(std::move(sampler)), label_(desc.label ? desc.label : "") {}
+    : sampler_(std::move(sampler)), label_(CopyLabel(desc.label)) {}
 
 std::string GPUSampler::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPUSampler::setLabel(Napi::Env, std::string value) {
-    sampler_.SetLabel(value.c_str());
+    sampler_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

@@ -45,7 +45,8 @@ class Ternary final : public Castable<Ternary, core::ir::Call> {
     ///
     /// Note, the args are in the order of (`false`, `true`, `compare`) to match select.
     /// Note, the ternary evaluates all branches, not just the selected branch.
-    Ternary(core::ir::InstructionResult* result, VectorRef<core::ir::Value*> args);
+    Ternary(Id id, core::ir::InstructionResult* result, VectorRef<core::ir::Value*> args);
+
     ~Ternary() override;
 
     /// @copydoc Instruction::Clone()

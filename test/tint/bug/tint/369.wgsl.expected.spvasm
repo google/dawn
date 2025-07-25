@@ -1,53 +1,51 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 16
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %SSBO_block "SSBO_block"
-               OpMemberName %SSBO_block 0 "inner"
-               OpName %S "S"
                OpMemberName %S 0 "m"
-               OpName %SSBO "SSBO"
-               OpName %SSBO_block_std140 "SSBO_block_std140"
-               OpMemberName %SSBO_block_std140 0 "inner"
+               OpName %S "S"
+               OpMemberName %SSBO_block 0 "inner"
+               OpName %SSBO_block "SSBO_block"
+               OpMemberName %S_std140 0 "m_col0"
+               OpMemberName %S_std140 1 "m_col1"
                OpName %S_std140 "S_std140"
-               OpMemberName %S_std140 0 "m_0"
-               OpMemberName %S_std140 1 "m_1"
-               OpName %UBO "UBO"
+               OpMemberName %UBO_block_std140 0 "inner"
+               OpName %UBO_block_std140 "UBO_block_std140"
                OpName %unused_entry_point "unused_entry_point"
-               OpDecorate %SSBO_block Block
-               OpMemberDecorate %SSBO_block 0 Offset 0
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 0 ColMajor
                OpMemberDecorate %S 0 MatrixStride 8
-               OpDecorate %SSBO NonWritable
-               OpDecorate %SSBO DescriptorSet 0
-               OpDecorate %SSBO Binding 0
-               OpDecorate %SSBO_block_std140 Block
-               OpMemberDecorate %SSBO_block_std140 0 Offset 0
+               OpMemberDecorate %SSBO_block 0 Offset 0
+               OpDecorate %SSBO_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
                OpMemberDecorate %S_std140 0 Offset 0
                OpMemberDecorate %S_std140 1 Offset 8
-               OpDecorate %UBO NonWritable
-               OpDecorate %UBO DescriptorSet 0
-               OpDecorate %UBO Binding 0
+               OpMemberDecorate %UBO_block_std140 0 Offset 0
+               OpDecorate %UBO_block_std140 Block
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 0
+               OpDecorate %8 NonWritable
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2
           %S = OpTypeStruct %mat2v2float
  %SSBO_block = OpTypeStruct %S
 %_ptr_StorageBuffer_SSBO_block = OpTypePointer StorageBuffer %SSBO_block
-       %SSBO = OpVariable %_ptr_StorageBuffer_SSBO_block StorageBuffer
+          %1 = OpVariable %_ptr_StorageBuffer_SSBO_block StorageBuffer
    %S_std140 = OpTypeStruct %v2float %v2float
-%SSBO_block_std140 = OpTypeStruct %S_std140
-%_ptr_Uniform_SSBO_block_std140 = OpTypePointer Uniform %SSBO_block_std140
-        %UBO = OpVariable %_ptr_Uniform_SSBO_block_std140 Uniform
+%UBO_block_std140 = OpTypeStruct %S_std140
+%_ptr_Uniform_UBO_block_std140 = OpTypePointer Uniform %UBO_block_std140
+          %8 = OpVariable %_ptr_Uniform_UBO_block_std140 Uniform
        %void = OpTypeVoid
-         %12 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %12
+         %14 = OpTypeFunction %void
+%unused_entry_point = OpFunction %void None %14
          %15 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -25,70 +25,129 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(private_headers
-    "BinarySemaphore.h"
-    "ComboRenderBundleEncoderDescriptor.h"
-    "ComboRenderPipelineDescriptor.h"
-    "PlatformDebugLogger.h"
-    "SystemUtils.h"
-    "TerribleCommandBuffer.h"
-    "TestUtils.h"
-    "TextureUtils.h"
-    "Timer.h"
-    "WGPUHelpers.h"
-    "WireHelper.h"
-)
-set(sources
-    "BinarySemaphore.cpp"
-    "ComboRenderBundleEncoderDescriptor.cpp"
-    "ComboRenderPipelineDescriptor.cpp"
-    "SystemUtils.cpp"
-    "TerribleCommandBuffer.cpp"
-    "TestUtils.cpp"
-    "TextureUtils.cpp"
-    "WGPUHelpers.cpp"
-    "WireHelper.cpp"
-)
-set(conditional_private_depends)
-if(WIN32 AND NOT WINDOWS_STORE)
-  list(APPEND sources "WindowsDebugLogger.cpp")
-else()
-  list(APPEND sources "EmptyDebugLogger.cpp")
-endif()
-
-if(WIN32)
-  list(APPEND sources "WindowsTimer.cpp")
-elseif(APPLE)
-    list(APPEND private_headers
-        "ObjCUtils.h"
-    )
-    list(APPEND sources
-        "ObjCUtils.mm"
-        "OSXTimer.cpp"
-    )
-    list(APPEND conditional_private_depends "-framework QuartzCore")
-elseif(UNIX)
-    list(APPEND sources "PosixTimer.cpp")
-endif()
-
+###############################################################################
+# Dawn WGPU utilities
+#   - Used in tests and samples
+###############################################################################
+set(private_wgpu_depends)
 if (TINT_BUILD_SPV_READER)
-    list(APPEND conditional_private_depends SPIRV-Tools-opt)
-endif ()
+      list(APPEND private_wgpu_depends SPIRV-Tools-opt)
+endif()
+
+DawnJSONGenerator(
+    TARGET "dawn_utils"
+    PRINT_NAME "Dawn native utilities"
+    OUTPUT_HEADERS DAWN_UTILS_GEN_HEADERS
+    OUTPUT_SOURCES DAWN_UTILS_GEN_SOURCES
+)
 dawn_add_library(
-  dawn_utils
+  dawn_wgpu_utils
+  ENABLE_EMSCRIPTEN
   UTILITY_TARGET dawn_internal_config
   PRIVATE_HEADERS
-    ${private_headers}
+    "${DAWN_UTILS_GEN_HEADERS}"
+    "ComboRenderBundleEncoderDescriptor.h"
+    "ComboRenderPipelineDescriptor.h"
+    "TextureUtils.h"
+    "WGPUHelpers.h"
   SOURCES
-    ${sources}
+    "${DAWN_UTILS_GEN_SOURCES}"
+    "ComboRenderBundleEncoderDescriptor.cpp"
+    "ComboRenderPipelineDescriptor.cpp"
+    "TextureUtils.cpp"
+    "WGPUHelpers.cpp"
   DEPENDS
-    dawn::dawn_wire
-    dawn::dawncpp_headers
-    dawn::partition_alloc
+    webgpu_cpp
+    dawn_internal_config
+    dawn::dawn_common
+    absl::flat_hash_set
   PRIVATE_DEPENDS
-    ${conditional_private_depends}
+    ${private_wgpu_depends}
 )
+
 # Needed by WGPUHelpers
-target_compile_definitions(dawn_utils
+target_compile_definitions(dawn_wgpu_utils
   PUBLIC
     "-DTINT_BUILD_SPV_READER=$<BOOL:${TINT_BUILD_SPV_READER}>")
+
+###############################################################################
+# Dawn test utilities
+#   - Used in tests
+###############################################################################
+dawn_add_library(
+  dawn_test_utils
+  UTILITY_TARGET dawn_internal_config
+  PRIVATE_HEADERS
+    "BinarySemaphore.h"
+    "TerribleCommandBuffer.h"
+    "TestUtils.h"
+    "WireHelper.h"
+  SOURCES
+    "BinarySemaphore.cpp"
+    "TerribleCommandBuffer.cpp"
+    "TestUtils.cpp"
+    "WireHelper.cpp"
+  DEPENDS
+    dawn_wgpu_utils
+    webgpu_cpp
+    dawn::dawn_common
+    dawn::dawn_wire
+    dawn::partition_alloc
+    absl::flat_hash_set
+)
+
+###############################################################################
+# Dawn system utilities
+#   - Used in tests and samples
+###############################################################################
+set(private_system_headers
+    "CommandLineParser.h"
+    "PlatformDebugLogger.h"
+    "SystemUtils.h"
+    "Timer.h"
+)
+set(system_sources
+    "CommandLineParser.cpp"
+    "SystemUtils.cpp"
+)
+set(private_system_depends)
+
+if (WIN32 AND NOT WINDOWS_STORE)
+  list(APPEND system_sources "WindowsDebugLogger.cpp")
+else ()
+  list(APPEND system_sources "EmptyDebugLogger.cpp")
+endif ()
+
+if (WIN32)
+  list(APPEND system_sources "WindowsTimer.cpp")
+elseif (APPLE)
+  list(APPEND private_system_headers
+      "ObjCUtils.h"
+  )
+  list(APPEND system_sources
+      "ObjCUtils.mm"
+      "OSXTimer.cpp"
+  )
+  list(APPEND private_system_depends "-framework QuartzCore")
+elseif (UNIX)
+    list(APPEND system_sources "PosixTimer.cpp")
+endif ()
+
+dawn_add_library(
+  dawn_system_utils
+  ENABLE_EMSCRIPTEN
+  UTILITY_TARGET dawn_internal_config
+  PRIVATE_HEADERS
+    ${private_system_headers}
+  SOURCES
+    ${system_sources}
+  DEPENDS
+    dawn::dawn_common
+    absl::span
+  PRIVATE_DEPENDS
+    absl::strings
+    absl::string_view
+    absl::str_format_internal
+    absl::flat_hash_map
+    ${private_system_depends}
+)

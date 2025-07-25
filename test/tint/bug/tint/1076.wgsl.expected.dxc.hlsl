@@ -2,29 +2,31 @@ struct FragIn {
   float a;
   uint mask;
 };
-struct tint_symbol_2 {
-  float a : TEXCOORD0;
+
+struct main_outputs {
+  float FragIn_a : SV_Target0;
+  uint FragIn_mask : SV_Coverage;
+};
+
+struct main_inputs {
+  float FragIn_a : TEXCOORD0;
   float b : TEXCOORD1;
-  uint mask : SV_Coverage;
-};
-struct tint_symbol_3 {
-  float a : SV_Target0;
-  uint mask : SV_Coverage;
+  uint FragIn_mask : SV_Coverage;
 };
 
-FragIn main_inner(FragIn tint_symbol, float b) {
-  if ((tint_symbol.mask == 0u)) {
-    return tint_symbol;
+
+FragIn main_inner(FragIn v, float b) {
+  if ((v.mask == 0u)) {
+    return v;
   }
-  FragIn tint_symbol_5 = {b, 1u};
-  return tint_symbol_5;
+  FragIn v_1 = {b, 1u};
+  return v_1;
 }
 
-tint_symbol_3 main(tint_symbol_2 tint_symbol_1) {
-  FragIn tint_symbol_4 = {tint_symbol_1.a, tint_symbol_1.mask};
-  FragIn inner_result = main_inner(tint_symbol_4, tint_symbol_1.b);
-  tint_symbol_3 wrapper_result = (tint_symbol_3)0;
-  wrapper_result.a = inner_result.a;
-  wrapper_result.mask = inner_result.mask;
-  return wrapper_result;
+main_outputs main(main_inputs inputs) {
+  FragIn v_2 = {inputs.FragIn_a, inputs.FragIn_mask};
+  FragIn v_3 = main_inner(v_2, inputs.b);
+  main_outputs v_4 = {v_3.a, v_3.mask};
+  return v_4;
 }
+

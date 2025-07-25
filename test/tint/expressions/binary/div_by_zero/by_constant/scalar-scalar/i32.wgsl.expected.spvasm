@@ -1,40 +1,43 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 24
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %tint_div "tint_div"
+               OpName %f "f"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %r "r"
+               OpName %tint_div_i32 "tint_div_i32"
                OpName %lhs "lhs"
                OpName %rhs "rhs"
-               OpName %f "f"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-          %1 = OpTypeFunction %int %int %int
-          %8 = OpConstantNull %int
+          %a = OpConstant %int 1
+          %b = OpConstant %int 0
+         %12 = OpTypeFunction %int %int %int
        %bool = OpTypeBool
 %int_n2147483648 = OpConstant %int -2147483648
      %int_n1 = OpConstant %int -1
-      %int_1 = OpConstant %int 1
-       %void = OpTypeVoid
-         %19 = OpTypeFunction %void
-   %tint_div = OpFunction %int None %1
+          %f = OpFunction %void None %3
+          %4 = OpLabel
+          %r = OpFunctionCall %int %tint_div_i32 %a %b
+               OpReturn
+               OpFunctionEnd
+%tint_div_i32 = OpFunction %int None %12
         %lhs = OpFunctionParameter %int
         %rhs = OpFunctionParameter %int
-          %6 = OpLabel
-          %9 = OpIEqual %bool %rhs %8
-         %12 = OpIEqual %bool %lhs %int_n2147483648
-         %14 = OpIEqual %bool %rhs %int_n1
-         %15 = OpLogicalAnd %bool %12 %14
-         %16 = OpLogicalOr %bool %9 %15
-          %7 = OpSelect %int %16 %int_1 %rhs
-         %18 = OpSDiv %int %lhs %7
-               OpReturnValue %18
-               OpFunctionEnd
-          %f = OpFunction %void None %19
-         %22 = OpLabel
-         %23 = OpFunctionCall %int %tint_div %int_1 %8
-               OpReturn
+         %13 = OpLabel
+         %14 = OpIEqual %bool %rhs %b
+         %16 = OpIEqual %bool %lhs %int_n2147483648
+         %18 = OpIEqual %bool %rhs %int_n1
+         %20 = OpLogicalAnd %bool %16 %18
+         %21 = OpLogicalOr %bool %14 %20
+         %22 = OpSelect %int %21 %a %rhs
+         %23 = OpSDiv %int %lhs %22
+               OpReturnValue %23
                OpFunctionEnd

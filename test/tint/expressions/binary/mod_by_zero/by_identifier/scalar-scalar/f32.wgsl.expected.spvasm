@@ -1,6 +1,6 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
+; Generator: Google Tint Compiler; 1
 ; Bound: 14
 ; Schema: 0
                OpCapability Shader
@@ -10,20 +10,21 @@
                OpName %f "f"
                OpName %a "a"
                OpName %b "b"
+               OpName %r "r"
        %void = OpTypeVoid
-          %1 = OpTypeFunction %void
+          %3 = OpTypeFunction %void
       %float = OpTypeFloat 32
-    %float_1 = OpConstant %float 1
 %_ptr_Function_float = OpTypePointer Function %float
-          %9 = OpConstantNull %float
-          %f = OpFunction %void None %1
+    %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
+          %f = OpFunction %void None %3
           %4 = OpLabel
-          %a = OpVariable %_ptr_Function_float Function %9
-          %b = OpVariable %_ptr_Function_float Function %9
+          %a = OpVariable %_ptr_Function_float Function
+          %b = OpVariable %_ptr_Function_float Function
                OpStore %a %float_1
-               OpStore %b %9
-         %11 = OpLoad %float %a
-         %12 = OpLoad %float %b
-         %13 = OpFRem %float %11 %12
+               OpStore %b %float_0
+         %11 = OpLoad %float %a None
+         %12 = OpLoad %float %b None
+          %r = OpFRem %float %11 %12
                OpReturn
                OpFunctionEnd

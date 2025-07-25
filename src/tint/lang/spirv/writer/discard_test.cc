@@ -62,24 +62,24 @@ TEST_F(SpirvWriterTest, Discard) {
                OpSelectionMerge %18 None
                OpBranchConditional %front_facing %19 %18
          %19 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %18
          %18 = OpLabel
-         %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %25 = OpLoad %bool %continue_execution
-               OpSelectionMerge %26 None
-               OpBranchConditional %25 %27 %26
-         %27 = OpLabel
-               OpStore %21 %int_42
-               OpBranch %26
+         %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+         %24 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %25 None
+               OpBranchConditional %24 %26 %25
          %26 = OpLabel
-         %29 = OpLoad %bool %continue_execution
-         %30 = OpLogicalNot %bool %29
-               OpSelectionMerge %31 None
-               OpBranchConditional %30 %32 %31
-         %32 = OpLabel
+               OpStore %20 %int_42 None
+               OpBranch %25
+         %25 = OpLabel
+         %27 = OpLoad %bool %continue_execution None
+         %28 = OpLogicalNot %bool %27
+               OpSelectionMerge %29 None
+               OpBranchConditional %28 %30 %29
+         %30 = OpLabel
                OpKill
-         %31 = OpLabel
+         %29 = OpLabel
                OpReturnValue %float_0_5
                OpFunctionEnd
 )");
@@ -115,30 +115,74 @@ TEST_F(SpirvWriterTest, DiscardBeforeAtomic) {
                OpSelectionMerge %18 None
                OpBranchConditional %front_facing %19 %18
          %19 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %18
          %18 = OpLabel
-         %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %25 = OpLoad %bool %continue_execution
-               OpSelectionMerge %26 None
-               OpBranchConditional %25 %27 %28
-         %27 = OpLabel
-         %29 = OpAtomicIAdd %int %21 %uint_1 %uint_0 %int_1
-               OpBranch %26
-         %28 = OpLabel
-               OpBranch %26
+         %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+         %24 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %25 None
+               OpBranchConditional %24 %26 %27
          %26 = OpLabel
-         %32 = OpPhi %int %29 %27 %33 %28
-         %34 = OpLoad %bool %continue_execution
-         %35 = OpLogicalNot %bool %34
-               OpSelectionMerge %36 None
-               OpBranchConditional %35 %37 %36
-         %37 = OpLabel
+         %29 = OpAtomicIAdd %int %20 %uint_1 %uint_0 %int_1
+               OpBranch %25
+         %27 = OpLabel
+               OpBranch %25
+         %25 = OpLabel
+         %28 = OpPhi %int %29 %26 %30 %27
+         %31 = OpLoad %bool %continue_execution None
+         %32 = OpLogicalNot %bool %31
+               OpSelectionMerge %33 None
+               OpBranchConditional %32 %34 %33
+         %34 = OpLabel
                OpKill
-         %36 = OpLabel
+         %33 = OpLabel
                OpReturnValue %float_0_5
                OpFunctionEnd
 )");
+}
+
+TEST_F(SpirvWriterTest, Discard_DemoteToHelperWithExtension) {
+    Options opts{};
+    opts.use_demote_to_helper_invocation_extensions = true;
+
+    auto* v = b.Var("v", ty.ptr<private_, i32>());
+    v->SetInitializer(b.Constant(42_i));
+    mod.root_block->Append(v);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Discard();
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+
+        b.Store(v, add);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpDemoteToHelperInvocation");
+}
+
+TEST_F(SpirvWriterTest, Discard_DemoteToHelperAsTransform) {
+    Options opts{};
+    opts.use_demote_to_helper_invocation_extensions = false;
+
+    auto* v = b.Var("v", ty.ptr<private_, i32>());
+    v->SetInitializer(b.Constant(42_i));
+    mod.root_block->Append(v);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Discard();
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+
+        b.Store(v, add);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("continue_execution");
 }
 
 }  // namespace

@@ -1,83 +1,66 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   uint inner;
-} prevent_dce;
-
-layout(rgba8) uniform highp readonly image2DArray arg_0;
+} v;
+layout(binding = 1, rgba8) uniform highp readonly image2DArray f_arg_0;
 uint textureNumLayers_3eff89() {
-  uint res = uint(imageSize(arg_0).z);
+  uint res = uint(imageSize(f_arg_0).z);
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  uint prevent_dce;
-};
-
-void fragment_main() {
-  prevent_dce.inner = textureNumLayers_3eff89();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = textureNumLayers_3eff89();
 }
+//
+// compute_main
+//
 #version 310 es
 
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer prevent_dce_block_1_ssbo {
   uint inner;
-} prevent_dce;
-
-layout(rgba8) uniform highp readonly image2DArray arg_0;
+} v;
+layout(binding = 1, rgba8) uniform highp readonly image2DArray arg_0;
 uint textureNumLayers_3eff89() {
   uint res = uint(imageSize(arg_0).z);
   return res;
 }
-
-struct VertexOutput {
-  vec4 pos;
-  uint prevent_dce;
-};
-
-void compute_main() {
-  prevent_dce.inner = textureNumLayers_3eff89();
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  compute_main();
-  return;
+  v.inner = textureNumLayers_3eff89();
 }
+//
+// vertex_main
+//
 #version 310 es
 
-layout(location = 0) flat out uint prevent_dce_1;
-layout(rgba8) uniform highp readonly image2DArray arg_0;
-uint textureNumLayers_3eff89() {
-  uint res = uint(imageSize(arg_0).z);
-  return res;
-}
 
 struct VertexOutput {
   vec4 pos;
   uint prevent_dce;
 };
 
-VertexOutput vertex_main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), 0u);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureNumLayers_3eff89();
-  return tint_symbol;
+layout(binding = 0, rgba8) uniform highp readonly image2DArray v_arg_0;
+layout(location = 0) flat out uint tint_interstage_location0;
+uint textureNumLayers_3eff89() {
+  uint res = uint(imageSize(v_arg_0).z);
+  return res;
 }
-
+VertexOutput vertex_main_inner() {
+  VertexOutput v = VertexOutput(vec4(0.0f), 0u);
+  v.pos = vec4(0.0f);
+  v.prevent_dce = textureNumLayers_3eff89();
+  return v;
+}
 void main() {
-  gl_PointSize = 1.0;
-  VertexOutput inner_result = vertex_main();
-  gl_Position = inner_result.pos;
-  prevent_dce_1 = inner_result.prevent_dce;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = vec4(v_1.pos.x, -(v_1.pos.y), ((2.0f * v_1.pos.z) - v_1.pos.w), v_1.pos.w);
+  tint_interstage_location0 = v_1.prevent_dce;
+  gl_PointSize = 1.0f;
 }

@@ -51,7 +51,6 @@
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/RenderPipelineD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
-#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/SamplerD3D12.h"
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
@@ -71,7 +70,7 @@ namespace {
 static constexpr uint16_t kShaderVisibleDescriptorHeapSize = 1024;
 static constexpr uint8_t kAttachmentDescriptorHeapSize = 64;
 
-// Value may change in the future to better accomodate large clears.
+// Value may change in the future to better accommodate large clears.
 static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
 
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
@@ -90,6 +89,12 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mD3d12Device = ToBackend(GetPhysicalDevice())->GetDevice();
+
+    // Querying for the ID3D12DebugDevice interface will tell us whether the debug layer
+    // is enabled. The debug layer can be enabled internally via command line flags or externally
+    // via dxcpl.exe or d3dconfig.exe.
+    ComPtr<ID3D12DebugDevice> d3d12DebugDevice;
+    mIsDebugLayerEnabled = SUCCEEDED(mD3d12Device.As(&d3d12DebugDevice));
 
     DAWN_ASSERT(mD3d12Device != nullptr);
 
@@ -171,10 +176,8 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
                                              IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
-    DAWN_TRY(DeviceBase::Initialize(std::move(queue)));
-
-    // Ensure DXC if use_dxc toggle is set.
-    DAWN_TRY(EnsureDXCIfRequired());
+    DAWN_TRY(DeviceBase::Initialize(descriptor, std::move(queue)));
+    DAWN_TRY(EnsureCompilerLibraries());
 
     // Set up shader profile for DXC.
     if (IsToggleEnabled(Toggle::UseDXC)) {
@@ -265,12 +268,11 @@ ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
 }
 
 // Ensure DXC if use_dxc toggles are set and validated.
-MaybeError Device::EnsureDXCIfRequired() {
+MaybeError Device::EnsureCompilerLibraries() {
     if (IsToggleEnabled(Toggle::UseDXC)) {
-        DAWN_ASSERT(ToBackend(GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
-        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcCompiler());
-        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcLibrary());
-        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcValidator());
+        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDXC());
+    } else {
+        DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureFXC());
     }
 
     return {};
@@ -286,11 +288,45 @@ MutexProtected<ResidencyManager>& Device::GetResidencyManager() const {
 
 MaybeError Device::CreateZeroBuffer() {
     BufferDescriptor zeroBufferDescriptor;
-    zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     zeroBufferDescriptor.size = kZeroBufferSize;
     zeroBufferDescriptor.label = "ZeroBuffer_Internal";
-    DAWN_TRY_ASSIGN(mZeroBuffer, Buffer::Create(this, Unpack(&zeroBufferDescriptor)));
 
+    Ref<BufferBase> zeroBufferBase;
+
+    // Clear zero buffer from CPU when `Feature::BufferMapExtendedUsages` is supported.
+    if (ToBackend(GetPhysicalDevice())->SupportsBufferMapExtendedUsages()) {
+        zeroBufferDescriptor.mappedAtCreation = true;
+        zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::MapWrite;
+
+        DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
+
+        void* mappedPointer = zeroBufferBase->GetMappedPointer();
+        DAWN_ASSERT(mappedPointer != nullptr);
+        memset(mappedPointer, 0, zeroBufferBase->GetAllocatedSize());
+        DAWN_TRY(zeroBufferBase->Unmap());
+    } else {
+        zeroBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+
+        DAWN_TRY_ASSIGN(zeroBufferBase, CreateBuffer(&zeroBufferDescriptor));
+
+        CommandRecordingContext* commandContext =
+            ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
+
+        DAWN_TRY(GetDynamicUploader()->WithUploadReservation(
+            kZeroBufferSize, kCopyBufferToBufferOffsetAlignment,
+            [&](UploadReservation reservation) -> MaybeError {
+                memset(reservation.mappedPointer, 0u, kZeroBufferSize);
+
+                CopyFromStagingToBufferHelper(commandContext, reservation.buffer.Get(),
+                                              reservation.offsetInBuffer, zeroBufferBase.Get(), 0,
+                                              kZeroBufferSize);
+
+                zeroBufferBase->SetInitialized(true);
+                return {};
+            }));
+    }
+
+    mZeroBuffer = ToBackend(zeroBufferBase);
     return {};
 }
 
@@ -298,26 +334,6 @@ MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
                                      BufferBase* destination,
                                      uint64_t offset,
                                      uint64_t size) {
-    // TODO(crbug.com/dawn/852): It would be ideal to clear the buffer in CreateZeroBuffer, but
-    // the allocation of the staging buffer causes various end2end tests that monitor heap usage
-    // to fail if it's done during device creation. Perhaps ClearUnorderedAccessView*() can be
-    // used to avoid that.
-    if (!mZeroBuffer->IsInitialized()) {
-        DynamicUploader* uploader = GetDynamicUploader();
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        uploader->Allocate(kZeroBufferSize, GetQueue()->GetPendingCommandSerial(),
-                                           kCopyBufferToBufferOffsetAlignment));
-
-        memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
-
-        CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
-                                      uploadHandle.startOffset, mZeroBuffer.Get(), 0,
-                                      kZeroBufferSize);
-
-        mZeroBuffer->SetInitialized(true);
-    }
-
     Buffer* dstBuffer = ToBackend(destination);
 
     // Necessary to ensure residency of the zero buffer.
@@ -396,10 +412,8 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
-                                compilationMessages);
+    ShaderModuleParseResult* parseResult) {
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult);
 }
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
                                                               SwapChainBase* previousSwapChain,
@@ -485,15 +499,16 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     }
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     CommandRecordingContext* commandRecordingContext =
         ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
 
     Buffer* dstBuffer = ToBackend(destination);
+    DAWN_TRY(dstBuffer->SynchronizeBufferBeforeUseOnGPU());
 
     [[maybe_unused]] bool cleared;
     DAWN_TRY_ASSIGN(cleared, dstBuffer->EnsureDataInitializedAsDestination(
@@ -522,7 +537,7 @@ void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandConte
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     CommandRecordingContext* commandContext =
@@ -547,19 +562,23 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     return {};
 }
 
+uint32_t Device::GetResourceHeapTier() const {
+    return IsToggleEnabled(Toggle::UseD3D12ResourceHeapTier2) ? 2u : 1u;
+}
+
 void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {
     (*mResourceAllocatorManager)->DeallocateMemory(allocation);
 }
 
 ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
-    D3D12_HEAP_TYPE heapType,
+    ResourceHeapKind resourceHeapKind,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
     uint32_t formatBytesPerBlock,
     bool forceAllocateAsCommittedResource) {
     // formatBytesPerBlock is needed only for color non-compressed formats for a workaround.
     return (*mResourceAllocatorManager)
-        ->AllocateMemory(heapType, resourceDescriptor, initialUsage, formatBytesPerBlock,
+        ->AllocateMemory(resourceHeapKind, resourceDescriptor, initialUsage, formatBytesPerBlock,
                          forceAllocateAsCommittedResource);
 }
 
@@ -656,7 +675,7 @@ void AppendDebugLayerMessagesToError(ID3D12InfoQueue* infoQueue,
 }
 
 MaybeError Device::CheckDebugLayerAndGenerateErrors() {
-    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled()) {
+    if (!mIsDebugLayerEnabled) {
         return {};
     }
 
@@ -702,6 +721,7 @@ void Device::AppendDeviceLostMessage(ErrorData* error) {
         HRESULT result = mD3d12Device->GetDeviceRemovedReason();
         error->AppendBackendMessage("Device removed reason: %s (0x%08X)",
                                     d3d::HRESULTAsString(result), result);
+        RecordDeviceRemovedReason(result);
     }
 }
 
@@ -743,16 +763,18 @@ Device::GetSamplerShaderVisibleDescriptorAllocator() const {
 MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     DAWN_ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount > 0);
     // This is Log2 of the next power of two, plus 1.
-    uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
+    uint32_t allocatorIndex = Log2Ceil(descriptorCount) + 1;
     return mViewAllocators[allocatorIndex].get();
 }
 
 MutexProtected<StagingDescriptorAllocator>* Device::GetSamplerStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     DAWN_ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount > 0);
     // This is Log2 of the next power of two, plus 1.
-    uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
+    uint32_t allocatorIndex = Log2Ceil(descriptorCount) + 1;
     return mSamplerAllocators[allocatorIndex].get();
 }
 
@@ -778,6 +800,14 @@ uint32_t Device::GetOptimalBytesPerRowAlignment() const {
 // so we return 1 and let ComputeTextureCopySplits take care of the alignment.
 uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
     return 1;
+}
+
+bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
+    return true;
+}
+
+bool Device::CanResolveSubRect() const {
+    return true;
 }
 
 float Device::GetTimestampPeriodInNS() const {

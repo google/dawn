@@ -4,12 +4,14 @@ struct FragmentInputs {
   uint sample_index;
   uint sample_mask;
 };
-struct tint_symbol_1 {
-  float4 position : SV_Position;
-  bool front_facing : SV_IsFrontFace;
-  uint sample_index : SV_SampleIndex;
-  uint sample_mask : SV_Coverage;
+
+struct main_inputs {
+  float4 FragmentInputs_position : SV_Position;
+  bool FragmentInputs_front_facing : SV_IsFrontFace;
+  uint FragmentInputs_sample_index : SV_SampleIndex;
+  uint FragmentInputs_sample_mask : SV_Coverage;
 };
+
 
 void main_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
@@ -18,8 +20,8 @@ void main_inner(FragmentInputs inputs) {
   }
 }
 
-void main(tint_symbol_1 tint_symbol) {
-  FragmentInputs tint_symbol_2 = {float4(tint_symbol.position.xyz, (1.0f / tint_symbol.position.w)), tint_symbol.front_facing, tint_symbol.sample_index, tint_symbol.sample_mask};
-  main_inner(tint_symbol_2);
-  return;
+void main(main_inputs inputs) {
+  FragmentInputs v = {float4(inputs.FragmentInputs_position.xyz, (1.0f / inputs.FragmentInputs_position.w)), inputs.FragmentInputs_front_facing, inputs.FragmentInputs_sample_index, inputs.FragmentInputs_sample_mask};
+  main_inner(v);
 }
+

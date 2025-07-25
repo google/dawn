@@ -2,34 +2,39 @@ struct str {
   int arr[4];
 };
 
-groupshared str S;
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-void tint_zero_workgroup_memory(uint local_idx) {
+
+groupshared str S;
+void func() {
+  int v[4] = (int[4])0;
+  S.arr = v;
+}
+
+void main_inner(uint tint_local_index) {
   {
-    for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-      uint i = idx;
-      S.arr[i] = 0;
+    uint v_1 = 0u;
+    v_1 = tint_local_index;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 4u)) {
+        break;
+      }
+      S.arr[v_2] = int(0);
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-}
-
-void func_S_arr() {
-  int tint_symbol_2[4] = (int[4])0;
-  S.arr = tint_symbol_2;
-}
-
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-  func_S_arr();
+  func();
 }
 
 [numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
+

@@ -39,10 +39,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::NextIteration);
 
 namespace tint::core::ir {
 
-NextIteration::NextIteration() = default;
+NextIteration::NextIteration(Id id) : Base(id) {}
 
-NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
-    : loop_(loop) {
+NextIteration::NextIteration(Id id, ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
+    : Base(id), loop_(loop) {
     TINT_ASSERT(loop_);
 
     AddOperands(NextIteration::kArgsOperandOffset, std::move(args));
@@ -54,10 +54,17 @@ NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::E
 
 NextIteration::~NextIteration() = default;
 
+void NextIteration::Destroy() {
+    if (loop_) {
+        loop_->Body()->RemoveInboundSiblingBranch(this);
+    }
+    Instruction::Destroy();
+}
+
 NextIteration* NextIteration::Clone(CloneContext& ctx) {
     auto* new_loop = ctx.Clone(loop_);
     auto args = ctx.Remap<NextIteration::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<NextIteration>(new_loop, args);
+    return ctx.ir.CreateInstruction<NextIteration>(new_loop, args);
 }
 
 void NextIteration::SetLoop(ir::Loop* loop) {

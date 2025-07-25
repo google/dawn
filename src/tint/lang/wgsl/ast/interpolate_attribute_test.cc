@@ -39,8 +39,8 @@ using InterpolateAttributeTest = TestHelper;
 
 TEST_F(InterpolateAttributeTest, Creation) {
     auto* d = Interpolate(core::InterpolationType::kLinear, core::InterpolationSampling::kCenter);
-    CheckIdentifier(d->type, "linear");
-    CheckIdentifier(d->sampling, "center");
+    EXPECT_EQ(d->interpolation.type, core::InterpolationType::kLinear);
+    EXPECT_EQ(d->interpolation.sampling, core::InterpolationSampling::kCenter);
 }
 
 }  // namespace

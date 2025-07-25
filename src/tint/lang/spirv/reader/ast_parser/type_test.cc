@@ -41,6 +41,7 @@ TEST(SpirvASTParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.Bool(), ty.Bool());
     EXPECT_EQ(ty.U32(), ty.U32());
     EXPECT_EQ(ty.F32(), ty.F32());
+    EXPECT_EQ(ty.F16(), ty.F16());
     EXPECT_EQ(ty.I32(), ty.I32());
     EXPECT_EQ(ty.Pointer(core::AddressSpace::kUndefined, ty.I32()),
               ty.Pointer(core::AddressSpace::kUndefined, ty.I32()));

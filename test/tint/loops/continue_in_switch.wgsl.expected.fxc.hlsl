@@ -1,22 +1,36 @@
+
 [numthreads(1, 1, 1)]
 void f() {
-  bool tint_continue = false;
   {
-    for(int i = 0; (i < 4); i = (i + 1)) {
-      tint_continue = false;
+    int i = int(0);
+    while(true) {
+      if ((i < int(4))) {
+      } else {
+        break;
+      }
+      bool tint_continue = false;
       switch(i) {
-        case 0: {
+        case int(0):
+        {
           tint_continue = true;
           break;
         }
-        default: {
+        default:
+        {
           break;
         }
       }
       if (tint_continue) {
+        {
+          i = (i + int(1));
+        }
         continue;
       }
+      {
+        i = (i + int(1));
+      }
+      continue;
     }
   }
-  return;
 }
+

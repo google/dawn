@@ -95,8 +95,7 @@ class alignas(detail::kNativeVkHandleAlignment) VkHandle {
     VkHandle& operator=(const VkHandle<Tag, HandleType>&) = default;
 
     // Comparisons between handles
-    bool operator==(VkHandle<Tag, HandleType> other) const { return mHandle == other.mHandle; }
-    bool operator!=(VkHandle<Tag, HandleType> other) const { return mHandle != other.mHandle; }
+    bool operator==(const VkHandle<Tag, HandleType>& other) const = default;
 
     // Comparisons between handles and VK_NULL_HANDLE
     bool operator==(std::nullptr_t) const { return mHandle == 0; }
@@ -149,7 +148,9 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
 #endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #if defined(DAWN_USE_X11)
+#ifndef VK_USE_PLATFORM_XLIB_KHR
 #define VK_USE_PLATFORM_XLIB_KHR
+#endif
 #ifndef VK_USE_PLATFORM_XCB_KHR
 #define VK_USE_PLATFORM_XCB_KHR
 #endif

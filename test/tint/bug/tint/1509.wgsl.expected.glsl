@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) out uint value;
 uint v0 = 0u;
 uint v1 = 0u;
 uint v2 = 0u;
@@ -1003,6 +1002,7 @@ uint v996 = 0u;
 uint v997 = 0u;
 uint v998 = 0u;
 uint v999 = 0u;
+layout(location = 0) out uint main_loc0_Output;
 uint foo() {
   uint x = 0u;
   x = (x + v0);
@@ -2007,13 +2007,9 @@ uint foo() {
   x = (x + v999);
   return x;
 }
-
-uint tint_symbol() {
+uint main_inner() {
   return foo();
 }
-
 void main() {
-  uint inner_result = tint_symbol();
-  value = inner_result;
-  return;
+  main_loc0_Output = main_inner();
 }

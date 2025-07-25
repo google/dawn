@@ -41,24 +41,31 @@
 tint_add_target(tint_lang_hlsl_type lib
   lang/hlsl/type/byte_address_buffer.cc
   lang/hlsl/type/byte_address_buffer.h
+  lang/hlsl/type/int8_t4_packed.cc
+  lang/hlsl/type/int8_t4_packed.h
+  lang/hlsl/type/rasterizer_ordered_texture_2d.cc
+  lang/hlsl/type/rasterizer_ordered_texture_2d.h
+  lang/hlsl/type/uint8_t4_packed.cc
+  lang/hlsl/type/uint8_t4_packed.h
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_type lib
+  tint_api_common
   tint_lang_core
   tint_lang_core_type
+  tint_utils
   tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
-  tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
-  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_hlsl_type lib
+  "src_utils"
 )
 
 ################################################################################
@@ -67,25 +74,24 @@ tint_target_add_dependencies(tint_lang_hlsl_type lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_type_test test
   lang/hlsl/type/byte_address_buffer_test.cc
+  lang/hlsl/type/int8_t4_packed_test.cc
+  lang/hlsl/type/uint8_t4_packed_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_type_test test
   tint_lang_core
   tint_lang_core_type
   tint_lang_hlsl_type
+  tint_utils
   tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
   tint_utils_rtti
-  tint_utils_text
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_hlsl_type_test test
   "gtest"
+  "src_utils"
 )

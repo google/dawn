@@ -32,21 +32,89 @@
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/u64.h"
+#include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/macros/compiler.h"
 
 namespace tint::core::type {
+namespace {
+
+const Type* SubtypeFor(core::TexelFormat format, Manager& type_mgr) {
+    switch (format) {
+        case core::TexelFormat::kR8Uint:
+        case core::TexelFormat::kRg8Uint:
+        case core::TexelFormat::kRgba8Uint:
+        case core::TexelFormat::kR16Uint:
+        case core::TexelFormat::kRg16Uint:
+        case core::TexelFormat::kRgba16Uint:
+        case core::TexelFormat::kR32Uint:
+        case core::TexelFormat::kRg32Uint:
+        case core::TexelFormat::kRgba32Uint:
+        case core::TexelFormat::kRgb10A2Uint: {
+            return type_mgr.u32();
+        }
+
+        case core::TexelFormat::kR8Sint:
+        case core::TexelFormat::kRg8Sint:
+        case core::TexelFormat::kRgba8Sint:
+        case core::TexelFormat::kR16Sint:
+        case core::TexelFormat::kRg16Sint:
+        case core::TexelFormat::kRgba16Sint:
+        case core::TexelFormat::kR32Sint:
+        case core::TexelFormat::kRg32Sint:
+        case core::TexelFormat::kRgba32Sint: {
+            return type_mgr.i32();
+        }
+
+        case core::TexelFormat::kR8Unorm:
+        case core::TexelFormat::kR8Snorm:
+        case core::TexelFormat::kRg8Unorm:
+        case core::TexelFormat::kRg8Snorm:
+        case core::TexelFormat::kBgra8Unorm:
+        case core::TexelFormat::kRgba8Unorm:
+        case core::TexelFormat::kRgba8Snorm:
+        case core::TexelFormat::kR16Unorm:
+        case core::TexelFormat::kR16Snorm:
+        case core::TexelFormat::kRg16Unorm:
+        case core::TexelFormat::kRg16Snorm:
+        case core::TexelFormat::kRgba16Unorm:
+        case core::TexelFormat::kRgba16Snorm:
+        case core::TexelFormat::kR16Float:
+        case core::TexelFormat::kRg16Float:
+        case core::TexelFormat::kRgba16Float:
+        case core::TexelFormat::kR32Float:
+        case core::TexelFormat::kRg32Float:
+        case core::TexelFormat::kRgba32Float:
+        case core::TexelFormat::kRgb10A2Unorm:
+        case core::TexelFormat::kRg11B10Ufloat: {
+            return type_mgr.f32();
+        }
+
+        case core::TexelFormat::kUndefined:
+            break;
+    }
+
+    return nullptr;
+}
+
+}  // namespace
 
 Manager::Manager() = default;
 
@@ -60,6 +128,10 @@ const core::type::Invalid* Manager::invalid() {
     return Get<core::type::Invalid>();
 }
 
+const core::type::Function* Manager::function() {
+    return Get<core::type::Function>();
+}
+
 const core::type::Void* Manager::void_() {
     return Get<core::type::Void>();
 }
@@ -68,12 +140,24 @@ const core::type::Bool* Manager::bool_() {
     return Get<core::type::Bool>();
 }
 
+const core::type::I8* Manager::i8() {
+    return Get<core::type::I8>();
+}
+
 const core::type::I32* Manager::i32() {
     return Get<core::type::I32>();
 }
 
+const core::type::U8* Manager::u8() {
+    return Get<core::type::U8>();
+}
+
 const core::type::U32* Manager::u32() {
     return Get<core::type::U32>();
+}
+
+const core::type::U64* Manager::u64() {
+    return Get<core::type::U64>();
 }
 
 const core::type::F32* Manager::f32() {
@@ -100,6 +184,21 @@ const core::type::Vector* Manager::packed_vec(const core::type::Type* inner, uin
     return Get<core::type::Vector>(inner, size, true);
 }
 
+const core::type::Type* Manager::MatchWidth(const core::type::Type* el_ty,
+                                            const core::type::Type* match) {
+    if (auto* m = match->As<core::type::Vector>()) {
+        return vec(el_ty, m->Width());
+    }
+    return el_ty;
+}
+
+const core::type::Type* Manager::MatchWidth(const core::type::Type* el_ty, size_t size) {
+    if (size > 1) {
+        return vec(el_ty, static_cast<uint32_t>(size));
+    }
+    return el_ty;
+}
+
 const core::type::Vector* Manager::vec(const core::type::Type* inner, uint32_t size) {
     return Get<core::type::Vector>(inner, size);
 }
@@ -114,6 +213,38 @@ const core::type::Vector* Manager::vec3(const core::type::Type* inner) {
 
 const core::type::Vector* Manager::vec4(const core::type::Type* inner) {
     return vec(inner, 4);
+}
+
+const core::type::SampledTexture* Manager::sampled_texture(TextureDimension dim,
+                                                           const core::type::Type* type) {
+    return Get<core::type::SampledTexture>(dim, type);
+}
+
+const core::type::MultisampledTexture* Manager::multisampled_texture(TextureDimension dim,
+                                                                     const core::type::Type* type) {
+    return Get<core::type::MultisampledTexture>(dim, type);
+}
+
+const core::type::StorageTexture* Manager::storage_texture(TextureDimension dim,
+                                                           core::TexelFormat format,
+                                                           core::Access access) {
+    const auto* subtype = SubtypeFor(format, *this);
+    return Get<core::type::StorageTexture>(dim, format, access, subtype);
+}
+
+const core::type::TexelBuffer* Manager::texel_buffer(core::TexelFormat format,
+                                                     core::Access access) {
+    const auto* subtype = SubtypeFor(format, *this);
+    return Get<core::type::TexelBuffer>(format, access, subtype);
+}
+
+const core::type::DepthTexture* Manager::depth_texture(TextureDimension dim) {
+    return Get<core::type::DepthTexture>(dim);
+}
+
+const core::type::DepthMultisampledTexture* Manager::depth_multisampled_texture(
+    TextureDimension dim) {
+    return Get<core::type::DepthMultisampledTexture>(dim);
 }
 
 const core::type::Matrix* Manager::mat(const core::type::Type* inner,
@@ -162,6 +293,13 @@ const core::type::Matrix* Manager::mat4x4(const core::type::Type* inner) {
     return mat(inner, 4, 4);
 }
 
+const core::type::SubgroupMatrix* Manager::subgroup_matrix(SubgroupMatrixKind kind,
+                                                           const core::type::Type* inner,
+                                                           uint32_t cols,
+                                                           uint32_t rows) {
+    return Get<core::type::SubgroupMatrix>(kind, inner, cols, rows);
+}
+
 const core::type::Array* Manager::array(const core::type::Type* elem_ty,
                                         uint32_t count,
                                         uint32_t stride /* = 0*/) {
@@ -196,6 +334,11 @@ const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty,
         /* implicit stride */ implicit_stride);
 }
 
+const core::type::BindingArray* Manager::binding_array(const core::type::Type* elem_ty,
+                                                       uint32_t count) {
+    return Get<core::type::BindingArray>(elem_ty, Get<ConstantArrayCount>(count));
+}
+
 const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
                                         const core::type::Type* subtype,
                                         core::Access access /* = core::Access::kUndefined */) {
@@ -211,7 +354,8 @@ const core::type::Reference* Manager::ref(core::AddressSpace address_space,
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {
-    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+    if (auto* existing = Find<type::Struct>(name, /* is_wgsl_internal */ false);
+        DAWN_UNLIKELY(existing)) {
         TINT_ICE() << "attempting to construct two structs named " << name.NameView();
     }
 
@@ -224,8 +368,10 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
                                    tint::RoundUp(max_align, size), size);
 }
 
-core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md) {
-    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+core::type::Struct* Manager::Struct(Symbol name,
+                                    bool is_wgsl_internal,
+                                    VectorRef<StructMemberDesc> md) {
+    if (auto* existing = Find<type::Struct>(name, is_wgsl_internal); DAWN_UNLIKELY(existing)) {
         TINT_ICE() << "attempting to construct two structs named " << name.NameView();
     }
 
@@ -242,7 +388,8 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md)
         max_align = std::max(max_align, align);
     }
     return Get<core::type::Struct>(name, std::move(members), max_align,
-                                   tint::RoundUp(max_align, current_size), current_size);
+                                   tint::RoundUp(max_align, current_size), current_size,
+                                   is_wgsl_internal);
 }
 
 }  // namespace tint::core::type

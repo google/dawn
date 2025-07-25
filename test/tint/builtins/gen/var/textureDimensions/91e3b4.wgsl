@@ -35,6 +35,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// flags: --glsl-desktop
+
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
 
 @group(1) @binding(0) var arg_0: texture_storage_3d<rg32sint, read_write>;

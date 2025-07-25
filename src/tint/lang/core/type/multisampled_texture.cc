@@ -38,7 +38,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::type::MultisampledTexture);
 
 namespace tint::core::type {
 
-MultisampledTexture::MultisampledTexture(TextureDimension dim, const Type* type)
+MultisampledTexture::MultisampledTexture(TextureDimension dim, const type::Type* type)
     : Base(Hash(tint::TypeCode::Of<MultisampledTexture>().bits, dim, type), dim), type_(type) {
     TINT_ASSERT(type_);
 }
@@ -47,20 +47,20 @@ MultisampledTexture::~MultisampledTexture() = default;
 
 bool MultisampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<MultisampledTexture>()) {
-        return o->dim() == dim() && o->type_ == type_;
+        return o->Dim() == Dim() && o->type_ == type_;
     }
     return false;
 }
 
 std::string MultisampledTexture::FriendlyName() const {
     StringStream out;
-    out << "texture_multisampled_" << dim() << "<" << type_->FriendlyName() << ">";
+    out << "texture_multisampled_" << Dim() << "<" << type_->FriendlyName() << ">";
     return out.str();
 }
 
 MultisampledTexture* MultisampledTexture::Clone(CloneContext& ctx) const {
     auto* ty = type_->Clone(ctx);
-    return ctx.dst.mgr->Get<MultisampledTexture>(dim(), ty);
+    return ctx.dst.mgr->Get<MultisampledTexture>(Dim(), ty);
 }
 
 }  // namespace tint::core::type

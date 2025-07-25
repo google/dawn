@@ -1,8 +1,12 @@
 #include <metal_stdlib>
-
 using namespace metal;
-kernel void tint_symbol(device float3x4* tint_symbol_1 [[buffer(0)]], const device float3x4* tint_symbol_2 [[buffer(1)]]) {
-  *(tint_symbol_1) = *(tint_symbol_2);
-  return;
-}
 
+struct tint_module_vars_struct {
+  const device float3x4* in;
+  device float3x4* out;
+};
+
+kernel void v(const device float3x4* in [[buffer(0)]], device float3x4* out [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
+  (*tint_module_vars.out) = (*tint_module_vars.in);
+}

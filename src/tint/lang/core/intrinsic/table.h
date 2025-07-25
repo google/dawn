@@ -33,11 +33,10 @@
 #include <utility>
 
 #include "src/tint/lang/core/binary_op.h"
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/core/intrinsic/ctor_conv.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
-#include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/unary_op.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string.h"
@@ -153,7 +152,7 @@ void PrintCandidate(StyledText& ss,
 /// @param function_id the function identifier
 /// @param template_args the optional template arguments
 /// @param args the argument types passed to the builtin function
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+/// @param earliest_eval_stage the earliest evaluation stage that a call to
 ///        the builtin can be made. This can alter the overloads considered.
 ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
 ///        only overloads with concrete argument types will be considered, as all
@@ -174,7 +173,7 @@ Result<Overload, StyledText> LookupFn(Context& context,
 /// @param function_id the function identifier
 /// @param template_args the optional template arguments
 /// @param args the argument types passed to the builtin function
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+/// @param earliest_eval_stage the earliest evaluation stage that a call to
 ///        the builtin can be made. This can alter the overloads considered.
 ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
 ///        only overloads with concrete argument types will be considered, as all
@@ -193,7 +192,7 @@ Result<Overload, StyledText> LookupMemberFn(Context& context,
 /// @param context the intrinsic context
 /// @param op the unary operator
 /// @param arg the type of the expression passed to the operator
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+/// @param earliest_eval_stage the earliest evaluation stage that a call to
 ///        the unary operator can be made. This can alter the overloads considered.
 ///        For example, if the earliest evaluation stage is
 ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
@@ -211,7 +210,7 @@ Result<Overload, StyledText> LookupUnary(Context& context,
 /// @param op the binary operator
 /// @param lhs the LHS value type passed to the operator
 /// @param rhs the RHS value type passed to the operator
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+/// @param earliest_eval_stage the earliest evaluation stage that a call to
 ///        the binary operator can be made. This can alter the overloads considered.
 ///        For example, if the earliest evaluation stage is
 ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
@@ -232,7 +231,7 @@ Result<Overload, StyledText> LookupBinary(Context& context,
 /// @param type_id the type identifier
 /// @param template_args the optional template arguments
 /// @param args the argument types passed to the constructor / conversion call
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+/// @param earliest_eval_stage the earliest evaluation stage that a call to
 ///        the constructor or conversion can be made. This can alter the overloads considered.
 ///        For example, if the earliest evaluation stage is
 ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
@@ -268,7 +267,7 @@ struct Table {
     /// @param builtin_fn the builtin function
     /// @param template_args the optional template arguments
     /// @param args the argument types passed to the builtin function
-    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    /// @param earliest_eval_stage the earliest evaluation stage that a call to
     ///        the builtin can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
     ///        only overloads with concrete argument types will be considered, as all
@@ -291,7 +290,7 @@ struct Table {
     /// @param object the object type
     /// @param template_args the optional template arguments
     /// @param args the argument types passed to the builtin function
-    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    /// @param earliest_eval_stage the earliest evaluation stage that a call to
     ///        the builtin can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
     ///        only overloads with concrete argument types will be considered, as all
@@ -318,7 +317,7 @@ struct Table {
     /// diagnostic if the operator was not found.
     /// @param op the unary operator
     /// @param arg the type of the expression passed to the operator
-    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    /// @param earliest_eval_stage the earliest evaluation stage that a call to
     ///        the unary operator can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
     ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
@@ -337,7 +336,7 @@ struct Table {
     /// @param op the binary operator
     /// @param lhs the LHS value type passed to the operator
     /// @param rhs the RHS value type passed to the operator
-    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    /// @param earliest_eval_stage the earliest evaluation stage that a call to
     ///        the binary operator can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
     ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
@@ -358,7 +357,7 @@ struct Table {
     /// @param type the type being constructed or converted
     /// @param template_args the optional template arguments
     /// @param args the argument types passed to the constructor / conversion call
-    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    /// @param earliest_eval_stage the earliest evaluation stage that a call to
     ///        the constructor or conversion can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
     ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types

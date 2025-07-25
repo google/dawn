@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
 
 #include <utility>
 #include <vector>
@@ -37,7 +38,6 @@
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn/webgpu_cpp.h"
 #include "mocks/BindGroupLayoutMock.h"
 #include "mocks/BindGroupMock.h"
 #include "mocks/BufferMock.h"
@@ -51,7 +51,6 @@
 #include "mocks/RenderPipelineMock.h"
 #include "mocks/SamplerMock.h"
 #include "mocks/ShaderModuleMock.h"
-#include "mocks/SwapChainMock.h"
 #include "mocks/TextureMock.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -69,7 +68,7 @@ using ::testing::StrictMock;
 using ::testing::Test;
 
 using MockMapAsyncCallback =
-    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>>;
+    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>;
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}
@@ -103,7 +102,7 @@ class DestroyObjectTests : public DawnMockTest {
   public:
     DestroyObjectTests() : DawnMockTest() {
         // Skipping validation on descriptors as coverage for validation is already present.
-        mDeviceMock->ForceSetToggleForTesting(Toggle::SkipValidation, true);
+        mDeviceToggles.ForceSet(Toggle::SkipValidation, true);
     }
 };
 
@@ -385,7 +384,8 @@ TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -415,7 +415,8 @@ TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -449,7 +450,8 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -484,9 +486,27 @@ TEST_F(DestroyObjectTests, PipelineLayoutNativeExplicit) {
 // If the reference count on API objects reach 0, they should delete themselves. Note that GTest
 // will also complain if there is a memory leak.
 TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
+    Ref<BindGroupLayoutMock> bindGroupLayoutMock;
+    wgpu::BindGroupLayout bindGroupLayout;
+    {
+        // Use an non-empty bind group layout to avoid hitting the internal empty layout in the
+        // cache.
+        BindGroupLayoutDescriptor desc = {};
+        std::vector<BindGroupLayoutEntry> entries;
+        entries.push_back(utils::BindingLayoutEntryInitializationHelper(
+            0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform));
+        desc.entryCount = entries.size();
+        desc.entries = entries.data();
+
+        ScopedRawPtrExpectation scoped(mDeviceMock);
+        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        EXPECT_CALL(*mDeviceMock, CreateBindGroupLayoutImpl).WillOnce(Return(bindGroupLayoutMock));
+        bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
+    }
+
     PipelineLayoutDescriptor desc = {};
     std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
+    bindGroupLayouts.push_back(reinterpret_cast<BindGroupLayoutBase*>(bindGroupLayout.Get()));
     desc.bindGroupLayoutCount = bindGroupLayouts.size();
     desc.bindGroupLayouts = bindGroupLayouts.data();
 
@@ -631,7 +651,7 @@ TEST_F(DestroyObjectTests, ShaderModuleNativeExplicit) {
 }
 
 TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
-    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code = kVertexShader.data();
     ShaderModuleDescriptor desc = {};
     desc.nextInChain = &wgslDesc;
@@ -829,7 +849,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     Ref<ShaderModuleMock> csModuleMock;
     wgpu::ShaderModule csModule;
     {
-        ShaderModuleWGSLDescriptor wgslDesc = {};
+        ShaderSourceWGSL wgslDesc = {};
         wgslDesc.code = kComputeShader.data();
         ShaderModuleDescriptor desc = {};
         desc.nextInChain = &wgslDesc;
@@ -843,7 +863,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     Ref<ShaderModuleMock> vsModuleMock;
     wgpu::ShaderModule vsModule;
     {
-        ShaderModuleWGSLDescriptor wgslDesc = {};
+        ShaderSourceWGSL wgslDesc = {};
         wgslDesc.code = kVertexShader.data();
         ShaderModuleDescriptor desc = {};
         desc.nextInChain = &wgslDesc;
@@ -900,9 +920,11 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     Ref<PipelineLayoutMock> pipelineLayoutMock;
     wgpu::PipelineLayout pipelineLayout;
     {
+        // Use an non-empty bind group layout to avoid hitting the internal empty pipeline layout in
+        // the cache.
         PipelineLayoutDescriptor desc = {};
         std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-        bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
+        bindGroupLayouts.push_back(reinterpret_cast<BindGroupLayoutBase*>(bindGroupLayout.Get()));
         desc.bindGroupLayoutCount = bindGroupLayouts.size();
         desc.bindGroupLayouts = bindGroupLayouts.data();
 
@@ -986,7 +1008,8 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         desc.gamutConversionMatrix = placeholderConstantArray.data();
         desc.srcTransferFunctionParameters = placeholderConstantArray.data();
         desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-        desc.visibleSize = {1, 1};
+        desc.cropSize = {1, 1};
+        desc.apparentSize = {1, 1};
         desc.plane0 = textureViewMock.Get();
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
@@ -1027,7 +1050,12 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     EXPECT_TRUE(FromAPI(csModule.Get())->IsAlive());
     EXPECT_TRUE(FromAPI(texture.Get())->IsAlive());
     EXPECT_TRUE(FromAPI(textureView.Get())->IsAlive());
+
+    EXPECT_CALL(mDeviceLostCallback,
+                Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Destroyed, _))
+        .Times(1);
     device.Destroy();
+
     EXPECT_FALSE(FromAPI(bindGroup.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(bindGroupLayout.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(buffer.Get())->IsAlive());

@@ -1,36 +1,49 @@
 ; SPIR-V
 ; Version: 1.3
-; Generator: Google Tint Compiler; 0
-; Bound: 17
+; Generator: Google Tint Compiler; 1
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpName %s_block "s_block"
                OpMemberName %s_block 0 "inner"
-               OpName %s "s"
+               OpName %s_block "s_block"
                OpName %f "f"
-               OpDecorate %s_block Block
+               OpName %a "a"
+               OpName %a "a__"
+               OpName %a "b"
+               OpName %a "b__"
                OpMemberDecorate %s_block 0 Offset 0
-               OpDecorate %s DescriptorSet 0
-               OpDecorate %s Binding 0
+               OpDecorate %s_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
         %int = OpTypeInt 32 1
     %s_block = OpTypeStruct %int
 %_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
-          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+          %1 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
-      %int_1 = OpConstant %int 1
+          %7 = OpTypeFunction %void
+          %a = OpConstant %int 1
        %uint = OpTypeInt 32 0
-     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-          %f = OpFunction %void None %5
+     %uint_0 = OpConstant %uint 0
+          %f = OpFunction %void None %7
           %8 = OpLabel
-         %13 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_0
-         %14 = OpIAdd %int %int_1 %int_1
-         %15 = OpIAdd %int %14 %int_1
-         %16 = OpIAdd %int %15 %int_1
-               OpStore %13 %16
+         %11 = OpBitcast %uint %a
+         %12 = OpBitcast %uint %a
+         %13 = OpIAdd %uint %11 %12
+         %14 = OpBitcast %int %13
+         %15 = OpBitcast %uint %14
+         %16 = OpBitcast %uint %a
+         %17 = OpIAdd %uint %15 %16
+         %18 = OpBitcast %int %17
+         %19 = OpBitcast %uint %18
+         %20 = OpBitcast %uint %a
+         %21 = OpIAdd %uint %19 %20
+         %22 = OpBitcast %int %21
+         %23 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %23 %22 None
                OpReturn
                OpFunctionEnd

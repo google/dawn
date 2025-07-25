@@ -1,14 +1,11 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
+
 struct S {
   ivec3 v;
 };
 
-S P = S(ivec3(0, 0, 0));
+S P = S(ivec3(0));
 void f() {
   ivec3 v = P.v;
   int x = P.v.x;
@@ -132,4 +129,6 @@ void f() {
   ivec4 zzzy = P.v.zzzy;
   ivec4 zzzz = P.v.zzzz;
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

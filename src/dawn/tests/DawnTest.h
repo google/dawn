@@ -28,6 +28,10 @@
 #ifndef SRC_DAWN_TESTS_DAWNTEST_H_
 #define SRC_DAWN_TESTS_DAWNTEST_H_
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
+
 #include <atomic>
 #include <memory>
 #include <queue>
@@ -47,12 +51,11 @@
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/ParamGenerator.h"
 #include "dawn/tests/ToggleParser.h"
+#include "dawn/utils/ComboLimits.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
-#include "dawn/webgpu_cpp.h"
+#include "dawn/utils/Timer.h"
 #include "dawn/webgpu_cpp_print.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 // Getting data back from Dawn is done in an async manners so all expectations are "deferred"
@@ -122,6 +125,9 @@
 #define EXPECT_TEXTURE_FLOAT16_EQ(...) \
     AddTextureExpectation<float, uint16_t>(__FILE__, __LINE__, __VA_ARGS__)
 
+#define EXPECT_TEXTURE_NORM_BETWEEN(...) \
+    AddSnormTextureBoundsExpectation(__FILE__, __LINE__, __VA_ARGS__)
+
 // Matcher for C++ types to verify that their internal C-handles are identical.
 MATCHER_P(CHandleIs, cType, "") {
     return arg.Get() == cType;
@@ -167,6 +173,8 @@ template <typename T, typename U = T>
 class ExpectEq;
 template <typename T>
 class ExpectBetweenColors;
+template <typename T>
+class ExpectBetweenSnormTextureBounds;
 }  // namespace detail
 
 namespace wire {
@@ -252,6 +260,7 @@ class DawnTestBase {
     bool IsD3D12() const;
     bool IsMetal() const;
     bool IsNull() const;
+    bool IsWebGPUOnWebGPU() const;
     bool IsOpenGL() const;
     bool IsOpenGLES() const;
     bool IsVulkan() const;
@@ -272,6 +281,7 @@ class DawnTestBase {
 
     bool IsIntelGen9() const;
     bool IsIntelGen12() const;
+    bool IsIntelGen12OrLater() const;
 
     bool IsWindows() const;
     bool IsLinux() const;
@@ -286,6 +296,7 @@ class DawnTestBase {
     bool IsBackendValidationEnabled() const;
     bool IsFullBackendValidationEnabled() const;
     bool IsCompatibilityMode() const;
+    bool IsCPU() const;
     bool RunSuppressedTests() const;
 
     bool IsDXC() const;
@@ -328,25 +339,32 @@ class DawnTestBase {
     // mDeferredExpectations get too big.
     void ResolveDeferredExpectationsNow();
 
+    // Starts the internal timer for the test and sets the max expected time. This
+    // 'max_expected_time' is not actually a test timeout as it simply checks an expectation at the
+    // end of the test.
+    void StartTestTimer(float expected_max_time);
+
   protected:
     wgpu::Instance instance;
     wgpu::Adapter adapter;
+    dawn::utils::ComboLimits adapterLimits;
     wgpu::Device device;
+    dawn::utils::ComboLimits deviceLimits;
     wgpu::Queue queue;
 
     DawnProcTable backendProcs = {};
     WGPUDevice backendDevice = nullptr;
 
     uint64_t mLastWarningCount = 0;
+    std::unique_ptr<utils::Timer> mTimer;
+    float mExpectedTimeMaxSec = 0.0f;
 
     // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
     // device loss that aren't expected should result in test failures and not just some warnings
     // printed to stdout.
-    testing::StrictMock<
-        testing::MockCppCallback<void (*)(const wgpu::Device&, wgpu::ErrorType, const char*)>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
         mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCppCallback<
-        void (*)(const wgpu::Device&, wgpu::DeviceLostReason, const char*)>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback<void>*>>
         mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros
@@ -535,6 +553,46 @@ class DawnTestBase {
             texture, {x, y}, {1, 1}, level, aspect, sizeof(T), bytesPerRow);
     }
 
+    template <typename T>
+    std::ostringstream& AddSnormTextureBoundsExpectation(
+        const char* file,
+        int line,
+        const std::vector<T>& expectedL,
+        const std::vector<T>& expectedU,
+        const wgpu::Texture& texture,
+        wgpu::Origin3D origin,
+        wgpu::Extent3D extent,
+        wgpu::TextureFormat format,
+        uint32_t level = 0,
+        wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+        uint32_t bytesPerRow = 0) {
+        // No device passed explicitly. Default it, and forward the rest of the args.
+        return AddSnormTextureBoundsExpectation(file, line, this->device, expectedL, expectedU,
+                                                texture, origin, extent, format, level, aspect,
+                                                bytesPerRow);
+    }
+
+    template <typename T>
+    std::ostringstream& AddSnormTextureBoundsExpectation(
+        const char* file,
+        int line,
+        const wgpu::Device& targetDevice,
+        const std::vector<T>& expectedL,
+        const std::vector<T>& expectedU,
+        const wgpu::Texture& texture,
+        wgpu::Origin3D origin,
+        wgpu::Extent3D extent,
+        wgpu::TextureFormat format,
+        uint32_t level = 0,
+        wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+        uint32_t bytesPerRow = 0) {
+        uint32_t texelBlockSize = utils::GetTexelBlockSizeInBytes(format);
+        return AddTextureExpectationImpl(
+            file, line, std::move(targetDevice),
+            new detail::ExpectBetweenSnormTextureBounds<T>(expectedL, expectedU), texture, origin,
+            extent, level, aspect, texelBlockSize, bytesPerRow);
+    }
+
     std::ostringstream& ExpectSampledFloatData(wgpu::Texture texture,
                                                uint32_t width,
                                                uint32_t height,
@@ -615,12 +673,19 @@ class DawnTestBase {
     // code path to handle the situation when not all features are supported.
     virtual std::vector<wgpu::FeatureName> GetRequiredFeatures();
 
-    virtual wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits&);
+    // Called in SetUp() to get the limits required to be enabled in the tests.
+    // Note implementations of this can assume `required` starts as default-initialized.
+    virtual void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                                   dawn::utils::ComboLimits& required);
+
+    // Called in SetUp() to check if 'SetUseTieredLimits' should be set to true on the backend
+    // adapter.
+    virtual bool GetRequireUseTieredLimits();
 
     const TestAdapterProperties& GetAdapterProperties() const;
 
-    wgpu::SupportedLimits GetAdapterLimits();
-    wgpu::SupportedLimits GetSupportedLimits();
+    const dawn::utils::ComboLimits& GetAdapterLimits();
+    const dawn::utils::ComboLimits& GetSupportedLimits();
 
     uint64_t GetDeprecationWarningCountForTesting() const;
 
@@ -706,6 +771,7 @@ class DawnTestBase {
     // Assuming the data is mapped, checks all expectations
     void ResolveExpectations();
 
+    bool mRequireUseTieredLimits = false;
     native::Adapter mBackendAdapter;
     WGPUDevice mLastCreatedBackendDevice;
 
@@ -893,6 +959,26 @@ class ExpectBetweenColors : public Expectation {
 // each counterparts. It doesn't matter which value is higher or lower. Essentially color =
 // lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
 extern template class ExpectBetweenColors<utils::RGBA8>;
+
+template <typename T>
+class ExpectBetweenSnormTextureBounds : public Expectation {
+  public:
+    // Inclusive for now
+    ExpectBetweenSnormTextureBounds(const std::vector<T>& expectedL,
+                                    const std::vector<T>& expectedU)
+        : expectedLower(expectedL), expectedUpper(expectedU) {}
+    testing::AssertionResult Check(const void* data, size_t size) override;
+
+  private:
+    std::vector<T> expectedLower;
+    std::vector<T> expectedUpper;
+};
+template <typename T>
+ExpectBetweenSnormTextureBounds(const std::vector<T>&, const std::vector<T>&)
+    -> ExpectBetweenSnormTextureBounds<T>;
+extern template class ExpectBetweenSnormTextureBounds<int8_t>;
+extern template class ExpectBetweenSnormTextureBounds<int16_t>;
+extern template class ExpectBetweenSnormTextureBounds<uint16_t>;
 
 class CustomTextureExpectation : public Expectation {
   public:

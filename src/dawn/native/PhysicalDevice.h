@@ -88,6 +88,8 @@ class PhysicalDeviceBase : public RefCounted {
     const std::string& GetDriverDescription() const;
     wgpu::AdapterType GetAdapterType() const;
     wgpu::BackendType GetBackendType() const;
+    uint32_t GetSubgroupMinSize() const;
+    uint32_t GetSubgroupMaxSize() const;
 
     MaybeError ResetInternalDeviceForTesting();
 
@@ -102,7 +104,9 @@ class PhysicalDeviceBase : public RefCounted {
 
     virtual bool SupportsExternalImages() const = 0;
 
-    virtual bool SupportsFeatureLevel(FeatureLevel featureLevel) const = 0;
+    // `instance` is an optional parameter used to log warnings but may be null.
+    virtual bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                      InstanceBase* instance) const = 0;
 
     // Backend-specific force-setting and defaulting device toggles
     virtual void SetupBackendAdapterToggles(dawn::platform::Platform* platform,
@@ -116,13 +120,13 @@ class PhysicalDeviceBase : public RefCounted {
                                                                 const TogglesState& toggles) const;
 
     // Populate backend properties. Ownership of allocations written are owned by the caller.
-    virtual void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const = 0;
+    virtual void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const = 0;
 
     // Populate backend format capabilities. Ownership of allocations written are owned by the
     // caller.
     virtual void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
-        UnpackedPtr<FormatCapabilities>& capabilities) const;
+        UnpackedPtr<DawnFormatCapabilities>& capabilities) const;
 
     virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,
@@ -137,6 +141,10 @@ class PhysicalDeviceBase : public RefCounted {
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
     gpu_info::DriverVersion mDriverVersion;
     std::string mDriverDescription;
+    // When the feature is *not* supported, these must be 4 and 128. Set those defaults now, but a
+    // backend may override this.
+    uint32_t mSubgroupMinSize = kDefaultSubgroupMinSize;
+    uint32_t mSubgroupMaxSize = kDefaultSubgroupMaxSize;
 
     // Juat a wrapper of ValidateFeatureSupportedWithToggles, return true if a feature is supported
     // by this adapter AND suitable with given toggles.
@@ -147,7 +155,7 @@ class PhysicalDeviceBase : public RefCounted {
     // Used for the tests that intend to use an adapter without all features enabled.
     void SetSupportedFeaturesForTesting(const std::vector<wgpu::FeatureName>& requiredFeatures);
 
-    void GetDefaultLimitsForSupportedFeatureLevel(Limits* limits) const;
+    void GetDefaultLimitsForSupportedFeatureLevel(CombinedLimits* limits) const;
 
   private:
     virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(

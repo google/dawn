@@ -73,15 +73,16 @@ class QueueWriteTextureValidationTest : public ValidationTest {
                           wgpu::TextureAspect aspect = wgpu::TextureAspect::All) {
         std::vector<uint8_t> data(dataSize);
 
-        wgpu::TextureDataLayout textureDataLayout;
-        textureDataLayout.offset = dataOffset;
-        textureDataLayout.bytesPerRow = dataBytesPerRow;
-        textureDataLayout.rowsPerImage = dataRowsPerImage;
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout;
+        texelCopyBufferLayout.offset = dataOffset;
+        texelCopyBufferLayout.bytesPerRow = dataBytesPerRow;
+        texelCopyBufferLayout.rowsPerImage = dataRowsPerImage;
 
-        wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, texLevel, texOrigin, aspect);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, texLevel, texOrigin, aspect);
 
-        queue.WriteTexture(&imageCopyTexture, data.data(), dataSize, &textureDataLayout, &size);
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), dataSize, &texelCopyBufferLayout,
+                           &size);
     }
 
     void TestWriteTextureExactDataSize(uint32_t bytesPerRow,
@@ -361,17 +362,18 @@ TEST_F(QueueWriteTextureValidationTest, TextureInErrorState) {
     wgpu::TextureDescriptor errorTextureDescriptor;
     errorTextureDescriptor.size.depthOrArrayLayers = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
-    wgpu::ImageCopyTexture errorImageCopyTexture =
-        utils::CreateImageCopyTexture(errorTexture, 0, {0, 0, 0});
+    wgpu::TexelCopyTextureInfo errorTexelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(errorTexture, 0, {0, 0, 0});
 
     wgpu::Extent3D extent3D = {0, 0, 0};
 
     {
         std::vector<uint8_t> data(4);
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 0, 0);
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, 0, 0);
 
-        ASSERT_DEVICE_ERROR(queue.WriteTexture(&errorImageCopyTexture, data.data(), 4,
-                                               &textureDataLayout, &extent3D));
+        ASSERT_DEVICE_ERROR(queue.WriteTexture(&errorTexelCopyTextureInfo, data.data(), 4,
+                                               &texelCopyBufferLayout, &extent3D));
     }
 }
 

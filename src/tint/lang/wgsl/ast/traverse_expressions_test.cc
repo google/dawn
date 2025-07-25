@@ -112,7 +112,7 @@ TEST_F(TraverseExpressionsTest, Depth) {
     auto* root = Mul(i[0], i[1]);
 
     size_t j = 0;
-    size_t depths[] = {0, 1, 2, 2, 1, 2, 2};
+    constexpr std::array<size_t, 7> depths = {0, 1, 2, 2, 1, 2, 2};
     {
         TraverseExpressions<TraverseOrder::LeftToRight>(  //
             root, [&](const Expression* expr, size_t depth) {

@@ -2,17 +2,10 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) out vec4 value;
-struct MyStruct {
-  float f1;
-};
-
-vec4 tint_symbol() {
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner() {
   return vec4(0.0f);
 }
-
 void main() {
-  vec4 inner_result = tint_symbol();
-  value = inner_result;
-  return;
+  main_loc0_Output = main_inner();
 }

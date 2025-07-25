@@ -1,7 +1,3 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
 void f() {
   bool v = true;
@@ -9,3 +5,8 @@ void f() {
   bool3 v3 = bool3((v).xxx);
   bool4 v4 = bool4((v).xxxx);
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

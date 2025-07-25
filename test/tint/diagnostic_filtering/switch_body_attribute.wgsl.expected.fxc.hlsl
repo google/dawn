@@ -10,22 +10,26 @@
   switch (i32(x)) @diagnostic(warning, derivative_uniformity) {
               ^
 
-int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
-}
-
-struct tint_symbol_1 {
+struct main_inputs {
   float x : TEXCOORD0;
 };
 
-void main_inner(float x) {
-  tint_ftoi(x);
-  do {
-    float tint_phony = ddx(1.0f);
-  } while (false);
+
+int tint_f32_to_i32(float value) {
+  return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
 
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.x);
-  return;
+void main_inner(float x) {
+  tint_f32_to_i32(x);
+  {
+    while(true) {
+      ddx(1.0f);
+      break;
+    }
+  }
 }
+
+void main(main_inputs inputs) {
+  main_inner(inputs.x);
+}
+

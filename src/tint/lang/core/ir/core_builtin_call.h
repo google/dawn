@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/intrinsic/dialect.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
@@ -42,15 +42,19 @@ namespace tint::core::ir {
 class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
   public:
     /// Constructor (no results, no operands)
-    CoreBuiltinCall();
+    /// @param id the instruction id
+    explicit CoreBuiltinCall(Id id);
 
     /// Constructor
+    /// @param id the instruction id
     /// @param result the result value
     /// @param func the builtin function
     /// @param args the conversion arguments
-    CoreBuiltinCall(InstructionResult* result,
+    CoreBuiltinCall(Id id,
+                    InstructionResult* result,
                     core::BuiltinFn func,
                     VectorRef<Value*> args = tint::Empty);
+
     ~CoreBuiltinCall() override;
 
     /// @copydoc Instruction::Clone()
@@ -72,6 +76,9 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     const core::intrinsic::TableData& TableData() const override {
         return core::intrinsic::Dialect::kData;
     }
+
+    /// @returns an access information for the function
+    Accesses GetSideEffects() const override;
 
   private:
     core::BuiltinFn func_;

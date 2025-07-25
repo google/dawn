@@ -37,7 +37,10 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using IR_BindingRemapperTest = TransformTest;
+class IR_BindingRemapperTest : public TransformTest {
+  public:
+    IR_BindingRemapperTest() { capabilities = kBindingRemapperCapabilities; }
+};
 
 TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
     auto* buffer = b.Var("buffer", ty.ptr<uniform, i32>());
@@ -46,7 +49,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_NoRemappings) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
 }
 
 )";
@@ -67,7 +70,7 @@ TEST_F(IR_BindingRemapperTest, NoModify_RemappingDifferentBindingPoint) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(0, 0)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(0, 0)
 }
 
 )";
@@ -89,7 +92,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroup) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -97,7 +100,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(3, 2)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(3, 2)
 }
 
 )";
@@ -116,7 +119,7 @@ TEST_F(IR_BindingRemapperTest, RemappingBindingIndex) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -124,7 +127,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(1, 3)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(1, 3)
 }
 
 )";
@@ -143,7 +146,7 @@ TEST_F(IR_BindingRemapperTest, RemappingGroupAndBindingIndex) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(1, 2)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -151,7 +154,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer:ptr<uniform, i32, read> = var @binding_point(3, 4)
+  %buffer:ptr<uniform, i32, read> = var undef @binding_point(3, 4)
 }
 
 )";
@@ -173,8 +176,8 @@ TEST_F(IR_BindingRemapperTest, SwapTwoBindingPoints) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer_a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %buffer_b:ptr<uniform, i32, read> = var @binding_point(3, 4)
+  %buffer_a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %buffer_b:ptr<uniform, i32, read> = var undef @binding_point(3, 4)
 }
 
 )";
@@ -182,8 +185,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer_a:ptr<uniform, i32, read> = var @binding_point(3, 4)
-  %buffer_b:ptr<uniform, i32, read> = var @binding_point(1, 2)
+  %buffer_a:ptr<uniform, i32, read> = var undef @binding_point(3, 4)
+  %buffer_b:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
 }
 
 )";
@@ -213,8 +216,8 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer_a:ptr<uniform, i32, read> = var @binding_point(1, 2)
-  %buffer_b:ptr<uniform, i32, read> = var @binding_point(3, 4)
+  %buffer_a:ptr<uniform, i32, read> = var undef @binding_point(1, 2)
+  %buffer_b:ptr<uniform, i32, read> = var undef @binding_point(3, 4)
 }
 
 %main = @fragment func():void {
@@ -229,8 +232,8 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %buffer_a:ptr<uniform, i32, read> = var @binding_point(0, 1)
-  %buffer_b:ptr<uniform, i32, read> = var @binding_point(0, 1)
+  %buffer_a:ptr<uniform, i32, read> = var undef @binding_point(0, 1)
+  %buffer_b:ptr<uniform, i32, read> = var undef @binding_point(0, 1)
 }
 
 %main = @fragment func():void {

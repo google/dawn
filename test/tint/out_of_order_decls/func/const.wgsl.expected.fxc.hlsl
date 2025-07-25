@@ -1,4 +1,4 @@
+
 void f() {
-  return;
 }
 

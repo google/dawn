@@ -1,4 +1,4 @@
-const O = 123;
+override O = 123;
 
 alias A = array<i32, (O * 2)>;
 

@@ -28,6 +28,7 @@
 dawn_add_library(
   partition_alloc
   HEADER_ONLY
+  ENABLE_EMSCRIPTEN
   UTILITY_TARGET dawn_internal_config
   HEADERS
     "partition_alloc/pointers/raw_ptr_exclusion.h"

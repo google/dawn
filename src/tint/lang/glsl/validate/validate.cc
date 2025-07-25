@@ -30,7 +30,11 @@
 #include <string>
 
 #include "glslang/Public/ResourceLimits.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 #include "glslang/Public/ShaderLang.h"
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 #include "src/tint/utils/macros/static_init.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -38,13 +42,13 @@ namespace tint::glsl::validate {
 
 namespace {
 
-EShLanguage PipelineStageToEshLanguage(tint::ast::PipelineStage stage) {
+EShLanguage PipelineStageToEshLanguage(core::ir::Function::PipelineStage stage) {
     switch (stage) {
-        case tint::ast::PipelineStage::kFragment:
+        case core::ir::Function::PipelineStage::kFragment:
             return EShLangFragment;
-        case tint::ast::PipelineStage::kVertex:
+        case core::ir::Function::PipelineStage::kVertex:
             return EShLangVertex;
-        case tint::ast::PipelineStage::kCompute:
+        case core::ir::Function::PipelineStage::kCompute:
             return EShLangCompute;
         default:
             TINT_UNREACHABLE();
@@ -56,7 +60,7 @@ EShLanguage PipelineStageToEshLanguage(tint::ast::PipelineStage stage) {
 
 }  // namespace
 
-Result<SuccessType> Validate(const std::string& source, tint::ast::PipelineStage stage) {
+Result<SuccessType> Validate(const std::string& source, core::ir::Function::PipelineStage stage) {
     TINT_STATIC_INIT(glslang::InitializeProcess());
 
     const char* strings[1] = {source.c_str()};

@@ -1,20 +1,5 @@
-SKIP: FAILED
+SKIP: INVALID
 
+pixel_local address space is not supported by the GLSL backend
 
-enable chromium_experimental_pixel_local;
-
-struct PixelLocal {
-  a : u32,
-}
-
-var<pixel_local> P : PixelLocal;
-
-@fragment
-fn f() {
-  P.a += 42;
-}
-
-Failed to generate: <dawn>/test/tint/extensions/pixel_local/entry_point_use/zero_outputs/single_attachment.wgsl:2:8 error: GLSL backend does not support extension 'chromium_experimental_pixel_local'
-enable chromium_experimental_pixel_local;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+tint executable returned error: exit status 1

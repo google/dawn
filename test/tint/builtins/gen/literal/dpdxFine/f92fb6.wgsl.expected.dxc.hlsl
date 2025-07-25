@@ -1,5 +1,5 @@
-RWByteAddressBuffer prevent_dce : register(u0);
 
+RWByteAddressBuffer prevent_dce : register(u0);
 float3 dpdxFine_f92fb6() {
   float3 res = ddx_fine((1.0f).xxx);
   return res;
@@ -7,5 +7,5 @@ float3 dpdxFine_f92fb6() {
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(dpdxFine_f92fb6()));
-  return;
 }
+

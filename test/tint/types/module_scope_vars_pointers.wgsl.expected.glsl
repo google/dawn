@@ -1,22 +1,16 @@
 #version 310 es
 
+float p = 0.0f;
 shared float w;
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
     w = 0.0f;
   }
   barrier();
-}
-
-float p = 0.0f;
-void tint_symbol(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
   float x = (p + w);
   p = x;
 }
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol(gl_LocalInvocationIndex);
-  return;
+  main_inner(gl_LocalInvocationIndex);
 }

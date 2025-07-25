@@ -25,14 +25,15 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <gtest/gtest.h>
+#include <webgpu/webgpu_cpp.h>
+#include <webgpu/webgpu_enum_class_bitmasks.h>
+
 #include <cmath>
 #include <limits>
 #include <vector>
 
 #include "dawn/common/Math.h"
-#include "dawn/webgpu_cpp.h"
-#include "gtest/gtest.h"
-#include "webgpu/webgpu_enum_class_bitmasks.h"
 
 namespace wgpu {
 
@@ -51,18 +52,6 @@ struct IsWGPUBitmask<TestEnum> {
 
 namespace dawn {
 namespace {
-
-// Tests for ScanForward
-TEST(Math, ScanForward) {
-    // Test extrema
-    ASSERT_EQ(ScanForward(1), 0u);
-    ASSERT_EQ(ScanForward(0x80000000), 31u);
-
-    // Test with more than one bit set.
-    ASSERT_EQ(ScanForward(256), 8u);
-    ASSERT_EQ(ScanForward(256 + 32), 5u);
-    ASSERT_EQ(ScanForward(1024 + 256 + 32), 5u);
-}
 
 // Tests for Log2
 TEST(Math, Log2) {
@@ -197,6 +186,36 @@ TEST(Math, Align) {
     ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
 }
 
+// Tests for AlignDown
+TEST(Math, AlignDown) {
+    // 0 aligns to 0
+    ASSERT_EQ(AlignDown(0u, 4), 0u);
+    ASSERT_EQ(AlignDown(0u, 256), 0u);
+    ASSERT_EQ(AlignDown(0u, 512), 0u);
+
+    // Multiples align to self
+    ASSERT_EQ(AlignDown(8u, 8), 8u);
+    ASSERT_EQ(AlignDown(16u, 8), 16u);
+    ASSERT_EQ(AlignDown(24u, 8), 24u);
+    ASSERT_EQ(AlignDown(256u, 256), 256u);
+    ASSERT_EQ(AlignDown(512u, 256), 512u);
+    ASSERT_EQ(AlignDown(768u, 256), 768u);
+
+    // Alignment with 1 is self
+    for (uint32_t i = 0; i < 128; ++i) {
+        ASSERT_EQ(AlignDown(i, 1), i);
+    }
+
+    // Everything in the range (align, 2*align - 1) aligns down to align
+    for (uint32_t i = 1; i < 64; ++i) {
+        ASSERT_EQ(AlignDown(64 + i, 64), 64u);
+    }
+
+    // Test extrema
+    ASSERT_EQ(AlignDown(static_cast<uint64_t>(0xFFFFFFFF), 4), 0xFFFFFFFC);
+    ASSERT_EQ(AlignDown(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
+}
+
 TEST(Math, AlignSizeof) {
     // Basic types should align to self if alignment is a divisor.
     ASSERT_EQ((AlignSizeof<uint8_t, 1>()), 1u);
@@ -327,20 +346,20 @@ TEST(Math, SRGBToLinear) {
 
 // Tests for RoundUp
 TEST(Math, RoundUp) {
-    ASSERT_EQ(RoundUp(2, 2), 2u);
-    ASSERT_EQ(RoundUp(2, 4), 4u);
-    ASSERT_EQ(RoundUp(6, 2), 6u);
-    ASSERT_EQ(RoundUp(8, 4), 8u);
-    ASSERT_EQ(RoundUp(12, 6), 12u);
+    ASSERT_EQ(RoundUp(2u, 2u), 2u);
+    ASSERT_EQ(RoundUp(2u, 4u), 4u);
+    ASSERT_EQ(RoundUp(6u, 2u), 6u);
+    ASSERT_EQ(RoundUp(8u, 4u), 8u);
+    ASSERT_EQ(RoundUp(12u, 6u), 12u);
 
-    ASSERT_EQ(RoundUp(3, 3), 3u);
-    ASSERT_EQ(RoundUp(3, 5), 5u);
-    ASSERT_EQ(RoundUp(5, 3), 6u);
-    ASSERT_EQ(RoundUp(9, 5), 10u);
+    ASSERT_EQ(RoundUp(3u, 3u), 3u);
+    ASSERT_EQ(RoundUp(3u, 5u), 5u);
+    ASSERT_EQ(RoundUp(5u, 3u), 6u);
+    ASSERT_EQ(RoundUp(9u, 5u), 10u);
 
     // Test extrema
     ASSERT_EQ(RoundUp(0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull), 0x8000000000000000ull);
-    ASSERT_EQ(RoundUp(1, 1), 1u);
+    ASSERT_EQ(RoundUp(1u, 1u), 1u);
 }
 
 // Tests for IsSubset

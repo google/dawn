@@ -25,9 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <utility>
+
 #include "dawn/native/CommandBuffer.h"
 
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
@@ -43,17 +44,16 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
     : ApiObjectBase(encoder->GetDevice(), descriptor->label),
       mCommands(encoder->AcquireCommands()),
       mResourceUsages(encoder->AcquireResourceUsages()),
+      mIndirectDrawMetadata(encoder->AcquireIndirectDrawMetadata()),
       mEncoderLabel(encoder->GetLabel()) {
     GetObjectTrackingList()->Track(this);
 }
 
-CommandBufferBase::CommandBufferBase(DeviceBase* device,
-                                     ObjectBase::ErrorTag tag,
-                                     const char* label)
+CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 // static
-Ref<CommandBufferBase> CommandBufferBase::MakeError(DeviceBase* device, const char* label) {
+Ref<CommandBufferBase> CommandBufferBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new CommandBufferBase(device, ObjectBase::kError, label));
 }
 
@@ -91,12 +91,18 @@ MaybeError CommandBufferBase::ValidateCanUseInSubmitNow() const {
 }
 
 void CommandBufferBase::DestroyImpl() {
+    // These metadatas hold raw_ptr to the commands, so they need to be cleared first.
+    mIndirectDrawMetadata.clear();
     FreeCommands(&mCommands);
     mResourceUsages = {};
 }
 
 const CommandBufferResourceUsage& CommandBufferBase::GetResourceUsages() const {
     return mResourceUsages;
+}
+
+const std::vector<IndirectDrawMetadata>& CommandBufferBase::GetIndirectDrawMetadata() {
+    return mIndirectDrawMetadata;
 }
 
 CommandIterator* CommandBufferBase::GetCommandIteratorForTesting() {
@@ -150,7 +156,7 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Ex
 }
 
 void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
-    for (auto i : IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
+    for (auto i : renderPass->attachmentState->GetColorAttachmentsMask()) {
         auto& attachmentInfo = renderPass->colorAttachments[i];
         TextureViewBase* view = attachmentInfo.view.Get();
         bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;

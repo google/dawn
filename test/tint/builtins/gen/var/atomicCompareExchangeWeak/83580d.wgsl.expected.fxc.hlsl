@@ -2,37 +2,34 @@ struct atomic_compare_exchange_result_u32 {
   uint old_value;
   bool exchanged;
 };
+
+struct compute_main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
 groupshared uint arg_0;
-
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    uint atomic_result = 0u;
-    InterlockedExchange(arg_0, 0u, atomic_result);
-  }
-  GroupMemoryBarrierWithGroupSync();
-}
-
 void atomicCompareExchangeWeak_83580d() {
   uint arg_1 = 1u;
   uint arg_2 = 1u;
-  atomic_compare_exchange_result_u32 atomic_result_1 = (atomic_compare_exchange_result_u32)0;
-  uint atomic_compare_value = arg_1;
-  InterlockedCompareExchange(arg_0, atomic_compare_value, arg_2, atomic_result_1.old_value);
-  atomic_result_1.exchanged = atomic_result_1.old_value == atomic_compare_value;
-  atomic_compare_exchange_result_u32 res = atomic_result_1;
+  uint v = arg_1;
+  uint v_1 = 0u;
+  InterlockedCompareExchange(arg_0, v, arg_2, v_1);
+  uint v_2 = v_1;
+  atomic_compare_exchange_result_u32 res = {v_2, (v_2 == v)};
 }
 
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void compute_main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
+void compute_main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    uint v_3 = 0u;
+    InterlockedExchange(arg_0, 0u, v_3);
+  }
+  GroupMemoryBarrierWithGroupSync();
   atomicCompareExchangeWeak_83580d();
 }
 
 [numthreads(1, 1, 1)]
-void compute_main(tint_symbol_1 tint_symbol) {
-  compute_main_inner(tint_symbol.local_invocation_index);
-  return;
+void compute_main(compute_main_inputs inputs) {
+  compute_main_inner(inputs.tint_local_index);
 }
+

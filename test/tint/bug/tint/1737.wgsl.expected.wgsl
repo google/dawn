@@ -1,4 +1,4 @@
-const wgsize : u32 = 10u;
+override wgsize : u32;
 
 var<workgroup> a : array<f32, wgsize>;
 

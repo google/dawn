@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -43,5 +44,15 @@ libtint_source_set("spirv") {
     "builtin_fn.cc",
     "builtin_fn.h",
   ]
-  deps = [ "${tint_src_dir}/utils/traits" ]
+  deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/lang/core/ir",
+    "${tint_src_dir}/lang/core/type",
+    "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/ice",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/rtti",
+  ]
 }

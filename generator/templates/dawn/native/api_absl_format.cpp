@@ -34,6 +34,7 @@
 
 #include "{{native_dir}}/ChainUtils.h"
 #include "{{native_dir}}/ObjectType_autogen.h"
+#include "{{native_dir}}/webgpu_absl_format.h"
 
 namespace {{native_namespace}} {
 
@@ -53,7 +54,7 @@ namespace {{native_namespace}} {
                         return {true};
                     }
                     s->Append("[{{as_cppType(type.name)}}");
-                    if (value->label != nullptr) {
+                    if (value->label.data != nullptr) {
                         s->Append(absl::StrFormat(" \"%s\"", value->label));
                     }
                     s->Append("]");
@@ -85,9 +86,9 @@ namespace {{namespace}} {
                       absl::FormatSink* s) {
         if (spec.conversion_char() == absl::FormatConversionChar::s) {
             s->Append("{{as_cppType(type.name)}}::");
-            switch (value) {
-            {% for value in type.values %}
-                case {{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
+            switch ({{as_cType(type.name)}}(value)) {
+            {% for value in type.values if not is_enum_value_proxy(value) %}
+                case {{as_cEnum(type.name, value.name)}}:
                     s->Append("{{as_cppEnum(value.name)}}");
                     return {true};
             {% endfor %}
@@ -95,7 +96,7 @@ namespace {{namespace}} {
                 break;
             }
         }
-        s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
+        s->Append(absl::StrFormat("%u", static_cast<{{as_cType(type.name)}}>(value)));
         return {true};
     }
     {% endfor %}

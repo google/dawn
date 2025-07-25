@@ -44,6 +44,8 @@
 
 namespace dawn::native {
 
+class CommandAllocator;
+
 // Definition of the commands that are present in the CommandIterator given by the
 // CommandBufferBuilder. There are not defined in CommandBuffer.h to break some header
 // dependencies: Ref<Object> needs Object to be defined.
@@ -63,6 +65,8 @@ enum class Command {
     DrawIndexed,
     DrawIndirect,
     DrawIndexedIndirect,
+    MultiDrawIndirect,
+    MultiDrawIndexedIndirect,
     EndComputePass,
     EndOcclusionQuery,
     EndRenderPass,
@@ -79,6 +83,7 @@ enum class Command {
     SetScissorRect,
     SetBlendConstant,
     SetBindGroup,
+    SetImmediateData,
     SetIndexBuffer,
     SetVertexBuffer,
     WriteBuffer,
@@ -147,6 +152,18 @@ struct RenderPassDepthStencilAttachmentInfo {
     bool stencilReadOnly;
 };
 
+struct ResolveRect {
+    uint32_t colorOffsetX = 0;
+    uint32_t colorOffsetY = 0;
+    uint32_t resolveOffsetX = 0;
+    uint32_t resolveOffsetY = 0;
+    uint32_t updateWidth = 0;
+    uint32_t updateHeight = 0;
+    // Returns whether this ResolveRect contains valid dimensions for a partial resolve operation.
+    // A resolve rectangle is considered valid only when both width and height are non-zero.
+    bool HasValue() const;
+};
+
 struct BeginRenderPassCmd {
     BeginRenderPassCmd();
     ~BeginRenderPassCmd();
@@ -160,6 +177,8 @@ struct BeginRenderPassCmd {
     // Cache the width and height of all attachments for convenience
     uint32_t width;
     uint32_t height;
+    // Used for partial resolve
+    ResolveRect resolveRect;
 
     Ref<QuerySetBase> occlusionQuerySet;
     TimestampWrites timestampWrites;
@@ -256,6 +275,19 @@ struct DrawIndirectCmd {
 
 struct DrawIndexedIndirectCmd : DrawIndirectCmd {};
 
+struct MultiDrawIndirectCmd {
+    MultiDrawIndirectCmd();
+    ~MultiDrawIndirectCmd();
+
+    Ref<BufferBase> indirectBuffer;
+    uint64_t indirectOffset;
+    uint32_t maxDrawCount;
+    Ref<BufferBase> drawCountBuffer;
+    uint64_t drawCountOffset;
+};
+
+struct MultiDrawIndexedIndirectCmd : MultiDrawIndirectCmd {};
+
 struct EndComputePassCmd {
     EndComputePassCmd();
     ~EndComputePassCmd();
@@ -349,6 +381,14 @@ struct SetBindGroupCmd {
     uint32_t dynamicOffsetCount;
 };
 
+struct SetImmediateDataCmd {
+    SetImmediateDataCmd();
+    ~SetImmediateDataCmd();
+
+    uint64_t offset;
+    uint64_t size;
+};
+
 struct SetIndexBufferCmd {
     SetIndexBufferCmd();
     ~SetIndexBufferCmd();
@@ -394,6 +434,9 @@ void FreeCommands(CommandIterator* commands);
 // Helper function to allow skipping over a command when it is unimplemented, while still
 // consuming the correct amount of data from the command iterator.
 void SkipCommand(CommandIterator* commands, Command type);
+
+// Helper function to copy a wgpu::StringView into a safely null-terminated C-string in commands.
+const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, uint32_t* length);
 
 }  // namespace dawn::native
 

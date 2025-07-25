@@ -45,6 +45,7 @@
 #include "dawn/native/d3d11/BindGroupLayoutD3D11.h"
 #include "dawn/native/d3d11/BufferD3D11.h"
 #include "dawn/native/d3d11/CommandBufferD3D11.h"
+#include "dawn/native/d3d11/CommandRecordingContextD3D11.h"
 #include "dawn/native/d3d11/ComputePipelineD3D11.h"
 #include "dawn/native/d3d11/PhysicalDeviceD3D11.h"
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
@@ -68,10 +69,11 @@ namespace {
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
 bool SkipDebugMessage(const D3D11_MESSAGE& message) {
-    // Filter out messages that are not warnings or errors.
+    // Filter out messages that are not errors.
     switch (message.Severity) {
         case D3D11_MESSAGE_SEVERITY_INFO:
         case D3D11_MESSAGE_SEVERITY_MESSAGE:
+        case D3D11_MESSAGE_SEVERITY_WARNING:
             return true;
         default:
             break;
@@ -82,6 +84,35 @@ bool SkipDebugMessage(const D3D11_MESSAGE& message) {
         case D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET:
         // D3D11 Debug layer warns SetPrivateData() with same name more than once.
         case D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS:
+            return true;
+        case D3D11_MESSAGE_ID_DEVICE_CHECKFEATURESUPPORT_UNRECOGNIZED_FEATURE:
+        case D3D11_MESSAGE_ID_DEVICE_CHECKFEATURESUPPORT_INVALIDARG_RETURN:
+            // We already handle CheckFeatureSupport() failures so ignore the messages from the
+            // debug layer.
+            return true;
+        case D3D11_MESSAGE_ID_DECODERBEGINFRAME_HAZARD:
+            // This is video decoder's error which must happen externally because Dawn doesn't
+            // handle video directly. So ignore it.
+            return true;
+        case D3D11_MESSAGE_ID_DEVICE_DRAWINSTANCED_INSTANCEPOS_OVERFLOW:
+        case D3D11_MESSAGE_ID_DEVICE_DRAWINDEXEDINSTANCED_INSTANCEPOS_OVERFLOW:
+            // Some clients use workarounds such as packing uniform data in a 32 bits BaseInstance
+            // value to avoid needing an uniform buffer. See
+            // https://source.chromium.org/chromium/chromium/src/+/main:third_party/skia/src/gpu/graphite/dawn/DawnResourceProvider.cpp;drc=d29622dea776ec762e8a69c8c65b87f8e9ee8908;l=398
+            // for one example.
+            // The embedded data would cause BaseInstance + InstanceCount to overflow. This is not
+            // an error because the workarounds always use InstanceCount=1 and we never invoke any
+            // vertex shader at (BaseInstance + InstanceCount)-th instance.
+            // Furthermore, the behavior of overflown InstanceID is already well documented in
+            // https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-input-assembler-stage-using#instanceid
+            // i.e. it will wrap to 0.
+            return true;
+        case D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDDIMENSIONS:
+        case D3D11_MESSAGE_ID_CREATETEXTURE2D_INVALIDARG_RETURN:
+            // External video decoder sometimes attempts to create a multiplanar texture with
+            // non-even dimensions. This is not supported by D3D11 runtime, but the error should
+            // already be handled by the call sites. Chromium's video decoder already does that so
+            // it's better we don't treat this as a fatal error.
             return true;
         default:
             return false;
@@ -161,14 +192,18 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     mIsDebugLayerEnabled = IsDebugLayerEnabled(mD3d11Device);
 
-    // Get the ID3D11Device5 interface which is need for creating fences.
-    // TODO(dawn:1741): Handle the case where ID3D11Device5 is not available.
-    DAWN_TRY(CheckHRESULT(mD3d11Device.As(&mD3d11Device5), "D3D11: getting ID3D11Device5"));
+    DAWN_TRY(CheckHRESULT(mD3d11Device.As(&mD3d11Device3), "D3D11: getting ID3D11Device3"));
+
+    if (!IsToggleEnabled(Toggle::D3D11DisableFence)) {
+        // Get the ID3D11Device5 interface which is need for creating fences. This interface is only
+        // available since Win 10 Creators Update so don't return on error here.
+        mD3d11Device.As(&mD3d11Device5);
+    }
 
     Ref<Queue> queue;
     DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
 
-    DAWN_TRY(DeviceBase::Initialize(queue));
+    DAWN_TRY(DeviceBase::Initialize(descriptor, queue));
     DAWN_TRY(queue->InitializePendingContext());
 
     SetLabelImpl();
@@ -182,7 +217,14 @@ ID3D11Device* Device::GetD3D11Device() const {
     return mD3d11Device.Get();
 }
 
+ID3D11Device3* Device::GetD3D11Device3() const {
+    return mD3d11Device3.Get();
+}
+
 ID3D11Device5* Device::GetD3D11Device5() const {
+    // Some older devices don't support ID3D11Device5. Make sure we avoid calling this method in
+    // those cases. An assert here is to verify that.
+    DAWN_ASSERT(mD3d11Device5);
     return mD3d11Device5.Get();
 }
 
@@ -245,10 +287,8 @@ ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescripto
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
     const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult,
-    OwnedCompilationMessages* compilationMessages) {
-    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult,
-                                compilationMessages);
+    ShaderModuleParseResult* parseResult) {
+    return ShaderModule::Create(this, descriptor, internalExtensions, parseResult);
 }
 
 ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
@@ -326,11 +366,11 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     }
 }
 
-MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) {
+MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) {
     // D3D11 requires that buffers are unmapped before being used in a copy.
     DAWN_TRY(source->Unmap());
 
@@ -341,7 +381,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
-                                                const TextureDataLayout& src,
+                                                const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
     return DAWN_UNIMPLEMENTED_ERROR("CopyFromStagingToTextureImpl");
@@ -401,6 +441,7 @@ void Device::AppendDeviceLostMessage(ErrorData* error) {
         HRESULT result = mD3d11Device->GetDeviceRemovedReason();
         error->AppendBackendMessage("Device removed reason: %s (0x%08X)",
                                     d3d::HRESULTAsString(result), result);
+        RecordDeviceRemovedReason(result);
     }
 }
 
@@ -438,6 +479,23 @@ void Device::DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
     // Nothing to do, the ComPtr will release the keyed mutex.
 }
 
+bool Device::ReduceMemoryUsageImpl() {
+    // D3D11 defers the deletion of resources until we call Flush().
+    // So trigger a Flush() here to force deleting any pending resources.
+    auto commandContext =
+        ToBackend(GetQueue())
+            ->GetScopedPendingCommandContext(ExecutionQueueBase::SubmitMode::Passive);
+    commandContext.Flush();
+
+    // Call Trim() to delete any internal resources created by the driver.
+    ComPtr<IDXGIDevice3> dxgiDevice3;
+    if (SUCCEEDED(mD3d11Device.As(&dxgiDevice3))) {
+        dxgiDevice3->Trim();
+    }
+
+    return false;
+}
+
 bool Device::MayRequireDuplicationOfIndirectParameters() const {
     return true;
 }
@@ -450,11 +508,11 @@ bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
     return true;
 }
 
-bool Device::PreferNotUsingMappableOrUniformBufferAsStorage() const {
-    // D3D11 constant buffer or mappable buffer cannot be used as UAV. Allowing them to be used as
-    // storage buffer would require some workarounds including extra copies so it's better we
-    // prefer to not do that.
-    return true;
+bool Device::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage storageUsage,
+                                                          wgpu::BufferUsage originalUsage,
+                                                          size_t bufferSize) const {
+    return d3d11::CanAddStorageUsageToBufferWithoutSideEffects(this, storageUsage, originalUsage,
+                                                               bufferSize);
 }
 
 uint32_t Device::GetUAVSlotCount() const {

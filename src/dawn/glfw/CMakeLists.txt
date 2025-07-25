@@ -28,28 +28,34 @@
 set(headers
     "${DAWN_INCLUDE_DIR}/webgpu/webgpu_glfw.h"
 )
-set(sources
-    "utils.cpp"
-)
-set(conditional_private_depends)
-if (DAWN_ENABLE_METAL)
-    list(APPEND sources "utils_metal.mm")
-    list(APPEND conditional_private_depends "-framework Metal")
+set(sources)
+set(conditional_public_depends)
+if (EMSCRIPTEN)
+    list(APPEND sources "utils_emscripten.cpp")
+    list(APPEND conditional_public_depends "emdawnwebgpu_cpp")
+else()
+    list(APPEND sources "utils.cpp")
+    list(APPEND conditional_public_depends "dawn::dawn_common")
+    list(APPEND conditional_public_depends "dawn::dawncpp_headers")
+    if (DAWN_ENABLE_METAL)
+        list(APPEND sources "utils_metal.mm")
+        list(APPEND conditional_public_depends "-framework Metal")
+        list(APPEND conditional_public_depends "-framework QuartzCore")
+    endif ()
 endif ()
 
 dawn_add_library(
   dawn_glfw
+  ENABLE_EMSCRIPTEN
   UTILITY_TARGET dawn_internal_config
   HEADERS
     "${headers}"
   SOURCES
     "${sources}"
   DEPENDS
-    dawn::dawn_common
-    dawn::dawncpp_headers
+    ${conditional_public_depends}
   PRIVATE_DEPENDS
     glfw
-    ${conditional_private_depends}
 )
 target_compile_definitions(dawn_glfw PRIVATE "WGPU_GLFW_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)

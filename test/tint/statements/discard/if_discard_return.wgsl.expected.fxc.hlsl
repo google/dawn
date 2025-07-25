@@ -1,11 +1,13 @@
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
-  return;
-}
 
+static bool continue_execution = true;
 void f(bool cond) {
   if (cond) {
-    discard;
+    continue_execution = false;
     return;
   }
 }
+
+[numthreads(1, 1, 1)]
+void unused_entry_point() {
+}
+

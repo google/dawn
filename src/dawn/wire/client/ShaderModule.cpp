@@ -30,6 +30,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Client.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -39,7 +40,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::CompilationInfo;
 
-    CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo2& callbackInfo,
+    CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo& callbackInfo,
                          Ref<ShaderModule> shader)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
@@ -62,12 +63,15 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         }
 
         mStatus = status;
+
+        // Deep copy the WGPUCompilationInfo
         mShader->mMessageStrings.reserve(info->messageCount);
         mShader->mMessages.reserve(info->messageCount);
         for (size_t i = 0; i < info->messageCount; i++) {
-            mShader->mMessageStrings.push_back(info->messages[i].message);
+            DAWN_ASSERT(info->messages[i].length != WGPU_STRLEN);
+            mShader->mMessageStrings.push_back(ToString(info->messages[i].message));
             mShader->mMessages.push_back(info->messages[i]);
-            mShader->mMessages[i].message = mShader->mMessageStrings[i].c_str();
+            mShader->mMessages[i].message = ToOutputStringView(mShader->mMessageStrings[i]);
         }
         mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
 
@@ -86,7 +90,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
         WGPUCompilationInfo* compilationInfo = nullptr;
         if (completionType == EventCompletionType::Shutdown) {
-            mStatus = WGPUCompilationInfoRequestStatus_InstanceDropped;
+            mStatus = WGPUCompilationInfoRequestStatus_CallbackCancelled;
         } else {
             compilationInfo = &(*mShader->mCompilationInfo);
         }
@@ -98,7 +102,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         }
     }
 
-    WGPUCompilationInfoCallback2 mCallback;
+    WGPUCompilationInfoCallback mCallback;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
@@ -113,39 +117,8 @@ ObjectType ShaderModule::GetObjectType() const {
     return ObjectType::ShaderModule;
 }
 
-namespace {
-
-void DefaultGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
-                                       const WGPUCompilationInfo* compilationInfo,
-                                       void* callback,
-                                       void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    auto cb = reinterpret_cast<WGPUCompilationInfoCallback>(callback);
-    cb(status, compilationInfo, userdata);
-}
-
-}  // anonymous namespace
-
-void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    GetCompilationInfo2({nullptr, WGPUCallbackMode_AllowSpontaneous,
-                         &DefaultGetCompilationInfoCallback, reinterpret_cast<void*>(callback),
-                         userdata});
-}
-
-WGPUFuture ShaderModule::GetCompilationInfoF(const WGPUCompilationInfoCallbackInfo& callbackInfo) {
-    return GetCompilationInfo2(
-        {callbackInfo.nextInChain, callbackInfo.mode, &DefaultGetCompilationInfoCallback,
-         reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-WGPUFuture ShaderModule::GetCompilationInfo2(const WGPUCompilationInfoCallbackInfo2& callbackInfo) {
+WGPUFuture ShaderModule::APIGetCompilationInfo(
+    const WGPUCompilationInfoCallbackInfo& callbackInfo) {
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(callbackInfo, this));
     if (!tracked) {

@@ -28,29 +28,40 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_SURFACE_H_
 #define SRC_DAWN_WIRE_CLIENT_SURFACE_H_
 
-#include "dawn/webgpu.h"
+#include <webgpu/webgpu.h>
+
+#include <vector>
+
 #include "dawn/wire/client/ObjectBase.h"
 
 namespace dawn::wire::client {
 
 class Device;
 
+void APIFreeMembers(WGPUSurfaceCapabilities capabilities);
+
 class Surface final : public ObjectBase {
   public:
-    explicit Surface(const ObjectBaseParams& params);
+    explicit Surface(const ObjectBaseParams& params, const WGPUSurfaceCapabilities* capabilities);
     ~Surface() override;
 
     ObjectType GetObjectType() const override;
 
-    void Configure(WGPUSurfaceConfiguration const* config);
-
-    WGPUTextureFormat GetPreferredFormat(WGPUAdapter adapter) const;
-
-    WGPUStatus GetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
-
-    void GetCurrentTexture(WGPUSurfaceTexture* surfaceTexture);
+    // WebGPU API
+    void APIConfigure(const WGPUSurfaceConfiguration* config);
+    WGPUStatus APIPresent();
+    void APIUnconfigure();
+    WGPUTextureFormat APIGetPreferredFormat(WGPUAdapter adapter) const;
+    WGPUStatus APIGetCapabilities(WGPUAdapter adapter, WGPUSurfaceCapabilities* capabilities) const;
+    void APIGetCurrentTexture(WGPUSurfaceTexture* surfaceTexture);
 
   private:
+    WGPUTextureUsage mSupportedUsages;
+    std::vector<WGPUTextureFormat> mSupportedFormats;
+    std::vector<WGPUPresentMode> mSupportedPresentModes;
+    std::vector<WGPUCompositeAlphaMode> mSupportedAlphaModes;
+
+    Ref<Device> mConfiguredDevice;
     WGPUTextureDescriptor mTextureDescriptor;
 };
 

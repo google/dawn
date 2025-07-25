@@ -71,12 +71,12 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Uniform) {
     block->Append(b.Return(func, load));
 
     auto* expect = R"(
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:i32 @offset(0)
+tint_symbol = struct @align(4), @block {
+  inner:i32 @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(0, 0)
+  %1:ptr<uniform, tint_symbol, read> = var undef @binding_point(0, 0)
 }
 
 %foo = func():i32 {
@@ -103,12 +103,12 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_Storage) {
     func->Block()->Append(b.Return(func));
 
     auto* expect = R"(
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:i32 @offset(0)
+tint_symbol = struct @align(4), @block {
+  inner:i32 @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -125,8 +125,8 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BlockDecoratedStructsTest, Scalar_PushConstant) {
-    auto* buffer = b.Var(ty.ptr<push_constant, i32>());
+TEST_F(IR_BlockDecoratedStructsTest, Scalar_Immediate) {
+    auto* buffer = b.Var(ty.ptr<immediate, i32>());
     mod.root_block->Append(buffer);
 
     auto* func = b.Function("foo", ty.i32());
@@ -135,17 +135,17 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_PushConstant) {
     });
 
     auto* expect = R"(
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:i32 @offset(0)
+tint_symbol = struct @align(4), @block {
+  inner:i32 @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<push_constant, tint_symbol_1, read> = var
+  %1:ptr<immediate, tint_symbol, read> = var undef
 }
 
 %foo = func():i32 {
   $B2: {
-    %3:ptr<push_constant, i32, read> = access %1, 0u
+    %3:ptr<immediate, i32, read> = access %1, 0u
     %4:i32 = load %3
     ret %4
   }
@@ -171,12 +171,12 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
     });
 
     auto* expect = R"(
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:array<i32> @offset(0)
+tint_symbol = struct @align(4), @block {
+  inner:array<i32> @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -224,7 +224,7 @@ MyStruct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():void {
@@ -256,7 +256,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct_ArrayLengthViaLets) {
 
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
-        auto* let_root = b.Let("root", buffer->Result(0));
+        auto* let_root = b.Let("root", buffer->Result());
         auto* let_arr = b.Let("arr", b.Access(ty.ptr(storage, ty.array<i32>()), let_root, 1_u));
         auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, let_arr);
         b.Return(func, length);
@@ -269,7 +269,7 @@ MyStruct = struct @align(4), @block {
 }
 
 $B1: {  # root
-  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %1:ptr<storage, MyStruct, read_write> = var undef @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -312,13 +312,13 @@ MyStruct = struct @align(4) {
   b:i32 @offset(4)
 }
 
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:MyStruct @offset(0)
+tint_symbol = struct @align(4), @block {
+  inner:MyStruct @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %2:ptr<private, MyStruct, read_write> = var
+  %1:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %2:ptr<private, MyStruct, read_write> = var undef
 }
 
 %foo = func():void {
@@ -357,22 +357,22 @@ TEST_F(IR_BlockDecoratedStructsTest, MultipleBuffers) {
     });
 
     auto* expect = R"(
+tint_symbol = struct @align(4), @block {
+  inner:i32 @offset(0)
+}
+
 tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:i32 @offset(0)
+  inner:i32 @offset(0)
 }
 
-tint_symbol_3 = struct @align(4), @block {
-  tint_symbol_2:i32 @offset(0)
-}
-
-tint_symbol_5 = struct @align(4), @block {
-  tint_symbol_4:i32 @offset(0)
+tint_symbol_2 = struct @align(4), @block {
+  inner:i32 @offset(0)
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %2:ptr<storage, tint_symbol_3, read_write> = var @binding_point(0, 1)
-  %3:ptr<storage, tint_symbol_5, read_write> = var @binding_point(0, 2)
+  %1:ptr<storage, tint_symbol, read_write> = var undef @binding_point(0, 0)
+  %2:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(0, 1)
+  %3:ptr<storage, tint_symbol_2, read_write> = var undef @binding_point(0, 2)
 }
 
 %foo = func():void {
@@ -384,6 +384,80 @@ $B1: {  # root
     %9:i32 = add %6, %8
     %10:ptr<storage, i32, read_write> = access %1, 0u
     store %10, %9
+    ret
+  }
+}
+)";
+
+    Run(BlockDecoratedStructs);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BlockDecoratedStructsTest, ImmediateAlreadyHasBlockAttribute) {
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("i"), ty.i32()},
+                                                             });
+    structure->SetStructFlag(type::kBlock);
+
+    auto* buffer = b.Var(ty.ptr(immediate, structure));
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* val_ptr = b.Access<ptr<immediate, i32>>(buffer, 0_u);
+        b.Return(func, b.Load(val_ptr));
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4), @block {
+  i:i32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<immediate, MyStruct, read> = var undef
+}
+
+%foo = func():i32 {
+  $B2: {
+    %3:ptr<immediate, i32, read> = access %1, 0u
+    %4:i32 = load %3
+    ret %4
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(BlockDecoratedStructs);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BlockDecoratedStructsTest, PropagateVarName) {
+    auto* buffer = b.Var("my_var", ty.ptr<storage, i32>());
+    buffer->SetBindingPoint(0, 0);
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.void_());
+    func->Block()->Append(b.Store(buffer, 42_i));
+    func->Block()->Append(b.Return(func));
+
+    auto* expect = R"(
+my_var_block = struct @align(4), @block {
+  inner:i32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, my_var_block, read_write> = var undef @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<storage, i32, read_write> = access %1, 0u
+    store %3, 42i
     ret
   }
 }

@@ -1,61 +1,67 @@
 #version 310 es
-#extension GL_AMD_gpu_shader_half_float : require
+#extension GL_AMD_gpu_shader_half_float: require
 
-struct mat4x3_f16 {
+
+struct mat4x3_f16_std140 {
   f16vec3 col0;
   f16vec3 col1;
   f16vec3 col2;
   f16vec3 col3;
 };
 
-layout(binding = 0, std140) uniform u_block_std140_ubo {
-  mat4x3_f16 inner[4];
-} u;
-
-layout(binding = 1, std430) buffer u_block_ssbo {
+layout(binding = 0, std140)
+uniform u_block_std140_1_ubo {
+  mat4x3_f16_std140 inner[4];
+} v;
+layout(binding = 1, std430)
+buffer s_block_1_ssbo {
   f16mat4x3 inner[4];
-} s;
-
-void assign_and_preserve_padding_1_s_inner_X(uint dest[1], f16mat4x3 value) {
-  s.inner[dest[0]][0] = value[0u];
-  s.inner[dest[0]][1] = value[1u];
-  s.inner[dest[0]][2] = value[2u];
-  s.inner[dest[0]][3] = value[3u];
+} v_1;
+void tint_store_and_preserve_padding_1(uint target_indices[1], f16mat4x3 value_param) {
+  v_1.inner[target_indices[0u]][0u] = value_param[0u];
+  v_1.inner[target_indices[0u]][1u] = value_param[1u];
+  v_1.inner[target_indices[0u]][2u] = value_param[2u];
+  v_1.inner[target_indices[0u]][3u] = value_param[3u];
 }
-
-void assign_and_preserve_padding_s_inner(f16mat4x3 value[4]) {
+void tint_store_and_preserve_padding(f16mat4x3 value_param[4]) {
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      uint tint_symbol[1] = uint[1](i);
-      assign_and_preserve_padding_1_s_inner_X(tint_symbol, value[i]);
+    uint v_2 = 0u;
+    v_2 = 0u;
+    while(true) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
     }
   }
 }
-
-f16mat4x3 conv_mat4x3_f16(mat4x3_f16 val) {
-  return f16mat4x3(val.col0, val.col1, val.col2, val.col3);
-}
-
-f16mat4x3[4] conv_arr4_mat4x3_f16(mat4x3_f16 val[4]) {
-  f16mat4x3 arr[4] = f16mat4x3[4](f16mat4x3(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat4x3(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat4x3(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf), f16mat4x3(0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf, 0.0hf));
-  {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = conv_mat4x3_f16(val[i]);
-    }
-  }
-  return arr;
-}
-
-void f() {
-  assign_and_preserve_padding_s_inner(conv_arr4_mat4x3_f16(u.inner));
-  uint tint_symbol_1[1] = uint[1](1u);
-  assign_and_preserve_padding_1_s_inner_X(tint_symbol_1, conv_mat4x3_f16(u.inner[2u]));
-  s.inner[1][0] = u.inner[0u].col1.zxy;
-  s.inner[1][0].x = u.inner[0u].col1[0u];
-}
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f();
-  return;
+  mat4x3_f16_std140 v_4[4] = v.inner;
+  f16mat4x3 v_5[4] = f16mat4x3[4](f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)), f16mat4x3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf)));
+  {
+    uint v_6 = 0u;
+    v_6 = 0u;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4u)) {
+        break;
+      }
+      v_5[v_7] = f16mat4x3(v_4[v_7].col0, v_4[v_7].col1, v_4[v_7].col2, v_4[v_7].col3);
+      {
+        v_6 = (v_7 + 1u);
+      }
+      continue;
+    }
+  }
+  tint_store_and_preserve_padding(v_5);
+  f16mat4x3 v_8 = f16mat4x3(v.inner[2u].col0, v.inner[2u].col1, v.inner[2u].col2, v.inner[2u].col3);
+  tint_store_and_preserve_padding_1(uint[1](1u), v_8);
+  v_1.inner[1u][0u] = v.inner[0u].col1.zxy;
+  v_1.inner[1u][0u].x = v.inner[0u].col1.x;
 }

@@ -28,10 +28,10 @@
 #ifndef SRC_DAWN_COMMON_FUTUREUTILS_H_
 #define SRC_DAWN_COMMON_FUTUREUTILS_H_
 
+#include <webgpu/webgpu.h>
+
 #include <cstddef>
 #include <cstdint>
-
-#include "dawn/webgpu.h"
 
 namespace dawn {
 

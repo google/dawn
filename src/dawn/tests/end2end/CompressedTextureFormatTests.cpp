@@ -134,15 +134,16 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         // Copy texture data from a staging buffer to the destination texture.
         wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), data.size(),
                                                                  wgpu::BufferUsage::CopySrc);
-        wgpu::ImageCopyBuffer imageCopyBuffer =
-            utils::CreateImageCopyBuffer(stagingBuffer, copyConfig.bufferOffset,
-                                         copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
+        wgpu::TexelCopyBufferInfo texelCopyBufferInfo = utils::CreateTexelCopyBufferInfo(
+            stagingBuffer, copyConfig.bufferOffset, copyConfig.bytesPerRowAlignment,
+            copyConfig.rowsPerImage);
 
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             compressedTexture, copyConfig.viewMipmapLevel, copyConfig.copyOrigin3D);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copyConfig.copyExtent3D);
+        encoder.CopyBufferToTexture(&texelCopyBufferInfo, &texelCopyTextureInfo,
+                                    &copyConfig.copyExtent3D);
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
     }
@@ -347,11 +348,11 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                                     wgpu::Texture dstTexture,
                                     CopyConfig srcConfig,
                                     CopyConfig dstConfig) {
-        wgpu::ImageCopyTexture imageCopyTextureSrc = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfoSrc = utils::CreateTexelCopyTextureInfo(
             srcTexture, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
-        wgpu::ImageCopyTexture imageCopyTextureDst = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfoDst = utils::CreateTexelCopyTextureInfo(
             dstTexture, dstConfig.viewMipmapLevel, dstConfig.copyOrigin3D);
-        encoder.CopyTextureToTexture(&imageCopyTextureSrc, &imageCopyTextureDst,
+        encoder.CopyTextureToTexture(&texelCopyTextureInfoSrc, &texelCopyTextureInfoDst,
                                      &dstConfig.copyExtent3D);
     }
 
@@ -755,6 +756,10 @@ TEST_P(CompressedTextureFormatTest, Cube) {
 
     const wgpu::TextureFormat format = GetParam().mTextureFormat;
 
+    // TODO(crbug.com/362762192): diagnose this failure on GLES with ASTC and ETC2 texture formats
+    DAWN_SUPPRESS_TEST_IF(
+        IsOpenGLES() && (utils::IsASTCTextureFormat(format) || utils::IsETC2TextureFormat(format)));
+
     constexpr uint32_t kLayers = 6;
     CopyConfig config = GetDefaultSmallConfig(kLayers);
     config.copyExtent3D = config.textureDescriptor.size;
@@ -856,6 +861,9 @@ TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
 TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
+
     CopyConfig config = GetDefaultFullConfig();
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
     // dimensions so paddings are required in the copies.
@@ -928,7 +936,7 @@ TEST_P(CompressedTextureFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualT
     // Create textureSrc as the source texture and initialize it with pre-prepared compressed
     // data.
     wgpu::Texture textureSrc = CreateTextureWithCompressedData(srcConfig);
-    wgpu::ImageCopyTexture imageCopyTextureSrc = utils::CreateImageCopyTexture(
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfoSrc = utils::CreateTexelCopyTextureInfo(
         textureSrc, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
 
     // Create textureDst and copy from the content in textureSrc into it.
@@ -1216,6 +1224,9 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
 TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
+
     CopyConfig config = GetDefaultFullConfig();
 
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
@@ -1314,12 +1325,14 @@ TEST_P(CompressedTextureFormatSpecificTest, BC1RGBAUnorm_UnalignedDynamicUploade
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
-    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(buffer, 0, 256);
+    wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+        utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0});
+    wgpu::TexelCopyBufferInfo texelCopyBufferInfo =
+        utils::CreateTexelCopyBufferInfo(buffer, 0, 256);
     wgpu::Extent3D copyExtent = {4, 4, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copyExtent);
+    encoder.CopyTextureToBuffer(&texelCopyTextureInfo, &texelCopyBufferInfo, &copyExtent);
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 }
@@ -1347,13 +1360,13 @@ class CompressedTextureWriteTextureTest : public CompressedTextureFormatTest {
 
         std::vector<uint8_t> data = UploadData(copyConfig);
 
-        wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout = utils::CreateTexelCopyBufferLayout(
             copyConfig.bufferOffset, copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
 
-        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo = utils::CreateTexelCopyTextureInfo(
             compressedTexture, copyConfig.viewMipmapLevel, copyConfig.copyOrigin3D);
 
-        queue.WriteTexture(&imageCopyTexture, data.data(), data.size(), &textureDataLayout,
+        queue.WriteTexture(&texelCopyTextureInfo, data.data(), data.size(), &texelCopyBufferLayout,
                            &copyConfig.copyExtent3D);
     }
 
@@ -1431,8 +1444,19 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
 // its virtual size.
 TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
+
+    // TODO(https://issues.chromium.org/issues/41479545): Triggers some VVL sync error on the
+    // textures used as an attachment when verifying the contents of the compressed texture.
+    // It complains that the CmdPipelineBarrier to attachment doesn't include the previous call
+    // to CmdCopyBufferToTexture in its source, but that texture is never used in such a call!
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     CopyConfig config = GetDefaultFullConfig();
 

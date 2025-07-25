@@ -3,26 +3,22 @@ struct S {
   float b;
 };
 
-groupshared S v;
+struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
 
-void tint_zero_workgroup_memory(uint local_idx) {
-  if ((local_idx < 1u)) {
-    S tint_symbol_2 = (S)0;
-    v = tint_symbol_2;
+
+groupshared S v;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    S v_1 = (S)0;
+    v = v_1;
   }
   GroupMemoryBarrierWithGroupSync();
 }
 
-struct tint_symbol_1 {
-  uint local_invocation_index : SV_GroupIndex;
-};
-
-void main_inner(uint local_invocation_index) {
-  tint_zero_workgroup_memory(local_invocation_index);
-}
-
 [numthreads(1, 1, 1)]
-void main(tint_symbol_1 tint_symbol) {
-  main_inner(tint_symbol.local_invocation_index);
-  return;
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
+

@@ -36,7 +36,7 @@
 namespace dawn::native::d3d {
 
 PhysicalDevice::PhysicalDevice(Backend* backend,
-                               ComPtr<IDXGIAdapter4> hardwareAdapter,
+                               ComPtr<IDXGIAdapter3> hardwareAdapter,
                                wgpu::BackendType backendType)
     : PhysicalDeviceBase(backendType),
       mHardwareAdapter(std::move(hardwareAdapter)),
@@ -44,7 +44,7 @@ PhysicalDevice::PhysicalDevice(Backend* backend,
 
 PhysicalDevice::~PhysicalDevice() = default;
 
-IDXGIAdapter4* PhysicalDevice::GetHardwareAdapter() const {
+IDXGIAdapter3* PhysicalDevice::GetHardwareAdapter() const {
     return mHardwareAdapter.Get();
 }
 
@@ -57,12 +57,18 @@ ResultOrError<PhysicalDeviceSurfaceCapabilities> PhysicalDevice::GetSurfaceCapab
     const Surface*) const {
     PhysicalDeviceSurfaceCapabilities capabilities;
 
+    // StorageBinding is not supported by DXGI swapchains.
     capabilities.usages = wgpu::TextureUsage::RenderAttachment |
                           wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
                           wgpu::TextureUsage::CopyDst;
 
-    // This is the only supported format in native mode (see crbug.com/dawn/160).
-    capabilities.formats.push_back(wgpu::TextureFormat::BGRA8Unorm);
+    // The list of format allowed with the DXGI flip model.
+    capabilities.formats = {
+        wgpu::TextureFormat::BGRA8Unorm,
+        wgpu::TextureFormat::RGBA8Unorm,
+        wgpu::TextureFormat::RGBA16Float,
+        wgpu::TextureFormat::RGB10A2Unorm,
+    };
 
     capabilities.presentModes = {
         wgpu::PresentMode::Fifo,

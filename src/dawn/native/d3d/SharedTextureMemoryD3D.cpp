@@ -39,14 +39,15 @@
 namespace dawn::native::d3d {
 
 SharedTextureMemory::SharedTextureMemory(d3d::Device* device,
-                                         const char* label,
+                                         StringView label,
                                          SharedTextureMemoryProperties properties)
     : SharedTextureMemoryBase(device, label, properties) {}
 
 MaybeError SharedTextureMemory::BeginAccessImpl(
     TextureBase* texture,
     const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
-    DAWN_TRY(descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState>());
+    DAWN_TRY((descriptor.ValidateSubset<SharedTextureMemoryD3DSwapchainBeginState,
+                                        SharedTextureMemoryD3D11BeginState>()));
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
         SharedFenceBase* fence = descriptor->fences[i];
 
@@ -71,9 +72,10 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
     DAWN_TRY(state.ValidateSubset<>());
-    DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceDXGISharedHandle),
-                    "Required feature (%s) is missing.",
-                    wgpu::FeatureName::SharedFenceDXGISharedHandle);
+
+    if (!GetDevice()->HasFeature(Feature::SharedFenceDXGISharedHandle)) {
+        return FenceAndSignalValue{nullptr, 0};
+    }
 
     Ref<SharedFence> sharedFence;
     DAWN_TRY_ASSIGN(sharedFence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());

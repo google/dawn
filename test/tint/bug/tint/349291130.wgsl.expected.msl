@@ -1,16 +1,30 @@
 #include <metal_stdlib>
-
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+struct tint_module_vars_struct {
+  texture2d<float, access::sample> tint_member;
+};
 
-kernel void e(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]]) {
+kernel void e(texture2d<float, access::sample> v [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v};
   {
-    TINT_ISOLATE_UB(tint_volatile_true) for(uint level = tint_symbol_1.get_num_mip_levels(); (level > 0u); ) {
+    uint2 tint_loop_idx = uint2(4294967295u);
+    uint level = tint_module_vars.tint_member.get_num_mip_levels();
+    while(true) {
+      if (all((tint_loop_idx == uint2(0u)))) {
+        break;
+      }
+      if ((level > 0u)) {
+      } else {
+        break;
+      }
+      {
+        uint const tint_low_inc = (tint_loop_idx.x - 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 4294967295u));
+        tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
+      }
+      continue;
     }
   }
-  return;
 }
-

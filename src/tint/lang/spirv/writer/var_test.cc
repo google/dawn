@@ -148,7 +148,11 @@ TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Private_int Private %int_42");
     EXPECT_INST("%load = OpLoad %int %v");
-    EXPECT_INST("OpStore %v %add");
+    EXPECT_INST("OpBitcast %uint %load");
+    EXPECT_INST("OpBitcast %uint %int_1");
+    EXPECT_INST("OpIAdd %uint %11 %12");
+    EXPECT_INST("OpBitcast %int %14");
+    EXPECT_INST("OpStore %v %15 None");
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar) {
@@ -161,8 +165,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar) {
 TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
     auto* v = mod.root_block->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         auto* add = b.Add(ty.i32(), load, 1_i);
@@ -175,14 +178,22 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup");
     EXPECT_INST("%load = OpLoad %int %v");
-    EXPECT_INST("OpStore %v %add");
+    EXPECT_INST("OpBitcast %uint %load");
+    EXPECT_INST("OpBitcast %uint %int_1");
+    EXPECT_INST("OpIAdd %uint %21 %22");
+    EXPECT_INST("OpBitcast %int %24");
+    EXPECT_INST("OpStore %v %25 None");
 }
 
 TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
     mod.root_block->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
+    Options opts{};
+    opts.disable_workgroup_init = false;
+    opts.use_zero_initialize_workgroup_memory_extension = true;
+
     // Create a writer with the zero_init_workgroup_memory flag set to `true`.
-    ASSERT_TRUE(Generate({}, /* zero_init_workgroup_memory */ true)) << Error() << output_;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("%4 = OpConstantNull %int");
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup %4");
 }
@@ -194,15 +205,15 @@ TEST_F(SpirvWriterTest, StorageVar_ReadOnly) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpDecorate %tint_symbol_1 Block
+               OpDecorate %v_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int                  ; Block
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer   ; DescriptorSet 0, Binding 0, NonWritable
+    %v_block = OpTypeStruct %int                    ; Block
+%_ptr_StorageBuffer_v_block = OpTypePointer StorageBuffer %v_block
+          %1 = OpVariable %_ptr_StorageBuffer_v_block StorageBuffer     ; DescriptorSet 0, Binding 0, NonWritable
 )");
 }
 
@@ -211,8 +222,7 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         auto* add = b.Add(ty.i32(), load, 1_i);
@@ -224,12 +234,169 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-       %load = OpLoad %int %9
-        %add = OpIAdd %int %load %int_1
-         %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %16 %add
+               OpDecorate %1 Coherent
 )");
+
+    EXPECT_INST(R"(
+          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+       %load = OpLoad %int %9 None
+         %14 = OpBitcast %uint %load
+         %15 = OpBitcast %uint %int_1
+         %17 = OpIAdd %uint %14 %15
+         %18 = OpBitcast %int %17
+         %19 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %19 %18 None
+)");
+}
+
+TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
+    auto* v = b.Var("v", ty.ptr<storage, i32, read_write>());
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+        mod.SetName(load, "load");
+        mod.SetName(add, "add");
+    });
+
+    Options opts;
+    opts.use_vulkan_memory_model = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST(R"(               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %foo "foo"
+               OpExecutionMode %foo LocalSize 1 1 1
+
+               ; Debug Information
+               OpMemberName %v_block 0 "inner"
+               OpName %v_block "v_block"            ; id %3
+               OpName %foo "foo"                    ; id %5
+               OpName %load "load"                  ; id %13
+
+               ; Annotations
+               OpMemberDecorate %v_block 0 Offset 0
+               OpDecorate %v_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+
+               ; Types, variables and constants
+        %int = OpTypeInt 32 1
+    %v_block = OpTypeStruct %int                    ; Block
+%_ptr_StorageBuffer_v_block = OpTypePointer StorageBuffer %v_block
+          %1 = OpVariable %_ptr_StorageBuffer_v_block StorageBuffer     ; DescriptorSet 0, Binding 0
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+      %int_1 = OpConstant %int 1
+
+               ; Function foo
+        %foo = OpFunction %void None %7
+          %8 = OpLabel
+          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+       %load = OpLoad %int %9 NonPrivatePointer
+         %14 = OpBitcast %uint %load
+         %15 = OpBitcast %uint %int_1
+         %17 = OpIAdd %uint %14 %15
+         %18 = OpBitcast %int %17
+         %19 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %19 %18 NonPrivatePointer
+               OpReturn
+               OpFunctionEnd)");
+}
+
+TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
+    auto* v = b.Var("v", ty.ptr<workgroup, i32, read_write>());
+    mod.root_block->Append(v);
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+        mod.SetName(load, "load");
+        mod.SetName(add, "add");
+    });
+
+    Options opts;
+    opts.use_vulkan_memory_model = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST(R"(               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %foo "foo" %foo_local_invocation_index_Input
+               OpExecutionMode %foo LocalSize 1 1 1
+
+               ; Debug Information
+               OpName %v "v"                        ; id %1
+               OpName %foo_local_invocation_index_Input "foo_local_invocation_index_Input"  ; id %4
+               OpName %foo_inner "foo_inner"                                                ; id %7
+               OpName %tint_local_index "tint_local_index"                                  ; id %9
+               OpName %load "load"                                                          ; id %20
+               OpName %foo "foo"                                                            ; id %27
+
+               ; Annotations
+               OpDecorate %foo_local_invocation_index_Input BuiltIn LocalInvocationIndex
+
+               ; Types, variables and constants
+        %int = OpTypeInt 32 1
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+          %v = OpVariable %_ptr_Workgroup_int Workgroup
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%foo_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input   ; BuiltIn LocalInvocationIndex
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+     %uint_2 = OpConstant %uint 2
+ %uint_24840 = OpConstant %uint 24840
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+         %28 = OpTypeFunction %void
+
+               ; Function foo_inner
+  %foo_inner = OpFunction %void None %10
+%tint_local_index = OpFunctionParameter %uint
+         %11 = OpLabel
+         %12 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %15 None
+               OpBranchConditional %12 %16 %15
+         %16 = OpLabel
+               OpStore %v %int_0 NonPrivatePointer
+               OpBranch %15
+         %15 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_24840
+       %load = OpLoad %int %v NonPrivatePointer
+         %21 = OpBitcast %uint %load
+         %22 = OpBitcast %uint %int_1
+         %24 = OpIAdd %uint %21 %22
+         %25 = OpBitcast %int %24
+               OpStore %v %25 NonPrivatePointer
+               OpReturn
+               OpFunctionEnd
+
+               ; Function foo
+        %foo = OpFunction %void None %28
+         %29 = OpLabel
+         %30 = OpLoad %uint %foo_local_invocation_index_Input None
+         %31 = OpFunctionCall %void %foo_inner %30
+               OpReturn
+               OpFunctionEnd)");
 }
 
 TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
@@ -237,8 +404,7 @@ TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Store(v, 42_i);
         b.Return(func);
@@ -246,14 +412,14 @@ TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpDecorate %tint_symbol_1 Block
+               OpDecorate %v_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonReadable
 )");
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %9 %int_42
+               OpStore %9 %int_42 None
 )");
 }
 
@@ -264,14 +430,14 @@ TEST_F(SpirvWriterTest, UniformVar) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpDecorate %tint_symbol_1 Block
+               OpDecorate %v_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int                  ; Block
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform   ; DescriptorSet 0, Binding 0, NonWritable
+    %v_block = OpTypeStruct %int                    ; Block
+%_ptr_Uniform_v_block = OpTypePointer Uniform %v_block
+          %1 = OpVariable %_ptr_Uniform_v_block Uniform     ; DescriptorSet 0, Binding 0, NonWritable
 )");
 }
 
@@ -280,8 +446,7 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         b.Return(func);
@@ -291,27 +456,27 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
-       %load = OpLoad %int %9
+       %load = OpLoad %int %9 None
 )");
 }
 
-TEST_F(SpirvWriterTest, PushConstantVar) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(SpirvWriterTest, ImmediateVar) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpDecorate %tint_symbol_1 Block
+               OpDecorate %v_block Block
 )");
     EXPECT_INST(R"(
-%tint_symbol_1 = OpTypeStruct %int                  ; Block
-%_ptr_PushConstant_tint_symbol_1 = OpTypePointer PushConstant %tint_symbol_1
-          %1 = OpVariable %_ptr_PushConstant_tint_symbol_1 PushConstant
+    %v_block = OpTypeStruct %int                    ; Block
+%_ptr_PushConstant_v_block = OpTypePointer PushConstant %v_block
+          %1 = OpVariable %_ptr_PushConstant_v_block PushConstant
 )");
 }
 
-TEST_F(SpirvWriterTest, PushConstantVar_Load) {
-    auto* v = b.Var("v", ty.ptr<push_constant, i32>());
+TEST_F(SpirvWriterTest, ImmedaiteVar_Load) {
+    auto* v = b.Var("v", ty.ptr<immediate, i32>());
     mod.root_block->Append(v);
 
     auto* func = b.Function("foo", ty.i32());
@@ -324,7 +489,7 @@ TEST_F(SpirvWriterTest, PushConstantVar_Load) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-       %load = OpLoad %int %8
+       %load = OpLoad %int %8 None
                OpReturnValue %load
 )");
 }
@@ -363,10 +528,9 @@ TEST_F(SpirvWriterTest, SamplerVar_Load) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar) {
-    auto* v = b.Var(
-        "v", ty.ptr(core::AddressSpace::kHandle,
-                    ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-                    core::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -383,10 +547,9 @@ TEST_F(SpirvWriterTest, TextureVar) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar_Load) {
-    auto* v = b.Var(
-        "v", ty.ptr(core::AddressSpace::kHandle,
-                    ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
-                    core::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -401,12 +564,75 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
     EXPECT_INST("%load = OpLoad %3 %v");
 }
 
+TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_NoDva) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kRead);
+    tex->SetBindingPoint(0, 0);
+    mod.root_block->Append(tex);
+
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
+                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    Options opts{};
+    opts.dva_transform_handle = false;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpFunctionParameter");
+}
+
+TEST_F(SpirvWriterTest, TextureVar_TextureParamTextureLoad_Dva) {
+    auto* tex =
+        b.Var("tex", handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kRead);
+    tex->SetBindingPoint(0, 0);
+    mod.root_block->Append(tex);
+
+    auto* t = b.FunctionParam("texparam",
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, t,
+                          b.Splat(ty.vec2<u32>(), 0_u), 0_u));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    Options opts{};
+    opts.dva_transform_handle = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    // Consider a EXPECT_NOT_INST macro.
+    ASSERT_TRUE(output_.find("OpFunctionParameter") == std::string::npos) << output_;
+}
+
 TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
     auto format = core::TexelFormat::kRgba8Unorm;
     auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                                ty.Get<core::type::StorageTexture>(
-                                    core::type::TextureDimension::k2d, format, read,
-                                    core::type::StorageTexture::SubtypeFor(format, ty)),
+                                ty.storage_texture(core::type::TextureDimension::k2d, format, read),
                                 core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -426,11 +652,10 @@ TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
 
 TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                                ty.Get<core::type::StorageTexture>(
-                                    core::type::TextureDimension::k2d, format, read_write,
-                                    core::type::StorageTexture::SubtypeFor(format, ty)),
-                                core::Access::kRead));
+    auto* v =
+        b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                          ty.storage_texture(core::type::TextureDimension::k2d, format, read_write),
+                          core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
@@ -438,21 +663,21 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
     EXPECT_INST(R"(
                OpDecorate %v DescriptorSet 0
                OpDecorate %v Binding 0
+               OpDecorate %v Coherent
 )");
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, Coherent
 )");
 }
 
 TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
     auto format = core::TexelFormat::kRgba8Unorm;
-    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                                ty.Get<core::type::StorageTexture>(
-                                    core::type::TextureDimension::k2d, format, write,
-                                    core::type::StorageTexture::SubtypeFor(format, ty)),
-                                core::Access::kRead));
+    auto* v =
+        b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                          ty.storage_texture(core::type::TextureDimension::k2d, format, write),
+                          core::Access::kRead));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 

@@ -65,15 +65,16 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
-                            const char* label,
+                            StringView label,
                             const SharedTextureMemoryProperties& properties);
     SharedTextureMemoryBase(DeviceBase* device,
                             const SharedTextureMemoryDescriptor* descriptor,
                             ObjectBase::ErrorTag tag);
 
+    MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
+
   private:
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* rawDescriptor);
-    MaybeError GetProperties(SharedTextureMemoryProperties* properties) const;
 
     Ref<SharedResourceMemoryContents> CreateContents() override;
 

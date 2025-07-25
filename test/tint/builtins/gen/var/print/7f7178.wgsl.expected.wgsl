@@ -1,0 +1,27 @@
+fn print_7f7178() {
+  var arg_0 = vec4<u32>(1u);
+  print(arg_0);
+}
+
+@fragment
+fn fragment_main() {
+  print_7f7178();
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  print_7f7178();
+}
+
+struct VertexOutput {
+  @builtin(position)
+  pos : vec4<f32>,
+}
+
+@vertex
+fn vertex_main() -> VertexOutput {
+  var out : VertexOutput;
+  out.pos = vec4<f32>();
+  print_7f7178();
+  return out;
+}

@@ -54,8 +54,8 @@ TEST_F(IR_BinaryTest, Result) {
     auto* a = b.Add(mod.Types().i32(), 4_i, 2_i);
 
     EXPECT_EQ(a->Results().Length(), 1u);
-    EXPECT_TRUE(a->Result(0)->Is<InstructionResult>());
-    EXPECT_EQ(a, a->Result(0)->Instruction());
+    EXPECT_TRUE(a->Result()->Is<InstructionResult>());
+    EXPECT_EQ(a, a->Result()->Instruction());
 }
 
 TEST_F(IR_BinaryTest, CreateAnd) {
@@ -63,7 +63,7 @@ TEST_F(IR_BinaryTest, CreateAnd) {
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
-    ASSERT_NE(inst->Results()[0]->Type(), nullptr);
+    ASSERT_NE(inst->Result()->Type(), nullptr);
 
     ASSERT_TRUE(inst->LHS()->Is<Constant>());
     auto lhs = inst->LHS()->As<Constant>()->Value();
@@ -337,10 +337,10 @@ TEST_F(IR_BinaryTest, Binary_Usage) {
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
     ASSERT_NE(inst->LHS(), nullptr);
-    EXPECT_THAT(inst->LHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 0u}));
+    EXPECT_THAT(inst->LHS()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 0u}));
 
     ASSERT_NE(inst->RHS(), nullptr);
-    EXPECT_THAT(inst->RHS()->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(inst->RHS()->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
@@ -351,7 +351,7 @@ TEST_F(IR_BinaryTest, Binary_Usage_DuplicateValue) {
     ASSERT_EQ(inst->LHS(), inst->RHS());
 
     ASSERT_NE(inst->LHS(), nullptr);
-    EXPECT_THAT(inst->LHS()->Usages(),
+    EXPECT_THAT(inst->LHS()->UsagesUnsorted(),
                 testing::UnorderedElementsAre(Usage{inst, 0u}, Usage{inst, 1u}));
 }
 
@@ -362,11 +362,11 @@ TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
 
     EXPECT_EQ(inst->Op(), BinaryOp::kAnd);
 
-    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
-    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre());
+    EXPECT_THAT(rhs_a->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(rhs_b->UsagesUnsorted(), testing::UnorderedElementsAre());
     inst->SetOperand(1, rhs_b);
-    EXPECT_THAT(rhs_a->Usages(), testing::UnorderedElementsAre());
-    EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
+    EXPECT_THAT(rhs_a->UsagesUnsorted(), testing::UnorderedElementsAre());
+    EXPECT_THAT(rhs_b->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
 TEST_F(IR_BinaryTest, Clone) {
@@ -378,7 +378,7 @@ TEST_F(IR_BinaryTest, Clone) {
 
     EXPECT_NE(inst, c);
 
-    EXPECT_EQ(mod.Types().i32(), c->Result(0)->Type());
+    EXPECT_EQ(mod.Types().i32(), c->Result()->Type());
     EXPECT_EQ(BinaryOp::kAnd, c->Op());
 
     auto new_lhs = c->LHS()->As<Constant>()->Value();

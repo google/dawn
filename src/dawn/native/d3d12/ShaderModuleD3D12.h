@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -53,8 +54,7 @@ class ShaderModule final : public ShaderModuleBase {
         Device* device,
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult,
-        OwnedCompilationMessages* compilationMessages);
+        ShaderModuleParseResult* parseResult);
 
     ResultOrError<d3d::CompiledShader> Compile(
         const ProgrammableStage& programmableStage,
@@ -62,16 +62,14 @@ class ShaderModule final : public ShaderModuleBase {
         const PipelineLayout* layout,
         uint32_t compileFlags,
         const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
-            usedInterstageVariables = {},
-        std::optional<uint32_t> maxSubgroupSizeForFullSubgroups = std::nullopt);
+            usedInterstageVariables = {});
 
   private:
     ShaderModule(Device* device,
                  const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                  std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModule() override = default;
-    MaybeError Initialize(ShaderModuleParseResult* parseResult,
-                          OwnedCompilationMessages* compilationMessages);
+    MaybeError Initialize(ShaderModuleParseResult* parseResult);
 };
 
 }  // namespace dawn::native::d3d12

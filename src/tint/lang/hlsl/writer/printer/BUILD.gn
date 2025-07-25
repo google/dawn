@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -44,6 +45,7 @@ libtint_source_set("printer") {
     "printer.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
@@ -54,20 +56,19 @@ libtint_source_set("printer") {
     "${tint_src_dir}/lang/hlsl/intrinsic",
     "${tint_src_dir}/lang/hlsl/ir",
     "${tint_src_dir}/lang/hlsl/type",
+    "${tint_src_dir}/lang/hlsl/writer/common",
+    "${tint_src_dir}/lang/wgsl/ast",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/generator",
     "${tint_src_dir}/utils/ice",
-    "${tint_src_dir}/utils/id",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/reflection",
-    "${tint_src_dir}/utils/result",
     "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/strconv",
     "${tint_src_dir}/utils/symbol",
     "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
+    "${tint_src_dir}/utils/text_generator",
   ]
 }

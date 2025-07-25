@@ -28,11 +28,12 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPURENDERPASSENCODER_H_
 #define SRC_DAWN_NODE_BINDING_GPURENDERPASSENCODER_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
 #include <vector>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
@@ -108,6 +109,19 @@ class GPURenderPassEncoder final : public interop::GPURenderPassEncoder {
     void drawIndexedIndirect(Napi::Env,
                              interop::Interface<interop::GPUBuffer> indirectBuffer,
                              interop::GPUSize64 indirectOffset) override;
+    void multiDrawIndirect(Napi::Env,
+                           interop::Interface<interop::GPUBuffer> indirectBuffer,
+                           interop::GPUSize64 indirectOffset,
+                           interop::GPUSize32 maxDrawCount,
+                           std::optional<interop::Interface<interop::GPUBuffer>> countBuffer,
+                           interop::GPUSize64 countBufferOffset) override;
+    void multiDrawIndexedIndirect(
+        Napi::Env,
+        interop::Interface<interop::GPUBuffer> indirectBuffer,
+        interop::GPUSize64 indirectOffset,
+        interop::GPUSize32 maxDrawCount,
+        std::optional<interop::Interface<interop::GPUBuffer>> drawCountBuffer,
+        interop::GPUSize64 drawCountBufferOffset) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;
 

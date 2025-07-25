@@ -45,9 +45,9 @@ TEST_F(IR_BreakIfTest, Usage) {
 
     auto* brk = b.BreakIf(loop, cond, arg1, arg2);
 
-    EXPECT_THAT(cond->Usages(), testing::UnorderedElementsAre(Usage{brk, 0u}));
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 2u}));
+    EXPECT_THAT(cond->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 0u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 1u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 2u}));
 }
 
 TEST_F(IR_BreakIfTest, Results) {
@@ -127,6 +127,19 @@ TEST_F(IR_BreakIfTest, SetLoop) {
     brk->SetLoop(loop2);
     EXPECT_TRUE(loop1->Exits().IsEmpty());
     EXPECT_THAT(loop2->Exits(), testing::ElementsAre(brk));
+}
+
+TEST_F(IR_BreakIfTest, Destroy) {
+    auto* loop = b.Loop();
+    auto* cond = b.Constant(true);
+    auto* inst = b.BreakIf(loop, cond);
+
+    ASSERT_EQ(1u, loop->Body()->InboundSiblingBranches().Length());
+    EXPECT_EQ(inst, loop->Body()->InboundSiblingBranches()[0]);
+
+    inst->Destroy();
+
+    EXPECT_EQ(0u, loop->Body()->InboundSiblingBranches().Length());
 }
 
 }  // namespace

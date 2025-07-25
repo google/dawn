@@ -27,8 +27,10 @@
 
 import sys
 
+PRESUBMIT_VERSION = '2.0.0'
 
-def _DoCommonChecks(input_api, output_api):
+
+def CheckCtsValidate(input_api, output_api):
     sys.path += [input_api.change.RepositoryRoot()]
 
     from go_presubmit_support import go_path
@@ -62,5 +64,14 @@ def _DoCommonChecks(input_api, output_api):
     return results
 
 
-CheckChangeOnUpload = _DoCommonChecks
-CheckChangeOnCommit = _DoCommonChecks
+def CheckHeaderSync(input_api, output_api):
+    results = []
+    sync_script = input_api.os_path.join(input_api.PresubmitLocalPath(),
+                                         'scripts', 'check_headers_in_sync.py')
+    try:
+        input_api.subprocess.check_call_out([sync_script],
+                                            stdout=input_api.subprocess.PIPE,
+                                            stderr=input_api.subprocess.STDOUT)
+    except input_api.subprocess.CalledProcessError as e:
+        results.append(output_api.PresubmitError(str(e)))
+    return results

@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -37,14 +37,14 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUBindGroup
 ////////////////////////////////////////////////////////////////////////////////
 GPUBindGroup::GPUBindGroup(const wgpu::BindGroupDescriptor& desc, wgpu::BindGroup group)
-    : group_(std::move(group)), label_(desc.label ? desc.label : "") {}
+    : group_(std::move(group)), label_(CopyLabel(desc.label)) {}
 
 std::string GPUBindGroup::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPUBindGroup::setLabel(Napi::Env, std::string value) {
-    group_.SetLabel(value.c_str());
+    group_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

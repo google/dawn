@@ -35,7 +35,7 @@
 namespace tint::core::type {
 
 /// A vector type.
-class Vector : public Castable<Vector, Type> {
+class Vector : public Castable<Vector, type::Type> {
   public:
     /// Constructor
     /// @param subtype the vector element type
@@ -51,7 +51,7 @@ class Vector : public Castable<Vector, Type> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the type of the vector elements
-    const Type* type() const { return subtype_; }
+    const type::Type* Type() const { return subtype_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -78,18 +78,18 @@ class Vector : public Castable<Vector, Type> {
     static uint32_t AlignOf(uint32_t width);
 
     /// @copydoc Type::Elements
-    TypeAndCount Elements(const Type* type_if_invalid = nullptr,
+    TypeAndCount Elements(const type::Type* type_if_invalid = nullptr,
                           uint32_t count_if_invalid = 0) const override;
 
     /// @copydoc Type::Element
-    const Type* Element(uint32_t index) const override;
+    const type::Type* Element(uint32_t index) const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
     Vector* Clone(CloneContext& ctx) const override;
 
   private:
-    Type const* const subtype_;
+    type::Type const* const subtype_;
     const uint32_t width_;
     const bool packed_;
 };

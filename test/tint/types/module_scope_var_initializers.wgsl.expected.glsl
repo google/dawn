@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   float a;
 };
@@ -14,7 +15,8 @@ vec4 v4f32_var = vec4(0.0f);
 mat2x3 m2x3_var = mat2x3(vec3(0.0f), vec3(0.0f));
 float arr_var[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
 S struct_var = S(0.0f);
-void tint_symbol() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   bool_var = false;
   i32_var = 0;
   u32_var = 0u;
@@ -23,14 +25,6 @@ void tint_symbol() {
   v3u32_var = uvec3(0u);
   v4f32_var = vec4(0.0f);
   m2x3_var = mat2x3(vec3(0.0f), vec3(0.0f));
-  float tint_symbol_1[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
-  arr_var = tint_symbol_1;
-  S tint_symbol_2 = S(0.0f);
-  struct_var = tint_symbol_2;
-}
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  tint_symbol();
-  return;
+  arr_var = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  struct_var = S(0.0f);
 }

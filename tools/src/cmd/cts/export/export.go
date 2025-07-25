@@ -67,14 +67,18 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions(sheets.SpreadsheetsScope))
+	c.flags.auth.Register(
+		flag.CommandLine,
+		auth.DefaultAuthOptions(cfg.OsWrapper, sheets.SpreadsheetsScope))
 	c.flags.results.RegisterFlags(cfg)
 	npmPath, _ := exec.LookPath("npm")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
-	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(), "path to node")
+	flag.StringVar(&c.flags.nodePath, "node", fileutils.NodePath(cfg.OsWrapper), "path to node")
 	return nil, nil
 }
 
+// TODO(crbug.com/416731783): Add unittest coverage when there is a way to
+// avoid network interactions from gitiles.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Validate command line arguments
 	auth, err := c.flags.auth.Options()

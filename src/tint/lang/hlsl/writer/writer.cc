@@ -32,89 +32,81 @@
 
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/input_attachment.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
-#include "src/tint/utils/ice/ice.h"
 
 namespace tint::hlsl::writer {
-namespace {
 
-ast::PipelineStage ir_to_ast_stage(core::ir::Function::PipelineStage stage) {
-    switch (stage) {
-        case core::ir::Function::PipelineStage::kCompute:
-            return ast::PipelineStage::kCompute;
-        case core::ir::Function::PipelineStage::kFragment:
-            return ast::PipelineStage::kFragment;
-        case core::ir::Function::PipelineStage::kVertex:
-            return ast::PipelineStage::kVertex;
-        default:
-            break;
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported types.
+    for (auto* ty : ir.Types()) {
+        if (ty->Is<core::type::SubgroupMatrix>()) {
+            return Failure("subgroup matrices are not supported by the HLSL backend");
+        }
     }
-    TINT_UNREACHABLE();
+
+    // Check for unsupported module-scope variable address spaces and types.
+    for (auto* inst : *ir.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            // Check the pixel_local variables have corresponding entries in the PLS attachment map.
+            auto* str = ptr->StoreType()->As<core::type::Struct>();
+            for (uint32_t i = 0; i < str->Members().Length(); i++) {
+                if (options.pixel_local.attachments.count(i) == 0) {
+                    return Failure("missing pixel local attachment for member index " +
+                                   std::to_string(i));
+                }
+            }
+        }
+        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+            return Failure("input attachments are not supported by the HLSL backend");
+        }
+    }
+
+    // Check for unsupported shader IO builtins.
+    for (auto& func : ir.functions) {
+        if (!func->IsEntryPoint()) {
+            continue;
+        }
+
+        for (auto* param : func->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId) {
+                        return Failure("subgroup_id is not yet supported by the HLSL backend");
+                    }
+                }
+            } else {
+                if (param->Builtin() == core::BuiltinValue::kSubgroupId) {
+                    return Failure("subgroup_id is not yet supported by the HLSL backend");
+                }
+            }
+        }
+    }
+
+    {
+        auto res = ValidateBindingOptions(options);
+        if (res != Success) {
+            return res.Failure();
+        }
+    }
+
+    return Success;
 }
 
-}  // namespace
-
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
-    Output output;
-
     // Raise the core-dialect to HLSL-dialect
     auto res = Raise(ir, options);
     if (res != Success) {
         return res.Failure();
     }
 
-    auto result = Print(ir);
-    if (result != Success) {
-        return result.Failure();
-    }
-    output.hlsl = result->hlsl;
-
-    // Collect the list of entry points in the generated program.
-    for (auto func : ir.functions) {
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
-            auto name = ir.NameOf(func).Name();
-            output.entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
-        }
-    }
-
-    return output;
-}
-
-Result<Output> Generate(const Program& program, const Options& options) {
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
-    }
-
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options);
-    if (!sanitized_result.program.IsValid()) {
-        return Failure{sanitized_result.program.Diagnostics()};
-    }
-
-    // Generate the HLSL code.
-    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics()};
-    }
-
-    Output output;
-    output.hlsl = impl->Result();
-
-    // Collect the list of entry points in the sanitized program.
-    for (auto* func : sanitized_result.program.AST().Functions()) {
-        if (func->IsEntryPoint()) {
-            auto name = func->name->symbol.Name();
-            output.entry_points.push_back({name, func->PipelineStage()});
-        }
-    }
-
-    output.used_array_length_from_uniform_indices =
-        std::move(sanitized_result.used_array_length_from_uniform_indices);
-
-    return output;
+    return Print(ir, options);
 }
 
 }  // namespace tint::hlsl::writer

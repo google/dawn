@@ -25,13 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/interpolation_sampling.h"
-#include "src/tint/lang/core/interpolation_type.h"
-#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
@@ -80,81 +75,6 @@ TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverAddressSpaceUsedWithTemplateArgs,
                          testing::ValuesIn(core::kAddressSpaceStrings));
-
-////////////////////////////////////////////////////////////////////////////////
-// builtin value
-////////////////////////////////////////////////////////////////////////////////
-using ResolverBuiltinValueUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
-
-TEST_P(ResolverBuiltinValueUsedWithTemplateArgs, Test) {
-    // fn f(@builtin(BUILTIN<T>) p : vec4<f32>) {}
-    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f", Vector{Param("p", ty.vec4<f32>(), Vector{Builtin(tmpl)})}, ty.void_(), tint::Empty,
-         Vector{Stage(ast::PipelineStage::kFragment)});
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: builtin value '" + std::string(GetParam()) +
-                                "' does not take template arguments");
-}
-
-INSTANTIATE_TEST_SUITE_P(,
-                         ResolverBuiltinValueUsedWithTemplateArgs,
-                         testing::ValuesIn(core::kBuiltinValueStrings));
-
-////////////////////////////////////////////////////////////////////////////////
-// interpolation sampling
-////////////////////////////////////////////////////////////////////////////////
-using ResolverInterpolationSamplingUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
-
-TEST_P(ResolverInterpolationSamplingUsedWithTemplateArgs, Test) {
-    // @fragment
-    // fn f(@location(0) @interpolate(linear, INTERPOLATION_SAMPLING<T>) p : vec4<f32>) {}
-    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f",
-         Vector{Param("p", ty.vec4<f32>(),
-                      Vector{
-                          Location(0_a),
-                          Interpolate(core::InterpolationType::kLinear, tmpl),
-                      })},
-         ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: interpolation sampling '" + std::string(GetParam()) +
-                                "' does not take template arguments");
-}
-
-INSTANTIATE_TEST_SUITE_P(,
-                         ResolverInterpolationSamplingUsedWithTemplateArgs,
-                         testing::ValuesIn(core::kInterpolationSamplingStrings));
-
-////////////////////////////////////////////////////////////////////////////////
-// interpolation type
-////////////////////////////////////////////////////////////////////////////////
-using ResolverInterpolationTypeUsedWithTemplateArgs = ResolverTestWithParam<std::string_view>;
-
-TEST_P(ResolverInterpolationTypeUsedWithTemplateArgs, Test) {
-    // @fragment
-    // fn f(@location(0) @interpolate(INTERPOLATION_TYPE<T>, center) p : vec4<f32>) {}
-    auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f",
-         Vector{Param("p", ty.vec4<f32>(),
-                      Vector{
-                          Location(0_a),
-                          Interpolate(tmpl, core::InterpolationSampling::kCenter),
-                      })},
-         ty.void_(), tint::Empty,
-         Vector{
-             Stage(ast::PipelineStage::kFragment),
-         });
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: interpolation type '" + std::string(GetParam()) +
-                                "' does not take template arguments");
-}
-
-INSTANTIATE_TEST_SUITE_P(,
-                         ResolverInterpolationTypeUsedWithTemplateArgs,
-                         testing::ValuesIn(core::kInterpolationTypeStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // texel format

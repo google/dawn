@@ -1,32 +1,16 @@
-SKIP: FAILED
-
-#version 310 es
+#version 460
 precision highp float;
 precision highp int;
 
-uniform highp samplerCubeArrayShadow arg_0_arg_1;
-
-layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+layout(binding = 0, std430)
+buffer f_prevent_dce_block_ssbo {
   float inner;
-} prevent_dce;
-
-void textureSample_c2f4e8() {
-  float res = texture(arg_0_arg_1, vec4(vec3(1.0f), float(1)), 0.0f);
-  prevent_dce.inner = res;
+} v;
+uniform highp samplerCubeArrayShadow f_arg_0_arg_1;
+float textureSample_c2f4e8() {
+  float res = texture(f_arg_0_arg_1, vec4(vec3(1.0f), float(1)), 0.0f);
+  return res;
 }
-
-void fragment_main() {
-  textureSample_c2f4e8();
-}
-
 void main() {
-  fragment_main();
-  return;
+  v.inner = textureSample_c2f4e8();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:5: 'samplerCubeArrayShadow' : Reserved word. 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

@@ -44,8 +44,8 @@ TEST_F(IR_ContinueTest, Usage) {
 
     auto* brk = b.Continue(loop, arg1, arg2);
 
-    EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{brk, 0u}));
-    EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{brk, 1u}));
+    EXPECT_THAT(arg1->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 0u}));
+    EXPECT_THAT(arg2->UsagesUnsorted(), testing::UnorderedElementsAre(Usage{brk, 1u}));
 }
 
 TEST_F(IR_ContinueTest, Results) {
@@ -99,6 +99,18 @@ TEST_F(IR_ContinueTest, CloneWithArgs) {
 
     auto* val1 = args[1]->As<Constant>()->Value();
     EXPECT_EQ(2_u, val1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_ContinueTest, Destroy) {
+    auto* loop = b.Loop();
+    auto* inst = b.Continue(loop);
+
+    ASSERT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
+    EXPECT_EQ(inst, loop->Continuing()->InboundSiblingBranches()[0]);
+
+    inst->Destroy();
+
+    EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 }
 
 }  // namespace

@@ -28,6 +28,7 @@
 #include "src/dawn/node/binding/GPUSupportedFeatures.h"
 
 #include "src/dawn/node/binding/Converter.h"
+#include "src/dawn/node/binding/IteratorHelper.h"
 
 namespace wgpu::binding {
 
@@ -36,12 +37,13 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 
 GPUSupportedFeatures::GPUSupportedFeatures(Napi::Env env,
-                                           const std::vector<wgpu::FeatureName>& features) {
+                                           const wgpu::SupportedFeatures& supportedFeatures) {
     Converter conv(env);
 
     // Add all known GPUFeatureNames that are known by dawn.node and skip the other ones are they
     // may be native-only extension, Dawn-specific or other special cases.
-    for (wgpu::FeatureName feature : features) {
+    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
+        wgpu::FeatureName feature = supportedFeatures.features[i];
         interop::GPUFeatureName gpuFeature;
         if (conv(gpuFeature, feature)) {
             enabled_.emplace(gpuFeature);
@@ -55,11 +57,12 @@ bool GPUSupportedFeatures::has(Napi::Env, std::string name) {
         return false;
     }
 
-    return enabled_.count(feature);
+    return enabled_.count(feature) != 0u;
 }
 
 std::vector<std::string> GPUSupportedFeatures::keys(Napi::Env) {
     std::vector<std::string> out;
+
     out.reserve(enabled_.size());
     for (auto feature : enabled_) {
         out.push_back(interop::Converter<interop::GPUFeatureName>::ToString(feature));
@@ -69,6 +72,10 @@ std::vector<std::string> GPUSupportedFeatures::keys(Napi::Env) {
 
 size_t GPUSupportedFeatures::getSize(Napi::Env) {
     return enabled_.size();
+}
+
+Napi::Value GPUSupportedFeatures::iterator(const Napi::CallbackInfo& info) {
+    return CreateIterator(info, this->enabled_);
 }
 
 }  // namespace wgpu::binding

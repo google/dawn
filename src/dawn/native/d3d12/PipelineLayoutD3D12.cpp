@@ -31,7 +31,6 @@
 #include <sstream>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/BitSetIterator.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
@@ -47,14 +46,19 @@ namespace {
 // but are not directly related to allocation of the root signature.
 // In the root signature, it the index of the root parameter where these registers are
 // used that determines the layout of the root signature.
+// TODO(crbug.com/366291600): Use Immediates to support internal constants.
 static constexpr uint32_t kRenderOrComputeInternalRegisterSpace = kMaxBindGroups + 1;
 static constexpr uint32_t kRenderOrComputeInternalBaseRegister = 0;
 
 static constexpr uint32_t kDynamicStorageBufferLengthsRegisterSpace = kMaxBindGroups + 2;
 static constexpr uint32_t kDynamicStorageBufferLengthsBaseRegister = 0;
 
+static constexpr uint32_t kImmediatesRegisterSpace = kMaxBindGroups + 3;
+static constexpr uint32_t kImmediatesBaseRegister = 0;
+
 static constexpr uint32_t kInvalidDynamicStorageBufferLengthsParameterIndex =
     std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t kInvalidImmediatesParameterIndex = std::numeric_limits<uint32_t>::max();
 
 D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BufferBindingType type) {
     switch (type) {
@@ -64,7 +68,9 @@ D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BufferBindingType type) {
         case kInternalStorageBufferBinding:
             return D3D12_ROOT_PARAMETER_TYPE_UAV;
         case wgpu::BufferBindingType::ReadOnlyStorage:
+        case kInternalReadOnlyStorageBufferBinding:
             return D3D12_ROOT_PARAMETER_TYPE_SRV;
+        case wgpu::BufferBindingType::BindingNotUsed:
         case wgpu::BufferBindingType::Undefined:
             DAWN_UNREACHABLE();
     }
@@ -157,7 +163,7 @@ MaybeError PipelineLayout::Initialize() {
 
     size_t rangesCount = 0;
     size_t staticSamplerCount = 0;
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
         rangesCount += bindGroupLayout->GetCbvUavSrvDescriptorRanges().size() +
                        bindGroupLayout->GetSamplerDescriptorRanges().size();
@@ -170,7 +176,7 @@ MaybeError PipelineLayout::Initialize() {
 
     uint32_t rangeIndex = 0;
 
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
         // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
@@ -288,13 +294,13 @@ MaybeError PipelineLayout::Initialize() {
     // so the loop also computes the first register offset for each group where the
     // data should start.
     uint32_t dynamicStorageBufferLengthsShaderRegisterOffset = 0;
-    for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
+    for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
 
         mDynamicStorageBufferLengthInfo[group].firstRegisterOffset =
             dynamicStorageBufferLengthsShaderRegisterOffset;
         mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.reserve(
-            bgl->GetBindingCountInfo().dynamicStorageBufferCount);
+            bgl->GetDynamicStorageBufferCount());
 
         for (BindingIndex bindingIndex(0); bindingIndex < bgl->GetDynamicBufferCount();
              ++bindingIndex) {
@@ -306,7 +312,7 @@ MaybeError PipelineLayout::Initialize() {
         }
 
         DAWN_ASSERT(mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.size() ==
-                    bgl->GetBindingCountInfo().dynamicStorageBufferCount);
+                    bgl->GetDynamicStorageBufferCount());
     }
 
     if (dynamicStorageBufferLengthsShaderRegisterOffset > 0) {
@@ -327,6 +333,20 @@ MaybeError PipelineLayout::Initialize() {
             kInvalidDynamicStorageBufferLengthsParameterIndex;
     }
 
+    if (GetImmediateDataRangeByteSize() > 0) {
+        D3D12_ROOT_PARAMETER1 immediateConstants{};
+        immediateConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        immediateConstants.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+        immediateConstants.Constants.Num32BitValues =
+            GetImmediateDataRangeByteSize() / sizeof(uint32_t);
+        immediateConstants.Constants.RegisterSpace = kImmediatesRegisterSpace;
+        immediateConstants.Constants.ShaderRegister = kImmediatesBaseRegister;
+        mImmediatesParameterIndex = rootParameters.size();
+        rootParameters.emplace_back(immediateConstants);
+    } else {
+        mImmediatesParameterIndex = kInvalidImmediatesParameterIndex;
+    }
+
     D3D12_VERSIONED_ROOT_SIGNATURE_DESC versionedRootSignatureDescriptor = {};
     versionedRootSignatureDescriptor.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
     versionedRootSignatureDescriptor.Desc_1_1.NumParameters = rootParameters.size();
@@ -339,8 +359,8 @@ MaybeError PipelineLayout::Initialize() {
     DAWN_TRY([&]() -> MaybeError {
         ComPtr<ID3DBlob> error;
         if (device->IsToggleEnabled(Toggle::D3D12UseRootSignatureVersion1_1) &&
-            DAWN_LIKELY(SUCCEEDED(device->GetFunctions()->d3d12SerializeVersionedRootSignature(
-                &versionedRootSignatureDescriptor, &mRootSignatureBlob, &error)))) {
+            SUCCEEDED(device->GetFunctions()->d3d12SerializeVersionedRootSignature(
+                &versionedRootSignatureDescriptor, &mRootSignatureBlob, &error))) [[likely]] {
             return {};
         }
         // If using root signature version 1.1 failed, try again with root signature version 1.0.
@@ -356,7 +376,7 @@ MaybeError PipelineLayout::Initialize() {
         }
         HRESULT hr = SerializeRootParameter1_0(device, versionedRootSignatureDescriptor,
                                                &mRootSignatureBlob, &error);
-        if (DAWN_LIKELY(SUCCEEDED(hr))) {
+        if (SUCCEEDED(hr)) [[likely]] {
             return {};
         }
         if (error) {
@@ -465,6 +485,19 @@ uint32_t PipelineLayout::GetDynamicStorageBufferLengthsParameterIndex() const {
     DAWN_ASSERT(mDynamicStorageBufferLengthsParameterIndex !=
                 kInvalidDynamicStorageBufferLengthsParameterIndex);
     return mDynamicStorageBufferLengthsParameterIndex;
+}
+
+uint32_t PipelineLayout::GetImmediatesRegisterSpace() const {
+    return kImmediatesRegisterSpace;
+}
+
+uint32_t PipelineLayout::GetImmediatesShaderRegister() const {
+    return kImmediatesBaseRegister;
+}
+
+uint32_t PipelineLayout::GetImmediatesParameterIndex() const {
+    DAWN_ASSERT(mImmediatesParameterIndex != kInvalidImmediatesParameterIndex);
+    return mImmediatesParameterIndex;
 }
 
 ID3D12CommandSignature* PipelineLayout::GetDispatchIndirectCommandSignatureWithNumWorkgroups() {

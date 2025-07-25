@@ -28,10 +28,11 @@
 #ifndef SRC_DAWN_NODE_BINDING_GPUCOMPUTEPIPELINE_H_
 #define SRC_DAWN_NODE_BINDING_GPUCOMPUTEPIPELINE_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <string>
 
 #include "dawn/native/DawnNative.h"
-#include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 

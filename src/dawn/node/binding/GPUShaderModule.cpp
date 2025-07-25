@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -41,31 +41,56 @@ namespace wgpu::binding {
 GPUShaderModule::GPUShaderModule(const wgpu::ShaderModuleDescriptor& desc,
                                  wgpu::ShaderModule shader,
                                  std::shared_ptr<AsyncRunner> async)
-    : shader_(std::move(shader)), async_(std::move(async)), label_(desc.label ? desc.label : "") {}
+    : shader_(std::move(shader)), async_(std::move(async)), label_(CopyLabel(desc.label)) {}
 
 interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
 GPUShaderModule::getCompilationInfo(Napi::Env env) {
     struct GPUCompilationMessage : public interop::GPUCompilationMessage {
-        WGPUCompilationMessage message;
+        interop::GPUCompilationMessageType type;
+        uint64_t lineNum;
+        uint64_t linePos;
+        uint64_t offset;
+        uint64_t length;
+        std::string message;
 
-        explicit GPUCompilationMessage(const WGPUCompilationMessage& m) : message(m) {}
-        std::string getMessage(Napi::Env) override { return message.message; }
-        interop::GPUCompilationMessageType getType(Napi::Env) override {
-            switch (message.type) {
-                case WGPUCompilationMessageType_Error:
-                    return interop::GPUCompilationMessageType::kError;
-                case WGPUCompilationMessageType_Warning:
-                    return interop::GPUCompilationMessageType::kWarning;
-                case WGPUCompilationMessageType_Info:
-                    return interop::GPUCompilationMessageType::kInfo;
+        explicit GPUCompilationMessage(const wgpu::CompilationMessage& m)
+            : lineNum(m.lineNum),
+              message(m.message) {
+            [[maybe_unused]] bool foundUtf16 = false;
+            for (const auto* chain = m.nextInChain; chain != nullptr; chain = chain->nextInChain) {
+                if (chain->sType == wgpu::SType::DawnCompilationMessageUtf16) {
+                    assert(!foundUtf16);
+                    foundUtf16 = true;
+                    const auto* utf16 =
+                        reinterpret_cast<const wgpu::DawnCompilationMessageUtf16*>(chain);
+                    linePos = utf16->linePos;
+                    offset = utf16->offset;
+                    length = utf16->length;
+                }
+            }
+            assert(foundUtf16);
+
+            switch (m.type) {
+                case wgpu::CompilationMessageType::Error:
+                    type = interop::GPUCompilationMessageType::kError;
+                    break;
+                case wgpu::CompilationMessageType::Warning:
+                    type = interop::GPUCompilationMessageType::kWarning;
+                    break;
+                case wgpu::CompilationMessageType::Info:
+                    type = interop::GPUCompilationMessageType::kInfo;
+                    break;
                 default:
-                    UNREACHABLE();
+                    UNREACHABLE("unrecognized handled compilation message type", m.type);
             }
         }
-        uint64_t getLineNum(Napi::Env) override { return message.lineNum; }
-        uint64_t getLinePos(Napi::Env) override { return message.utf16LinePos; }
-        uint64_t getOffset(Napi::Env) override { return message.utf16Offset; }
-        uint64_t getLength(Napi::Env) override { return message.utf16Length; }
+
+        std::string getMessage(Napi::Env) override { return message; }
+        interop::GPUCompilationMessageType getType(Napi::Env) override { return type; }
+        uint64_t getLineNum(Napi::Env) override { return lineNum; }
+        uint64_t getLinePos(Napi::Env) override { return linePos; }
+        uint64_t getOffset(Napi::Env) override { return offset; }
+        uint64_t getLength(Napi::Env) override { return length; }
     };
 
     using Messages = std::vector<interop::Interface<interop::GPUCompilationMessage>>;
@@ -116,7 +141,7 @@ std::string GPUShaderModule::getLabel(Napi::Env) {
 }
 
 void GPUShaderModule::setLabel(Napi::Env, std::string value) {
-    shader_.SetLabel(value.c_str());
+    shader_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

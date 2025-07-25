@@ -1,80 +1,40 @@
+//
+// vert_main
+//
 #version 310 es
 
-layout(location = 0) in vec2 a_particlePos_1;
-layout(location = 1) in vec2 a_particleVel_1;
-layout(location = 2) in vec2 a_pos_1;
-struct Particle {
-  vec2 pos;
-  vec2 vel;
-};
-
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-
-struct Particles {
-  Particle particles[5];
-};
-
-vec4 vert_main(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
+layout(location = 0) in vec2 vert_main_loc0_Input;
+layout(location = 1) in vec2 vert_main_loc1_Input;
+layout(location = 2) in vec2 vert_main_loc2_Input;
+vec4 vert_main_inner(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
   float angle = -(atan(a_particleVel.x, a_particleVel.y));
   vec2 pos = vec2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   return vec4((pos + a_particlePos), 0.0f, 1.0f);
 }
-
 void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vert_main(a_particlePos_1, a_particleVel_1, a_pos_1);
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
+  vec4 v = vert_main_inner(vert_main_loc0_Input, vert_main_loc1_Input, vert_main_loc2_Input);
+  gl_Position = vec4(v.x, -(v.y), ((2.0f * v.z) - v.w), v.w);
+  gl_PointSize = 1.0f;
 }
+//
+// frag_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(location = 0) out vec4 value;
-struct Particle {
-  vec2 pos;
-  vec2 vel;
-};
-
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-
-struct Particles {
-  Particle particles[5];
-};
-
-vec4 frag_main() {
+layout(location = 0) out vec4 frag_main_loc0_Output;
+vec4 frag_main_inner() {
   return vec4(1.0f);
 }
-
 void main() {
-  vec4 inner_result = frag_main();
-  value = inner_result;
-  return;
+  frag_main_loc0_Output = frag_main_inner();
 }
+//
+// comp_main
+//
 #version 310 es
 
-struct Particle {
-  vec2 pos;
-  vec2 vel;
-};
 
 struct SimParams {
   float deltaT;
@@ -84,68 +44,95 @@ struct SimParams {
   float rule1Scale;
   float rule2Scale;
   float rule3Scale;
-  uint pad;
+};
+
+struct Particle {
+  vec2 pos;
+  vec2 vel;
 };
 
 struct Particles {
   Particle particles[5];
 };
 
-layout(binding = 0, std140) uniform params_block_ubo {
+layout(binding = 0, std140)
+uniform params_block_1_ubo {
   SimParams inner;
-} params;
-
-layout(binding = 1, std430) buffer particlesA_block_ssbo {
+} v;
+layout(binding = 1, std430)
+buffer particlesA_block_1_ssbo {
   Particles inner;
-} particlesA;
-
-layout(binding = 2, std430) buffer particlesA_block_ssbo_1 {
+} v_1;
+layout(binding = 2, std430)
+buffer particlesB_block_1_ssbo {
   Particles inner;
-} particlesB;
-
-void comp_main(uvec3 tint_symbol) {
-  uint index = tint_symbol.x;
+} v_2;
+void comp_main_inner(uvec3 v_3) {
+  uint index = v_3.x;
   if ((index >= 5u)) {
     return;
   }
-  vec2 vPos = particlesA.inner.particles[index].pos;
-  vec2 vVel = particlesA.inner.particles[index].vel;
+  uint v_4 = min(index, 4u);
+  vec2 vPos = v_1.inner.particles[v_4].pos;
+  uint v_5 = min(index, 4u);
+  vec2 vVel = v_1.inner.particles[v_5].vel;
   vec2 cMass = vec2(0.0f);
   vec2 cVel = vec2(0.0f);
   vec2 colVel = vec2(0.0f);
   int cMassCount = 0;
   int cVelCount = 0;
-  vec2 pos = vec2(0.0f, 0.0f);
-  vec2 vel = vec2(0.0f, 0.0f);
+  vec2 pos = vec2(0.0f);
+  vec2 vel = vec2(0.0f);
   {
-    for(uint i = 0u; (i < 5u); i = (i + 1u)) {
+    uint i = 0u;
+    while(true) {
+      if ((i < 5u)) {
+      } else {
+        break;
+      }
       if ((i == index)) {
+        {
+          i = (i + 1u);
+        }
         continue;
       }
-      pos = particlesA.inner.particles[i].pos.xy;
-      vel = particlesA.inner.particles[i].vel.xy;
-      if ((distance(pos, vPos) < params.inner.rule1Distance)) {
+      uint v_6 = min(i, 4u);
+      pos = v_1.inner.particles[v_6].pos.xy;
+      uint v_7 = min(i, 4u);
+      vel = v_1.inner.particles[v_7].vel.xy;
+      if ((distance(pos, vPos) < v.inner.rule1Distance)) {
         cMass = (cMass + pos);
-        cMassCount = (cMassCount + 1);
+        uint v_8 = uint(cMassCount);
+        cMassCount = int((v_8 + uint(1)));
       }
-      if ((distance(pos, vPos) < params.inner.rule2Distance)) {
+      if ((distance(pos, vPos) < v.inner.rule2Distance)) {
         colVel = (colVel - (pos - vPos));
       }
-      if ((distance(pos, vPos) < params.inner.rule3Distance)) {
+      if ((distance(pos, vPos) < v.inner.rule3Distance)) {
         cVel = (cVel + vel);
-        cVelCount = (cVelCount + 1);
+        uint v_9 = uint(cVelCount);
+        cVelCount = int((v_9 + uint(1)));
       }
+      {
+        i = (i + 1u);
+      }
+      continue;
     }
   }
   if ((cMassCount > 0)) {
-    cMass = ((cMass / vec2(float(cMassCount), float(cMassCount))) - vPos);
+    vec2 v_10 = cMass;
+    float v_11 = float(cMassCount);
+    vec2 v_12 = (v_10 / vec2(v_11, float(cMassCount)));
+    cMass = (v_12 - vPos);
   }
   if ((cVelCount > 0)) {
-    cVel = (cVel / vec2(float(cVelCount), float(cVelCount)));
+    vec2 v_13 = cVel;
+    float v_14 = float(cVelCount);
+    cVel = (v_13 / vec2(v_14, float(cVelCount)));
   }
-  vVel = (((vVel + (cMass * params.inner.rule1Scale)) + (colVel * params.inner.rule2Scale)) + (cVel * params.inner.rule3Scale));
+  vVel = (((vVel + (cMass * v.inner.rule1Scale)) + (colVel * v.inner.rule2Scale)) + (cVel * v.inner.rule3Scale));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
-  vPos = (vPos + (vVel * params.inner.deltaT));
+  vPos = (vPos + (vVel * v.inner.deltaT));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;
   }
@@ -158,12 +145,12 @@ void comp_main(uvec3 tint_symbol) {
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  particlesB.inner.particles[index].pos = vPos;
-  particlesB.inner.particles[index].vel = vVel;
+  uint v_15 = min(index, 4u);
+  v_2.inner.particles[v_15].pos = vPos;
+  uint v_16 = min(index, 4u);
+  v_2.inner.particles[v_16].vel = vVel;
 }
-
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  comp_main(gl_GlobalInvocationID);
-  return;
+  comp_main_inner(gl_GlobalInvocationID);
 }

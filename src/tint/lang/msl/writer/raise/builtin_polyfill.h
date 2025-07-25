@@ -28,17 +28,11 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_BUILTIN_POLYFILL_H_
 
-#include <string>
-
-#include "src/tint/lang/core/ir/constant.h"
-#include "src/tint/lang/core/type/type.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/utils/result.h"
 
 // Forward declarations.
 namespace tint::core::ir {
 class Module;
-class Texture;
 }  // namespace tint::core::ir
 
 namespace tint::msl::writer::raise {

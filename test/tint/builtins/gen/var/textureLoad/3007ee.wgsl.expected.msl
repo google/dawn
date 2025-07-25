@@ -1,0 +1,519 @@
+SKIP: FAILED
+
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, vec4<i32>, read_write> @offset(0)
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 1u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%fragment_main = @fragment func(%prevent_dce:ptr<storage, vec4<i32>, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %16  # %tint_module_vars_1: 'tint_module_vars'
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    %19:ptr<storage, vec4<i32>, read_write> = access %tint_module_vars_1, 0u
+    store %19, %18
+    ret
+  }
+}
+Failed to generate: :16:17 error: get_width: no matching call to 'get_width(texel_buffer<rg8sint, read>)'
+
+16 candidate functions:
+ • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d_array<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_3d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_2d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_2d_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_3d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+
+    %6:u32 = %4.get_width
+                ^^^^^^^^^
+
+:12:3 note: in block
+  $B1: {
+  ^^^
+
+:20:24 error: read: no matching call to 'read(texel_buffer<rg8sint, read>, u32)'
+
+20 candidate functions:
+ • 'read(texture: texture_storage_1d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_1d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_1d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<u32>'
+ • 'read(texture: texture_1d<T>  ✗ , coords: u32  ✓ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_3d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_2d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_3d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_2d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_storage_3d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_depth_2d  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_multisampled_2d  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> f32' where:
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<f32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<i32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<u32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_2d<T>  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_3d<T>  ✗ , coords: vec3<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_multisampled_2d<T>  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_2d_array  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_2d_array<T>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+
+    %10:vec4<i32> = %4.read %9
+                       ^^^^
+
+:12:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, vec4<i32>, read_write> @offset(0)
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 1u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%fragment_main = @fragment func(%prevent_dce:ptr<storage, vec4<i32>, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %16  # %tint_module_vars_1: 'tint_module_vars'
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    %19:ptr<storage, vec4<i32>, read_write> = access %tint_module_vars_1, 0u
+    store %19, %18
+    ret
+  }
+}
+
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, vec4<i32>, read_write> @offset(0)
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 1u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, vec4<i32>, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %16  # %tint_module_vars_1: 'tint_module_vars'
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    %19:ptr<storage, vec4<i32>, read_write> = access %tint_module_vars_1, 0u
+    store %19, %18
+    ret
+  }
+}
+Failed to generate: :16:17 error: get_width: no matching call to 'get_width(texel_buffer<rg8sint, read>)'
+
+16 candidate functions:
+ • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d_array<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_3d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_2d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_2d_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_3d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+
+    %6:u32 = %4.get_width
+                ^^^^^^^^^
+
+:12:3 note: in block
+  $B1: {
+  ^^^
+
+:20:24 error: read: no matching call to 'read(texel_buffer<rg8sint, read>, u32)'
+
+20 candidate functions:
+ • 'read(texture: texture_storage_1d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_1d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_1d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<u32>'
+ • 'read(texture: texture_1d<T>  ✗ , coords: u32  ✓ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_3d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_2d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_3d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_2d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_storage_3d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_depth_2d  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_multisampled_2d  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> f32' where:
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<f32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<i32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<u32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_2d<T>  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_3d<T>  ✗ , coords: vec3<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_multisampled_2d<T>  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_2d_array  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_2d_array<T>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+
+    %10:vec4<i32> = %4.read %9
+                       ^^^^
+
+:12:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  prevent_dce:ptr<storage, vec4<i32>, read_write> @offset(0)
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 1u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%compute_main = @compute @workgroup_size(1i, 1i, 1i) func(%prevent_dce:ptr<storage, vec4<i32>, read_write> [@binding_point(0, 0)], %arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):void {
+  $B2: {
+    %16:tint_module_vars_struct = construct %prevent_dce, %arg_0
+    %tint_module_vars_1:tint_module_vars_struct = let %16  # %tint_module_vars_1: 'tint_module_vars'
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    %19:ptr<storage, vec4<i32>, read_write> = access %tint_module_vars_1, 0u
+    store %19, %18
+    ret
+  }
+}
+
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+vertex_main_outputs = struct @align(16) {
+  VertexOutput_pos:vec4<f32> @offset(0), @builtin(position)
+  VertexOutput_prevent_dce:vec4<i32> @offset(16), @location(0), @interpolate(flat)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 0u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%vertex_main_inner = func(%tint_module_vars_1:tint_module_vars_struct):VertexOutput {  # %tint_module_vars_1: 'tint_module_vars'
+  $B2: {
+    %out:ptr<function, VertexOutput, read_write> = var undef
+    %16:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    store %16, vec4<f32>(0.0f)
+    %17:ptr<function, vec4<i32>, read_write> = access %out, 1u
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    store %17, %18
+    %19:VertexOutput = load %out
+    ret %19
+  }
+}
+%vertex_main = @vertex func(%arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):vertex_main_outputs {
+  $B3: {
+    %22:tint_module_vars_struct = construct %arg_0
+    %tint_module_vars_2:tint_module_vars_struct = let %22  # %tint_module_vars_2: 'tint_module_vars'
+    %24:VertexOutput = call %vertex_main_inner, %tint_module_vars_2
+    %25:vec4<f32> = access %24, 0u
+    %26:vec4<i32> = access %24, 1u
+    %tint_wrapper_result:ptr<function, vertex_main_outputs, read_write> = var undef
+    %28:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
+    store %28, %25
+    %29:ptr<function, vec4<i32>, read_write> = access %tint_wrapper_result, 1u
+    store %29, %26
+    %30:vertex_main_outputs = load %tint_wrapper_result
+    ret %30
+  }
+}
+Failed to generate: :20:17 error: get_width: no matching call to 'get_width(texel_buffer<rg8sint, read>)'
+
+16 candidate functions:
+ • 'get_width(texture: texture_depth_multisampled_2d  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_1d<F, A>  ✗ ) -> u32'
+ • 'get_width(texture: texture_1d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_multisampled_2d<T>  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_depth_2d  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_2d_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_depth_cube_array  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_2d_array<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_storage_3d<F, A>  ✗ , u32  ✗ ) -> u32'
+ • 'get_width(texture: texture_2d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_2d_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_3d<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'get_width(texture: texture_cube_array<T>  ✗ , u32  ✗ ) -> u32' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+
+    %6:u32 = %4.get_width
+                ^^^^^^^^^
+
+:16:3 note: in block
+  $B1: {
+  ^^^
+
+:24:24 error: read: no matching call to 'read(texel_buffer<rg8sint, read>, u32)'
+
+20 candidate functions:
+ • 'read(texture: texture_storage_1d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_1d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_1d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: u32  ✓ ) -> vec4<u32>'
+ • 'read(texture: texture_1d<T>  ✗ , coords: u32  ✓ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_3d<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<f32>'
+ • 'read(texture: texture_storage_2d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_3d<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<i32>'
+ • 'read(texture: texture_storage_2d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_storage_3d<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec3<u32>  ✗ ) -> vec4<u32>'
+ • 'read(texture: texture_depth_2d  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_multisampled_2d  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> f32' where:
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8unorm', 'r8snorm', 'rg8unorm', 'rg8snorm', 'bgra8unorm', 'rgba8unorm', 'rgba8snorm', 'r16unorm', 'r16snorm', 'rg16unorm', 'rg16snorm', 'rgba16unorm', 'rgba16snorm', 'r16float', 'rg16float', 'rgba16float', 'r32float', 'rg32float', 'rgba32float', 'rgb10a2unorm' or 'rg11b10ufloat, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<f32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8sint', 'rg8sint', 'rgba8sint', 'r16sint', 'rg16sint', 'rgba16sint', 'r32sint', 'rg32sint' or 'rgba32sint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<i32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_storage_2d_array<r8uint', 'rg8uint', 'r16uint', 'rg16uint', 'rgba8uint', 'rgba16uint', 'r32uint', 'rg32uint', 'rgba32uint' or 'rgb10a2uint, read' or 'read_write>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ ) -> vec4<u32>' where:
+      ✗  'A' is 'i32' or 'u32'
+ • 'read(texture: texture_2d<T>  ✗ , coords: vec2<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_3d<T>  ✗ , coords: vec3<u32>  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_multisampled_2d<T>  ✗ , coords: vec2<u32>  ✗ , sample_index: S  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'S' is 'i32' or 'u32'
+ • 'read(texture: texture_depth_2d_array  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> f32' where:
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+ • 'read(texture: texture_2d_array<T>  ✗ , coords: vec2<u32>  ✗ , array_index: A  ✗ , level: L  ✗ ) -> vec4<T>' where:
+      ✗  'T' is 'f32', 'i32' or 'u32'
+      ✗  'A' is 'i32' or 'u32'
+      ✗  'L' is 'i32' or 'u32'
+
+    %10:vec4<i32> = %4.read %9
+                       ^^^^
+
+:16:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+VertexOutput = struct @align(16) {
+  pos:vec4<f32> @offset(0)
+  prevent_dce:vec4<i32> @offset(16)
+}
+
+vertex_main_outputs = struct @align(16) {
+  VertexOutput_pos:vec4<f32> @offset(0), @builtin(position)
+  VertexOutput_prevent_dce:vec4<i32> @offset(16), @location(0), @interpolate(flat)
+}
+
+tint_module_vars_struct = struct @align(1) {
+  arg_0:texel_buffer<rg8sint, read> @offset(0)
+}
+
+%textureLoad_3007ee = func(%tint_module_vars:tint_module_vars_struct):vec4<i32> {
+  $B1: {
+    %arg_1:ptr<function, u32, read_write> = var 1u
+    %4:texel_buffer<rg8sint, read> = access %tint_module_vars, 0u
+    %5:u32 = load %arg_1
+    %6:u32 = %4.get_width
+    %7:u32 = construct %6
+    %8:u32 = sub %7, 1u
+    %9:u32 = min %5, %8
+    %10:vec4<i32> = %4.read %9
+    %res:ptr<function, vec4<i32>, read_write> = var %10
+    %12:vec4<i32> = load %res
+    ret %12
+  }
+}
+%vertex_main_inner = func(%tint_module_vars_1:tint_module_vars_struct):VertexOutput {  # %tint_module_vars_1: 'tint_module_vars'
+  $B2: {
+    %out:ptr<function, VertexOutput, read_write> = var undef
+    %16:ptr<function, vec4<f32>, read_write> = access %out, 0u
+    store %16, vec4<f32>(0.0f)
+    %17:ptr<function, vec4<i32>, read_write> = access %out, 1u
+    %18:vec4<i32> = call %textureLoad_3007ee, %tint_module_vars_1
+    store %17, %18
+    %19:VertexOutput = load %out
+    ret %19
+  }
+}
+%vertex_main = @vertex func(%arg_0:texel_buffer<rg8sint, read> [@binding_point(0, 0)]):vertex_main_outputs {
+  $B3: {
+    %22:tint_module_vars_struct = construct %arg_0
+    %tint_module_vars_2:tint_module_vars_struct = let %22  # %tint_module_vars_2: 'tint_module_vars'
+    %24:VertexOutput = call %vertex_main_inner, %tint_module_vars_2
+    %25:vec4<f32> = access %24, 0u
+    %26:vec4<i32> = access %24, 1u
+    %tint_wrapper_result:ptr<function, vertex_main_outputs, read_write> = var undef
+    %28:ptr<function, vec4<f32>, read_write> = access %tint_wrapper_result, 0u
+    store %28, %25
+    %29:ptr<function, vec4<i32>, read_write> = access %tint_wrapper_result, 1u
+    store %29, %26
+    %30:vertex_main_outputs = load %tint_wrapper_result
+    ret %30
+  }
+}
+
+//
+// fragment_main
+//
+//
+// compute_main
+//
+//
+// vertex_main
+//
+
+tint executable returned error: exit status 1

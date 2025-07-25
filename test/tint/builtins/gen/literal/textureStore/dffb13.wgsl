@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// flags: --glsl-desktop
 @group(1) @binding(0) var arg_0: texture_storage_2d_array<rg32uint, write>;
 
 // fn textureStore(texture: texture_storage_2d_array<rg32uint, write>, coords: vec2<i32>, array_index: u32, value: vec4<u32>)

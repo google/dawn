@@ -27,16 +27,10 @@
 
 #include "src/tint/lang/wgsl/sem/function.h"
 
-#include "src/tint/lang/core/type/depth_texture.h"
-#include "src/tint/lang/core/type/external_texture.h"
-#include "src/tint/lang/core/type/multisampled_texture.h"
-#include "src/tint/lang/core/type/sampled_texture.h"
-#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/must_use_attribute.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/utils/containers/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 
@@ -50,21 +44,6 @@ Function::Function(const ast::Function* declaration)
 
 Function::~Function() = default;
 
-std::vector<std::pair<const Variable*, const ast::LocationAttribute*>>
-Function::TransitivelyReferencedLocationVariables() const {
-    std::vector<std::pair<const Variable*, const ast::LocationAttribute*>> ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        for (auto* attr : global->Declaration()->attributes) {
-            if (auto* location = attr->As<ast::LocationAttribute>()) {
-                ret.push_back({global, location});
-                break;
-            }
-        }
-    }
-    return ret;
-}
-
 void Function::AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global) {
     if (transitively_referenced_globals_.Add(global)) {
         for (auto* ref : global->TransitivelyReferencedOverrides()) {
@@ -73,132 +52,13 @@ void Function::AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global
     }
 }
 
-Function::VariableBindings Function::TransitivelyReferencedUniformVariables() const {
-    VariableBindings ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        if (global->AddressSpace() != core::AddressSpace::kUniform) {
-            continue;
-        }
-
-        if (auto bp = global->Attributes().binding_point) {
-            ret.push_back({global, *bp});
-        }
-    }
-    return ret;
-}
-
-Function::VariableBindings Function::TransitivelyReferencedStorageBufferVariables() const {
-    VariableBindings ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        if (global->AddressSpace() != core::AddressSpace::kStorage) {
-            continue;
-        }
-
-        if (auto bp = global->Attributes().binding_point) {
-            ret.push_back({global, *bp});
-        }
-    }
-    return ret;
-}
-
-std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>>
-Function::TransitivelyReferencedBuiltinVariables() const {
-    std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>> ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        for (auto* attr : global->Declaration()->attributes) {
-            if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-                ret.push_back({global, builtin});
-                break;
-            }
-        }
-    }
-    return ret;
-}
-
-Function::VariableBindings Function::TransitivelyReferencedSamplerVariables() const {
-    return TransitivelyReferencedSamplerVariablesImpl(core::type::SamplerKind::kSampler);
-}
-
-Function::VariableBindings Function::TransitivelyReferencedComparisonSamplerVariables() const {
-    return TransitivelyReferencedSamplerVariablesImpl(core::type::SamplerKind::kComparisonSampler);
-}
-
-Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariables() const {
-    return TransitivelyReferencedSampledTextureVariablesImpl(false);
-}
-
-Function::VariableBindings Function::TransitivelyReferencedMultisampledTextureVariables() const {
-    return TransitivelyReferencedSampledTextureVariablesImpl(true);
-}
-
-Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
-    const tint::TypeInfo* type) const {
-    VariableBindings ret;
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = global->Type()->UnwrapRef();
-        if (unwrapped_type->TypeInfo().Is(type)) {
-            if (auto bp = global->Attributes().binding_point) {
-                ret.push_back({global, *bp});
-            }
-        }
-    }
-    return ret;
-}
-
-bool Function::HasAncestorEntryPoint(Symbol symbol) const {
-    for (const auto* point : ancestor_entry_points_) {
+bool Function::HasCallGraphEntryPoint(Symbol symbol) const {
+    for (const auto* point : call_graph_entry_points_) {
         if (point->Declaration()->name->symbol == symbol) {
             return true;
         }
     }
     return false;
-}
-
-Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
-    core::type::SamplerKind kind) const {
-    VariableBindings ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = global->Type()->UnwrapRef();
-        auto* sampler = unwrapped_type->As<core::type::Sampler>();
-        if (sampler == nullptr || sampler->kind() != kind) {
-            continue;
-        }
-
-        if (auto bp = global->Attributes().binding_point) {
-            ret.push_back({global, *bp});
-        }
-    }
-    return ret;
-}
-
-Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariablesImpl(
-    bool multisampled) const {
-    VariableBindings ret;
-
-    for (auto* global : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = global->Type()->UnwrapRef();
-        auto* texture = unwrapped_type->As<core::type::Texture>();
-        if (texture == nullptr) {
-            continue;
-        }
-
-        auto is_multisampled = texture->Is<core::type::MultisampledTexture>();
-        auto is_sampled = texture->Is<core::type::SampledTexture>();
-
-        if ((multisampled && !is_multisampled) || (!multisampled && !is_sampled)) {
-            continue;
-        }
-
-        if (auto bp = global->Attributes().binding_point) {
-            ret.push_back({global, *bp});
-        }
-    }
-
-    return ret;
 }
 
 void Function::SetDiagnosticSeverity(wgsl::DiagnosticRule rule, wgsl::DiagnosticSeverity severity) {

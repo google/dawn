@@ -1,36 +1,46 @@
+
 cbuffer cbuffer_a : register(b0) {
   uint4 a[8];
 };
 RWByteAddressBuffer s : register(u1);
-
-float4x2 a_load_1(uint offset) {
-  const uint scalar_offset = ((offset + 0u)) / 4;
-  uint4 ubo_load = a[scalar_offset / 4];
-  const uint scalar_offset_1 = ((offset + 8u)) / 4;
-  uint4 ubo_load_1 = a[scalar_offset_1 / 4];
-  const uint scalar_offset_2 = ((offset + 16u)) / 4;
-  uint4 ubo_load_2 = a[scalar_offset_2 / 4];
-  const uint scalar_offset_3 = ((offset + 24u)) / 4;
-  uint4 ubo_load_3 = a[scalar_offset_3 / 4];
-  return float4x2(asfloat(((scalar_offset & 2) ? ubo_load.zw : ubo_load.xy)), asfloat(((scalar_offset_1 & 2) ? ubo_load_1.zw : ubo_load_1.xy)), asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy)), asfloat(((scalar_offset_3 & 2) ? ubo_load_3.zw : ubo_load_3.xy)));
+float4x2 v(uint start_byte_offset) {
+  uint4 v_1 = a[(start_byte_offset / 16u)];
+  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  uint4 v_3 = a[((8u + start_byte_offset) / 16u)];
+  float2 v_4 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy)));
+  uint4 v_5 = a[((16u + start_byte_offset) / 16u)];
+  float2 v_6 = asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.zw) : (v_5.xy)));
+  uint4 v_7 = a[((24u + start_byte_offset) / 16u)];
+  return float4x2(v_2, v_4, v_6, asfloat(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_7.zw) : (v_7.xy))));
 }
 
-typedef float4x2 a_load_ret[4];
-a_load_ret a_load(uint offset) {
-  float4x2 arr[4] = (float4x2[4])0;
+typedef float4x2 ary_ret[4];
+ary_ret v_8(uint start_byte_offset) {
+  float4x2 a_1[4] = (float4x2[4])0;
   {
-    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-      arr[i] = a_load_1((offset + (i * 32u)));
+    uint v_9 = 0u;
+    v_9 = 0u;
+    while(true) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
+        break;
+      }
+      a_1[v_10] = v((start_byte_offset + (v_10 * 32u)));
+      {
+        v_9 = (v_10 + 1u);
+      }
+      continue;
     }
   }
-  return arr;
+  float4x2 v_11[4] = a_1;
+  return v_11;
 }
 
 [numthreads(1, 1, 1)]
 void f() {
-  float4x2 l_a[4] = a_load(0u);
-  float4x2 l_a_i = a_load_1(64u);
-  float2 l_a_i_i = asfloat(a[4].zw);
-  s.Store(0u, asuint((((asfloat(a[4].z) + l_a[0][0].x) + l_a_i[0].x) + l_a_i_i.x)));
-  return;
+  float4x2 l_a[4] = v_8(0u);
+  float4x2 l_a_i = v(64u);
+  float2 l_a_i_i = asfloat(a[4u].zw);
+  s.Store(0u, asuint((((asfloat(a[4u].z) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
 }
+

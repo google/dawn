@@ -1,9 +1,6 @@
 #version 310 es
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
-  return;
-}
+
 struct Inner {
   bool b;
   ivec4 v;
@@ -15,14 +12,12 @@ struct Outer {
 };
 
 shared Outer v;
-Outer tint_workgroupUniformLoad_v() {
-  barrier();
-  Outer result = v;
-  barrier();
-  return result;
-}
-
 Outer foo() {
-  return tint_workgroupUniformLoad_v();
+  barrier();
+  Outer v_1 = v;
+  barrier();
+  return v_1;
 }
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

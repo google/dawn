@@ -51,8 +51,6 @@ class SwapChain final : public SwapChainBase {
     ~SwapChain() override;
 
   private:
-    void DestroyImpl() override;
-
     using SwapChainBase::SwapChainBase;
     MaybeError Initialize(SwapChainBase* previousSwapChain);
 

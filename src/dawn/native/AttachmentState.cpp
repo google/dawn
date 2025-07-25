@@ -27,7 +27,8 @@
 
 #include "dawn/native/AttachmentState.h"
 
-#include "dawn/common/BitSetIterator.h"
+#include <bit>
+
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/native/ChainUtils.h"
@@ -141,7 +142,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
         if (colorAttachment.loadOp == wgpu::LoadOp::ExpandResolveTexture) {
             mExpandResolveInfo.attachmentsToExpandResolve.set(i);
         }
-        mExpandResolveInfo.resolveTargetsMask.set(i, colorAttachment.resolveTarget);
+        mExpandResolveInfo.resolveTargetsMask.set(i, colorAttachment.resolveTarget != nullptr);
     }
 
     // Gather the depth-stencil information.
@@ -213,7 +214,7 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
     }
 
     // Check color formats
-    for (auto i : IterateBitSet(a->mColorAttachmentsSet)) {
+    for (auto i : a->mColorAttachmentsSet) {
         if (a->mColorFormats[i] != b->mColorFormats[i]) {
             return false;
         }
@@ -260,7 +261,7 @@ size_t AttachmentState::ComputeContentHash() {
 
     // Hash color formats
     HashCombine(&hash, mColorAttachmentsSet);
-    for (auto i : IterateBitSet(mColorAttachmentsSet)) {
+    for (auto i : mColorAttachmentsSet) {
         HashCombine(&hash, mColorFormats[i]);
     }
 
@@ -329,7 +330,8 @@ AttachmentState::ComputeStorageAttachmentPackingInColorAttachments() const {
     auto availableSlots = ~mColorAttachmentsSet;
     for (size_t i = 0; i < mStorageAttachmentSlots.size(); i++) {
         DAWN_ASSERT(!availableSlots.none());
-        auto slot = ColorAttachmentIndex(uint8_t(ScanForward(availableSlots.to_ulong())));
+        auto slot = ColorAttachmentIndex(static_cast<uint8_t>(
+            std::countr_zero(static_cast<uint32_t>(availableSlots.to_ulong()))));
         availableSlots.reset(slot);
         result[i] = slot;
     }
