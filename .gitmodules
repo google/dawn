@@ -81,10 +81,6 @@
 	path = third_party/swiftshader
 	url = https://swiftshader.googlesource.com/SwiftShader
 	gclient-condition = dawn_standalone
-[submodule "third_party/vulkan-deps"]
-	path = third_party/vulkan-deps
-	url = https://chromium.googlesource.com/vulkan-deps
-	gclient-condition = dawn_standalone
 [submodule "third_party/glslang/src"]
 	path = third_party/glslang/src
 	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/glslang
