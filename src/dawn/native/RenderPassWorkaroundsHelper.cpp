@@ -37,6 +37,7 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {
@@ -221,6 +222,8 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
     std::optional<RenderPassDescriptorResolveRect> expandResolveRect;
     if (auto* legacyResolveRect =
             renderPassDescriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
+        // This is a deprecated option.
+        // TODO(417768364): Remove this once the all the call sites are updated to use the new rect.
         RenderPassDescriptorResolveRect rect;
         rect.colorOffsetX = legacyResolveRect->x;
         rect.colorOffsetY = legacyResolveRect->y;
@@ -229,7 +232,6 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         rect.width = legacyResolveRect->width;
         rect.height = legacyResolveRect->height;
         expandResolveRect = rect;
-
     } else if (auto* resolveRect = renderPassDescriptor.Get<RenderPassDescriptorResolveRect>()) {
         expandResolveRect = *resolveRect;
     }
@@ -238,43 +240,54 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
     // removing the resolve targets and forcing the storeOp to Store. After the pass has ended an
     // new pass is recorded for each resolve target that resolves it separately.
     if (expandResolveRect) {
-        std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
+        if (device->CanResolveSubRect()) {
+            // When CanResolveSubRect is true, the resolve parameters are passed through 'cmd' to
+            // execute the appropriate resolve operation.
+            cmd->resolveRect = {.colorOffsetX = expandResolveRect->colorOffsetX,
+                                .colorOffsetY = expandResolveRect->colorOffsetY,
+                                .resolveOffsetX = expandResolveRect->resolveOffsetX,
+                                .resolveOffsetY = expandResolveRect->resolveOffsetY,
+                                .updateWidth = expandResolveRect->width,
+                                .updateHeight = expandResolveRect->height};
+        } else {
+            std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 
-        for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
-            auto& attachmentInfo = cmd->colorAttachments[i];
-            TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
-            if (!resolveTarget) {
-                continue;
-            }
-            // Save the color and resolve targets together for an explicit resolve pass
-            // after this one ends, then remove the resolve target from this pass and
-            // force the storeOp to Store.
-            temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(), resolveTarget,
-                                                     attachmentInfo.storeOp);
-            attachmentInfo.storeOp = wgpu::StoreOp::Store;
-            attachmentInfo.resolveTarget = nullptr;
-        }
-        for (auto& deferredResolve : temporaryResolveAttachments) {
-            passEndOperations.emplace_back([device, encoder, resolveRect = *expandResolveRect,
-                                            deferredResolve]() -> MaybeError {
-                // Do partial resolve first in one render pass.
-                DAWN_TRY(ResolveMultisampleWithDraw(device, encoder, resolveRect,
-                                                    deferredResolve.copySrc.Get(),
-                                                    deferredResolve.copyDst.Get()));
-
-                switch (deferredResolve.storeOp) {
-                    case wgpu::StoreOp::Store:
-                        // 'Store' has been handled in the main render pass already.
-                        break;
-                    case wgpu::StoreOp::Discard:
-                        // Handle 'Discard', tagging the subresource as uninitialized.
-                        DiscardWithRenderPass(encoder, deferredResolve.copySrc.Get());
-                        break;
-                    default:
-                        DAWN_UNREACHABLE();
+            for (auto i : cmd->attachmentState->GetColorAttachmentsMask()) {
+                auto& attachmentInfo = cmd->colorAttachments[i];
+                TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
+                if (!resolveTarget) {
+                    continue;
                 }
-                return {};
-            });
+                // Save the color and resolve targets together for an explicit resolve pass
+                // after this one ends, then remove the resolve target from this pass and
+                // force the storeOp to Store.
+                temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(), resolveTarget,
+                                                         attachmentInfo.storeOp);
+                attachmentInfo.storeOp = wgpu::StoreOp::Store;
+                attachmentInfo.resolveTarget = nullptr;
+            }
+            for (auto& deferredResolve : temporaryResolveAttachments) {
+                passEndOperations.emplace_back([device, encoder, resolveRect = *expandResolveRect,
+                                                deferredResolve]() -> MaybeError {
+                    // Do partial resolve first in one render pass.
+                    DAWN_TRY(ResolveMultisampleWithDraw(device, encoder, resolveRect,
+                                                        deferredResolve.copySrc.Get(),
+                                                        deferredResolve.copyDst.Get()));
+
+                    switch (deferredResolve.storeOp) {
+                        case wgpu::StoreOp::Store:
+                            // 'Store' has been handled in the main render pass already.
+                            break;
+                        case wgpu::StoreOp::Discard:
+                            // Handle 'Discard', tagging the subresource as uninitialized.
+                            DiscardWithRenderPass(encoder, deferredResolve.copySrc.Get());
+                            break;
+                        default:
+                            DAWN_UNREACHABLE();
+                    }
+                    return {};
+                });
+            }
         }
     }
 

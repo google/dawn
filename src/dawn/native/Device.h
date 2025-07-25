@@ -386,6 +386,9 @@ class DeviceBase : public ErrorSink,
     // will be resolved into.
     virtual bool CanTextureLoadResolveTargetInTheSameRenderpass() const;
 
+    // Whether the backend supports resolving MSAA textures partially.
+    virtual bool CanResolveSubRect() const;
+
     // Whether the backend can add internal storage usage to the buffer without side effects.
     // - storageUsage is the internal storage usage that would be added.
     // - originalUsage is the original usage of the buffer.

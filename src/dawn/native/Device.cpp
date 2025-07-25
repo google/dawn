@@ -2416,6 +2416,10 @@ bool DeviceBase::CanTextureLoadResolveTargetInTheSameRenderpass() const {
     return false;
 }
 
+bool DeviceBase::CanResolveSubRect() const {
+    return false;
+}
+
 bool DeviceBase::CanAddStorageUsageToBufferWithoutSideEffects(wgpu::BufferUsage storageUsage,
                                                               wgpu::BufferUsage originalUsage,
                                                               size_t bufferSize) const {

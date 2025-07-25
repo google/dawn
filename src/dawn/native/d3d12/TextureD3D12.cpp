@@ -85,7 +85,14 @@ D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& 
         resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
     }
     if (usage & wgpu::TextureUsage::RenderAttachment) {
-        if (format.HasDepthOrStencil()) {
+        if (usage & kResolveAttachmentLoadingUsage) {
+            // Special case for MSAA resolve operations: the resolve target needs to be accessible
+            // as a shader resource during expanding step. Resolve target is also not a render
+            // target in D3D12 term so we can skip assigning the render target stage. Note: this is
+            // important because if we assigned both shader resource and render target state, D3D12
+            // would complain that it's an invalid combination of states.
+            resourceState |= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        } else if (format.HasDepthOrStencil()) {
             resourceState |= D3D12_RESOURCE_STATE_DEPTH_WRITE;
         } else {
             resourceState |= D3D12_RESOURCE_STATE_RENDER_TARGET;

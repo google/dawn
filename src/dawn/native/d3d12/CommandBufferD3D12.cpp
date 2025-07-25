@@ -803,6 +803,31 @@ class VertexBufferTracker {
     PerVertexBuffer<D3D12_VERTEX_BUFFER_VIEW> mD3D12BufferViews = {};
 };
 
+MaybeError EnsureResolveTargetInitialized(CommandRecordingContext* commandContext,
+                                          BeginRenderPassCmd* renderPass) {
+    DAWN_ASSERT(renderPass != nullptr);
+
+    for (ColorAttachmentIndex i : renderPass->attachmentState->GetColorAttachmentsMask()) {
+        TextureViewBase* resolveTarget = renderPass->colorAttachments[i].resolveTarget.Get();
+        if (resolveTarget == nullptr) {
+            continue;
+        }
+
+        if (renderPass->resolveRect.HasValue() &&
+            renderPass->resolveRect.updateWidth != renderPass->width &&
+            renderPass->resolveRect.updateHeight != renderPass->height) {
+            // The resolve texture also has `RenderAttachment` usage but if there is a
+            // resolve rect, the texture would only be partially filled. In this case we
+            // need to initialize the texture otherwise the regions outside the resolve
+            // rect would contain undefined pixels.
+            Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
+            DAWN_TRY(resolveTexture->EnsureSubresourceContentInitialized(
+                commandContext, resolveTexture->GetAllSubresources()));
+        }
+    }
+    return {};
+}
+
 void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
                                    BeginRenderPassCmd* renderPass) {
     DAWN_ASSERT(renderPass != nullptr);
@@ -817,22 +842,34 @@ void ResolveMultisampledRenderPass(CommandRecordingContext* commandContext,
         Texture* colorTexture = ToBackend(colorView->GetTexture());
         Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
 
-        // Transition the usages of the color attachment and resolve target.
+        // Transition the usages of the color attachment.
         colorTexture->TrackUsageAndTransitionNow(
             commandContext, D3D12_RESOURCE_STATE_RESOLVE_SOURCE, colorView->GetSubresourceRange());
-        resolveTexture->TrackUsageAndTransitionNow(commandContext,
-                                                   D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                                                   resolveTarget->GetSubresourceRange());
 
-        // Do MSAA resolve with ResolveSubResource().
         ID3D12Resource* colorTextureHandle = colorTexture->GetD3D12Resource();
         ID3D12Resource* resolveTextureHandle = resolveTexture->GetD3D12Resource();
         const uint32_t resolveTextureSubresourceIndex = resolveTexture->GetSubresourceIndex(
             resolveTarget->GetBaseMipLevel(), resolveTarget->GetBaseArrayLayer(), Aspect::Color);
         constexpr uint32_t kColorTextureSubresourceIndex = 0;
-        commandContext->GetCommandList()->ResolveSubresource(
-            resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
-            kColorTextureSubresourceIndex, colorTexture->GetD3D12Format());
+        // Use ResolveSubresource when there is no resolveRect so we don't have to specify the extra
+        // information ResolveSubresourceRegion requires.
+        if (renderPass->resolveRect.HasValue()) {
+            D3D12_RECT pSrcRect = {static_cast<int32_t>(renderPass->resolveRect.colorOffsetX),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetY),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetX +
+                                                        renderPass->resolveRect.updateWidth),
+                                   static_cast<int32_t>(renderPass->resolveRect.colorOffsetY +
+                                                        renderPass->resolveRect.updateHeight)};
+            commandContext->GetCommandList1()->ResolveSubresourceRegion(
+                resolveTextureHandle, resolveTextureSubresourceIndex,
+                renderPass->resolveRect.resolveOffsetX, renderPass->resolveRect.resolveOffsetY,
+                colorTextureHandle, kColorTextureSubresourceIndex, &pSrcRect,
+                colorTexture->GetD3D12Format(), D3D12_RESOLVE_MODE_AVERAGE);
+        } else {
+            commandContext->GetCommandList()->ResolveSubresource(
+                resolveTextureHandle, resolveTextureSubresourceIndex, colorTextureHandle,
+                kColorTextureSubresourceIndex, colorTexture->GetD3D12Format());
+        }
     }
 }
 
@@ -876,6 +913,8 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
             case Command::BeginRenderPass: {
                 BeginRenderPassCmd* beginRenderPassCmd =
                     mCommands.NextCommand<BeginRenderPassCmd>();
+
+                DAWN_TRY(EnsureResolveTargetInitialized(commandContext, beginRenderPassCmd));
 
                 bool passHasUAV;
                 DAWN_TRY(TransitionAndClearForSyncScope(
@@ -1452,15 +1491,9 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
             // Set color store operation.
             if (attachmentInfo.resolveTarget != nullptr) {
                 TextureView* resolveDestinationView = ToBackend(attachmentInfo.resolveTarget.Get());
-                Texture* resolveDestinationTexture =
-                    ToBackend(resolveDestinationView->GetTexture());
-
-                resolveDestinationTexture->TrackUsageAndTransitionNow(
-                    commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
-                    resolveDestinationView->GetSubresourceRange());
-
                 renderPassBuilder->SetRenderTargetEndingAccessResolve(i, attachmentInfo.storeOp,
-                                                                      view, resolveDestinationView);
+                                                                      view, resolveDestinationView,
+                                                                      renderPass->resolveRect);
             } else {
                 renderPassBuilder->SetRenderTargetEndingAccess(i, attachmentInfo.storeOp);
             }
@@ -1862,6 +1895,18 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                                             renderPass->timestampWrites.endOfPassWriteIndex);
                 }
 
+                for (ColorAttachmentIndex i :
+                     renderPass->attachmentState->GetColorAttachmentsMask()) {
+                    TextureViewBase* resolveTarget =
+                        renderPass->colorAttachments[i].resolveTarget.Get();
+                    if (resolveTarget == nullptr) {
+                        continue;
+                    }
+                    Texture* resolveTexture = ToBackend(resolveTarget->GetTexture());
+                    resolveTexture->TrackUsageAndTransitionNow(
+                        commandContext, D3D12_RESOURCE_STATE_RESOLVE_DEST,
+                        resolveTarget->GetSubresourceRange());
+                }
                 if (useRenderPass) {
                     commandContext->GetCommandList4()->EndRenderPass();
                 } else if (renderPass->attachmentState->GetSampleCount() > 1) {
