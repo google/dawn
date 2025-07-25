@@ -208,6 +208,7 @@ jobs:
             -DDAWN_USE_GLFW=OFF \
             -DDAWN_FETCH_DEPENDENCIES=ON \
             -DDAWN_BUILD_MONOLITHIC_LIBRARY=STATIC \
+            -DDBUILD_SHARED_LIBS=STATIC \
             -DDAWN_ENABLE_OPENGLES=OFF \
             -DDAWN_ENABLE_DESKTOP_GL=OFF
           ninja -C ${{ matrix.output_dir }}
