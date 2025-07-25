@@ -1,15 +1,91 @@
-SKIP: FAILED
-
-../../src/tint/lang/msl/writer/printer/printer.cc:1198 internal compiler error: TINT_UNREACHABLE unhandled: print
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 //
 // fragment_main
 //
+#include <metal_stdlib>
+using namespace metal;
 
-tint executable returned error: signal: trace/BPT trap
+struct tint_module_vars_struct {
+  thread float3* tint_print_invocation_id;
+};
+
+void print_7f7178(tint_module_vars_struct tint_module_vars) {
+  uint4 arg_0 = uint4(1u);
+  float3 const v = (*tint_module_vars.tint_print_invocation_id);
+  os_log_default.log("[ frag fragment_main:L43 position(%f, %f, %f) ] %v4hlu", v.x, v.y, v.z, arg_0);
+}
+
+void fragment_main_inner(float4 tint_symbol, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.tint_print_invocation_id) = tint_symbol.xyz;
+  print_7f7178(tint_module_vars);
+}
+
+fragment void fragment_main(float4 tint_symbol [[position]]) {
+  thread float3 tint_print_invocation_id = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_print_invocation_id=(&tint_print_invocation_id)};
+  fragment_main_inner(tint_symbol, tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  thread uint3* tint_print_invocation_id;
+};
+
+void print_7f7178(tint_module_vars_struct tint_module_vars) {
+  uint4 arg_0 = uint4(1u);
+  uint3 const v = (*tint_module_vars.tint_print_invocation_id);
+  os_log_default.log("[ comp compute_main:L43 global_invocation_id(%u, %u, %u) ] %v4hlu", v.x, v.y, v.z, arg_0);
+}
+
+void compute_main_inner(uint3 tint_symbol, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.tint_print_invocation_id) = tint_symbol;
+  print_7f7178(tint_module_vars);
+}
+
+kernel void compute_main(uint3 tint_symbol [[thread_position_in_grid]]) {
+  thread uint3 tint_print_invocation_id = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_print_invocation_id=(&tint_print_invocation_id)};
+  compute_main_inner(tint_symbol, tint_module_vars);
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  thread uint2* tint_print_invocation_id;
+};
+
+struct VertexOutput {
+  float4 pos;
+};
+
+struct vertex_main_outputs {
+  float4 VertexOutput_pos [[position]];
+};
+
+void print_7f7178(tint_module_vars_struct tint_module_vars) {
+  uint4 arg_0 = uint4(1u);
+  uint2 const v = (*tint_module_vars.tint_print_invocation_id);
+  os_log_default.log("[ vert vertex_main:L43 instance=%u, vertex=%u ] %v4hlu", v.x, v.y, arg_0);
+}
+
+VertexOutput vertex_main_inner(uint tint_symbol, uint tint_symbol_1, tint_module_vars_struct tint_module_vars) {
+  (*tint_module_vars.tint_print_invocation_id) = uint2(tint_symbol, tint_symbol_1);
+  VertexOutput out = {};
+  out.pos = float4(0.0f);
+  print_7f7178(tint_module_vars);
+  return out;
+}
+
+vertex vertex_main_outputs vertex_main(uint tint_symbol [[instance_id]], uint tint_symbol_1 [[vertex_id]]) {
+  thread uint2 tint_print_invocation_id = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_print_invocation_id=(&tint_print_invocation_id)};
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = vertex_main_inner(tint_symbol, tint_symbol_1, tint_module_vars).pos;
+  return tint_wrapper_result;
+}

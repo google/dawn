@@ -225,9 +225,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 }  // namespace
 
 Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(
-        ir, "msl.ShaderIO",
-        tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowDuplicateBindings});
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.ShaderIO",
+                                          tint::core::ir::Capabilities{
+                                              core::ir::Capability::kAllow8BitIntegers,
+                                              core::ir::Capability::kAllowDuplicateBindings,
+                                              core::ir::Capability::kAllowNonCoreTypes,
+                                          });
     if (result != Success) {
         return result;
     }

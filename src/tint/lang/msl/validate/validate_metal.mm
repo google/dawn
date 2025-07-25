@@ -68,6 +68,19 @@ Result ValidateUsingMetal(const std::string& src_original, MslVersion version) {
         case MslVersion::kMsl_2_3:
             compileOptions.languageVersion = MTLLanguageVersion2_3;
             break;
+        case MslVersion::kMsl_3_2:
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 150000
+            if (@available(macOS 15.0, iOS 18.0, *)) {
+                compileOptions.languageVersion = MTLLanguageVersion3_2;
+                break;
+            } else
+#endif
+            {
+                // TODO(crbug.com/434149401): Instead of silently skipping validation, it'd be nice
+                // if we could produce a warning here that the requested validation is not
+                // happening, in a way that does not break the Tint E2E tests on Dawn CQ.
+                return Result{};
+            }
     }
 
     id<MTLLibrary> library = [device newLibraryWithSource:source

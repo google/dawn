@@ -171,6 +171,7 @@ struct Options {
     std::string xcrun_path;
     bool use_argument_buffers = false;
     std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
+    tint::msl::validate::MslVersion msl_version = tint::msl::validate::MslVersion::kMsl_2_3;
 #endif
 
 #if TINT_BUILD_HLSL_WRITER
@@ -439,6 +440,17 @@ When specified, automatically enables MSL validation)",
     auto& use_argument_buffers = options.Add<BoolOption>(
         "use-argument-buffers", "Use the Argument Buffers in MSL", Default{false});
     TINT_DEFER(opts->use_argument_buffers = *use_argument_buffers.value);
+
+    // Default to validating against MSL 2.3, which corresponds to macOS 11.0.
+    tint::Vector<EnumName<tint::msl::validate::MslVersion>, 2> msl_version_enum_names{
+        EnumName(tint::msl::validate::MslVersion::kMsl_2_3, "2.3"),
+        EnumName(tint::msl::validate::MslVersion::kMsl_3_2, "3.2"),
+    };
+    auto& msl_version = options.Add<EnumOption<tint::msl::validate::MslVersion>>(
+        "msl-version", R"(Specify the MSL version.
+Valid values are 2.3 and 3.2)",
+        msl_version_enum_names, Default{tint::msl::validate::MslVersion::kMsl_2_3});
+    TINT_DEFER(opts->msl_version = *msl_version.value);
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
@@ -962,13 +974,10 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
         PrintHash(hash);
     }
 
-    // Default to validating against MSL 2.3, which corresponds to macOS 11.0.
-    auto msl_version = tint::msl::validate::MslVersion::kMsl_2_3;
-
     if (options.validate && options.skip_hash.count(hash) == 0) {
         tint::msl::validate::Result res;
 #if TINT_BUILD_IS_MAC
-        res = tint::msl::validate::ValidateUsingMetal(result->msl, msl_version);
+        res = tint::msl::validate::ValidateUsingMetal(result->msl, options.msl_version);
 #else
 #ifdef _WIN32
         const char* default_xcrun_exe = "metal.exe";
@@ -978,7 +987,7 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
         auto xcrun = tint::Command::LookPath(
             options.xcrun_path.empty() ? default_xcrun_exe : std::string(options.xcrun_path));
         if (xcrun.Found()) {
-            res = tint::msl::validate::Validate(xcrun.Path(), result->msl, msl_version);
+            res = tint::msl::validate::Validate(xcrun.Path(), result->msl, options.msl_version);
         } else {
             res.output = "xcrun executable not found. Cannot validate.";
             res.failed = true;

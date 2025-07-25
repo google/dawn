@@ -45,6 +45,8 @@ See:
 {{- template "HLSLShaderModel" $overload -}}
 {{- /* Generate the optional flag for GLSL desktop */ -}}
 {{- template "GLSLShaderModel" $overload -}}
+{{- /* Generate the optional flag for the MSL version */ -}}
+{{- template "MSLVersion" $overload -}}
 
 {{- /* Generate enable directives */ -}}
 {{- template "EnableDirectives" $overload -}}
@@ -288,6 +290,21 @@ fn vertex_main() -> VertexOutput {
 {{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 // [hlsl-dxc] flags: --hlsl-shader-model 60
 
+{{    end -}}
+
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "MSLVersion"                               -}}
+{{- /* Emits the optional MSL version for a given overload                */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
+
+{{-   if eq "print" $builtin_name}}
+// [msl] flags: --msl-version 3.2
 {{    end -}}
 
 {{- end -}}

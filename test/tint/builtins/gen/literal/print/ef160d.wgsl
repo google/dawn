@@ -38,6 +38,8 @@
 // flags: --hlsl-shader-model 62
 
 
+// [msl] flags: --msl-version 3.2
+
 enable f16;
 
 // fn print(vec<3, f16>)

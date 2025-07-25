@@ -52,6 +52,7 @@
 #include "src/tint/lang/msl/writer/raise/argument_buffers.h"
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/msl/writer/raise/convert_print_to_log.h"
 #include "src/tint/lang/msl/writer/raise/module_constant.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
@@ -145,6 +146,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     if (!options.disable_demote_to_helper) {
         RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
     }
+
+    // ConvertPrintToLog must come before ShaderIO as it may introduce entry point builtins.
+    RUN_TRANSFORM(raise::ConvertPrintToLog, module);
 
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});

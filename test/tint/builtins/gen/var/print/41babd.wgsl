@@ -35,6 +35,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// [msl] flags: --msl-version 3.2
+
 // fn print(vec<2, bool>)
 fn print_41babd() {
   var arg_0 = vec2<bool>(true);

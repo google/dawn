@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/constant/string.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
@@ -84,6 +85,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/core/type/string.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
@@ -961,7 +963,13 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        out << c->Func() << "(";
+        // Some builtins need special-casing for the name they use.
+        if (c->Func() == msl::BuiltinFn::kOsLog) {
+            out << "os_log_default.log(";
+        } else {
+            out << c->Func() << "(";
+        }
+
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
             if (needs_comma) {
@@ -1780,6 +1788,11 @@ class Printer : public tint::TextGenerator {
                     out << "." << NameOf(members[i]) << "=";
                     EmitConstant(out, c->Index(i));
                 }
+            },  //
+            [&](const core::type::String*) {
+                auto* string_constant = c->As<core::constant::String>();
+                TINT_ASSERT(string_constant);
+                out << "\"" << string_constant->Value() << "\"";
             },  //
             TINT_ICE_ON_NO_MATCH);
     }
