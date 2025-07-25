@@ -280,6 +280,11 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
+  'third_party/vulkan-deps': {
+    'url': '{chromium_git}/vulkan-deps@03f51f594fdd73cce50e3614f55ef5fe8f680417',
+    'condition': 'dawn_standalone',
+  },
+
   'third_party/glslang/src': {
     'url': '{chromium_git}/external/github.com/KhronosGroup/glslang@eb77189a282b90e9856fc0ed5b08361a70025bec',
     'condition': 'dawn_standalone',
