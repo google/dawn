@@ -377,7 +377,6 @@ crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch
 crbug.com/341282605 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 
 # sample_texture_combos test is failing on all Compat platforms
-crbug.com/402772749 [ android android-chromium android-pixel-6 angle-opengles arm compat-default mobile ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 crbug.com/402772749 [ angle-opengl arch-x86_64 desktop display-server-x memory_ge_16gb nvidia-0x2184 release ubuntu ] webgpu:api,operation,sampling,sampler_texture:sample_texture_combos: [ Failure ]
 
 ### This section represents tests which may require CTS changes.
@@ -853,11 +852,10 @@ crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,buffer,create:limit: [ Failure ]
 crbug.com/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="validation";errorFilter="out-of-memory" [ Skip ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="canvas";isOriginClean=true [ Failure ]
-crbug.com/0000 [ intel linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={"buffer":{"type":"storage"}};awaitLost=false [ Failure ]
+crbug.com/0000 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={"buffer":{"type":"storage"}};awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="offscreen";contextType="webgl2";awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="webgl";awaitLost=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec2u";indexType="u32" [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec3f";indexType="i32" [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="f";textureType="texture_external";filt="linear";modeU="m";modeV="m" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,shader_io,workgroup_size:workgroup_size:attr="override_expr" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
