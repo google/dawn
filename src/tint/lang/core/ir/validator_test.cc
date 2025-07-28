@@ -210,6 +210,69 @@ TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Matrix_NoArgs) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.mat2x2<f32>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Matrix_Scalar) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.mat2x2<f32>(), 1_f, 2_f, 3_f, 4_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Matrix_ColumnVectors) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* v1 = b.Composite(ty.vec2<f32>(), 1_f, 2_f);
+        auto* v2 = b.Composite(ty.vec2<f32>(), 3_f, 4_f);
+        b.Construct(ty.mat2x2<f32>(), v1, v2);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Matrix_MixedScalarVector) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.mat2x2<f32>(), 1_f, b.Composite(ty.vec2<f32>(), 2_f, 3_f));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: construct: no matching overload for mat2x2<f32> constructor"));
+}
+
+TEST_F(IR_ValidatorTest, Construct_Matrix_Scalar_WrongType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.mat2x2<f32>(), 1_f, 2_f, 3_h, 4_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("error: construct: no matching overload for mat2x2<f32> constructor"));
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},

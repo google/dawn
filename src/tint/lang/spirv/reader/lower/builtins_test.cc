@@ -532,10 +532,10 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4f) {
     %155:f32 = mul %7, %74
     %156:f32 = sub %153, %154
     %157:f32 = add %156, %155
-    %158:vec3<f32> = construct %80, %85, %90, %95
-    %159:vec3<f32> = construct %102, %107, %112, %117
-    %160:vec3<f32> = construct %122, %127, %132, %137
-    %161:vec3<f32> = construct %142, %147, %152, %157
+    %158:vec4<f32> = construct %80, %85, %90, %95
+    %159:vec4<f32> = construct %102, %107, %112, %117
+    %160:vec4<f32> = construct %122, %127, %132, %137
+    %161:vec4<f32> = construct %142, %147, %152, %157
     %162:mat4x4<f32> = construct %158, %159, %160, %161
     %163:mat4x4<f32> = mul %4, %162
     ret
@@ -728,10 +728,10 @@ TEST_F(SpirvReader_BuiltinsTest, Inverse_Mat4x4h) {
     %155:f16 = mul %7, %74
     %156:f16 = sub %153, %154
     %157:f16 = add %156, %155
-    %158:vec3<f16> = construct %80, %85, %90, %95
-    %159:vec3<f16> = construct %102, %107, %112, %117
-    %160:vec3<f16> = construct %122, %127, %132, %137
-    %161:vec3<f16> = construct %142, %147, %152, %157
+    %158:vec4<f16> = construct %80, %85, %90, %95
+    %159:vec4<f16> = construct %102, %107, %112, %117
+    %160:vec4<f16> = construct %122, %127, %132, %137
+    %161:vec4<f16> = construct %142, %147, %152, %157
     %162:mat4x4<f16> = construct %158, %159, %160, %161
     %163:mat4x4<f16> = mul %4, %162
     ret

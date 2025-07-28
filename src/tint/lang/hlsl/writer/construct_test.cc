@@ -141,7 +141,7 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstructMatrix) {
     auto* f = b.Function("a", ty.mat2x2<f32>());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_f);
+        auto* v = b.Let("v", 2_f);
         b.Return(f, b.Construct(ty.mat2x2<f32>(), v, v, v, v));
     });
 
@@ -149,7 +149,8 @@ TEST_F(HlslWriterTest, ConstructMatrix) {
     EXPECT_EQ(output_.hlsl, R"(
 float2x2 a() {
   float v = 2.0f;
-  return float2x2(v, v, v, v);
+  float2 v_1 = float2(v, v);
+  return float2x2(v_1, float2(v, v));
 }
 
 [numthreads(1, 1, 1)]

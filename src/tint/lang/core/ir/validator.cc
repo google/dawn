@@ -3153,8 +3153,16 @@ void Validator::CheckConstruct(const Construct* construct) {
         // TODO(crbug.com/427964608): This needs special handling as Element() produces nullptr.
     } else if (result_type->Is<core::type::Vector>()) {
         // TODO(crbug.com/427964205): This needs special handling as there are many cases.
-    } else if (result_type->Is<core::type::Matrix>()) {
-        // TODO(crbug.com/427965903): This needs special handling as there are many cases.
+    } else if (auto* mat = result_type->As<core::type::Matrix>()) {
+        auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+        auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
+        auto arg_types = Transform<8>(args, [&](auto* v) { return v->Type(); });
+        auto match = table.Lookup(ctor_conv, Vector{mat->Type()}, std::move(arg_types),
+                                  core::EvaluationStage::kConstant);
+        if (match != Success) {
+            AddError(construct) << "no matching overload for " << mat->FriendlyName()
+                                << " constructor";
+        }
     } else if (result_type->Is<core::type::Array>()) {
         check_args_match_elements();
     } else if (auto* str = As<core::type::Struct>(result_type)) {
