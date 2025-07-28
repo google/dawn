@@ -55,7 +55,7 @@ We strive to support recent GCC and MSVC compilers.
 
 ## Test code
 
-We might relax the above rules rules for test code, since test code
+We might relax the above rules for test code, since test code
 shouldn't ship to users.
 
 However, test code should still be readable and maintainable.
@@ -63,3 +63,47 @@ However, test code should still be readable and maintainable.
 For test code, the tradeoff between readability and maintainability
 and other factors is weighted even more strongly toward readability
 and maintainability.
+
+## Infra/Tooling
+
+Tint has infra scripts and tooling written in two primary languages
+Python and Go.
+
+The general advice when making changes to existing code is to use the
+language that the existing implementation uses, since there is no
+ongoing effort to migrate to a single common language, i.e. don't go
+rewriting things just for the sake of rewriting things.
+
+If you are looking at writing a new tool or script, where and how this
+code is going to be used should guide your choice.
+
+For example if it is a standalone tool that primarily lives in the
+Dawn repo, especially for something like a CLI dev tool, etc, the
+preference is to use Go, since there is a substantial existing body of
+support code already.
+
+If it is something that needs to directly interface with Chromium
+tooling, e.g. interacts with GN or other support libraries/tools will
+be accessing it, the preference would be to use Python.
+
+That being said for many Chromium infrastructure tasks, i.e. running
+in a build recipe, the integration there is via exec, even for Python
+scripts. For integration there is no significant difference between
+call into a Python script vs a Go one.
+
+The primary driver in this case to using Python instead of Go would be
+either something else written in Python that needs to import your code
+as a library (and not just treat it like a standalone binary) or your
+code needs to import Chromium specific Python code/libraries.
+
+Often tooling for Tint does double duty, being a CLI for devs and also
+how the bots do a similar task. Due to the above considerations,
+i.e. existing support for CLI in Go and needing to fork regardless of
+the language, the preference in these cases tends to be use Go if
+possible.
+
+Another way to view the decision is looking at the number of execs or
+similar calls that need to occur. If you are designing something and
+seeing that your code is going to be ping ponging between the two
+languages via execs, it is probably worthwhile seeing if it is
+feasible to implement everything as a library in one language.
