@@ -66,6 +66,7 @@
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/phony.h"
+#include "src/tint/lang/core/ir/referenced_functions.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -761,6 +762,10 @@ class Validator {
     /// sound and sets up data structures for later checks.
     void RunStructuralSoundnessChecks();
 
+    /// Checks that there is no direct or indirect recursion.
+    /// Depends on CheckStructuralSoundness() having previously been run.
+    void CheckForRecursion();
+
     /// Checks that there are no orphaned instructions
     /// Depends on CheckStructuralSoundness() having previously been run
     void CheckForOrphanedInstructions();
@@ -1414,19 +1419,31 @@ Disassembler& Validator::Disassemble() {
 Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
-    if (!diagnostics_.ContainsErrors()) {
-        CheckForOrphanedInstructions();
-    }
-
-    if (!diagnostics_.ContainsErrors()) {
-        CheckForNonFragmentDiscards();
-    }
+    CheckForRecursion();
+    CheckForOrphanedInstructions();
+    CheckForNonFragmentDiscards();
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
         return Failure{diagnostics_.Str()};
     }
     return Success;
+}
+
+void Validator::CheckForRecursion() {
+    if (diagnostics_.ContainsErrors()) {
+        return;
+    }
+
+    ReferencedFunctions<const Module> referenced_functions(mod_);
+    for (auto& func : mod_.functions) {
+        auto& refs = referenced_functions.TransitiveReferences(func);
+        if (refs.Contains(func)) {
+            // TODO(434684891): Consider improving this error with more information.
+            AddError(func) << "recursive function calls are not allowed";
+            return;
+        }
+    }
 }
 
 void Validator::CheckForOrphanedInstructions() {

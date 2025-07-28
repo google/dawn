@@ -1154,4 +1154,47 @@ TEST_F(IR_ValidatorTest, Function_EntryPoint_PtrToWorkgroup) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_DirectRecursion) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Call(f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: recursive function calls are not allowed
+%f = func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_IndirectRecursion) {
+    auto* f1 = b.Function("f1", ty.void_());
+    auto* f2 = b.Function("f2", ty.void_());
+    auto* f3 = b.Function("f3", ty.void_());
+
+    b.Append(f1->Block(), [&] {
+        b.Call(f2);
+        b.Return(f1);
+    });
+    b.Append(f2->Block(), [&] {
+        b.Call(f3);
+        b.Return(f2);
+    });
+    b.Append(f3->Block(), [&] {
+        b.Call(f1);
+        b.Return(f3);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: recursive function calls are not allowed
+%f1 = func():void {
+^^^
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir
