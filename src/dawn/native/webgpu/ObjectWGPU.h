@@ -25,35 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_OBJECTWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_OBJECTWGPU_H_
 
-#include "dawn/native/Buffer.h"
-
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
+#include <webgpu/webgpu.h>
 
 namespace dawn::native::webgpu {
 
-class Device;
-
-class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
+// This is the templated abstract base class for most WebGPU-on-WebGPU backend objects that has a
+// corresponding WebGPU C API object.
+// TODO(crbug.com/413053623): Add members needed for record/playback (e.g. ObjectIds)
+template <typename WGPUHandle>
+class ObjectWGPU {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+    WGPUHandle GetInnerHandle() const { return mInnerHandle; }
 
-  private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void DestroyImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    virtual ~ObjectWGPU() = 0;
 
-    raw_ptr<void> mMappedData = nullptr;
+  protected:
+    // The WebGPU C API handle of the "lower layer" object.
+    // The inherited class is responsible to assign and release it properly.
+    WGPUHandle mInnerHandle = nullptr;
 };
+
+template <typename WGPUHandle>
+ObjectWGPU<WGPUHandle>::~ObjectWGPU() {}
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_OBJECTWGPU_H_

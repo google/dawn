@@ -107,15 +107,11 @@ Device::Device(AdapterBase* adapter,
 
     // TODO(crbug.com/413053623): use adapterRequestDevice instead as dawn_wire doesn't support
     // adapterCreateDevice.
-    mInnerDevice = wgpu.adapterCreateDevice(innerAdapter, &apiDesc);
+    mInnerHandle = wgpu.adapterCreateDevice(innerAdapter, &apiDesc);
 }
 
 Device::~Device() {
     Destroy();
-}
-
-WGPUDevice Device::GetInnerHandle() const {
-    return mInnerDevice;
 }
 
 WGPUInstance Device::GetInnerInstance() const {
@@ -202,11 +198,11 @@ void Device::DestroyImpl() {
     //   is implicitly destroyed. This case is thread-safe because there are no
     //   other threads using the device since there are no other live refs.
 
-    if (mInnerDevice) {
+    if (mInnerHandle) {
         // webgpu.h guarantees that losing this reference will cause all internal resources to be
         // freed and wait on the GPU if needed to do so.
-        wgpu.deviceRelease(mInnerDevice);
-        mInnerDevice = nullptr;
+        wgpu.deviceRelease(mInnerHandle);
+        mInnerHandle = nullptr;
     }
 }
 
@@ -226,7 +222,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 }
 
 MaybeError Device::TickImpl() {
-    wgpu.deviceTick(mInnerDevice);
+    wgpu.deviceTick(mInnerHandle);
     return {};
 }
 

@@ -44,14 +44,14 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
     return AcquireRef(new Queue(device, descriptor));
 }
 
-Queue::Queue(Device* device, const QueueDescriptor* descriptor)
-    : QueueBase(device, descriptor),
-      mInnerQueue(device->wgpu.deviceGetQueue(device->GetInnerHandle())) {}
+Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {
+    mInnerHandle = device->wgpu.deviceGetQueue(device->GetInnerHandle());
+}
 
 Queue::~Queue() {
-    if (mInnerQueue) {
-        ToBackend(GetDevice())->wgpu.queueRelease(mInnerQueue);
-        mInnerQueue = nullptr;
+    if (mInnerHandle) {
+        ToBackend(GetDevice())->wgpu.queueRelease(mInnerHandle);
+        mInnerHandle = nullptr;
     }
 }
 
@@ -67,7 +67,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
         innerCommandBuffers[i] = ToBackend(commands[i])->Encode();
     }
 
-    wgpu.queueSubmit(mInnerQueue, commandCount, innerCommandBuffers.data());
+    wgpu.queueSubmit(mInnerHandle, commandCount, innerCommandBuffers.data());
 
     for (uint32_t i = 0; i < commandCount; ++i) {
         wgpu.commandBufferRelease(innerCommandBuffers[i]);
@@ -83,7 +83,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   size_t size) {
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
     ToBackend(GetDevice())
-        ->wgpu.queueWriteBuffer(mInnerQueue, innerBuffer, bufferOffset, data, size);
+        ->wgpu.queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
     buffer->MarkUsedInPendingCommands();
     return {};
 }
@@ -135,7 +135,7 @@ MaybeError Queue::SubmitFutureSync() {
     WGPUFuture future =
         ToBackend(GetDevice())
             ->wgpu.queueOnSubmittedWorkDone(
-                mInnerQueue,
+                mInnerHandle,
                 {nullptr, WGPUCallbackMode_AllowSpontaneous,
                  [](WGPUQueueWorkDoneStatus, WGPUStringView, void*, void*) {}, nullptr, nullptr});
     if (future.id == kNullFutureID) {

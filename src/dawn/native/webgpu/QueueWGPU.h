@@ -32,14 +32,14 @@
 #include <utility>
 #include "dawn/common/MutexProtected.h"
 #include "dawn/native/Queue.h"
-
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/ObjectWGPU.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class Queue final : public QueueBase {
+class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
@@ -60,7 +60,6 @@ class Queue final : public QueueBase {
     MaybeError WaitForIdleForDestruction() override;
     MaybeError SubmitFutureSync();
 
-    WGPUQueue mInnerQueue = nullptr;
     MutexProtected<std::deque<std::pair<WGPUFuture, ExecutionSerial>>> mFuturesInFlight;
     bool mHasPendingCommands = false;
 };
