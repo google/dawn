@@ -156,7 +156,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::SimdBallot, module);
     // ArgumentBuffers must come before ModuleScopeVars
     if (options.use_argument_buffers) {
-        RUN_TRANSFORM(raise::ArgumentBuffers, module);
+        raise::ArgumentBuffersConfig cfg{};
+        RUN_TRANSFORM(raise::ArgumentBuffers, module, cfg);
     }
 
     // ChangeImmediateToUniform must come before ModuleScopeVars

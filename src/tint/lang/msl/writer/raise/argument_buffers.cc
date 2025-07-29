@@ -41,6 +41,9 @@ using namespace tint::core::fluent_types;  // NOLINT
 
 /// PIMPL state for the transform.
 struct State {
+    /// The argument buffer configuration.
+    const ArgumentBuffersConfig& config;
+
     /// The IR module.
     core::ir::Module& ir;
 
@@ -160,6 +163,10 @@ struct State {
                 continue;
             }
 
+            if (config.skip_bindings.contains(*bp)) {
+                continue;
+            }
+
             vars.Push(var);
         }
 
@@ -193,7 +200,7 @@ struct State {
             struct_members.Push(core::type::Manager::StructMemberDesc{
                 name, type,
                 core::IOAttributes{
-                    .binding_point = BindingPoint{0, bp->binding},
+                    .binding_point = BindingPoint{bp->group, bp->binding},
                 }});
         }
 
@@ -307,7 +314,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> ArgumentBuffers(core::ir::Module& ir) {
+Result<SuccessType> ArgumentBuffers(core::ir::Module& ir, const ArgumentBuffersConfig& config) {
     auto result = ValidateAndDumpIfNeeded(
         ir, "msl.ArgumentBuffers",
         tint::core::ir::Capabilities{tint::core::ir::Capability::kAllowDuplicateBindings});
@@ -315,7 +322,7 @@ Result<SuccessType> ArgumentBuffers(core::ir::Module& ir) {
         return result.Failure();
     }
 
-    State{ir}.Process();
+    State{config, ir}.Process();
 
     return Success;
 }
