@@ -383,7 +383,6 @@ class Printer : public tint::TextGenerator {
 
                 auto ptr = param->Type()->As<core::type::Pointer>();
                 if (auto binding_point = param->BindingPoint()) {
-                    TINT_ASSERT(binding_point->group == 0);
                     if (ptr) {
                         switch (ptr->AddressSpace()) {
                             case core::AddressSpace::kStorage:

@@ -160,12 +160,15 @@ void PopulateBindingRelatedOptions(
             const binding::BindingInfo& dst_binding_point = it.second;
 
             // Bindings which go to the same slot in MSL do not need to be re-bound.
-            if (src_binding_point.group == 0 &&
+            if (src_binding_point.group == dst_binding_point.group &&
                 src_binding_point.binding == dst_binding_point.binding) {
                 continue;
             }
 
-            remapper_data.emplace(src_binding_point, BindingPoint{0, dst_binding_point.binding});
+            remapper_data.emplace(src_binding_point, BindingPoint{
+                                                         .group = dst_binding_point.group,
+                                                         .binding = dst_binding_point.binding,
+                                                     });
         }
     };
 
@@ -183,15 +186,15 @@ void PopulateBindingRelatedOptions(
         const binding::BindingInfo& plane1 = it.second.plane1;
         const binding::BindingInfo& metadata = it.second.metadata;
 
-        const BindingPoint plane0_binding_point{0, plane0.binding};
-        const BindingPoint plane1_binding_point{0, plane1.binding};
-        const BindingPoint metadata_binding_point{0, metadata.binding};
+        const BindingPoint plane0_binding_point{plane0.group, plane0.binding};
+        const BindingPoint plane1_binding_point{plane1.group, plane1.binding};
+        const BindingPoint metadata_binding_point{metadata.group, metadata.binding};
 
-        // Use the re-bound MSL plane0 value for the lookup key. The group goes to `0` which is the
-        // value always used for re-bound data.
-        multiplanar_map.emplace(BindingPoint{0, plane0_binding_point.binding},
-                                tint::transform::multiplanar::BindingPoints{
-                                    plane1_binding_point, metadata_binding_point});
+        // Use the re-bound MSL plane0 value for the lookup key.
+        multiplanar_map.emplace(
+            BindingPoint{plane0_binding_point.group, plane0_binding_point.binding},
+            tint::transform::multiplanar::BindingPoints{plane1_binding_point,
+                                                        metadata_binding_point});
 
         // Bindings which go to the same slot in MSL do not need to be re-bound.
         if (src_binding_point == plane0_binding_point) {

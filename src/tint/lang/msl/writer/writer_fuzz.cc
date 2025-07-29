@@ -41,7 +41,7 @@ namespace {
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              Options options) {
-    options.bindings = GenerateBindings(module);
+    options.bindings = GenerateBindings(module, false);
     options.array_length_from_uniform.ubo_binding = 30;
 
     // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.

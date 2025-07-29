@@ -41,23 +41,27 @@ namespace binding {
 
 /// Generic binding point
 struct BindingInfo {
+    /// The group
+    uint32_t group = 0;
     /// The binding
     uint32_t binding = 0;
 
     /// Equality operator
     /// @param rhs the BindingInfo to compare against
-    /// /// @returns true if this BindingInfo is equal to `rhs`
-    inline bool operator==(const BindingInfo& rhs) const { return binding == rhs.binding; }
+    /// @returns true if this BindingInfo is equal to `rhs`
+    inline bool operator==(const BindingInfo& rhs) const {
+        return group == rhs.group && binding == rhs.binding;
+    }
     /// Inequality operator
     /// @param rhs the BindingInfo to compare against
     /// @returns true if this BindingInfo is not equal to `rhs`
     inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
 
     /// @returns the hash code of the BindingInfo
-    tint::HashCode HashCode() const { return Hash(binding); }
+    tint::HashCode HashCode() const { return Hash(group, binding); }
 
-    /// Reflect the fields of this class so taht it can be used by tint::ForeachField()
-    TINT_REFLECT(BindingInfo, binding);
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(BindingInfo, group, binding);
 };
 
 using Uniform = BindingInfo;

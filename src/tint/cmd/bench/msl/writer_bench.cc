@@ -78,7 +78,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
             return;
         }
 
-        gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get());
+        gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get(), false);
     }
 
     for (auto _ : state) {

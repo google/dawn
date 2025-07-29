@@ -125,11 +125,12 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
 
 namespace {
 
-tint::msl::writer::Bindings generateBindingInfo(
+tint::msl::writer::Bindings GenerateBindingInfo(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     const BindingInfoArray& moduleBindingInfo,
-    tint::msl::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform) {
+    tint::msl::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform,
+    bool useArgumentBuffers) {
     tint::msl::writer::Bindings bindings;
 
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
@@ -141,31 +142,33 @@ tint::msl::writer::Bindings generateBindingInfo(
             const auto& binding = currentModuleBindingInfo.first;
             const auto& shaderBindingInfo = currentModuleBindingInfo.second;
 
-            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
-                                               static_cast<uint32_t>(binding)};
+            tint::BindingPoint srcBindingPoint{
+                .group = uint32_t(group),
+                .binding = uint32_t(binding),
+            };
 
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             auto& bindingIndexInfo = layout->GetBindingIndexInfo(stage)[group];
             uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
 
-            tint::BindingPoint dstBindingPoint{0, shaderIndex};
+            tint::msl::writer::binding::BindingInfo dstBindingPoint{
+                .group = useArgumentBuffers ? uint32_t(group) : 0,
+                .binding = shaderIndex,
+            };
 
             MatchVariant(
                 shaderBindingInfo.bindingInfo,
                 [&](const BufferBindingInfo& bindingInfo) {
                     switch (bindingInfo.type) {
                         case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(
-                                srcBindingPoint,
-                                tint::msl::writer::binding::Uniform{dstBindingPoint.binding});
+                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
                             break;
                         case kInternalStorageBufferBinding:
                         case wgpu::BufferBindingType::Storage:
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                         case kInternalReadOnlyStorageBufferBinding:
-                            bindings.storage.emplace(
-                                srcBindingPoint,
-                                tint::msl::writer::binding::Storage{dstBindingPoint.binding});
+                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
+
                             // Use the ShaderIndex as the indices for the buffer size lookups in
                             // the array length uniform transform. This is used to compute the
                             // size of variable length arrays in storage buffers.
@@ -179,17 +182,13 @@ tint::msl::writer::Bindings generateBindingInfo(
                     }
                 },
                 [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(srcBindingPoint, tint::msl::writer::binding::Sampler{
-                                                                  dstBindingPoint.binding});
+                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const TextureBindingInfo& bindingInfo) {
-                    bindings.texture.emplace(srcBindingPoint, tint::msl::writer::binding::Texture{
-                                                                  dstBindingPoint.binding});
+                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint,
-                        tint::msl::writer::binding::StorageTexture{dstBindingPoint.binding});
+                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const ExternalTextureBindingInfo& bindingInfo) {
                     const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
@@ -198,11 +197,17 @@ tint::msl::writer::Bindings generateBindingInfo(
 
                     const auto& bindingExpansion = expansion->second;
                     tint::msl::writer::binding::BindingInfo plane0{
-                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)]};
+                        .group = dstBindingPoint.group,
+                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)],
+                    };
                     tint::msl::writer::binding::BindingInfo plane1{
-                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)]};
+                        .group = dstBindingPoint.group,
+                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)],
+                    };
                     tint::msl::writer::binding::BindingInfo metadata{
-                        bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)]};
+                        .group = dstBindingPoint.group,
+                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)],
+                    };
 
                     bindings.external_texture.emplace(
                         srcBindingPoint,
@@ -229,8 +234,10 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     tint::msl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = kBufferLengthBufferSlot;
 
-    tint::msl::writer::Bindings bindings =
-        generateBindingInfo(stage, layout, moduleBindingInfo, arrayLengthFromUniform);
+    bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
+
+    tint::msl::writer::Bindings bindings = GenerateBindingInfo(
+        stage, layout, moduleBindingInfo, arrayLengthFromUniform, useArgumentBuffers);
 
     OptionalVertexPullingTransformConfig vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
@@ -242,12 +249,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
 
             // Tell Tint to map (kPullingBufferBindingSet, slot) to this MSL buffer index.
-            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(kPullingBufferBindingSet),
-                                               static_cast<uint8_t>(slot)};
-            tint::BindingPoint dstBindingPoint{0, metalIndex};
+            tint::BindingPoint srcBindingPoint{
+                .group = uint32_t(kPullingBufferBindingSet),
+                .binding = uint8_t(slot),
+            };
+            tint::BindingPoint dstBindingPoint{
+                .group = 0,
+                .binding = metalIndex,
+            };
             if (srcBindingPoint != dstBindingPoint) {
-                bindings.storage.emplace(
-                    srcBindingPoint, tint::msl::writer::binding::Storage{dstBindingPoint.binding});
+                bindings.storage.emplace(srcBindingPoint, tint::msl::writer::binding::Storage{
+                                                              .group = 0,
+                                                              .binding = dstBindingPoint.binding,
+                                                          });
             }
 
             // Use the ShaderIndex as the indices for the buffer size lookups in the array
@@ -303,7 +317,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
     req.tintOptions.enable_integer_range_analysis =
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
-    req.tintOptions.use_argument_buffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
+    req.tintOptions.use_argument_buffers = useArgumentBuffers;
 
     req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(

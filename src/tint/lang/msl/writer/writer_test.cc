@@ -264,7 +264,8 @@ TEST_F(MslWriterTest, VertexPulling) {
     array_length_config.ubo_binding = 30u;
     array_length_config.bindpoint_to_size_index.insert({BindingPoint{0u, 1u}, 0u});
     Options options;
-    options.bindings.storage.emplace(BindingPoint{4u, 0u}, tint::msl::writer::binding::Storage{1u});
+    options.bindings.storage.emplace(BindingPoint{4u, 0u},
+                                     tint::msl::writer::binding::Storage{0u, 1u});
     options.vertex_pulling_config = std::move(vertex_pulling_config);
     options.array_length_from_uniform = std::move(array_length_config);
 
