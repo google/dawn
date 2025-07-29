@@ -1667,8 +1667,11 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
     }
 
+    // Handle features that implicitly enable other features.
+    if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier2)) {
+        mEnabledFeatures.EnableFeature(Feature::TextureFormatsTier1);
+    }
     if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier1)) {
-        // Handle features that implicitly enable other features.
         mEnabledFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
     }
 
