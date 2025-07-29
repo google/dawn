@@ -3440,6 +3440,7 @@ void Validator::CheckIf(const If* if_) {
 
 void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
+    CheckOperands(l, 0);
 
     // Note: Tasks are queued in reverse order of their execution
     tasks_.Push([this, l] {
