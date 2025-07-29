@@ -114,19 +114,6 @@ if (EMSCRIPTEN)
                 ${EMDAWNWEBGPU_HEADERS_GEN_HEADERS}  # for webgpu.h
                 ${EMDAWNWEBGPU_STRUCT_INFO_JSON_GEN_SOURCES}  # for struct_info_webgpu.json
         )
-
-        # Prior to CMake 3.20 the GENERATED property is local to a directory which means that putting
-        # generated headers in INTERFACE properties causes dependent targets to complain that they
-        # cannot find the file. (because they don't see it as generated and want to check is is
-        # actually on the filesystem).
-        # Work around this by generating the files once if they aren't present at configuration time.
-        if (NOT EXISTS ${OUTPUT})
-            message(STATUS "Dawn: Generating initial versions of files for ${PRINT_NAME}.")
-            execute_process(COMMAND ${ARGS} RESULT_VARIABLE RET)
-            if (NOT RET EQUAL 0)
-                message(FATAL_ERROR "Dawn: Failed to generate the initial version of files for ${PRINT_NAME}. Base args are '${ARGS}'.")
-            endif()
-        endif()
     endfunction()
 
     message(STATUS "Dawn: Configuring Emscripten gen_struct_info for WebGPU.")
@@ -179,19 +166,6 @@ if (EMSCRIPTEN)
                 "${EM_SRC_DIR}/concat.py"
                 ${SRCS}
         )
-
-        # Prior to CMake 3.20 the GENERATED property is local to a directory which means that putting
-        # generated headers in INTERFACE properties causes dependent targets to complain that they
-        # cannot find the file. (because they don't see it as generated and want to check is is
-        # actually on the filesystem).
-        # Work around this by generating the files once if they aren't present at configuration time.
-        if (NOT EXISTS ${OUTPUT})
-            message(STATUS "Dawn: Generating initial versions of files for ${PRINT_NAME}.")
-            execute_process(COMMAND ${ARGS} RESULT_VARIABLE RET)
-            if (NOT RET EQUAL 0)
-                message(FATAL_ERROR "Dawn: Failed to generate the initial version of files for ${PRINT_NAME}. Base args are '${ARGS}'.")
-            endif()
-        endif()
     endfunction()
 
     webgpu_gen_struct_info_js(
