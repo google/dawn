@@ -40,23 +40,22 @@ fi
 PKG_FILE=emdawnwebgpu_pkg-${PKG_VERSION}.zip
 REMOTE_PORT_FILE=emdawnwebgpu-${PKG_VERSION}.remoteport.py
 
-# Initialize dependencies. We could use gclient for this, but then we still have to
-# install gclient, and it takes a long time. We only need a few deps for emdawnwebgpu.
-git submodule update --init --depth=1 third_party/abseil-cpp
-git submodule update --init --depth=1 third_party/googletest
+# Initialize emsdk so we can use emcmake. Other dependencies wll be downloaded
+# later via DAWN_FETCH_DEPENDENCIES (set in dawn-ci.cmake).
 git submodule update --init --depth=1 third_party/emsdk
 python3 tools/activate-emsdk
 
-# Build the package (which is not affected by the build type), and build the
-# link test in release mode (with Closure, which verifies the JS to some extent)
-mkdir -p out/wasm
-third_party/emsdk/upstream/emscripten/emcmake cmake -S=. -B=out/wasm -DCMAKE_BUILD_TYPE=Release
-make -j4 -C out/wasm emdawnwebgpu_pkg emdawnwebgpu_link_test
+# First build the link test in debug mode as a basic test.
+third_party/emsdk/upstream/emscripten/emcmake cmake -S=. -B=out/wasm \
+    -C=.github/workflows/dawn-ci.cmake \
+    -DCMAKE_BUILD_TYPE=Debug
+make -j4 -C out/wasm emdawnwebgpu_link_test
 
-# Also build the link test in debug mode.
-mkdir -p out/wasm-debug
-third_party/emsdk/upstream/emscripten/emcmake cmake -S=. -B=out/wasm-debug -DCMAKE_BUILD_TYPE=Debug
-make -j4 -C out/wasm-debug emdawnwebgpu_link_test
+# Switch the build type (in-place to save time), rebuild the link test (this
+# time with Closure, which verifies the linked JS to some extent), and build the
+# final package (which is not actually affected by build type).
+cmake -S=. -B=out/wasm -DCMAKE_BUILD_TYPE=Release
+make -j4 -C out/wasm emdawnwebgpu_pkg emdawnwebgpu_link_test
 
 # Get variables for documentation.
 SHA=$(git rev-parse HEAD)
