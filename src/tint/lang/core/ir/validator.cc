@@ -3816,6 +3816,13 @@ void Validator::CheckLoad(const Load* l) {
                 << "result type " << NameOf(l->Result()->Type())
                 << " does not match source store type " << NameOf(mv->StoreType());
         }
+
+        if (auto* arr = mv->StoreType()->As<core::type::Array>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                AddError(l) << "cannot load a runtime-sized array";
+                return;
+            }
+        }
     }
 }
 
@@ -3846,6 +3853,12 @@ void Validator::CheckStore(const Store* s) {
                 AddError(s, Store::kFromOperandOffset)
                     << "value type " << NameOf(value_type) << " does not match store type "
                     << NameOf(store_type);
+                return;
+            }
+
+            if (!store_type->IsConstructible()) {
+                AddError(s) << "store type " << NameOf(store_type) << " is not constructible";
+                return;
             }
         }
     }
