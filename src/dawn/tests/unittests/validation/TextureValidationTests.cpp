@@ -1246,5 +1246,25 @@ TEST_F(TextureFormatsTier1TextureTest, StorageBindingSuppport) {
     }
 }
 
+class TextureFormatsTier2TextureTest : public TextureValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureFormatsTier2};
+    }
+};
+
+// Test that creating a storage texture using kTier2AdditionalStorageFormats succeeds when
+// TextureFormatsTier2 feature is enabled.
+TEST_F(TextureFormatsTier2TextureTest, StorageBindingSuppport) {
+    for (wgpu::TextureFormat format : utils::kTier2AdditionalStorageFormats) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {1, 1, 1};
+        descriptor.usage = wgpu::TextureUsage::StorageBinding;
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        descriptor.format = format;
+        device.CreateTexture(&descriptor);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

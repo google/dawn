@@ -1322,5 +1322,34 @@ TEST_F(TextureFormatsTier1StorageValidationTests, BGLEntry) {
     }
 }
 
+class TextureFormatsTier2StorageValidationTests : public StorageTextureValidationTests {
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::TextureFormatsTier2};
+    }
+};
+
+// Check that it is allowed to create a kTier2AdditionalStorageFormats format
+// texture with the storage usage with TextureFormatsTier2.
+TEST_F(TextureFormatsTier2StorageValidationTests, TextureCreation) {
+    for (const auto format : utils::kTier2AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        wgpu::TextureDescriptor desc;
+        desc.format = format;
+        desc.usage = wgpu::TextureUsage::StorageBinding;
+        desc.size = {1, 1};
+        device.CreateTexture(&desc);
+    }
+}
+
+// Check that it is allowed to create a BGL with a read-write
+// kTier2AdditionalStorageFormat format storage texture entry with TextureFormatsTier2.
+TEST_F(TextureFormatsTier2StorageValidationTests, BGLEntry) {
+    for (const auto format : utils::kTier2AdditionalStorageFormats) {
+        SCOPED_TRACE(absl::StrFormat("Test format: %s", format));
+        utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Fragment,
+                                             wgpu::StorageTextureAccess::ReadWrite, format}});
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
