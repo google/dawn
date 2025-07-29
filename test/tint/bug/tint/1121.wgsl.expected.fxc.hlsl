@@ -59,18 +59,10 @@ void main_inner(uint3 GlobalInvocationID) {
   int TILE_COUNT_Y = int(2);
   {
     int y = int(0);
-    while(true) {
-      if ((y < TILE_COUNT_Y)) {
-      } else {
-        break;
-      }
+    while((y < TILE_COUNT_Y)) {
       {
         int x = int(0);
-        while(true) {
-          if ((x < TILE_COUNT_X)) {
-          } else {
-            break;
-          }
+        while((x < TILE_COUNT_X)) {
           int2 tilePixel0Idx = int2((x * TILE_SIZE), (y * TILE_SIZE));
           float2 v_13 = (2.0f * float2(tilePixel0Idx));
           float2 floorCoord = ((v_13 / asfloat(uniforms[10u]).xy) - (1.0f).xx);
@@ -86,11 +78,7 @@ void main_inner(uint3 GlobalInvocationID) {
           float dp = 0.0f;
           {
             uint i = 0u;
-            while(true) {
-              if ((i < 6u)) {
-              } else {
-                break;
-              }
+            while((i < 6u)) {
               float4 p = (0.0f).xxxx;
               uint v_16 = min(i, 5u);
               if ((frustumPlanes[v_16].x > 0.0f)) {

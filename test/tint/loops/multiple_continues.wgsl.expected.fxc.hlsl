@@ -3,11 +3,7 @@
 void main() {
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(2))) {
-      } else {
-        break;
-      }
+    while((i < int(2))) {
       bool tint_continue = false;
       switch(i) {
         case int(0):

@@ -11,11 +11,7 @@ void main_inner(uint3 GlobalInvocationID) {
   float4 texel = myTexture.Load(int4(int2(GlobalInvocationID.xy), int(0), int(0)));
   {
     uint i = 0u;
-    while(true) {
-      if ((i < 1u)) {
-      } else {
-        break;
-      }
+    while((i < 1u)) {
       uint v = 0u;
       result.GetDimensions(v);
       result.Store((0u + (min((flatIndex + i), ((v / 4u) - 1u)) * 4u)), asuint(texel.x));

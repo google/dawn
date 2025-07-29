@@ -69,11 +69,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   float2 vel = (0.0f).xx;
   {
     uint i = 0u;
-    while(true) {
-      if ((i < 5u)) {
-      } else {
-        break;
-      }
+    while((i < 5u)) {
       if ((i == index)) {
         {
           i = (i + 1u);

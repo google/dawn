@@ -16,11 +16,7 @@ void main() {
   OuterS s1 = (OuterS)0;
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(4))) {
-      } else {
-        break;
-      }
+    while((i < int(4))) {
       uint v_1 = uniforms[0u].x;
       InnerS tint_array_copy[8] = s1.a1;
       InnerS v_2 = v;

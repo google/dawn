@@ -92,11 +92,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
   float BCached[4] = (float[4])0;
   {
     uint index = 0u;
-    while(true) {
-      if ((index < 16u)) {
-      } else {
-        break;
-      }
+    while((index < 16u)) {
       uint v_8 = min(index, 15u);
       acc[v_8] = 0.0f;
       {
@@ -111,25 +107,13 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
   uint tileRowB = (local_id.y * RowPerThreadB);
   {
     uint t = 0u;
-    while(true) {
-      if ((t < numTiles)) {
-      } else {
-        break;
-      }
+    while((t < numTiles)) {
       {
         uint innerRow = 0u;
-        while(true) {
-          if ((innerRow < 4u)) {
-          } else {
-            break;
-          }
+        while((innerRow < 4u)) {
           {
             uint innerCol = 0u;
-            while(true) {
-              if ((innerCol < ColPerThreadA)) {
-              } else {
-                break;
-              }
+            while((innerCol < ColPerThreadA)) {
               uint inputRow = (tileRow + innerRow);
               uint inputCol = (tileColA + innerCol);
               mm_Asub[min(inputRow, 63u)][min(inputCol, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
@@ -147,18 +131,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
       }
       {
         uint innerRow = 0u;
-        while(true) {
-          if ((innerRow < RowPerThreadB)) {
-          } else {
-            break;
-          }
+        while((innerRow < RowPerThreadB)) {
           {
             uint innerCol = 0u;
-            while(true) {
-              if ((innerCol < 4u)) {
-              } else {
-                break;
-              }
+            while((innerCol < 4u)) {
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
               uint v_9 = min(innerCol, 63u);
@@ -178,18 +154,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
       GroupMemoryBarrierWithGroupSync();
       {
         uint k = 0u;
-        while(true) {
-          if ((k < 64u)) {
-          } else {
-            break;
-          }
+        while((k < 64u)) {
           {
             uint inner = 0u;
-            while(true) {
-              if ((inner < 4u)) {
-              } else {
-                break;
-              }
+            while((inner < 4u)) {
               uint v_10 = min(inner, 3u);
               uint v_11 = min(k, 63u);
               uint v_12 = min((tileCol + inner), 63u);
@@ -202,21 +170,13 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
           }
           {
             uint innerRow = 0u;
-            while(true) {
-              if ((innerRow < 4u)) {
-              } else {
-                break;
-              }
+            while((innerRow < 4u)) {
               uint v_13 = min((tileRow + innerRow), 63u);
               uint v_14 = min(k, 63u);
               ACached = mm_Asub[v_13][v_14];
               {
                 uint innerCol = 0u;
-                while(true) {
-                  if ((innerCol < 4u)) {
-                  } else {
-                    break;
-                  }
+                while((innerCol < 4u)) {
                   uint index = ((innerRow * 4u) + innerCol);
                   float v_15 = acc[min(index, 15u)];
                   float v_16 = ACached;
@@ -249,18 +209,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
   }
   {
     uint innerRow = 0u;
-    while(true) {
-      if ((innerRow < 4u)) {
-      } else {
-        break;
-      }
+    while((innerRow < 4u)) {
       {
         uint innerCol = 0u;
-        while(true) {
-          if ((innerCol < 4u)) {
-          } else {
-            break;
-          }
+        while((innerCol < 4u)) {
           uint index = ((innerRow * 4u) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[min(index, 15u)]);
           {

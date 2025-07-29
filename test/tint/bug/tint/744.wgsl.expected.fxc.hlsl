@@ -16,11 +16,7 @@ void main_inner(uint3 global_id) {
   uint result = 0u;
   {
     uint i = 0u;
-    while(true) {
-      if ((i < dimInner)) {
-      } else {
-        break;
-      }
+    while((i < dimInner)) {
       uint a = (i + (resultCell.x * dimInner));
       uint b = (resultCell.y + (i * dimOutter));
       uint v = 0u;

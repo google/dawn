@@ -4,11 +4,7 @@ void main() {
   int i = int(0);
   {
     int i_1 = int(0);
-    while(true) {
-      if ((i_1 < int(2))) {
-      } else {
-        break;
-      }
+    while((i_1 < int(2))) {
       bool tint_continue = false;
       switch(i_1) {
         case int(0):

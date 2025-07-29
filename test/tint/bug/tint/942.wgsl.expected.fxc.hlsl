@@ -44,18 +44,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
   uint2 baseIndex = (v_3 - uint2(filterOffset, 0u));
   {
     uint r = 0u;
-    while(true) {
-      if ((r < 4u)) {
-      } else {
-        break;
-      }
+    while((r < 4u)) {
       {
         uint c = 0u;
-        while(true) {
-          if ((c < 4u)) {
-          } else {
-            break;
-          }
+        while((c < 4u)) {
           uint2 loadIndex = (baseIndex + uint2(c, r));
           if ((flip[0u].x != 0u)) {
             loadIndex = loadIndex.yx;
@@ -79,18 +71,10 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
   GroupMemoryBarrierWithGroupSync();
   {
     uint r = 0u;
-    while(true) {
-      if ((r < 4u)) {
-      } else {
-        break;
-      }
+    while((r < 4u)) {
       {
         uint c = 0u;
-        while(true) {
-          if ((c < 4u)) {
-          } else {
-            break;
-          }
+        while((c < 4u)) {
           uint2 writeIndex = (baseIndex + uint2(c, r));
           if ((flip[0u].x != 0u)) {
             writeIndex = writeIndex.yx;

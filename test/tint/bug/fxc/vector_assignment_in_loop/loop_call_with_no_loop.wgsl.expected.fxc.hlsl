@@ -31,11 +31,7 @@ void foo() {
 void main() {
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(2))) {
-      } else {
-        break;
-      }
+    while((i < int(2))) {
       foo();
       {
         i = (i + int(1));
