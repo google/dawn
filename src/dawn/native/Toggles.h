@@ -159,6 +159,7 @@ enum class Toggle {
     EnableIntegerRangeAnalysisInRobustness,
     UseSpirv14,
     MetalUseArgumentBuffers,
+    EnableShaderPrint,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
