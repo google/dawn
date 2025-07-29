@@ -238,9 +238,6 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
         case wgpu::TextureFormat::RGBA32Sint:
         case wgpu::TextureFormat::RGBA32Float:
         case wgpu::TextureFormat::RGB9E5Ufloat:
-        case wgpu::TextureFormat::R8Snorm:
-        case wgpu::TextureFormat::RG8Snorm:
-        case wgpu::TextureFormat::RGBA8Snorm:
             return false;
 
         case wgpu::TextureFormat::RG11B10Ufloat:
@@ -250,6 +247,10 @@ bool TextureFormatSupportsMultisampling(const wgpu::Device& device,
         case wgpu::TextureFormat::R32Float:
             return !isCompatibilityMode;
 
+        case wgpu::TextureFormat::R8Snorm:
+        case wgpu::TextureFormat::RG8Snorm:
+        case wgpu::TextureFormat::RGBA8Snorm:
+            return device.HasFeature(wgpu::FeatureName::TextureFormatsTier1);
         default:
             return true;
     }
@@ -273,13 +274,20 @@ bool TextureFormatSupportsResolveTarget(const wgpu::Device& device,
         case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::RG16Unorm:
         case wgpu::TextureFormat::RGBA16Unorm:
-            return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats) ||
-                   device.HasFeature(wgpu::FeatureName::TextureFormatsTier1);
+            return device.HasFeature(wgpu::FeatureName::Unorm16TextureFormats);
+
         case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::RG16Snorm:
         case wgpu::TextureFormat::RGBA16Snorm:
-            return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats) ||
-                   device.HasFeature(wgpu::FeatureName::TextureFormatsTier1);
+            return device.HasFeature(wgpu::FeatureName::Snorm16TextureFormats);
+
+        case wgpu::TextureFormat::R8Snorm:
+        case wgpu::TextureFormat::RG8Snorm:
+        case wgpu::TextureFormat::RGBA8Snorm:
+            return device.HasFeature(wgpu::FeatureName::TextureFormatsTier1);
+
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            return device.HasFeature(wgpu::FeatureName::RG11B10UfloatRenderable);
 
         default:
             return false;
