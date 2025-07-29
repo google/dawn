@@ -39,13 +39,12 @@ namespace dawn::native::webgpu {
 
 class Device;
 
-class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
+class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue, WGPUProcQueueRelease> {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
-    ~Queue() override;
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     MaybeError WriteBufferImpl(BufferBase* buffer,
                                uint64_t bufferOffset,

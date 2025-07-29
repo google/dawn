@@ -78,6 +78,7 @@ Device::Device(AdapterBase* adapter,
                const TogglesState& deviceToggles,
                Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
     : DeviceBase(adapter, descriptor, deviceToggles, std::move(lostEvent)),
+      ObjectWGPU(ToBackend(adapter->GetPhysicalDevice())->GetFunctions().deviceRelease),
       wgpu(ToBackend(adapter->GetPhysicalDevice())->GetFunctions()) {
     DAWN_ASSERT(adapter->GetPhysicalDevice()->GetBackendType() == wgpu::BackendType::WebGPU);
 
@@ -199,10 +200,7 @@ void Device::DestroyImpl() {
     //   other threads using the device since there are no other live refs.
 
     if (mInnerHandle) {
-        // webgpu.h guarantees that losing this reference will cause all internal resources to be
-        // freed and wait on the GPU if needed to do so.
-        wgpu.deviceRelease(mInnerHandle);
-        mInnerHandle = nullptr;
+        wgpu.deviceDestroy(mInnerHandle);
     }
 }
 

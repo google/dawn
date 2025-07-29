@@ -56,7 +56,7 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 Buffer::Buffer(Device* device,
                const UnpackedPtr<BufferDescriptor>& descriptor,
                WGPUBuffer innerBuffer)
-    : BufferBase(device, descriptor) {
+    : BufferBase(device, descriptor), ObjectWGPU(device->wgpu.bufferRelease) {
     mInnerHandle = innerBuffer;
     mAllocatedSize = GetSize();
 }
@@ -126,15 +126,6 @@ void Buffer::UnmapImpl() {
         ToBackend(GetDevice())->wgpu.bufferUnmap(mInnerHandle);
     }
     mMappedData = nullptr;
-}
-
-void Buffer::DestroyImpl() {
-    BufferBase::DestroyImpl();
-
-    if (mInnerHandle) {
-        ToBackend(GetDevice())->wgpu.bufferRelease(mInnerHandle);
-        mInnerHandle = nullptr;
-    }
 }
 
 }  // namespace dawn::native::webgpu

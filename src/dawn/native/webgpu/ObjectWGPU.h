@@ -29,27 +29,39 @@
 #define SRC_DAWN_NATIVE_WEBGPU_OBJECTWGPU_H_
 
 #include <webgpu/webgpu.h>
+#include "dawn/common/NonMovable.h"
 
 namespace dawn::native::webgpu {
 
 // This is the templated abstract base class for most WebGPU-on-WebGPU backend objects that has a
 // corresponding WebGPU C API object.
 // TODO(crbug.com/413053623): Add members needed for record/playback (e.g. ObjectIds)
-template <typename WGPUHandle>
-class ObjectWGPU {
+template <typename WGPUHandle, typename WGPUProcHandleRelease>
+class ObjectWGPU : NonMovable {
   public:
+    explicit ObjectWGPU(WGPUProcHandleRelease releaseProc) : mReleaseProc(releaseProc) {}
     WGPUHandle GetInnerHandle() const { return mInnerHandle; }
 
-    virtual ~ObjectWGPU() = 0;
+    virtual ~ObjectWGPU();
 
   protected:
     // The WebGPU C API handle of the "lower layer" object.
-    // The inherited class is responsible to assign and release it properly.
+    // The inherited class is responsible to assign it properly.
     WGPUHandle mInnerHandle = nullptr;
+
+  private:
+    // The WebGPU C API handle release function pointer.
+    // It will be called to release the mInnerHandle at the destructor.
+    WGPUProcHandleRelease mReleaseProc = nullptr;
 };
 
-template <typename WGPUHandle>
-ObjectWGPU<WGPUHandle>::~ObjectWGPU() {}
+template <typename WGPUHandle, typename WGPUProcHandleRelease>
+ObjectWGPU<WGPUHandle, WGPUProcHandleRelease>::~ObjectWGPU() {
+    if (mInnerHandle != nullptr) {
+        mReleaseProc(mInnerHandle);
+        mInnerHandle = nullptr;
+    }
+}
 
 }  // namespace dawn::native::webgpu
 

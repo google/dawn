@@ -44,15 +44,9 @@ ResultOrError<Ref<Queue>> Queue::Create(Device* device, const QueueDescriptor* d
     return AcquireRef(new Queue(device, descriptor));
 }
 
-Queue::Queue(Device* device, const QueueDescriptor* descriptor) : QueueBase(device, descriptor) {
+Queue::Queue(Device* device, const QueueDescriptor* descriptor)
+    : QueueBase(device, descriptor), ObjectWGPU(device->wgpu.queueRelease) {
     mInnerHandle = device->wgpu.deviceGetQueue(device->GetInnerHandle());
-}
-
-Queue::~Queue() {
-    if (mInnerHandle) {
-        ToBackend(GetDevice())->wgpu.queueRelease(mInnerHandle);
-        mInnerHandle = nullptr;
-    }
 }
 
 MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {

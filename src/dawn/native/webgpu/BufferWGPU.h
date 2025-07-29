@@ -37,7 +37,7 @@ namespace dawn::native::webgpu {
 
 class Device;
 
-class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
+class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer, WGPUProcBufferRelease> {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
                                              const UnpackedPtr<BufferDescriptor>& descriptor);
@@ -46,7 +46,6 @@ class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
   private:
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
-    void DestroyImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
