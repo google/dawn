@@ -34,7 +34,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,10 +50,6 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/utils"
 )
 
-const (
-	wgslDictionaryRelPath = "src/tint/cmd/fuzz/wgsl/dictionary.txt"
-)
-
 type TaskMode int
 
 const (
@@ -63,10 +58,17 @@ const (
 	TaskModeGenerate
 )
 
+type FuzzMode int
+
+const (
+	FuzzModeWgsl FuzzMode = iota
+	FuzzModeIr
+)
+
 type cmdConfig struct {
 	verbose      bool
 	dump         bool
-	irMode       bool
+	fuzzMode     FuzzMode
 	taskMode     TaskMode
 	filter       string
 	inputs       string
@@ -97,12 +99,12 @@ func main() {
 
 	flag.Usage = showUsage
 
-	check, generate := false, false
+	check, generate, irMode := false, false, false
 	flag.BoolVar(&c.verbose, "verbose", false, "print additional output")
 	flag.BoolVar(&check, "check", false, "check that all the end-to-end tests in -inputs do not fail")
 	flag.BoolVar(&generate, "generate", false, "generate fuzzing corpus based on -inputs")
 	flag.BoolVar(&c.dump, "dump", false, "dumps shader input/output from fuzzer")
-	flag.BoolVar(&c.irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer (This feature is a WIP)")
+	flag.BoolVar(&irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer (This feature is a WIP)")
 	flag.StringVar(&c.filter, "filter", "", "filter the fuzzing passes run to those with this substring")
 	flag.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(osWrapper), "obsolete, use -inputs instead")
 	flag.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(osWrapper), "the directory that holds the files to use")
@@ -125,13 +127,19 @@ func main() {
 		c.taskMode = TaskModeRun
 	}
 
+	if irMode {
+		c.fuzzMode = FuzzModeIr
+	} else {
+		c.fuzzMode = FuzzModeWgsl
+	}
+
 	if c.numProcesses < 1 {
 		c.numProcesses = 1
 	}
 
 	// Running/checking the fuzzer in IR mode requires an explicit input directory, and test/tint should not contain any .tirb files.
 	if c.inputs == defaultWgslCorpusDir(osWrapper) {
-		if c.irMode && (c.taskMode == TaskModeRun || c.taskMode == TaskModeCheck) {
+		if c.fuzzMode == FuzzModeIr && (c.taskMode == TaskModeRun || c.taskMode == TaskModeCheck) {
 			fmt.Println("-inputs is required when running or checking the IR fuzzer")
 			os.Exit(1)
 		}
@@ -145,9 +153,10 @@ func main() {
 
 type taskConfig struct {
 	cmdConfig
-	fuzzer    string // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
-	generator string // path to the corpus generator, generate_tint_corpus.py
-	assembler string // path to the test case assembler, tint_fuzz_as
+	fuzzer     string // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
+	generator  string // path to the corpus generator, generate_tint_corpus.py
+	assembler  string // path to the test case assembler, tint_fuzz_as
+	dictionary string // path to dictionary to use for tint_wgsl_fuzzer
 }
 
 // TODO(crbug.com/344014313): Add unittests once fileutils and term are updated
@@ -184,33 +193,41 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 	dependencies := make([]depConfig, 0)
 	switch t.taskMode {
 	case TaskModeRun:
+		if c.fuzzMode == FuzzModeWgsl {
+			dependencies = append(dependencies, depConfig{"dictionary.txt", &t.dictionary})
+		}
 		fallthrough
 	case TaskModeCheck:
 		fuzzerName := "tint_wgsl_fuzzer"
-		if t.irMode {
+		if c.fuzzMode == FuzzModeIr {
 			fuzzerName = "tint_ir_fuzzer"
 		}
 		dependencies = append(dependencies, depConfig{fuzzerName, &t.fuzzer})
 	case TaskModeGenerate:
 		dependencies = append(dependencies, depConfig{"generate_tint_corpus.py", &t.generator})
-		if t.irMode {
+		if c.fuzzMode == FuzzModeIr {
 			dependencies = append(dependencies, depConfig{"ir_fuzz_as", &t.assembler})
 		}
 	}
 
 	// Verify all the required dependencies are present
 	for _, config := range dependencies {
-		if filepath.Ext(config.name) != ".py" {
+		switch {
+		case filepath.Ext(config.name) == ".py":
+			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz"), config.name)
+			if !fileutils.IsFile(*config.path) {
+				return fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
+			}
+		case filepath.Ext(config.name) == ".txt":
+			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
+			if !fileutils.IsFile(*config.path) {
+				return fmt.Errorf("resource '%v' not found at '%v'", config.name, *config.path)
+			}
+		default:
 			*config.path = filepath.Join(t.build, config.name+fileutils.ExeExt)
 			if !fileutils.IsExe(*config.path) {
 				return fmt.Errorf("binary '%v' not found at '%v'", config.name, *config.path)
 			}
-		} else {
-			*config.path = filepath.Join(generateCorpusScriptDir(osWrapper), config.name)
-			if !fileutils.IsFile(*config.path) {
-				return fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
-			}
-
 		}
 	}
 
@@ -232,7 +249,7 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 // ensuring that the fuzzers do not error for the given file.
 func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 	var files []string
-	if t.irMode {
+	if t.fuzzMode == FuzzModeIr {
 		if t.inputs == "" {
 			return fmt.Errorf("must explicitly provide a inputs when running in IR mode")
 		}
@@ -252,7 +269,7 @@ func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 		// Remove '*.expected.wgsl'
 		files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
 	}
-	log.Printf("checking %v files...\n", len(files))
+	fmt.Printf("checking %v files...\n", len(files))
 
 	remaining := transform.SliceToChan(files)
 
@@ -287,7 +304,7 @@ func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 		return err
 	}
 
-	log.Printf("done")
+	fmt.Println("done")
 	return nil
 }
 
@@ -302,12 +319,13 @@ func runFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	args, err := generateFuzzerArgs(t, fsReader)
-	if err != nil {
-		return err
-	}
+	args := generateFuzzerArgs(t, fsReader)
 
+	if t.verbose {
+		fmt.Println("Using fuzzing cmd: " + t.fuzzer + strings.Join(args, " "))
+	}
 	fmt.Println("running", t.numProcesses, "fuzzer instances")
+
 	errs := make(chan error, t.numProcesses)
 	for i := 0; i < t.numProcesses; i++ {
 		go func() {
@@ -334,25 +352,21 @@ func runFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 	for err := range errs {
 		return err
 	}
+
+	fmt.Println("done")
 	return nil
 }
 
 // TODO(crbug.com/344014313): Add unittests once fileutils is converted to use
 // dependency injection.
 // generateFuzzerArgs generates the arguments that need to be passed into the fuzzer binary call
-func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) ([]string, error) {
+func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) []string {
 	args := []string{t.out}
 
 	if t.inputs != "" {
 		args = append(args, t.inputs)
 	}
-	if !t.irMode {
-		dictPath, err := filepath.Abs(filepath.Join(fileutils.DawnRoot(fsReader), wgslDictionaryRelPath))
-		if err != nil || !fileutils.IsFile(dictPath) {
-			return []string{}, fmt.Errorf("failed to obtain the dictionary.txt path: %w", err)
-		}
-		args = append(args, "-dict="+dictPath)
-	}
+	args = append(args, "-dict="+t.dictionary)
 	if t.verbose {
 		args = append(args, "--verbose")
 	}
@@ -362,7 +376,7 @@ func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) ([]s
 	if t.filter != "" {
 		args = append(args, "--filter="+t.filter)
 	}
-	return args, nil
+	return args
 }
 
 // TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
@@ -376,6 +390,10 @@ func runCorpusGenerator(t *taskConfig, fsReader oswrapper.FilesystemReader) erro
 	defer cancel()
 
 	args := generateGeneratorArgs(t, fsReader)
+	if t.verbose {
+		fmt.Println("Using generator cmd: " + t.generator + strings.Join(args, " "))
+	}
+	fmt.Println("running generator")
 
 	cmd := exec.CommandContext(ctx, "python3", args...)
 	out := bytes.Buffer{}
@@ -389,6 +407,8 @@ func runCorpusGenerator(t *taskConfig, fsReader oswrapper.FilesystemReader) erro
 	if err := cmd.Run(); err != nil {
 		return err
 	}
+
+	fmt.Println("done")
 	return nil
 }
 
@@ -398,7 +418,7 @@ func generateGeneratorArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) [
 	if t.verbose {
 		args = append(args, "--verbose")
 	}
-	if t.irMode {
+	if t.fuzzMode == FuzzModeIr {
 		args = append(args, "--ir_as="+t.assembler)
 	}
 	args = append(args, t.inputs, t.out)
@@ -412,8 +432,4 @@ func defaultWgslCorpusDir(fsReader oswrapper.FilesystemReader) string {
 
 func defaultBuildDir(fsReader oswrapper.FilesystemReader) string {
 	return filepath.Join(fileutils.DawnRoot(fsReader), "out", "active")
-}
-
-func generateCorpusScriptDir(fsReader oswrapper.FilesystemReader) string {
-	return filepath.Join(fileutils.DawnRoot(fsReader), "src", "tint", "cmd", "fuzz")
 }
