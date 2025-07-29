@@ -39,7 +39,7 @@
 
 namespace dawn::native::webgpu {
 
-class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice, WGPUProcDeviceRelease> {
+class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
   public:
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              WGPUAdapter innerAdapter,

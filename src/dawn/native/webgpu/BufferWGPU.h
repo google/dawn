@@ -37,7 +37,7 @@ namespace dawn::native::webgpu {
 
 class Device;
 
-class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer, WGPUProcBufferRelease> {
+class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
                                              const UnpackedPtr<BufferDescriptor>& descriptor);
