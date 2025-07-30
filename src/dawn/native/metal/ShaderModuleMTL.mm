@@ -480,6 +480,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     if (GetDevice()->IsToggleEnabled(Toggle::EnableShaderPrint)) {
         if (@available(macOS 15.0, iOS 18.0, *)) {
             (*compileOptions).enableLogging = true;
+            (*compileOptions).languageVersion = MTLLanguageVersion3_2;
         }
     }
 #endif
