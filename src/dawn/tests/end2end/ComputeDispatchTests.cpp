@@ -269,6 +269,9 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
     // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 #endif
+    // TODO(crbug.com/435074717): Flaky on WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWARP());
+
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
 
     // Test that the maximum works in each dimension.
