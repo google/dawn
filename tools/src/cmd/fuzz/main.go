@@ -50,6 +50,13 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/utils"
 )
 
+// TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
+// via dependency injection.
+// TODO(crbug.com/344014313): Add unittests once fileutils and term are updated
+// to support dependency injection.
+// TODO(crbug.com/344014313): Add unittests once term is converted to support
+// dependency injection.
+
 type TaskMode int
 
 const (
@@ -157,8 +164,6 @@ type taskConfig struct {
 	dictionary string   // path to dictionary to use for tint_wgsl_fuzzer
 }
 
-// TODO(crbug.com/344014313): Add unittests once fileutils and term are updated
-// to support dependency injection.
 func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 	if !fileutils.IsDir(c.build) {
 		return fmt.Errorf("build directory '%v' does not exist", c.build)
@@ -287,8 +292,6 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, osWrapper oswrapper.OSWrapper
 	return &t, nil
 }
 
-// TODO(crbug.com/344014313): Add unittests once term is converted to support
-// dependency injection.
 // checkFuzzer runs the fuzzer against all the test files the inputs directory,
 // ensuring that the fuzzers do not error for the given file.
 func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
@@ -306,7 +309,7 @@ func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 		return err
 	}
 
-	// Remove '*.expected.wgsl'
+	// Remove '*.expected.*'
 	files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
 
 	fmt.Printf("checking %v files...\n", len(files))
@@ -348,8 +351,6 @@ func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 	return nil
 }
 
-// TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
-// via dependency injection.
 // runFuzzer runs the fuzzer across t.numProcesses processes.
 // The fuzzer will use t.inputs as the seed directory.
 // New cases are written to t.out.
@@ -359,12 +360,12 @@ func runFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	args := generateFuzzerArgs(t, fsReader)
+	args := generateFuzzerArgs(t)
 
 	if t.verbose {
-		fmt.Println("Using fuzzing cmd: " + t.fuzzer + strings.Join(args, " "))
+		fmt.Println("Using fuzzing cmd: " + t.fuzzer + " " + strings.Join(args, " "))
 	}
-	fmt.Println("running", t.numProcesses, "fuzzer instances")
+	fmt.Println("running ", t.numProcesses, " fuzzer instances")
 
 	errs := make(chan error, t.numProcesses)
 	for i := 0; i < t.numProcesses; i++ {
@@ -397,10 +398,8 @@ func runFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 	return nil
 }
 
-// TODO(crbug.com/344014313): Add unittests once fileutils is converted to use
-// dependency injection.
 // generateFuzzerArgs generates the arguments that need to be passed into the fuzzer binary call
-func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) []string {
+func generateFuzzerArgs(t *taskConfig) []string {
 	args := []string{t.out}
 
 	if t.inputs != "" {
@@ -421,23 +420,53 @@ func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) []st
 	return args
 }
 
-// TODO(crbug.com/416755658): Add unittest coverage when exec calls are done
-// via dependency injection.
 // runCorpusGenerator converts a set of input test files into a fuzzer corpus
-// The fuzzer will use t.inputs as the source directory.
+// The generator will use t.inputs as the source directory.
 // The corpus will be written to t.out.
-// Note: Currently execs to generate_tint_corpus.py
-func runCorpusGenerator(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
+func runCorpusGenerator(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
+	switch t.fuzzMode {
+	case FuzzModeWgsl:
+		return runCorpusGeneratorWgsl(t, osWrapper)
+	case FuzzModeIr:
+		return runCorpusGeneratorIr(t, osWrapper)
+	default:
+		return fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
+	}
+}
+
+// runCorpusGeneratorWgsl converts a set of input test .wgsl files into a WGSL fuzzer corpus.
+func runCorpusGeneratorWgsl(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
+	return gatherWgslFiles(t.inputs, t.out, osWrapper)
+}
+
+// runCorpusGeneratorWgsl converts a set of input test .wgsl files into an IR fuzzer corpus
+// Forks out to an external binary, t.assembler, to perform the operation.
+func runCorpusGeneratorIr(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
+	tmp, err := osWrapper.MkdirTemp("", "wgsl_corpus")
+	if err == nil {
+		defer func(osWrapper oswrapper.OSWrapper, path string) {
+			_ = osWrapper.RemoveAll(path)
+		}(osWrapper, tmp)
+	} else {
+		return err
+	}
+
+	err = gatherWgslFiles(t.inputs, tmp, osWrapper)
+	if err != nil {
+		return err
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	args := generateGeneratorArgs(t, fsReader)
-	if t.verbose {
-		fmt.Println("Using generator cmd: " + t.generator + strings.Join(args, " "))
-	}
-	fmt.Println("running generator")
+	args := []string{tmp, t.out}
 
-	cmd := exec.CommandContext(ctx, "python3", args...)
+	if t.verbose {
+		fmt.Println("Using assembler cmd: " + t.assembler + " " + strings.Join(args, " "))
+	}
+	fmt.Println("running assembler")
+
+	cmd := exec.CommandContext(ctx, t.assembler, args...)
 	out := bytes.Buffer{}
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -454,18 +483,36 @@ func runCorpusGenerator(t *taskConfig, fsReader oswrapper.FilesystemReader) erro
 	return nil
 }
 
-// generateGeneratorArgs generates the arguments that need to be passed into python to run the corpus generator, this includes the script file
-func generateGeneratorArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) []string {
-	args := []string{t.generator}
-	if t.verbose {
-		args = append(args, "--verbose")
+// gatherWgslFiles copies all the .wgsl files in a directory structure over to a flat directory
+// structure, via replacing the path separators for the origins with underscores in the destination
+// file names. It also filters out any '*.expected.*' files
+func gatherWgslFiles(inputs string, out string, osWrapper oswrapper.OSWrapper) error {
+	fmt.Println("gathering and filtering .wgsl files")
+	files, err := glob.Glob(filepath.Join(inputs, "**.wgsl"), osWrapper)
+	if err != nil {
+		return err
 	}
-	if t.fuzzMode == FuzzModeIr {
-		args = append(args, "--ir_as="+t.assembler)
-	}
-	args = append(args, t.inputs, t.out)
 
-	return args
+	// Remove '*.expected.*'
+	files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
+
+	// Map src file paths to dst filenames where the path separators have been converted to underscores
+	mapping := make(map[string]string, len(files))
+	for _, f := range files {
+		// paths returned by glob.Glob are absolute, but only want to use the relative path in the dest name
+		tmp := strings.Replace(f, inputs, "", -1)
+		tmp = strings.TrimPrefix(tmp, "/")
+		mapping[f] = strings.ReplaceAll(filepath.ToSlash(tmp), "/", "_")
+	}
+
+	for src, dest := range mapping {
+		if err := fileutils.CopyFile(filepath.Join(out, dest), src); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("done")
+	return nil
 }
 
 func defaultWgslCorpusDir(fsReader oswrapper.FilesystemReader) string {
