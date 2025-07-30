@@ -239,7 +239,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, u32, read_write> @offset(0), @binding_point(3, 4)
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %4:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -261,7 +261,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -308,7 +318,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<uniform, i32, read> @offset(0), @binding_point(3, 4)
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %4:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -322,7 +332,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -370,7 +390,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:sampler @offset(0), @binding_point(3, 4)
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %4:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -382,7 +402,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -432,7 +462,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   s:binding_array<sampler, 3> @offset(0), @binding_point(3, 4)
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %4:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -446,7 +476,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -504,7 +544,7 @@ $B1: {  # root
   %c:ptr<private, i32, read_write> = var undef
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %5:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %6:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -522,7 +562,17 @@ $B1: {  # root
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -575,7 +625,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(3, 4)
 }
 
-%foo = @fragment func(%param:i32 [@location(1), @interpolate(flat)], %tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%param:i32 [@location(1), @interpolate(flat)], %tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %5:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %6:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -592,7 +642,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -661,7 +721,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %10:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %11:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -673,7 +733,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -746,7 +816,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %12:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %13:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -758,7 +828,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -827,7 +907,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret %5
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %9:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %10:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -839,7 +919,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -912,7 +1002,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret %7
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %11:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %12:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -924,7 +1014,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -985,7 +1085,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
   b:ptr<storage, i32, read_write> @offset(0), @binding_point(3, 4)
 }
 
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B1: {
     %4:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1006,7 +1106,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -1072,7 +1182,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret 42i
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %5:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %6:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1090,7 +1200,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -1175,7 +1295,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret %6
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B3: {
     %10:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %11:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1194,7 +1314,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -1281,7 +1411,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     ret %6
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B3: {
     %10:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %11:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1300,7 +1430,17 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -1392,7 +1532,7 @@ $B1: {  # root
     ret %7
   }
 }
-%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B4: {
     %11:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %12:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1411,7 +1551,17 @@ $B1: {  # root
 }
 )";
 
-    Run(ArgumentBuffers, ArgumentBuffersConfig{});
+    ArgumentBuffersConfig cfg{
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+    Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());
 }
@@ -1477,7 +1627,7 @@ $B1: {  # root
   %b:ptr<storage, u32, read_write> = var undef @binding_point(3, 4)
 }
 
-%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(1, 0)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(3, 0)]):void {
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
     %5:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
     %6:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
@@ -1497,8 +1647,84 @@ $B1: {  # root
 }
 )";
 
+    ArgumentBuffersConfig cfg{
+        .skip_bindings = {BindingPoint{.group = 3, .binding = 4}},
+        .group_to_argument_buffer_info = {{1,
+                                           ArgumentBufferInfo{
+                                               .id = 20,
+                                           }},
+                                          {3,
+                                           ArgumentBufferInfo{
+                                               .id = 30,
+                                           }}},
+    };
+
+    Run(ArgumentBuffers, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ArgumentBuffersTest, DynamicOffset) {
+    auto* var_a = b.Var("a", ty.ptr<storage, i32, core::Access::kReadWrite>());
+    var_a->SetBindingPoint(1, 2);
+    mod.root_block->Append(var_a);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* load_a = b.Load(var_a);
+        auto* add = b.Add<i32>(load_a, load_a);
+        b.Store(var_a, add);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %a:ptr<storage, i32, read_write> = var undef @binding_point(1, 2)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:i32 = load %a
+    %4:i32 = add %3, %3
+    store %a, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
+  a:ptr<storage, i32, read_write> @offset(0), @binding_point(1, 2)
+}
+
+%foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 2)], %tint_dynamic_offset_buffer_1:ptr<storage, array<u32>, read> [@binding_point(0, 3)]):void {
+  $B1: {
+    %4:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
+    %5:ptr<storage, i32, read_write> = access %4, 0u
+    %6:ptr<storage, u32, read> = access %tint_dynamic_offset_buffer_1, 3u
+    %7:u32 = load %6
+    %8:ptr<storage, i32, read_write> = msl.pointer_offset %5, %7
+    %9:i32 = load %8
+    %10:i32 = add %9, %9
+    %11:ptr<storage, i32, read_write> = access %4, 0u
+    %12:ptr<storage, u32, read> = access %tint_dynamic_offset_buffer_1, 3u
+    %13:u32 = load %12
+    %14:ptr<storage, i32, read_write> = msl.pointer_offset %11, %13
+    store %14, %10
+    ret
+  }
+}
+)";
+
+    ArgumentBufferInfo info{
+        .id = 2,
+        .dynamic_buffer_id = 3,
+        .binding_info_to_offset_index = {{2, 3}},
+    };
+
     ArgumentBuffersConfig cfg{};
-    cfg.skip_bindings.insert(BindingPoint{.group = 3, .binding = 4});
+    cfg.group_to_argument_buffer_info.insert({1, info});
     Run(ArgumentBuffers, cfg);
 
     EXPECT_EQ(expect, str());

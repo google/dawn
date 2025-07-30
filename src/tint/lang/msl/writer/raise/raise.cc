@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/msl/writer/raise/raise.h"
 
+#include <utility>
+
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
@@ -157,7 +159,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     // ArgumentBuffers must come before ModuleScopeVars
     if (options.use_argument_buffers) {
-        raise::ArgumentBuffersConfig cfg{};
+        raise::ArgumentBuffersConfig cfg{
+            .group_to_argument_buffer_info = std::move(options.group_to_argument_buffer_info),
+        };
         cfg.skip_bindings.insert(BindingPoint{0u, array_length_from_uniform_options.ubo_binding});
 
         if (options.vertex_pulling_config) {

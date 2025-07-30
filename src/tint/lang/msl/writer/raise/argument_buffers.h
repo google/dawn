@@ -28,9 +28,11 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_RAISE_ARGUMENT_BUFFERS_H_
 #define SRC_TINT_LANG_MSL_WRITER_RAISE_ARGUMENT_BUFFERS_H_
 
+#include <unordered_map>
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/utils/reflection.h"
 #include "src/tint/utils/result.h"
 
@@ -44,10 +46,13 @@ namespace tint::msl::writer::raise {
 // Configuration for argument buffers.
 struct ArgumentBuffersConfig {
     // The set of bindings which should not go into argument buffers.
-    std::unordered_set<tint::BindingPoint> skip_bindings;
+    std::unordered_set<tint::BindingPoint> skip_bindings{};
+
+    /// Map from the group id to the argument buffer information for the group
+    std::unordered_map<uint32_t, ArgumentBufferInfo> group_to_argument_buffer_info{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArgumentBuffersConfig, skip_bindings);
+    TINT_REFLECT(ArgumentBuffersConfig, skip_bindings, group_to_argument_buffer_info);
 };
 
 /// ArgumentBuffers is a transform that replaces module-scope variables with entry-point

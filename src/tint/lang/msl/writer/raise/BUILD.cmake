@@ -143,6 +143,7 @@ tint_target_add_external_dependencies(tint_lang_msl_writer_raise_test test
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_raise_test test
+    tint_lang_msl_writer_common
     tint_lang_msl_writer_raise
   )
 endif(TINT_BUILD_MSL_WRITER)

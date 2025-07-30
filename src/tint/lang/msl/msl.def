@@ -411,3 +411,6 @@ implicit(N: num, T: scalar) fn os_log(string, f32, f32, f32, vec<N, T>)
 // Vertex
 implicit(T: scalar) fn os_log(string, u32, u32, T)
 implicit(N: num, T: scalar) fn os_log(string, u32, u32, vec<N, T>)
+
+implicit(T, S: address_space, A: access) fn pointer_offset(ptr<S, T, A>, u32) -> ptr<S, T, A>
+

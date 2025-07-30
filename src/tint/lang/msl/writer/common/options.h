@@ -130,6 +130,20 @@ struct ArrayLengthFromUniformOptions {
     TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
 };
 
+/// Information to configure an argument buffer
+struct ArgumentBufferInfo {
+    /// The buffer ID to use for this argument buffer
+    uint32_t id;
+
+    /// The buffer ID to use for the dynamic buffer if needed
+    std::optional<uint32_t> dynamic_buffer_id{};
+
+    /// Dynamic offsets map. The map is binding number -> offset index
+    std::unordered_map<uint32_t, uint32_t> binding_info_to_offset_index{};
+
+    TINT_REFLECT(ArgumentBufferInfo, id, dynamic_buffer_id, binding_info_to_offset_index);
+};
+
 /// Configuration options used for generating MSL.
 struct Options {
     /// Constructor
@@ -197,6 +211,9 @@ struct Options {
     /// Immediate binding point info
     std::optional<BindingPoint> immediate_binding_point = {};
 
+    /// Map of group id to argument buffer information
+    std::unordered_map<uint32_t, ArgumentBufferInfo> group_to_argument_buffer_info;
+
     /// The bindings.
     Bindings bindings;
 
@@ -219,6 +236,7 @@ struct Options {
                  array_length_from_uniform,
                  vertex_pulling_config,
                  immediate_binding_point,
+                 group_to_argument_buffer_info,
                  bindings);
 };
 

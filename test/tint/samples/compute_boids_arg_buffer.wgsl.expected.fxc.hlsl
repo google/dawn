@@ -6,8 +6,8 @@ struct comp_main_inputs {
 cbuffer cbuffer_params : register(b0) {
   uint4 params[2];
 };
-RWByteAddressBuffer particlesA : register(u1);
-RWByteAddressBuffer particlesB : register(u2);
+RWByteAddressBuffer particlesA : register(u0, space1);
+RWByteAddressBuffer particlesB : register(u0, space2);
 void comp_main_inner(uint3 gl_GlobalInvocationID) {
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {

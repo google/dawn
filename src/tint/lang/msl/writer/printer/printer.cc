@@ -266,6 +266,10 @@ class Printer : public tint::TextGenerator {
         }
         return Switch(
             value->As<core::ir::InstructionResult>()->Instruction(),
+            [&](const msl::ir::BuiltinCall* c) {
+                // Pointer offset is always a pointer
+                return c->Func() == msl::BuiltinFn::kPointerOffset;
+            },
             [&](const core::ir::Var*) {
                 // Variable declarations are always references.
                 return false;
@@ -949,15 +953,27 @@ class Printer : public tint::TextGenerator {
 
             out << ")";
             return;
-        } else if (c->Func() == msl::BuiltinFn::kSimdBallot) {
+        }
+        if (c->Func() == msl::BuiltinFn::kSimdBallot) {
             out << "as_type<uint2>((simd_vote::vote_t)simd_ballot(";
             EmitValue(out, c->Args()[0]);
             out << "))";
             return;
-        } else if (c->Func() == msl::BuiltinFn::kConvert) {
+        }
+        if (c->Func() == msl::BuiltinFn::kConvert) {
             EmitType(out, c->Result()->Type());
             out << "(";
             EmitValue(out, c->Operand(0));
+            out << ")";
+            return;
+        }
+        if (c->Func() == msl::BuiltinFn::kPointerOffset) {
+            out << "reinterpret_cast<";
+            EmitType(out, c->Result()->Type());
+            out << ">(reinterpret_cast<const constant char*>(";
+            EmitValue(out, c->Operand(0));
+            out << ") + ";
+            EmitValue(out, c->Operand(1));
             out << ")";
             return;
         }

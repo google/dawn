@@ -130,6 +130,7 @@ cc_library(
     "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
+      "//src/tint/lang/msl/writer/common",
       "//src/tint/lang/msl/writer/raise",
     ],
     "//conditions:default": [],
