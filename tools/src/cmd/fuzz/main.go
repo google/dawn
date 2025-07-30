@@ -69,7 +69,7 @@ type cmdConfig struct {
 	verbose      bool
 	dump         bool
 	fuzzMode     FuzzMode
-	taskMode     TaskMode
+	cmdMode      TaskMode // meta-task being requested by the user, may require running multiple tasks internally
 	filter       string
 	inputs       string
 	build        string
@@ -114,17 +114,17 @@ func main() {
 	flag.Parse()
 
 	if check && generate {
-		fmt.Println("cannot set check and generate flags at the same time")
+		fmt.Println("cannot set -check and -generate flags at the same time")
 		os.Exit(1)
 	}
 
 	switch {
 	case check:
-		c.taskMode = TaskModeCheck
+		c.cmdMode = TaskModeCheck
 	case generate:
-		c.taskMode = TaskModeGenerate
+		c.cmdMode = TaskModeGenerate
 	default:
-		c.taskMode = TaskModeRun
+		c.cmdMode = TaskModeRun
 	}
 
 	if irMode {
@@ -137,12 +137,9 @@ func main() {
 		c.numProcesses = 1
 	}
 
-	// Running/checking the fuzzer in IR mode requires an explicit input directory, and test/tint should not contain any .tirb files.
-	if c.inputs == defaultWgslCorpusDir(osWrapper) {
-		if c.fuzzMode == FuzzModeIr && (c.taskMode == TaskModeRun || c.taskMode == TaskModeCheck) {
-			fmt.Println("-inputs is required when running or checking the IR fuzzer")
-			os.Exit(1)
-		}
+	if c.cmdMode == TaskModeGenerate && (c.out == "" || c.out == "<tmp>") {
+		fmt.Println("need to specify -output when using -generate")
+		os.Exit(1)
 	}
 
 	if err := run(&c, osWrapper); err != nil {
@@ -153,37 +150,93 @@ func main() {
 
 type taskConfig struct {
 	cmdConfig
-	fuzzer     string // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
-	generator  string // path to the corpus generator, generate_tint_corpus.py
-	assembler  string // path to the test case assembler, tint_fuzz_as
-	dictionary string // path to dictionary to use for tint_wgsl_fuzzer
+	taskMode   TaskMode // specific task being run at this time, may be different from cmdConfig.cmdMode
+	fuzzer     string   // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
+	generator  string   // path to the corpus generator, generate_tint_corpus.py
+	assembler  string   // path to the test case assembler, tint_fuzz_as
+	dictionary string   // path to dictionary to use for tint_wgsl_fuzzer
 }
 
 // TODO(crbug.com/344014313): Add unittests once fileutils and term are updated
 // to support dependency injection.
 func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
-	t := taskConfig{
-		cmdConfig: *c,
-	}
-
-	if !fileutils.IsDir(t.build) {
-		return fmt.Errorf("build directory '%v' does not exist", t.build)
+	if !fileutils.IsDir(c.build) {
+		return fmt.Errorf("build directory '%v' does not exist", c.build)
 	}
 
 	// Verify / create the output directory
-	if t.out == "" || t.out == "<tmp>" {
+	if c.out == "" || c.out == "<tmp>" {
 		if tmp, err := osWrapper.MkdirTemp("", "tint_fuzz"); err == nil {
 			defer func(osWrapper oswrapper.OSWrapper, path string) {
 				_ = osWrapper.RemoveAll(path)
 			}(osWrapper, tmp)
-			t.out = tmp
+			c.out = tmp
 		} else {
 			return err
 		}
 	}
 
-	if !fileutils.IsDir(t.out) {
-		return fmt.Errorf("output directory '%v' does not exist", t.out)
+	if !fileutils.IsDir(c.out) {
+		return fmt.Errorf("output directory '%v' does not exist", c.out)
+	}
+
+	queue := make([]*taskConfig, 0, 1)
+
+	if c.fuzzMode == FuzzModeIr && (c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck) {
+		// The default input files are .wgsl files and tint_ir_fuzzer runs on .tirb files, so need
+		// to convert them before running/checking
+		if c.inputs == defaultWgslCorpusDir(osWrapper) {
+			origOut := c.out
+			tmp, err := osWrapper.MkdirTemp("", "ir_corpus")
+			if err != nil {
+				return err
+			}
+			defer func(osWrapper oswrapper.OSWrapper, path string) {
+				_ = osWrapper.RemoveAll(path)
+			}(osWrapper, tmp)
+
+			c.out = tmp
+			t, err := generateTaskConfig(TaskModeGenerate, c, osWrapper)
+			if err != nil {
+				return err
+			}
+			queue = append(queue, t)
+
+			c.out = origOut
+			c.inputs = tmp
+		}
+	}
+
+	t, err := generateTaskConfig(c.cmdMode, c, osWrapper)
+	if err != nil {
+		return err
+	}
+	queue = append(queue, t)
+
+	for _, t := range queue {
+		var err error
+		switch t.taskMode {
+		case TaskModeRun:
+			err = runFuzzer(t, osWrapper)
+		case TaskModeCheck:
+			err = checkFuzzer(t, osWrapper)
+		case TaskModeGenerate:
+			err = runCorpusGenerator(t, osWrapper)
+		default:
+			err = fmt.Errorf("unknown task mode %d", t.taskMode)
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// generateTaskConfig produces a taskConfig based off the supplied cmdConfig and specified TaskMode.
+func generateTaskConfig(tm TaskMode, c *cmdConfig, osWrapper oswrapper.OSWrapper) (*taskConfig, error) {
+	t := taskConfig{
+		cmdConfig: *c,
+		taskMode:  tm,
 	}
 
 	type depConfig struct {
@@ -191,7 +244,7 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 		path *string
 	}
 	dependencies := make([]depConfig, 0)
-	switch t.taskMode {
+	switch tm {
 	case TaskModeRun:
 		if c.fuzzMode == FuzzModeWgsl {
 			dependencies = append(dependencies, depConfig{"dictionary.txt", &t.dictionary})
@@ -216,31 +269,22 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 		case filepath.Ext(config.name) == ".py":
 			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz"), config.name)
 			if !fileutils.IsFile(*config.path) {
-				return fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
+				return nil, fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
 			}
 		case filepath.Ext(config.name) == ".txt":
 			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
 			if !fileutils.IsFile(*config.path) {
-				return fmt.Errorf("resource '%v' not found at '%v'", config.name, *config.path)
+				return nil, fmt.Errorf("resource '%v' not found at '%v'", config.name, *config.path)
 			}
 		default:
 			*config.path = filepath.Join(t.build, config.name+fileutils.ExeExt)
 			if !fileutils.IsExe(*config.path) {
-				return fmt.Errorf("binary '%v' not found at '%v'", config.name, *config.path)
+				return nil, fmt.Errorf("binary '%v' not found at '%v'", config.name, *config.path)
 			}
 		}
 	}
 
-	switch t.taskMode {
-	case TaskModeRun:
-		return runFuzzer(&t, osWrapper)
-	case TaskModeCheck:
-		return checkFuzzer(&t, osWrapper)
-	case TaskModeGenerate:
-		return runCorpusGenerator(&t, osWrapper)
-	default:
-		return fmt.Errorf("unknown task mode %d", t.taskMode)
-	}
+	return &t, nil
 }
 
 // TODO(crbug.com/344014313): Add unittests once term is converted to support
@@ -249,26 +293,22 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 // ensuring that the fuzzers do not error for the given file.
 func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 	var files []string
-	if t.fuzzMode == FuzzModeIr {
-		if t.inputs == "" {
-			return fmt.Errorf("must explicitly provide a inputs when running in IR mode")
-		}
-
-		var err error
+	var err error
+	switch t.fuzzMode {
+	case FuzzModeIr:
 		files, err = glob.Glob(filepath.Join(t.inputs, "**.tirb"), osWrapper)
-		if err != nil {
-			return err
-		}
-	} else {
-		var err error
+	case FuzzModeWgsl:
 		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), osWrapper)
-		if err != nil {
-			return err
-		}
-
-		// Remove '*.expected.wgsl'
-		files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
+	default:
+		err = fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
 	}
+	if err != nil {
+		return err
+	}
+
+	// Remove '*.expected.wgsl'
+	files = transform.Filter(files, func(s string) bool { return !strings.Contains(s, ".expected.") })
+
 	fmt.Printf("checking %v files...\n", len(files))
 
 	remaining := transform.SliceToChan(files)
@@ -366,7 +406,9 @@ func generateFuzzerArgs(t *taskConfig, fsReader oswrapper.FilesystemReader) []st
 	if t.inputs != "" {
 		args = append(args, t.inputs)
 	}
-	args = append(args, "-dict="+t.dictionary)
+	if t.dictionary != "" {
+		args = append(args, "-dict="+t.dictionary)
+	}
 	if t.verbose {
 		args = append(args, "--verbose")
 	}
