@@ -1285,25 +1285,6 @@ void ReflectShaderUsingTint(const ShaderModuleParseDeviceInfo& deviceInfo,
 }  // anonymous namespace
 
 ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    const tint::Program& program,
-    const char* entryPointName,
-    bool usesSubgroupMatrix,
-    uint32_t maxSubgroupSize,
-    const LimitsForCompilationRequest& limits,
-    const LimitsForCompilationRequest& adaterSupportedlimits) {
-    tint::inspector::Inspector inspector(program);
-
-    // At this point the entry point must exist and must have workgroup size values.
-    tint::inspector::EntryPoint entryPoint = inspector.GetEntryPoint(entryPointName);
-    DAWN_ASSERT(entryPoint.workgroup_size.has_value());
-    const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
-
-    return ValidateComputeStageWorkgroupSize(workgroup_size.x, workgroup_size.y, workgroup_size.z,
-                                             entryPoint.workgroup_storage_size, usesSubgroupMatrix,
-                                             maxSubgroupSize, limits, adaterSupportedlimits);
-}
-
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     uint32_t x,
     uint32_t y,
     uint32_t z,
