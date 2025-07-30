@@ -83,11 +83,12 @@ If you cannot or do not want to depend on `depot_tools`, you may use the `tools/
 # Clone the repo as "dawn"
 git clone https://dawn.googlesource.com/dawn dawn && cd dawn
 
-# Fetch dependencies (lose equivalent of gclient sync)
-python tools/fetch_dawn_dependencies.py --use-test-deps
+# Fetch dependencies (loosely equivalent to gclient sync)
+python tools/fetch_dawn_dependencies.py
 ```
 
-Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options. The `--use-test-deps` option used above specifies to also fetch dependencies needed by tests. Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
+Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options.
+Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
 
 ### Linux dependencies
 

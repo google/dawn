@@ -32,18 +32,12 @@ set(BUILD_TESTING OFF)
 # It is particularly interesting when building dawn as a subdirectory in
 # a parent project that does not want to use depot_tools.
 if (DAWN_FETCH_DEPENDENCIES)
-    set(EXTRA_FETCH_ARGS)
-    if (NOT TARGET gmock AND (DAWN_BUILD_TESTS OR TINT_BUILD_TESTS))
-        list(APPEND EXTRA_FETCH_ARGS --use-test-deps)
-    endif()
-
     message(STATUS "Running fetch_dawn_dependencies:")
     execute_process(
         COMMAND
             ${Python3_EXECUTABLE}
             "${PROJECT_SOURCE_DIR}/tools/fetch_dawn_dependencies.py"
             --directory ${PROJECT_SOURCE_DIR}
-            ${EXTRA_FETCH_ARGS}
     )
 endif ()
 
