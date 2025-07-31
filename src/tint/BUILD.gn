@@ -150,6 +150,11 @@ config("tint_public_config") {
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",
   ]
+
+  if (!is_clang && is_win) {
+    # MSVC needs a flag to enable a standard-compliant preprocessor.
+    cflags = [ "/Zc:preprocessor" ]
+  }
 }
 
 config("tint_config") {
