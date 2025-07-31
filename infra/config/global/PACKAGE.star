@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -25,29 +25,30 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-"""Project declaration for the Dawn project."""
+"""Package declaration for the Dawn project."""
 
-def _milestone_details(*, chromium_project, ref, platforms):
-    """Define the details for an active milestone.
+pkg.declare(
+    name = "@dawn-project",
+    lucicfg = "1.45.6",
+)
 
-    Args:
-      * chromium_project - The name of the LUCI project that is configured for the
-        milestone.
-      * ref - The ref in the Dawn git repository that contains the code for the
-        milestone.
-      * platforms - A list of platform strings that the milestone is active for.
-    """
-    return struct(
-        chromium_project = chromium_project,
-        ref = ref,
-        platforms = platforms,
-    )
+pkg.options.lint_checks([
+    "all",
+])
 
-ACTIVE_MILESTONES = {
-    m["name"]: _milestone_details(
-        chromium_project = m["chromium_project"],
-        ref = m["ref"],
-        platforms = m["platforms"],
-    )
-    for m in json.decode(io.read_file("./milestones.json")).values()
-}
+pkg.entrypoint("main.star")
+
+pkg.depend(
+    name = "@chromium-luci",
+    source = pkg.source.googlesource(
+        host = "chromium",
+        repo = "infra/chromium",
+        ref = "refs/heads/main",
+        path = "starlark-libs/chromium-luci",
+        revision = "5e6d4b3392677bd2e947f0098229d0555e220eef",
+    ),
+)
+
+pkg.resources([
+    "milestones.json",
+])

@@ -25,6 +25,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+"""Constants shared between multiple Dawn Starlark files."""
+
 # Copied from Chromium's lib/builders.star and trimmed.
 siso = struct(
     project = struct(
