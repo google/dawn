@@ -1826,7 +1826,10 @@ var LibraryWebGPU = {
   },
 
   emwgpuDeviceDestroy: (devicePtr) => {
-    WebGPU.getJsObject(devicePtr).destroy()
+    const device = WebGPU.getJsObject(devicePtr);
+    // Remove the onuncapturederror handler which holds a pointer to the WGPUDevice.
+    device.onuncapturederror = null;
+    device.destroy()
   },
 
   wgpuDeviceGetFeatures__deps: ['malloc'],

@@ -293,6 +293,7 @@ if (EMSCRIPTEN)
         add_library(emdawnwebgpu_test_linkopts INTERFACE)
         target_link_options(emdawnwebgpu_test_linkopts
             INTERFACE
+                "-sALLOW_MEMORY_GROWTH"
                 # Build with Closure so we can look at code size, and to test that Closure
                 # minification works, and to let Closure statically analyze our JS.
                 "$<$<CONFIG:Release,MinSizeRel>:--closure=1>"
