@@ -159,7 +159,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	flag.Parse()
 
 	// Check the executable can be found and actually is executable
-	if !fileutils.IsExe(tintPath) {
+	if !fileutils.IsExe(tintPath, fsReaderWriter) {
 		fmt.Fprintln(os.Stderr, "tint executable not found, please specify with --tint")
 		showUsage()
 	}
@@ -192,12 +192,12 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		}
 
 		switch {
-		case fileutils.IsDir(arg):
+		case fileutils.IsDir(arg, fsReaderWriter):
 			// Argument is to a directory, expand out to N globs
 			for _, glob := range directoryGlobs {
 				globs = append(globs, path.Join(arg, glob))
 			}
-		case fileutils.IsFile(arg):
+		case fileutils.IsFile(arg, fsReaderWriter):
 			// Argument is a file, append to absFiles
 			absFiles = append(absFiles, arg)
 		default:
@@ -270,16 +270,16 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		if *tool.path == "" {
 			// Look first in the directory of the tint executable
 			p, err := exec.LookPath(filepath.Join(filepath.Dir(tintPath), tool.name))
-			if err == nil && fileutils.IsExe(p) {
+			if err == nil && fileutils.IsExe(p, fsReaderWriter) {
 				*tool.path = p
 			} else {
 				// Look in PATH
 				p, err := exec.LookPath(tool.name)
-				if err == nil && fileutils.IsExe(p) {
+				if err == nil && fileutils.IsExe(p, fsReaderWriter) {
 					*tool.path = p
 				}
 			}
-		} else if !fileutils.IsExe(*tool.path) {
+		} else if !fileutils.IsExe(*tool.path, fsReaderWriter) {
 			return fmt.Errorf("%v not found at '%v'", tool.name, *tool.path)
 		}
 

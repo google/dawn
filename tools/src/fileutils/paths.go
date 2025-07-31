@@ -29,7 +29,6 @@ package fileutils
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -137,8 +136,8 @@ func BuildPath(fsReader oswrapper.FilesystemReader) string {
 }
 
 // IsDir returns true if the path resolves to a directory
-func IsDir(path string) bool {
-	s, err := os.Stat(path)
+func IsDir(path string, fsReader oswrapper.FilesystemReader) bool {
+	s, err := fsReader.Stat(path)
 	if err != nil {
 		return false
 	}
@@ -146,8 +145,8 @@ func IsDir(path string) bool {
 }
 
 // IsFile returns true if the path resolves to a file
-func IsFile(path string) bool {
-	s, err := os.Stat(path)
+func IsFile(path string, fsReader oswrapper.FilesystemReader) bool {
+	s, err := fsReader.Stat(path)
 	if err != nil {
 		return false
 	}

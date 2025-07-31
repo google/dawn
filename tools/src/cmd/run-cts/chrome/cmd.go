@@ -80,7 +80,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 // TODO(crbug.com/416755658): Add unittest coverage once there is a way to fake
 // the Chrome instance.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
-	state, err := c.flags.Process()
+	state, err := c.flags.Process(cfg.OsWrapper)
 	if err != nil {
 		return err
 	}
@@ -96,10 +96,10 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return fmt.Errorf("only a single query can be provided")
 	}
 
-	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
+	if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
 		return err
 	}
-	if err := c.state.CTS.Standalone.BuildIfRequired(c.flags.Verbose); err != nil {
+	if err := c.state.CTS.Standalone.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
 		return err
 	}
 
@@ -206,9 +206,9 @@ func (c *cmd) runChromeInstance(
 	handler.HandleFunc("/test_page.html", serveFile("webgpu-cts/test_page.html", fsReader))
 	handler.HandleFunc("/test_runner.js", serveFile("webgpu-cts/test_runner.js", fsReader))
 	handler.HandleFunc("/third_party/webgpu-cts/resources/",
-		serveDir("/third_party/webgpu-cts/resources/", c.flags.CTS+"/out/resources/"))
+		serveDir("/third_party/webgpu-cts/resources/", c.flags.CTS+"/out/resources/", fsReader))
 	handler.HandleFunc("/third_party/webgpu-cts/src/",
-		serveDir("/third_party/webgpu-cts/src/", c.flags.CTS+"/out/"))
+		serveDir("/third_party/webgpu-cts/src/", c.flags.CTS+"/out/", fsReader))
 	handler.HandleFunc("/", websocket.Handler(func(ws *websocket.Conn) {
 		go func() {
 			d := json.NewDecoder(ws)
@@ -337,17 +337,17 @@ func serveFile(relPath string, fsReader oswrapper.FilesystemReader) func(http.Re
 	dawnRoot := fileutils.DawnRoot(fsReader)
 	return func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(dawnRoot, relPath)
-		if !fileutils.IsFile(fullPath) {
+		if !fileutils.IsFile(fullPath, fsReader) {
 			log.Printf("'%v' file does not exist", fullPath)
 		}
 		http.ServeFile(w, r, filepath.Join(dawnRoot, relPath))
 	}
 }
 
-func serveDir(remote, local string) func(http.ResponseWriter, *http.Request) {
+func serveDir(remote, local string, fsReader oswrapper.FilesystemReader) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fullPath := filepath.Join(local, strings.TrimPrefix(r.URL.Path, remote))
-		if !fileutils.IsFile(fullPath) {
+		if !fileutils.IsFile(fullPath, fsReader) {
 			log.Printf("'%v' file does not exist", fullPath)
 		}
 		http.ServeFile(w, r, fullPath)

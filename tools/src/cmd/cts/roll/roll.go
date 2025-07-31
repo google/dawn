@@ -810,7 +810,7 @@ func (r *roller) genTSDepList(
 	ctx context.Context, fsReader oswrapper.FilesystemReader) (string, error) {
 
 	tscPath := filepath.Join(r.ctsDir, "node_modules/.bin/tsc")
-	if !fileutils.IsExe(tscPath) {
+	if !fileutils.IsExe(tscPath, fsReader) {
 		return "", fmt.Errorf("tsc not found at '%v'", tscPath)
 	}
 

@@ -146,6 +146,12 @@ func TestStat_Nonexistent(t *testing.T) {
 	require.ErrorContains(t, err, "open /foo.txt: file does not exist")
 }
 
+func TestStat_EmptyString(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	_, err := wrapper.Stat("")
+	require.ErrorContains(t, err, "no such file or directory")
+}
+
 func TestWalk_Nonexistent(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
 

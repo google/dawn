@@ -164,24 +164,24 @@ type taskConfig struct {
 	dictionary string   // path to dictionary to use for tint_wgsl_fuzzer
 }
 
-func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
-	if !fileutils.IsDir(c.build) {
+func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
+	if !fileutils.IsDir(c.build, fsReaderWriter) {
 		return fmt.Errorf("build directory '%v' does not exist", c.build)
 	}
 
 	// Verify / create the output directory
 	if c.out == "" || c.out == "<tmp>" {
-		if tmp, err := osWrapper.MkdirTemp("", "tint_fuzz"); err == nil {
-			defer func(osWrapper oswrapper.OSWrapper, path string) {
-				_ = osWrapper.RemoveAll(path)
-			}(osWrapper, tmp)
+		if tmp, err := fsReaderWriter.MkdirTemp("", "tint_fuzz"); err == nil {
+			defer func(fsWriter oswrapper.FilesystemWriter, path string) {
+				_ = fsWriter.RemoveAll(path)
+			}(fsReaderWriter, tmp)
 			c.out = tmp
 		} else {
 			return err
 		}
 	}
 
-	if !fileutils.IsDir(c.out) {
+	if !fileutils.IsDir(c.out, fsReaderWriter) {
 		return fmt.Errorf("output directory '%v' does not exist", c.out)
 	}
 
@@ -190,18 +190,18 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 	if c.fuzzMode == FuzzModeIr && (c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck) {
 		// The default input files are .wgsl files and tint_ir_fuzzer runs on .tirb files, so need
 		// to convert them before running/checking
-		if c.inputs == defaultWgslCorpusDir(osWrapper) {
+		if c.inputs == defaultWgslCorpusDir(fsReaderWriter) {
 			origOut := c.out
-			tmp, err := osWrapper.MkdirTemp("", "ir_corpus")
+			tmp, err := fsReaderWriter.MkdirTemp("", "ir_corpus")
 			if err != nil {
 				return err
 			}
-			defer func(osWrapper oswrapper.OSWrapper, path string) {
-				_ = osWrapper.RemoveAll(path)
-			}(osWrapper, tmp)
+			defer func(fsWriter oswrapper.FilesystemWriter, path string) {
+				_ = fsWriter.RemoveAll(path)
+			}(fsReaderWriter, tmp)
 
 			c.out = tmp
-			t, err := generateTaskConfig(TaskModeGenerate, c, osWrapper)
+			t, err := generateTaskConfig(TaskModeGenerate, c, fsReaderWriter)
 			if err != nil {
 				return err
 			}
@@ -212,7 +212,7 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 		}
 	}
 
-	t, err := generateTaskConfig(c.cmdMode, c, osWrapper)
+	t, err := generateTaskConfig(c.cmdMode, c, fsReaderWriter)
 	if err != nil {
 		return err
 	}
@@ -222,11 +222,11 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 		var err error
 		switch t.taskMode {
 		case TaskModeRun:
-			err = runFuzzer(t, osWrapper)
+			err = runFuzzer(t)
 		case TaskModeCheck:
-			err = checkFuzzer(t, osWrapper)
+			err = checkFuzzer(t, fsReaderWriter)
 		case TaskModeGenerate:
-			err = runCorpusGenerator(t, osWrapper)
+			err = runCorpusGenerator(t, fsReaderWriter)
 		default:
 			err = fmt.Errorf("unknown task mode %d", t.taskMode)
 		}
@@ -238,7 +238,7 @@ func run(c *cmdConfig, osWrapper oswrapper.OSWrapper) error {
 }
 
 // generateTaskConfig produces a taskConfig based off the supplied cmdConfig and specified TaskMode.
-func generateTaskConfig(tm TaskMode, c *cmdConfig, osWrapper oswrapper.OSWrapper) (*taskConfig, error) {
+func generateTaskConfig(tm TaskMode, c *cmdConfig, fsReader oswrapper.FilesystemReader) (*taskConfig, error) {
 	t := taskConfig{
 		cmdConfig: *c,
 		taskMode:  tm,
@@ -272,18 +272,18 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, osWrapper oswrapper.OSWrapper
 	for _, config := range dependencies {
 		switch {
 		case filepath.Ext(config.name) == ".py":
-			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz"), config.name)
-			if !fileutils.IsFile(*config.path) {
+			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(fsReader), "src", "tint", "cmd", "fuzz"), config.name)
+			if !fileutils.IsFile(*config.path, fsReader) {
 				return nil, fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
 			}
 		case filepath.Ext(config.name) == ".txt":
-			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(osWrapper), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
-			if !fileutils.IsFile(*config.path) {
+			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(fsReader), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
+			if !fileutils.IsFile(*config.path, fsReader) {
 				return nil, fmt.Errorf("resource '%v' not found at '%v'", config.name, *config.path)
 			}
 		default:
 			*config.path = filepath.Join(t.build, config.name+fileutils.ExeExt)
-			if !fileutils.IsExe(*config.path) {
+			if !fileutils.IsExe(*config.path, fsReader) {
 				return nil, fmt.Errorf("binary '%v' not found at '%v'", config.name, *config.path)
 			}
 		}
@@ -294,14 +294,14 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, osWrapper oswrapper.OSWrapper
 
 // checkFuzzer runs the fuzzer against all the test files the inputs directory,
 // ensuring that the fuzzers do not error for the given file.
-func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
+func checkFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 	var files []string
 	var err error
 	switch t.fuzzMode {
 	case FuzzModeIr:
-		files, err = glob.Glob(filepath.Join(t.inputs, "**.tirb"), osWrapper)
+		files, err = glob.Glob(filepath.Join(t.inputs, "**.tirb"), fsReader)
 	case FuzzModeWgsl:
-		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), osWrapper)
+		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), fsReader)
 	default:
 		err = fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
 	}
@@ -355,7 +355,7 @@ func checkFuzzer(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 // The fuzzer will use t.inputs as the seed directory.
 // New cases are written to t.out.
 // Blocks until a fuzzer errors, or the process is interrupted.
-func runFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
+func runFuzzer(t *taskConfig) error {
 	ctx := utils.CancelOnInterruptContext(context.Background())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -423,35 +423,35 @@ func generateFuzzerArgs(t *taskConfig) []string {
 // runCorpusGenerator converts a set of input test files into a fuzzer corpus
 // The generator will use t.inputs as the source directory.
 // The corpus will be written to t.out.
-func runCorpusGenerator(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
+func runCorpusGenerator(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	switch t.fuzzMode {
 	case FuzzModeWgsl:
-		return runCorpusGeneratorWgsl(t, osWrapper)
+		return runCorpusGeneratorWgsl(t, fsReaderWriter)
 	case FuzzModeIr:
-		return runCorpusGeneratorIr(t, osWrapper)
+		return runCorpusGeneratorIr(t, fsReaderWriter)
 	default:
 		return fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
 	}
 }
 
 // runCorpusGeneratorWgsl converts a set of input test .wgsl files into a WGSL fuzzer corpus.
-func runCorpusGeneratorWgsl(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
-	return gatherWgslFiles(t.inputs, t.out, osWrapper)
+func runCorpusGeneratorWgsl(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
+	return gatherWgslFiles(t.inputs, t.out, fsReaderWriter)
 }
 
 // runCorpusGeneratorWgsl converts a set of input test .wgsl files into an IR fuzzer corpus
 // Forks out to an external binary, t.assembler, to perform the operation.
-func runCorpusGeneratorIr(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
-	tmp, err := osWrapper.MkdirTemp("", "wgsl_corpus")
+func runCorpusGeneratorIr(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
+	tmp, err := fsReaderWriter.MkdirTemp("", "wgsl_corpus")
 	if err == nil {
-		defer func(osWrapper oswrapper.OSWrapper, path string) {
-			_ = osWrapper.RemoveAll(path)
-		}(osWrapper, tmp)
+		defer func(fsWriter oswrapper.FilesystemWriter, path string) {
+			_ = fsWriter.RemoveAll(path)
+		}(fsReaderWriter, tmp)
 	} else {
 		return err
 	}
 
-	err = gatherWgslFiles(t.inputs, tmp, osWrapper)
+	err = gatherWgslFiles(t.inputs, tmp, fsReaderWriter)
 	if err != nil {
 		return err
 	}
@@ -486,9 +486,9 @@ func runCorpusGeneratorIr(t *taskConfig, osWrapper oswrapper.OSWrapper) error {
 // gatherWgslFiles copies all the .wgsl files in a directory structure over to a flat directory
 // structure, via replacing the path separators for the origins with underscores in the destination
 // file names. It also filters out any '*.expected.*' files
-func gatherWgslFiles(inputs string, out string, osWrapper oswrapper.OSWrapper) error {
+func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	fmt.Println("gathering and filtering .wgsl files")
-	files, err := glob.Glob(filepath.Join(inputs, "**.wgsl"), osWrapper)
+	files, err := glob.Glob(filepath.Join(inputs, "**.wgsl"), fsReaderWriter)
 	if err != nil {
 		return err
 	}
@@ -506,7 +506,7 @@ func gatherWgslFiles(inputs string, out string, osWrapper oswrapper.OSWrapper) e
 	}
 
 	for src, dest := range mapping {
-		if err := fileutils.CopyFile(filepath.Join(out, dest), src); err != nil {
+		if err := fileutils.CopyFile(filepath.Join(out, dest), src, fsReaderWriter); err != nil {
 			return err
 		}
 	}

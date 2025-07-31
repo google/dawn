@@ -123,6 +123,11 @@ func (m MemMapFilesystemReader) ReadFile(name string) ([]byte, error) {
 }
 
 func (m MemMapFilesystemReader) Stat(name string) (os.FileInfo, error) {
+	// KI with afero, https://github.com/spf13/afero/issues/522
+	if name == "" {
+		return nil, fmt.Errorf("no such file or directory")
+	}
+
 	return m.fs.Stat(name)
 }
 

@@ -31,7 +31,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -69,7 +68,7 @@ func (f *Flags) Register(fsReader oswrapper.FilesystemReader) {
 
 // Process processes the flags, returning a State.
 // Note: Ensure you call Close() on the returned State
-func (f *Flags) Process() (*State, error) {
+func (f *Flags) Process(fsReaderWriter oswrapper.FilesystemReaderWriter) (*State, error) {
 	s := &State{
 		resultsPath: f.ResultsPath,
 	}
@@ -81,7 +80,7 @@ func (f *Flags) Process() (*State, error) {
 	if f.CTS == "" {
 		return nil, subcmd.InvalidCLA()
 	}
-	if !fileutils.IsDir(f.CTS) {
+	if !fileutils.IsDir(f.CTS, fsReaderWriter) {
 		return nil, fmt.Errorf("'%v' is not a directory", f.CTS)
 	}
 	absCTS, err := filepath.Abs(f.CTS)
@@ -92,7 +91,7 @@ func (f *Flags) Process() (*State, error) {
 
 	// Build the logger, if needed
 	if f.Log != "" {
-		writer, err := os.Create(f.Log)
+		writer, err := fsReaderWriter.Create(f.Log)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open log '%v': %w", f.Log, err)
 		}
