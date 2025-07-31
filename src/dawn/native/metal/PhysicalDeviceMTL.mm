@@ -395,7 +395,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // TODO(crbug.com/dawn/342): Investigate emulation -- possibly expensive.
         deviceToggles->Default(Toggle::MetalDisableSamplerCompare, !haveSamplerCompare);
 
-        // TODO(crbug.com/dawn/363031535): Enable by default when possible
+        // TODO(crbug.com/363031535): Enable by default when possible
         deviceToggles->Default(Toggle::MetalUseArgumentBuffers, false);
 
         bool haveBaseVertexBaseInstance = true;

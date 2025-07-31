@@ -28,6 +28,7 @@
 #include "dawn/native/metal/ShaderModuleMTL.h"
 
 #include "dawn/common/MatchVariant.h"
+#include "dawn/common/Range.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/CacheRequest.h"
@@ -219,6 +220,56 @@ tint::msl::writer::Bindings GenerateBindingInfo(
     return bindings;
 }
 
+std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgumentBufferInfo(
+    SingleShaderStage stage,
+    const PipelineLayout* layout,
+    const BindingInfoArray& moduleBindingInfo,
+    bool useArgumentBuffers) {
+    if (!useArgumentBuffers) {
+        return {};
+    }
+
+    // TODO(363031535): The dynamic offsets should all move to be immediates and contained into a
+    // single buffer.
+    std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> info = {};
+
+    uint32_t curBufferIdx = kArgumentBufferSlotMax;
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
+        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+
+        // Node, this buffer index value needs to match up to the value set in the
+        // CommandBufferMTL #argument-buffer-index
+        tint::msl::writer::ArgumentBufferInfo argBufferInfo = {
+            .id = curBufferIdx--,
+        };
+
+        uint32_t curDynamicOffset = 0;
+
+        for (BindingIndex bindingIndex : Range(bgl->GetBindingCount())) {
+            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+
+            MatchVariant(
+                bindingInfo.bindingLayout,  //
+                [&](const BufferBindingInfo& binding) {
+                    if (binding.hasDynamicOffset) {
+                        argBufferInfo.dynamic_buffer_id = curBufferIdx--;
+
+                        argBufferInfo.binding_info_to_offset_index.insert(
+                            {static_cast<uint32_t>(bindingInfo.binding), curDynamicOffset++});
+                    }
+                },
+                [&](const SamplerBindingInfo& bindingInfo) {},
+                [&](const StaticSamplerBindingInfo& bindingInfo) {},
+                [&](const TextureBindingInfo& bindingInfo) {},
+                [&](const StorageTextureBindingInfo& bindingInfo) {},
+                [](const InputAttachmentBindingInfo&) { DAWN_CHECK(false); });
+        }
+        info.insert({static_cast<uint32_t>(group), argBufferInfo});
+    }
+
+    return info;
+}
+
 ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     DeviceBase* device,
     const ProgrammableStage& programmableStage,
@@ -238,6 +289,9 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     tint::msl::writer::Bindings bindings = GenerateBindingInfo(
         stage, layout, moduleBindingInfo, arrayLengthFromUniform, useArgumentBuffers);
+
+    std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> argumentBufferInfo =
+        GenerateArgumentBufferInfo(stage, layout, moduleBindingInfo, useArgumentBuffers);
 
     OptionalVertexPullingTransformConfig vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
@@ -318,6 +372,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.enable_integer_range_analysis =
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
     req.tintOptions.use_argument_buffers = useArgumentBuffers;
+    req.tintOptions.group_to_argument_buffer_info = std::move(argumentBufferInfo);
 
     req.limits = LimitsForCompilationRequest::Create(device->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(
