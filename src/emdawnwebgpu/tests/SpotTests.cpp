@@ -96,4 +96,25 @@ TEST_F(SpotTests, BufferGetMapState) {
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
+TEST_F(SpotTests, GetCompilationInfo) {
+    for (bool valid : {true, false}) {
+        wgpu::ShaderSourceWGSL wgslDesc{};
+        wgslDesc.code = valid ? "" : "some invalid code";
+
+        wgpu::ShaderModuleDescriptor descriptor{};
+        descriptor.nextInChain = &wgslDesc;
+        auto sm = device.CreateShaderModule(&descriptor);
+        auto future = sm.GetCompilationInfo(
+            wgpu::CallbackMode::WaitAnyOnly,
+            [](wgpu::CompilationInfoRequestStatus, const wgpu::CompilationInfo* compilationInfo) {
+                // We shouldn't have tried to allocate stuff if there were no messages.
+                EXPECT_EQ(compilationInfo->messageCount == 0, compilationInfo->messages == nullptr);
+
+                // After this, any compilation info will be freed. (There was a bug here which
+                // this test catches, but only in ASAN builds.)
+            });
+        EXPECT_EQ(wgpu::WaitStatus::Success, instance.WaitAny(future, UINT64_MAX));
+    }
+}
+
 }  // namespace

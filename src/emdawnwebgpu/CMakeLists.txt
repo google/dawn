@@ -290,19 +290,27 @@ if (EMSCRIPTEN)
             gmock_main_wasmsafe
         )
 
-        # Build with Closure so we can look at code size, and to test that Closure minification
-        # works, and to let Closure statically analyze our JS.
-        add_library(enable_closure INTERFACE)
-        target_link_options(enable_closure
+        add_library(emdawnwebgpu_test_linkopts INTERFACE)
+        target_link_options(emdawnwebgpu_test_linkopts
             INTERFACE
+                # Build with Closure so we can look at code size, and to test that Closure
+                # minification works, and to let Closure statically analyze our JS.
                 "$<$<CONFIG:Release,MinSizeRel>:--closure=1>"
         )
+        if (NOT DAWN_ENABLE_ASAN)
+            target_link_options(emdawnwebgpu_test_linkopts
+                INTERFACE
+                    # If ASAN is not enabled, enable SAFE_HEAP to catch some bugs.
+                    # (ASAN+UBSAN is preferable to this.)
+                    "$<$<CONFIG:Debug>:-sSAFE_HEAP>"
+            )
+        endif()
 
         add_library(emdawnwebgpu_tests)
         target_link_libraries(
             emdawnwebgpu_tests
             PUBLIC
-                enable_closure
+                emdawnwebgpu_test_linkopts
                 ${emdawnwebgpu_test_deps}
         )
 
@@ -314,6 +322,7 @@ if (EMSCRIPTEN)
             PUBLIC
                 # We need Asyncify or JSPI for Future tests.
                 "-sASYNCIFY=1"
+                "-sASYNCIFY_STACK_SIZE=10000"  # Needed when building with ASAN.
         )
 
         add_executable(emdawnwebgpu_tests_jspi ${emdawnwebgpu_test_sources})
@@ -343,7 +352,7 @@ if (EMSCRIPTEN)
         target_link_libraries(
             emdawnwebgpu_link_test
             PUBLIC
-                enable_closure
+                emdawnwebgpu_test_linkopts
                 emdawnwebgpu_c
         )
     endif()
