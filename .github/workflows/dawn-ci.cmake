@@ -42,6 +42,10 @@ if (ANDROID OR (CMAKE_SYSTEM_NAME STREQUAL "iOS") OR (DEFINED PLATFORM AND PLATF
     # Disable OpenGL variants for mobile
     set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "")
     set(DAWN_ENABLE_DESKTOP_GL OFF CACHE BOOL "")
+    
+    # Disable protobuf-dependent features that cause cross-compilation issues
+    set(TINT_BUILD_IR_BINARY OFF CACHE BOOL "")
+    set(TINT_BUILD_PROTOBUF_IR_CONV OFF CACHE BOOL "")
 endif ()
 
 # macOS universal build configuration (uses Apple toolchain but is not mobile)
@@ -57,6 +61,9 @@ if (DEFINED PLATFORM AND PLATFORM STREQUAL "MAC_UNIVERSAL")
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
     set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "")
     set(DAWN_ENABLE_DESKTOP_GL OFF CACHE BOOL "")
+    
+    # Disable protobuf-dependent features for consistency
+    set(TINT_BUILD_PROTOBUF_IR_CONV OFF CACHE BOOL "")
 endif ()
 
 # Android-specific configuration
