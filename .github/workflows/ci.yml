@@ -136,7 +136,7 @@ jobs:
       with:
         name: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
         path: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz
-  
+
   mobile:
     strategy:
       fail-fast: false
@@ -215,40 +215,27 @@ jobs:
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27d
-  
+
       - name: Set ANDROID_NDK
         if: matrix.platform == 'android'
         run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
-  
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-    
+
       - name: Download Apple toolchain
         if: matrix.platform != 'android'
         run: |
           mkdir -p build-tools
           # Download the ios-cmake toolchain file
-          curl -L https://raw.githubusercontent.com/leetal/ios-cmake/master/ios.toolchain.cmake -o build-tools/apple.toolchain.cmake
-    
+          curl -L https://raw.githubusercontent.com/leetal/ios-cmake/6fa909e133b92343db2d099e0478448c05ffec1a/ios.toolchain.cmake -o build-tools/apple.toolchain.cmake
+
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
+            -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=STATIC \
-            -DDBUILD_SHARED_LIBS=STATIC \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
+            -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
-    
+
       - name: Strip Android binaries
         if: matrix.platform == 'android'
         run: |
@@ -277,31 +264,19 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r26d
+          ndk-version: r27d
 
       - name: Set ANDROID_NDK
         run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
 
-      - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
-
       - name: Generate headers (using one Android build)
         run: |
           cmake -S . -B out/headers -G Ninja \
+            -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-26 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SAMPLES=OFF \
-            -DTINT_BUILD_TESTS=OFF \
-            -DTINT_BUILD_CMD_TOOLS=OFF \
-            -DTINT_BUILD_IR_BINARY=OFF \
-            -DDAWN_BUILD_SAMPLES=OFF \
-            -DDAWN_USE_GLFW=OFF \
-            -DDAWN_FETCH_DEPENDENCIES=ON \
-            -DDAWN_BUILD_MONOLITHIC_LIBRARY=ON \
-            -DDAWN_ENABLE_OPENGLES=OFF \
-            -DDAWN_ENABLE_DESKTOP_GL=OFF
+            -DCMAKE_BUILD_TYPE=Release
 
       - name: Create iOS Simulator fat binary
         run: |
