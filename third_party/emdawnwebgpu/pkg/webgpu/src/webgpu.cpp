@@ -1986,12 +1986,12 @@ void wgpuBufferUnmap(WGPUBuffer buffer) {
 
 WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device,
                                   const WGPUBufferDescriptor* descriptor) {
-  WGPUBuffer buffer = new WGPUBufferImpl(device, descriptor->mappedAtCreation);
-  if (!emwgpuDeviceCreateBuffer(device, descriptor, buffer)) {
-    delete buffer;
+  Ref<WGPUBufferImpl> buffer =
+      AcquireRef(new WGPUBufferImpl(device, descriptor->mappedAtCreation));
+  if (!emwgpuDeviceCreateBuffer(device, descriptor, buffer.Get())) {
     return nullptr;
   }
-  return buffer;
+  return ReturnToAPI(std::move(buffer));
 }
 
 WGPUFuture wgpuDeviceCreateComputePipelineAsync(

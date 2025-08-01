@@ -117,4 +117,21 @@ TEST_F(SpotTests, GetCompilationInfo) {
     }
 }
 
+TEST_F(SpotTests, ExternalRefCount) {
+    wgpu::BufferDescriptor bufferDesc{
+        .usage = wgpu::BufferUsage::MapRead, .size = 16, .mappedAtCreation = true};
+
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    ASSERT_TRUE(buffer);
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
+    {
+        // Add and then release an extra external ref.
+        wgpu::Buffer tmp = buffer;
+    }
+
+    // Make sure the device wasn't implicitly destroyed (because we thought
+    // the last external ref was dropped).
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
+}
+
 }  // namespace
