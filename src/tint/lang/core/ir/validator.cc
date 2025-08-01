@@ -1851,9 +1851,8 @@ void Validator::CheckType(const core::type::Type* root,
     }
 
     if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
-        // Check for core types (this is a hack to determine if the type is core, non-core types
-        // prefix their names with `lang.`, so we search for a `.` to find non-core)
-        if (root->FriendlyName().find(".") != std::string::npos) {
+        // Check for core types, which are the only types declared in the `tint::core` namespace.
+        if (!std::string_view(root->TypeInfo().name).starts_with("tint::core")) {
             diag() << "non-core types not allowed in core IR";
             return;
         }

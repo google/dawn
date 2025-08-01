@@ -39,12 +39,28 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/clone_context.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
+
+namespace tint::mock {
+/// A mock non-core type used for testing the non-core type validation rule.
+class NonCoreType final : public Castable<NonCoreType, core::type::Type> {
+  public:
+    NonCoreType() : Base(0u, core::type::Flags{}) {}
+    bool Equals(const UniqueNode& other) const override { return other.Is<NonCoreType>(); }
+    std::string FriendlyName() const override { return "NonCoreType"; }
+    core::type::Type* Clone(core::type::CloneContext& ctx) const override {
+        return ctx.dst.mgr->Get<NonCoreType>();
+    }
+};
+}  // namespace tint::mock
+
+TINT_INSTANTIATE_TYPEINFO(tint::mock::NonCoreType);
 
 namespace tint::core::ir {
 
@@ -265,6 +281,19 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidTypeForHandleAddressSpace) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 testing::HasSubstr("the 'handle' address space can only be used for handle types"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, NonCoreType) {
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->AppendParam(b.FunctionParam(ty.Get<tint::mock::NonCoreType>()));
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("non-core types not allowed in core IR"))
         << res.Failure();
 }
 
