@@ -82,6 +82,7 @@ type cmdConfig struct {
 	build        string
 	out          string
 	numProcesses int
+	osWrapper    oswrapper.OSWrapper
 }
 
 func showUsage() {
@@ -102,7 +103,7 @@ usage:
 
 func main() {
 	c := cmdConfig{}
-	osWrapper := oswrapper.GetRealOSWrapper()
+	c.osWrapper = oswrapper.GetRealOSWrapper()
 
 	flag.Usage = showUsage
 
@@ -113,9 +114,9 @@ func main() {
 	flag.BoolVar(&c.dump, "dump", false, "dumps shader input/output from fuzzer")
 	flag.BoolVar(&irMode, "ir", false, "runs using IR fuzzer instead of WGSL fuzzer (This feature is a WIP)")
 	flag.StringVar(&c.filter, "filter", "", "filter the fuzzing passes run to those with this substring")
-	flag.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(osWrapper), "obsolete, use -inputs instead")
-	flag.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(osWrapper), "the directory that holds the files to use")
-	flag.StringVar(&c.build, "build", defaultBuildDir(osWrapper), "the build directory")
+	flag.StringVar(&c.inputs, "corpus", defaultWgslCorpusDir(c.osWrapper), "obsolete, use -inputs instead")
+	flag.StringVar(&c.inputs, "inputs", defaultWgslCorpusDir(c.osWrapper), "the directory that holds the files to use")
+	flag.StringVar(&c.build, "build", defaultBuildDir(c.osWrapper), "the build directory")
 	flag.StringVar(&c.out, "out", "<tmp>", "the directory to store outputs to")
 	flag.IntVar(&c.numProcesses, "j", runtime.NumCPU(), "number of concurrent fuzzers to run")
 	flag.Parse()
@@ -149,7 +150,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := run(&c, osWrapper); err != nil {
+	if err := run(&c); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -159,29 +160,26 @@ type taskConfig struct {
 	cmdConfig
 	taskMode   TaskMode // specific task being run at this time, may be different from cmdConfig.cmdMode
 	fuzzer     string   // path to the fuzzer binary, tint_wgsl_fuzzer or tint_ir_fuzzer
-	generator  string   // path to the corpus generator, generate_tint_corpus.py
 	assembler  string   // path to the test case assembler, tint_fuzz_as
 	dictionary string   // path to dictionary to use for tint_wgsl_fuzzer
 }
 
-func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
-	if !fileutils.IsDir(c.build, fsReaderWriter) {
+func run(c *cmdConfig) error {
+	if !fileutils.IsDir(c.build, c.osWrapper) {
 		return fmt.Errorf("build directory '%v' does not exist", c.build)
 	}
 
 	// Verify / create the output directory
 	if c.out == "" || c.out == "<tmp>" {
-		if tmp, err := fsReaderWriter.MkdirTemp("", "tint_fuzz"); err == nil {
-			defer func(fsWriter oswrapper.FilesystemWriter, path string) {
-				_ = fsWriter.RemoveAll(path)
-			}(fsReaderWriter, tmp)
+		if tmp, err := c.osWrapper.MkdirTemp("", "tint_fuzz"); err == nil {
+			defer c.osWrapper.RemoveAll(tmp)
 			c.out = tmp
 		} else {
 			return err
 		}
 	}
 
-	if !fileutils.IsDir(c.out, fsReaderWriter) {
+	if !fileutils.IsDir(c.out, c.osWrapper) {
 		return fmt.Errorf("output directory '%v' does not exist", c.out)
 	}
 
@@ -190,20 +188,18 @@ func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	if c.fuzzMode == FuzzModeIr && (c.cmdMode == TaskModeRun || c.cmdMode == TaskModeCheck) {
 		// The default input files are .wgsl files and tint_ir_fuzzer runs on .tirb files, so need
 		// to convert them before running/checking
-		if c.inputs == defaultWgslCorpusDir(fsReaderWriter) {
+		if c.inputs == defaultWgslCorpusDir(c.osWrapper) {
 			origOut := c.out
-			tmp, err := fsReaderWriter.MkdirTemp("", "ir_corpus")
+			tmp, err := c.osWrapper.MkdirTemp("", "ir_corpus")
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create temporary directory for IR corpus: %w", err)
 			}
-			defer func(fsWriter oswrapper.FilesystemWriter, path string) {
-				_ = fsWriter.RemoveAll(path)
-			}(fsReaderWriter, tmp)
+			defer c.osWrapper.RemoveAll(tmp)
 
 			c.out = tmp
-			t, err := generateTaskConfig(TaskModeGenerate, c, fsReaderWriter)
+			t, err := generateTaskConfig(TaskModeGenerate, c)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to generate task config for IR corpus generation: %w", err)
 			}
 			queue = append(queue, t)
 
@@ -212,9 +208,9 @@ func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		}
 	}
 
-	t, err := generateTaskConfig(c.cmdMode, c, fsReaderWriter)
+	t, err := generateTaskConfig(c.cmdMode, c)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate task config for command mode %d: %w", c.cmdMode, err)
 	}
 	queue = append(queue, t)
 
@@ -224,9 +220,9 @@ func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		case TaskModeRun:
 			err = runFuzzer(t)
 		case TaskModeCheck:
-			err = checkFuzzer(t, fsReaderWriter)
+			err = checkFuzzer(t)
 		case TaskModeGenerate:
-			err = runCorpusGenerator(t, fsReaderWriter)
+			err = runCorpusGenerator(t)
 		default:
 			err = fmt.Errorf("unknown task mode %d", t.taskMode)
 		}
@@ -238,7 +234,7 @@ func run(c *cmdConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 }
 
 // generateTaskConfig produces a taskConfig based off the supplied cmdConfig and specified TaskMode.
-func generateTaskConfig(tm TaskMode, c *cmdConfig, fsReader oswrapper.FilesystemReader) (*taskConfig, error) {
+func generateTaskConfig(tm TaskMode, c *cmdConfig) (*taskConfig, error) {
 	t := taskConfig{
 		cmdConfig: *c,
 		taskMode:  tm,
@@ -262,7 +258,6 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, fsReader oswrapper.Filesystem
 		}
 		dependencies = append(dependencies, depConfig{fuzzerName, &t.fuzzer})
 	case TaskModeGenerate:
-		dependencies = append(dependencies, depConfig{"generate_tint_corpus.py", &t.generator})
 		if c.fuzzMode == FuzzModeIr {
 			dependencies = append(dependencies, depConfig{"ir_fuzz_as", &t.assembler})
 		}
@@ -271,20 +266,15 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, fsReader oswrapper.Filesystem
 	// Verify all the required dependencies are present
 	for _, config := range dependencies {
 		switch {
-		case filepath.Ext(config.name) == ".py":
-			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(fsReader), "src", "tint", "cmd", "fuzz"), config.name)
-			if !fileutils.IsFile(*config.path, fsReader) {
-				return nil, fmt.Errorf("script '%v' not found at '%v'", config.name, *config.path)
-			}
 		case filepath.Ext(config.name) == ".txt":
-			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(fsReader), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
-			if !fileutils.IsFile(*config.path, fsReader) {
-				return nil, fmt.Errorf("resource '%v' not found at '%v'", config.name, *config.path)
+			*config.path = filepath.Join(filepath.Join(fileutils.DawnRoot(c.osWrapper), "src", "tint", "cmd", "fuzz", "wgsl"), config.name)
+			if !fileutils.IsFile(*config.path, t.osWrapper) {
+				return nil, fmt.Errorf("resource '%v' not found at '%v'. Please ensure the Dawn repository is correctly cloned and up-to-date", config.name, *config.path)
 			}
 		default:
 			*config.path = filepath.Join(t.build, config.name+fileutils.ExeExt)
-			if !fileutils.IsExe(*config.path, fsReader) {
-				return nil, fmt.Errorf("binary '%v' not found at '%v'", config.name, *config.path)
+			if !fileutils.IsExe(*config.path, t.osWrapper) {
+				return nil, fmt.Errorf("binary '%v' not found at '%v'. Please ensure the project has been built (e.g., with `ninja -C %s %s`)", config.name, *config.path, t.build, config.name)
 			}
 		}
 	}
@@ -294,14 +284,14 @@ func generateTaskConfig(tm TaskMode, c *cmdConfig, fsReader oswrapper.Filesystem
 
 // checkFuzzer runs the fuzzer against all the test files the inputs directory,
 // ensuring that the fuzzers do not error for the given file.
-func checkFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
+func checkFuzzer(t *taskConfig) error {
 	var files []string
 	var err error
 	switch t.fuzzMode {
 	case FuzzModeIr:
-		files, err = glob.Glob(filepath.Join(t.inputs, "**.tirb"), fsReader)
+		files, err = glob.Glob(filepath.Join(t.inputs, "**.tirb"), t.osWrapper)
 	case FuzzModeWgsl:
-		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), fsReader)
+		files, err = glob.Glob(filepath.Join(t.inputs, "**.wgsl"), t.osWrapper)
 	default:
 		err = fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
 	}
@@ -337,7 +327,7 @@ func checkFuzzer(t *taskConfig, fsReader oswrapper.FilesystemReader) error {
 
 			if out, err := exec.Command(t.fuzzer, file).CombinedOutput(); err != nil {
 				_, fuzzer := filepath.Split(t.fuzzer)
-				return fmt.Errorf("%v run with %v failed with %v\n\n%v", fuzzer, file, err, string(out))
+				return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
 			}
 		}
 		return nil
@@ -382,11 +372,10 @@ func runFuzzer(t *taskConfig) error {
 				if ctxErr := ctx.Err(); ctxErr != nil {
 					errs <- ctxErr
 				} else {
-					_, fuzzer := filepath.Split(t.fuzzer)
-					errs <- fmt.Errorf("%v failed with %v\n\n%v", fuzzer, err, out.String())
+					errs <- fmt.Errorf("fuzzer process '%s' failed with error: %w\nOutput:\n%s", t.fuzzer, err, out.String())
 				}
 			} else {
-				errs <- fmt.Errorf("fuzzer unexpectedly terminated without error:\n%v", out.String())
+				errs <- fmt.Errorf("fuzzer process '%s' unexpectedly terminated without error.\nOutput:\n%s", t.fuzzer, out.String())
 			}
 		}()
 	}
@@ -423,60 +412,57 @@ func generateFuzzerArgs(t *taskConfig) []string {
 // runCorpusGenerator converts a set of input test files into a fuzzer corpus
 // The generator will use t.inputs as the source directory.
 // The corpus will be written to t.out.
-func runCorpusGenerator(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
+func runCorpusGenerator(t *taskConfig) error {
 	switch t.fuzzMode {
 	case FuzzModeWgsl:
-		return runCorpusGeneratorWgsl(t, fsReaderWriter)
+		return runCorpusGeneratorWgsl(t)
 	case FuzzModeIr:
-		return runCorpusGeneratorIr(t, fsReaderWriter)
+		return runCorpusGeneratorIr(t)
 	default:
 		return fmt.Errorf("unknown fuzzer mode %d", t.fuzzMode)
 	}
 }
 
 // runCorpusGeneratorWgsl converts a set of input test .wgsl files into a WGSL fuzzer corpus.
-func runCorpusGeneratorWgsl(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
-	return gatherWgslFiles(t.inputs, t.out, fsReaderWriter)
+func runCorpusGeneratorWgsl(t *taskConfig) error {
+	return gatherWgslFiles(t.inputs, t.out, t.osWrapper)
 }
 
-// runCorpusGeneratorWgsl converts a set of input test .wgsl files into an IR fuzzer corpus
-// Forks out to an external binary, t.assembler, to perform the operation.
-func runCorpusGeneratorIr(t *taskConfig, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
-	tmp, err := fsReaderWriter.MkdirTemp("", "wgsl_corpus")
-	if err == nil {
-		defer func(fsWriter oswrapper.FilesystemWriter, path string) {
-			_ = fsWriter.RemoveAll(path)
-		}(fsReaderWriter, tmp)
-	} else {
-		return err
-	}
-
-	err = gatherWgslFiles(t.inputs, tmp, fsReaderWriter)
+// runCorpusGeneratorIr converts a set of input test .wgsl files into an IR fuzzer corpus.
+// It gathers the WGSL files, then forks out to an external binary (t.assembler) to perform the conversion.
+func runCorpusGeneratorIr(t *taskConfig) error {
+	tmp, err := t.osWrapper.MkdirTemp("", "wgsl_corpus_for_ir")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create temporary directory for WGSL files: %w", err)
+	}
+	defer t.osWrapper.RemoveAll(tmp)
+
+	if err := gatherWgslFiles(t.inputs, tmp, t.osWrapper); err != nil {
+		return fmt.Errorf("failed to gather WGSL files for IR corpus generation: %w", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	args := []string{tmp, t.out}
+	cmdStr := fmt.Sprintf("%s %s", t.assembler, strings.Join(args, " "))
 
 	if t.verbose {
-		fmt.Println("Using assembler cmd: " + t.assembler + " " + strings.Join(args, " "))
+		fmt.Println("Using assembler cmd: " + cmdStr)
 	}
 	fmt.Println("running assembler")
 
 	cmd := exec.CommandContext(ctx, t.assembler, args...)
-	out := bytes.Buffer{}
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+	out := &bytes.Buffer{}
+	cmd.Stdout = out
+	cmd.Stderr = out
 	if t.verbose {
-		cmd.Stdout = io.MultiWriter(&out, os.Stdout)
-		cmd.Stderr = io.MultiWriter(&out, os.Stderr)
+		cmd.Stdout = io.MultiWriter(out, os.Stdout)
+		cmd.Stderr = io.MultiWriter(out, os.Stderr)
 	}
 
 	if err := cmd.Run(); err != nil {
-		return err
+		return fmt.Errorf("failed to run IR corpus assembler.\n  command: %s\n  error: %w\n  output:\n%s", cmdStr, err, out.String())
 	}
 
 	fmt.Println("done")
@@ -488,9 +474,10 @@ func runCorpusGeneratorIr(t *taskConfig, fsReaderWriter oswrapper.FilesystemRead
 // file names. It also filters out any '*.expected.*' files
 func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	fmt.Println("gathering and filtering .wgsl files")
-	files, err := glob.Glob(filepath.Join(inputs, "**.wgsl"), fsReaderWriter)
+	globPattern := filepath.Join(inputs, "**.wgsl")
+	files, err := glob.Glob(globPattern, fsReaderWriter)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to find .wgsl files with pattern '%v': %w", globPattern, err)
 	}
 
 	// Remove '*.expected.*'
@@ -500,14 +487,17 @@ func gatherWgslFiles(inputs string, out string, fsReaderWriter oswrapper.Filesys
 	mapping := make(map[string]string, len(files))
 	for _, f := range files {
 		// paths returned by glob.Glob are absolute, but only want to use the relative path in the dest name
-		tmp := strings.Replace(f, inputs, "", -1)
-		tmp = strings.TrimPrefix(tmp, "/")
-		mapping[f] = strings.ReplaceAll(filepath.ToSlash(tmp), "/", "_")
+		relPath, err := filepath.Rel(inputs, f)
+		if err != nil {
+			return fmt.Errorf("failed to calculate relative path for '%v' from base '%v': %w", f, inputs, err)
+		}
+		mapping[f] = strings.ReplaceAll(filepath.ToSlash(relPath), "/", "_")
 	}
 
 	for src, dest := range mapping {
-		if err := fileutils.CopyFile(filepath.Join(out, dest), src, fsReaderWriter); err != nil {
-			return err
+		dstPath := filepath.Join(out, dest)
+		if err := fileutils.CopyFile(dstPath, src, fsReaderWriter); err != nil {
+			return fmt.Errorf("failed to copy '%v' to '%v': %w", src, dstPath, err)
 		}
 	}
 
