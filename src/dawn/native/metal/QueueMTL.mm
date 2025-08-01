@@ -33,6 +33,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/MetalBackend.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/metal/CommandBufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -67,7 +68,8 @@ MaybeError Queue::Initialize() {
 
 #if __MAC_OS_X_VERSION_MAX_ALLOWED >= 150000
     if (@available(macOS 15.0, *)) {
-        if (GetDevice()->IsToggleEnabled(Toggle::EnableShaderPrint)) {
+        if (gpu_info::IsApple(GetDevice()->GetPhysicalDevice()->GetVendorId()) &&
+            GetDevice()->IsToggleEnabled(Toggle::EnableShaderPrint)) {
             // Add a logging callback to the command queue that forwards print output to the Dawn
             // logging callback.
             NSError* error = nil;
