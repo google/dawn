@@ -41,6 +41,7 @@ lucicfg.config(fail_on_warnings = True)
 
 luci.project(
     name = "dawn",
+    config_dir = "luci",
     buildbucket = "cr-buildbucket.appspot.com",
     logdog = "luci-logdog.appspot.com",
     milo = "luci-milo.appspot.com",
