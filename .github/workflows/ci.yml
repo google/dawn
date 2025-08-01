@@ -209,7 +209,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r26d
+          ndk-version: r27d
   
       - name: Set ANDROID_NDK
         if: matrix.platform == 'android'
