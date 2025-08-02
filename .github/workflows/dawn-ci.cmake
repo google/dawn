@@ -1,22 +1,43 @@
 # This file caches variables which are platform specific.
 
-# Define IS_MOBILE variable for mobile platforms and universal builds
-# Check for mobile platform indicators that are available at cache time
-message(STATUS "Checking mobile platform variables:")
-message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+# Mobile platform configuration
+# Since cache files run before toolchain files, we need to check for mobile
+# configuration differently. The workflow should set DAWN_MOBILE_BUILD=ON
+# for mobile platforms.
+message(STATUS "Dawn CI Cache: DAWN_MOBILE_BUILD = ${DAWN_MOBILE_BUILD}")
 
-# Check if this is a mobile build based on toolchain file or command line args
-set(IS_MOBILE FALSE)
-if(CMAKE_TOOLCHAIN_FILE)
-    if(CMAKE_TOOLCHAIN_FILE MATCHES "android\\.toolchain\\.cmake" OR
-       CMAKE_TOOLCHAIN_FILE MATCHES "apple\\.toolchain\\.cmake")
-        set(IS_MOBILE TRUE)
-        message(STATUS "IS_MOBILE set to TRUE based on toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
-    endif()
-endif()
-
-if(NOT IS_MOBILE)
-    message(STATUS "IS_MOBILE set to FALSE")
+if(DAWN_MOBILE_BUILD)
+    message(STATUS "=== Configuring Dawn Mobile Build ===")
+    
+    # Build type
+    message(STATUS "- Setting CMAKE_BUILD_TYPE to Release")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+    
+    # Disable samples and tests
+    message(STATUS "- Disabling samples and tests")
+    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(TINT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(TINT_BUILD_CMD_TOOLS OFF CACHE BOOL "" FORCE)
+    set(TINT_BUILD_IR_BINARY OFF CACHE BOOL "" FORCE)
+    set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    
+    # Disable GLFW
+    message(STATUS "- Disabling GLFW support")
+    set(DAWN_USE_GLFW OFF CACHE BOOL "" FORCE)
+    
+    # Use static monolithic library
+    message(STATUS "- Enabling monolithic static library")
+    set(DAWN_BUILD_MONOLITHIC_LIBRARY ON CACHE BOOL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+    
+    # Disable OpenGL variants
+    message(STATUS "- Disabling OpenGL variants")
+    set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "" FORCE)
+    set(DAWN_ENABLE_DESKTOP_GL OFF CACHE BOOL "" FORCE)
+    
+    message(STATUS "=== Mobile build configuration complete ===")
+else()
+    message(STATUS "Dawn CI Cache: Desktop build configuration")
 endif()
 
 # Windows-specific configuration
@@ -42,26 +63,3 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_CXX_COMPILER_LAUNCHER "sccache" CACHE STRING "")
 endif()
 
-# Mobile and universal build configuration
-if (IS_MOBILE)
-    # Build type
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
-    
-    # Disable samples and tests
-    set(BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-    set(TINT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-    set(TINT_BUILD_CMD_TOOLS OFF CACHE BOOL "" FORCE)
-    set(TINT_BUILD_IR_BINARY OFF CACHE BOOL "" FORCE)
-    set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-    
-    # Disable GLFW
-    set(DAWN_USE_GLFW OFF CACHE BOOL "" FORCE)
-    
-    # Use static monolithic library
-    set(DAWN_BUILD_MONOLITHIC_LIBRARY ON CACHE BOOL "" FORCE)
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-    
-    # Disable OpenGL variants
-    set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "" FORCE)
-    set(DAWN_ENABLE_DESKTOP_GL OFF CACHE BOOL "" FORCE)
-endif()
