@@ -54,6 +54,9 @@ make -j4 -C out/wasm emdawnwebgpu_link_test
 # Switch the build type (in-place to save time), rebuild the link test (this
 # time with Closure, which verifies the linked JS to some extent), and build the
 # final package (which is not actually affected by build type).
+# TODO: If we have Ninja (from depot_tools), we could use -G'Ninja Multi-Config'
+# to do multiple build types more cleanly.
+# https://cmake.org/cmake/help/latest/generator/Ninja%20Multi-Config.html
 cmake -S=. -B=out/wasm -DCMAKE_BUILD_TYPE=Release
 make -j4 -C out/wasm emdawnwebgpu_pkg emdawnwebgpu_link_test
 

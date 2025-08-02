@@ -336,6 +336,7 @@ if (EMSCRIPTEN)
                 "-sJSPI=1"
         )
 
+        # A "sample" that makes real (bogus) API calls to serve as a basic code size test.
         DawnJSONGenerator(
             TARGET "emdawnwebgpu_link_test_cpp"
             PRINT_NAME "emdawnwebgpu LinkTest.cpp"
@@ -347,7 +348,6 @@ if (EMSCRIPTEN)
         # The test is just that this links, not that it runs (it will just
         # crash), so just build to .js. Since it has a main() function, this is
         # the same as building to .html, but skipping the .html file.
-        # This makes real (bogus) API calls to serve as a basic code size test.
         set_target_properties(emdawnwebgpu_link_test PROPERTIES
             SUFFIX ".js")
         target_link_libraries(
@@ -355,6 +355,20 @@ if (EMSCRIPTEN)
             PUBLIC
                 emdawnwebgpu_test_linkopts
                 emdawnwebgpu_c
+        )
+
+        # A "sample" that just creates a device. This is used to check the code size for the
+        # elimination of unused library code.
+        add_executable(emdawnwebgpu_init_only_sample
+            "InitOnlySample.cpp"
+        )
+        set_target_properties(emdawnwebgpu_init_only_sample PROPERTIES
+            SUFFIX ".js")
+        target_link_libraries(
+            emdawnwebgpu_init_only_sample
+            PUBLIC
+                emdawnwebgpu_test_linkopts
+                emdawnwebgpu_cpp
         )
     endif()
 endif()
