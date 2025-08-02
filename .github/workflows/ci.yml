@@ -204,6 +204,16 @@ jobs:
           name: build-android-${{ matrix.arch }}
           path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
 
+      - name: Upload headers (from arm64-v8a build only)
+        if: matrix.arch == 'arm64-v8a'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dawn-headers
+          path: |
+            ${{ matrix.output_dir }}/gen/include/
+            include/
+            src/dawn/dawn.json
+
   mobile-apple:
     strategy:
       fail-fast: false
@@ -281,25 +291,11 @@ jobs:
           pattern: build-*
           path: artifacts
 
-      - name: Setup Android NDK (for header generation)
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
+      - name: Download headers
+        uses: actions/download-artifact@v4
         with:
-          ndk-version: r27d
-
-      - name: Set ANDROID_NDK
-        run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
-
-      - name: Generate headers (using one Android build)
-        run: |
-          cmake -S . -B out/headers -G Ninja \
-            -DDAWN_MOBILE_BUILD=ON \
-            -C .github/workflows/dawn-ci.cmake \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=arm64-v8a \
-            -DANDROID_PLATFORM=android-26 \
-            -DCMAKE_BUILD_TYPE=Release
-          ninja -C out/headers dawn_headers webgpu_headers
+          name: dawn-headers
+          path: headers
 
       - name: Create iOS Simulator fat binary
         run: |
@@ -321,11 +317,27 @@ jobs:
         run: |
           mkdir -p Dawn-${{ github.sha }}-headers/webgpu
           mkdir -p Dawn-${{ github.sha }}-headers/dawn
-          cp -a out/headers/gen/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
-          cp -a out/headers/gen/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
-          cp -a include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
-          cp -a include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
-          cp src/dawn/dawn.json Dawn-${{ github.sha }}-headers/
+          
+          # Copy generated headers from Android build
+          if [ -d "headers/gen/include/webgpu" ]; then
+            cp -a headers/gen/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
+          fi
+          if [ -d "headers/gen/include/dawn" ]; then
+            cp -a headers/gen/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
+          fi
+          
+          # Copy source headers
+          if [ -d "headers/include/webgpu" ]; then
+            cp -a headers/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
+          fi
+          if [ -d "headers/include/dawn" ]; then
+            cp -a headers/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
+          fi
+          
+          # Copy dawn.json
+          if [ -f "headers/src/dawn/dawn.json" ]; then
+            cp headers/src/dawn/dawn.json Dawn-${{ github.sha }}-headers/
+          fi
 
       - name: Package Android libraries
         run: |
