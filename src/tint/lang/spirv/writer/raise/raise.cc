@@ -177,7 +177,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     raise::PolyfillConfig config = {.use_vulkan_memory_model = options.use_vulkan_memory_model,
-                                    .version = options.spirv_version};
+                                    .version = options.spirv_version,
+                                    .subgroup_shuffle_clamped = options.subgroup_shuffle_clamped};
     RUN_TRANSFORM(raise::BuiltinPolyfill, module, config);
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);
 
