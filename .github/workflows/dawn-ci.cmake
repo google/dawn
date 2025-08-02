@@ -1,6 +1,14 @@
 # This file caches variables which are platform specific.
 
 # Define IS_MOBILE variable for mobile platforms and universal builds
+message(STATUS "Checking mobile platform variables:")
+message(STATUS "ANDROID: ${ANDROID}")
+message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "PLATFORM defined: ${DEFINED PLATFORM}")
+if(DEFINED PLATFORM)  
+    message(STATUS "PLATFORM: ${PLATFORM}")
+endif()
+
 if (ANDROID OR 
     (CMAKE_SYSTEM_NAME STREQUAL "iOS") OR 
     (DEFINED PLATFORM AND (PLATFORM STREQUAL "OS64" OR 
@@ -8,8 +16,10 @@ if (ANDROID OR
                           PLATFORM STREQUAL "SIMULATOR64" OR 
                           PLATFORM STREQUAL "MAC_UNIVERSAL")))
     set(IS_MOBILE TRUE)
+    message(STATUS "IS_MOBILE set to TRUE")
 else()
     set(IS_MOBILE FALSE)
+    message(STATUS "IS_MOBILE set to FALSE")
 endif()
 
 # Windows-specific configuration
