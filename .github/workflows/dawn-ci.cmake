@@ -1,24 +1,21 @@
 # This file caches variables which are platform specific.
 
 # Define IS_MOBILE variable for mobile platforms and universal builds
+# Check for mobile platform indicators that are available at cache time
 message(STATUS "Checking mobile platform variables:")
-message(STATUS "ANDROID: ${ANDROID}")
-message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
-message(STATUS "PLATFORM defined: ${DEFINED PLATFORM}")
-if(DEFINED PLATFORM)  
-    message(STATUS "PLATFORM: ${PLATFORM}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
+
+# Check if this is a mobile build based on toolchain file or command line args
+set(IS_MOBILE FALSE)
+if(CMAKE_TOOLCHAIN_FILE)
+    if(CMAKE_TOOLCHAIN_FILE MATCHES "android\\.toolchain\\.cmake" OR
+       CMAKE_TOOLCHAIN_FILE MATCHES "apple\\.toolchain\\.cmake")
+        set(IS_MOBILE TRUE)
+        message(STATUS "IS_MOBILE set to TRUE based on toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+    endif()
 endif()
 
-if (ANDROID OR 
-    (CMAKE_SYSTEM_NAME STREQUAL "iOS") OR 
-    (DEFINED PLATFORM AND (PLATFORM STREQUAL "OS64" OR 
-                          PLATFORM STREQUAL "SIMULATORARM64" OR 
-                          PLATFORM STREQUAL "SIMULATOR64" OR 
-                          PLATFORM STREQUAL "MAC_UNIVERSAL")))
-    set(IS_MOBILE TRUE)
-    message(STATUS "IS_MOBILE set to TRUE")
-else()
-    set(IS_MOBILE FALSE)
+if(NOT IS_MOBILE)
     message(STATUS "IS_MOBILE set to FALSE")
 endif()
 
