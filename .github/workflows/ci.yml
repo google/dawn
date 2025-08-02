@@ -346,10 +346,10 @@ jobs:
           mkdir -p Dawn-${{ github.sha }}-Android/x86
           mkdir -p Dawn-${{ github.sha }}-Android/x86_64
           
-          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/arm64-v8a/
-          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/armeabi-v7a/
-          cp artifacts/build-android-x86/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86/
-          cp artifacts/build-android-x86_64/libwebgpu_dawn.so Dawn-${{ github.sha }}-Android/x86_64/
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/x86_64/
 
       - name: Create archives
         run: |
