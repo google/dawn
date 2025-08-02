@@ -1645,14 +1645,14 @@ $B1: {  # root
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %5:ptr<storage, atomic<i32>, read_write> = access %sb, 0u
-    %6:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %5, 2i, 3i
+    %6:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %5, 3i, 2i
     %7:i32 = access %6, 0u
     %8:ptr<storage, atomic<u32>, read_write> = access %sb, 1u
-    %9:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %8, 4u, 5u
+    %9:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %8, 5u, 4u
     %10:u32 = access %9, 0u
-    %11:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %wg_i32, 6i, 7i
+    %11:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %wg_i32, 7i, 6i
     %12:i32 = access %11, 0u
-    %13:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %wg_u32, 8u, 9u
+    %13:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %wg_u32, 9u, 8u
     %14:u32 = access %13, 0u
     ret
   }

@@ -221,7 +221,7 @@ struct State {
             auto* strct =
                 core::type::CreateAtomicCompareExchangeResult(ty, ir.symbols, val->Type());
 
-            auto* bi = b.Call(strct, core::BuiltinFn::kAtomicCompareExchangeWeak, var, val, comp);
+            auto* bi = b.Call(strct, core::BuiltinFn::kAtomicCompareExchangeWeak, var, comp, val);
             b.AccessWithResult(call->DetachResult(), bi, 0_u);
         });
         call->Destroy();
