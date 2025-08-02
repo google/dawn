@@ -3203,5 +3203,57 @@ $B1: {  # root
     ASSERT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_AtomicsTest, ArrayLength) {
+    auto* f = b.ComputeFunction("main");
+
+    core::ir::Var* buffer = nullptr;
+    b.Append(mod.root_block,
+             [&] {  //
+                 buffer = b.Var("buffer", ty.ptr<storage, array<u32>, read_write>());
+                 buffer->SetBindingPoint(0u, 0u);
+             });
+
+    b.Append(f->Block(), [&] {  //
+        auto* a = b.Access(ty.ptr<storage, u32, read_write>(), buffer, 1_i);
+        b.Call<spirv::ir::BuiltinCall>(ty.void_(), spirv::BuiltinFn::kAtomicStore, a, 1_u, 0_u,
+                                       1_u);
+        b.Call<core::ir::CoreBuiltinCall>(ty.u32(), core::BuiltinFn::kArrayLength, buffer);
+        b.Return(f);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<u32>, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, u32, read_write> = access %buffer, 1i
+    %4:void = spirv.atomic_store %3, 1u, 0u, 1u
+    %5:u32 = arrayLength %buffer
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+    Run(Atomics);
+
+    auto* expect = R"(
+$B1: {  # root
+  %buffer:ptr<storage, array<atomic<u32>>, read_write> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, atomic<u32>, read_write> = access %buffer, 1i
+    %4:void = atomicStore %3, 1u
+    %5:u32 = arrayLength %buffer
+    ret
+  }
+}
+)";
+    ASSERT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower
