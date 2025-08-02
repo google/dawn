@@ -230,9 +230,9 @@ jobs:
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
+            -DDAWN_MOBILE_BUILD=ON \
             -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
-            -DDAWN_MOBILE_BUILD=ON \
             ${{ matrix.cmake_args }} \
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
