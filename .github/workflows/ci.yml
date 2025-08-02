@@ -137,40 +137,78 @@ jobs:
         name: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
         path: Dawn-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}.tar.gz
 
-  mobile:
+  mobile-android:
     strategy:
       fail-fast: false
       matrix:
         include:
           # Android builds
-          - platform: android
-            arch: arm64-v8a
+          - arch: arm64-v8a
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-26
             output_dir: out/android_arm64-v8a
             library_path: src/dawn/native/libwebgpu_dawn.a
-            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
-          - platform: android
-            arch: armeabi-v7a
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: armeabi-v7a
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-26
             output_dir: out/android_armeabi-v7a
             library_path: src/dawn/native/libwebgpu_dawn.a
-            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
-          - platform: android
-            arch: x86
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: x86
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86 -DANDROID_PLATFORM=android-26
             output_dir: out/android_x86
             library_path: src/dawn/native/libwebgpu_dawn.a
-            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
-          - platform: android
-            arch: x86_64
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+          - arch: x86_64
             toolchain_file: $ANDROID_NDK/build/cmake/android.toolchain.cmake
             cmake_args: -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-26
             output_dir: out/android_x86_64
             library_path: src/dawn/native/libwebgpu_dawn.a
-            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip
+            strip_tool: $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip
+
+    name: Build-android-${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27d
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
+
+      - name: Build android ${{ matrix.arch }}
+        run: |
+          cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
+            -DDAWN_MOBILE_BUILD=ON \
+            -C .github/workflows/dawn-ci.cmake \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
+            ${{ matrix.cmake_args }} \
+            -DCMAKE_BUILD_TYPE=Release
+          ninja -C ${{ matrix.output_dir }}
+
+      - name: Strip Android binaries
+        run: |
+          ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-android-${{ matrix.arch }}
+          path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
+
+  mobile-apple:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
           # Apple builds
           - platform: ios
             arch: arm64
@@ -201,7 +239,6 @@ jobs:
     runs-on: macos-latest-large
     steps:
       - name: Setup Xcode
-        if: matrix.platform != 'android'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
@@ -209,19 +246,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup Android NDK
-        if: matrix.platform == 'android'
-        id: setup-ndk
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r27d
-
-      - name: Set ANDROID_NDK
-        if: matrix.platform == 'android'
-        run: echo "ANDROID_NDK=${{ steps.setup-ndk.outputs.ndk-path }}" >> $GITHUB_ENV
-
       - name: Download Apple toolchain
-        if: matrix.platform != 'android'
         run: |
           mkdir -p build-tools
           # Download the ios-cmake toolchain file
@@ -237,11 +262,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
 
-      - name: Strip Android binaries
-        if: matrix.platform == 'android'
-        run: |
-          ${{ matrix.strip_tool }} ${{ matrix.output_dir }}/${{ matrix.library_path }}
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -251,7 +271,7 @@ jobs:
   package-mobile:
     name: Package Mobile Artifacts
     runs-on: macos-latest
-    needs: mobile
+    needs: [mobile-android, mobile-apple]
     steps:
       - uses: actions/checkout@v4
 
