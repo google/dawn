@@ -28,7 +28,6 @@
 package fileutils_test
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -229,18 +228,9 @@ func TestCopyDir(t *testing.T) {
 			},
 			wantErr: false,
 			verify: func(t *testing.T, fs oswrapper.MemMapOSWrapper) {
-				require.True(t, fileutils.IsDir("/dst", fs))
-				// Check it's empty by walking the directory.
-				var fileCount int
-				err := fs.Walk("/dst", func(path string, info os.FileInfo, err error) error {
-					require.NoError(t, err)
-					if path != "/dst" {
-						fileCount++
-					}
-					return nil
-				})
+				isEmpty, err := fileutils.IsEmptyDir("/dst", fs)
 				require.NoError(t, err)
-				require.Zero(t, fileCount, "directory should be empty")
+				require.True(t, isEmpty)
 			},
 		},
 		{
