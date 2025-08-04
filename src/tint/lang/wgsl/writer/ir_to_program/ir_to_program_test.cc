@@ -1319,7 +1319,7 @@ fn f(i : i32) {
 
 TEST_F(IRToProgramTest, TypeConstruct_u32) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i = b.FunctionParam("i", ty.i32());
+    auto* i = b.FunctionParam("i", ty.u32());
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
@@ -1328,7 +1328,7 @@ TEST_F(IRToProgramTest, TypeConstruct_u32) {
     });
 
     EXPECT_WGSL(R"(
-fn f(i : i32) {
+fn f(i : u32) {
   var v : u32 = u32(i);
 }
 )");
@@ -1336,7 +1336,7 @@ fn f(i : i32) {
 
 TEST_F(IRToProgramTest, TypeConstruct_f32) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i = b.FunctionParam("i", ty.i32());
+    auto* i = b.FunctionParam("i", ty.f32());
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
@@ -1345,7 +1345,7 @@ TEST_F(IRToProgramTest, TypeConstruct_f32) {
     });
 
     EXPECT_WGSL(R"(
-fn f(i : i32) {
+fn f(i : f32) {
   var v : f32 = f32(i);
 }
 )");
@@ -1353,7 +1353,7 @@ fn f(i : i32) {
 
 TEST_F(IRToProgramTest, TypeConstruct_bool) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i = b.FunctionParam("i", ty.i32());
+    auto* i = b.FunctionParam("i", ty.bool_());
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
@@ -1362,7 +1362,7 @@ TEST_F(IRToProgramTest, TypeConstruct_bool) {
     });
 
     EXPECT_WGSL(R"(
-fn f(i : i32) {
+fn f(i : bool) {
   var v : bool = bool(i);
 }
 )");
@@ -1488,12 +1488,12 @@ fn f(i : f32) {
 
 TEST_F(IRToProgramTest, TypeConstruct_Inlining) {
     auto* fn = b.Function("f", ty.void_());
-    auto* i0 = b.FunctionParam("i0", ty.i32());
-    auto* i1 = b.FunctionParam("i1", ty.i32());
-    auto* i2 = b.FunctionParam("i2", ty.i32());
-    auto* i3 = b.FunctionParam("i3", ty.i32());
-    auto* i4 = b.FunctionParam("i4", ty.i32());
-    auto* i5 = b.FunctionParam("i5", ty.i32());
+    auto* i0 = b.FunctionParam("i0", ty.f32());
+    auto* i1 = b.FunctionParam("i1", ty.f32());
+    auto* i2 = b.FunctionParam("i2", ty.f32());
+    auto* i3 = b.FunctionParam("i3", ty.f32());
+    auto* i4 = b.FunctionParam("i4", ty.f32());
+    auto* i5 = b.FunctionParam("i5", ty.f32());
     fn->SetParams({i0, i1, i2, i3, i4, i5});
 
     b.Append(fn->Block(), [&] {
@@ -1508,7 +1508,7 @@ TEST_F(IRToProgramTest, TypeConstruct_Inlining) {
     });
 
     EXPECT_WGSL(R"(
-fn f(i0 : i32, i1 : i32, i2 : i32, i3 : i32, i4 : i32, i5 : i32) {
+fn f(i0 : f32, i1 : f32, i2 : f32, i3 : f32, i4 : f32, i5 : f32) {
   var v : mat2x3<f32> = mat2x3<f32>(f32(i0), f32(i1), f32(i2), f32(i3), f32(i4), f32(i5));
 }
 )");

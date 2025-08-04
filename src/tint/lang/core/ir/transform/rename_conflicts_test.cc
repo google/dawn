@@ -845,14 +845,14 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_NamedIn
         auto* i = b.Add(ty.i32(), 1_i, 2_i);
         b.ir.SetName(i, "f32");
 
-        b.Return(fn, b.Construct(ty.f32(), i));
+        b.Return(fn, b.Convert(ty.f32(), i));
     });
 
     auto* src = R"(
 %f = func():f32 {
   $B1: {
     %f32:i32 = add 1i, 2i
-    %3:f32 = construct %f32
+    %3:f32 = convert %f32
     ret %3
   }
 }
@@ -863,7 +863,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_NamedIn
 %f = func():f32 {
   $B1: {
     %f32_1:i32 = add 1i, 2i
-    %3:f32 = construct %f32_1
+    %3:f32 = convert %f32_1
     ret %3
   }
 }

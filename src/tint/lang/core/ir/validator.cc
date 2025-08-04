@@ -3149,7 +3149,14 @@ void Validator::CheckConstruct(const Construct* construct) {
     };
 
     if (result_type->Is<core::type::Scalar>()) {
-        // TODO(crbug.com/427964608): This needs special handling as Element() produces nullptr.
+        // The only valid non-zero scalar constructor is the identity operation.
+        if (args.Length() > 1) {
+            AddError(construct) << "scalar construct must not have more than one argument";
+        }
+        if (args[0]->Type() != result_type) {
+            AddError(construct, 0u) << "scalar construct argument type " << NameOf(args[0]->Type())
+                                    << " does not match result type " << NameOf(result_type);
+        }
     } else if (result_type->Is<core::type::Vector>()) {
         // TODO(crbug.com/427964205): This needs special handling as there are many cases.
     } else if (auto* mat = result_type->As<core::type::Matrix>()) {

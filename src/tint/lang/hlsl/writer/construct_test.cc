@@ -33,10 +33,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::hlsl::writer {
 namespace {
 
-TEST_F(HlslWriterTest, ConstructF32Var) {
+TEST_F(HlslWriterTest, ConstructF32) {
     auto* f = b.Function("a", ty.f32());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_f);
+        auto* v = b.Let("v", 2_f);
         b.Return(f, b.Construct(ty.f32(), v));
     });
 
@@ -54,10 +54,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructF16Var) {
+TEST_F(HlslWriterTest, ConstructF16) {
     auto* f = b.Function("a", ty.f16());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_h);
+        auto* v = b.Let("v", 2_h);
         b.Return(f, b.Construct(ty.f16(), v));
     });
 
@@ -75,10 +75,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructBoolVar) {
+TEST_F(HlslWriterTest, ConstructBool) {
     auto* f = b.Function("a", ty.bool_());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", false);
+        auto* v = b.Let("v", false);
         b.Return(f, b.Construct(ty.bool_(), v));
     });
 
@@ -96,10 +96,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructI32Var) {
+TEST_F(HlslWriterTest, ConstructI32) {
     auto* f = b.Function("a", ty.i32());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_i);
+        auto* v = b.Let("v", 2_i);
         b.Return(f, b.Construct(ty.i32(), v));
     });
 
@@ -120,7 +120,7 @@ void unused_entry_point() {
 TEST_F(HlslWriterTest, ConstructU32) {
     auto* f = b.Function("a", ty.u32());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_u);
+        auto* v = b.Let("v", 2_u);
         b.Return(f, b.Construct(ty.u32(), v));
     });
 
@@ -160,10 +160,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructVecSingleScalarF32Var) {
+TEST_F(HlslWriterTest, ConstructVecSingleScalarF32) {
     auto* f = b.Function("a", ty.vec3<f32>());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_f);
+        auto* v = b.Let("v", 2_f);
         b.Return(f, b.Construct(ty.vec3<f32>(), v));
     });
 
@@ -181,10 +181,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructVecSingleScalarF16Var) {
+TEST_F(HlslWriterTest, ConstructVecSingleScalarF16) {
     auto* f = b.Function("a", ty.vec3<f16>());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", 2_h);
+        auto* v = b.Let("v", 2_h);
         b.Return(f, b.Construct(ty.vec3<f16>(), v));
     });
 
@@ -202,10 +202,10 @@ void unused_entry_point() {
 )");
 }
 
-TEST_F(HlslWriterTest, ConstructVecSingleScalarBoolVar) {
+TEST_F(HlslWriterTest, ConstructVecSingleScalarBool) {
     auto* f = b.Function("a", ty.vec3<bool>());
     b.Append(f->Block(), [&] {
-        auto* v = b.Var("v", true);
+        auto* v = b.Let("v", true);
         b.Return(f, b.Construct(ty.vec3<bool>(), v));
     });
 

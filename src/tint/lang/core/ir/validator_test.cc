@@ -192,6 +192,41 @@ TEST_F(IR_ValidatorTest, RootBlock_VarBlockMismatch) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Scalar_WrongArgType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<u32>(42_i);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:24 error: construct: scalar construct argument type 'i32' does not match result type 'u32'
+    %2:u32 = construct 42i
+                       ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_Scalar_TooManyArguments) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct<u32>(42_u, 10_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:3:14 error: construct: scalar construct must not have more than one argument
+    %2:u32 = construct 42u, 10u
+             ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
