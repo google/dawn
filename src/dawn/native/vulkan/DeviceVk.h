@@ -217,6 +217,7 @@ class Device final : public DeviceBase {
     Ref<PipelineCache> mMonolithicPipelineCache;
 
     Ref<QuerySetBase> mEmptyPassQuerySet;
+    std::atomic<uint64_t> mNextTextureViewId = 1;
 
     MaybeError ImportExternalImage(const ExternalImageDescriptorVk* descriptor,
                                    ExternalMemoryHandle memoryHandle,

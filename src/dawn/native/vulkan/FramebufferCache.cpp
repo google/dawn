@@ -51,7 +51,7 @@ void FramebufferCacheQuery::SetRenderPass(uint64_t passId,
 MaybeError FramebufferCacheQuery::AddAttachment(TextureView* view,
                                                 VkClearValue clearValue,
                                                 uint32_t depthSlice) {
-    textureViews[attachmentCount].weakRef = GetWeakRef(view);
+    textureViews[attachmentCount].textureViewId = view->GetTextureViewId();
     textureViews[attachmentCount].depthSlice = depthSlice;
 
     if (view->GetDimension() == wgpu::TextureViewDimension::e3D) {
@@ -92,8 +92,7 @@ size_t FramebufferCacheFuncs::operator()(const FramebufferCacheQuery& query) con
     HashCombine(&hash, query.width, query.height, query.attachmentCount);
 
     for (uint32_t i = 0; i < query.attachmentCount; ++i) {
-        Ref<TextureView> view = query.textureViews[i].weakRef.Promote();
-        HashCombine(&hash, view.Get(), query.textureViews[i].depthSlice);
+        HashCombine(&hash, query.textureViews[i].textureViewId, query.textureViews[i].depthSlice);
     }
 
     return hash;
@@ -107,9 +106,8 @@ bool FramebufferCacheFuncs::operator()(const FramebufferCacheQuery& a,
     }
 
     for (uint32_t i = 0; i < a.attachmentCount; ++i) {
-        Ref<TextureView> viewA = a.textureViews[i].weakRef.Promote();
-        Ref<TextureView> viewB = b.textureViews[i].weakRef.Promote();
-        if (viewA != viewB || a.textureViews[i].depthSlice != b.textureViews[i].depthSlice) {
+        if (a.textureViews[i].textureViewId != b.textureViews[i].textureViewId ||
+            a.textureViews[i].depthSlice != b.textureViews[i].depthSlice) {
             return false;
         }
     }
