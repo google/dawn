@@ -1018,12 +1018,13 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
     gen_options.bindings = tint::msl::writer::GenerateBindings(ir, options.use_argument_buffers);
-    gen_options.array_length_from_uniform.ubo_binding = 30;
+    // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
+    gen_options.array_length_from_constants.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
 
-    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
+    // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<tint::core::ir::Var>();
@@ -1039,7 +1040,7 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
         auto* ty = var->Result()->Type()->UnwrapPtr();
         if (!ty->HasFixedFootprint()) {
             if (storage_bindings.insert(bp.value()).second) {
-                gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
                     bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
             }
         }

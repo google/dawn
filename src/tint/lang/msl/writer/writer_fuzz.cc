@@ -42,16 +42,16 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              Options options) {
     options.bindings = GenerateBindings(module, false);
-    options.array_length_from_uniform.ubo_binding = 30;
+    options.array_length_from_constants.ubo_binding = 30;
 
-    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
+    // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
         if (!var->Result()->Type()->UnwrapPtr()->HasFixedFootprint()) {
             if (auto bp = var->BindingPoint()) {
                 if (storage_bindings.insert(bp.value()).second) {
-                    options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                    options.array_length_from_constants.bindpoint_to_size_index.emplace(
                         bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
                 }
             }

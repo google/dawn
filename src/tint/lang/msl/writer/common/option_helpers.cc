@@ -149,11 +149,10 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 //
 // When the data comes in we have a list of all WGSL origin (group,binding) pairs to MSL
 // (binding) in the `uniform`, `storage`, `texture`, and `sampler` arrays.
-void PopulateBindingRelatedOptions(
-    const Options& options,
-    RemapperData& remapper_data,
-    tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options) {
+void PopulateBindingRelatedOptions(const Options& options,
+                                   RemapperData& remapper_data,
+                                   tint::transform::multiplanar::BindingsMap& multiplanar_map,
+                                   ArrayLengthOptions& array_length_options) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
@@ -204,10 +203,11 @@ void PopulateBindingRelatedOptions(
         remapper_data.emplace(src_binding_point, plane0_binding_point);
     }
 
-    // ArrayLengthFromUniformOptions bindpoints may need to be remapped
+    // ArrayLengthOptions bindpoints may need to be remapped
     {
         std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
-        for (auto& [bindpoint, index] : options.array_length_from_uniform.bindpoint_to_size_index) {
+        for (auto& [bindpoint, index] :
+             options.array_length_from_constants.bindpoint_to_size_index) {
             auto it = remapper_data.find(bindpoint);
             if (it != remapper_data.end()) {
                 bindpoint_to_size_index.emplace(it->second, index);
@@ -216,10 +216,14 @@ void PopulateBindingRelatedOptions(
             }
         }
 
-        array_length_from_uniform_options.ubo_binding =
-            options.array_length_from_uniform.ubo_binding;
-        array_length_from_uniform_options.bindpoint_to_size_index =
-            std::move(bindpoint_to_size_index);
+        if (options.array_length_from_constants.buffer_sizes_offset) {
+            array_length_options.buffer_sizes_offset =
+                options.array_length_from_constants.buffer_sizes_offset;
+        } else {
+            array_length_options.ubo_binding = options.array_length_from_constants.ubo_binding;
+        }
+
+        array_length_options.bindpoint_to_size_index = std::move(bindpoint_to_size_index);
     }
 }
 

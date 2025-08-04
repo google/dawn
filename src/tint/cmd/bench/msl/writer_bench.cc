@@ -46,23 +46,24 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
     }
 
     tint::msl::writer::Options gen_options = {};
-    gen_options.array_length_from_uniform.ubo_binding = 30;
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
-                                                                          0);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
-                                                                          1);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 2},
-                                                                          2);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 3},
-                                                                          3);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 4},
-                                                                          4);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 5},
-                                                                          5);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 6},
-                                                                          6);
-    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 7},
-                                                                          7);
+    // TODO(crbug.com/366291600): Replace ubo with immediate block for bench
+    gen_options.array_length_from_constants.ubo_binding = 30;
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 0}, 0);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 1}, 1);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 2}, 2);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 3}, 3);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 4}, 4);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 5}, 5);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 6}, 6);
+    gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
+        tint::BindingPoint{0, 7}, 7);
     {
         // Convert the AST program to an IR module, so that we can generating bindings data.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);

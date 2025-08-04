@@ -129,7 +129,10 @@ struct State {
 
 Result<ImmediateDataLayout> PrepareImmediateData(Module& ir,
                                                  const PrepareImmediateDataConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.PrepareImmediateData");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.PrepareImmediateData",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowDuplicateBindings,
+                                          });
     if (result != Success) {
         return result.Failure();
     }
