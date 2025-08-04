@@ -5598,7 +5598,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureSampleLevel_DepthCube_Array) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_i));
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
         auto* array_idx = b.Value(4_u);
 
         auto* t = b.Load(tex);
@@ -5615,7 +5615,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3i
+    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %5:texture_depth_cube_array = load %1
     %6:sampler = load %2
     %7:f32 = textureSampleLevel %5, %6, %4, 4u, 3i
@@ -5634,7 +5634,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %4:vec3<f32> = construct 1.0f, 2.0f, 3i
+    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %5:texture_depth_cube_array = load %1
     %6:sampler = load %2
     %7:f32 = convert 4u
