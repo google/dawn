@@ -33,16 +33,22 @@ if(DAWN_MOBILE_BUILD)
     set(TINT_BUILD_CMD_TOOLS OFF CACHE BOOL "")
     set(TINT_BUILD_IR_BINARY OFF CACHE BOOL "")
     set(DAWN_BUILD_SAMPLES OFF CACHE BOOL "")
-    
-    # Disable GLFW
-    set(DAWN_USE_GLFW OFF CACHE BOOL "")
-    
+        
     # Use static monolithic library
     set(DAWN_BUILD_MONOLITHIC_LIBRARY STATIC CACHE STRING "")
     set(BUILD_SHARED_LIBS STATIC CACHE STRING BOOL "")
     
-    # Disable OpenGL variants
-    message(STATUS "- Disabling OpenGL variants")
-    set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "")
+    set(DAWN_USE_GLFW OFF CACHE BOOL "")
+    # Configure OpenGL variables by default.
+    # Enable OpenGL ES only for Android platform
     set(DAWN_ENABLE_DESKTOP_GL OFF CACHE BOOL "")
+    message(STATUS "- DAWN_MOBILE_BUILD: ${DAWN_MOBILE_BUILD}")
+    if(DAWN_MOBILE_BUILD STREQUAL "android")
+        message(STATUS "- Enabling OpenGL ES for Android mobile build")
+        set(DAWN_ENABLE_OPENGLES ON CACHE BOOL "")
+    else()
+        message(STATUS "- Disabling OpenGL ES for non-Android mobile build")
+        set(DAWN_ENABLE_OPENGLES OFF CACHE BOOL "")
+    endif()
+    
 endif()

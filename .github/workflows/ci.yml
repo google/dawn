@@ -187,7 +187,7 @@ jobs:
       - name: Build android ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
-            -DDAWN_MOBILE_BUILD=ON \
+            -DDAWN_MOBILE_BUILD=android \
             -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
@@ -204,15 +204,17 @@ jobs:
           name: build-android-${{ matrix.arch }}
           path: ${{ matrix.output_dir }}/${{ matrix.library_path }}
 
+      - name: Install headers (from arm64-v8a build only)
+        if: matrix.arch == 'arm64-v8a'
+        run: |
+          cmake --install ${{ matrix.output_dir }} --prefix dawn-headers-install
+
       - name: Upload headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
         uses: actions/upload-artifact@v4
         with:
           name: dawn-headers
-          path: |
-            ${{ matrix.output_dir }}/gen/include/
-            include/
-            src/dawn/dawn.json
+          path: dawn-headers-install/
 
   mobile-apple:
     strategy:
@@ -265,7 +267,7 @@ jobs:
       - name: Build ${{ matrix.platform }} ${{ matrix.arch }}
         run: |
           cmake -S . -B ${{ matrix.output_dir }} -G Ninja \
-            -DDAWN_MOBILE_BUILD=ON \
+            -DDAWN_MOBILE_BUILD=apple \
             -C .github/workflows/dawn-ci.cmake \
             -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain_file }} \
             ${{ matrix.cmake_args }} \
@@ -291,11 +293,6 @@ jobs:
           pattern: build-*
           path: artifacts
 
-      - name: Download headers
-        uses: actions/download-artifact@v4
-        with:
-          name: dawn-headers
-          path: headers
 
       - name: Create iOS Simulator fat binary
         run: |
@@ -313,39 +310,13 @@ jobs:
             -library artifacts/build-macos-universal/libwebgpu_dawn.a \
             -output Dawn-${{ github.sha }}-Apple.xcframework
 
-      - name: Copy headers
-        run: |
-          mkdir -p Dawn-${{ github.sha }}-headers/webgpu
-          mkdir -p Dawn-${{ github.sha }}-headers/dawn
-          
-          # Copy generated headers from Android build
-          if [ -d "headers/gen/include/webgpu" ]; then
-            cp -a headers/gen/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
-          fi
-          if [ -d "headers/gen/include/dawn" ]; then
-            cp -a headers/gen/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
-          fi
-          
-          # Copy source headers
-          if [ -d "headers/include/webgpu" ]; then
-            cp -a headers/include/webgpu/* Dawn-${{ github.sha }}-headers/webgpu/
-          fi
-          if [ -d "headers/include/dawn" ]; then
-            cp -a headers/include/dawn/* Dawn-${{ github.sha }}-headers/dawn/
-          fi
-          
-          # Copy dawn.json
-          if [ -f "headers/src/dawn/dawn.json" ]; then
-            cp headers/src/dawn/dawn.json Dawn-${{ github.sha }}-headers/
-          fi
-
       - name: Package Android libraries
         run: |
           mkdir -p Dawn-${{ github.sha }}-Android/arm64-v8a
           mkdir -p Dawn-${{ github.sha }}-Android/armeabi-v7a
           mkdir -p Dawn-${{ github.sha }}-Android/x86
           mkdir -p Dawn-${{ github.sha }}-Android/x86_64
-          
+
           cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/arm64-v8a/
           cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/armeabi-v7a/
           cp artifacts/build-android-x86/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/x86/
@@ -355,7 +326,6 @@ jobs:
         run: |
           tar -czf Dawn-${{ github.sha }}-Android.tar.gz Dawn-${{ github.sha }}-Android
           tar -czf Dawn-${{ github.sha }}-Apple.xcframework.tar.gz Dawn-${{ github.sha }}-Apple.xcframework
-          tar -czf Dawn-${{ github.sha }}-headers.tar.gz Dawn-${{ github.sha }}-headers
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
@@ -369,11 +339,6 @@ jobs:
           name: Dawn-${{ github.sha }}-Apple
           path: Dawn-${{ github.sha }}-Apple.xcframework.tar.gz
 
-      - name: Upload headers
-        uses: actions/upload-artifact@v4
-        with:
-          name: Dawn-${{ github.sha }}-headers
-          path: Dawn-${{ github.sha }}-headers.tar.gz
 
   golang:
     name: Go Build and Test
