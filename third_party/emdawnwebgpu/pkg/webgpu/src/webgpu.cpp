@@ -853,14 +853,15 @@ struct WGPUShaderModuleImpl final : public EventSource, public RefCounted {
         return;
       }
 
+      // Free allocations iff there were any.
       if (compilationInfo->messageCount) {
         // Since we allocate all the messages in a single block, we only need to
         // free the first pointer.
         free(const_cast<char*>(compilationInfo->messages[0].message.data));
-      }
-      if (compilationInfo->messages) {
+        // We also allocate all the Utf16 structs in a single array.
         free(reinterpret_cast<WGPUDawnCompilationMessageUtf16*>(
             compilationInfo->messages[0].nextInChain));
+        // Finally, free the array of messages.
         free(const_cast<WGPUCompilationMessage*>(compilationInfo->messages));
       }
       delete compilationInfo;
@@ -1985,12 +1986,12 @@ void wgpuBufferUnmap(WGPUBuffer buffer) {
 
 WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device,
                                   const WGPUBufferDescriptor* descriptor) {
-  WGPUBuffer buffer = new WGPUBufferImpl(device, descriptor->mappedAtCreation);
-  if (!emwgpuDeviceCreateBuffer(device, descriptor, buffer)) {
-    delete buffer;
+  Ref<WGPUBufferImpl> buffer =
+      AcquireRef(new WGPUBufferImpl(device, descriptor->mappedAtCreation));
+  if (!emwgpuDeviceCreateBuffer(device, descriptor, buffer.Get())) {
     return nullptr;
   }
-  return buffer;
+  return ReturnToAPI(std::move(buffer));
 }
 
 WGPUFuture wgpuDeviceCreateComputePipelineAsync(

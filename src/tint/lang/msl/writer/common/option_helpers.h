@@ -48,13 +48,13 @@ Result<SuccessType> ValidateBindingOptions(const Options& options);
 /// @param options the writer options
 /// @param remapper_data where to put the remapper data
 /// @param multiplanar_map where to store the multiplanar bindings map
-/// @param array_length_from_uniform_options where to store the ArrayLengthFromUniform options
+/// @param array_length_options where to store the ArrayLength options for ArrayLengthFromUniform
+/// and ArrayLengthFromImmediate transforms.
 /// Note, these are populated together because there are dependencies between the two types of data.
-void PopulateBindingRelatedOptions(
-    const Options& options,
-    RemapperData& remapper_data,
-    tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options);
+void PopulateBindingRelatedOptions(const Options& options,
+                                   RemapperData& remapper_data,
+                                   tint::transform::multiplanar::BindingsMap& multiplanar_map,
+                                   ArrayLengthOptions& array_length_options);
 
 }  // namespace tint::msl::writer
 

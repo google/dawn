@@ -455,6 +455,8 @@ class DeviceBase : public ErrorSink,
     // The returned std::string_view is constructed from std::string and ensure null terminated.
     std::string_view GetIsolatedEntryPointName() const;
 
+    tint::InternalCompilerErrorCallbackInfo GetTintInternalCompilerErrorCallback();
+
   protected:
     // Constructor used only for mocking and testing.
     DeviceBase();

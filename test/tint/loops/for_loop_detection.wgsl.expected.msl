@@ -1,0 +1,80 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct Scalars {
+  /* 0x0000 */ float4 f0;
+  /* 0x0010 */ int4 i1;
+  /* 0x0020 */ int4 i2;
+  /* 0x0030 */ int4 i3;
+};
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  const constant Scalars* U;
+  texture2d<uint, access::write> dst_image2d;
+  texture2d<float, access::sample> src_image2d;
+  threadgroup tint_array<tint_array<uint4, 32>, 8>* outputs;
+};
+
+struct tint_symbol_1 {
+  tint_array<tint_array<uint4, 32>, 8> tint_symbol;
+};
+
+uint4 tint_v4f32_to_v4u32(float4 value) {
+  return uint4(clamp(value, float4(0.0f), float4(4294967040.0f)));
+}
+
+void main_inner(uint3 lid, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 256u)) {
+    (*tint_module_vars.outputs)[(tint_local_index / 32u)][(tint_local_index % 32u)] = uint4(0u);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  int const init = int(lid.z);
+  {
+    int S = init;
+    while(true) {
+      if ((S < (*tint_module_vars.U).i3.x)) {
+      } else {
+        break;
+      }
+      {
+        S = as_type<int>((as_type<uint>(S) + as_type<uint>(8)));
+      }
+      continue;
+    }
+  }
+  {
+    int s_group = 0;
+    while(true) {
+      if ((s_group < (*tint_module_vars.U).i3.z)) {
+      } else {
+        break;
+      }
+      (*tint_module_vars.outputs)[lid.z][lid.x] = tint_v4f32_to_v4u32(tint_module_vars.src_image2d.read(uint2(uint((*tint_module_vars.U).i3.x)), 0));
+      threadgroup_barrier(mem_flags::mem_threadgroup);
+      uint4 result = (*tint_module_vars.outputs)[lid.z][lid.x];
+      uint2 const v = uint2(uint((*tint_module_vars.U).i3.x));
+      tint_module_vars.dst_image2d.write(result, v);
+      {
+        s_group = as_type<int>((as_type<uint>(s_group) + as_type<uint>(8)));
+      }
+      continue;
+    }
+  }
+}
+
+kernel void v_1(uint3 lid [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], const constant Scalars* U [[buffer(0)]], texture2d<uint, access::write> dst_image2d [[texture(0)]], texture2d<float, access::sample> src_image2d [[texture(1)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.U=U, .dst_image2d=dst_image2d, .src_image2d=src_image2d, .outputs=(&(*v_2).tint_symbol)};
+  main_inner(lid, tint_local_index, tint_module_vars);
+}

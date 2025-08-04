@@ -66,6 +66,7 @@
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/phony.h"
+#include "src/tint/lang/core/ir/referenced_functions.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -761,6 +762,10 @@ class Validator {
     /// sound and sets up data structures for later checks.
     void RunStructuralSoundnessChecks();
 
+    /// Checks that there is no direct or indirect recursion.
+    /// Depends on CheckStructuralSoundness() having previously been run.
+    void CheckForRecursion();
+
     /// Checks that there are no orphaned instructions
     /// Depends on CheckStructuralSoundness() having previously been run
     void CheckForOrphanedInstructions();
@@ -1414,19 +1419,31 @@ Disassembler& Validator::Disassemble() {
 Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
-    if (!diagnostics_.ContainsErrors()) {
-        CheckForOrphanedInstructions();
-    }
-
-    if (!diagnostics_.ContainsErrors()) {
-        CheckForNonFragmentDiscards();
-    }
+    CheckForRecursion();
+    CheckForOrphanedInstructions();
+    CheckForNonFragmentDiscards();
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
         return Failure{diagnostics_.Str()};
     }
     return Success;
+}
+
+void Validator::CheckForRecursion() {
+    if (diagnostics_.ContainsErrors()) {
+        return;
+    }
+
+    ReferencedFunctions<const Module> referenced_functions(mod_);
+    for (auto& func : mod_.functions) {
+        auto& refs = referenced_functions.TransitiveReferences(func);
+        if (refs.Contains(func)) {
+            // TODO(434684891): Consider improving this error with more information.
+            AddError(func) << "recursive function calls are not allowed";
+            return;
+        }
+    }
 }
 
 void Validator::CheckForOrphanedInstructions() {
@@ -1834,9 +1851,8 @@ void Validator::CheckType(const core::type::Type* root,
     }
 
     if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
-        // Check for core types (this is a hack to determine if the type is core, non-core types
-        // prefix their names with `lang.`, so we search for a `.` to find non-core)
-        if (root->FriendlyName().find(".") != std::string::npos) {
+        // Check for core types, which are the only types declared in the `tint::core` namespace.
+        if (!std::string_view(root->TypeInfo().name).starts_with("tint::core")) {
             diag() << "non-core types not allowed in core IR";
             return;
         }
@@ -1861,7 +1877,7 @@ void Validator::CheckType(const core::type::Type* root,
 
                 for (auto* member : str->Members()) {
                     if (member->RowMajor()) {
-                        diag() << "Row major annotation now allowed on structures";
+                        diag() << "Row major annotation not allowed on structures";
                         return false;
                     }
                     if (member->HasMatrixStride()) {
@@ -3136,8 +3152,16 @@ void Validator::CheckConstruct(const Construct* construct) {
         // TODO(crbug.com/427964608): This needs special handling as Element() produces nullptr.
     } else if (result_type->Is<core::type::Vector>()) {
         // TODO(crbug.com/427964205): This needs special handling as there are many cases.
-    } else if (result_type->Is<core::type::Matrix>()) {
-        // TODO(crbug.com/427965903): This needs special handling as there are many cases.
+    } else if (auto* mat = result_type->As<core::type::Matrix>()) {
+        auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
+        auto ctor_conv = intrinsic::MatrixCtorConv(mat->Columns(), mat->Rows());
+        auto arg_types = Transform<8>(args, [&](auto* v) { return v->Type(); });
+        auto match = table.Lookup(ctor_conv, Vector{mat->Type()}, std::move(arg_types),
+                                  core::EvaluationStage::kConstant);
+        if (match != Success) {
+            AddError(construct) << "no matching overload for " << mat->FriendlyName()
+                                << " constructor";
+        }
     } else if (result_type->Is<core::type::Array>()) {
         check_args_match_elements();
     } else if (auto* str = As<core::type::Struct>(result_type)) {
@@ -3415,6 +3439,7 @@ void Validator::CheckIf(const If* if_) {
 
 void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
+    CheckOperands(l, 0);
 
     // Note: Tasks are queued in reverse order of their execution
     tasks_.Push([this, l] {
@@ -3791,6 +3816,13 @@ void Validator::CheckLoad(const Load* l) {
                 << "result type " << NameOf(l->Result()->Type())
                 << " does not match source store type " << NameOf(mv->StoreType());
         }
+
+        if (auto* arr = mv->StoreType()->As<core::type::Array>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                AddError(l) << "cannot load a runtime-sized array";
+                return;
+            }
+        }
     }
 }
 
@@ -3821,6 +3853,12 @@ void Validator::CheckStore(const Store* s) {
                 AddError(s, Store::kFromOperandOffset)
                     << "value type " << NameOf(value_type) << " does not match store type "
                     << NameOf(store_type);
+                return;
+            }
+
+            if (!store_type->IsConstructible()) {
+                AddError(s) << "store type " << NameOf(store_type) << " is not constructible";
+                return;
             }
         }
     }

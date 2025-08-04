@@ -180,3 +180,176 @@ func TestCommonRootDir(t *testing.T) {
 		}
 	}
 }
+
+func TestIsDir(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		setupFS func(fs oswrapper.MemMapOSWrapper) // Sets up the filesystem
+		want    bool
+	}{
+		{
+			name: "Is a directory",
+			path: "/a/b/c",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/a/b/c", 0777))
+			},
+			want: true,
+		},
+		{
+			name: "Is a file",
+			path: "/a/b/file.txt",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/a/b", 0777))
+				require.NoError(t, fs.WriteFile("/a/b/file.txt", []byte("hello"), 0666))
+			},
+			want: false,
+		},
+		{
+			name:    "Does not exist",
+			path:    "/a/b/c",
+			setupFS: nil,
+			want:    false,
+		},
+		{
+			name:    "Empty path",
+			path:    "",
+			setupFS: nil,
+			want:    false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateMemMapOSWrapper()
+			if tc.setupFS != nil {
+				tc.setupFS(wrapper)
+			}
+
+			got := fileutils.IsDir(tc.path, wrapper)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestIsFile(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		setupFS func(fs oswrapper.MemMapOSWrapper) // Sets up the filesystem
+		want    bool
+	}{
+		{
+			name: "Is a file",
+			path: "/a/b/file.txt",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/a/b", 0777))
+				require.NoError(t, fs.WriteFile("/a/b/file.txt", []byte("hello"), 0666))
+			},
+			want: true,
+		},
+		{
+			name: "Is a directory",
+			path: "/a/b/c",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/a/b/c", 0777))
+			},
+			want: false,
+		},
+		{
+			name:    "Does not exist",
+			path:    "/a/b/c",
+			setupFS: nil,
+			want:    false,
+		},
+		{
+			name:    "Empty path",
+			path:    "",
+			setupFS: nil,
+			want:    false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateMemMapOSWrapper()
+			if tc.setupFS != nil {
+				tc.setupFS(wrapper)
+			}
+
+			got := fileutils.IsFile(tc.path, wrapper)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestIsEmptyDir(t *testing.T) {
+	tests := []struct {
+		name    string
+		path    string
+		setupFS func(fs oswrapper.MemMapOSWrapper)
+		want    bool
+		wantErr bool
+	}{
+		{
+			name:    "Path does not exist",
+			path:    "/nonexistent",
+			setupFS: nil,
+			wantErr: true,
+		},
+		{
+			name: "Path is a file",
+			path: "/myfile.txt",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.WriteFile("/myfile.txt", []byte("content"), 0666))
+			},
+			wantErr: true,
+		},
+		{
+			name: "Directory is empty",
+			path: "/mydir",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/mydir", 0777))
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "Directory with a file",
+			path: "/mydir",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll("/mydir", 0777))
+				require.NoError(t, fs.WriteFile(filepath.Join("/mydir", "file.txt"), []byte("content"), 0666))
+			},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "Directory with a subdirectory",
+			path: "/mydir",
+			setupFS: func(fs oswrapper.MemMapOSWrapper) {
+				require.NoError(t, fs.MkdirAll(filepath.Join("/mydir", "subdir"), 0777))
+			},
+			want:    false,
+			wantErr: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := oswrapper.CreateMemMapOSWrapper()
+			if tc.setupFS != nil {
+				tc.setupFS(wrapper)
+			}
+
+			got, err := fileutils.IsEmptyDir(tc.path, wrapper)
+
+			if tc.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.want, got)
+			}
+		})
+	}
+}

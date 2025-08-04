@@ -56,21 +56,18 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 Buffer::Buffer(Device* device,
                const UnpackedPtr<BufferDescriptor>& descriptor,
                WGPUBuffer innerBuffer)
-    : BufferBase(device, descriptor), mInnerBuffer(innerBuffer) {
+    : BufferBase(device, descriptor), ObjectWGPU(device->wgpu.bufferRelease) {
+    mInnerHandle = innerBuffer;
     mAllocatedSize = GetSize();
 }
 
-WGPUBuffer Buffer::GetInnerHandle() const {
-    return mInnerBuffer;
-}
-
 bool Buffer::IsCPUWritableAtCreation() const {
-    return ToBackend(GetDevice())->wgpu.bufferGetMapState(mInnerBuffer) ==
+    return ToBackend(GetDevice())->wgpu.bufferGetMapState(mInnerHandle) ==
            WGPUBufferMapState_Mapped;
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
-    mMappedData = ToBackend(GetDevice())->wgpu.bufferGetMappedRange(mInnerBuffer, 0, GetSize());
+    mMappedData = ToBackend(GetDevice())->wgpu.bufferGetMappedRange(mInnerHandle, 0, GetSize());
     return {};
 }
 
@@ -96,7 +93,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // TODO(crbug.com/413053623): We do not have a way to efficiently process the async event
     // on the inner webgpu layer. For now we simply wait on the future.
     WGPUFutureWaitInfo waitInfo = {};
-    waitInfo.future = wgpu.bufferMapAsync(mInnerBuffer, static_cast<WGPUMapMode>(mode), offset,
+    waitInfo.future = wgpu.bufferMapAsync(mInnerHandle, static_cast<WGPUMapMode>(mode), offset,
                                           size, innerCallbackInfo);
     wgpu.instanceWaitAny(ToBackend(GetDevice())->GetInnerInstance(), 1, &waitInfo, UINT64_MAX);
 
@@ -108,10 +105,10 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     // the resource but WGPU gives us the pointer at offset. Remove the offset.
     if (bool{mode & wgpu::MapMode::Write}) {
         mMappedData =
-            static_cast<uint8_t*>(wgpu.bufferGetMappedRange(mInnerBuffer, offset, size)) - offset;
+            static_cast<uint8_t*>(wgpu.bufferGetMappedRange(mInnerHandle, offset, size)) - offset;
     } else if (bool{mode & wgpu::MapMode::Read}) {
         mMappedData = static_cast<uint8_t*>(const_cast<void*>(
-                          wgpu.bufferGetConstMappedRange(mInnerBuffer, offset, size))) -
+                          wgpu.bufferGetConstMappedRange(mInnerHandle, offset, size))) -
                       offset;
     } else {
         DAWN_UNREACHABLE();
@@ -125,19 +122,10 @@ void* Buffer::GetMappedPointerImpl() {
 }
 
 void Buffer::UnmapImpl() {
-    if (mInnerBuffer) {
-        ToBackend(GetDevice())->wgpu.bufferUnmap(mInnerBuffer);
+    if (mInnerHandle) {
+        ToBackend(GetDevice())->wgpu.bufferUnmap(mInnerHandle);
     }
     mMappedData = nullptr;
-}
-
-void Buffer::DestroyImpl() {
-    BufferBase::DestroyImpl();
-
-    if (mInnerBuffer) {
-        ToBackend(GetDevice())->wgpu.bufferRelease(mInnerBuffer);
-        mInnerBuffer = nullptr;
-    }
 }
 
 }  // namespace dawn::native::webgpu

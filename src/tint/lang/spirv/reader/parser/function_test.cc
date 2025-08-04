@@ -744,13 +744,13 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValueChain) {
 
         %foo = OpFunction %bool None %fn_type
   %foo_start = OpLabel
-       %call = OpFunctionCall %bool %foo
+       %call = OpFunctionCall %bool %bar
                OpReturnValue %call
                OpFunctionEnd
 
        %main = OpFunction %void None %main_type
  %main_start = OpLabel
-          %1 = OpFunctionCall %bool %bar
+          %1 = OpFunctionCall %bool %foo
                OpReturn
                OpFunctionEnd
 )",
@@ -762,13 +762,13 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValueChain) {
 }
 %2 = func():bool {
   $B2: {
-    %3:bool = call %2
+    %3:bool = call %1
     ret %3
   }
 }
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
-    %5:bool = call %1
+    %5:bool = call %2
     ret
   }
 }

@@ -60,13 +60,13 @@
                OpMemberDecorate %Particles_tint_explicit_layout 0 Offset 0
                OpMemberDecorate %particlesA_block_tint_explicit_layout 0 Offset 0
                OpDecorate %particlesA_block_tint_explicit_layout Block
-               OpDecorate %6 DescriptorSet 0
-               OpDecorate %6 Binding 1
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 0
                OpDecorate %6 Coherent
                OpMemberDecorate %particlesB_block_tint_explicit_layout 0 Offset 0
                OpDecorate %particlesB_block_tint_explicit_layout Block
-               OpDecorate %15 DescriptorSet 0
-               OpDecorate %15 Binding 2
+               OpDecorate %15 DescriptorSet 2
+               OpDecorate %15 Binding 0
                OpDecorate %15 Coherent
                OpDecorate %comp_main_global_invocation_id_Input BuiltIn GlobalInvocationId
       %float = OpTypeFloat 32

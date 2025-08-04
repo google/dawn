@@ -75,7 +75,7 @@ func findClangFormat(fsReader oswrapper.FilesystemReader) (string, error) {
 	case "windows":
 		path = filepath.Join(dawnRoot, "buildtools/win/clang-format.exe")
 	}
-	if fileutils.IsExe(path) {
+	if fileutils.IsExe(path, fsReader) {
 		return path, nil
 	}
 	var err error

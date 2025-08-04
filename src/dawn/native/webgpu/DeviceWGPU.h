@@ -34,11 +34,12 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/ObjectWGPU.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::webgpu {
 
-class Device final : public DeviceBase {
+class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
   public:
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              WGPUAdapter innerAdapter,
@@ -53,8 +54,6 @@ class Device final : public DeviceBase {
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
     float GetTimestampPeriodInNS() const override;
-
-    WGPUDevice GetInnerHandle() const;
 
     WGPUInstance GetInnerInstance() const;
 
@@ -112,9 +111,6 @@ class Device final : public DeviceBase {
                                             const Extent3D& copySizePixels) override;
 
     void DestroyImpl() override;
-
-    // The "lower layer" implementation device that actually manages calls to GPU driver.
-    WGPUDevice mInnerDevice = nullptr;
 };
 
 }  // namespace dawn::native::webgpu

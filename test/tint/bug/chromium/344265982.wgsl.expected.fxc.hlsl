@@ -3,11 +3,7 @@ RWByteAddressBuffer buffer : register(u0);
 void foo() {
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(4))) {
-      } else {
-        break;
-      }
+    while((i < int(4))) {
       bool tint_continue = false;
       switch(asint(buffer.Load((0u + (min(uint(i), 3u) * 4u))))) {
         case int(1):

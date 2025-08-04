@@ -33,6 +33,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/MetalBackend.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/metal/CommandBufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -65,7 +66,39 @@ void Queue::DestroyImpl() {
 MaybeError Queue::Initialize() {
     id<MTLDevice> mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
 
-    mCommandQueue.Acquire([mtlDevice newCommandQueue]);
+#if __MAC_OS_X_VERSION_MAX_ALLOWED >= 150000
+    if (@available(macOS 15.0, *)) {
+        if (gpu_info::IsApple(GetDevice()->GetPhysicalDevice()->GetVendorId()) &&
+            GetDevice()->IsToggleEnabled(Toggle::EnableShaderPrint)) {
+            // Add a logging callback to the command queue that forwards print output to the Dawn
+            // logging callback.
+            NSError* error = nil;
+            MTLLogStateDescriptor* logStateDesc = [MTLLogStateDescriptor new];
+            logStateDesc.bufferSize = 4096;
+            logStateDesc.level = MTLLogLevelInfo;
+            id<MTLLogState> mtlLogState = [mtlDevice newLogStateWithDescriptor:logStateDesc
+                                                                         error:&error];
+            if (error != nil) {
+                return DAWN_INTERNAL_ERROR("Error creating MTLLogState:" +
+                                           std::string([error.localizedDescription UTF8String]));
+            }
+            [mtlLogState addLogHandler:^(NSString* substring, NSString* category, MTLLogLevel level,
+                                         NSString* message) {
+                GetDevice()->EmitLog([message UTF8String]);
+            }];
+
+            MTLCommandQueueDescriptor* mtlQueueDescriptor = [MTLCommandQueueDescriptor new];
+            mtlQueueDescriptor.logState = mtlLogState;
+            mCommandQueue.Acquire([mtlDevice newCommandQueueWithDescriptor:mtlQueueDescriptor]);
+        } else {
+            mCommandQueue.Acquire([mtlDevice newCommandQueue]);
+        }
+    } else
+#endif
+    {
+        mCommandQueue.Acquire([mtlDevice newCommandQueue]);
+    }
+
     if (mCommandQueue == nil) {
         return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
     }

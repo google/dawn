@@ -973,6 +973,42 @@ fn f() {
 )");
 }
 
+TEST_F(IRToProgramTest, RenameStructAndStructMembers) {
+    auto* s0 = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                          {mod.symbols.New("safe"), ty.i32()},
+                                                          {mod.symbols.New("2"), ty.u32()},
+                                                          {mod.symbols.New("__member"), ty.u32()},
+                                                      });
+    auto* s1 = ty.Struct(mod.symbols.New("__BadStructName"), {
+                                                                 {mod.symbols.New("a"), ty.i32()},
+                                                             });
+
+    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(fn->Block(), [&] {
+        b.Var("s0", ty.ref<function>(s0));
+        b.Var("s1", ty.ref<function>(s1));
+        b.Return(fn);
+    });
+
+    EXPECT_WGSL(R"(
+struct MyStruct {
+  safe : i32,
+  m : u32,
+  m_1 : u32,
+}
+
+struct S {
+  a : i32,
+}
+
+@fragment
+fn f() {
+  var s0 : MyStruct;
+  var s1 : S;
+}
+)");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Unary ops
 ////////////////////////////////////////////////////////////////////////////////

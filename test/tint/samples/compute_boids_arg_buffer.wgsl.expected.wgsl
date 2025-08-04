@@ -17,11 +17,11 @@ struct Particles {
   particles : array<Particle, 5>,
 }
 
-@binding(0) @group(0) var<uniform> params : SimParams;
+@group(0) @binding(0) var<uniform> params : SimParams;
 
-@binding(1) @group(0) var<storage, read_write> particlesA : Particles;
+@group(1) @binding(0) var<storage, read_write> particlesA : Particles;
 
-@binding(2) @group(0) var<storage, read_write> particlesB : Particles;
+@group(2) @binding(0) var<storage, read_write> particlesB : Particles;
 
 @compute @workgroup_size(1)
 fn comp_main(@builtin(global_invocation_id) gl_GlobalInvocationID : vec3<u32>) {

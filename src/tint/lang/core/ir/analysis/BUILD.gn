@@ -45,6 +45,8 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("analysis") {
   sources = [
+    "for_loop_analysis.cc",
+    "for_loop_analysis.h",
     "integer_range_analysis.cc",
     "integer_range_analysis.h",
     "loop_analysis.cc",
@@ -73,6 +75,7 @@ libtint_source_set("analysis") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
+      "for_loop_analysis_test.cc",
       "integer_range_analysis_test.cc",
       "loop_analysis_test.cc",
     ]
@@ -86,6 +89,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/ir:unittests",
       "${tint_src_dir}/lang/core/ir/analysis",
+      "${tint_src_dir}/lang/core/ir/transform",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/utils",
       "${tint_src_dir}/utils/containers",

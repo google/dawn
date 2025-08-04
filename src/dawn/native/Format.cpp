@@ -506,23 +506,29 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
     // clang-format off
     // 1 byte color formats
-    auto r8unormSupportsStorage = (device->HasFeature(Feature::TextureFormatsTier1) || device->HasFeature(Feature::R8UnormStorage)) ? Cap::StorageROrW : Cap::None;
+    auto r8unormSupportsStorageROrW = (device->HasFeature(Feature::TextureFormatsTier1) || device->HasFeature(Feature::R8UnormStorage)) ? Cap::StorageROrW : Cap::None;
+    auto r8unormSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
     auto r8snormSupportsRender = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Renderable : Cap::None;
     auto r8snormSupportsBlend = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Blendable : Cap::None;
     auto r8snormSupportsMultisample = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Multisample : Cap::None;
     auto r8snormSupportsResolve = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Resolve : Cap::None;
     auto r8snormSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    auto r8uintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    auto r8sintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    AddColorFormat(wgpu::TextureFormat::R8Unorm, Cap::Renderable | Cap::Multisample | Cap::Resolve | r8unormSupportsStorage | Cap::Blendable, ByteSize(1), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
+    auto r8uintSupportsStorageROrW = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r8uintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto r8sintSupportsStorageROrW = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r8sintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    AddColorFormat(wgpu::TextureFormat::R8Unorm, Cap::Renderable | Cap::Multisample | Cap::Resolve | r8unormSupportsStorageROrW | r8unormSupportsStorageRW | Cap::Blendable, ByteSize(1), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
     AddColorFormat(wgpu::TextureFormat::R8Snorm, r8snormSupportsRender | r8snormSupportsBlend | r8snormSupportsMultisample | r8snormSupportsResolve | r8snormSupportsStorage, ByteSize(1), kAnyFloat, ComponentCount(1),RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
-    AddColorFormat(wgpu::TextureFormat::R8Uint, Cap::Renderable | intMultisampleCaps | r8uintSupportsStorage, ByteSize(1), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
-    AddColorFormat(wgpu::TextureFormat::R8Sint, Cap::Renderable | intMultisampleCaps | r8sintSupportsStorage, ByteSize(1), SampleTypeBit::Sint, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
+    AddColorFormat(wgpu::TextureFormat::R8Uint, Cap::Renderable | intMultisampleCaps | r8uintSupportsStorageROrW | r8uintSupportsStorageRW, ByteSize(1), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
+    AddColorFormat(wgpu::TextureFormat::R8Sint, Cap::Renderable | intMultisampleCaps | r8sintSupportsStorageROrW | r8sintSupportsStorageRW, ByteSize(1), SampleTypeBit::Sint, ComponentCount(1), RenderTargetPixelByteCost(1), RenderTargetComponentAlignment(1));
 
     // 2 bytes color formats
-    auto r16uintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    auto r16sintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    auto r16floatSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r16uintSupportsStorageROrW = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r16uintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto r16sintSupportsStorageROrW = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r16sintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto r16floatSupportsStorageROrW = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
+    auto r16floatSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
     auto rg8unormSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
     auto rg8snormSupportsRender = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Renderable : Cap::None;
     auto rg8snormSupportsBlend = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Blendable : Cap::None;
@@ -531,9 +537,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     auto rg8snormSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
     auto rg8uintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
     auto rg8sintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
-    AddColorFormat(wgpu::TextureFormat::R16Uint, Cap::Renderable | intMultisampleCaps | r16uintSupportsStorage, ByteSize(2), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
-    AddColorFormat(wgpu::TextureFormat::R16Sint, Cap::Renderable | intMultisampleCaps | r16sintSupportsStorage, ByteSize(2), SampleTypeBit::Sint, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
-    AddColorFormat(wgpu::TextureFormat::R16Float, Cap::Renderable | Cap::Multisample | Cap::Resolve | Cap::Blendable | r16floatSupportsStorage, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::R16Uint, Cap::Renderable | intMultisampleCaps | r16uintSupportsStorageROrW | r16uintSupportsStorageRW, ByteSize(2), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::R16Sint, Cap::Renderable | intMultisampleCaps | r16sintSupportsStorageROrW | r16sintSupportsStorageRW, ByteSize(2), SampleTypeBit::Sint, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::R16Float, Cap::Renderable | Cap::Multisample | Cap::Resolve | Cap::Blendable | r16floatSupportsStorageROrW | r16floatSupportsStorageRW, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RG8Unorm, Cap::Renderable | Cap::Multisample | Cap::Resolve | Cap::Blendable | rg8unormSupportsStorage, ByteSize(2), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(1));
     AddColorFormat(wgpu::TextureFormat::RG8Snorm, rg8snormSupportsRender | rg8snormSupportsBlend | rg8snormSupportsMultisample | rg8snormSupportsResolve | rg8snormSupportsStorage, ByteSize(2), kAnyFloat, ComponentCount(2),RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RG8Uint, Cap::Renderable | intMultisampleCaps | rg8uintSupportsStorage, ByteSize(2), SampleTypeBit::Uint, ComponentCount(2), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(1));
@@ -552,6 +558,9 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     auto rgba8snormSupportsBlend = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Blendable : Cap::None;
     auto rgba8snormSupportsMultisample = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Multisample : Cap::None;
     auto rgba8snormSupportsResolve = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::Resolve : Cap::None;
+    auto rgba8unormSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba8uintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba8sintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
 
     AddColorFormat(wgpu::TextureFormat::R32Uint, Cap::Renderable | Cap::StorageROrW | Cap::StorageRW | supportsPLS, ByteSize(4), SampleTypeBit::Uint, ComponentCount(1), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(4));
     AddColorFormat(wgpu::TextureFormat::R32Sint, Cap::Renderable | Cap::StorageROrW | Cap::StorageRW | supportsPLS, ByteSize(4), SampleTypeBit::Sint, ComponentCount(1), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(4));
@@ -559,11 +568,11 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     AddColorFormat(wgpu::TextureFormat::RG16Uint, Cap::Renderable | intMultisampleCaps | rg16uintSupportsStorage, ByteSize(4), SampleTypeBit::Uint, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RG16Sint, Cap::Renderable | intMultisampleCaps | rg16sintSupportsStorage, ByteSize(4), SampleTypeBit::Sint, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
     AddColorFormat(wgpu::TextureFormat::RG16Float, Cap::Renderable | Cap::Multisample | Cap::Resolve | Cap::Blendable | rg16floatSupportsStorage, ByteSize(4), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
-    AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, Cap::Renderable | Cap::StorageROrW | Cap::Multisample | Cap::Resolve | Cap::Blendable, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1));
+    AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, Cap::Renderable | Cap::StorageROrW | Cap::Multisample | Cap::Resolve | Cap::Blendable | rgba8unormSupportsStorageRW, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1));
     AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, Cap::Renderable | Cap::Multisample | Cap::Resolve | Cap::Blendable, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1), wgpu::TextureFormat::RGBA8Unorm);
     AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, Cap::StorageROrW | rgba8snormSupportsRender | rgba8snormSupportsBlend | rgba8snormSupportsMultisample | rgba8snormSupportsResolve, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RGBA8Uint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps, ByteSize(4), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(1));
-    AddColorFormat(wgpu::TextureFormat::RGBA8Sint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps, ByteSize(4), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(1));
+    AddColorFormat(wgpu::TextureFormat::RGBA8Uint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps | rgba8uintSupportsStorageRW, ByteSize(4), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(1));
+    AddColorFormat(wgpu::TextureFormat::RGBA8Sint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps | rgba8sintSupportsStorageRW, ByteSize(4), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(1));
 
     const UnsupportedReason externalUnsupportedReason = device->HasFeature(Feature::YCbCrVulkanSamplers) ?  Format::supported : RequiresFeature{wgpu::FeatureName::YCbCrVulkanSamplers};
     AddConditionalColorFormat(wgpu::TextureFormat::External, externalUnsupportedReason, Cap::None, ByteSize(1), SampleTypeBit::External, ComponentCount(0));
@@ -584,20 +593,25 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
     // 8 bytes color formats
     auto rg32StorageCaps = device->IsCompatibilityMode() ? Cap::None : Cap::StorageROrW;
+    auto rgba16uintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba16sintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba16floatSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
     // (github.com/gpuweb/gpuweb/issues/5049): rgba16float compat multisampled support is optional
     auto rgba16FloatMultisampleCaps = device->IsCompatibilityMode() ? Cap::None : Cap::Multisample;
-
     AddColorFormat(wgpu::TextureFormat::RG32Uint, Cap::Renderable | rg32StorageCaps, ByteSize(8), SampleTypeBit::Uint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
     AddColorFormat(wgpu::TextureFormat::RG32Sint, Cap::Renderable | rg32StorageCaps, ByteSize(8), SampleTypeBit::Sint, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
     AddColorFormat(wgpu::TextureFormat::RG32Float, Cap::Renderable | rg32StorageCaps | float32BlendableCaps, ByteSize(8), sampleTypeFor32BitFloatFormats, ComponentCount(2), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RGBA16Uint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps, ByteSize(8), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
-    AddColorFormat(wgpu::TextureFormat::RGBA16Sint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps, ByteSize(8), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
-    AddColorFormat(wgpu::TextureFormat::RGBA16Float, Cap::Renderable | Cap::StorageROrW | rgba16FloatMultisampleCaps | Cap::Resolve | Cap::Blendable, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::RGBA16Uint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps | rgba16uintSupportsStorageRW, ByteSize(8), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::RGBA16Sint, Cap::Renderable | Cap::StorageROrW | intMultisampleCaps | rgba16sintSupportsStorageRW, ByteSize(8), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+    AddColorFormat(wgpu::TextureFormat::RGBA16Float, Cap::Renderable | Cap::StorageROrW | rgba16FloatMultisampleCaps | Cap::Resolve | Cap::Blendable | rgba16floatSupportsStorageRW, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
 
     // 16 bytes color formats
-    AddColorFormat(wgpu::TextureFormat::RGBA32Uint, Cap::Renderable | Cap::StorageROrW, ByteSize(16), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RGBA32Sint, Cap::Renderable | Cap::StorageROrW, ByteSize(16), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
-    AddColorFormat(wgpu::TextureFormat::RGBA32Float, Cap::Renderable | Cap::StorageROrW | float32BlendableCaps, ByteSize(16), sampleTypeFor32BitFloatFormats, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
+    auto rgba32uintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba32sintSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    auto rgba32floatSupportsStorageRW = device->HasFeature(Feature::TextureFormatsTier2) ? Cap::StorageRW : Cap::None;
+    AddColorFormat(wgpu::TextureFormat::RGBA32Uint, Cap::Renderable | Cap::StorageROrW | rgba32uintSupportsStorageRW, ByteSize(16), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
+    AddColorFormat(wgpu::TextureFormat::RGBA32Sint, Cap::Renderable | Cap::StorageROrW | rgba32sintSupportsStorageRW, ByteSize(16), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
+    AddColorFormat(wgpu::TextureFormat::RGBA32Float, Cap::Renderable | Cap::StorageROrW | float32BlendableCaps | rgba32floatSupportsStorageRW, ByteSize(16), sampleTypeFor32BitFloatFormats, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
 
     bool norm16TextureFormats = device->HasFeature(Feature::Norm16TextureFormats);
     bool textureFormatsTier1Enabled = device->HasFeature(Feature::TextureFormatsTier1);

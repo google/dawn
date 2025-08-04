@@ -29,7 +29,6 @@ package fileutils
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -81,7 +80,7 @@ func pathOfFileInParentDirs(path string, name string, fsReader oswrapper.Filesys
 }
 
 // ExpandHome returns the string with all occurrences of '~' replaced with the
-// user's home directory. The the user's home directory cannot be found, then
+// user's home directory. If the user's home directory cannot be found, then
 // the input string is returned.
 func ExpandHome(path string, environProvider oswrapper.EnvironProvider) string {
 	if strings.ContainsRune(path, '~') {
@@ -137,8 +136,8 @@ func BuildPath(fsReader oswrapper.FilesystemReader) string {
 }
 
 // IsDir returns true if the path resolves to a directory
-func IsDir(path string) bool {
-	s, err := os.Stat(path)
+func IsDir(path string, fsReader oswrapper.FilesystemReader) bool {
+	s, err := fsReader.Stat(path)
 	if err != nil {
 		return false
 	}
@@ -146,8 +145,8 @@ func IsDir(path string) bool {
 }
 
 // IsFile returns true if the path resolves to a file
-func IsFile(path string) bool {
-	s, err := os.Stat(path)
+func IsFile(path string, fsReader oswrapper.FilesystemReader) bool {
+	s, err := fsReader.Stat(path)
 	if err != nil {
 		return false
 	}
@@ -178,4 +177,26 @@ func CommonRootDir(pathA, pathB string) string {
 		}
 	}
 	return common
+}
+
+// IsEmptyDir returns true if the directory at 'dir' contains no files or
+// subdirectories. Returns an error if the path does not exist or is not a
+// directory.
+func IsEmptyDir(dir string, fsReader oswrapper.FilesystemReader) (bool, error) {
+	// First, check if the path exists and is a directory.
+	info, err := fsReader.Stat(dir)
+	if err != nil {
+		return false, fmt.Errorf("failed to stat '%s': %w", dir, err)
+	}
+	if !info.IsDir() {
+		return false, fmt.Errorf("path is not a directory: %s", dir)
+	}
+
+	// Now, read the directory's contents.
+	entries, err := fsReader.Readdir(dir)
+	if err != nil {
+		return false, fmt.Errorf("failed to read directory '%s': %w", dir, err)
+	}
+
+	return len(entries) == 0, nil
 }

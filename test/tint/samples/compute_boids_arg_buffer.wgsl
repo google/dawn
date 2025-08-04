@@ -1,6 +1,6 @@
-// flags: --use-argument-buffers
+// flags: --use-argument-buffers --argument-buffer 0=20,1=21,2=22 --dynamic-offset-buffer 0=23 --dynamic-offset 0.0=2
 //
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,16 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//
+// # Flag arguments
+//
+// * Argument buffer for group 0 -> buffer 20
+// * Argument buffer for group 1 -> buffer 21
+// * Argument buffer for group 2 -> buffer 22
+// * Dynamic offset buffer for group 0 -> buffer 23
+// * Dynamic offset for group 0, binding 0 is at index 2
+//
 
 struct Particle {
   pos : vec2<f32>,
@@ -46,9 +56,9 @@ struct Particle {
   particles : array<Particle, 5>,
 };
 
-@binding(0) @group(0) var<uniform> params : SimParams;
-@binding(1) @group(0) var<storage, read_write> particlesA : Particles;
-@binding(2) @group(0) var<storage, read_write> particlesB : Particles;
+@group(0) @binding(0) var<uniform> params : SimParams;
+@group(1) @binding(0) var<storage, read_write> particlesA : Particles;
+@group(2) @binding(0) var<storage, read_write> particlesB : Particles;
 
 // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
 @compute @workgroup_size(1)

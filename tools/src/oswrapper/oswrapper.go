@@ -56,10 +56,18 @@ type FilesystemReaderWriter interface {
 	FilesystemWriter
 }
 
+// Note: afero's implementation of ReadDir/Readdir is somewhat non-compliant.
+// It's ReadDir doesn't implement the os.ReadDir interface, but instead is a
+// wrapper that calls its implementations of File.Readdir which has a subtly
+// different interface, i.e. []DirEntry vs []FileInfo.
+// So FilesystemReader has a Readdir that returns []FileInfo, and does not have
+// a ReadDir that returns []DirEntry
+
 // FilesystemReader is a wrapper around the read-related filesystem os functions.
 type FilesystemReader interface {
 	Open(name string) (afero.File, error)
 	OpenFile(name string, flag int, perm os.FileMode) (afero.File, error)
+	Readdir(name string) ([]os.FileInfo, error) // See note above for why Readdir and not ReadDir
 	ReadFile(name string) ([]byte, error)
 	Stat(name string) (os.FileInfo, error)
 	Walk(root string, fn filepath.WalkFunc) error

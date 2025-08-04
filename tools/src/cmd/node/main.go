@@ -79,14 +79,14 @@ func main() {
 		debugger = "lldb"
 	}
 
-	if err := run(opts.BinDir, nodePath, nodeFlags, flag.Args(), debugger); err != nil {
+	if err := run(opts.BinDir, nodePath, nodeFlags, flag.Args(), debugger, wrapper); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
 // run starts the
-func run(binPath, nodePath string, flags node.Flags, args []string, debugger string) error {
+func run(binPath, nodePath string, flags node.Flags, args []string, debugger string, fsReader oswrapper.FilesystemReader) error {
 	if len(args) == 0 {
 		return fmt.Errorf("missing path to .js file")
 	}
@@ -102,7 +102,7 @@ func run(binPath, nodePath string, flags node.Flags, args []string, debugger str
 	}
 
 	for _, file := range []string{"cts.js", "dawn.node"} {
-		if !fileutils.IsFile(filepath.Join(binPath, file)) {
+		if !fileutils.IsFile(filepath.Join(binPath, file), fsReader) {
 			return fmt.Errorf("'%v' does not contain '%v'", binPath, file)
 		}
 	}

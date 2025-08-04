@@ -32,6 +32,7 @@ import (
 	"io/fs"
 	"os"
 	"regexp"
+	"sort"
 	"testing"
 	"time"
 
@@ -146,6 +147,12 @@ func TestStat_Nonexistent(t *testing.T) {
 	require.ErrorContains(t, err, "open /foo.txt: file does not exist")
 }
 
+func TestStat_EmptyString(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	_, err := wrapper.Stat("")
+	require.ErrorContains(t, err, "no such file or directory")
+}
+
 func TestWalk_Nonexistent(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
 
@@ -215,6 +222,47 @@ func TestCreate_ReadFile(t *testing.T) {
 	contents, err := wrapper.ReadFile("/foo.txt")
 	require.NoErrorf(t, err, "Failed to read file: %v", err)
 	require.Equal(t, []byte("asdf"), contents)
+}
+
+func TestReaddir_NonExistent(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	_, err := wrapper.Readdir("/nonexistent")
+	require.Error(t, err)
+	require.ErrorContains(t, err, "open /nonexistent: file does not exist")
+}
+
+func TestReaddir_PathIsFile(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	require.NoError(t, wrapper.WriteFile("/myfile", []byte("content"), 0644))
+	_, err := wrapper.Readdir("/myfile")
+	require.Error(t, err)
+	require.ErrorContains(t, err, "not a dir")
+}
+
+func TestReaddir_EmptyDir(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	require.NoError(t, wrapper.Mkdir("/mydir", 0755))
+	infos, err := wrapper.Readdir("/mydir")
+	require.NoError(t, err)
+	require.Empty(t, infos)
+}
+
+func TestReaddir_MixedContent(t *testing.T) {
+	wrapper := CreateMemMapOSWrapper()
+	require.NoError(t, wrapper.MkdirAll("/mydir/b_subdir", 0755))
+	require.NoError(t, wrapper.WriteFile("/mydir/z_file.txt", nil, 0644))
+	require.NoError(t, wrapper.WriteFile("/mydir/a_file.txt", nil, 0644))
+
+	infos, err := wrapper.Readdir("/mydir")
+	require.NoError(t, err)
+
+	gotNames := []string{}
+	for _, info := range infos {
+		gotNames = append(gotNames, info.Name())
+	}
+	sort.Strings(gotNames)
+	expectedNames := []string{"a_file.txt", "b_subdir", "z_file.txt"}
+	require.Equal(t, expectedNames, gotNames, "directory entries do not match")
 }
 
 func TestMkdir_Exists(t *testing.T) {

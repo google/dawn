@@ -6,11 +6,7 @@ static bool2 v2b = (false).xx;
 void foo() {
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(2))) {
-      } else {
-        break;
-      }
+    while((i < int(2))) {
       int v = i;
       float2 v_1 = v2f;
       float2 v_2 = float2((1.0f).xx);
@@ -43,11 +39,7 @@ void foo() {
 void main() {
   {
     int i = int(0);
-    while(true) {
-      if ((i < int(2))) {
-      } else {
-        break;
-      }
+    while((i < int(2))) {
       foo();
       {
         i = (i + int(1));

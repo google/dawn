@@ -126,12 +126,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
-	if err := c.maybeInitCoverage(); err != nil {
+	if err := c.maybeInitCoverage(cfg.OsWrapper); err != nil {
 		return err
 	}
 
 	if c.flags.build {
-		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose); err != nil {
+		if err := c.state.CTS.Node.BuildIfRequired(c.flags.Verbose, cfg.OsWrapper); err != nil {
 			return err
 		}
 	}
@@ -178,17 +178,17 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 }
 
 // TODO(crbug.com/344014313): Add unittest coverage.
-func (c *cmd) processFlags(fsReader oswrapper.FilesystemReader) error {
+func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	// Check mandatory arguments
 	if c.flags.bin == "" {
 		return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist",
-			filepath.Join(fileutils.DawnRoot(fsReader), "out/active"))
+			filepath.Join(fileutils.DawnRoot(fsReaderWriter), "out/active"))
 	}
-	if !fileutils.IsDir(c.flags.bin) {
+	if !fileutils.IsDir(c.flags.bin, fsReaderWriter) {
 		return fmt.Errorf("'%v' is not a directory", c.flags.bin)
 	}
 	for _, file := range []string{"cts.js", "dawn.node"} {
-		if !fileutils.IsFile(filepath.Join(c.flags.bin, file)) {
+		if !fileutils.IsFile(filepath.Join(c.flags.bin, file), fsReaderWriter) {
 			return fmt.Errorf("'%v' does not contain '%v'", c.flags.bin, file)
 		}
 	}
@@ -228,7 +228,7 @@ func (c *cmd) processFlags(fsReader oswrapper.FilesystemReader) error {
 		c.flags.Verbose = true
 	}
 
-	state, err := c.flags.Process()
+	state, err := c.flags.Process(fsReaderWriter)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func (c *cmd) processFlags(fsReader oswrapper.FilesystemReader) error {
 
 // TODO(crbug.com/416755658): Add unittest coverage when exec is handled via
 // dependency injection.
-func (c *cmd) maybeInitCoverage() error {
+func (c *cmd) maybeInitCoverage(fsReader oswrapper.FilesystemReader) error {
 	if !c.flags.genCoverage && c.flags.coverageFile == "" {
 		return nil
 	}
@@ -249,7 +249,7 @@ func (c *cmd) maybeInitCoverage() error {
 		profdata = ""
 		if runtime.GOOS == "darwin" {
 			profdata = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/llvm-profdata"
-			if !fileutils.IsExe(profdata) {
+			if !fileutils.IsExe(profdata, fsReader) {
 				profdata = ""
 			}
 		}
@@ -260,7 +260,7 @@ func (c *cmd) maybeInitCoverage() error {
 
 	llvmCov := ""
 	turboCov := filepath.Join(c.flags.bin, "turbo-cov"+fileutils.ExeExt)
-	if !fileutils.IsExe(turboCov) {
+	if !fileutils.IsExe(turboCov, fsReader) {
 		turboCov = ""
 		if path, err := exec.LookPath("llvm-cov"); err == nil {
 			llvmCov = path

@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <array>
 #include <mutex>
+#include <string>
 #include <utility>
 
 #include "absl/container/flat_hash_set.h"
@@ -1667,8 +1668,11 @@ void DeviceBase::ApplyFeatures(const UnpackedPtr<DeviceDescriptor>& deviceDescri
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
     }
 
+    // Handle features that implicitly enable other features.
+    if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier2)) {
+        mEnabledFeatures.EnableFeature(Feature::TextureFormatsTier1);
+    }
     if (mEnabledFeatures.IsEnabled(Feature::TextureFormatsTier1)) {
-        // Handle features that implicitly enable other features.
         mEnabledFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
     }
 
@@ -2623,6 +2627,16 @@ std::pair<std::string, bool> DeviceBase::GetTraceInfo() {
                                           tm.tm_min, tm.tm_sec, count));
 
     return {traceName, true};
+}
+
+tint::InternalCompilerErrorCallbackInfo DeviceBase::GetTintInternalCompilerErrorCallback() {
+    static auto tintInternalCompilerErrorCallback = [](std::string err, void* userdata) {
+        static_cast<DeviceBase*>(userdata)->HandleError(DAWN_INTERNAL_ERROR(err));
+    };
+    return tint::InternalCompilerErrorCallbackInfo{
+        .callback = tintInternalCompilerErrorCallback,
+        .userdata = this,
+    };
 }
 
 }  // namespace dawn::native

@@ -585,6 +585,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/CommandBufferWGPU.h"
         "webgpu/DeviceWGPU.h"
         "webgpu/Forward.h"
+        "webgpu/ObjectWGPU.h"
         "webgpu/PhysicalDeviceWGPU.h"
         "webgpu/QueueWGPU.h"
         "webgpu/WebGPUError.h"

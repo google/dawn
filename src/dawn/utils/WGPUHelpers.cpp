@@ -433,6 +433,7 @@ bool BackendRequiresCompat(wgpu::BackendType backend) {
 const absl::flat_hash_map<wgpu::FeatureName, absl::flat_hash_set<wgpu::FeatureName>>
     kImplicitlyEnabledFeaturesMap = {
         {wgpu::FeatureName::TextureFormatsTier1, {wgpu::FeatureName::RG11B10UfloatRenderable}},
+        {wgpu::FeatureName::TextureFormatsTier2, {wgpu::FeatureName::TextureFormatsTier1}},
         // Add other implicit enabling rules here
 };
 

@@ -363,6 +363,27 @@ TEST_F(IR_ValidatorTest, Loop_NullResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Loop_TooManyOperands) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->SetOperands(Vector{b.Value(42_i)});
+        b.Append(loop->Body(), [&] {  //
+            b.Return(f);
+        });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: loop: expected exactly 0 operands, got 1
+    loop [b: $B2] {  # loop_1
+    ^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Switch_RootBlock) {
     auto* switch_ = b.Switch(1_i);
     auto* def = b.DefaultCase(switch_);

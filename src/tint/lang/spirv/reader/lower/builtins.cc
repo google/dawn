@@ -1287,10 +1287,10 @@ struct State {
                     // a * fkgj - b * ekgi + c * ejfi
                     auto* r_33 = sub_add_mul3(ma, fkgj, mb, ekgi, mc, ejfi);
 
-                    auto* r1 = b.Construct(ty.vec3(elem_ty), r_00, r_01, r_02, r_03);
-                    auto* r2 = b.Construct(ty.vec3(elem_ty), r_10, r_11, r_12, r_13);
-                    auto* r3 = b.Construct(ty.vec3(elem_ty), r_20, r_21, r_22, r_23);
-                    auto* r4 = b.Construct(ty.vec3(elem_ty), r_30, r_31, r_32, r_33);
+                    auto* r1 = b.Construct(ty.vec4(elem_ty), r_00, r_01, r_02, r_03);
+                    auto* r2 = b.Construct(ty.vec4(elem_ty), r_10, r_11, r_12, r_13);
+                    auto* r3 = b.Construct(ty.vec4(elem_ty), r_20, r_21, r_22, r_23);
+                    auto* r4 = b.Construct(ty.vec4(elem_ty), r_30, r_31, r_32, r_33);
 
                     auto* m = b.Construct(mat_ty, r1, r2, r3, r4);
                     auto* inv = b.Multiply(mat_ty, inv_det, m);

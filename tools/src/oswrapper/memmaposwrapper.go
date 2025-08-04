@@ -122,7 +122,25 @@ func (m MemMapFilesystemReader) ReadFile(name string) ([]byte, error) {
 	return afero.ReadFile(m.fs, name)
 }
 
+func (m MemMapFilesystemReader) Readdir(name string) ([]os.FileInfo, error) {
+	// afero does technically implement Readdir behaviour as afero.ReadDir, but
+	// that its interface does not match os.ReadDir, so that may change in the
+	// future, so implementing this here using only interfaces that match os.*
+	// behaviour.
+	f, err := m.fs.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return f.Readdir(-1)
+}
+
 func (m MemMapFilesystemReader) Stat(name string) (os.FileInfo, error) {
+	// KI with afero, https://github.com/spf13/afero/issues/522
+	if name == "" {
+		return nil, fmt.Errorf("no such file or directory")
+	}
+
 	return m.fs.Stat(name)
 }
 

@@ -271,12 +271,12 @@ deps = {
   },
 
   'third_party/angle': {
-    'url': '{chromium_git}/angle/angle@d38531e82fd85aae0b0d15b2ff0469860c15c6c5',
+    'url': '{chromium_git}/angle/angle@b6b2f380814eadf33f215adc2e99f208c800ae47',
     'condition': 'dawn_standalone',
   },
 
   'third_party/swiftshader': {
-    'url': '{swiftshader_git}/SwiftShader@8802b4ec130bc6f23f34ca0cda4690f3e5408aa3',
+    'url': '{swiftshader_git}/SwiftShader@681d07e76d8e03286b231766447800aab543bd27',
     'condition': 'dawn_standalone',
   },
 
@@ -341,7 +341,7 @@ deps = {
   },
 
   'third_party/dxc': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@97b5edbc4398317a6c50437cee06393c1fd94b74',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@50764bac3d4048144e9ada5f5a742c82cc97cc9a',
   },
 
   'third_party/dxheaders': {

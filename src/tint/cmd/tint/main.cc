@@ -32,6 +32,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/command/args.h"
 #include "src/tint/utils/text/color_mode.h"
@@ -169,7 +170,11 @@ struct Options {
 
 #if TINT_BUILD_MSL_WRITER
     std::string xcrun_path;
+
     bool use_argument_buffers = false;
+    std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo>
+        group_to_argument_buffer_info;
+
     std::unordered_map<uint32_t, uint32_t> pixel_local_attachments;
     tint::msl::validate::MslVersion msl_version = tint::msl::validate::MslVersion::kMsl_2_3;
 #endif
@@ -441,6 +446,18 @@ When specified, automatically enables MSL validation)",
         "use-argument-buffers", "Use the Argument Buffers in MSL", Default{false});
     TINT_DEFER(opts->use_argument_buffers = *use_argument_buffers.value);
 
+    auto& arg_buffer = options.Add<StringOption>(
+        "argument-buffer",
+        R"(Mapping for an argument buffer, format is GROUP=ARGUMENT_BUFFER_ID, comma separated)");
+
+    auto& dynamic_buffer = options.Add<StringOption>(
+        "dynamic-offset-buffer",
+        R"(Mapping for a dynamic offset buffer, format is GROUP=DYNAMIC_BUFFER_ID, comma separated))");
+
+    auto& dynamic_offset = options.Add<StringOption>(
+        "dynamic-offset",
+        R"(Mapping for dynamic buffers to be attached to the entry point, format is GROUP.BINDING=OFFSET, comma separated))");
+
     // Default to validating against MSL 2.3, which corresponds to macOS 11.0.
     tint::Vector<EnumName<tint::msl::validate::MslVersion>, 2> msl_version_enum_names{
         EnumName(tint::msl::validate::MslVersion::kMsl_2_3, "2.3"),
@@ -573,6 +590,82 @@ Options:
         }
     }
 #endif  // TINT_BUILD_SPV_READER
+
+#if TINT_BUILD_MSL_WRITER
+    if (arg_buffer.value.has_value()) {
+        for (auto ab : tint::Split(*arg_buffer.value, ",")) {
+            auto parts = tint::Split(ab, "=");
+            if (parts.Length() != 2) {
+                std::cerr << "argument-buffer values must be of the form GROUP=ARGUMENT_BUFFER_ID";
+                return false;
+            }
+
+            uint32_t group = 0;
+            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10);
+
+            uint32_t idx = 0;
+            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10);
+
+            if (!opts->group_to_argument_buffer_info.contains(group)) {
+                opts->group_to_argument_buffer_info.insert({group, {}});
+            }
+            opts->group_to_argument_buffer_info[group].id = idx;
+        }
+    }
+
+    if (dynamic_buffer.value.has_value()) {
+        for (auto db : tint::Split(*dynamic_buffer.value, ",")) {
+            auto parts = tint::Split(db, "=");
+            if (parts.Length() != 2) {
+                std::cerr
+                    << "dynamic-offset-buffer values must be of the form GROUP=DYNAMIC_BUFFER_ID";
+                return false;
+            }
+
+            uint32_t group = 0;
+            std::from_chars(parts[0].data(), parts[0].data() + parts[0].size(), group, 10);
+
+            uint32_t idx = 0;
+            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), idx, 10);
+
+            if (!opts->group_to_argument_buffer_info.contains(group)) {
+                opts->group_to_argument_buffer_info.insert({group, {}});
+            }
+            opts->group_to_argument_buffer_info[group].dynamic_buffer_id = idx;
+        }
+    }
+
+    if (dynamic_offset.value.has_value()) {
+        for (auto val : tint::Split(*dynamic_offset.value, ",")) {
+            auto parts = tint::Split(val, "=");
+            if (parts.Length() != 2) {
+                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET";
+                return false;
+            }
+
+            auto bind_point = tint::Split(parts[0], ".");
+            if (bind_point.Length() != 2) {
+                std::cerr << "dynamic-offset values must be of the form GROUP.BINDING=OFFSET";
+                return false;
+            }
+            uint32_t group = 0;
+            std::from_chars(bind_point[0].data(), bind_point[0].data() + bind_point[0].size(),
+                            group, 10);
+            uint32_t binding = 0;
+            std::from_chars(bind_point[0].data(), bind_point[0].data() + bind_point[0].size(),
+                            binding, 10);
+
+            uint32_t offset = 0;
+            std::from_chars(parts[1].data(), parts[1].data() + parts[1].size(), offset, 10);
+
+            if (!opts->group_to_argument_buffer_info.contains(group)) {
+                opts->group_to_argument_buffer_info.insert({group, {}});
+            }
+            opts->group_to_argument_buffer_info[group].binding_info_to_offset_index.insert(
+                {binding, offset});
+        }
+    }
+#endif
 
 #if TINT_BUILD_HLSL_WRITER
     if (pixel_local_attachment_formats.value.has_value()) {
@@ -906,7 +999,7 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                  [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
-    {
+    if (!options.use_argument_buffers) {
         // Remap resource numbers to a flat namespace.
         auto res = tint::msl::ir::transform::FlattenBindings(ir);
         if (res != tint::Success) {
@@ -924,12 +1017,14 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
-    gen_options.bindings = tint::msl::writer::GenerateBindings(ir);
-    gen_options.array_length_from_uniform.ubo_binding = 30;
+    gen_options.bindings = tint::msl::writer::GenerateBindings(ir, options.use_argument_buffers);
+    // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
+    gen_options.array_length_from_constants.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
+    gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
 
-    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
+    // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<tint::core::ir::Var>();
@@ -945,7 +1040,7 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
         auto* ty = var->Result()->Type()->UnwrapPtr();
         if (!ty->HasFixedFootprint()) {
             if (storage_bindings.insert(bp.value()).second) {
-                gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
                     bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
             }
         }

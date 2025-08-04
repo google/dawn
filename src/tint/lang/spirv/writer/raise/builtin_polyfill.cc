@@ -48,6 +48,7 @@
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/internal_limits.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -280,7 +281,7 @@ struct State {
                     SubgroupBroadcast(builtin);
                     break;
                 case core::BuiltinFn::kSubgroupShuffle:
-                    SubgroupShuffle(builtin);
+                    SubgroupShuffle(builtin, config.subgroup_shuffle_clamped);
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(builtin);
@@ -1093,7 +1094,7 @@ struct State {
 
     /// Handle a SubgroupShuffle() builtin.
     /// @param builtin the builtin call instruction
-    void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin) {
+    void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin, bool clamp_subgroup_shuffle) {
         TINT_ASSERT(builtin->Args().Length() == 2);
         auto* id = builtin->Args()[1];
 
@@ -1102,6 +1103,17 @@ struct State {
             auto* cast = b.Bitcast(ty.u32(), id);
             cast->InsertBefore(builtin);
             builtin->SetArg(1, cast->Result());
+        }
+
+        /// Polyfill a `subgroupShuffle()` builtin call with one that has clamped the 'id' param
+        if (clamp_subgroup_shuffle) {
+            auto* shuffle_id = builtin->Args()[1];
+            auto* mask_max_subgroup_size =
+                b.Constant(core::u32(tint::internal_limits::kMaxSubgroupSize - 1));
+            b.InsertBefore(builtin, [&] {
+                auto* clamp_via_masking_and = b.And<u32>(shuffle_id, mask_max_subgroup_size);
+                builtin->SetArg(1, clamp_via_masking_and->Result());
+            });
         }
     }
 

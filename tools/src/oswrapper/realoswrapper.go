@@ -29,10 +29,9 @@
 package oswrapper
 
 import (
+	"github.com/spf13/afero"
 	"os"
 	"path/filepath"
-
-	"github.com/spf13/afero"
 )
 
 type RealOSWrapper struct {
@@ -102,6 +101,15 @@ func (rfsr RealFilesystemReader) OpenFile(name string, flag int, perm os.FileMod
 
 func (RealFilesystemReader) ReadFile(name string) ([]byte, error) {
 	return os.ReadFile(name)
+}
+
+func (rfsr RealFilesystemReader) Readdir(name string) ([]os.FileInfo, error) {
+	f, err := rfsr.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return f.Readdir(-1)
 }
 
 func (RealFilesystemReader) Stat(name string) (os.FileInfo, error) {

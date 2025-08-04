@@ -1089,6 +1089,13 @@ class State {
             return ast::Type{};
         }
 
+        auto safe_name = [&](const Symbol& name, const char* fallback_name) {
+            if (IsWGSLSafe(name.NameView())) {
+                return b.Symbols().Register(name.NameView());
+            }
+            return b.Symbols().New(fallback_name);
+        };
+
         auto n = structs_.GetOrAdd(s, [&] {
             TINT_ASSERT(s->Members().Length() > 0);
             uint32_t current_offset = s->Members()[0]->Offset();
@@ -1156,13 +1163,15 @@ class State {
                 if (ir_attrs.invariant) {
                     ast_attrs.Push(b.Invariant());
                 }
-                members.Push(b.Member(m->Name().NameView(), ty, std::move(ast_attrs)));
+
+                auto name = safe_name(m->Name(), "m");
+                members.Push(b.Member(name, ty, std::move(ast_attrs)));
             }
 
             // TODO(crbug.com/tint/1902): Emit structure attributes
             Vector<const ast::Attribute*, 2> attrs;
 
-            auto name = b.Symbols().Register(s->Name().NameView());
+            auto name = safe_name(s->Name(), "S");
             b.Structure(name, std::move(members), std::move(attrs));
             return name;
         });

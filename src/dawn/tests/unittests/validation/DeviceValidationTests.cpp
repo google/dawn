@@ -283,7 +283,7 @@ TEST_F(RequestDeviceValidationTest, ErrorTriggersDeviceLost) {
 }
 
 // Test that RG11B10UfloatRenderable is implicitly enabled when TextureFormatsTier1 is active.
-TEST_F(RequestDeviceValidationTest, Implicit) {
+TEST_F(RequestDeviceValidationTest, TextureFormatsTier1ImpliesRG11B10UfloatRenderable) {
     wgpu::DeviceDescriptor descriptor = {};
     std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::TextureFormatsTier1};
     descriptor.requiredFeatures = features.data();
@@ -293,6 +293,22 @@ TEST_F(RequestDeviceValidationTest, Implicit) {
                 Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::RG11B10UfloatRenderable));
+        }));
+    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                          mRequestDeviceCallback.Callback());
+}
+
+// Test that TextureFormatsTier1 is implicitly enabled when TextureFormatsTier2 is active.
+TEST_F(RequestDeviceValidationTest, TextureFormatsTier2ImpliesTextureFormatsTier1) {
+    wgpu::DeviceDescriptor descriptor = {};
+    std::vector<wgpu::FeatureName> features = {wgpu::FeatureName::TextureFormatsTier2};
+    descriptor.requiredFeatures = features.data();
+    descriptor.requiredFeatureCount = features.size();
+
+    EXPECT_CALL(mRequestDeviceCallback,
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), EmptySizedString()))
+        .WillOnce(WithArgs<1>([](wgpu::Device device) {
+            EXPECT_TRUE(device.HasFeature(wgpu::FeatureName::TextureFormatsTier1));
         }));
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());

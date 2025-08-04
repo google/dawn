@@ -31,28 +31,24 @@
 #include "dawn/native/Buffer.h"
 
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/ObjectWGPU.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class Buffer final : public BufferBase {
+class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
                                              const UnpackedPtr<BufferDescriptor>& descriptor);
     Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
 
-    WGPUBuffer GetInnerHandle() const;
-
   private:
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
     void UnmapImpl() override;
-    void DestroyImpl() override;
     bool IsCPUWritableAtCreation() const override;
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
-
-    WGPUBuffer mInnerBuffer = nullptr;
 
     raw_ptr<void> mMappedData = nullptr;
 };

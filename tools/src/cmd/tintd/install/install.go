@@ -31,6 +31,7 @@ package install
 import (
 	"bytes"
 	"context"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -74,12 +75,12 @@ func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, 
 // TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
 // dependency injection.
 func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
-	pkgDir := c.findPackage()
+	pkgDir := c.findPackage(cfg.OsWrapper)
 	if pkgDir == "" {
 		return fmt.Errorf("could not find extension package directory at '%v'", c.flags.buildDir)
 	}
 
-	if !fileutils.IsExe(c.flags.npmPath) {
+	if !fileutils.IsExe(c.flags.npmPath, cfg.OsWrapper) {
 		return fmt.Errorf("could not find npm")
 	}
 
@@ -109,7 +110,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		return fmt.Errorf("failed to obtain home directory: %w", err)
 	}
 	vscodeBaseExtsDir := filepath.Join(home, ".vscode", "extensions")
-	if !fileutils.IsDir(vscodeBaseExtsDir) {
+	if !fileutils.IsDir(vscodeBaseExtsDir, cfg.OsWrapper) {
 		return fmt.Errorf("vscode extensions directory not found at '%v'", vscodeBaseExtsDir)
 	}
 
@@ -123,7 +124,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		}
 	} else {
 		// Copy the build directory to vscode extensions directory
-		if err := fileutils.CopyDir(vscodeTintdDir, pkgDir); err != nil {
+		if err := fileutils.CopyDir(vscodeTintdDir, pkgDir, cfg.OsWrapper); err != nil {
 			return fmt.Errorf("failed to copy '%v' to '%v': %w", pkgDir, vscodeTintdDir, err)
 		}
 	}
@@ -133,7 +134,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 
 // TODO(crbug.com/344014313): Add unittest coverage.
 // findPackage looks for and returns the tintd package directory. Returns an empty string if not found.
-func (c Cmd) findPackage() string {
+func (c Cmd) findPackage(fsReader oswrapper.FilesystemReader) string {
 	searchPaths := []string{
 		filepath.Join(c.flags.buildDir, "gen/vscode"),
 		c.flags.buildDir,
@@ -143,7 +144,7 @@ func (c Cmd) findPackage() string {
 nextDir:
 	for _, dir := range searchPaths {
 		for _, file := range files {
-			if !fileutils.IsFile(filepath.Join(dir, file)) {
+			if !fileutils.IsFile(filepath.Join(dir, file), fsReader) {
 				continue nextDir
 			}
 		}

@@ -29,6 +29,8 @@
 # recipe. Note that builders must first be defined the the build repo in
 # https://source.chromium.org/chromium/infra/infra_superproject/+/main:build/recipes/recipe_modules/dawn/trybots.py
 
+"""Try Dawn builders using GN and a standalone Dawn checkout (instead of Chromium)."""
+
 load("//constants.star", "siso")
 
 luci.recipe(
@@ -40,31 +42,31 @@ luci.recipe(
 )
 
 LINUX_BUILDER_DIMENSIONS = {
-    "pool": "luci.chromium.gpu.try",
-    "os": "Ubuntu-22.04",
     "cores": "8",
+    "os": "Ubuntu-22.04",
+    "pool": "luci.chromium.gpu.try",
 }
 
 TRY_SERVICE_ACCOUNT = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com"
 
 def generate_properties():
     properties = {
-        "builder_group": "dawn",
-        "$build/siso": {
-            "project": siso.project.DEFAULT_UNTRUSTED,
-            "remote_jobs": siso.remote_jobs.DEFAULT,
-            "configs": ["builder"],
-            "enable_cloud_monitoring": True,
-            "enable_cloud_profiler": True,
-            "enable_cloud_trace": True,
-            "metrics_project": "chromium-reclient-metrics",
-        },
         "$build/reclient": {
             "instance": siso.project.DEFAULT_UNTRUSTED,
             "jobs": siso.remote_jobs.DEFAULT,
             "metrics_project": "chromium-reclient-metrics",
             "scandeps_server": True,
         },
+        "$build/siso": {
+            "configs": ["builder"],
+            "enable_cloud_monitoring": True,
+            "enable_cloud_profiler": True,
+            "enable_cloud_trace": True,
+            "metrics_project": "chromium-reclient-metrics",
+            "project": siso.project.DEFAULT_UNTRUSTED,
+            "remote_jobs": siso.remote_jobs.DEFAULT,
+        },
+        "builder_group": "dawn",
     }
     return properties
 

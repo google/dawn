@@ -33,6 +33,8 @@ cmake_minimum_required(VERSION 3.22.1)
 # Hide non-public symbols; set before dawn subdirectory is imported.
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
+set(DAWN_BUILD_MONOLITHIC_LIBRARY STATIC)
+
 set(DAWN_DIR "${webgpu_SOURCE_DIR}/../../../../../..")
 add_subdirectory(${DAWN_DIR} dawn)
 

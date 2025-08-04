@@ -258,12 +258,19 @@ struct IntegerRangeAnalysisImpl {
 
     IntegerRangeInfo GetInfo(const Binary* binary) {
         return integer_binary_range_info_map_.GetOrAdd(binary, [&]() -> IntegerRangeInfo {
-            IntegerRangeInfo range_lhs = GetInfo(binary->LHS());
-            if (!range_lhs.IsValid()) {
-                return {};
-            }
             IntegerRangeInfo range_rhs = GetInfo(binary->RHS());
             if (!range_rhs.IsValid()) {
+                return {};
+            }
+
+            // We may compute the range of a `modulo` binary when the LHS doesn't have a valid
+            // range.
+            if (binary->Op() == BinaryOp::kModulo) {
+                return ComputeIntegerRangeForBinaryModulo(binary->LHS(), range_rhs);
+            }
+
+            IntegerRangeInfo range_lhs = GetInfo(binary->LHS());
+            if (!range_lhs.IsValid()) {
                 return {};
             }
 
@@ -1120,6 +1127,165 @@ struct IntegerRangeAnalysisImpl {
             uint64_t min_bound = lhs_u32.min_bound >> rhs_u32.max_bound;
             uint64_t max_bound = lhs_u32.max_bound >> rhs_u32.min_bound;
             return IntegerRangeInfo(min_bound, max_bound);
+        }
+    }
+
+    IntegerRangeInfo ComputeIntegerRangeForBinaryModulo(const Value* lhs,
+                                                        const IntegerRangeInfo& rhs_range) {
+        TINT_ASSERT(rhs_range.IsValid());
+
+        if (!lhs->Type()->IsIntegerScalar()) {
+            return {};
+        }
+        IntegerRangeInfo lhs_range = GetInfo(lhs);
+        if (!lhs_range.IsValid()) {
+            lhs_range = GetFullRangeWithSameIntegerRangeInfoType(rhs_range);
+        }
+
+        // Suppose the range of `lhs` is [a, b], `a` and `b` are 64-bit signed positive integers
+        // and no greater than u32::kHighestValue.
+        // .
+        // `rhs` is a 64-bit signed constant positive integer.
+        // Let ra = a % rhs (0 <= ra <= rhs - 1), rb = b % rhs (0 <= rb <= rhs - 1)
+        // qa = a / rhs, qb = b / rhs
+        // Then a = qa * rhs + ra, b = qb * rhs + rb
+        //
+        // All the below arithmetic operations are done in the range of 64-bit signed integers so
+        // there won't be any overflow or underflow issues.
+        //
+        // I. We can ignore the case of qa > qb.
+        //    Proof:
+        //    Let qa = qb + d (d >= 1), then
+        //         a = (qb + d) * rhs + ra
+        //           = (qb * rhs + d * rhs) + ra
+        //           = (qb * rhs + rb) - rb + (d * rhs + ra)
+        //           = b - rb + (d * rhs) + ra
+        //           >= b - rb + rhs + (ra)  // d >= 1
+        //           >= b + (rhs - rb)       // ra >= 0
+        //           > b (impossible)        // rhs > rb
+        //
+        // II. When qa < qb, the range of `lhs % rhs` is [0, rhs- 1].
+        //     Proof:
+        //     Let qb = qa + d (d >= 1), then
+        //          b = (qa + d) * rhs + rb
+        //            = (qa * rhs + d * rhs) + rb
+        //            = qa * rhs + (ra - ra) + d * rhs + rb
+        //            = (qa * rhs + ra) + rb - ra + d * rhs
+        //            = a + rb - ra + d * rhs
+        //            >= a + (rb) - ra + rhs    // d >= 1
+        //
+        //      (1) rb >= 0
+        //       =>  b >= a - ra + rhs
+        //       =>  b >= (a) + (rhs - ra) > a  // rhs > ra
+        //       =>  b >= (qa * rhs + ra) + (rhs - ra) > a
+        //       =>  b >= (qa + 1) * rhs > a
+        //       So there must exist a k = ((qa + 1) * rhs) in (a, b] that satisfies `k % rhs == 0`
+        //
+        //      (2)   k = (qa + 1) * rhs > a
+        //            k > a, a >= 0 => k - 1 >= 0
+        //       Then b >= k
+        //              > k - 1 = (qa + 1) * rhs - 1
+        //                      = qa * rhs + (rhs - 1)  // rhs - 1 >= ra
+        //                      >= qa * rhs + ra = a
+        //       So there must exist a (k - 1) = ((qa + 1) * rhs - 1) in [a, b) that satisfies
+        //       `(k - 1) % rhs == 0`.
+        //
+        //       Based on (1) and (2), we can conclude the range of `lhs % rhs` is [0, rhs - 1].
+        //
+        // III. When qa == qb, the range of `lhs % rhs` is `[ra, rb]`.
+        //      Proof:
+        //      let q = qa = qb,
+        //      then a = q * rhs + ra, b = q * rhs + rb
+        //           a = q * rhs + ra <= q * rhs + rb = b
+        //      =>                 ra <= rb
+        //      Arbitrarily choose x in range [a, b], let rx = x % rhs, qx = x / rhs
+        //      x = qx * rhs + rx (0 <= rx < rhs)
+        //      a <= x <= b
+        //      => (q * rhs + ra) <= (qx * rhs + rx) <= (q * rhs + rb)
+        //
+        //      (1) q * rhs + ra <= qx * rhs + rx
+        //                    ra <= qx * rhs + rx - q * rhs  // ra >= 0
+        //               0 <= ra <= qx * rhs + rx - q * rhs
+        //                     0 <= qx * rhs + rx - q * rhs
+        //    q * rhs - qx * rhs <= rx < rhs
+        //    q * rhs - qx * rhs < rhs  // rhs > 0
+        //                q - qx < 1
+        //                    qx > q - 1
+        //
+        //       (2) qx * rhs + rx <= q * rhs + rb
+        //           qx * rhs + rx - q * rhs <= rb < rhs
+        //           qx * rhs + rx - q * rhs < rhs
+        //                                rx < rhs + q * rhs - qx * rhs  // rx >= 0
+        //                           0 <= rx < rhs + q * rhs - qx * rhs
+        //                                 0 < rhs + q * rhs - qx * rhs  // rhs > 0
+        //                                 0 < 1 + q - qx
+        //                                qx < q + 1
+        //
+        //        Based on (1) and (2), qx == q
+        //        Then (q * rhs + ra) <= (q * rhs + rx) <= (q * rhs + rb)
+        //          =>             ra <= rx <= rb
+        //        The range of `lhs % rhs` is [ra, rb].
+        if (std::holds_alternative<IntegerRangeInfo::SignedIntegerRange>(rhs_range.range)) {
+            // Currently we require `lhs` must be non-negative.
+            auto lhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(lhs_range.range);
+            if (lhs_i32.min_bound < 0) {
+                return {};
+            }
+
+            // Currently we only accept `rhs` as a constant positive integer.
+            auto rhs_i32 = std::get<IntegerRangeInfo::SignedIntegerRange>(rhs_range.range);
+            if (rhs_i32.min_bound != rhs_i32.max_bound) {
+                return {};
+            }
+            int64_t rhs_const = rhs_i32.min_bound;
+            if (rhs_const <= 0) {
+                return {};
+            }
+
+            // Let:
+            // lhs_max = q_max * rhs_const + r_max; // 0 <= r_max < rhs_const
+            // lhs_min = q_min * rhs_const + r_min; // 0 <= r_min < rhs_const
+            if (lhs_i32.min_bound / rhs_const == lhs_i32.max_bound / rhs_const) {
+                // if q_min == q_max (matches case III):
+                // The range of `lhs % rhs` is [r_min, r_max].
+                int64_t min_bound = lhs_i32.min_bound % rhs_const;
+                int64_t max_bound = lhs_i32.max_bound % rhs_const;
+                TINT_ASSERT(min_bound <= max_bound);
+                return IntegerRangeInfo(min_bound, max_bound);
+            } else {
+                // Otherwise (q_min < q_max, matches case II):
+                // The range of `lhs % rhs` is [0, rhs - 1] (the whole remainder range).
+                return IntegerRangeInfo(0, rhs_const - 1);
+            }
+        } else {
+            // Currently we only accept `rhs` as a constant positive integer.
+            auto rhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(rhs_range.range);
+            if (rhs_u32.min_bound != rhs_u32.max_bound) {
+                return {};
+            }
+            uint64_t rhs_const = rhs_u32.min_bound;
+            if (rhs_const == 0) {
+                return {};
+            }
+
+            // `lhs` must not be negative so we don't need to do the check on it.
+
+            // Let:
+            // lhs_max = q_max * rhs_const + r_max; // 0 <= r_max < rhs_const
+            // lhs_min = q_min * rhs_const + r_min; // 0 <= r_min < rhs_const
+            auto lhs_u32 = std::get<IntegerRangeInfo::UnsignedIntegerRange>(lhs_range.range);
+            if (lhs_u32.min_bound / rhs_const == lhs_u32.max_bound / rhs_const) {
+                // if q_min == q_max (matches case III):
+                // The range of `lhs % rhs` is [r_min, r_max].
+                uint64_t min_bound = lhs_u32.min_bound % rhs_const;
+                uint64_t max_bound = lhs_u32.max_bound % rhs_const;
+                TINT_ASSERT(min_bound <= max_bound);
+                return IntegerRangeInfo(min_bound, max_bound);
+            } else {
+                // Otherwise (q_min < q_max, matches case II):
+                // The range of `lhs % rhs` is [0, rhs - 1] (the whole remainder range).
+                return IntegerRangeInfo(0, rhs_const - 1);
+            }
         }
     }
 

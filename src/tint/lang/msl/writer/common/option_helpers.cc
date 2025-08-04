@@ -149,23 +149,25 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
 //
 // When the data comes in we have a list of all WGSL origin (group,binding) pairs to MSL
 // (binding) in the `uniform`, `storage`, `texture`, and `sampler` arrays.
-void PopulateBindingRelatedOptions(
-    const Options& options,
-    RemapperData& remapper_data,
-    tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options) {
+void PopulateBindingRelatedOptions(const Options& options,
+                                   RemapperData& remapper_data,
+                                   tint::transform::multiplanar::BindingsMap& multiplanar_map,
+                                   ArrayLengthOptions& array_length_options) {
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
             const binding::BindingInfo& dst_binding_point = it.second;
 
             // Bindings which go to the same slot in MSL do not need to be re-bound.
-            if (src_binding_point.group == 0 &&
+            if (src_binding_point.group == dst_binding_point.group &&
                 src_binding_point.binding == dst_binding_point.binding) {
                 continue;
             }
 
-            remapper_data.emplace(src_binding_point, BindingPoint{0, dst_binding_point.binding});
+            remapper_data.emplace(src_binding_point, BindingPoint{
+                                                         .group = dst_binding_point.group,
+                                                         .binding = dst_binding_point.binding,
+                                                     });
         }
     };
 
@@ -183,15 +185,15 @@ void PopulateBindingRelatedOptions(
         const binding::BindingInfo& plane1 = it.second.plane1;
         const binding::BindingInfo& metadata = it.second.metadata;
 
-        const BindingPoint plane0_binding_point{0, plane0.binding};
-        const BindingPoint plane1_binding_point{0, plane1.binding};
-        const BindingPoint metadata_binding_point{0, metadata.binding};
+        const BindingPoint plane0_binding_point{plane0.group, plane0.binding};
+        const BindingPoint plane1_binding_point{plane1.group, plane1.binding};
+        const BindingPoint metadata_binding_point{metadata.group, metadata.binding};
 
-        // Use the re-bound MSL plane0 value for the lookup key. The group goes to `0` which is the
-        // value always used for re-bound data.
-        multiplanar_map.emplace(BindingPoint{0, plane0_binding_point.binding},
-                                tint::transform::multiplanar::BindingPoints{
-                                    plane1_binding_point, metadata_binding_point});
+        // Use the re-bound MSL plane0 value for the lookup key.
+        multiplanar_map.emplace(
+            BindingPoint{plane0_binding_point.group, plane0_binding_point.binding},
+            tint::transform::multiplanar::BindingPoints{plane1_binding_point,
+                                                        metadata_binding_point});
 
         // Bindings which go to the same slot in MSL do not need to be re-bound.
         if (src_binding_point == plane0_binding_point) {
@@ -201,10 +203,11 @@ void PopulateBindingRelatedOptions(
         remapper_data.emplace(src_binding_point, plane0_binding_point);
     }
 
-    // ArrayLengthFromUniformOptions bindpoints may need to be remapped
+    // ArrayLengthOptions bindpoints may need to be remapped
     {
         std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
-        for (auto& [bindpoint, index] : options.array_length_from_uniform.bindpoint_to_size_index) {
+        for (auto& [bindpoint, index] :
+             options.array_length_from_constants.bindpoint_to_size_index) {
             auto it = remapper_data.find(bindpoint);
             if (it != remapper_data.end()) {
                 bindpoint_to_size_index.emplace(it->second, index);
@@ -213,10 +216,14 @@ void PopulateBindingRelatedOptions(
             }
         }
 
-        array_length_from_uniform_options.ubo_binding =
-            options.array_length_from_uniform.ubo_binding;
-        array_length_from_uniform_options.bindpoint_to_size_index =
-            std::move(bindpoint_to_size_index);
+        if (options.array_length_from_constants.buffer_sizes_offset) {
+            array_length_options.buffer_sizes_offset =
+                options.array_length_from_constants.buffer_sizes_offset;
+        } else {
+            array_length_options.ubo_binding = options.array_length_from_constants.ubo_binding;
+        }
+
+        array_length_options.bindpoint_to_size_index = std::move(bindpoint_to_size_index);
     }
 }
 
