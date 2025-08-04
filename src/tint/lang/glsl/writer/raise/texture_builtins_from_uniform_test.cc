@@ -265,14 +265,13 @@ $B1: {  # root
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %4:u32 = construct 1u
-    %5:u32 = add 0u, %4
-    %6:u32 = div %5, 4u
-    %7:u32 = mod %5, 4u
-    %8:ptr<uniform, vec4<u32>, read> = access %2, 0u, %6
-    %9:vec4<u32> = load %8
-    %10:u32 = access %9, %7
-    %len:u32 = let %10
+    %4:u32 = add 0u, 1u
+    %5:u32 = div %4, 4u
+    %6:u32 = mod %4, 4u
+    %7:ptr<uniform, vec4<u32>, read> = access %2, 0u, %5
+    %8:vec4<u32> = load %7
+    %9:u32 = access %8, %6
+    %len:u32 = let %9
     ret
   }
 }
@@ -329,7 +328,71 @@ $B1: {  # root
   $B2: {
     %4:binding_array<texture_2d<f32>, 3> = load %1
     %5:texture_2d<f32> = access %4, 1u
-    %6:u32 = construct 1u
+    %6:u32 = add 0u, 1u
+    %7:u32 = div %6, 4u
+    %8:u32 = mod %6, 4u
+    %9:ptr<uniform, vec4<u32>, read> = access %2, 0u, %7
+    %10:vec4<u32> = load %9
+    %11:u32 = access %10, %8
+    %len:u32 = let %11
+    ret
+  }
+}
+)";
+
+    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 3, .binding = {0}}}};
+    Run(TextureBuiltinsFromUniform, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TextureBuiltinsFromUniformTest,
+       TextureNumLevelsBindindArrayAccessThroughValue_I32Index) {
+    auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+    auto* textures = b.Var(ty.ptr<handle>(ty.binding_array(texture_type, 3)));
+    textures->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(textures);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* textures_value = b.Load(textures);
+        auto* texture = b.Access(texture_type, textures_value, 1_i);
+        b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, texture));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:binding_array<texture_2d<f32>, 3> = load %1
+    %4:texture_2d<f32> = access %3, 1i
+    %5:u32 = textureNumLevels %4
+    %len:u32 = let %5
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+TintTextureUniformData = struct @align(16) {
+  metadata:array<vec4<u32>, 1> @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(0, 0)
+  %2:ptr<uniform, TintTextureUniformData, read> = var undef @binding_point(0, 30)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:binding_array<texture_2d<f32>, 3> = load %1
+    %5:texture_2d<f32> = access %4, 1i
+    %6:u32 = convert 1i
     %7:u32 = add 0u, %6
     %8:u32 = div %7, 4u
     %9:u32 = mod %7, 4u
