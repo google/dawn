@@ -15,8 +15,8 @@ int4 insertBits_d86978() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int4 v_6 = (((v_2 < 32u)) ? ((v_1 << uint4((v_2).xxxx))) : ((int(0)).xxxx));
-  int4 v_7 = (v_6 & int4((v_5).xxxx));
-  int4 res = (v_7 | (v & int4((~(v_5)).xxxx)));
+  int4 v_7 = (v_6 & int4((int(v_5)).xxxx));
+  int4 res = (v_7 | (v & int4((int(~(v_5))).xxxx)));
   return res;
 }
 
@@ -41,8 +41,8 @@ int4 insertBits_d86978() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int4 v_6 = (((v_2 < 32u)) ? ((v_1 << uint4((v_2).xxxx))) : ((int(0)).xxxx));
-  int4 v_7 = (v_6 & int4((v_5).xxxx));
-  int4 res = (v_7 | (v & int4((~(v_5)).xxxx)));
+  int4 v_7 = (v_6 & int4((int(v_5)).xxxx));
+  int4 res = (v_7 | (v & int4((int(~(v_5))).xxxx)));
   return res;
 }
 
@@ -77,8 +77,8 @@ int4 insertBits_d86978() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int4 v_6 = (((v_2 < 32u)) ? ((v_1 << uint4((v_2).xxxx))) : ((int(0)).xxxx));
-  int4 v_7 = (v_6 & int4((v_5).xxxx));
-  int4 res = (v_7 | (v & int4((~(v_5)).xxxx)));
+  int4 v_7 = (v_6 & int4((int(v_5)).xxxx));
+  int4 res = (v_7 | (v & int4((int(~(v_5))).xxxx)));
   return res;
 }
 

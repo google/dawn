@@ -15,8 +15,8 @@ int3 insertBits_428b0b() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int3 v_6 = (((v_2 < 32u)) ? ((v_1 << uint3((v_2).xxx))) : ((int(0)).xxx));
-  int3 v_7 = (v_6 & int3((v_5).xxx));
-  int3 res = (v_7 | (v & int3((~(v_5)).xxx)));
+  int3 v_7 = (v_6 & int3((int(v_5)).xxx));
+  int3 res = (v_7 | (v & int3((int(~(v_5))).xxx)));
   return res;
 }
 
@@ -41,8 +41,8 @@ int3 insertBits_428b0b() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int3 v_6 = (((v_2 < 32u)) ? ((v_1 << uint3((v_2).xxx))) : ((int(0)).xxx));
-  int3 v_7 = (v_6 & int3((v_5).xxx));
-  int3 res = (v_7 | (v & int3((~(v_5)).xxx)));
+  int3 v_7 = (v_6 & int3((int(v_5)).xxx));
+  int3 res = (v_7 | (v & int3((int(~(v_5))).xxx)));
   return res;
 }
 
@@ -77,8 +77,8 @@ int3 insertBits_428b0b() {
   uint v_4 = (((v_2 < 32u)) ? ((1u << v_2)) : (0u));
   uint v_5 = ((v_4 - 1u) ^ ((((v_3 < 32u)) ? ((1u << v_3)) : (0u)) - 1u));
   int3 v_6 = (((v_2 < 32u)) ? ((v_1 << uint3((v_2).xxx))) : ((int(0)).xxx));
-  int3 v_7 = (v_6 & int3((v_5).xxx));
-  int3 res = (v_7 | (v & int3((~(v_5)).xxx)));
+  int3 v_7 = (v_6 & int3((int(v_5)).xxx));
+  int3 res = (v_7 | (v & int3((int(~(v_5))).xxx)));
   return res;
 }
 
