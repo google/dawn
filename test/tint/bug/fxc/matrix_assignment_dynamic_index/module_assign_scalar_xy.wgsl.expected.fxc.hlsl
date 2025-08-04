@@ -12,16 +12,16 @@ void main() {
     {
       float4 v_2 = m1[0u];
       float4 v_3 = float4((1.0f).xxxx);
-      float4 v_4 = float4((v_1).xxxx);
-      m1[0u] = (((v_4 == float4(int(0), int(1), int(2), int(3)))) ? (v_3) : (v_2));
+      uint4 v_4 = uint4((v_1).xxxx);
+      m1[0u] = (((v_4 == uint4(0u, 1u, 2u, 3u))) ? (v_3) : (v_2));
       break;
     }
     case 1u:
     {
       float4 v_5 = m1[1u];
       float4 v_6 = float4((1.0f).xxxx);
-      float4 v_7 = float4((v_1).xxxx);
-      m1[1u] = (((v_7 == float4(int(0), int(1), int(2), int(3)))) ? (v_6) : (v_5));
+      uint4 v_7 = uint4((v_1).xxxx);
+      m1[1u] = (((v_7 == uint4(0u, 1u, 2u, 3u))) ? (v_6) : (v_5));
       break;
     }
     default:

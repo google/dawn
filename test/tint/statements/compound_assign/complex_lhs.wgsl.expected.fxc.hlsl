@@ -21,8 +21,8 @@ void main() {
   int v_2 = (x.a[v][min(uint(v_1), 3u)] + int(5));
   int4 v_3 = x.a[v];
   int4 v_4 = int4((v_2).xxxx);
-  int4 v_5 = int4((v_1).xxxx);
-  x.a[v] = (((v_5 == int4(int(0), int(1), int(2), int(3)))) ? (v_4) : (v_3));
+  uint4 v_5 = uint4((uint(v_1)).xxxx);
+  x.a[v] = (((v_5 == uint4(0u, 1u, 2u, 3u))) ? (v_4) : (v_3));
 }
 
 [numthreads(1, 1, 1)]

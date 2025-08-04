@@ -111,8 +111,8 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             int v_10 = _72_h;
             float4 v_11 = _71_g;
             float4 v_12 = float4((_skTemp13).xxxx);
-            float4 v_13 = float4((v_10).xxxx);
-            _71_g = (((v_13 == float4(int(0), int(1), int(2), int(3)))) ? (v_12) : (v_11));
+            uint4 v_13 = uint4((uint(v_10)).xxxx);
+            _71_g = (((v_13 == uint4(0u, 1u, 2u, 3u))) ? (v_12) : (v_11));
             {
               uint tint_low_inc_1 = (tint_loop_idx_1.x - 1u);
               tint_loop_idx_1.x = tint_low_inc_1;

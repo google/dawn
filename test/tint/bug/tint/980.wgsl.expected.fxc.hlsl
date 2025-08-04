@@ -9,8 +9,8 @@ float3 Bad(uint index, float3 rd) {
   float v_1 = -(float(sign(rd[min(index, 2u)])));
   float3 v_2 = normal;
   float3 v_3 = float3((v_1).xxx);
-  float3 v_4 = float3((index).xxx);
-  normal = (((v_4 == float3(int(0), int(1), int(2)))) ? (v_3) : (v_2));
+  uint3 v_4 = uint3((index).xxx);
+  normal = (((v_4 == uint3(0u, 1u, 2u))) ? (v_3) : (v_2));
   return normalize(normal);
 }
 

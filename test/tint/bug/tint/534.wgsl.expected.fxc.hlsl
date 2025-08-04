@@ -47,7 +47,7 @@ void main_inner(uint3 GlobalInvocationID) {
       uint4 v_4 = srcColorBits;
       uint4 v_5 = uint4((v_3).xxxx);
       uint4 v_6 = uint4((v_2).xxxx);
-      srcColorBits = (((v_6 == uint4(int(0), int(1), int(2), int(3)))) ? (v_5) : (v_4));
+      srcColorBits = (((v_6 == uint4(0u, 1u, 2u, 3u))) ? (v_5) : (v_4));
       bool v_7 = false;
       if (success) {
         v_7 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
