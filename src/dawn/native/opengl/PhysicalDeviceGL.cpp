@@ -300,6 +300,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mFunctions.IsGLExtensionSupported("GL_EXT_float_blend")) {
         EnableFeature(Feature::Float32Blendable);
     }
+
+    // TextureComponentSwizzle
+    if (mFunctions.IsAtLeastGLES(3, 0) || mFunctions.IsAtLeastGL(3, 3)) {
+        EnableFeature(Feature::TextureComponentSwizzle);
+    }
 }
 
 namespace {

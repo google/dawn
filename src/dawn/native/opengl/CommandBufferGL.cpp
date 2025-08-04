@@ -57,6 +57,26 @@ namespace dawn::native::opengl {
 
 namespace {
 
+GLenum ComponentSwizzle(wgpu::ComponentSwizzle swizzle) {
+    switch (swizzle) {
+        case wgpu::ComponentSwizzle::Zero:
+            return GL_ZERO;
+        case wgpu::ComponentSwizzle::One:
+            return GL_ONE;
+        case wgpu::ComponentSwizzle::R:
+            return GL_RED;
+        case wgpu::ComponentSwizzle::G:
+            return GL_GREEN;
+        case wgpu::ComponentSwizzle::B:
+            return GL_BLUE;
+        case wgpu::ComponentSwizzle::A:
+            return GL_ALPHA;
+
+        case wgpu::ComponentSwizzle::Undefined:
+            DAWN_UNREACHABLE();
+    }
+}
+
 GLenum IndexFormatType(wgpu::IndexFormat format) {
     switch (format) {
         case wgpu::IndexFormat::Uint16:
@@ -407,6 +427,20 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         DAWN_GL_TRY(
                             gl, TexParameteri(target, GL_TEXTURE_MAX_LEVEL,
                                               view->GetBaseMipLevel() + view->GetLevelCount() - 1));
+                        if (mPipelineLayout->GetDevice()->HasFeature(
+                                Feature::TextureComponentSwizzle)) {
+                            DAWN_GL_TRY(gl, TexParameteri(target, GL_TEXTURE_SWIZZLE_R,
+                                                          ComponentSwizzle(view->GetSwizzleRed())));
+                            DAWN_GL_TRY(gl,
+                                        TexParameteri(target, GL_TEXTURE_SWIZZLE_G,
+                                                      ComponentSwizzle(view->GetSwizzleGreen())));
+                            DAWN_GL_TRY(gl,
+                                        TexParameteri(target, GL_TEXTURE_SWIZZLE_B,
+                                                      ComponentSwizzle(view->GetSwizzleBlue())));
+                            DAWN_GL_TRY(gl,
+                                        TexParameteri(target, GL_TEXTURE_SWIZZLE_A,
+                                                      ComponentSwizzle(view->GetSwizzleAlpha())));
+                        }
                     }
 
                     // Some texture builtin function data needs emulation to update into the

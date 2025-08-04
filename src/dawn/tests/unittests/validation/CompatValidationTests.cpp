@@ -2003,6 +2003,86 @@ TEST_F(CompatMaxVertexAttributesTest, VertexAndInstanceIndexEachTakeAnAttribute)
     TestMaxVertexAttributes(true, true);
 }
 
+enum class SwizzleChannel {
+    Red,
+    Green,
+    Blue,
+    Alpha,
+};
+
+class CompatTextureViewSwizzleValidationTests : public CompatTextureViewValidationTests {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures =
+            CompatTextureViewValidationTests::GetRequiredFeatures();
+        requiredFeatures.push_back(wgpu::FeatureName::TextureComponentSwizzle);
+        return requiredFeatures;
+    }
+
+    void SetSwizzleChannel(wgpu::TextureComponentSwizzle& swizzle,
+                           SwizzleChannel channel,
+                           wgpu::ComponentSwizzle value) {
+        switch (channel) {
+            case SwizzleChannel::Red:
+                swizzle.r = value;
+                break;
+            case SwizzleChannel::Green:
+                swizzle.g = value;
+                break;
+            case SwizzleChannel::Blue:
+                swizzle.b = value;
+                break;
+            case SwizzleChannel::Alpha:
+                swizzle.a = value;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    }
+};
+
+// Test we get a validation error if we have 2 different swizzles of a texture
+// in the same bind group. Unless FlexibleTextureViews is enabled.
+TEST_P(CompatTextureViewSwizzleValidationTests,
+       CanNotDrawDifferentSwizzleSameTextureSameBindGroup) {
+    for (auto swizzleChannel : {SwizzleChannel::Red, SwizzleChannel::Green, SwizzleChannel::Blue,
+                                SwizzleChannel::Alpha}) {
+        TestMultipleTextureViewValidationInRenderPass(
+            device, wgpu::TextureFormat::RGBA8Unorm, kRenderTwoTexturesOneBindgroupWGSL,
+            [this, &swizzleChannel](wgpu::Device device, wgpu::Texture texture,
+                                    wgpu::RenderPipeline pipeline,
+                                    std::function<void(wgpu::RenderPassEncoder pass)> drawFn) {
+                wgpu::TextureViewDescriptor viewDesc1;
+                wgpu::TextureComponentSwizzleDescriptor swizzleDesc1 = {};
+                SetSwizzleChannel(swizzleDesc1.swizzle, swizzleChannel,
+                                  wgpu::ComponentSwizzle::Zero);
+                viewDesc1.nextInChain = &swizzleDesc1;
+
+                wgpu::TextureViewDescriptor viewDesc2;
+                wgpu::TextureComponentSwizzleDescriptor swizzleDesc2 = {};
+                SetSwizzleChannel(swizzleDesc2.swizzle, swizzleChannel,
+                                  wgpu::ComponentSwizzle::One);
+                viewDesc2.nextInChain = &swizzleDesc2;
+
+                wgpu::BindGroup bindGroup = utils::MakeBindGroup(
+                    device, pipeline.GetBindGroupLayout(0),
+                    {{0, texture.CreateView(&viewDesc1)}, {1, texture.CreateView(&viewDesc2)}});
+
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+                utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, 4, 1);
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+                pass.SetPipeline(pipeline);
+                pass.SetBindGroup(0, bindGroup);
+                drawFn(pass);
+                pass.End();
+
+                ASSERT_TEXTURE_VIEW_ERROR_IF_NO_FLEXIBLE_FEATURE(
+                    encoder.Finish(), testing::HasSubstr("different views"));
+            });
+    }
+}
+
 INSTANTIATE_TEST_SUITE_P(,
                          CompatTextureViewValidationTests,
                          ::testing::Values(FlexibleTextureViewsFeature::Disabled,
@@ -2011,6 +2091,12 @@ INSTANTIATE_TEST_SUITE_P(,
 
 INSTANTIATE_TEST_SUITE_P(,
                          CompatTextureViewDimensionValidationTests,
+                         ::testing::Values(FlexibleTextureViewsFeature::Disabled,
+                                           FlexibleTextureViewsFeature::Enabled),
+                         CompatTextureViewValidationTests::PrintToStringParamName);
+
+INSTANTIATE_TEST_SUITE_P(,
+                         CompatTextureViewSwizzleValidationTests,
                          ::testing::Values(FlexibleTextureViewsFeature::Disabled,
                                            FlexibleTextureViewsFeature::Enabled),
                          CompatTextureViewValidationTests::PrintToStringParamName);
