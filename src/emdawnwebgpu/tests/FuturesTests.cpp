@@ -315,6 +315,26 @@ TEST_F(DeviceLevelTests, BufferMapAndWorkDone) {
     dst.Unmap();
 }
 
+TEST_F(DeviceLevelTests, BufferMappedAtCreationUnmapRemap) {
+    static constexpr size_t kSize = 4;
+    wgpu::BufferDescriptor desc{
+        .usage = wgpu::BufferUsage::MapWrite, .size = kSize, .mappedAtCreation = true};
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
+
+    buffer.Unmap();
+    EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
+
+    EXPECT_EQ(instance.WaitAny(
+                  buffer.MapAsync(wgpu::MapMode::Write, 0, kSize, wgpu::CallbackMode::WaitAnyOnly,
+                                  [&buffer](wgpu::MapAsyncStatus s, wgpu::StringView) {
+                                      ASSERT_EQ(s, wgpu::MapAsyncStatus::Success);
+                                      EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
+                                  }),
+                  UINT64_MAX),
+              wgpu::WaitStatus::Success);
+}
+
 TEST_F(DeviceLevelTests, CreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = CreateShaderModule(R"(
