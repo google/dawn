@@ -32,6 +32,18 @@
     passAsPointer: value => MEMORY64 ? `BigInt(${value})` : value,
     convertToPassAsPointer: variable => MEMORY64 ? `${variable} = BigInt(${variable});` : '',
 
+    // Helpers used to convert from the default JS interpretation of signed ints to unsigned ints.
+    // Note that we use |convertToU31| for values we assume should always be small so that we only
+    // assert it in debug mode. We use |convertToU32| for values that may be unsigned values that
+    // can validly be larger than 2^31 such that the signed bit may be flipped.
+    convertToU31: function(value) {
+      if (!ASSERTIONS) return '';
+      return `assert(${value} >= 0);`;
+    },
+    convertToU32: function(value) {
+      return `${value} >>>= 0;`;
+    },
+
     makeGetBool: function(struct, offset) {
       return `!!(${makeGetValue(struct, offset, 'u32')})`;
     },
@@ -1270,6 +1282,8 @@ var LibraryWebGPU = {
   },
 
   wgpuCommandEncoderResolveQuerySet: (encoderPtr, querySetPtr, firstQuery, queryCount, destinationPtr, destinationOffset) => {
+    {{{ gpu.convertToU31('firstQuery') }}}
+    {{{ gpu.convertToU31('queryCount') }}}
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var querySet = WebGPU.getJsObject(querySetPtr);
     var destination = WebGPU.getJsObject(destinationPtr);
@@ -1278,6 +1292,7 @@ var LibraryWebGPU = {
   },
 
   wgpuCommandEncoderWriteTimestamp: (encoderPtr, querySetPtr, queryIndex) => {
+    {{{ gpu.convertToU31('queryIndex') }}}
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var querySet = WebGPU.getJsObject(querySetPtr);
     commandEncoder.writeTimestamp(querySet, queryIndex);
@@ -1288,6 +1303,9 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 
   wgpuComputePassEncoderDispatchWorkgroups: (passPtr, x, y, z) => {
+    {{{ gpu.convertToU31('x') }}}
+    {{{ gpu.convertToU31('y') }}}
+    {{{ gpu.convertToU31('z') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.dispatchWorkgroups(x, y, z);
   },
@@ -1319,6 +1337,7 @@ var LibraryWebGPU = {
   },
 
   wgpuComputePassEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
+    {{{ gpu.convertToU31('groupIndex') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var group = WebGPU.getJsObject(groupPtr);
     if (dynamicOffsetCount == 0) {
@@ -1335,6 +1354,7 @@ var LibraryWebGPU = {
   },
 
   wgpuComputePassEncoderWriteTimestamp: (encoderPtr, querySetPtr, queryIndex) => {
+    {{{ gpu.convertToU31('queryIndex') }}}
     var encoder = WebGPU.getJsObject(encoderPtr);
     var querySet = WebGPU.getJsObject(querySetPtr);
     encoder.writeTimestamp(querySet, queryIndex);
@@ -1346,6 +1366,7 @@ var LibraryWebGPU = {
 
   wgpuComputePipelineGetBindGroupLayout__deps: ['emwgpuCreateBindGroupLayout'],
   wgpuComputePipelineGetBindGroupLayout: (pipelinePtr, groupIndex) => {
+    {{{ gpu.convertToU31('groupIndex') }}}
     var pipeline = WebGPU.getJsObject(pipelinePtr);
     var ptr = _emwgpuCreateBindGroupLayout({{{ gpu.NULLPTR }}});
     WebGPU.Internals.jsObjectInsert(ptr, pipeline.getBindGroupLayout(groupIndex));
@@ -2134,11 +2155,19 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 
   wgpuRenderBundleEncoderDraw: (passPtr, vertexCount, instanceCount, firstVertex, firstInstance) => {
+    {{{ gpu.convertToU31('vertexCount') }}}
+    {{{ gpu.convertToU31('instanceCount') }}}
+    {{{ gpu.convertToU32('firstVertex') }}}
+    {{{ gpu.convertToU32('firstInstance') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.draw(vertexCount, instanceCount, firstVertex, firstInstance);
   },
 
   wgpuRenderBundleEncoderDrawIndexed: (passPtr, indexCount, instanceCount, firstIndex, baseVertex, firstInstance) => {
+    {{{ gpu.convertToU31('indexCount') }}}
+    {{{ gpu.convertToU31('instanceCount') }}}
+    {{{ gpu.convertToU32('firstIndex') }}}
+    {{{ gpu.convertToU32('firstInstance') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
   },
@@ -2187,6 +2216,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderBundleEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
+    {{{ gpu.convertToU31('groupIndex') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var group = WebGPU.getJsObject(groupPtr);
     if (dynamicOffsetCount == 0) {
@@ -2210,6 +2240,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderBundleEncoderSetVertexBuffer: (passPtr, slot, bufferPtr, offset, size) => {
+    {{{ gpu.convertToU31('slot') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
     {{{ gpu.convertSentinelToUndefined('size') }}}
@@ -2221,16 +2252,25 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 
   wgpuRenderPassEncoderBeginOcclusionQuery: (passPtr, queryIndex) => {
+    {{{ gpu.convertToU31('queryIndex') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.beginOcclusionQuery(queryIndex);
   },
 
   wgpuRenderPassEncoderDraw: (passPtr, vertexCount, instanceCount, firstVertex, firstInstance) => {
+    {{{ gpu.convertToU31('vertexCount') }}}
+    {{{ gpu.convertToU31('instanceCount') }}}
+    {{{ gpu.convertToU32('firstVertex') }}}
+    {{{ gpu.convertToU32('firstInstance') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.draw(vertexCount, instanceCount, firstVertex, firstInstance);
   },
 
   wgpuRenderPassEncoderDrawIndexed: (passPtr, indexCount, instanceCount, firstIndex, baseVertex, firstInstance) => {
+    {{{ gpu.convertToU31('indexCount') }}}
+    {{{ gpu.convertToU31('instanceCount') }}}
+    {{{ gpu.convertToU32('firstIndex') }}}
+    {{{ gpu.convertToU32('firstInstance') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
   },
@@ -2248,6 +2288,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderMultiDrawIndirect: (passPtr, indirectBufferPtr, indirectOffset, maxDrawCount, drawCountBufferPtr, drawCountBufferOffset) => {
+    {{{ gpu.convertToU31('maxDrawCount') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var indirectBuffer = WebGPU.getJsObject(indirectBufferPtr);
     var drawCountBuffer = WebGPU.getJsObject(drawCountBufferPtr);
@@ -2255,6 +2296,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderMultiDrawIndexedIndirect: (passPtr, indirectBufferPtr, indirectOffset, maxDrawCount, drawCountBufferPtr, drawCountBufferOffset) => {
+    {{{ gpu.convertToU31('maxDrawCount') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var indirectBuffer = WebGPU.getJsObject(indirectBufferPtr);
     var drawCountBuffer = WebGPU.getJsObject(drawCountBufferPtr);
@@ -2299,6 +2341,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
+    {{{ gpu.convertToU31('groupIndex') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var group = WebGPU.getJsObject(groupPtr);
     if (dynamicOffsetCount == 0) {
@@ -2328,16 +2371,22 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderSetScissorRect: (passPtr, x, y, w, h) => {
+    {{{ gpu.convertToU31('x') }}}
+    {{{ gpu.convertToU31('y') }}}
+    {{{ gpu.convertToU31('w') }}}
+    {{{ gpu.convertToU31('h') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.setScissorRect(x, y, w, h);
   },
 
   wgpuRenderPassEncoderSetStencilReference: (passPtr, reference) => {
+    {{{ gpu.convertToU32('reference') }}}
     var pass = WebGPU.getJsObject(passPtr);
     pass.setStencilReference(reference);
   },
 
   wgpuRenderPassEncoderSetVertexBuffer: (passPtr, slot, bufferPtr, offset, size) => {
+    {{{ gpu.convertToU31('slot') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
     {{{ gpu.convertSentinelToUndefined('size') }}}
@@ -2350,6 +2399,7 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderWriteTimestamp: (encoderPtr, querySetPtr, queryIndex) => {
+    {{{ gpu.convertToU31('queryIndex') }}}
     var encoder = WebGPU.getJsObject(encoderPtr);
     var querySet = WebGPU.getJsObject(querySetPtr);
     encoder.writeTimestamp(querySet, queryIndex);
@@ -2361,6 +2411,7 @@ var LibraryWebGPU = {
 
   wgpuRenderPipelineGetBindGroupLayout__deps: ['emwgpuCreateBindGroupLayout'],
   wgpuRenderPipelineGetBindGroupLayout: (pipelinePtr, groupIndex) => {
+    {{{ gpu.convertToU31('groupIndex') }}}
     var pipeline = WebGPU.getJsObject(pipelinePtr);
     var ptr = _emwgpuCreateBindGroupLayout({{{ gpu.NULLPTR }}});
     WebGPU.Internals.jsObjectInsert(ptr, pipeline.getBindGroupLayout(groupIndex));
