@@ -168,19 +168,13 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 [&](const BufferBindingInfo& bindingInfo) {
                     switch (bindingInfo.type) {
                         case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(
-                                srcBindingPoint,
-                                tint::spirv::writer::binding::Uniform{dstBindingPoint.group,
-                                                                      dstBindingPoint.binding});
+                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
                             break;
                         case kInternalStorageBufferBinding:
                         case wgpu::BufferBindingType::Storage:
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                         case kInternalReadOnlyStorageBufferBinding:
-                            bindings.storage.emplace(
-                                srcBindingPoint,
-                                tint::spirv::writer::binding::Storage{dstBindingPoint.group,
-                                                                      dstBindingPoint.binding});
+                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
                             break;
                         case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
@@ -189,9 +183,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     }
                 },
                 [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(srcBindingPoint,
-                                             tint::spirv::writer::binding::Sampler{
-                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const TextureBindingInfo& bindingInfo) {
                     if (auto samplerIndex = bgl->GetStaticSamplerIndexForTexture(
@@ -199,14 +191,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         dstBindingPoint.binding = static_cast<uint32_t>(samplerIndex.value());
                         statically_paired_texture_binding_points.insert(srcBindingPoint);
                     }
-                    bindings.texture.emplace(srcBindingPoint,
-                                             tint::spirv::writer::binding::Texture{
-                                                 dstBindingPoint.group, dstBindingPoint.binding});
+                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint, tint::spirv::writer::binding::StorageTexture{
-                                             dstBindingPoint.group, dstBindingPoint.binding});
+                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
                 },
                 [&](const ExternalTextureBindingInfo& bindingInfo) {
                     const auto& bindingMap = bgl->GetExternalTextureBindingExpansionMap();
@@ -214,24 +202,22 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     DAWN_ASSERT(expansion != bindingMap.end());
 
                     const auto& bindingExpansion = expansion->second;
-                    tint::spirv::writer::binding::BindingInfo plane0{
+                    tint::BindingPoint plane0{
                         static_cast<uint32_t>(group),
                         static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane0))};
-                    tint::spirv::writer::binding::BindingInfo plane1{
+                    tint::BindingPoint plane1{
                         static_cast<uint32_t>(group),
                         static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.plane1))};
-                    tint::spirv::writer::binding::BindingInfo metadata{
+                    tint::BindingPoint metadata{
                         static_cast<uint32_t>(group),
                         static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.params))};
 
                     bindings.external_texture.emplace(
                         srcBindingPoint,
-                        tint::spirv::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                        tint::spirv::writer::ExternalTexture{metadata, plane0, plane1});
                 },
                 [&](const InputAttachmentBindingInfo& bindingInfo) {
-                    bindings.input_attachment.emplace(
-                        srcBindingPoint, tint::spirv::writer::binding::InputAttachment{
-                                             dstBindingPoint.group, dstBindingPoint.binding});
+                    bindings.input_attachment.emplace(srcBindingPoint, dstBindingPoint);
                 });
         }
     }
