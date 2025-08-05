@@ -405,9 +405,8 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
                                             WGPUStringView message,
                                             uint64_t readDataUpdateInfoLength,
                                             const uint8_t* readDataUpdateInfo) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<Buffer::MapAsyncEvent>(future.id, status, message, readDataUpdateInfoLength,
-                                               readDataUpdateInfo);
+    return SetFutureReady<Buffer::MapAsyncEvent>(eventManager, future.id, status, message,
+                                                 readDataUpdateInfoLength, readDataUpdateInfo);
 }
 
 void* Buffer::APIGetMappedRange(size_t offset, size_t size) {

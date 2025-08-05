@@ -322,9 +322,8 @@ WireResult Client::DoAdapterRequestDeviceCallback(ObjectHandle eventManager,
                                                   const WGPULimits* limits,
                                                   uint32_t featuresCount,
                                                   const WGPUFeatureName* features) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<RequestDeviceEvent>(future.id, status, message, limits, featuresCount,
-                                            features);
+    return SetFutureReady<RequestDeviceEvent>(eventManager, future.id, status, message, limits,
+                                              featuresCount, features);
 }
 
 WGPUInstance Adapter::APIGetInstance() const {

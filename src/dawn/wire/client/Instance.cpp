@@ -212,9 +212,8 @@ WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
                                                     const WGPULimits* limits,
                                                     uint32_t featuresCount,
                                                     const WGPUFeatureName* features) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<RequestAdapterEvent>(future.id, status, message, info, limits,
-                                             featuresCount, features);
+    return SetFutureReady<RequestAdapterEvent>(eventManager, future.id, status, message, info,
+                                               limits, featuresCount, features);
 }
 
 void Instance::APIProcessEvents() {

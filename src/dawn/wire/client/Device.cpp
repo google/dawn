@@ -352,8 +352,7 @@ WireResult Client::DoDeviceLostCallback(ObjectHandle eventManager,
                                         WGPUFuture future,
                                         WGPUDeviceLostReason reason,
                                         WGPUStringView message) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<Device::DeviceLostEvent>(future.id, reason, message);
+    return SetFutureReady<Device::DeviceLostEvent>(eventManager, future.id, reason, message);
 }
 
 WGPUFuture Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
@@ -377,8 +376,7 @@ WireResult Client::DoDevicePopErrorScopeCallback(ObjectHandle eventManager,
                                                  WGPUPopErrorScopeStatus status,
                                                  WGPUErrorType errorType,
                                                  WGPUStringView message) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<PopErrorScopeEvent>(future.id, status, errorType, message);
+    return SetFutureReady<PopErrorScopeEvent>(eventManager, future.id, status, errorType, message);
 }
 
 void Device::APIInjectError(WGPUErrorType type, WGPUStringView message) {
@@ -458,8 +456,7 @@ WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectHandle event
                                                               WGPUFuture future,
                                                               WGPUCreatePipelineAsyncStatus status,
                                                               WGPUStringView message) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<CreateComputePipelineEvent>(future.id, status, message);
+    return SetFutureReady<CreateComputePipelineEvent>(eventManager, future.id, status, message);
 }
 
 WGPUFuture Device::APICreateRenderPipelineAsync(
@@ -473,8 +470,7 @@ WireResult Client::DoDeviceCreateRenderPipelineAsyncCallback(ObjectHandle eventM
                                                              WGPUFuture future,
                                                              WGPUCreatePipelineAsyncStatus status,
                                                              WGPUStringView message) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<CreateRenderPipelineEvent>(future.id, status, message);
+    return SetFutureReady<CreateRenderPipelineEvent>(eventManager, future.id, status, message);
 }
 
 void Device::APIDestroy() {

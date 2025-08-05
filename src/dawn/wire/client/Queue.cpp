@@ -92,7 +92,7 @@ WireResult Client::DoQueueWorkDoneCallback(ObjectHandle eventManager,
                                            WGPUFuture future,
                                            WGPUQueueWorkDoneStatus status,
                                            WGPUStringView message) {
-    return GetEventManager(eventManager).SetFutureReady<WorkDoneEvent>(future.id, status, message);
+    return SetFutureReady<WorkDoneEvent>(eventManager, future.id, status, message);
 }
 
 WGPUFuture Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {

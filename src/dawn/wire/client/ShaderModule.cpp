@@ -145,8 +145,8 @@ WireResult Client::DoShaderModuleGetCompilationInfoCallback(ObjectHandle eventMa
                                                             WGPUFuture future,
                                                             WGPUCompilationInfoRequestStatus status,
                                                             const WGPUCompilationInfo* info) {
-    return GetEventManager(eventManager)
-        .SetFutureReady<ShaderModule::CompilationInfoEvent>(future.id, status, info);
+    return SetFutureReady<ShaderModule::CompilationInfoEvent>(eventManager, future.id, status,
+                                                              info);
 }
 
 }  // namespace dawn::wire::client
