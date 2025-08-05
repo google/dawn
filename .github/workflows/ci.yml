@@ -207,14 +207,14 @@ jobs:
       - name: Install headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
         run: |
-          cmake --install ${{ matrix.output_dir }} --prefix dawn-headers-install
+          cmake --install ${{ matrix.output_dir }} --prefix dawn-headers
 
       - name: Upload headers (from arm64-v8a build only)
         if: matrix.arch == 'arm64-v8a'
         uses: actions/upload-artifact@v4
         with:
-          name: dawn-headers
-          path: dawn-headers-install/
+          name: dawn-headers-${{ github.sha }}
+          path: dawn-headers/
 
   mobile-apple:
     strategy:
@@ -308,37 +308,36 @@ jobs:
             -library libs/apple/iphonesimulator/libwebgpu_dawn.a \
             -library artifacts/build-ios-arm64/libwebgpu_dawn.a \
             -library artifacts/build-macos-universal/libwebgpu_dawn.a \
-            -output Dawn-${{ github.sha }}-Apple.xcframework
+            -output dawn-apple-${{ github.sha }}.xcframework
 
       - name: Package Android libraries
         run: |
-          mkdir -p Dawn-${{ github.sha }}-Android/arm64-v8a
-          mkdir -p Dawn-${{ github.sha }}-Android/armeabi-v7a
-          mkdir -p Dawn-${{ github.sha }}-Android/x86
-          mkdir -p Dawn-${{ github.sha }}-Android/x86_64
+          mkdir -p dawn-android-${{ github.sha }}/arm64-v8a
+          mkdir -p dawn-android-${{ github.sha }}/armeabi-v7a
+          mkdir -p dawn-android-${{ github.sha }}/x86
+          mkdir -p dawn-android-${{ github.sha }}/x86_64
 
-          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/arm64-v8a/
-          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/armeabi-v7a/
-          cp artifacts/build-android-x86/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/x86/
-          cp artifacts/build-android-x86_64/libwebgpu_dawn.a Dawn-${{ github.sha }}-Android/x86_64/
+          cp artifacts/build-android-arm64-v8a/libwebgpu_dawn.a dawn-android-${{ github.sha }}/arm64-v8a/
+          cp artifacts/build-android-armeabi-v7a/libwebgpu_dawn.a dawn-android-${{ github.sha }}/armeabi-v7a/
+          cp artifacts/build-android-x86/libwebgpu_dawn.a dawn-android-${{ github.sha }}/x86/
+          cp artifacts/build-android-x86_64/libwebgpu_dawn.a dawn-android-${{ github.sha }}/x86_64/
 
       - name: Create archives
         run: |
-          tar -czf Dawn-${{ github.sha }}-Android.tar.gz Dawn-${{ github.sha }}-Android
-          tar -czf Dawn-${{ github.sha }}-Apple.xcframework.tar.gz Dawn-${{ github.sha }}-Apple.xcframework
+          tar -czf dawn-android-${{ github.sha }}.tar.gz dawn-android-${{ github.sha }}
+          tar -czf dawn-apple-${{ github.sha }}.xcframework.tar.gz dawn-apple-${{ github.sha }}.xcframework
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Dawn-${{ github.sha }}-Android
-          path: Dawn-${{ github.sha }}-Android.tar.gz
+          name: dawn-android-${{ github.sha }}
+          path: dawn-android-${{ github.sha }}.tar.gz
 
       - name: Upload Apple artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Dawn-${{ github.sha }}-Apple
-          path: Dawn-${{ github.sha }}-Apple.xcframework.tar.gz
-
+          name: dawn-apple-${{ github.sha }}
+          path: dawn-apple-${{ github.sha }}.xcframework.tar.gz
 
   golang:
     name: Go Build and Test
