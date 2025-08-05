@@ -737,8 +737,8 @@ var LibraryWebGPU = {
     var offset = 0;
     var numFeatures = 0;
     adapter.features.forEach(feature => {
-      var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
-      if (featureEnumValue !== undefined) {
+      var featureEnumValue = WebGPU.FeatureName.indexOf(feature);
+      if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
@@ -1841,8 +1841,8 @@ var LibraryWebGPU = {
     var offset = 0;
     var numFeatures = 0;
     device.features.forEach(feature => {
-      var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
-      if (featureEnumValue !== undefined) {
+      var featureEnumValue = WebGPU.FeatureName.indexOf(feature);
+      if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
@@ -1980,8 +1980,8 @@ var LibraryWebGPU = {
     var offset = 0;
     var numFeatures = 0;
     navigator["gpu"]["wgslLanguageFeatures"].forEach(feature => {
-      var featureEnumValue = WebGPU.WGSLLanguageFeatureNameString2Enum[feature];
-      if (featureEnumValue !== undefined) {
+      var featureEnumValue = WebGPU.WGSLLanguageFeatureName.indexOf(feature);
+      if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
@@ -2629,16 +2629,6 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 };
 
-// Inverted index used by GetFeatures/HasFeature
-LibraryWebGPU.$WebGPU.FeatureNameString2Enum = {};
-for (var value in LibraryWebGPU.$WebGPU.FeatureName) {
-  LibraryWebGPU.$WebGPU.FeatureNameString2Enum[LibraryWebGPU.$WebGPU.FeatureName[value]] = value;
-}
-LibraryWebGPU.$WebGPU.WGSLLanguageFeatureNameString2Enum = {};
-for (var value in LibraryWebGPU.$WebGPU.WGSLLanguageFeatureName) {
-  LibraryWebGPU.$WebGPU.WGSLLanguageFeatureNameString2Enum[LibraryWebGPU.$WebGPU.WGSLLanguageFeatureName[value]] = value;
-}
-
 // Add and set __i53abi to true for functions with 64-bit value in their
 // signatures, if not explicitly set otherwise.
 for (const key of Object.keys(LibraryWebGPU)) {
@@ -2662,9 +2652,8 @@ function moveDeps(object, targetDeps) {
     }
   }
 }
-// TODO(crbug.com/377760848): Right now all of this helper code probably cannot be
-// dead-code-eliminated (at least not by Emscripten - maybe Closure can do it).
-// Investigate this and probably move the helper functions out of $WebGPU.
+// TODO(crbug.com/377760848): Investigate whether Closure is able
+// to dead-code-eliminate these; if not, make them library-level items.
 moveDeps(LibraryWebGPU.$WebGPU, LibraryWebGPU.$WebGPU__deps)
 
 autoAddDeps(LibraryWebGPU, '$WebGPU');

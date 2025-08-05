@@ -72,8 +72,9 @@
 
     // Maps from enum number to enum string.
     // These appear in the final build result so should be kept minimal.
-    // TODO(crbug.com/377760848): Make these library-level items like the
-    // string-to-int tables, so they can be dead-code-eliminated.
+    // TODO(crbug.com/377760848): Investigate whether Closure is able
+    // to dead-code-eliminate these; if not, make them library-level
+    // items like the string-to-int tables.
     globalThis.WEBGPU_INT_TO_STRING_TABLES = `
         {% for type in by_category["enum"] if not type.json_data.get("emscripten_no_enum_table") %}
             //* Use an array if the enum is contiguous, allowing up to an arbitrary 10 blank entries
@@ -95,11 +96,12 @@
                     {% endfor %}
                 ]
             {%- else -%}
-                {
+                // Create a sparse array so we can use indexOf on it.
+                Object.assign([], {
                     {% for value in type.values %}
                         {{value.value}}: {{as_jsEnumValue(value)}},
                     {% endfor %}
-                }
+                })
             {%- endif -%}
             ,
         {% endfor %}
