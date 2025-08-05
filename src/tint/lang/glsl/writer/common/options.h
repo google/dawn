@@ -37,7 +37,7 @@
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 
-namespace tint::glsl::writer::binding {
+namespace tint::glsl::writer {
 
 /// Generic binding point
 struct BindingInfo {
@@ -56,12 +56,6 @@ struct BindingInfo {
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(BindingInfo, binding);
 };
-
-using Uniform = BindingInfo;
-using Storage = BindingInfo;
-using Texture = BindingInfo;
-using StorageTexture = BindingInfo;
-using Sampler = BindingInfo;
 
 /// An external texture
 struct ExternalTexture {
@@ -111,29 +105,28 @@ struct CombinedTextureSamplerPair {
     TINT_REFLECT(CombinedTextureSamplerPair, texture, sampler, is_external_plane1);
 };
 
-}  // namespace tint::glsl::writer::binding
+}  // namespace tint::glsl::writer
 
 namespace std {
 
-/// Custom std::hash specialization for tint::glsl::writer::binding::BindingInfo
+/// Custom std::hash specialization for tint::glsl::writer::BindingInfo
 template <>
-class hash<tint::glsl::writer::binding::BindingInfo> {
+class hash<tint::glsl::writer::BindingInfo> {
   public:
     /// @param n the binding info
     /// @return the hash value
-    inline std::size_t operator()(const tint::glsl::writer::binding::BindingInfo& n) const {
+    inline std::size_t operator()(const tint::glsl::writer::BindingInfo& n) const {
         return tint::Hash(n.binding);
     }
 };
 
-/// Custom std::hash specialization for tint::glsl::writer::binding::CombinedTextureSamplerPair
+/// Custom std::hash specialization for tint::glsl::writer::CombinedTextureSamplerPair
 template <>
-class hash<tint::glsl::writer::binding::CombinedTextureSamplerPair> {
+class hash<tint::glsl::writer::CombinedTextureSamplerPair> {
   public:
     /// @param n the combined sampler texture pair
     /// @return the hash value
-    inline std::size_t operator()(
-        const tint::glsl::writer::binding::CombinedTextureSamplerPair& n) const {
+    inline std::size_t operator()(const tint::glsl::writer::CombinedTextureSamplerPair& n) const {
         return tint::Hash(n.texture, n.sampler);
     }
 };
@@ -142,36 +135,23 @@ class hash<tint::glsl::writer::binding::CombinedTextureSamplerPair> {
 
 namespace tint::glsl::writer {
 
-/// Maps the WGSL binding point to the SPIR-V group,binding for uniforms
-using UniformBindings = std::unordered_map<BindingPoint, binding::Uniform>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for storage
-using StorageBindings = std::unordered_map<BindingPoint, binding::Storage>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for textures
-using TextureBindings = std::unordered_map<BindingPoint, binding::Texture>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for storage textures
-using StorageTextureBindings = std::unordered_map<BindingPoint, binding::StorageTexture>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for samplers
-using SamplerBindings = std::unordered_map<BindingPoint, binding::Sampler>;
-/// Maps the WGSL binding point to the plane0, plane1, and metadata information for external
-/// textures
-using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::ExternalTexture>;
-/// Maps texture/sampler info to a combined sampler name
-using CombinedTextureSamplerInfo =
-    std::unordered_map<binding::CombinedTextureSamplerPair, std::string>;
+using BindingMap = std::unordered_map<BindingPoint, BindingInfo>;
+using ExternalTextureBindings = std::unordered_map<BindingPoint, ExternalTexture>;
+using CombinedTextureSamplerInfo = std::unordered_map<CombinedTextureSamplerPair, std::string>;
 
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load texture builtin values.
 struct TextureBuiltinsFromUniformOptions {
     /// The binding point to use to generate a uniform buffer from which to read texture builtin
     /// values. Note that this is a post-remapping binding.
-    binding::Uniform ubo_binding = {};
+    BindingInfo ubo_binding = {};
 
     /// Ordered list of post-remapping bindings in the uniform buffer for polyfilling
     /// `textureNumSamples` and `textureNumLevels`.
     struct EmulatedBuiltin {
         uint32_t offset;
         uint32_t count;
-        binding::Texture binding;
+        BindingInfo binding;
 
         TINT_REFLECT(EmulatedBuiltin, offset, count, binding);
     };
@@ -208,15 +188,15 @@ struct Bindings {
     Bindings& operator=(const Bindings&) = default;
 
     /// Uniform bindings
-    UniformBindings uniform{};
+    BindingMap uniform{};
     /// Storage bindings
-    StorageBindings storage{};
+    BindingMap storage{};
     /// Texture bindings
-    TextureBindings texture{};
+    BindingMap texture{};
     /// Storage texture bindings
-    StorageTextureBindings storage_texture{};
+    BindingMap storage_texture{};
     /// Sampler bindings
-    SamplerBindings sampler{};
+    BindingMap sampler{};
     /// External bindings
     ExternalTextureBindings external_texture{};
 

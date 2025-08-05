@@ -80,7 +80,7 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                 continue;
             }
 
-            binding::BindingInfo info{get_binding(bp.value())};
+            BindingInfo info{get_binding(bp.value())};
             switch (ptr_type->AddressSpace()) {
                 case core::AddressSpace::kHandle: {
                     // Handle binding_array<handle> before logic dependent on the base handle type.
@@ -130,11 +130,11 @@ Bindings GenerateBindings(const core::ir::Module& module) {
     }
 
     for (auto bp : ext_tex_bps) {
-        binding::BindingInfo plane0{get_binding(bp)};
-        binding::BindingInfo plane1{next_binding++};
-        binding::BindingInfo metadata{next_binding++};
+        BindingInfo plane0{get_binding(bp)};
+        BindingInfo plane1{next_binding++};
+        BindingInfo metadata{next_binding++};
 
-        bindings.external_texture.emplace(bp, binding::ExternalTexture{metadata, plane0, plane1});
+        bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
     }
 
     return bindings;

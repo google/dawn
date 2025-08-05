@@ -1104,9 +1104,8 @@ class Printer : public tint::TextGenerator {
         // If this is a combined texture sampler variable, check the provided map to see if we need
         // to give it a specific name.
         if (auto* combined_texture_sampler = var->As<ir::CombinedTextureSamplerVar>()) {
-            binding::CombinedTextureSamplerPair key{
-                combined_texture_sampler->TextureBindingPoint(),
-                combined_texture_sampler->SamplerBindingPoint()};
+            CombinedTextureSamplerPair key{combined_texture_sampler->TextureBindingPoint(),
+                                           combined_texture_sampler->SamplerBindingPoint()};
             auto itr = options_.bindings.sampler_texture_to_name.find(key);
             if (itr != options_.bindings.sampler_texture_to_name.end()) {
                 names_.Add(var->Result(), itr->second);

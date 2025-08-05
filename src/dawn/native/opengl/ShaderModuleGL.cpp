@@ -121,39 +121,39 @@ void GenerateCombinedSamplerInfo(
     std::vector<CombinedSampler>* combinedSamplers,
     tint::glsl::writer::CombinedTextureSamplerInfo* samplerTextureToName) {
     // Helper to avoid duplicated logic for when a CombinedSampler is determined.
-    auto AddCombinedSampler =
-        [&](tint::BindingPoint textureWGSL, tint::BindingPoint textureRemapped,
-            std::optional<tint::BindingPoint> samplerWGSL, BindingIndex textureArraySize,
-            bool isPlane1 = false) {
-            // Dawn needs pre-remapping WGSL bind points.
-            CombinedSampler combinedSampler = {{
-                .samplerLocation = std::nullopt,
-                .textureLocation = {{
-                    .group = BindGroupIndex(textureWGSL.group),
-                    .binding = BindingNumber(textureWGSL.binding),
-                    .arraySize = textureArraySize,
-                }},
-            }};
-            if (samplerWGSL.has_value()) {
-                combinedSampler.samplerLocation = {{{
-                    .group = BindGroupIndex(samplerWGSL->group),
-                    .binding = BindingNumber(samplerWGSL->binding),
-                }}};
-            }
-            combinedSamplers->push_back(combinedSampler);
+    auto AddCombinedSampler = [&](tint::BindingPoint textureWGSL,
+                                  tint::BindingPoint textureRemapped,
+                                  std::optional<tint::BindingPoint> samplerWGSL,
+                                  BindingIndex textureArraySize, bool isPlane1 = false) {
+        // Dawn needs pre-remapping WGSL bind points.
+        CombinedSampler combinedSampler = {{
+            .samplerLocation = std::nullopt,
+            .textureLocation = {{
+                .group = BindGroupIndex(textureWGSL.group),
+                .binding = BindingNumber(textureWGSL.binding),
+                .arraySize = textureArraySize,
+            }},
+        }};
+        if (samplerWGSL.has_value()) {
+            combinedSampler.samplerLocation = {{{
+                .group = BindGroupIndex(samplerWGSL->group),
+                .binding = BindingNumber(samplerWGSL->binding),
+            }}};
+        }
+        combinedSamplers->push_back(combinedSampler);
 
-            // Tint uses post-remapping bind points.
-            tint::BindingPoint samplerRemapped = bindings.placeholder_sampler_bind_point;
-            if (samplerWGSL.has_value()) {
-                samplerRemapped = {.group = 0,
-                                   .binding = bindings.sampler.at(samplerWGSL.value()).binding};
-            }
+        // Tint uses post-remapping bind points.
+        tint::BindingPoint samplerRemapped = bindings.placeholder_sampler_bind_point;
+        if (samplerWGSL.has_value()) {
+            samplerRemapped = {.group = 0,
+                               .binding = bindings.sampler.at(samplerWGSL.value()).binding};
+        }
 
-            samplerTextureToName->emplace(
-                tint::glsl::writer::binding::CombinedTextureSamplerPair{textureRemapped,
-                                                                        samplerRemapped, isPlane1},
-                combinedSampler.GetName());
-        };
+        samplerTextureToName->emplace(
+            tint::glsl::writer::CombinedTextureSamplerPair{textureRemapped, samplerRemapped,
+                                                           isPlane1},
+            combinedSampler.GetName());
+    };
 
     for (const auto& use : metadata.samplerAndNonSamplerTexturePairs) {
         // Replace uses of the placeholder sampler with its actual binding point.
@@ -226,7 +226,7 @@ void GenerateTextureBuiltinFromUniformData(
         // Tint uses post-remapping binding points for textureBuiltinFromUniform options.
         tint::BindingPoint wgslBindPoint = {.group = query.group, .binding = query.binding};
 
-        tint::glsl::writer::binding::BindingInfo remappedBinding;
+        tint::glsl::writer::BindingInfo remappedBinding;
         if (bindings.texture.contains(wgslBindPoint)) {
             remappedBinding = bindings.texture.at(wgslBindPoint);
         } else {
@@ -366,17 +366,15 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
             if (bufferBindingInfo) {
                 switch (bufferBindingInfo->type) {
                     case wgpu::BufferBindingType::Uniform:
-                        bindings.uniform.emplace(
-                            srcBindingPoint,
-                            tint::glsl::writer::binding::Uniform{dstBindingPoint.binding});
+                        bindings.uniform.emplace(srcBindingPoint, tint::glsl::writer::BindingInfo{
+                                                                      dstBindingPoint.binding});
                         break;
                     case kInternalStorageBufferBinding:
                     case wgpu::BufferBindingType::Storage:
                     case wgpu::BufferBindingType::ReadOnlyStorage:
                     case kInternalReadOnlyStorageBufferBinding:
-                        bindings.storage.emplace(
-                            srcBindingPoint,
-                            tint::glsl::writer::binding::Storage{dstBindingPoint.binding});
+                        bindings.storage.emplace(srcBindingPoint, tint::glsl::writer::BindingInfo{
+                                                                      dstBindingPoint.binding});
                         break;
                     case wgpu::BufferBindingType::BindingNotUsed:
                     case wgpu::BufferBindingType::Undefined:
@@ -384,23 +382,22 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                         break;
                 }
             } else if (std::holds_alternative<SamplerBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.sampler.emplace(
-                    srcBindingPoint, tint::glsl::writer::binding::Sampler{dstBindingPoint.binding});
+                bindings.sampler.emplace(srcBindingPoint,
+                                         tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
             } else if (std::holds_alternative<TextureBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.texture.emplace(
-                    srcBindingPoint, tint::glsl::writer::binding::Texture{dstBindingPoint.binding});
+                bindings.texture.emplace(srcBindingPoint,
+                                         tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
             } else if (std::holds_alternative<StorageTextureBindingInfo>(
                            shaderBindingInfo.bindingInfo)) {
                 bindings.storage_texture.emplace(
-                    srcBindingPoint,
-                    tint::glsl::writer::binding::StorageTexture{dstBindingPoint.binding});
+                    srcBindingPoint, tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
             } else if (std::holds_alternative<ExternalTextureBindingInfo>(
                            shaderBindingInfo.bindingInfo)) {
                 const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
                 const auto& expansion = etBindingMap.find(binding);
                 DAWN_ASSERT(expansion != etBindingMap.end());
 
-                using BindingInfo = tint::glsl::writer::binding::BindingInfo;
+                using BindingInfo = tint::glsl::writer::BindingInfo;
 
                 const auto& bindingExpansion = expansion->second;
                 const BindingInfo plane0{
@@ -415,8 +412,7 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                 externalTextureExpansionMap[srcBindingPoint] = plane1WGSLBindingPoint;
 
                 bindings.external_texture.emplace(
-                    srcBindingPoint,
-                    tint::glsl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                    srcBindingPoint, tint::glsl::writer::ExternalTexture{metadata, plane0, plane1});
             }
         }
     }
@@ -492,7 +488,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             req.tintOptions.use_array_length_from_uniform = true;
             bindings.array_length_from_uniform.ubo_binding = {kMaxBindGroups + 2, 0};
             bindings.uniform.emplace(bindings.array_length_from_uniform.ubo_binding,
-                                     tint::glsl::writer::binding::Uniform{
+                                     tint::glsl::writer::BindingInfo{
                                          uint32_t(layout->GetInternalArrayLengthUniformBinding())});
         }
     }

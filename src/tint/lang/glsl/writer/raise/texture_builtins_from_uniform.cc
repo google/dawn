@@ -58,7 +58,7 @@ struct State {
     core::ir::Var* texture_uniform_data_ = nullptr;
 
     /// Map from binding point to index into uniform structure
-    Hashmap<binding::BindingInfo, uint32_t, 2> binding_point_to_uniform_offset_{};
+    Hashmap<BindingInfo, uint32_t, 2> binding_point_to_uniform_offset_{};
 
     /// Process the module.
     void Process() {
@@ -152,7 +152,7 @@ struct State {
     core::ir::Value* GetAccessFromUniform(core::ir::Value* arg) {
         auto path = PathForTexture(arg);
 
-        binding::BindingInfo binding = {path.var->BindingPoint()->binding};
+        BindingInfo binding = {path.var->BindingPoint()->binding};
         uint32_t metadata_offset = *binding_point_to_uniform_offset_.Get(binding);
 
         // Returns the u32 at `metadata_offset` + `path.index` (if present) in

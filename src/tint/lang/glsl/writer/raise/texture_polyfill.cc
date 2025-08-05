@@ -71,8 +71,7 @@ struct State {
     Hashmap<core::ir::Var*, core::ir::Var*, 2> texture_to_replacement_{};
 
     // A map of the <texture,sampler> binding pair to the replacement CombinedTextureSamplerVar.
-    Hashmap<binding::CombinedTextureSamplerPair, core::ir::Var*, 2>
-        texture_sampler_to_replacement_{};
+    Hashmap<CombinedTextureSamplerPair, core::ir::Var*, 2> texture_sampler_to_replacement_{};
 
     // The list of textures and samplers that were replaced. There may have been textures which
     // existed but were unused. We don't want to delete them, so we only delete replaced values.
@@ -233,7 +232,7 @@ struct State {
 
     // Creates the new root module var that will be used as the replacement for a texture+(sampler?)
     // pair.
-    glsl::ir::CombinedTextureSamplerVar* MakeReplacement(binding::CombinedTextureSamplerPair& key,
+    glsl::ir::CombinedTextureSamplerVar* MakeReplacement(CombinedTextureSamplerPair& key,
                                                          core::ir::Var* tex,
                                                          core::ir::Var* sampler,
                                                          const core::type::Type* handle_type) {
@@ -300,7 +299,7 @@ struct State {
             BindingPoint tex_bp = tex->BindingPoint().value();
             BindingPoint samp_bp = sampler->BindingPoint().value();
 
-            binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
+            CombinedTextureSamplerPair key{tex_bp, samp_bp};
             auto* replacement = texture_sampler_to_replacement_.GetOrAdd(key, [&] {
                 return MakeReplacement(key, tex, sampler, tex->Result()->Type()->UnwrapPtr());
             });
@@ -351,8 +350,8 @@ struct State {
                 replacement_ty = ty.binding_array(replacement_ty, binding_array_count.value());
             }
 
-            binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),
-                                                    cfg.placeholder_sampler_bind_point};
+            CombinedTextureSamplerPair key{tex->BindingPoint().value(),
+                                           cfg.placeholder_sampler_bind_point};
             texture_to_replacement_.Add(tex, MakeReplacement(key, tex, nullptr, replacement_ty));
         }
     }
@@ -482,7 +481,7 @@ struct State {
             auto t_bp = texture_path.var->BindingPoint();
             auto s_bp = sampler_path.var->BindingPoint();
             TINT_ASSERT(t_bp.has_value() && s_bp.has_value());
-            binding::CombinedTextureSamplerPair key{t_bp.value(), s_bp.value()};
+            CombinedTextureSamplerPair key{t_bp.value(), s_bp.value()};
 
             replacement_var = *texture_sampler_to_replacement_.Get(key).value;
         } else {

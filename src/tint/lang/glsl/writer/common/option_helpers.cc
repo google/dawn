@@ -68,10 +68,10 @@ std::string_view ToString(BindingType value) {
 Result<SuccessType> ValidateBindingOptions(const Options& options) {
     diag::List diagnostics;
 
-    tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
-    tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_glsl_texture_bindings{};
-    tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_glsl_sampler_bindings{};
-    tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8> seen_glsl_other_bindings{};
+    tint::Hashmap<tint::BindingPoint, BindingInfo, 8> seen_wgsl_bindings{};
+    tint::Hashmap<BindingInfo, tint::BindingPoint, 8> seen_glsl_texture_bindings{};
+    tint::Hashmap<BindingInfo, tint::BindingPoint, 8> seen_glsl_sampler_bindings{};
+    tint::Hashmap<BindingInfo, tint::BindingPoint, 8> seen_glsl_other_bindings{};
     // Both wgsl_seen and glsl_seen check to see if the pair of [src, dst] are unique. If
     // we have multiple entries that map the same [src, dst] pair, that's fine. We treat it as valid
     // as it's possible for multiple entry points to use the remapper at the same time. If the pair
@@ -79,7 +79,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
     // For glsl_seen it is also valid for a texture and a sampler have the same GLSL side binding
     // point.
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
-                                                         const binding::BindingInfo& dst) -> bool {
+                                                         const BindingInfo& dst) -> bool {
         if (auto binding = seen_wgsl_bindings.Add(src, dst); binding.value != dst) {
             diagnostics.AddError(Source{}) << "found duplicate WGSL binding point: " << src;
             return true;
@@ -88,13 +88,12 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
     };
 
     auto glsl_seen = [&diagnostics, &seen_glsl_texture_bindings, &seen_glsl_sampler_bindings,
-                      &seen_glsl_other_bindings](const binding::BindingInfo& src,
+                      &seen_glsl_other_bindings](const BindingInfo& src,
                                                  const tint::BindingPoint& dst,
                                                  BindingType type) -> bool {
         auto disallowed_duplicate =
             [&diagnostics, &src,
-             &dst](const tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8>& seen_bindings)
-            -> bool {
+             &dst](const tint::Hashmap<BindingInfo, tint::BindingPoint, 8>& seen_bindings) -> bool {
             if (auto binding = seen_bindings.Get(src)) {
                 if (*binding != dst) {
                     diagnostics.AddError(Source{})
@@ -197,7 +196,7 @@ void PopulateBindingInfo(const Options& options,
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
-            const binding::Uniform& dst_binding_point = it.second;
+            const BindingInfo& dst_binding_point = it.second;
 
             // Bindings which go to the same slot in GLSL do not need to be re-bound.
             if (src_binding_point.group == 0 &&
@@ -219,9 +218,9 @@ void PopulateBindingInfo(const Options& options,
     for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
 
-        const binding::BindingInfo& plane0 = it.second.plane0;
-        const binding::BindingInfo& plane1 = it.second.plane1;
-        const binding::BindingInfo& metadata = it.second.metadata;
+        const BindingInfo& plane0 = it.second.plane0;
+        const BindingInfo& plane1 = it.second.plane1;
+        const BindingInfo& metadata = it.second.metadata;
 
         const BindingPoint plane0_binding_point{0, plane0.binding};
         const BindingPoint plane1_binding_point{0, plane1.binding};
