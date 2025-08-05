@@ -154,13 +154,20 @@ TEST_P(ShaderModuleCachingTests, ShaderModuleBlobCacheIsolationKey) {
 }
 
 DAWN_INSTANTIATE_TEST(ShaderModuleCachingTests,
-                      D3D11Backend(),
-                      D3D12Backend(),
-                      D3D12Backend({"use_dxc"}),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend());
+                      D3D11Backend({"blob_cache_hash_validation"}),
+                      D3D11Backend({}, {"blob_cache_hash_validation"}),
+                      D3D12Backend({"blob_cache_hash_validation"}),
+                      D3D12Backend({}, {"blob_cache_hash_validation"}),
+                      D3D12Backend({"use_dxc", "blob_cache_hash_validation"}),
+                      D3D12Backend({"use_dxc"}, {"blob_cache_hash_validation"}),
+                      MetalBackend({"blob_cache_hash_validation"}),
+                      MetalBackend({}, {"blob_cache_hash_validation"}),
+                      OpenGLBackend({"blob_cache_hash_validation"}),
+                      OpenGLBackend({}, {"blob_cache_hash_validation"}),
+                      OpenGLESBackend({"blob_cache_hash_validation"}),
+                      OpenGLESBackend({}, {"blob_cache_hash_validation"}),
+                      VulkanBackend({"blob_cache_hash_validation"}),
+                      VulkanBackend({}, {"blob_cache_hash_validation"}));
 
 }  // anonymous namespace
 }  // namespace dawn

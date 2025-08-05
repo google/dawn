@@ -265,6 +265,10 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     if (mInstance->IsBackendValidationEnabled()) {
         deviceToggles.Default(Toggle::UseUserDefinedLabelsInBackend, true);
     }
+    // Currently enable the blob cache hash validation by default to catch possible collapse.
+    // TODO(crbug.com/429938352): Disable default hash validation to prevent performance cost when
+    // no longer necessary.
+    deviceToggles.Default(Toggle::BlobCacheHashValidation, true);
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(mInstance->GetPlatform(), &deviceToggles);

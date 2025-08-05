@@ -161,6 +161,7 @@ enum class Toggle {
     UseSpirv14,
     MetalUseArgumentBuffers,
     EnableShaderPrint,
+    BlobCacheHashValidation,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

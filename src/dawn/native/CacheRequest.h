@@ -47,7 +47,7 @@ namespace dawn::native {
 
 namespace detail {
 
-void LogCacheHitError(std::unique_ptr<ErrorData> error);
+void LogCacheError(std::unique_ptr<ErrorData> error);
 
 }  // namespace detail
 
@@ -127,7 +127,18 @@ class CacheRequestImpl {
         CacheKey key = r.CreateCacheKey(device);
         platform::metrics::DawnHistogramTimer cacheTimer(
             cacheMetricName.empty() ? nullptr : device->GetPlatform());
-        Blob blob = device->GetBlobCache()->Load(key);
+
+        auto loadResult = device->GetBlobCache()->Load(key);
+        Blob blob;
+
+        if (loadResult.IsError()) {
+            // Cache hit but hash validation failed.
+            detail::LogCacheError(loadResult.AcquireError());
+            DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "BlobCacheHashValidationFailed", true);
+            // Continue as if it was a cache miss.
+        } else {
+            blob = loadResult.AcquireSuccess();
+        }
 
         if (!blob.Empty()) {
             // Cache hit. Handle the cached blob.
@@ -146,7 +157,7 @@ class CacheRequestImpl {
                         CacheResultType::CacheHit(std::move(key), result.AcquireSuccess()));
                 }
                 // On error, continue to the cache miss path and log the error.
-                detail::LogCacheHitError(result.AcquireError());
+                detail::LogCacheError(result.AcquireError());
             }
         }
         // Cache miss, or the CacheHitFn failed.
