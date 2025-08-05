@@ -184,6 +184,7 @@ option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
 option(DAWN_BUILD_PROTOBUF "Build the protobuf dependencies" ON)
 
 option(DAWN_WERROR "Build with -Werror (or equivalent)" OFF)
+option(DAWN_WEVERYTHING "Build with -Weverything if using Clang" OFF)
 option(DAWN_ENABLE_PIC "Build with Position-Independent-Code enabled" OFF)
 
 option(DAWN_EMIT_COVERAGE "Emit code coverage information" OFF)

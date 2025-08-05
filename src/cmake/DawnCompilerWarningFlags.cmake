@@ -37,8 +37,28 @@ if (DAWN_WERROR)
       INTERFACE
         "-Werror"
     )
-  endif ()
-endif ()
+  endif()
+endif()
+if (DAWN_WEVERYTHING)
+  # This is NOT a supported configuration; Dawn is not currently intended to be warning-clean in
+  # this configuration. For now it is a way to manually discover new warnings we should fix.
+  # TODO(crbug.com/436300898): Improve this config and enable more (or all) warnings.
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(dawn_warnings_config
+      INTERFACE
+        "-Weverything"
+        "-Wno-c++98-compat"
+        "-Wno-c++98-compat-pedantic"
+        "-Wno-covered-switch-default"
+        "-Wno-global-constructors"
+        "-Wno-padded"
+        "-Wno-poison-system-directories"
+        "-Wno-shadow"
+        "-Wno-shadow-field-in-constructor"
+        "-Wno-unsafe-buffer-usage"
+    )
+  endif()
+endif()
 
 # Flags that might not be supported in every version of a compiler.
 
