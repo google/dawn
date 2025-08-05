@@ -620,6 +620,7 @@ class EventManager : NonMovable {
         auto eventIt = mEvents.find(futureId);
         if (eventIt == mEvents.end()) {
           infos[i].completed = true;
+          anyCompleted = true;
           continue;
         }
 

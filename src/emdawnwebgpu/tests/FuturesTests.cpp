@@ -80,6 +80,22 @@ class InstanceLevelTests : public testing::Test {
     wgpu::Instance instance;
 };
 
+// Test that waiting for a future that is already complete will indicate that it is completed.
+TEST_F(InstanceLevelTests, WaitAnySameFuture) {
+    wgpu::RequestAdapterStatus status;
+    auto future = instance.RequestAdapter(
+        nullptr, wgpu::CallbackMode::AllowSpontaneous,
+        [&status](wgpu::RequestAdapterStatus s, wgpu::Adapter, wgpu::StringView) { status = s; });
+
+    // First wait should succeed.
+    EXPECT_EQ(instance.WaitAny(future, UINT64_MAX), wgpu::WaitStatus::Success);
+    EXPECT_EQ(status, wgpu::RequestAdapterStatus::Success);
+
+    // Repeated wait should also all succeed.
+    EXPECT_EQ(instance.WaitAny(future, UINT64_MAX), wgpu::WaitStatus::Success);
+    EXPECT_EQ(instance.WaitAny(future, 0), wgpu::WaitStatus::Success);
+}
+
 TEST_F(InstanceLevelTests, RequestAdapter) {
     EXPECT_NE(RequestAdapter(), nullptr);
 }
