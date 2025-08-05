@@ -1174,8 +1174,8 @@ bool GenerateHlsl([[maybe_unused]] const Options& options,
                 std::cout << "Validating with DXC: " << dxc.Path() << "\n";
             }
             dxc_res = tint::hlsl::validate::ValidateUsingDXC(
-                dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types,
-                hlsl_shader_model);
+                dxc.Path(), result->hlsl, result->entry_point_name, result->pipeline_stage,
+                dxc_require_16bit_types, hlsl_shader_model);
         } else {
             dxc_res.failed = true;
             dxc_res.output = "DXC executable '" + dxc_path + "' not found. Cannot validate.";
@@ -1203,8 +1203,8 @@ bool GenerateHlsl([[maybe_unused]] const Options& options,
             if (options.verbose) {
                 std::cout << "Validating with FXC: " << fxc.Path() << "\n";
             }
-            fxc_res = tint::hlsl::validate::ValidateUsingFXC(fxc.Path(), result->hlsl,
-                                                             result->entry_points);
+            fxc_res = tint::hlsl::validate::ValidateUsingFXC(
+                fxc.Path(), result->hlsl, result->entry_point_name, result->pipeline_stage);
         } else {
             fxc_res.failed = true;
             fxc_res.output = "FXC DLL '" + options.fxc_path + "' not found. Cannot validate.";

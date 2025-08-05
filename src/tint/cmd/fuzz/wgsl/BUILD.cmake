@@ -49,6 +49,7 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_cmd_fuzz_ir_fuzz
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_ir_transform_fuzz
   tint_lang_core_type
   tint_lang_hlsl_writer_raise_fuzz

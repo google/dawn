@@ -123,7 +123,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         uint32_t hlsl_shader_model = 66;
         bool require_16bit_types = true;
         [[maybe_unused]] auto validate_res = validate::ValidateUsingDXC(
-            dxc.Path(), output->hlsl, output->entry_points, require_16bit_types, hlsl_shader_model);
+            dxc.Path(), output->hlsl, output->entry_point_name, output->pipeline_stage,
+            require_16bit_types, hlsl_shader_model);
     }
 
     return Success;

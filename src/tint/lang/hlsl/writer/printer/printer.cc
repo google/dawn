@@ -149,20 +149,6 @@ StringStream& operator<<(StringStream& s, const RegisterAndSpace& rs) {
     return s;
 }
 
-ast::PipelineStage ir_to_ast_stage(core::ir::Function::PipelineStage stage) {
-    switch (stage) {
-        case core::ir::Function::PipelineStage::kCompute:
-            return ast::PipelineStage::kCompute;
-        case core::ir::Function::PipelineStage::kFragment:
-            return ast::PipelineStage::kFragment;
-        case core::ir::Function::PipelineStage::kVertex:
-            return ast::PipelineStage::kVertex;
-        default:
-            break;
-    }
-    TINT_UNREACHABLE();
-}
-
 /// PIMPL class for the HLSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -261,7 +247,9 @@ class Printer : public tint::TextGenerator {
                     func_name = options_.remapped_entry_point_name;
                     TINT_ASSERT(!IsKeyword(func_name));
                 }
-                result_.entry_points.push_back({func_name, ir_to_ast_stage(func->Stage())});
+                TINT_ASSERT(result_.entry_point_name.empty());
+                result_.entry_point_name = func_name;
+                result_.pipeline_stage = func->Stage();
             }
 
             if (func->ReturnType()->Is<core::type::Array>()) {
