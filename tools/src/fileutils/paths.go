@@ -183,7 +183,6 @@ func CommonRootDir(pathA, pathB string) string {
 // subdirectories. Returns an error if the path does not exist or is not a
 // directory.
 func IsEmptyDir(dir string, fsReader oswrapper.FilesystemReader) (bool, error) {
-	// First, check if the path exists and is a directory.
 	info, err := fsReader.Stat(dir)
 	if err != nil {
 		return false, fmt.Errorf("failed to stat '%s': %w", dir, err)
@@ -192,8 +191,7 @@ func IsEmptyDir(dir string, fsReader oswrapper.FilesystemReader) (bool, error) {
 		return false, fmt.Errorf("path is not a directory: %s", dir)
 	}
 
-	// Now, read the directory's contents.
-	entries, err := fsReader.Readdir(dir)
+	entries, err := fsReader.ReadDir(dir)
 	if err != nil {
 		return false, fmt.Errorf("failed to read directory '%s': %w", dir, err)
 	}

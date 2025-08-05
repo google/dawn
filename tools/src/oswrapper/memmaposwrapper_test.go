@@ -224,41 +224,41 @@ func TestCreate_ReadFile(t *testing.T) {
 	require.Equal(t, []byte("asdf"), contents)
 }
 
-func TestReaddir_NonExistent(t *testing.T) {
+func TestReadDir_NonExistent(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
-	_, err := wrapper.Readdir("/nonexistent")
+	_, err := wrapper.ReadDir("/nonexistent")
 	require.Error(t, err)
 	require.ErrorContains(t, err, "open /nonexistent: file does not exist")
 }
 
-func TestReaddir_PathIsFile(t *testing.T) {
+func TestReadDir_PathIsFile(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
 	require.NoError(t, wrapper.WriteFile("/myfile", []byte("content"), 0644))
-	_, err := wrapper.Readdir("/myfile")
+	_, err := wrapper.ReadDir("/myfile")
 	require.Error(t, err)
 	require.ErrorContains(t, err, "not a dir")
 }
 
-func TestReaddir_EmptyDir(t *testing.T) {
+func TestReadDir_EmptyDir(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
 	require.NoError(t, wrapper.Mkdir("/mydir", 0755))
-	infos, err := wrapper.Readdir("/mydir")
+	entries, err := wrapper.ReadDir("/mydir")
 	require.NoError(t, err)
-	require.Empty(t, infos)
+	require.Empty(t, entries)
 }
 
-func TestReaddir_MixedContent(t *testing.T) {
+func TestReadDir_MixedContent(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
 	require.NoError(t, wrapper.MkdirAll("/mydir/b_subdir", 0755))
 	require.NoError(t, wrapper.WriteFile("/mydir/z_file.txt", nil, 0644))
 	require.NoError(t, wrapper.WriteFile("/mydir/a_file.txt", nil, 0644))
 
-	infos, err := wrapper.Readdir("/mydir")
+	entries, err := wrapper.ReadDir("/mydir")
 	require.NoError(t, err)
 
 	gotNames := []string{}
-	for _, info := range infos {
-		gotNames = append(gotNames, info.Name())
+	for _, entry := range entries {
+		gotNames = append(gotNames, entry.Name())
 	}
 	sort.Strings(gotNames)
 	expectedNames := []string{"a_file.txt", "b_subdir", "z_file.txt"}
