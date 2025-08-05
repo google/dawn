@@ -161,10 +161,6 @@ template("tint_benchmarks_source_set") {
 ###############################################################################
 if (tint_has_fuzzers) {
   import("//testing/libfuzzer/fuzzer_test.gni")
-  fuzzer_corpus_dir = "${root_gen_dir}/fuzzers"
-  fuzzer_corpus_wgsl_dir = "${fuzzer_corpus_dir}/wgsl_corpus"
-  fuzzer_corpus_wgsl_stamp = "${fuzzer_corpus_wgsl_dir}/wgsl.stamp"
-
   template("tint_fuzz_source_set") {
     source_set(target_name) {
       forward_variables_from(invoker, "*", [ "configs" ])
@@ -224,16 +220,12 @@ if (tint_has_fuzzers) {
           "max_len=10000",
         ]
 
-        deps += [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
-        seed_corpus = fuzzer_corpus_wgsl_dir
-        seed_corpus_deps = [ "${tint_src_dir}:tint_generate_wgsl_corpus" ]
-      } else if (target_name == "ir") {
-        # TODO(409348527): Re-enable corpus generation
-        # deps += [ "${tint_src_dir}:tint_generate_ir_corpus" ]
-        # seed_corpus = fuzzer_corpus_ir_dir
-        # seed_corpus_deps = [ "${tint_src_dir}:tint_generate_ir_corpus" ]
-      } else {
-        assert(false, "unsupported tint fuzzer target")
+        # There is a nightly job that generates the corpus for each of
+        # the fuzzers and uploads them to cloud storage that
+        # ClusterFuzz uses, so there is no need for this rule to
+        # automatically generate the corpus. There are instructions in
+        # docs/tint/fuzzers.md for how to generate the corpus locally
+        # if needed.
       }
     }
 

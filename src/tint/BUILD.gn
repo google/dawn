@@ -308,23 +308,6 @@ source_set("dxcompiler-for-fuzzer") {
 }
 
 ###############################################################################
-# Fuzzers
-###############################################################################
-if (tint_has_fuzzers) {
-  action("tint_generate_wgsl_corpus") {
-    testonly = true
-    script = "${tint_src_dir}/cmd/fuzz/generate_tint_corpus.py"
-    sources = [ "${script}" ]
-    deps = []
-    args = [
-      rebase_path("${tint_root_dir}/test/tint", root_build_dir),
-      rebase_path("${fuzzer_corpus_dir}/wgsl_corpus", root_build_dir),
-    ]
-    outputs = [ fuzzer_corpus_wgsl_stamp ]
-  }
-}
-
-###############################################################################
 # Groups
 ###############################################################################
 group("libs") {
