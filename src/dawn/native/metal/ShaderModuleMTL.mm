@@ -152,7 +152,7 @@ tint::msl::writer::Bindings GenerateBindingInfo(
             auto& bindingIndexInfo = layout->GetBindingIndexInfo(stage)[group];
             uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
 
-            tint::msl::writer::binding::BindingInfo dstBindingPoint{
+            tint::BindingPoint dstBindingPoint{
                 .group = useArgumentBuffers ? uint32_t(group) : 0,
                 .binding = shaderIndex,
             };
@@ -197,22 +197,22 @@ tint::msl::writer::Bindings GenerateBindingInfo(
                     DAWN_ASSERT(expansion != etBindingMap.end());
 
                     const auto& bindingExpansion = expansion->second;
-                    tint::msl::writer::binding::BindingInfo plane0{
+                    tint::BindingPoint plane0{
                         .group = dstBindingPoint.group,
                         .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)],
                     };
-                    tint::msl::writer::binding::BindingInfo plane1{
+                    tint::BindingPoint plane1{
                         .group = dstBindingPoint.group,
                         .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)],
                     };
-                    tint::msl::writer::binding::BindingInfo metadata{
+                    tint::BindingPoint metadata{
                         .group = dstBindingPoint.group,
                         .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)],
                     };
 
                     bindings.external_texture.emplace(
                         srcBindingPoint,
-                        tint::msl::writer::binding::ExternalTexture{metadata, plane0, plane1});
+                        tint::msl::writer::ExternalTexture{metadata, plane0, plane1});
                 },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
@@ -312,7 +312,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 .binding = metalIndex,
             };
             if (srcBindingPoint != dstBindingPoint) {
-                bindings.storage.emplace(srcBindingPoint, tint::msl::writer::binding::Storage{
+                bindings.storage.emplace(srcBindingPoint, tint::BindingPoint{
                                                               .group = 0,
                                                               .binding = dstBindingPoint.binding,
                                                           });

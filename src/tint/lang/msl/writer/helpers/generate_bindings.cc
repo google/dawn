@@ -73,7 +73,7 @@ Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buff
                 continue;
             }
 
-            binding::BindingInfo info{
+            tint::BindingPoint info{
                 .group = use_argument_buffers ? bp->group : 0,
                 .binding = bp->binding,
             };
@@ -112,20 +112,20 @@ Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buff
 
         uint32_t g = use_argument_buffers ? bp.group : 0;
 
-        binding::BindingInfo plane0{
+        tint::BindingPoint plane0{
             .group = g,
             .binding = bp.binding,
         };
-        binding::BindingInfo plane1{
+        tint::BindingPoint plane1{
             .group = g,
             .binding = next_num++,
         };
-        binding::BindingInfo metadata{
+        tint::BindingPoint metadata{
             .group = g,
             .binding = next_num++,
         };
 
-        bindings.external_texture.emplace(bp, binding::ExternalTexture{metadata, plane0, plane1});
+        bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
     }
 
     return bindings;

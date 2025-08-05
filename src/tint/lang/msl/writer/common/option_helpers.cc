@@ -34,17 +34,16 @@
 
 namespace tint::msl::writer {
 
-/// binding::BindingInfo to tint::BindingPoint map
-using InfoToPointMap = tint::Hashmap<binding::BindingInfo, tint::BindingPoint, 8>;
+using PointToPointMap = tint::Hashmap<tint::BindingPoint, tint::BindingPoint, 8>;
 
 Result<SuccessType> ValidateBindingOptions(const Options& options) {
     diag::List diagnostics;
 
-    tint::Hashmap<tint::BindingPoint, binding::BindingInfo, 8> seen_wgsl_bindings{};
+    PointToPointMap seen_wgsl_bindings{};
 
-    InfoToPointMap seen_msl_buffer_bindings{};
-    InfoToPointMap seen_msl_texture_bindings{};
-    InfoToPointMap seen_msl_sampler_bindings{};
+    PointToPointMap seen_msl_buffer_bindings{};
+    PointToPointMap seen_msl_texture_bindings{};
+    PointToPointMap seen_msl_sampler_bindings{};
 
     // Both wgsl_seen and spirv_seen check to see if the pair of [src, dst] are unique. If we have
     // multiple entries that map the same [src, dst] pair, that's fine. We treat it as valid as it's
@@ -52,7 +51,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
     // match, then we report an error about a duplicate binding point.
 
     auto wgsl_seen = [&diagnostics, &seen_wgsl_bindings](const tint::BindingPoint& src,
-                                                         const binding::BindingInfo& dst) -> bool {
+                                                         const tint::BindingPoint& dst) -> bool {
         if (auto binding = seen_wgsl_bindings.Add(src, dst); binding.value != dst) {
             diagnostics.AddError(Source{}) << "found duplicate WGSL binding point: " << src;
             return true;
@@ -60,7 +59,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         return false;
     };
 
-    auto msl_seen = [&diagnostics](InfoToPointMap& map, const binding::BindingInfo& src,
+    auto msl_seen = [&diagnostics](PointToPointMap& map, const tint::BindingPoint& src,
                                    const tint::BindingPoint& dst) -> bool {
         if (auto binding = map.Add(src, dst); binding.value != dst) {
             diagnostics.AddError(Source{})
@@ -70,7 +69,7 @@ Result<SuccessType> ValidateBindingOptions(const Options& options) {
         return false;
     };
 
-    auto valid = [&wgsl_seen, &msl_seen](InfoToPointMap& map, const auto& hsh) -> bool {
+    auto valid = [&wgsl_seen, &msl_seen](PointToPointMap& map, const auto& hsh) -> bool {
         for (const auto& it : hsh) {
             const auto& src_binding = it.first;
             const auto& dst_binding = it.second;
@@ -156,18 +155,14 @@ void PopulateBindingRelatedOptions(const Options& options,
     auto create_remappings = [&remapper_data](const auto& hsh) {
         for (const auto& it : hsh) {
             const BindingPoint& src_binding_point = it.first;
-            const binding::BindingInfo& dst_binding_point = it.second;
+            const auto& dst_binding_point = it.second;
 
             // Bindings which go to the same slot in MSL do not need to be re-bound.
-            if (src_binding_point.group == dst_binding_point.group &&
-                src_binding_point.binding == dst_binding_point.binding) {
+            if (src_binding_point == dst_binding_point) {
                 continue;
             }
 
-            remapper_data.emplace(src_binding_point, BindingPoint{
-                                                         .group = dst_binding_point.group,
-                                                         .binding = dst_binding_point.binding,
-                                                     });
+            remapper_data.emplace(src_binding_point, dst_binding_point);
         }
     };
 
@@ -181,26 +176,20 @@ void PopulateBindingRelatedOptions(const Options& options,
     for (const auto& it : options.bindings.external_texture) {
         const BindingPoint& src_binding_point = it.first;
 
-        const binding::BindingInfo& plane0 = it.second.plane0;
-        const binding::BindingInfo& plane1 = it.second.plane1;
-        const binding::BindingInfo& metadata = it.second.metadata;
-
-        const BindingPoint plane0_binding_point{plane0.group, plane0.binding};
-        const BindingPoint plane1_binding_point{plane1.group, plane1.binding};
-        const BindingPoint metadata_binding_point{metadata.group, metadata.binding};
+        const auto& plane0 = it.second.plane0;
+        const auto& plane1 = it.second.plane1;
+        const auto& metadata = it.second.metadata;
 
         // Use the re-bound MSL plane0 value for the lookup key.
-        multiplanar_map.emplace(
-            BindingPoint{plane0_binding_point.group, plane0_binding_point.binding},
-            tint::transform::multiplanar::BindingPoints{plane1_binding_point,
-                                                        metadata_binding_point});
+        multiplanar_map.emplace(plane0,
+                                tint::transform::multiplanar::BindingPoints{plane1, metadata});
 
         // Bindings which go to the same slot in MSL do not need to be re-bound.
-        if (src_binding_point == plane0_binding_point) {
+        if (src_binding_point == plane0) {
             continue;
         }
 
-        remapper_data.emplace(src_binding_point, plane0_binding_point);
+        remapper_data.emplace(src_binding_point, plane0);
     }
 
     // ArrayLengthOptions bindpoints may need to be remapped

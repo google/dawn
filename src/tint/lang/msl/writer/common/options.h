@@ -37,79 +37,35 @@
 #include "src/tint/utils/reflection.h"
 
 namespace tint::msl::writer {
-namespace binding {
-
-/// Generic binding point
-struct BindingInfo {
-    /// The group
-    uint32_t group = 0;
-    /// The binding
-    uint32_t binding = 0;
-
-    /// Equality operator
-    /// @param rhs the BindingInfo to compare against
-    /// @returns true if this BindingInfo is equal to `rhs`
-    inline bool operator==(const BindingInfo& rhs) const {
-        return group == rhs.group && binding == rhs.binding;
-    }
-    /// Inequality operator
-    /// @param rhs the BindingInfo to compare against
-    /// @returns true if this BindingInfo is not equal to `rhs`
-    inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
-
-    /// @returns the hash code of the BindingInfo
-    tint::HashCode HashCode() const { return Hash(group, binding); }
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(BindingInfo, group, binding);
-};
-
-using Uniform = BindingInfo;
-using Storage = BindingInfo;
-using Texture = BindingInfo;
-using StorageTexture = BindingInfo;
-using Sampler = BindingInfo;
 
 /// An external texture
 struct ExternalTexture {
     /// Metadata
-    BindingInfo metadata{};
+    BindingPoint metadata{};
     /// Plane0 binding data
-    BindingInfo plane0{};
+    BindingPoint plane0{};
     /// Plane1 binding data;
-    BindingInfo plane1{};
+    BindingPoint plane1{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
 };
 
-}  // namespace binding
-
-/// Maps the WGSL binding point to the SPIR-V group,binding for uniforms
-using UniformBindings = std::unordered_map<BindingPoint, binding::Uniform>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for storage
-using StorageBindings = std::unordered_map<BindingPoint, binding::Storage>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for textures
-using TextureBindings = std::unordered_map<BindingPoint, binding::Texture>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for storage textures
-using StorageTextureBindings = std::unordered_map<BindingPoint, binding::StorageTexture>;
-/// Maps the WGSL binding point to the SPIR-V group,binding for samplers
-using SamplerBindings = std::unordered_map<BindingPoint, binding::Sampler>;
-/// Maps the WGSL binding point to the plane0, plane1, and metadata for external textures
-using ExternalTextureBindings = std::unordered_map<BindingPoint, binding::ExternalTexture>;
+using BindingMap = std::unordered_map<BindingPoint, BindingPoint>;
+using ExternalTextureBindings = std::unordered_map<BindingPoint, ExternalTexture>;
 
 /// Binding information
 struct Bindings {
     /// Uniform bindings
-    UniformBindings uniform{};
+    BindingMap uniform{};
     /// Storage bindings
-    StorageBindings storage{};
+    BindingMap storage{};
     /// Texture bindings
-    TextureBindings texture{};
+    BindingMap texture{};
     /// Storage texture bindings
-    StorageTextureBindings storage_texture{};
+    BindingMap storage_texture{};
     /// Sampler bindings
-    SamplerBindings sampler{};
+    BindingMap sampler{};
     /// External bindings
     ExternalTextureBindings external_texture{};
 
