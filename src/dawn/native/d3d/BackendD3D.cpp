@@ -93,7 +93,7 @@ IDXGIFactory4* Backend::GetFactory() const {
 }
 
 MaybeError Backend::EnsureFXC() {
-    return mFunctions.get()->EnsureFXC();
+    return mFunctions.get()->EnsureFXC(GetInstance()->GetRuntimeSearchPaths());
 }
 
 const PlatformFunctions* Backend::GetFunctions() const {
