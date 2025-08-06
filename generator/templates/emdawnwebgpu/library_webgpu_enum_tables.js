@@ -96,12 +96,11 @@
                     {% endfor %}
                 ]
             {%- else -%}
-                // Create a sparse array so we can use indexOf on it.
-                Object.assign([], {
+                {
                     {% for value in type.values %}
                         {{value.value}}: {{as_jsEnumValue(value)}},
                     {% endfor %}
-                })
+                }
             {%- endif -%}
             ,
         {% endfor %}

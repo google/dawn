@@ -740,7 +740,7 @@ var LibraryWebGPU = {
   // Methods of Adapter
   // --------------------------------------------------------------------------
 
-  wgpuAdapterGetFeatures__deps: ['malloc'],
+  wgpuAdapterGetFeatures__deps: ['malloc', '$emwgpuStringToInt_FeatureName'],
   wgpuAdapterGetFeatures: (adapterPtr, supportedFeatures) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
 
@@ -749,7 +749,7 @@ var LibraryWebGPU = {
     var offset = 0;
     var numFeatures = 0;
     adapter.features.forEach(feature => {
-      var featureEnumValue = WebGPU.FeatureName.indexOf(feature);
+      var featureEnumValue = emwgpuStringToInt_FeatureName[feature];
       if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
@@ -1853,7 +1853,7 @@ var LibraryWebGPU = {
     device.destroy()
   },
 
-  wgpuDeviceGetFeatures__deps: ['malloc'],
+  wgpuDeviceGetFeatures__deps: ['malloc', '$emwgpuStringToInt_FeatureName'],
   wgpuDeviceGetFeatures: (devicePtr, supportedFeatures) => {
     var device = WebGPU.getJsObject(devicePtr);
 
@@ -1862,7 +1862,7 @@ var LibraryWebGPU = {
     var offset = 0;
     var numFeatures = 0;
     device.features.forEach(feature => {
-      var featureEnumValue = WebGPU.FeatureName.indexOf(feature);
+      var featureEnumValue = emwgpuStringToInt_FeatureName[feature];
       if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;

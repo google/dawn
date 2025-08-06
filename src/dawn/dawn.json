@@ -2262,6 +2262,7 @@
     },
     "feature name": {
         "category": "enum",
+        "emscripten_string_to_int": true,
         "values": [
             {"value": 1, "name": "core features and limits"},
             {"value": 2, "name": "depth clip control"},
