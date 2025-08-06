@@ -2514,5 +2514,77 @@ TEST_F(SpirvParserTest, Phi_FromContinuing) {
 )");
 }
 
+// Bug: https://crbug.com/dawn/435621075
+TEST_F(SpirvParserTest, Phi_Bug_435621075) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+      %float = OpTypeFloat 32
+    %float_0 = OpConstant %float 0
+       %void = OpTypeVoid
+         %29 = OpTypeFunction %void
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %29
+         %33 = OpLabel
+               OpBranch %35
+         %35 = OpLabel
+         %36 = OpPhi %float %float_0 %33 %37 %38
+               OpLoopMerge %44 %38 None
+               OpBranchConditional %true %45 %44
+         %45 = OpLabel
+         %37 = OpCopyObject %float %float_0
+               OpSelectionMerge %48 None
+               OpBranchConditional %true %49 %48
+         %49 = OpLabel
+               OpBranch %38
+         %48 = OpLabel
+               OpBranch %38
+         %38 = OpLabel
+               OpBranch %35
+         %44 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        next_iteration 0.0f  # -> $B3
+      }
+      $B3 (%2:f32): {  # body
+        if true [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            %3:f32 = let 0.0f
+            if true [t: $B7, f: $B8] {  # if_2
+              $B7: {  # true
+                continue %3  # -> $B4
+              }
+              $B8: {  # false
+                exit_if  # if_2
+              }
+            }
+            continue %3  # -> $B4
+          }
+          $B6: {  # false
+            exit_loop  # loop_1
+          }
+        }
+        unreachable
+      }
+      $B4 (%4:f32): {  # continuing
+        next_iteration %4  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

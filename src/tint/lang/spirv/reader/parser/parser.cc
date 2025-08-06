@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -1177,7 +1178,6 @@ class Parser {
 
                         auto* loop = cont->Loop();
                         loop->Continuing()->AddParam(param);
-
                         cont->PushOperand(src);
 
                         // Set `src` as the `param` so it's returned as the new value
@@ -1315,7 +1315,7 @@ class Parser {
     ///
     /// @param id a SPIR-V result ID
     /// @returns a Tint value object
-    core::ir::Value* ValueNoPropagate(uint32_t id) {
+    std::optional<core::ir::Value*> ValueNoPropagate(uint32_t id) {
         auto v = values_.Get(id);
         if (v) {
             return *v;
@@ -1342,7 +1342,7 @@ class Parser {
             return construct->Result();
         }
 
-        TINT_UNREACHABLE() << "missing value for result ID " << id;
+        return std::nullopt;
     }
 
     /// Attempts to retrieve the current Tint IR value for `id`. If the value exists and is not in
@@ -1352,13 +1352,13 @@ class Parser {
     /// @returns a Tint value object
     core::ir::Value* Value(uint32_t id, bool add_to_scope = true) {
         auto v = ValueNoPropagate(id);
-        TINT_ASSERT(v);
+        TINT_ASSERT(v.has_value());
 
-        if (v->Is<core::ir::Constant>() || IdIsInScope(id)) {
-            return v;
+        if (v.value()->Is<core::ir::Constant>() || IdIsInScope(id)) {
+            return v.value();
         }
 
-        auto* new_v = Propagate(id, v);
+        auto* new_v = Propagate(id, v.value());
         if (add_to_scope) {
             AddValue(id, new_v);
         }
@@ -1692,8 +1692,9 @@ class Parser {
         // in the block.
         auto replace = values_to_replace_.back();
         for (auto& val : replace) {
-            auto* value = ValueNoPropagate(val.value_id);
-            val.terminator->SetOperand(val.idx, value);
+            auto v = ValueNoPropagate(val.value_id);
+            TINT_ASSERT(v.has_value());
+            val.terminator->SetOperand(val.idx, v.value());
         }
 
         values_to_replace_.pop_back();
@@ -1705,6 +1706,21 @@ class Parser {
         // Emit the continuing block. The continue block is within the scope of the body block,
         // so we don't pop the id stack yet.
         auto continue_id = loop_merge_inst->GetSingleWordInOperand(1);
+
+        // Capture any continue PHi header values before emitting the continue because the value
+        // will get re-written to be the continue block param, so we have to capture first.
+        auto continue_loop_phi_ids = block_phi_values_[continue_id];
+        std::vector<core::ir::Value*> continue_loop_phi_values;
+        if (!continue_loop_phi_ids.empty()) {
+            continue_loop_phi_values.reserve(continue_loop_phi_ids.size());
+            for (auto& id : continue_loop_phi_ids) {
+                auto v = ValueNoPropagate(id);
+                if (v.has_value()) {
+                    continue_loop_phi_values.push_back(v.value());
+                }
+            }
+        }
+
         EmitContinueBlock(src.id(), continue_id, loop);
 
         // Remove the body block id stack before emitting the merge block.
@@ -1717,17 +1733,37 @@ class Parser {
             for (auto incoming : loop->Continuing()->InboundSiblingBranches()) {
                 TINT_ASSERT(incoming->Is<core::ir::Continue>());
 
+                if (incoming->Args().Length() == loop->Continuing()->Params().Length()) {
+                    continue;
+                }
+
                 // Check if the block this instruction exists in has default phi result that we
                 // can append.
                 auto inst_to_blk_iter = inst_to_spirv_block_.find(incoming);
                 if (inst_to_blk_iter != inst_to_spirv_block_.end()) {
                     uint32_t spirv_blk = inst_to_blk_iter->second;
+
                     auto phi_values_from_loop_header = block_phi_values_[spirv_blk];
-                    // If there were phi values, push them to this instruction
-                    for (auto value_id : phi_values_from_loop_header) {
-                        auto* value = Value(value_id);
-                        incoming->PushOperand(value);
+
+                    // We require a PHI value, but the current block doesn't have any from the
+                    // header. In this case, check the `continue` target to see if it has header
+                    // provided phi values. If so, use that one.
+                    if (phi_values_from_loop_header.empty()) {
+                        TINT_ASSERT(!continue_loop_phi_values.empty());
+
+                        for (auto* value : continue_loop_phi_values) {
+                            incoming->PushOperand(value);
+                        }
+
+                    } else {
+                        // If there were phi values, push them to this instruction
+                        for (auto value_id : phi_values_from_loop_header) {
+                            auto* value = Value(value_id);
+                            incoming->PushOperand(value);
+                        }
                     }
+                } else {
+                    TINT_UNREACHABLE() << "unable to provide needed continue arguments";
                 }
             }
         }
@@ -2669,7 +2705,6 @@ class Parser {
                 if (sibling->Operands().Length() >= param_count) {
                     continue;
                 }
-
                 // We haven't updated the sibling yet
                 auto* term = sibling->As<core::ir::Terminator>();
                 TINT_ASSERT(term);
@@ -2729,6 +2764,12 @@ class Parser {
         for (uint32_t i = 0; i < inst.NumInOperands(); i += 2) {
             auto value_id = inst.GetSingleWordInOperand(i);
             auto blk_id = inst.GetSingleWordInOperand(i + 1);
+
+            if (block_phi_values_.contains(blk_id)) {
+                block_phi_values_[blk_id].push_back(value_id);
+            } else {
+                block_phi_values_[blk_id] = {value_id};
+            }
 
             core::ir::Terminator* term = nullptr;
             // The referenced block hasn't been emitted yet (continue blocks have this
@@ -3258,7 +3299,7 @@ class Parser {
         return nullptr;
     }
 
-    void EmitBranch(const spvtools::opt::Instruction& inst) {
+    void EmitBranch(spvtools::opt::Instruction& inst) {
         auto dest_id = inst.GetSingleWordInOperand(0);
 
         // Disallow fallthrough
@@ -3270,7 +3311,10 @@ class Parser {
 
         // The destination is a continuing block, so insert a `continue`
         if (auto* loop = ContinueTarget(dest_id)) {
-            EmitWithoutResult(b_.Continue(loop));
+            auto* new_inst = b_.Continue(loop);
+            auto id = spirv_context_->get_instr_block(&inst)->id();
+            inst_to_spirv_block_[new_inst] = id;
+            EmitWithoutResult(new_inst);
             return;
         }
         // If this is branching to a previous merge block then we're done. It can be a previous
@@ -4445,7 +4489,7 @@ class Parser {
     // are defined after the `OpPhi` instruction.
     std::vector<std::vector<ReplacementValue>> values_to_replace_;
 
-    // A map of loop header to phi values returned by that loop header
+    // A map of block to phi values returned by the loop header
     std::unordered_map<uint32_t, std::vector<uint32_t>> block_phi_values_;
 
     // Map of certain instructions back to their originating spirv block
