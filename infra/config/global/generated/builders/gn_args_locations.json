@@ -1,0 +1,6 @@
+{
+  "dawn": {
+    "dawn-cq-linux-x64-sws-rel": "try/dawn-cq-linux-x64-sws-rel/gn-args.json",
+    "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json"
+  }
+}
