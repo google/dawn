@@ -36,6 +36,8 @@ namespace tint::wgsl::writer {
 struct ProgramOptions {
     /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
     bool allow_non_uniform_derivatives = false;
+    /// Set to `true` to insert a directive to disable uniformity checks for subgroup builtins.
+    bool allow_non_uniform_subgroup_operations = false;
     /// The extensions and language features that are allowed to be used in the generated WGSL.
     wgsl::AllowedFeatures allowed_features = {};
 };

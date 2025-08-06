@@ -51,8 +51,6 @@ IRToProgramTest::Result IRToProgramTest::Run() {
 
     result.ir = str();
 
-    ProgramOptions options;
-    options.allowed_features = AllowedFeatures::Everything();
     auto output_program = IRToProgram(mod, options);
     if (!output_program.IsValid()) {
         result.err = output_program.Diagnostics().Str();
@@ -3598,6 +3596,37 @@ struct S {
 }
 
 fn f(x : S) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, AllowNonUniformSubgroups) {
+    auto non_uniform = Var<private_, bool>();
+    b.ir.root_block->Append(non_uniform);
+
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {  //
+        auto* if_ = b.If(b.Load(non_uniform));
+        b.Append(if_->True(), [&] {
+            b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<u32>(), wgsl::BuiltinFn::kSubgroupBallot,
+                                                  true));
+            b.ExitIf(if_);
+        });
+        b.Return(fn);
+    });
+
+    options.allow_non_uniform_subgroup_operations = true;
+    EXPECT_WGSL(R"(
+enable f16;
+enable subgroups;
+diagnostic(off, subgroup_uniformity);
+
+var<private> v : bool;
+
+fn f() {
+  if (v) {
+    _ = subgroupBallot(true);
+  }
 }
 )");
 }

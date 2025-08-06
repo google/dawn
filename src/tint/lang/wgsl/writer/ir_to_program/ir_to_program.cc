@@ -136,6 +136,11 @@ class State {
             // diagnostic directive to the module.
             b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "derivative_uniformity");
         }
+        if (options.allow_non_uniform_subgroup_operations) {
+            // Suppress errors regarding non-uniform subgroups operations if requested, by adding a
+            // diagnostic directive to the module.
+            b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "subgroup_uniformity");
+        }
 
         return Program{resolver::Resolve(b, options.allowed_features)};
     }
