@@ -1178,6 +1178,25 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         }
+        case core::BuiltinValue::kBarycentricCoord: {
+            if (!enabled_extensions_.Contains(
+                    wgsl::Extension::kChromiumExperimentalBarycentricCoord)) {
+                AddError(attr->source) << "use of " << style::Attribute("@builtin")
+                                       << style::Code("(", style::Enum(builtin), ")")
+                                       << " requires enabling extension "
+                                       << style::Code("chromium_experimental_barycentric_coord");
+                return false;
+            }
+            if (!(type->IsFloatVector() && type->As<core::type::Vector>()->Width() == 3)) {
+                err_builtin_type("vec3<f32>");
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone &&
+                !(stage == ast::PipelineStage::kFragment && is_input)) {
+                is_stage_mismatch = true;
+            }
+            break;
+        }
         default:
             break;
     }

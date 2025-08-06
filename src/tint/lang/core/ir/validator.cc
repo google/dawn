@@ -472,6 +472,17 @@ constexpr BuiltinChecker kPrimitiveIdChecker{
     /* type_error */ "primitive_id must be an u32",
 };
 
+constexpr BuiltinChecker kBarycentricCoordChecker{
+    /* name */ "barycentric_coord",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsFloatVector() && ty->Elements().count == 3;
+    },
+    /* type_error */ "barycentric_coord must be an vec3<f32>",
+};
+
 /// @returns an appropriate BuiltInCheck for @p builtin, ICEs when one isn't defined
 const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
     switch (builtin) {
@@ -507,6 +518,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kWorkgroupIdChecker;
         case BuiltinValue::kPrimitiveId:
             return kPrimitiveIdChecker;
+        case BuiltinValue::kBarycentricCoord:
+            return kBarycentricCoordChecker;
         case BuiltinValue::kPosition:
             TINT_ICE() << "BuiltinValue::kPosition requires special handling, so does not have a "
                           "checker defined";

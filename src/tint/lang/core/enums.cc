@@ -967,6 +967,9 @@ std::string_view ToString(BuiltinType value) {
 /// @param str the string to parse
 /// @returns the parsed enum, or BuiltinValue::kUndefined if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str) {
+    if (str == "barycentric_coord") {
+        return BuiltinValue::kBarycentricCoord;
+    }
     if (str == "clip_distances") {
         return BuiltinValue::kClipDistances;
     }
@@ -1028,6 +1031,8 @@ std::string_view ToString(BuiltinValue value) {
             return "__cull_distance";
         case BuiltinValue::kPointSize:
             return "__point_size";
+        case BuiltinValue::kBarycentricCoord:
+            return "barycentric_coord";
         case BuiltinValue::kClipDistances:
             return "clip_distances";
         case BuiltinValue::kFragDepth:

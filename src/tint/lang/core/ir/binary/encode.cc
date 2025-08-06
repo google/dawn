@@ -1083,6 +1083,8 @@ struct Encoder {
                 return pb::BuiltinValue::clip_distances;
             case core::BuiltinValue::kPrimitiveId:
                 return pb::BuiltinValue::primitive_id;
+            case core::BuiltinValue::kBarycentricCoord:
+                return pb::BuiltinValue::barycentric_coord;
             case core::BuiltinValue::kUndefined:
                 break;
         }

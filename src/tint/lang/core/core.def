@@ -66,6 +66,7 @@ enum builtin_value {
   subgroup_invocation_id
   subgroup_size
   primitive_id
+  barycentric_coord
   @internal __point_size
   @internal __cull_distance
 }

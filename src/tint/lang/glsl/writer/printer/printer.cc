@@ -102,6 +102,7 @@ constexpr const char* kOESSampleVariables = "GL_OES_sample_variables";
 constexpr const char* kEXTBlendFuncExtended = "GL_EXT_blend_func_extended";
 constexpr const char* kEXTTextureShadowLod = "GL_EXT_texture_shadow_lod";
 constexpr const char* kEXTGeometryShader = "GL_EXT_geometry_shader";
+constexpr const char* kEXTFragmentShaderBarycentric = "GL_EXT_fragment_shader_barycentric";
 
 enum class LayoutFormat : uint8_t {
     kStd140,
@@ -1991,6 +1992,9 @@ class Printer : public tint::TextGenerator {
                 }
 
                 return "gl_PrimitiveID";
+            case core::BuiltinValue::kBarycentricCoord:
+                EmitExtension(kEXTFragmentShaderBarycentric);
+                return "gl_BaryCoordEXT";
             default:
                 TINT_UNREACHABLE();
         }

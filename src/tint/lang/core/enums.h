@@ -528,6 +528,7 @@ enum class BuiltinValue : uint8_t {
     kUndefined,
     kCullDistance,  // Tint-internal enum entry - not parsed
     kPointSize,     // Tint-internal enum entry - not parsed
+    kBarycentricCoord,
     kClipDistances,
     kFragDepth,
     kFrontFacing,
@@ -566,6 +567,7 @@ auto& operator<<(STREAM& out, BuiltinValue value) {
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
 constexpr std::string_view kBuiltinValueStrings[] = {
+    "barycentric_coord",
     "clip_distances",
     "frag_depth",
     "front_facing",

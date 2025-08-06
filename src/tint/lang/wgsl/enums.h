@@ -114,6 +114,7 @@ constexpr std::string_view kChromiumDiagnosticRuleStrings[] = {
 enum class Extension : uint8_t {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
+    kChromiumExperimentalBarycentricCoord,
     kChromiumExperimentalFramebufferFetch,
     kChromiumExperimentalImmediate,
     kChromiumExperimentalPixelLocal,
@@ -147,6 +148,7 @@ Extension ParseExtension(std::string_view str);
 
 constexpr std::string_view kExtensionStrings[] = {
     "chromium_disable_uniformity_analysis",
+    "chromium_experimental_barycentric_coord",
     "chromium_experimental_framebuffer_fetch",
     "chromium_experimental_immediate",
     "chromium_experimental_pixel_local",
@@ -163,6 +165,7 @@ constexpr std::string_view kExtensionStrings[] = {
 /// All extensions
 static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumDisableUniformityAnalysis,
+    Extension::kChromiumExperimentalBarycentricCoord,
     Extension::kChromiumExperimentalFramebufferFetch,
     Extension::kChromiumExperimentalImmediate,
     Extension::kChromiumExperimentalPixelLocal,

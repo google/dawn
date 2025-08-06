@@ -1609,6 +1609,8 @@ struct Decoder {
                 return core::BuiltinValue::kClipDistances;
             case pb::BuiltinValue::primitive_id:
                 return core::BuiltinValue::kPrimitiveId;
+            case pb::BuiltinValue::barycentric_coord:
+                return core::BuiltinValue::kBarycentricCoord;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinValue::BuiltinValue_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;

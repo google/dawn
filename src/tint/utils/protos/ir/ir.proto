@@ -579,6 +579,7 @@ enum BuiltinValue {
     cull_distance = 16;
     subgroup_id = 17;
     primitive_id = 18;
+    barycentric_coord = 19;
 }
 
 enum BuiltinFn {

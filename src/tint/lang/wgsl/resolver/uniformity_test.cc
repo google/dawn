@@ -768,11 +768,15 @@ test:9:7 note: parameter 's' of 'main' may be non-uniform
 class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
+    std::string asScalar = "vec4(b).x";
     std::string src = "";
     if (GetParam().name == "subgroup_size") {
         src += "enable subgroups;\n";
     } else if (GetParam().name == "primitive_id") {
         src += "enable chromium_experimental_primitive_id;\n";
+    } else if (GetParam().name == "barycentric_coord") {
+        src += "enable chromium_experimental_barycentric_coord;\n";
+        asScalar = "vec3(b).x";
     } else {
         src += "\n";
     }
@@ -781,7 +785,8 @@ TEST_P(FragmentBuiltin, AsParam) {
 @fragment
 fn main(@builtin()" +
            GetParam().name + R"() b : )" + GetParam().type + R"() {
-  if (u32(vec4(b).x) == 0u) {
+  if (u32()" +
+           asScalar + R"() == 0u) {
     _ = dpdx(0.5);
   }
 }
@@ -796,22 +801,28 @@ fn main(@builtin()" +
         ^^^^^^^^^
 
 test:5:3 note: control flow depends on possibly non-uniform value
-  if (u32(vec4(b).x) == 0u) {
+  if (u32()" + asScalar +
+                      R"() == 0u) {
   ^^
 
 test:5:16 note: builtin 'b' of 'main' may be non-uniform
-  if (u32(vec4(b).x) == 0u) {
+  if (u32()" + asScalar +
+                      R"() == 0u) {
                ^
 )");
     }
 }
 
 TEST_P(FragmentBuiltin, InStruct) {
+    std::string asScalar = "vec4(s.b).x";
     std::string src = "";
     if (GetParam().name == "subgroup_size") {
         src += "enable subgroups;\n";
     } else if (GetParam().name == "primitive_id") {
         src += "enable chromium_experimental_primitive_id;\n";
+    } else if (GetParam().name == "barycentric_coord") {
+        src += "enable chromium_experimental_barycentric_coord;\n";
+        asScalar = "vec3(s.b).x";
     } else {
         src += "\n";
     }
@@ -824,7 +835,8 @@ struct S {
 
 @fragment
 fn main(s : S) {
-  if (u32(vec4(s.b).x) == 0u) {
+  if (u32()" +
+           asScalar + R"() == 0u) {
     _ = dpdx(0.5);
   }
 }
@@ -839,11 +851,13 @@ fn main(s : S) {
         ^^^^^^^^^
 
 test:9:3 note: control flow depends on possibly non-uniform value
-  if (u32(vec4(s.b).x) == 0u) {
+  if (u32()" + asScalar +
+                      R"() == 0u) {
   ^^
 
 test:9:16 note: parameter 's' of 'main' may be non-uniform
-  if (u32(vec4(s.b).x) == 0u) {
+  if (u32()" + asScalar +
+                      R"() == 0u) {
                ^
 )");
     }
@@ -856,7 +870,8 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                                            BuiltinEntry{"sample_index", "u32", false},
                                            BuiltinEntry{"sample_mask", "u32", false},
                                            BuiltinEntry{"primitive_id", "u32", false},
-                                           BuiltinEntry{"subgroup_size", "u32", false}),
+                                           BuiltinEntry{"subgroup_size", "u32", false},
+                                           BuiltinEntry{"barycentric_coord", "vec3<f32>", false}),
                          [](const ::testing::TestParamInfo<FragmentBuiltin::ParamType>& p) {
                              return p.param.name;
                          });

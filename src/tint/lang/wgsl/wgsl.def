@@ -99,6 +99,8 @@ enum extension {
   chromium_experimental_subgroup_matrix
   // A Chromium-specific extension for primitive_id support
   chromium_experimental_primitive_id
+  // A Chromium-specific extension for barycentric_coord support
+  chromium_experimental_barycentric_coord
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec

@@ -83,6 +83,8 @@ std::string BuiltinToAttribute(core::BuiltinValue builtin) {
             return "clip_distance";
         case core::BuiltinValue::kPrimitiveId:
             return "primitive_id";
+        case core::BuiltinValue::kBarycentricCoord:
+            return "barycentric_coord";
         default:
             break;
     }

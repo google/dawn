@@ -80,10 +80,21 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                     if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId) {
                         return Failure("subgroup_id is not yet supported by the HLSL backend");
                     }
+
+                    if (member->Attributes().builtin == core::BuiltinValue::kBarycentricCoord &&
+                        options.compiler == Options::Compiler::kFXC) {
+                        return Failure(
+                            "barycentric_coord is not supported by the FXC HLSL backend");
+                    }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kSubgroupId) {
                     return Failure("subgroup_id is not yet supported by the HLSL backend");
+                }
+
+                if (param->Builtin() == core::BuiltinValue::kBarycentricCoord &&
+                    options.compiler == Options::Compiler::kFXC) {
+                    return Failure("barycentric_coord is not supported by the FXC HLSL backend");
                 }
             }
         }

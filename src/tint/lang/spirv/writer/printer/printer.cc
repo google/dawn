@@ -400,9 +400,13 @@ class Printer {
                 module_.PushCapability(SpvCapabilityClipDistance);
                 return SpvBuiltInClipDistance;
             case core::BuiltinValue::kPrimitiveId:
-                // TODO(dsinclair): This come be others, but use geometry for now.
+                // TODO(dsinclair): This can be others, but use geometry for now.
                 module_.PushCapability(SpvCapabilityGeometry);
                 return SpvBuiltInPrimitiveId;
+            case core::BuiltinValue::kBarycentricCoord:
+                module_.PushExtension("SPV_KHR_fragment_shader_barycentric");
+                module_.PushCapability(SpvCapabilityFragmentBarycentricKHR);
+                return SpvBuiltInBaryCoordKHR;
             case core::BuiltinValue::kUndefined:
                 return SpvBuiltInMax;
         }
