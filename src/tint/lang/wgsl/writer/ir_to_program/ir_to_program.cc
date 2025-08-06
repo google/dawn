@@ -187,9 +187,6 @@ class State {
     /// The current function being emitted.
     const core::ir::Function* current_function_ = nullptr;
 
-    /// True if 'diagnostic(off, derivative_uniformity)' has been emitted
-    bool disabled_derivative_uniformity_ = false;
-
     void RootBlock(const core::ir::Block* root) {
         for (auto* inst : *root) {
             tint::Switch(
@@ -694,13 +691,6 @@ class State {
                 Bind(c->Result(), expr);
             },
             [&](const wgsl::ir::BuiltinCall* c) {
-                if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
-                    // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
-                    b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff,
-                                          wgsl::CoreDiagnosticRule::kDerivativeUniformity);
-                    disabled_derivative_uniformity_ = true;
-                }
-
                 switch (c->Func()) {
                     case wgsl::BuiltinFn::kSubgroupBallot:
                     case wgsl::BuiltinFn::kSubgroupElect:
@@ -1391,26 +1381,6 @@ class State {
             }
         }
         return b.IndexAccessor(expr, Expr(index));
-    }
-
-    bool RequiresDerivativeUniformity(wgsl::BuiltinFn fn) {
-        switch (fn) {
-            case wgsl::BuiltinFn::kDpdxCoarse:
-            case wgsl::BuiltinFn::kDpdyCoarse:
-            case wgsl::BuiltinFn::kFwidthCoarse:
-            case wgsl::BuiltinFn::kDpdxFine:
-            case wgsl::BuiltinFn::kDpdyFine:
-            case wgsl::BuiltinFn::kFwidthFine:
-            case wgsl::BuiltinFn::kDpdx:
-            case wgsl::BuiltinFn::kDpdy:
-            case wgsl::BuiltinFn::kFwidth:
-            case wgsl::BuiltinFn::kTextureSample:
-            case wgsl::BuiltinFn::kTextureSampleBias:
-            case wgsl::BuiltinFn::kTextureSampleCompare:
-                return true;
-            default:
-                return false;
-        }
     }
 
     /// @returns true if the builtin value requires the kSubgroups extension to be enabled.

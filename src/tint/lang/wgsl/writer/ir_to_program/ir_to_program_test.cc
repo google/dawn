@@ -2074,8 +2074,6 @@ TEST_F(IRToProgramTest, Load_Reused) {
     });
 
     EXPECT_WGSL(R"(
-diagnostic(off, derivative_uniformity);
-
 @group(0u) @binding(0u) var im : texture_2d<f32>;
 
 @group(0u) @binding(1u) var v : sampler;
@@ -3596,6 +3594,50 @@ struct S {
 }
 
 fn f(x : S) {
+}
+)");
+}
+
+TEST_F(IRToProgramTest, AllowNonUniformDerivatives) {
+    auto im = b.Var(
+        "im",
+        ty.ref(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), read));
+    im->SetBindingPoint(0, 0);
+    auto sampler = b.Var("sampler", ty.ref(handle, ty.sampler(), read));
+    sampler->SetBindingPoint(0, 1);
+    auto non_uniform = Var<private_, bool>();
+
+    b.ir.root_block->Append(im);
+    b.ir.root_block->Append(sampler);
+    b.ir.root_block->Append(non_uniform);
+
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {  //
+        auto* if_ = b.If(b.Load(non_uniform));
+        b.Append(if_->True(), [&] {
+            auto* tl = b.Load(im);
+            auto* sl = b.Load(sampler);
+            b.Phony(b.Call<wgsl::ir::BuiltinCall>(ty.vec4<f32>(), wgsl::BuiltinFn::kTextureSample,
+                                                  tl, sl, b.Splat(ty.vec2<f32>(), 0_f)));
+            b.ExitIf(if_);
+        });
+        b.Return(fn);
+    });
+
+    options.allow_non_uniform_derivatives = true;
+    EXPECT_WGSL(R"(
+diagnostic(off, derivative_uniformity);
+
+@group(0u) @binding(0u) var im : texture_2d<f32>;
+
+@group(0u) @binding(1u) var v : sampler;
+
+var<private> v_1 : bool;
+
+fn f() {
+  if (v_1) {
+    _ = textureSample(im, v, vec2<f32>());
+  }
 }
 )");
 }

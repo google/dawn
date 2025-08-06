@@ -432,23 +432,6 @@ fn foo() -> u32 {
 )");
 }
 
-TEST_F(IRToProgramRoundtripTest, CoreBuiltinCall_DisableDerivativeUniformity) {
-    RUN_TEST(R"(
-fn f(in : f32) {
-  let x = dpdx(in);
-  let y = dpdy(in);
-}
-)",
-             R"(
-diagnostic(off, derivative_uniformity);
-
-fn f(in : f32) {
-  let x = dpdx(in);
-  let y = dpdy(in);
-}
-)");
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Type Construct
 ////////////////////////////////////////////////////////////////////////////////
