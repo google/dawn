@@ -3659,7 +3659,6 @@ TEST_F(IRToProgramTest, AllowNonUniformSubgroups) {
 
     options.allow_non_uniform_subgroup_operations = true;
     EXPECT_WGSL(R"(
-enable f16;
 enable subgroups;
 diagnostic(off, subgroup_uniformity);
 
