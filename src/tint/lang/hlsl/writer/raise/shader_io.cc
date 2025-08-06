@@ -116,6 +116,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 return 13;
             case core::BuiltinValue::kClipDistances:
                 return 14;
+            case core::BuiltinValue::kPrimitiveId:
+                return 15;
+            case core::BuiltinValue::kBarycentricCoord:
+                return 16;
             case core::BuiltinValue::kSubgroupInvocationId:
             case core::BuiltinValue::kSubgroupSize:
                 // These are sorted, but don't actually end up as members. Value doesn't really
