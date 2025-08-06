@@ -1,8 +1,54 @@
 {
-  # Paths to gn_args_locations.json relative to the directory containing mb_config.pyl.
-  # Such json files contain maps of
-  # builder group -> builder ID -> file path of "gn-args.json" generated from starlark.
-  'gn_args_locations_files': [
-      '../config/global/generated/builders/gn_args_locations.json',
-  ],
+  'builder_groups': {
+    'dawn': {
+      # CI.
+      'dawn-linux-x64-builder-rel': 'dawn_linux_x64_release_swiftshader',
+      # Try.
+      'dawn-cq-linux-x64-sws-rel': 'dawn_linux_x64_release_swiftshader',
+    },
+  },
+  'configs': {
+    'dawn_linux_x64_release_swiftshader': ['clang', 'component', 'dawn_no_d3d12', 'dawn_swiftshader', 'release', 'siso', 'tint_hlsl_writer', 'tint_msl_writer', 'tint_spv_reader', 'tint_spv_writer', 'tint_wgsl_reader', 'tint_wgsl_writer', 'x64'],
+  },
+  'mixins': {
+    'clang': {
+      'gn_args': 'is_clang=true',
+    },
+    'component': {
+      'gn_args': 'is_component_build=true',
+    },
+    'dawn_no_d3d12': {
+      'gn_args': 'dawn_enable_d3d12=false',
+    },
+    'dawn_swiftshader': {
+      'gn_args': 'dawn_use_swiftshader=true',
+    },
+    'release': {
+      'gn_args': 'is_debug=false',
+    },
+    'siso': {
+      'gn_args': 'use_siso=true use_remoteexec=true use_reclient=false',
+    },
+    'tint_hlsl_writer': {
+      'gn_args': 'tint_build_hlsl_writer=true',
+    },
+    'tint_msl_writer': {
+      'gn_args': 'tint_build_msl_writer=true',
+    },
+    'tint_spv_reader': {
+      'gn_args': 'tint_build_spv_reader=true',
+    },
+    'tint_spv_writer': {
+      'gn_args': 'tint_build_spv_writer=true',
+    },
+    'tint_wgsl_reader': {
+      'gn_args': 'tint_build_wgsl_reader=true',
+    },
+    'tint_wgsl_writer': {
+      'gn_args': 'tint_build_wgsl_writer=true',
+    },
+    'x64': {
+      'gn_args': 'target_cpu="x64"',
+    },
+  },
 }
