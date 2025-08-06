@@ -34,6 +34,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Compiler.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
@@ -42,10 +43,10 @@
 namespace dawn {
 
 template <typename MutexT>
-class MutexBase : public RefCounted, NonCopyable {
+class DAWN_MUTEX_CAPABILITY MutexBase : public RefCounted, NonCopyable {
   public:
     template <typename MutexRef>
-    struct AutoLockBase : NonMovable {
+    struct DAWN_SCOPED_LOCKABLE AutoLockBase : NonMovable {
         AutoLockBase() : mMutex(nullptr) {}
         explicit AutoLockBase(MutexRef mutex) : mMutex(std::move(mutex)) {
             if (mMutex != nullptr) {
@@ -83,7 +84,7 @@ class MutexBase : public RefCounted, NonCopyable {
     }
 
   protected:
-    void Lock() {
+    void Lock() DAWN_EXCLUSIVE_LOCK_FUNCTION {
 #if defined(DAWN_ENABLE_ASSERTS)
         auto currentThread = std::this_thread::get_id();
         if constexpr (!std::is_same_v<MutexT, std::recursive_mutex>) {
@@ -99,7 +100,7 @@ class MutexBase : public RefCounted, NonCopyable {
 #endif  // DAWN_ENABLE_ASSERTS
     }
 
-    void Unlock() {
+    void Unlock() DAWN_UNLOCK_FUNCTION {
 #if defined(DAWN_ENABLE_ASSERTS)
         DAWN_ASSERT(IsLockedByCurrentThread());
         if (--mRecursionStackDepth == 0) {
