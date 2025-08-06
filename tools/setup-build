@@ -275,7 +275,11 @@ case $BUILD_SYSTEM in
       CMAKE_FLAGS+=("-DCMAKE_INSTALL_PREFIX=out/install")
       CMAKE_FLAGS+=("-DTINT_ENABLE_INSTALL=ON")
       CMAKE_FLAGS+=("-DDAWN_ENABLE_INSTALL=ON")
-      CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=ON")
+      if [[ -n "$SHARED" ]]; then
+        CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED")
+      else
+        CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=STATIC")
+      fi
     fi
     generate "cmake"             \
              "-S" "."            \
