@@ -51,13 +51,11 @@ namespace dawn {
 //  };
 //
 //  struct CachedValueCacheFuncs {
-//    size_t operator()(const CachedValueCacheFuncs& key) const {
-//      size_t hash = Hash(key.a);
-//      HashCombine(&hash, key.b);
-//      return hash;
+//    size_t operator()(const CachedValueKey& key) const {
+//      return absl::HashOf(key.a, key.b);
 //    }
-//    bool operator()(const CachedValueCacheFuncs& a, const CachedValueCacheFuncs& b) const {
-//      return a.a == b.a && a.b == b.b;
+//    bool operator()(const CachedValueKey& a, const CachedValueKey& b) const {
+//      return std::tie(a.a, a.b) == std::tie(b.a, b.b);
 //    }
 //  };
 //
@@ -73,24 +71,33 @@ namespace dawn {
 //      }
 //
 //    private:
-//      using ValueCache = LRUCache<CachedValueKey, CachedValue, ErrorData, CachedValueCacheFuncs>;
+//      using ValueCache = LRUCache<CachedValueKey, CachedValue, CachedValueCacheFuncs>;
+//      // Or: `LRUCache<CachedValueKey, CachedValue>` if CachedValueKey already has an operator==
+//      // and an absl hash specialization defined.
 //      ValueCache mCache;
 //  };
 
-template <typename Key, typename Value, typename Error, typename CacheFuncs>
+template <typename Key>
+struct DefaultCacheFuncs {
+    size_t operator()(const Key& key) const { return absl::DefaultHashContainerHash<Key>()(key); }
+    bool operator()(const Key& lhs, const Key& rhs) const {
+        return absl::DefaultHashContainerEq<Key>()(lhs, rhs);
+    }
+};
+
+template <typename Key, typename Value, typename CacheFuncs = DefaultCacheFuncs<Key>>
 class LRUCache {
   public:
     explicit LRUCache(size_t capacity) : mCapacity(capacity) {}
     virtual ~LRUCache() = default;
 
-    template <typename CreateFn>
-    Result<Value, Error> GetOrCreate(Key& key, CreateFn createFn) {
-        // A capacity of 0 means caching is disabled, so just return the result
-        // of the createFn directly.
+    template <typename CreateFn, typename ReturnType = std::invoke_result_t<CreateFn, const Key&>>
+    ReturnType GetOrCreate(const Key& key, CreateFn createFn) {
+        // A capacity of 0 means caching is disabled, so just return the result of the createFn.
         if (mCapacity == 0) {
             auto result = createFn(key);
             if (result.IsError()) [[unlikely]] {
-                return Result<Value, Error>(result.AcquireError());
+                return result;
             }
             auto value = result.AcquireSuccess();
             // If caching is disabled treat every value as if it is immediately evicted from the
@@ -99,7 +106,7 @@ class LRUCache {
             return value;
         }
 
-        return mCache.Use([&](auto cache) -> Result<Value, Error> {
+        return mCache.Use([&](auto cache) -> ReturnType {
             // Try to lookup |Key| to see if we have a cache hit.
             auto it = cache->map.find(key);
             if (it != cache->map.end()) {
@@ -113,9 +120,9 @@ class LRUCache {
             }
 
             // Otherwise, we need to try to create the entry.
-            Result<Value, Error> result = createFn(key);
+            auto result = createFn(key);
             if (result.IsError()) [[unlikely]] {
-                return Result<Value, Error>(result.AcquireError());
+                return result;
             }
             auto value = result.AcquireSuccess();
             cache->list.emplace_front(key, value);
@@ -128,7 +135,6 @@ class LRUCache {
                 cache->map.erase(back.first);
                 cache->list.pop_back();
             }
-
             return value;
         });
     }

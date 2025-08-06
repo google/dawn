@@ -264,7 +264,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     ApiObjectList mTextureViews;
 
     using TextureViewCache =
-        LRUCache<TextureViewQuery, Ref<TextureViewBase>, ErrorData, TextureViewCacheFuncs>;
+        LRUCache<TextureViewQuery, Ref<TextureViewBase>, TextureViewCacheFuncs>;
     std::unique_ptr<TextureViewCache> mTextureViewCache;
 
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space

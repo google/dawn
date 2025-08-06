@@ -66,8 +66,8 @@ struct CacheFuncs {
     }
 };
 
-class TestCache final : public LRUCache<CacheKey, CacheValue, ErrorData, CacheFuncs> {
-    using Base = LRUCache<CacheKey, CacheValue, ErrorData, CacheFuncs>;
+class TestCache final : public LRUCache<CacheKey, CacheValue, CacheFuncs> {
+    using Base = LRUCache<CacheKey, CacheValue, CacheFuncs>;
 
   public:
     static const size_t kDefaultCapacity = 4;

@@ -517,7 +517,8 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
         DAWN_TRY_ASSIGN(framebuffer,
                         device->GetFramebufferCache()->GetOrCreate(
                             framebufferQuery,
-                            [&](FramebufferCacheQuery& query) -> ResultOrError<VkFramebuffer> {
+                            [&](const FramebufferCacheQuery& query)
+                                -> ResultOrError<VkFramebuffer> {
                                 VkFramebufferCreateInfo createInfo;
                                 createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
                                 createInfo.pNext = nullptr;

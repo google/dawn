@@ -92,8 +92,8 @@ struct FramebufferCacheFuncs {
 // attachments in the rendering pipeline matches the one of the framebuffer.
 // All the operations on FramebufferCache are guaranteed to be thread-safe.
 class FramebufferCache final
-    : public LRUCache<FramebufferCacheQuery, VkFramebuffer, ErrorData, FramebufferCacheFuncs> {
-    using Base = LRUCache<FramebufferCacheQuery, VkFramebuffer, ErrorData, FramebufferCacheFuncs>;
+    : public LRUCache<FramebufferCacheQuery, VkFramebuffer, FramebufferCacheFuncs> {
+    using Base = LRUCache<FramebufferCacheQuery, VkFramebuffer, FramebufferCacheFuncs>;
 
   public:
     static const size_t kDefaultCapacity = 32;

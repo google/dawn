@@ -124,6 +124,11 @@ HandleType* AsVkArray(detail::VkHandle<Tag, HandleType>* handle) {
     return reinterpret_cast<HandleType*>(handle);
 }
 
+template <typename Tag, typename HandleType>
+const HandleType* AsVkArray(const detail::VkHandle<Tag, HandleType>* handle) {
+    return reinterpret_cast<const HandleType*>(handle);
+}
+
 }  // namespace dawn::native::vulkan
 
 #define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object)                       \
