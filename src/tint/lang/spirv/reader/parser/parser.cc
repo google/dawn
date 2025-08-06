@@ -3746,8 +3746,14 @@ class Parser {
     /// @param inst the SPIR-V instruction for OpCopyObject
     void EmitCopyObject(const spvtools::opt::Instruction& inst) {
         // Make the result Id a pointer to the original copied value.
-        auto* l = b_.Let(Value(inst.GetSingleWordOperand(2)));
-        Emit(l, inst.result_id());
+        auto* v = Value(inst.GetSingleWordOperand(2));
+
+        if (v->Type()->IsHandle()) {
+            values_.Add(inst.result_id(), v);
+        } else {
+            auto* l = b_.Let(v);
+            Emit(l, inst.result_id());
+        }
     }
 
     /// @param inst the SPIR-V instruction for OpCopyMemory
