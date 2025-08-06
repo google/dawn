@@ -112,20 +112,24 @@ class ExecutionQueueBase {
     bool mInSubmit = false;
 
   protected:
+    static constexpr ExecutionSerial kWaitSerialTimeout = kBeginningOfGPUTime;
+
     // Currently, the queue has two paths for serial updating, one is via DeviceBase::Tick which
     // calls into the backend specific polling mechanisms implemented in
     // CheckAndUpdateCompletedSerials. Alternatively, the backend can actively call
     // UpdateCompletedSerial when a new serial is complete to make forward progress proactively.
     void UpdateCompletedSerialTo(ExecutionSerial completedSerial);
 
-    // Backend specific wait function.
-    virtual ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
-                                                       Nanoseconds timeout) = 0;
-
   private:
     // Each backend should implement to check their passed fences if there are any and return a
     // completed serial. Return 0 should indicate no fences to check.
     virtual ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() = 0;
+
+    // Backend specific wait function, returns kWaitSerialTimeout if we did not successfully wait
+    // for |waitSerial|.
+    virtual ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
+                                                                  Nanoseconds timeout) = 0;
+
     // mCompletedSerial tracks the last completed command serial that the fence has returned.
     // mLastSubmittedSerial tracks the last submitted command serial.
     // During device removal, the serials could be artificially incremented

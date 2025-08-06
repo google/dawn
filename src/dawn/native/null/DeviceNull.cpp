@@ -464,8 +464,9 @@ MaybeError Queue::SubmitPendingCommandsImpl() {
     return {};
 }
 
-ResultOrError<bool> Queue::WaitForQueueSerialImpl(ExecutionSerial serial, Nanoseconds timeout) {
-    return true;
+ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial waitSerial,
+                                                             Nanoseconds timeout) {
+    return waitSerial;
 }
 
 MaybeError Queue::WaitForIdleForDestruction() {

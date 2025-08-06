@@ -300,8 +300,8 @@ class Queue final : public QueueBase {
     void ForceEventualFlushOfCommands() override;
     bool HasPendingCommands() const override;
     MaybeError SubmitPendingCommandsImpl() override;
-    ResultOrError<bool> WaitForQueueSerialImpl(ExecutionSerial serial,
-                                               Nanoseconds timeout) override;
+    ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
+                                                          Nanoseconds timeout) override;
     MaybeError WaitForIdleForDestruction() override;
 };
 

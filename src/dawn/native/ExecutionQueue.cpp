@@ -49,10 +49,10 @@ ExecutionSerial ExecutionQueueBase::GetCompletedCommandSerial() const {
 
 ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial serial,
                                                            Nanoseconds timeout) {
-    bool succeeded;
-    DAWN_TRY_ASSIGN(succeeded, WaitForQueueSerialImpl(serial, timeout));
+    ExecutionSerial completedSerial;
+    DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(serial, timeout));
 
-    if (!succeeded) {
+    if (completedSerial == kWaitSerialTimeout) {
         return false;
     }
 
@@ -61,7 +61,7 @@ ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial seria
     // the fence list will be empty, preventing the current thread from determining the true latest
     // serial. Pre-emptively updating mCompletedSerial ensures CheckAndUpdateCompletedSerials()
     // returns an accurate value, preventing stale data.
-    FetchMax(mCompletedSerial, uint64_t(serial));
+    FetchMax(mCompletedSerial, uint64_t(completedSerial));
 
     return true;
 }

@@ -75,29 +75,30 @@ MaybeError Queue::ReturnSystemEventReceivers(std::span<SystemEventReceiver> rece
     return {};
 }
 
-ResultOrError<bool> Queue::WaitForQueueSerialImpl(ExecutionSerial serial, Nanoseconds timeout) {
+ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial waitSerial,
+                                                             Nanoseconds timeout) {
     ExecutionSerial completedSerial = GetCompletedCommandSerial();
-    if (serial <= completedSerial) {
-        return true;
+    if (waitSerial <= completedSerial) {
+        return waitSerial;
     }
 
-    auto receiver = mSystemEventReceivers->TakeOne(serial);
+    auto receiver = mSystemEventReceivers->TakeOne(waitSerial);
     if (!receiver) {
         DAWN_TRY_ASSIGN(receiver, GetSystemEventReceiver());
-        SetEventOnCompletion(serial, receiver->GetPrimitive().Get());
+        SetEventOnCompletion(waitSerial, receiver->GetPrimitive().Get());
     }
 
     bool ready = false;
     std::array<std::pair<const dawn::native::SystemEventReceiver&, bool*>, 1> events{
         {{*receiver, &ready}}};
-    DAWN_ASSERT(serial <= GetLastSubmittedCommandSerial());
+    DAWN_ASSERT(waitSerial <= GetLastSubmittedCommandSerial());
     bool didComplete = WaitAnySystemEvent(events.begin(), events.end(), timeout);
     // Return the SystemEventReceiver to the pool of receivers so it can be re-waited in the
     // future.
-    // The caller should call CheckPassedSerials() which will clear passed system events.
-    mSystemEventReceivers->Enqueue(std::move(*receiver), serial);
+    // The caller should call UpdateCompletedSerial() which will clear passed system events.
+    mSystemEventReceivers->Enqueue(std::move(*receiver), waitSerial);
 
-    return didComplete;
+    return didComplete ? waitSerial : kWaitSerialTimeout;
 }
 
 MaybeError Queue::RecycleSystemEventReceivers(ExecutionSerial completedSerial) {
