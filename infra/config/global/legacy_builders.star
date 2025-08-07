@@ -722,24 +722,6 @@ luci.cq_tryjob_verifier(
 )
 _add_branch_verifiers("dawn-chromium-presubmit", "linux", min_milestone = 130, disable_reuse = True)
 
-# Views
-
-luci.milo(
-    logo = "https://storage.googleapis.com/chrome-infra-public/logo/dawn-logo.png",
-)
-
-luci.console_view(
-    name = "ci",
-    title = "Dawn CI Builders",
-    repo = "https://dawn.googlesource.com/dawn",
-    refs = ["refs/heads/main"],
-)
-
-luci.list_view(
-    name = "try",
-    title = "Dawn try Builders",
-)
-
 # CQ
 
 luci.cq(

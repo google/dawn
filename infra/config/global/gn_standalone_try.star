@@ -33,7 +33,7 @@ load("//constants.star", "siso")
 
 try_.defaults.set(
     executable = "recipe:dawn/gn_v2_trybot",
-    builder_group = "dawn",
+    builder_group = "try",
     bucket = "try",
     pool = "luci.chromium.gpu.try",
     builderless = True,

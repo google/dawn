@@ -30,12 +30,13 @@
 load("@chromium-luci//builder_config.star", "builder_config")
 load("@chromium-luci//builders.star", "os")
 load("@chromium-luci//ci.star", "ci")
+load("@chromium-luci//consoles.star", "consoles")
 load("@chromium-luci//gn_args.star", "gn_args")
 load("//constants.star", "siso")
 
 ci.defaults.set(
     executable = "recipe:dawn/gn_v2",
-    builder_group = "dawn",
+    builder_group = "ci",
     bucket = "ci",
     pool = "luci.chromium.gpu.ci",
     build_numbers = True,
@@ -82,6 +83,10 @@ ci.builder(
     ),
     cores = 8,
     os = os.LINUX_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|rel",
+        short_name = "x64",
+    ),
 )
 
 ci.thin_tester(
@@ -101,5 +106,9 @@ ci.thin_tester(
             target_platform = builder_config.target_platform.LINUX,
         ),
         run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|test|clang|rel|x64",
+        short_name = "sws",
     ),
 )
