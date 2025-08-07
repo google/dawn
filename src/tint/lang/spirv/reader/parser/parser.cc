@@ -2256,6 +2256,17 @@ class Parser {
                     EmitPhi(inst);
                     break;
 
+                case spv::Op::OpGroupNonUniformBroadcast:
+                    EmitSubgroupBuiltinConstantId(inst,
+                                                  spirv::BuiltinFn::kGroupNonUniformBroadcast);
+                    break;
+                case spv::Op::OpGroupNonUniformQuadBroadcast:
+                    EmitSubgroupBuiltinConstantId(inst,
+                                                  spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
+                    break;
+                case spv::Op::OpGroupNonUniformQuadSwap:
+                    EmitSubgroupBuiltinConstantId(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
+                    break;
                 case spv::Op::OpGroupNonUniformAll:
                     EmitSubgroupBuiltin(inst, core::BuiltinFn::kSubgroupAll);
                     break;
@@ -2271,9 +2282,6 @@ class Parser {
                 case spv::Op::OpGroupNonUniformBroadcastFirst:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcastFirst);
                     break;
-                case spv::Op::OpGroupNonUniformBroadcast:
-                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformBroadcast);
-                    break;
                 case spv::Op::OpGroupNonUniformShuffle:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformShuffle);
                     break;
@@ -2285,12 +2293,6 @@ class Parser {
                     break;
                 case spv::Op::OpGroupNonUniformShuffleUp:
                     EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformShuffleUp);
-                    break;
-                case spv::Op::OpGroupNonUniformQuadBroadcast:
-                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadBroadcast);
-                    break;
-                case spv::Op::OpGroupNonUniformQuadSwap:
-                    EmitSubgroupBuiltin(inst, spirv::BuiltinFn::kGroupNonUniformQuadSwap);
                     break;
                 case spv::Op::OpGroupNonUniformSMin:
                     EmitSubgroupMinMax(inst, spirv::BuiltinFn::kGroupNonUniformSMin);
@@ -2419,18 +2421,24 @@ class Parser {
             inst.result_id());
     }
 
-    void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
-        auto val = Value(inst.GetSingleWordInOperand(1));
+    void EmitSubgroupBuiltinConstantId(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
+        auto id = Value(inst.GetSingleWordInOperand(2));
 
         // TODO(431054356): Convert core::BuiltinFn::kSubgroupBroadcast non-constant values into a
         // `subgroupShuffle` when we support SPIR-V >= 1.5 source.
         //
         // For QuadBroadcast this will remain an error as there is no WGSL equivalent.
         // For QuadSwap this will remain an error as there is no WGSL equivalent.
-        if (!val->Is<core::ir::Constant>()) {
-            TINT_ICE() << "non-constant GroupNonUniform `value` not supported";
+        if (!id->Is<core::ir::Constant>()) {
+            TINT_ICE() << "non-constant GroupNonUniform `Invocation Id` not supported";
         }
 
+        ValidateScope(inst);
+        Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
+             inst.result_id());
+    }
+
+    void EmitSubgroupBuiltin(spvtools::opt::Instruction& inst, spirv::BuiltinFn fn) {
         ValidateScope(inst);
         Emit(b_.Call<spirv::ir::BuiltinCall>(Type(inst.type_id()), fn, Args(inst, 2)),
              inst.result_id());

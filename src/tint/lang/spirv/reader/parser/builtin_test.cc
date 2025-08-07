@@ -1924,6 +1924,42 @@ TEST_F(SpirvParserTest, NonUniformBroadcast_Constant_NumericVector) {
                   SPV_ENV_VULKAN_1_1);
 }
 
+TEST_F(SpirvParserTest, NonUniformBroadcast_NonConstant_NumericVector) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+     %v3uint = OpTypeVector %uint 3
+         %12 = OpConstantComposite %v3uint %uint_1 %uint_3 %uint_1
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %7 = OpCopyObject %v3uint %12
+          %8 = OpGroupNonUniformBroadcast %v3uint %uint_3 %7 %uint_1
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec3<u32> = let vec3<u32>(1u, 3u, 1u)
+    %3:vec3<u32> = spirv.group_non_uniform_broadcast 3u, %2, 1u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
 TEST_F(SpirvParserTest, NonUniformBroadcastFirst_Constant_BoolScalar) {
     EXPECT_IR_SPV(R"(
                OpCapability Shader
@@ -2382,6 +2418,40 @@ TEST_F(SpirvParserTest, NonUniformShuffle_Constant_BoolScalar) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:bool = spirv.group_non_uniform_shuffle 3u, true, 1u
+    ret
+  }
+}
+)",
+                  SPV_ENV_VULKAN_1_1);
+}
+
+TEST_F(SpirvParserTest, NonUniformShuffle_NonConstant_BoolScalar) {
+    EXPECT_IR_SPV(R"(
+               OpCapability Shader
+               OpCapability GroupNonUniformShuffle
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_3 = OpConstant %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+       %void = OpTypeVoid
+         %23 = OpTypeFunction %void
+       %main = OpFunction %void None %23
+         %24 = OpLabel
+          %7 = OpCopyObject %bool %true
+          %8 = OpGroupNonUniformShuffle %bool %uint_3 %7 %uint_1
+               OpReturn
+               OpFunctionEnd
+)",
+                  R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = let true
+    %3:bool = spirv.group_non_uniform_shuffle 3u, %2, 1u
     ret
   }
 }
