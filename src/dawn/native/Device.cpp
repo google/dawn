@@ -1159,20 +1159,20 @@ Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(AttachmentState* blu
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
     const RenderBundleEncoderDescriptor* descriptor) {
-    AttachmentState blueprint(this, descriptor);
+    AttachmentState blueprint(descriptor);
     return GetOrCreateAttachmentState(&blueprint);
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
     const PipelineLayoutBase* layout) {
-    AttachmentState blueprint(this, descriptor, layout);
+    AttachmentState blueprint(descriptor, layout);
     return GetOrCreateAttachmentState(&blueprint);
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
     const UnpackedPtr<RenderPassDescriptor>& descriptor) {
-    AttachmentState blueprint(this, descriptor);
+    AttachmentState blueprint(descriptor);
     return GetOrCreateAttachmentState(&blueprint);
 }
 

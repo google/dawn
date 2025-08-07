@@ -356,8 +356,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
         s->Append(absl::StrFormat("%d={format:%s", i, value->GetColorAttachmentFormat(i)));
 
-        if (value->GetDevice()->HasFeature(Feature::DawnLoadResolveTexture) &&
-            value->GetExpandResolveInfo().attachmentsToExpandResolve.any()) {
+        if (value->GetExpandResolveInfo().attachmentsToExpandResolve.any()) {
             s->Append(
                 absl::StrFormat(", resolve:%v, expandResolve:%v",
                                 value->GetExpandResolveInfo().resolveTargetsMask.test(i),

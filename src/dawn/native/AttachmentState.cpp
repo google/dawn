@@ -39,9 +39,8 @@
 
 namespace dawn::native {
 
-AttachmentState::AttachmentState(DeviceBase* device,
-                                 const RenderBundleEncoderDescriptor* descriptor)
-    : ObjectBase(device), mSampleCount(descriptor->sampleCount) {
+AttachmentState::AttachmentState(const RenderBundleEncoderDescriptor* descriptor)
+    : mSampleCount(descriptor->sampleCount) {
     DAWN_ASSERT(descriptor->colorFormatCount <= kMaxColorAttachments);
     auto colorFormats = ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->colorFormats,
                                                                     descriptor->colorFormatCount);
@@ -61,10 +60,9 @@ AttachmentState::AttachmentState(DeviceBase* device,
     SetContentHash(ComputeContentHash());
 }
 
-AttachmentState::AttachmentState(DeviceBase* device,
-                                 const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
+AttachmentState::AttachmentState(const UnpackedPtr<RenderPipelineDescriptor>& descriptor,
                                  const PipelineLayoutBase* layout)
-    : ObjectBase(device), mSampleCount(descriptor->multisample.count) {
+    : mSampleCount(descriptor->multisample.count) {
     if (descriptor->fragment != nullptr) {
         DAWN_ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
         auto targets = ityp::SpanFromUntyped<ColorAttachmentIndex>(
@@ -109,9 +107,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
     SetContentHash(ComputeContentHash());
 }
 
-AttachmentState::AttachmentState(DeviceBase* device,
-                                 const UnpackedPtr<RenderPassDescriptor>& descriptor)
-    : ObjectBase(device) {
+AttachmentState::AttachmentState(const UnpackedPtr<RenderPassDescriptor>& descriptor) {
     auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
         descriptor->colorAttachments, descriptor->colorAttachmentCount);
     for (auto [i, colorAttachment] : Enumerate(colorAttachments)) {
@@ -187,8 +183,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
     SetContentHash(ComputeContentHash());
 }
 
-AttachmentState::AttachmentState(const AttachmentState& blueprint)
-    : ObjectBase(blueprint.GetDevice()) {
+AttachmentState::AttachmentState(const AttachmentState& blueprint) {
     mColorAttachmentsSet = blueprint.mColorAttachmentsSet;
     mColorFormats = blueprint.mColorFormats;
     mDepthStencilFormat = blueprint.mDepthStencilFormat;
