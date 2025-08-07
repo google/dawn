@@ -31,6 +31,7 @@
 #include <mutex>
 #include <utility>
 
+#include "dawn/common/Compiler.h"
 #include "dawn/common/Defer.h"
 #include "dawn/common/Mutex.h"
 #include "dawn/common/NonMovable.h"
@@ -87,7 +88,7 @@ struct MutexProtectedSupportTraits {
 // Guard class is a wrapping class that gives access to a protected resource after acquiring the
 // lock related to it. For the lifetime of this class, the lock is held.
 template <typename T, typename Traits>
-class Guard : public NonMovable, StackAllocated {
+class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
   public:
     // It's the programmer's burden to not save the pointer/reference and reuse it without the lock.
     auto* operator->() const { return Get(); }

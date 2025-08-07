@@ -31,6 +31,7 @@
 #include <mutex>
 #include <optional>
 
+#include "dawn/common/Compiler.h"
 #include "dawn/common/Defer.h"
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
@@ -47,8 +48,8 @@ class DeviceMutex : public RecursiveMutex {
     friend class DeviceBase;
     friend struct AutoLockBase<DeviceMutex*>;
 
-    void Lock();
-    void Unlock();
+    void Lock() DAWN_EXCLUSIVE_LOCK_FUNCTION;
+    void Unlock() DAWN_UNLOCK_FUNCTION;
 
     uint32_t mRecursionStackDepth = 0;
     std::optional<class Defer> mDefer = std::nullopt;
