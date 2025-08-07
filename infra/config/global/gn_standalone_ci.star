@@ -25,104 +25,81 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Starlark file for Buildbucket entries of CI builders using the gn_v2 recipe.
-# Note that builders must first be defined the the build repo in
-# https://source.chromium.org/chromium/infra/infra_superproject/+/main:build/recipes/recipe_modules/dawn/builders.py
-
 """CI Dawn builders using GN and a standalone Dawn checkout (instead of Chromium)."""
 
+load("@chromium-luci//builder_config.star", "builder_config")
+load("@chromium-luci//builders.star", "os")
+load("@chromium-luci//ci.star", "ci")
+load("@chromium-luci//gn_args.star", "gn_args")
 load("//constants.star", "siso")
 
-luci.recipe(
-    name = "recipe:dawn/gn_v2",
-    cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
-    recipe = "dawn/gn_v2",
-    use_bbagent = True,
-    use_python3 = True,
+ci.defaults.set(
+    executable = "recipe:dawn/gn_v2",
+    builder_group = "dawn",
+    bucket = "ci",
+    pool = "luci.chromium.gpu.ci",
+    build_numbers = True,
+    contact_team_email = "chrome-gpu-infra@google.com",
+    service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
+    shadow_service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+    siso_project = siso.project.DEFAULT_TRUSTED,
+    siso_remote_jobs = siso.remote_jobs.DEFAULT,
+    thin_tester_cores = 2,
 )
 
-LINUX_BUILDER_DIMENSIONS = {
-    "cores": "8",
-    "os": "Ubuntu-22.04",
-    "pool": "luci.chromium.gpu.ci",
-}
+ci.builder(
+    name = "dawn-linux-x64-builder-rel",
+    description_html = "Compiles Dawn test binaries for Linux/x64",
+    schedule = "triggered",
+    triggered_by = [],
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "clang",
+            "component",
+            "dawn_no_d3d12",
+            "dawn_swiftshader",
+            "linux",
+            "release",
+            "siso",
+            "tint_hlsl_writer",
+            "tint_msl_writer",
+            "tint_spv_reader_writer",
+            "tint_wgsl_reader_writer",
+            "x64",
+        ],
+    ),
+    cores = 8,
+    os = os.LINUX_DEFAULT,
+)
 
-CI_SERVICE_ACCOUNT = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com"
-CI_SHADOW_SERVICE_ACCOUNT = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com"
-
-def generate_properties_for_project(project):
-    properties = {
-        "$build/reclient": {
-            "instance": project,
-            "jobs": siso.remote_jobs.DEFAULT,
-            "metrics_project": "chromium-reclient-metrics",
-            "scandeps_server": True,
-        },
-        "$build/siso": {
-            "configs": ["builder"],
-            "enable_cloud_monitoring": True,
-            "enable_cloud_profiler": True,
-            "enable_cloud_trace": True,
-            "metrics_project": "chromium-reclient-metrics",
-            "project": project,
-            "remote_jobs": siso.remote_jobs.DEFAULT,
-        },
-        "builder_group": "dawn",
-    }
-    return properties
-
-def parent_builder(name, dimensions):
-    """Adds a CI parent builder.
-
-    Args:
-      name: The name of the builder.
-      dimensions: The Swarming dimensions the builder should target.
-    """
-    luci.builder(
-        name = name,
-        bucket = "ci",
-        # TODO(crbug.com/385317083): Switch this to be triggered by
-        # "primary-poller" once we're ready to begin migration to this recipe.
-        triggered_by = None,
-        schedule = "triggered",
-        executable = "recipe:dawn/gn_v2",
-        dimensions = dimensions,
-        properties = generate_properties_for_project(siso.project.DEFAULT_TRUSTED),
-        shadow_properties = generate_properties_for_project(siso.project.DEFAULT_UNTRUSTED),
-        build_numbers = True,
-        # TODO(crbug.com/385317083): Make CI builders notify the gardeners once
-        # migration to this recipe has begun.
-        service_account = CI_SERVICE_ACCOUNT,
-        shadow_service_account = CI_SHADOW_SERVICE_ACCOUNT,
-    )
-
-def child_tester(name, parent_builder):
-    """Adds a CI child tester.
-
-    Args:
-        name: The name of the tester.
-        parent_builder: The name of the parent builder that will trigger the
-            tester.
-    """
-    luci.builder(
-        name = name,
-        bucket = "ci",
-        triggered_by = [parent_builder],
-        executable = "recipe:dawn/gn_v2",
-        dimensions = {
-            "cores": "2",
-            "os": "Ubuntu-22.04",
-            "pool": "luci.chromium.gpu.ci",
-        },
-        properties = {
-            "builder_group": "dawn",
-        },
-        build_numbers = True,
-        resultdb_settings = resultdb.settings(enable = True),
-        service_account = CI_SERVICE_ACCOUNT,
-        shadow_service_account = CI_SHADOW_SERVICE_ACCOUNT,
-    )
-
-parent_builder("dawn-linux-x64-builder-rel", LINUX_BUILDER_DIMENSIONS)
-
-child_tester("dawn-linux-x64-sws-rel", "ci/dawn-linux-x64-builder-rel")
+ci.thin_tester(
+    name = "dawn-linux-x64-sws-rel",
+    description_html = "Tests Dawn on Linux/x64 with SwiftShader",
+    parent = "dawn-linux-x64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+        run_tests_serially = True,
+    ),
+)
