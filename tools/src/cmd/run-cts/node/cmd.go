@@ -166,11 +166,15 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		len(testCases),
 		resultStream,
 		cfg.OsWrapper)
-	if err != nil {
-		return err
+
+	// Make sure we always save results, even if there were failures.
+	if results != nil {
+		if err := c.state.Close(results); err != nil {
+			return err
+		}
 	}
 
-	if err := c.state.Close(results); err != nil {
+	if err != nil {
 		return err
 	}
 
