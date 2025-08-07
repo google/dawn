@@ -134,7 +134,6 @@ class Parser {
         for (const auto& import : spirv_context_->ext_inst_imports()) {
             auto name = import.GetInOperand(0).AsString();
 
-            // TODO(dneto): Handle other extended instruction sets when needed.
             if (name == "GLSL.std.450") {
                 glsl_std_450_imports_.insert(import.result_id());
             } else if (name.find("NonSemantic.") == 0) {
@@ -155,8 +154,6 @@ class Parser {
 
         EmitFunctions();
         EmitEntryPointAttributes();
-
-        // TODO(crbug.com/tint/1907): Handle annotation instructions.
 
         RemapSamplers();
         RemapBufferBlockAddressSpace();
@@ -653,7 +650,6 @@ class Parser {
         }
 
         return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
-            // TODO(crbug.com/1907): Handle decorations that affect the type
             uint32_t array_stride = 0;
             bool set_as_storage_buffer = false;
             for (auto& deco : type->decorations()) {

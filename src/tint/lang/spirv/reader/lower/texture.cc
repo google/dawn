@@ -926,7 +926,6 @@ struct State {
                                       img->GetTexelFormat(), img->GetAccess());
         }
 
-        // TODO(dsinclair): Handle determining depth texture by usage
         if (img->GetDepth() == spirv::type::Depth::kDepth) {
             if (img->GetMultisampled() == spirv::type::Multisampled::kMultisampled) {
                 return ty.depth_multisampled_texture(ConvertDim(img->GetDim(), img->GetArrayed()));
