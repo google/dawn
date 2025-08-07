@@ -3860,5 +3860,70 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Struct_Vec3_Bool_VectorElementLoadAndStore) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("data"), ty.vec3<bool>()},
+                                              });
+    auto* var = b.Var("v", ty.ptr<workgroup>(s));
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* ptr = b.Access(ty.ptr<workgroup, vec3<bool>>(), var, 0_u);
+        auto* el = b.LoadVectorElement(ptr, 0_u);
+        b.StoreVectorElement(ptr, 1_u, el);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  data:vec3<bool> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, vec3<bool>, read_write> = access %v, 0u
+    %4:bool = load_vector_element %3, 0u
+    store_vector_element %3, 1u, %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  data:vec3<bool> @offset(0)
+}
+
+S_packed_vec3 = struct @align(16) {
+  data:__packed_vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S_packed_vec3, read_write> = var undef
+}
+
+%foo = func():void {
+  $B2: {
+    %3:ptr<workgroup, __packed_vec3<u32>, read_write> = access %v, 0u
+    %4:u32 = load_vector_element %3, 0u
+    %5:bool = convert %4
+    %6:u32 = convert %5
+    store_vector_element %3, 1u, %6
+    ret
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

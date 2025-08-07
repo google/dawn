@@ -315,7 +315,7 @@ struct State {
                 // Packed vectors support component access so there is usually nothing to do.
                 // For vectors that were originally booleans we need to convert the u32 that we load
                 // to a bool.
-                if (unpacked_type->IsBoolVector()) {
+                if (unpacked_type->UnwrapPtr()->IsBoolVector()) {
                     auto* u32_load = b.InstructionResult<u32>();
                     auto* converted_to_bool = b.ConvertWithResult(lve->DetachResult(), u32_load);
                     converted_to_bool->InsertAfter(lve);
@@ -330,7 +330,7 @@ struct State {
                 // Packed vectors support component access so there is usually nothing to do.
                 // For vectors that were originally booleans we need to convert the bool to a u32
                 // before we store it.
-                if (unpacked_type->IsBoolVector()) {
+                if (unpacked_type->UnwrapPtr()->IsBoolVector()) {
                     auto* converted_to_u32 = b.Convert<u32>(sve->Value());
                     converted_to_u32->InsertBefore(sve);
                     sve->SetOperand(core::ir::StoreVectorElement::kValueOperandOffset,
