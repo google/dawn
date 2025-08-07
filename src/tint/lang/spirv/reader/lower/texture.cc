@@ -182,7 +182,12 @@ struct State {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
                     case spirv::BuiltinFn::kSampledImage:
-                        // Handled above.
+                        // Note, we _also_ do this here even though it was done above. The one above
+                        // registers for the depth functions, but, we may have forked functions in
+                        // the `UpdateValues` when it does the `ConvertUserCalls`. This would then
+                        // generate new `SampledImage` objects which need to be registered. In the
+                        // worse case, we just write the same data twice.
+                        SampledImage(builtin);
                         break;
                     case spirv::BuiltinFn::kImage:
                     case spirv::BuiltinFn::kImageRead:
@@ -245,7 +250,11 @@ struct State {
 
         // Destroy all the OpSampledImage instructions.
         for (auto res : sampled_images_) {
-            res.value->Destroy();
+            // If the sampled image was in a user function which was forked and the original
+            // destroyed then it will no longer be alive.
+            if (res.value->Alive()) {
+                res.value->Destroy();
+            }
         }
     }
 

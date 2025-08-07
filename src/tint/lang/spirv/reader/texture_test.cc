@@ -4180,5 +4180,83 @@ $B1: {  # root
 )");
 }
 
+// https://crbug.com/430358345
+TEST_F(SpirvReaderTest, Image_UserCall_Params) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %main_position_Input
+               OpExecutionMode %main OriginUpperLeft
+               OpName %sampler0 "sampler0"
+               OpName %texture0 "texture0"
+               OpName %main_position_Input "main_position_Input"
+               OpName %foo "foo"
+               OpName %t "t"
+               OpName %s "s"
+               OpName %main "main"
+               OpDecorate %sampler0 DescriptorSet 0
+               OpDecorate %sampler0 Binding 0
+               OpDecorate %texture0 DescriptorSet 0
+               OpDecorate %texture0 Binding 1
+               OpDecorate %main_position_Input BuiltIn FragCoord
+          %3 = OpTypeSampler
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+   %sampler0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+      %float = OpTypeFloat 32
+          %6 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_6 = OpTypePointer UniformConstant %6
+   %texture0 = OpVariable %_ptr_UniformConstant_6 UniformConstant
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%main_position_Input = OpVariable %_ptr_Input_v4float Input
+         %17 = OpTypeFunction %v4float %6 %3
+    %v2float = OpTypeVector %float 2
+    %float_2 = OpConstant %float 2
+         %22 = OpConstantComposite %v2float %float_2 %float_2
+         %25 = OpTypeSampledImage %6
+         %29 = OpTypeFunction %v4float %v4float
+       %void = OpTypeVoid
+         %36 = OpTypeFunction %void
+
+        %foo = OpFunction %v4float None %17
+          %t = OpFunctionParameter %6
+          %s = OpFunctionParameter %3
+         %18 = OpLabel
+         %24 = OpSampledImage %25 %t %s
+         %26 = OpImageSampleImplicitLod %v4float %24 %22 None
+               OpReturnValue %26
+               OpFunctionEnd
+
+       %main = OpFunction %void None %36
+         %37 = OpLabel
+         %31 = OpLoad %6 %texture0 None
+         %32 = OpLoad %3 %sampler0 None
+         %33 = OpFunctionCall %v4float %foo %31 %32
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %sampler0:ptr<handle, sampler, read> = var undef @binding_point(0, 0)
+  %texture0:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 1)
+}
+
+%main = @fragment func(%main_position_Input:vec4<f32> [@position]):void {
+  $B2: {
+    %5:texture_2d<f32> = load %texture0
+    %6:sampler = load %sampler0
+    %7:vec4<f32> = call %foo, %5, %6
+    ret
+  }
+}
+%foo = func(%t:texture_2d<f32>, %s:sampler):vec4<f32> {
+  $B3: {
+    %11:vec4<f32> = textureSample %t, %s, vec2<f32>(2.0f)
+    ret %11
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
