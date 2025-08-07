@@ -142,9 +142,9 @@ struct BindingInfo {
     wgpu::ShaderStage visibility;
 
     // The size of the array this binding is part of. Each BindingInfo represents a single entry.
-    BindingIndex arraySize{1};
+    BindingIndex arraySize{1u};
     // The index of this entry in the array. Must be 0 if this entry is not in an array.
-    BindingIndex indexInArray{0};
+    BindingIndex indexInArray{0u};
 
     std::variant<BufferBindingInfo,
                  SamplerBindingInfo,

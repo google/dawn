@@ -244,12 +244,12 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     // Initialize the padding bytes to zero.
     if (GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) && !mappedAtCreation) {
-        uint32_t paddingBytes = GetAllocatedSize() - GetSize();
+        uint64_t paddingBytes = GetAllocatedSize() - GetSize();
         if (paddingBytes > 0) {
             CommandRecordingContext* commandRecordingContext =
                 ToBackend(GetDevice()->GetQueue())->GetPendingCommandContext();
 
-            uint32_t clearSize = paddingBytes;
+            uint64_t clearSize = paddingBytes;
             uint64_t clearOffset = GetSize();
             DAWN_TRY(ClearBuffer(commandRecordingContext, 0, clearOffset, clearSize));
         }

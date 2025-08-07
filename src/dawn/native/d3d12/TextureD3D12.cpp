@@ -458,7 +458,8 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
 
     TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, range);
     if (barriers.size()) {
-        commandContext->GetCommandList()->ResourceBarrier(barriers.size(), barriers.data());
+        commandContext->GetCommandList()->ResourceBarrier(static_cast<uint32_t>(barriers.size()),
+                                                          barriers.data());
     }
 }
 

@@ -141,12 +141,13 @@ void RecordResolveQuerySetCmd(ID3D12GraphicsCommandList* commandList,
         auto nextFalseIt = std::find(firstTrueIt, lastIt, false);
 
         // The query index of firstTrueIt where the resolving starts
-        uint32_t resolveQueryIndex = std::distance(availability.begin(), firstTrueIt);
+        uint32_t resolveQueryIndex =
+            static_cast<uint32_t>(std::distance(availability.begin(), firstTrueIt));
         // The queries count between firstTrueIt and nextFalseIt need to be resolved
-        uint32_t resolveQueryCount = std::distance(firstTrueIt, nextFalseIt);
+        uint32_t resolveQueryCount = static_cast<uint32_t>(std::distance(firstTrueIt, nextFalseIt));
 
         // Calculate destinationOffset based on the current resolveQueryIndex and firstQuery
-        uint32_t resolveDestinationOffset =
+        uint64_t resolveDestinationOffset =
             destinationOffset + (resolveQueryIndex - firstQuery) * sizeof(uint64_t);
 
         // Resolve the queries between firstTrueIt and nextFalseIt (which is at most lastIt)
@@ -169,7 +170,8 @@ void RecordFirstIndexOffset(ID3D12GraphicsCommandList* commandList,
     std::array<uint32_t, 2> offsets{firstVertex, firstInstance};
     PipelineLayout* layout = ToBackend(pipeline->GetLayout());
     commandList->SetGraphicsRoot32BitConstants(layout->GetFirstIndexOffsetParameterIndex(),
-                                               offsets.size(), offsets.data(), 0);
+                                               static_cast<uint32_t>(offsets.size()),
+                                               offsets.data(), 0);
 }
 
 bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
@@ -393,7 +395,7 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     }
 
     if (barriers.size()) {
-        commandList->ResourceBarrier(barriers.size(), barriers.data());
+        commandList->ResourceBarrier(static_cast<uint32_t>(barriers.size()), barriers.data());
     }
 
     if (passHasUAV) {
@@ -714,7 +716,8 @@ class DescriptorHeapState {
             mDevice->GetSamplerShaderVisibleDescriptorAllocator()->GetShaderVisibleHeap()};
         DAWN_ASSERT(descriptorHeaps[0] != nullptr);
         DAWN_ASSERT(descriptorHeaps[1] != nullptr);
-        commandList->SetDescriptorHeaps(descriptorHeaps.size(), descriptorHeaps.data());
+        commandList->SetDescriptorHeaps(static_cast<uint32_t>(descriptorHeaps.size()),
+                                        descriptorHeaps.data());
 
         // Descriptor table state is undefined at the beginning of a command list and after
         // descriptor heaps are changed on a command list. Invalidate the root sampler tables to
@@ -752,7 +755,7 @@ class VertexBufferTracker {
 
         auto* d3d12BufferView = &mD3D12BufferViews[slot];
         d3d12BufferView->BufferLocation = buffer->GetVA() + offset;
-        d3d12BufferView->SizeInBytes = size;
+        d3d12BufferView->SizeInBytes = static_cast<uint32_t>(size);
         // The bufferView stride is set based on the vertex state before a draw.
     }
 
@@ -772,7 +775,7 @@ class VertexBufferTracker {
                 startSlot = std::min(startSlot, slot);
                 endSlot = std::max(endSlot, ityp::PlusOne(slot));
                 mD3D12BufferViews[slot].StrideInBytes =
-                    renderPipeline->GetVertexBuffer(slot).arrayStride;
+                    static_cast<uint32_t>(renderPipeline->GetVertexBuffer(slot).arrayStride);
             }
         }
 
@@ -1861,7 +1864,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 D3D12_INDEX_BUFFER_VIEW bufferView;
                 bufferView.Format = DXGIIndexFormat(cmd->format);
                 bufferView.BufferLocation = ToBackend(cmd->buffer)->GetVA() + cmd->offset;
-                bufferView.SizeInBytes = cmd->size;
+                bufferView.SizeInBytes = static_cast<uint32_t>(cmd->size);
 
                 commandList->IASetIndexBuffer(&bufferView);
                 break;

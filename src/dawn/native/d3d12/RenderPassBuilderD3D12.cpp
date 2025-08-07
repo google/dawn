@@ -191,13 +191,13 @@ void RenderPassBuilder::SetRenderTargetBeginningAccess(ColorAttachmentIndex atta
         D3D12BeginningAccessType(loadOp);
     if (loadOp == wgpu::LoadOp::Clear) {
         mRenderPassRenderTargetDescriptors[attachment].BeginningAccess.Clear.ClearValue.Color[0] =
-            clearColor.r;
+            static_cast<float>(clearColor.r);
         mRenderPassRenderTargetDescriptors[attachment].BeginningAccess.Clear.ClearValue.Color[1] =
-            clearColor.g;
+            static_cast<float>(clearColor.g);
         mRenderPassRenderTargetDescriptors[attachment].BeginningAccess.Clear.ClearValue.Color[2] =
-            clearColor.b;
+            static_cast<float>(clearColor.b);
         mRenderPassRenderTargetDescriptors[attachment].BeginningAccess.Clear.ClearValue.Color[3] =
-            clearColor.a;
+            static_cast<float>(clearColor.a);
         mRenderPassRenderTargetDescriptors[attachment].BeginningAccess.Clear.ClearValue.Format =
             format;
     }

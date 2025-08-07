@@ -536,7 +536,7 @@ D3D12_INPUT_LAYOUT_DESC RenderPipeline::ComputeInputLayout(
 
         const VertexBufferInfo& input = GetVertexBuffer(attribute.vertexBufferSlot);
 
-        inputElementDescriptor.AlignedByteOffset = attribute.offset;
+        inputElementDescriptor.AlignedByteOffset = static_cast<uint32_t>(attribute.offset);
         inputElementDescriptor.InputSlotClass = VertexStepModeFunction(input.stepMode);
         if (inputElementDescriptor.InputSlotClass == D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA) {
             inputElementDescriptor.InstanceDataStepRate = 0;

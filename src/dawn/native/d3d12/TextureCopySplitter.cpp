@@ -253,7 +253,7 @@ TextureCopySubresource Compute2DTextureCopySubresourceAligned(BlockOrigin3D orig
 
     // The copies must be 512-aligned. To do this, we calculate the first 512-aligned address
     // preceding our data.
-    uint64_t alignedOffset = AlignDownForDataPlacement(offset);
+    uint64_t alignedOffset = AlignDownForDataPlacement(static_cast<uint32_t>(offset));
 
     // If the provided offset to the data was already 512-aligned, we can simply copy the data
     // without further translation.

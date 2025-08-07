@@ -214,8 +214,9 @@ void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
 
         const uint64_t offsetBytes = info.alignedOffset + baseOffset;
         const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-            ComputeBufferLocationForCopyTextureRegion(texture, bufferResource, bufferSize,
-                                                      offsetBytes, bufferBytesPerRow, aspect);
+            ComputeBufferLocationForCopyTextureRegion(
+                texture, bufferResource, bufferSize, offsetBytes,
+                static_cast<uint32_t>(bufferBytesPerRow), aspect);
 
         if (direction == BufferTextureCopyDirection::B2T) {
             const D3D12_BOX sourceRegion =
@@ -419,14 +420,16 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     }
 
     if (label.empty()) {
-        object->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(prefix), prefix);
+        object->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(strlen(prefix)),
+                               prefix);
         return;
     }
 
     std::string objectName = prefix;
     objectName += "_";
     objectName += label;
-    object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
+    object->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<uint32_t>(objectName.length()),
+                           objectName.c_str());
 }
 
 D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
