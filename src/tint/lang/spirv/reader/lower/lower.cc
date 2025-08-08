@@ -36,6 +36,7 @@
 #include "src/tint/lang/spirv/reader/lower/decompose_strided_matrix.h"
 #include "src/tint/lang/spirv/reader/lower/shader_io.h"
 #include "src/tint/lang/spirv/reader/lower/texture.h"
+#include "src/tint/lang/spirv/reader/lower/transpose_row_major.h"
 #include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
 
 namespace tint::spirv::reader {
@@ -53,6 +54,10 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     RUN_TRANSFORM(lower::VectorElementPointer, mod);
     RUN_TRANSFORM(lower::ShaderIO, mod);
     RUN_TRANSFORM(lower::Builtins, mod);
+
+    // TransposeRowMajor must come before DecomposeStridedMatrix as we need to convert the matrices
+    // first.
+    RUN_TRANSFORM(lower::TransposeRowMajor, mod);
     // DecomposeStridedMatrix must come before DecomposeStridedArray, as it introduces strided
     // arrays that need to be replaced.
     RUN_TRANSFORM(lower::DecomposeStridedMatrix, mod);

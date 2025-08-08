@@ -93,6 +93,10 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
         return idx;
     }
 
+    /// Pops the last operand off the operand list
+    /// @returns the removed element
+    Value* PopOperand() { return operands_.Pop(); }
+
     /// Removes all operands from the instruction
     void ClearOperands() {
         for (uint32_t i = 0; i < operands_.Length(); i++) {

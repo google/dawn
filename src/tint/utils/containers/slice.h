@@ -90,7 +90,7 @@ struct CanReinterpretSlice {
         (std::is_same_v<std::remove_const_t<TO>, std::remove_const_t<FROM>> ||
 
          // Both TO and FROM are pointers...
-         ((std::is_pointer_v<TO> && std::is_pointer_v<FROM>)&&
+         ((std::is_pointer_v<TO> && std::is_pointer_v<FROM>) &&
 
           // const can only be applied to element type, not removed
           !ConstRemoved<TO_EL, FROM_EL> &&
@@ -125,7 +125,7 @@ template <ReinterpretMode MODE, typename TO, typename FROM>
 static constexpr bool CanReinterpretSlice =
     tint::detail::CanReinterpretSlice<MODE, TO, FROM>::value;
 
-/// A slice represents a contigious array of elements of type T.
+/// A slice represents a contiguous array of elements of type T.
 template <typename T>
 struct Slice {
     /// Type of `T`.
