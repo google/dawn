@@ -33,12 +33,10 @@
 namespace dawn::native::opengl {
 
 // static
-ResultOrError<Ref<DisplayEGL>> DisplayEGL::CreateFromDynamicLoading(
-    wgpu::BackendType backend,
-    const char* libName,
-    std::span<const std::string> searchPaths) {
+ResultOrError<Ref<DisplayEGL>> DisplayEGL::CreateFromDynamicLoading(wgpu::BackendType backend,
+                                                                    const char* libName) {
     Ref<DisplayEGL> display = AcquireRef(new DisplayEGL(backend));
-    DAWN_TRY(display->InitializeWithDynamicLoading(libName, searchPaths));
+    DAWN_TRY(display->InitializeWithDynamicLoading(libName));
     return std::move(display);
 }
 
@@ -78,10 +76,9 @@ DisplayEGL::~DisplayEGL() {
     }
 }
 
-MaybeError DisplayEGL::InitializeWithDynamicLoading(const char* libName,
-                                                    std::span<const std::string> searchPaths) {
+MaybeError DisplayEGL::InitializeWithDynamicLoading(const char* libName) {
     std::string err;
-    if (!mLib.Valid() && !mLib.Open(libName, searchPaths, &err)) {
+    if (!mLib.Valid() && !mLib.Open(libName, &err)) {
         return DAWN_VALIDATION_ERROR("Failed to load %s: \"%s\".", libName, err.c_str());
     }
 

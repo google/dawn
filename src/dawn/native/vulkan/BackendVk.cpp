@@ -335,12 +335,28 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
 
     const std::vector<std::string>& searchPaths = instance->GetRuntimeSearchPaths();
 
-    auto LoadVulkan = [&](const char* libName) -> MaybeError {
-        std::string error;
-        if (mVulkanLib.Open(libName, searchPaths, &error)) {
-            return {};
+    auto CommaSeparatedResolvedSearchPaths = [&](const char* name) {
+        std::string list;
+        bool first = true;
+        for (const std::string& path : searchPaths) {
+            if (!first) {
+                list += ", ";
+            }
+            first = false;
+            list += (path + name);
         }
-        return DAWN_FORMAT_INTERNAL_ERROR("Couldn't load Vulkan: %s", error.c_str());
+        return list;
+    };
+
+    auto LoadVulkan = [&](const char* libName) -> MaybeError {
+        for (const std::string& path : searchPaths) {
+            std::string resolvedPath = path + libName;
+            if (mVulkanLib.Open(resolvedPath)) {
+                return {};
+            }
+        }
+        return DAWN_FORMAT_INTERNAL_ERROR("Couldn't load Vulkan. Searched %s.",
+                                          CommaSeparatedResolvedSearchPaths(libName));
     };
 
     switch (icd) {

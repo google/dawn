@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 #define SRC_DAWN_NATIVE_D3D12_PLATFORMFUNCTIONS_H_
 
-#include <span>
 #include <string>
 
 #include "dawn/native/d3d/PlatformFunctions.h"
@@ -43,8 +42,8 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
     PlatformFunctions();
     ~PlatformFunctions() override;
 
-    MaybeError Initialize(std::span<const std::string> searchPaths);
-    MaybeError EnsureDXCLibraries(std::span<const std::string> searchPaths);
+    MaybeError Initialize();
+    MaybeError EnsureDXCLibraries();
     bool IsPIXEventRuntimeLoaded() const;
 
     // Functions from d3d12.dll
@@ -88,7 +87,7 @@ class PlatformFunctions final : public d3d::PlatformFunctions {
 
     MaybeError LoadD3D12();
     MaybeError LoadD3D11();
-    void LoadPIXRuntime(std::span<const std::string> searchPaths);
+    void LoadPIXRuntime();
 
     DynamicLib mD3D12Lib;
     DynamicLib mD3D11Lib;

@@ -47,7 +47,7 @@ class PlatformFunctions {
     virtual ~PlatformFunctions();
 
     MaybeError Initialize();
-    MaybeError EnsureFXC(std::span<const std::string> searchPaths);
+    MaybeError EnsureFXC();
 
     uint64_t GetWindowsBuildNumber() const;
 

@@ -86,7 +86,6 @@ set(USE_WINDOWS_UI OFF)
 set(BUILD_SAMPLES OFF)
 set(BUILD_TESTS OFF)
 set(TARGET_MACOS OFF)
-set(FORCE_SYSTEM_COMPONENT_LOAD OFF)
 if (EMSCRIPTEN)
   # Only the samples are supported for Emscripten at the moment.
   # TODO(crbug.com/42240181): Make dawn_end2end_tests work too.
@@ -149,7 +148,6 @@ option(DAWN_ENABLE_DESKTOP_GL "Enable compilation of the OpenGL backend" ${ENABL
 option(DAWN_ENABLE_OPENGLES "Enable compilation of the OpenGL ES backend" ${ENABLE_OPENGLES})
 option(DAWN_ENABLE_VULKAN "Enable compilation of the Vulkan backend" ${ENABLE_VULKAN})
 option(DAWN_ENABLE_SPIRV_VALIDATION "Enable validation of SPIR-V" ${ENABLE_SPIRV_VALIDATION})
-option(DAWN_FORCE_SYSTEM_COMPONENT_LOAD "Allow system component fallback" ${FORCE_SYSTEM_COMPONENT_LOAD})
 
 message(STATUS "Dawn building using Emscripten toolchain: ${EMSCRIPTEN}")
 message(STATUS "Dawn build D3D11 backend: ${DAWN_ENABLE_D3D11}")
@@ -167,7 +165,6 @@ message(STATUS "Dawn build with TSAN: ${DAWN_ENABLE_TSAN}")
 message(STATUS "Dawn build with MSAN: ${DAWN_ENABLE_MSAN}")
 message(STATUS "Dawn build with UBSAN: ${DAWN_ENABLE_UBSAN}")
 message(STATUS "Dawn enable install: ${DAWN_ENABLE_INSTALL}")
-message(STATUS "Dawn allow system component fallback: ${DAWN_FORCE_SYSTEM_COMPONENT_LOAD}")
 message(STATUS "")
 
 option(DAWN_ALWAYS_ASSERT "Enable assertions on all build types" OFF)
@@ -438,9 +435,6 @@ if (DAWN_USE_WINDOWS_UI)
 endif()
 if (WIN32)
     target_compile_definitions(dawn_internal_config INTERFACE "NOMINMAX" "WIN32_LEAN_AND_MEAN")
-endif()
-if (DAWN_FORCE_SYSTEM_COMPONENT_LOAD)
-    target_compile_definitions(dawn_internal_config INTERFACE "DAWN_FORCE_SYSTEM_COMPONENT_LOAD")
 endif()
 
 ################################################################################

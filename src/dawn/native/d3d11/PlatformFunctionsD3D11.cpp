@@ -34,11 +34,11 @@ namespace dawn::native::d3d11 {
 PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
-MaybeError PlatformFunctions::Initialize(std::span<const std::string> searchPaths) {
+MaybeError PlatformFunctions::Initialize() {
     DAWN_TRY(Base::Initialize());
 
     // Load FX compiler unconditionally since that's the only compiler we can use for D3D11.
-    DAWN_TRY(EnsureFXC(searchPaths));
+    DAWN_TRY(EnsureFXC());
 
     DAWN_TRY(LoadD3D11());
     return {};

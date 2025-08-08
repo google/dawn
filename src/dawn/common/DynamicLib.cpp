@@ -27,7 +27,6 @@
 
 #include "dawn/common/DynamicLib.h"
 
-#include <span>
 #include <utility>
 
 #include "dawn/common/Platform.h"
@@ -79,14 +78,7 @@ bool DynamicLib::Open(const std::string& filename, std::string* error) {
 #if DAWN_PLATFORM_IS(WINUWP)
     mHandle = LoadPackagedLibrary(UTF8ToWStr(filename.c_str()).c_str(), 0);
 #else
-#if defined(DAWN_FORCE_SYSTEM_COMPONENT_LOAD)
-    const DWORD loadLibraryFlags = LOAD_LIBRARY_SEARCH_SYSTEM32;
-#else
-    // Use SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS to avoid DLL search path attacks.
-    const DWORD loadLibraryFlags =
-        LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS;
-#endif
-    mHandle = LoadLibraryExA(filename.c_str(), nullptr, loadLibraryFlags);
+    mHandle = LoadLibraryA(filename.c_str());
 #endif
     if (mHandle == nullptr && error != nullptr) {
         *error =
@@ -103,18 +95,6 @@ bool DynamicLib::Open(const std::string& filename, std::string* error) {
 #endif
 
     return mHandle != nullptr;
-}
-
-bool DynamicLib::Open(const std::string& filename,
-                      std::span<const std::string> searchPaths,
-                      std::string* error) {
-    for (const std::string& path : searchPaths) {
-        const std::string fullPath = path + filename;
-        if (Open(fullPath, error)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void DynamicLib::Close() {

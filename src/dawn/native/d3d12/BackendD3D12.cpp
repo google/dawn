@@ -47,7 +47,7 @@ MaybeError Backend::Initialize() {
         // Put function initialization in curly braces to avoid the temptation to use the
         // std::move-ed `functions` variable later in the method.
         auto functions = std::make_unique<PlatformFunctions>();
-        DAWN_TRY(functions->Initialize(GetInstance()->GetRuntimeSearchPaths()));
+        DAWN_TRY(functions->Initialize());
 
         DAWN_TRY(Base::Initialize(std::move(functions)));
     }
@@ -90,8 +90,7 @@ MaybeError Backend::EnsureDXC() {
         return {};
     }
 
-    DAWN_TRY(const_cast<PlatformFunctions*>(GetFunctions())
-                 ->EnsureDXCLibraries(GetInstance()->GetRuntimeSearchPaths()));
+    DAWN_TRY(const_cast<PlatformFunctions*>(GetFunctions())->EnsureDXCLibraries());
 
     ComPtr<IDxcLibrary> dxcLibrary;
     DAWN_TRY(

@@ -29,8 +29,6 @@
 #define SRC_DAWN_NATIVE_OPENGL_DISPLAYEGL_H_
 
 #include <memory>
-#include <span>
-#include <string>
 
 #include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/DynamicLib.h"
@@ -48,10 +46,9 @@ static constexpr EGLConfig kNoConfig = 0;
 // global to EGL.
 class DisplayEGL : public RefCounted {
   public:
-    static ResultOrError<Ref<DisplayEGL>> CreateFromDynamicLoading(
-        wgpu::BackendType backend,
-        const char* libName,
-        std::span<const std::string> searchPaths);
+    static ResultOrError<Ref<DisplayEGL>> CreateFromDynamicLoading(wgpu::BackendType backend,
+                                                                   const char* libName);
+
     static ResultOrError<Ref<DisplayEGL>> CreateFromProcAndDisplay(wgpu::BackendType backend,
                                                                    EGLGetProcProc getProc,
                                                                    EGLDisplay display);
@@ -73,8 +70,7 @@ class DisplayEGL : public RefCounted {
                            wgpu::TextureFormat depthStencil = wgpu::TextureFormat::Undefined) const;
 
   private:
-    MaybeError InitializeWithDynamicLoading(const char* libName,
-                                            std::span<const std::string> searchPaths);
+    MaybeError InitializeWithDynamicLoading(const char* libName);
     MaybeError InitializeWithProcAndDisplay(EGLGetProcProc getProc, EGLDisplay display);
 
     DynamicLib mLib;

@@ -32,19 +32,17 @@
 #include <string>
 #include <utility>
 
-#include "dawn/common/SystemUtils.h"
-
 namespace dawn::native::d3d12 {
 
 PlatformFunctions::PlatformFunctions() = default;
 PlatformFunctions::~PlatformFunctions() = default;
 
-MaybeError PlatformFunctions::Initialize(std::span<const std::string> searchPaths) {
+MaybeError PlatformFunctions::Initialize() {
     DAWN_TRY(Base::Initialize());
 
     DAWN_TRY(LoadD3D12());
     DAWN_TRY(LoadD3D11());
-    LoadPIXRuntime(searchPaths);
+    LoadPIXRuntime();
     return {};
 }
 
@@ -93,14 +91,13 @@ bool PlatformFunctions::IsPIXEventRuntimeLoaded() const {
     return mPIXEventRuntimeLib.Valid();
 }
 
-void PlatformFunctions::LoadPIXRuntime(std::span<const std::string> searchPaths) {
+void PlatformFunctions::LoadPIXRuntime() {
     // TODO(dawn:766):
     // In UWP PIX should be statically linked WinPixEventRuntime_UAP.lib
     // So maybe we should put WinPixEventRuntime as a third party package
     // Currently PIX is not going to be loaded in UWP since the following
     // mPIXEventRuntimeLib.Open will fail.
-
-    if (!mPIXEventRuntimeLib.Open("WinPixEventRuntime.dll", searchPaths) ||
+    if (!mPIXEventRuntimeLib.Open("WinPixEventRuntime.dll") ||
         !mPIXEventRuntimeLib.GetProc(&pixBeginEventOnCommandList, "PIXBeginEventOnCommandList") ||
         !mPIXEventRuntimeLib.GetProc(&pixEndEventOnCommandList, "PIXEndEventOnCommandList") ||
         !mPIXEventRuntimeLib.GetProc(&pixSetMarkerOnCommandList, "PIXSetMarkerOnCommandList")) {
@@ -109,7 +106,7 @@ void PlatformFunctions::LoadPIXRuntime(std::span<const std::string> searchPaths)
 }
 
 #if DAWN_USE_BUILT_DXC
-MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> searchPaths) {
+MaybeError PlatformFunctions::EnsureDXCLibraries() {
     // TODO(dawn:766)
     // Statically linked with dxcompiler.lib in UWP
     // currently linked with dxcompiler.lib making CoreApp unable to activate
@@ -125,12 +122,12 @@ MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> se
     DynamicLib dxilLib;
     std::string error;
     // DXIL must be loaded before DXC, otherwise shader signing is unavailable
-    if (!dxilLib.Open("dxil.dll", searchPaths, &error)) {
+    if (!dxilLib.Open("dxil.dll", &error)) {
         return DAWN_INTERNAL_ERROR(std::move(error));
     }
 
     DynamicLib dxCompilerLib;
-    if (!dxCompilerLib.Open("dxcompiler.dll", searchPaths, &error)) {
+    if (!dxCompilerLib.Open("dxcompiler.dll", &error)) {
         return DAWN_INTERNAL_ERROR(std::move(error));
     }
 
@@ -143,4 +140,5 @@ MaybeError PlatformFunctions::EnsureDXCLibraries(std::span<const std::string> se
     return {};
 }
 #endif  // DAWN_USE_BUILT_DXC
+
 }  // namespace dawn::native::d3d12
