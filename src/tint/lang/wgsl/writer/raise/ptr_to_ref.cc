@@ -141,7 +141,6 @@ Result<SuccessType> PtrToRef(core::ir::Module& mod) {
     auto result =
         core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.PtrToRef",
                                           core::ir::Capabilities{
-                                              core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowPhonyInstructions,
                                           }
