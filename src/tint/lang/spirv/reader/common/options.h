@@ -46,6 +46,8 @@ struct Options {
     /// Mapping from a SPIR-V Sampler binding point to a WGSL sampler binding
     /// point. This allows remapping samplers which are split out of the
     /// combined texture/sampler pairs in SPIR-V.
+    /// If this map is empty, any binding conflicts will be automatically resolved by incrementing
+    /// binding numbers until they are unique.
     std::unordered_map<BindingPoint, BindingPoint> sampler_mappings{};
 };
 

@@ -44,6 +44,7 @@ TINT_BEGIN_DISABLE_WARNING(SIGN_CONVERSION);
 TINT_BEGIN_DISABLE_WARNING(WEAK_VTABLES);
 TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 #include "source/opt/build_module.h"
+#include "source/opt/resolve_binding_conflicts_pass.h"
 #include "source/opt/split_combined_image_sampler_pass.h"
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 TINT_END_DISABLE_WARNING(WEAK_VTABLES);
@@ -108,11 +109,19 @@ class Parser {
             return Failure("failed to build the internal representation of the module");
         }
 
+        // Run SPIR-V opt transforms to make the input friendlier for the SPIR-V frontend.
         {
             spvtools::opt::SplitCombinedImageSamplerPass pass;
             auto status = pass.Run(spirv_context_.get());
             if (status == spvtools::opt::Pass::Status::Failure) {
                 return Failure("failed to run SplitCombinedImageSamplerPass in SPIR-V opt");
+            }
+        }
+        if (options_.sampler_mappings.empty()) {
+            spvtools::opt::ResolveBindingConflictsPass pass;
+            auto status = pass.Run(spirv_context_.get());
+            if (status == spvtools::opt::Pass::Status::Failure) {
+                return Failure("failed to run ResolveBindingConflictsPass in SPIR-V opt");
             }
         }
 
