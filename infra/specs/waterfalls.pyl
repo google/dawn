@@ -1,6 +1,6 @@
 [
   {
-    'name': 'dawn',
+    'name': 'ci',
     'mixins': [
       'chromium-tester-service-account',
       'swarming_containment_auto',
