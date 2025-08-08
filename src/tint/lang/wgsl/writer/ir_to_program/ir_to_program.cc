@@ -187,6 +187,9 @@ class State {
     /// Map of struct to output program name.
     Hashmap<const core::type::Struct*, Symbol, 8> structs_;
 
+    /// Map of struct members to their sanitized names.
+    Hashmap<const core::type::StructMember*, Symbol, 32> member_names_;
+
     /// The current function being emitted.
     const core::ir::Function* current_function_ = nullptr;
 
@@ -823,7 +826,7 @@ class State {
                         TINT_ASSERT(i < s->Members().Length());
                         auto* member = s->Members()[i];
                         obj_ty = member->Type();
-                        expr = b.MemberAccessor(expr, member->Name().NameView());
+                        expr = b.MemberAccessor(expr, SanitizedMemberName(member));
                     } else {
                         TINT_ICE() << "invalid index for struct type: " << index->TypeInfo().name;
                     }
@@ -1086,13 +1089,6 @@ class State {
             return ast::Type{};
         }
 
-        auto safe_name = [&](const Symbol& name, const char* fallback_name) {
-            if (IsWGSLSafe(name.NameView())) {
-                return b.Symbols().Register(name.NameView());
-            }
-            return b.Symbols().New(fallback_name);
-        };
-
         auto n = structs_.GetOrAdd(s, [&] {
             TINT_ASSERT(s->Members().Length() > 0);
             uint32_t current_offset = s->Members()[0]->Offset();
@@ -1161,14 +1157,21 @@ class State {
                     ast_attrs.Push(b.Invariant());
                 }
 
-                auto name = safe_name(m->Name(), "m");
+                auto name = SanitizedMemberName(m);
                 members.Push(b.Member(name, ty, std::move(ast_attrs)));
             }
 
             // TODO(crbug.com/tint/1902): Emit structure attributes
             Vector<const ast::Attribute*, 2> attrs;
 
-            auto name = safe_name(s->Name(), "S");
+            // Sanitize the name of the structure.
+            Symbol name;
+            if (IsWGSLSafe(s->Name().NameView())) {
+                name = b.Symbols().Register(s->Name().NameView());
+            } else {
+                name = b.Symbols().New("S");
+            }
+
             b.Structure(name, std::move(members), std::move(attrs));
             return name;
         });
@@ -1261,6 +1264,16 @@ class State {
                 }
             }
             return b.Symbols().New("v");
+        });
+    }
+
+    /// @returns the AST name for the given struct member
+    Symbol SanitizedMemberName(const core::type::StructMember* member) {
+        return member_names_.GetOrAdd(member, [&] {
+            if (IsWGSLSafe(member->Name().NameView())) {
+                return b.Symbols().Register(member->Name().NameView());
+            }
+            return b.Symbols().New("m");
         });
     }
 

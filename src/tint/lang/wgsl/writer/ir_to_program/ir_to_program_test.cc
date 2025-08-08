@@ -983,8 +983,12 @@ TEST_F(IRToProgramTest, RenameStructAndStructMembers) {
 
     auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(fn->Block(), [&] {
-        b.Var("s0", ty.ref<function>(s0));
-        b.Var("s1", ty.ref<function>(s1));
+        auto* s0_var = b.Var("s0", ty.ref<function>(s0));
+        auto* s1_var = b.Var("s1", ty.ref<function>(s1));
+        b.Let("s0_0", b.Load(b.Access(ty.ref<function, i32>(), s0_var, 0_u)));
+        b.Let("s0_1", b.Load(b.Access(ty.ref<function, u32>(), s0_var, 1_u)));
+        b.Let("s0_2", b.Load(b.Access(ty.ref<function, u32>(), s0_var, 2_u)));
+        b.Let("s1_0", b.Load(b.Access(ty.ref<function, i32>(), s1_var, 0_u)));
         b.Return(fn);
     });
 
@@ -1003,6 +1007,10 @@ struct S {
 fn f() {
   var s0 : MyStruct;
   var s1 : S;
+  let s0_0 = s0.safe;
+  let s0_1 = s0.m;
+  let s0_2 = s0.m_1;
+  let s1_0 = s1.a;
 }
 )");
 }
