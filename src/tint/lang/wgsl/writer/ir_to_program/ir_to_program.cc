@@ -107,9 +107,12 @@ class State {
     explicit State(const core::ir::Module& m) : mod(m) {}
 
     Program Run(const ProgramOptions& options) {
-        core::ir::Capabilities caps{core::ir::Capability::kAllowRefTypes,
-                                    core::ir::Capability::kAllowOverrides,
-                                    core::ir::Capability::kAllowPhonyInstructions};
+        core::ir::Capabilities caps{
+            core::ir::Capability::kAllowMultipleEntryPoints,
+            core::ir::Capability::kAllowOverrides,
+            core::ir::Capability::kAllowPhonyInstructions,
+            core::ir::Capability::kAllowRefTypes,
+        };
         if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.to_program", caps);
             res != Success) {
             // IR module failed validation.

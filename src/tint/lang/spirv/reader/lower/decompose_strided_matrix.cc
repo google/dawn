@@ -365,6 +365,7 @@ struct State {
 Result<SuccessType> DecomposeStridedMatrix(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.DecomposeStridedMatrix",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowStructMatrixDecorations,
                                               core::ir::Capability::kAllowNonCoreTypes,
                                               core::ir::Capability::kAllowOverrides,
