@@ -4222,6 +4222,61 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, Let_SampledImage) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %t "t"
+               OpName %s "s"
+               OpDecorate %t Binding 0
+               OpDecorate %t DescriptorSet 0
+               OpDecorate %s Binding 1
+               OpDecorate %s DescriptorSet 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+         %10 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_10 = OpTypePointer UniformConstant %10
+          %t = OpVariable %_ptr_UniformConstant_10 UniformConstant
+         %14 = OpTypeSampler
+%_ptr_UniformConstant_14 = OpTypePointer UniformConstant %14
+          %s = OpVariable %_ptr_UniformConstant_14 UniformConstant
+         %18 = OpTypeSampledImage %10
+    %v2float = OpTypeVector %float 2
+    %float_0 = OpConstant %float 0
+         %22 = OpConstantComposite %v2float %float_0 %float_0
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+         %13 = OpLoad %10 %t
+         %17 = OpLoad %14 %s
+         %19 = OpSampledImage %18 %13 %17
+        %100 = OpCopyObject %18 %19
+         %23 = OpImageSampleExplicitLod %v4float %100 %22 Lod %float_0
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %t:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(0, 0)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(0, 1)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %t
+    %5:sampler = load %s
+    %6:vec4<f32> = textureSampleLevel %4, %5, vec2<f32>(0.0f), 0.0f
+    ret
+  }
+}
+)");
+}
+
 // https://crbug.com/430358345
 TEST_F(SpirvReaderTest, Image_UserCall_Params) {
     EXPECT_IR(R"(

@@ -3788,7 +3788,7 @@ class Parser {
         // Make the result Id a pointer to the original copied value.
         auto* v = Value(inst.GetSingleWordOperand(2));
 
-        if (v->Type()->IsHandle()) {
+        if (v->Type()->IsHandle() || v->Type()->Is<spirv::type::SampledImage>()) {
             values_.Add(inst.result_id(), v);
         } else {
             auto* l = b_.Let(v);
