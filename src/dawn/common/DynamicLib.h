@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_DYNAMICLIB_H_
 #define SRC_DAWN_COMMON_DYNAMICLIB_H_
 
+#include <span>
 #include <string>
 #include <type_traits>
 
@@ -53,6 +54,9 @@ class DynamicLib {
     bool OpenSystemLibrary(std::wstring_view filename, std::string* error = nullptr);
 #endif
     bool Open(const std::string& filename, std::string* error = nullptr);
+    bool Open(const std::string& filename,
+              std::span<const std::string> searchPaths,
+              std::string* error = nullptr);
     void Close();
 
     void* GetProc(const std::string& procName, std::string* error = nullptr) const;

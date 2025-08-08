@@ -31,6 +31,7 @@
 
 #include "dawn/common/DynamicLib.h"
 #include "dawn/common/egl_platform.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/OpenGLBackend.h"
 #include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/tests/DawnTest.h"
@@ -42,7 +43,9 @@ namespace {
 
 class EGLFunctions {
   public:
-    EGLFunctions() {
+    EGLFunctions() = default;
+
+    bool Initialize(const std::vector<std::string>& searchPaths) {
 #if DAWN_PLATFORM_IS(WINDOWS)
         const char* eglLib = "libEGL.dll";
 #elif DAWN_PLATFORM_IS(MACOS)
@@ -50,7 +53,10 @@ class EGLFunctions {
 #else
         const char* eglLib = "libEGL.so";
 #endif
-        EXPECT_TRUE(mlibEGL.Open(eglLib));
+        std::string error;
+        if (!mlibEGL.Open(eglLib, searchPaths, &error)) {
+            return false;
+        }
         CreateImage = reinterpret_cast<PFNEGLCREATEIMAGEPROC>(LoadProc("eglCreateImage"));
         DestroyImage = reinterpret_cast<PFNEGLDESTROYIMAGEPROC>(LoadProc("eglDestroyImage"));
         GetCurrentContext =
@@ -58,6 +64,7 @@ class EGLFunctions {
         GetCurrentDisplay =
             reinterpret_cast<PFNEGLGETCURRENTDISPLAYPROC>(LoadProc("eglGetCurrentDisplay"));
         QueryString = reinterpret_cast<PFNEGLQUERYSTRINGPROC>(LoadProc("eglQueryString"));
+        return true;
     }
 
   private:
@@ -139,6 +146,12 @@ class EGLImageTestBase : public DawnTest {
     void SetUp() override {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DawnTest::SetUp();
+
+        // Initialize EGL functions with runtime search paths from the instance
+        auto instance = native::FromAPI(GetInstance().Get());
+        const std::vector<std::string>& searchPaths = instance->GetRuntimeSearchPaths();
+        ASSERT_TRUE(egl.Initialize(searchPaths));
+
         // TODO(crbug.com/dawn/2206): remove this check if possible.
         DAWN_TEST_UNSUPPORTED_IF(!HasExtension("KHR_gl_texture_2D_image"));
         // EGL extension not available
