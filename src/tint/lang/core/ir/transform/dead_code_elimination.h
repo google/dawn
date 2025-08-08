@@ -40,6 +40,7 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kDeadCodeEliminationCapabilities{
+    core::ir::Capability::kAllowMultipleEntryPoints,
     core::ir::Capability::kAllowOverrides,
     core::ir::Capability::kAllowVectorElementPointer,
     core::ir::Capability::kAllowPhonyInstructions,

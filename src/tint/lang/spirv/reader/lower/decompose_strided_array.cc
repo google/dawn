@@ -256,6 +256,7 @@ struct State {
 Result<SuccessType> DecomposeStridedArray(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.DecomposeStridedArray",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowNonCoreTypes,
                                               core::ir::Capability::kAllowOverrides,
                                           });

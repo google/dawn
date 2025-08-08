@@ -948,6 +948,7 @@ struct State {
 Result<SuccessType> Texture(core::ir::Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "spirv.Texture",
                                           core::ir::Capabilities{
+                                              core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowNonCoreTypes,
                                           });

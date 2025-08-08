@@ -71,7 +71,10 @@ class SpirvReaderTestHelperBase : public BASE {
         }
 
         // Validate the IR module against the capabilities supported by the core dialect.
-        auto validated = core::ir::Validate(parsed.Get());
+        auto validated =
+            core::ir::Validate(parsed.Get(), core::ir::Capabilities{
+                                                 core::ir::Capability::kAllowMultipleEntryPoints,
+                                             });
         if (validated != Success) {
             return validated.Failure();
         }
