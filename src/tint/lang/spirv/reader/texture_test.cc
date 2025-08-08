@@ -168,6 +168,48 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, Handle_SameImageType_TwoVarsWithDifferentAccessModes) {
+    EXPECT_IR(R"(
+           OpCapability Shader
+           OpCapability Sampled1D
+           OpCapability StorageImageExtendedFormats
+           OpMemoryModel Logical Simple
+           OpEntryPoint Fragment %main "main"
+           OpExecutionMode %main OriginUpperLeft
+           OpName %write_only_image "write_only_image"
+           OpName %read_only_image "read_only_image"
+           OpDecorate %write_only_image DescriptorSet 0
+           OpDecorate %write_only_image Binding 0
+           OpDecorate %write_only_image NonReadable
+           OpDecorate %read_only_image DescriptorSet 0
+           OpDecorate %read_only_image Binding 1
+           OpDecorate %read_only_image NonWritable
+  %float = OpTypeFloat 32
+%storage = OpTypeImage %float 1D 0 0 0 2 Rg32f
+%ptr_storage = OpTypePointer UniformConstant %storage
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+%write_only_image = OpVariable %ptr_storage UniformConstant
+ %read_only_image = OpVariable %ptr_storage UniformConstant
+   %main = OpFunction %void None %voidfn
+  %entry = OpLabel
+           OpReturn
+           OpFunctionEnd
+        )",
+              R"(
+$B1: {  # root
+  %write_only_image:ptr<handle, texture_storage_1d<rg32float, write>, read> = var undef @binding_point(0, 0)
+  %read_only_image:ptr<handle, texture_storage_1d<rg32float, read>, read> = var undef @binding_point(0, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvReaderTest, Handle_MS_2D) {
     EXPECT_IR(R"(
            OpCapability Shader

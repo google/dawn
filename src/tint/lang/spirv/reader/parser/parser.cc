@@ -634,19 +634,11 @@ class Parser {
     /// @returns a Tint type object
     const core::type::Type* Type(const spvtools::opt::analysis::Type* type,
                                  core::Access access_mode = core::Access::kUndefined) {
+        // Only use the access mode for the map key if it is used as part of the type in Tint IR.
         auto key_mode = core::Access::kUndefined;
-        if (type->kind() == spvtools::opt::analysis::Type::kImage) {
+        if (type->kind() == spvtools::opt::analysis::Type::kImage ||
+            type->kind() == spvtools::opt::analysis::Type::kPointer) {
             key_mode = access_mode;
-        } else if (type->kind() == spvtools::opt::analysis::Type::kPointer) {
-            // Pointers use the access mode, unless they're handle pointers in which case they get
-            // Read.
-            key_mode = access_mode;
-
-            auto* ptr = type->AsPointer();
-            if (ptr->pointee_type()->kind() == spvtools::opt::analysis::Type::kSampler ||
-                ptr->pointee_type()->kind() == spvtools::opt::analysis::Type::kImage) {
-                key_mode = core::Access::kRead;
-            }
         }
 
         return types_.GetOrAdd(TypeKey{type, key_mode}, [&]() -> const core::type::Type* {
