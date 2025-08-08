@@ -2024,7 +2024,6 @@ void Validator::CheckType(const core::type::Type* root,
 
                 switch (ms->Dim()) {
                     case core::type::TextureDimension::k2d:
-                    case core::type::TextureDimension::k2dArray:
                         break;
                     default:
                         diag() << "invalid multisampled texture dimension: "

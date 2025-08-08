@@ -512,7 +512,7 @@ INSTANTIATE_TEST_SUITE_P(
                                      std::make_tuple(false, TypeBuilder<core::type::Void>)),
                      testing::Values(std::make_tuple(false, core::type::TextureDimension::k1d),
                                      std::make_tuple(true, core::type::TextureDimension::k2d),
-                                     std::make_tuple(true, core::type::TextureDimension::k2dArray),
+                                     std::make_tuple(false, core::type::TextureDimension::k2dArray),
                                      std::make_tuple(false, core::type::TextureDimension::k3d),
                                      std::make_tuple(false, core::type::TextureDimension::kCube),
                                      std::make_tuple(false,
