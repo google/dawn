@@ -392,24 +392,9 @@ MaybeError ExpandResolveTextureWithDraw(
     }
     renderEncoder->APISetBindGroup(0, bindGroup.Get());
 
-    std::optional<RenderPassDescriptorResolveRect> expandResolveRect;
-    if (auto* legacyResolveRect =
-            renderPassDescriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
-        // This is a deprecated option.
-        // TODO(417768364): Remove this once the all the call sites are updated to use the new rect.
-        RenderPassDescriptorResolveRect rect{};
-        rect.colorOffsetX = legacyResolveRect->x;
-        rect.colorOffsetY = legacyResolveRect->y;
-        rect.resolveOffsetX = legacyResolveRect->x;
-        rect.resolveOffsetY = legacyResolveRect->y;
-        rect.width = legacyResolveRect->width;
-        rect.height = legacyResolveRect->height;
-        expandResolveRect = rect;
-    } else if (auto* resolveRect = renderPassDescriptor.Get<RenderPassDescriptorResolveRect>()) {
-        expandResolveRect = *resolveRect;
-    }
     renderEncoder->APISetPipeline(pipeline.Get());
 
+    const auto* expandResolveRect = renderPassDescriptor.Get<RenderPassDescriptorResolveRect>();
     if (expandResolveRect) {
         // TODO(chromium:344814092): Prevent the scissor to be reset to outside of this region by
         // passing the scissor bound to the render pass creation.
@@ -419,7 +404,7 @@ MaybeError ExpandResolveTextureWithDraw(
     }
     // The texture size never exceeds 16 bits. We pack two values {offsetX, offsetY} into a 32-bit
     // firstInstance value, which avoids creating a uniform buffer.
-    const auto offsets = expandResolveRect ? PackOffsets(expandResolveRect.value()) : 0;
+    const auto offsets = expandResolveRect ? PackOffsets(*expandResolveRect) : 0;
     // Draw to perform the blit.
     renderEncoder->APIDraw(/*vertexCount=*/3,
                            /*instanceCount=*/1,

@@ -1348,8 +1348,9 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ExpandResolveRectWithoutF
     auto multisampledColorTextureView = CreateMultisampledColorTextureView();
     auto resolveTarget = CreateNonMultisampledColorTextureView();
 
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
+    wgpu::RenderPassDescriptorResolveRect rect{};
+    rect.colorOffsetX = rect.colorOffsetY = 0;
+    rect.resolveOffsetX = rect.resolveOffsetY = 0;
     rect.width = rect.height = 1;
 
     auto renderPass = CreateMultisampledRenderPass();
@@ -2108,8 +2109,9 @@ TEST_F(DawnLoadResolveTextureValidationTest, ExpandResolveRectWithoutFeatureEnab
     auto multisampledColorTextureView = CreateMultisampledColorTextureView();
     auto resolveTarget = CreateCompatibleResolveTextureView();
 
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
+    wgpu::RenderPassDescriptorResolveRect rect{};
+    rect.colorOffsetX = rect.colorOffsetY = 0;
+    rect.resolveOffsetX = rect.resolveOffsetY = 0;
     rect.width = rect.height = 1;
 
     auto renderPass = CreateMultisampledRenderPass();
@@ -2140,8 +2142,9 @@ TEST_F(DawnPartialLoadResolveTextureValidationTest, ExpandResolveRectValid) {
     // Create a resolve texture with sample count = 1.
     auto resolveTarget = CreateCompatibleResolveTextureView();
 
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
+    wgpu::RenderPassDescriptorResolveRect rect{};
+    rect.colorOffsetX = rect.colorOffsetY = 0;
+    rect.resolveOffsetX = rect.resolveOffsetY = 0;
     rect.width = rect.height = 1;
 
     auto renderPass = CreateMultisampledRenderPass();
@@ -2168,8 +2171,9 @@ TEST_F(DawnPartialLoadResolveTextureValidationTest, ExpandResolveRectMixedLoadOp
     auto resolveTarget1 = CreateCompatibleResolveTextureView();
     auto resolveTarget2 = CreateCompatibleResolveTextureView();
 
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
+    wgpu::RenderPassDescriptorResolveRect rect{};
+    rect.colorOffsetX = rect.colorOffsetY = 0;
+    rect.resolveOffsetX = rect.resolveOffsetY = 0;
     rect.width = rect.height = 1;
 
     utils::ComboRenderPassDescriptor renderPass(
@@ -2192,8 +2196,9 @@ TEST_F(DawnPartialLoadResolveTextureValidationTest, ExpandResolveRectInvalidSize
     // Create a resolve texture with sample count = 1.
     auto resolveTarget = CreateCompatibleResolveTextureView();
 
-    wgpu::RenderPassDescriptorExpandResolveRect rect{};
-    rect.x = rect.y = 0;
+    wgpu::RenderPassDescriptorResolveRect rect{};
+    rect.colorOffsetX = rect.colorOffsetY = 0;
+    rect.resolveOffsetX = rect.resolveOffsetY = 0;
     rect.width = rect.height = kSize;
 
     auto renderPass = CreateMultisampledRenderPass();

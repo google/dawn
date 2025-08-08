@@ -820,22 +820,12 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
     auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
         descriptor->colorAttachments, descriptor->colorAttachmentCount);
     ColorAttachmentFormats colorAttachmentFormats;
-    std::optional<RenderPassDescriptorResolveRect> expandResolveRect;
-    if (auto* legacyResolveRect = descriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
-        // This is a deprecated option.
-        // TODO(417768364): Remove this once the all the call sites are updated to use the new rect.
-        RenderPassDescriptorResolveRect rect;
-        rect.colorOffsetX = legacyResolveRect->x;
-        rect.colorOffsetY = legacyResolveRect->y;
-        rect.resolveOffsetX = legacyResolveRect->x;
-        rect.resolveOffsetY = legacyResolveRect->y;
-        rect.width = legacyResolveRect->width;
-        rect.height = legacyResolveRect->height;
-        expandResolveRect = rect;
-    } else if (auto* resolveRect = descriptor.Get<RenderPassDescriptorResolveRect>()) {
-        expandResolveRect = *resolveRect;
+    if (const auto* expandResolveRect = descriptor.Get<RenderPassDescriptorResolveRect>()) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::DawnPartialLoadResolveTexture),
+                        "RenderPassDescriptorResolveRect can't be used without %s.",
+                        ToAPI(Feature::DawnPartialLoadResolveTexture));
+        validationState->SetExpandResolveRect(*expandResolveRect);
     }
-    validationState->SetExpandResolveRect(expandResolveRect);
 
     for (auto [i, attachment] : Enumerate(colorAttachments)) {
         DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(device, attachment, usageValidationMode,
@@ -894,12 +884,6 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         // TODO(dawn:1704): Consider supporting ExpandResolveTexture + PLS
         DAWN_INVALID_IF(pls != nullptr, "For now pixel local storage is invalid to use with %s.",
                         wgpu::LoadOp::ExpandResolveTexture);
-    }
-
-    if (expandResolveRect) {
-        DAWN_INVALID_IF(!device->HasFeature(Feature::DawnPartialLoadResolveTexture),
-                        "RenderPassDescriptorExpandResolveRect can't be used without %s.",
-                        ToAPI(Feature::DawnPartialLoadResolveTexture));
     }
 
     return {};

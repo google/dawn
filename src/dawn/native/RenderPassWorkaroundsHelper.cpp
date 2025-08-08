@@ -219,27 +219,12 @@ MaybeError RenderPassWorkaroundsHelper::ApplyOnPostEncoding(
         cmd->attachmentState->GetExpandResolveInfo().attachmentsToExpandResolve.any() &&
         device->CanTextureLoadResolveTargetInTheSameRenderpass();
 
-    std::optional<RenderPassDescriptorResolveRect> expandResolveRect;
-    if (auto* legacyResolveRect =
-            renderPassDescriptor.Get<RenderPassDescriptorExpandResolveRect>()) {
-        // This is a deprecated option.
-        // TODO(417768364): Remove this once the all the call sites are updated to use the new rect.
-        RenderPassDescriptorResolveRect rect;
-        rect.colorOffsetX = legacyResolveRect->x;
-        rect.colorOffsetY = legacyResolveRect->y;
-        rect.resolveOffsetX = legacyResolveRect->x;
-        rect.resolveOffsetY = legacyResolveRect->y;
-        rect.width = legacyResolveRect->width;
-        rect.height = legacyResolveRect->height;
-        expandResolveRect = rect;
-    } else if (auto* resolveRect = renderPassDescriptor.Get<RenderPassDescriptorResolveRect>()) {
-        expandResolveRect = *resolveRect;
-    }
     // Handle partial resolve. This identifies passes where there are MSAA color attachments with
     // wgpu::LoadOp::ExpandResolveTexture. If that's the case then the resolves are deferred by
     // removing the resolve targets and forcing the storeOp to Store. After the pass has ended an
     // new pass is recorded for each resolve target that resolves it separately.
-    if (expandResolveRect) {
+    if (const auto* expandResolveRect =
+            renderPassDescriptor.Get<RenderPassDescriptorResolveRect>()) {
         if (device->CanResolveSubRect()) {
             // When CanResolveSubRect is true, the resolve parameters are passed through 'cmd' to
             // execute the appropriate resolve operation.
