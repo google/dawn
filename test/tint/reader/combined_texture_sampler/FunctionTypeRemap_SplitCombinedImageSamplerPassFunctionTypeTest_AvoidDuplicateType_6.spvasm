@@ -1,6 +1,4 @@
                OpCapability Shader
-               OpCapability RuntimeDescriptorArray
-               OpExtension "SPV_EXT_descriptor_indexing"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
