@@ -155,10 +155,6 @@ struct Options {
     bool dump_ir = false;
     bool use_ir_reader = false;
 
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    bool dump_ast = false;
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
 #endif  // TINT_BUILD_SPV_READER
@@ -496,12 +492,6 @@ When specified, automatically enables HLSL validation)",
         "dump-inspector-bindings", "Dump reflection data about bindings to stdout",
         Alias{"emit-inspector-bindings"}, Default{false});
     TINT_DEFER(opts->dump_inspector_bindings = *dump_inspector_bindings.value);
-
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    auto& dump_ast = options.Add<BoolOption>("dump-ast", "Writes the AST to stdout",
-                                             Alias{"emit-ast"}, Default{false});
-    TINT_DEFER(opts->dump_ast = *dump_ast.value);
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
     auto& parse_only =
         options.Add<BoolOption>("parse-only", "Stop after parsing the input", Default{false});
@@ -950,9 +940,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-    // TODO(jrprice): Provide a way for the user to set non-default options.
-    tint::wgsl::writer::Options gen_options;
-    auto result = tint::wgsl::writer::Generate(program, gen_options);
+    auto result = tint::wgsl::writer::Generate(program);
     if (result != tint::Success) {
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
@@ -1455,19 +1443,6 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
     if (options.parse_only) {
         return 1;
     }
-
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    if (options.dump_ast) {
-        tint::wgsl::writer::Options gen_options;
-        gen_options.use_syntax_tree_writer = true;
-        auto result = tint::wgsl::writer::Generate(info.program, gen_options);
-        if (result != tint::Success) {
-            std::cerr << "Failed to dump AST: " << result.Failure() << "\n";
-        } else {
-            std::cout << result->wgsl << "\n";
-        }
-    }
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
     if (options.dump_ir || options.format == Format::kIr) {
         auto res = DumpIR(info.program, options);

@@ -147,8 +147,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
 
 void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-    tint::wgsl::writer::Options options;
-    auto result = tint::wgsl::writer::Generate(program, options);
+    auto result = tint::wgsl::writer::Generate(program);
     if (result == Success) {
         out << "\n" << result->wgsl << "\n";
     } else {

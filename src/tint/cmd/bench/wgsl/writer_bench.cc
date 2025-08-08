@@ -40,7 +40,7 @@ void GenerateWGSL(benchmark::State& state, std::string input_name) {
         return;
     }
     for (auto _ : state) {
-        auto gen_res = Generate(res->program, {});
+        auto gen_res = Generate(res->program);
         if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason);
         }

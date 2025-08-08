@@ -72,7 +72,7 @@ void Initialize() {
 #if TINT_BUILD_WGSL_WRITER
     // Register the Program printer. This is used for debugging purposes.
     tint::Program::printer = [](const tint::Program& program) {
-        auto result = wgsl::writer::Generate(program, {});
+        auto result = wgsl::writer::Generate(program);
         if (result != Success) {
             return result.Failure().reason;
         }

@@ -110,12 +110,6 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_GLSL_VALIDATOR=0" ]
   }
 
-  if (tint_build_syntax_tree_writer) {
-    defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=1" ]
-  } else {
-    defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=0" ]
-  }
-
   if (tint_build_ir_binary) {
     defines += [ "TINT_BUILD_IR_BINARY=1" ]
   } else {

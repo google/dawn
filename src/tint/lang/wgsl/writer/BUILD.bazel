@@ -39,12 +39,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "writer",
   srcs = [
-    "options.cc",
     "output.cc",
     "writer.cc",
   ],
   hdrs = [
-    "options.h",
     "output.h",
     "writer.h",
   ],
@@ -60,7 +58,6 @@ cc_library(
     "//src/tint/lang/wgsl/sem",
     "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/lang/wgsl/writer/raise",
-    "//src/tint/lang/wgsl/writer/syntax_tree_printer",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -86,7 +83,6 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "options_test.cc",
     "writer_test.cc",
   ],
   deps = [

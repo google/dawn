@@ -95,7 +95,7 @@ class DirectVariableAccessTest : public TransformTestBase<testing::Test> {
                    "\n\nAST:\n" + Program::printer(program_out);
         }
 
-        auto output = wgsl::writer::Generate(program_out, wgsl::writer::Options{});
+        auto output = wgsl::writer::Generate(program_out);
         if (output != Success) {
             return "wgsl::writer::IRToProgram() failed: \n" + output.Failure().reason +
                    "\n\nIR:\n" + ir::Disassembler(module.Get()).Plain();

@@ -49,8 +49,7 @@ inline std::string str(const Program& program) {
         return program.Diagnostics().Str();
     }
 
-    wgsl::writer::Options options;
-    auto result = wgsl::writer::Generate(program, options);
+    auto result = wgsl::writer::Generate(program);
     if (result != Success) {
         return result.Failure().reason;
     }

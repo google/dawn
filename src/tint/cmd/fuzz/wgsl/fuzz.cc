@@ -132,7 +132,7 @@ void Run(std::string_view wgsl, const Options& options, Slice<const std::byte> d
 #if TINT_BUILD_WGSL_WRITER
     // Register the Program printer. This is used for debugging purposes.
     tint::Program::printer = [](const tint::Program& program) {
-        auto result = tint::wgsl::writer::Generate(program, {});
+        auto result = tint::wgsl::writer::Generate(program);
         if (result != Success) {
             return result.Failure().reason;
         }
