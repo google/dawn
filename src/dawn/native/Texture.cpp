@@ -711,6 +711,26 @@ wgpu::TextureUsage AddInternalUsages(const DeviceBase* device,
     return internalUsage;
 }
 
+wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::ComponentSwizzle component,
+                                               wgpu::TextureComponentSwizzle swizzle) {
+    switch (component) {
+        case wgpu::ComponentSwizzle::Zero:
+            return wgpu::ComponentSwizzle::Zero;
+        case wgpu::ComponentSwizzle::One:
+            return wgpu::ComponentSwizzle::One;
+        case wgpu::ComponentSwizzle::R:
+            return swizzle.r;
+        case wgpu::ComponentSwizzle::G:
+            return swizzle.g;
+        case wgpu::ComponentSwizzle::B:
+            return swizzle.b;
+        case wgpu::ComponentSwizzle::A:
+            return swizzle.a;
+        case wgpu::ComponentSwizzle::Undefined:
+            return wgpu::ComponentSwizzle::Undefined;
+    }
+}
+
 }  // anonymous namespace
 
 MaybeError ValidateTextureDescriptor(
@@ -1723,6 +1743,16 @@ bool TextureViewBase::UsesNonDefaultSwizzle() const {
     // first approximation.
     return mSwizzleRed != wgpu::ComponentSwizzle::R || mSwizzleGreen != wgpu::ComponentSwizzle::G ||
            mSwizzleBlue != wgpu::ComponentSwizzle::B || mSwizzleAlpha != wgpu::ComponentSwizzle::A;
+}
+
+wgpu::TextureComponentSwizzle TextureViewBase::ComposeSwizzle(
+    wgpu::TextureComponentSwizzle swizzle) const {
+    wgpu::TextureComponentSwizzle result;
+    result.r = ComposeSwizzleComponent(mSwizzleRed, swizzle);
+    result.g = ComposeSwizzleComponent(mSwizzleGreen, swizzle);
+    result.b = ComposeSwizzleComponent(mSwizzleBlue, swizzle);
+    result.a = ComposeSwizzleComponent(mSwizzleAlpha, swizzle);
+    return result;
 }
 
 bool TextureViewBase::IsYCbCr() const {
