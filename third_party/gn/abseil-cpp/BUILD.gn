@@ -112,8 +112,6 @@ group("absl_component_deps") {
     # "//third_party/abseil-cpp/absl/functional:bind_front",
     ":function_ref",
     ":has_ostream_operator",
-
-    # "//third_party/abseil-cpp/absl/functional:overload",
     ":hash",
     ":inlined_vector",
     ":int128",
@@ -127,6 +125,7 @@ group("absl_component_deps") {
     ":no_destructor",
     ":nullability",
     ":optional",
+    ":overload",
     ":prefetch",
     ":span",
 
@@ -632,9 +631,11 @@ absl_source_set("layout") {
 absl_source_set("raw_hash_map") {
   public = [ "${dawn_abseil_dir}/absl/container/internal/raw_hash_map.h" ]
   deps = [
+    ":common_policy_traits",
     ":container_memory",
     ":raw_hash_set",
     ":throw_delegate",
+    ":type_traits",
   ]
 }
 
@@ -1362,7 +1363,10 @@ absl_source_set("vlog_is_on") {
 
 absl_source_set("voidify") {
   public = [ "${dawn_abseil_dir}/absl/log/internal/voidify.h" ]
-  deps = [ ":config" ]
+  deps = [
+    ":config",
+    ":core_headers",
+  ]
 }
 
 #
