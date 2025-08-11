@@ -562,7 +562,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     if (mDeviceInfo.features.shaderStorageImageExtendedFormats == VK_TRUE) {
-        bool requiredTier1FormatsAreRenderableBlendable = true;
+        bool supportTier1AndTier2 = true;
 
         for (const auto& format :
              {VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16G16_UNORM,
@@ -576,13 +576,17 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
                     static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
                                                       VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
                     properties.optimalTilingFeatures)) {
-                requiredTier1FormatsAreRenderableBlendable = false;
+                supportTier1AndTier2 = false;
                 break;
             }
         }
 
-        if (requiredTier1FormatsAreRenderableBlendable) {
+        // We cannot enable TextureFormatsTier2 if TextureFormatsTier1 is not enabled.
+        // TextureFormatsTier2 only requires shaderStorageImageExtendedFormats from Vulkan
+        // so we don't have to check anything else.
+        if (supportTier1AndTier2) {
             EnableFeature(Feature::TextureFormatsTier1);
+            EnableFeature(Feature::TextureFormatsTier2);
         }
     }
 

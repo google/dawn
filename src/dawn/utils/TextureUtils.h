@@ -310,6 +310,13 @@ constexpr std::array<wgpu::TextureFormat, 15> kTier2AdditionalStorageFormats = {
     wgpu::TextureFormat::RGBA16Sint, wgpu::TextureFormat::RGBA16Float,
     wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint,
     wgpu::TextureFormat::RGBA32Float};
+
+constexpr std::array<wgpu::TextureFormat, 10> kTier2AdditionalIntStorageFormats = {
+    wgpu::TextureFormat::R8Uint,     wgpu::TextureFormat::R8Sint,
+    wgpu::TextureFormat::RGBA8Uint,  wgpu::TextureFormat::RGBA8Sint,
+    wgpu::TextureFormat::R16Uint,    wgpu::TextureFormat::R16Sint,
+    wgpu::TextureFormat::RGBA16Uint, wgpu::TextureFormat::RGBA16Sint,
+    wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint};
 #endif  // __EMSCRIPTEN__
 
 class SubsamplingFactor {
@@ -364,7 +371,10 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat);
 
-const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat);
+enum class WGSLComponentType { Float32, Int32, Uint32 };
+WGSLComponentType GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat);
+const char* GetWGSLColorTextureComponentTypeStr(wgpu::TextureFormat textureFormat);
+
 const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat);
 

@@ -1913,7 +1913,7 @@ TEST_F(RenderPipelineValidationTest, RenderPipelineColorAttachmentBytesPerSample
         for (size_t i = 0; i < kMaxColorAttachments; i++) {
             if (i < formats.size()) {
                 std::ostringstream type;
-                type << "vec4<" << utils::GetWGSLColorTextureComponentType(formats.at(i)) << ">";
+                type << "vec4<" << utils::GetWGSLColorTextureComponentTypeStr(formats.at(i)) << ">";
                 bindings << "@location(" << i << ") o" << i << " : " << type.str() << ", ";
                 outputs << type.str() << "(1), ";
             } else {

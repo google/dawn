@@ -253,7 +253,7 @@ class TextureFormatTest : public DawnTest {
             })");
 
         // Compute the WGSL type of the texture's data.
-        const char* type = utils::GetWGSLColorTextureComponentType(sampleFormatInfo.format);
+        const char* type = utils::GetWGSLColorTextureComponentTypeStr(sampleFormatInfo.format);
 
         std::ostringstream fsSource;
         fsSource << "@group(0) @binding(0) var myTexture : texture_2d<" << type << ">;\n";

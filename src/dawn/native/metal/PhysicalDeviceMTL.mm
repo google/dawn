@@ -720,6 +720,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if ([*mDevice supportsFamily:MTLGPUFamilyMac2]) {
         EnableFeature(Feature::TextureComponentSwizzle);
     }
+
+    if ([*mDevice readWriteTextureSupport] == MTLReadWriteTextureTier2) {
+        EnableFeature(Feature::TextureFormatsTier2);
+    }
 }
 
 void PhysicalDevice::InitializeVendorArchitectureImpl() {
