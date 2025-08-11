@@ -85,14 +85,14 @@ MemoryTransferService::WriteHandle::WriteHandle() = default;
 MemoryTransferService::WriteHandle::~WriteHandle() = default;
 
 void MemoryTransferService::WriteHandle::SetTarget(void* data) {
-    mTargetData = data;
+    mTargetData = static_cast<uint8_t*>(data);
 }
 void MemoryTransferService::WriteHandle::SetDataLength(size_t dataLength) {
     mDataLength = dataLength;
 }
 std::span<uint8_t> MemoryTransferService::WriteHandle::GetTarget() const {
     DAWN_ASSERT(mTargetData != nullptr);
-    return std::span<uint8_t>(static_cast<uint8_t*>(mTargetData), mDataLength);
+    return std::span<uint8_t>(mTargetData, mDataLength);
 }
 
 }  // namespace server

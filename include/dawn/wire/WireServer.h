@@ -139,15 +139,12 @@ class DAWN_WIRE_EXPORT MemoryTransferService {
                                            size_t size) = 0;
         std::span<uint8_t> GetTarget() const;
 
-      protected:
-        // TODO(42240963): Move them into a std::span and put it to private after landing the
-        // related changes in Chromium.
-        void* mTargetData = nullptr;
-        size_t mDataLength = 0;
-
       private:
         WriteHandle(const WriteHandle&) = delete;
         WriteHandle& operator=(const WriteHandle&) = delete;
+
+        uint8_t* mTargetData = nullptr;
+        size_t mDataLength = 0;
     };
 
   private:
