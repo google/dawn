@@ -39,6 +39,7 @@ ci.defaults.set(
     builder_group = "ci",
     bucket = "ci",
     pool = "luci.chromium.gpu.ci",
+    triggered_by = ["primary-poller"],
     build_numbers = True,
     contact_team_email = "chrome-gpu-infra@google.com",
     service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
@@ -52,7 +53,6 @@ ci.builder(
     name = "dawn-linux-x64-builder-rel",
     description_html = "Compiles Dawn test binaries for Linux/x64",
     schedule = "triggered",
-    triggered_by = [],
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",

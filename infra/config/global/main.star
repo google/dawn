@@ -263,6 +263,15 @@ luci.bucket(
     dynamic = True,
 )
 
+luci.gitiles_poller(
+    name = "primary-poller",
+    bucket = "ci",
+    repo = "https://dawn.googlesource.com/dawn",
+    refs = [
+        "refs/heads/main",
+    ],
+)
+
 # Views
 
 luci.milo(

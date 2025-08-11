@@ -543,15 +543,6 @@ def clang_tidy_dawn_tryjob():
         ],
     )
 
-luci.gitiles_poller(
-    name = "primary-poller",
-    bucket = "ci",
-    repo = "https://dawn.googlesource.com/dawn",
-    refs = [
-        "refs/heads/main",
-    ],
-)
-
 luci.list_view_entry(
     list_view = "try",
     builder = "try/presubmit",
