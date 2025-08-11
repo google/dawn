@@ -1407,7 +1407,7 @@ void DumpShaderFromDescriptor(LogEmitter* logEmitter,
     }
 #else   // TINT_BUILD_SPV_READER
     // SPIR-V is not enabled, so the descriptor should not contain it.
-    DAWN_ASSERT(shaderModuleDesc.Get<ShaderSourceSPIRV>() == nullptr);
+    DAWN_ASSERT(!shaderModuleDesc.Has<ShaderSourceSPIRV>());
 #endif  // TINT_BUILD_SPV_READER
 
     // Dump WGSL.

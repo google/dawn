@@ -346,7 +346,7 @@ BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& 
       mSize(descriptor->size),
       mUsage(descriptor->usage),
       mInternalUsage(ComputeInternalBufferUsages(device, descriptor->usage, descriptor->size)),
-      mState(descriptor.Get<BufferHostMappedPointer>() ? BufferState::HostMappedPersistent
+      mState(descriptor.Has<BufferHostMappedPointer>() ? BufferState::HostMappedPersistent
                                                        : BufferState::Unmapped) {
     GetObjectTrackingList()->Track(this);
 }

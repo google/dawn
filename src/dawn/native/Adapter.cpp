@@ -129,22 +129,22 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     }
 
     bool hadError = false;
-    if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
+    if (unpacked.Has<AdapterPropertiesMemoryHeaps>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
     }
-    if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
+    if (unpacked.Has<AdapterPropertiesD3D>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
     }
-    if (unpacked.Get<AdapterPropertiesVk>() != nullptr &&
+    if (unpacked.Has<AdapterPropertiesVk>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
     }
-    if (unpacked.Get<AdapterPropertiesSubgroupMatrixConfigs>() != nullptr &&
+    if (unpacked.Has<AdapterPropertiesSubgroupMatrixConfigs>() &&
         !mSupportedFeatures.IsEnabled(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix)) {
         hadError |= mInstance->ConsumedError(
             DAWN_VALIDATION_ERROR("Feature ChromiumExperimentalSubgroupMatrix is not available."));

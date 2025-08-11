@@ -459,7 +459,7 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     mState = State::Alive;
 
     // Fake an error after the creation of a device here for testing.
-    if (descriptor.Get<DawnFakeDeviceInitializeErrorForTesting>() != nullptr) {
+    if (descriptor.Has<DawnFakeDeviceInitializeErrorForTesting>()) {
         return DAWN_INTERNAL_ERROR("DawnFakeDeviceInitialzeErrorForTesting");
     }
 
@@ -1213,7 +1213,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* rawDescriptor) {
             descriptor = Unpack(rawDescriptor);
         }
 
-        bool hasHostMapped = descriptor.Get<BufferHostMappedPointer>() != nullptr;
+        bool hasHostMapped = descriptor.Has<BufferHostMappedPointer>();
         bool fakeOOMAtDevice = false;
         if (auto* ext = descriptor.Get<DawnFakeBufferOOMForTesting>()) {
             fakeOOMAtNativeMap = ext->fakeOOMAtNativeMap;
@@ -2183,7 +2183,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
             break;
         }
         case wgpu::SType::ShaderSourceWGSL: {
-            DAWN_INVALID_IF(unpacked.Get<ShaderModuleCompilationOptions>() != nullptr &&
+            DAWN_INVALID_IF(unpacked.Has<ShaderModuleCompilationOptions>() &&
                                 !HasFeature(Feature::ShaderModuleCompilationOptions),
                             "Shader module compilation options used without %s enabled.",
                             wgpu::FeatureName::ShaderModuleCompilationOptions);

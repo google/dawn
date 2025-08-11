@@ -78,7 +78,7 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
         DAWN_ASSERT(
             device->GetInstance()->HasFeature(wgpu::InstanceFeatureName::ShaderSourceSPIRV));
         // Descriptor should not contain WGSL part.
-        DAWN_ASSERT(descriptor.Get<ShaderSourceWGSL>() == nullptr);
+        DAWN_ASSERT(!descriptor.Has<ShaderSourceWGSL>());
 
         const auto* spirvOptions = descriptor.Get<DawnShaderModuleSPIRVOptionsDescriptor>();
         DAWN_ASSERT(spirvDesc != nullptr);
@@ -96,7 +96,7 @@ ShaderModuleParseRequest BuildShaderModuleParseRequest(
     }
 #else   // TINT_BUILD_SPV_READER
     // SPIR-V is not enabled, so the descriptor should not contain it.
-    DAWN_ASSERT(descriptor.Get<ShaderSourceSPIRV>() == nullptr);
+    DAWN_ASSERT(!descriptor.Has<ShaderSourceSPIRV>());
 #endif  // TINT_BUILD_SPV_READER
 
     // Handling WGSL.
