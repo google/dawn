@@ -34,6 +34,7 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/IntegerTypes.h"
+#include "dawn/native/ShaderModule.h"
 #include "dawn/native/stream/Stream.h"
 
 #include "tint/tint.h"
@@ -51,6 +52,10 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
 
 std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage);
+
+std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
+    const EntryPointMetadata& metadata,
+    const PipelineConstantEntries& constants);
 
 namespace stream {
 // Uses tint::ForeachField when available to implement the stream::Stream trait for types.

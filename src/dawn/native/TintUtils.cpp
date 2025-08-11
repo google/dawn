@@ -172,14 +172,15 @@ tint::VertexPullingConfig BuildVertexPullingTransformConfig(
 
 std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
     const ProgrammableStage& stage) {
-    const EntryPointMetadata& metadata = *stage.metadata;
+    return BuildSubstituteOverridesTransformConfig(*stage.metadata, stage.constants);
+}
 
+std::unordered_map<tint::OverrideId, double> BuildSubstituteOverridesTransformConfig(
+    const EntryPointMetadata& metadata,
+    const PipelineConstantEntries& constants) {
     std::unordered_map<tint::OverrideId, double> map;
-
-    const auto& constants = stage.constants;
     for (const auto& [key, value] : constants) {
         const auto& o = metadata.overrides.at(key);
-
         map.insert({{o.id.value}, value});
     }
     return map;
