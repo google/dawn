@@ -566,45 +566,24 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
                                size_t offset,
                                size_t size,
                                const WGPUBufferMapCallbackInfo& callbackInfo) {
-    // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
-    // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Ref<MapAsyncEvent> event;
     {
         auto deviceGuard = GetDevice()->GetGuard();
 
-            // Early-exit validation: prevent double-mapping of the same buffer.
-            //
-            // According to the WebGPU specification, a buffer must not be mapped more than
-            // once at a time. If a buffer is already in a Mapped or MappedAtCreation state,
-            // calling MapAsync() again is invalid.
-            //
-            // Instead of deferring to the full validation path (ValidateMapAsync),
-            // we return early here with a warning and an error callback to improve
-            // developer feedback and reduce unnecessary work.
+        // Remove redundant early-exit validation.
+        // Let ValidateMapAsync and MapAsyncImpl handle invalid states,
+        // so errors are reported through the device's uncaptured error mechanism.
+        // We can still log a warning for developer visibility.
+        BufferState currentState = mState.load(std::memory_order::acquire);
+        if (currentState == BufferState::Mapped || currentState == BufferState::MappedAtCreation) {
+            dawn::EmitWarning(GetDevice(),
+                "Attempted to map a buffer that is already mapped. "
+                "Call Unmap() before calling MapAsync again.");
+        }
 
-            BufferState currentState = mState.load(std::memory_order::acquire);
-            if (currentState == BufferState::Mapped || currentState == BufferState::MappedAtCreation) {
-                // Log a warning for developer visibility. This does not raise a device error.
-                dawn::EmitWarning(GetDevice(),
-                    "Attempted to map a buffer that is already mapped. "
-                    "Call Unmap() before calling MapAsync again.");
-
-                // Trigger the callback immediately with an error status.
-                // This provides synchronous feedback for invalid usage.
-                if (callbackInfo.callback != nullptr) {
-                    callbackInfo.callback(WGPUMapAsyncStatus_Error, callbackInfo.userdata);
-                }
-
-                // Return a null future. No event is tracked for this invalid operation.
-                return Future::MakeEmpty();
-            }
-
-
-        // Handle the defaulting of size required by WebGPU, even if in webgpu_cpp.h it is not
-        // possible to default the function argument (because there is the callback later in the
-        // argument list)
+        // Handle the defaulting of size required by WebGPU
         if ((size == wgpu::kWholeMapSize) && (offset <= mSize)) {
             size = mSize - offset;
         }
@@ -639,8 +618,9 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
 
     DAWN_ASSERT(event);
     FutureID futureID = GetInstance()->GetEventManager()->TrackEvent(std::move(event));
-    return {futureID};
+    return {futureID}; // Always return a valid FutureID
 }
+
 
 
 //****************************************************************************************************** */
