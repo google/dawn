@@ -49,6 +49,8 @@ struct ExternalTexture {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
+    TINT_REFLECT_EQUALS(ExternalTexture);
+    TINT_REFLECT_HASH_CODE(ExternalTexture);
 };
 
 using BindingMap = std::unordered_map<BindingPoint, BindingPoint>;
@@ -71,6 +73,8 @@ struct Bindings {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Bindings, uniform, storage, texture, storage_texture, sampler, external_texture);
+    TINT_REFLECT_EQUALS(Bindings);
+    TINT_REFLECT_HASH_CODE(Bindings);
 };
 
 /// Options used to specify a mapping of binding points to indices into a UBO
@@ -89,6 +93,8 @@ struct ArrayLengthOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthOptions, ubo_binding, buffer_sizes_offset, bindpoint_to_size_index);
+    TINT_REFLECT_EQUALS(ArrayLengthOptions);
+    TINT_REFLECT_HASH_CODE(ArrayLengthOptions);
 };
 
 /// Information to configure an argument buffer
@@ -103,6 +109,8 @@ struct ArgumentBufferInfo {
     std::unordered_map<uint32_t, uint32_t> binding_info_to_offset_index{};
 
     TINT_REFLECT(ArgumentBufferInfo, id, dynamic_buffer_id, binding_info_to_offset_index);
+    TINT_REFLECT_EQUALS(ArgumentBufferInfo);
+    TINT_REFLECT_HASH_CODE(ArgumentBufferInfo);
 };
 
 /// Configuration options used for generating MSL.
@@ -199,6 +207,8 @@ struct Options {
                  immediate_binding_point,
                  group_to_argument_buffer_info,
                  bindings);
+    TINT_REFLECT_EQUALS(Options);
+    TINT_REFLECT_HASH_CODE(Options);
 };
 
 }  // namespace tint::msl::writer
