@@ -4201,69 +4201,67 @@ class Parser {
         auto* vector1 = Value(inst.GetSingleWordOperand(2));
         auto* vector2 = Value(inst.GetSingleWordOperand(3));
         auto* result_ty = Type(inst.type_id());
+        auto* el_ty = result_ty->DeepestElement();
 
         uint32_t n1 = vector1->Type()->As<core::type::Vector>()->Width();
         uint32_t n2 = vector2->Type()->As<core::type::Vector>()->Width();
 
-        Vector<uint32_t, 4> literals;
+        Vector<core::ir::Value*, 4> swizzles;
+
+        // Track the current swizzle that we are building from consecutive indices that fall within
+        // the same vector.
+        Vector<uint32_t, 4> current_indices;
+        core::ir::Value* current_vector = nullptr;
+
+        // Emit the current swizzle that we have constructed so far, and add it to the list.
+        auto flush_swizzle = [&] {
+            if (current_vector == nullptr) {
+                return;
+            }
+            auto* swizzle_type = ty_.MatchWidth(el_ty, current_indices.Length());
+            auto* swizzle = b_.Swizzle(swizzle_type, current_vector, current_indices);
+            EmitWithoutSpvResult(swizzle);
+            swizzles.Push(swizzle->Result());
+            current_indices.Clear();
+        };
+
         for (uint32_t i = 4; i < inst.NumOperandWords(); i++) {
-            literals.Push(inst.GetSingleWordOperand(i));
-        }
+            uint32_t literal = inst.GetSingleWordOperand(i);
 
-        // Check if all literals fall entirely within `vector1` or `vector2`,
-        // which would allow us to use a single-vector swizzle.
-        bool swizzle_from_vector1_only = true;
-        bool swizzle_from_vector2_only = true;
-        for (auto& literal : literals) {
-            if (literal == ~0u) {
-                // A `0xFFFFFFFF` literal represents an undefined index,
-                // fallback to first index.
-                literal = 0;
-            }
-            if (literal >= n1) {
-                swizzle_from_vector1_only = false;
-            }
-            if (literal < n1) {
-                swizzle_from_vector2_only = false;
-            }
-        }
-
-        // If only one vector is used, we can swizzle it.
-        if (swizzle_from_vector1_only) {
-            // Indices are already within `[0, n1)`, as expected by `Swizzle` IR
-            // for `vector1`.
-            Emit(b_.Swizzle(result_ty, vector1, literals), inst.result_id());
-            return;
-        }
-        if (swizzle_from_vector2_only) {
-            // Map logical concatenated indices' range `[n1, n1 + n2)` into the range
-            // `[0, n2)`, as expected by `Swizzle` IR for `vector2`.
-            for (auto& literal : literals) {
-                literal -= n1;
-            }
-            Emit(b_.Swizzle(result_ty, vector2, literals), inst.result_id());
-            return;
-        }
-
-        // Swizzle is not possible, construct the result vector out of elements
-        // from both vectors.
-        auto* element_ty = vector1->Type()->DeepestElement();
-        Vector<core::ir::Value*, 4> result;
-        for (auto idx : literals) {
-            TINT_ASSERT(idx < n1 + n2);
-
-            if (idx < n1) {
-                auto* access_inst = b_.Access(element_ty, vector1, b_.Constant(u32(idx)));
-                EmitWithoutSpvResult(access_inst);
-                result.Push(access_inst->Result());
+            // Determine which vector this index falls within.
+            uint32_t next_index;
+            core::ir::Value* next_vector = nullptr;
+            if (literal == 0xFFFFFFFF) {
+                // Undefined component, so just use the first component of the first vector.
+                next_vector = vector1;
+                next_index = 0;
+            } else if (literal < n1) {
+                next_vector = vector1;
+                next_index = literal;
+            } else if (literal < n1 + n2) {
+                next_vector = vector2;
+                next_index = literal - n1;
             } else {
-                auto* access_inst = b_.Access(element_ty, vector2, b_.Constant(u32(idx - n1)));
-                EmitWithoutSpvResult(access_inst);
-                result.Push(access_inst->Result());
+                TINT_ICE() << "invalid vector shuffle index";
             }
+
+            // If the vector has changed from the previous index, flush the swizzle.
+            if (next_vector != current_vector) {
+                flush_swizzle();
+            }
+            current_vector = next_vector;
+            current_indices.Push(next_index);
         }
 
-        Emit(b_.Construct(result_ty, result), inst.result_id());
+        flush_swizzle();
+
+        if (swizzles.Length() == 1) {
+            // There was only one swizzle, so we can just use it directly.
+            AddValue(inst.result_id(), swizzles[0]);
+        } else {
+            // There were multiple swizzles, so we combine them all to produce the final result.
+            Emit(b_.Construct(result_ty, swizzles), inst.result_id());
+        }
     }
 
     /// @param inst the SPIR-V instruction for OpFunctionCall
