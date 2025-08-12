@@ -673,10 +673,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::FlexibleTextureViews);
     EnableFeature(Feature::TextureFormatsTier1);
 
-    // The function subgroupBroadcast(f16) fails for some edge cases on intel gen-9 devices.
-    // See crbug.com/391680973
-    const bool kForceDisableSubgroups = gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId());
-
     // SIMD-scoped permute operations is supported by GPU family Metal3, Apple6, Apple7, Apple8,
     // and Mac2.
     // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
@@ -687,8 +683,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Note that supportsFamily: method requires macOS 10.15+ or iOS 13.0+
     // TODO(380326541): Check that reduction operations are supported in Apple6. The support
     // table says Apple7.
-    if (!kForceDisableSubgroups && ([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
-                                    [*mDevice supportsFamily:MTLGPUFamilyMac2])) {
+    if (([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
+         [*mDevice supportsFamily:MTLGPUFamilyMac2])) {
         EnableFeature(Feature::Subgroups);
     }
 
@@ -914,6 +910,22 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
+    switch (feature) {
+        // The function subgroupBroadcast(f16) fails for some edge cases on Intel Gen-9 devices.
+        // See crbug.com/391680973. We disable subgroups on this device unless the user has
+        // explicitly enabled the 'EnableSubgroupsIntelGen9' toggle.
+        case wgpu::FeatureName::Subgroups:
+            if (gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId()) &&
+                !toggles.IsEnabled(Toggle::EnableSubgroupsIntelGen9)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Intel Gen-9 devices require `enable_subgroups_intel_gen9`"
+                                    " to enable %s.",
+                                    feature));
+            }
+            break;
+        default:
+            break;
+    }
     return {};
 }
 

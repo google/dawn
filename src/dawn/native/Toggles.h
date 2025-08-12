@@ -135,6 +135,7 @@ enum class Toggle {
     D3DDisableIEEEStrictness,
     PolyFillPacked4x8DotProduct,
     PolyfillPackUnpack4x8Norm,
+    EnableSubgroupsIntelGen9,
     D3D12PolyFillPackUnpack4x8,
     ExposeWGSLTestingFeatures,
     ExposeWGSLExperimentalFeatures,

@@ -189,6 +189,12 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kSubgroupBroadcast:
+                        if (config.subgroup_broadcast_f16 &&
+                            builtin->Result()->Type()->DeepestElement()->Is<core::type::F16>()) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -281,6 +287,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kUnpack4X8Unorm:
                     Unpack4x8Unorm(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupBroadcast:
+                    SubgroupBroadcast(builtin);
                     break;
                 default:
                     break;
@@ -1171,6 +1180,72 @@ struct State {
     void Unpack4xU8(ir::CoreBuiltinCall* call) {
         auto* result = Unpack4xU8OnValue(call, call->Args()[0]);
         result->SetResult(call->DetachResult());
+        call->Destroy();
+    }
+
+    /// Polyfill a `subgroupBroadcast(f16)` builtin call.
+    /// @param call the builtin call instruction
+    void SubgroupBroadcast(ir::CoreBuiltinCall* call) {
+        // This polyfill is implemented by bitcasting f16 values to u32, performing the broadcast on
+        // the uint type, and then bitcasting back. Uses vec<f16> specific bit casting.
+        //
+        // f16       -> broadcast as u32 after packing with a zero, then unpack
+        // vec2<f16> -> broadcast as u32
+        // vec3<f16> -> broadcast as one vec2<u32>
+        // vec4<f16> -> broadcast as one vec2<u32>
+
+        auto* value = call->Args()[0];
+        auto* type = value->Type();
+
+        auto* lane_id = call->Args()[1];
+
+        b.InsertBefore(call, [&] {
+            ir::Value* result = nullptr;
+
+            if (auto* vec_ty = type->As<core::type::Vector>()) {
+                // Handle vector types.
+                switch (vec_ty->Width()) {
+                    case 2: {  // vec2<f16>
+                        auto* u32_val = b.Bitcast(ty.u32(), value);
+                        auto* broadcasted_u32 =
+                            b.Call(ty.u32(), core::BuiltinFn::kSubgroupBroadcast, u32_val, lane_id);
+                        result = b.Bitcast(vec_ty, broadcasted_u32)->Result();
+                        break;
+                    }
+                    case 3: {  // vec3<f16>
+                        auto* v4f16_val = b.Construct(ty.vec4<f16>(), value, b.Zero(ty.f16()));
+                        auto* v2u32_val = b.Bitcast(ty.vec2<u32>(), v4f16_val);
+                        auto* broadcasted_v2u32 =
+                            b.Call(ty.vec2<u32>(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val,
+                                   lane_id);
+                        auto* broadcasted_v4f16 = b.Bitcast(ty.vec4<f16>(), broadcasted_v2u32);
+                        result = b.Swizzle(vec_ty, broadcasted_v4f16, {0u, 1u, 2u})->Result();
+                        break;
+                    }
+                    case 4: {  // vec4<f16>
+                        auto* v2u32_val = b.Bitcast(ty.vec2<u32>(), value);
+                        auto* broadcasted_v2u32 =
+                            b.Call(ty.vec2<u32>(), core::BuiltinFn::kSubgroupBroadcast, v2u32_val,
+                                   lane_id);
+                        result = b.Bitcast(vec_ty, broadcasted_v2u32)->Result();
+                        break;
+                    }
+                    default:
+                        TINT_UNREACHABLE()
+                            << "unhandled f16 vector width in subgroupBroadcast polyfill";
+                }
+            } else {  // Scalar f16
+                // Construct a vec2<f16>(0, value), then bitcast to u32.
+                auto* vec_val = b.Construct(ty.vec2<f16>(), value, b.Zero(ty.f16()));
+                auto* u32_val = b.Bitcast(ty.u32(), vec_val);
+                auto* broadcasted_u32 =
+                    b.Call(ty.u32(), core::BuiltinFn::kSubgroupBroadcast, u32_val, lane_id);
+                auto* broadcasted_vec = b.Bitcast(ty.vec2<f16>(), broadcasted_u32);
+                result = b.Access(ty.f16(), broadcasted_vec, 0_u)->Result();
+            }
+
+            call->Result()->ReplaceAllUsesWith(result);
+        });
         call->Destroy();
     }
 };

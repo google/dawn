@@ -164,6 +164,8 @@ struct Options {
     /// Set to `true` to generate a polyfill clamp of `id` param of subgroupShuffle to within the
     /// spec max subgroup size.
     bool subgroup_shuffle_clamped = false;
+    /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
+    bool polyfill_subgroup_broadcast_f16 = false;
 
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
@@ -202,6 +204,7 @@ struct Options {
                  polyfill_dot_4x8_packed,
                  polyfill_pack_unpack_4x8_norm,
                  subgroup_shuffle_clamped,
+                 polyfill_subgroup_broadcast_f16,
                  disable_polyfill_integer_div_mod,
                  scalarize_max_min_clamp,
                  use_vulkan_memory_model,

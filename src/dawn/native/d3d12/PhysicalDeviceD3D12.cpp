@@ -191,11 +191,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::ShaderF16);
     }
 
-    // The function subgroupBroadcast(f16) fails for some edge cases on intel gen-9 devices.
-    // See crbug.com/391680973
-    const bool kForceDisableSubgroups = gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId());
     // Subgroups feature requires SM >= 6.0 and capabilities flags.
-    if (!kForceDisableSubgroups && mDeviceInfo.supportsWaveOps) {
+    if (mDeviceInfo.supportsWaveOps) {
         EnableFeature(Feature::Subgroups);
     }
 #endif
@@ -455,9 +452,11 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                 break;
         }
     }
+
     // Validate applied shader version.
     switch (feature) {
         // The feature `shader-f16` requires using shader model 6.2 or higher.
+        // Note: DXC is enabled for this feature at this point in the code.
         case wgpu::FeatureName::ShaderF16: {
             if (!(GetAppliedShaderModelUnderToggles(toggles) >= 62)) {
                 return FeatureValidationResult(absl::StrFormat(
@@ -465,6 +464,19 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             }
             break;
         }
+        // The function subgroupBroadcast(f16) fails for some edge cases on Intel Gen-9 devices.
+        // See crbug.com/391680973. We disable subgroups on this device unless the user has
+        // explicitly enabled the 'enable_subgroups_intel_gen9' toggle.
+        // Note: DXC is enabled for this feature at this point in the code.
+        case wgpu::FeatureName::Subgroups:
+            if (gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId()) &&
+                !toggles.IsEnabled(Toggle::EnableSubgroupsIntelGen9)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Intel Gen-9 devices require "
+                                    "`enable_subgroups_intel_gen9` to enable %s.",
+                                    feature));
+            }
+            break;
         default:
             break;
     }
@@ -640,7 +652,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 #else
     const bool dxcAvailable = false;
 #endif
-
     const bool useResourceHeapTier2 = (GetDeviceInfo().resourceHeapTier >= 2);
     deviceToggles->Default(Toggle::UseD3D12ResourceHeapTier2, useResourceHeapTier2);
     deviceToggles->Default(Toggle::UseD3D12RenderPass, GetDeviceInfo().supportsRenderPass);

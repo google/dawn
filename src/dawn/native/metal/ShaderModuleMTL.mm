@@ -368,6 +368,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.scalarize_max_min_clamp = device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     req.tintOptions.disable_module_constant_f16 =
         device->IsToggleEnabled(Toggle::MetalDisableModuleConstantF16);
+    req.tintOptions.polyfill_subgroup_broadcast_f16 =
+        device->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
     req.tintOptions.enable_integer_range_analysis =
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);

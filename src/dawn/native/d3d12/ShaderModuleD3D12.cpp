@@ -354,6 +354,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         device->IsToggleEnabled(Toggle::ScalarizeMaxMinClamp);
     req.hlsl.tintOptions.polyfill_pack_unpack_4x8 =
         device->IsToggleEnabled(Toggle::D3D12PolyFillPackUnpack4x8);
+    req.hlsl.tintOptions.polyfill_subgroup_broadcast_f16 =
+        device->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
     req.hlsl.tintOptions.enable_integer_range_analysis =
         device->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);
 

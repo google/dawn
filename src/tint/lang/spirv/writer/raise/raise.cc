@@ -127,6 +127,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     core_polyfills.pack_4xu8_clamp = true;
     core_polyfills.pack_unpack_4x8_norm = options.polyfill_pack_unpack_4x8_norm;
     core_polyfills.abs_signed_int = true;
+    core_polyfills.subgroup_broadcast_f16 = options.polyfill_subgroup_broadcast_f16;
     RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
 
     core::ir::transform::ConversionPolyfillConfig conversion_polyfills;

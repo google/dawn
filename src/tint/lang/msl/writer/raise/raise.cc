@@ -153,6 +153,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.radians = true;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         core_polyfills.abs_signed_int = true;
+        core_polyfills.subgroup_broadcast_f16 = options.polyfill_subgroup_broadcast_f16;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 

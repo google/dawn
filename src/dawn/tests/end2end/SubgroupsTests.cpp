@@ -401,6 +401,9 @@ enum class BroadcastType {
     U32,
     F32,
     F16,
+    Vec2F16,
+    Vec3F16,
+    Vec4F16,
 };
 
 std::ostream& operator<<(std::ostream& o, BroadcastType broadcastType) {
@@ -416,6 +419,15 @@ std::ostream& operator<<(std::ostream& o, BroadcastType broadcastType) {
             break;
         case BroadcastType::F16:
             o << "f16";
+            break;
+        case BroadcastType::Vec2F16:
+            o << "vec2<f16>";
+            break;
+        case BroadcastType::Vec3F16:
+            o << "vec3<f16>";
+            break;
+        case BroadcastType::Vec4F16:
+            o << "vec4<f16>";
             break;
     }
     return o;
@@ -497,6 +509,46 @@ class SubgroupsBroadcastTests : public SubgroupsTestsBase<SubgroupsBroadcastTest
     }
 
   private:
+    std::string GetValueConstructor(const std::string& value) {
+        std::stringstream ss;
+        switch (GetParam().mBroadcastType) {
+            case BroadcastType::Vec2F16:
+                ss << "vec2<u32>(" << value << ")";
+                break;
+            case BroadcastType::Vec3F16:
+                ss << "vec3<u32>(" << value << ")";
+                break;
+            case BroadcastType::Vec4F16:
+                ss << "vec4<u32>(" << value << ")";
+                break;
+            default:
+                ss << value;
+                break;
+        }
+        return ss.str();
+    }
+
+    std::string GetResultExpression(const std::string& varName) {
+        std::stringstream ss;
+        switch (GetParam().mBroadcastType) {
+            case BroadcastType::Vec2F16:
+                ss << "i32(" << varName << ".x) & i32(" << varName << ".y)";
+                break;
+            case BroadcastType::Vec3F16:
+                ss << "i32(" << varName << ".x) & i32(" << varName << ".y) & i32(" << varName
+                   << ".z)";
+                break;
+            case BroadcastType::Vec4F16:
+                ss << "i32(" << varName << ".x) & i32(" << varName << ".y) & i32(" << varName
+                   << ".z) & i32(" << varName << ".w)";
+                break;
+            default:
+                ss << "i32(" << varName << ")";
+                break;
+        }
+        return ss.str();
+    }
+
     // Helper function that create shader module for testing broadcasting subgroup_size. The shader
     // declares a workgroup size of [workgroupSize, 1, 1], in which each invocation hold a register
     // initialized to SubgroupRegisterInitializer, then sets the register of invocation 0 to
@@ -531,11 +583,12 @@ fn main(
         reg = BroadcastType()";
         switch (GetParam().mSubgroupBroadcastValueOfInvocation0) {
             case SubgroupBroadcastValueOfInvocation0::Constant: {
-                code << SubgroupBroadcastConstantValueForInvocation0;
+                code << GetValueConstructor(
+                    std::to_string(SubgroupBroadcastConstantValueForInvocation0));
                 break;
             }
             case SubgroupBroadcastValueOfInvocation0::SubgroupSize: {
-                code << "sg_size";
+                code << GetValueConstructor("sg_size");
                 break;
             }
         }
@@ -545,8 +598,11 @@ fn main(
     workgroupBarrier();
     // Broadcast the register value of subgroup_id 0 in each subgroup.
     reg = subgroupBroadcast(reg, 0u);
-    // Write back the register value in i32.
-    output.broadcastOutput[local_id.x] = i32(reg);
+
+    // Write back the register value in i32, if it's a vec type, AND them together.
+    let shfld : i32 = )"
+             << GetResultExpression("reg") << R"(;
+    output.broadcastOutput[local_id.x] = shfld;
 }
 )";
         return utils::CreateShaderModule(device, code.str().c_str());
@@ -640,7 +696,10 @@ fn main(
 // subgroup, we don't assume any other particular subgroups layout property.
 TEST_P(SubgroupsBroadcastTests, SubgroupBroadcast) {
     DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
-    if (GetParam().mBroadcastType == BroadcastType::F16) {
+    if (GetParam().mBroadcastType == BroadcastType::F16 ||
+        GetParam().mBroadcastType == BroadcastType::Vec2F16 ||
+        GetParam().mBroadcastType == BroadcastType::Vec3F16 ||
+        GetParam().mBroadcastType == BroadcastType::Vec4F16) {
         DAWN_TEST_UNSUPPORTED_IF(!IsShaderF16EnabledInWGSL());
     }
 
@@ -658,6 +717,9 @@ DAWN_INSTANTIATE_TEST_P(SubgroupsBroadcastTests,
                             BroadcastType::U32,
                             BroadcastType::F32,
                             BroadcastType::F16,
+                            BroadcastType::Vec2F16,
+                            BroadcastType::Vec3F16,
+                            BroadcastType::Vec4F16,
                         },  // BroadcastType
                         {SubgroupBroadcastValueOfInvocation0::Constant,
                          SubgroupBroadcastValueOfInvocation0::SubgroupSize}

@@ -263,6 +263,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
     req.tintOptions.polyfill_pack_unpack_4x8_norm =
         GetDevice()->IsToggleEnabled(Toggle::PolyfillPackUnpack4x8Norm);
+    req.tintOptions.polyfill_subgroup_broadcast_f16 =
+        GetDevice()->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
     req.tintOptions.scalarize_max_min_clamp =

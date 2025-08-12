@@ -473,10 +473,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesVk);
     EnableFeature(Feature::DawnLoadResolveTexture);
 
-    // The function subgroupBroadcast(f16) fails for some edge cases on intel gen-9 devices.
-    // See crbug.com/391680973
-    const bool kForceDisableSubgroups = gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId());
-
     // Enable Subgroups feature if:
     // 1. Vulkan API version is 1.1 or later, and
     // 2. subgroupSupportedStages includes compute and fragment stage bit, and
@@ -510,8 +506,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Some devices (PowerVR GE8320) can apparently report subgroup size of 1.
     const bool allowSubgroupSizeRanges =
         mSubgroupMinSize >= kDefaultSubgroupMinSize && mSubgroupMaxSize <= kDefaultSubgroupMaxSize;
-    if (!kForceDisableSubgroups && hasBaseSubgroupSupport && hasRequiredF16Support &&
-        allowSubgroupSizeRanges) {
+    if (hasBaseSubgroupSupport && hasRequiredF16Support && allowSubgroupSizeRanges) {
         EnableFeature(Feature::Subgroups);
     }
 
@@ -1078,12 +1073,28 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
-    if (feature == wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix &&
-        !toggles.IsEnabled(Toggle::UseVulkanMemoryModel)) {
-        return FeatureValidationResult(
-            absl::StrFormat("Feature %s requires VulkanMemoryModel toggle on Vulkan.", feature));
+    switch (feature) {
+        case wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix:
+            if (!toggles.IsEnabled(Toggle::UseVulkanMemoryModel)) {
+                return FeatureValidationResult(absl::StrFormat(
+                    "Feature %s requires VulkanMemoryModel toggle on Vulkan.", feature));
+            }
+            break;
+        // The function subgroupBroadcast(f16) fails for some edge cases on Intel Gen-9 devices.
+        // See crbug.com/391680973. We disable subgroups on this device unless the user has
+        // explicitly enabled the 'enable_subgroups_intel_gen9' toggle.
+        case wgpu::FeatureName::Subgroups:
+            if (gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId()) &&
+                !toggles.IsEnabled(Toggle::EnableSubgroupsIntelGen9)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Intel Gen-9 devices require `enable_subgroups_intel_gen9`"
+                                    " to enable %s.",
+                                    feature));
+            }
+            break;
+        default:
+            break;
     }
-
     return {};
 }
 
