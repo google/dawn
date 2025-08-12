@@ -945,6 +945,345 @@ func TestFSTestOSWrapper_MkdirAll_MatchesReal(t *testing.T) {
 	}
 }
 
+func TestFSTestOSWrapper_Remove(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name          string
+		setup         unittestSetup
+		path          string
+		expectMissing []string
+		expectPresent []string
+		expectedError
+	}{
+		{
+			name: "Remove file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			expectMissing: []string{filepath.Join(root, "file.txt")},
+		},
+		{
+			name: "Remove empty directory",
+			path: filepath.Join(root, "emptydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "emptydir")},
+			},
+			expectMissing: []string{filepath.Join(root, "emptydir")},
+		},
+		{
+			name: "Remove file, others retained",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "file.txt"):     "content",
+					filepath.Join(root, "other.txt"):    "other content",
+					filepath.Join(root, "dir", "f.txt"): "in dir",
+				},
+				initialDirs: []string{filepath.Join(root, "otherdir")},
+			},
+			expectMissing: []string{filepath.Join(root, "file.txt")},
+			expectPresent: []string{
+				filepath.Join(root, "other.txt"),
+				filepath.Join(root, "otherdir"),
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "dir", "f.txt"),
+			},
+		},
+		{
+			name: "Error on non-existent path",
+			path: filepath.Join(root, "nonexistent"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Error on non-empty directory",
+			path: filepath.Join(root, "nonemptydir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "nonemptydir", "file.txt"): "content"},
+				initialDirs:  []string{filepath.Join(root, "nonemptydir")},
+			},
+			expectPresent: []string{
+				filepath.Join(root, "nonemptydir"),
+				filepath.Join(root, "nonemptydir", "file.txt"),
+			},
+			expectedError: expectedError{
+				wantErrIs: syscall.ENOTEMPTY,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			err := wrapper.Remove(tc.path)
+
+			for _, p := range tc.expectPresent {
+				_, statErr := wrapper.Stat(p)
+				require.NoError(t, statErr, "path '%s' should exist but it does not", p)
+			}
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			for _, p := range tc.expectMissing {
+				_, statErr := wrapper.Stat(p)
+				require.Error(t, statErr, "path '%s' should not exist but it does", p)
+				require.True(t, os.IsNotExist(statErr))
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_Remove_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        matchesRealSetup
+		pathToRemove string
+	}{
+		{
+			name: "Remove file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+			}},
+			pathToRemove: "file.txt",
+		},
+		{
+			name: "Remove file, others retained",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt":                    "content",
+					"other.txt":                   "other content",
+					filepath.Join("dir", "f.txt"): "in dir",
+				},
+				initialDirs: []string{
+					"dir",
+					"otherdir",
+				},
+			}},
+			pathToRemove: "file.txt",
+		},
+		{
+			name: "Remove empty directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"emptydir"},
+			}},
+			pathToRemove: "emptydir",
+		},
+		{
+			name:         "Error on non-existent path",
+			pathToRemove: "nonexistent",
+		},
+		{
+			name: "Error on non-empty directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{filepath.Join("dir", "file.txt"): "content"},
+				initialDirs:  []string{"dir"},
+			}},
+			pathToRemove: "dir",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute
+			realErr := realFS.Remove(filepath.Join(realRoot, tc.pathToRemove))
+			testErr := testFS.Remove(tc.pathToRemove)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_RemoveAll(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name          string
+		setup         unittestSetup
+		path          string
+		expectMissing []string
+		expectPresent []string
+		expectedError
+	}{
+		{
+			name: "Remove single file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			expectMissing: []string{filepath.Join(root, "file.txt")},
+		},
+		{
+			name: "Remove directory with contents",
+			path: filepath.Join(root, "dir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file1.txt"):           "content",
+					filepath.Join(root, "dir", "subdir", "file2.txt"): "content",
+				},
+				initialDirs: []string{
+					filepath.Join(root, "dir"),
+					filepath.Join(root, "dir", "subdir"),
+				},
+			},
+			expectMissing: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "dir", "file1.txt"),
+				filepath.Join(root, "dir", "subdir"),
+				filepath.Join(root, "dir", "subdir", "file2.txt"),
+			},
+		},
+		{
+			name: "Remove directory with contents, others retained",
+			path: filepath.Join(root, "dir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file1.txt"):           "content",
+					filepath.Join(root, "dir", "subdir", "file2.txt"): "content",
+					filepath.Join(root, "other.txt"):                  "other content",
+				},
+				initialDirs: []string{
+					filepath.Join(root, "dir"),
+					filepath.Join(root, "dir", "subdir"),
+					filepath.Join(root, "otherdir"),
+				},
+			},
+			expectMissing: []string{
+				filepath.Join(root, "dir"),
+				filepath.Join(root, "dir", "file1.txt"),
+				filepath.Join(root, "dir", "subdir"),
+				filepath.Join(root, "dir", "subdir", "file2.txt"),
+			},
+			expectPresent: []string{
+				filepath.Join(root, "other.txt"),
+				filepath.Join(root, "otherdir"),
+			},
+		},
+		{
+			name: "Remove non-existent path",
+			path: filepath.Join(root, "nonexistent"),
+		},
+		{
+			name: "Path is a file, but parent is not a directory",
+			path: filepath.Join(root, "a", "b"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "a"): "i am a file"},
+			},
+			expectPresent: []string{
+				filepath.Join(root, "a"),
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			err := wrapper.RemoveAll(tc.path)
+
+			for _, p := range tc.expectPresent {
+				_, statErr := wrapper.Stat(p)
+				require.NoError(t, statErr, "path '%s' should exist but it does not", p)
+			}
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			for _, p := range tc.expectMissing {
+				_, statErr := wrapper.Stat(p)
+				require.Error(t, statErr, "path '%s' should not exist but it does", p)
+				require.True(t, os.IsNotExist(statErr))
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_RemoveAll_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        matchesRealSetup
+		pathToRemove string
+	}{
+		{
+			name: "Remove single file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+			}},
+			pathToRemove: "file.txt",
+		},
+		{
+			name: "Remove directory with contents",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file1.txt"):           "content",
+					filepath.Join("dir", "subdir", "file2.txt"): "content",
+				},
+				initialDirs: []string{
+					"dir",
+					filepath.Join("dir", "subdir"),
+				},
+			}},
+			pathToRemove: "dir",
+		},
+		{
+			name: "Remove directory with contents, others retained",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file1.txt"):           "content",
+					filepath.Join("dir", "subdir", "file2.txt"): "content",
+					"other.txt": "other content",
+				},
+				initialDirs: []string{
+					"dir",
+					filepath.Join("dir", "subdir"),
+					"otherdir",
+				},
+			}},
+			pathToRemove: "dir",
+		},
+		{
+			name:         "Remove non-existent path",
+			pathToRemove: "nonexistent",
+		},
+		{
+			name: "Path is a file, but parent is not a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"a": "i am a file",
+				},
+			}},
+			pathToRemove: filepath.Join("a", "b"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute
+			realErr := realFS.RemoveAll(filepath.Join(realRoot, tc.pathToRemove))
+			testErr := testFS.RemoveAll(tc.pathToRemove)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
+		})
+	}
+}
+
 func TestFSTestOSWrapper_WriteFile(t *testing.T) {
 	root := getTestRoot()
 	tests := []struct {

@@ -29,12 +29,14 @@
 package oswrapper
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"testing/fstest"
 	"time"
 )
@@ -232,15 +234,58 @@ func (w FSTestFilesystemReaderWriter) MkdirTemp(dir, pattern string) (string, er
 }
 
 func (w FSTestFilesystemReaderWriter) Remove(name string) error {
-	panic("Remove() is not currently implemented in fstest wrapper")
+	p := w.CleanPath(name)
+
+	info, err := w.Stat(p)
+	if err != nil {
+		var pathErr *os.PathError
+		if errors.As(err, &pathErr) {
+			pathErr.Op = "remove"
+			pathErr.Path = name
+			return pathErr
+		}
+		return &os.PathError{Op: "remove", Path: name, Err: err}
+	}
+
+	if info.IsDir() {
+		entries, err := w.ReadDir(p)
+		if err != nil {
+			return &os.PathError{Op: "remove", Path: name, Err: err}
+		}
+		if len(entries) > 0 {
+			return &os.PathError{Op: "remove", Path: name, Err: syscall.ENOTEMPTY}
+		}
+	}
+	delete(w.FS, p)
+	return nil
 }
 
 func (w FSTestFilesystemReaderWriter) RemoveAll(path string) error {
-	panic("RemoveAll() is not currently implemented in fstest wrapper")
+	p := w.CleanPath(path)
+
+	// Check if the path or any of its parents are invalid.
+	// os.RemoveAll returns nil if the path doesn't exist, but errors if a
+	// parent path component is a file.
+	dir := filepath.Dir(p)
+	for dir != "." && dir != "" {
+		info, exists := w.FS[dir]
+		if exists && !info.Mode.IsDir() {
+			return &os.PathError{Op: "removeall", Path: path, Err: fmt.Errorf("not a directory")}
+		}
+		dir = filepath.Dir(dir)
+	}
+
+	prefix := p + "/"
+	for key := range w.FS {
+		if key == p || strings.HasPrefix(key, prefix) {
+			delete(w.FS, key)
+		}
+	}
+	return nil
 }
 
-func (w FSTestFilesystemReaderWriter) Symlink(oldname, newname string) error {
-	return fmt.Errorf("symlink not currently supported in fstest wrapper")
+func (w FSTestFilesystemReaderWriter) Symlink(_, _ string) error {
+	panic("Symlink() is not currently implemented in fstest wrapper")
 }
 
 func (w FSTestFilesystemReaderWriter) WriteFile(name string, data []byte, perm os.FileMode) error {
