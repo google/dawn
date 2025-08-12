@@ -80,6 +80,10 @@ class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParam
         DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && GetParam().mUseDedicatedAllocation &&
                               GetParam().mDetectDedicatedAllocation);
 
+        // TODO(crbug.com/438257193): Nvidia is crashing for all tests that use DMA buffers.
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() &&
+                              GetParam().mExternalImageType == ExternalImageType::DmaBuf);
+
         // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
         DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsIntel() && IsBackendValidationEnabled());
 
