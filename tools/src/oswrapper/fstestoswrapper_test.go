@@ -342,6 +342,137 @@ func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
 	}
 }
 
+func TestFSTestOSWrapper_ReadDir(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		expectedEntries []string
+		expectedError
+	}{
+		{
+			name: "Read empty directory",
+			path: filepath.Join(root, "emptydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "emptydir")},
+			},
+			expectedEntries: []string{},
+		},
+		{
+			name: "Read directory with files and subdirectories",
+			path: filepath.Join(root, "dir"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "dir", "file1.txt"):  "",
+					filepath.Join(root, "dir", "z_file.txt"): "",
+				},
+				initialDirs: []string{filepath.Join(root, "dir", "subdir", "nested")},
+			},
+			expectedEntries: []string{"file1.txt", "subdir", "z_file.txt"},
+		},
+		{
+			name: "Read non-existent directory",
+			path: filepath.Join(root, "nonexistent"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Read a file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): ""},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			entries, err := wrapper.ReadDir(tc.path)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			entryNames := make([]string, len(entries))
+			for i, e := range entries {
+				entryNames[i] = e.Name()
+			}
+			require.ElementsMatch(t, tc.expectedEntries, entryNames)
+		})
+	}
+}
+
+func TestFSTestOSWrapper_ReadDir_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup matchesRealSetup
+		path  string
+	}{
+		{
+			name: "Read empty directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"emptydir"},
+			}},
+			path: "emptydir",
+		},
+		{
+			name: "Read directory with files and subdirectories",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join("dir", "file1.txt"):  "content",
+					filepath.Join("dir", "z_file.txt"): "content",
+				},
+				initialDirs: []string{
+					"dir",
+					filepath.Join("dir", "subdir", "nested"),
+				},
+			}},
+			path: "dir",
+		},
+		{
+			name: "Error on non-existent directory",
+			path: "nonexistent",
+		},
+		{
+			name: "Error on path is a file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{"file.txt": "content"},
+			}},
+			path: "file.txt",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute
+			realEntries, realErr := realFS.ReadDir(filepath.Join(realRoot, tc.path))
+			testEntries, testErr := testFS.ReadDir(tc.path)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				realNames := make([]string, len(realEntries))
+				for i, e := range realEntries {
+					realNames[i] = e.Name()
+				}
+				testNames := make([]string, len(testEntries))
+				for i, e := range testEntries {
+					testNames[i] = e.Name()
+				}
+				require.ElementsMatch(t, realNames, testNames)
+			}
+		})
+	}
+}
+
 func TestFSTestOSWrapper_Stat(t *testing.T) {
 	root := getTestRoot()
 	tests := []struct {
