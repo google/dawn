@@ -145,7 +145,7 @@ func (w FSTestFilesystemReaderWriter) ReadDir(name string) ([]os.DirEntry, error
 }
 
 func (w FSTestFilesystemReaderWriter) Stat(name string) (os.FileInfo, error) {
-	panic("Stat() is not currently implemented in fstest wrapper")
+	return fs.Stat(w.fs(), w.CleanPath(name))
 }
 
 func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) error {
@@ -158,37 +158,68 @@ func (w FSTestFilesystemReaderWriter) Create(name string) (File, error) {
 	panic("Create() is not currently implemented in fstest wrapper")
 }
 
-func (w FSTestFilesystemReaderWriter) Mkdir(path string, perm os.FileMode) error {
-	panic("Mkdir() is not currently implemented in fstest wrapper")
-}
-
-func (w FSTestFilesystemReaderWriter) MkdirAll(path string, perm os.FileMode) error {
-	p := w.CleanPath(path)
+func (w FSTestFilesystemReaderWriter) Mkdir(dir string, perm os.FileMode) error {
+	p := w.CleanPath(dir)
 
 	if p == "." {
+		// The root directory always exists in a fs.FS.
+		// os.Mkdir returns EEXIST in this case.
+		return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrExist}
+	}
+
+	if _, exists := w.FS[p]; exists {
+		return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrExist}
+	}
+
+	parent := filepath.Dir(p)
+	if parent != "." {
+		parentInfo, parentExists := w.FS[parent]
+		if !parentExists {
+			return &os.PathError{Op: "mkdir", Path: dir, Err: os.ErrNotExist}
+		}
+		if !parentInfo.Mode.IsDir() {
+			return &os.PathError{Op: "mkdir", Path: dir, Err: fmt.Errorf("not a directory")}
+		}
+	}
+	w.FS[p] = &fstest.MapFile{Mode: os.ModeDir | perm, ModTime: time.Now()}
+	return nil
+}
+
+func (w FSTestFilesystemReaderWriter) MkdirAll(dir string, perm os.FileMode) error {
+	err := w.Mkdir(dir, perm)
+	if err == nil {
 		return nil
 	}
 
-	parts := strings.Split(p, "/")
-	current := ""
-	for i, part := range parts {
-		if current == "" {
-			current = part
-		} else {
-			current = current + "/" + part // Internally FSTestOSWrapper uses '/' for separators
+	if os.IsExist(err) {
+		info, statErr := w.Stat(dir)
+		if statErr == nil && info.IsDir() {
+			// p already exists and is a directory, so return success
+			return nil
 		}
-		if file, exists := w.FS[current]; !exists {
-			w.FS[current] = &fstest.MapFile{Mode: os.ModeDir | perm, ModTime: time.Now()}
-		} else if !file.Mode.IsDir() {
-			// If this is the last part of the path, the error is that the file exists.
-			// Otherwise, an intermediate path component is not a directory.
-			if i < len(parts)-1 {
-				return &os.PathError{Op: "mkdir", Path: path, Err: fmt.Errorf("not a directory")}
-			}
-			return &os.PathError{Op: "mkdir", Path: path, Err: os.ErrExist}
-		}
+		// p already exists and is not a directory, so propagate the error
+		return err
 	}
-	return nil
+
+	if !os.IsNotExist(err) {
+		// Unexpected failure, probably indicating a bad path, i.e. parent is a file, so propagate the error
+		return err
+	}
+
+	// At this point, it is known the problem was the parent didn't exist, so need to recursively create it.
+	p := w.CleanPath(dir)
+	parent := filepath.Dir(p)
+	if parent == "." || parent == p {
+		// The parent is the root of the filesystem, so Mkdir should have succeeded, so propagating the error.
+		return err
+	}
+
+	if err := w.MkdirAll(parent, perm); err != nil {
+		return err
+	}
+
+	// Creating the directory now that the parent exists.
+	return w.Mkdir(p, perm)
 }
 
 func (w FSTestFilesystemReaderWriter) MkdirTemp(dir, pattern string) (string, error) {
