@@ -30,7 +30,7 @@
 
     "_doc": "See docs/dawn/codegen.md",
 
-    "kotlin_package": "android.dawn",
+    "kotlin_package": "androidx.webgpu",
 
     "jni_primitives" : {
         "bool": "jboolean",

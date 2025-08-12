@@ -1,4 +1,4 @@
-package android.dawn.helper
+package androidx.webgpu.helper
 
 /**
  * Helpers for image dimension management.  Each adds a method to round to the next higher

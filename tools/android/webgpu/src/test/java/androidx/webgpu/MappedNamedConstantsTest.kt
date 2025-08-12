@@ -1,4 +1,4 @@
-package android.dawn
+package androidx.webgpu
 
 import java.net.URL
 import java.util.jar.JarFile
@@ -110,10 +110,10 @@ class MappedNamedConstantsTest {
      */
     @Test
     fun testPackageClassesMatchTestTargets() {
-        val dawnClasses = classNames("android.dawn")
+        val dawnClasses = classNames("androidx.webgpu")
         val actual = dawnClasses.filter { clazz ->
             isAndroidDawn(clazz) && hasCompanionObjectWithNames(clazz)
-        }.map { it.removePrefix("android.dawn.") }
+        }.map { it.removePrefix("androidx.webgpu.") }
 
         val expected = TYPES_WITH_MAPPED_NAMED_CONSTANTS.mapNotNull { it.simpleName }
 
@@ -143,7 +143,7 @@ class MappedNamedConstantsTest {
     }
 
     private fun isAndroidDawn(clazz: String): Boolean {
-        return clazz.startsWith("android.dawn") && clazz.count { it == '.' } == 2
+        return clazz.startsWith("androidx.webgpu") && clazz.count { it == '.' } == 2
     }
 
     private fun hasCompanionObjectWithNames(clazz: String): Boolean {

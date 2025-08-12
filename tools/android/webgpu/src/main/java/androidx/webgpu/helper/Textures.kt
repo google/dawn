@@ -1,7 +1,7 @@
-package android.dawn.helper
+package androidx.webgpu.helper
 
-import android.dawn.*
 import android.graphics.Bitmap
+import androidx.webgpu.*
 import java.nio.ByteBuffer
 
 public fun Bitmap.createGpuTexture(device: Device): Texture {

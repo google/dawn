@@ -1,8 +1,8 @@
-package android.dawn
+package androidx.webgpu
 
-import android.dawn.helper.UncapturedErrorException
-import android.dawn.helper.createWebGpu
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.webgpu.helper.UncapturedErrorException
+import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
 import org.junit.Test

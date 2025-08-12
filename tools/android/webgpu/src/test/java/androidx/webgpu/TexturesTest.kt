@@ -1,7 +1,7 @@
-package android.dawn
+package androidx.webgpu
 
-import android.dawn.helper.DawnException
-import android.dawn.helper.createBitmap
+import androidx.webgpu.helper.DawnException
+import androidx.webgpu.helper.createBitmap
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

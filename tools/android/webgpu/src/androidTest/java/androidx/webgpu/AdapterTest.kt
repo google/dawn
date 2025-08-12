@@ -1,7 +1,7 @@
-package android.dawn
+package androidx.webgpu
 
-import android.dawn.helper.Util
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.webgpu.helper.Util
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -1,7 +1,7 @@
-package android.dawn
+package androidx.webgpu
 
-import android.dawn.helper.roundDownToNearestMultipleOf
-import android.dawn.helper.roundUpToNearestMultipleOf
+import androidx.webgpu.helper.roundDownToNearestMultipleOf
+import androidx.webgpu.helper.roundUpToNearestMultipleOf
 import org.junit.Assert
 import org.junit.Test
 

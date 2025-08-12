@@ -1,4 +1,4 @@
-package android.dawn.helper
+package androidx.webgpu.helper
 
 import android.view.Surface
 

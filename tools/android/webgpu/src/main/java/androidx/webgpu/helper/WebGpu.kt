@@ -1,30 +1,30 @@
-package android.dawn.helper
+package androidx.webgpu.helper
 
-import android.dawn.Adapter
-import android.dawn.BackendType
-import android.dawn.CallbackMode.Companion.AllowSpontaneous
-import android.dawn.Device
-import android.dawn.DeviceDescriptor
-import android.dawn.DeviceLostCallback
-import android.dawn.DeviceLostCallbackInfo
-import android.dawn.DeviceLostReason
-import android.dawn.ErrorType
-import android.dawn.FeatureName
-import android.dawn.Instance
-import android.dawn.InstanceDescriptor
-import android.dawn.RequestAdapterOptions
-import android.dawn.RequestAdapterStatus
-import android.dawn.RequestDeviceStatus
-import android.dawn.SurfaceDescriptor
-import android.dawn.SurfaceSourceAndroidNativeWindow
-import android.dawn.UncapturedErrorCallbackInfo
-import android.dawn.createInstance
-import android.dawn.helper.Util.windowFromSurface
-import android.dawn.requestAdapter
-import android.dawn.requestDevice
 import android.os.Handler
 import android.os.Looper
 import android.view.Surface
+import androidx.webgpu.Adapter
+import androidx.webgpu.BackendType
+import androidx.webgpu.CallbackMode.Companion.AllowSpontaneous
+import androidx.webgpu.Device
+import androidx.webgpu.DeviceDescriptor
+import androidx.webgpu.DeviceLostCallback
+import androidx.webgpu.DeviceLostCallbackInfo
+import androidx.webgpu.DeviceLostReason
+import androidx.webgpu.ErrorType
+import androidx.webgpu.FeatureName
+import androidx.webgpu.Instance
+import androidx.webgpu.InstanceDescriptor
+import androidx.webgpu.RequestAdapterOptions
+import androidx.webgpu.RequestAdapterStatus
+import androidx.webgpu.RequestDeviceStatus
+import androidx.webgpu.SurfaceDescriptor
+import androidx.webgpu.SurfaceSourceAndroidNativeWindow
+import androidx.webgpu.UncapturedErrorCallbackInfo
+import androidx.webgpu.createInstance
+import androidx.webgpu.helper.Util.windowFromSurface
+import androidx.webgpu.requestAdapter
+import androidx.webgpu.requestDevice
 
 public class DeviceLostException(
     public val device: Device, public val reason: DeviceLostReason, message: String
@@ -38,7 +38,7 @@ private const val POLLING_DELAY_MS = 100L
 
 public abstract class WebGpu : AutoCloseable {
     public abstract val instance: Instance
-    public abstract val webgpuSurface: android.dawn.Surface
+    public abstract val webgpuSurface: androidx.webgpu.Surface
     public abstract val device: Device
 }
 

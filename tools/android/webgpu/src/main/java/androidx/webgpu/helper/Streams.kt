@@ -1,4 +1,4 @@
-package android.dawn.helper
+package androidx.webgpu.helper
 
 import java.io.InputStream
 import java.io.InputStreamReader

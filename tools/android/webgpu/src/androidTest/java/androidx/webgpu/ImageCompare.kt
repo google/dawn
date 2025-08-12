@@ -1,4 +1,4 @@
-package android.dawn
+package androidx.webgpu
 
 import android.graphics.Bitmap
 import kotlin.math.pow

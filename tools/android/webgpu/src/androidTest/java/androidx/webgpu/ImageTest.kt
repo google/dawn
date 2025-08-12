@@ -1,13 +1,13 @@
-package android.dawn
+package androidx.webgpu
 
-import android.dawn.helper.asString
-import android.dawn.helper.createBitmap
-import android.dawn.helper.createWebGpu
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.services.storage.TestStorage
+import androidx.webgpu.helper.asString
+import androidx.webgpu.helper.createBitmap
+import androidx.webgpu.helper.createWebGpu
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
