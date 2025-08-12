@@ -522,35 +522,30 @@ MaybeError FillLimits(Limits* outputLimits,
         compatibilityModeLimits->nextInChain = originalChain;
     }
 
-    if (auto* texelCopyBufferRowAlignmentLimits =
-            unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
-        wgpu::ChainedStructOut* originalChain = texelCopyBufferRowAlignmentLimits->nextInChain;
-        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
-            // If the feature is not enabled, minTexelCopyBufferRowAlignment is default-initialized
-            // to WGPU_LIMIT_U32_UNDEFINED.
-            *texelCopyBufferRowAlignmentLimits = DawnTexelCopyBufferRowAlignmentLimits{};
+    // Helper to fill a part of the extension chain based on the features enabled.
+    auto FillExtensionLimits = [&](auto chain, auto memberPtr, wgpu::FeatureName requiredFeature) {
+        if (chain == nullptr) {
+            return;
+        }
+
+        wgpu::ChainedStructOut* originalChain = chain->nextInChain;
+        if (!supportedFeatures.IsEnabled(requiredFeature)) {
+            // Default initialize the chain.
+            *chain = {};
         } else {
-            *texelCopyBufferRowAlignmentLimits = combinedLimits.texelCopyBufferRowAlignmentLimits;
+            *chain = combinedLimits.*memberPtr;
         }
 
         // Recover original chain.
-        texelCopyBufferRowAlignmentLimits->nextInChain = originalChain;
-    }
+        chain->nextInChain = originalChain;
+    };
 
-    if (auto* hostMappedPointerLimits = unpacked.Get<DawnHostMappedPointerLimits>()) {
-        wgpu::ChainedStructOut* originalChain = hostMappedPointerLimits->nextInChain;
-        if (!supportedFeatures.IsEnabled(wgpu::FeatureName::HostMappedPointer)) {
-            // If the feature is not enabled, hostMappedPointerAlignment is default-initialized to
-            // WGPU_LIMIT_U32_UNDEFINED.
-            *hostMappedPointerLimits = DawnHostMappedPointerLimits{};
-        } else {
-            hostMappedPointerLimits->hostMappedPointerAlignment =
-                combinedLimits.hostMappedPointerLimits.hostMappedPointerAlignment;
-        }
-
-        // Recover original chain.
-        hostMappedPointerLimits->nextInChain = originalChain;
-    }
+    FillExtensionLimits(unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>(),
+                        &CombinedLimits::texelCopyBufferRowAlignmentLimits,
+                        wgpu::FeatureName::DawnTexelCopyBufferRowAlignment);
+    FillExtensionLimits(unpacked.Get<DawnHostMappedPointerLimits>(),
+                        &CombinedLimits::hostMappedPointerLimits,
+                        wgpu::FeatureName::HostMappedPointer);
 
     return {};
 }
