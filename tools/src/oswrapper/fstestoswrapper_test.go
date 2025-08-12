@@ -242,3 +242,297 @@ func TestFSTestOSWrapper_CleanPath(t *testing.T) {
 		})
 	}
 }
+
+// --- FilesystemReader tests ---
+
+func TestFSTestOSWrapper_ReadFile(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		expectedContent []byte
+		expectedError
+	}{
+		{
+			name: "Read existing file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "hello world"},
+			},
+			expectedContent: []byte("hello world"),
+		},
+		{
+			name: "Read non-existent file",
+			path: filepath.Join(root, "nonexistent.txt"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Read a directory",
+			path: filepath.Join(root, "mydir"),
+			setup: unittestSetup{
+				initialDirs: []string{"/mydir"},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			content, err := wrapper.ReadFile(tc.path)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			require.Equal(t, tc.expectedContent, content)
+		})
+	}
+}
+
+func TestFSTestOSWrapper_ReadFile_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup matchesRealSetup
+		path  string
+	}{
+		{
+			name: "Read existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "hello world",
+				},
+			}},
+			path: "file.txt",
+		},
+		{
+			name: "Error on non-existent file",
+			path: "nonexistent.txt",
+		},
+		{
+			name: "Error on path is a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{
+					"mydir",
+				},
+			}},
+			path: "mydir",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute
+			realContent, realErr := realFS.ReadFile(filepath.Join(realRoot, tc.path))
+			testContent, testErr := testFS.ReadFile(tc.path)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				require.Equal(t, realContent, testContent)
+			}
+		})
+	}
+}
+
+// --- FilesystemWriter tests ---
+
+func TestFSTestOSWrapper_WriteFile(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name          string
+		setup         unittestSetup
+		path          string
+		content       []byte
+		mode          os.FileMode
+		expectContent *string
+		expectedMode  os.FileMode
+		expectedError
+	}{
+		{
+			name:          "Create new file",
+			path:          filepath.Join(root, "newfile.txt"),
+			content:       []byte("new content"),
+			mode:          0666,
+			expectContent: stringPtr("new content"),
+			expectedMode:  0666,
+		},
+		{
+			name: "Overwrite existing file",
+			path: filepath.Join(root, "existing.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "existing.txt"): "old content"},
+			},
+			content:       []byte("overwritten"),
+			mode:          0666,
+			expectContent: stringPtr("overwritten"),
+			expectedMode:  0666,
+		},
+		{
+			name: "Create file in existing subdirectory",
+			path: filepath.Join(root, "foo", "bar.txt"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "foo")},
+			},
+			content:       []byte("sub content"),
+			mode:          0666,
+			expectContent: stringPtr("sub content"),
+			expectedMode:  0666,
+		},
+		{
+			name:    "Error on non-existent directory",
+			path:    filepath.Join(root, "new", "dir", "file.txt"),
+			content: []byte("some data"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Error on path is a directory",
+			path: filepath.Join(root, "mydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+			content: []byte("some data"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Error on parent path is a file",
+			path: filepath.Join(root, "file.txt", "another.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "i am a file"},
+			},
+			content: []byte("some data"),
+			mode:    0666,
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+		{
+			name:          "Create new file with specific mode",
+			path:          filepath.Join(root, "newfile_mode.txt"),
+			content:       []byte("new content"),
+			mode:          0755,
+			expectContent: stringPtr("new content"),
+			expectedMode:  0755,
+		},
+		{
+			name: "Overwrite existing file with different mode",
+			path: filepath.Join(root, "existing.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "existing.txt"): "old content"},
+			},
+			content:       []byte("overwritten"),
+			mode:          0777,
+			expectContent: stringPtr("overwritten"),
+			expectedMode:  0777,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			err := wrapper.WriteFile(tc.path, tc.content, tc.mode)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			if tc.expectContent != nil {
+				content, err := wrapper.ReadFile(tc.path)
+				require.NoError(t, err)
+				require.Equal(t, *tc.expectContent, string(content))
+			}
+
+			if tc.expectedMode != 0 {
+				cleanedPath := wrapper.CleanPath(tc.path)
+				file, ok := wrapper.FS[cleanedPath]
+				require.True(t, ok, "file %v not found in test fs", cleanedPath)
+				require.Equal(t, tc.expectedMode, file.Mode.Perm())
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_WriteFile_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name    string
+		setup   matchesRealSetup
+		path    string
+		content []byte
+	}{
+		{
+			name:    "Create new file",
+			path:    "newfile.txt",
+			content: []byte("new content"),
+		},
+		{
+			name: "Overwrite existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"existing.txt": "old content",
+				},
+			}},
+			path:    "existing.txt",
+			content: []byte("overwritten"),
+		},
+		{
+			name: "Create file in existing subdirectory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"foo"},
+			}},
+			path:    filepath.Join("foo", "bar.txt"),
+			content: []byte("sub content"),
+		},
+		{
+			name:    "Error on non-existent directory",
+			path:    filepath.Join("new", "dir", "file.txt"),
+			content: []byte("some data"),
+		},
+		{
+			name: "Error on path is a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"mydir"},
+			}},
+			path:    "mydir",
+			content: []byte("some data"),
+		},
+		{
+			name: "Error on parent path is a file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "i am a file",
+				},
+			}},
+			path:    filepath.Join("file.txt", "another.txt"),
+			content: []byte("some data"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute
+			realErr := realFS.WriteFile(filepath.Join(realRoot, tc.path), tc.content, 0666)
+			testErr := testFS.WriteFile(tc.path, tc.content, 0666)
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
+		})
+	}
+}
