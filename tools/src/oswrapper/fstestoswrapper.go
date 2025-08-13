@@ -37,6 +37,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"testing/fstest"
 	"time"
@@ -380,8 +381,27 @@ func (w FSTestFilesystemReaderWriter) MkdirAll(dir string, perm os.FileMode) err
 	return w.Mkdir(p, perm)
 }
 
+// tempCounter is an incrementing value used for generating the 'random' part of  temporary file
+// names.
+var tempCounter atomic.Uint32
+
 func (w FSTestFilesystemReaderWriter) MkdirTemp(dir, pattern string) (string, error) {
-	panic("MkdirTemp() is not currently implemented in fstest wrapper")
+	prefix, suffix := pattern, ""
+	if i := strings.LastIndex(pattern, "*"); i != -1 {
+		prefix, suffix = pattern[:i], pattern[i+1:]
+	}
+
+	// Note: This is using deterministic values for the 'random' part of the path names. This code
+	// should only be used for testing purposes, since an attacker might be able to exploit this.
+	rndStr := fmt.Sprintf("%d", tempCounter.Add(1))
+
+	name := prefix + rndStr + suffix
+	path := filepath.Join(dir, name)
+	err := w.Mkdir(path, 0700|os.ModeDir)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 func (w FSTestFilesystemReaderWriter) Remove(name string) error {
