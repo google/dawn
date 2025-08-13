@@ -383,6 +383,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "subresource are completely initialized, and StoreOp::Discard is always translated as a "
       "Store.",
       "https://crbug.com/dawn/838", ToggleStage::Device}},
+    {Toggle::MetalPolyfillUnpack2x16snorm,
+     {"metal_polyfill_unpack_2x16_snorm",
+      "Polyfill unpack2x16snorm for MSL due to CTS failures on Mac AMD devices.",
+      "https://crbug.com/407109055", ToggleStage::Device}},
     {Toggle::MetalFillEmptyOcclusionQueriesWithZero,
      {"metal_fill_empty_occlusion_queries_with_zero",
       "Apple GPUs leave stale results in the visibility result buffer instead of writing zero if "

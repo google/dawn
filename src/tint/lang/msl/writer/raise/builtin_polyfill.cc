@@ -36,8 +36,11 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -59,12 +62,15 @@
 namespace tint::msl::writer::raise {
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
     core::ir::Module& ir;
+
+    BuiltinPolyfillConfig config;
 
     /// The IR builder.
     core::ir::Builder b{ir};
@@ -130,6 +136,11 @@ struct State {
                     case core::BuiltinFn::kTextureBarrier:
                     case core::BuiltinFn::kUnpack2X16Float:
                         builtin_worklist.Push(builtin);
+                        break;
+                    case core::BuiltinFn::kUnpack2X16Snorm:
+                        if ((config.polyfill_unpack_2x16_snorm)) {
+                            builtin_worklist.Push(builtin);
+                        }
                         break;
                     default:
                         break;
@@ -270,6 +281,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kUnpack2X16Float:
                     Unpack2x16Float(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack2X16Snorm:
+                    Unpack2x16Snorm(builtin);
                     break;
 
                 // Subgroup matrix builtins.
@@ -957,6 +971,27 @@ struct State {
         builtin->Destroy();
     }
 
+    /// Polyfill a `unpack2x16snorm` builtin call
+    /// @param builtin the builtin call instruction
+    void Unpack2x16Snorm(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        b.InsertBefore(builtin, [&] {
+            auto* conv = b.Convert(ty.i32(), arg);
+            auto* x = b.ShiftLeft(ty.i32(), conv, 16_u);
+
+            auto* vec = b.Construct(ty.vec2<i32>(), x, conv);
+            auto* v = b.ShiftRight(ty.vec2<i32>(), vec, b.Splat(ty.vec2<u32>(), 16_u));
+
+            auto* flt = b.Convert(ty.vec2<f32>(), v);
+            auto* scale = b.Divide(ty.vec2<f32>(), flt, 32767_f);
+
+            auto* lower = b.Splat(ty.vec2<f32>(), -1_f);
+            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+        });
+        builtin->Destroy();
+    }
+
     /// Replace a subgroupMatrixLoad builtin.
     /// @param builtin the builtin call instruction
     void SubgroupMatrixLoad(core::ir::CoreBuiltinCall* builtin) {
@@ -1068,7 +1103,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, const BuiltinPolyfillConfig& config) {
     auto result =
         ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
                                 core::ir::Capabilities{
@@ -1083,7 +1118,7 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
         return result.Failure();
     }
 
-    State{ir}.Process();
+    State{ir, config}.Process();
 
     return Success;
 }

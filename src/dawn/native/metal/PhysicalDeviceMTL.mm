@@ -444,6 +444,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalDisableModuleConstantF16, true);
     }
 
+    // chromium:407109055: Signed unpacking is inaccurate on AMD only.
+    if (gpu_info::IsAMD(vendorId)) {
+        deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16snorm, true);
+    }
+
     // On some Intel GPUs vertex only render pipeline get wrong depth result if no fragment
     // shader provided. Create a placeholder fragment shader module to work around this issue.
     if (gpu_info::IsIntel(vendorId)) {

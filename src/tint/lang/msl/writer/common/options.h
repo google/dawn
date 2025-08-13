@@ -150,6 +150,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` to polyfill `unpack2x16snorm()`.
+    bool polyfill_unpack_2x16_snorm = false;
+
     /// Set to `true` to scalarize max min and clamp builtins.
     bool scalarize_max_min_clamp = false;
 
@@ -199,6 +202,7 @@ struct Options {
                  disable_demote_to_helper,
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
+                 polyfill_unpack_2x16_snorm,
                  scalarize_max_min_clamp,
                  disable_module_constant_f16,
                  polyfill_subgroup_broadcast_f16,

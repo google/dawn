@@ -78,7 +78,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup_I32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -111,7 +112,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicAdd_Storage_U32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -144,7 +146,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicAnd) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -177,7 +180,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicExchange) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -210,7 +214,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicLoad) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -243,7 +248,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicMax) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -276,7 +282,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicMin) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -309,7 +316,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicOr) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -342,7 +350,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicStore) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -375,7 +384,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicSub) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -408,7 +418,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, AtomicXor) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -480,7 +491,8 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -560,7 +572,8 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -662,7 +675,8 @@ __atomic_compare_exchange_result_u32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -752,7 +766,8 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -787,7 +802,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Distance_Scalar) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -821,7 +837,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Distance_Vector) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -868,7 +885,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Dot_I32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -913,7 +931,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Dot_U32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -947,7 +966,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Dot_F32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1016,7 +1036,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Dot_MultipleCalls) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1076,7 +1097,8 @@ __frexp_result_f32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1136,7 +1158,8 @@ __frexp_result_vec4_f32 = struct @align(16) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1169,7 +1192,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Length_Scalar) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1202,7 +1226,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Length_Vector) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1260,7 +1285,8 @@ __modf_result_f32 = struct @align(4) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1318,7 +1344,8 @@ __modf_result_vec4_f32 = struct @align(16) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1352,7 +1379,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, QuantizeToF16_Scalar) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1386,7 +1414,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, QuantizeToF16_Vector) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1419,7 +1448,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Sign_F32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1455,7 +1485,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Sign_Scalar) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1491,7 +1522,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Sign_Vector) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1525,7 +1557,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1560,7 +1593,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithoutLod) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1596,7 +1630,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithI32Lod) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1632,7 +1667,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureDimensions_3d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1667,7 +1703,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_2d_UnsignedComponent) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1702,7 +1739,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_2d_SignedComponent) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1739,7 +1777,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_2d_WithOffset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1774,7 +1813,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_Depth2d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1811,7 +1851,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGatherCompare) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1848,7 +1889,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_1d_U32Coord) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1886,7 +1928,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_1d_I32Coord) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1923,7 +1966,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2d_U32Coords) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1961,7 +2005,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2d_I32Coords) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -1998,7 +2043,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2d_WithLevel) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2037,7 +2083,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2darray_U32Index) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2076,7 +2123,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2darray_I32Index) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2114,7 +2162,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_2darray_WithLevel) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2152,7 +2201,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureLoad_3d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2186,7 +2236,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumLayers) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2219,7 +2270,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumLevels) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2253,7 +2305,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureNumSamples) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2288,7 +2341,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSample) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2329,7 +2383,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleBias) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2373,7 +2428,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleBias_Array) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2409,7 +2465,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompare) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2451,7 +2508,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2494,7 +2552,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_WithOffset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2537,7 +2596,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_2d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2575,7 +2635,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureGather_2dArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2621,7 +2682,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_2dArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2664,7 +2726,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_3d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2708,7 +2771,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_Cube) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2752,7 +2816,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleGrad_WithOffset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2788,7 +2853,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel_1d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2829,7 +2895,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel_2d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2873,7 +2940,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureSampleLevel_Array) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2911,7 +2979,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_1d_U32Coord) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2950,7 +3019,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_1d_I32Coord) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -2988,7 +3058,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2d_U32Coords) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3027,7 +3098,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2d_I32Coords) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3067,7 +3139,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2darray_U32Index) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3107,7 +3180,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_2darray_I32Index) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3146,7 +3220,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStore_3d) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3198,7 +3273,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureStoreToReadWriteBeforeAndAfterLoad)
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3229,7 +3305,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3260,7 +3337,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, StorageBarrier) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3291,7 +3369,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, TextureBarrier) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3325,7 +3404,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Pack2x16Float) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3359,7 +3439,82 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Float) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Snorm_enabled) {
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* input = b.FunctionParam("input", ty.u32());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<f32>>(core::BuiltinFn::kUnpack2X16Snorm, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16snorm %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:i32 = convert %input
+    %4:i32 = shl %3, 16u
+    %5:vec2<i32> = construct %4, %3
+    %6:vec2<i32> = shr %5, vec2<u32>(16u)
+    %7:vec2<f32> = convert %6
+    %8:vec2<f32> = div %7, 32767.0f
+    %9:vec2<f32> = clamp %8, vec2<f32>(-1.0f), vec2<f32>(1.0f)
+    ret %9
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config{.polyfill_unpack_2x16_snorm = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Snorm_disabled) {
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* input = b.FunctionParam("input", ty.u32());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<f32>>(core::BuiltinFn::kUnpack2X16Snorm, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16snorm %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16snorm %input
+    ret %3
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3400,7 +3555,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
 )";
 
     capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3441,7 +3597,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_F16) {
 )";
 
     capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3478,7 +3635,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_F32) {
 )";
 
     capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3515,7 +3673,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_F16) {
 )";
 
     capabilities.Add(core::ir::Capability::kAllow64BitIntegers);
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3554,7 +3713,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3593,7 +3753,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_F16) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3633,7 +3794,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_F32) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }
@@ -3673,7 +3835,8 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_F16) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
 
     EXPECT_EQ(expect, str());
 }

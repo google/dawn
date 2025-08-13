@@ -251,7 +251,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
 
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
-    RUN_TRANSFORM(raise::BuiltinPolyfill, module);
+    RUN_TRANSFORM(raise::BuiltinPolyfill, module,
+                  {.polyfill_unpack_2x16_snorm = options.polyfill_unpack_2x16_snorm});
     // After 'BuiltinPolyfill' as that transform can introduce signed dot products.
     core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
         .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
