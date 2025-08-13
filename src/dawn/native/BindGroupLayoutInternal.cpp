@@ -280,7 +280,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
 MaybeError ValidateStaticSamplersWithTextureBindings(
     DeviceBase* device,
-    const BindGroupLayoutDescriptor* descriptor,
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor,
     const std::map<BindingNumber, uint32_t>& bindingNumberToIndexMap) {
     // Map of texture binding number to static sampler binding number.
     std::map<BindingNumber, BindingNumber> textureToStaticSamplerBindingMap;
@@ -322,9 +322,28 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
 }  // anonymous namespace
 
 MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                             const BindGroupLayoutDescriptor* descriptor,
+                                             const BindGroupLayoutDescriptor* descriptorChain,
                                              bool allowInternalBinding) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
+    UnpackedPtr<BindGroupLayoutDescriptor> descriptor;
+    DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(descriptorChain));
+
+    // Handle the dynamic binding array first to also extract information needed to validate the
+    // rest of the bindings.
+    std::optional<BindingNumber> startOfDynamicArray = {};
+    if (auto* dynamic = descriptor.Get<BindGroupLayoutDynamicBindingArray>()) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::ChromiumExperimentalBindless),
+                        "Dynamic binding array used without the %s feature enabled.",
+                        wgpu::FeatureName::ChromiumExperimentalBindless);
+        DAWN_INVALID_IF(dynamic->dynamicArray.nextInChain != nullptr,
+                        "DynamicBindingArrayLayout::nextInChain must be nullptr");
+
+        startOfDynamicArray = BindingNumber(dynamic->dynamicArray.start);
+        DAWN_TRY(ValidateDynamicBindingKind(dynamic->dynamicArray.kind));
+
+        DAWN_INVALID_IF(startOfDynamicArray >= kMaxBindingsPerBindGroupTyped,
+                        "dynamic array start (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
+                        startOfDynamicArray.value(), kMaxBindingsPerBindGroup);
+    }
 
     // Map of binding number to entry index.
     std::map<BindingNumber, uint32_t> bindingMap;
@@ -338,7 +357,7 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
         DAWN_INVALID_IF(
             bindingNumber >= kMaxBindingsPerBindGroupTyped,
             "On entries[%u]: binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
-            i, uint32_t(bindingNumber), kMaxBindingsPerBindGroup);
+            i, bindingNumber, kMaxBindingsPerBindGroup);
 
         BindingNumber arraySize{1};
         if (entry->bindingArraySize > 1) {
@@ -356,6 +375,12 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
                             uint32_t(arraySize) + uint32_t(bindingNumber),
                             kMaxBindingsPerBindGroupTyped);
         }
+
+        DAWN_INVALID_IF(startOfDynamicArray.has_value() &&
+                            bindingNumber + arraySize > startOfDynamicArray.value(),
+                        "On entries[%u]: the range of binding used [%u, %u) conflicts with the "
+                        "dynamic binding array that starts at binding %u.",
+                        i, bindingNumber, bindingNumber + arraySize, startOfDynamicArray.value());
 
         // Check that the same binding is not set twice. bindingNumber + arraySize cannot overflow
         // as they are both smaller than kMaxBindingsPerBindGroupTyped.
@@ -448,7 +473,8 @@ struct ExpandedBindingInfo {
     ityp::vector<BindingIndex, BindingInfo> entries;
     ExternalTextureBindingExpansionMap externalTextureBindingExpansions;
 };
-ExpandedBindingInfo ConvertAndExpandBGLEntries(const BindGroupLayoutDescriptor* descriptor) {
+ExpandedBindingInfo ConvertAndExpandBGLEntries(
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
     ExpandedBindingInfo result;
 
     // When new bgl entries are created, we use binding numbers larger than kMaxBindingsPerBindGroup
@@ -550,9 +576,11 @@ bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindin
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     DeviceBase* device,
-    const BindGroupLayoutDescriptor* descriptor,
+    const BindGroupLayoutDescriptor* descriptorChain,
     ApiObjectBase::UntrackedByDeviceTag tag)
-    : ApiObjectBase(device, descriptor->label) {
+    : ApiObjectBase(device, descriptorChain->label) {
+    UnpackedPtr<BindGroupLayoutDescriptor> descriptor = Unpack(descriptorChain);
+
     ExpandedBindingInfo unpackedBindings = ConvertAndExpandBGLEntries(descriptor);
     mExternalTextureBindingExpansionMap =
         std::move(unpackedBindings.externalTextureBindingExpansions);
@@ -611,6 +639,13 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
         UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
         IncrementBindingCounts(&mValidationBindingCounts, entry);
     }
+
+    // Handle the dynamic binding array if there is one.
+    if (auto* dynamic = descriptor.Get<BindGroupLayoutDynamicBindingArray>()) {
+        mHasDynamicArray = true;
+        mDynamicArrayStart = BindingNumber(dynamic->dynamicArray.start);
+        mDynamicArrayKind = dynamic->dynamicArray.kind;
+    }
 }
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
@@ -658,6 +693,18 @@ BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingN
     return it->second;
 }
 
+bool BindGroupLayoutInternalBase::HasDynamicArray() const {
+    return mHasDynamicArray;
+}
+
+BindingNumber BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
+    return mDynamicArrayStart;
+}
+
+wgpu::DynamicBindingKind BindGroupLayoutInternalBase::GetDynamicArrayKind() const {
+    return mDynamicArrayKind;
+}
+
 void BindGroupLayoutInternalBase::ReduceMemoryUsage() {}
 
 size_t BindGroupLayoutInternalBase::ComputeContentHash() {
@@ -698,6 +745,8 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             });
     }
 
+    recorder.Record(mHasDynamicArray, mDynamicArrayStart, mDynamicArrayKind);
+
     return recorder.GetContentHash();
 }
 
@@ -712,12 +761,21 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
             return false;
         }
     }
-    return a->mBindingMap == b->mBindingMap;
+    if (a->mBindingMap != b->mBindingMap) {
+        return false;
+    }
+
+    if (a->mHasDynamicArray != b->mHasDynamicArray ||
+        a->mDynamicArrayKind != b->mDynamicArrayKind ||
+        a->mDynamicArrayStart != b->mDynamicArrayStart) {
+        return false;
+    }
+    return true;
 }
 
 bool BindGroupLayoutInternalBase::IsEmpty() const {
     DAWN_ASSERT(!IsError());
-    return mBindingInfo.empty();
+    return mBindingInfo.empty() && !mHasDynamicArray;
 }
 
 BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {

@@ -512,12 +512,39 @@
             {"name": "storage texture", "type": "storage texture binding layout", "default": "zero"}
         ]
     },
+
+    "dynamic binding kind": {
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "sampled texture"}
+        ]
+    },
+    "dynamic binding array layout": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "extensible": "in",
+        "members": [
+            {"name": "start", "type": "uint32_t", "default": 0},
+            {"name": "kind", "type": "dynamic binding kind"}
+        ]
+    },
+    "bind group layout dynamic binding array": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["bind group layout descriptor"],
+        "members": [
+            {"name": "dynamic array", "type": "dynamic binding array layout"}
+        ]
+    },
     "bind group layout descriptor": {
         "category": "structure",
         "extensible": "in",
         "members": [
             {"name": "label", "type": "string view", "optional": true},
-            {"name": "entry count", "type": "size_t"},
+            {"name": "entry count", "type": "size_t", "default": 0},
             {"name": "entries", "type": "bind group layout entry", "annotation": "const*", "length": "entry count"}
         ]
     },
@@ -3902,7 +3929,8 @@
             {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
             {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]},
             {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
-            {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]}
+            {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
+            {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]}
         ]
     },
     "texture": {

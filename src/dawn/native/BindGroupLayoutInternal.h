@@ -80,10 +80,16 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // A map from the BindingNumber to its packed BindingIndex.
     using BindingMap = std::map<BindingNumber, BindingIndex>;
 
+    // Getters for static bindings
     const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
     bool HasBinding(BindingNumber bindingNumber) const;
     BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
+
+    // Getters for the dynamic binding array.
+    bool HasDynamicArray() const;
+    BindingNumber GetDynamicArrayStart() const;
+    wgpu::DynamicBindingKind GetDynamicArrayKind() const;
 
     // Signals it's an appropriate time to free unused memory. BindGroupLayout implementations often
     // have SlabAllocator<BindGroup> that need an external signal.
@@ -175,6 +181,11 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     BindingCounts mValidationBindingCounts = {};
     bool mNeedsCrossBindingValidation = false;
+
+    // Information about the dynamic binding array part of the BGL.
+    bool mHasDynamicArray = false;
+    BindingNumber mDynamicArrayStart{0};
+    wgpu::DynamicBindingKind mDynamicArrayKind = wgpu::DynamicBindingKind::Undefined;
 };
 
 }  // namespace dawn::native

@@ -4344,5 +4344,109 @@ TEST_F(PipelineLayoutValidationTest, ReuseEmptyBindGroupLayoutCreatedwithAutoPip
     }
 }
 
+class BindGroupValidationTest_ChromiumExperimentalBindless : public BindGroupValidationTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        return {wgpu::FeatureName::ChromiumExperimentalBindless};
+    }
+};
+
+// Control case where creating a dynamic binding array with the feature enabled is valid.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, SuccessWithFeatureEnabled) {
+    wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.nextInChain = &dynamic;
+
+    // No error is produced.
+    device.CreateBindGroupLayout(&desc);
+}
+
+// Error case where creating a dynamic binding array with the feature disabled is an error.
+TEST_F(BindGroupValidationTest, ErrorWithFeatureDisabled) {
+    wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.nextInChain = &dynamic;
+
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+}
+
+// Check that using DynamicArrayKind::Undefined is an error.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, UndefinedArrayKind) {
+    wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.nextInChain = &dynamic;
+
+    // Control case: SampledTexture is a valid kind.
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+    device.CreateBindGroupLayout(&desc);
+
+    // Error case: Undefined is invalid.
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::Undefined;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+}
+
+// Check that the start of the binding array must be less than maxBindingsPerBindGroup
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, DynamicArrayStartLimit) {
+    wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.nextInChain = &dynamic;
+
+    // No error is produced if we are under the limit.
+    dynamic.dynamicArray.start = kMaxBindingsPerBindGroup - 1;
+    device.CreateBindGroupLayout(&desc);
+
+    // Error case if we are at the limit.
+    dynamic.dynamicArray.start = kMaxBindingsPerBindGroup;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+
+    // Error case if we are above the limit.
+    dynamic.dynamicArray.start = kMaxBindingsPerBindGroup + 1;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+}
+
+// Check that conflicts of binding number are not allowed between dynamic and static bindings.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, ConflictWithStaticBindings) {
+    wgpu::BindGroupLayoutEntry entry;
+    entry.binding = 0;
+    entry.bindingArraySize = 0;
+    entry.texture.sampleType = wgpu::TextureSampleType::Float;
+
+    wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+    dynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+    dynamic.dynamicArray.start = 3;
+
+    wgpu::BindGroupLayoutDescriptor desc;
+    desc.nextInChain = &dynamic;
+    desc.entryCount = 1;
+    desc.entries = &entry;
+
+    // Control case: the non-arrayed static binding is before the dynamic array.
+    entry.binding = 2;
+    entry.bindingArraySize = 1;
+    device.CreateBindGroupLayout(&desc);
+
+    // Error case: the non-arrayed static binding is after the dynamic array.
+    entry.binding = 3;
+    entry.bindingArraySize = 1;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+
+    // Control case: the arrayed static binding is before the dynamic array.
+    entry.binding = 0;
+    entry.bindingArraySize = 3;
+    device.CreateBindGroupLayout(&desc);
+
+    // Error case: the arrayed static binding is after the dynamic array.
+    entry.binding = 0;
+    entry.bindingArraySize = 4;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
+}
+
 }  // anonymous namespace
 }  // namespace dawn
