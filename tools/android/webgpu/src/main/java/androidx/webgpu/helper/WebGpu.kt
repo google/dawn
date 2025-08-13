@@ -64,7 +64,7 @@ public suspend fun createWebGpu(
     val adapter = requestAdapter(instance, requestAdapterOptions)
     val device = requestDevice(adapter, requiredFeatures)
 
-    val isClosing = false
+    var isClosing = false
     // Long-running event poller for async methods. Can be removed when
     // https://issues.chromium.org/issues/323983633 is fixed.
     val handler = Handler(Looper.getMainLooper())
@@ -86,10 +86,11 @@ public suspend fun createWebGpu(
         override val device = device
 
         override fun close() {
-            device.close()
-            device.destroy();
-//          webgpuSurface.close()  // TODO(b/428866400): Remove when fixed
-//          instance.close()  // TODO(b/428866400): Remove when fixed
+            isClosing = true
+            //device.close() // TODO(b/428866400): Uncomment when fixed.
+            webgpuSurface?.close()
+            instance.close()
+            adapter.close()
         }
     }
 }
