@@ -53,11 +53,16 @@ class StorageTextureTests : public DawnTest {
     }
 
   public:
+    // Stores an expected value into the given pointer, assumed to be storage
+    // for the texel of the given format.  The value is some varying function
+    //   f(x,y,depth?orArrayLayer) + also_add, for the x component
+    //   f(x,y,depth?orArrayLayer),            for other components
     static void FillExpectedData(void* pixelValuePtr,
                                  wgpu::TextureFormat format,
                                  uint32_t x,
                                  uint32_t y,
-                                 uint32_t depthOrArrayLayer) {
+                                 uint32_t depthOrArrayLayer,
+                                 int also_add = 0) {
         const uint32_t pixelValue = 1 + x + kWidth * (y + kHeight * depthOrArrayLayer);
         DAWN_ASSERT(pixelValue <= 255u / 4);
 
@@ -65,20 +70,20 @@ class StorageTextureTests : public DawnTest {
             // 32-bit unsigned integer formats
             case wgpu::TextureFormat::R32Uint: {
                 uint32_t* valuePtr = static_cast<uint32_t*>(pixelValuePtr);
-                *valuePtr = pixelValue;
+                *valuePtr = pixelValue + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG32Uint: {
                 uint32_t* valuePtr = static_cast<uint32_t*>(pixelValuePtr);
-                valuePtr[0] = pixelValue;
+                valuePtr[0] = pixelValue + also_add;
                 valuePtr[1] = pixelValue * 2;
                 break;
             }
 
             case wgpu::TextureFormat::RGBA32Uint: {
                 uint32_t* valuePtr = static_cast<uint32_t*>(pixelValuePtr);
-                valuePtr[0] = pixelValue;
+                valuePtr[0] = pixelValue + also_add;
                 valuePtr[1] = pixelValue * 2;
                 valuePtr[2] = pixelValue * 3;
                 valuePtr[3] = pixelValue * 4;
@@ -88,20 +93,20 @@ class StorageTextureTests : public DawnTest {
             // 32-bit signed integer formats
             case wgpu::TextureFormat::R32Sint: {
                 int32_t* valuePtr = static_cast<int32_t*>(pixelValuePtr);
-                *valuePtr = static_cast<int32_t>(pixelValue);
+                *valuePtr = static_cast<int32_t>(pixelValue) + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG32Sint: {
                 int32_t* valuePtr = static_cast<int32_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int32_t>(pixelValue);
+                valuePtr[0] = static_cast<int32_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int32_t>(pixelValue);
                 break;
             }
 
             case wgpu::TextureFormat::RGBA32Sint: {
                 int32_t* valuePtr = static_cast<int32_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int32_t>(pixelValue);
+                valuePtr[0] = static_cast<int32_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int32_t>(pixelValue);
                 valuePtr[2] = static_cast<int32_t>(pixelValue * 2);
                 valuePtr[3] = -static_cast<int32_t>(pixelValue * 2);
@@ -111,20 +116,20 @@ class StorageTextureTests : public DawnTest {
             // 32-bit float formats
             case wgpu::TextureFormat::R32Float: {
                 float_t* valuePtr = static_cast<float_t*>(pixelValuePtr);
-                *valuePtr = static_cast<float_t>(pixelValue * 1.1f);
+                *valuePtr = static_cast<float_t>(pixelValue * 1.1f) + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG32Float: {
                 float_t* valuePtr = static_cast<float_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<float_t>(pixelValue * 1.1f);
+                valuePtr[0] = static_cast<float_t>(pixelValue * 1.1f) + also_add;
                 valuePtr[1] = -static_cast<float_t>(pixelValue * 2.2f);
                 break;
             }
 
             case wgpu::TextureFormat::RGBA32Float: {
                 float_t* valuePtr = static_cast<float_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<float_t>(pixelValue * 1.1f);
+                valuePtr[0] = static_cast<float_t>(pixelValue * 1.1f) + also_add;
                 valuePtr[1] = -static_cast<float_t>(pixelValue * 1.1f);
                 valuePtr[2] = static_cast<float_t>(pixelValue * 2.2f);
                 valuePtr[3] = -static_cast<float_t>(pixelValue * 2.2f);
@@ -133,21 +138,21 @@ class StorageTextureTests : public DawnTest {
 
             // 16-bit float formats
             case wgpu::TextureFormat::R16Float: {
-                uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
+                uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr) + also_add;
                 *valuePtr = Float32ToFloat16(static_cast<float_t>(pixelValue));
                 break;
             }
 
             case wgpu::TextureFormat::RG16Float: {
                 uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
-                valuePtr[0] = Float32ToFloat16(static_cast<float_t>(pixelValue));
+                valuePtr[0] = Float32ToFloat16(static_cast<float_t>(pixelValue)) + also_add;
                 valuePtr[1] = Float32ToFloat16(-static_cast<float_t>(pixelValue));
                 break;
             }
 
             case wgpu::TextureFormat::RGBA16Float: {
                 uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
-                valuePtr[0] = Float32ToFloat16(static_cast<float_t>(pixelValue));
+                valuePtr[0] = Float32ToFloat16(static_cast<float_t>(pixelValue)) + also_add;
                 valuePtr[1] = Float32ToFloat16(-static_cast<float_t>(pixelValue));
                 valuePtr[2] = Float32ToFloat16(static_cast<float_t>(pixelValue * 2));
                 valuePtr[3] = Float32ToFloat16(-static_cast<float_t>(pixelValue * 2));
@@ -158,22 +163,22 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::RGBA8Uint: {
                 utils::RGBA8* valuePtr = static_cast<utils::RGBA8*>(pixelValuePtr);
-                *valuePtr =
-                    utils::RGBA8(pixelValue, pixelValue * 2, pixelValue * 3, pixelValue * 4);
+                *valuePtr = utils::RGBA8(pixelValue + also_add, pixelValue * 2, pixelValue * 3,
+                                         pixelValue * 4);
                 break;
             }
 
             case wgpu::TextureFormat::BGRA8Unorm: {
                 utils::RGBA8* valuePtr = static_cast<utils::RGBA8*>(pixelValuePtr);
-                *valuePtr =
-                    utils::RGBA8(pixelValue * 3, pixelValue * 2, pixelValue, pixelValue * 4);
+                *valuePtr = utils::RGBA8(pixelValue * 3 + also_add, pixelValue * 2, pixelValue,
+                                         pixelValue * 4);
                 break;
             }
 
             case wgpu::TextureFormat::RGBA8Snorm:
             case wgpu::TextureFormat::RGBA8Sint: {
                 int8_t* valuePtr = static_cast<int8_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int8_t>(pixelValue);
+                valuePtr[0] = static_cast<int8_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int8_t>(pixelValue);
                 valuePtr[2] = static_cast<int8_t>(pixelValue) * 2;
                 valuePtr[3] = -static_cast<int8_t>(pixelValue) * 2;
@@ -184,14 +189,14 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::R16Unorm:
             case wgpu::TextureFormat::R16Uint: {
                 uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
-                *valuePtr = static_cast<uint16_t>(pixelValue);
+                *valuePtr = static_cast<uint16_t>(pixelValue) + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG16Unorm:
             case wgpu::TextureFormat::RG16Uint: {
                 uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<uint16_t>(pixelValue);
+                valuePtr[0] = static_cast<uint16_t>(pixelValue) + also_add;
                 valuePtr[1] = static_cast<uint16_t>(pixelValue * 2);
                 break;
             }
@@ -199,14 +204,14 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::R16Snorm:
             case wgpu::TextureFormat::R16Sint: {
                 int16_t* valuePtr = static_cast<int16_t*>(pixelValuePtr);
-                *valuePtr = static_cast<int16_t>(pixelValue);
+                *valuePtr = static_cast<int16_t>(pixelValue) + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG16Snorm:
             case wgpu::TextureFormat::RG16Sint: {
                 int16_t* valuePtr = static_cast<int16_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int16_t>(pixelValue);
+                valuePtr[0] = static_cast<int16_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int16_t>(pixelValue);
                 break;
             }
@@ -214,7 +219,7 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::RGBA16Unorm:
             case wgpu::TextureFormat::RGBA16Uint: {
                 uint16_t* valuePtr = static_cast<uint16_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<uint16_t>(pixelValue);
+                valuePtr[0] = static_cast<uint16_t>(pixelValue) + also_add;
                 valuePtr[1] = static_cast<uint16_t>(pixelValue * 2);
                 valuePtr[2] = static_cast<uint16_t>(pixelValue * 3);
                 valuePtr[3] = static_cast<uint16_t>(pixelValue * 4);
@@ -224,7 +229,7 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::RGBA16Snorm:
             case wgpu::TextureFormat::RGBA16Sint: {
                 int16_t* valuePtr = static_cast<int16_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int16_t>(pixelValue);
+                valuePtr[0] = static_cast<int16_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int16_t>(pixelValue);
                 valuePtr[2] = static_cast<int16_t>(pixelValue * 2);
                 valuePtr[3] = -static_cast<int16_t>(pixelValue * 2);
@@ -235,14 +240,14 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::R8Unorm:
             case wgpu::TextureFormat::R8Uint: {
                 uint8_t* valuePtr = static_cast<uint8_t*>(pixelValuePtr);
-                *valuePtr = pixelValue;
+                *valuePtr = pixelValue + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG8Unorm:
             case wgpu::TextureFormat::RG8Uint: {
                 uint8_t* valuePtr = static_cast<uint8_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<uint8_t>(pixelValue);
+                valuePtr[0] = static_cast<uint8_t>(pixelValue) + also_add;
                 valuePtr[1] = static_cast<uint8_t>(pixelValue * 2);
                 break;
             }
@@ -250,21 +255,21 @@ class StorageTextureTests : public DawnTest {
             case wgpu::TextureFormat::R8Snorm:
             case wgpu::TextureFormat::R8Sint: {
                 int8_t* valuePtr = static_cast<int8_t*>(pixelValuePtr);
-                *valuePtr = static_cast<int8_t>(pixelValue);
+                *valuePtr = static_cast<int8_t>(pixelValue) + also_add;
                 break;
             }
 
             case wgpu::TextureFormat::RG8Snorm:
             case wgpu::TextureFormat::RG8Sint: {
                 int8_t* valuePtr = static_cast<int8_t*>(pixelValuePtr);
-                valuePtr[0] = static_cast<int8_t>(pixelValue);
+                valuePtr[0] = static_cast<int8_t>(pixelValue) + also_add;
                 valuePtr[1] = -static_cast<int8_t>(pixelValue);
                 break;
             }
 
             case wgpu::TextureFormat::RGB10A2Uint: {
                 uint32_t* valuePtr = static_cast<uint32_t*>(pixelValuePtr);
-                uint32_t r = static_cast<uint32_t>(pixelValue) % 1024;
+                uint32_t r = static_cast<uint32_t>(pixelValue + also_add) % 1024;
                 uint32_t g = static_cast<uint32_t>(pixelValue * 2) % 1024;
                 uint32_t b = static_cast<uint32_t>(pixelValue * 3) % 1024;
                 uint32_t a = static_cast<uint32_t>(3) % 4;
@@ -274,7 +279,7 @@ class StorageTextureTests : public DawnTest {
 
             case wgpu::TextureFormat::RGB10A2Unorm: {
                 uint32_t* valuePtr = static_cast<uint32_t*>(pixelValuePtr);
-                uint32_t r = static_cast<uint32_t>(pixelValue) % 1024;
+                uint32_t r = static_cast<uint32_t>(pixelValue + also_add) % 1024;
                 uint32_t g = static_cast<uint32_t>(pixelValue * 2) % 1024;
                 uint32_t b = static_cast<uint32_t>(pixelValue * 3) % 1024;
                 uint32_t a = static_cast<uint32_t>(3);
@@ -295,7 +300,7 @@ class StorageTextureTests : public DawnTest {
                 constexpr uint32_t kFloat11One = 0x3C0;
                 constexpr uint32_t kFloat10Zero = 0;
 
-                *valuePtr = MakeRG11B10(kFloat11One, kFloat11One, kFloat10Zero);
+                *valuePtr = MakeRG11B10(kFloat11One + also_add, kFloat11One, kFloat10Zero);
                 break;
             }
 
@@ -1329,20 +1334,15 @@ class ReadWriteStorageTextureTests : public StorageTextureTests {
             absl::StrFormat("Test format: %s", utils::GetWGSLImageFormatQualifier(format)));
 
         const std::vector<uint8_t> initialTextureData = GetExpectedData(format);
-        utils::WGSLComponentType componentType = utils::GetWGSLColorTextureComponentType(format);
 
         wgpu::Texture readWriteStorageTexture =
             CreateTextureWithTestData(initialTextureData.data(), initialTextureData.size(), format);
 
+        // The shader will add this to the .x component of the texel,
+        // to prove that it both read and wrote the texel.
+        const int also_add = 2;
+
         std::ostringstream sstream;
-        std::string multiplyStatement;
-        if (componentType == utils::WGSLComponentType::Float32) {
-            multiplyStatement = "data1.x = data1.x + 2.0;\n";
-        } else if (componentType == utils::WGSLComponentType::Int32) {
-            multiplyStatement = "data1.x = data1.x + 2;\n";
-        } else {
-            multiplyStatement = "data1.x = data1.x + 2u;\n";
-        }
 
         sstream << R"(
 @group(0) @binding(0) var rwImage : texture_storage_2d<)"
@@ -1352,8 +1352,9 @@ class ReadWriteStorageTextureTests : public StorageTextureTests {
                 << kWidth << ", " << kHeight << R"()
 fn main(@builtin(local_invocation_id) local_id: vec3<u32>) {
   var data1 = textureLoad(rwImage, vec2i(local_id.xy));
-)" << multiplyStatement
-                << R"(  textureStore(rwImage, vec2i(local_id.xy), data1);
+  data1.x += )" << also_add
+                << R"(; // Abstract integers automatically convert
+  textureStore(rwImage, vec2i(local_id.xy), data1);
 })";
 
         wgpu::ComputePipeline pipeline = CreateComputePipeline(sstream.str().c_str());
@@ -1376,18 +1377,7 @@ fn main(@builtin(local_invocation_id) local_id: vec3<u32>) {
             uint8_t* pixelValuePtr = &expectedModifiedData[i * texelSizeInBytes];
             const uint32_t x = i % kWidth;
             const uint32_t y = i / kWidth;
-            FillExpectedData(pixelValuePtr, format, x, y, 0);
-
-            if (componentType == utils::WGSLComponentType::Float32) {
-                float* val = reinterpret_cast<float*>(pixelValuePtr);
-                val[0] += 2.0f;
-            } else if (componentType == utils::WGSLComponentType::Int32) {
-                int32_t* val = reinterpret_cast<int32_t*>(pixelValuePtr);
-                val[0] += 2;
-            } else {  // u32
-                uint32_t* val = reinterpret_cast<uint32_t*>(pixelValuePtr);
-                val[0] += 2u;
-            }
+            FillExpectedData(pixelValuePtr, format, x, y, 0, also_add);
         }
 
         CheckOutputStorageTexture(readWriteStorageTexture, format, {kWidth, kHeight},
