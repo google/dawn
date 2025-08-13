@@ -43,6 +43,13 @@ import (
 	"time"
 )
 
+var (
+	ErrPwdNotSet  = errors.New("PWD not set in test environment")
+	ErrHomeNotSet = errors.New("HOME not set in test environment")
+)
+
+// --- OSWrapper implementation ---
+
 // FSTestOSWrapper is an in-memory implementation of OSWrapper for testing.
 // It uses a map to simulate a filesystem, which can be used to create
 // a read-only fstest.MapFS for read operations. Write operations
@@ -55,15 +62,95 @@ type FSTestOSWrapper struct {
 // CreateFSTestOSWrapper creates a new FSTestOSWrapper with an empty in-memory filesystem.
 func CreateFSTestOSWrapper() FSTestOSWrapper {
 	return FSTestOSWrapper{
-		FSTestEnvironProvider{},
+		FSTestEnvironProvider{env: make(map[string]string)},
 		FSTestFilesystemReaderWriter{
 			FS: make(map[string]*fstest.MapFile),
 		},
 	}
 }
 
-// FSTestEnvironProvider is a stub implementation of EnvironProvider that panics if called.
-type FSTestEnvironProvider struct{}
+// CreateFSTestOSWrapperWithRealEnv creates a new FSTestOSWrapper with an empty in-memory filesystem
+// and an environment initialized from the current process's environment.
+func CreateFSTestOSWrapperWithRealEnv() FSTestOSWrapper {
+	envMap := make(map[string]string)
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if len(pair) == 2 {
+			envMap[pair[0]] = pair[1]
+		}
+	}
+
+	// os.Getwd() and os.UserHomeDir() are not always from environment variables on all systems, but
+	// to simplify the test wrapper PWD and HOME will be populated from them.
+	if _, ok := envMap["PWD"]; !ok {
+		if wd, err := os.Getwd(); err == nil {
+			envMap["PWD"] = wd
+		}
+	}
+	if _, ok := envMap["HOME"]; !ok {
+		if home, err := os.UserHomeDir(); err == nil {
+			envMap["HOME"] = home
+		}
+	}
+
+	return FSTestOSWrapper{
+		FSTestEnvironProvider: FSTestEnvironProvider{env: envMap},
+		FSTestFilesystemReaderWriter: FSTestFilesystemReaderWriter{
+			FS: make(map[string]*fstest.MapFile),
+		},
+	}
+}
+
+// --- EnvironProvider implementation ---
+
+// FSTestEnvironProvider is a stub implementation of EnvironProvider that uses a map.
+type FSTestEnvironProvider struct {
+	env map[string]string
+}
+
+// EnvMap returns the internal environment map.
+// This is intended for testing purposes.
+func (p FSTestEnvironProvider) EnvMap() map[string]string {
+	return p.env
+}
+
+// Setenv sets an environment variable in the test provider.
+func (p FSTestEnvironProvider) Setenv(key, value string) {
+	p.env[key] = value
+}
+
+func (p FSTestEnvironProvider) Environ() []string {
+	result := make([]string, 0, len(p.env))
+	for k, v := range p.env {
+		result = append(result, k+"="+v)
+	}
+	return result
+}
+
+func (p FSTestEnvironProvider) Getenv(key string) string {
+	// os.Getenv returns "" for a missing key, which is the same as a map lookup.
+	return p.env[key]
+}
+
+func (p FSTestEnvironProvider) Getwd() (string, error) {
+	if wd, ok := p.env["PWD"]; ok {
+		return wd, nil
+	}
+	// The specific error returned by os.Getwd is very system dependent, so just returning a package
+	// error
+	return "", ErrPwdNotSet
+}
+
+func (p FSTestEnvironProvider) UserHomeDir() (string, error) {
+	if home, ok := p.env["HOME"]; ok {
+		return home, nil
+	}
+	// The specific error returned by os.UserHomeDir() is very system dependent, so just returning
+	// a package error
+	return "", ErrHomeNotSet
+}
+
+// --- FilesystemReaderWriter implementation ---
 
 // FSTestFilesystemReaderWriter provides an in-memory implementation of FilesystemReaderWriter.
 // It holds the map that represents the filesystem.
@@ -139,24 +226,6 @@ type fstestFileHandle struct {
 	offset       int64
 	flag         int
 	closed       bool
-}
-
-// --- EnvironProvider implementation ---
-
-func (p FSTestEnvironProvider) Environ() []string {
-	panic("Environ() is not currently implemented in fstest wrapper")
-}
-
-func (p FSTestEnvironProvider) Getenv(_ string) string {
-	panic("Getenv() is not currently implemented in fstest wrapper")
-}
-
-func (p FSTestEnvironProvider) Getwd() (string, error) {
-	panic("Getwd() is not currently implemented in fstest wrapper")
-}
-
-func (p FSTestEnvironProvider) UserHomeDir() (string, error) {
-	panic("UserHomeDir() is not currently implemented in fstest wrapper")
 }
 
 // --- FilesystemReader implementation ---
