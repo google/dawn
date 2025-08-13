@@ -44,6 +44,7 @@ struct CombinedLimits {
     CompatibilityModeLimits compat;
     DawnHostMappedPointerLimits hostMappedPointerLimits;
     DawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits;
+    DynamicBindingArrayLimits dynamicBindingArrayLimits;
 };
 
 // Populate |limits| with the default limits.

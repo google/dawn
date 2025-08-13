@@ -112,6 +112,10 @@ static constexpr uint32_t kTimestampQuantizationMask = 0xFFFF0000;
 static constexpr uint32_t kMaxDynamicUniformBuffersPerPipelineLayout = 16u;
 static constexpr uint32_t kMaxDynamicStorageBuffersPerPipelineLayout = 16u;
 
+// Default limit for dynamic binding arrays.
+// TODO(https://issues.chromium.org/issues/435317394): Update once the spec decides on a value.
+static constexpr uint32_t kMaxDynamicBindingArraySize = 50'000;
+
 }  // namespace dawn
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_

@@ -1645,6 +1645,15 @@
             {"name": "host mapped pointer alignment", "type": "uint32_t", "default": "limit u32 undefined"}
         ]
     },
+    "dynamic binding array limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "max dynamic binding array size", "type": "uint32_t", "default": "limit u32 undefined"}
+        ]
+    },
     "supported features": {
         "category": "structure",
         "out": true,
@@ -3930,7 +3939,8 @@
             {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]},
             {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
             {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
-            {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]}
+            {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
+            {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]}
         ]
     },
     "texture": {
