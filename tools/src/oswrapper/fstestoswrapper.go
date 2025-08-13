@@ -278,7 +278,36 @@ func (w FSTestFilesystemReaderWriter) Stat(name string) (os.FileInfo, error) {
 }
 
 func (w FSTestFilesystemReaderWriter) Walk(root string, fn filepath.WalkFunc) error {
-	panic("Walk() is not currently implemented in fstest wrapper")
+	fsRoot := w.CleanPath(root)
+
+	walkDirFn := func(path string, d fs.DirEntry, err error) error {
+		// The path from fs.WalkDir is relative to the FS root.
+		// We need to reconstruct the path that the user's filepath.WalkFunc expects.
+		// The contract for filepath.Walk is that the paths passed to the callback
+		// have the original `root` argument as a prefix.
+		var fullPath string
+		if path == fsRoot {
+			fullPath = root
+		} else {
+			// fs.WalkDir gives a path from the FS root. We need the part relative
+			// to the walk's root, and then join it with the original root string.
+			rel, errRel := filepath.Rel(fsRoot, path)
+			if errRel != nil {
+				return fn(path, nil, fmt.Errorf("internal error creating relative path: %w", errRel))
+			}
+			fullPath = filepath.Join(root, rel)
+		}
+
+		if err != nil {
+			return fn(fullPath, nil, err)
+		}
+		info, errInfo := d.Info()
+		if errInfo != nil {
+			return fn(fullPath, nil, errInfo)
+		}
+		return fn(fullPath, info, nil)
+	}
+	return fs.WalkDir(w.fs(), fsRoot, walkDirFn)
 }
 
 // --- FilesystemWriter implementation ---
