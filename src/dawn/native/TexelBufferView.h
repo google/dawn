@@ -1,4 +1,4 @@
-// Copyright 2017 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,70 +25,43 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_FORWARD_H_
-#define SRC_DAWN_NATIVE_FORWARD_H_
+#ifndef SRC_DAWN_NATIVE_TEXELBUFFERVIEW_H_
+#define SRC_DAWN_NATIVE_TEXELBUFFERVIEW_H_
 
-#include <cstdint>
-
-namespace dawn {
-template <typename T>
-class Ref;
-}  // namespace dawn
+#include "dawn/native/Forward.h"
+#include "dawn/native/ObjectBase.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
-enum class ObjectType : uint32_t;
+class TexelBufferViewBase : public ApiObjectBase {
+  public:
+    TexelBufferViewBase(BufferBase* buffer,
+                        const UnpackedPtr<TexelBufferViewDescriptor>& descriptor);
+    TexelBufferViewBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
+    ~TexelBufferViewBase() override;
 
-class AdapterBase;
-class BindGroupBase;
-class BindGroupLayoutBase;
-class BindGroupLayoutInternalBase;
-class BufferBase;
-class SharedBufferMemoryBase;
-class ComputePipelineBase;
-class CommandBufferBase;
-class CommandEncoder;
-class ComputePassEncoder;
-class ExternalTextureBase;
-class SharedTextureMemoryBase;
-class InstanceBase;
-class PhysicalDeviceBase;
-class PipelineBase;
-class PipelineCacheBase;
-class PipelineLayoutBase;
-class QuerySetBase;
-class QueueBase;
-class RenderBundleBase;
-class RenderBundleEncoder;
-class RenderPassEncoder;
-class RenderPipelineBase;
-class ResourceHeapBase;
-class SamplerBase;
-class SharedFenceBase;
-class Surface;
-class ShaderModuleBase;
-class SwapChainBase;
-class TextureBase;
-class TextureViewBase;
-class TexelBufferViewBase;
+    static Ref<TexelBufferViewBase> MakeError(DeviceBase* device, StringView label = {});
 
-class DeviceBase;
+    ObjectType GetType() const override;
 
-template <typename T>
-class PerStage;
+    BufferBase* GetBuffer() const;
+    wgpu::TextureFormat GetFormat() const;
+    uint64_t GetOffset() const;
+    uint64_t GetSize() const;
 
-struct Format;
+  protected:
+    void DestroyImpl() override;
 
-template <typename T>
-class UnpackedPtr;
+  private:
+    ApiObjectList* GetObjectTrackingList() override;
 
-// Aliases for frontend-only types.
-using CommandEncoderBase = CommandEncoder;
-using ComputePassEncoderBase = ComputePassEncoder;
-using RenderBundleEncoderBase = RenderBundleEncoder;
-using RenderPassEncoderBase = RenderPassEncoder;
-using SurfaceBase = Surface;
+    Ref<BufferBase> mBuffer;
+    wgpu::TextureFormat mFormat = wgpu::TextureFormat::Undefined;
+    uint64_t mOffset = 0;
+    uint64_t mSize = 0;
+};
 
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_FORWARD_H_
+#endif  // SRC_DAWN_NATIVE_TEXELBUFFERVIEW_H_

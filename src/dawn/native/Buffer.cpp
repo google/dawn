@@ -406,6 +406,8 @@ void BufferBase::DestroyImpl() {
             break;
     }
     mState.store(BufferState::Destroyed, std::memory_order::release);
+
+    mTexelBufferViews.Destroy();
 }
 
 // static
@@ -926,6 +928,10 @@ void BufferBase::DumpMemoryStatistics(MemoryDump* dump, const char* prefix) cons
                     GetAllocatedSize());
     dump->AddString(name.c_str(), "label", GetLabel());
     dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetInternalUsage()));
+}
+
+ApiObjectList* BufferBase::GetTexelBufferViewTrackingList() {
+    return &mTexelBufferViews;
 }
 
 }  // namespace dawn::native

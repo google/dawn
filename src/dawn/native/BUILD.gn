@@ -393,6 +393,8 @@ source_set("sources") {
     "SystemEvent.h",
     "SystemHandle.cpp",
     "SystemHandle.h",
+    "TexelBufferView.cpp",
+    "TexelBufferView.h",
     "Texture.cpp",
     "Texture.h",
     "TintUtils.cpp",

@@ -142,6 +142,8 @@ class BufferBase : public SharedResource {
     wgpu::BufferMapState APIGetMapState() const;
     uint64_t APIGetSize() const;
 
+    ApiObjectList* GetTexelBufferViewTrackingList();
+
   protected:
     BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor);
     BufferBase(DeviceBase* device, const BufferDescriptor* descriptor, ObjectBase::ErrorTag tag);
@@ -208,6 +210,10 @@ class BufferBase : public SharedResource {
     // unmapped. Because this buffer itself is directly mappable, it will not create another
     // staging buffer recursively.
     Ref<BufferBase> mStagingBuffer = nullptr;
+
+    // Track texel buffer views created from this buffer so they can be destroyed
+    // when the buffer is destroyed.
+    ApiObjectList mTexelBufferViews;
 
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
