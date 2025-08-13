@@ -28,6 +28,7 @@ package oswrapper_test
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -63,7 +64,7 @@ func getTestRoot() string {
 
 // --- Unittest specific helpers ---
 
-// unittestSetup is a helper for setting up the FSTestOSWrapper for a unittest.
+// unittestSetup is a helper for setting up the FSTestOSWrapper for an unittest.
 type unittestSetup struct {
 	initialFiles map[string]string
 	initialDirs  []string
@@ -208,6 +209,8 @@ func requireErrorsMatch(t *testing.T, realErr, testErr error) {
 			require.ErrorIs(t, testErr, os.ErrExist, "Real error is os.ErrExist, but test error is not")
 		} else if errors.Is(realErr, syscall.ENOTEMPTY) {
 			require.ErrorIs(t, testErr, syscall.ENOTEMPTY, "Real error is syscall.ENOTEMPTY, but test error is not")
+		} else if errors.Is(realErr, os.ErrClosed) {
+			require.ErrorIs(t, testErr, os.ErrClosed, "Real error is os.ErrClosed, but test error is not")
 		}
 		// For other errors (e.g., 'is a directory', 'directory not empty'),
 		// the exact error message can be OS-dependent. In these cases, just
@@ -244,6 +247,680 @@ func TestFSTestOSWrapper_CleanPath(t *testing.T) {
 }
 
 // --- FilesystemReader tests ---
+
+func TestFSTestOSWrapper_Open(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		expectedContent *string
+		expectedError
+	}{
+		{
+			name: "Open existing file",
+			path: filepath.Join(root, "file.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "file.txt"): "hello world",
+				},
+			},
+			expectedContent: stringPtr("hello world"),
+		},
+		{
+			name: "Open non-existent file",
+			path: filepath.Join(root, "nonexistent.txt"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Open a directory",
+			path: filepath.Join(root, "mydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+		},
+		{
+			name: "Parent path is a file",
+			path: filepath.Join(root, "file.txt", "another.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{
+					filepath.Join(root, "file.txt"): "i am a file",
+				},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			file, err := wrapper.Open(tc.path)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			require.NotNil(t, file)
+			defer file.Close()
+
+			if tc.expectedContent != nil {
+				content, err := io.ReadAll(file)
+				require.NoError(t, err)
+				require.Equal(t, *tc.expectedContent, string(content))
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_Open_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup matchesRealSetup
+		path  string // path to Open
+	}{
+		{
+			name: "Open existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "hello world",
+				},
+			}},
+			path: "file.txt",
+		},
+		{
+			name: "Error on non-existent file",
+			path: "nonexistent.txt",
+		},
+		{
+			name: "Open a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{
+					"mydir",
+				},
+			}},
+			path: "mydir",
+		},
+		{
+			name: "Error on parent path is a file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "i am a file",
+				},
+			}},
+			path: filepath.Join("file.txt", "another.txt"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			realFile, realErr := realFS.Open(filepath.Join(realRoot, tc.path))
+			if realErr == nil {
+				defer realFile.Close()
+			}
+			testFile, testErr := testFS.Open(tc.path)
+			if testErr == nil {
+				defer testFile.Close()
+			}
+
+			requireErrorsMatch(t, realErr, testErr)
+
+			if realErr == nil {
+				realInfo, err := realFile.Stat()
+				require.NoError(t, err)
+				testInfo, err := testFile.Stat()
+				require.NoError(t, err)
+
+				require.Equal(t, realInfo.IsDir(), testInfo.IsDir(), "IsDir mismatch for opened path")
+
+				if !realInfo.IsDir() {
+					realContent, err := io.ReadAll(realFile)
+					require.NoError(t, err)
+					testContent, err := io.ReadAll(testFile)
+					require.NoError(t, err)
+					require.Equal(t, realContent, testContent)
+				}
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_OpenFile(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		flag            int
+		action          func(t *testing.T, file oswrapper.File) // Action to perform on the opened file
+		expectedContent *string                                 // Expected content of the file *after* the action
+		expectedError
+	}{
+		{
+			name: "O_RDONLY - Read existing file",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "read me"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				content, err := io.ReadAll(file)
+				require.NoError(t, err)
+				require.Equal(t, "read me", string(content))
+			},
+		},
+		{
+			name: "O_RDONLY - Error on write",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "read only"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("fail"))
+				require.Error(t, err)
+			},
+			expectedContent: stringPtr("read only"),
+		},
+		{
+			name: "O_WRONLY - Write to existing file",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_WRONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "initial"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("newtial"),
+		},
+		{
+			name: "O_WRONLY - Error on read",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_WRONLY,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "write only"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := io.ReadAll(file)
+				require.Error(t, err)
+			},
+			expectedContent: stringPtr("write only"),
+		},
+		{
+			name: "O_RDWR - Read and Write",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "start"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				// This should not advance the write offset
+				content, err := io.ReadAll(file)
+				require.NoError(t, err)
+				require.Equal(t, "start", string(content))
+
+				// Seek to the beginning to overwrite
+				_, err = file.Seek(0, io.SeekStart)
+				require.NoError(t, err)
+
+				_, err = file.Write([]byte("finish"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("finish"),
+		},
+		{
+			name: "O_APPEND - Append to file",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_WRONLY | os.O_APPEND,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "first,"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("second"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("first,second"),
+		},
+		{
+			name: "O_CREATE - Create new file",
+			path: filepath.Join(root, "newfile.txt"),
+			flag: os.O_WRONLY | os.O_CREATE,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("created"),
+		},
+		{
+			name: "O_CREATE | O_EXCL - Fail if exists",
+			path: filepath.Join(root, "existing.txt"),
+			flag: os.O_WRONLY | os.O_CREATE | os.O_EXCL,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "existing.txt"): "..."},
+			},
+			expectedError: expectedError{
+				wantErrIs: os.ErrExist,
+			},
+		},
+		{
+			name: "O_TRUNC - Truncate existing file",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_WRONLY | os.O_TRUNC,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "to be truncated"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new data"))
+				require.NoError(t, err)
+			},
+			expectedContent: stringPtr("new data"),
+		},
+		{
+			name: "Error - Open non-existent for reading",
+			path: filepath.Join(root, "no.txt"),
+			flag: os.O_RDONLY,
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Error - Path is a directory",
+			path: filepath.Join(root, "mydir"),
+			flag: os.O_WRONLY,
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			file, err := wrapper.OpenFile(tc.path, tc.flag, 0666)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			require.NotNil(t, file)
+			defer file.Close()
+			if tc.action != nil {
+				tc.action(t, file)
+			}
+
+			// Close the file to ensure contents are flushed.
+			require.NoError(t, file.Close())
+
+			if tc.expectedContent != nil {
+				content, err := wrapper.ReadFile(tc.path)
+				require.NoError(t, err)
+				require.Equal(t, *tc.expectedContent, string(content))
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_OpenFile_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name   string
+		setup  matchesRealSetup
+		path   string
+		flag   int
+		action func(t *testing.T, file oswrapper.File)
+	}{
+		{
+			name: "O_RDONLY - Read existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "read me",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "O_RDONLY - Error on write",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "read only",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_RDONLY,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("fail"))
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "O_WRONLY - Write to existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "initial",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_WRONLY,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "O_WRONLY - Error on read",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "write only",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_WRONLY,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := io.ReadAll(file)
+				require.Error(t, err)
+			},
+		},
+		{
+			name: "O_RDWR - Read and Write",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "start",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_RDWR,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("finish"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "O_APPEND - Append to file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "first,",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_WRONLY | os.O_APPEND,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("second"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "O_CREATE - Create new file",
+			path: "newfile.txt",
+			flag: os.O_WRONLY | os.O_CREATE,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("created"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "O_CREATE | O_EXCL - Fail if exists",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"existing.txt": "...",
+				},
+			}},
+			path: "existing.txt",
+			flag: os.O_WRONLY | os.O_CREATE | os.O_EXCL,
+		},
+		{
+			name: "O_TRUNC - Truncate existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "to be truncated",
+				},
+			}},
+			path: "file.txt",
+			flag: os.O_WRONLY | os.O_TRUNC,
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("new data"))
+				require.NoError(t, err)
+			},
+		},
+		{
+			name: "Error - Open non-existent for reading",
+			path: "no.txt",
+			flag: os.O_RDONLY,
+		},
+		{
+			name: "Error - Path is a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{"mydir"},
+			}},
+			path: "mydir",
+			flag: os.O_WRONLY,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			// Execute on Real FS
+			realFile, realErr := realFS.OpenFile(filepath.Join(realRoot, tc.path), tc.flag, 0666)
+			if realErr == nil {
+				defer realFile.Close()
+				if tc.action != nil {
+					tc.action(t, realFile)
+				}
+				require.NoError(t, realFile.Close())
+			}
+
+			// Execute on Test FS
+			testFile, testErr := testFS.OpenFile(tc.path, tc.flag, 0666)
+			if testErr == nil {
+				defer testFile.Close()
+				if tc.action != nil {
+					tc.action(t, testFile)
+				}
+				require.NoError(t, testFile.Close())
+			}
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_ClosedFile(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		flag            int
+		action          func(t *testing.T, file oswrapper.File) // Action to perform on the closed file
+		expectedContent *string                                 // Expected content of the file *after* the action
+		expectedError
+	}{
+		{
+			name: "Read on closed file fails",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Read(make([]byte, 1))
+				require.Error(t, err)
+				require.ErrorIs(t, err, os.ErrClosed)
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Write on closed file fails",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Write([]byte("fail"))
+				require.Error(t, err)
+				require.ErrorIs(t, err, os.ErrClosed)
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Seek on closed file fails",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Seek(0, io.SeekStart)
+				require.Error(t, err)
+				require.ErrorIs(t, err, os.ErrClosed)
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Stat on closed file fails",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				_, err := file.Stat()
+				require.Error(t, err)
+				require.ErrorIs(t, err, os.ErrClosed)
+			},
+			expectedContent: stringPtr("content"),
+		},
+		{
+			name: "Closed on closed file fails",
+			path: filepath.Join(root, "file.txt"),
+			flag: os.O_RDWR,
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "content"},
+			},
+			action: func(t *testing.T, file oswrapper.File) {
+				err := file.Close()
+				require.Error(t, err)
+				require.ErrorIs(t, err, os.ErrClosed)
+			},
+			expectedContent: stringPtr("content"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			file, err := wrapper.OpenFile(tc.path, tc.flag, 0666)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			require.NotNil(t, file)
+
+			require.NoError(t, file.Close())
+			if tc.action != nil {
+				tc.action(t, file)
+			}
+
+			if tc.expectedContent != nil {
+				content, err := wrapper.ReadFile(tc.path)
+				require.NoError(t, err)
+				require.Equal(t, *tc.expectedContent, string(content))
+			}
+		})
+	}
+}
+
+func TestFSTestOSWrapper_ClosedFile_MatchesReal(t *testing.T) {
+	setup := matchesRealSetup{unittestSetup{
+		initialFiles: map[string]string{
+			"file.txt": "content",
+		},
+	}}
+	path := "file.txt"
+	flag := os.O_RDWR
+
+	tests := []struct {
+		name      string
+		operation func(t *testing.T, realFile, testFile oswrapper.File)
+	}{
+		{
+			name: "Read",
+			operation: func(t *testing.T, realFile, testFile oswrapper.File) {
+				_, realErr := realFile.Read(make([]byte, 1))
+				_, testErr := testFile.Read(make([]byte, 1))
+				requireErrorsMatch(t, realErr, testErr)
+			},
+		},
+		{
+			name: "Write",
+			operation: func(t *testing.T, realFile, testFile oswrapper.File) {
+				_, realErr := realFile.Write([]byte("fail"))
+				_, testErr := testFile.Write([]byte("fail"))
+				requireErrorsMatch(t, realErr, testErr)
+			},
+		},
+		{
+			name: "Seek",
+			operation: func(t *testing.T, realFile, testFile oswrapper.File) {
+				_, realErr := realFile.Seek(0, io.SeekStart)
+				_, testErr := testFile.Seek(0, io.SeekStart)
+				requireErrorsMatch(t, realErr, testErr)
+			},
+		},
+		{
+			name: "Stat",
+			operation: func(t *testing.T, realFile, testFile oswrapper.File) {
+				_, realErr := realFile.Stat()
+				_, testErr := testFile.Stat()
+				requireErrorsMatch(t, realErr, testErr)
+			},
+		},
+		{
+			name: "Close",
+			operation: func(t *testing.T, realFile, testFile oswrapper.File) {
+				realErr := realFile.Close()
+				testErr := testFile.Close()
+				requireErrorsMatch(t, realErr, testErr)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			realFile, realOpenErr := realFS.OpenFile(filepath.Join(realRoot, path), flag, 0666)
+			require.NoError(t, realOpenErr)
+			require.NoError(t, realFile.Close())
+
+			testFile, testOpenErr := testFS.OpenFile(path, flag, 0666)
+			require.NoError(t, testOpenErr)
+			require.NoError(t, testFile.Close())
+
+			tc.operation(t, realFile, testFile)
+			requireFileSystemsMatch(t, realRoot, testFS)
+		})
+	}
+}
 
 func TestFSTestOSWrapper_ReadFile(t *testing.T) {
 	root := getTestRoot()
@@ -583,6 +1260,190 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 }
 
 // --- FilesystemWriter tests ---
+
+func TestFSTestOSWrapper_Create(t *testing.T) {
+	root := getTestRoot()
+	tests := []struct {
+		name            string
+		setup           unittestSetup
+		path            string
+		contentToWrite  []byte
+		expectedContent *string
+		expectedError
+	}{
+		{
+			name:            "Create new file and write",
+			path:            filepath.Join(root, "newfile.txt"),
+			contentToWrite:  []byte("hello"),
+			expectedContent: stringPtr("hello"),
+		},
+		{
+			name: "Truncate existing file",
+			path: filepath.Join(root, "existing.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "existing.txt"): "old content"},
+			},
+			contentToWrite:  []byte("new"),
+			expectedContent: stringPtr("new"),
+		},
+		{
+			name: "Create file in existing subdirectory",
+			path: filepath.Join(root, "foo", "bar.txt"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "foo")},
+			},
+			contentToWrite:  []byte("sub content"),
+			expectedContent: stringPtr("sub content"),
+		},
+		{
+			name: "Create file in non-existent directory",
+			path: filepath.Join(root, "new", "dir", "file.txt"),
+			expectedError: expectedError{
+				wantErrIs: os.ErrNotExist,
+			},
+		},
+		{
+			name: "Path is a directory",
+			path: filepath.Join(root, "mydir"),
+			setup: unittestSetup{
+				initialDirs: []string{filepath.Join(root, "mydir")},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "is a directory",
+			},
+		},
+		{
+			name: "Parent path is a file",
+			path: filepath.Join(root, "file.txt", "another.txt"),
+			setup: unittestSetup{
+				initialFiles: map[string]string{filepath.Join(root, "file.txt"): "i am a file"},
+			},
+			expectedError: expectedError{
+				wantErrMsg: "not a directory",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			wrapper := tc.setup.setup(t)
+			file, err := wrapper.Create(tc.path)
+
+			if tc.expectedError.Check(t, err) {
+				return
+			}
+
+			// For success cases:
+			require.NotNil(t, file)
+			defer file.Close()
+
+			if len(tc.contentToWrite) > 0 {
+				n, err := file.Write(tc.contentToWrite)
+				require.NoError(t, err)
+				require.Equal(t, len(tc.contentToWrite), n)
+			}
+
+			// Close the file to ensure contents are flushed to the in-memory map.
+			require.NoError(t, file.Close())
+
+			if tc.expectedContent != nil {
+				content, err := wrapper.ReadFile(tc.path)
+				require.NoError(t, err)
+				require.Equal(t, *tc.expectedContent, string(content))
+			}
+		})
+	}
+}
+
+// TestFSTestOSWrapper_Create_MatchesReal tests that the behavior of FSTestOSWrapper.Create
+// matches the behavior of the real os.Create function.
+func TestFSTestOSWrapper_Create_MatchesReal(t *testing.T) {
+	tests := []struct {
+		name           string
+		setup          matchesRealSetup
+		path           string // path to Create
+		contentToWrite []byte
+	}{
+		{
+			name:           "Create new file",
+			path:           "newfile.txt",
+			contentToWrite: []byte("hello"),
+		},
+		{
+			name: "Truncate existing file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"existing.txt": "old content",
+				},
+			}},
+			path:           "existing.txt",
+			contentToWrite: []byte("new"),
+		},
+		{
+			name: "Create file in existing subdirectory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{
+					"foo",
+				},
+			}},
+			path:           filepath.Join("foo", "bar.txt"),
+			contentToWrite: []byte("sub content"),
+		},
+		{
+			name: "Error on non-existent directory",
+			path: filepath.Join("new", "dir", "file.txt"),
+		},
+		{
+			name: "Error on path is a directory",
+			setup: matchesRealSetup{unittestSetup{
+				initialDirs: []string{
+					"mydir",
+				},
+			}},
+			path: "mydir",
+		},
+		{
+			name: "Error on parent path is a file",
+			setup: matchesRealSetup{unittestSetup{
+				initialFiles: map[string]string{
+					"file.txt": "i am a file",
+				},
+			}},
+			path: filepath.Join("file.txt", "another.txt"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			realRoot, realFS, testFS := tc.setup.setup(t)
+			defer os.RemoveAll(realRoot)
+
+			realPath := filepath.Join(realRoot, tc.path)
+			realFile, realErr := realFS.Create(realPath)
+			if realErr == nil {
+				if len(tc.contentToWrite) > 0 {
+					_, err := realFile.Write(tc.contentToWrite)
+					require.NoError(t, err)
+				}
+				require.NoError(t, realFile.Close())
+			}
+
+			testFile, testErr := testFS.Create(tc.path)
+			if testErr == nil {
+				if len(tc.contentToWrite) > 0 {
+					_, err := testFile.Write(tc.contentToWrite)
+					require.NoError(t, err)
+				}
+				require.NoError(t, testFile.Close())
+			}
+
+			requireErrorsMatch(t, realErr, testErr)
+			if realErr == nil {
+				requireFileSystemsMatch(t, realRoot, testFS)
+			}
+		})
+	}
+}
 
 func TestFSTestOSWrapper_Mkdir(t *testing.T) {
 	root := getTestRoot()
