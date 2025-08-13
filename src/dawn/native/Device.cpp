@@ -1022,7 +1022,7 @@ std::vector<const Format*> DeviceBase::GetCompatibleViewFormats(const Format& fo
 }
 
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
-    const BindGroupLayoutDescriptor* descriptor,
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken) {
     BindGroupLayoutInternalBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
 
@@ -1048,7 +1048,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateEmptyBindGroupLayout()
     desc.entryCount = 0;
     desc.entries = nullptr;
 
-    return GetOrCreateBindGroupLayout(&desc);
+    return GetOrCreateBindGroupLayout(Unpack(&desc));
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreateEmptyPipelineLayout() {
@@ -1915,32 +1915,45 @@ QueueBase* DeviceBase::GetQueue() const {
 
 // Implementation details of object creation
 
-ResultOrError<Ref<BindGroupBase>> DeviceBase::CreateBindGroup(const BindGroupDescriptor* descriptor,
-                                                              UsageValidationMode mode) {
+ResultOrError<Ref<BindGroupBase>> DeviceBase::CreateBindGroup(
+    const BindGroupDescriptor* rawDescriptor,
+    UsageValidationMode mode) {
     DAWN_TRY(ValidateIsAlive());
+
+    UnpackedPtr<BindGroupDescriptor> descriptor;
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateBindGroupDescriptor(this, descriptor, mode),
-                         "validating %s against %s", descriptor, descriptor->layout);
+        DAWN_TRY_ASSIGN_CONTEXT(descriptor, ValidateBindGroupDescriptor(this, rawDescriptor, mode),
+                                "validating %s against %s", rawDescriptor, rawDescriptor->layout);
+    } else {
+        descriptor = Unpack(rawDescriptor);
     }
     return CreateBindGroupImpl(descriptor);
 }
 
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateBindGroupLayout(
-    const BindGroupLayoutDescriptor* descriptor,
+    const BindGroupLayoutDescriptor* rawDescriptor,
     bool allowInternalBinding) {
     DAWN_TRY(ValidateIsAlive());
+
+    UnpackedPtr<BindGroupLayoutDescriptor> descriptor;
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateBindGroupLayoutDescriptor(this, descriptor, allowInternalBinding),
-                         "validating %s", descriptor);
+        DAWN_TRY_ASSIGN_CONTEXT(
+            descriptor,
+            ValidateBindGroupLayoutDescriptor(this, rawDescriptor, allowInternalBinding),
+            "validating %s", rawDescriptor);
+    } else {
+        descriptor = Unpack(rawDescriptor);
     }
     return GetOrCreateBindGroupLayout(descriptor);
 }
 
 ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* rawDescriptor) {
     DAWN_TRY(ValidateIsAlive());
+
     UnpackedPtr<BufferDescriptor> descriptor;
     if (IsValidationEnabled()) {
-        DAWN_TRY_ASSIGN(descriptor, ValidateBufferDescriptor(this, rawDescriptor));
+        DAWN_TRY_ASSIGN_CONTEXT(descriptor, ValidateBufferDescriptor(this, rawDescriptor),
+                                "validating %s", rawDescriptor);
     } else {
         descriptor = Unpack(rawDescriptor);
     }

@@ -43,8 +43,9 @@
 namespace dawn::native::vulkan {
 
 // static
-ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
-                                                const BindGroupDescriptor* descriptor) {
+ResultOrError<Ref<BindGroup>> BindGroup::Create(
+    Device* device,
+    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     Ref<BindGroup> bindGroup;
     DAWN_TRY_ASSIGN(bindGroup, ToBackend(descriptor->layout->GetInternalBindGroupLayout())
                                    ->AllocateBindGroup(device, descriptor));
@@ -53,7 +54,7 @@ ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
 }
 
 BindGroup::BindGroup(Device* device,
-                     const BindGroupDescriptor* descriptor,
+                     const UnpackedPtr<BindGroupDescriptor>& descriptor,
                      DescriptorSetAllocation descriptorSetAllocation)
     : BindGroupBase(this, device, descriptor), mDescriptorSetAllocation(descriptorSetAllocation) {}
 

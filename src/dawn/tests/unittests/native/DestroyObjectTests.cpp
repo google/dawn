@@ -112,7 +112,7 @@ TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
     desc.entryCount = 0;
     desc.entries = nullptr;
 
-    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
 
     EXPECT_TRUE(bindGroupMock->IsAlive());
@@ -128,7 +128,7 @@ TEST_F(DestroyObjectTests, BindGroupImplicit) {
     desc.entryCount = 0;
     desc.entries = nullptr;
 
-    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+    Ref<BindGroupMock> bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupMock.Get(), DestroyImpl).Times(1);
     {
         ScopedRawPtrExpectation scoped(bindGroupMock.Get());
@@ -151,7 +151,7 @@ TEST_F(DestroyObjectTests, BindGroupLayoutNativeExplicit) {
     desc.entries = entries.data();
 
     Ref<BindGroupLayoutMock> bindGroupLayoutMock =
-        AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupLayoutMock.Get(), DestroyImpl).Times(1);
 
     EXPECT_TRUE(bindGroupLayoutMock->IsAlive());
@@ -171,7 +171,7 @@ TEST_F(DestroyObjectTests, BindGroupLayoutImplicit) {
     desc.entries = entries.data();
 
     Ref<BindGroupLayoutMock> bindGroupLayoutMock =
-        AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
     EXPECT_CALL(*bindGroupLayoutMock.Get(), DestroyImpl).Times(1);
     {
         ScopedRawPtrExpectation scoped(bindGroupLayoutMock.Get());
@@ -499,7 +499,7 @@ TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
         desc.entries = entries.data();
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
-        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
         EXPECT_CALL(*mDeviceMock, CreateBindGroupLayoutImpl).WillOnce(Return(bindGroupLayoutMock));
         bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
     }
@@ -823,7 +823,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         desc.entries = nullptr;
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
-        bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, &desc));
+        bindGroupMock = AcquireRef(new BindGroupMock(mDeviceMock, Unpack(&desc)));
         EXPECT_CALL(*mDeviceMock, CreateBindGroupImpl).WillOnce(Return(bindGroupMock));
         bindGroup = device.CreateBindGroup(ToCppAPI(&desc));
     }
@@ -841,7 +841,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         desc.entries = entries.data();
 
         ScopedRawPtrExpectation scoped(mDeviceMock);
-        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, &desc));
+        bindGroupLayoutMock = AcquireRef(new BindGroupLayoutMock(mDeviceMock, Unpack(&desc)));
         EXPECT_CALL(*mDeviceMock, CreateBindGroupLayoutImpl).WillOnce(Return(bindGroupLayoutMock));
         bindGroupLayout = device.CreateBindGroupLayout(ToCppAPI(&desc));
     }

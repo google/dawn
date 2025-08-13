@@ -43,16 +43,17 @@ class Device;
 class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
     static Ref<BindGroupLayout> Create(DeviceBase* device,
-                                       const BindGroupLayoutDescriptor* descriptor);
+                                       const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
-    Ref<BindGroup> AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
+    Ref<BindGroup> AllocateBindGroup(Device* device,
+                                     const UnpackedPtr<BindGroupDescriptor>& descriptor);
     void DeallocateBindGroup(BindGroup* bindGroup);
     void ReduceMemoryUsage() override;
 
     NSPRef<id<MTLArgumentEncoder>> GetArgumentEncoder() const;
 
   private:
-    BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
+    BindGroupLayout(DeviceBase* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayout() override;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;

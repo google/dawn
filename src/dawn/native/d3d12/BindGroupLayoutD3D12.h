@@ -53,10 +53,12 @@ static constexpr uint32_t kRegisterSpacePlaceholder =
 
 class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    static Ref<BindGroupLayout> Create(Device* device, const BindGroupLayoutDescriptor* descriptor);
+    static Ref<BindGroupLayout> Create(Device* device,
+                                       const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
-    ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
-                                                    const BindGroupDescriptor* descriptor);
+    ResultOrError<Ref<BindGroup>> AllocateBindGroup(
+        Device* device,
+        const UnpackedPtr<BindGroupDescriptor>& descriptor);
     void DeallocateBindGroup(BindGroup* bindGroup);
     void DeallocateDescriptor(CPUDescriptorHeapAllocation* viewAllocation);
     void ReduceMemoryUsage() override;
@@ -80,7 +82,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     const std::vector<D3D12_STATIC_SAMPLER_DESC>& GetStaticSamplers() const;
 
   private:
-    BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
+    BindGroupLayout(Device* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayout() override = default;
 
     // Contains the offset into the descriptor heap for the given resource view. Samplers and

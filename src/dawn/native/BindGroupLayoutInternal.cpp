@@ -321,9 +321,10 @@ MaybeError ValidateStaticSamplersWithTextureBindings(
 
 }  // anonymous namespace
 
-MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                             const BindGroupLayoutDescriptor* descriptorChain,
-                                             bool allowInternalBinding) {
+ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDescriptor(
+    DeviceBase* device,
+    const BindGroupLayoutDescriptor* descriptorChain,
+    bool allowInternalBinding) {
     UnpackedPtr<BindGroupLayoutDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(descriptorChain));
 
@@ -406,7 +407,7 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
         ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()),
         "validating binding counts");
 
-    return {};
+    return descriptor;
 }
 
 namespace {
@@ -576,11 +577,9 @@ bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindin
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     DeviceBase* device,
-    const BindGroupLayoutDescriptor* descriptorChain,
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor,
     ApiObjectBase::UntrackedByDeviceTag tag)
-    : ApiObjectBase(device, descriptorChain->label) {
-    UnpackedPtr<BindGroupLayoutDescriptor> descriptor = Unpack(descriptorChain);
-
+    : ApiObjectBase(device, descriptor->label) {
     ExpandedBindingInfo unpackedBindings = ConvertAndExpandBGLEntries(descriptor);
     mExternalTextureBindingExpansionMap =
         std::move(unpackedBindings.externalTextureBindingExpansions);
@@ -650,7 +649,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     DeviceBase* device,
-    const BindGroupLayoutDescriptor* descriptor)
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
     : BindGroupLayoutInternalBase(device, descriptor, kUntrackedByDevice) {
     GetObjectTrackingList()->Track(this);
 }

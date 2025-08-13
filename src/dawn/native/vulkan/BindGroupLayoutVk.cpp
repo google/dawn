@@ -105,7 +105,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
 // static
 ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
     Device* device,
-    const BindGroupLayoutDescriptor* descriptor) {
+    const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
     Ref<BindGroupLayout> bgl = AcquireRef(new BindGroupLayout(device, descriptor));
     DAWN_TRY(bgl->Initialize());
     return bgl;
@@ -238,7 +238,8 @@ MaybeError BindGroupLayout::Initialize() {
     return {};
 }
 
-BindGroupLayout::BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor)
+BindGroupLayout::BindGroupLayout(DeviceBase* device,
+                                 const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
     : BindGroupLayoutInternalBase(device, descriptor),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {}
 
@@ -268,7 +269,7 @@ VkDescriptorSetLayout BindGroupLayout::GetHandle() const {
 
 ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     Device* device,
-    const BindGroupDescriptor* descriptor) {
+    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     DescriptorSetAllocation descriptorSetAllocation;
     DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(this));
 

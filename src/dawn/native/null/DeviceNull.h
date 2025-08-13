@@ -144,9 +144,9 @@ class Device final : public DeviceBase {
     using DeviceBase::DeviceBase;
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
-        const BindGroupDescriptor* descriptor) override;
+        const UnpackedPtr<BindGroupDescriptor>& descriptor) override;
     ResultOrError<Ref<BindGroupLayoutInternalBase>> CreateBindGroupLayoutImpl(
-        const BindGroupLayoutDescriptor* descriptor) override;
+        const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) override;
     ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) override;
     Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
@@ -237,7 +237,7 @@ class BindGroupDataHolder {
 // the Null backend. This class, keeps the binding data in a separate allocation for simplicity.
 class BindGroup final : private BindGroupDataHolder, public BindGroupBase {
   public:
-    BindGroup(DeviceBase* device, const BindGroupDescriptor* descriptor);
+    BindGroup(DeviceBase* device, const UnpackedPtr<BindGroupDescriptor>& descriptor);
 
   private:
     ~BindGroup() override = default;
@@ -247,7 +247,7 @@ class BindGroup final : private BindGroupDataHolder, public BindGroupBase {
 
 class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
+    BindGroupLayout(DeviceBase* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
   private:
     ~BindGroupLayout() override = default;

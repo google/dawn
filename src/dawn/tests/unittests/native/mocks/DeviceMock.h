@@ -80,11 +80,11 @@ class DeviceMock : public DeviceBase {
 
     MOCK_METHOD(ResultOrError<Ref<BindGroupBase>>,
                 CreateBindGroupImpl,
-                (const BindGroupDescriptor*),
+                (const UnpackedPtr<BindGroupDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<BindGroupLayoutInternalBase>>,
                 CreateBindGroupLayoutImpl,
-                (const BindGroupLayoutDescriptor*),
+                (const UnpackedPtr<BindGroupLayoutDescriptor>&),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<BufferBase>>,
                 CreateBufferImpl,

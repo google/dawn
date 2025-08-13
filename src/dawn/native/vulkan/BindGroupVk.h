@@ -41,10 +41,10 @@ class Device;
 class BindGroup final : public BindGroupBase, public PlacementAllocated {
   public:
     static ResultOrError<Ref<BindGroup>> Create(Device* device,
-                                                const BindGroupDescriptor* descriptor);
+                                                const UnpackedPtr<BindGroupDescriptor>& descriptor);
 
     BindGroup(Device* device,
-              const BindGroupDescriptor* descriptor,
+              const UnpackedPtr<BindGroupDescriptor>& descriptor,
               DescriptorSetAllocation descriptorSetAllocation);
 
     VkDescriptorSet GetHandle() const;

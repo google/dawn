@@ -330,11 +330,15 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         desc.entries = entryVec.data();
         desc.entryCount = entryVec.size();
 
+        UnpackedPtr<BindGroupLayoutDescriptor> unpacked;
         if (device->IsValidationEnabled()) {
-            DAWN_TRY_CONTEXT(ValidateBindGroupLayoutDescriptor(device, &desc, allowInternalBinding),
-                             "validating %s", &desc);
+            DAWN_TRY_ASSIGN_CONTEXT(
+                unpacked, ValidateBindGroupLayoutDescriptor(device, &desc, allowInternalBinding),
+                "validating %s", &desc);
+        } else {
+            unpacked = Unpack(&desc);
         }
-        return device->GetOrCreateBindGroupLayout(&desc, pipelineCompatibilityToken);
+        return device->GetOrCreateBindGroupLayout(unpacked, pipelineCompatibilityToken);
     };
 
     DAWN_ASSERT(!stages.empty());

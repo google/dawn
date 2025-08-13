@@ -41,6 +41,7 @@
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/BindingInfo.h"
 #include "dawn/native/CachedObject.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
@@ -58,9 +59,10 @@ struct ExternalTextureBindingExpansion {
 using ExternalTextureBindingExpansionMap =
     absl::flat_hash_map<BindingNumber, ExternalTextureBindingExpansion>;
 
-MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
-                                             const BindGroupLayoutDescriptor* descriptor,
-                                             bool allowInternalBinding = false);
+ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDescriptor(
+    DeviceBase* device,
+    const BindGroupLayoutDescriptor* descriptor,
+    bool allowInternalBinding = false);
 
 // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
 // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
@@ -70,9 +72,10 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
                                     public ContentLessObjectCacheable<BindGroupLayoutInternalBase> {
   public:
     BindGroupLayoutInternalBase(DeviceBase* device,
-                                const BindGroupLayoutDescriptor* descriptor,
+                                const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor,
                                 ApiObjectBase::UntrackedByDeviceTag tag);
-    BindGroupLayoutInternalBase(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
+    BindGroupLayoutInternalBase(DeviceBase* device,
+                                const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayoutInternalBase() override;
 
     ObjectType GetType() const override;

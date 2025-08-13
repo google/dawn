@@ -62,15 +62,17 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo);
 // expensive syscall.
 class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    static ResultOrError<Ref<BindGroupLayout>> Create(Device* device,
-                                                      const BindGroupLayoutDescriptor* descriptor);
+    static ResultOrError<Ref<BindGroupLayout>> Create(
+        Device* device,
+        const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
-    BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
+    BindGroupLayout(DeviceBase* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
 
     VkDescriptorSetLayout GetHandle() const;
 
-    ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
-                                                    const BindGroupDescriptor* descriptor);
+    ResultOrError<Ref<BindGroup>> AllocateBindGroup(
+        Device* device,
+        const UnpackedPtr<BindGroupDescriptor>& descriptor);
     void DeallocateBindGroup(BindGroup* bindGroup);
     void DeallocateDescriptorSet(DescriptorSetAllocation* descriptorSetAllocation);
     void ReduceMemoryUsage() override;

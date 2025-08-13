@@ -43,14 +43,15 @@
 namespace dawn::native::d3d12 {
 
 // static
-ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
-                                                const BindGroupDescriptor* descriptor) {
+ResultOrError<Ref<BindGroup>> BindGroup::Create(
+    Device* device,
+    const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     return ToBackend(descriptor->layout->GetInternalBindGroupLayout())
         ->AllocateBindGroup(device, descriptor);
 }
 
 BindGroup::BindGroup(Device* device,
-                     const BindGroupDescriptor* descriptor,
+                     const UnpackedPtr<BindGroupDescriptor>& descriptor,
                      const CPUDescriptorHeapAllocation& viewAllocation)
     : BindGroupBase(this, device, descriptor), mCPUViewAllocation(viewAllocation) {}
 

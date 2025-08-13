@@ -45,10 +45,10 @@ class ShaderVisibleDescriptorAllocator;
 class BindGroup final : public BindGroupBase, public PlacementAllocated {
   public:
     static ResultOrError<Ref<BindGroup>> Create(Device* device,
-                                                const BindGroupDescriptor* descriptor);
+                                                const UnpackedPtr<BindGroupDescriptor>& descriptor);
 
     BindGroup(Device* device,
-              const BindGroupDescriptor* descriptor,
+              const UnpackedPtr<BindGroupDescriptor>& descriptor,
               const CPUDescriptorHeapAllocation& viewAllocation);
 
     // Returns true if the BindGroup was successfully populated.

@@ -38,7 +38,7 @@ namespace dawn::native {
 
 class BindGroupMock : private null::BindGroupDataHolder, public BindGroupBase {
   public:
-    BindGroupMock(DeviceMock* device, const BindGroupDescriptor* descriptor);
+    BindGroupMock(DeviceMock* device, const UnpackedPtr<BindGroupDescriptor>& descriptor);
     ~BindGroupMock() override;
 
     MOCK_METHOD(MaybeError, InitializeImpl, (), (override));

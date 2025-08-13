@@ -174,7 +174,7 @@ class DeviceBase : public ErrorSink,
     // instead of a backend Foo object. If the blueprint doesn't match an object in the
     // cache, then the descriptor is used to make a new object.
     ResultOrError<Ref<BindGroupLayoutBase>> GetOrCreateBindGroupLayout(
-        const BindGroupLayoutDescriptor* descriptor,
+        const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor,
         PipelineCompatibilityToken pipelineCompatibilityToken = kExplicitPCT);
 
     BindGroupLayoutBase* GetEmptyBindGroupLayout();
@@ -488,9 +488,9 @@ class DeviceBase : public ErrorSink,
     void WillDropLastExternalRef() override;
 
     virtual ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
-        const BindGroupDescriptor* descriptor) = 0;
+        const UnpackedPtr<BindGroupDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<BindGroupLayoutInternalBase>> CreateBindGroupLayoutImpl(
-        const BindGroupLayoutDescriptor* descriptor) = 0;
+        const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
         const UnpackedPtr<BufferDescriptor>& descriptor) = 0;
     virtual ResultOrError<Ref<ExternalTextureBase>> CreateExternalTextureImpl(
