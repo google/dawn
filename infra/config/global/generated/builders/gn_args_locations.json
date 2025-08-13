@@ -3,6 +3,7 @@
     "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json"
   },
   "try": {
-    "dawn-cq-linux-x64-sws-rel": "try/dawn-cq-linux-x64-sws-rel/gn-args.json"
+    "dawn-cq-linux-x64-rel": "try/dawn-cq-linux-x64-rel/gn-args.json",
+    "dawn-try-linux-x64-sws-rel": "try/dawn-try-linux-x64-sws-rel/gn-args.json"
   }
 }

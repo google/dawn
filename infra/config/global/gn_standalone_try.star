@@ -39,24 +39,42 @@ try_.defaults.set(
     builderless = True,
     build_numbers = True,
     list_view = "try",
+    cq_group = "Dawn-CQ",
     contact_team_email = "chrome-gpu-infra@google.com",
     service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     siso_project = siso.project.DEFAULT_UNTRUSTED,
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
 )
 
-def dawn_linux_builder(*, name, **kwargs):
+# CQ Builders
+
+try_.builder(
+    name = "dawn-cq-linux-x64-rel",
+    description_html = "Tests Dawn on Linux/x64 on multiple hardware configs. Blocks CL submission",
+    max_concurrent_builds = 3,
+    os = os.LINUX_DEFAULT,
+    ssd = None,
+    mirrors = [
+        "ci/dawn-linux-x64-builder-rel",
+        "ci/dawn-linux-x64-sws-rel",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-rel",
+)
+
+# Manual trybots
+
+def dawn_linux_manual_builder(*, name, **kwargs):
     return try_.builder(
         name = name,
-        max_concurrent_builds = 5,
+        max_concurrent_builds = 1,
         os = os.LINUX_DEFAULT,
         ssd = None,
         **kwargs
     )
 
-dawn_linux_builder(
-    name = "dawn-cq-linux-x64-sws-rel",
-    description_html = "Tests Dawn on Linux/x64 with SwiftShader",
+dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-sws-rel",
+    description_html = "Tests Dawn on Linux/x64 with SwiftShader. Manual only.",
     mirrors = [
         "ci/dawn-linux-x64-builder-rel",
         "ci/dawn-linux-x64-sws-rel",
