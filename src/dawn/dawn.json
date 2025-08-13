@@ -343,13 +343,22 @@
             {"name": "texture view", "type": "texture view", "optional": true}
         ]
     },
+    "bind group dynamic binding array": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["bind group descriptor"],
+        "members": [
+            {"name": "dynamic array size", "type": "uint32_t", "default": 0}
+        ]
+    },
     "bind group descriptor": {
         "category": "structure",
         "extensible": "in",
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "layout", "type": "bind group layout"},
-            {"name": "entry count", "type": "size_t"},
+            {"name": "entry count", "type": "size_t", "default": 0},
             {"name": "entries", "type": "bind group entry", "annotation": "const*", "length": "entry count"}
         ]
     },
@@ -3940,7 +3949,8 @@
             {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
             {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
             {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
-            {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]}
+            {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]},
+            {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]}
         ]
     },
     "texture": {
