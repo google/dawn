@@ -144,6 +144,14 @@ TEST_F(IR_FunctionTest, CloneWithExits) {
     EXPECT_EQ(new_f, new_f->Block()->Front()->As<Return>()->Func());
 }
 
+TEST_F(IR_FunctionTest, CloneWithoutName) {
+    auto* f = b.Function(mod.Types().void_());
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto* new_f = clone_ctx.Clone(f);
+    EXPECT_FALSE(mod.NameOf(new_f).IsValid());
+}
+
 TEST_F(IR_FunctionTest, Parameters) {
     auto* f = b.Function("my_func", mod.Types().void_());
 
