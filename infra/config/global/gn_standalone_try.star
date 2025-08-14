@@ -46,6 +46,18 @@ try_.defaults.set(
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
 )
 
+# These are commonly touched locations which do not have relevant testing on CQ
+# builders. `gn analyze` should avoid compiling/testing for CLs that only touch
+# these locations, but we can avoid starting a build entirely to save a bit of
+# resources.
+LOCATIONS_EXCLUDED_FROM_STANDALONE_CQ = [
+    # Go code.
+    cq.location_filter(exclude = True, path_regexp = "tools/src/.+"),
+    # WebGPU CTS expectation files, which are only relevant for Chromium.
+    cq.location_filter(exclude = True, path_regexp = "webgpu-cts/compat-expectations.txt"),
+    cq.location_filter(exclude = True, path_regexp = "webgpu-cts/expectations.txt"),
+]
+
 # CQ Builders
 
 try_.builder(
@@ -59,6 +71,9 @@ try_.builder(
         "ci/dawn-linux-x64-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x64-builder-rel",
+    tryjob = try_.job(
+        location_filters = LOCATIONS_EXCLUDED_FROM_STANDALONE_CQ,
+    ),
 )
 
 # Manual trybots
