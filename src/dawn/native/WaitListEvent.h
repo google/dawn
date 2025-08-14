@@ -73,7 +73,11 @@ class WaitListEvent : public RefCounted {
 template <typename It>
 bool WaitListEvent::WaitAny(It eventAndReadyStateBegin,
                             It eventAndReadyStateEnd,
-                            Nanoseconds timeout) {
+                            Nanoseconds timeout)
+    // This method conditionally locks a set of events, and then unlocks them.
+    // The thread-safety analysis does not handle conditional locking, so
+    // we turn off the analysis to avoid spurious warnings.
+    DAWN_NO_THREAD_SAFETY_ANALYSIS {
     static_assert(std::is_base_of_v<std::random_access_iterator_tag,
                                     typename std::iterator_traits<It>::iterator_category>);
     static_assert(std::is_same_v<typename std::iterator_traits<It>::value_type,
