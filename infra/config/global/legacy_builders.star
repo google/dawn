@@ -33,6 +33,7 @@ appropriately named files.
 """
 
 load("//constants.star", "siso")
+load("//location_filters.star", "exclusion_filters")
 load("//project.star", "ACTIVE_MILESTONES")
 
 os_category = struct(
@@ -67,26 +68,6 @@ def get_dimension(os):
         return "Windows-10"
 
     return "Invalid Dimension"
-
-# File exclusion filters meant for use on cmake and msvc trybots since these
-# files do not affect compilation for either.
-cmake_msvc_file_exclusions = [
-    # WebGPU CTS expectations, only affects builders that run WebGPU CTS.
-    cq.location_filter(
-        path_regexp = "webgpu-cts/[^/]*expectations.txt",
-        exclude = True,
-    ),
-    # Tools written in Go.
-    cq.location_filter(
-        path_regexp = "tools/src/.+",
-        exclude = True,
-    ),
-    # Go dependencies.
-    cq.location_filter(
-        path_regexp = "go\\.(mod|sum)",
-        exclude = True,
-    ),
-]
 
 luci.notifier(
     name = "gardener-notifier",
@@ -338,7 +319,7 @@ def dawn_standalone_builder(name, clang, debug, cpu, fuzzer):
 
         additional_filters = []
         if config == "msvc":
-            additional_filters = cmake_msvc_file_exclusions
+            additional_filters = exclusion_filters.gn_msvc_cq_file_exclusions
 
         luci.cq_tryjob_verifier(
             cq_group = "Dawn-CQ",
@@ -422,13 +403,7 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
             experiment_percentage = 100 if experimental else None,
             cq_group = "Dawn-CQ",
             builder = "dawn:try/" + name,
-            location_filters = [
-                cq.location_filter(path_regexp = ".*"),
-                cq.location_filter(
-                    path_regexp = "\\.github/.+",
-                    exclude = True,
-                ),
-            ] + cmake_msvc_file_exclusions,
+            location_filters = exclusion_filters.cmake_cq_file_exclusions,
         )
 
     # These builders run fine unbranched on branch CLs, so add them to the
