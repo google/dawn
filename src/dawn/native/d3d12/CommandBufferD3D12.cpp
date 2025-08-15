@@ -67,6 +67,8 @@ DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
             return DXGI_FORMAT_R16_UINT;
         case wgpu::IndexFormat::Uint32:
             return DXGI_FORMAT_R32_UINT;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -76,6 +78,8 @@ D3D12_QUERY_TYPE D3D12QueryType(wgpu::QueryType type) {
             return D3D12_QUERY_TYPE_BINARY_OCCLUSION;
         case wgpu::QueryType::Timestamp:
             return D3D12_QUERY_TYPE_TIMESTAMP;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 

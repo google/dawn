@@ -53,6 +53,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 case wgpu::BufferBindingType::BindingNotUsed:
                 case wgpu::BufferBindingType::Undefined:
+                default:
                     DAWN_UNREACHABLE();
             }
         },
@@ -74,6 +75,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 case wgpu::StorageTextureAccess::BindingNotUsed:
                 case wgpu::StorageTextureAccess::Undefined:
+                default:
                     DAWN_UNREACHABLE();
             }
         },

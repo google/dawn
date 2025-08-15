@@ -131,14 +131,15 @@ D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::TextureUsage usage, const Format& 
 
 D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension) {
     switch (dimension) {
-        case wgpu::TextureDimension::Undefined:
-            DAWN_UNREACHABLE();
         case wgpu::TextureDimension::e1D:
             return D3D12_RESOURCE_DIMENSION_TEXTURE1D;
         case wgpu::TextureDimension::e2D:
             return D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         case wgpu::TextureDimension::e3D:
             return D3D12_RESOURCE_DIMENSION_TEXTURE3D;
+        case wgpu::TextureDimension::Undefined:
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -170,6 +171,7 @@ D3D12_SHADER_COMPONENT_MAPPING D3D12ComponentSwizzle(wgpu::ComponentSwizzle swiz
             return D3D12_SHADER_COMPONENT_MAPPING_FROM_MEMORY_COMPONENT_3;
 
         case wgpu::ComponentSwizzle::Undefined:
+        default:
             DAWN_UNREACHABLE();
     }
 }

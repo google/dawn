@@ -301,6 +301,8 @@ D3D12_INDEX_BUFFER_STRIP_CUT_VALUE ComputeIndexBufferStripCutValue(
             return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
         case wgpu::IndexFormat::Undefined:
             return D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 

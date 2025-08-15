@@ -72,6 +72,7 @@ D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BufferBindingType type) {
             return D3D12_ROOT_PARAMETER_TYPE_SRV;
         case wgpu::BufferBindingType::BindingNotUsed:
         case wgpu::BufferBindingType::Undefined:
+        default:
             DAWN_UNREACHABLE();
     }
 }

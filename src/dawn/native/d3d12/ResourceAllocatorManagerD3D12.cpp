@@ -80,6 +80,7 @@ D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
         case ResourceHeapKind::Default_OnlyRenderableOrDepthTextures:
             return D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
         case EnumCount:
+        default:
             DAWN_UNREACHABLE();
     }
 }

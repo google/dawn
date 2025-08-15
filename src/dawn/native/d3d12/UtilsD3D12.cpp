@@ -146,6 +146,7 @@ D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func) {
             return D3D12_COMPARISON_FUNC_ALWAYS;
 
         case wgpu::CompareFunction::Undefined:
+        default:
             DAWN_UNREACHABLE();
     }
 }
@@ -448,6 +449,7 @@ D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
         case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
             return D3D12_HEAP_TYPE_CUSTOM;
         case EnumCount:
+        default:
             DAWN_UNREACHABLE();
     }
 }

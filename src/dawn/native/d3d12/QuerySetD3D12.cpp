@@ -42,6 +42,8 @@ D3D12_QUERY_HEAP_TYPE D3D12QueryHeapType(wgpu::QueryType type) {
             return D3D12_QUERY_HEAP_TYPE_OCCLUSION;
         case wgpu::QueryType::Timestamp:
             return D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+        default:
+            DAWN_UNREACHABLE();
     }
 }
 }  // anonymous namespace
