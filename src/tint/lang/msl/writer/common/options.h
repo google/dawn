@@ -82,14 +82,14 @@ struct Bindings {
 /// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
 struct ArrayLengthOptions {
     /// The MSL binding point to use to generate a uniform buffer from which to read buffer sizes.
-    std::optional<uint32_t> ubo_binding;
+    std::optional<uint32_t> ubo_binding{};
 
     /// The offset in immediate block for buffer sizes.
-    std::optional<uint32_t> buffer_sizes_offset;
+    std::optional<uint32_t> buffer_sizes_offset{};
 
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
     /// into the uniform buffer where the length of the buffer is stored.
-    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
+    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index{};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthOptions, ubo_binding, buffer_sizes_offset, bindpoint_to_size_index);
