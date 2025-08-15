@@ -30,7 +30,7 @@
 load("@chromium-luci//builders.star", "os")
 load("@chromium-luci//try.star", "try_")
 load("//constants.star", "siso")
-load("//location_filters.star", "exclusion_filters")
+# load("//location_filters.star", "exclusion_filters")
 
 try_.defaults.set(
     executable = "recipe:dawn/gn_v2_trybot",
@@ -60,9 +60,11 @@ try_.builder(
         "ci/dawn-linux-x64-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x64-builder-rel",
-    tryjob = try_.job(
-        location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
-    ),
+    # TODO(crbug.com/385317083): Re-add this to the CQ after the recipe is
+    # fixed to properly surface failures and the CI builder is green.
+    # tryjob = try_.job(
+    #     location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
+    # ),
 )
 
 # Manual trybots
