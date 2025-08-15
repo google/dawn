@@ -215,7 +215,6 @@ func (c *cmd) processFlags(fsReaderWriter oswrapper.FilesystemReaderWriter) erro
 	}
 
 	c.flags.dawn.SetOptions(node.Options{
-		BinDir:            c.flags.bin,
 		Backend:           c.flags.backend,
 		Adapter:           c.flags.adapterName,
 		Validate:          c.flags.validate,

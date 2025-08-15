@@ -75,7 +75,6 @@ func (f *Flags) GlobListFlags(prefix string, delimiter string) {
 
 // Options that can be passed to Flags.SetOptions
 type Options struct {
-	BinDir            string
 	Backend           string
 	Adapter           string
 	Validate          bool
@@ -87,9 +86,6 @@ type Options struct {
 }
 
 func (f *Flags) SetOptions(opts Options) error {
-	// For Windows, set the DLL directory to bin so that Dawn loads dxcompiler.dll from there.
-	f.Set("dlldir=" + opts.BinDir)
-
 	// Forward the backend and adapter to use, if specified.
 	if opts.Backend != "" && opts.Backend != "default" {
 		fmt.Println("Forcing backend to", opts.Backend)

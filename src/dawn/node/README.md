@@ -147,14 +147,13 @@ The `--flag` parameter must be passed in multiple times, once for each flag begi
 
 - `backend=<null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles>`
 - `adapter=<name-of-adapter>` - specifies the adapter to use. May be a substring of the full adapter name. Pass an invalid adapter name and `--verbose` to see all possible adapters.
-- `dlldir=<path>` - used to add an extra DLL search path on Windows, primarily to load the right d3dcompiler_47.dll
 - `enable-dawn-features=<features>` - enable [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/native/Toggles.cpp), e.g. `dump_shaders`
 - `disable-dawn-features=<features>` - disable [Dawn toggles](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/native/Toggles.cpp)
 
-For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout, and to dump shader output, we could run the following using Git Bash:
+For example, to dump shader output, we could run the following using Git Bash:
 
 ```sh
-./tools/run run-cts --verbose --bin=/c/src/dawn/out/active --cts=/c/src/webgpu-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
+./tools/run run-cts --verbose --bin=/c/src/dawn/out/active --cts=/c/src/webgpu-cts --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
 ```
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
