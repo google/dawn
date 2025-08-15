@@ -35,12 +35,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"sync/atomic"
 
+	"dawn.googlesource.com/dawn/tools/src/execwrapper"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
@@ -83,6 +83,7 @@ type cmdConfig struct {
 	out          string
 	numProcesses int
 	osWrapper    oswrapper.OSWrapper
+	execWrapper  execwrapper.ExecWrapper
 }
 
 func showUsage() {
@@ -104,6 +105,7 @@ usage:
 func main() {
 	c := cmdConfig{}
 	c.osWrapper = oswrapper.GetRealOSWrapper()
+	c.execWrapper = execwrapper.CreateRealExecWrapper()
 
 	flag.Usage = showUsage
 
@@ -325,7 +327,7 @@ func checkFuzzer(t *taskConfig) error {
 				})
 			}
 
-			if out, err := exec.Command(t.fuzzer, file).CombinedOutput(); err != nil {
+			if out, err := t.execWrapper.Command(t.fuzzer, file).RunWithCombinedOutput(); err != nil {
 				_, fuzzer := filepath.Split(t.fuzzer)
 				return fmt.Errorf("fuzzer '%s' failed to process file '%s' with error: %w\nOutput:\n%s", fuzzer, file, err, string(out))
 			}
@@ -360,14 +362,15 @@ func runFuzzer(t *taskConfig) error {
 	errs := make(chan error, t.numProcesses)
 	for i := 0; i < t.numProcesses; i++ {
 		go func() {
-			cmd := exec.CommandContext(ctx, t.fuzzer, args...)
 			out := bytes.Buffer{}
-			cmd.Stdout = &out
-			cmd.Stderr = &out
+			var stdout, stderr io.Writer = &out, &out
 			if t.verbose || t.dump {
-				cmd.Stdout = io.MultiWriter(&out, os.Stdout)
-				cmd.Stderr = io.MultiWriter(&out, os.Stderr)
+				stdout = io.MultiWriter(&out, os.Stdout)
+				stderr = io.MultiWriter(&out, os.Stderr)
 			}
+
+			cmd := t.execWrapper.CommandContext(ctx, t.fuzzer, args...).WithStdout(stdout).WithStderr(stderr)
+
 			if err := cmd.Run(); err != nil {
 				if ctxErr := ctx.Err(); ctxErr != nil {
 					errs <- ctxErr
@@ -452,14 +455,14 @@ func runCorpusGeneratorIr(t *taskConfig) error {
 	}
 	fmt.Println("running assembler")
 
-	cmd := exec.CommandContext(ctx, t.assembler, args...)
 	out := &bytes.Buffer{}
-	cmd.Stdout = out
-	cmd.Stderr = out
+	var stdout, stderr io.Writer = out, out
 	if t.verbose {
-		cmd.Stdout = io.MultiWriter(out, os.Stdout)
-		cmd.Stderr = io.MultiWriter(out, os.Stderr)
+		stdout = io.MultiWriter(out, os.Stdout)
+		stderr = io.MultiWriter(out, os.Stderr)
 	}
+
+	cmd := t.execWrapper.CommandContext(ctx, t.assembler, args...).WithStdout(stdout).WithStderr(stderr)
 
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to run IR corpus assembler.\n  command: %s\n  error: %w\n  output:\n%s", cmdStr, err, out.String())
