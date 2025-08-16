@@ -1017,7 +1017,6 @@ crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:
 crbug.com/0000 [ intel linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType="nonFiltSamp";entry={"sampler":{"type":"non-filtering"}};awaitLost=false [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType="nonFiltSamp";entry={"sampler":{"type":"non-filtering"}};awaitLost=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroupLayout:entry={"buffer":{"type":"storage"}};awaitLost=false [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="offscreen";contextType="webgl2";awaitLost=false [ Failure ]
 crbug.com/0000 [ compat-min-es31 linux nvidia nvidia_ge_535.183.01 ] webgpu:api,validation,state,device_lost,destroy:queue,copyExternalImageToTexture,canvas:canvasType="onscreen";contextType="webgl";awaitLost=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec2u";indexType="u32" [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,access,array,index:runtime_sized:elementType="vec3f";indexType="i32" [ Failure ]
