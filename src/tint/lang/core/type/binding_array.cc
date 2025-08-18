@@ -55,21 +55,36 @@ bool BindingArray::Equals(const UniqueNode& other) const {
 
 std::string BindingArray::FriendlyName() const {
     StringStream out;
-    out << "binding_array<" << element_->FriendlyName() << ", " << count_->FriendlyName() << ">";
+    out << "binding_array<" << element_->FriendlyName();
+
+    auto count_str = count_->FriendlyName();
+    if (!count_str.empty()) {
+        out << ", " << count_str;
+    }
+    out << ">";
+
     return out.str();
 }
 
-TypeAndCount BindingArray::Elements([[maybe_unused]] const Type*, [[maybe_unused]] uint32_t) const {
-    return {element_, count_->As<ConstantArrayCount>()->value};
+TypeAndCount BindingArray::Elements([[maybe_unused]] const Type*, uint32_t count_if_invalid) const {
+    uint32_t n = count_if_invalid;
+    if (auto* const_count = count_->As<ConstantArrayCount>()) {
+        n = const_count->value;
+    }
+    return {element_, n};
 }
 
 const Type* BindingArray::Element(uint32_t index) const {
-    return index < count_->As<ConstantArrayCount>()->value ? element_ : nullptr;
+    if (auto* count = count_->As<ConstantArrayCount>()) {
+        return index < count->value ? element_ : nullptr;
+    }
+    return element_;
 }
 
 BindingArray* BindingArray::Clone(CloneContext& ctx) const {
     auto* elem_ty = element_->Clone(ctx);
-    return ctx.dst.mgr->Get<BindingArray>(elem_ty, count_);
+    auto* count = count_->Clone(ctx);
+    return ctx.dst.mgr->Get<BindingArray>(elem_ty, count);
 }
 
 }  // namespace tint::core::type

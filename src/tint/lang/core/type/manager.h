@@ -565,6 +565,10 @@ class Manager final {
     /// @returns the array type
     const core::type::BindingArray* binding_array(const core::type::Type* elem_ty, uint32_t count);
 
+    /// @param elem_ty the array element type
+    /// @returns the array type
+    const core::type::BindingArray* runtime_binding_array(const core::type::Type* elem_ty);
+
     /// @param address_space the address space
     /// @param subtype the pointer subtype
     /// @param access the access settings
