@@ -73,6 +73,7 @@ struct VulkanDeviceKnobs {
     VkPhysicalDeviceShaderSubgroupExtendedTypesFeaturesKHR shaderSubgroupExtendedTypes;
     VkPhysicalDeviceVulkanMemoryModelFeatures vulkanMemoryModelFeatures;
     VkPhysicalDeviceCooperativeMatrixFeaturesKHR cooperativeMatrixFeatures;
+    VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures;
 
     bool HasExt(DeviceExt ext) const;
     DeviceExtSet extensions;
@@ -88,6 +89,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceSubgroupProperties subgroupProperties;
     VkPhysicalDeviceExternalMemoryHostPropertiesEXT externalMemoryHostProperties;
     VkPhysicalDeviceCooperativeMatrixPropertiesKHR cooperativeMatrixProperties;
+    VkPhysicalDeviceDescriptorIndexingProperties descriptorIndexingProperties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
     std::vector<VkCooperativeMatrixPropertiesKHR> cooperativeMatrixConfigs;

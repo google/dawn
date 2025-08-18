@@ -611,6 +611,54 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     EnableFeature(Feature::TextureComponentSwizzle);
+
+    // Enable support for bindless if WebGPU semantics are supported:
+    //  - We can update descriptor sets while pending.
+    //  - Descriptor set may have variable size and be partially bound.
+    //  - We can declare runtime-sized arrays of resources in SPIRV.
+    //  - Limits are large enough for WebGPU.
+    // Bindless support for WebGPU requires checking a LOT of things, use runtimeDescriptorArray as
+    // good proxy to whether bindless will be available, and do the proper check using separate
+    // boolean variables instead of a giant if-statement. runtimeDescriptorArray checks if we can
+    // declare runtime-sized arrays of resources in SPIRV.
+    if (mDeviceInfo.HasExt(DeviceExt::DescriptorIndexing) &&
+        mDeviceInfo.descriptorIndexingFeatures.runtimeDescriptorArray) {
+        const auto& vkFeatures = mDeviceInfo.descriptorIndexingFeatures;
+        const auto& vkProperties = mDeviceInfo.descriptorIndexingProperties;
+
+        // All shader resource types support update-after-bind, except uniform buffers and input
+        // attachments that are not supported in WebGPU"s bindless.
+        bool hasUpdateAfterBind = vkFeatures.descriptorBindingSampledImageUpdateAfterBind &&
+                                  vkFeatures.descriptorBindingStorageImageUpdateAfterBind &&
+                                  vkFeatures.descriptorBindingStorageBufferUpdateAfterBind &&
+                                  vkFeatures.descriptorBindingStorageTexelBufferUpdateAfterBind;
+
+        // We can modify descriptor sets after binding them, they can have variable size and be
+        // sparse.
+        bool hasOtherFeatures = vkFeatures.descriptorBindingUpdateUnusedWhilePending &&
+                                vkFeatures.descriptorBindingPartiallyBound &&
+                                vkFeatures.descriptorBindingVariableDescriptorCount;
+
+        // We need to check a dozen Vulkan limits against the WebGPU limit for dynamic binding
+        // arrays.
+        constexpr uint32_t kRequiredLimit =
+            kMaxDynamicBindingArraySize + kReservedDynamicBindingArrayEntries;
+        bool hasLimit =
+            vkProperties.maxPerStageDescriptorUpdateAfterBindSamplers >= kRequiredLimit &&
+            vkProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers >= kRequiredLimit &&
+            vkProperties.maxPerStageDescriptorUpdateAfterBindSampledImages >= kRequiredLimit &&
+            vkProperties.maxPerStageDescriptorUpdateAfterBindStorageImages >= kRequiredLimit &&
+            vkProperties.maxPerStageUpdateAfterBindResources >= kRequiredLimit &&
+            vkProperties.maxDescriptorSetUpdateAfterBindSamplers >= kRequiredLimit &&
+            vkProperties.maxDescriptorSetUpdateAfterBindStorageBuffers >= kRequiredLimit &&
+            vkProperties.maxDescriptorSetUpdateAfterBindSampledImages >= kRequiredLimit &&
+            vkProperties.maxDescriptorSetUpdateAfterBindStorageImages >= kRequiredLimit &&
+            vkProperties.maxUpdateAfterBindDescriptorsInAllPools >= kRequiredLimit;
+
+        if (hasUpdateAfterBind && hasOtherFeatures && hasLimit) {
+            EnableFeature(Feature::ChromiumExperimentalBindless);
+        }
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -816,6 +864,25 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
             kMinimumHostMappedPointerAlignment) {
         limits->hostMappedPointerLimits.hostMappedPointerAlignment =
             kMinimumHostMappedPointerAlignment;
+    }
+
+    // Compute the limits for bindless, it requires checking a dozen vulkan limits.
+    if (mDeviceInfo.HasExt(DeviceExt::DescriptorIndexing)) {
+        const auto& vkProperties = mDeviceInfo.descriptorIndexingProperties;
+        uint32_t vkMax = 0;
+        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindSamplers);
+        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindStorageBuffers);
+        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindSampledImages);
+        vkMax = std::max(vkMax, vkProperties.maxPerStageDescriptorUpdateAfterBindStorageImages);
+        vkMax = std::max(vkMax, vkProperties.maxPerStageUpdateAfterBindResources);
+        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSamplers);
+        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindStorageBuffers);
+        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindSampledImages);
+        vkMax = std::max(vkMax, vkProperties.maxDescriptorSetUpdateAfterBindStorageImages);
+        vkMax = std::max(vkMax, vkProperties.maxUpdateAfterBindDescriptorsInAllPools);
+
+        limits->dynamicBindingArrayLimits.maxDynamicBindingArraySize =
+            vkMax - kReservedDynamicBindingArrayEntries;
     }
 
     return {};

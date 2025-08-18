@@ -603,6 +603,11 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         }
     }
 
+    if (HasFeature(Feature::ChromiumExperimentalBindless)) {
+        usedKnobs.descriptorIndexingFeatures = mDeviceInfo.descriptorIndexingFeatures;
+        featuresChain.Add(&usedKnobs.descriptorIndexingFeatures);
+    }
+
     // Find a universal queue family
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.

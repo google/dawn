@@ -111,6 +111,7 @@ enum class DeviceExt {
     VulkanMemoryModel,
     ShaderFloatControls,
     Spirv14,
+    DescriptorIndexing,
 
     // Promoted to 1.3
     ShaderIntegerDotProduct,

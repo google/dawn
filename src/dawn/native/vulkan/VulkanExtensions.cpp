@@ -173,6 +173,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::VulkanMemoryModel, "VK_KHR_vulkan_memory_model", VulkanVersion_1_2},
     {DeviceExt::ShaderFloatControls, "VK_KHR_shader_float_controls", VulkanVersion_1_2},
     {DeviceExt::Spirv14, "VK_KHR_spirv_1_4", VulkanVersion_1_2},
+    {DeviceExt::DescriptorIndexing, "VK_EXT_descriptor_indexing", VulkanVersion_1_2},
 
     {DeviceExt::ShaderIntegerDotProduct, "VK_KHR_shader_integer_dot_product", VulkanVersion_1_3},
     {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
@@ -334,6 +335,11 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::_16BitStorage:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2) &&
                                   HasDep(DeviceExt::StorageBufferStorageClass);
+                break;
+
+            case DeviceExt::DescriptorIndexing:
+                hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2) &&
+                                  HasDep(DeviceExt::Maintenance3);
                 break;
 
             case DeviceExt::DisplayTiming:
