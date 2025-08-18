@@ -173,11 +173,17 @@ function(generate_protos)
 
     file(MAKE_DIRECTORY "${ARGS_PROTOC_OUT_DIR}/${REL_DIR}")
 
+    if(PLUGIN_OPTIONS)
+      set(lang_out_arg "--${ARGS_LANGUAGE}_out=${PLUGIN_OPTIONS}:${ARGS_PROTOC_OUT_DIR}")
+    else()
+      set(lang_out_arg "--${ARGS_LANGUAGE}_out=${ARGS_PROTOC_OUT_DIR}")
+    endif()
+
     add_custom_command(
       OUTPUT ${GENERATED_SRCS}
-      COMMAND protobuf::protoc
-      ARGS ${ARGS_PROTOC_OPTIONS} --${ARGS_LANGUAGE}_out ${_plugin_options}:${ARGS_PROTOC_OUT_DIR} ${_plugin} ${PROTOBUF_INCLUDE_PATH} ${ABS_FILE}
-      DEPENDS ${ABS_FILE} protobuf::protoc
+      COMMAND $<TARGET_FILE:protobuf::protoc>
+      ARGS ${ARGS_PROTOC_OPTIONS} ${lang_out_arg} ${_plugin} ${PROTOBUF_INCLUDE_PATH} ${ABS_FILE}
+      DEPENDS ${ABS_FILE} $<TARGET_FILE:protobuf::protoc>
       COMMENT ${COMMENT}
       VERBATIM)
   endforeach()
