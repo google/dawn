@@ -40,8 +40,6 @@ import (
 var errTest = errors.New("test error")
 
 func TestTestCmdWrapper_Run(t *testing.T) {
-	t.Parallel()
-
 	for _, tc := range []struct {
 		name       string
 		useContext bool
@@ -135,8 +133,6 @@ func TestTestCmdWrapper_Run(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			var ew execwrapper.ExecWrapper
 			if tc.err != nil {
 				ew = execwrapper.NewTestExecWrapperForFailure(tc.err)
@@ -168,8 +164,6 @@ func TestTestCmdWrapper_Run(t *testing.T) {
 }
 
 func TestTestCmdWrapper_RunCombinedOutput(t *testing.T) {
-	t.Parallel()
-
 	for _, tc := range []struct {
 		name       string
 		useContext bool
@@ -250,8 +244,6 @@ func TestTestCmdWrapper_RunCombinedOutput(t *testing.T) {
 	} {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			var ew execwrapper.ExecWrapper
 			if tc.err != nil {
 				ew = execwrapper.NewTestExecWrapperForFailure(tc.err)
