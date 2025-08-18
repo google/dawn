@@ -331,7 +331,7 @@ func TestLoadExternals(t *testing.T) {
 			// We can't compare the entire structs to each other since
 			// includePatternMatch will be an anonymous function.
 			require.Equal(t, testCase.want.externalsJsonPath, p.externalsJsonPath)
-			require.Equal(t, len(testCase.want.externals), len(p.externals))
+			require.Len(t, p.externals, len(testCase.want.externals))
 			for k := range p.externals {
 				require.Contains(t, testCase.want.externals, k)
 				require.Equal(t, testCase.want.externals[k].Name, p.externals[k].Name)

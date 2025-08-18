@@ -306,7 +306,7 @@ func TestLoadConfig(t *testing.T) {
 			// We can't check equality since the loaded Config contains function
 			// pointers to anonymous functions. So, just check that the number of
 			// rules matches.
-			require.Equal(t, testCase.wantNumRules, len(cfg.Paths))
+			require.Len(t, cfg.Paths, testCase.wantNumRules)
 			if testCase.wantErr {
 				require.ErrorContains(t, err, testCase.wantErrMsg)
 			} else {

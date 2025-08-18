@@ -208,7 +208,7 @@ func TestGetTrimmedContent_NonExistentFile(t *testing.T) {
 		/*verbose=*/ false,
 		wrapper)
 
-	require.Equal(t, content, expectations.Content{})
+	require.Equal(t, expectations.Content{}, content)
 	require.ErrorContains(t, err, "open /expectations.txt: file does not exist")
 }
 
@@ -230,7 +230,7 @@ crbug.com/0000 [ android ] foo
 		/*verbose=*/ false,
 		wrapper)
 
-	require.Equal(t, content, expectations.Content{})
+	require.Equal(t, expectations.Content{}, content)
 	require.ErrorContains(t, err, "/expectations.txt:6:31 error: expected status")
 }
 

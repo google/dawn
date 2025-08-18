@@ -63,7 +63,7 @@ func TestMemMapOSWrapper_Environ(t *testing.T) {
 
 func TestMemMapOSWrapper_Getenv(t *testing.T) {
 	wrapper := CreateMemMapOSWrapper()
-	require.Equal(t, "", wrapper.Getenv("HOME"))
+	require.Empty(t, wrapper.Getenv("HOME"))
 
 	wrapper.MemMapEnvironProvider.Environment = map[string]string{
 		"HOME": "/tmp",
@@ -158,7 +158,7 @@ func TestMemMapOSWrapper_Walk_Nonexistent(t *testing.T) {
 
 	walkfunc := func(root string, info fs.FileInfo, err error) error {
 		require.Equal(t, "/nonexistent", root)
-		require.Equal(t, nil, info)
+		require.Nil(t, info)
 		require.ErrorContains(t, err, "open /nonexistent: file does not exist")
 		return err
 	}
@@ -203,7 +203,7 @@ func TestMemMapOSWrapper_Create_Walk_NonexistentDirectory(t *testing.T) {
 
 	err = wrapper.Walk("/parent", walkfunc)
 	require.NoErrorf(t, err, "Got error walking: %v", err)
-	require.Equal(t, 2, len(inputs))
+	require.Len(t, inputs, 2)
 	require.Equal(t, "/parent", inputs[0].root)
 	require.True(t, inputs[0].info.IsDir())
 	require.Equal(t, "/parent/foo.txt", inputs[1].root)
@@ -295,7 +295,7 @@ func TestMemMapOSWrapper_Mkdir_MkdirAll(t *testing.T) {
 
 	err = wrapper.Walk("/parent", walkfunc)
 	require.NoErrorf(t, err, "Got error walking: %v", err)
-	require.Equal(t, len(inputs), 3)
+	require.Len(t, inputs, 3)
 
 	require.Equal(t, "/parent", inputs[0].root)
 	require.True(t, inputs[0].info.IsDir())

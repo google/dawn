@@ -181,7 +181,7 @@ func requireFileSystemsMatch(t *testing.T, realRoot string, testFS oswrapper.FST
 	require.NoError(t, err)
 
 	testMap := testFS.FS
-	require.Equal(t, len(realMap), len(testMap), "Filesystems have a different number of entries")
+	require.Len(t, testMap, len(realMap), "Filesystems have a different number of entries")
 
 	for key, realFile := range realMap {
 		testFile, ok := testMap[key]
@@ -288,7 +288,7 @@ func TestFSTestEnvironProvider_Getenv(t *testing.T) {
 
 	t.Run("Get non-existent variable", func(t *testing.T) {
 		val := wrapper.Getenv("NON_EXISTENT_VAR")
-		require.Equal(t, "", val)
+		require.Empty(t, val)
 	})
 }
 

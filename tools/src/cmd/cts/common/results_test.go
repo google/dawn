@@ -377,8 +377,8 @@ func TestGetResultsHappyPath(t *testing.T) {
 	expectedResults["execution_mode"] = expectedResultsList
 
 	results, err := GetResults(ctx, cfg, client, builds)
-	require.Nil(t, err)
-	require.Equal(t, results, expectedResults)
+	require.NoError(t, err)
+	require.Equal(t, expectedResults, results)
 }
 
 // Tests that errors from GetRawResults are properly surfaced.
@@ -487,8 +487,8 @@ func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	expectedResults["execution_mode"] = expectedResultsList
 
 	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
-	require.Nil(t, err)
-	require.Equal(t, results, expectedResults)
+	require.NoError(t, err)
+	require.Equal(t, expectedResults, results)
 }
 
 // Tests that errors from GetRawResults are properly surfaced.
@@ -591,8 +591,8 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 	expectedResults["execution_mode"] = expectedResultsList
 
 	results, err := GetRawResults(ctx, cfg, client, builds)
-	require.Nil(t, err)
-	require.Equal(t, results, expectedResults)
+	require.NoError(t, err)
+	require.Equal(t, expectedResults, results)
 }
 
 // Tests that a mismatched prefix results in an error.
@@ -775,8 +775,8 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	expectedResults["execution_mode"] = expectedResultsList
 
 	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
-	require.Nil(t, err)
-	require.Equal(t, results, expectedResults)
+	require.NoError(t, err)
+	require.Equal(t, expectedResults, results)
 }
 
 // Tests that a mismatched prefix results in an error.
@@ -868,7 +868,7 @@ func TestCleanResultsTagRemoval(t *testing.T) {
 	}
 
 	CleanResults(cfg, &results)
-	require.Equal(t, results, expectedResults)
+	require.Equal(t, expectedResults, results)
 }
 
 // Tests that duplicate results with the same status always use that status.
@@ -904,7 +904,7 @@ func TestCleanResultsDuplicateResultSameStatus(t *testing.T) {
 		}
 
 		CleanResults(cfg, &results)
-		require.Equal(t, results, expectedResults)
+		require.Equal(t, expectedResults, results)
 	}
 }
 
@@ -939,7 +939,7 @@ func runPriorityTest(t *testing.T, testedStatus result.Status, lowerPriorityStat
 		}
 
 		CleanResults(cfg, &results)
-		require.Equal(t, results, expectedResults)
+		require.Equal(t, expectedResults, results)
 	}
 }
 
@@ -1005,7 +1005,7 @@ func TestCleanResultsReplaceResultDefault(t *testing.T) {
 			}
 
 			CleanResults(cfg, &results)
-			require.Equal(t, results, expectedResults)
+			require.Equal(t, expectedResults, results)
 		}
 	}
 }
@@ -1443,5 +1443,5 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 
 	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
 	require.NoErrorf(t, err, "Got error getting results: %v", err)
-	require.Equal(t, resultsByExecutionMode, expectedResults)
+	require.Equal(t, expectedResults, resultsByExecutionMode)
 }
