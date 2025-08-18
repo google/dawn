@@ -296,8 +296,8 @@ If not provided, will be inferred from output filename extension:
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
 
-    auto& use_ir_reader = options.Add<BoolOption>(
-        "use-ir-reader", "Use the IR for the SPIR-V reader", Default{false});
+    auto& use_ir_reader =
+        options.Add<BoolOption>("use-ir-reader", "Use the IR for the SPIR-V reader", Default{true});
     TINT_DEFER(opts->use_ir_reader = *use_ir_reader.value);
 
     auto& disable_wg_init = options.Add<BoolOption>(
