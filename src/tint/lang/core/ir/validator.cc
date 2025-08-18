@@ -3395,7 +3395,7 @@ void Validator::CheckAccess(const Access* a) {
 }
 
 void Validator::CheckBinary(const Binary* b) {
-    if (!CheckResultsAndOperandRange(b, Binary::kNumResults, Binary::kNumOperands)) {
+    if (!CheckResultsAndOperands(b, Binary::kNumResults, Binary::kNumOperands)) {
         return;
     }
 
@@ -3421,7 +3421,7 @@ void Validator::CheckBinary(const Binary* b) {
 }
 
 void Validator::CheckUnary(const Unary* u) {
-    if (!CheckResultsAndOperandRange(u, Unary::kNumResults, Unary::kNumOperands)) {
+    if (!CheckResultsAndOperands(u, Unary::kNumResults, Unary::kNumOperands)) {
         return;
     }
 
