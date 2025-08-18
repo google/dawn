@@ -1,17 +1,18 @@
-var<private> gl_Position : vec4f;
-
-fn main_1() {
-  gl_Position = vec4f();
-  return;
+struct gl_PerVertex {
+  gl_Position : vec4<f32>,
+  gl_PointSize : f32,
+  gl_ClipDistance : array<f32, 1u>,
+  gl_CullDistance : array<f32, 1u>,
 }
 
-struct main_out {
-  @builtin(position)
-  gl_Position : vec4f,
+var<private> v : gl_PerVertex;
+
+fn main_inner() {
+  v.gl_Position = vec4<f32>();
 }
 
 @vertex
-fn main() -> main_out {
-  main_1();
-  return main_out(gl_Position);
+fn main() -> @builtin(position) vec4<f32> {
+  main_inner();
+  return v.gl_Position;
 }

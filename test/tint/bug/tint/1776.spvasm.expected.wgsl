@@ -1,25 +1,15 @@
 struct S {
-  /* @offset(0) */
-  a : vec4f,
-  /* @offset(16) */
+  a : vec4<f32>,
   b : i32,
 }
 
-alias RTArr = array<S>;
-
 struct sb_block {
-  /* @offset(0) */
-  inner : RTArr,
+  inner : array<S>,
 }
 
-@group(0) @binding(0) var<storage, read> sb : sb_block;
+@group(0u) @binding(0u) var<storage, read> sb : sb_block;
 
-fn main_1() {
-  let x_18 = sb.inner[1i];
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  _ = sb.inner[1i];
 }

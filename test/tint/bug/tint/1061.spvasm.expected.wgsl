@@ -1,32 +1,25 @@
 struct buf0 {
-  /* @offset(0) */
-  r : vec4f,
+  r : vec4<f32>,
 }
 
-@group(0) @binding(0) var<uniform> x_7 : buf0;
+@group(0u) @binding(0u) var<uniform> v_1 : buf0;
 
-var<private> x_GLF_color : vec4f;
+var<private> v_2 : vec4<f32>;
 
-fn main_1() {
+fn main_inner() {
   var f : f32;
-  var v : vec4f;
-  f = determinant(mat3x3f(vec3f(1.0f, 0.0f, 0.0f), vec3f(0.0f, 1.0f, 0.0f), vec3f(0.0f, 0.0f, 1.0f)));
-  v = vec4f(sin(f), cos(f), exp2(f), log(f));
-  if ((distance(v, x_7.r) < 0.10000000149011611938f)) {
-    x_GLF_color = vec4f(1.0f, 0.0f, 0.0f, 1.0f);
+  var v : vec4<f32>;
+  f = determinant(mat3x3<f32>(vec3<f32>(1.0f, 0.0f, 0.0f), vec3<f32>(0.0f, 1.0f, 0.0f), vec3<f32>(0.0f, 0.0f, 1.0f)));
+  v = vec4<f32>(sin(f), cos(f), exp2(f), log(f));
+  if ((distance(v, v_1.r) < 0.10000000149011611938f)) {
+    v_2 = vec4<f32>(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    x_GLF_color = vec4f();
+    v_2 = vec4<f32>();
   }
-  return;
-}
-
-struct main_out {
-  @location(0)
-  x_GLF_color_1 : vec4f,
 }
 
 @fragment
-fn main() -> main_out {
-  main_1();
-  return main_out(x_GLF_color);
+fn main() -> @location(0u) vec4<f32> {
+  main_inner();
+  return v_2;
 }

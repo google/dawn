@@ -1,12 +1,7 @@
-fn main_1() {
-  var v = vec3f();
-  let x_14 = v.y;
-  let x_17 = v.xz;
-  let x_19 = v.xzy;
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  var v : vec3<f32> = vec3<f32>();
+  _ = v.y;
+  _ = v.xz;
+  _ = v.xzy;
 }

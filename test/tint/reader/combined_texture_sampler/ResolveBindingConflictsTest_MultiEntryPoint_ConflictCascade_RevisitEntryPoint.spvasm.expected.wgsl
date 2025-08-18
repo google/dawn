@@ -1,36 +1,28 @@
+@group(0u) @binding(0u) var v : texture_2d<f32>;
+
+@group(0u) @binding(1u) var v_1 : sampler;
+
 struct st_ty {
-  /* @offset(0) */
-  field0 : u32,
+  tint_symbol : u32,
 }
 
-@group(0) @binding(0) var x_100 : texture_2d<f32>;
+@group(0u) @binding(2u) var<uniform> v_2 : st_ty;
 
-@group(0) @binding(1) var x_101 : sampler;
+@group(0u) @binding(3u) var<storage, read_write> v_3 : st_ty;
 
-@group(0) @binding(2) var<uniform> x_102 : st_ty;
+@group(0u) @binding(5u) var v_4 : sampler;
 
-@group(0) @binding(3) var<storage, read_write> x_103 : st_ty;
+@group(0u) @binding(3u) var v_5 : texture_2d<f32>;
 
-@group(0) @binding(3) var x_2005 : sampler;
+@group(0u) @binding(4u) var v_6 : sampler;
 
-@group(0) @binding(3) var x_2006 : texture_2d<f32>;
-
-@group(0) @binding(4) var x_105 : sampler;
-
-fn alpha_1() {
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn alpha() {
-  alpha_1();
+  let v_7 = &(v_3);
 }
 
-fn beta_1() {
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn beta() {
-  beta_1();
+  let v_8 = &(v_2);
+  let v_9 = &(v_3);
 }

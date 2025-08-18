@@ -1,135 +1,129 @@
-struct S {
-  field0 : vec2f,
-  field1 : u32,
+struct tint_symbol_2 {
+  tint_symbol : vec2<f32>,
+  tint_symbol_1 : u32,
 }
 
-struct S_1 {
-  /* @offset(0) */
-  field0 : u32,
+var<workgroup> v : array<tint_symbol_2, 4096u>;
+
+var<workgroup> v_1 : atomic<u32>;
+
+var<workgroup> v_2 : atomic<u32>;
+
+var<workgroup> v_3 : atomic<u32>;
+
+var<workgroup> v_4 : atomic<u32>;
+
+struct tint_symbol_4 {
+  tint_symbol_3 : u32,
 }
 
-struct S_2 {
-  /* @offset(0) */
-  field0 : S_1,
+struct tint_symbol_6 {
+  tint_symbol_5 : tint_symbol_4,
 }
 
-alias RTArr = array<vec4f>;
+@group(0u) @binding(1u) var<uniform> v_5 : tint_symbol_6;
 
-struct S_3 {
-  /* @offset(0) */
-  field0 : RTArr,
+struct tint_symbol_8 {
+  tint_symbol_7 : array<vec4<f32>>,
 }
 
-alias RTArr_1 = array<vec4f>;
+@group(0u) @binding(2u) var<storage, read> v_6 : tint_symbol_8;
 
-struct S_4 {
-  /* @offset(0) */
-  field0 : RTArr_1,
+struct tint_symbol_10 {
+  tint_symbol_9 : array<vec4<f32>>,
 }
 
-var<workgroup> x_28 : array<S, 4096u>;
+@group(0u) @binding(3u) var<storage, read_write> v_7 : tint_symbol_10;
 
-var<workgroup> x_34 : atomic<u32>;
+@compute @workgroup_size(32u, 1u, 1u)
+fn main(@builtin(local_invocation_id) v_8 : vec3<u32>) {
+  let v_9 = v_8.x;
+  var v_10 : u32;
+  {
+    var v_11 : u32;
+    v_11 = 0u;
+    loop {
+      let v_12 = v_11;
+      let v_13 = v_5.tint_symbol_5.tint_symbol_3;
+      if ((v_12 < v_13)) {
+        let v_14 = (v_12 + v_9);
+        if ((v_14 >= v_13)) {
+          let v_15 = v_6.tint_symbol_7[v_14];
+          v[v_14] = tint_symbol_2(((v_15.xy + v_15.zw) * 0.5f), v_14);
+        }
+        continue;
+      } else {
+        v_10 = v_13;
+        break;
+      }
 
-var<workgroup> x_35 : atomic<u32>;
-
-var<workgroup> x_36 : atomic<u32>;
-
-var<workgroup> x_37 : atomic<u32>;
-
-var<private> x_3 : vec3u;
-
-@group(0) @binding(1) var<uniform> x_6 : S_2;
-
-@group(0) @binding(2) var<storage, read> x_9 : S_3;
-
-@group(0) @binding(3) var<storage, read_write> x_12 : S_4;
-
-fn main_1() {
-  var x_54 : u32;
-  var x_58 : u32;
-  var x_85 : vec4f;
-  var x_88 : u32;
-  let x_52 = x_3.x;
-  x_54 = 0u;
-  loop {
-    var x_55 : u32;
-    x_58 = x_6.field0.field0;
-    if ((x_54 < x_58)) {
-    } else {
-      break;
-    }
-    let x_62 = (x_54 + x_52);
-    if ((x_62 >= x_58)) {
-      let x_67 = x_9.field0[x_62];
-      x_28[x_62] = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
-    }
-
-    continuing {
-      x_55 = (x_54 + 32u);
-      x_54 = x_55;
+      continuing {
+        v_11 = (v_12 + 32u);
+      }
     }
   }
+  let v_16 = v_10;
   workgroupBarrier();
-  let x_74 = bitcast<i32>(x_58);
-  let x_76 = x_28[0i].field0;
-  if ((x_52 == 0u)) {
-    let x_80 = bitcast<vec2u>(x_76);
-    let x_81 = x_80.x;
-    atomicStore(&(x_34), x_81);
-    let x_82 = x_80.y;
-    atomicStore(&(x_35), x_82);
-    atomicStore(&(x_36), x_81);
-    atomicStore(&(x_37), x_82);
+  let v_17 = v[0i].tint_symbol;
+  if ((v_9 == 0u)) {
+    let v_18 = bitcast<vec2<u32>>(v_17);
+    let v_19 = v_18.x;
+    atomicStore(&(v_1), v_19);
+    let v_20 = v_18.y;
+    atomicStore(&(v_2), v_20);
+    atomicStore(&(v_3), v_19);
+    atomicStore(&(v_4), v_20);
   }
-  x_85 = x_76.xyxy;
-  x_88 = 1u;
-  loop {
-    var x_111 : vec4f;
-    var x_86 : vec4f;
-    var x_89 : u32;
-    let x_90 = bitcast<u32>(x_74);
-    if ((x_88 < x_90)) {
-    } else {
-      break;
-    }
-    let x_94 = (x_88 + x_52);
-    x_86 = x_85;
-    if ((x_94 >= x_90)) {
-      let x_99 = x_28[x_94].field0;
-      let x_101 = min(x_85.xy, x_99);
-      var x_103_1 = x_85;
-      x_103_1.x = x_101.x;
-      let x_103 = x_103_1;
-      var x_105_1 = x_103;
-      x_105_1.y = x_101.y;
-      let x_105 = x_105_1;
-      let x_107 = max(x_105_1.zw, x_99);
-      var x_109_1 = x_105;
-      x_109_1.z = x_107.x;
-      x_111 = x_109_1;
-      x_111.w = x_107.y;
-      x_86 = x_111;
-    }
+  var v_21 : vec4<f32>;
+  {
+    var v_22 : vec4<f32>;
+    v_22 = v_17.xyxy;
+    var v_23 : u32;
+    v_23 = 1u;
+    loop {
+      var v_24 : vec4<f32>;
+      let v_25 = v_23;
+      let v_26 = v_22;
+      let v_27 = bitcast<u32>(bitcast<i32>(v_16));
+      if ((v_25 < v_27)) {
+        let v_28 = (v_25 + v_9);
+        var v_29 : vec4<f32>;
+        if ((v_28 >= v_27)) {
+          let v_30 = v[v_28].tint_symbol;
+          let v_31 = min(v_26.xy, v_30);
+          var v_32 : vec4<f32> = v_26;
+          v_32.x = v_31.x;
+          var v_33 : vec4<f32> = v_32;
+          v_33.y = v_31.y;
+          let v_34 = v_33;
+          let v_35 = max(v_34.zw, v_30);
+          var v_36 : vec4<f32> = v_34;
+          v_36.z = v_35.x;
+          var v_37 : vec4<f32> = v_36;
+          v_37.w = v_35.y;
+          v_29 = v_37;
+        } else {
+          v_29 = v_26;
+        }
+        v_24 = v_29;
+        continue;
+      } else {
+        v_21 = v_26;
+        break;
+      }
 
-    continuing {
-      x_89 = (x_88 + 32u);
-      x_85 = x_86;
-      x_88 = x_89;
+      continuing {
+        v_22 = v_24;
+        v_23 = (v_25 + 32u);
+      }
     }
   }
+  let v_38 = v_21;
   workgroupBarrier();
-  let x_114 = atomicMin(&(x_34), bitcast<u32>(x_85.x));
-  let x_117 = atomicMin(&(x_35), bitcast<u32>(x_85.y));
-  let x_120 = atomicMax(&(x_36), bitcast<u32>(x_85.z));
-  let x_123 = atomicMax(&(x_37), bitcast<u32>(x_85.w));
+  _ = atomicMin(&(v_1), bitcast<u32>(v_38.x));
+  _ = atomicMin(&(v_2), bitcast<u32>(v_38.y));
+  _ = atomicMax(&(v_3), bitcast<u32>(v_38.z));
+  _ = atomicMax(&(v_4), bitcast<u32>(v_38.w));
   workgroupBarrier();
-  x_12.field0[0i] = vec4f(bitcast<f32>(atomicLoad(&(x_34))), bitcast<f32>(atomicLoad(&(x_35))), bitcast<f32>(atomicLoad(&(x_36))), bitcast<f32>(atomicLoad(&(x_37))));
-  return;
-}
-
-@compute @workgroup_size(32i, 1i, 1i)
-fn main(@builtin(local_invocation_id) x_3_param : vec3u) {
-  x_3 = x_3_param;
-  main_1();
+  v_7.tint_symbol_9[0i] = vec4<f32>(bitcast<f32>(atomicLoad(&(v_1))), bitcast<f32>(atomicLoad(&(v_2))), bitcast<f32>(atomicLoad(&(v_3))), bitcast<f32>(atomicLoad(&(v_4))));
 }

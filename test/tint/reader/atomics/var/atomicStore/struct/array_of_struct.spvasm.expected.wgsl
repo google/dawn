@@ -4,27 +4,19 @@ struct S_atomic {
   y : u32,
 }
 
-struct S {
-  x : i32,
-  a : u32,
-  y : u32,
-}
-
-var<private> local_invocation_index_1 : u32;
-
 var<workgroup> wg : array<S_atomic, 10u>;
 
-fn compute_main_inner(local_invocation_index_2 : u32) {
-  var idx = 0u;
-  idx = local_invocation_index_2;
+fn compute_main_inner(local_invocation_index : u32) {
+  var idx : u32 = 0u;
+  idx = local_invocation_index;
   loop {
     if (!((idx < 10u))) {
       break;
     }
-    let x_28 = idx;
-    wg[x_28].x = 0i;
-    atomicStore(&(wg[x_28].a), 0u);
-    wg[x_28].y = 0u;
+    let v = idx;
+    wg[v].x = 0i;
+    atomicStore(&(wg[v].a), 0u);
+    wg[v].y = 0u;
 
     continuing {
       idx = (idx + 1u);
@@ -32,17 +24,9 @@ fn compute_main_inner(local_invocation_index_2 : u32) {
   }
   workgroupBarrier();
   atomicStore(&(wg[4i].a), 1u);
-  return;
 }
 
-fn compute_main_1() {
-  let x_53 = local_invocation_index_1;
-  compute_main_inner(x_53);
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
-fn compute_main(@builtin(local_invocation_index) local_invocation_index_1_param : u32) {
-  local_invocation_index_1 = local_invocation_index_1_param;
-  compute_main_1();
+@compute @workgroup_size(1u, 1u, 1u)
+fn compute_main(@builtin(local_invocation_index) local_invocation_index_1 : u32) {
+  compute_main_inner(local_invocation_index_1);
 }

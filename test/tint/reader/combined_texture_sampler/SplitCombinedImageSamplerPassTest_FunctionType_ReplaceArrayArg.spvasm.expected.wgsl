@@ -1,8 +1,3 @@
-fn main_1() {
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
 }

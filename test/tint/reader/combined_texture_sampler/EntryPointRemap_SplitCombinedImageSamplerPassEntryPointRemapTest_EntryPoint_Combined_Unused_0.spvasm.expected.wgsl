@@ -1,23 +1,14 @@
-var<private> in_var : vec4f;
+var<private> out_var : vec4<f32>;
 
-var<private> out_var : vec4f;
+@group(0u) @binding(1u) var combined_var_sampler : sampler;
 
-@group(0) @binding(0) var combined_var_sampler : sampler;
+@group(0u) @binding(0u) var combined_var_image : texture_2d<f32>;
 
-@group(0) @binding(0) var combined_var_image : texture_2d<f32>;
-
-fn main_1() {
-  return;
-}
-
-struct main_out {
-  @location(0)
-  out_var_1 : vec4f,
+fn main_inner(in_var : vec4<f32>) {
 }
 
 @fragment
-fn main(@builtin(position) in_var_param : vec4f) -> main_out {
-  in_var = in_var_param;
-  main_1();
-  return main_out(out_var);
+fn main(@builtin(position) in_var : vec4<f32>) -> @location(0u) vec4<f32> {
+  main_inner(in_var);
+  return out_var;
 }

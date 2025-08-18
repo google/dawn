@@ -4,12 +4,7 @@ struct S {
 
 var<private> V : S;
 
-fn main_1() {
-  V.i = 5i;
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  V.i = 5i;
 }

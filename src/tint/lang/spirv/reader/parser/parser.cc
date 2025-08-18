@@ -786,6 +786,9 @@ class Parser {
                     if (img->sampled() == 0) {
                         TINT_ICE() << "Unsupported texture sample setting: Known at Runtime";
                     }
+                    if (depth == type::Depth::kDepth && !sampled_ty->Is<core::type::F32>()) {
+                        TINT_ICE() << "Unsupported depth texture sampled type (must be f32)";
+                    }
 
                     return ty_.Get<spirv::type::Image>(sampled_ty, dim, depth, arrayed, ms, sampled,
                                                        texel_format, access_mode);
@@ -2985,6 +2988,12 @@ class Parser {
 
     void EmitSampledImage(const spvtools::opt::Instruction& inst) {
         auto* tex = Value(inst.GetSingleWordInOperand(0));
+        auto* img_type = tex->Type()->As<type::Image>();
+        TINT_ASSERT(img_type);
+        if (img_type->GetMultisampled() == type::Multisampled::kMultisampled) {
+            TINT_ICE()
+                << "Creating an OpTypeSampledImage from a multisampled image is not supported";
+        }
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()),
                                                      spirv::BuiltinFn::kSampledImage,
                                                      Vector{tex->Type()}, Args(inst, 2)),

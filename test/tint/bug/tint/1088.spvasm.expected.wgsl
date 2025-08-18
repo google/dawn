@@ -1,60 +1,51 @@
-alias Arr = array<mat4x4f, 2u>;
-
-struct strided_arr {
-  @size(16)
-  el : f32,
+struct tint_padded_array_element {
+  @size(16u)
+  tint_element : f32,
 }
 
-alias Arr_1 = array<strided_arr, 4u>;
-
-struct LeftOver {
-  /* @offset(0) */
-  worldViewProjection : mat4x4f,
-  /* @offset(64) */
+struct LeftOver_1_1 {
+  worldViewProjection : mat4x4<f32>,
   time : f32,
-  /* @offset(80) */
-  test2 : Arr,
-  /* @offset(208) */
-  test : Arr_1,
+  test2 : array<mat4x4<f32>, 2u>,
+  test : array<tint_padded_array_element, 4u>,
 }
 
-var<private> position_1 : vec3f;
+@group(2u) @binding(2u) var<uniform> v : LeftOver_1_1;
 
-@group(2) @binding(2) var<uniform> x_14 : LeftOver;
+struct gl_PerVertex {
+  gl_Position : vec4<f32>,
+  gl_PointSize : f32,
+  gl_ClipDistance : array<f32, 1u>,
+  gl_CullDistance : array<f32, 1u>,
+}
 
-var<private> vUV : vec2f;
+var<private> v_1 : gl_PerVertex;
 
-var<private> uv : vec2f;
+var<private> vUV : vec2<f32>;
 
-var<private> normal : vec3f;
-
-var<private> gl_Position : vec4f;
-
-fn main_1() {
-  var q : vec4f;
-  var p : vec3f;
-  q = vec4f(position_1.x, position_1.y, position_1.z, 1.0f);
+fn main_inner(position : vec3<f32>, uv : vec2<f32>, normal : vec3<f32>) {
+  var q : vec4<f32>;
+  var p : vec3<f32>;
+  q = vec4<f32>(position.x, position.y, position.z, 1.0f);
   p = q.xyz;
-  p.x = (p.x + sin(((x_14.test[0i].el * position_1.y) + x_14.time)));
-  p.y = (p.y + sin((x_14.time + 4.0f)));
-  gl_Position = (x_14.worldViewProjection * vec4f(p.x, p.y, p.z, 1.0f));
+  p.x = (p.x + sin(((v.test[0i].tint_element * position.y) + v.time)));
+  p.y = (p.y + sin((v.time + 4.0f)));
+  let v_2 = v.worldViewProjection;
+  let v_3 = p;
+  v_1.gl_Position = (v_2 * vec4<f32>(v_3.x, v_3.y, v_3.z, 1.0f));
   vUV = uv;
-  gl_Position.y = (gl_Position.y * -1.0f);
-  return;
+  v_1.gl_Position.y = (v_1.gl_Position.y * -1.0f);
 }
 
-struct main_out {
+struct tint_symbol {
   @builtin(position)
-  gl_Position : vec4f,
-  @location(0)
-  vUV_1 : vec2f,
+  gl_Position : vec4<f32>,
+  @location(0u)
+  vUV : vec2<f32>,
 }
 
 @vertex
-fn main(@location(0) position_1_param : vec3f, @location(2) uv_param : vec2f, @location(1) normal_param : vec3f) -> main_out {
-  position_1 = position_1_param;
-  uv = uv_param;
-  normal = normal_param;
-  main_1();
-  return main_out(gl_Position, vUV);
+fn main(@location(0u) position : vec3<f32>, @location(2u) uv : vec2<f32>, @location(1u) normal : vec3<f32>) -> tint_symbol {
+  main_inner(position, uv, normal);
+  return tint_symbol(v_1.gl_Position, vUV);
 }

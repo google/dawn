@@ -1,15 +1,9 @@
-fn x_200(x_201 : ptr<function, vec2f>) -> f32 {
-  let x_212 = (*(x_201)).x;
-  return x_212;
+fn v_1(v : ptr<function, vec2<f32>>) -> f32 {
+  return (*(v)).x;
 }
 
-fn main_1() {
-  var x_11 : vec2f;
-  let x_12 = x_200(&(x_11));
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  var v_2 : vec2<f32>;
+  v_1(&(v_2));
 }

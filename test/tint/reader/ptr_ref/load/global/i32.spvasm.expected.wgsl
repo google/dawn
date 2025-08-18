@@ -1,11 +1,6 @@
-var<private> I = 0i;
+var<private> I : i32 = 0i;
 
-fn main_1() {
-  let x_11 = (I + 1i);
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  _ = (I + 1i);
 }

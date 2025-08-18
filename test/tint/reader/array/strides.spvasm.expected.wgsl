@@ -1,37 +1,25 @@
-struct strided_arr {
-  @size(8)
-  el : f32,
+struct tint_padded_array_element {
+  @size(8u)
+  tint_element : f32,
 }
 
-alias Arr = array<strided_arr, 2u>;
-
-alias Arr_1 = array<Arr, 3u>;
-
-struct strided_arr_1 {
-  @size(128)
-  el : Arr_1,
+struct tint_padded_array_element_1 {
+  @size(128u)
+  tint_element_1 : array<array<tint_padded_array_element, 2u>, 3u>,
 }
 
-alias Arr_2 = array<strided_arr_1, 4u>;
-
-struct S {
-  /* @offset(0) */
-  a : Arr_2,
+struct S_1 {
+  a : array<tint_padded_array_element_1, 4u>,
 }
 
-@group(0) @binding(0) var<storage, read_write> s : S;
+@group(0u) @binding(0u) var<storage, read_write> s : S_1;
 
-fn f_1() {
-  let x_19 = s.a;
-  let x_24 = s.a[3i].el;
-  let x_28 = s.a[3i].el[2i];
-  let x_32 = s.a[3i].el[2i][1i].el;
-  s.a = array<strided_arr_1, 4u>();
-  s.a[3i].el[2i][1i].el = 5.0f;
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn f() {
-  f_1();
+  _ = s.a;
+  _ = s.a[3i].tint_element_1;
+  _ = s.a[3i].tint_element_1[2i];
+  _ = s.a[3i].tint_element_1[2i][1i].tint_element;
+  s.a = array<tint_padded_array_element_1, 4u>();
+  s.a[3i].tint_element_1[2i][1i].tint_element = 5.0f;
 }

@@ -1,11 +1,5 @@
-const x_22 = vec2f(2.0f);
-
-fn main_1() {
-  let x_10 = distance(x_22, x_22);
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  let distance_1 = vec2<f32>(2.0f);
+  _ = distance(distance_1, vec2<f32>(2.0f));
 }

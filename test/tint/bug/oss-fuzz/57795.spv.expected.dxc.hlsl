@@ -1,9 +1,5 @@
 
-void main_1() {
-  uint x_88 = 58u;
-}
-
 void main() {
-  main_1();
+  uint v_2 = 58u;
 }
 

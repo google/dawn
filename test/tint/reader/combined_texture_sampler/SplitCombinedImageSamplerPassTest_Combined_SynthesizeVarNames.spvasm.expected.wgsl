@@ -1,12 +1,9 @@
-@group(0) @binding(1) var orig_var_sampler : sampler;
+@group(0u) @binding(1u) var orig_var_sampler : sampler;
 
-@group(0) @binding(0) var orig_var_image : texture_2d<f32>;
+@group(0u) @binding(0u) var orig_var_image : texture_2d<f32>;
 
-fn main_1() {
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  _ = orig_var_image;
+  _ = orig_var_sampler;
 }

@@ -1,13 +1,8 @@
-fn f_1() {
-  var v = vec3i();
-  var n = vec3i();
-  var offset_1 = 0u;
-  var count = 0u;
-  let x_16 = insertBits(v, n, offset_1, count);
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn f() {
-  f_1();
+  var v : vec3<i32> = vec3<i32>();
+  var n : vec3<i32> = vec3<i32>();
+  var offset : u32 = 0u;
+  var count : u32 = 0u;
+  _ = insertBits(v, n, offset, count);
 }

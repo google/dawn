@@ -1,50 +1,40 @@
+@group(0u) @binding(1u) var v : sampler;
+
+@group(0u) @binding(0u) var v_1 : texture_2d<f32>;
+
+@group(0u) @binding(2u) var v_2 : texture_2d<f32>;
+
+@group(0u) @binding(3u) var v_3 : sampler;
+
 struct st_ty {
-  /* @offset(0) */
-  field0 : u32,
+  tint_symbol : u32,
 }
 
-@group(0) @binding(1) var x_100 : sampler;
+@group(0u) @binding(4u) var<uniform> v_4 : st_ty;
 
-@group(0) @binding(0) var x_101 : texture_2d<f32>;
-
-@group(0) @binding(2) var x_102 : texture_2d<f32>;
-
-@group(0) @binding(3) var x_103 : sampler;
-
-@group(0) @binding(4) var<uniform> x_104 : st_ty;
-
-fn x_200() {
-  return;
+fn v_5() {
 }
 
-fn x_300() {
-  return;
+fn v_6() {
 }
 
-fn x_400() {
-  x_200();
-  x_300();
-  return;
+fn v_7() {
+  v_5();
+  v_6();
 }
 
-fn x_500() {
-  x_400();
-  x_300();
-  return;
+fn v_8() {
+  v_7();
+  v_6();
 }
 
-fn x_600() {
-  x_300();
-  x_500();
-  return;
+fn v_9() {
+  v_6();
+  v_8();
+  let v_10 = &(v_4);
 }
 
-fn main_1() {
-  x_600();
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  v_9();
 }

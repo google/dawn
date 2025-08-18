@@ -1,164 +1,141 @@
-struct UniformBuffer {
-  @size(16)
-  padding_0 : u32,
-  /* @offset(16) */
+struct UniformBuffer_1 {
+  tint_pad_0 : u32,
+  tint_pad_4 : u32,
+  tint_pad_8 : u32,
+  tint_pad_12 : u32,
   unknownInput_S1_c0 : f32,
-  /* @offset(32) */
-  ucolorRed_S1_c0 : vec4f,
-  /* @offset(48) */
-  ucolorGreen_S1_c0 : vec4f,
-  /* @offset(64) */
-  umatrix_S1 : mat3x3f,
+  ucolorRed_S1_c0 : vec4<f32>,
+  ucolorGreen_S1_c0 : vec4<f32>,
+  umatrix_S1 : mat3x3<f32>,
 }
 
-@binding(0) @group(0) var<uniform> x_4 : UniformBuffer;
+@group(0u) @binding(0u) var<uniform> v : UniformBuffer_1;
 
-var<private> sk_FragColor : vec4f;
-
-var<private> sk_Clockwise : bool;
-
-var<private> vcolor_S0 : vec4f;
-
-const x_46 = vec4i(1i);
-
-const x_57 = vec4i(2i);
+var<private> sk_FragColor : vec4<f32>;
 
 fn test_int_S1_c0_b() -> bool {
   var unknown : i32;
   var ok : bool;
-  var val : vec4i;
-  var x_40 : bool;
-  var x_41 : bool;
-  var x_54 : bool;
-  var x_55 : bool;
-  var x_65 : bool;
-  var x_66 : bool;
-  let x_27 = i32(x_4.unknownInput_S1_c0);
-  unknown = x_27;
+  var val : vec4<i32>;
+  let v_1 = i32(v.unknownInput_S1_c0);
+  unknown = v_1;
   ok = true;
-  x_41 = false;
+  var v_2 : bool;
   if (true) {
-    x_40 = all(((vec4i() / vec4i(x_27)) == vec4i()));
-    x_41 = x_40;
-  }
-  ok = x_41;
-  let x_44 = vec4i(x_27);
-  val = x_44;
-  let x_47 = (x_44 + x_46);
-  val = x_47;
-  let x_48 = (x_47 - x_46);
-  val = x_48;
-  let x_49 = (x_48 + x_46);
-  val = x_49;
-  let x_50 = (x_49 - x_46);
-  val = x_50;
-  x_55 = false;
-  if (x_41) {
-    x_54 = all((x_50 == x_44));
-    x_55 = x_54;
-  }
-  ok = x_55;
-  let x_58 = (x_50 * x_57);
-  val = x_58;
-  let x_59 = (x_58 / x_57);
-  val = x_59;
-  let x_60 = (x_59 * x_57);
-  val = x_60;
-  let x_61 = (x_60 / x_57);
-  val = x_61;
-  x_66 = false;
-  if (x_55) {
-    x_65 = all((x_61 == x_44));
-    x_66 = x_65;
-  }
-  ok = x_66;
-  return x_66;
-}
-
-const x_91 = vec4f(1.0f);
-
-const x_102 = vec4f(2.0f);
-
-fn main_1() {
-  var outputColor_S0 : vec4f;
-  var output_S1 : vec4f;
-  var x_8_unknown : f32;
-  var x_9_ok : bool;
-  var x_10_val : vec4f;
-  var x_116 : vec4f;
-  var x_86 : bool;
-  var x_87 : bool;
-  var x_99 : bool;
-  var x_100 : bool;
-  var x_110 : bool;
-  var x_111 : bool;
-  var x_114 : bool;
-  var x_115 : bool;
-  outputColor_S0 = vcolor_S0;
-  let x_77 = x_4.unknownInput_S1_c0;
-  x_8_unknown = x_77;
-  x_9_ok = true;
-  x_87 = false;
-  if (true) {
-    x_86 = all(((vec4f() / vec4f(x_77)) == vec4f()));
-    x_87 = x_86;
-  }
-  x_9_ok = x_87;
-  let x_89 = vec4f(x_77);
-  x_10_val = x_89;
-  let x_92 = (x_89 + x_91);
-  x_10_val = x_92;
-  let x_93 = (x_92 - x_91);
-  x_10_val = x_93;
-  let x_94 = (x_93 + x_91);
-  x_10_val = x_94;
-  let x_95 = (x_94 - x_91);
-  x_10_val = x_95;
-  x_100 = false;
-  if (x_87) {
-    x_99 = all((x_95 == x_89));
-    x_100 = x_99;
-  }
-  x_9_ok = x_100;
-  let x_103 = (x_95 * x_102);
-  x_10_val = x_103;
-  let x_104 = (x_103 / x_102);
-  x_10_val = x_104;
-  let x_105 = (x_104 * x_102);
-  x_10_val = x_105;
-  let x_106 = (x_105 / x_102);
-  x_10_val = x_106;
-  x_111 = false;
-  if (x_100) {
-    x_110 = all((x_106 == x_89));
-    x_111 = x_110;
-  }
-  x_9_ok = x_111;
-  x_115 = false;
-  if (x_111) {
-    x_114 = test_int_S1_c0_b();
-    x_115 = x_114;
-  }
-  if (x_115) {
-    x_116 = x_4.ucolorGreen_S1_c0;
+    v_2 = all(((vec4<i32>() / vec4<i32>(v_1, v_1, v_1, v_1)) == vec4<i32>()));
   } else {
-    x_116 = x_4.ucolorRed_S1_c0;
+    v_2 = false;
   }
-  let x_125 = x_116;
-  output_S1 = x_116;
-  sk_FragColor = x_125;
-  return;
+  let v_3 = v_2;
+  ok = v_3;
+  let v_4 = vec4<i32>(v_1, v_1, v_1, v_1);
+  val = v_4;
+  let v_5 = (v_4 + vec4<i32>(1i));
+  val = v_5;
+  let v_6 = (v_5 - vec4<i32>(1i));
+  val = v_6;
+  let v_7 = (v_6 + vec4<i32>(1i));
+  val = v_7;
+  let v_8 = (v_7 - vec4<i32>(1i));
+  val = v_8;
+  var v_9 : bool;
+  if (v_3) {
+    v_9 = all((v_8 == v_4));
+  } else {
+    v_9 = false;
+  }
+  let v_10 = v_9;
+  ok = v_10;
+  let v_11 = (v_8 * vec4<i32>(2i));
+  val = v_11;
+  let v_12 = (v_11 / vec4<i32>(2i));
+  val = v_12;
+  let v_13 = (v_12 * vec4<i32>(2i));
+  val = v_13;
+  let v_14 = (v_13 / vec4<i32>(2i));
+  val = v_14;
+  var v_15 : bool;
+  if (v_10) {
+    v_15 = all((v_14 == v_4));
+  } else {
+    v_15 = false;
+  }
+  let v_16 = v_15;
+  ok = v_16;
+  return v_16;
 }
 
-struct main_out {
-  @location(0)
-  sk_FragColor_1 : vec4f,
+fn main_inner(sk_Clockwise : bool, vcolor_S0 : vec4<f32>) {
+  var outputColor_S0 : vec4<f32>;
+  var output_S1 : vec4<f32>;
+  var v_17 : f32;
+  var v_18 : bool;
+  var v_19 : vec4<f32>;
+  var v_20 : vec4<f32>;
+  outputColor_S0 = vcolor_S0;
+  let v_21 = v.unknownInput_S1_c0;
+  v_17 = v_21;
+  v_18 = true;
+  var v_22 : bool;
+  if (true) {
+    v_22 = all(((vec4<f32>() / vec4<f32>(v_21, v_21, v_21, v_21)) == vec4<f32>()));
+  } else {
+    v_22 = false;
+  }
+  let v_23 = v_22;
+  v_18 = v_23;
+  let v_24 = vec4<f32>(v_21, v_21, v_21, v_21);
+  v_19 = v_24;
+  let v_25 = (v_24 + vec4<f32>(1.0f));
+  v_19 = v_25;
+  let v_26 = (v_25 - vec4<f32>(1.0f));
+  v_19 = v_26;
+  let v_27 = (v_26 + vec4<f32>(1.0f));
+  v_19 = v_27;
+  let v_28 = (v_27 - vec4<f32>(1.0f));
+  v_19 = v_28;
+  var v_29 : bool;
+  if (v_23) {
+    v_29 = all((v_28 == v_24));
+  } else {
+    v_29 = false;
+  }
+  let v_30 = v_29;
+  v_18 = v_30;
+  let v_31 = (v_28 * vec4<f32>(2.0f));
+  v_19 = v_31;
+  let v_32 = (v_31 / vec4<f32>(2.0f));
+  v_19 = v_32;
+  let v_33 = (v_32 * vec4<f32>(2.0f));
+  v_19 = v_33;
+  let v_34 = (v_33 / vec4<f32>(2.0f));
+  v_19 = v_34;
+  var v_35 : bool;
+  if (v_30) {
+    v_35 = all((v_34 == v_24));
+  } else {
+    v_35 = false;
+  }
+  let v_36 = v_35;
+  v_18 = v_36;
+  var v_37 : bool;
+  if (v_36) {
+    v_37 = test_int_S1_c0_b();
+  } else {
+    v_37 = false;
+  }
+  if (v_37) {
+    v_20 = v.ucolorGreen_S1_c0;
+  } else {
+    v_20 = v.ucolorRed_S1_c0;
+  }
+  let v_38 = v_20;
+  output_S1 = v_38;
+  sk_FragColor = v_38;
 }
 
 @fragment
-fn main(@builtin(front_facing) sk_Clockwise_param : bool, @location(0) vcolor_S0_param : vec4f) -> main_out {
-  sk_Clockwise = sk_Clockwise_param;
-  vcolor_S0 = vcolor_S0_param;
-  main_1();
-  return main_out(sk_FragColor);
+fn main(@builtin(front_facing) sk_Clockwise : bool, @location(0u) vcolor_S0 : vec4<f32>) -> @location(0u) vec4<f32> {
+  main_inner(sk_Clockwise, vcolor_S0);
+  return sk_FragColor;
 }

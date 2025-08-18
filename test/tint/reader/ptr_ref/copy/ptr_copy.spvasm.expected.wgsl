@@ -1,9 +1,6 @@
-fn main_1() {
-  var x_10 : u32;
-  return;
-}
-
-@compute @workgroup_size(1i, 1i, 1i)
+@compute @workgroup_size(1u, 1u, 1u)
 fn main() {
-  main_1();
+  var v : u32;
+  let v_1 = &(v);
+  let v_2 = v_1;
 }
