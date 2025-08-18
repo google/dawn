@@ -8,11 +8,11 @@
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
                OpName %main "main"
-               OpName %v_2 "v_2"
+               OpName %v "v"
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
-        %v_2 = OpConstant %uint 58
+          %v = OpConstant %uint 58
        %main = OpFunction %void None %3
           %4 = OpLabel
                OpReturn

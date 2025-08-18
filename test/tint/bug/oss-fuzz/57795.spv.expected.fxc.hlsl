@@ -1,5 +1,5 @@
 
 void main() {
-  uint v_2 = 58u;
+  uint v = 58u;
 }
 

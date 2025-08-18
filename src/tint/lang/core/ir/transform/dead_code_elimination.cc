@@ -73,7 +73,11 @@ struct State {
 
         // Find any unused vars, do this after removing functions in case the usage was in a
         // function which is unused.
-        for (auto* inst : *ir_.root_block) {
+        auto* next = ir_.root_block->Front();
+        while (next) {
+            auto* inst = next;
+            next = inst->next;
+
             if (inst->Result()->IsUsed()) {
                 continue;
             }

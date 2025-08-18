@@ -1,6 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-fragment void v_3() {
-  uint const v_2 = 58u;
+fragment void v_1() {
+  uint const v = 58u;
 }
