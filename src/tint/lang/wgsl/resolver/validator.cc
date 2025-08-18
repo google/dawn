@@ -471,7 +471,7 @@ bool Validator::BindingArray(const core::type::BindingArray* t, const Source& so
                          << "language feature, which is not allowed in the current environment";
         return false;
     }
-    if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
+    if (!t->Count()->IsAnyOf<core::type::ConstantArrayCount, core::type::RuntimeArrayCount>()) {
         AddError(source) << "binding_array count must be a constant expression";
         return false;
     }

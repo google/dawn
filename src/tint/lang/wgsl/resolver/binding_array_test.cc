@@ -207,15 +207,14 @@ TEST_F(ResolverBindingArrayTest, InvalidNoTemplateType) {
     GlobalVar("a", Binding(0_a), Group(0_a), ty("binding_array", 4_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(error: 'binding_array' requires 2 template arguments)");
+    EXPECT_EQ(r()->error(), R"(error: cannot use value of type 'u32' as type)");
 }
 
-TEST_F(ResolverBindingArrayTest, InvalidNoTemplateCount) {
+TEST_F(ResolverBindingArrayTest, RuntimeBindingArray) {
     GlobalVar("a", Binding(0_a), Group(0_a),
               ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(error: 'binding_array' requires 2 template arguments)");
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverBindingArrayTest, InvalidCountZero) {
