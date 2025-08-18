@@ -595,6 +595,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     createInfo.renderPass = renderPassInfo.renderPass;
     createInfo.basePipelineHandle = VkPipeline{};
     createInfo.basePipelineIndex = -1;
+    PNextChainBuilder createInfoChain(&createInfo);
 
     // - If the pipeline uses input attachments in shader, currently this is only used by
     //   ExpandResolveTexture subpass, hence we need to set the subpass to 0.
@@ -607,6 +608,32 @@ MaybeError RenderPipeline::InitializeImpl() {
     if (buildCacheKey) {
         // Record cache key information now since createInfo is not stored.
         StreamIn(&mCacheKey, createInfo, layout->GetCacheKey());
+    }
+
+    // If possible, specify where exactly robustness should be added in the pipeline. This is
+    // necessary because when bindless is enabled and robustBufferAccessUpdateAfterBind is false, we
+    // must only set robust buffer access on vertexInputs.
+    VkPipelineRobustnessCreateInfo robustnessCreateInfo;
+    if (device->GetDeviceInfo().HasExt(DeviceExt::PipelineRobustness)) {
+        createInfoChain.Add(&robustnessCreateInfo,
+                            VK_STRUCTURE_TYPE_PIPELINE_ROBUSTNESS_CREATE_INFO);
+
+        // Without any specific toggle only vertex inputs can be made robust enough for WebGPU.
+        robustnessCreateInfo.vertexInputs =
+            VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS;
+        robustnessCreateInfo.uniformBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
+        robustnessCreateInfo.storageBuffers = VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_DISABLED;
+        robustnessCreateInfo.images = VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_DISABLED;
+
+        if (device->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2)) {
+            // Uniform buffers are checked with WebGPU validation and don't need robustness.
+            robustnessCreateInfo.storageBuffers =
+                VK_PIPELINE_ROBUSTNESS_BUFFER_BEHAVIOR_ROBUST_BUFFER_ACCESS_2;
+        }
+        if (device->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2)) {
+            robustnessCreateInfo.images =
+                VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_ROBUST_IMAGE_ACCESS_2;
+        }
     }
 
     // Try to see if we have anything in the blob cache.

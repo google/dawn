@@ -38,6 +38,7 @@ namespace dawn::native::vulkan {
 static constexpr uint32_t VulkanVersion_1_1 = VK_API_VERSION_1_1;
 static constexpr uint32_t VulkanVersion_1_2 = VK_API_VERSION_1_2;
 static constexpr uint32_t VulkanVersion_1_3 = VK_API_VERSION_1_3;
+static constexpr uint32_t VulkanVersion_1_4 = VK_API_VERSION_1_4;
 static constexpr uint32_t NeverPromoted = std::numeric_limits<uint32_t>::max();
 
 // A static array for InstanceExtInfo that can be indexed with InstanceExts.
@@ -183,6 +184,8 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::Maintenance4, "VK_KHR_maintenance4", VulkanVersion_1_3},
     {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", VulkanVersion_1_3},
 
+    {DeviceExt::PipelineRobustness, "VK_EXT_pipeline_robustness", VulkanVersion_1_4},
+
     {DeviceExt::DepthClipEnable, "VK_EXT_depth_clip_enable", NeverPromoted},
     {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
     {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
@@ -292,6 +295,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::ZeroInitializeWorkgroupMemory:
             case DeviceExt::DemoteToHelperInvocation:
             case DeviceExt::Maintenance4:
+            case DeviceExt::PipelineRobustness:
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:
             case DeviceExt::ShaderSubgroupExtendedTypes:

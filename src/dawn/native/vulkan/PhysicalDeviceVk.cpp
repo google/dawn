@@ -655,7 +655,25 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             vkProperties.maxDescriptorSetUpdateAfterBindStorageImages >= kRequiredLimit &&
             vkProperties.maxUpdateAfterBindDescriptorsInAllPools >= kRequiredLimit;
 
-        if (hasUpdateAfterBind && hasOtherFeatures && hasLimit) {
+        // Drivers may not support robust buffer access with UpdateAfterBind (presumably because
+        // they only pass a GPU virtual memory address in the descriptor and not the size of the
+        // binding). This is denoted with robustBufferAccessUpdateAfterBind and when this is false
+        // Vulkan 1.0 robustness and the later robustness2 feature must not be used at all. While
+        // Dawn can emulate most robustness, doing it for vertex inputs would be too onerous.
+        //
+        // Luckily, the extension VK_EXT_pipeline_robustness (promoted to 1.4, made originally for
+        // ANGLE) allows enabling robustness per-pipeline and more importantly per buffer type.
+        // Without robustBufferAccessUpdateAfterBind, all the buffer robustness is disallowed,
+        // except vertexInputs, the one we actually care about.
+        //
+        // Note that we could add this requirement only when robustness is enabled, but doing so
+        // would make some GPUAdapter potentially advertise bindless support but fail to create a
+        // GPUDevice with it (because it cannot be supported with robustness).
+        bool canSupportRobustness = vkProperties.robustBufferAccessUpdateAfterBind ||
+                                    (mDeviceInfo.HasExt(DeviceExt::PipelineRobustness) &&
+                                     mDeviceInfo.pipelineRobustnessFeatures.pipelineRobustness);
+
+        if (hasUpdateAfterBind && hasOtherFeatures && hasLimit && canSupportRobustness) {
             EnableFeature(Feature::ChromiumExperimentalBindless);
         }
     }
@@ -1089,24 +1107,29 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // insertion of the placeholder fragment shader.
     deviceToggles->Default(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, true);
 
-    // The environment can only request to use VK_EXT_robustness2 when the extension is available.
-    // Override the decision if it is not applicable or robustImageAccess2 is false.
+    // By default try to skip injecting robustness checks on textures using VK_EXT_robustness2. But
+    // disable that optimization when the feature is not available.
     if (!GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
         GetDeviceInfo().robustness2Features.robustImageAccess2 == VK_FALSE) {
         deviceToggles->ForceSet(Toggle::VulkanUseImageRobustAccess2, false);
+    } else {
+        deviceToggles->Default(Toggle::VulkanUseImageRobustAccess2, true);
     }
-    // By default try to skip robustness transform on textures according to the Vulkan extension
-    // VK_EXT_robustness2.
-    deviceToggles->Default(Toggle::VulkanUseImageRobustAccess2, true);
-    // The environment can only request to use VK_EXT_robustness2 when the extension is available.
-    // Override the decision if it is not applicable or robustBufferAccess2 is false.
+
+    // By default try to skip injecting robustness checks on buffers using VK_EXT_robustness2. But
+    // disable that optimization when the feature is not available or if it conflicts with bindless
+    // support (see comment in the detection of bindless support for more details).
     if (!GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
         GetDeviceInfo().robustness2Features.robustBufferAccess2 == VK_FALSE) {
         deviceToggles->ForceSet(Toggle::VulkanUseBufferRobustAccess2, false);
+    } else if (GetDeviceInfo().HasExt(DeviceExt::DescriptorIndexing) &&
+               !GetDeviceInfo().descriptorIndexingProperties.robustBufferAccessUpdateAfterBind) {
+        // TODO(https://issues.chromium.org/435317394): Only disable the toggle if the bindless
+        // extension is actually requested.
+        deviceToggles->ForceSet(Toggle::VulkanUseBufferRobustAccess2, false);
+    } else {
+        deviceToggles->Default(Toggle::VulkanUseBufferRobustAccess2, true);
     }
-    // By default try to disable index clamping on the runtime-sized arrays on storage buffers in
-    // Tint robustness transform according to the Vulkan extension VK_EXT_robustness2.
-    deviceToggles->Default(Toggle::VulkanUseBufferRobustAccess2, true);
 
     // Enable the polyfill versions of dot4I8Packed() and dot4U8Packed() when the SPIR-V capability
     // `DotProductInput4x8BitPackedKHR` is not supported.
@@ -1141,12 +1164,14 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TogglesState& toggles) const {
     switch (feature) {
+        // Subgroup matrices require the vulkan memory model to be used.
         case wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix:
             if (!toggles.IsEnabled(Toggle::UseVulkanMemoryModel)) {
                 return FeatureValidationResult(absl::StrFormat(
                     "Feature %s requires VulkanMemoryModel toggle on Vulkan.", feature));
             }
             break;
+
         // The function subgroupBroadcast(f16) fails for some edge cases on Intel Gen-9 devices.
         // See crbug.com/391680973. We disable subgroups on this device unless the user has
         // explicitly enabled the 'enable_subgroups_intel_gen9' toggle.
@@ -1159,9 +1184,11 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                                     feature));
             }
             break;
+
         default:
             break;
     }
+
     return {};
 }
 

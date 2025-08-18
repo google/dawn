@@ -120,6 +120,9 @@ enum class DeviceExt {
     Maintenance4,
     SubgroupSizeControl,
 
+    // Promoted to 1.4
+    PipelineRobustness,
+
     // Others
     DepthClipEnable,
     ImageDrmFormatModifier,
