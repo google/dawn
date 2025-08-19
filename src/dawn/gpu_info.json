@@ -270,9 +270,10 @@
       "id": "0x4D4F4351",
 
       "devices": [{
-        "mask": "0xFF000000",
+        "mask": "0xFFFFFF00",
         "architecture": {
-          "Adreno 8xx": ["0x36000000"]
+          "Adreno 6xx": ["0x41333800", "0x36334100", "0x41333400", "0x36333600"],
+          "Adreno 7xx": ["0x37314400", "0x36334300"]
         }
       }]
 
