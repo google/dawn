@@ -66,6 +66,10 @@ ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial seria
     return true;
 }
 
+MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {
+    return WaitForIdleForDestructionImpl();
+}
+
 MaybeError ExecutionQueueBase::CheckPassedSerials() {
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());

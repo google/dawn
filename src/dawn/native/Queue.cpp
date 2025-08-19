@@ -117,7 +117,7 @@ class ErrorQueue : public QueueBase {
                                                           Nanoseconds timeout) override {
         DAWN_UNREACHABLE();
     }
-    MaybeError WaitForIdleForDestruction() override { DAWN_UNREACHABLE(); }
+    MaybeError WaitForIdleForDestructionImpl() override { DAWN_UNREACHABLE(); }
 };
 
 }  // namespace

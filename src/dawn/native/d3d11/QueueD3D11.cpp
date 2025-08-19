@@ -394,7 +394,7 @@ bool Queue::HasPendingCommands() const {
 
 void Queue::ForceEventualFlushOfCommands() {}
 
-MaybeError Queue::WaitForIdleForDestruction() {
+MaybeError Queue::WaitForIdleForDestructionImpl() {
     if (!mPendingCommands->IsValid()) {
         return {};
     }

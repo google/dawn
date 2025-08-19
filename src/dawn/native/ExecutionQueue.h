@@ -85,11 +85,10 @@ class ExecutionQueueBase {
     // Increment mLastSubmittedSerial when we submit the next serial
     void IncrementLastSubmittedCommandSerial();
 
-    // WaitForIdleForDestruction waits for GPU to finish, checks errors and gets ready for
-    // destruction. This is only used when properly destructing the device. For a real
-    // device loss, this function doesn't need to be called since the driver already closed all
-    // resources.
-    virtual MaybeError WaitForIdleForDestruction() = 0;
+    // Waits for GPU to finish, checks errors and gets ready for destruction. This is only used when
+    // properly destructing the device. For a real device loss, this function doesn't need to be
+    // called since the driver already closed all resources.
+    MaybeError WaitForIdleForDestruction();
 
     // Wait at most `timeout` synchronously for the ExecutionSerial to pass. Returns true
     // if the serial passed.
@@ -129,6 +128,9 @@ class ExecutionQueueBase {
     // for |waitSerial|.
     virtual ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
                                                                   Nanoseconds timeout) = 0;
+
+    // Backend specific wait for idle function.
+    virtual MaybeError WaitForIdleForDestructionImpl() = 0;
 
     // mCompletedSerial tracks the last completed command serial that the fence has returned.
     // mLastSubmittedSerial tracks the last submitted command serial.

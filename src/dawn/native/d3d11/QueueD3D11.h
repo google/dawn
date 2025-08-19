@@ -81,7 +81,7 @@ class Queue : public d3d::Queue {
     void DestroyImpl() override;
     bool HasPendingCommands() const override;
     void ForceEventualFlushOfCommands() override;
-    MaybeError WaitForIdleForDestruction() override;
+    MaybeError WaitForIdleForDestructionImpl() override;
     MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 

@@ -197,7 +197,7 @@ void Queue::ForceEventualFlushOfCommands() {
     mPendingCommands.SetNeedsSubmit();
 }
 
-MaybeError Queue::WaitForIdleForDestruction() {
+MaybeError Queue::WaitForIdleForDestructionImpl() {
     // Immediately forget about all pending commands
     mPendingCommands.Release();
 

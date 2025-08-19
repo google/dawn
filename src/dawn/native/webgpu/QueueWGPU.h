@@ -56,7 +56,7 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
     MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
                                                           Nanoseconds timeout) override;
-    MaybeError WaitForIdleForDestruction() override;
+    MaybeError WaitForIdleForDestructionImpl() override;
     MaybeError SubmitFutureSync();
 
     MutexProtected<std::deque<std::pair<WGPUFuture, ExecutionSerial>>> mFuturesInFlight;

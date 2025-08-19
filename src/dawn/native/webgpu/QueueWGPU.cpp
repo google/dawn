@@ -177,7 +177,7 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
     });
 }
 
-MaybeError Queue::WaitForIdleForDestruction() {
+MaybeError Queue::WaitForIdleForDestructionImpl() {
     auto& wgpu = ToBackend(GetDevice())->wgpu;
     mFuturesInFlight.Use([&](auto futuresInFlight) {
         while (!futuresInFlight->empty()) {

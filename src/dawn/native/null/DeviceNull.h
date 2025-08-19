@@ -302,7 +302,7 @@ class Queue final : public QueueBase {
     MaybeError SubmitPendingCommandsImpl() override;
     ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
                                                           Nanoseconds timeout) override;
-    MaybeError WaitForIdleForDestruction() override;
+    MaybeError WaitForIdleForDestructionImpl() override;
 };
 
 class ComputePipeline final : public ComputePipelineBase {

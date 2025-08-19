@@ -121,7 +121,7 @@ void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
     });
 }
 
-MaybeError Queue::WaitForIdleForDestruction() {
+MaybeError Queue::WaitForIdleForDestructionImpl() {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
     DAWN_TRY(CheckPassedSerials());

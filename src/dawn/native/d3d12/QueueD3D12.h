@@ -67,7 +67,7 @@ class Queue final : public d3d::Queue {
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
-    MaybeError WaitForIdleForDestruction() override;
+    MaybeError WaitForIdleForDestructionImpl() override;
 
     void SetEventOnCompletion(ExecutionSerial serial, HANDLE event) override;
 

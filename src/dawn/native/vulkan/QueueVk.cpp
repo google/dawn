@@ -158,7 +158,7 @@ void Queue::ForceEventualFlushOfCommands() {
     mRecordingContext.needsSubmit |= mRecordingContext.used;
 }
 
-MaybeError Queue::WaitForIdleForDestruction() {
+MaybeError Queue::WaitForIdleForDestructionImpl() {
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     // Move the mRecordingContext.used to mUnusedCommands so it can be cleaned up in
     // ShutDownImpl
