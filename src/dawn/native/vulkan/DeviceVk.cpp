@@ -454,7 +454,9 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     if (IsRobustnessEnabled()) {
         usedKnobs.features.robustBufferAccess = VK_TRUE;
 
-        // Enable the robustness 2 guarantees that better implement the WebGPU semantics.
+        // Enable the robustness 2 guarantees that better implement the WebGPU semantics. It forces
+        // tight bounds checking when enabled on buffers (instead of potentially extending by 16
+        // bytes or a vertex stride). It also exposes driver support for image robustness.
         if (mDeviceInfo.HasExt(DeviceExt::Robustness2)) {
             DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
 

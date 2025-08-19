@@ -228,8 +228,6 @@ MaybeError BindGroupLayout::Initialize() {
         descriptorCountPerType[vulkanType] += numVkDescriptors;
     }
 
-    // TODO(enga): Consider deduping allocators for layouts with the same descriptor type
-    // counts.
     mDescriptorSetAllocator =
         DescriptorSetAllocator::Create(device, std::move(descriptorCountPerType));
 
@@ -252,10 +250,6 @@ void BindGroupLayout::DestroyImpl() {
 
     // DescriptorSetLayout aren't used by execution on the GPU and can be deleted at any time,
     // so we can destroy mHandle immediately instead of using the FencedDeleter.
-    // (Swiftshader implements this wrong b/154522740).
-    // In practice, the GPU is done with all descriptor sets because bind group deallocation
-    // refs the bind group layout so that once the bind group is finished being used, we can
-    // recycle its descriptor set.
     if (mHandle != VK_NULL_HANDLE) {
         device->fn.DestroyDescriptorSetLayout(device->GetVkDevice(), mHandle, nullptr);
         mHandle = VK_NULL_HANDLE;
@@ -271,7 +265,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     Device* device,
     const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     DescriptorSetAllocation descriptorSetAllocation;
-    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(this));
+    DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate(mHandle));
 
     return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
 }

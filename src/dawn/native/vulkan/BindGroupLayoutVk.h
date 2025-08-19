@@ -48,18 +48,9 @@ class Device;
 
 VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo);
 
-// In Vulkan descriptor pools have to be sized to an exact number of descriptors. This means
-// it's hard to have something where we can mix different types of descriptor sets because
-// we don't know if their vector of number of descriptors will be similar.
-//
-// That's why that in addition to containing the VkDescriptorSetLayout to create
-// VkDescriptorSets for its bindgroups, the layout also acts as an allocator for the descriptor
-// sets.
-//
-// The allocations is done with one pool per descriptor set, which is inefficient, but at least
-// the pools are reused when no longer used. Minimizing the number of descriptor pool allocation
-// is important because creating them can incur GPU memory allocation which is usually an
-// expensive syscall.
+// Backend BindGroupLayout implementation for Vulkan. In addition to containing a BindGroupAllocator
+// for the CPU-side tracking data, it has a DescriptorSetAllocator that handles efficient allocation
+// of the corresponding VkDescriptorSets.
 class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
     static ResultOrError<Ref<BindGroupLayout>> Create(
