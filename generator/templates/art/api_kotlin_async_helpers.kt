@@ -39,10 +39,17 @@ import kotlin.coroutines.suspendCoroutine
 
         //* We make a return class for every callback method so that it can be used inline
         //* (without callbacks) in a suspend (async) function.
-        public data class {{ return_name }}(
+        public class {{ return_name }}(
             {% for arg in kotlin_record_members(callback_function.arguments) %}
-                val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
-            {% endfor %})
+                public val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
+            {% endfor %}) {
+            //* Required for destructuring declarations. These come for free in a 'data' class but
+            //* we don't make it a data class because that can cause binary compatibility issues.
+            {% for arg in kotlin_record_members(callback_function.arguments) %}
+                public operator fun component{{ loop.index }}() : {{ kotlin_declaration(arg) }} =
+                    {{- as_varName(arg.name) }}
+            {% endfor %}
+        }
 
         //* Every method that is identified as using callbacks is given a helper method that wraps
         //* call with a suspend function.
