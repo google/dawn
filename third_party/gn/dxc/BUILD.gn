@@ -588,6 +588,10 @@ template("dxc_module") {
     if (dawn_has_build) {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
+
+      # `:common_config` sets exceptions and RTTI and that is incompatible with
+      # libc++ clang modules.
+      use_libcxx_modules = false
     }
     if (is_win) {
       # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
