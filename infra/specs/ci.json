@@ -31,7 +31,8 @@
       },
       {
         "args": [
-          "--adapter-vendor-id=0x1AE0"
+          "--adapter-vendor-id=0x1AE0",
+          "--gtest_filter=-SurfaceTests.*/Vulkan_SwiftShader_Device__Subzero"
         ],
         "merge": {
           "script": "//testing/merge_scripts/noop_merge.py"

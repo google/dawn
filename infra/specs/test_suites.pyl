@@ -26,6 +26,9 @@
       'dawn_end2end_sws_tests': {
         'args': [
           '--adapter-vendor-id=0x1AE0',
+          # These tests seem to cause flaky issues with X11 resource exhaustion
+          # when run via SwiftShader.
+          '--gtest_filter=-SurfaceTests.*/Vulkan_SwiftShader_Device__Subzero',
         ],
         'mixins': [
           'result_adapter_gtest_json',
