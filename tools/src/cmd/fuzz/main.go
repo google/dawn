@@ -45,7 +45,6 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/progressbar"
-	"dawn.googlesource.com/dawn/tools/src/term"
 	"dawn.googlesource.com/dawn/tools/src/transform"
 	"dawn.googlesource.com/dawn/tools/src/utils"
 )
@@ -73,17 +72,18 @@ const (
 )
 
 type cmdConfig struct {
-	verbose      bool
-	dump         bool
-	fuzzMode     FuzzMode
-	cmdMode      TaskMode // meta-task being requested by the user, may require running multiple tasks internally
-	filter       string
-	inputs       string
-	build        string
-	out          string
-	numProcesses int
-	osWrapper    oswrapper.OSWrapper
-	execWrapper  execwrapper.ExecWrapper
+	verbose         bool
+	dump            bool
+	fuzzMode        FuzzMode
+	cmdMode         TaskMode // meta-task being requested by the user, may require running multiple tasks internally
+	filter          string
+	inputs          string
+	build           string
+	out             string
+	numProcesses    int
+	osWrapper       oswrapper.OSWrapper
+	execWrapper     execwrapper.ExecWrapper
+	progressBuilder progressbar.Build
 }
 
 func showUsage() {
@@ -106,6 +106,7 @@ func main() {
 	c := cmdConfig{}
 	c.osWrapper = oswrapper.GetRealOSWrapper()
 	c.execWrapper = execwrapper.CreateRealExecWrapper()
+	c.progressBuilder = progressbar.New
 
 	flag.Usage = showUsage
 
@@ -308,24 +309,19 @@ func checkFuzzer(t *taskConfig) error {
 
 	remaining := transform.SliceToChan(files)
 
-	var pb *progressbar.ProgressBar
-	if term.CanUseAnsiEscapeSequences() {
-		pb = progressbar.New(os.Stdout, nil)
-		defer pb.Stop()
-	}
+	pb := t.progressBuilder(os.Stdout, nil)
+	defer pb.Stop()
 	var numDone uint32
 
 	routine := func() error {
 		for file := range remaining {
 			atomic.AddUint32(&numDone, 1)
-			if pb != nil {
-				pb.Update(progressbar.Status{
-					Total: len(files),
-					Segments: []progressbar.Segment{
-						{Count: int(atomic.LoadUint32(&numDone))},
-					},
-				})
-			}
+			pb.Update(progressbar.Status{
+				Total: len(files),
+				Segments: []progressbar.Segment{
+					{Count: int(atomic.LoadUint32(&numDone))},
+				},
+			})
 
 			if out, err := t.execWrapper.Command(t.fuzzer, file).RunWithCombinedOutput(); err != nil {
 				_, fuzzer := filepath.Split(t.fuzzer)
