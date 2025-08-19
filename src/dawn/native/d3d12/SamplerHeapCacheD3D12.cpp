@@ -120,12 +120,8 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(const Bi
     std::vector<Sampler*> samplers;
     samplers.reserve(samplerCount);
 
-    for (BindingIndex bindingIndex = bgl->GetDynamicBufferCount();
-         bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
-        const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-        if (std::holds_alternative<SamplerBindingInfo>(bindingInfo.bindingLayout)) {
-            samplers.push_back(ToBackend(group->GetBindingAsSampler(bindingIndex)));
-        }
+    for (BindingIndex bindingIndex : bgl->GetSamplerIndices()) {
+        samplers.push_back(ToBackend(group->GetBindingAsSampler(bindingIndex)));
     }
 
     // Check the cache if there exists a sampler heap allocation that corresponds to the

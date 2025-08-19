@@ -380,10 +380,10 @@ MaybeError ValidateExternalTextureBinding(
 template <typename F>
 void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* bgl, F&& f) {
     uint32_t packedIndex = 0;
-    for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
-        const auto* bufferLayout =
-            std::get_if<BufferBindingInfo>(&bgl->GetBindingInfo(bindingIndex).bindingLayout);
-        if (bufferLayout == nullptr || bufferLayout->minBindingSize == 0) {
+    for (BindingIndex bindingIndex : bgl->GetBufferIndices()) {
+        const auto& bufferLayout =
+            std::get<BufferBindingInfo>(bgl->GetBindingInfo(bindingIndex).bindingLayout);
+        if (bufferLayout.minBindingSize == 0) {
             f(bindingIndex, packedIndex++);
         }
     }

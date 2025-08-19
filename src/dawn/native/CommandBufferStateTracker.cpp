@@ -120,9 +120,8 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
     for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
         BindGroupLayoutInternalBase* bgl = bindGroups[groupIndex]->GetLayout();
 
-        for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex : bgl->GetBufferIndices()) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
-            // Buffer bindings are sorted to have smallest of bindingIndex.
             const BufferBindingInfo& layout =
                 std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
 
@@ -158,16 +157,11 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
         }
 
         // TODO(dawn:1642): optimize: precompute start/end range of storage textures bindings.
-        for (BindingIndex bindingIndex{bgl->GetBufferCount()};
-             bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
+        for (BindingIndex bindingIndex : bgl->GetStorageTextureIndices()) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+            const auto& layout = std::get<StorageTextureBindingInfo>(bindingInfo.bindingLayout);
 
-            const auto* layout = std::get_if<StorageTextureBindingInfo>(&bindingInfo.bindingLayout);
-            if (layout == nullptr) {
-                continue;
-            }
-
-            switch (layout->access) {
+            switch (layout.access) {
                 case wgpu::StorageTextureAccess::WriteOnly:
                 case wgpu::StorageTextureAccess::ReadWrite:
                     break;
