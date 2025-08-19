@@ -136,6 +136,11 @@ tasks.register('generateBindings', Exec) {
     '--jinja2-path', 'third_party/jinja2'
 }
 
+tasks.register('createDirectory', Exec) {
+    commandLine 'mkdir', '-p', 'src/main/cpp/gen/include'
+}
+
 preBuild {
+    dependsOn createDirectory
     dependsOn generateBindings
 }
