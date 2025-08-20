@@ -116,6 +116,11 @@ wgpu::BufferUsage ComputeInternalBufferUsages(const DeviceBase* device,
         usage |= kReadOnlyStorageBuffer;
     }
 
+    // Texel buffers support read-only access without requiring storage usage.
+    if (usage & wgpu::BufferUsage::TexelBuffer) {
+        usage |= kReadOnlyTexelBuffer;
+    }
+
     // The query resolve buffer need to be used as a storage buffer in the internal compute
     // pipeline which does timestamp uint conversion for timestamp query, it requires the buffer
     // has Storage usage in the binding group. Implicitly add an InternalStorage usage which is
@@ -306,6 +311,11 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
     wgpu::BufferUsage usage = descriptor->usage;
 
     DAWN_INVALID_IF(usage == wgpu::BufferUsage::None, "Buffer usages must not be 0.");
+
+    if (usage & wgpu::BufferUsage::TexelBuffer) {
+        DAWN_INVALID_IF(!device->AreTexelBuffersEnabled(), "%s is not enabled.",
+                        wgpu::WGSLLanguageFeatureName::TexelBuffers);
+    }
 
     if (!device->HasFeature(Feature::BufferMapExtendedUsages)) {
         const wgpu::BufferUsage kMapWriteAllowedUsages =

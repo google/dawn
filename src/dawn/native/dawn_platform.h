@@ -62,6 +62,9 @@ static constexpr wgpu::BufferUsage kInternalCopySrcBuffer =
 static constexpr wgpu::BufferUsage kIndirectBufferForBackendResourceTracking =
     static_cast<wgpu::BufferUsage>(1u << 28);
 
+// Add an extra buffer usage (readonly texel buffer usage) for resource tracking
+static constexpr wgpu::BufferUsage kReadOnlyTexelBuffer = static_cast<wgpu::BufferUsage>(1u << 27);
+
 // Define `kIndirectBufferForFrontendValidation` as an alias of wgpu::BufferUsage::Indirect just
 // for front-end validation on the indirect buffer usage.
 static constexpr wgpu::BufferUsage kIndirectBufferForFrontendValidation =

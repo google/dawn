@@ -413,6 +413,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/SamplerValidationTests.cpp",
     "unittests/validation/ShaderModuleValidationTests.cpp",
     "unittests/validation/StorageTextureValidationTests.cpp",
+    "unittests/validation/TexelBufferValidationTests.cpp",
     "unittests/validation/TextureSubresourceTests.cpp",
     "unittests/validation/TextureValidationTests.cpp",
     "unittests/validation/TextureViewValidationTests.cpp",

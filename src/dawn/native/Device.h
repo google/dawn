@@ -337,6 +337,7 @@ class DeviceBase : public ErrorSink,
 
     std::vector<const char*> GetTogglesUsed() const;
     const tint::wgsl::AllowedFeatures& GetWGSLAllowedFeatures() const;
+    bool AreTexelBuffersEnabled() const;
     bool IsToggleEnabled(Toggle toggle) const;
     const TogglesState& GetTogglesState() const;
     const FeaturesSet& GetEnabledFeatures() const;

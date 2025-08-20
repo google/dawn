@@ -1746,6 +1746,11 @@ const tint::wgsl::AllowedFeatures& DeviceBase::GetWGSLAllowedFeatures() const {
     return mWGSLAllowedFeatures;
 }
 
+bool DeviceBase::AreTexelBuffersEnabled() const {
+    const auto& features = GetWGSLAllowedFeatures().features;
+    return features.count(tint::wgsl::LanguageFeature::kTexelBuffers);
+}
+
 bool DeviceBase::IsValidationEnabled() const {
     return !IsToggleEnabled(Toggle::SkipValidation);
 }

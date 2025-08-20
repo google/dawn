@@ -61,7 +61,8 @@ std::string ToBufferSyncScopeResourceUsage(wgpu::BufferUsage syncScopeBufferUsag
         std::make_pair(wgpu::BufferUsage::Indirect, "Indirect"),
         std::make_pair(wgpu::BufferUsage::Uniform, "Uniform"),
         std::make_pair(wgpu::BufferUsage::Storage, "Storage(read-write)"),
-        std::make_pair(kReadOnlyStorageBuffer, "Storage(read-only)")};
+        std::make_pair(kReadOnlyStorageBuffer, "Storage(read-only)"),
+        std::make_pair(kReadOnlyTexelBuffer, "TexelBuffer(read-only)")};
 
     std::stringstream stream;
     bool first = true;

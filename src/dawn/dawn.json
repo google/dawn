@@ -772,7 +772,8 @@
             {"value": 64, "name": "uniform"},
             {"value": 128, "name": "storage"},
             {"value": 256, "name": "indirect"},
-            {"value": 512, "name": "query resolve"}
+            {"value": 512, "name": "query resolve"},
+            {"value": 1024, "name": "texel buffer", "tags": ["dawn"]}
         ]
     },
     "char": {
