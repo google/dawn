@@ -102,7 +102,10 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BeginEndRange<BindingIndex> GetDynamicBufferIndices() const;
     BeginEndRange<BindingIndex> GetBufferIndices() const;
     BeginEndRange<BindingIndex> GetStorageTextureIndices() const;
+    BeginEndRange<BindingIndex> GetSampledTextureIndices() const;
     BeginEndRange<BindingIndex> GetSamplerIndices() const;
+    BeginEndRange<BindingIndex> GetNonStaticSamplerIndices() const;
+    BeginEndRange<BindingIndex> GetInputAttachmentIndices() const;
 
     // Getters for the dynamic binding array.
     bool HasDynamicArray() const;

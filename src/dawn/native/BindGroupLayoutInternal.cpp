@@ -833,8 +833,23 @@ BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetStorageTextureIndice
                  GetBindingTypeEnd(Order_StorageTexture));
 }
 
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSampledTextureIndices() const {
+    return Range(GetBindingTypeStart(Order_SampledTexture),
+                 GetBindingTypeEnd(Order_SampledTexture));
+}
+
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSamplerIndices() const {
     return Range(GetBindingTypeStart(Order_StaticSampler), GetBindingTypeEnd(Order_RegularSampler));
+}
+
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetNonStaticSamplerIndices() const {
+    return Range(GetBindingTypeStart(Order_RegularSampler),
+                 GetBindingTypeEnd(Order_RegularSampler));
+}
+
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetInputAttachmentIndices() const {
+    return Range(GetBindingTypeStart(Order_InputAttachment),
+                 GetBindingTypeEnd(Order_InputAttachment));
 }
 
 const ExternalTextureBindingExpansionMap&
