@@ -3362,5 +3362,71 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, PrimitiveId) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpCapability Geometry
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %main_primitive_id_Input %main_loc0_Output
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main_primitive_id_Input "main_primitive_id_Input"
+               OpName %main_loc0_Output "main_loc0_Output"
+               OpName %main_inner "main_inner"
+               OpName %prim_id "prim_id"
+               OpName %main "main"
+               OpDecorate %main_primitive_id_Input Flat
+               OpDecorate %main_primitive_id_Input BuiltIn PrimitiveId
+               OpDecorate %main_loc0_Output Location 0
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_primitive_id_Input = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_loc0_Output = OpVariable %_ptr_Output_v4float Output
+         %10 = OpTypeFunction %v4float %uint
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+ %main_inner = OpFunction %v4float None %10
+    %prim_id = OpFunctionParameter %uint
+         %11 = OpLabel
+         %12 = OpConvertUToF %float %prim_id
+         %13 = OpCompositeConstruct %v4float %12 %12 %12 %12
+               OpReturnValue %13
+               OpFunctionEnd
+       %main = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpLoad %uint %main_primitive_id_Input None
+         %19 = OpFunctionCall %v4float %main_inner %18
+               OpStore %main_loc0_Output %19 None
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %main_primitive_id_Input:ptr<__in, u32, read> = var undef @builtin(primitive_id)
+  %main_loc0_Output:ptr<__out, vec4<f32>, read_write> = var undef @location(0)
+}
+
+%main_inner = func(%prim_id:u32):vec4<f32> {
+  $B2: {
+    %5:f32 = spirv.convert_u_to_f<f32> %prim_id
+    %6:vec4<f32> = construct %5, %5, %5, %5
+    ret %6
+  }
+}
+%main = @fragment func():void {
+  $B3: {
+    undef = phony %main_loc0_Output
+    undef = phony %main_primitive_id_Input
+    %8:u32 = load %main_primitive_id_Input
+    %9:vec4<f32> = call %main_inner, %8
+    store %main_loc0_Output, %9
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

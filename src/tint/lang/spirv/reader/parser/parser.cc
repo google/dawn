@@ -633,6 +633,8 @@ class Parser {
                 return core::BuiltinValue::kClipDistances;
             case spv::BuiltIn::CullDistance:
                 return core::BuiltinValue::kCullDistance;
+            case spv::BuiltIn::PrimitiveId:
+                return core::BuiltinValue::kPrimitiveId;
             default:
                 TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << static_cast<uint32_t>(b);
         }

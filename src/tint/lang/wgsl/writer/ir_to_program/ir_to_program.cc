@@ -268,6 +268,10 @@ class State {
                         Enable(wgsl::Extension::kClipDistances);
                         attrs.Push(b.Builtin(core::BuiltinValue::kClipDistances));
                         break;
+                    case core::BuiltinValue::kPrimitiveId:
+                        Enable(wgsl::Extension::kChromiumExperimentalPrimitiveId);
+                        attrs.Push(b.Builtin(core::BuiltinValue::kPrimitiveId));
+                        break;
                     default:
                         TINT_UNIMPLEMENTED() << builtin.value();
                 }
