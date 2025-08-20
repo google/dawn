@@ -27,12 +27,15 @@
 {% from 'art/api_kotlin_types.kt' import kotlin_declaration with context %}
 package {{ kotlin_package }}
 
+import kotlin.jvm.JvmField
+
 public object Constants {
     private val UINT32_MAX = Integer.parseUnsignedInt("4294967295")
     private val UINT64_MAX = java.lang.Long.parseUnsignedLong("18446744073709551615")
     private val SIZE_MAX = UINT64_MAX
 
     {% for constant in by_category['constant'] %}
+       @JvmField
         public val {{ as_ktName(constant.name.SNAKE_CASE() ) }}:{{ ' ' }}
         {{- kotlin_declaration(constant) }} =
         {%- if constant.value == 'NAN' %}
