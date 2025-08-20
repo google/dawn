@@ -58,4 +58,5 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
     //* the wrapped object.
     override fun equals(other: Any?): Boolean =
         other is {{ obj.name.CamelCase() }} && other.handle == handle
+    override fun hashCode(): Int = handle.hashCode()
 }
