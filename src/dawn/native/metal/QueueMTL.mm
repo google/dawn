@@ -124,14 +124,9 @@ void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
 MaybeError Queue::WaitForIdleForDestructionImpl() {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
-    DAWN_TRY(CheckPassedSerials());
 
-    // Wait for all commands to be finished so we can free resources
-    while (GetCompletedCommandSerial() != GetLastSubmittedCommandSerial()) {
-        usleep(100);
-        DAWN_TRY(CheckPassedSerials());
-    }
-
+    DAWN_TRY(WaitForQueueSerial(GetLastSubmittedCommandSerial(),
+                                std::numeric_limits<Nanoseconds>::max()));
     return {};
 }
 
@@ -194,7 +189,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     // Update the completed serial once the completed handler is fired. Make a local copy of
     // mLastSubmittedSerial so it is captured by value.
     ExecutionSerial pendingSerial = GetPendingCommandSerial();
-    // This ObjC block runs on a different thread
+    // This ObjC block runs on a different thread.
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
         TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                uint64_t(pendingSerial));
@@ -272,7 +267,9 @@ Ref<WaitListEvent> Queue::CreateWorkDoneEvent(ExecutionSerial serial) {
         // This serial may have just completed. If it did, mark the event complete.
         // Also check for device loss. Otherwise, we could enqueue the event
         // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
-        if (GetDevice()->IsLost() || serial <= GetCompletedCommandSerial()) {
+        if (GetDevice()->GetState() == DeviceBase::State::Disconnected ||
+            GetDevice()->GetState() == DeviceBase::State::Destroyed ||
+            serial <= GetCompletedCommandSerial()) {
             completionEvent->Signal();
         } else {
             // Insert the event into the list which will be signaled inside Metal's queue

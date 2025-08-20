@@ -33,8 +33,19 @@
 
 #include "dawn/common/Atomic.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Error.h"
 
 namespace dawn::native {
+namespace {
+void PopWaitingTasksInto(ExecutionSerial serial,
+                         SerialMap<ExecutionSerial, ExecutionQueueBase::Task>& waitingTasks,
+                         std::vector<ExecutionQueueBase::Task>& tasks) {
+    for (auto task : waitingTasks.IterateUpTo(serial)) {
+        tasks.push_back(std::move(task));
+    }
+    waitingTasks.ClearUpTo(serial);
+}
+}  // namespace
 
 ExecutionSerial ExecutionQueueBase::GetPendingCommandSerial() const {
     return ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire) + 1);
@@ -106,7 +117,40 @@ MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Na
 }
 
 MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {
-    return WaitForIdleForDestructionImpl();
+    // Currently waiting for idle for destruction requires the device lock to be held.
+    DAWN_ASSERT(GetDevice()->IsLockedByCurrentThreadIfNeeded());
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        DAWN_ASSERT(!mWaitingForIdle);
+        mWaitingForIdle = true;
+    }
+    IgnoreErrors(WaitForIdleForDestructionImpl());
+
+    // Prepare to call any remaining outstanding callbacks now.
+    std::vector<Task> tasks;
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
+
+        if (mCallingCallbacks) {
+            mCv.wait(lock, [&] { return !mCallingCallbacks; });
+        }
+
+        auto serial = GetCompletedCommandSerial();
+        PopWaitingTasksInto(serial, mWaitingTasks, tasks);
+
+        if (tasks.size() > 0) {
+            mCallingCallbacks = true;
+        }
+    }
+    for (auto task : tasks) {
+        task();
+    }
+    if (tasks.size() > 0) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mCallingCallbacks = false;
+    }
+    mCv.notify_all();
+    return {};
 }
 
 MaybeError ExecutionQueueBase::CheckPassedSerials() {
@@ -132,27 +176,58 @@ MaybeError ExecutionQueueBase::UpdateCompletedSerial() {
 }
 
 void ExecutionQueueBase::TrackSerialTask(ExecutionSerial serial, Task&& task) {
-    if (serial <= GetCompletedCommandSerial()) {
-        task();
-        return;
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        if (serial > GetCompletedCommandSerial()) {
+            mWaitingTasks.Enqueue(std::move(task), serial);
+            return;
+        }
     }
-    mWaitingTasks->Enqueue(std::move(task), serial);
+    task();
 }
 
 void ExecutionQueueBase::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
-    // Atomically set mCompletedSerial to completedSerial if completedSerial is larger.
-    FetchMax(mCompletedSerial, uint64_t(completedSerial));
+    std::vector<Task> tasks;
+    {
+        std::unique_lock<std::mutex> lock(mMutex);
 
-    mWaitingTasks.Use([&](auto tasks) {
-        // Note that the callbacks need to be called while holding this lock to ensure that callback
-        // ordering is enforced. At the moment, that means that re-entrant callbacks that call async
-        // APIs will deadlock. In the future we may consider making this a recursive lock or
-        // providing some other mechanism in order to enable re-entrant async APIs.
-        for (auto task : tasks->IterateUpTo(completedSerial)) {
-            task();
+        // We update the completed serial as soon as possible before waiting for callback rights so
+        // that we almost always process as many callbacks as possible.
+        FetchMax(mCompletedSerial, uint64_t(completedSerial));
+
+        if (mWaitingForIdle) {
+            // If we are waiting for idle, then the callbacks will be fired there. It is currently
+            // necessary to avoid calling the callbacks in this function and doing it in the
+            // |WaitForIdleForDestruction| call because |WaitForIdleForDestruction| is called while
+            // holding the device lock and any re-entrant callbacks may also try to acquire the
+            // device lock. As a result, if the main thread is waiting for idle, and another thread
+            // is trying to update the completed serial and call callbacks, it could deadlock. Once
+            // we update |WaitForIdleForDestruction| to release the device lock on the wait, we may
+            // be able to simplify the code here.
+            return;
         }
-        tasks->ClearUpTo(completedSerial);
-    });
+
+        if (mCallingCallbacks) {
+            mCv.wait(lock, [&] { return !mCallingCallbacks; });
+        }
+
+        auto serial = GetCompletedCommandSerial();
+        PopWaitingTasksInto(serial, mWaitingTasks, tasks);
+        if (tasks.size() > 0) {
+            mCallingCallbacks = true;
+        }
+    }
+
+    // Call the callbacks without holding the lock on the ExecutionQueue to avoid lock-inversion
+    // issues when dealing with potential re-entrant callbacks.
+    for (auto task : tasks) {
+        task();
+    }
+    if (tasks.size() > 0) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mCallingCallbacks = false;
+    }
+    mCv.notify_all();
 }
 
 MaybeError ExecutionQueueBase::EnsureCommandsFlushed(ExecutionSerial serial) {
