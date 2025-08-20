@@ -64,6 +64,9 @@ class SurfaceTests : public DawnTest {
         DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNull());
         DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntel() && IsMesa("23.2"));
 
+        // Causes flaky X11 resource exhaustion when run with SwiftShader.
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsSwiftshader());
+
         glfwSetErrorCallback([](int code, const char* message) {
             ErrorLog() << "GLFW error " << code << " " << message;
         });
