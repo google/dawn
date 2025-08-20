@@ -169,8 +169,9 @@
                         {% endfor %}
 
                         //* Get the client (Kotlin) callback so we can call it.
+                        {% set callbackName = 'on' + member.type.name.chunks[:-1] | map('title') | join %}
                         jmethodID callbackMethod = env->GetMethodID(
-                                classes->{{ member.type.name.camelCase() }}, "callback", "(
+                                classes->{{ member.type.name.camelCase() }}, "{{ callbackName }}", "(
                             {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
                                 {{- jni_signature(callbackArg) -}}
                             {%- endfor %})V");
