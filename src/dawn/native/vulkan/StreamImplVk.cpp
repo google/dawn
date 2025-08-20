@@ -315,6 +315,14 @@ void stream::Stream<VkPipelineDynamicStateCreateInfo>::Write(
 }
 
 template <>
+void stream::Stream<VkPipelineRobustnessCreateInfo>::Write(
+    stream::Sink* sink,
+    const VkPipelineRobustnessCreateInfo& t) {
+    StreamIn(sink, t.vertexInputs, t.images, t.storageBuffers, t.uniformBuffers);
+    SerializePnext(sink, &t);
+}
+
+template <>
 void stream::Stream<vulkan::RenderPassCacheQuery>::Write(stream::Sink* sink,
                                                          const vulkan::RenderPassCacheQuery& t) {
     StreamIn(sink, t.colorMask.to_ulong(), t.resolveTargetMask.to_ulong(), t.sampleCount);
@@ -346,7 +354,7 @@ void stream::Stream<VkGraphicsPipelineCreateInfo>::Write(stream::Sink* sink,
              t.pInputAssemblyState, t.pTessellationState, t.pViewportState, t.pRasterizationState,
              t.pMultisampleState, t.pDepthStencilState, t.pColorBlendState, t.pDynamicState,
              t.subpass);
-    SerializePnext(sink, &t);
+    SerializePnext<VkPipelineRobustnessCreateInfo>(sink, &t);
 }
 
 }  // namespace dawn::native

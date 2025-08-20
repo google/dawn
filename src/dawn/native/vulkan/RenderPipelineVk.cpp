@@ -605,11 +605,6 @@ MaybeError RenderPipeline::InitializeImpl() {
     //   That also means mHasInputAttachment would be removed in future.
     createInfo.subpass = mHasInputAttachment ? 0 : renderPassInfo.mainSubpass;
 
-    if (buildCacheKey) {
-        // Record cache key information now since createInfo is not stored.
-        StreamIn(&mCacheKey, createInfo, layout->GetCacheKey());
-    }
-
     // If possible, specify where exactly robustness should be added in the pipeline. This is
     // necessary because when bindless is enabled and robustBufferAccessUpdateAfterBind is false, we
     // must only set robust buffer access on vertexInputs.
@@ -634,6 +629,11 @@ MaybeError RenderPipeline::InitializeImpl() {
             robustnessCreateInfo.images =
                 VK_PIPELINE_ROBUSTNESS_IMAGE_BEHAVIOR_ROBUST_IMAGE_ACCESS_2;
         }
+    }
+
+    if (buildCacheKey) {
+        // Record cache key information now since createInfo is not stored.
+        StreamIn(&mCacheKey, createInfo, layout->GetCacheKey());
     }
 
     // Try to see if we have anything in the blob cache.
