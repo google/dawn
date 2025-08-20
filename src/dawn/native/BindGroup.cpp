@@ -868,15 +868,13 @@ const ityp::span<uint32_t, uint64_t>& BindGroupBase::GetUnverifiedBufferSizes() 
     return mBindingData.unverifiedBufferSizes;
 }
 
-BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex) {
+BufferBase* BindGroupBase::GetBindingAsBuffer(BindingIndex bindingIndex) {
     DAWN_ASSERT(!IsError());
     const BindGroupLayoutInternalBase* layout = GetLayout();
     DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
     DAWN_ASSERT(std::holds_alternative<BufferBindingInfo>(
         layout->GetBindingInfo(bindingIndex).bindingLayout));
-    BufferBase* buffer = static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
-    return {buffer, mBindingData.bufferData[bindingIndex].offset,
-            mBindingData.bufferData[bindingIndex].size};
+    return static_cast<BufferBase*>(mBindingData.bindings[bindingIndex].Get());
 }
 
 SamplerBase* BindGroupBase::GetBindingAsSampler(BindingIndex bindingIndex) const {
@@ -899,6 +897,12 @@ TextureViewBase* BindGroupBase::GetBindingAsTextureView(BindingIndex bindingInde
                 std::holds_alternative<InputAttachmentBindingInfo>(
                     layout->GetBindingInfo(bindingIndex).bindingLayout));
     return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
+}
+
+BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex) {
+    DAWN_ASSERT(!IsError());
+    return {GetBindingAsBuffer(bindingIndex), mBindingData.bufferData[bindingIndex].offset,
+            mBindingData.bufferData[bindingIndex].size};
 }
 
 const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalTextures() const {

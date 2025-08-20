@@ -132,7 +132,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                 DAWN_UNREACHABLE();
         }
 
-        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+        BufferBase* buffer = group->GetBindingAsBuffer(i);
         BufferUsedAs(buffer, usage, bindingInfo.visibility);
     }
 
@@ -229,7 +229,7 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
     const auto* layout = group->GetLayout();
 
     for (BindingIndex i : layout->GetBufferIndices()) {
-        mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(i).buffer);
+        mUsage.referencedBuffers.insert(group->GetBindingAsBuffer(i));
     }
 
     for (BindingIndex i : layout->GetTextureIndices()) {

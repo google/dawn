@@ -70,9 +70,11 @@ class BindGroupBase : public ApiObjectBase {
     BindGroupLayoutInternalBase* GetLayout();
     const BindGroupLayoutInternalBase* GetLayout() const;
 
-    BufferBinding GetBindingAsBufferBinding(BindingIndex bindingIndex);
+    // Getters for static bindings.
+    BufferBase* GetBindingAsBuffer(BindingIndex bindingIndex);
     SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex) const;
     TextureViewBase* GetBindingAsTextureView(BindingIndex bindingIndex);
+    BufferBinding GetBindingAsBufferBinding(BindingIndex bindingIndex);
     const ityp::span<uint32_t, uint64_t>& GetUnverifiedBufferSizes() const;
     const std::vector<Ref<ExternalTextureBase>>& GetBoundExternalTextures() const;
 

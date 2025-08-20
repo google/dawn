@@ -669,11 +669,9 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
                             std::numeric_limits<uint32_t>::max());
 
                 const auto& bindingInfo = mBindgroups[i]->GetLayout()->GetBindingInfo(bindingIndex);
-                const BufferBinding& bufferBinding =
-                    mBindgroups[i]->GetBindingAsBufferBinding(bindingIndex);
+                const BufferBase* buffer = mBindgroups[i]->GetBindingAsBuffer(bindingIndex);
 
                 BindingNumber bindingNumber = bindingInfo.binding;
-                const BufferBase* buffer = bufferBinding.buffer;
 
                 uint64_t bufferSize =
                     mBindgroups[i]->GetUnverifiedBufferSizes()[packedIndex.value()];
@@ -704,9 +702,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
                 mBindgroups[a.e0.bindGroupIndex], a.e0.bindGroupIndex, a.e0.bindingIndex,
                 mBindgroups[a.e1.bindGroupIndex], a.e1.bindGroupIndex, a.e1.bindingIndex,
                 a.e0.offset, a.e0.size, a.e1.offset, a.e1.size,
-                mBindgroups[a.e0.bindGroupIndex]
-                    ->GetBindingAsBufferBinding(a.e0.bindingIndex)
-                    .buffer);
+                mBindgroups[a.e0.bindGroupIndex]->GetBindingAsBuffer(a.e0.bindingIndex));
         } else {
             DAWN_ASSERT(std::holds_alternative<TextureAliasing>(result));
             const auto& a = std::get<TextureAliasing>(result);
