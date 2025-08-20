@@ -356,7 +356,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_PROPERTIES);
         }
 
-        if (info.extensions[DeviceExt::DescriptorIndexing]) {
+        if (info.extensions[DeviceExt::PipelineRobustness]) {
             featuresChain.Add(&info.pipelineRobustnessFeatures,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_ROBUSTNESS_FEATURES);
             propertiesChain.Add(&info.pipelineRobustnessProperties,
