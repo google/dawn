@@ -1574,7 +1574,7 @@ MaybeError DeviceBase::Tick() {
     // To avoid overly ticking, we only want to tick when:
     // 1. the last submitted serial has moved beyond the completed serial
     // 2. or the backend still has pending commands to submit.
-    DAWN_TRY(mQueue->CheckPassedSerials());
+    DAWN_TRY(mQueue->UpdateCompletedSerial());
     DAWN_TRY(TickImpl());
 
     // TODO(crbug.com/dawn/833): decouple TickImpl from updating the serial so that we can
