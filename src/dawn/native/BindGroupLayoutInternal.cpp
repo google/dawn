@@ -838,6 +838,11 @@ BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSampledTextureIndice
                  GetBindingTypeEnd(Order_SampledTexture));
 }
 
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetTextureIndices() const {
+    return Range(GetBindingTypeStart(Order_SampledTexture),
+                 GetBindingTypeEnd(Order_InputAttachment));
+}
+
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSamplerIndices() const {
     return Range(GetBindingTypeStart(Order_StaticSampler), GetBindingTypeEnd(Order_RegularSampler));
 }

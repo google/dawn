@@ -105,70 +105,79 @@ void SyncScopeUsageTracker::AddRenderBundleTextureUsage(
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
-    for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
-         ++bindingIndex) {
-        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
+    const auto* layout = group->GetLayout();
 
-        MatchVariant(
-            bindingInfo.bindingLayout,
-            [&](const BufferBindingInfo& layout) {
-                BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
-                switch (layout.type) {
-                    case wgpu::BufferBindingType::Uniform:
-                        BufferUsedAs(buffer, wgpu::BufferUsage::Uniform, bindingInfo.visibility);
-                        break;
-                    case wgpu::BufferBindingType::Storage:
-                        BufferUsedAs(buffer, wgpu::BufferUsage::Storage, bindingInfo.visibility);
-                        break;
-                    case kInternalStorageBufferBinding:
-                        BufferUsedAs(buffer, kInternalStorageBuffer, bindingInfo.visibility);
-                        break;
-                    case wgpu::BufferBindingType::ReadOnlyStorage:
-                    case kInternalReadOnlyStorageBufferBinding:
-                        BufferUsedAs(buffer, kReadOnlyStorageBuffer, bindingInfo.visibility);
-                        break;
-                    case wgpu::BufferBindingType::BindingNotUsed:
-                    case wgpu::BufferBindingType::Undefined:
-                        DAWN_UNREACHABLE();
-                }
-            },
-            [&](const TextureBindingInfo& layout) {
-                TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                switch (layout.sampleType) {
-                    case kInternalResolveAttachmentSampleType:
-                        TextureViewUsedAs(view, kResolveAttachmentLoadingUsage,
-                                          bindingInfo.visibility);
-                        break;
-                    default:
-                        TextureViewUsedAs(view, wgpu::TextureUsage::TextureBinding,
-                                          bindingInfo.visibility);
-                        break;
-                }
-            },
-            [&](const StorageTextureBindingInfo& layout) {
-                TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
-                switch (layout.access) {
-                    case wgpu::StorageTextureAccess::WriteOnly:
-                        TextureViewUsedAs(view, kWriteOnlyStorageTexture, bindingInfo.visibility);
-                        break;
-                    case wgpu::StorageTextureAccess::ReadWrite:
-                        TextureViewUsedAs(view, wgpu::TextureUsage::StorageBinding,
-                                          bindingInfo.visibility);
-                        break;
-                    case wgpu::StorageTextureAccess::ReadOnly:
-                        TextureViewUsedAs(view, kReadOnlyStorageTexture, bindingInfo.visibility);
-                        break;
-                    case wgpu::StorageTextureAccess::BindingNotUsed:
-                    case wgpu::StorageTextureAccess::Undefined:
-                        DAWN_UNREACHABLE();
-                }
-            },
-            [&](const SamplerBindingInfo&) {},  //
-            [&](const StaticSamplerBindingInfo&) {},
-            [&](const InputAttachmentBindingInfo&) {
-                // This binding is not supposed to be used on front-end.
+    for (BindingIndex i : layout->GetBufferIndices()) {
+        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(i);
+        const BufferBindingInfo& bufferInfo =
+            std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
+
+        wgpu::BufferUsage usage;
+        switch (bufferInfo.type) {
+            case wgpu::BufferBindingType::Uniform:
+                usage = wgpu::BufferUsage::Uniform;
+                break;
+            case wgpu::BufferBindingType::Storage:
+                usage = wgpu::BufferUsage::Storage;
+                break;
+            case kInternalStorageBufferBinding:
+                usage = kInternalStorageBuffer;
+                break;
+            case wgpu::BufferBindingType::ReadOnlyStorage:
+            case kInternalReadOnlyStorageBufferBinding:
+                usage = kReadOnlyStorageBuffer;
+                break;
+            case wgpu::BufferBindingType::BindingNotUsed:
+            case wgpu::BufferBindingType::Undefined:
                 DAWN_UNREACHABLE();
-            });
+        }
+
+        BufferBase* buffer = group->GetBindingAsBufferBinding(i).buffer;
+        BufferUsedAs(buffer, usage, bindingInfo.visibility);
+    }
+
+    for (BindingIndex i : layout->GetSampledTextureIndices()) {
+        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(i);
+        const TextureBindingInfo& textureInfo =
+            std::get<TextureBindingInfo>(bindingInfo.bindingLayout);
+
+        wgpu::TextureUsage usage;
+        switch (textureInfo.sampleType) {
+            case kInternalResolveAttachmentSampleType:
+                usage = kResolveAttachmentLoadingUsage;
+                break;
+            default:
+                usage = wgpu::TextureUsage::TextureBinding;
+                break;
+        }
+
+        TextureViewBase* view = group->GetBindingAsTextureView(i);
+        TextureViewUsedAs(view, usage, bindingInfo.visibility);
+    }
+
+    for (BindingIndex i : layout->GetStorageTextureIndices()) {
+        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(i);
+        const StorageTextureBindingInfo& textureInfo =
+            std::get<StorageTextureBindingInfo>(bindingInfo.bindingLayout);
+
+        wgpu::TextureUsage usage;
+        switch (textureInfo.access) {
+            case wgpu::StorageTextureAccess::WriteOnly:
+                usage = kWriteOnlyStorageTexture;
+                break;
+            case wgpu::StorageTextureAccess::ReadWrite:
+                usage = wgpu::TextureUsage::StorageBinding;
+                break;
+            case wgpu::StorageTextureAccess::ReadOnly:
+                usage = kReadOnlyStorageTexture;
+                break;
+            case wgpu::StorageTextureAccess::BindingNotUsed:
+            case wgpu::StorageTextureAccess::Undefined:
+                DAWN_UNREACHABLE();
+        }
+
+        TextureViewBase* view = group->GetBindingAsTextureView(i);
+        TextureViewUsedAs(view, usage, bindingInfo.visibility);
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
@@ -217,24 +226,14 @@ void ComputePassResourceUsageTracker::AddReferencedBuffer(BufferBase* buffer) {
 }
 
 void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGroupBase* group) {
-    for (BindingIndex index{0}; index < group->GetLayout()->GetBindingCount(); ++index) {
-        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(index);
+    const auto* layout = group->GetLayout();
 
-        MatchVariant(
-            bindingInfo.bindingLayout,
-            [&](const BufferBindingInfo&) {
-                mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(index).buffer);
-            },
-            [&](const TextureBindingInfo&) {
-                mUsage.referencedTextures.insert(
-                    group->GetBindingAsTextureView(index)->GetTexture());
-            },
-            [&](const StorageTextureBindingInfo&) {
-                mUsage.referencedTextures.insert(
-                    group->GetBindingAsTextureView(index)->GetTexture());
-            },
-            [](const SamplerBindingInfo&) {}, [](const StaticSamplerBindingInfo&) {},
-            [&](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
+    for (BindingIndex i : layout->GetBufferIndices()) {
+        mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(i).buffer);
+    }
+
+    for (BindingIndex i : layout->GetTextureIndices()) {
+        mUsage.referencedTextures.insert(group->GetBindingAsTextureView(i)->GetTexture());
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {

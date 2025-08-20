@@ -103,6 +103,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BeginEndRange<BindingIndex> GetBufferIndices() const;
     BeginEndRange<BindingIndex> GetStorageTextureIndices() const;
     BeginEndRange<BindingIndex> GetSampledTextureIndices() const;
+    BeginEndRange<BindingIndex> GetTextureIndices() const;
     BeginEndRange<BindingIndex> GetSamplerIndices() const;
     BeginEndRange<BindingIndex> GetNonStaticSamplerIndices() const;
     BeginEndRange<BindingIndex> GetInputAttachmentIndices() const;
