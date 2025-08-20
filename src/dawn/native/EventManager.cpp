@@ -161,32 +161,8 @@ void WaitQueueSerials(const QueueWaitSerialsMap& queueWaitSerials, Nanoseconds t
         }
         auto waitSerial = queueAndSerial.second;
 
-        auto* device = queue->GetDevice();
-        [[maybe_unused]] bool error;
-        error = device->ConsumedError(
-            [&]() -> MaybeError {
-                auto deviceGuard = device->GetGuard();
-
-                if (waitSerial > queue->GetLastSubmittedCommandSerial()) {
-                    // Serial has not been submitted yet. Submit it now.
-                    DAWN_TRY(queue->EnsureCommandsFlushed(waitSerial));
-                }
-                // Check the completed serial.
-                if (waitSerial > queue->GetCompletedCommandSerial()) {
-                    if (timeout > Nanoseconds(0)) {
-                        // Wait on the serial if it hasn't passed yet.
-                        [[maybe_unused]] bool waitResult = false;
-                        DAWN_TRY_ASSIGN(waitResult, queue->WaitForQueueSerial(waitSerial, timeout));
-                    }
-                }
-                return {};
-            }(),
-            "waiting for work in %s.", queue.Get());
-
-        // Updating completed serial cannot hold the device-wide lock because it may cause user
-        // callbacks to fire.
-        error = device->ConsumedError(queue->UpdateCompletedSerial(),
-                                      "updating completed serial in %s", queue.Get());
+        [[maybe_unused]] bool hadError = queue->GetDevice()->ConsumedError(
+            queue->WaitForQueueSerial(waitSerial, timeout), "waiting for work in %s.", queue.Get());
     }
 }
 
@@ -351,9 +327,9 @@ FutureID EventManager::TrackEvent(Ref<TrackedEvent>&& event) {
 
     if (const auto* queueAndSerial = event->GetIfQueueAndSerial()) {
         if (auto q = queueAndSerial->queue.Promote()) {
-            q->TrackSerialTask(queueAndSerial->completionSerial, [this, event]() {
+            q->TrackSerialTask(queueAndSerial->completionSerial, [this, q, event]() {
                 // If this is executed, we can be sure that the raw pointer to this EventManager is
-                // valid because the Queue is alive and:
+                // valid because the Queue is kept alive by the lambda capture and:
                 //   Queue -[refs]->
                 //     Device -[refs]->
                 //       Adapter -[refs]->

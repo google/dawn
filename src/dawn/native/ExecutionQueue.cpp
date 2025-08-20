@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "dawn/common/Atomic.h"
+#include "dawn/native/Device.h"
 
 namespace dawn::native {
 
@@ -47,23 +48,61 @@ ExecutionSerial ExecutionQueueBase::GetCompletedCommandSerial() const {
     return ExecutionSerial(mCompletedSerial.load(std::memory_order_acquire));
 }
 
-ResultOrError<bool> ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial serial,
-                                                           Nanoseconds timeout) {
-    ExecutionSerial completedSerial;
-    DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(serial, timeout));
+MaybeError ExecutionQueueBase::WaitForQueueSerial(ExecutionSerial waitSerial, Nanoseconds timeout) {
+    // We currently have two differing implementations for this function depending on whether the
+    // backend supports thread safe waits. Note that while currently only the Metal backend
+    // explicitly enables thread safe wait, the main blocking backend is D3D11 which is using the
+    // value of |mCompletedSerial| within it's implementation of |CheckAndUpdateCompletedSerials|.
+    if (GetDevice()->IsToggleEnabled(Toggle::WaitIsThreadSafe)) {
+        {
+            auto deviceGuard = GetDevice()->GetGuard();
+            if (waitSerial > GetLastSubmittedCommandSerial()) {
+                // Serial has not been submitted yet. Submit it now.
+                DAWN_TRY(EnsureCommandsFlushed(waitSerial));
+            }
+        }
 
-    if (completedSerial == kWaitSerialTimeout) {
-        return false;
+        // Serial is already complete.
+        if (waitSerial <= GetCompletedCommandSerial()) {
+            return {};
+        }
+
+        if (timeout > Nanoseconds(0)) {
+            // Wait on the serial if it hasn't passed yet.
+            ExecutionSerial completedSerial = kWaitSerialTimeout;
+            DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(waitSerial, timeout));
+            UpdateCompletedSerialTo(completedSerial);
+            return {};
+        }
+        return UpdateCompletedSerial();
+    } else {
+        // Otherwise, we need to acquire the device lock first.
+        auto deviceGuard = GetDevice()->GetGuard();
+        if (waitSerial > GetLastSubmittedCommandSerial()) {
+            // Serial has not been submitted yet. Submit it now.
+            DAWN_TRY(EnsureCommandsFlushed(waitSerial));
+        }
+
+        // Serial is already complete.
+        if (waitSerial <= GetCompletedCommandSerial()) {
+            return UpdateCompletedSerial();
+        }
+
+        if (timeout > Nanoseconds(0)) {
+            // Wait on the serial if it hasn't passed yet.
+            ExecutionSerial completedSerial = kWaitSerialTimeout;
+            DAWN_TRY_ASSIGN(completedSerial, WaitForQueueSerialImpl(waitSerial, timeout));
+
+            // It's critical to update the completed serial right away. If fences are processed
+            // by another thread before CheckAndUpdateCompletedSerials() runs on the current
+            // thread, the fence list will be empty, preventing the current thread from
+            // determining the true latest serial. Preemptively updating mCompletedSerial
+            // ensures CheckAndUpdateCompletedSerials() returns an accurate value, preventing
+            // stale data.
+            FetchMax(mCompletedSerial, uint64_t(completedSerial));
+        }
+        return UpdateCompletedSerial();
     }
-
-    // It's critical to update the completed serial right away. If fences are processed by another
-    // thread before CheckAndUpdateCompletedSerials() runs on the current thread,
-    // the fence list will be empty, preventing the current thread from determining the true latest
-    // serial. Pre-emptively updating mCompletedSerial ensures CheckAndUpdateCompletedSerials()
-    // returns an accurate value, preventing stale data.
-    FetchMax(mCompletedSerial, uint64_t(completedSerial));
-
-    return true;
 }
 
 MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {

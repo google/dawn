@@ -62,9 +62,7 @@ struct TrackTaskCallback : CallbackTask {
     ExecutionSerial mSerial = kMaxExecutionSerial;
 };
 
-class QueueBase : public ApiObjectBase,
-                  public ExecutionQueueBase,
-                  public WeakRefSupport<QueueBase> {
+class QueueBase : public ExecutionQueueBase, public WeakRefSupport<QueueBase> {
   public:
     ~QueueBase() override;
 

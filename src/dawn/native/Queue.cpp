@@ -131,12 +131,12 @@ void TrackTaskCallback::SetFinishedSerial(ExecutionSerial serial) {
 // QueueBase
 
 QueueBase::QueueBase(DeviceBase* device, const QueueDescriptor* descriptor)
-    : ApiObjectBase(device, descriptor->label) {
+    : ExecutionQueueBase(device, descriptor->label) {
     GetObjectTrackingList()->Track(this);
 }
 
 QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
-    : ApiObjectBase(device, tag, label) {}
+    : ExecutionQueueBase(device, tag, label) {}
 
 QueueBase::~QueueBase() {
     DAWN_ASSERT(mTasksInFlight->Empty());
