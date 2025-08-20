@@ -327,6 +327,10 @@ MaybeError RenderPipeline::InitializeImpl() {
         compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     }
 
+    if (device->IsToggleEnabled(Toggle::D3DSkipShaderOptimizations)) {
+        compileFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
+    }
+
     if (device->IsToggleEnabled(Toggle::UseDXC) &&
         ((compileFlags & D3DCOMPILE_OPTIMIZATION_LEVEL2) == 0)) {
         // DXC's default opt level is /O3, unlike FXC's /O1. Set explicitly, otherwise there's no

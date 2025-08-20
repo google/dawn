@@ -547,6 +547,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "workaround issues where FXC can miscompile code that depends on special float values (NaN, "
       "INF, etc).",
       "https://crbug.com/tint/976", ToggleStage::Device}},
+    {Toggle::D3DSkipShaderOptimizations,
+     {"d3d_skip_shader_optimizations",
+      "Sets the D3DCOMPILE_SKIP_OPTIMIZATION compilation flag when compiling HLSL code.",
+      "https://crbug.com/439845637", ToggleStage::Device}},
     {Toggle::PolyFillPacked4x8DotProduct,
      {"polyfill_packed_4x8_dot_product",
       "Always use the polyfill version of dot4I8Packed() and dot4U8Packed().",

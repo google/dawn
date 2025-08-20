@@ -134,6 +134,7 @@ enum class Toggle {
     D3D12CreateNotZeroedHeap,
     D3D12DontUseNotZeroedHeapFlagOnTexturesAsCommitedResources,
     D3DDisableIEEEStrictness,
+    D3DSkipShaderOptimizations,
     PolyFillPacked4x8DotProduct,
     PolyfillPackUnpack4x8Norm,
     EnableSubgroupsIntelGen9,
