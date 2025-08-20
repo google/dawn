@@ -2217,5 +2217,91 @@ $B1: {  # root
     EXPECT_EQ(after, str());
 }
 
+TEST_F(SpirvReader_TransposeRowMajorTest, AccessSiblingToMatrix) {
+    // struct S {
+    //   @offset(16) @row_major m : mat4x4<f32>,
+    //   c : vec4<i32>,
+    // };
+    //
+    // @group(0) @binding(0) var<uniform> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x : i32 = s.c.z;
+    // }
+
+    auto* matrix_member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat4x4<f32>(),
+                                                           0u, 16u, 64u, 64u, core::IOAttributes{});
+    matrix_member->SetRowMajor();
+
+    auto* vec_member = ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.vec4<i32>(), 64u,
+                                                        64u, 16u, 16u, core::IOAttributes{});
+
+    auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member, vec_member});
+
+    core::ir::Var* var = nullptr;
+    b.Append(mod.root_block, [&] {
+        var = b.Var("s", ty.ptr<uniform>(strct));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto* f = b.ComputeFunction("f");
+    b.Append(f->Block(), [&] {
+        auto* a = b.Access<ptr<uniform, vec4<i32>>>(var, 1_u);
+        b.Let("x", b.LoadVectorElement(a, 2_u));
+        b.Return(f);
+    });
+
+    auto* before = R"(
+S = struct @align(64) {
+  m:mat4x4<f32> @offset(16), @row_major
+  c:vec4<i32> @offset(64)
+}
+
+$B1: {  # root
+  %s:ptr<uniform, S, read> = var undef @binding_point(0, 0)
+}
+
+%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<uniform, vec4<i32>, read> = access %s, 1u
+    %4:i32 = load_vector_element %3, 2u
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(before, str());
+
+    auto* after = R"(
+S = struct @align(64) {
+  m:mat4x4<f32> @offset(16), @row_major
+  c:vec4<i32> @offset(64)
+}
+
+S_1 = struct @align(64) {
+  m:mat4x4<f32> @offset(16)
+  c:vec4<i32> @offset(64)
+}
+
+$B1: {  # root
+  %s:ptr<uniform, S_1, read> = var undef @binding_point(0, 0)
+}
+
+%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<uniform, vec4<i32>, read> = access %s, 1u
+    %4:i32 = load_vector_element %3, 2u
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+
+    Run(TransposeRowMajor);
+    EXPECT_EQ(after, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

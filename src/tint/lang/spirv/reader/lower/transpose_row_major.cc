@@ -326,9 +326,11 @@ struct State {
             return;
         }
 
-        // If we didn't find a matrix, then something is weird, we should have never tried to
-        // replace the access.
-        TINT_ASSERT(matrix_index != -1);
+        // If we don't have a matrix index we need to update, then we've updated the `var` type
+        // we're accessing but we're accessing another member of the struct, so we're done.
+        if (matrix_index == -1) {
+            return;
+        }
 
         // Not accessing through a matrix, nothing to do.
         if (!indexed_through_row_major) {
