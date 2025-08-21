@@ -94,5 +94,17 @@ void tint_entry_point(tint_struct_1 v_8) {
 )");
 }
 
+TEST_F(HlslWriterTest, CanGenerate_TexelBufferUnsupported) {
+    auto* buffer_ty = ty.texel_buffer(core::TexelFormat::kRgba8Unorm, core::Access::kRead);
+    auto* var = b.Var("buf", ty.ptr<handle>(buffer_ty));
+    mod.root_block->Append(var);
+
+    Options options;
+    auto result = CanGenerate(mod, options);
+    ASSERT_NE(result, Success);
+    EXPECT_THAT(result.Failure().reason,
+                testing::HasSubstr("texel buffers are not supported by the HLSL backend"));
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

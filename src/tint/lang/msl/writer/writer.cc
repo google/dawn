@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
@@ -49,6 +50,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             if (m->Columns() != 8 || m->Rows() != 8) {
                 return Failure("the MSL backend only supports 8x8 subgroup matrices");
             }
+        } else if (ty->Is<core::type::TexelBuffer>()) {
+            // TODO(crbug/382544164): Prototype texel buffer feature
+            return Failure("texel buffers are not supported by the MSL backend");
         }
     }
 
