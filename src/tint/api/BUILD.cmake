@@ -57,7 +57,7 @@ tint_target_add_dependencies(tint_api lib
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_ir_to_program
+  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -131,7 +131,7 @@ tint_add_target(tint_api_test test
 tint_target_add_dependencies(tint_api_test test
   tint_api
   tint_lang_wgsl
-  tint_lang_wgsl_writer_ir_to_program
+  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic

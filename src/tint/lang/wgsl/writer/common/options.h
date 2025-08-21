@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,50 +25,34 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/writer/writer.h"
+#ifndef SRC_TINT_LANG_WGSL_WRITER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_WGSL_WRITER_COMMON_OPTIONS_H_
 
-#include <memory>
-
-#include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
-#include "src/tint/lang/wgsl/writer/raise/raise.h"
+#include "src/tint/lang/wgsl/allowed_features.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::wgsl::writer {
 
-Result<Output> Generate(const Program& program, const Options& options) {
-    Output output;
+/// Configuration options used for producing a WGSL program from an IR module.
+struct Options {
+    /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
+    bool allow_non_uniform_derivatives = false;
+    /// Set to `true` to insert a directive to disable uniformity checks for subgroup builtins.
+    bool allow_non_uniform_subgroup_operations = false;
+    /// The extensions and language features that are allowed to be used in the generated WGSL.
+    wgsl::AllowedFeatures allowed_features = {};
 
-    // Generate the WGSL code.
-    auto impl = std::make_unique<ASTPrinter>(program, options);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics().Str()};
-    }
-    output.wgsl = impl->Result();
+    /// Set to `true` to minify the output WGSL.
+    bool minify = false;
 
-    return output;
-}
-
-Result<Output> WgslFromIR(core::ir::Module& module, const Options& options) {
-    auto res = ProgramFromIR(module, options);
-    if (res != Success) {
-        return res.Failure();
-    }
-    return Generate(res.Move(), options);
-}
-
-Result<Program> ProgramFromIR(core::ir::Module& module, const Options& options) {
-    // core-dialect -> WGSL-dialect
-    if (auto res = Raise(module); res != Success) {
-        return res.Failure();
-    }
-
-    auto program = IRToProgram(module, options);
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics().Str()};
-    }
-
-    return program;
-}
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField().
+    TINT_REFLECT(Options,
+                 allow_non_uniform_derivatives,
+                 allow_non_uniform_subgroup_operations,
+                 allowed_features,
+                 minify);
+};
 
 }  // namespace tint::wgsl::writer
+
+#endif  // SRC_TINT_LANG_WGSL_WRITER_COMMON_OPTIONS_H_

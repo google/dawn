@@ -121,7 +121,7 @@ tint::Program ReadSpirv(const std::vector<uint32_t>& data, const LoadProgramOpti
         }
 
         // Convert the IR module to a Program.
-        tint::wgsl::writer::ProgramOptions writer_options;
+        tint::wgsl::writer::Options writer_options;
         writer_options.allow_non_uniform_derivatives =
             opts.spirv_reader_options.allow_non_uniform_derivatives;
         writer_options.allowed_features = opts.spirv_reader_options.allowed_features;

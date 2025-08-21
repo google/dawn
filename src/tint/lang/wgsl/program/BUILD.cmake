@@ -126,7 +126,7 @@ tint_target_add_dependencies(tint_lang_wgsl_program_fuzz fuzz
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_ir_to_program
+  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_bytes
   tint_utils_containers

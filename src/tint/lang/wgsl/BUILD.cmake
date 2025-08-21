@@ -95,6 +95,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_lang_wgsl_writer_common
   tint_lang_wgsl_writer_ir_to_program
   tint_lang_wgsl_writer_raise
   tint_utils

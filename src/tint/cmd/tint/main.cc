@@ -154,6 +154,7 @@ struct Options {
 
     bool dump_ir = false;
     bool use_ir_reader = false;
+    bool minify = false;
 
 #if TINT_BUILD_SPV_READER
     tint::spirv::reader::Options spirv_reader_options;
@@ -317,6 +318,9 @@ If not provided, will be inferred from output filename extension:
 
     auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
     TINT_DEFER(opts->rename_all = *rename_all.value);
+
+    auto& minify = options.Add<BoolOption>("minify", "Minify the output WGSL", Default{false});
+    TINT_DEFER(opts->minify = *minify.value);
 
     auto& overrides = options.Add<StringOption>(
         "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
@@ -940,7 +944,10 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-    auto result = tint::wgsl::writer::Generate(program);
+    tint::wgsl::writer::Options writer_options{
+        .minify = options.minify,
+    };
+    auto result = tint::wgsl::writer::Generate(program, writer_options);
     if (result != tint::Success) {
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;

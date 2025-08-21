@@ -72,7 +72,7 @@ cc_binary(
     "//src/tint/lang/wgsl/reader/lower:test",
     "//src/tint/lang/wgsl/resolver:test",
     "//src/tint/lang/wgsl/sem:test",
-    "//src/tint/lang/wgsl/writer/ir_to_program",
+    "//src/tint/lang/wgsl/writer/common",
     "//src/tint/lang/wgsl/writer/ir_to_program:test",
     "//src/tint/lang/wgsl/writer/raise:test",
     "//src/tint/lang/wgsl:test",

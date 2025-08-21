@@ -82,7 +82,7 @@ class IRToProgramRoundtripTest : public testing::Test {
 
         result.ir_post_raise = core::ir::Disassembler(ir_module.Get()).Plain();
 
-        writer::ProgramOptions program_options;
+        writer::Options program_options;
         program_options.allowed_features = AllowedFeatures::Everything();
         auto output_program = wgsl::writer::IRToProgram(ir_module.Get(), program_options);
         if (!output_program.IsValid()) {

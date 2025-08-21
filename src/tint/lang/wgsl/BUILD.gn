@@ -85,6 +85,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer/common",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/lang/wgsl/writer/raise",
       "${tint_src_dir}/utils",

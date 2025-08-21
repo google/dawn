@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_AST_PRINTER_H_
 
 #include "src/tint/lang/core/binary_op.h"
+#include "src/tint/lang/wgsl/writer/common/options.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text_generator/text_generator.h"
 
@@ -88,7 +89,8 @@ class ASTPrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
-    explicit ASTPrinter(const Program& program);
+    /// @param options the writer options
+    explicit ASTPrinter(const Program& program, const Options& options = {});
     ~ASTPrinter() override;
 
     /// Generates the result data
@@ -230,6 +232,7 @@ class ASTPrinter : public tint::TextGenerator {
 
   private:
     const Program& program_;
+    [[maybe_unused]] const Options options_;
 };
 
 }  // namespace tint::wgsl::writer

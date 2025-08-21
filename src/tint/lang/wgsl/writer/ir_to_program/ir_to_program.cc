@@ -106,7 +106,7 @@ class State {
   public:
     explicit State(const core::ir::Module& m) : mod(m) {}
 
-    Program Run(const ProgramOptions& options) {
+    Program Run(const Options& options) {
         core::ir::Capabilities caps{
             core::ir::Capability::kAllowMultipleEntryPoints,
             core::ir::Capability::kAllowOverrides,
@@ -1422,7 +1422,7 @@ class State {
 
 }  // namespace
 
-Program IRToProgram(const core::ir::Module& i, const ProgramOptions& options) {
+Program IRToProgram(const core::ir::Module& i, const Options& options) {
     return State{i}.Run(options);
 }
 

@@ -73,7 +73,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_wgsl_reader_lower_test
   tint_lang_wgsl_resolver_test
   tint_lang_wgsl_sem_test
-  tint_lang_wgsl_writer_ir_to_program
+  tint_lang_wgsl_writer_common
   tint_lang_wgsl_writer_ir_to_program_test
   tint_lang_wgsl_writer_raise_test
   tint_lang_wgsl_test

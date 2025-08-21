@@ -465,7 +465,7 @@ MaybeError ParseSPIRV(const std::vector<uint32_t>& spirv,
         return {};
     }
 
-    tint::wgsl::writer::ProgramOptions options;
+    tint::wgsl::writer::Options options;
     options.allow_non_uniform_derivatives = allowNonUniformDerivatives;
     options.allowed_features = allowedFeatures.ToTint();
     auto wgslResult = tint::wgsl::writer::ProgramFromIR(irResult.Get(), options);

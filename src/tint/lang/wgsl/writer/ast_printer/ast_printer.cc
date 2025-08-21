@@ -93,7 +93,8 @@
 
 namespace tint::wgsl::writer {
 
-ASTPrinter::ASTPrinter(const Program& program) : program_(program) {}
+ASTPrinter::ASTPrinter(const Program& program, const Options& options)
+    : program_(program), options_(options) {}
 
 ASTPrinter::~ASTPrinter() = default;
 

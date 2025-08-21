@@ -87,7 +87,7 @@ void Shutdown() {
 }
 
 Result<std::string> SpirvToWgsl([[maybe_unused]] const std::vector<uint32_t>& spirv,
-                                [[maybe_unused]] const wgsl::writer::ProgramOptions& wgsl_options) {
+                                [[maybe_unused]] const wgsl::writer::Options& wgsl_options) {
 #if !TINT_BUILD_SPV_READER
     return Failure{"Tint SPIR-V reader is not enabled"};
 #elif !TINT_BUILD_WGSL_WRITER

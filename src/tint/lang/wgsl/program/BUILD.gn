@@ -120,7 +120,7 @@ tint_fuzz_source_set("fuzz") {
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/resolver",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
+    "${tint_src_dir}/lang/wgsl/writer/common",
     "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/bytes",
     "${tint_src_dir}/utils/containers",

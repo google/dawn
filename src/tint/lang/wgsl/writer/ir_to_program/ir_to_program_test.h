@@ -33,7 +33,7 @@
 
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/wgsl/writer/ir_to_program/program_options.h"
+#include "src/tint/lang/wgsl/writer/common/options.h"
 
 namespace tint::wgsl::writer {
 
@@ -100,7 +100,7 @@ class IRToProgramTest : public core::ir::IRTestHelper {
     }
 
     /// The options to use when generating WGSL.
-    ProgramOptions options{
+    Options options{
         .allowed_features = AllowedFeatures::Everything(),
     };
 };

@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -37,63 +37,15 @@
 load("//src/tint:flags.bzl", "COPTS")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
-  name = "wgsl",
+  name = "common",
   srcs = [
-    "enums.cc",
-    "feature_status.cc",
-    "reserved_words.cc",
+    "common.cc",
   ],
   hdrs = [
-    "allowed_features.h",
-    "enums.h",
-    "feature_status.h",
-    "reserved_words.h",
+    "options.h",
   ],
   deps = [
-    "//src/tint/utils",
-    "//src/tint/utils/containers",
-    "//src/tint/utils/diagnostic",
-    "//src/tint/utils/ice",
-    "//src/tint/utils/macros",
-    "//src/tint/utils/math",
-    "//src/tint/utils/memory",
-    "//src/tint/utils/rtti",
-    "//src/tint/utils/text",
-    "//src/utils",
-  ],
-  copts = COPTS,
-  visibility = ["//visibility:public"],
-)
-cc_library(
-  name = "test",
-  alwayslink = True,
-  srcs = [
-    "allowed_features_test.cc",
-    "enums_test.cc",
-    "language_feature_status_test.cc",
-  ] + select({
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
-      "ir_roundtrip_test.cc",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    "//conditions:default": [],
-  }),
-  deps = [
-    "//src/tint/api/common",
-    "//src/tint/lang/core",
-    "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/ir",
-    "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
-    "//src/tint/lang/wgsl/ast",
-    "//src/tint/lang/wgsl/program",
-    "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer/common",
-    "//src/tint/lang/wgsl/writer/ir_to_program",
-    "//src/tint/lang/wgsl/writer/raise",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -102,43 +54,10 @@ cc_library(
     "//src/tint/utils/math",
     "//src/tint/utils/memory",
     "//src/tint/utils/rtti",
-    "//src/tint/utils/symbol",
     "//src/tint/utils/text",
-    "@gtest",
     "//src/utils",
-  ] + select({
-    ":tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/reader",
-      "//src/tint/lang/wgsl/reader/program_to_ir",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_writer": [
-      "//src/tint/lang/wgsl/writer",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   copts = COPTS,
   visibility = ["//visibility:public"],
-)
-
-alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
-)
-
-alias(
-  name = "tint_build_wgsl_writer",
-  actual = "//src/tint:tint_build_wgsl_writer_true",
-)
-
-selects.config_setting_group(
-    name = "tint_build_wgsl_reader_and_tint_build_wgsl_writer",
-    match_all = [
-        ":tint_build_wgsl_reader",
-        ":tint_build_wgsl_writer",
-    ],
 )
 

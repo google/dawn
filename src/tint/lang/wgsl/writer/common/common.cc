@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_PROGRAM_OPTIONS_H_
-#define SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_PROGRAM_OPTIONS_H_
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
+#endif
 
-#include "src/tint/lang/wgsl/allowed_features.h"
-
-namespace tint::wgsl::writer {
-
-/// Configuration options used for producing a WGSL program from an IR module.
-struct ProgramOptions {
-    /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
-    bool allow_non_uniform_derivatives = false;
-    /// Set to `true` to insert a directive to disable uniformity checks for subgroup builtins.
-    bool allow_non_uniform_subgroup_operations = false;
-    /// The extensions and language features that are allowed to be used in the generated WGSL.
-    wgsl::AllowedFeatures allowed_features = {};
-};
-
-}  // namespace tint::wgsl::writer
-
-#endif  // SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_PROGRAM_OPTIONS_H_
+// A placeholder symbol used to emit a symbol for this lib target.
+int tint_lang_wgsl_writer_common_symbol = 1;
