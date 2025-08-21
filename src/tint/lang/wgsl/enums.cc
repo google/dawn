@@ -52,6 +52,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_barycentric_coord") {
         return Extension::kChromiumExperimentalBarycentricCoord;
     }
+    if (str == "chromium_experimental_dynamic_binding") {
+        return Extension::kChromiumExperimentalDynamicBinding;
+    }
     if (str == "chromium_experimental_framebuffer_fetch") {
         return Extension::kChromiumExperimentalFramebufferFetch;
     }
@@ -95,6 +98,8 @@ std::string_view ToString(Extension value) {
             return "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalBarycentricCoord:
             return "chromium_experimental_barycentric_coord";
+        case Extension::kChromiumExperimentalDynamicBinding:
+            return "chromium_experimental_dynamic_binding";
         case Extension::kChromiumExperimentalFramebufferFetch:
             return "chromium_experimental_framebuffer_fetch";
         case Extension::kChromiumExperimentalImmediate:

@@ -203,7 +203,7 @@ TEST_F(EnableDirectiveTest, InvalidChromiumExtension) {
     // Error when unknown extension found
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_barycentric_coord', 'chromium_experimental_framebuffer_fetch', 'chromium_experimental_immediate', 'chromium_experimental_pixel_local', 'chromium_experimental_subgroup_matrix', 'chromium_internal_graphite', 'chromium_internal_input_attachments', 'clip_distances', 'dual_source_blending', 'f16', 'primitive_index', 'subgroups')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_barycentric_coord', 'chromium_experimental_dynamic_binding', 'chromium_experimental_framebuffer_fetch', 'chromium_experimental_immediate', 'chromium_experimental_pixel_local', 'chromium_experimental_subgroup_matrix', 'chromium_internal_graphite', 'chromium_internal_input_attachments', 'clip_distances', 'dual_source_blending', 'f16', 'primitive_index', 'subgroups')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);

@@ -162,6 +162,7 @@
 "centroid"
 "chromium_disable_uniformity_analysis"
 "chromium_experimental_barycentric_coord"
+"chromium_experimental_dynamic_binding"
 "chromium_experimental_framebuffer_fetch"
 "chromium_experimental_immediate"
 "chromium_experimental_pixel_local"

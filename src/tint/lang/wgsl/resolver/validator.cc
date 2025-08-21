@@ -471,6 +471,16 @@ bool Validator::BindingArray(const core::type::BindingArray* t, const Source& so
                          << "language feature, which is not allowed in the current environment";
         return false;
     }
+
+    if (t->Count()->Is<core::type::RuntimeArrayCount>()) {
+        if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalDynamicBinding)) {
+            AddError(source) << "use of a runtime " << style::Attribute("binding_array")
+                             << " requires enabling extension "
+                             << style::Code("chromium_experimental_dynamic_binding");
+            return false;
+        }
+    }
+
     if (!t->Count()->IsAnyOf<core::type::ConstantArrayCount, core::type::RuntimeArrayCount>()) {
         AddError(source) << "binding_array count must be a constant expression";
         return false;

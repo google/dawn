@@ -101,6 +101,8 @@ enum extension {
   chromium_experimental_subgroup_matrix
   // A Chromium-specific extension for barycentric_coord support
   chromium_experimental_barycentric_coord
+  // A Chromium-specific extension for dynamic binding
+  chromium_experimental_dynamic_binding
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
