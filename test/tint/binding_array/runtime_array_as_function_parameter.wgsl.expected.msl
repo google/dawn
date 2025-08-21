@@ -1,5 +1,17 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-runtime binding array not supported by the MSL backend
+struct tint_module_vars_struct {
+  array<texture2d<float, access::sample>, 1> sampled_textures;
+};
 
-tint executable returned error: exit status 1
+void do_texture_load(array<texture2d<float, access::sample>, 1> ts) {
+  uint const v = min(uint(0), (ts[0].get_num_mip_levels() - 1u));
+  uint2 const v_1 = (uint2(ts[0].get_width(v), ts[0].get_height(v)) - uint2(1u));
+  float4 const texture_load = ts[0].read(min(uint2(int2(0)), v_1), v);
+}
+
+fragment void fs(array<texture2d<float, access::sample>, 1> sampled_textures [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sampled_textures=sampled_textures};
+  do_texture_load(tint_module_vars.sampled_textures);
+}
