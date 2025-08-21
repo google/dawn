@@ -206,7 +206,7 @@ void ForeachField(const OBJECT& object, CB&& callback) {
 /// TINT_REFLECT_HASH_CODE(CLASS) generates a tint::HashCode implementation for the CLASS based on
 /// the reflected fields.
 #define TINT_REFLECT_HASH_CODE(CLASS)                         \
-    HashCode HashCode() const {                               \
+    tint::HashCode HashCode() const {                         \
         return Hash(CLASS::Reflection::FieldsAsTuple(*this)); \
     }                                                         \
     TINT_REQUIRE_SEMICOLON
