@@ -463,6 +463,13 @@ cmake_configure_file("dxc-config-h") {
 ## Common config shared by all targets
 #######################################################################
 
+# `:common_config` sets exceptions and RTTI and that is incompatible with
+# libc++ clang modules.
+# Unfortunately, we cannot set use_libcxx_modules = false in a config target,
+# so it can't propogate to transitive dependencies - we have to do this
+# manually.
+use_libcxx_modules = false
+
 config("common_config") {
   warning_flags = []
   if (is_clang) {
@@ -589,9 +596,7 @@ template("dxc_module") {
       configs -= [ "//build/config/compiler:chromium_code" ]
       configs += [ "//build/config/compiler:no_chromium_code" ]
 
-      # `:common_config` sets exceptions and RTTI and that is incompatible with
-      # libc++ clang modules.
-      use_libcxx_modules = false
+      use_libcxx_modules = use_libcxx_modules
     }
     if (is_win) {
       # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
@@ -739,6 +744,10 @@ dxc_module("Support") {
 source_set("TableGen") {
   public_deps = [ ":Support" ]
 
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
+
   sources = [
     "$dawn_dxc_dir/lib/TableGen/Error.cpp",
     "$dawn_dxc_dir/lib/TableGen/Main.cpp",
@@ -753,6 +762,10 @@ source_set("TableGen") {
 
 executable("llvm-tblgen") {
   deps = [ ":TableGen" ]
+
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   sources = [
     "$dawn_dxc_dir/utils/TableGen/AsmMatcherEmitter.cpp",
@@ -788,6 +801,10 @@ executable("llvm-tblgen") {
 
 executable("clang-tblgen") {
   deps = [ ":TableGen" ]
+
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   sources = [
     "$dawn_dxc_dir/tools/clang/utils/TableGen/ClangASTNodesEmitter.cpp",
@@ -2392,6 +2409,8 @@ executable("dxc") {
   if (dawn_has_build) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
+
+    use_libcxx_modules = use_libcxx_modules
   }
 
   if (is_win) {
