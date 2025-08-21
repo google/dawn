@@ -103,6 +103,9 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true on successful generation, false otherwise
     bool Generate();
 
+    /// @returns the result data
+    std::string Result() const override;
+
     /// Handles generating a diagnostic control
     /// @param out the output stream
     /// @param diagnostic the diagnostic control node

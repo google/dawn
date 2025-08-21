@@ -91,23 +91,14 @@ fn another_func(param : MyAlias) -> i32 {
 }
 )";
     auto minified =
-        R"(alias a = i32;
-
-struct b {
-  c : a,
-}
-
-var<private> d : b;
-
-fn e(f : i32) -> a {
-  let g = ((d.c + (&(d)).c) + f);
-  return g;
-}
-
-fn h(f : a) -> i32 {
-  return e(f);
-}
-)";
+        R"(alias
+a=i32;struct
+b{c:a,}var<private>d:b;fn
+e(f:i32)->a{let
+g=((d.c+(&(d)).c)+f);return
+g;}fn
+h(f:a)->i32{return
+e(f);})";
 
     Run(input, minified);
 }
@@ -117,11 +108,11 @@ TEST_F(WgslMinifierTest, EntryPoint) {
 fn main(@location(0) in : vec4<f32>) -> @builtin(position) vec4<f32> {
   return in;
 })";
-    auto minified = R"(@vertex
-fn main(@location(0) a : vec4<f32>) -> @builtin(position) vec4<f32> {
-  return a;
-}
-)";
+    auto minified =
+        R"(@vertex
+fn
+main(@location(0)a:vec4<f32>)->@builtin(position)vec4<f32>{return
+a;})";
 
     Run(input, minified);
 }
@@ -133,12 +124,10 @@ fn f() -> i32 {
   return my_override;
 }
 )";
-    auto minified = R"(override my_override : i32;
-
-fn a() -> i32 {
-  return my_override;
-}
-)";
+    auto minified = R"(override
+my_override:i32;fn
+a()->i32{return
+my_override;})";
 
     Run(input, minified);
 }
@@ -154,16 +143,12 @@ fn f() -> u32 {
   return 0;
 }
 )";
-    auto minified = R"(var<workgroup> a : atomic<u32>;
-
-fn b() -> u32 {
-  let c = atomicCompareExchangeWeak(&(a), 0, 1);
-  if (c.exchanged) {
-    return c.old_value;
-  }
-  return 0;
-}
-)";
+    auto minified =
+        R"(var<workgroup>a:atomic<u32>;fn
+b()->u32{let
+c=atomicCompareExchangeWeak(&(a),0,1);if(c.exchanged){return
+c.old_value;}return
+0;})";
 
     Run(input, minified);
 }
@@ -183,6 +168,23 @@ TEST_F(WgslMinifierTest, ReservedWordCollision) {
     )";
 
     Run(source);
+}
+
+TEST_F(WgslMinifierTest, Unicode) {
+    auto input = R"(override 𝖗𝖊𝖘𝖚𝖑𝖙 : f32;
+
+@fragment fn 𝕖𝕟𝕥𝕣𝕪𝕡𝕠𝕚𝕟𝕥() -> @location(0) f32 {
+  return 𝖗𝖊𝖘𝖚𝖑𝖙;
+}
+)";
+    auto minified =
+        R"(override
+𝖗𝖊𝖘𝖚𝖑𝖙:f32;@fragment
+fn
+𝕖𝕟𝕥𝕣𝕪𝕡𝕠𝕚𝕟𝕥()->@location(0)f32{return
+𝖗𝖊𝖘𝖚𝖑𝖙;})";
+
+    Run(input, minified);
 }
 
 }  // namespace

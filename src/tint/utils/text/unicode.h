@@ -69,6 +69,11 @@ struct CodePoint {
 
 namespace utf8 {
 
+/// Returns the length of the utf8 sequence that starts with @p first_code_point.
+/// @param first_code_point the first byte of the utf8 sequence
+/// @returns the length of the utf8 sequence, or 0 if the sequence is invalid.
+uint8_t SequenceLength(uint8_t first_code_point);
+
 /// Decodes the first code point in the utf8 string.
 /// @param ptr the pointer to the first byte of the utf8 sequence
 /// @param len the maximum number of uint8_t to read

@@ -147,6 +147,13 @@ bool ASTPrinter::Generate() {
     return !diagnostics_.ContainsErrors();
 }
 
+std::string ASTPrinter::Result() const {
+    if (options_.minify) {
+        return main_buffer_.MinifiedString();
+    }
+    return main_buffer_.String();
+}
+
 void ASTPrinter::EmitDiagnosticControl(StringStream& out,
                                        const ast::DiagnosticControl& diagnostic) {
     out << "diagnostic(" << diagnostic.severity << ", " << diagnostic.rule_name->String() << ")";

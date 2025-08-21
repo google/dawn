@@ -342,17 +342,7 @@ bool CodePoint::IsXIDContinue() const {
 
 namespace utf8 {
 
-// This is a C-style API that will always trigger -Wunsafe-buffer-usage
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
-std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
-    if (len < 1) {
-        return {};
-    }
-    // Fast-path ASCII characters as they're always valid
-    if (ptr[0] <= 0x7f) {
-        return {CodePoint{ptr[0]}, 1};
-    }
-
+uint8_t SequenceLength(uint8_t first_code_point) {
     // Lookup table for the first byte of a UTF-8 sequence.
     // 0 indicates an invalid length.
     // Note that bit encodings that can fit in a smaller number of bytes are
@@ -379,8 +369,21 @@ std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
         /* 0xe0 */ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
         /* 0xf0 */ 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     };
+    return kSequenceLength[first_code_point];
+}
 
-    uint8_t n = kSequenceLength[ptr[0]];
+// This is a C-style API that will always trigger -Wunsafe-buffer-usage
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+std::pair<CodePoint, size_t> Decode(const uint8_t* ptr, size_t len) {
+    if (len < 1) {
+        return {};
+    }
+    // Fast-path ASCII characters as they're always valid
+    if (ptr[0] <= 0x7f) {
+        return {CodePoint{ptr[0]}, 1};
+    }
+
+    uint8_t n = SequenceLength(ptr[0]);
     if (n > len) {
         return {};
     }
