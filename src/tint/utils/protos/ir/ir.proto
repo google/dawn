@@ -578,7 +578,7 @@ enum BuiltinValue {
     clip_distances = 15;
     cull_distance = 16;
     subgroup_id = 17;
-    primitive_id = 18;
+    primitive_index = 18;
     barycentric_coord = 19;
 }
 

@@ -659,7 +659,7 @@ source_set("end2end_tests_sources") {
     "end2end/PipelineLayoutTests.cpp",
     "end2end/PixelLocalStorageTests.cpp",
     "end2end/PolyfillBuiltinSimpleTests.cpp",
-    "end2end/PrimitiveIdTests.cpp",
+    "end2end/PrimitiveIndexTests.cpp",
     "end2end/PrimitiveStateTests.cpp",
     "end2end/PrimitiveTopologyTests.cpp",
     "end2end/QueryTests.cpp",

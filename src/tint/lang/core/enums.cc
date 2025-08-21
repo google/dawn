@@ -997,8 +997,8 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "position") {
         return BuiltinValue::kPosition;
     }
-    if (str == "primitive_id") {
-        return BuiltinValue::kPrimitiveId;
+    if (str == "primitive_index") {
+        return BuiltinValue::kPrimitiveIndex;
     }
     if (str == "sample_index") {
         return BuiltinValue::kSampleIndex;
@@ -1051,8 +1051,8 @@ std::string_view ToString(BuiltinValue value) {
             return "num_workgroups";
         case BuiltinValue::kPosition:
             return "position";
-        case BuiltinValue::kPrimitiveId:
-            return "primitive_id";
+        case BuiltinValue::kPrimitiveIndex:
+            return "primitive_index";
         case BuiltinValue::kSampleIndex:
             return "sample_index";
         case BuiltinValue::kSampleMask:

@@ -37,13 +37,12 @@ namespace {
 constexpr uint32_t kRTSize = 16;
 constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-constexpr wgpu::FeatureName kPrimitiveIdFeature =
-    wgpu::FeatureName::ChromiumExperimentalPrimitiveId;
+constexpr wgpu::FeatureName kPrimitiveIndexFeature = wgpu::FeatureName::PrimitiveIndex;
 
-using RequirePrimitiveIdFeature = bool;
-DAWN_TEST_PARAM_STRUCT(PrimitiveIdTestsParams, RequirePrimitiveIdFeature);
+using RequirePrimitiveIndexFeature = bool;
+DAWN_TEST_PARAM_STRUCT(PrimitiveIndexTestsParams, RequirePrimitiveIndexFeature);
 
-class PrimitiveIdTests : public DawnTestWithParams<PrimitiveIdTestsParams> {
+class PrimitiveIndexTests : public DawnTestWithParams<PrimitiveIndexTestsParams> {
   public:
     wgpu::Texture CreateDefault2DTexture() {
         wgpu::TextureDescriptor descriptor;
@@ -60,32 +59,32 @@ class PrimitiveIdTests : public DawnTestWithParams<PrimitiveIdTestsParams> {
 
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        mIsPrimitiveIdSupportedOnAdapter = SupportsFeatures({kPrimitiveIdFeature});
-        if (!mIsPrimitiveIdSupportedOnAdapter) {
+        mIsPrimitiveIndexSupportedOnAdapter = SupportsFeatures({kPrimitiveIndexFeature});
+        if (!mIsPrimitiveIndexSupportedOnAdapter) {
             return {};
         }
 
-        if (GetParam().mRequirePrimitiveIdFeature) {
-            return {kPrimitiveIdFeature};
+        if (GetParam().mRequirePrimitiveIndexFeature) {
+            return {kPrimitiveIndexFeature};
         }
 
         return {};
     }
 
-    bool IsPrimitiveIdSupportedOnAdapter() const { return mIsPrimitiveIdSupportedOnAdapter; }
+    bool IsPrimitiveIndexSupportedOnAdapter() const { return mIsPrimitiveIndexSupportedOnAdapter; }
 
   private:
-    bool mIsPrimitiveIdSupportedOnAdapter = false;
+    bool mIsPrimitiveIndexSupportedOnAdapter = false;
 };
 
-// Test simple primitive ID within shader with enable directive. The result should be as expected if
-// the device enables the extension, otherwise a shader creation error should be caught.
-TEST_P(PrimitiveIdTests, BasicPrimitiveIdFeaturesTest) {
+// Test simple primitive index within shader with enable directive. The result should be as expected
+// if the device enables the extension, otherwise a shader creation error should be caught.
+TEST_P(PrimitiveIndexTests, BasicPrimitiveIndexFeaturesTest) {
     // Skip if device doesn't support the extension.
-    DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(kPrimitiveIdFeature));
+    DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(kPrimitiveIndexFeature));
 
     const char* shader = R"(
-enable chromium_experimental_primitive_id;
+enable primitive_index;
 
 @vertex
 fn VSMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -105,8 +104,8 @@ var<private> colorId : array<vec3f, 5> = array<vec3f, 5>(
 );
 
 @fragment
-fn FSMain(@builtin(primitive_id) pid : u32) -> @location(0) vec4f {
-    // Select a color based on the primitive ID
+fn FSMain(@builtin(primitive_index) pid : u32) -> @location(0) vec4f {
+    // Select a color based on the primitive index
     return vec4f(colorId[pid%5], 1.0);
 })";
 
@@ -162,7 +161,7 @@ fn FSMain(@builtin(primitive_id) pid : u32) -> @location(0) vec4f {
 }
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(PrimitiveIdTests,
+DAWN_INSTANTIATE_TEST_P(PrimitiveIndexTests,
                         {
                             D3D11Backend(),
                             D3D12Backend(),

@@ -5,12 +5,12 @@ struct main_outputs {
   float4 tint_symbol [[color(0)]];
 };
 
-float4 main_inner(uint prim_id) {
-  return float4(float(prim_id));
+float4 main_inner(uint prim_idx) {
+  return float4(float(prim_idx));
 }
 
-fragment main_outputs v(uint prim_id [[primitive_id]]) {
+fragment main_outputs v(uint prim_idx [[primitive_id]]) {
   main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol = main_inner(prim_id);
+  tint_wrapper_result.tint_symbol = main_inner(prim_idx);
   return tint_wrapper_result;
 }

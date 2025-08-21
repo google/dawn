@@ -1608,8 +1608,8 @@ struct Decoder {
                 return core::BuiltinValue::kWorkgroupId;
             case pb::BuiltinValue::clip_distances:
                 return core::BuiltinValue::kClipDistances;
-            case pb::BuiltinValue::primitive_id:
-                return core::BuiltinValue::kPrimitiveId;
+            case pb::BuiltinValue::primitive_index:
+                return core::BuiltinValue::kPrimitiveIndex;
             case pb::BuiltinValue::barycentric_coord:
                 return core::BuiltinValue::kBarycentricCoord;
             case pb::BuiltinValue::BuiltinValue_INT_MIN_SENTINEL_DO_NOT_USE_:

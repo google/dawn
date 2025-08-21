@@ -877,12 +877,12 @@ const struct WGSLExtensionInfo kExtensions[] = {
     {"clip_distances", false, {"clip-distances"}, {}},
     {"dual_source_blending", false, {"dual-source-blending"}, {}},
     {"subgroups", false, {"subgroups"}, {}},
+    {"primitive_index", false, {"primitive-index"}, {}},
     {"chromium_experimental_pixel_local", true, {"pixel-local-storage-coherent"}, {}},
     {"chromium_disable_uniformity_analysis", true, {}, {}},
     {"chromium_internal_graphite", true, {}, {}},
     {"chromium_experimental_framebuffer_fetch", true, {"framebuffer-fetch"}, {}},
     {"chromium_experimental_subgroup_matrix", true, {"chromium-experimental-subgroup-matrix"}, {}},
-    {"chromium_experimental_primitive_id", true, {"chromium-experimental-primitive-id"}, {}},
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*

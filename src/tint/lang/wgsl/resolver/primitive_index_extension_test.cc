@@ -36,64 +36,65 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace {
 
-using ResolverPrimitiveIdExtensionTest = ResolverTest;
+using ResolverPrimitiveIndexExtensionTest = ResolverTest;
 
-TEST_F(ResolverPrimitiveIdExtensionTest, UsePrimitiveIdWithoutExtensionError) {
+TEST_F(ResolverPrimitiveIndexExtensionTest, UsePrimitiveIndexWithoutExtensionError) {
     Structure("Inputs",
               Vector{
-                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveId)}),
+                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveIndex)}),
               });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: use of '@builtin(primitive_id)' requires enabling extension 'chromium_experimental_primitive_id')");
+        R"(error: use of '@builtin(primitive_index)' requires enabling extension 'primitive_index')");
 }
 
-TEST_F(ResolverPrimitiveIdExtensionTest, UsePrimitiveIdWithExtension) {
-    Enable(wgsl::Extension::kChromiumExperimentalPrimitiveId);
+TEST_F(ResolverPrimitiveIndexExtensionTest, UsePrimitiveIndexWithExtension) {
+    Enable(wgsl::Extension::kPrimitiveIndex);
     Structure("Inputs",
               Vector{
-                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveId)}),
+                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveIndex)}),
               });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverPrimitiveIdExtensionTest, PrimitiveIdI32Error) {
-    Enable(wgsl::Extension::kChromiumExperimentalPrimitiveId);
+TEST_F(ResolverPrimitiveIndexExtensionTest, PrimitiveIndexI32Error) {
+    Enable(wgsl::Extension::kPrimitiveIndex);
     Structure("Inputs",
               Vector{
-                  Member("a", ty.i32(), Vector{Builtin(core::BuiltinValue::kPrimitiveId)}),
+                  Member("a", ty.i32(), Vector{Builtin(core::BuiltinValue::kPrimitiveIndex)}),
               });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: store type of '@builtin(primitive_id)' must be 'u32'");
+    EXPECT_EQ(r()->error(), "error: store type of '@builtin(primitive_index)' must be 'u32'");
 }
 
-TEST_F(ResolverPrimitiveIdExtensionTest, PrimitiveIdVertexShader) {
-    Enable(wgsl::Extension::kChromiumExperimentalPrimitiveId);
-    Func("main", Vector{Param("pi", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveId)})},
+TEST_F(ResolverPrimitiveIndexExtensionTest, PrimitiveIndexVertexShader) {
+    Enable(wgsl::Extension::kPrimitiveIndex);
+    Func("main",
+         Vector{Param("pi", ty.u32(), Vector{Builtin(core::BuiltinValue::kPrimitiveIndex)})},
          ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kVertex)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: '@builtin(primitive_id)' cannot be used for vertex shader input");
+              "error: '@builtin(primitive_index)' cannot be used for vertex shader input");
 }
 
-TEST_F(ResolverPrimitiveIdExtensionTest, PrimitiveIdFragmentShaderOutput) {
-    Enable(wgsl::Extension::kChromiumExperimentalPrimitiveId);
+TEST_F(ResolverPrimitiveIndexExtensionTest, PrimitiveIndexFragmentShaderOutput) {
+    Enable(wgsl::Extension::kPrimitiveIndex);
 
     Func("main", tint::Empty, ty.u32(),
          Vector{
              Return(Call<u32>()),
          },
          Vector{Stage(ast::PipelineStage::kFragment)},
-         Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kPrimitiveId)});
+         Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kPrimitiveIndex)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "1:2 error: '@builtin(primitive_id)' cannot be used for fragment shader output");
+              "1:2 error: '@builtin(primitive_index)' cannot be used for fragment shader output");
 }
 
 }  // namespace

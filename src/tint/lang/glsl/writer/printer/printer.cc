@@ -1985,7 +1985,7 @@ class Printer : public tint::TextGenerator {
             }
             case core::BuiltinValue::kPointSize:
                 return "gl_PointSize";
-            case core::BuiltinValue::kPrimitiveId:
+            case core::BuiltinValue::kPrimitiveIndex:
                 if (options_.version.IsES() && options_.version.major_version == 3 &&
                     options_.version.minor_version == 1) {
                     EmitExtension(kEXTGeometryShader);

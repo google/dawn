@@ -61,9 +61,6 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_pixel_local") {
         return Extension::kChromiumExperimentalPixelLocal;
     }
-    if (str == "chromium_experimental_primitive_id") {
-        return Extension::kChromiumExperimentalPrimitiveId;
-    }
     if (str == "chromium_experimental_subgroup_matrix") {
         return Extension::kChromiumExperimentalSubgroupMatrix;
     }
@@ -81,6 +78,9 @@ Extension ParseExtension(std::string_view str) {
     }
     if (str == "f16") {
         return Extension::kF16;
+    }
+    if (str == "primitive_index") {
+        return Extension::kPrimitiveIndex;
     }
     if (str == "subgroups") {
         return Extension::kSubgroups;
@@ -101,8 +101,6 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_immediate";
         case Extension::kChromiumExperimentalPixelLocal:
             return "chromium_experimental_pixel_local";
-        case Extension::kChromiumExperimentalPrimitiveId:
-            return "chromium_experimental_primitive_id";
         case Extension::kChromiumExperimentalSubgroupMatrix:
             return "chromium_experimental_subgroup_matrix";
         case Extension::kChromiumInternalGraphite:
@@ -115,6 +113,8 @@ std::string_view ToString(Extension value) {
             return "dual_source_blending";
         case Extension::kF16:
             return "f16";
+        case Extension::kPrimitiveIndex:
+            return "primitive_index";
         case Extension::kSubgroups:
             return "subgroups";
     }

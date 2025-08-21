@@ -2330,6 +2330,7 @@
             {"value": 18, "name": "subgroups"},
             {"value": 19, "name": "texture formats tier1"},
             {"value": 20, "name": "texture formats tier2"},
+            {"value": 21, "name": "primitive index"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},

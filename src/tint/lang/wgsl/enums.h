@@ -118,13 +118,13 @@ enum class Extension : uint8_t {
     kChromiumExperimentalFramebufferFetch,
     kChromiumExperimentalImmediate,
     kChromiumExperimentalPixelLocal,
-    kChromiumExperimentalPrimitiveId,
     kChromiumExperimentalSubgroupMatrix,
     kChromiumInternalGraphite,
     kChromiumInternalInputAttachments,
     kClipDistances,
     kDualSourceBlending,
     kF16,
+    kPrimitiveIndex,
     kSubgroups,
 };
 
@@ -152,13 +152,13 @@ constexpr std::string_view kExtensionStrings[] = {
     "chromium_experimental_framebuffer_fetch",
     "chromium_experimental_immediate",
     "chromium_experimental_pixel_local",
-    "chromium_experimental_primitive_id",
     "chromium_experimental_subgroup_matrix",
     "chromium_internal_graphite",
     "chromium_internal_input_attachments",
     "clip_distances",
     "dual_source_blending",
     "f16",
+    "primitive_index",
     "subgroups",
 };
 
@@ -169,13 +169,13 @@ static constexpr Extension kAllExtensions[] = {
     Extension::kChromiumExperimentalFramebufferFetch,
     Extension::kChromiumExperimentalImmediate,
     Extension::kChromiumExperimentalPixelLocal,
-    Extension::kChromiumExperimentalPrimitiveId,
     Extension::kChromiumExperimentalSubgroupMatrix,
     Extension::kChromiumInternalGraphite,
     Extension::kChromiumInternalInputAttachments,
     Extension::kClipDistances,
     Extension::kDualSourceBlending,
     Extension::kF16,
+    Extension::kPrimitiveIndex,
     Extension::kSubgroups,
 };
 

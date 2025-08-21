@@ -430,10 +430,13 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "dawn_device_allocator_control.md",
       FeatureInfo::FeatureState::Experimental}},
     {Feature::ChromiumExperimentalPrimitiveId,
-     {"Supports the \"enable chromium_experimental_primitive_id;\" directive in WGSL",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/tint/extensions/"
-      "chromium_experimental_primitive_id.md",
+     {"(Deprecated) Supports the \"enable primitive_index;\" directive in WGSL",
+      "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-primitive-index",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::PrimitiveIndex,
+     {"Supports the \"enable primitive_index;\" directive in WGSL",
+      "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-primitive-index",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalBindless,
      {"Experimental support for the prototype of a bindless extension",
       "https://hackmd.io/@kangz/bindless-proposal", FeatureInfo::FeatureState::Experimental}}};

@@ -463,13 +463,13 @@ constexpr BuiltinChecker kWorkgroupIdChecker{
     /* type_error */ "workgroup_id must be an vec3<u32>",
 };
 
-constexpr BuiltinChecker kPrimitiveIdChecker{
-    /* name */ "primitive_id",
+constexpr BuiltinChecker kPrimitiveIndexChecker{
+    /* name */ "primitive_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ BuiltinChecker::IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
-    /* type_error */ "primitive_id must be an u32",
+    /* type_error */ "primitive_index must be an u32",
 };
 
 constexpr BuiltinChecker kBarycentricCoordChecker{
@@ -516,8 +516,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kVertexIndexChecker;
         case BuiltinValue::kWorkgroupId:
             return kWorkgroupIdChecker;
-        case BuiltinValue::kPrimitiveId:
-            return kPrimitiveIdChecker;
+        case BuiltinValue::kPrimitiveIndex:
+            return kPrimitiveIndexChecker;
         case BuiltinValue::kBarycentricCoord:
             return kBarycentricCoordChecker;
         case BuiltinValue::kPosition:

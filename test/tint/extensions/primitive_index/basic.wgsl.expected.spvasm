@@ -6,19 +6,19 @@
                OpCapability Shader
                OpCapability Geometry
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Fragment %main "main" %main_primitive_id_Input %main_loc0_Output
+               OpEntryPoint Fragment %main "main" %main_primitive_index_Input %main_loc0_Output
                OpExecutionMode %main OriginUpperLeft
-               OpName %main_primitive_id_Input "main_primitive_id_Input"
+               OpName %main_primitive_index_Input "main_primitive_index_Input"
                OpName %main_loc0_Output "main_loc0_Output"
                OpName %main_inner "main_inner"
-               OpName %prim_id "prim_id"
+               OpName %prim_idx "prim_idx"
                OpName %main "main"
-               OpDecorate %main_primitive_id_Input Flat
-               OpDecorate %main_primitive_id_Input BuiltIn PrimitiveId
+               OpDecorate %main_primitive_index_Input Flat
+               OpDecorate %main_primitive_index_Input BuiltIn PrimitiveId
                OpDecorate %main_loc0_Output Location 0
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
-%main_primitive_id_Input = OpVariable %_ptr_Input_uint Input
+%main_primitive_index_Input = OpVariable %_ptr_Input_uint Input
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
@@ -27,15 +27,15 @@
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
  %main_inner = OpFunction %v4float None %10
-    %prim_id = OpFunctionParameter %uint
+   %prim_idx = OpFunctionParameter %uint
          %11 = OpLabel
-         %12 = OpConvertUToF %float %prim_id
+         %12 = OpConvertUToF %float %prim_idx
          %13 = OpCompositeConstruct %v4float %12 %12 %12 %12
                OpReturnValue %13
                OpFunctionEnd
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %uint %main_primitive_id_Input None
+         %18 = OpLoad %uint %main_primitive_index_Input None
          %19 = OpFunctionCall %v4float %main_inner %18
                OpStore %main_loc0_Output %19 None
                OpReturn

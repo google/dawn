@@ -3362,7 +3362,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, PrimitiveId) {
+TEST_F(SpirvParserTest, PrimitiveIndex) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpCapability Geometry
@@ -3404,7 +3404,7 @@ TEST_F(SpirvParserTest, PrimitiveId) {
 )",
               R"(
 $B1: {  # root
-  %main_primitive_id_Input:ptr<__in, u32, read> = var undef @builtin(primitive_id)
+  %main_primitive_id_Input:ptr<__in, u32, read> = var undef @builtin(primitive_index)
   %main_loc0_Output:ptr<__out, vec4<f32>, read_write> = var undef @location(0)
 }
 

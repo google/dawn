@@ -4,8 +4,8 @@ precision highp float;
 precision highp int;
 
 layout(location = 0) out vec4 main_loc0_Output;
-vec4 main_inner(uint prim_id) {
-  return vec4(float(prim_id));
+vec4 main_inner(uint prim_idx) {
+  return vec4(float(prim_idx));
 }
 void main() {
   main_loc0_Output = main_inner(uint(gl_PrimitiveID));

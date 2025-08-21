@@ -333,10 +333,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::ClipDistances);
     }
 
-    // primitive_id is currently exposed if we support geometry shaders.
+    // primitive_index is currently exposed if we support geometry shaders.
     // TODO(342172182): We could also potentially use tessellation or mesh shaders.
     if (mDeviceInfo.features.geometryShader == VK_TRUE) {
-        EnableFeature(Feature::ChromiumExperimentalPrimitiveId);
+        EnableFeature(Feature::PrimitiveIndex);
     }
 
     bool shaderF16Enabled = false;

@@ -1160,12 +1160,12 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         }
-        case core::BuiltinValue::kPrimitiveId: {
-            if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalPrimitiveId)) {
-                AddError(attr->source) << "use of " << style::Attribute("@builtin")
-                                       << style::Code("(", style::Enum(builtin), ")")
-                                       << " requires enabling extension "
-                                       << style::Code("chromium_experimental_primitive_id");
+        case core::BuiltinValue::kPrimitiveIndex: {
+            if (!enabled_extensions_.Contains(wgsl::Extension::kPrimitiveIndex)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " requires enabling extension " << style::Code("primitive_index");
                 return false;
             }
             if (!type->Is<core::type::U32>()) {

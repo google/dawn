@@ -81,7 +81,7 @@ std::string BuiltinToAttribute(core::BuiltinValue builtin) {
             return "threads_per_simdgroup";
         case core::BuiltinValue::kClipDistances:
             return "clip_distance";
-        case core::BuiltinValue::kPrimitiveId:
+        case core::BuiltinValue::kPrimitiveIndex:
             return "primitive_id";
         case core::BuiltinValue::kBarycentricCoord:
             return "barycentric_coord";

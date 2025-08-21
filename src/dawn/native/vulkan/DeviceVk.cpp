@@ -547,7 +547,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         usedKnobs.features.depthClamp = VK_TRUE;
     }
 
-    if (HasFeature(Feature::ChromiumExperimentalPrimitiveId)) {
+    if (HasFeature(Feature::PrimitiveIndex)) {
         DAWN_ASSERT(mDeviceInfo.features.geometryShader == VK_TRUE);
         usedKnobs.features.geometryShader = VK_TRUE;
     }

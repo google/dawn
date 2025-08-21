@@ -116,7 +116,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 return 13;
             case core::BuiltinValue::kClipDistances:
                 return 14;
-            case core::BuiltinValue::kPrimitiveId:
+            case core::BuiltinValue::kPrimitiveIndex:
                 return 15;
             case core::BuiltinValue::kBarycentricCoord:
                 return 16;

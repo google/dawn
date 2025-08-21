@@ -327,17 +327,17 @@ TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Fragment) {
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSampleIndex),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSampleMask),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kSubgroupSize),
-        MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kPrimitiveId),
+        MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kPrimitiveIndex),
     });
 
     fn->Block()->Append(b.Return(fn));
 
     EXPECT_WGSL(R"(
 enable subgroups;
-enable chromium_experimental_primitive_id;
+enable primitive_index;
 
 @fragment
-fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_id) v_4 : u32) {
+fn f(@builtin(front_facing) v : bool, @builtin(sample_index) v_1 : u32, @builtin(sample_mask) v_2 : u32, @builtin(subgroup_size) v_3 : u32, @builtin(primitive_index) v_4 : u32) {
 }
 )");
 }
