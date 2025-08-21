@@ -401,6 +401,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
+void Buffer::FinalizeMapImpl() {}
+
 void* Buffer::GetMappedPointerImpl() {
     return mBackingData.get();
 }

@@ -91,6 +91,8 @@ class ErrorBuffer final : public BufferBase {
         return {};
     }
 
+    void FinalizeMapImpl() override {}
+
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
         DAWN_UNREACHABLE();
     }
@@ -258,7 +260,7 @@ struct BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
                 error = true;
             } else if (auto** buffer = std::get_if<BufferBase*>(&*bufferOrError)) {
                 // Set the buffer state to Mapped if this pending map succeeded.
-                (*buffer)->SetMapped(BufferState::Mapped);
+                (*buffer)->FinalizeMap(BufferState::Mapped);
             }
         });
         if (error) {
@@ -469,7 +471,7 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
     }
 }
 
-void BufferBase::SetMapped(BufferState newState) {
+void BufferBase::FinalizeMap(BufferState newState) {
     // There are only 2 valid transitions:
     //   1) Nominal: PendingMap -> Mapped
     //   2) MappedAtCreation case because initial state is unmapped: Unmapped -> MappedAtCreation.
@@ -486,6 +488,8 @@ void BufferBase::SetMapped(BufferState newState) {
     }
 
     mState.store(newState, std::memory_order::release);
+
+    FinalizeMapImpl();
 }
 
 MaybeError BufferBase::MapAtCreation() {
@@ -551,7 +555,7 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     mMapOffset = 0;
     mMapSize = mSize;
     mStagingBuffer = std::move(stagingBuffer);
-    SetMapped(BufferState::MappedAtCreation);
+    FinalizeMap(BufferState::MappedAtCreation);
     return mStagingBuffer != nullptr;
 }
 

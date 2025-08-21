@@ -507,6 +507,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return MapInternal(mode & wgpu::MapMode::Write, offset, size, "D3D12 map async");
 }
 
+void Buffer::FinalizeMapImpl() {}
+
 void Buffer::UnmapImpl() {
     GetD3D12Resource()->Unmap(0, &mWrittenMappedRange);
     mMappedData = nullptr;

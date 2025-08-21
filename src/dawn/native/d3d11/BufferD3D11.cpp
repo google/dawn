@@ -520,6 +520,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
+void Buffer::FinalizeMapImpl() {}
+
 MaybeError Buffer::FinalizeMap(ScopedCommandRecordingContext* commandContext,
                                ExecutionSerial completedSerial,
                                wgpu::MapMode mode) {

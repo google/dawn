@@ -537,6 +537,8 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
+void Buffer::FinalizeMapImpl() {}
+
 void Buffer::UnmapImpl() {
     // No need to do anything, we keep CPU-visible memory mapped at all time.
 }

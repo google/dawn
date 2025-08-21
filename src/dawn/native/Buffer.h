@@ -166,6 +166,7 @@ class BufferBase : public SharedResource {
 
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
+    virtual void FinalizeMapImpl() = 0;
     virtual void* GetMappedPointerImpl() = 0;
     virtual void UnmapImpl() = 0;
 
@@ -181,7 +182,7 @@ class BufferBase : public SharedResource {
     MaybeError UnmapInternal(WGPUMapAsyncStatus status, std::string_view message);
 
     // Updates internal state to reflect that the buffer is now mapped.
-    void SetMapped(BufferState newState);
+    void FinalizeMap(BufferState newState);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
