@@ -28,15 +28,21 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_AST_PRINTER_H_
 #define SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_AST_PRINTER_H_
 
+#include <string>
+#include <string_view>
+
 #include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/wgsl/writer/common/options.h"
+#include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/containers/hashset.h"
+#include "src/tint/utils/symbol/symbol.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text_generator/text_generator.h"
 
 // Forward declarations
 namespace tint {
 class Program;
-}
+}  // namespace tint
 namespace tint::ast {
 class AssignmentStatement;
 class Attribute;
@@ -231,8 +237,22 @@ class ASTPrinter : public tint::TextGenerator {
     void EmitAttributes(StringStream& out, VectorRef<const ast::Attribute*> attrs);
 
   private:
+    /// Traverses the AST to build the set of names that cannot be changed.
+    void BuildUnrenameableNames();
+
+    /// @returns the next minified name.
+    std::string NextMinifiedName();
+
+    /// Get the generated name for a symbol, minifying it if required.
+    /// @param sym the symbol to get the name for.
+    /// @return the name for the symbol.
+    std::string_view GetSymbolName(tint::Symbol sym);
+
     const Program& program_;
-    [[maybe_unused]] const Options options_;
+    const Options options_;
+    Hashset<std::string_view, 8> unrenameable_;
+    Hashmap<tint::Symbol, std::string, 8> symbol_to_name_;
+    uint64_t next_minified_name_idx_ = 0;
 };
 
 }  // namespace tint::wgsl::writer

@@ -126,6 +126,7 @@ endif(TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   tint_target_add_sources(tint_lang_wgsl_test test
     "lang/wgsl/ir_roundtrip_test.cc"
+    "lang/wgsl/minifier_test.cc"
   )
 endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 

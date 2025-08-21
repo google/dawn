@@ -109,7 +109,10 @@ if (tint_build_unittests) {
     }
 
     if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
-      sources += [ "ir_roundtrip_test.cc" ]
+      sources += [
+        "ir_roundtrip_test.cc",
+        "minifier_test.cc",
+      ]
     }
 
     if (tint_build_wgsl_writer) {
