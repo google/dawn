@@ -50,6 +50,7 @@ cc_library(
     "reserved_words.h",
   ],
   deps = [
+    "//src/tint/lang/core",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",

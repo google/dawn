@@ -416,7 +416,6 @@ TEST_F(IRToProgramTest, TypeWords) {
         Var("u32", true);
         Var("f32", true);
         Var("f16", true);
-        Var("vec", true);
         Var("vec2", true);
         Var("vec3", true);
         Var("vec4", true);
@@ -557,7 +556,6 @@ fn f() {
   var v_67 : bool = true;
   var v_68 : bool = true;
   var v_69 : bool = true;
-  var v_70 : bool = true;
 }
 )");
 }
