@@ -376,17 +376,7 @@ void RenderPassEncoder::APIExecuteBundles(uint32_t count, RenderBundleBase* cons
             for (uint32_t i = 0; i < count; ++i) {
                 bundles[i] = renderBundles[i];
 
-                const RenderPassResourceUsage& usages = bundles[i]->GetResourceUsage();
-                for (uint32_t j = 0; j < usages.buffers.size(); ++j) {
-                    mUsageTracker.BufferUsedAs(usages.buffers[j], usages.bufferSyncInfos[j].usage,
-                                               usages.bufferSyncInfos[j].shaderStages);
-                }
-
-                for (uint32_t j = 0; j < usages.textures.size(); ++j) {
-                    mUsageTracker.AddRenderBundleTextureUsage(usages.textures[j],
-                                                              usages.textureSyncInfos[j]);
-                }
-
+                mUsageTracker.MergeResourceUsages(bundles[i]->GetResourceUsage());
                 if (IsValidationEnabled()) {
                     mIndirectDrawMetadata.AddBundle(renderBundles[i]);
                 }

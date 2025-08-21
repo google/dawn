@@ -84,24 +84,38 @@ void SyncScopeUsageTracker::TextureRangeUsedAs(TextureBase* texture,
         });
 }
 
-void SyncScopeUsageTracker::AddRenderBundleTextureUsage(
-    TextureBase* texture,
-    const TextureSubresourceSyncInfo& textureSyncInfo) {
+void SyncScopeUsageTracker::MergeTextureUsage(TextureBase* texture,
+                                              const TextureSubresourceSyncInfo& textureSyncInfo) {
     // Get or create a new TextureSubresourceSyncInfo for that texture (initially filled with
     // wgpu::TextureUsage::None and WGPUShaderStage_None)
     auto it = mTextureSyncInfos.try_emplace(
         texture, texture->GetFormat().aspects, texture->GetArrayLayers(),
         texture->GetNumMipLevels(),
         TextureSyncInfo{wgpu::TextureUsage::None, wgpu::ShaderStage::None});
-    TextureSubresourceSyncInfo* passTextureSyncInfo = &it.first->second;
+    TextureSubresourceSyncInfo& passTextureSyncInfo = it.first->second;
 
-    passTextureSyncInfo->Merge(
+    passTextureSyncInfo.Merge(
         textureSyncInfo, [](const SubresourceRange&, TextureSyncInfo* storedSyncInfo,
                             const TextureSyncInfo& addedSyncInfo) {
             DAWN_ASSERT((addedSyncInfo.usage & wgpu::TextureUsage::RenderAttachment) == 0);
             storedSyncInfo->usage |= addedSyncInfo.usage;
             storedSyncInfo->shaderStages |= addedSyncInfo.shaderStages;
         });
+}
+
+void SyncScopeUsageTracker::MergeResourceUsages(const SyncScopeResourceUsage& usages) {
+    for (uint32_t i = 0; i < usages.buffers.size(); ++i) {
+        BufferUsedAs(usages.buffers[i], usages.bufferSyncInfos[i].usage,
+                     usages.bufferSyncInfos[i].shaderStages);
+    }
+
+    for (uint32_t i = 0; i < usages.textures.size(); ++i) {
+        MergeTextureUsage(usages.textures[i], usages.textureSyncInfos[i]);
+    }
+
+    for (ExternalTextureBase* t : usages.externalTextures) {
+        mExternalTextureUsages.insert(t);
+    }
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
@@ -196,18 +210,17 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
         result.buffers.push_back(buffer);
         result.bufferSyncInfos.push_back(std::move(syncInfo));
     }
+    mBufferSyncInfos.clear();
 
     for (auto& [texture, syncInfo] : mTextureSyncInfos) {
         result.textures.push_back(texture);
         result.textureSyncInfos.push_back(std::move(syncInfo));
     }
+    mTextureSyncInfos.clear();
 
     for (auto* const it : mExternalTextureUsages) {
         result.externalTextures.push_back(it);
     }
-
-    mBufferSyncInfos.clear();
-    mTextureSyncInfos.clear();
     mExternalTextureUsages.clear();
 
     return result;

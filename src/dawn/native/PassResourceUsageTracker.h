@@ -65,8 +65,9 @@ class SyncScopeUsageTracker {
                             const SubresourceRange& range,
                             wgpu::TextureUsage usage,
                             wgpu::ShaderStage shaderStages = wgpu::ShaderStage::None);
-    void AddRenderBundleTextureUsage(TextureBase* texture,
-                                     const TextureSubresourceSyncInfo& textureSyncInfo);
+
+    // Add all usages referenced to this tracker.
+    void MergeResourceUsages(const SyncScopeResourceUsage& usages);
 
     // Walks the bind groups and tracks all its resources.
     void AddBindGroup(BindGroupBase* group);
@@ -75,6 +76,8 @@ class SyncScopeUsageTracker {
     SyncScopeResourceUsage AcquireSyncScopeUsage();
 
   private:
+    void MergeTextureUsage(TextureBase* texture, const TextureSubresourceSyncInfo& textureSyncInfo);
+
     absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
     absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
     absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
