@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 Error parsing GLSL shader:
-ERROR: 0:14: 'variable indexing sampler array' : not supported for this version or the enabled extensions 
-ERROR: 0:14: '' : compilation terminated 
+ERROR: 0:13: 'variable indexing sampler array' : not supported for this version or the enabled extensions 
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -17,12 +17,11 @@ uniform f_TintTextureUniformData_ubo {
 } v;
 uniform highp sampler2D f_sampled_textures[4];
 void do_texture_load(uint t_indices[1]) {
-  uint v_1 = (0u + uint(t_indices[0u]));
-  uint v_2 = (v.metadata[(v_1 / 4u)][(v_1 % 4u)] - 1u);
-  uint v_3 = min(uint(0), v_2);
-  uvec2 v_4 = (uvec2(textureSize(f_sampled_textures[t_indices[0u]], int(v_3))) - uvec2(1u));
-  ivec2 v_5 = ivec2(min(uvec2(ivec2(0)), v_4));
-  vec4 texture_load = texelFetch(f_sampled_textures[t_indices[0u]], v_5, int(v_3));
+  uint v_1 = (v.metadata[((0u + t_indices[0u]) / 4u)][((0u + t_indices[0u]) % 4u)] - 1u);
+  uint v_2 = min(uint(0), v_1);
+  uvec2 v_3 = (uvec2(textureSize(f_sampled_textures[t_indices[0u]], int(v_2))) - uvec2(1u));
+  ivec2 v_4 = ivec2(min(uvec2(ivec2(0)), v_3));
+  vec4 texture_load = texelFetch(f_sampled_textures[t_indices[0u]], v_4, int(v_2));
 }
 void main() {
   do_texture_load(uint[1](uint(0)));

@@ -31,6 +31,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
@@ -57,6 +58,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (ty->Is<core::type::SubgroupMatrix>()) {
             if (!options.use_vulkan_memory_model) {
                 return Failure("using subgroup matrices requires the Vulkan Memory Model");
+            }
+        }
+        if (auto* ba = ty->As<core::type::BindingArray>()) {
+            if (ba->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return Failure("runtime binding array not supported by the SPIR-V backend");
             }
         }
     }

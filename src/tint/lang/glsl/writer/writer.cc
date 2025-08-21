@@ -50,6 +50,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             // TODO(crbug/382544164): Prototype texel buffer feature
             return Failure("texel buffers are not supported by the GLSL backend");
         }
+        if (auto* ba = ty->As<core::type::BindingArray>()) {
+            if (ba->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return Failure("runtime binding array not supported by the GLSL backend");
+            }
+        }
     }
 
     // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,

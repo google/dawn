@@ -1,8 +1,8 @@
 SKIP: FAILED
 
 Error parsing GLSL shader:
-ERROR: 0:19: 'variable indexing sampler array' : not supported for this version or the enabled extensions 
-ERROR: 0:19: '' : compilation terminated 
+ERROR: 0:18: 'variable indexing sampler array' : not supported for this version or the enabled extensions 
+ERROR: 0:18: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -22,12 +22,11 @@ uniform f_TintTextureUniformData_ubo {
 uniform highp sampler2D f_sampled_textures[4];
 void main() {
   uint v_2 = v.inner;
-  uint v_3 = (0u + uint(v_2));
-  uint v_4 = (v_1.metadata[(v_3 / 4u)][(v_3 % 4u)] - 1u);
-  uint v_5 = min(uint(0), v_4);
-  uvec2 v_6 = (uvec2(textureSize(f_sampled_textures[v_2], int(v_5))) - uvec2(1u));
-  ivec2 v_7 = ivec2(min(uvec2(ivec2(0)), v_6));
-  vec4 texture_load = texelFetch(f_sampled_textures[v_2], v_7, int(v_5));
+  uint v_3 = (v_1.metadata[((0u + v_2) / 4u)][((0u + v_2) % 4u)] - 1u);
+  uint v_4 = min(uint(0), v_3);
+  uvec2 v_5 = (uvec2(textureSize(f_sampled_textures[v_2], int(v_4))) - uvec2(1u));
+  ivec2 v_6 = ivec2(min(uvec2(ivec2(0)), v_5));
+  vec4 texture_load = texelFetch(f_sampled_textures[v_2], v_6, int(v_4));
 }
 
 tint executable returned error: exit status 1

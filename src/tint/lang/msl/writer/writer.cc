@@ -29,6 +29,7 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -53,6 +54,11 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         } else if (ty->Is<core::type::TexelBuffer>()) {
             // TODO(crbug/382544164): Prototype texel buffer feature
             return Failure("texel buffers are not supported by the MSL backend");
+        }
+        if (auto* ba = ty->As<core::type::BindingArray>()) {
+            if (ba->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return Failure("runtime binding array not supported by the MSL backend");
+            }
         }
     }
 

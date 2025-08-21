@@ -88,7 +88,9 @@ Bindings GenerateBindings(const core::ir::Module& module) {
                     uint32_t count = 1;
                     if (auto* ba = handle_type->As<core::type::BindingArray>()) {
                         handle_type = ba->ElemType();
-                        count = ba->Count()->As<core::type::ConstantArrayCount>()->value;
+                        if (auto* cnt = ba->Count()->As<core::type::ConstantArrayCount>()) {
+                            count = cnt->value;
+                        }
                     }
 
                     Switch(
