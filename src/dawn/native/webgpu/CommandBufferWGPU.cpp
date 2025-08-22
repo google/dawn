@@ -98,6 +98,109 @@ WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy) {
     };
 }
 
+void EncodeComputePass(const DawnProcTable& wgpu,
+                       WGPUCommandEncoder innerEncoder,
+                       CommandIterator& commands,
+                       BeginComputePassCmd* computePassCmd) {
+    // TODO(crbug.com/440123094): Create actual compute pass descriptor
+    WGPUComputePassEncoder passEncoder = wgpu.commandEncoderBeginComputePass(innerEncoder, nullptr);
+
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndComputePass: {
+                commands.NextCommand<EndComputePassCmd>();
+                wgpu.computePassEncoderEnd(passEncoder);
+                return;
+            }
+
+            case Command::Dispatch: {
+                auto cmd = commands.NextCommand<DispatchCmd>();
+                wgpu.computePassEncoderDispatchWorkgroups(passEncoder, cmd->x, cmd->y, cmd->z);
+                break;
+            }
+
+            case Command::DispatchIndirect: {
+                auto cmd = commands.NextCommand<DispatchIndirectCmd>();
+                wgpu.computePassEncoderDispatchWorkgroupsIndirect(
+                    passEncoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(),
+                    cmd->indirectOffset);
+                break;
+            }
+
+            case Command::SetComputePipeline: {
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // ComputePipelineWGPU
+                /*auto cmd = */ commands.NextCommand<SetComputePipelineCmd>();
+                wgpu.computePassEncoderSetPipeline(
+                    passEncoder, nullptr /*ToBackend(cmd->pipeline)->GetInnerHandle()*/);
+                break;
+            }
+
+            case Command::SetBindGroup: {
+                auto cmd = commands.NextCommand<SetBindGroupCmd>();
+                uint32_t* dynamicOffsets = nullptr;
+                if (cmd->dynamicOffsetCount > 0) {
+                    dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                }
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // BindGroupWGPU
+                wgpu.computePassEncoderSetBindGroup(
+                    passEncoder, static_cast<uint32_t>(cmd->index),
+                    nullptr /*ToBackend(cmd->group)->GetInnerHandle()*/, cmd->dynamicOffsetCount,
+                    dynamicOffsets);
+                break;
+            }
+            case Command::InsertDebugMarker: {
+                auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
+                char* label = commands.NextData<char>(cmd->length + 1);
+                wgpu.computePassEncoderInsertDebugMarker(passEncoder, {label, cmd->length});
+                break;
+            }
+
+            case Command::PopDebugGroup: {
+                commands.NextCommand<PopDebugGroupCmd>();
+                wgpu.computePassEncoderPopDebugGroup(passEncoder);
+                break;
+            }
+
+            case Command::PushDebugGroup: {
+                auto cmd = commands.NextCommand<PushDebugGroupCmd>();
+                char* label = commands.NextData<char>(cmd->length + 1);
+                wgpu.computePassEncoderPushDebugGroup(passEncoder, {label, cmd->length});
+                break;
+            }
+
+            case Command::WriteTimestamp: {
+                auto cmd = commands.NextCommand<WriteTimestampCmd>();
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // QuerySetWGPU
+                wgpu.computePassEncoderWriteTimestamp(
+                    passEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
+                    cmd->queryIndex);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                auto cmd = commands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = commands.NextData<uint8_t>(cmd->size);
+                wgpu.computePassEncoderSetImmediateData(passEncoder, cmd->offset, value, cmd->size);
+                break;
+            }
+
+            default: {
+                DAWN_UNREACHABLE();
+                break;
+            }
+        }
+    }
+
+    // EndComputePass should have been called
+    DAWN_UNREACHABLE();
+}
+
 }  // anonymous namespace
 
 WGPUCommandBuffer CommandBuffer::Encode() {
@@ -110,6 +213,11 @@ WGPUCommandBuffer CommandBuffer::Encode() {
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
+            case Command::BeginComputePass: {
+                BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
+                EncodeComputePass(wgpu, innerEncoder, mCommands, cmd);
+                break;
+            }
             case Command::CopyBufferToBuffer: {
                 auto copy = mCommands.NextCommand<CopyBufferToBufferCmd>();
                 wgpu.commandEncoderCopyBufferToBuffer(
