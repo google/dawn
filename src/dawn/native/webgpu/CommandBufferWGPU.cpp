@@ -142,6 +142,56 @@ WGPUCommandBuffer CommandBuffer::Encode() {
                 wgpu.commandEncoderCopyTextureToTexture(innerEncoder, &source, &destination, &size);
                 break;
             }
+            case Command::ClearBuffer: {
+                auto cmd = mCommands.NextCommand<ClearBufferCmd>();
+                wgpu.commandEncoderClearBuffer(
+                    innerEncoder, ToBackend(cmd->buffer)->GetInnerHandle(), cmd->offset, cmd->size);
+                break;
+            }
+            case Command::ResolveQuerySet: {
+                auto cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // QuerySetWGPU
+                wgpu.commandEncoderResolveQuerySet(
+                    innerEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
+                    cmd->firstQuery, cmd->queryCount, ToBackend(cmd->destination)->GetInnerHandle(),
+                    cmd->destinationOffset);
+                break;
+            }
+            case Command::WriteTimestamp: {
+                auto cmd = mCommands.NextCommand<WriteTimestampCmd>();
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // QuerySetWGPU
+                wgpu.commandEncoderWriteTimestamp(
+                    innerEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
+                    cmd->queryIndex);
+                break;
+            }
+            case Command::InsertDebugMarker: {
+                auto cmd = mCommands.NextCommand<InsertDebugMarkerCmd>();
+                char* label = mCommands.NextData<char>(cmd->length + 1);
+                wgpu.commandEncoderInsertDebugMarker(innerEncoder, {label, cmd->length});
+                break;
+            }
+            case Command::PopDebugGroup: {
+                mCommands.NextCommand<PopDebugGroupCmd>();
+                wgpu.commandEncoderPopDebugGroup(innerEncoder);
+                break;
+            }
+            case Command::PushDebugGroup: {
+                auto cmd = mCommands.NextCommand<PushDebugGroupCmd>();
+                char* label = mCommands.NextData<char>(cmd->length + 1);
+                wgpu.commandEncoderPushDebugGroup(innerEncoder, {label, cmd->length});
+                break;
+            }
+            case Command::WriteBuffer: {
+                auto cmd = mCommands.NextCommand<WriteBufferCmd>();
+                auto data = mCommands.NextData<uint8_t>(cmd->size);
+                wgpu.commandEncoderWriteBuffer(innerEncoder,
+                                               ToBackend(cmd->buffer)->GetInnerHandle(),
+                                               cmd->offset, data, cmd->size);
+                break;
+            }
             default:
                 DAWN_UNREACHABLE();
         }
