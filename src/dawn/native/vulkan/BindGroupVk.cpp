@@ -49,8 +49,9 @@ ResultOrError<Ref<BindGroup>> BindGroup::Create(
     Device* device,
     const UnpackedPtr<BindGroupDescriptor>& descriptor) {
     Ref<BindGroup> bindGroup;
-    DAWN_TRY_ASSIGN(bindGroup, ToBackend(descriptor->layout->GetInternalBindGroupLayout())
-                                   ->AllocateBindGroup(device, descriptor));
+    DAWN_TRY_ASSIGN(
+        bindGroup,
+        ToBackend(descriptor->layout->GetInternalBindGroupLayout())->AllocateBindGroup(descriptor));
     DAWN_TRY(bindGroup->Initialize(descriptor));
     return bindGroup;
 }

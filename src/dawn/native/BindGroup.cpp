@@ -466,7 +466,7 @@ MaybeError ValidateBindGroupDynamicBindingArray(DeviceBase* device,
                     "dynamicArraySize (%u) exceeds the maxDynamicBindingArraySize limit (%u).",
                     dynamic->dynamicArraySize, maxDynamicBindingArraySize);
 
-    const BindingNumber dynamicArrayStart = layout->GetDynamicArrayStart();
+    const BindingNumber dynamicArrayStart = layout->GetAPIDynamicArrayStart();
     const BindingNumber dynamicArraySize = BindingNumber(dynamic->dynamicArraySize);
 
     // Validate that any non-static entry fits in the dynamic binding array and that they match its
@@ -537,7 +537,7 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
         const auto& it = staticBindingMap.find(binding);
         if (it == staticBindingMap.end()) {
             if (descriptor.Has<BindGroupDynamicBindingArray>() &&
-                binding >= layout->GetDynamicArrayStart()) {
+                binding >= layout->GetAPIDynamicArrayStart()) {
                 continue;
             }
             return DAWN_VALIDATION_ERROR(
@@ -692,7 +692,7 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
     // being in the dynamic array. This keeps the condition in the loop below simple.
     BindingNumber dynamicArrayStart = std::numeric_limits<BindingNumber>::max();
     if (layout->HasDynamicArray()) {
-        dynamicArrayStart = layout->GetDynamicArrayStart();
+        dynamicArrayStart = layout->GetAPIDynamicArrayStart();
     }
 
     // Gather static bindings.

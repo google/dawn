@@ -622,8 +622,11 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     // Handle the dynamic binding array if there is one.
     if (auto* dynamic = descriptor.Get<BindGroupLayoutDynamicBindingArray>()) {
         mHasDynamicArray = true;
-        mDynamicArrayStart = BindingNumber(dynamic->dynamicArray.start);
+        mAPIDynamicArrayStart = BindingNumber(dynamic->dynamicArray.start);
         mDynamicArrayKind = dynamic->dynamicArray.kind;
+
+        // Pack the dynamic array to start right after static bindings.
+        mDynamicArrayStart = mBindingInfo.size();
     }
 }
 
@@ -708,7 +711,11 @@ bool BindGroupLayoutInternalBase::HasDynamicArray() const {
     return mHasDynamicArray;
 }
 
-BindingNumber BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
+BindingNumber BindGroupLayoutInternalBase::GetAPIDynamicArrayStart() const {
+    return mAPIDynamicArrayStart;
+}
+
+BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
     return mDynamicArrayStart;
 }
 
@@ -756,7 +763,7 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             });
     }
 
-    recorder.Record(mHasDynamicArray, mDynamicArrayStart, mDynamicArrayKind);
+    recorder.Record(mHasDynamicArray, mAPIDynamicArrayStart, mDynamicArrayKind);
 
     return recorder.GetContentHash();
 }
@@ -778,7 +785,7 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
 
     if (a->mHasDynamicArray != b->mHasDynamicArray ||
         a->mDynamicArrayKind != b->mDynamicArrayKind ||
-        a->mDynamicArrayStart != b->mDynamicArrayStart) {
+        a->mAPIDynamicArrayStart != b->mAPIDynamicArrayStart) {
         return false;
     }
     return true;

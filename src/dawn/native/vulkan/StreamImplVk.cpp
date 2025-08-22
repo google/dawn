@@ -118,11 +118,19 @@ void stream::Stream<VkDescriptorSetLayoutBinding>::Write(stream::Sink* sink,
 }
 
 template <>
+void stream::Stream<VkDescriptorSetLayoutBindingFlagsCreateInfo>::Write(
+    stream::Sink* sink,
+    const VkDescriptorSetLayoutBindingFlagsCreateInfo& t) {
+    StreamIn(sink, Iterable(t.pBindingFlags, t.bindingCount));
+    SerializePnext(sink, &t);
+}
+
+template <>
 void stream::Stream<VkDescriptorSetLayoutCreateInfo>::Write(
     stream::Sink* sink,
     const VkDescriptorSetLayoutCreateInfo& t) {
     StreamIn(sink, t.flags, Iterable(t.pBindings, t.bindingCount));
-    SerializePnext(sink, &t);
+    SerializePnext<VkDescriptorSetLayoutBindingFlagsCreateInfo>(sink, &t);
 }
 
 template <>

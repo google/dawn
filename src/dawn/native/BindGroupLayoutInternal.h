@@ -110,7 +110,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     // Getters for the dynamic binding array.
     bool HasDynamicArray() const;
-    BindingNumber GetDynamicArrayStart() const;
+    BindingNumber GetAPIDynamicArrayStart() const;
+    BindingIndex GetDynamicArrayStart() const;
     wgpu::DynamicBindingKind GetDynamicArrayKind() const;
 
     // Functions necessary for the unordered_set<BGLBase*>-based cache.
@@ -219,7 +220,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     // Information about the dynamic binding array part of the BGL.
     bool mHasDynamicArray = false;
-    BindingNumber mDynamicArrayStart{0};
+    BindingNumber mAPIDynamicArrayStart{0};
+    BindingIndex mDynamicArrayStart{0};
     wgpu::DynamicBindingKind mDynamicArrayKind = wgpu::DynamicBindingKind::Undefined;
 };
 

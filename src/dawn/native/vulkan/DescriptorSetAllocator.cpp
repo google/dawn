@@ -27,6 +27,7 @@
 
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "dawn/native/Queue.h"
@@ -35,6 +36,8 @@
 #include "dawn/native/vulkan/VulkanError.h"
 
 namespace dawn::native::vulkan {
+
+// DescriptorSetAllocator
 
 // TODO(https://crbug.com/439522242): Consider adding some better heuristic, like an exponential
 // increase up to a larger constant.
@@ -60,26 +63,19 @@ DescriptorSetAllocator::DescriptorSetAllocator(
         mPoolSizes.push_back(VkDescriptorPoolSize{type, count});
     }
 
-    if (totalDescriptorCount == 0) {
-        // Vulkan requires that valid usage of vkCreateDescriptorPool must have a non-zero
-        // number of pools, each of which has non-zero descriptor counts.
-        // Since the descriptor set layout is empty, we should be able to allocate
-        // |kMaxDescriptorsPerPool| sets from this 1-sized descriptor pool.
-        // The type of this descriptor pool doesn't matter because it is never used.
-        mPoolSizes.push_back(VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
-        mMaxSets = kMaxDescriptorsPerPool;
-    } else {
-        DAWN_ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
-        static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool);
+    // Always assume there is one descriptor requested to avoid a division by 0 below.
+    totalDescriptorCount = std::max(1u, totalDescriptorCount);
 
-        // Compute the total number of descriptors sets that fits given the max.
-        mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;
-        DAWN_ASSERT(mMaxSets > 0);
+    DAWN_ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
+    static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool);
 
-        // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
-        for (auto& poolSize : mPoolSizes) {
-            poolSize.descriptorCount *= mMaxSets;
-        }
+    // Compute the total number of descriptors sets that fits given the max.
+    mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;
+    DAWN_ASSERT(mMaxSets > 0);
+
+    // Grow the number of descriptors in the pool to fit the computed |mMaxSets|.
+    for (auto& poolSize : mPoolSizes) {
+        poolSize.descriptorCount *= mMaxSets;
     }
 }
 
@@ -140,7 +136,7 @@ void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo)
             mLastDeallocationSerial = serial;
         }
 
-        // Clear the content of allocation so that use after frees are more visible.
+        // Clear the content of the allocation so that use after frees are more visible.
         *allocationInfo = {};
     }
 
@@ -172,7 +168,7 @@ MaybeError DescriptorSetAllocator::AllocateDescriptorPool(VkDescriptorSetLayout 
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
     createInfo.maxSets = mMaxSets;
-    createInfo.poolSizeCount = static_cast<PoolIndex>(mPoolSizes.size());
+    createInfo.poolSizeCount = mPoolSizes.size();
     createInfo.pPoolSizes = mPoolSizes.data();
 
     VkDescriptorPool descriptorPool;
@@ -212,6 +208,121 @@ MaybeError DescriptorSetAllocator::AllocateDescriptorPool(VkDescriptorSetLayout 
         DescriptorPool{descriptorPool, std::move(sets), std::move(freeSetIndices)});
 
     return {};
+}
+
+// DescriptorSetAllocatorDynamicArray
+
+// static
+std::unique_ptr<DescriptorSetAllocatorDynamicArray> DescriptorSetAllocatorDynamicArray::Create(
+    Device* device) {
+    return std::make_unique<DescriptorSetAllocatorDynamicArray>(device);
+}
+
+DescriptorSetAllocatorDynamicArray::DescriptorSetAllocatorDynamicArray(Device* device)
+    : mDevice(device) {}
+
+DescriptorSetAllocatorDynamicArray::~DescriptorSetAllocatorDynamicArray() {
+    for (VkDescriptorPool pool : mPools) {
+        if (pool != VK_NULL_HANDLE) {
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(pool);
+        }
+    }
+}
+
+ResultOrError<DescriptorSetAllocation> DescriptorSetAllocatorDynamicArray::Allocate(
+    VkDescriptorSetLayout dsLayout,
+    const absl::flat_hash_map<VkDescriptorType, uint32_t>& descriptorCountPerType,
+    VkDescriptorType dynamicVariableType,
+    uint32_t dynamicVariableCount) {
+    // Create the pool (for a single set), accounting for the extra bindings necessary for the
+    // dynamic array.
+    std::vector<VkDescriptorPoolSize> sizes;
+    sizes.reserve(descriptorCountPerType.size());
+    for (auto [type, count] : descriptorCountPerType) {
+        if (type == dynamicVariableType) {
+            count += dynamicVariableCount;
+        }
+        sizes.push_back(VkDescriptorPoolSize{type, count});
+    }
+    if (!descriptorCountPerType.contains(dynamicVariableType)) {
+        // Vulkan requires that all specified pool sizes contain at least one descriptor and the
+        // VVLs complain if the dynamic array (of size 0) uses a VkDescriptorType that doesn't have
+        // an associated VkDescriptorPoolSize. For that reason always create a pool with at least
+        // one descriptor in it.
+        sizes.push_back(
+            VkDescriptorPoolSize{dynamicVariableType, std::max(dynamicVariableCount, 1u)});
+    }
+
+    VkDescriptorPoolCreateInfo createInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT,
+        .maxSets = 1,
+        .poolSizeCount = uint32_t(sizes.size()),
+        .pPoolSizes = sizes.data(),
+    };
+
+    VkDescriptorPool pool;
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.CreateDescriptorPool(mDevice->GetVkDevice(), &createInfo, nullptr, &*pool),
+        "CreateDescriptorPool"));
+
+    // Immediately track the pool to make sure it is eventually destroyed if we fail descriptor set
+    // allocation.
+    uint32_t slot;
+    {
+        Mutex::AutoLock lock(&mMutex);
+
+        if (mAvailableSlots.empty()) {
+            slot = static_cast<uint32_t>(mPools.size());
+            mPools.push_back(pool);
+        } else {
+            slot = mAvailableSlots.back();
+            mAvailableSlots.pop_back();
+
+            DAWN_ASSERT(mPools[slot] == VK_NULL_HANDLE);
+            mPools[slot] = pool;
+        }
+    }
+
+    // Create the descriptor set, sized to account for the dynamic array.
+    VkDescriptorSetVariableDescriptorCountAllocateInfo variableCountInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .descriptorSetCount = 1,
+        .pDescriptorCounts = &dynamicVariableCount,
+    };
+
+    VkDescriptorSetAllocateInfo allocateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .pNext = &variableCountInfo,
+        .descriptorPool = pool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = &*dsLayout,
+    };
+
+    VkDescriptorSet set;
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.AllocateDescriptorSets(mDevice->GetVkDevice(), &allocateInfo, &*set),
+        "AllocateDescriptorSets"));
+
+    return DescriptorSetAllocation{set, slot, 0};
+}
+
+void DescriptorSetAllocatorDynamicArray::Deallocate(DescriptorSetAllocation* allocationInfo) {
+    Mutex::AutoLock lock(&mMutex);
+
+    DAWN_ASSERT(allocationInfo->setIndex == 0);
+    DAWN_ASSERT(allocationInfo->poolIndex < mPools.size());
+    DAWN_ASSERT(mPools[allocationInfo->poolIndex] != VK_NULL_HANDLE);
+    uint32_t slot = allocationInfo->poolIndex;
+
+    mDevice->GetFencedDeleter()->DeleteWhenUnused(mPools[slot]);
+    mPools[slot] = VK_NULL_HANDLE;
+    mAvailableSlots.push_back(slot);
+
+    // Clear the content of the allocation so that use after frees are more visible.
+    *allocationInfo = {};
 }
 
 }  // namespace dawn::native::vulkan
