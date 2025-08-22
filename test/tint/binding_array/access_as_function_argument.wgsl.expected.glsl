@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 Error parsing GLSL shader:
 ERROR: 0:13: 'variable indexing sampler array' : not supported for this version or the enabled extensions 

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 runtime binding array not supported by the GLSL backend
 
