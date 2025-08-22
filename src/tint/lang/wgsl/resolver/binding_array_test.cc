@@ -181,6 +181,20 @@ TEST_F(ResolverBindingArrayTest, ValidFunctionParameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverBindingArrayTest, Runtime_InvalidAsFunctionParameter) {
+    Enable(wgsl::Extension::kChromiumExperimentalDynamicBinding);
+    Func("foo",
+         Vector{
+             Param("a", ty("binding_array",
+                           ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()))),
+         },
+         ty.void_(), Empty);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: type of function parameter cannot be binding_array<texture_2d<f32>>)");
+}
+
 TEST_F(ResolverBindingArrayTest, InvalidFunctionPointerParameterWithHandleType) {
     Func("foo",
          Vector{

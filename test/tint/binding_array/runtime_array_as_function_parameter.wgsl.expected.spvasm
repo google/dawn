@@ -1,5 +1,0 @@
-SKIP: FAILED
-
-runtime binding array not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1

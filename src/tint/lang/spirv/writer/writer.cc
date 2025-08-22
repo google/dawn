@@ -60,11 +60,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 return Failure("using subgroup matrices requires the Vulkan Memory Model");
             }
         }
-        if (auto* ba = ty->As<core::type::BindingArray>()) {
-            if (ba->Count()->Is<core::type::RuntimeArrayCount>()) {
-                return Failure("runtime binding array not supported by the SPIR-V backend");
-            }
-        }
     }
 
     // If a remapped entry point name is provided, it must not be empty, and must not contain

@@ -985,12 +985,16 @@ bool Validator::Parameter(const sem::Variable* var) const {
         }
     }
 
+    auto* ba = var->Type()->As<core::type::BindingArray>();
+    bool is_runtime_binding_array = ba && ba->Count()->Is<core::type::RuntimeArrayCount>();
+
     if (IsPlain(var->Type())) {
         if (!var->Type()->IsConstructible()) {
             AddError(decl->type->source) << "type of function parameter must be constructible";
             return false;
         }
-    } else if (!var->Type()->Is<core::type::Pointer>() && !var->Type()->IsHandle()) {
+    } else if (is_runtime_binding_array ||
+               (!var->Type()->Is<core::type::Pointer>() && !var->Type()->IsHandle())) {
         AddError(decl->source) << "type of function parameter cannot be "
                                << sem_.TypeNameOf(var->Type());
         return false;
