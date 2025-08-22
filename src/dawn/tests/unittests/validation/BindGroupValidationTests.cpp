@@ -4513,6 +4513,27 @@ TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, DynamicArraySizeLim
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
 }
 
+// Check that the dynamic array size must be below the limit.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, DynamicArrayRequiresASize) {
+    wgpu::BindGroupLayoutDynamicBindingArray layoutDynamic;
+    layoutDynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+    wgpu::BindGroupLayoutDescriptor layoutDesc;
+    layoutDesc.nextInChain = &layoutDynamic;
+
+    wgpu::BindGroupDynamicBindingArray dynamic;
+    dynamic.dynamicArraySize = 0;
+    wgpu::BindGroupDescriptor desc;
+    desc.layout = device.CreateBindGroupLayout(&layoutDesc);
+
+    // Control case: a size, even of 0 is valid.
+    desc.nextInChain = &dynamic;
+    device.CreateBindGroup(&desc);
+
+    // Error case: an unspecified size is invalid.
+    desc.nextInChain = nullptr;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
+}
+
 // Check that specifying an entry that's neither a known static one or a dynamic one is an error.
 TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, EntryNeitherStaticNorDynamic) {
     // Create a layout with a static entry at 0 and a dynamic binding array starting at 2.

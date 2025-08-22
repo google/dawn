@@ -663,6 +663,10 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     // Validate the dynamic entries.
     if (descriptor.Has<BindGroupDynamicBindingArray>()) {
         DAWN_TRY(ValidateBindGroupDynamicBindingArray(device, descriptor, mode));
+    } else {
+        DAWN_INVALID_IF(
+            layout->HasDynamicArray(),
+            "dynamicArraySize is not specified when the layout contains a dynamic binding array.");
     }
 
     return descriptor;
