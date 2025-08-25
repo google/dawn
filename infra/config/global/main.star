@@ -176,6 +176,26 @@ luci.bucket(
     ],
 )
 
+# Allows builders to write baselines and query ResultDB for new tests.
+luci.realm(
+    name = "@project",
+    bindings = [
+        luci.binding(
+            roles = "role/resultdb.baselineWriter",
+            users = [
+                "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+        luci.binding(
+            roles = "role/resultdb.baselineReader",
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
+)
+
 # Allow LED users to trigger swarming tasks directly when debugging try
 # builders.
 luci.binding(
