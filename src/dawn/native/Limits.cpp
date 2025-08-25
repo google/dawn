@@ -54,10 +54,10 @@
     X(v1, Maximum,                    maxComputeWorkgroupSizeZ,        64,          64,         64) \
     X(v1, Maximum,            maxComputeWorkgroupsPerDimension,     65535,       65535,      65535)
 
-// Tiers are 128MB, 512MB, 1GB, 2GB-4, 4GB-4.
+// Tiers are 128MB, 256MB, 512MB, 1GB, 2GB-4, 4GB-4.
 //                                                 compat     tier0      tier1
 #define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                                        \
-    X(v1, Maximum, maxStorageBufferBindingSize, 134217728, 134217728, 536870912, 1073741824, 2147483644, 4294967292)
+    X(v1, Maximum, maxStorageBufferBindingSize, 134217728, 134217728, 268435456, 536870912, 1073741824, 2147483644, 4294967292)
 
 // Tiers are 256MB, 1GB, 2GB, 4GB.
 //                                    compat      tier0       tier1

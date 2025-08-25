@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/GPUInfo.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/WindowsUtils.h"
 #include "dawn/native/ChainUtils.h"
@@ -406,7 +407,6 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     // D3D12 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
-    limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
 
     // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
     // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
@@ -422,13 +422,14 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Using base limits for:
     // TODO(crbug.com/dawn/685):
     // - maxVertexBufferArrayStride
-
-    if (gpu_info::IsQualcomm_ACPI(GetVendorId())) {
-        // Due to a driver and hardware limitation, Raw Buffers can only address 2^27 WORDS instead
-        // of the guaranteeed 2^31 bytes. Probably because it uses some form of texel buffer of
-        // 32bit values to implement [RW]ByteAddressBuffer.
-        limits->v1.maxStorageBufferBindingSize = sizeof(uint32_t)
-                                                 << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
+    if (gpu_info::IsQualcommACPI(GetVendorId()) &&
+        gpu_info::GetQualcommACPIGen(GetVendorId(), GetDeviceId()) <=
+            gpu_info::QualcommACPIGen::Adreno7xx) {
+        // Due to hardware limitation, Raw Buffers can only address 2^28 bytes instead of the
+        // guaranteed 2^31 bytes.
+        limits->v1.maxStorageBufferBindingSize = 1 << 28;
+    } else {
+        limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
     }
 
     return {};
@@ -878,7 +879,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // loading/sampling issues for depth24plus-stencil8 texture. Note that Qualcomm D3D12 drivers
     // only report ACPI ids.
     // See https://crbug.com/411268750 for more information.
-    if (gpu_info::IsQualcomm_ACPI(vendorId)) {
+    if (gpu_info::IsQualcommACPI(vendorId)) {
         deviceToggles->Default(Toggle::UsePackedDepth24UnormStencil8Format, true);
     }
 

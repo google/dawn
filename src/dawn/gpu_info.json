@@ -249,7 +249,7 @@
       }]
     },
 
-    "Qualcomm_PCI": {
+    "QualcommPCI": {
       "name_override": "Qualcomm",
       "id": "0x5143",
 
@@ -265,7 +265,7 @@
       }]
     },
 
-    "Qualcomm_ACPI": {
+    "QualcommACPI": {
       "name_override": "Qualcomm",
       "id": "0x4D4F4351",
 
