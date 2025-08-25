@@ -27,6 +27,7 @@
 
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
@@ -89,6 +90,16 @@ WGPUTextureAspect ToWGPU(const Aspect aspect) {
     }
 }
 
+WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes) {
+    return {
+        .nextInChain = nullptr,
+        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for QuerySetWGPU
+        .querySet = nullptr /*ToBackend(writes.querySet)->GetInnerHandle()*/,
+        .beginningOfPassWriteIndex = writes.beginningOfPassWriteIndex,
+        .endOfPassWriteIndex = writes.endOfPassWriteIndex,
+    };
+}
+
 WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy) {
     return {
         .texture = ToBackend(copy.texture)->GetInnerHandle(),
@@ -102,8 +113,14 @@ void EncodeComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
                        CommandIterator& commands,
                        BeginComputePassCmd* computePassCmd) {
-    // TODO(crbug.com/440123094): Create actual compute pass descriptor
-    WGPUComputePassEncoder passEncoder = wgpu.commandEncoderBeginComputePass(innerEncoder, nullptr);
+    WGPUPassTimestampWrites timestampWrites = ToWGPU(computePassCmd->timestampWrites);
+    WGPUComputePassDescriptor passDescriptor{
+        .nextInChain = nullptr,
+        .label = ToOutputStringView(computePassCmd->label),
+        .timestampWrites = &timestampWrites,
+    };
+    WGPUComputePassEncoder passEncoder =
+        wgpu.commandEncoderBeginComputePass(innerEncoder, &passDescriptor);
 
     Command type;
     while (commands.NextCommandId(&type)) {
