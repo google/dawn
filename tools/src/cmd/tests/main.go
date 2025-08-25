@@ -331,7 +331,6 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 		generateSkip:     generateSkip,
 		validationCache:  validationCache,
 		server:           server,
-		useIrReader:      useIrReader,
 	}
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
@@ -672,7 +671,6 @@ type runConfig struct {
 	generateSkip     bool
 	validationCache  validationCache
 	server           bool
-	useIrReader      bool
 }
 
 type tintServerState struct {
@@ -748,10 +746,6 @@ func (j job) run(cfg runConfig, fsReaderWriter oswrapper.FilesystemReaderWriter,
 			j.file,
 			"--format", outputFormat,
 			"--print-hash",
-		}
-
-		if cfg.useIrReader {
-			args = append(args, "--use-ir-reader")
 		}
 
 		// Append any skip-hashes, if they're found.

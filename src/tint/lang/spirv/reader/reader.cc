@@ -31,7 +31,6 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/spirv/reader/ast_parser/parse.h"
 #include "src/tint/lang/spirv/reader/lower/lower.h"
 #include "src/tint/lang/spirv/reader/parser/parser.h"
 
@@ -61,10 +60,6 @@ Result<core::ir::Module> ReadIR(const std::vector<uint32_t>& input, const Option
     }
 
     return mod;
-}
-
-Program Read(const std::vector<uint32_t>& input, const Options& options) {
-    return ast_parser::Parse(input, options);
 }
 
 }  // namespace tint::spirv::reader

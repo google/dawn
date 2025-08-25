@@ -153,7 +153,6 @@ struct Options {
     bool enable_robustness = true;
 
     bool dump_ir = false;
-    bool use_ir_reader = false;
     bool minify = false;
 
 #if TINT_BUILD_SPV_READER
@@ -296,10 +295,6 @@ If not provided, will be inferred from output filename extension:
     auto& output = options.Add<StringOption>("output-name", "Output file name", ShortName{"o"},
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
-
-    auto& use_ir_reader =
-        options.Add<BoolOption>("use-ir-reader", "Use the IR for the SPIR-V reader", Default{true});
-    TINT_DEFER(opts->use_ir_reader = *use_ir_reader.value);
 
     auto& disable_wg_init = options.Add<BoolOption>(
         "disable-workgroup-init", "Disable workgroup memory zero initialization", Default{false});
@@ -1435,12 +1430,15 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
         options.format = Format::kSpvAsm;
     }
 
-    tint::cmd::LoadProgramOptions opts;
-    opts.filename = options.input_filename;
-    opts.printer = options.printer.get();
+    tint::cmd::LoadProgramOptions opts{
+        .filename = options.input_filename,
 #if TINT_BUILD_SPV_READER
-    opts.use_ir_reader = options.use_ir_reader;
-    opts.spirv_reader_options = options.spirv_reader_options;
+        .spirv_reader_options = options.spirv_reader_options,
+#endif
+        .printer = options.printer.get(),
+    };
+
+#if TINT_BUILD_SPV_READER
     // Allow the shader-f16 extension
     opts.spirv_reader_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
 #endif

@@ -145,15 +145,6 @@ if (tint_build_unittests) {
       ]
     }
 
-    if (tint_build_spv_reader && tint_build_wgsl_reader &&
-        tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/ast_lower:unittests" ]
-    }
-
-    if (tint_build_spv_reader && tint_build_wgsl_writer) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/ast_parser:unittests" ]
-    }
-
     if (tint_build_spv_reader || tint_build_spv_writer) {
       deps += [ "${tint_src_dir}/lang/spirv/validate:unittests" ]
     }
