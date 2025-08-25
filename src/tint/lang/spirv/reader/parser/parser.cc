@@ -3682,12 +3682,12 @@ class Parser {
         auto merge_id = merge_inst->GetSingleWordInOperand(0);
         walk_stop_blocks_.insert({merge_id, switch_});
 
+        size_t switch_blocks_id = current_switch_blocks_.size();
         current_switch_blocks_.push_back({});
-        auto& switch_blocks = current_switch_blocks_.back();
 
         auto* default_blk = b_.DefaultCase(switch_);
         if (default_id != merge_id) {
-            switch_blocks.emplace(default_id);
+            current_switch_blocks_[switch_blocks_id].emplace(default_id);
 
             const auto& bb_default = current_spirv_function_->FindBlock(default_id);
             EmitBlockParent(default_blk, *bb_default);
@@ -3703,7 +3703,7 @@ class Parser {
             auto blk_id = inst.GetSingleWordInOperand(i + 1);
 
             if (blk_id != merge_id) {
-                switch_blocks.emplace(blk_id);
+                current_switch_blocks_[switch_blocks_id].emplace(blk_id);
             }
         }
 

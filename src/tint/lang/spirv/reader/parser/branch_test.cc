@@ -7196,5 +7196,58 @@ TEST_F(SpirvParserTest, ConvertHoisted) {
 )");
 }
 
+// https://crbug.com/440964231
+TEST_F(SpirvParserTest, SwitchWithSwitchInDefault) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+               OpSelectionMerge %24 None
+               OpSwitch %int_0 %22 0 %23
+         %23 = OpLabel
+               OpBranch %24
+         %22 = OpLabel
+               OpSelectionMerge %35 None
+               OpSwitch %int_0 %33
+         %33 = OpLabel
+               OpBranch %35
+         %35 = OpLabel
+               OpBranch %24
+         %24 = OpLabel
+               OpBranch %16
+         %16 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    switch 0i [c: (default, $B2), c: (0i, $B3)] {  # switch_1
+      $B2: {  # case
+        switch 0i [c: (default, $B4)] {  # switch_2
+          $B4: {  # case
+            exit_switch  # switch_2
+          }
+        }
+        exit_switch  # switch_1
+      }
+      $B3: {  # case
+        exit_switch  # switch_1
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
