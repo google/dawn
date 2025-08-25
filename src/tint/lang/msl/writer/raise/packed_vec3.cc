@@ -98,7 +98,9 @@ struct State {
 
         // Find all function parameters that contain vec3 types in host-shareable address spaces and
         // update them to use packed vec3 types instead.
-        for (auto func : ir.functions) {
+        // Take a copy of the function list as we may add new functions when updating usages.
+        auto functions = ir.functions;
+        for (auto func : functions) {
             for (auto* param : func->Params()) {
                 auto* ptr = param->Type()->As<core::type::Pointer>();
                 if (!ptr || !AddressSpaceNeedsPacking(ptr->AddressSpace())) {
