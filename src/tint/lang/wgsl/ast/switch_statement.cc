@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::SwitchStatement);
 
@@ -65,16 +64,5 @@ SwitchStatement::SwitchStatement(GenerationID pid,
 }
 
 SwitchStatement::~SwitchStatement() = default;
-
-const SwitchStatement* SwitchStatement::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* cond = ctx.Clone(condition);
-    auto b = ctx.Clone(body);
-    auto attrs = ctx.Clone(attributes);
-    auto body_attrs = ctx.Clone(body_attributes);
-    return ctx.dst->create<SwitchStatement>(src, cond, std::move(b), std::move(attrs),
-                                            std::move(body_attrs));
-}
 
 }  // namespace tint::ast

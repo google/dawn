@@ -80,12 +80,6 @@ class Var final : public Castable<Var, Variable> {
     /// @returns "var"
     const char* Kind() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Var* Clone(CloneContext& ctx) const override;
-
     /// The declared address space
     const Expression* const declared_address_space = nullptr;
 

@@ -47,11 +47,6 @@ class Node : public Castable<Node> {
   public:
     ~Node() override;
 
-    /// Performs a deep clone of this object using the CloneContext `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned object
-    virtual const Node* Clone(CloneContext& ctx) const = 0;
-
     /// The identifier of the program that owns this node
     const GenerationID generation_id;
 

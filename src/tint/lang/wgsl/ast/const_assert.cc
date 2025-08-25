@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/const_assert.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstAssert);
 
@@ -41,12 +40,5 @@ ConstAssert::ConstAssert(GenerationID pid, NodeID nid, const Source& src, const 
 }
 
 ConstAssert::~ConstAssert() = default;
-
-const ConstAssert* ConstAssert::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* cond = ctx.Clone(condition);
-    return ctx.dst->create<ConstAssert>(src, cond);
-}
 
 }  // namespace tint::ast

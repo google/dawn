@@ -50,12 +50,6 @@ class StrideAttribute final : public Castable<StrideAttribute, Attribute> {
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const StrideAttribute* Clone(CloneContext& ctx) const override;
-
     /// The stride value
     const uint32_t stride;
 };

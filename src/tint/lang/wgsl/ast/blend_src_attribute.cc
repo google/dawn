@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BlendSrcAttribute);
 
@@ -46,13 +45,6 @@ BlendSrcAttribute::~BlendSrcAttribute() = default;
 
 std::string BlendSrcAttribute::Name() const {
     return "blend_src";
-}
-
-const BlendSrcAttribute* BlendSrcAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* expr_ = ctx.Clone(expr);
-    return ctx.dst->create<BlendSrcAttribute>(src, expr_);
 }
 
 }  // namespace tint::ast

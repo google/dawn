@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticRuleName);
 
@@ -68,14 +67,7 @@ DiagnosticRuleName::DiagnosticRuleName(GenerationID pid,
     }
 }
 
-const DiagnosticRuleName* DiagnosticRuleName::Clone(CloneContext& ctx) const {
-    auto src = ctx.Clone(source);
-    auto n = ctx.Clone(name);
-    if (auto c = ctx.Clone(category)) {
-        return ctx.dst->create<DiagnosticRuleName>(src, c, n);
-    }
-    return ctx.dst->create<DiagnosticRuleName>(src, n);
-}
+DiagnosticRuleName::~DiagnosticRuleName() = default;
 
 std::string DiagnosticRuleName::String() const {
     if (category) {

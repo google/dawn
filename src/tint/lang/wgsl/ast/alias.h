@@ -49,11 +49,6 @@ class Alias final : public Castable<Alias, TypeDecl> {
     /// Destructor
     ~Alias() override;
 
-    /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned type
-    const Alias* Clone(CloneContext& ctx) const override;
-
     /// the alias type
     const Type type;
 };

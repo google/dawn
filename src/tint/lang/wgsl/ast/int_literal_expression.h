@@ -55,12 +55,6 @@ class IntLiteralExpression final : public Castable<IntLiteralExpression, Literal
 
     ~IntLiteralExpression() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IntLiteralExpression* Clone(CloneContext& ctx) const override;
-
     /// The literal value
     const int64_t value;
 

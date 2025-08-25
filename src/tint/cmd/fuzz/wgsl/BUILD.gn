@@ -96,7 +96,6 @@ if (tint_build_wgsl_reader) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/program:fuzz",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/writer/raise:fuzz",
       "${tint_src_dir}/utils",

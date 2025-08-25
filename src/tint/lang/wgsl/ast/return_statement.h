@@ -52,12 +52,6 @@ class ReturnStatement final : public Castable<ReturnStatement, Statement> {
     /// Destructor
     ~ReturnStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const ReturnStatement* Clone(CloneContext& ctx) const override;
-
     /// The value returned. May be null.
     const Expression* const value;
 };

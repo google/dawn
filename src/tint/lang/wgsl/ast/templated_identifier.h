@@ -59,11 +59,6 @@ class TemplatedIdentifier final : public Castable<TemplatedIdentifier, Identifie
     /// Destructor
     ~TemplatedIdentifier() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const TemplatedIdentifier* Clone(CloneContext& ctx) const override;
-
     /// The templated arguments
     const tint::Vector<const Expression*, 3> arguments;
 

@@ -49,12 +49,6 @@ class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const LocationAttribute* Clone(CloneContext& ctx) const override;
-
     /// The location expression
     const Expression* const expr;
 };

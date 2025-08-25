@@ -53,12 +53,6 @@ class StructMemberAlignAttribute final : public Castable<StructMemberAlignAttrib
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const StructMemberAlignAttribute* Clone(CloneContext& ctx) const override;
-
     /// The align expression
     const Expression* const expr;
 };

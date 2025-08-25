@@ -51,12 +51,6 @@ class IncrementDecrementStatement final : public Castable<IncrementDecrementStat
     /// Destructor
     ~IncrementDecrementStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IncrementDecrementStatement* Clone(CloneContext& ctx) const override;
-
     /// The LHS expression.
     const Expression* const lhs;
 

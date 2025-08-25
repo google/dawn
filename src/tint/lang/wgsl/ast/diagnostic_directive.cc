@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/diagnostic_directive.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticDirective);
 
@@ -41,12 +40,5 @@ DiagnosticDirective::DiagnosticDirective(GenerationID pid,
     : Base(pid, nid, src), control(std::move(dc)) {}
 
 DiagnosticDirective::~DiagnosticDirective() = default;
-
-const DiagnosticDirective* DiagnosticDirective::Clone(CloneContext& ctx) const {
-    auto src = ctx.Clone(source);
-    auto rule = ctx.Clone(control.rule_name);
-    DiagnosticControl dc(control.severity, rule);
-    return ctx.dst->create<DiagnosticDirective>(src, std::move(dc));
-}
 
 }  // namespace tint::ast

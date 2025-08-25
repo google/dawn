@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Let);
 
@@ -51,15 +50,6 @@ Let::~Let() = default;
 
 const char* Let::Kind() const {
     return "let";
-}
-
-const Let* Let::Clone(CloneContext& ctx) const {
-    auto src = ctx.Clone(source);
-    auto* n = ctx.Clone(name);
-    auto ty = ctx.Clone(type);
-    auto* init = ctx.Clone(initializer);
-    auto attrs = ctx.Clone(attributes);
-    return ctx.dst->create<Let>(src, n, ty, init, std::move(attrs));
 }
 
 }  // namespace tint::ast

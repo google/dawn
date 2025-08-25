@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiscardStatement);
 
@@ -38,11 +37,5 @@ DiscardStatement::DiscardStatement(GenerationID pid, NodeID nid, const Source& s
     : Base(pid, nid, src) {}
 
 DiscardStatement::~DiscardStatement() = default;
-
-const DiscardStatement* DiscardStatement::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    return ctx.dst->create<DiscardStatement>(src);
-}
 
 }  // namespace tint::ast

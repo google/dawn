@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ForLoopStatement);
 
@@ -63,17 +62,5 @@ ForLoopStatement::ForLoopStatement(GenerationID pid,
 }
 
 ForLoopStatement::~ForLoopStatement() = default;
-
-const ForLoopStatement* ForLoopStatement::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-
-    auto* init = ctx.Clone(initializer);
-    auto* cond = ctx.Clone(condition);
-    auto* cont = ctx.Clone(continuing);
-    auto* b = ctx.Clone(body);
-    auto attrs = ctx.Clone(attributes);
-    return ctx.dst->create<ForLoopStatement>(src, init, cond, cont, b, std::move(attrs));
-}
 
 }  // namespace tint::ast

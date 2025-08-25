@@ -153,17 +153,6 @@ class Module final : public Castable<Module, Node> {
     /// @returns true if the module has any 'override' declarations
     bool HasOverrides() const;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Module* Clone(CloneContext& ctx) const override;
-
-    /// Copy copies the content of the Module src into this module.
-    /// @param ctx the clone context
-    /// @param src the module to copy into this module
-    void Copy(CloneContext& ctx, const Module* src);
-
   private:
     /// Adds `decl` to either:
     /// * #global_declarations_

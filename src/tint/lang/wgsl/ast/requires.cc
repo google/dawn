@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/requires.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Requires);
 
@@ -38,10 +37,5 @@ Requires::Requires(GenerationID pid, NodeID nid, const Source& src, LanguageFeat
     : Base(pid, nid, src), features(std::move(feats)) {}
 
 Requires::~Requires() = default;
-
-const Requires* Requires::Clone(CloneContext& ctx) const {
-    auto src = ctx.Clone(source);
-    return ctx.dst->create<Requires>(src, features);
-}
 
 }  // namespace tint::ast

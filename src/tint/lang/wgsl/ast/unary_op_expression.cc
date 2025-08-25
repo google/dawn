@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::UnaryOpExpression);
 
@@ -45,12 +44,5 @@ UnaryOpExpression::UnaryOpExpression(GenerationID pid,
 }
 
 UnaryOpExpression::~UnaryOpExpression() = default;
-
-const UnaryOpExpression* UnaryOpExpression::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* e = ctx.Clone(expr);
-    return ctx.dst->create<UnaryOpExpression>(src, op, e);
-}
 
 }  // namespace tint::ast

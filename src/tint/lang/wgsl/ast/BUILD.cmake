@@ -73,8 +73,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/case_selector.h
   lang/wgsl/ast/case_statement.cc
   lang/wgsl/ast/case_statement.h
-  lang/wgsl/ast/clone_context.cc
-  lang/wgsl/ast/clone_context.h
   lang/wgsl/ast/color_attribute.cc
   lang/wgsl/ast/color_attribute.h
   lang/wgsl/ast/compound_assignment_statement.cc
@@ -245,7 +243,6 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/call_statement_test.cc
   lang/wgsl/ast/case_selector_test.cc
   lang/wgsl/ast/case_statement_test.cc
-  lang/wgsl/ast/clone_context_test.cc
   lang/wgsl/ast/color_attribute_test.cc
   lang/wgsl/ast/compound_assignment_statement_test.cc
   lang/wgsl/ast/const_assert_test.cc
@@ -299,14 +296,12 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
-  tint_lang_wgsl_writer_common
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
@@ -323,21 +318,3 @@ tint_target_add_external_dependencies(tint_lang_wgsl_ast_test test
   "gtest"
   "src_utils"
 )
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_dependencies(tint_lang_wgsl_ast_test test
-    tint_lang_wgsl_reader
-  )
-endif(TINT_BUILD_WGSL_READER)
-
-if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-  tint_target_add_sources(tint_lang_wgsl_ast_test test
-    "lang/wgsl/ast/module_clone_test.cc"
-  )
-endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-
-if(TINT_BUILD_WGSL_WRITER)
-  tint_target_add_dependencies(tint_lang_wgsl_ast_test test
-    tint_lang_wgsl_writer
-  )
-endif(TINT_BUILD_WGSL_WRITER)

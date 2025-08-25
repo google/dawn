@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Struct);
 
@@ -54,14 +53,5 @@ Struct::Struct(GenerationID pid,
 }
 
 Struct::~Struct() = default;
-
-const Struct* Struct::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto n = ctx.Clone(name);
-    auto mem = ctx.Clone(members);
-    auto attrs = ctx.Clone(attributes);
-    return ctx.dst->create<Struct>(src, n, std::move(mem), std::move(attrs));
-}
 
 }  // namespace tint::ast

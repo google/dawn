@@ -45,12 +45,6 @@ class BoolLiteralExpression final : public Castable<BoolLiteralExpression, Liter
     BoolLiteralExpression(GenerationID pid, NodeID nid, const Source& src, bool value);
     ~BoolLiteralExpression() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const BoolLiteralExpression* Clone(CloneContext& ctx) const override;
-
     /// The boolean literal value
     const bool value;
 };

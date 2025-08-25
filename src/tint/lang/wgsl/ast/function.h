@@ -83,12 +83,6 @@ class Function final : public Castable<Function, Node> {
     /// @returns true if this function is an entry point
     bool IsEntryPoint() const { return PipelineStage() != ast::PipelineStage::kNone; }
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Function* Clone(CloneContext& ctx) const override;
-
     /// The function name
     const Identifier* const name;
 

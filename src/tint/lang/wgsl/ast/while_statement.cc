@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::WhileStatement);
 
@@ -55,15 +54,5 @@ WhileStatement::WhileStatement(GenerationID pid,
 }
 
 WhileStatement::~WhileStatement() = default;
-
-const WhileStatement* WhileStatement::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-
-    auto* cond = ctx.Clone(condition);
-    auto* b = ctx.Clone(body);
-    auto attrs = ctx.Clone(attributes);
-    return ctx.dst->create<WhileStatement>(src, cond, b, std::move(attrs));
-}
 
 }  // namespace tint::ast

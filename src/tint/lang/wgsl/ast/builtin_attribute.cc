@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinAttribute);
 
@@ -46,12 +45,6 @@ BuiltinAttribute::~BuiltinAttribute() = default;
 
 std::string BuiltinAttribute::Name() const {
     return "builtin";
-}
-
-const BuiltinAttribute* BuiltinAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    return ctx.dst->create<BuiltinAttribute>(src, builtin);
 }
 
 }  // namespace tint::ast

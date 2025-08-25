@@ -65,12 +65,6 @@ class WorkgroupAttribute final : public Castable<WorkgroupAttribute, Attribute> 
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const WorkgroupAttribute* Clone(CloneContext& ctx) const override;
-
     /// The workgroup x dimension.
     const Expression* const x;
     /// The optional workgroup y dimension. May be null.

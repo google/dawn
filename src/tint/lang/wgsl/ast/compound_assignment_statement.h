@@ -54,12 +54,6 @@ class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStat
     /// Destructor
     ~CompoundAssignmentStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const CompoundAssignmentStatement* Clone(CloneContext& ctx) const override;
-
     /// left side expression
     const Expression* const lhs;
 

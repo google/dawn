@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IdAttribute);
 
@@ -43,13 +42,6 @@ IdAttribute::~IdAttribute() = default;
 
 std::string IdAttribute::Name() const {
     return "id";
-}
-
-const IdAttribute* IdAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* expr_ = ctx.Clone(expr);
-    return ctx.dst->create<IdAttribute>(src, expr_);
 }
 
 }  // namespace tint::ast

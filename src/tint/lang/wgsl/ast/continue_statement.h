@@ -43,12 +43,6 @@ class ContinueStatement final : public Castable<ContinueStatement, Statement> {
 
     /// Destructor
     ~ContinueStatement() override;
-
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const ContinueStatement* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

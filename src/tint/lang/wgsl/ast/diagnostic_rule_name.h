@@ -61,10 +61,7 @@ class DiagnosticRuleName final : public Castable<DiagnosticRuleName, Node> {
                        const Identifier* category,
                        const Identifier* name);
 
-    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const DiagnosticRuleName* Clone(CloneContext& ctx) const override;
+    ~DiagnosticRuleName() override;
 
     /// @return the full name of this diagnostic rule, either as `name` or `category.name`.
     std::string String() const;

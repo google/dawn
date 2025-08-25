@@ -58,11 +58,6 @@ class Requires final : public Castable<Requires, Node> {
     /// Destructor
     ~Requires() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Requires* Clone(CloneContext& ctx) const override;
-
     /// The features being required by this directive.
     const LanguageFeatures features;
 };

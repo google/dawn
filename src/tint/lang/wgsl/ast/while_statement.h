@@ -54,12 +54,6 @@ class WhileStatement final : public Castable<WhileStatement, Statement> {
     /// Destructor
     ~WhileStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const WhileStatement* Clone(CloneContext& ctx) const override;
-
     /// The condition expression
     const Expression* const condition;
 

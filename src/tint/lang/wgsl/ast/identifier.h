@@ -46,12 +46,6 @@ class Identifier : public Castable<Identifier, Node> {
     /// Destructor
     ~Identifier() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Identifier* Clone(CloneContext& ctx) const override;
-
     /// The symbol for the identifier
     const Symbol symbol;
 };

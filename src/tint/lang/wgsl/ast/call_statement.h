@@ -46,12 +46,6 @@ class CallStatement final : public Castable<CallStatement, Statement> {
     /// Destructor
     ~CallStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const CallStatement* Clone(CloneContext& ctx) const override;
-
     /// The call expression
     const CallExpression* const expr;
 };

@@ -56,12 +56,6 @@ class FloatLiteralExpression final : public Castable<FloatLiteralExpression, Lit
     FloatLiteralExpression(GenerationID pid, NodeID nid, const Source& src, double val, Suffix suf);
     ~FloatLiteralExpression() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const FloatLiteralExpression* Clone(CloneContext& ctx) const override;
-
     /// The literal value
     const double value;
 

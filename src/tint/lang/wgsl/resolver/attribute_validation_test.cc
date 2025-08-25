@@ -2874,7 +2874,6 @@ class TestAttribute : public Castable<TestAttribute, ast::InternalAttribute> {
     TestAttribute(GenerationID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
         : Base(pid, nid, Vector{dep}) {}
     std::string InternalName() const override { return "test_attribute"; }
-    const Node* Clone(ast::CloneContext&) const override { return nullptr; }
 };
 
 using InternalAttributeDepsTest = ResolverTest;

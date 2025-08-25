@@ -57,12 +57,6 @@ class IfStatement final : public Castable<IfStatement, Statement> {
     /// Destructor
     ~IfStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IfStatement* Clone(CloneContext& ctx) const override;
-
     /// The if condition or nullptr if none set
     const Expression* const condition;
 

@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/extension.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 //! @cond Doxygen_Suppress
 // Doxygen gets confused with tint::ast::Extension and tint::wgsl::Extension
@@ -41,11 +40,6 @@ Extension::Extension(GenerationID pid, NodeID nid, const Source& src, wgsl::Exte
     : Base(pid, nid, src), name(ext) {}
 
 Extension::~Extension() = default;
-
-const Extension* Extension::Clone(CloneContext& ctx) const {
-    auto src = ctx.Clone(source);
-    return ctx.dst->create<Extension>(src, name);
-}
 
 }  // namespace tint::ast
 

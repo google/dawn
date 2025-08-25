@@ -56,7 +56,6 @@ tint_target_add_dependencies(tint_cmd_fuzz_wgsl_fuzz_cmd fuzz_cmd
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
-  tint_lang_wgsl_program_fuzz
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer_raise_fuzz
   tint_utils

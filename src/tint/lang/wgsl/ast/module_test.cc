@@ -27,7 +27,6 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
-#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::ast {
@@ -98,50 +97,6 @@ TEST_F(ModuleDeathTest, Assert_Null_Function) {
             builder.AST().AddFunction(nullptr);
         },
         "internal compiler error");
-}
-
-TEST_F(ModuleTest, CloneOrder) {
-    // Create a program with a function, alias decl and var decl.
-    Program p = [] {
-        ProgramBuilder b;
-        b.Func("F", {}, b.ty.void_(), {});
-        b.Alias("A", b.ty.u32());
-        b.GlobalVar("V", b.ty.i32(), core::AddressSpace::kPrivate);
-        return resolver::Resolve(b);
-    }();
-
-    // Clone the program, using ReplaceAll() to create new module-scope
-    // declarations. We want to test that these are added just before the
-    // declaration that triggered the ReplaceAll().
-    ProgramBuilder cloned;
-    program::CloneContext ctx(&cloned, &p);
-    ctx.ReplaceAll([&](const Function*) -> const Function* {
-        ctx.dst->Alias("inserted_before_F", cloned.ty.u32());
-        return nullptr;
-    });
-    ctx.ReplaceAll([&](const ast::Alias*) -> const ast::Alias* {
-        ctx.dst->Alias("inserted_before_A", cloned.ty.u32());
-        return nullptr;
-    });
-    ctx.ReplaceAll([&](const Variable*) -> const Variable* {
-        ctx.dst->Alias("inserted_before_V", cloned.ty.u32());
-        return nullptr;
-    });
-    ctx.Clone();
-
-    auto& decls = cloned.AST().GlobalDeclarations();
-    ASSERT_EQ(decls.Length(), 6u);
-    EXPECT_TRUE(decls[1]->Is<Function>());
-    EXPECT_TRUE(decls[3]->Is<ast::Alias>());
-    EXPECT_TRUE(decls[5]->Is<Variable>());
-
-    ASSERT_TRUE(decls[0]->Is<ast::Alias>());
-    ASSERT_TRUE(decls[2]->Is<ast::Alias>());
-    ASSERT_TRUE(decls[4]->Is<ast::Alias>());
-
-    ASSERT_EQ(decls[0]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_F");
-    ASSERT_EQ(decls[2]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_A");
-    ASSERT_EQ(decls[4]->As<ast::Alias>()->name->symbol.Name(), "inserted_before_V");
 }
 
 TEST_F(ModuleTest, Directives) {

@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/clone_context.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -102,18 +102,6 @@ Program& Program::operator=(Program&& program) {
     diagnostics_ = std::move(program.diagnostics_);
     is_valid_ = program.is_valid_;
     return *this;
-}
-
-Program Program::Clone() const {
-    AssertNotMoved();
-    return Program(CloneAsBuilder());
-}
-
-ProgramBuilder Program::CloneAsBuilder() const {
-    AssertNotMoved();
-    ProgramBuilder out;
-    program::CloneContext(&out, this).Clone();
-    return out;
 }
 
 bool Program::IsValid() const {

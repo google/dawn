@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/type_decl.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -156,31 +155,6 @@ bool Module::HasOverrides() const {
         }
     }
     return false;
-}
-
-const Module* Module::Clone(CloneContext& ctx) const {
-    auto* out = ctx.dst->create<Module>();
-    out->Copy(ctx, this);
-    return out;
-}
-
-void Module::Copy(CloneContext& ctx, const Module* src) {
-    ctx.Clone(global_declarations_, src->global_declarations_);
-
-    // During the clone, declarations may have been placed into the module.
-    // Clear everything out, as we're about to re-bin the declarations.
-    type_decls_.Clear();
-    functions_.Clear();
-    global_variables_.Clear();
-    enables_.Clear();
-    diagnostic_directives_.Clear();
-
-    for (auto* decl : global_declarations_) {
-        if (DAWN_UNLIKELY(!decl)) {
-            TINT_ICE() << "src global declaration was nullptr";
-        }
-        BinGlobalDeclaration(decl);
-    }
 }
 
 }  // namespace tint::ast

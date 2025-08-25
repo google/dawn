@@ -65,12 +65,6 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
     /// @returns the last statement in the block or nullptr if block empty
     const Statement* Last() const { return statements.IsEmpty() ? nullptr : statements.Back(); }
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const BlockStatement* Clone(CloneContext& ctx) const override;
-
     /// the statement list
     const tint::Vector<const Statement*, 8> statements;
 

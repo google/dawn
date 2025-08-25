@@ -57,11 +57,6 @@ class Enable final : public Castable<Enable, Node> {
     /// @returns true if this Enable lists the given extension
     bool HasExtension(wgsl::Extension ext) const;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Enable* Clone(CloneContext& ctx) const override;
-
     /// The extensions being enabled by this directive
     const tint::Vector<const Extension*, 4> extensions;
 };

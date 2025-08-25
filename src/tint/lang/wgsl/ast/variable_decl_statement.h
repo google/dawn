@@ -49,12 +49,6 @@ class VariableDeclStatement final : public Castable<VariableDeclStatement, State
     /// Destructor
     ~VariableDeclStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const VariableDeclStatement* Clone(CloneContext& ctx) const override;
-
     /// The variable
     const Variable* const variable;
 };

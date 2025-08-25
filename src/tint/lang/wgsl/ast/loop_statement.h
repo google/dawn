@@ -51,12 +51,6 @@ class LoopStatement final : public Castable<LoopStatement, Statement> {
     /// Destructor
     ~LoopStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const LoopStatement* Clone(CloneContext& ctx) const override;
-
     /// The loop body
     const BlockStatement* const body;
 

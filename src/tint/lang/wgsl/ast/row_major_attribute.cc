@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::RowMajorAttribute);
 
@@ -41,12 +40,6 @@ RowMajorAttribute::~RowMajorAttribute() = default;
 
 std::string RowMajorAttribute::Name() const {
     return "row_major";
-}
-
-const RowMajorAttribute* RowMajorAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    return ctx.dst->create<RowMajorAttribute>(src);
 }
 
 }  // namespace tint::ast

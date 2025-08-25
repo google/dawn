@@ -52,12 +52,6 @@ class InterpolateAttribute final : public Castable<InterpolateAttribute, Attribu
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const InterpolateAttribute* Clone(CloneContext& ctx) const override;
-
     /// The interpolation attribute values
     const core::Interpolation interpolation;
 };

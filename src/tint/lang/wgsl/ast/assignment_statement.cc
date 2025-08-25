@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::AssignmentStatement);
 
@@ -47,13 +46,5 @@ AssignmentStatement::AssignmentStatement(GenerationID pid,
 }
 
 AssignmentStatement::~AssignmentStatement() = default;
-
-const AssignmentStatement* AssignmentStatement::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* l = ctx.Clone(lhs);
-    auto* r = ctx.Clone(rhs);
-    return ctx.dst->create<AssignmentStatement>(src, l, r);
-}
 
 }  // namespace tint::ast

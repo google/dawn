@@ -51,12 +51,6 @@ class AssignmentStatement final : public Castable<AssignmentStatement, Statement
     /// Destructor
     ~AssignmentStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const AssignmentStatement* Clone(CloneContext& ctx) const override;
-
     /// left side expression
     const Expression* const lhs;
 

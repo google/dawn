@@ -30,7 +30,6 @@
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ColorAttribute);
 
@@ -48,13 +47,6 @@ ColorAttribute::~ColorAttribute() = default;
 
 std::string ColorAttribute::Name() const {
     return "color";
-}
-
-const ColorAttribute* ColorAttribute::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto e = ctx.Clone(expr);
-    return ctx.dst->create<ColorAttribute>(src, e);
 }
 
 }  // namespace tint::ast

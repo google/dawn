@@ -58,12 +58,6 @@ class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
     /// Destructor
     ~ForLoopStatement() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const ForLoopStatement* Clone(CloneContext& ctx) const override;
-
     /// The initializer statement
     const Statement* const initializer;
 

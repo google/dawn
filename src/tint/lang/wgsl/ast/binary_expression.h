@@ -100,12 +100,6 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
     /// @returns true if the op is a logical expression
     bool IsLogical() const;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const BinaryExpression* Clone(CloneContext& ctx) const override;
-
     /// the binary op type
     const core::BinaryOp op;
     /// the left side expression

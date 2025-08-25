@@ -66,13 +66,11 @@ using ResolverValidationDeathTest = ResolverValidationTest;
 class FakeStmt final : public Castable<FakeStmt, ast::Statement> {
   public:
     FakeStmt(GenerationID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
-    FakeStmt* Clone(ast::CloneContext&) const override { return nullptr; }
 };
 
 class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
   public:
     FakeExpr(GenerationID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
-    FakeExpr* Clone(ast::CloneContext&) const override { return nullptr; }
 };
 
 TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {

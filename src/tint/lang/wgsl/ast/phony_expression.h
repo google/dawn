@@ -44,12 +44,6 @@ class PhonyExpression final : public Castable<PhonyExpression, Expression> {
 
     /// Destructor
     ~PhonyExpression() override;
-
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const PhonyExpression* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

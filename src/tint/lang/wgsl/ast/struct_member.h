@@ -60,12 +60,6 @@ class StructMember final : public Castable<StructMember, Node> {
     /// Destructor
     ~StructMember() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const StructMember* Clone(CloneContext& ctx) const override;
-
     /// The member name
     const Identifier* const name;
 

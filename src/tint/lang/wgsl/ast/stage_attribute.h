@@ -49,12 +49,6 @@ class StageAttribute final : public Castable<StageAttribute, Attribute> {
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const StageAttribute* Clone(CloneContext& ctx) const override;
-
     /// The pipeline stage
     const PipelineStage stage;
 };

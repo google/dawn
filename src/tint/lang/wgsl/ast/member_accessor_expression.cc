@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/ast/member_accessor_expression.h"
 
 #include "src/tint/lang/wgsl/ast/builder.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 
@@ -50,13 +49,5 @@ MemberAccessorExpression::MemberAccessorExpression(GenerationID pid,
 }
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
-
-const MemberAccessorExpression* MemberAccessorExpression::Clone(CloneContext& ctx) const {
-    // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx.Clone(source);
-    auto* obj = ctx.Clone(object);
-    auto* mem = ctx.Clone(member);
-    return ctx.dst->create<MemberAccessorExpression>(src, obj, mem);
-}
 
 }  // namespace tint::ast

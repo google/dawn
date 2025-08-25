@@ -49,12 +49,6 @@ class BlendSrcAttribute final : public Castable<BlendSrcAttribute, Attribute> {
     /// @returns the WGSL name for the attribute
     std::string Name() const override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const BlendSrcAttribute* Clone(CloneContext& ctx) const override;
-
     /// The blend_src expression
     const Expression* const expr;
 };

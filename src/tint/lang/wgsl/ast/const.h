@@ -66,12 +66,6 @@ class Const final : public Castable<Const, Variable> {
 
     /// @returns "const"
     const char* Kind() const override;
-
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const Const* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

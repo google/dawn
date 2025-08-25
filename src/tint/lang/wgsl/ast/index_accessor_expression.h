@@ -50,12 +50,6 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, A
     /// Destructor
     ~IndexAccessorExpression() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IndexAccessorExpression* Clone(CloneContext& ctx) const override;
-
     /// the index expression
     const Expression* const index;
 };

@@ -127,20 +127,6 @@ class Program {
         return diagnostics_;
     }
 
-    /// Performs a deep clone of this program.
-    /// The returned Program will contain no pointers to objects owned by this
-    /// Program, and so after calling, this Program can be safely destructed.
-    /// @return a new Program copied from this Program
-    Program Clone() const;
-
-    /// Performs a deep clone of this Program's AST nodes, types and symbols into
-    /// a new ProgramBuilder. Semantic nodes are not cloned, as these will be
-    /// rebuilt when the ProgramBuilder builds its Program.
-    /// The returned ProgramBuilder will contain no pointers to objects owned by
-    /// this Program, and so after calling, this Program can be safely destructed.
-    /// @return a new ProgramBuilder copied from this Program
-    ProgramBuilder CloneAsBuilder() const;
-
     /// @returns true if the program has no error diagnostics and is not missing
     /// information
     bool IsValid() const;

@@ -53,12 +53,6 @@ class IdentifierExpression final : public Castable<IdentifierExpression, Express
     /// Destructor
     ~IdentifierExpression() override;
 
-    /// Clones this node and all transitive child nodes using the `CloneContext`
-    /// `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned node
-    const IdentifierExpression* Clone(CloneContext& ctx) const override;
-
     /// The identifier for the expression
     Identifier const* const identifier;
 };

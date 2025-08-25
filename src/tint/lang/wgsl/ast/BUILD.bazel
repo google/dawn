@@ -56,7 +56,6 @@ cc_library(
     "call_statement.cc",
     "case_selector.cc",
     "case_statement.cc",
-    "clone_context.cc",
     "color_attribute.cc",
     "compound_assignment_statement.cc",
     "const.cc",
@@ -138,7 +137,6 @@ cc_library(
     "call_statement.h",
     "case_selector.h",
     "case_statement.h",
-    "clone_context.h",
     "color_attribute.h",
     "compound_assignment_statement.h",
     "const.h",
@@ -244,7 +242,6 @@ cc_library(
     "call_statement_test.cc",
     "case_selector_test.cc",
     "case_statement_test.cc",
-    "clone_context_test.cc",
     "color_attribute_test.cc",
     "compound_assignment_statement_test.cc",
     "const_assert_test.cc",
@@ -292,28 +289,17 @@ cc_library(
     "variable_test.cc",
     "while_statement_test.cc",
     "workgroup_attribute_test.cc",
-  ] + select({
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_reader_and_tint_build_wgsl_writer": [
-      "module_clone_test.cc",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    "//conditions:default": [],
-  }),
+  ],
   deps = [
     "//src/tint/api/common",
     "//src/tint/lang/core",
     "//src/tint/lang/core/constant",
-    "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer/common",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -326,38 +312,8 @@ cc_library(
     "//src/tint/utils/text",
     "@gtest",
     "//src/utils",
-  ] + select({
-    ":tint_build_wgsl_reader": [
-      "//src/tint/lang/wgsl/reader",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_writer": [
-      "//src/tint/lang/wgsl/writer",
-    ],
-    "//conditions:default": [],
-  }),
+  ],
   copts = COPTS,
   visibility = ["//visibility:public"],
-)
-
-alias(
-  name = "tint_build_wgsl_reader",
-  actual = "//src/tint:tint_build_wgsl_reader_true",
-)
-
-alias(
-  name = "tint_build_wgsl_writer",
-  actual = "//src/tint:tint_build_wgsl_writer_true",
-)
-
-selects.config_setting_group(
-    name = "tint_build_wgsl_reader_and_tint_build_wgsl_writer",
-    match_all = [
-        ":tint_build_wgsl_reader",
-        ":tint_build_wgsl_writer",
-    ],
 )
 
