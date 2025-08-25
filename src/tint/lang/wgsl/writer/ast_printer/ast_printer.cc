@@ -68,7 +68,6 @@
 #include "src/tint/lang/wgsl/ast/override.h"
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
@@ -557,7 +556,6 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 out << ")";
             },
             [&](const ast::MustUseAttribute*) { out << "must_use"; },
-            [&](const ast::RowMajorAttribute*) { out << "row_major"; },
             [&](const ast::StructMemberOffsetAttribute* offset) {
                 out << "offset(";
                 EmitExpression(out, offset->expr);

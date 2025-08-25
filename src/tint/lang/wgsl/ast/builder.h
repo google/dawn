@@ -83,7 +83,6 @@
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
@@ -3374,17 +3373,6 @@ class Builder {
                                                Expr(std::forward<EXPR_Y>(y)),
                                                Expr(std::forward<EXPR_Z>(z)));
     }
-
-    /// Creates an ast::RowMajorAttribute
-    /// @param source the source information
-    /// @returns the row-major attribute pointer
-    const ast::RowMajorAttribute* RowMajor(const Source& source) {
-        return create<ast::RowMajorAttribute>(source);
-    }
-
-    /// Creates an ast::RowMajorAttribute
-    /// @returns the row-major attribute pointer
-    const ast::RowMajorAttribute* RowMajor() { return create<ast::RowMajorAttribute>(source_); }
 
     /// Creates an ast::DisableValidationAttribute
     /// @param validation the validation to disable

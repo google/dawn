@@ -70,7 +70,6 @@
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
-#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
@@ -4505,19 +4504,6 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                         return false;
                     }
                     attributes.invariant = true;
-                    return true;
-                },
-                [&](const ast::RowMajorAttribute* attr) {
-                    const auto* element_type = type;
-                    while (auto* arr = element_type->As<core::type::Array>()) {
-                        element_type = arr->ElemType();
-                    }
-                    if (!element_type->Is<core::type::Matrix>()) {
-                        AddError(attr->source)
-                            << style::Attribute("@row_major")
-                            << " can only be applied to matrices or arrays of matrices";
-                        return false;
-                    }
                     return true;
                 },
                 [&](const ast::StrideAttribute* attr) {

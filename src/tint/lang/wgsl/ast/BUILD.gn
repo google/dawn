@@ -166,8 +166,6 @@ libtint_source_set("ast") {
     "requires.h",
     "return_statement.cc",
     "return_statement.h",
-    "row_major_attribute.cc",
-    "row_major_attribute.h",
     "stage_attribute.cc",
     "stage_attribute.h",
     "statement.cc",

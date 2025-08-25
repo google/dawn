@@ -160,8 +160,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/requires.h
   lang/wgsl/ast/return_statement.cc
   lang/wgsl/ast/return_statement.h
-  lang/wgsl/ast/row_major_attribute.cc
-  lang/wgsl/ast/row_major_attribute.h
   lang/wgsl/ast/stage_attribute.cc
   lang/wgsl/ast/stage_attribute.h
   lang/wgsl/ast/statement.cc
