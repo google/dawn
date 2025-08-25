@@ -4513,6 +4513,34 @@ TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, DynamicArraySizeLim
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
 }
 
+// Check that a dynamic array counts as one additional storage buffer when checking against limits.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, UsesOneStorageBufferTowardsLimit) {
+    const uint32_t maxStorageBuffers = deviceLimits.maxStorageBuffersPerShaderStage;
+    std::vector<wgpu::BindGroupLayoutEntry> storageBufferEntries(maxStorageBuffers);
+    for (size_t i = 0; i < storageBufferEntries.size(); i++) {
+        storageBufferEntries[i].buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+        storageBufferEntries[i].visibility =
+            wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute;
+        storageBufferEntries[i].binding = i;
+    }
+
+    wgpu::BindGroupLayoutDynamicBindingArray layoutDynamic;
+    layoutDynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
+    layoutDynamic.dynamicArray.start = maxStorageBuffers + 3;
+    wgpu::BindGroupLayoutDescriptor layoutDesc;
+    layoutDesc.nextInChain = &layoutDynamic;
+    layoutDesc.entries = storageBufferEntries.data();
+
+    // Success case: exactly maxStorageBuffers are used (1 for the dynamic array, max - 1 for the
+    // the static bindings).
+    layoutDesc.entryCount = maxStorageBuffers - 1;
+    device.CreateBindGroupLayout(&layoutDesc);
+
+    // Error case: the dynamic binding array storage buffer make the layout go over the limit.
+    layoutDesc.entryCount = maxStorageBuffers;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&layoutDesc));
+}
+
 // Check that the dynamic array size must be below the limit.
 TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, DynamicArrayRequiresASize) {
     wgpu::BindGroupLayoutDynamicBindingArray layoutDynamic;

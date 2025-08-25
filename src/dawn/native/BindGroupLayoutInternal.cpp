@@ -327,6 +327,9 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
     UnpackedPtr<BindGroupLayoutDescriptor> descriptor;
     DAWN_TRY_ASSIGN(descriptor, ValidateAndUnpack(descriptorChain));
 
+    // A running total of the number of bindings used by the layout.
+    BindingCounts bindingCounts = {};
+
     // Handle the dynamic binding array first to also extract information needed to validate the
     // rest of the bindings.
     std::optional<BindingNumber> startOfDynamicArray = {};
@@ -343,11 +346,23 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
         DAWN_INVALID_IF(startOfDynamicArray >= kMaxBindingsPerBindGroupTyped,
                         "dynamic array start (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
                         startOfDynamicArray.value(), kMaxBindingsPerBindGroup);
+
+        // Add to the limits the storage buffer that will be used for the availability data of the
+        // dynamic array. Set a minimum binding size so as to not increment unverifiedBufferCount.
+        BindGroupLayoutEntry availabilityEntry{
+            .binding = 0,
+            .visibility = kAllStages,
+            .buffer =
+                {
+                    .type = wgpu::BufferBindingType::ReadOnlyStorage,
+                    .minBindingSize = 4,
+                },
+        };
+        IncrementBindingCounts(&bindingCounts, Unpack(&availabilityEntry));
     }
 
     // Map of binding number to entry index.
     std::map<BindingNumber, uint32_t> bindingMap;
-    BindingCounts bindingCounts = {};
 
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         UnpackedPtr<BindGroupLayoutEntry> entry;
