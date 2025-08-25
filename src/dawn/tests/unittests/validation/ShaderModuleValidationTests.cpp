@@ -877,7 +877,7 @@ const struct WGSLExtensionInfo kExtensions[] = {
     {"clip_distances", false, {"clip-distances"}, {}},
     {"dual_source_blending", false, {"dual-source-blending"}, {}},
     {"subgroups", false, {"subgroups"}, {}},
-    {"primitive_index", false, {"primitive-index"}, {}},
+    {"primitive_index", true, {"primitive-index"}, {}},
     {"chromium_experimental_pixel_local", true, {"pixel-local-storage-coherent"}, {}},
     {"chromium_disable_uniformity_analysis", true, {}, {}},
     {"chromium_internal_graphite", true, {}, {}},

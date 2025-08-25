@@ -1732,8 +1732,7 @@ void DeviceBase::SetWGSLExtensionAllowList() {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
     }
-    if (mEnabledFeatures.IsEnabled(Feature::PrimitiveIndex) ||
-        mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalPrimitiveId)) {
+    if (mEnabledFeatures.IsEnabled(Feature::PrimitiveIndex)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kPrimitiveIndex);
     }
 

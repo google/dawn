@@ -1627,7 +1627,6 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kTextureComponentSwizzle:
             out = wgpu::FeatureName::TextureComponentSwizzle;
             return true;
-        case interop::GPUFeatureName::kChromiumExperimentalPrimitiveId:
         case interop::GPUFeatureName::kPrimitiveIndex:
             out = wgpu::FeatureName::PrimitiveIndex;
             return true;
@@ -1725,7 +1724,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnTexelCopyBufferRowAlignment:
         case wgpu::FeatureName::FlexibleTextureViews:
         case wgpu::FeatureName::ChromiumExperimentalBindless:
-        case wgpu::FeatureName::ChromiumExperimentalPrimitiveId:
             return false;
     }
     return false;

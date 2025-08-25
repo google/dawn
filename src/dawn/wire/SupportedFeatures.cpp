@@ -121,7 +121,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_TextureFormatsTier1:
         case WGPUFeatureName_TextureFormatsTier2:
         case WGPUFeatureName_TextureComponentSwizzle:
-        case WGPUFeatureName_ChromiumExperimentalPrimitiveId:
         case WGPUFeatureName_ChromiumExperimentalBindless:
         case WGPUFeatureName_PrimitiveIndex:
             return true;
