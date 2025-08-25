@@ -1732,8 +1732,14 @@ bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> 
     }
 
     bool passed = true;
+    Hashset<const InstructionResult*, 4> seen_instruction_results;
     for (size_t i = 0; i < inst->Results().Length(); i++) {
         if (DAWN_UNLIKELY(!CheckResult(inst, i))) {
+            passed = false;
+        }
+
+        if (!seen_instruction_results.Add(inst->Result(i))) {
+            AddResultError(inst, i) << "result was seen previously as a result";
             passed = false;
         }
     }

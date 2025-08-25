@@ -1075,6 +1075,26 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Instruction_DuplicateResultOneCall) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* l = b.Loop();
+        auto* r1 = b.InstructionResult(ty.u32());
+        l->SetResults(Vector{r1, r1});
+        b.Append(l->Body(), [&] { b.Unreachable(); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:13 error: loop: result was seen previously as a result
+    %2:u32, %2:u32 = loop [b: $B2] {  # loop_1
+            ^^^^^^)"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Instruction_WrongInstructionResultInstruction) {
     auto* f = b.Function("my_func", ty.void_());
 
