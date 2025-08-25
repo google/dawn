@@ -29,6 +29,7 @@
 
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -90,8 +91,7 @@ WGPUTextureAspect ToWGPU(const Aspect aspect) {
 
 WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy) {
     return {
-        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureWGPU
-        .texture = nullptr,  // ToBackend(copy.texture)->GetInnerHandle(),
+        .texture = ToBackend(copy.texture)->GetInnerHandle(),
         .mipLevel = copy.mipLevel,
         .origin = ToWGPU(copy.origin),
         .aspect = ToWGPU(copy.aspect),

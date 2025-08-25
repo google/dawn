@@ -55,6 +55,7 @@
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
 
 #include "tint/tint.h"
 
@@ -181,7 +182,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    return Ref<TextureBase>{nullptr};
+    return Texture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,

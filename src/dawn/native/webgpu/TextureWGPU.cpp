@@ -25,36 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#include "dawn/native/webgpu/TextureWGPU.h"
 
-#include "dawn/native/Buffer.h"
+#include <utility>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/DeviceWGPU.h"
 
 namespace dawn::native::webgpu {
 
-class Device;
+// static
+ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                            const UnpackedPtr<TextureDescriptor>& descriptor) {
+    auto desc = ToAPI(*descriptor);
+    WGPUTexture innerTexture = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), desc);
+    DAWN_ASSERT(innerTexture);
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, innerTexture));
+    return std::move(texture);
+}
 
-class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
-  public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+Texture::Texture(Device* device,
+                 const UnpackedPtr<TextureDescriptor>& descriptor,
+                 WGPUTexture innerTexture)
+    : TextureBase(device, descriptor), ObjectWGPU(device->wgpu.textureRelease) {
+    mInnerHandle = innerTexture;
+}
 
-  private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
-
-    raw_ptr<void> mMappedData = nullptr;
-};
+void Texture::DestroyImpl() {
+    TextureBase::DestroyImpl();
+    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    wgpu.textureDestroy(mInnerHandle);
+}
 
 }  // namespace dawn::native::webgpu
-
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_

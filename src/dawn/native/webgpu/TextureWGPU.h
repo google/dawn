@@ -25,36 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_
 
-#include "dawn/native/Buffer.h"
-
-#include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/Forward.h"
+#include "dawn/native/Texture.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/webgpu.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class Buffer final : public BufferBase, public ObjectWGPU<WGPUBuffer> {
+class Texture final : public TextureBase, public ObjectWGPU<WGPUTexture> {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+    static ResultOrError<Ref<Texture>> Create(Device* device,
+                                              const UnpackedPtr<TextureDescriptor>& descriptor);
 
   private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
+    Texture(Device* device,
+            const UnpackedPtr<TextureDescriptor>& descriptor,
+            WGPUTexture innerTexture);
     void DestroyImpl() override;
-
-    raw_ptr<void> mMappedData = nullptr;
 };
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_

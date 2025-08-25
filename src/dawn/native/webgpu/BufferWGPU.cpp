@@ -130,4 +130,10 @@ void Buffer::UnmapImpl() {
     mMappedData = nullptr;
 }
 
+void Buffer::DestroyImpl() {
+    BufferBase::DestroyImpl();
+    auto& wgpu = ToBackend(GetDevice())->wgpu;
+    wgpu.bufferDestroy(mInnerHandle);
+}
+
 }  // namespace dawn::native::webgpu

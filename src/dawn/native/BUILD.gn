@@ -728,6 +728,8 @@ source_set("sources") {
       "webgpu/PhysicalDeviceWGPU.h",
       "webgpu/QueueWGPU.cpp",
       "webgpu/QueueWGPU.h",
+      "webgpu/TextureWGPU.cpp",
+      "webgpu/TextureWGPU.h",
       "webgpu/WebGPUError.h",
     ]
   }

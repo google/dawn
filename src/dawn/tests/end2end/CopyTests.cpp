@@ -2821,7 +2821,7 @@ TEST_P(CopyTests_B2T, Texture1DFull) {
 DAWN_INSTANTIATE_TEST_P(CopyTests_B2T,
                         {D3D11Backend(), D3D11Backend({"d3d11_disable_cpu_buffers"}),
                          D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                         VulkanBackend(), WebGPUBackend()},
                         {
                             wgpu::TextureFormat::R8Unorm,
                             wgpu::TextureFormat::RG8Unorm,
@@ -3417,7 +3417,8 @@ DAWN_INSTANTIATE_TEST(CopyTests_B2B,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Test clearing full buffers
 TEST_P(ClearBufferTests, FullClear) {
