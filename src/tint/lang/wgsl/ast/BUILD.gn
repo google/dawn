@@ -97,8 +97,6 @@ libtint_source_set("ast") {
     "diagnostic_directive.h",
     "diagnostic_rule_name.cc",
     "diagnostic_rule_name.h",
-    "disable_validation_attribute.cc",
-    "disable_validation_attribute.h",
     "discard_statement.cc",
     "discard_statement.h",
     "enable.cc",

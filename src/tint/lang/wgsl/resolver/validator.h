@@ -609,22 +609,6 @@ class Validator {
                             core::AddressSpace sc,
                             Source source) const;
 
-    /// @returns true if the attribute list contains a
-    /// ast::DisableValidationAttribute with the validation mode equal to
-    /// `validation`
-    /// @param attributes the attribute list to check
-    /// @param validation the validation mode to check
-    bool IsValidationDisabled(VectorRef<const ast::Attribute*> attributes,
-                              ast::DisabledValidation validation) const;
-
-    /// @returns true if the attribute list does not contains a
-    /// ast::DisableValidationAttribute with the validation mode equal to
-    /// `validation`
-    /// @param attributes the attribute list to check
-    /// @param validation the validation mode to check
-    bool IsValidationEnabled(VectorRef<const ast::Attribute*> attributes,
-                             ast::DisabledValidation validation) const;
-
   private:
     /// @param ty the type to check
     /// @returns true if @p ty is an array with an `override` expression element count, otherwise

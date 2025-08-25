@@ -57,7 +57,6 @@
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
@@ -1331,8 +1330,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
                 AddError(end_source) << "missing return at end of function";
                 return false;
             }
-        } else if (DAWN_UNLIKELY(IsValidationEnabled(
-                       decl->attributes, ast::DisabledValidation::kFunctionHasNoBody))) {
+        } else {
             TINT_ICE() << "function " << decl->name->symbol.NameView() << " has no body";
         }
     }
@@ -3156,23 +3154,6 @@ bool Validator::DiagnosticControls(VectorRef<const ast::DiagnosticControl*> cont
         }
     }
     return true;
-}
-
-bool Validator::IsValidationDisabled(VectorRef<const ast::Attribute*> attributes,
-                                     ast::DisabledValidation validation) const {
-    for (auto* attribute : attributes) {
-        if (auto* dv = attribute->As<ast::DisableValidationAttribute>()) {
-            if (dv->validation == validation) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-bool Validator::IsValidationEnabled(VectorRef<const ast::Attribute*> attributes,
-                                    ast::DisabledValidation validation) const {
-    return !IsValidationDisabled(attributes, validation);
 }
 
 bool Validator::IsArrayWithOverrideCount(const core::type::Type* ty) const {

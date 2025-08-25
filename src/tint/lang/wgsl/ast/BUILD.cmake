@@ -91,8 +91,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/diagnostic_directive.h
   lang/wgsl/ast/diagnostic_rule_name.cc
   lang/wgsl/ast/diagnostic_rule_name.h
-  lang/wgsl/ast/disable_validation_attribute.cc
-  lang/wgsl/ast/disable_validation_attribute.h
   lang/wgsl/ast/discard_statement.cc
   lang/wgsl/ast/discard_statement.h
   lang/wgsl/ast/enable.cc

@@ -59,7 +59,6 @@
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_directive.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_rule_name.h"
-#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/enable.h"
 #include "src/tint/lang/wgsl/ast/float_literal_expression.h"
@@ -3372,14 +3371,6 @@ class Builder {
         return create<ast::WorkgroupAttribute>(source_, Expr(std::forward<EXPR_X>(x)),
                                                Expr(std::forward<EXPR_Y>(y)),
                                                Expr(std::forward<EXPR_Z>(z)));
-    }
-
-    /// Creates an ast::DisableValidationAttribute
-    /// @param validation the validation to disable
-    /// @returns the disable validation attribute pointer
-    const ast::DisableValidationAttribute* Disable(ast::DisabledValidation validation) {
-        return ASTNodes().Create<ast::DisableValidationAttribute>(ID(), AllocateNodeID(),
-                                                                  validation);
     }
 
     /// Passthrough overload

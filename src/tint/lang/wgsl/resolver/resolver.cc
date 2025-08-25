@@ -60,7 +60,6 @@
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
-#include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
 #include "src/tint/lang/wgsl/ast/for_loop_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
@@ -4506,14 +4505,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     attributes.invariant = true;
                     return true;
                 },
-                [&](const ast::StrideAttribute* attr) {
-                    if (validator_.IsValidationEnabled(
-                            member->attributes, ast::DisabledValidation::kIgnoreStrideAttribute)) {
-                        ErrorInvalidAttribute(
-                            attribute, StyledText{} << style::Keyword("struct") << " members");
-                        return false;
-                    }
-                    return StrideAttribute(attr);
+                [&](const ast::StrideAttribute*) {
+                    ErrorInvalidAttribute(attribute,
+                                          StyledText{} << style::Keyword("struct") << " members");
+                    return false;
                 },
                 [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {
