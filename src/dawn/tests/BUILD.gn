@@ -386,6 +386,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/DeviceValidationTests.cpp",
     "unittests/validation/DrawIndirectValidationTests.cpp",
     "unittests/validation/DrawVertexAndIndexBufferOOBValidationTests.cpp",
+    "unittests/validation/DynamicBindingArrayValidationTests.cpp",
     "unittests/validation/DynamicStateCommandValidationTests.cpp",
     "unittests/validation/ErrorScopeValidationTests.cpp",
     "unittests/validation/ExternalTextureTests.cpp",
