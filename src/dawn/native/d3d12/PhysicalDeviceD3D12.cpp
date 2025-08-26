@@ -328,6 +328,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // This is maxColorAttachments times 16, the color format with the largest cost.
     limits->v1.maxColorAttachmentBytesPerSample = D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT * 16;
 
+    // We want to support a minimum of 10 and 8 for these limits (see https://crbug.com/440381283).
+    limits->v1.maxDynamicUniformBuffersPerPipelineLayout = 10;
+    limits->v1.maxDynamicStorageBuffersPerPipelineLayout = 8;
+
     // https://docs.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits
     // In DWORDS. Descriptor tables cost 1, Root constants cost 1, Root descriptors cost 2.
     static constexpr uint32_t kMaxRootSignatureSize = 64u;
@@ -364,6 +368,10 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     availableRootSignatureSlots -= maxImmediateDataSlots;
     limits->v1.maxImmediateSize = maxImmediateDataSlots * kImmediateConstantElementByteSize;
 
+    // TODO(crbug.com/440381283): We used to allocate more root signature space toward other limits
+    // here, but the logic above effectively hardcodes limits very close to the max so this doesn't
+    // actually do much. If we free up space by moving things (e.g. immediates) out of the root
+    // signature, then revisit this.
     while (availableRootSignatureSlots >= 2) {
         // Start by incrementing maxDynamicStorageBuffersPerPipelineLayout since the
         // default is just 4 and developers likely want more. This scheme currently
@@ -382,10 +390,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         }
     }
 
+    DAWN_ASSERT(limits->v1.maxImmediateSize >= 32);
     DAWN_ASSERT(
         2 * limits->v1.maxBindGroups + 2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
             3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
-            limits->v1.maxImmediateSize / kImmediateConstantElementByteSize + kReservedSlots ==
+            limits->v1.maxImmediateSize / kImmediateConstantElementByteSize + kReservedSlots <=
         kMaxRootSignatureSize);
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads
