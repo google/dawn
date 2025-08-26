@@ -455,10 +455,10 @@ MaybeError ValidateBindGroupDynamicBindingArray(DeviceBase* device,
                     "Dynamic binding array used without the %s feature enabled.",
                     wgpu::FeatureName::ChromiumExperimentalBindless);
 
-    DAWN_INVALID_IF(!layout->HasDynamicArray() && dynamic->dynamicArraySize != 0,
-                    "Dynamic binding array size (%u) is non-zero when the layout (%s) doesn't "
-                    "contain a dynamic binding array.",
-                    dynamic->dynamicArraySize, layout);
+    DAWN_INVALID_IF(
+        !layout->HasDynamicArray(),
+        "dynamicArraySize specified when the layout (%s) doesn't contain a dynamic binding array.",
+        layout);
 
     const uint32_t maxDynamicBindingArraySize =
         device->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize;

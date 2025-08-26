@@ -4421,11 +4421,11 @@ TEST_F(BindGroupValidationTest, LayoutErrorWithFeatureDisabled) {
 // Control case where creating a dynamic binding array bind group with the feature enabled is valid.
 TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, GroupSuccessWithFeatureEnabled) {
     wgpu::BindGroupDynamicBindingArray dynamic;
-    dynamic.dynamicArraySize = 0;
+    dynamic.dynamicArraySize = 1;
 
     wgpu::BindGroupDescriptor desc;
     desc.nextInChain = &dynamic;
-    desc.layout = utils::MakeBindGroupLayout(device, {});
+    desc.layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
 
     // No error is produced.
     device.CreateBindGroup(&desc);
@@ -4435,7 +4435,7 @@ TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, GroupSuccessWithFea
 // error.
 TEST_F(BindGroupValidationTest, GroupErrorWithFeatureDisabled) {
     wgpu::BindGroupDynamicBindingArray dynamic;
-    dynamic.dynamicArraySize = 0;
+    dynamic.dynamicArraySize = 1;
 
     wgpu::BindGroupDescriptor desc;
     desc.nextInChain = &dynamic;
@@ -4518,21 +4518,30 @@ TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, ConflictWithStaticB
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
-// Check that the layout must have a dynamic array part if the bind group is created on it has a
-// non-zero dynamic array size.
-TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, NonZeroSizeWithLayoutNoDynamicArray) {
+// Check that the layout must have a dynamic array, even if the dynamicArraySize is 0.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, LayoutNoDynamicArray) {
     wgpu::BindGroupDynamicBindingArray dynamic;
 
     wgpu::BindGroupDescriptor desc;
     desc.nextInChain = &dynamic;
-    desc.layout = utils::MakeBindGroupLayout(device, {});
 
-    // Control case: dynamicArraySize = 0 is valid with a layout without dynamic binding array.
+    // Control case: dynamicArraySize = 1 is valid with a layout with a dynamic binding array.
+    dynamic.dynamicArraySize = 1;
+    desc.layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    device.CreateBindGroup(&desc);
+
+    // Control case: dynamicArraySize = 0 is valid with a layout with a dynamic binding array.
     dynamic.dynamicArraySize = 0;
     device.CreateBindGroup(&desc);
 
     // Error case: dynamicArraySize > 0 requires the layout to have a dynamic binding array.
     dynamic.dynamicArraySize = 1;
+    desc.layout = utils::MakeBindGroupLayout(device, {});
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
+
+    // Error case: dynamicArraySize = 0 requires the layout to have a dynamic binding array.
+    dynamic.dynamicArraySize = 1;
+    desc.layout = utils::MakeBindGroupLayout(device, {});
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
 }
 
