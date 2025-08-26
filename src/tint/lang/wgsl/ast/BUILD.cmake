@@ -123,8 +123,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/input_attachment_index_attribute.h
   lang/wgsl/ast/int_literal_expression.cc
   lang/wgsl/ast/int_literal_expression.h
-  lang/wgsl/ast/internal_attribute.cc
-  lang/wgsl/ast/internal_attribute.h
   lang/wgsl/ast/interpolate_attribute.cc
   lang/wgsl/ast/interpolate_attribute.h
   lang/wgsl/ast/invariant_attribute.cc

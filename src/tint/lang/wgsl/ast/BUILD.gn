@@ -129,8 +129,6 @@ libtint_source_set("ast") {
     "input_attachment_index_attribute.h",
     "int_literal_expression.cc",
     "int_literal_expression.h",
-    "internal_attribute.cc",
-    "internal_attribute.h",
     "interpolate_attribute.cc",
     "interpolate_attribute.h",
     "invariant_attribute.cc",

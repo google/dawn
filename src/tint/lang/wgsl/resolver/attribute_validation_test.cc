@@ -2663,39 +2663,4 @@ INSTANTIATE_TEST_SUITE_P(LocationTest,
 }  // namespace
 }  // namespace InterpolateTests
 
-namespace InternalAttributeDeps {
-namespace {
-
-class TestAttribute : public Castable<TestAttribute, ast::InternalAttribute> {
-  public:
-    TestAttribute(GenerationID pid, ast::NodeID nid, const ast::IdentifierExpression* dep)
-        : Base(pid, nid, Vector{dep}) {}
-    std::string InternalName() const override { return "test_attribute"; }
-};
-
-using InternalAttributeDepsTest = ResolverTest;
-TEST_F(InternalAttributeDepsTest, Dependency) {
-    auto* ident = Expr("v");
-    auto* attr = ASTNodes().Create<TestAttribute>(ID(), AllocateNodeID(), ident);
-    auto* f = Func("f", tint::Empty, ty.void_(), tint::Empty, Vector{attr});
-    auto* v = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* user = As<sem::VariableUser>(Sem().Get(ident));
-    ASSERT_NE(user, nullptr);
-
-    auto* var = Sem().Get(v);
-    EXPECT_EQ(user->Variable(), var);
-
-    auto* fn = Sem().Get(f);
-    EXPECT_THAT(fn->DirectlyReferencedGlobals(), testing::ElementsAre(var));
-    EXPECT_THAT(fn->TransitivelyReferencedGlobals(), testing::ElementsAre(var));
-}
-
-}  // namespace
-}  // namespace InternalAttributeDeps
-
 }  // namespace tint::resolver
-
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::InternalAttributeDeps::TestAttribute);

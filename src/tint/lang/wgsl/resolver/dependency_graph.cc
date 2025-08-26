@@ -52,7 +52,6 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
-#include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/let.h"
@@ -386,11 +385,6 @@ class DependencyScanner {
                 TraverseExpression(wg->x);
                 TraverseExpression(wg->y);
                 TraverseExpression(wg->z);
-            },
-            [&](const ast::InternalAttribute* i) {
-                for (auto* dep : i->dependencies) {
-                    TraverseExpression(dep);
-                }
             },
             [&](Default) {
                 if (!attr->IsAnyOf<ast::BuiltinAttribute, ast::DiagnosticAttribute,

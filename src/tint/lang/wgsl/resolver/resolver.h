@@ -43,7 +43,6 @@
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/wgsl/allowed_features.h"
-#include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/intrinsic/dialect.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
@@ -453,10 +452,6 @@ class Resolver {
     /// Resolves the `@invariant` attribute @p attr
     /// @returns true on success, false on failure
     bool InvariantAttribute(const ast::InvariantAttribute*);
-
-    /// Resolves the internal attribute @p attr
-    /// @returns true on success, false on failure
-    bool InternalAttribute(const ast::InternalAttribute* attr);
 
     /// @param control the diagnostic control
     /// @returns true on success, false on failure

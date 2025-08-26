@@ -57,7 +57,6 @@
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
-#include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/invariant_attribute.h"
 #include "src/tint/lang/wgsl/ast/let.h"
@@ -569,9 +568,6 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 out << "align(";
                 EmitExpression(out, align->expr);
                 out << ")";
-            },
-            [&](const ast::InternalAttribute* internal) {
-                out << "internal(" << internal->InternalName() << ")";
             },
             [&](const ast::InputAttachmentIndexAttribute* index) {
                 out << "input_attachment_index(";

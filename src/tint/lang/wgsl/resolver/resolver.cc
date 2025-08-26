@@ -268,19 +268,10 @@ sem::Variable* Resolver::Let(const ast::Let* v) {
         sem->SetType(ty);
     }
 
-    for (auto* attribute : v->attributes) {
-        Mark(attribute);
-        bool ok = Switch(
-            attribute,  //
-            [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
-            [&](Default) {
-                ErrorInvalidAttribute(attribute,
-                                      StyledText{} << style::Keyword("let") << " declaration");
-                return false;
-            });
-        if (!ok) {
-            return nullptr;
-        }
+    if (!v->attributes.IsEmpty()) {
+        ErrorInvalidAttribute(v->attributes[0],
+                              StyledText{} << style::Keyword("let") << " declaration");
+        return nullptr;
     }
 
     if (DAWN_UNLIKELY(!v->initializer)) {
@@ -638,9 +629,6 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     input_attachment_index = value.Get();
                     return kSuccess;
                 },
-                [&](const ast::InternalAttribute* attr) {
-                    return InternalAttribute(attr) ? kSuccess : kErrored;
-                },
                 [&](Default) { return kInvalid; });
 
             switch (res) {
@@ -663,21 +651,10 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             global->Attributes().input_attachment_index = input_attachment_index;
         }
 
-    } else {
-        for (auto* attribute : var->attributes) {
-            Mark(attribute);
-            bool ok = Switch(
-                attribute,
-                [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
-                [&](Default) {
-                    ErrorInvalidAttribute(
-                        attribute, StyledText{} << "function-scope " << style::Keyword("var"));
-                    return false;
-                });
-            if (!ok) {
-                return nullptr;
-            }
-        }
+    } else if (!var->attributes.IsEmpty()) {
+        ErrorInvalidAttribute(var->attributes[0],
+                              StyledText{} << "function-scope " << style::Keyword("var"));
+        return nullptr;
     }
 
     return sem;
@@ -722,7 +699,6 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                     return InvariantAttribute(attr);
                 },
                 [&](const ast::InterpolateAttribute*) { return true; },
-                [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
                 [&](Default) {
                     ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
                     return false;
@@ -731,26 +707,15 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
                 return nullptr;
             }
         }
-    } else {
-        for (auto* attribute : param->attributes) {
-            Mark(attribute);
-            bool ok = Switch(
-                attribute,  //
-                [&](const ast::InternalAttribute* attr) -> bool { return InternalAttribute(attr); },
-                [&](Default) {
-                    if (attribute->IsAnyOf<ast::LocationAttribute, ast::BuiltinAttribute,
-                                           ast::InvariantAttribute, ast::InterpolateAttribute>()) {
-                        ErrorInvalidAttribute(
-                            attribute, StyledText{} << "non-entry point function parameters");
-                    } else {
-                        ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
-                    }
-                    return false;
-                });
-            if (!ok) {
-                return nullptr;
-            }
+    } else if (!param->attributes.IsEmpty()) {
+        auto& attribute = param->attributes[0];
+        if (attribute->IsAnyOf<ast::LocationAttribute, ast::BuiltinAttribute,
+                               ast::InvariantAttribute, ast::InterpolateAttribute>()) {
+            ErrorInvalidAttribute(attribute, StyledText{} << "non-entry point function parameters");
+        } else {
+            ErrorInvalidAttribute(attribute, StyledText{} << "function parameters");
         }
+        return nullptr;
     }
 
     if (!validator_.NoDuplicateAttributes(param->attributes)) {
@@ -922,7 +887,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                 func->SetWorkgroupSize(value.Get());
                 return true;
             },
-            [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
             [&](Default) {
                 ErrorInvalidAttribute(attribute, StyledText{} << "functions");
                 return false;
@@ -1003,9 +967,6 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
                     return kSuccess;
                 },
                 [&](const ast::BuiltinAttribute*) { return kSuccess; },
-                [&](const ast::InternalAttribute* attr) {
-                    return InternalAttribute(attr) ? kSuccess : kErrored;
-                },
                 [&](const ast::InterpolateAttribute*) { return kSuccess; },
                 [&](const ast::InvariantAttribute* attr) {
                     return InvariantAttribute(attr) ? kSuccess : kErrored;
@@ -4045,15 +4006,6 @@ bool Resolver::InvariantAttribute(const ast::InvariantAttribute*) {
     return true;
 }
 
-bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
-    for (auto* dep : attr->dependencies) {
-        if (!Expression(dep)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     Mark(control.rule_name);
     Mark(control.rule_name->name);
@@ -4268,18 +4220,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         return nullptr;
     }
 
-    for (auto* attribute : str->attributes) {
-        Mark(attribute);
-        bool ok = Switch(
-            attribute, [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
-            [&](Default) {
-                ErrorInvalidAttribute(attribute,
-                                      StyledText{} << style::Keyword("struct") << " declarations");
-                return false;
-            });
-        if (!ok) {
-            return nullptr;
-        }
+    if (!str->attributes.IsEmpty()) {
+        ErrorInvalidAttribute(str->attributes[0],
+                              StyledText{} << style::Keyword("struct") << " declarations");
+        return nullptr;
     }
 
     Vector<const sem::StructMember*, 8> sem_members;
@@ -4474,7 +4418,6 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     attributes.invariant = true;
                     return true;
                 },
-                [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {
                     ErrorInvalidAttribute(attribute,
                                           StyledText{} << style::Keyword("struct") << " members");
