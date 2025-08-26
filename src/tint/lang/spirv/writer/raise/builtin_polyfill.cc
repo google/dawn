@@ -216,6 +216,9 @@ struct State {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSubgroupBroadcast:
                     case core::BuiltinFn::kSubgroupShuffle:
+                    case core::BuiltinFn::kSubgroupShuffleDown:
+                    case core::BuiltinFn::kSubgroupShuffleUp:
+                    case core::BuiltinFn::kSubgroupShuffleXor:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -284,6 +287,9 @@ struct State {
                     SubgroupBroadcast(builtin);
                     break;
                 case core::BuiltinFn::kSubgroupShuffle:
+                case core::BuiltinFn::kSubgroupShuffleDown:
+                case core::BuiltinFn::kSubgroupShuffleUp:
+                case core::BuiltinFn::kSubgroupShuffleXor:
                     SubgroupShuffle(builtin, config.subgroup_shuffle_clamped);
                     break;
                 case core::BuiltinFn::kTextureDimensions:
@@ -1095,20 +1101,22 @@ struct State {
         builtin->Destroy();
     }
 
-    /// Handle a SubgroupShuffle() builtin.
+    /// Handles SubgroupShuffle(), SubgroupShuffleDown(), SubgroupShuffleUp(), SubgroupShuffleXor()
+    /// builtins.
     /// @param builtin the builtin call instruction
     void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin, bool clamp_subgroup_shuffle) {
         TINT_ASSERT(builtin->Args().Length() == 2);
-        auto* id = builtin->Args()[1];
-
-        // Id must be an unsigned integer scalar, so bitcast if necessary.
-        if (id->Type()->IsSignedIntegerScalar()) {
-            auto* cast = b.Bitcast(ty.u32(), id);
+        // The second argument is either 'id' , 'delta', or 'mask'.
+        // All must be bound by [0, 128)
+        auto* arg2 = builtin->Args()[1];
+        // arg2 must be an unsigned integer scalar, so bitcast if necessary.
+        if (arg2->Type()->IsSignedIntegerScalar()) {
+            auto* cast = b.Bitcast(ty.u32(), arg2);
             cast->InsertBefore(builtin);
             builtin->SetArg(1, cast->Result());
         }
 
-        /// Polyfill a `subgroupShuffle()` builtin call with one that has clamped the 'id' param
+        /// Polyfill a `subgroupShuffleX` builtin call with one that has clamped the arg2 param
         if (clamp_subgroup_shuffle) {
             auto* shuffle_id = builtin->Args()[1];
             auto* mask_max_subgroup_size =
