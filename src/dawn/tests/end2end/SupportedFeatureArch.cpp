@@ -143,6 +143,16 @@ TEST_P(FeatureArchInfoTest_MaxLimits, MinUniformBufferOffsetAlignment) {
               GetAdapterLimits().minUniformBufferOffsetAlignment);
 }
 
+TEST_P(FeatureArchInfoTest_TieredMaxLimits, D3DHighMaxDynamicUniformBuffersPerPipelineLayout) {
+    const bool isWindowsHighEnd =
+        gpu_info::IsNvidia(GetParam().adapterProperties.vendorID) && (IsD3D11() || IsD3D12());
+    DAWN_TEST_UNSUPPORTED_IF(!isWindowsHighEnd);
+
+    // High-end windows desktop GPU should report at least 10 even when tiered is enabled
+    // See crbug.com/440381283
+    EXPECT_GE(GetAdapterLimits().maxDynamicUniformBuffersPerPipelineLayout, 10u);
+}
+
 DAWN_INSTANTIATE_TEST(FeatureArchInfoTest_MaxLimits,
                       D3D11Backend(),
                       D3D12Backend(),
