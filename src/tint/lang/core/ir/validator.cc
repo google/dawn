@@ -3137,10 +3137,16 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
-    if (!construct->Result()->Type()->IsConstructible() &&
-        !capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
-        AddError(construct) << "type is not constructible";
-        return;
+    auto* result_type = construct->Result()->Type();
+
+    if (!result_type->IsConstructible()) {
+        // We only allow `construct` to create non-constructible types when they are structures that
+        // contain pointers and handle types, with the corresponding capability enabled.
+        if (!(result_type->Is<core::type::Struct>() &&
+              capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures))) {
+            AddError(construct) << "type is not constructible";
+            return;
+        }
     }
 
     auto args = construct->Args();
@@ -3148,8 +3154,6 @@ void Validator::CheckConstruct(const Construct* construct) {
         // Zero-value constructors are valid for all constructible types.
         return;
     }
-
-    auto* result_type = construct->Result()->Type();
 
     auto check_args_match_elements = [&] {
         // Check that type type of each argument matches the expected element type of the composite.

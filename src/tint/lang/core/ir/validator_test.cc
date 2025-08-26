@@ -522,6 +522,22 @@ TEST_F(IR_ValidatorTest, Construct_TextureInStruct_WithCapability) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_NonConstructible_WithStructCapability) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.void_());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:3:15 error: construct: type is not constructible
+    %2:void = construct
+              ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Convert_MissingArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
