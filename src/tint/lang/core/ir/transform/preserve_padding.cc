@@ -85,7 +85,7 @@ struct State {
             type,  //
             [&](const type::Array* arr) {
                 auto* elem_ty = arr->ElemType();
-                if (arr->Stride() > elem_ty->Size()) {
+                if (arr->ImplicitStride() > elem_ty->Size()) {
                     return true;
                 }
                 return ContainsPadding(elem_ty);

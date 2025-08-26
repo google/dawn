@@ -246,7 +246,7 @@ TEST_F(WgslIntrinsicTableTest, MismatchPointer) {
 
 TEST_F(WgslIntrinsicTableTest, MatchArray) {
     auto* arr = create<core::type::Array>(create<core::type::U32>(),
-                                          create<core::type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+                                          create<core::type::RuntimeArrayCount>(), 4u, 4u);
     auto* arr_ptr =
         create<core::type::Pointer>(core::AddressSpace::kStorage, arr, core::Access::kReadWrite);
     auto result = table.Lookup(wgsl::BuiltinFn::kArrayLength, Empty, Vector{arr_ptr},
@@ -1042,7 +1042,7 @@ TEST_F(WgslIntrinsicTableTest, MatchTypeConversion) {
 
 TEST_F(WgslIntrinsicTableTest, MismatchTypeConversion) {
     auto* arr = create<core::type::Array>(create<core::type::U32>(),
-                                          create<core::type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+                                          create<core::type::RuntimeArrayCount>(), 4u, 4u);
     auto* f32 = create<core::type::F32>();
     auto result =
         table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{arr}, core::EvaluationStage::kConstant);

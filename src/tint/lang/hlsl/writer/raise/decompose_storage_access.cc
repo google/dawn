@@ -220,7 +220,7 @@ struct State {
             if (offset > 0) {
                 inst = b.Subtract(ty.u32(), inst, u32(offset));
             }
-            auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->Stride()));
+            auto* div = b.Divide(ty.u32(), inst, u32(arr_ty->ImplicitStride()));
             call->Result()->ReplaceAllUsesWith(div->Result());
         });
         call->Destroy();
@@ -639,7 +639,7 @@ struct State {
     //     if (i >= A length) {
     //       break;
     //     }
-    //     a[i] = <load array type>(offset + (i * A->Stride()));
+    //     a[i] = <load array type>(offset + (i * A->ImplicitStride()));
     //     i = i + 1;
     //   }
     //   return a;
@@ -660,7 +660,7 @@ struct State {
 
                 b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->Stride()));
+                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add<u32>(p, stride);
                     b.Store(access, MakeLoad(inst, var, arr->ElemType(), byte_offset->Result()));
                 });
@@ -687,7 +687,7 @@ struct State {
 
                 b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* from = b.Access(arr->ElemType(), obj, idx);
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->Stride()));
+                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()));
                     auto* byte_offset = b.Add<u32>(p, stride);
                     MakeStore(inst, var, from->Result(), byte_offset->Result());
                 });
@@ -724,7 +724,8 @@ struct State {
                     obj = m->ColumnType();
                 },
                 [&](const core::type::Array* ary) {
-                    b.InsertBefore(a, [&] { UpdateOffsetData(idx_value, ary->Stride(), &offset); });
+                    b.InsertBefore(
+                        a, [&] { UpdateOffsetData(idx_value, ary->ImplicitStride(), &offset); });
                     obj = ary->ElemType();
                 },
                 [&](const core::type::Struct* s) {

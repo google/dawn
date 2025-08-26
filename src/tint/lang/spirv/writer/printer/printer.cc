@@ -609,10 +609,9 @@ class Printer {
                         TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
                         module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(arr->ElemType())});
                     }
-                    if (arr->Is<type::ExplicitLayoutArray>()) {
-                        module_.PushAnnot(
-                            spv::Op::OpDecorate,
-                            {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
+                    if (auto* ex = arr->As<type::ExplicitLayoutArray>()) {
+                        module_.PushAnnot(spv::Op::OpDecorate,
+                                          {id, U32Operand(SpvDecorationArrayStride), ex->Stride()});
                     }
                 },
                 [&](const core::type::BindingArray* arr) {

@@ -2939,7 +2939,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayRemoveLay
         core::ir::Capability::kAllowNonCoreTypes,
     };
 
-    auto* array_ty = ty.array(ty.u32(), 4, 4);
+    auto* array_ty = ty.array(ty.u32(), 4);
     auto* ssbo = b.Var("ssbo", ty.ptr(storage, array_ty));
     ssbo->SetBindingPoint(0, 0);
     mod.root_block->Append(ssbo);
@@ -2996,7 +2996,7 @@ TEST_F(SpirvWriter_ForkExplicitLayoutTypesTest, Spv14_CopyLogical_ArrayAddLayout
         core::ir::Capability::kAllowNonCoreTypes,
     };
 
-    auto* array_ty = ty.array(ty.u32(), 4, 4);
+    auto* array_ty = ty.array(ty.u32(), 4);
     auto* ssbo = b.Var("ssbo", ty.ptr(storage, array_ty));
     ssbo->SetBindingPoint(0, 0);
     mod.root_block->Append(ssbo);

@@ -217,11 +217,17 @@ struct State {
             // The element type was not forked, so just use the original element type.
             new_element_type = original_array->ElemType();
         }
+
+        uint32_t stride = original_array->ImplicitStride();
+        if (auto* ex = original_array->As<type::ExplicitLayoutArray>()) {
+            stride = ex->Stride();
+        }
+
         return ty.Get<type::ExplicitLayoutArray>(new_element_type,         //
                                                  original_array->Count(),  //
                                                  original_array->Align(),  //
                                                  original_array->Size(),   //
-                                                 original_array->Stride());
+                                                 stride);
     }
 
     /// Update the store type of an instruction result to use the forked version if needed.

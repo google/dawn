@@ -237,11 +237,11 @@ TEST_F(SpirvWriterTest, EntryPoint_StorageVar_CalledFunction_Spirv1p4) {
 }
 
 TEST_F(SpirvWriterTest, Spv14_CopyLogical) {
-    auto* ssbo = b.Var("ssbo", core::AddressSpace::kStorage, ty.array(ty.u32(), 4, 4),
+    auto* ssbo = b.Var("ssbo", core::AddressSpace::kStorage, ty.array(ty.u32(), 4),
                        core::Access::kReadWrite);
     mod.root_block->Append(ssbo);
     ssbo->SetBindingPoint(0, 0);
-    auto* wg = b.Var("wg", core::AddressSpace::kWorkgroup, ty.array(ty.u32(), 4, 4),
+    auto* wg = b.Var("wg", core::AddressSpace::kWorkgroup, ty.array(ty.u32(), 4),
                      core::Access::kReadWrite);
     mod.root_block->Append(wg);
     auto* func = b.ComputeFunction("main");

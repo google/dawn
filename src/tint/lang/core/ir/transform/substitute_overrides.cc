@@ -216,8 +216,7 @@ struct State {
             uint32_t num_elements = new_value.Get()->Value()->ValueAs<uint32_t>();
             auto* new_cnt = ty.Get<core::type::ConstantArrayCount>(num_elements);
             auto* new_ty = ty.Get<core::type::Array>(old_ty->ElemType(), new_cnt, old_ty->Align(),
-                                                     num_elements * old_ty->Stride(),
-                                                     old_ty->Stride(), old_ty->ImplicitStride());
+                                                     num_elements * old_ty->ImplicitStride());
 
             auto* new_ptr = ty.ptr(old_ptr->AddressSpace(), new_ty, old_ptr->Access());
             var->Result()->SetType(new_ptr);

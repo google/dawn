@@ -46,8 +46,8 @@ ExplicitLayoutArray::ExplicitLayoutArray(const Type* element,
            element,
            count,
            align,
-           size,
-           stride) {}
+           size),
+      stride_(stride) {}
 
 bool ExplicitLayoutArray::Equals(const UniqueNode& other) const {
     if (other.Is<ExplicitLayoutArray>()) {

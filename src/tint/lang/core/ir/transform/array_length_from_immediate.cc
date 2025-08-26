@@ -321,7 +321,8 @@ struct State {
                 }
                 TINT_ASSERT(array_type);
 
-                auto* length = b.Divide<u32>(array_size, u32(array_type->Stride()))->Result();
+                auto* length =
+                    b.Divide<u32>(array_size, u32(array_type->ImplicitStride()))->Result();
                 constructor_values.Push(length);
             }
             lengths_constructor->SetOperands(std::move(constructor_values));

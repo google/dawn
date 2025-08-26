@@ -221,7 +221,7 @@ struct State {
                     obj_ty = m->ColumnType();
                 },
                 [&](const core::type::Array* ary) {
-                    update_offset(idx_value, ary->Stride());
+                    update_offset(idx_value, ary->ImplicitStride());
                     obj_ty = ary->ElemType();
                 },
                 [&](const core::type::Struct* s) {
@@ -542,7 +542,7 @@ struct State {
     //     if (i >= A length) {
     //       break;
     //     }
-    //     offset = (offset + (i * A->Stride())) / 16
+    //     offset = (offset + (i * A->ImplicitStride())) / 16
     //     a[i] = cast(v[offset].xyz)
     //     i = i + 1;
     //   }
@@ -563,7 +563,7 @@ struct State {
                 TINT_ASSERT(count);
 
                 b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
-                    auto* stride = b.Multiply<u32>(idx, u32(arr->Stride()))->Result();
+                    auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()))->Result();
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);
                     auto* access = b.Access(ty.ptr<function>(arr->ElemType()), result_arr, idx);

@@ -57,7 +57,7 @@ TEST_F(ExplicitLayoutArrayTest, Equals) {
     auto* c = ty.Get<ExplicitLayoutArray>(ty.u32(), count, 4u, 16u, 4u);
 
     // Make sure it does not match the equivalent regular array.
-    auto* d = ty.Get<core::type::Array>(ty.i32(), count, 4u, 16u, 4u, 4u);
+    auto* d = ty.Get<core::type::Array>(ty.i32(), count, 4u, 16u);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -79,7 +79,7 @@ TEST_F(ExplicitLayoutArrayTest, CloneArray) {
     core::type::Manager mgr;
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
-    auto* val = ary->Clone(ctx);
+    auto* val = ary->Clone(ctx)->As<type::ExplicitLayoutArray>();
 
     ASSERT_NE(val, nullptr);
     EXPECT_TRUE(val->ElemType()->Is<core::type::U32>());

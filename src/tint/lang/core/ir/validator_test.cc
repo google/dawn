@@ -1651,7 +1651,7 @@ TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
         o = b.Override(ty.u32());
 
         auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o->Result());
-        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u);
 
         b.Var("a", ty.ptr(workgroup, a1, read_write));
     });

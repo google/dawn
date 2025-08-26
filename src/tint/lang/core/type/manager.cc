@@ -300,38 +300,23 @@ const core::type::SubgroupMatrix* Manager::subgroup_matrix(SubgroupMatrixKind ki
     return Get<core::type::SubgroupMatrix>(kind, inner, cols, rows);
 }
 
-const core::type::Array* Manager::array(const core::type::Type* elem_ty,
-                                        uint32_t count,
-                                        uint32_t stride /* = 0*/) {
+const core::type::Array* Manager::array(const core::type::Type* elem_ty, uint32_t count) {
     uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
-    if (stride == 0) {
-        stride = implicit_stride;
-    }
-    TINT_ASSERT(stride >= implicit_stride);
 
     return Get<core::type::Array>(/* element type */ elem_ty,
                                   /* element count */ Get<ConstantArrayCount>(count),
                                   /* array alignment */ elem_ty->Align(),
-                                  /* array size */ count * stride,
-                                  /* element stride */ stride,
-                                  /* implicit stride */ implicit_stride);
+                                  /* array size */ count * implicit_stride);
 }
 
-const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty,
-                                                uint32_t stride /* = 0 */) {
+const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty) {
     uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
-    if (stride == 0) {
-        stride = implicit_stride;
-    }
-    TINT_ASSERT(stride >= implicit_stride);
 
     return Get<core::type::Array>(
         /* element type */ elem_ty,
         /* element count */ Get<RuntimeArrayCount>(),
         /* array alignment */ elem_ty->Align(),
-        /* array size */ stride,
-        /* element stride */ stride,
-        /* implicit stride */ implicit_stride);
+        /* array size */ implicit_stride);
 }
 
 const core::type::BindingArray* Manager::binding_array(const core::type::Type* elem_ty,

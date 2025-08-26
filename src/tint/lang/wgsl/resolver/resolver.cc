@@ -1714,7 +1714,7 @@ const core::type::Type* Resolver::ConcreteType(const core::type::Type* ty,
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
-                return Array(source, source, source, el_ty, a->Count(), /* explicit_stride */ 0);
+                return Array(source, source, source, el_ty, a->Count());
             }
             return nullptr;
         },
@@ -2223,8 +2223,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     }
                     return nullptr;
                 }
-                auto* arr = Array(expr->source, expr->source, expr->source, el_ty, el_count,
-                                  /* explicit_stride */ 0);
+                auto* arr = Array(expr->source, expr->source, expr->source, el_ty, el_count);
                 if (DAWN_UNLIKELY(!arr)) {
                     return nullptr;
                 }
@@ -2863,15 +2862,14 @@ const core::type::Type* Resolver::Array(const ast::Identifier* ident) {
     }
 
     // Look for explicit stride via @stride(n) attribute
-    uint32_t explicit_stride = 0;
-    if (!ArrayAttributes(tmpl_ident->attributes, el_ty, explicit_stride)) {
+    if (!ArrayAttributes(tmpl_ident->attributes)) {
         return nullptr;
     }
 
     auto* out = Array(tmpl_ident->source,                             //
                       ast_el_ty->source,                              //
                       ast_count ? ast_count->source : ident->source,  //
-                      el_ty, el_count, explicit_stride);
+                      el_ty, el_count);
     if (!out) {
         return nullptr;
     }
@@ -4185,9 +4183,7 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
     }
 }
 
-bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
-                               [[maybe_unused]] const core::type::Type* el_ty,
-                               [[maybe_unused]] uint32_t& explicit_stride) {
+bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes) {
     if (!validator_.NoDuplicateAttributes(attributes)) {
         return false;
     }
@@ -4207,27 +4203,23 @@ sem::Array* Resolver::Array(const Source& array_source,
                             const Source& el_source,
                             const Source& count_source,
                             const core::type::Type* el_ty,
-                            const core::type::ArrayCount* el_count,
-                            uint32_t explicit_stride) {
+                            const core::type::ArrayCount* el_count) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
     uint64_t implicit_stride = el_size ? tint::RoundUp<uint64_t>(el_align, el_size) : 0;
-    uint64_t stride = explicit_stride ? explicit_stride : implicit_stride;
     uint64_t size = 0;
 
     if (auto const_count = el_count->As<core::type::ConstantArrayCount>()) {
-        size = const_count->value * stride;
+        size = const_count->value * implicit_stride;
         if (size > std::numeric_limits<uint32_t>::max()) {
             AddError(count_source) << "array byte size (0x" << std::hex << size
                                    << ") must not exceed 0xffffffff bytes";
             return nullptr;
         }
     } else if (el_count->Is<core::type::RuntimeArrayCount>()) {
-        size = stride;
+        size = implicit_stride;
     }
-    auto* out =
-        b.create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
-                             static_cast<uint32_t>(stride), static_cast<uint32_t>(implicit_stride));
+    auto* out = b.create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size));
 
     // Maximum nesting depth of composite types
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits

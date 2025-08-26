@@ -438,7 +438,7 @@ TEST_F(IR_ReferencedModuleDeclsTest, ArrayTypeCount) {
     over_a->As<core::ir::Override>()->SetOverrideId(OverrideId{1});
 
     auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(over_a->Result());
-    auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
+    auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u);
 
     auto* var_a = mod.root_block->Append(b.Var("a", ty.ptr(workgroup, a1, read_write)));
 

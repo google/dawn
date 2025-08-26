@@ -57,6 +57,12 @@ class ExplicitLayoutArray : public Castable<ExplicitLayoutArray, core::type::Arr
     /// @returns true if the this type is equal to @p other
     bool Equals(const UniqueNode& other) const override;
 
+    /// @returns true if the stride is implicit
+    bool IsStrideImplicit() const { return ImplicitStride() == stride_; }
+
+    /// @returns the stride
+    uint32_t Stride() const { return stride_; }
+
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName() const override;
@@ -64,6 +70,10 @@ class ExplicitLayoutArray : public Castable<ExplicitLayoutArray, core::type::Arr
     /// @param ctx the clone context
     /// @returns a clone of this type
     ExplicitLayoutArray* Clone(core::type::CloneContext& ctx) const override;
+
+  private:
+    // The explicit stride
+    uint32_t stride_;
 };
 
 }  // namespace tint::spirv::type

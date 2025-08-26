@@ -707,7 +707,7 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
         if (address_space == core::AddressSpace::kUniform) {
             // We already validated that this array member is itself aligned to 16 bytes above, so
             // we only need to validate that stride is a multiple of 16 bytes.
-            if (arr->Stride() % 16 != 0) {
+            if (arr->ImplicitStride() % 16 != 0) {
                 // Since WGSL has no stride attribute, try to provide a useful hint for how the
                 // shader author can resolve the issue.
                 StyledText hint;
@@ -727,7 +727,8 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                                  << " storage requires that array elements are aligned to 16 "
                                     "bytes, but array element of type "
                                  << style::Type(arr->ElemType()->FriendlyName())
-                                 << " has a stride of " << arr->Stride() << " bytes. " << hint;
+                                 << " has a stride of " << arr->ImplicitStride() << " bytes. "
+                                 << hint;
                 return false;
             }
         }

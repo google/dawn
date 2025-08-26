@@ -869,7 +869,6 @@ struct Decoder {
 
     const type::Type* CreateTypeArray(const pb::TypeArray& array_in) {
         auto* element = Type(array_in.element());
-        uint32_t stride = array_in.stride();
         uint32_t count = array_in.count();
         if (count >= internal_limits::kMaxArrayElementCount) {
             err_ << "array count (" << count << ") must be less than "
@@ -877,8 +876,8 @@ struct Decoder {
             return mod_out_.Types().invalid();
         }
 
-        return count > 0 ? mod_out_.Types().array(element, count, stride)
-                         : mod_out_.Types().runtime_array(element, stride);
+        return count > 0 ? mod_out_.Types().array(element, count)
+                         : mod_out_.Types().runtime_array(element);
     }
 
     const type::Type* CreateTypeBindingArray(const pb::TypeBindingArray& array_in) {

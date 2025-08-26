@@ -894,7 +894,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySize) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u);
         b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -945,7 +945,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeOverrideOutOfBounds) {
         o->SetOverrideId({3});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -988,7 +988,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeLetOutOfBounds) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -1031,7 +1031,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeOutOfBounds) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -1072,7 +1072,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
 
         auto* inst = b.Multiply(ty.u32(), x, 2_u);
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(inst->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u);
         b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -1121,7 +1121,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeIntoLet) {
         x->SetOverrideId({2});
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
-        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
     });
 
@@ -1830,7 +1830,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeZeroFailure) {
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
         mod.SetSource(cnt->value, Source{{5, 8}});
-        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
         mod.SetSource(v, Source{{3, 2}});
     });
@@ -1873,7 +1873,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeNegativeFailure) {
 
         auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result());
         mod.SetSource(cnt->value, Source{{5, 8}});
-        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        auto* ary = ty.Get<core::type::Array>(ty.u32(), cnt, 4_u, 4_u);
         v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
         mod.SetSource(v, Source{{3, 2}});
     });

@@ -481,12 +481,8 @@ class Resolver {
 
     /// Resolves and validates the attributes on an array.
     /// @param attributes the attributes on the array type.
-    /// @param el_ty the element type of the array.
-    /// @param explicit_stride assigned the specified stride of the array in bytes.
     /// @returns true on success, false on failure
-    bool ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
-                         const core::type::Type* el_ty,
-                         uint32_t& explicit_stride);
+    bool ArrayAttributes(VectorRef<const ast::Attribute*> attributes);
 
     /// Builds and returns the semantic information for an array.
     /// @returns the semantic Array information, or nullptr if an error is raised.
@@ -497,13 +493,11 @@ class Resolver {
     ///        locally-declared element AST node.
     /// @param el_ty the Array element type
     /// @param el_count the number of elements in the array.
-    /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
     sem::Array* Array(const Source& array_source,
                       const Source& el_source,
                       const Source& count_source,
                       const core::type::Type* el_ty,
-                      const core::type::ArrayCount* el_count,
-                      uint32_t explicit_stride);
+                      const core::type::ArrayCount* el_count);
 
     /// Builds and returns the semantic information for the alias `alias`.
     /// This method does not mark the ast::Alias node, nor attach the generated

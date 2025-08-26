@@ -640,12 +640,11 @@ struct State {
         // The element type is the only thing that will change. That does not affect the stride of
         // the array itself, which may either be the natural stride or an larger stride in the case
         // of an explicitly laid out array.
-        if (arr->Is<spirv::type::ExplicitLayoutArray>()) {
+        if (auto* ex = arr->As<spirv::type::ExplicitLayoutArray>()) {
             return ty.Get<spirv::type::ExplicitLayoutArray>(elem_ty, arr->Count(), arr->Align(),
-                                                            arr->Size(), arr->Stride());
+                                                            arr->Size(), ex->Stride());
         }
-        return ty.Get<core::type::Array>(elem_ty, arr->Count(), arr->Align(), arr->Size(),
-                                         arr->Stride(), arr->Stride());
+        return ty.Get<core::type::Array>(elem_ty, arr->Count(), arr->Align(), arr->Size());
     }
 
     const core::type::Type* RewriteStruct(const core::type::Struct* old_struct) {

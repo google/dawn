@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/spirv/type/explicit_layout_array.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -188,7 +189,11 @@ TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
 
 TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<storage>(ty.array<f32, 4>(16)));
+        auto* cnt = ty.Get<core::type::ConstantArrayCount>(4_u);
+        auto* ex = ty.Get<type::ExplicitLayoutArray>(/* element */ ty.f32(), /* count */ cnt,
+                                                     /* align */ 4_u, /* size */ 4_u * 4_u,
+                                                     /* stride */ 16_u);
+        auto* v = b.Var("v", ty.ptr<storage>(ex));
         v->SetBindingPoint(0, 0);
     });
 
@@ -223,7 +228,11 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
 
 TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<storage, read_write>(ty.array<f32>(16)));
+        auto* cnt = ty.Get<core::type::RuntimeArrayCount>();
+        auto* ex =
+            ty.Get<type::ExplicitLayoutArray>(/* element */ ty.f32(), /* count */ cnt,
+                                              /* align */ 4_u, /* size */ 16_u, /* stride */ 16_u);
+        auto* v = b.Var("v", ty.ptr<storage, read_write>(ex));
         v->SetBindingPoint(0, 0);
     });
 

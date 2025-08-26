@@ -497,7 +497,6 @@ struct Encoder {
 
     void TypeArray(pb::TypeArray& array_out, const core::type::Array* array_in) {
         array_out.set_element(Type(array_in->ElemType()));
-        array_out.set_stride(array_in->Stride());
         tint::Switch(
             array_in->Count(),  //
             [&](const core::type::ConstantArrayCount* c) {
