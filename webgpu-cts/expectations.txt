@@ -889,7 +889,7 @@ crbug.com/407147670 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 crbug.com/407147670 [ intel mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:readTextureToTexelViews:srcFormat="stencil8";texelViewFormat="stencil8";viewDimension="cube";sampleCount=1 [ Failure ]
 
 # Some AbstractFloat matrix arithmetic tests failing on Win (mostly Intel, some NVIDIA)
-crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
+crbug.com/407159836 [ dawn-no-backend-validation intel no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=3;rows=4 [ Failure ]
 crbug.com/407159836 [ dawn-no-backend-validation intel no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:scalar_matrix:inputSource="const";cols=3;rows=4 [ Failure ]
@@ -898,6 +898,9 @@ crbug.com/407159836 [ dawn-no-backend-validation no-asan no-clang-coverage nvidi
 crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan target-cpu-32 webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=3;rows=4 [ Failure ]
 crbug.com/407159836 [ dawn-no-backend-validation intel no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
 crbug.com/407159836 [ dawn-no-backend-validation no-asan no-clang-coverage nvidia webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=4;rows=4 [ Failure ]
+crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan no-clang-coverage webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=3;rows=4 [ Failure ]
+crbug.com/407159836 [ dawn-no-backend-validation intel-0x9bc5 no-asan no-clang-coverage webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_subtraction:matrix:inputSource="const";cols=3;rows=4 [ Failure ]
+crbug.com/407159836 [ dawn-no-backend-validation nvidia no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ Failure ]
 
 # capability_checks,limits,maxInterStageShaderVariables failure on Android Qualcomm
 crbug.com/407159803 [ android-r qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderVariables:* [ Failure ]
