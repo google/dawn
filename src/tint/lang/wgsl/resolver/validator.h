@@ -194,15 +194,6 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Array(const sem::Array* arr, const Source& el_source) const;
 
-    /// Validates an array stride attribute
-    /// @param attr the stride attribute to validate
-    /// @param el_size the element size
-    /// @param el_align the element alignment
-    /// @returns true on success, false otherwise
-    bool ArrayStrideAttribute(const ast::StrideAttribute* attr,
-                              uint32_t el_size,
-                              uint32_t el_align) const;
-
     /// Validates an atomic type
     /// @param a the atomic ast node
     /// @param s the atomic sem node

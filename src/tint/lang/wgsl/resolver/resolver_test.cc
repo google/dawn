@@ -2071,13 +2071,6 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Test for crbug.com/tint/728
-TEST_F(ResolverTest, ASTNodesAreReached) {
-    Structure("A", Vector{Member("x", ty.array<f32, 4>(Vector{Stride(4)}))});
-    Structure("B", Vector{Member("x", ty.array<f32, 4>(Vector{Stride(4)}))});
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-}
-
 TEST_F(ResolverDeathTest, ASTNodeNotReached) {
     EXPECT_DEATH_IF_SUPPORTED(
         {

@@ -2590,24 +2590,6 @@ bool Validator::Array(const sem::Array* arr, const Source& el_source) const {
     return true;
 }
 
-bool Validator::ArrayStrideAttribute(const ast::StrideAttribute* attr,
-                                     uint32_t el_size,
-                                     uint32_t el_align) const {
-    auto stride = attr->stride;
-    bool is_valid_stride = (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
-    if (!is_valid_stride) {
-        // https://gpuweb.github.io/gpuweb/wgsl/#array-layout-rules
-        // Arrays decorated with the stride attribute must have a stride that is
-        // at least the size of the element type, and be a multiple of the
-        // element type's alignment value.
-        AddError(attr->source)
-            << "arrays decorated with the stride attribute must have a stride that is at least the "
-               "size of the element type, and be a multiple of the element type's alignment value";
-        return false;
-    }
-    return true;
-}
-
 bool Validator::Alias(const ast::Alias*) const {
     return true;
 }

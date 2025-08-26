@@ -83,7 +83,6 @@
 #include "src/tint/lang/wgsl/ast/requires.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
-#include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
@@ -2413,13 +2412,6 @@ class Builder {
     template <typename EXPR>
     const ast::StructMemberAlignAttribute* MemberAlign(EXPR&& val) {
         return create<ast::StructMemberAlignAttribute>(source_, Expr(std::forward<EXPR>(val)));
-    }
-
-    /// Creates a ast::StrideAttribute
-    /// @param stride the array stride
-    /// @returns the ast::StrideAttribute attribute
-    const ast::StrideAttribute* Stride(uint32_t stride) {
-        return create<ast::StrideAttribute>(source_, stride);
     }
 
     /// Creates the ast::GroupAttribute

@@ -162,8 +162,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/stage_attribute.h
   lang/wgsl/ast/statement.cc
   lang/wgsl/ast/statement.h
-  lang/wgsl/ast/stride_attribute.cc
-  lang/wgsl/ast/stride_attribute.h
   lang/wgsl/ast/struct.cc
   lang/wgsl/ast/struct.h
   lang/wgsl/ast/struct_member.cc
@@ -272,7 +270,6 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/requires_test.cc
   lang/wgsl/ast/return_statement_test.cc
   lang/wgsl/ast/stage_attribute_test.cc
-  lang/wgsl/ast/stride_attribute_test.cc
   lang/wgsl/ast/struct_member_align_attribute_test.cc
   lang/wgsl/ast/struct_member_offset_attribute_test.cc
   lang/wgsl/ast/struct_member_size_attribute_test.cc

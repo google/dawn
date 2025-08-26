@@ -65,7 +65,6 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
-#include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/loop_statement.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
@@ -4048,10 +4047,6 @@ bool Resolver::InvariantAttribute(const ast::InvariantAttribute*) {
     return true;
 }
 
-bool Resolver::StrideAttribute(const ast::StrideAttribute*) {
-    return true;
-}
-
 bool Resolver::InternalAttribute(const ast::InternalAttribute* attr) {
     for (auto* dep : attr->dependencies) {
         if (!Expression(dep)) {
@@ -4191,36 +4186,18 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
 }
 
 bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
-                               const core::type::Type* el_ty,
-                               uint32_t& explicit_stride) {
+                               [[maybe_unused]] const core::type::Type* el_ty,
+                               [[maybe_unused]] uint32_t& explicit_stride) {
     if (!validator_.NoDuplicateAttributes(attributes)) {
         return false;
     }
 
-    for (auto* attribute : attributes) {
-        Mark(attribute);
-        bool ok = Switch(
-            attribute,  //
-            [&](const ast::StrideAttribute* attr) {
-                // If the element type is not plain, then el_ty->Align() may be 0, in which case we
-                // could get a DBZ in ArrayStrideAttribute(). In this case, validation will error
-                // about the invalid array element type (which is tested later), so this is just a
-                // seatbelt.
-                if (IsPlain(el_ty)) {
-                    explicit_stride = attr->stride;
-                    if (!validator_.ArrayStrideAttribute(attr, el_ty->Size(), el_ty->Align())) {
-                        return false;
-                    }
-                }
-                return true;
-            },
-            [&](Default) {
-                ErrorInvalidAttribute(attribute, StyledText{} << style::Type("array") << " types");
-                return false;
-            });
-        if (!ok) {
-            return false;
+    if (!attributes.IsEmpty()) {
+        for (auto* attribute : attributes) {
+            Mark(attribute);
+            ErrorInvalidAttribute(attribute, StyledText{} << style::Type("array") << " types");
         }
+        return false;
     }
 
     return true;
@@ -4504,11 +4481,6 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     }
                     attributes.invariant = true;
                     return true;
-                },
-                [&](const ast::StrideAttribute*) {
-                    ErrorInvalidAttribute(attribute,
-                                          StyledText{} << style::Keyword("struct") << " members");
-                    return false;
                 },
                 [&](const ast::InternalAttribute* attr) { return InternalAttribute(attr); },
                 [&](Default) {

@@ -71,7 +71,6 @@ enum class AttributeKind {
     kOffset,
     kSize,
     kStageCompute,
-    kStride,
     kWorkgroupSize,
 };
 static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
@@ -108,8 +107,6 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@size";
         case AttributeKind::kStageCompute:
             return o << "@compute";
-        case AttributeKind::kStride:
-            return o << "@stride";
         case AttributeKind::kWorkgroupSize:
             return o << "@workgroup_size";
     }
@@ -199,10 +196,6 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
                 "1:2 error: '@compute' is not valid for " + thing,
             },
             TestParams{
-                {AttributeKind::kStride},
-                "1:2 error: '@stride' is not valid for " + thing,
-            },
-            TestParams{
                 {AttributeKind::kWorkgroupSize},
                 "1:2 error: '@workgroup_size' is not valid for " + thing,
             },
@@ -254,8 +247,6 @@ const ast::Attribute* CreateAttribute(const Source& source,
             return builder.MemberSize(source, 16_a);
         case AttributeKind::kStageCompute:
             return builder.Stage(source, ast::PipelineStage::kCompute);
-        case AttributeKind::kStride:
-            return builder.create<ast::StrideAttribute>(source, 4u);
         case AttributeKind::kWorkgroupSize:
             return builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1_i));
     }
@@ -391,10 +382,6 @@ INSTANTIATE_TEST_SUITE_P(
             Pass,
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for functions)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is only valid for compute stages)",
         }));
@@ -478,10 +465,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute, AttributeKind::kWorkgroupSize},
             R"(9:9 error: missing entry point IO attribute on return type)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for functions)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -571,10 +554,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for function parameters)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
         }));
@@ -658,10 +637,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for non-entry point function return types)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for non-entry point function return types)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -752,10 +727,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -857,10 +828,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -970,10 +937,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for function parameters)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for function parameters)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for function parameters)",
         }));
@@ -1061,10 +1024,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -1165,10 +1124,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for entry point return types)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for entry point return types)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for entry point return types)",
         },
@@ -1266,10 +1221,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for entry point return types)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for entry point return types)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for entry point return types)",
         },
@@ -1363,10 +1314,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for 'struct' declarations)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for 'struct' declarations)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for 'struct' declarations)",
         },
@@ -1457,10 +1404,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for 'struct' members)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for 'struct' members)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -1724,21 +1667,13 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for 'array' types)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            Pass,
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for 'array' types)",
         },
         TestParams{
             {AttributeKind::kBinding, AttributeKind::kGroup},
-            R"(1:2 error: '@binding' is not valid for 'array' types)",
-        },
-        TestParams{
-            {AttributeKind::kStride, AttributeKind::kStride},
-            R"(3:4 error: duplicate stride attribute
-1:2 note: first attribute declared here)",
+            R"(1:2 error: '@binding' is not valid for 'array' types
+3:4 error: '@group' is not valid for 'array' types)",
         }));
 
 using VariableAttributeTest = TestWithParams;
@@ -1813,10 +1748,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for module-scope 'var')",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for module-scope 'var')",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -1923,10 +1854,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@compute' is not valid for 'const' declaration)",
         },
         TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for 'const' declaration)",
-        },
-        TestParams{
             {AttributeKind::kWorkgroupSize},
             R"(1:2 error: '@workgroup_size' is not valid for 'const' declaration)",
         },
@@ -2002,10 +1929,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kStageCompute},
             R"(1:2 error: '@compute' is not valid for 'override' declaration)",
-        },
-        TestParams{
-            {AttributeKind::kStride},
-            R"(1:2 error: '@stride' is not valid for 'override' declaration)",
         },
         TestParams{
             {AttributeKind::kWorkgroupSize},
@@ -2172,131 +2095,6 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 }  // namespace
 }  // namespace AttributeTests
-
-namespace ArrayStrideTests {
-namespace {
-
-struct Params {
-    builder::ast_type_func_ptr create_el_type;
-    uint32_t stride;
-    bool should_pass;
-};
-
-template <typename T>
-constexpr Params ParamsFor(uint32_t stride, bool should_pass) {
-    return Params{DataType<T>::AST, stride, should_pass};
-}
-
-struct TestWithParams : ResolverTestWithParam<Params> {};
-
-using ArrayStrideTest = TestWithParams;
-TEST_P(ArrayStrideTest, All) {
-    auto& params = GetParam();
-    ast::Type el_ty = params.create_el_type(*this);
-
-    StringStream ss;
-    ss << "el_ty: " << FriendlyName(el_ty) << ", stride: " << params.stride
-       << ", should_pass: " << params.should_pass;
-    SCOPED_TRACE(ss.str());
-
-    auto arr = ty.array(el_ty, 4_u,
-                        Vector{
-                            create<ast::StrideAttribute>(Source{{12, 34}}, params.stride),
-                        });
-
-    GlobalVar("myarray", arr, core::AddressSpace::kPrivate);
-
-    if (params.should_pass) {
-        EXPECT_TRUE(r()->Resolve()) << r()->error();
-    } else {
-        EXPECT_FALSE(r()->Resolve());
-        EXPECT_EQ(r()->error(),
-                  "12:34 error: arrays decorated with the stride attribute must have a stride that "
-                  "is at least the size of the element type, and be a multiple of the element "
-                  "type's alignment value");
-    }
-}
-
-struct SizeAndAlignment {
-    uint32_t size;
-    uint32_t align;
-};
-constexpr SizeAndAlignment default_u32 = {4, 4};
-constexpr SizeAndAlignment default_i32 = {4, 4};
-constexpr SizeAndAlignment default_f32 = {4, 4};
-constexpr SizeAndAlignment default_vec2 = {8, 8};
-constexpr SizeAndAlignment default_vec3 = {12, 16};
-constexpr SizeAndAlignment default_vec4 = {16, 16};
-constexpr SizeAndAlignment default_mat2x2 = {16, 8};
-constexpr SizeAndAlignment default_mat3x3 = {48, 16};
-constexpr SizeAndAlignment default_mat4x4 = {64, 16};
-
-INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
-                         ArrayStrideTest,
-                         testing::Values(
-                             // Succeed because stride >= element size (while being multiple of
-                             // element alignment)
-                             ParamsFor<u32>(default_u32.size, true),
-                             ParamsFor<i32>(default_i32.size, true),
-                             ParamsFor<f32>(default_f32.size, true),
-                             ParamsFor<vec2<f32>>(default_vec2.size, true),
-                             // vec3's default size is not a multiple of its alignment
-                             // ParamsFor<vec3<f32>, default_vec3.size, true},
-                             ParamsFor<vec4<f32>>(default_vec4.size, true),
-                             ParamsFor<mat2x2<f32>>(default_mat2x2.size, true),
-                             ParamsFor<mat3x3<f32>>(default_mat3x3.size, true),
-                             ParamsFor<mat4x4<f32>>(default_mat4x4.size, true),
-
-                             // Fail because stride is < element size
-                             ParamsFor<u32>(default_u32.size - 1, false),
-                             ParamsFor<i32>(default_i32.size - 1, false),
-                             ParamsFor<f32>(default_f32.size - 1, false),
-                             ParamsFor<vec2<f32>>(default_vec2.size - 1, false),
-                             ParamsFor<vec3<f32>>(default_vec3.size - 1, false),
-                             ParamsFor<vec4<f32>>(default_vec4.size - 1, false),
-                             ParamsFor<mat2x2<f32>>(default_mat2x2.size - 1, false),
-                             ParamsFor<mat3x3<f32>>(default_mat3x3.size - 1, false),
-                             ParamsFor<mat4x4<f32>>(default_mat4x4.size - 1, false),
-
-                             // Succeed because stride equals multiple of element alignment
-                             ParamsFor<u32>(default_u32.align * 7, true),
-                             ParamsFor<i32>(default_i32.align * 7, true),
-                             ParamsFor<f32>(default_f32.align * 7, true),
-                             ParamsFor<vec2<f32>>(default_vec2.align * 7, true),
-                             ParamsFor<vec3<f32>>(default_vec3.align * 7, true),
-                             ParamsFor<vec4<f32>>(default_vec4.align * 7, true),
-                             ParamsFor<mat2x2<f32>>(default_mat2x2.align * 7, true),
-                             ParamsFor<mat3x3<f32>>(default_mat3x3.align * 7, true),
-                             ParamsFor<mat4x4<f32>>(default_mat4x4.align * 7, true),
-
-                             // Fail because stride is not multiple of element alignment
-                             ParamsFor<u32>((default_u32.align - 1) * 7, false),
-                             ParamsFor<i32>((default_i32.align - 1) * 7, false),
-                             ParamsFor<f32>((default_f32.align - 1) * 7, false),
-                             ParamsFor<vec2<f32>>((default_vec2.align - 1) * 7, false),
-                             ParamsFor<vec3<f32>>((default_vec3.align - 1) * 7, false),
-                             ParamsFor<vec4<f32>>((default_vec4.align - 1) * 7, false),
-                             ParamsFor<mat2x2<f32>>((default_mat2x2.align - 1) * 7, false),
-                             ParamsFor<mat3x3<f32>>((default_mat3x3.align - 1) * 7, false),
-                             ParamsFor<mat4x4<f32>>((default_mat4x4.align - 1) * 7, false)));
-
-TEST_F(ArrayStrideTest, DuplicateAttribute) {
-    auto arr = ty.array(Source{{12, 34}}, ty.i32(), 4_u,
-                        Vector{
-                            create<ast::StrideAttribute>(Source{{12, 34}}, 4u),
-                            create<ast::StrideAttribute>(Source{{56, 78}}, 4u),
-                        });
-
-    GlobalVar("myarray", arr, core::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(56:78 error: duplicate stride attribute
-12:34 note: first attribute declared here)");
-}
-
-}  // namespace
-}  // namespace ArrayStrideTests
 
 namespace ResourceTests {
 namespace {

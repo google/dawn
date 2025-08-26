@@ -368,15 +368,6 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
               "12:34 error: array byte size (0xc34f7cafc) must not exceed 0xffffffff bytes");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
-    // var<private> a : @stride(8000000) array<f32, 65535>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a), Vector{Stride(8000000)}),
-              core::AddressSpace::kPrivate);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array byte size (0x7a1185ee00) must not exceed 0xffffffff bytes");
-}
-
 TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
@@ -883,15 +874,6 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: texture_2d<f32> cannot be used as an element type of an array");
-}
-
-TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
-    auto ptr_ty = ty.ptr<uniform, u32>(Source{{12, 34}});
-    GlobalVar("arr", ty.array(ptr_ty, 4_i, Vector{Stride(16)}), core::AddressSpace::kPrivate);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: ptr<uniform, u32, read> cannot be used as an element type of an array");
 }
 
 namespace GetCanonicalTests {

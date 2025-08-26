@@ -66,17 +66,6 @@ TEST_F(WgslASTPrinterTest, EmitType_Array) {
     EXPECT_EQ(out.str(), "array<bool, 4u>");
 }
 
-TEST_F(WgslASTPrinterTest, EmitType_Array_Attribute) {
-    auto type = Alias("make_type_reachable", ty.array(ty.bool_(), 4_u, Vector{Stride(16)}))->type;
-
-    ASTPrinter& gen = Build();
-
-    StringStream out;
-    gen.EmitExpression(out, type);
-    EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(out.str(), "@stride(16) array<bool, 4u>");
-}
-
 TEST_F(WgslASTPrinterTest, EmitType_RuntimeArray) {
     auto type = Alias("make_type_reachable", ty.array(ty.bool_()))->type;
 

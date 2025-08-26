@@ -1025,18 +1025,14 @@ class State {
                 }
 
                 auto el = Type(a->ElemType());
-                Vector<const ast::Attribute*, 1> attrs;
-                if (!a->IsStrideImplicit()) {
-                    attrs.Push(b.Stride(a->Stride()));
-                }
                 if (a->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    return b.ty.array(el, std::move(attrs));
+                    return b.ty.array(el, {});
                 }
                 auto count = a->ConstantCount();
                 if (!count) {
                     TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                 }
-                return b.ty.array(el, u32(count.value()), std::move(attrs));
+                return b.ty.array(el, u32(count.value()), {});
             },
             [&](const core::type::Struct* s) { return Struct(s); },
             [&](const core::type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },

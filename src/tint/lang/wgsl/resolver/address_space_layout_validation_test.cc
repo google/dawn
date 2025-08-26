@@ -157,61 +157,6 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Detect unaligned array member for uniform buffers
-TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Array) {
-    // type Inner = @stride(16) array<f32, 10u>;
-    //
-    // struct Outer {
-    //   scalar : f32;
-    //   inner : Inner;
-    // };
-    //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
-    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
-
-    Structure(Ident(Source{{12, 34}}, "Outer"), Vector{
-                                                    Member("scalar", ty.f32()),
-                                                    Member(Source{{56, 78}}, "inner", ty("Inner")),
-                                                });
-
-    GlobalVar(Source{{78, 90}}, "a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a),
-              Binding(0_a));
-
-    ASSERT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting '@align(16)' on this member
-12:34 note: see layout of struct:
-/*             align(4) size(164) */ struct Outer {
-/* offset(  0) align(4) size(  4) */   scalar : f32,
-/* offset(  4) align(4) size(160) */   inner : @stride(16) array<f32, 10>,
-/*                                */ };
-78:90 note: 'Outer' used in address space 'uniform' here)");
-}
-
-TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Array_SuggestedFix) {
-    // type Inner = @stride(16) array<f32, 10u>;
-    //
-    // struct Outer {
-    //   scalar : f32;
-    //   @align(16) inner : Inner;
-    // };
-    //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
-    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
-
-    Structure("Outer", Vector{
-                           Member("scalar", ty.f32()),
-                           Member("inner", ty("Inner"), Vector{MemberAlign(16_i)}),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-}
-
 // Detect uniform buffers with byte offset between 2 members that is not a
 // multiple of 16 bytes
 TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotMultipleOf16) {
@@ -530,29 +475,6 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 /* offset( 0) align(4) size(64) */   inner : array<array<f32, 4>, 4>,
 /*                              */ };
 78:90 note: 'Outer' used in address space 'uniform' here)");
-}
-
-TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_SuggestedFix) {
-    // type Inner = @stride(16) array<f32, 10u>;
-    //
-    // struct Outer {
-    //   inner : Inner;
-    //   scalar : i32;
-    // };
-    //
-    // @group(0) @binding(0)
-    // var<uniform> a : Outer;
-
-    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
-
-    Structure("Outer", Vector{
-                           Member("inner", ty("Inner")),
-                           Member("scalar", ty.i32()),
-                       });
-
-    GlobalVar("a", ty("Outer"), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Detect unaligned member for immediate data buffers

@@ -69,7 +69,6 @@
 #include "src/tint/lang/wgsl/ast/phony_expression.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
-#include "src/tint/lang/wgsl/ast/stride_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
@@ -571,7 +570,6 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 EmitExpression(out, align->expr);
                 out << ")";
             },
-            [&](const ast::StrideAttribute* stride) { out << "stride(" << stride->stride << ")"; },
             [&](const ast::InternalAttribute* internal) {
                 out << "internal(" << internal->InternalName() << ")";
             },
