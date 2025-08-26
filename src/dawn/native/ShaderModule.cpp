@@ -420,6 +420,18 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
     DAWN_UNREACHABLE();
 }
 
+ResultOrError<wgpu::DynamicBindingKind> FromArrayResourceType(
+    tint::inspector::RuntimeBindingArrayInfo::ResourceType type) {
+    switch (type) {
+        case tint::inspector::RuntimeBindingArrayInfo::ResourceType::kSampledTexture:
+            return wgpu::DynamicBindingKind::SampledTexture;
+        case tint::inspector::RuntimeBindingArrayInfo::ResourceType::kNone:
+            return DAWN_VALIDATION_ERROR(
+                "Attempted to convert 'None' array resource type from Tint.");
+    }
+    DAWN_UNREACHABLE();
+}
+
 // Validation errors, if any, are stored within outputParseResult instead of get returned as
 // ErrorData.
 MaybeError ParseWGSL(std::unique_ptr<tint::Source::File> file,
@@ -716,6 +728,30 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
         });
 }
 
+MaybeError ValidateCompatibilityOfDynamicBindingArrayWithLayout(
+    DeviceBase* device,
+    const BindGroupLayoutInternalBase* layout,
+    const GroupDynamicBindingArrayInfo& shaderDynamicArray) {
+    DAWN_INVALID_IF(!layout->HasDynamicArray(), "%s doesn't contain a dynamic binding array.",
+                    layout);
+
+    DAWN_INVALID_IF(layout->GetAPIDynamicArrayStart() != shaderDynamicArray.start,
+                    "@binding for the dynamic array in the shader (%u) doesn't match the start "
+                    "(%u) defined in %s.",
+                    shaderDynamicArray.start, layout->GetAPIDynamicArrayStart(), layout);
+
+    // If the dynamic binding array is never accessed with any type in the shader, it is valid to
+    // use with any DynamicArrayKind.
+    if (shaderDynamicArray.kind != wgpu::DynamicBindingKind::Undefined) {
+        DAWN_INVALID_IF(shaderDynamicArray.kind != layout->GetDynamicArrayKind(),
+                        "Shader dynamic binding array is used with types (of kind %s) incompatible "
+                        "with %s's kind of dynamic binding array (%s).",
+                        shaderDynamicArray.kind, layout, layout->GetDynamicArrayKind());
+    }
+
+    return {};
+}
+
 MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                                                     BindGroupIndex group,
                                                     const EntryPointMetadata& entryPoint,
@@ -728,6 +764,15 @@ MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                          "validating that the entry-point's declaration for @group(%u) "
                          "@binding(%u) matches %s",
                          group, bindingId, layout);
+    }
+
+    // Check that the dynamic binding array, if any in the shader, matches the BindGroupLayout.
+    if (entryPoint.dynamicBindingArrays.contains(group)) {
+        DAWN_TRY_CONTEXT(
+            ValidateCompatibilityOfDynamicBindingArrayWithLayout(
+                device, layout, entryPoint.dynamicBindingArrays.at(group)),
+            "validating that the entry-point's dynamic binding array for @group(%u) matches %s",
+            group, layout);
     }
 
     return {};
@@ -1175,6 +1220,51 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         resource.binding, resource.bind_group);
     }
 
+    // Dynamic binding array reflection
+    for (const tint::inspector::RuntimeBindingArrayInfo& array :
+         inspector->GetRuntimeBindingArrayInfo(entryPoint.name)) {
+        BindGroupIndex group(array.group);
+        if (DelayedInvalidIf(group >= kMaxBindGroupsTyped,
+                             "The entry-point uses a binding with a group decoration (%u) "
+                             "that exceeds maxBindGroups (%u) - 1.",
+                             group, kMaxBindGroups)) {
+            continue;
+        }
+
+        BindingNumber binding(array.binding);
+        if (DelayedInvalidIf(
+                binding >= kMaxBindingsPerBindGroupTyped,
+                "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u) - 1.",
+                uint32_t(binding), kMaxBindingsPerBindGroup)) {
+            continue;
+        }
+
+        // Check that all the uses of the dynamic binding array have compatible DynamicArrayKind.
+        wgpu::DynamicBindingKind kind = wgpu::DynamicBindingKind::Undefined;
+        for (const auto& type : array.type_info) {
+            wgpu::DynamicBindingKind kindForType;
+            DAWN_TRY_ASSIGN(kindForType, FromArrayResourceType(type.type));
+
+            // This is the first kind that we compute, just store it.
+            if (kind == wgpu::DynamicBindingKind::Undefined) {
+                kind = kindForType;
+                continue;
+            }
+
+            DAWN_INVALID_IF(kindForType != kind,
+                            "Dynamic binding array for @group(%u) used with two incompatible kinds "
+                            "of types %s vs. %s",
+                            group, kind, kindForType);
+        }
+
+        DAWN_INVALID_IF(metadata->dynamicBindingArrays.contains(group),
+                        "Duplicate dynamic binding array for group: %u.", group);
+        metadata->dynamicBindingArrays[group] = {{
+            .start = binding,
+            .kind = kind,
+        }};
+    }
+
     // Sampler binding point placeholder for non-sampler texture usage. Make it
     // ToTint(EntryPointMetadata::nonSamplerBindingPoint), so that we have
     // FromTint(tintNonSamplerBindingPoint) == EntryPointMetadata::nonSamplerBindingPoint, and we
@@ -1511,7 +1601,11 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
     for (BindGroupIndex group : ~layout->GetBindGroupLayoutsMask()) {
         DAWN_INVALID_IF(entryPoint.bindings[group].size() > 0,
                         "The entry-point uses bindings in group %u but %s doesn't have a "
-                        "BindGroupLayout for this index",
+                        "BindGroupLayout for this index.",
+                        group, layout);
+        DAWN_INVALID_IF(entryPoint.dynamicBindingArrays.contains(group),
+                        "The entry-point uses a dynamic binding array in group %u but %s doesn't "
+                        "have a BindGroupLayout for this index.",
                         group, layout);
     }
 
