@@ -323,6 +323,55 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
                 return;
             }
 
+            case Command::SetBlendConstant: {
+                auto cmd = commands.NextCommand<SetBlendConstantCmd>();
+                WGPUColor color = ToWGPU(cmd->color);
+                wgpu.renderPassEncoderSetBlendConstant(passEncoder, &color);
+                break;
+            }
+
+            case Command::SetStencilReference: {
+                auto cmd = commands.NextCommand<SetStencilReferenceCmd>();
+                wgpu.renderPassEncoderSetStencilReference(passEncoder, cmd->reference);
+                break;
+            }
+
+            case Command::SetViewport: {
+                auto cmd = commands.NextCommand<SetViewportCmd>();
+                wgpu.renderPassEncoderSetViewport(passEncoder, cmd->x, cmd->y, cmd->width,
+                                                  cmd->height, cmd->minDepth, cmd->maxDepth);
+                break;
+            }
+
+            case Command::SetScissorRect: {
+                auto cmd = commands.NextCommand<SetScissorRectCmd>();
+                wgpu.renderPassEncoderSetScissorRect(passEncoder, cmd->x, cmd->y, cmd->width,
+                                                     cmd->height);
+                break;
+            }
+
+            case Command::BeginOcclusionQuery: {
+                auto cmd = commands.NextCommand<BeginOcclusionQueryCmd>();
+                wgpu.renderPassEncoderBeginOcclusionQuery(passEncoder, cmd->queryIndex);
+                break;
+            }
+
+            case Command::EndOcclusionQuery: {
+                commands.NextCommand<EndOcclusionQueryCmd>();
+                wgpu.renderPassEncoderEndOcclusionQuery(passEncoder);
+                break;
+            }
+
+            case Command::WriteTimestamp: {
+                auto cmd = commands.NextCommand<WriteTimestampCmd>();
+                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+                // QuerySetWGPU
+                wgpu.renderPassEncoderWriteTimestamp(
+                    passEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
+                    cmd->queryIndex);
+                break;
+            }
+
             default: {
                 DAWN_UNREACHABLE();
                 break;
