@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/Assert.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
@@ -177,6 +178,32 @@ MemoryKind GetMemoryKindFor(wgpu::BufferUsage bufferUsage) {
     }
 
     return requestKind;
+}
+
+// Returns a Vulkan spec compliant memory range by aligning `offset` down and `size` up to multiples
+// of `nonCoherentAtomSize`.
+VkMappedMemoryRange GetMappedMemoryRange(const ResourceMemoryAllocation& allocation,
+                                         size_t offset,
+                                         size_t size,
+                                         size_t nonCoherentAtomSize) {
+    DAWN_ASSERT(IsAligned(allocation.GetOffset(), nonCoherentAtomSize));
+
+    // `offset` must always be a multiple of nonCoherentAtomSize. `size` must either be a multiple
+    // of nonCoherentAtomSize or offset+size must be equal to the size of the allocation.
+    size_t fullOffset = allocation.GetOffset() + offset;
+    size_t alignedOffset = AlignDown(fullOffset, nonCoherentAtomSize);
+    size_t alignedSize = Align(size + (fullOffset - alignedOffset), nonCoherentAtomSize);
+
+    size_t allocationSize = allocation.GetInfo().mRequestedSize;
+    if (alignedOffset + alignedSize > allocationSize) {
+        alignedSize = allocationSize - alignedOffset;
+    }
+
+    return VkMappedMemoryRange{.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+                               .pNext = nullptr,
+                               .memory = ToBackend(allocation.GetResourceHeap())->GetMemory(),
+                               .offset = alignedOffset,
+                               .size = alignedSize};
 }
 
 }  // namespace
@@ -537,10 +564,38 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl() {}
+void Buffer::FinalizeMapImpl() {
+    if (!mHostCoherent) {
+        // Map reads always require invalidation. Map writes only require invalidation if the buffer
+        // contents could have been modified by the GPU previously, eg. it's not being mapped on
+        // creation and the buffer is GPU writable.
+        if (MapMode() == wgpu::MapMode::Read ||
+            (GetState() != BufferState::MappedAtCreation &&
+             !IsSubset(GetInternalUsage(), kReadOnlyBufferUsages | wgpu::BufferUsage::MapWrite))) {
+            Device* device = ToBackend(GetDevice());
+            VkDeviceSize nonCoherentAtomSize =
+                device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
+
+            VkMappedMemoryRange range = GetMappedMemoryRange(mMemoryAllocation, MapOffset(),
+                                                             MapSize(), nonCoherentAtomSize);
+
+            device->fn.InvalidateMappedMemoryRanges(device->GetVkDevice(), 1, &range);
+        }
+    }
+}
 
 void Buffer::UnmapImpl() {
-    // No need to do anything, we keep CPU-visible memory mapped at all time.
+    // We keep CPU-visible memory mapped at all times but need to flush writes to GPU memory here.
+    if (!mHostCoherent && IsMappedState(GetState()) && MapMode() == wgpu::MapMode::Write) {
+        Device* device = ToBackend(GetDevice());
+        VkDeviceSize nonCoherentAtomSize =
+            device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
+
+        VkMappedMemoryRange range =
+            GetMappedMemoryRange(mMemoryAllocation, MapOffset(), MapSize(), nonCoherentAtomSize);
+
+        device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &range);
+    }
 }
 
 void* Buffer::GetMappedPointerImpl() {

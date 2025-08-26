@@ -353,6 +353,12 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 
 // Buffer
 
+// static
+bool BufferBase::IsMappedState(BufferState state) {
+    return state == BufferBase::BufferState::Mapped ||
+           state == BufferBase::BufferState::MappedAtCreation;
+}
+
 BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : SharedResource(device, descriptor->label),
       mSize(descriptor->size),
@@ -552,11 +558,31 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     // Only set the state to mapped at creation if we did not fail any point in this helper.
     // Otherwise, if we override the default unmapped state before succeeding to create a
     // staging buffer, we will have issues when we try to destroy the buffer.
+    mMapMode = wgpu::MapMode::Write;
     mMapOffset = 0;
     mMapSize = mSize;
     mStagingBuffer = std::move(stagingBuffer);
     FinalizeMap(BufferState::MappedAtCreation);
     return mStagingBuffer != nullptr;
+}
+
+BufferBase::BufferState BufferBase::GetState() const {
+    return mState.load(std::memory_order::acquire);
+}
+
+wgpu::MapMode BufferBase::MapMode() const {
+    DAWN_ASSERT(IsMappedState(GetState()));
+    return mMapMode;
+}
+
+size_t BufferBase::MapOffset() const {
+    DAWN_ASSERT(IsMappedState(GetState()));
+    return mMapOffset;
+}
+
+size_t BufferBase::MapSize() const {
+    DAWN_ASSERT(IsMappedState(GetState()));
+    return mMapSize;
 }
 
 MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
@@ -660,8 +686,7 @@ wgpu::Status BufferBase::APIReadMappedRange(size_t offset, void* data, size_t si
 }
 
 void* BufferBase::GetMappedPointer() {
-    BufferState state = mState.load(std::memory_order::acquire);
-    if (state != BufferState::MappedAtCreation && state != BufferState::Mapped) {
+    if (!IsMappedState(mState.load(std::memory_order::acquire))) {
         return nullptr;
     }
     void** ptr = std::get_if<void*>(&mMapData);

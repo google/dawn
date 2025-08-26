@@ -87,6 +87,8 @@ class BufferBase : public SharedResource {
         SharedMemoryNoAccess,
         Destroyed,
     };
+    static bool IsMappedState(BufferState state);
+
     static Ref<BufferBase> MakeError(DeviceBase* device, const BufferDescriptor* descriptor);
 
     ObjectType GetType() const override;
@@ -156,6 +158,11 @@ class BufferBase : public SharedResource {
     // If no errors occur, returns true iff a staging buffer was used to implement the map at
     // creation. Otherwise, returns false indicating that backend specific mapping was used instead.
     ResultOrError<bool> MapAtCreationInternal();
+
+    BufferState GetState() const;
+    wgpu::MapMode MapMode() const;
+    size_t MapOffset() const;
+    size_t MapSize() const;
 
     uint64_t mAllocatedSize = 0;
 

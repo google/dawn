@@ -74,6 +74,8 @@ bool HasMemoryTypeWithFlags(const VulkanDeviceInfo& deviceInfo, VkMemoryProperty
 }  // anonymous namespace
 
 bool SupportsBufferMapExtendedUsages(const VulkanDeviceInfo& deviceInfo) {
+    // TODO(crbug.com/422798184): Only enable BufferMapExtendedUsages if heap size for device local
+    // + host visible is greater than 256MB aka it's not Resizable BAR.
     return HasMemoryTypeWithFlags(deviceInfo, kMapExtendedUsageMemoryPropertyFlags);
 }
 
@@ -195,8 +197,10 @@ ResourceMemoryAllocator::ResourceMemoryAllocator(Device* device, VkDeviceSize he
     const VulkanDeviceInfo& info = mDevice->GetDeviceInfo();
 
     // Check if mappable host coherent and host cached buffers will work.
-    mUseHostCachedForMappable = HasMemoryTypeWithFlags(
+    mHostCachedForExtendedUsagesAvailable = HasMemoryTypeWithFlags(
         info, kMapExtendedUsageMemoryPropertyFlags | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+    mHostVisibleCachedAvailable = HasMemoryTypeWithFlags(
+        info, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 
     mAllocatorsPerType.reserve(info.memoryTypes.size());
     for (size_t i = 0; i < info.memoryTypes.size(); i++) {
@@ -487,13 +491,23 @@ VkMemoryPropertyFlags ResourceMemoryAllocator::GetRequiredMemoryPropertyFlags(
     // Mappable resource must be host visible and host coherent.
     if (IsMemoryKindMappable(memoryKind)) {
         vkFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-        vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
-        // For device local mappable buffers prefer to use host coherent plus host cached memory
-        // when it's available for better host access performance.
-        DAWN_ASSERT(!(memoryKind & MemoryKind::HostCached));
-        if (memoryKind & MemoryKind::DeviceLocal && mUseHostCachedForMappable) {
-            vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+        if (memoryKind & MemoryKind::DeviceLocal) {
+            vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+            // For device local mappable buffers prefer to use host coherent plus host cached memory
+            // when it's available for better host access performance.
+            DAWN_ASSERT(!(memoryKind & MemoryKind::HostCached));
+            if (mHostCachedForExtendedUsagesAvailable) {
+                vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            }
+        } else {
+            // For read only buffers prefer host cached memory to improve read performance.
+            if (mHostVisibleCachedAvailable && !(memoryKind & MemoryKind::WriteMappable)) {
+                vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+            } else {
+                vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            }
         }
     }
 

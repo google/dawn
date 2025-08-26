@@ -520,7 +520,10 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl() {}
+void Buffer::FinalizeMapImpl() {
+    // TODO(crbug.com/440536255): See if FinalizeMap() below can be replaced with this generic
+    // implementation.
+}
 
 MaybeError Buffer::FinalizeMap(ScopedCommandRecordingContext* commandContext,
                                ExecutionSerial completedSerial,

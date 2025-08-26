@@ -117,7 +117,8 @@ class ResourceMemoryAllocator {
 
     raw_ptr<Device> mDevice;
     const VkDeviceSize mMaxSizeForSuballocation;
-    bool mUseHostCachedForMappable = false;
+    bool mHostCachedForExtendedUsagesAvailable = false;
+    bool mHostVisibleCachedAvailable = false;
 
     class SingleTypeAllocator;
     std::vector<std::unique_ptr<SingleTypeAllocator>> mAllocatorsPerType;
