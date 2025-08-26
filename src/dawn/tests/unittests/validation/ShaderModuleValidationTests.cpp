@@ -883,6 +883,7 @@ const struct WGSLExtensionInfo kExtensions[] = {
     {"chromium_internal_graphite", true, {}, {}},
     {"chromium_experimental_framebuffer_fetch", true, {"framebuffer-fetch"}, {}},
     {"chromium_experimental_subgroup_matrix", true, {"chromium-experimental-subgroup-matrix"}, {}},
+    {"chromium_experimental_dynamic_binding", true, {"chromium-experimental-bindless"}, {}}
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
