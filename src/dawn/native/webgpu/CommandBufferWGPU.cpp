@@ -27,6 +27,9 @@
 
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 
+#include <vector>
+
+#include "dawn/common/Assert.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
@@ -61,6 +64,15 @@ WGPUOrigin3D ToWGPU(const Origin3D& origin) {
     };
 }
 
+WGPUColor ToWGPU(const dawn::native::Color& color) {
+    return {
+        .r = color.r,
+        .g = color.g,
+        .b = color.b,
+        .a = color.a,
+    };
+}
+
 WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy) {
     return {
         .layout =
@@ -90,6 +102,31 @@ WGPUTextureAspect ToWGPU(const Aspect aspect) {
     }
 }
 
+WGPULoadOp ToWGPU(const wgpu::LoadOp op) {
+    switch (op) {
+        case wgpu::LoadOp::Load:
+            return WGPULoadOp_Load;
+        case wgpu::LoadOp::Clear:
+            return WGPULoadOp_Clear;
+        case wgpu::LoadOp::ExpandResolveTexture:
+            DAWN_UNREACHABLE();  // TODO(crbug.com/440123094): Fix when test that uses this is
+                                 // enabled.
+        default:
+            return WGPULoadOp_Undefined;
+    }
+}
+
+WGPUStoreOp ToWGPU(const wgpu::StoreOp op) {
+    switch (op) {
+        case wgpu::StoreOp::Store:
+            return WGPUStoreOp_Store;
+        case wgpu::StoreOp::Discard:
+            return WGPUStoreOp_Discard;
+        default:
+            return WGPUStoreOp_Undefined;
+    }
+}
+
 WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes) {
     return {
         .nextInChain = nullptr,
@@ -106,6 +143,36 @@ WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy) {
         .mipLevel = copy.mipLevel,
         .origin = ToWGPU(copy.origin),
         .aspect = ToWGPU(copy.aspect),
+    };
+}
+
+WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info) {
+    return {
+        .nextInChain = nullptr,
+        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
+        .view = nullptr /* ToBackend(info.view)->GetInnerHandle()*/,
+        .depthSlice = info.depthSlice,
+        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
+        .resolveTarget = nullptr /* ToBackend(info.resolveTarget)->GetInnerHandle()*/,
+        .loadOp = ToWGPU(info.loadOp),
+        .storeOp = ToWGPU(info.storeOp),
+        .clearValue = ToWGPU(info.clearColor),
+    };
+}
+
+WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachmentInfo& info) {
+    return {
+        .nextInChain = nullptr,
+        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
+        .view = nullptr /* ToBackend(info.view)->GetInnerHandle()*/,
+        .depthLoadOp = ToWGPU(info.depthLoadOp),
+        .depthStoreOp = ToWGPU(info.depthStoreOp),
+        .depthClearValue = info.clearDepth,
+        .depthReadOnly = info.depthReadOnly,
+        .stencilLoadOp = ToWGPU(info.stencilLoadOp),
+        .stencilStoreOp = ToWGPU(info.stencilStoreOp),
+        .stencilClearValue = info.clearStencil,
+        .stencilReadOnly = info.stencilReadOnly,
     };
 }
 
@@ -218,6 +285,55 @@ void EncodeComputePass(const DawnProcTable& wgpu,
     DAWN_UNREACHABLE();
 }
 
+void EncodeRenderPass(const DawnProcTable& wgpu,
+                      WGPUCommandEncoder innerEncoder,
+                      CommandIterator& commands,
+                      BeginRenderPassCmd* renderPassCmd) {
+    std::vector<WGPURenderPassColorAttachment> colorAttachments;
+
+    for (auto i : renderPassCmd->attachmentState->GetColorAttachmentsMask()) {
+        colorAttachments.push_back(ToWGPU(renderPassCmd->colorAttachments[i]));
+    }
+
+    colorAttachments.reserve(colorAttachments.size());
+    WGPURenderPassDepthStencilAttachment depthStencilAttachment =
+        ToWGPU(renderPassCmd->depthStencilAttachment);
+    WGPUPassTimestampWrites timestampWrites = ToWGPU(renderPassCmd->timestampWrites);
+
+    WGPURenderPassDescriptor passDescriptor{
+        .nextInChain = nullptr,
+        .label = ToOutputStringView(renderPassCmd->label),
+        .colorAttachmentCount = colorAttachments.size(),
+        .colorAttachments = colorAttachments.data(),
+        .depthStencilAttachment = &depthStencilAttachment,
+        // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
+        // QuerySetWGPU
+        .occlusionQuerySet = nullptr /*ToBackend(cmd->occlusionQuerySet)->GetInnerHandle()*/,
+        .timestampWrites = &timestampWrites,
+    };
+    WGPURenderPassEncoder passEncoder =
+        wgpu.commandEncoderBeginRenderPass(innerEncoder, &passDescriptor);
+
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndRenderPass: {
+                commands.NextCommand<EndRenderPassCmd>();
+                wgpu.renderPassEncoderEnd(passEncoder);
+                return;
+            }
+
+            default: {
+                DAWN_UNREACHABLE();
+                break;
+            }
+        }
+    }
+
+    // EndRenderPass should have been called
+    DAWN_UNREACHABLE();
+}
+
 }  // anonymous namespace
 
 WGPUCommandBuffer CommandBuffer::Encode() {
@@ -233,6 +349,11 @@ WGPUCommandBuffer CommandBuffer::Encode() {
             case Command::BeginComputePass: {
                 BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
                 EncodeComputePass(wgpu, innerEncoder, mCommands, cmd);
+                break;
+            }
+            case Command::BeginRenderPass: {
+                auto cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                EncodeRenderPass(wgpu, innerEncoder, mCommands, cmd);
                 break;
             }
             case Command::CopyBufferToBuffer: {
