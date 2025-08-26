@@ -40,6 +40,7 @@
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/BindGroup.h"
 #include "dawn/native/BlitBufferToDepthStencil.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBuffer.h"
@@ -490,22 +491,19 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
 
         const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
-        for (const BufferBase* buffer : usages.topLevelBuffers) {
-            DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
-        }
-
         // Maybe track last usage for other resources, and use it to release resources earlier?
         for (const SyncScopeResourceUsage& scope : usages.renderPasses) {
             for (const BufferBase* buffer : scope.buffers) {
                 DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
             }
-
             for (const TextureBase* texture : scope.textures) {
                 DAWN_TRY(texture->ValidateCanUseInSubmitNow());
             }
-
             for (const ExternalTextureBase* externalTexture : scope.externalTextures) {
                 DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
+            }
+            for (const BindGroupBase* dynamicArray : scope.dynamicBindingArrays) {
+                DAWN_TRY(dynamicArray->ValidateCanUseOnQueueNow());
             }
         }
 
@@ -519,8 +517,14 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
             for (const ExternalTextureBase* externalTexture : pass.referencedExternalTextures) {
                 DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
             }
+            for (const BindGroupBase* dynamicArray : pass.referencedDynamicBindingArrays) {
+                DAWN_TRY(dynamicArray->ValidateCanUseOnQueueNow());
+            }
         }
 
+        for (const BufferBase* buffer : usages.topLevelBuffers) {
+            DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
+        }
         for (const TextureBase* texture : usages.topLevelTextures) {
             DAWN_TRY(texture->ValidateCanUseInSubmitNow());
         }

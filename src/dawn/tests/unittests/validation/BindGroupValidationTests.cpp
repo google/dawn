@@ -4349,6 +4349,50 @@ class BindGroupValidationTest_ChromiumExperimentalBindless : public BindGroupVal
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::ChromiumExperimentalBindless};
     }
+
+    // Helper similar to utils::MakeBindGroupLayout but that adds a dynamic array.
+    wgpu::BindGroupLayout MakeBindGroupLayout(
+        wgpu::DynamicBindingKind kind,
+        uint32_t dynamicArrayStart = 0,
+        std::initializer_list<utils::BindingLayoutEntryInitializationHelper> entriesInitializer =
+            {}) {
+        std::vector<wgpu::BindGroupLayoutEntry> entries;
+        for (const utils::BindingLayoutEntryInitializationHelper& entry : entriesInitializer) {
+            entries.push_back(entry);
+        }
+
+        wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+        dynamic.dynamicArray.kind = kind;
+        dynamic.dynamicArray.start = dynamicArrayStart;
+
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.nextInChain = &dynamic;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+        return device.CreateBindGroupLayout(&descriptor);
+    }
+
+    // Helper similar to utils::MakeBindGroup but that adds a dynamic array.
+    wgpu::BindGroup MakeBindGroup(
+        const wgpu::BindGroupLayout& layout,
+        uint32_t dynamicArraySize,
+        std::initializer_list<utils::BindingInitializationHelper> entriesInitializer) {
+        std::vector<wgpu::BindGroupEntry> entries;
+        for (const utils::BindingInitializationHelper& helper : entriesInitializer) {
+            entries.push_back(helper.GetAsBinding());
+        }
+
+        wgpu::BindGroupDynamicBindingArray dynamic;
+        dynamic.dynamicArraySize = dynamicArraySize;
+
+        wgpu::BindGroupDescriptor descriptor;
+        descriptor.nextInChain = &dynamic;
+        descriptor.layout = layout;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+
+        return device.CreateBindGroup(&descriptor);
+    }
 };
 
 // Control case where creating a dynamic binding array layout with the feature enabled is valid.
@@ -4763,6 +4807,118 @@ TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless, SampledTextureKindR
     bufferEntry.buffer = buffer;
     desc.entries = &bufferEntry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
+}
+
+// Test that it is an error to call .Destroy() on a bind group without a dynamic array.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless,
+       DestroyDisallowedOnStaticOnlyBindGroup) {
+    // Create an empty dynamic bind group.
+    wgpu::BindGroupLayout layoutDynamic =
+        MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bgDynamic = MakeBindGroup(layoutDynamic, 0, {});
+
+    // Create a static only bind group.
+    wgpu::BindGroupLayout staticLayout = utils::MakeBindGroupLayout(device, {});
+    wgpu::BindGroup bgStatic = utils::MakeBindGroup(device, staticLayout, {});
+
+    // Success case: calling .Destroy() on a dynamic array bind group is valid.
+    bgDynamic.Destroy();
+    // Calling it multiple times is even valid!
+    bgDynamic.Destroy();
+
+    // Error case: calling .Destroy() on a static only bind group is an error.
+    ASSERT_DEVICE_ERROR(bgStatic.Destroy());
+}
+
+// Test that using a destroyed dynamic binding array in a render pass in a submit is an error.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless,
+       DestroyedDynamicBindingArrayUsedInRenderPass) {
+    // Create an empty dynamic bind group.
+    wgpu::BindGroupLayout layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(layout, 0, {});
+
+    for (bool destroy : {false, true}) {
+        if (destroy) {
+            bg.Destroy();
+        }
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.SetBindGroup(0, bg);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        if (destroy) {
+            ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+        } else {
+            device.GetQueue().Submit(1, &commands);
+        }
+    }
+}
+
+// Test that using a destroyed dynamic binding array in a compute pass in a submit is an error.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless,
+       DestroyedDynamicBindingArrayUsedInComputePass) {
+    // Create an empty dynamic bind group.
+    wgpu::BindGroupLayout layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(layout, 0, {});
+
+    for (bool destroy : {false, true}) {
+        if (destroy) {
+            bg.Destroy();
+        }
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bg);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        if (destroy) {
+            ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+        } else {
+            device.GetQueue().Submit(1, &commands);
+        }
+    }
+}
+
+// Test that using a destroyed dynamic binding array in a render bundle in a submit is an error.
+TEST_F(BindGroupValidationTest_ChromiumExperimentalBindless,
+       DestroyedDynamicBindingArrayUsedInRenderBundle) {
+    // Create an empty dynamic bind group.
+    wgpu::BindGroupLayout layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(layout, 0, {});
+
+    // Create the render bundle
+    wgpu::TextureFormat passFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::RenderBundleEncoderDescriptor rbDesc;
+    rbDesc.colorFormatCount = 1;
+    rbDesc.colorFormats = &passFormat;
+
+    wgpu::RenderBundleEncoder rbEncoder = device.CreateRenderBundleEncoder(&rbDesc);
+    rbEncoder.SetBindGroup(0, bg);
+    wgpu::RenderBundle bundle = rbEncoder.Finish();
+
+    for (bool destroy : {false, true}) {
+        if (destroy) {
+            bg.Destroy();
+        }
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        auto rp = utils::CreateBasicRenderPass(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rp.renderPassInfo);
+        pass.ExecuteBundles(1, &bundle);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        if (destroy) {
+            ASSERT_DEVICE_ERROR(device.GetQueue().Submit(1, &commands));
+        } else {
+            device.GetQueue().Submit(1, &commands);
+        }
+    }
 }
 
 }  // anonymous namespace

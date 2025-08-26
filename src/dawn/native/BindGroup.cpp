@@ -843,7 +843,7 @@ void BindGroupBase::DestroyImpl() {
         }
     }
 
-    if (mDynamicArray != nullptr) {
+    if (mDynamicArray != nullptr && !mDynamicArray->IsDestroyed()) {
         DAWN_ASSERT(!IsError());
         mDynamicArray->Destroy();
     }
@@ -866,6 +866,21 @@ Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, StringView label
 
 ObjectType BindGroupBase::GetType() const {
     return ObjectType::BindGroup;
+}
+
+void BindGroupBase::APIDestroy() {
+    if (GetDevice()->IsValidationEnabled() &&
+        GetDevice()->ConsumedError(ValidateDestroy(), "validating %s.Destroy()", this)) {
+        return;
+    }
+
+    // Destroy only the dynamic array part. Static bindings are always supposed to be valid so that
+    // SetBindGroup can iterate them without first checking if the BindGroup is destroyed. This also
+    // makes the behavior match between the bind groups with only static bindings and the static
+    // bindings part of the bind groups with dynamic arrays.
+    if (!mDynamicArray->IsDestroyed()) {
+        mDynamicArray->Destroy();
+    }
 }
 
 BindGroupLayoutBase* BindGroupBase::GetFrontendLayout() {
@@ -961,8 +976,17 @@ ityp::span<BindingIndex, const Ref<TextureViewBase>> BindGroupBase::GetDynamicAr
 MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
     DAWN_ASSERT(!IsError());
     DAWN_ASSERT(HasDynamicArray());
-    // TODO(crbug.com/435251399): Add wgpu::BindGroup::Destroy that acts only on dynamic array and
-    // prevents future submissions.
+
+    DAWN_INVALID_IF(mDynamicArray->IsDestroyed(), "Destroyed bind group %s used in a submit.",
+                    this);
+    return {};
+}
+
+MaybeError BindGroupBase::ValidateDestroy() const {
+    // On the queue we only validate that dynamic array bind groups are alive in a submit because
+    // validating for all bind groups would be too expensive. For that reason only allow dynamic
+    // arrays to be destroyed early.
+    DAWN_INVALID_IF(!HasDynamicArray(), "%s doesn't contain a dynamic array.", this);
     return {};
 }
 
@@ -971,20 +995,29 @@ BindGroupBase::DynamicArrayState::DynamicArrayState(BindingIndex size) {
 }
 
 BindingIndex BindGroupBase::DynamicArrayState::GetSize() const {
+    DAWN_ASSERT(!mDestroyed);
     return mBindings.size();
 }
 
 ityp::span<BindingIndex, const Ref<TextureViewBase>> BindGroupBase::DynamicArrayState::GetBindings()
     const {
+    DAWN_ASSERT(!mDestroyed);
     return {mBindings.data(), mBindings.size()};
 }
 
+bool BindGroupBase::DynamicArrayState::IsDestroyed() const {
+    return mDestroyed;
+}
+
 void BindGroupBase::DynamicArrayState::Update(BindingIndex i, TextureViewBase* view) {
+    DAWN_ASSERT(!mDestroyed);
     mBindings[i] = view;
 }
 
 void BindGroupBase::DynamicArrayState::Destroy() {
+    DAWN_ASSERT(!mDestroyed);
     mBindings.clear();
+    mDestroyed = true;
 }
 
 }  // namespace dawn::native

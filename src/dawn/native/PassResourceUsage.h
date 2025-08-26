@@ -73,6 +73,7 @@ struct SyncScopeResourceUsage {
     std::vector<TextureSubresourceSyncInfo> textureSyncInfos;
 
     std::vector<ExternalTextureBase*> externalTextures;
+    std::vector<BindGroupBase*> dynamicBindingArrays;
 };
 
 // Contains all the resource usage data for a compute pass.
@@ -88,6 +89,7 @@ struct ComputePassResourceUsage {
     absl::flat_hash_set<BufferBase*> referencedBuffers;
     absl::flat_hash_set<TextureBase*> referencedTextures;
     absl::flat_hash_set<ExternalTextureBase*> referencedExternalTextures;
+    absl::flat_hash_set<BindGroupBase*> referencedDynamicBindingArrays;
 };
 
 // Contains all the resource usage data for a render pass.

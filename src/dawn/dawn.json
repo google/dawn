@@ -324,6 +324,10 @@
         "category": "object",
         "methods": [
             {
+                "name": "destroy",
+                "tags": ["dawn"]
+            },
+            {
                 "name": "set label",
                 "args": [
                     {"name": "label", "type": "string view"}

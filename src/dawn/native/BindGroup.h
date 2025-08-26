@@ -68,6 +68,9 @@ class BindGroupBase : public ApiObjectBase {
 
     ObjectType GetType() const override;
 
+    // Dawn API
+    void APIDestroy();
+
     BindGroupLayoutBase* GetFrontendLayout();
     const BindGroupLayoutBase* GetFrontendLayout() const;
     BindGroupLayoutInternalBase* GetLayout();
@@ -122,6 +125,8 @@ class BindGroupBase : public ApiObjectBase {
   private:
     BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
+    MaybeError ValidateDestroy() const;
+
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;
     std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
@@ -134,11 +139,13 @@ class BindGroupBase : public ApiObjectBase {
 
         BindingIndex GetSize() const;
         ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
+        bool IsDestroyed() const;
 
         void Update(BindingIndex i, TextureViewBase* view);
         void Destroy();
 
       private:
+        bool mDestroyed = false;
         ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
     };
     std::unique_ptr<DynamicArrayState> mDynamicArray;

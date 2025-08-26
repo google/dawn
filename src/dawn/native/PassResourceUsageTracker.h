@@ -81,6 +81,7 @@ class SyncScopeUsageTracker {
     absl::flat_hash_map<BufferBase*, BufferSyncInfo> mBufferSyncInfos;
     absl::flat_hash_map<TextureBase*, TextureSubresourceSyncInfo> mTextureSyncInfos;
     absl::flat_hash_set<ExternalTextureBase*> mExternalTextureUsages;
+    absl::flat_hash_set<BindGroupBase*> mDynamicBindingArrayUsages;
 };
 
 // Helper class to build ComputePassResourceUsages

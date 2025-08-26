@@ -116,6 +116,10 @@ void SyncScopeUsageTracker::MergeResourceUsages(const SyncScopeResourceUsage& us
     for (ExternalTextureBase* t : usages.externalTextures) {
         mExternalTextureUsages.insert(t);
     }
+
+    for (BindGroupBase* b : usages.dynamicBindingArrays) {
+        mDynamicBindingArrayUsages.insert(b);
+    }
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
@@ -197,6 +201,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
         mExternalTextureUsages.insert(externalTexture.Get());
     }
+
+    if (group->HasDynamicArray()) {
+        mDynamicBindingArrayUsages.insert(group);
+    }
 }
 
 SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
@@ -205,6 +213,7 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
     result.bufferSyncInfos.reserve(mBufferSyncInfos.size());
     result.textures.reserve(mTextureSyncInfos.size());
     result.textureSyncInfos.reserve(mTextureSyncInfos.size());
+    result.dynamicBindingArrays.reserve(mDynamicBindingArrayUsages.size());
 
     for (auto& [buffer, syncInfo] : mBufferSyncInfos) {
         result.buffers.push_back(buffer);
@@ -222,6 +231,11 @@ SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
         result.externalTextures.push_back(it);
     }
     mExternalTextureUsages.clear();
+
+    for (auto* const it : mDynamicBindingArrayUsages) {
+        result.dynamicBindingArrays.push_back(it);
+    }
+    mDynamicBindingArrayUsages.clear();
 
     return result;
 }
@@ -251,6 +265,10 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
         mUsage.referencedExternalTextures.insert(externalTexture.Get());
+    }
+
+    if (group->HasDynamicArray()) {
+        mUsage.referencedDynamicBindingArrays.insert(group);
     }
 }
 
