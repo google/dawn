@@ -29,10 +29,13 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
+#include <memory>
 #include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
+#include "dawn/common/ityp_span.h"
+#include "dawn/common/ityp_vector.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
@@ -70,7 +73,7 @@ class BindGroupBase : public ApiObjectBase {
     BindGroupLayoutInternalBase* GetLayout();
     const BindGroupLayoutInternalBase* GetLayout() const;
 
-    // Getters for static bindings.
+    // Getters for static bindings part.
     BufferBase* GetBindingAsBuffer(BindingIndex bindingIndex);
     SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex) const;
     TextureViewBase* GetBindingAsTextureView(BindingIndex bindingIndex);
@@ -79,6 +82,12 @@ class BindGroupBase : public ApiObjectBase {
     const std::vector<Ref<ExternalTextureBase>>& GetBoundExternalTextures() const;
 
     void ForEachUnverifiedBufferBindingIndex(std::function<void(BindingIndex, uint32_t)> fn) const;
+
+    // Getters and operations on the dynamic array part.
+    bool HasDynamicArray() const;
+    BindingIndex GetDynamicArraySize() const;
+    ityp::span<BindingIndex, const Ref<TextureViewBase>> GetDynamicArrayBindings() const;
+    MaybeError ValidateCanUseOnQueueNow() const;
 
   protected:
     // To save memory, the size of a bind group is dynamically determined and the bind group is
@@ -115,10 +124,24 @@ class BindGroupBase : public ApiObjectBase {
 
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;
-
-    // TODO(dawn:1293): Store external textures in
-    // BindGroupLayoutBase::BindingDataPointers::bindings
     std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
+
+    // The dynamic array is separate so as to not bloat the size and destructor of bind groups
+    // without them.
+    class DynamicArrayState {
+      public:
+        explicit DynamicArrayState(BindingIndex size);
+
+        BindingIndex GetSize() const;
+        ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
+
+        void Update(BindingIndex i, TextureViewBase* view);
+        void Destroy();
+
+      private:
+        ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
+    };
+    std::unique_ptr<DynamicArrayState> mDynamicArray;
 };
 
 }  // namespace dawn::native

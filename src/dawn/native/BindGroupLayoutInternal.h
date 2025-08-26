@@ -112,6 +112,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     bool HasDynamicArray() const;
     BindingNumber GetAPIDynamicArrayStart() const;
     BindingIndex GetDynamicArrayStart() const;
+    BindingIndex GetDynamicBindingIndex(BindingNumber binding) const;
     wgpu::DynamicBindingKind GetDynamicArrayKind() const;
 
     // Functions necessary for the unordered_set<BGLBase*>-based cache.

@@ -286,11 +286,13 @@ ResultOrError<DescriptorSetAllocation> DescriptorSetAllocatorDynamicArray::Alloc
     }
 
     // Create the descriptor set, sized to account for the dynamic array.
+    // Force the count to be at least one as some Vulkan drivers mishandle 0.
+    uint32_t descriptorCount = std::max(1u, dynamicVariableCount);
     VkDescriptorSetVariableDescriptorCountAllocateInfo variableCountInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO,
         .pNext = nullptr,
         .descriptorSetCount = 1,
-        .pDescriptorCounts = &dynamicVariableCount,
+        .pDescriptorCounts = &descriptorCount,
     };
 
     VkDescriptorSetAllocateInfo allocateInfo{

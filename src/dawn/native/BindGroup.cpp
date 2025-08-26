@@ -812,6 +812,22 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
                                                     mBindingData.bufferData[bindingIndex].size;
                                             });
 
+    // Gather dynamic binding entries in a second loop to put the handling off the critical path.
+    if (auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>()) {
+        mDynamicArray =
+            std::make_unique<DynamicArrayState>(BindingIndex(dynamic->dynamicArraySize));
+
+        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+            UnpackedPtr<BindGroupEntry> entry = Unpack(&descriptor->entries[i]);
+            BindingNumber binding = BindingNumber(entry->binding);
+
+            if (binding < layout->GetAPIDynamicArrayStart()) {
+                continue;
+            }
+            mDynamicArray->Update(layout->GetDynamicBindingIndex(binding), entry->textureView);
+        }
+    }
+
     DAWN_TRY(InitializeImpl());
 
     return {};
@@ -825,6 +841,11 @@ void BindGroupBase::DestroyImpl() {
         for (BindingIndex i{0}; i < GetLayout()->GetBindingCount(); ++i) {
             mBindingData.bindings[i].~Ref<ObjectBase>();
         }
+    }
+
+    if (mDynamicArray != nullptr) {
+        DAWN_ASSERT(!IsError());
+        mDynamicArray->Destroy();
     }
 }
 
@@ -910,12 +931,60 @@ BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex
 }
 
 const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalTextures() const {
+    DAWN_ASSERT(!IsError());
     return mBoundExternalTextures;
 }
 
 void BindGroupBase::ForEachUnverifiedBufferBindingIndex(
     std::function<void(BindingIndex, uint32_t)> fn) const {
     ForEachUnverifiedBufferBindingIndexImpl(GetLayout(), fn);
+}
+
+bool BindGroupBase::HasDynamicArray() const {
+    DAWN_ASSERT(!IsError());
+    return mDynamicArray != nullptr;
+}
+
+BindingIndex BindGroupBase::GetDynamicArraySize() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(HasDynamicArray());
+    return mDynamicArray->GetSize();
+}
+
+ityp::span<BindingIndex, const Ref<TextureViewBase>> BindGroupBase::GetDynamicArrayBindings()
+    const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(HasDynamicArray());
+    return mDynamicArray->GetBindings();
+}
+
+MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(HasDynamicArray());
+    // TODO(crbug.com/435251399): Add wgpu::BindGroup::Destroy that acts only on dynamic array and
+    // prevents future submissions.
+    return {};
+}
+
+BindGroupBase::DynamicArrayState::DynamicArrayState(BindingIndex size) {
+    mBindings.resize(size);
+}
+
+BindingIndex BindGroupBase::DynamicArrayState::GetSize() const {
+    return mBindings.size();
+}
+
+ityp::span<BindingIndex, const Ref<TextureViewBase>> BindGroupBase::DynamicArrayState::GetBindings()
+    const {
+    return {mBindings.data(), mBindings.size()};
+}
+
+void BindGroupBase::DynamicArrayState::Update(BindingIndex i, TextureViewBase* view) {
+    mBindings[i] = view;
+}
+
+void BindGroupBase::DynamicArrayState::Destroy() {
+    mBindings.clear();
 }
 
 }  // namespace dawn::native

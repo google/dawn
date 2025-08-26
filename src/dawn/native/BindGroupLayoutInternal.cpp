@@ -737,6 +737,14 @@ BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
     return mDynamicArrayStart;
 }
 
+BindingIndex BindGroupLayoutInternalBase::GetDynamicBindingIndex(BindingNumber binding) const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mHasDynamicArray);
+    DAWN_ASSERT(binding >= mAPIDynamicArrayStart);
+    uint32_t indexInArray = uint32_t(binding - mAPIDynamicArrayStart);
+    return BindingIndex(indexInArray);
+}
+
 wgpu::DynamicBindingKind BindGroupLayoutInternalBase::GetDynamicArrayKind() const {
     DAWN_ASSERT(!IsError());
     return mDynamicArrayKind;

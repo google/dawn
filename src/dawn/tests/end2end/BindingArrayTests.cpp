@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <vector>
+
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -620,6 +622,7 @@ TEST_P(SizedBindingArrayTests, TextureNumLevels) {
 
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
 }
+
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -627,6 +630,157 @@ DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend());
+
+class DynamicBindingArrayTests : public DawnTest {
+  public:
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalBindless}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalBindless})) {
+            return {wgpu::FeatureName::ChromiumExperimentalBindless};
+        }
+        return {};
+    }
+
+    // Helper similar to utils::MakeBindGroupLayout but that adds a dynamic array.
+    wgpu::BindGroupLayout MakeBindGroupLayout(
+        wgpu::DynamicBindingKind kind,
+        uint32_t dynamicArrayStart = 0,
+        std::initializer_list<utils::BindingLayoutEntryInitializationHelper> entriesInitializer =
+            {}) {
+        std::vector<wgpu::BindGroupLayoutEntry> entries;
+        for (const utils::BindingLayoutEntryInitializationHelper& entry : entriesInitializer) {
+            entries.push_back(entry);
+        }
+
+        wgpu::BindGroupLayoutDynamicBindingArray dynamic;
+        dynamic.dynamicArray.kind = kind;
+        dynamic.dynamicArray.start = dynamicArrayStart;
+
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.nextInChain = &dynamic;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+        return device.CreateBindGroupLayout(&descriptor);
+    }
+
+    // Helper similar to utils::MakeBindGroup but that adds a dynamic array.
+    wgpu::BindGroup MakeBindGroup(
+        const wgpu::BindGroupLayout& layout,
+        uint32_t dynamicArraySize,
+        std::initializer_list<utils::BindingInitializationHelper> entriesInitializer) {
+        std::vector<wgpu::BindGroupEntry> entries;
+        for (const utils::BindingInitializationHelper& helper : entriesInitializer) {
+            entries.push_back(helper.GetAsBinding());
+        }
+
+        wgpu::BindGroupDynamicBindingArray dynamic;
+        dynamic.dynamicArraySize = dynamicArraySize;
+
+        wgpu::BindGroupDescriptor descriptor;
+        descriptor.nextInChain = &dynamic;
+        descriptor.layout = layout;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+
+        return device.CreateBindGroup(&descriptor);
+    }
+};
+
+// Tests that creating the bind group that's only a dynamic array doesn't crash in backends.
+TEST_P(DynamicBindingArrayTests, BindGroupOnlyDynamicArray) {
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::R32Float;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Make a dense dynamic array of size 1.
+    MakeBindGroup(bgl, 1, {{0, tex.CreateView()}});
+
+    // Make a dense dynamic array of size 3.
+    MakeBindGroup(bgl, 3,
+                  {
+                      {0, tex.CreateView()},
+                      {1, tex.CreateView()},
+                      {2, tex.CreateView()},
+                  });
+
+    // Make a sparse dynamic array.
+    MakeBindGroup(bgl, 3, {{1, tex.CreateView()}});
+
+    // Make an empty dynamic array.
+    MakeBindGroup(bgl, 3, {});
+}
+
+// Tests that creating the bind group that has static bindings and a dynamic array doesn't crash in
+// backends.
+TEST_P(DynamicBindingArrayTests, BindGroupDynamicArrayWithStaticBindings) {
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(
+        wgpu::DynamicBindingKind::SampledTexture, 4,
+        {
+            // Buffer sampler storage texture
+            {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+            {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+            {2, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float},
+        });
+
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::R16Float;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    wgpu::BufferDescriptor bDesc;
+    bDesc.size = 4;
+    bDesc.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&bDesc);
+
+    // Make a dense dynamic array of size 1.
+    MakeBindGroup(bgl, 1,
+                  {{0, buffer}, {1, sampler}, {2, tex.CreateView()}, {4, tex.CreateView()}});
+
+    // Make a dense dynamic array of size 3.
+    MakeBindGroup(bgl, 3,
+                  {
+                      {0, buffer},
+                      {1, sampler},
+                      {2, tex.CreateView()},
+                      {4, tex.CreateView()},
+                      {5, tex.CreateView()},
+                      {6, tex.CreateView()},
+                  });
+
+    // Make a sparse dynamic array.
+    MakeBindGroup(bgl, 3,
+                  {{0, buffer}, {1, sampler}, {2, tex.CreateView()}, {5, tex.CreateView()}});
+
+    // Make an empty dynamic array.
+    MakeBindGroup(bgl, 3, {{0, buffer}, {1, sampler}, {2, tex.CreateView()}});
+}
+
+// Test that creating bind groups of different sizes doesn't end up reuse incorrectly sized
+// allocations.
+TEST_P(DynamicBindingArrayTests, RecyclingDoesntReuseTooSmallAllocation) {
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+
+    for (uint32_t i = 0; i < 10; i++) {
+        MakeBindGroup(bgl, i, {});
+
+        // Wait to ensure some deallocation happens and has a chance to cause incorrect recycling.
+        WaitForAllOperations();
+    }
+}
+
+DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
