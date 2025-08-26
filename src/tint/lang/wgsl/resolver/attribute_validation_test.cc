@@ -68,7 +68,6 @@ enum class AttributeKind {
     kInvariant,
     kLocation,
     kMustUse,
-    kOffset,
     kSize,
     kStageCompute,
     kWorkgroupSize,
@@ -99,8 +98,6 @@ static std::ostream& operator<<(std::ostream& o, AttributeKind k) {
             return o << "@invariant";
         case AttributeKind::kLocation:
             return o << "@location";
-        case AttributeKind::kOffset:
-            return o << "@offset";
         case AttributeKind::kMustUse:
             return o << "@must_use";
         case AttributeKind::kSize:
@@ -184,10 +181,6 @@ static std::vector<TestParams> OnlyDiagnosticValidFor(std::string thing) {
                 "1:2 error: '@must_use' is not valid for " + thing,
             },
             TestParams{
-                {AttributeKind::kOffset},
-                "1:2 error: '@offset' is not valid for " + thing,
-            },
-            TestParams{
                 {AttributeKind::kSize},
                 "1:2 error: '@size' is not valid for " + thing,
             },
@@ -239,8 +232,6 @@ const ast::Attribute* CreateAttribute(const Source& source,
             return builder.Invariant(source);
         case AttributeKind::kLocation:
             return builder.Location(source, 0_a);
-        case AttributeKind::kOffset:
-            return builder.MemberOffset(source, 4_a);
         case AttributeKind::kMustUse:
             return builder.MustUse(source);
         case AttributeKind::kSize:
@@ -366,10 +357,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' can only be applied to functions that return a value)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for functions)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for functions)",
         },
@@ -449,10 +436,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             Pass,
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for functions)",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -542,10 +525,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for function parameters)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for function parameters)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for function parameters)",
         },
@@ -625,10 +604,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for non-entry point function return types)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for non-entry point function return types)",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -715,10 +690,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -816,10 +787,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for function parameters)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for function parameters)",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -925,10 +892,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for function parameters)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for function parameters)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for function parameters)",
         },
@@ -1012,10 +975,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for entry point return types)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for entry point return types)",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -1112,10 +1071,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for entry point return types)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for entry point return types)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for entry point return types)",
         },
@@ -1209,10 +1164,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for entry point return types)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for entry point return types)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for entry point return types)",
         },
@@ -1302,10 +1253,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for 'struct' declarations)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for 'struct' declarations)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for 'struct' declarations)",
         },
@@ -1392,10 +1339,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for 'struct' members)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            Pass,
         },
         TestParams{
             {AttributeKind::kSize},
@@ -1655,10 +1598,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for 'array' types)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for 'array' types)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for 'array' types)",
         },
@@ -1736,10 +1675,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for module-scope 'var')",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for module-scope 'var')",
         },
         TestParams{
             {AttributeKind::kSize},
@@ -1842,10 +1777,6 @@ INSTANTIATE_TEST_SUITE_P(
             R"(1:2 error: '@must_use' is not valid for 'const' declaration)",
         },
         TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for 'const' declaration)",
-        },
-        TestParams{
             {AttributeKind::kSize},
             R"(1:2 error: '@size' is not valid for 'const' declaration)",
         },
@@ -1917,10 +1848,6 @@ INSTANTIATE_TEST_SUITE_P(
         TestParams{
             {AttributeKind::kMustUse},
             R"(1:2 error: '@must_use' is not valid for 'override' declaration)",
-        },
-        TestParams{
-            {AttributeKind::kOffset},
-            R"(1:2 error: '@offset' is not valid for 'override' declaration)",
         },
         TestParams{
             {AttributeKind::kSize},

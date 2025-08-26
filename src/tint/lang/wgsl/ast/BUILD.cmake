@@ -166,8 +166,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/struct_member.h
   lang/wgsl/ast/struct_member_align_attribute.cc
   lang/wgsl/ast/struct_member_align_attribute.h
-  lang/wgsl/ast/struct_member_offset_attribute.cc
-  lang/wgsl/ast/struct_member_offset_attribute.h
   lang/wgsl/ast/struct_member_size_attribute.cc
   lang/wgsl/ast/struct_member_size_attribute.h
   lang/wgsl/ast/switch_statement.cc
@@ -269,7 +267,6 @@ tint_add_target(tint_lang_wgsl_ast_test test
   lang/wgsl/ast/return_statement_test.cc
   lang/wgsl/ast/stage_attribute_test.cc
   lang/wgsl/ast/struct_member_align_attribute_test.cc
-  lang/wgsl/ast/struct_member_offset_attribute_test.cc
   lang/wgsl/ast/struct_member_size_attribute_test.cc
   lang/wgsl/ast/struct_member_test.cc
   lang/wgsl/ast/struct_test.cc

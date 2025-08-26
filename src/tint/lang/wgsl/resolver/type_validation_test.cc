@@ -357,15 +357,15 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NestedStorageBufferLargeArray) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     // struct S {
-    //   @offset(800000) a : f32
+    //   @size(800000) a : f32
     // }
     // var<private> a : array<S, 65535>;
-    Structure("S", Vector{Member(Source{{12, 34}}, "a", ty.f32(), Vector{MemberOffset(800000_a)})});
+    Structure("S", Vector{Member(Source{{12, 34}}, "a", ty.f32(), Vector{MemberSize(800000_a)})});
     GlobalVar("a", ty.array(ty(Source{{12, 30}}, "S"), Expr(Source{{12, 34}}, 65535_a)),
               core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array byte size (0xc34f7cafc) must not exceed 0xffffffff bytes");
+              "12:34 error: array byte size (0xc34f3cb00) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {

@@ -1341,36 +1341,6 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
               R"(12:34 error: '@size' must be at least as big as the type's size (4))");
 }
 
-TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
-    Structure("S", Vector{
-                       Member(Source{{12, 34}}, "a", ty.f32(),
-                              Vector{MemberOffset(0_a), MemberSize(4_a)}),
-                   });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: '@offset' cannot be used with '@align' or '@size')");
-}
-
-TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
-    Structure("S", Vector{
-                       Member(Source{{12, 34}}, "a", ty.f32(),
-                              Vector{MemberOffset(0_a), MemberAlign(4_i)}),
-                   });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: '@offset' cannot be used with '@align' or '@size')");
-}
-
-TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
-    Structure("S", Vector{
-                       Member(Source{{12, 34}}, "a", ty.f32(),
-                              Vector{MemberOffset(0_a), MemberAlign(4_i), MemberSize(4_a)}),
-                   });
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: '@offset' cannot be used with '@align' or '@size')");
-}
-
 TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     auto* vf = Var("vf", ty.f32());
     auto* c = Call(Source{{12, 34}}, ty.ptr<function, i32>(), ExprList(vf));

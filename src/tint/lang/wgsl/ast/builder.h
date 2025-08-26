@@ -85,7 +85,6 @@
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
-#include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
@@ -2363,23 +2362,6 @@ class Builder {
         return MemberAccessor(source_, std::forward<OBJECT>(object), std::forward<MEMBER>(member));
     }
 
-    /// Creates a ast::StructMemberOffsetAttribute
-    /// @param val the offset expression
-    /// @returns the offset attribute pointer
-    template <typename EXPR>
-    const ast::StructMemberOffsetAttribute* MemberOffset(EXPR&& val) {
-        return create<ast::StructMemberOffsetAttribute>(source_, Expr(std::forward<EXPR>(val)));
-    }
-
-    /// Creates a ast::StructMemberOffsetAttribute
-    /// @param source the source information
-    /// @param val the offset expression
-    /// @returns the offset attribute pointer
-    template <typename EXPR>
-    const ast::StructMemberOffsetAttribute* MemberOffset(const Source& source, EXPR&& val) {
-        return create<ast::StructMemberOffsetAttribute>(source, Expr(std::forward<EXPR>(val)));
-    }
-
     /// Creates a ast::StructMemberSizeAttribute
     /// @param source the source information
     /// @param val the size value
@@ -2656,19 +2638,6 @@ class Builder {
                                     VectorRef<const ast::Attribute*> attributes = Empty) {
         return create<ast::StructMember>(source, Ident(std::forward<NAME>(name)), type,
                                          std::move(attributes));
-    }
-
-    /// Creates a ast::StructMember with the given byte offset
-    /// @param offset the offset to use in the StructMemberOffsetAttribute
-    /// @param name the struct member name
-    /// @param type the struct member type
-    /// @returns the struct member pointer
-    template <typename NAME>
-    const ast::StructMember* Member(uint32_t offset, NAME&& name, ast::Type type) {
-        return create<ast::StructMember>(source_, Ident(std::forward<NAME>(name)), type,
-                                         Vector<const ast::Attribute*, 1>{
-                                             MemberOffset(core::AInt(offset)),
-                                         });
     }
 
     /// Creates a ast::BlockStatement with input statements and attributes

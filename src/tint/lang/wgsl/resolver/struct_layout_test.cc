@@ -486,47 +486,5 @@ TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
     }
 }
 
-TEST_F(ResolverStructLayoutTest, OffsetAttributes) {
-    auto* inner = Structure("Inner", Vector{
-                                         Member("a", ty.f32(), Vector{MemberOffset(8_i)}),
-                                         Member("b", ty.f32(), Vector{MemberOffset(16_i)}),
-                                         Member("c", ty.f32(), Vector{MemberOffset(32_i)}),
-                                     });
-    auto* s = Structure("S", Vector{
-                                 Member("a", ty.f32(), Vector{MemberOffset(4_i)}),
-                                 Member("b", ty.u32(), Vector{MemberOffset(8_i)}),
-                                 Member("c", ty.Of(inner), Vector{MemberOffset(32_i)}),
-                                 Member("d", ty.i32()),
-                                 Member("e", ty.i32(), Vector{MemberOffset(128_i)}),
-                             });
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* sem = TypeOf(s)->As<sem::Struct>();
-    ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Size(), 132u);
-    EXPECT_EQ(sem->SizeNoPadding(), 132u);
-    EXPECT_EQ(sem->Align(), 4u);
-    ASSERT_EQ(sem->Members().Length(), 5u);
-    EXPECT_EQ(sem->Members()[0]->Offset(), 4u);
-    EXPECT_EQ(sem->Members()[0]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[0]->Size(), 4u);
-    EXPECT_EQ(sem->Members()[1]->Offset(), 8u);
-    EXPECT_EQ(sem->Members()[1]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[1]->Size(), 4u);
-    EXPECT_EQ(sem->Members()[2]->Offset(), 32u);
-    EXPECT_EQ(sem->Members()[2]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[2]->Size(), 36u);
-    EXPECT_EQ(sem->Members()[3]->Offset(), 68u);
-    EXPECT_EQ(sem->Members()[3]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[3]->Size(), 4u);
-    EXPECT_EQ(sem->Members()[4]->Offset(), 128u);
-    EXPECT_EQ(sem->Members()[4]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[4]->Size(), 4u);
-    for (auto& m : sem->Members()) {
-        EXPECT_EQ(m->Struct()->Declaration(), s);
-    }
-}
-
 }  // namespace
 }  // namespace tint::resolver

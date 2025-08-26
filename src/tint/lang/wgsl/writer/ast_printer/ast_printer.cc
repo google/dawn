@@ -69,7 +69,6 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
-#include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
@@ -405,10 +404,15 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
         // sanitizer.
         if (auto* mem_sem = program_.Sem().Get(mem)) {
             offset = tint::RoundUp(mem_sem->Align(), offset);
+            if (mem_sem->Offset() != offset) {
+                Line() << "/* offset(" << mem_sem->Offset() << ") */";
+            }
+
             if (uint32_t padding = mem_sem->Offset() - offset) {
                 add_padding(padding);
                 offset += padding;
             }
+
             offset += mem_sem->Size();
         }
 
@@ -418,14 +422,7 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
         Vector<const ast::Attribute*, 4> attributes_sanitized;
         attributes_sanitized.Reserve(mem->attributes.Length());
         for (auto* attr : mem->attributes) {
-            if (attr->Is<ast::StructMemberOffsetAttribute>()) {
-                auto l = Line();
-                l << "/* ";
-                EmitAttributes(l, Vector{attr});
-                l << " */";
-            } else {
-                attributes_sanitized.Push(attr);
-            }
+            attributes_sanitized.Push(attr);
         }
 
         if (!attributes_sanitized.IsEmpty()) {
@@ -554,11 +551,6 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 out << ")";
             },
             [&](const ast::MustUseAttribute*) { out << "must_use"; },
-            [&](const ast::StructMemberOffsetAttribute* offset) {
-                out << "offset(";
-                EmitExpression(out, offset->expr);
-                out << ")";
-            },
             [&](const ast::StructMemberSizeAttribute* size) {
                 out << "size(";
                 EmitExpression(out, size->expr);
