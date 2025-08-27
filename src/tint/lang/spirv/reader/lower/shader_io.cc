@@ -552,6 +552,7 @@ struct State {
                     break;
                 }
                 case core::BuiltinValue::kInstanceIndex:
+                case core::BuiltinValue::kPrimitiveIndex:
                 case core::BuiltinValue::kVertexIndex:
                 case core::BuiltinValue::kLocalInvocationIndex:
                 case core::BuiltinValue::kSubgroupInvocationId:
@@ -609,6 +610,7 @@ struct State {
                     break;
                 }
                 case core::BuiltinValue::kInstanceIndex:
+                case core::BuiltinValue::kPrimitiveIndex:
                 case core::BuiltinValue::kVertexIndex:
                 case core::BuiltinValue::kLocalInvocationIndex:
                 case core::BuiltinValue::kSubgroupInvocationId:

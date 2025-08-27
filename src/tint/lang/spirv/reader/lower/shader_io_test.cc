@@ -2306,6 +2306,91 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, PrimitiveIndex_i32) {
+    auto* idx = b.Var("prim_idx", ty.ptr(core::AddressSpace::kIn, ty.i32()));
+    idx->SetBuiltin(core::BuiltinValue::kPrimitiveIndex);
+    mod.root_block->Append(idx);
+
+    auto* ep = b.Function("foo", ty.i32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        auto* doubled = b.Multiply(ty.i32(), idx_value, 2_i);
+        b.Return(ep, doubled);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %prim_idx:ptr<__in, i32, read> = var undef @builtin(primitive_index)
+}
+
+%foo = @fragment func():i32 [@location(0)] {
+  $B2: {
+    %3:i32 = load %prim_idx
+    %4:i32 = mul %3, 2i
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func(%prim_idx:u32 [@primitive_index]):i32 [@location(0)] {
+  $B1: {
+    %3:i32 = convert %prim_idx
+    %4:i32 = mul %3, 2i
+    ret %4
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, PrimitiveIndex_u32) {
+    auto* idx = b.Var("prim_idx", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+    idx->SetBuiltin(core::BuiltinValue::kPrimitiveIndex);
+    mod.root_block->Append(idx);
+
+    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0);
+    b.Append(ep->Block(), [&] {
+        auto* idx_value = b.Load(idx);
+        auto* doubled = b.Multiply(ty.u32(), idx_value, 2_u);
+        b.Return(ep, doubled);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %prim_idx:ptr<__in, u32, read> = var undef @builtin(primitive_index)
+}
+
+%foo = @fragment func():u32 [@location(0)] {
+  $B2: {
+    %3:u32 = load %prim_idx
+    %4:u32 = mul %3, 2u
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func(%prim_idx:u32 [@primitive_index]):u32 [@location(0)] {
+  $B1: {
+    %3:u32 = mul %prim_idx, 2u
+    ret %3
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_ShaderIOTest, LocalInvocationIndex_i32) {
     auto* idx = b.Var("idx", ty.ptr(core::AddressSpace::kIn, ty.i32()));
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
