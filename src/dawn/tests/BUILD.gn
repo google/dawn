@@ -432,6 +432,7 @@ dawn_test("dawn_unittests") {
     "unittests/wire/WireArgumentTests.cpp",
     "unittests/wire/WireBasicTests.cpp",
     "unittests/wire/WireBufferMappingTests.cpp",
+    "unittests/wire/WireConfusionDeathTests.cpp",
     "unittests/wire/WireCreatePipelineAsyncTests.cpp",
     "unittests/wire/WireDeviceLifetimeTests.cpp",
     "unittests/wire/WireDisconnectTests.cpp",

@@ -141,7 +141,7 @@ namespace utils {
 class TerribleCommandBuffer;
 }  // namespace utils
 
-class WireTest : public testing::Test {
+class WireTest : virtual public testing::Test {
   protected:
     WireTest();
     ~WireTest() override;

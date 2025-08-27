@@ -133,7 +133,7 @@ WGPUFuture ShaderModule::APIGetCompilationInfo(
     }
 
     ShaderModuleGetCompilationInfoCmd cmd;
-    cmd.shaderModuleId = GetWireId();
+    cmd.shaderModuleId = GetWireHandle(GetClient()).id;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
 

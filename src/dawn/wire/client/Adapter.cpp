@@ -304,10 +304,10 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
     }
 
     AdapterRequestDeviceCmd cmd;
-    cmd.adapterId = GetWireId();
+    cmd.adapterId = GetWireHandle(client).id;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
-    cmd.deviceObjectHandle = device->GetWireHandle();
+    cmd.deviceObjectHandle = device->GetWireHandle(client);
     cmd.deviceLostFuture = device->APIGetLostFuture();
     cmd.descriptor = &wireDescriptor;
 

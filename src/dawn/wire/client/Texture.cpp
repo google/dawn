@@ -42,7 +42,7 @@ WGPUTexture Texture::CreateError(Device* device, const WGPUTextureDescriptor* de
     DeviceCreateErrorTextureCmd cmd;
     cmd.self = ToAPI(device);
     cmd.descriptor = descriptor;
-    cmd.result = texture->GetWireHandle();
+    cmd.result = texture->GetWireHandle(client);
     client->SerializeCommand(cmd);
 
     return ReturnToAPI(std::move(texture));

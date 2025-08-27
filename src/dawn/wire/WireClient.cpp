@@ -82,7 +82,7 @@ void WireClient::Disconnect() {
 
 Handle WireClient::GetWireHandle(WGPUDevice device) const {
     client::Device* wireDevice = client::FromAPI(device);
-    return {wireDevice->GetWireId(), wireDevice->GetWireGeneration()};
+    return wireDevice->GetWireHandle(mImpl.get());
 }
 
 namespace client {

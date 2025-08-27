@@ -49,6 +49,14 @@ using testing::WithArg;
 
 namespace dawn {
 
+namespace {
+// WireTest sets the wire proc table as the global proc table.
+// Tests that use multiple wires may inherit WireTest multiple times (see
+// WireConfusionDeathTest). Refcount how many WireTest instances are running
+// to make sure we don't unset the proc table until the test is done.
+uint32_t sWireProcTableRefCount = 0;
+}  // namespace
+
 WireTest::WireTest() {}
 
 WireTest::~WireTest() {}
@@ -84,7 +92,10 @@ void WireTest::SetUp() {
     mWireClient.reset(new wire::WireClient(clientDesc));
     mS2cBuf->SetHandler(mWireClient.get());
 
-    dawnProcSetProcs(&wire::client::GetProcs());
+    if (sWireProcTableRefCount == 0) {
+        dawnProcSetProcs(&wire::client::GetProcs());
+    }
+    ++sWireProcTableRefCount;
 
     auto reservedInstance = GetWireClient()->ReserveInstance();
     instance = wgpu::Instance::Acquire(reservedInstance.instance);
@@ -193,7 +204,11 @@ void WireTest::TearDown() {
     adapter = nullptr;
     device = nullptr;
     queue = nullptr;
-    dawnProcSetProcs(nullptr);
+
+    --sWireProcTableRefCount;
+    if (sWireProcTableRefCount == 0) {
+        dawnProcSetProcs(nullptr);
+    }
 
     // Derived classes should call the base TearDown() first. The client must
     // be reset before any mocks are deleted.

@@ -39,7 +39,7 @@ ObjectType RenderBundleEncoder::GetObjectType() const {
 
 void RenderBundleEncoder::APISetImmediateData(uint32_t offset, const void* data, size_t size) {
     RenderBundleEncoderSetImmediateDataCmd cmd;
-    cmd.renderBundleEncoderId = GetWireId();
+    cmd.renderBundleEncoderId = GetWireHandle(GetClient()).id;
     cmd.offset = offset;
     cmd.data = static_cast<const uint8_t*>(data);
     cmd.size = size;

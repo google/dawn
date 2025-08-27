@@ -214,7 +214,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle = nullptr;
 
     DeviceCreateBufferCmd cmd;
-    cmd.deviceId = device->GetWireId();
+    cmd.deviceId = device->GetWireHandle(wireClient).id;
     cmd.descriptor = descriptor;
     cmd.readHandleCreateInfoLength = 0;
     cmd.readHandleCreateInfo = nullptr;
@@ -264,7 +264,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
         buffer->mMappedData = writeHandle->GetData();
     }
 
-    cmd.result = buffer->GetWireHandle();
+    cmd.result = buffer->GetWireHandle(wireClient);
 
     // clang-format off
     // Turning off clang format here because for some reason it does not format the
@@ -308,7 +308,7 @@ WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descr
     DeviceCreateErrorBufferCmd cmd;
     cmd.self = ToAPI(device);
     cmd.descriptor = descriptor;
-    cmd.result = buffer->GetWireHandle();
+    cmd.result = buffer->GetWireHandle(client);
     client->SerializeCommand(cmd);
 
     return ReturnToAPI(std::move(buffer));
@@ -388,7 +388,7 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
 
     // Serialize the command to send to the server.
     BufferMapAsyncCmd cmd;
-    cmd.bufferId = GetWireId();
+    cmd.bufferId = GetWireHandle(client).id;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
     cmd.mode = mode;
@@ -464,7 +464,7 @@ void Buffer::APIUnmap() {
             mWriteHandle->SizeOfSerializeDataUpdate(mMappedOffset, mMappedSize);
 
         BufferUpdateMappedDataCmd cmd;
-        cmd.bufferId = GetWireId();
+        cmd.bufferId = GetWireHandle(client).id;
         cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
         cmd.writeDataUpdateInfo = nullptr;
         cmd.offset = mMappedOffset;

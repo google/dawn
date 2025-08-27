@@ -39,7 +39,7 @@ ObjectType RenderPassEncoder::GetObjectType() const {
 
 void RenderPassEncoder::APISetImmediateData(uint32_t offset, const void* data, size_t size) {
     RenderPassEncoderSetImmediateDataCmd cmd;
-    cmd.renderPassEncoderId = GetWireId();
+    cmd.renderPassEncoderId = GetWireHandle(GetClient()).id;
     cmd.offset = offset;
     cmd.data = static_cast<const uint8_t*>(data);
     cmd.size = size;

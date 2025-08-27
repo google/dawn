@@ -364,7 +364,7 @@ WGPUFuture Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
     }
 
     DevicePopErrorScopeCmd cmd;
-    cmd.deviceId = GetWireId();
+    cmd.deviceId = GetWireHandle(client).id;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
     client->SerializeCommand(cmd);
@@ -412,7 +412,7 @@ WGPUQueue Device::APIGetQueue() {
 
         DeviceGetQueueCmd cmd;
         cmd.self = ToAPI(this);
-        cmd.result = mQueue->GetWireHandle();
+        cmd.result = mQueue->GetWireHandle(client);
 
         client->SerializeCommand(cmd);
     }
@@ -435,11 +435,11 @@ WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
     }
 
     Cmd cmd;
-    cmd.deviceId = GetWireId();
+    cmd.deviceId = GetWireHandle(client).id;
     cmd.descriptor = descriptor;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
-    cmd.pipelineObjectHandle = pipeline->GetWireHandle();
+    cmd.pipelineObjectHandle = pipeline->GetWireHandle(client);
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};

@@ -194,10 +194,10 @@ WGPUFuture Instance::APIRequestAdapter(const WGPURequestAdapterOptions* options,
     }
 
     InstanceRequestAdapterCmd cmd;
-    cmd.instanceId = GetWireId();
+    cmd.instanceId = GetWireHandle(client).id;
     cmd.eventManagerHandle = GetEventManagerHandle();
     cmd.future = {futureIDInternal};
-    cmd.adapterObjectHandle = adapter->GetWireHandle();
+    cmd.adapterObjectHandle = adapter->GetWireHandle(client);
     cmd.options = options;
 
     client->SerializeCommand(cmd);

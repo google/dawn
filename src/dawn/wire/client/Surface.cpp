@@ -151,9 +151,9 @@ void Surface::APIGetCurrentTexture(WGPUSurfaceTexture* surfaceTexture) {
     Ref<Texture> texture = wireClient->Make<Texture>(&mTextureDescriptor);
 
     SurfaceGetCurrentTextureCmd cmd;
-    cmd.surfaceId = GetWireId();
-    cmd.textureHandle = texture->GetWireHandle();
-    cmd.configuredDeviceId = mConfiguredDevice->GetWireId();
+    cmd.surfaceId = GetWireHandle(wireClient).id;
+    cmd.textureHandle = texture->GetWireHandle(wireClient);
+    cmd.configuredDeviceId = mConfiguredDevice->GetWireHandle(wireClient).id;
     wireClient->SerializeCommand(cmd);
 
     surfaceTexture->status = WGPUSurfaceGetCurrentTextureStatus_SuccessOptimal;

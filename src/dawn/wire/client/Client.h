@@ -69,7 +69,7 @@ class Client : public ClientBase {
         ObjectBaseParams params = {this, mObjects[type].ReserveHandle()};
         Ref<T> object = AcquireRef(new T(params, std::forward<Args>(args)...));
 
-        mObjects[type].Insert(object.Get());
+        mObjects[type].Insert(object.Get(), this);
 
         return object;
     }

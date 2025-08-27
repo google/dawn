@@ -42,7 +42,7 @@ namespace dawn::wire::client {
 
                 {% if member.type.dict_name == "ObjectHandle" %}
                     {{Type}}* {{name}} = Get<{{Type}}>(cmd.{{name}}.id);
-                    if ({{name}} != nullptr && {{name}}->GetWireGeneration() != cmd.{{name}}.generation) {
+                    if ({{name}} != nullptr && {{name}}->GetWireHandle(this).generation != cmd.{{name}}.generation) {
                         {{name}} = nullptr;
                     }
                 {% endif %}
