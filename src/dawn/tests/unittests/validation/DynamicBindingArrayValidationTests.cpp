@@ -619,6 +619,18 @@ TEST_F(DynamicBindingArrayTests, DestroyedDynamicBindingArrayUsedInRenderBundle)
     }
 }
 
+// Test that using the WGSL enable requires the bindless extension.
+TEST_F(DynamicBindingArrayTests_FeatureDisabled, WGSLEnableNotAllowed) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+        @group(0) @binding(0) var a : binding_array<texture_2d<f32>>;
+
+        @compute @workgroup_size(1) fn main() {
+            _ = a[42];
+        }
+    )"));
+}
+
 // Test that a shader using a dynamic binding array requires a layout with one.
 TEST_F(DynamicBindingArrayTests, ShaderRequiresLayoutWithDynamicArray) {
     wgpu::ComputePipelineDescriptor csDesc;
