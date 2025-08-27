@@ -45,8 +45,7 @@ namespace {
 class TypeIsHostShareableTest : public TestHelper {
   protected:
     Manager ty;
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
 };
 
 TEST_F(TypeIsHostShareableTest, Void) {

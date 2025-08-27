@@ -31,7 +31,9 @@
 
 namespace tint {
 
-SymbolTable::SymbolTable(tint::GenerationID generation_id) : generation_id_(generation_id) {}
+SymbolTable::SymbolTable() : generation_id_(GenerationID::New()) {}
+
+SymbolTable::SymbolTable(GenerationID gen_id) : generation_id_(gen_id) {}
 
 SymbolTable::SymbolTable(SymbolTable&&) = default;
 

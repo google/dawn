@@ -55,10 +55,11 @@ TEST_F(TypeStructTest, Creation) {
 
 TEST_F(TypeStructTest, Equals) {
     Manager ty;
-    auto* a = ty.Get<Struct>(Symbol(1, GenerationID(), "a"), tint::Empty, 4u /* align */,
-                             4u /* size */, 4u /* size_no_padding */);
-    auto* b = ty.Get<Struct>(Symbol(2, GenerationID(), "b"), tint::Empty, 4u /* align */,
-                             4u /* size */, 4u /* size_no_padding */);
+    SymbolTable st{};
+    auto* a = ty.Get<Struct>(st.New("a"), tint::Empty, 4u /* align */, 4u /* size */,
+                             4u /* size_no_padding */);
+    auto* b = ty.Get<Struct>(st.New("b"), tint::Empty, 4u /* align */, 4u /* size */,
+                             4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
@@ -67,14 +68,14 @@ TEST_F(TypeStructTest, Equals) {
 
 TEST_F(TypeStructTest, FriendlyName) {
     Manager ty;
-    auto* s = ty.Get<Struct>(Symbol(1, GenerationID(), "my_struct"), tint::Empty, 4u /* align */,
-                             4u /* size */, 4u /* size_no_padding */);
+    SymbolTable st{};
+    auto* s = ty.Get<Struct>(st.New("my_struct"), tint::Empty, 4u /* align */, 4u /* size */,
+                             4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
 TEST_F(TypeStructTest, Layout) {
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
     auto* inner_st =  //
         ty.Struct(st.New("Inner"), tint::Vector{
@@ -111,8 +112,7 @@ TEST_F(TypeStructTest, Layout) {
 }
 
 TEST_F(TypeStructTest, Location) {
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
 
     core::IOAttributes attrs{};
@@ -128,8 +128,7 @@ TEST_F(TypeStructTest, Location) {
 }
 
 TEST_F(TypeStructTest, IsConstructable) {
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
 
     auto* inner =  //
@@ -160,8 +159,7 @@ TEST_F(TypeStructTest, IsConstructable) {
 }
 
 TEST_F(TypeStructTest, HasCreationFixedFootprint) {
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
     auto* inner =  //
         ty.Struct(st.New("Inner"), tint::Vector{
@@ -190,8 +188,7 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
 }
 
 TEST_F(TypeStructTest, HasFixedFootprint) {
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
 
     auto* inner =  //
@@ -221,8 +218,7 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
 }
 
 TEST_F(TypeStructTest, Clone) {
-    auto id = GenerationID::New();
-    SymbolTable syms{id};
+    SymbolTable syms{};
     Manager ty;
     core::IOAttributes attrs_location_2;
     attrs_location_2.location = 2;
@@ -234,8 +230,7 @@ TEST_F(TypeStructTest, Clone) {
             ty.Get<StructMember>(syms.New("a"), ty.i32(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
-    auto new_id = GenerationID::New();
-    SymbolTable new_st{new_id};
+    SymbolTable new_st{};
 
     core::type::Manager mgr;
     core::type::CloneContext ctx{{&syms}, {&new_st, &mgr}};

@@ -28,8 +28,6 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_TYPE_H_
 #define SRC_TINT_LANG_WGSL_AST_TYPE_H_
 
-#include "src/tint/utils/generation_id.h"
-
 // Forward declarations
 namespace tint::ast {
 class IdentifierExpression;

@@ -63,8 +63,7 @@ using ::testing::HasSubstr;
 
 class CoreIntrinsicTableTest : public testing::Test {
   public:
-    GenerationID id = GenerationID::New();
-    SymbolTable syms{id};
+    SymbolTable syms{};
     type::Manager ty;
     Table<Dialect> table{ty, syms};
 };

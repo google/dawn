@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("utils") {
   sources = [
-    "generation_id.cc",
-    "generation_id.h",
     "internal_limits.h",
     "reflection.cc",
     "reflection.h",

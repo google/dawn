@@ -35,7 +35,6 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/info.h"
-#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
 // Forward Declarations
@@ -165,7 +164,7 @@ class Program {
     SemNodeAllocator sem_nodes_;
     ast::Module* ast_ = nullptr;
     sem::Info sem_;
-    SymbolTable symbols_{GenerationID::New()};
+    SymbolTable symbols_{};
     diag::List diagnostics_;
     bool is_valid_ = false;  // Not valid until it is built
     bool moved_ = false;

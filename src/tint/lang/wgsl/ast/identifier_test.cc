@@ -35,12 +35,12 @@ using IdentifierDeathTest = IdentifierTest;
 
 TEST_F(IdentifierTest, Creation) {
     auto* i = Ident("ident");
-    EXPECT_EQ(i->symbol, Symbol(1, Symbols().GenerationID(), "ident"));
+    EXPECT_EQ(i->symbol, Symbols().Get("ident"));
 }
 
 TEST_F(IdentifierTest, Creation_WithSource) {
     auto* i = Ident(Source{{20, 2}}, "ident");
-    EXPECT_EQ(i->symbol, Symbol(1, Symbols().GenerationID(), "ident"));
+    EXPECT_EQ(i->symbol, Symbols().Get("ident"));
 
     auto src = i->source;
     EXPECT_EQ(src.range.begin.line, 20u);

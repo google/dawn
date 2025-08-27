@@ -60,7 +60,6 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
-#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/text/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER

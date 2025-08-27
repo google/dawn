@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,46 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/ast/helper_test.h"
+#include "src/tint/utils/symbol/generation_id.h"
 
-namespace tint::ast {
+#include <atomic>
+
+namespace tint {
+
 namespace {
 
-using namespace tint::core::number_suffixes;  // NOLINT
-
-using IdentifierExpressionTest = TestHelper;
-using IdentifierExpressionDeathTest = IdentifierExpressionTest;
-
-TEST_F(IdentifierExpressionTest, Creation) {
-    auto* i = Expr("ident");
-    EXPECT_EQ(i->identifier->symbol, Symbols().Get("ident"));
-}
-
-TEST_F(IdentifierExpressionTest, CreationTemplated) {
-    auto* i = Expr(Ident("ident", true));
-    EXPECT_EQ(i->identifier->symbol, Symbols().Get("ident"));
-    auto* tmpl_ident = i->identifier->As<TemplatedIdentifier>();
-    ASSERT_NE(tmpl_ident, nullptr);
-    EXPECT_EQ(tmpl_ident->arguments.Length(), 1_u);
-    EXPECT_TRUE(tmpl_ident->arguments[0]->Is<BoolLiteralExpression>());
-}
-
-TEST_F(IdentifierExpressionTest, Creation_WithSource) {
-    auto* i = Expr(Source{{20, 2}}, "ident");
-    EXPECT_EQ(i->identifier->symbol, Symbols().Get("ident"));
-
-    EXPECT_EQ(i->source.range, (Source::Range{{20, 2}}));
-    EXPECT_EQ(i->identifier->source.range, (Source::Range{{20, 2}}));
-}
-
-TEST_F(IdentifierExpressionDeathTest, Assert_InvalidSymbol) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b;
-            b.Expr("");
-        },
-        "internal compiler error");
-}
+std::atomic<uint32_t> next_generation_id{1};
 
 }  // namespace
-}  // namespace tint::ast
+
+GenerationID::GenerationID() = default;
+
+GenerationID::GenerationID(uint32_t id) : val(id) {}
+
+GenerationID GenerationID::New() {
+    return GenerationID(next_generation_id++);
+}
+
+}  // namespace tint

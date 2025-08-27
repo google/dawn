@@ -95,7 +95,6 @@
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/enums.h"
-#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string.h"
@@ -3517,7 +3516,7 @@ class Builder {
     ast::Module* ast_ = nullptr;
 
     /// The symbol table
-    SymbolTable symbols_{GenerationID::New()};
+    SymbolTable symbols_{};
 
     /// The diagnostic list
     diag::List diagnostics_;

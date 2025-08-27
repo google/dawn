@@ -41,7 +41,6 @@
 #include "src/tint/utils/containers/filtered_iterator.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
-#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
@@ -198,7 +197,7 @@ class Module {
     ConstPropagatingPtr<Block> root_block;
 
     /// The symbol table for the module
-    SymbolTable symbols{GenerationID::New()};
+    SymbolTable symbols{};
 
     /// The map of core::constant::Value to their ir::Constant.
     Hashmap<const core::constant::Value*, ir::Constant*, 16> constants;

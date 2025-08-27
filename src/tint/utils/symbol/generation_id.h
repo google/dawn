@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,41 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/generation_id.h"
+#ifndef SRC_TINT_UTILS_SYMBOL_GENERATION_ID_H_
+#define SRC_TINT_UTILS_SYMBOL_GENERATION_ID_H_
 
-#include <atomic>
+#include <stdint.h>
 
-#include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint {
 
-namespace {
+/// A GenerationID is a unique identifier of a generation.
+///
+/// GenerationID can be used to ensure that objects referenced by the generation are owned
+/// exclusively by that generation and have accidentally not leaked from another generation.
+class GenerationID {
+  public:
+    /// Constructor
+    GenerationID();
 
-std::atomic<uint32_t> next_generation_id{1};
+    /// @returns a new globally unique GenerationID
+    static GenerationID New();
 
-}  // namespace
+    /// Equality operator
+    /// @param rhs the other GenerationID
+    /// @returns true if the GenerationIDs are equal
+    bool operator==(const GenerationID& rhs) const { return val == rhs.val; }
 
-GenerationID::GenerationID() = default;
+    /// @returns true if this GenerationID is valid
+    explicit operator bool() const { return val != 0; }
 
-GenerationID::GenerationID(uint32_t id) : val(id) {}
+  private:
+    explicit GenerationID(uint32_t);
 
-GenerationID GenerationID::New() {
-    return GenerationID(next_generation_id++);
-}
+    uint32_t val = 0;
+};
 
-namespace detail {
-
-/// AssertGenerationIDsEqual is called by TINT_ASSERT_GENERATION_IDS_EQUAL() and
-/// TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID() to assert that the GenerationIDs
-/// `a` and `b` are equal.
-void AssertGenerationIDsEqual(GenerationID a,
-                              GenerationID b,
-                              bool if_valid,
-                              const char* msg,
-                              const char* file,
-                              size_t line) {
-    if (a == b) {
-        return;  // matched
-    }
-    if (if_valid && (!a || !b)) {
-        return;  //  a or b were not valid
-    }
-    tint::InternalCompilerError(file, line) << msg;
-}
-
-}  // namespace detail
 }  // namespace tint
+
+#endif  // SRC_TINT_UTILS_SYMBOL_GENERATION_ID_H_

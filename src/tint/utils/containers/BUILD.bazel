@@ -90,7 +90,6 @@ cc_library(
     "vector_test.cc",
   ],
   deps = [
-    "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",

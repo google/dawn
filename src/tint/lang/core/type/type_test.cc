@@ -138,8 +138,7 @@ struct TypeTest : public TestHelper {
             /* size */ 5u * 4u);
     }
 
-    GenerationID id;
-    SymbolTable st{id};
+    SymbolTable st{};
     Manager ty;
 
     const AbstractFloat* af = nullptr;

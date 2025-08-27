@@ -32,7 +32,6 @@
 
 #include "src/tint/lang/wgsl/ast/node_id.h"
 #include "src/tint/utils/diagnostic/source.h"
-#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
