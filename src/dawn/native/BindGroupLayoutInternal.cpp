@@ -359,6 +359,21 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
                 },
         };
         IncrementBindingCounts(&bindingCounts, Unpack(&availabilityEntry));
+
+        // Check that no ExternalTexture entry is in the static bindings part. It is redundant with
+        // validation below but since this is a temporary constraint only, it is fine.
+        // TODO(https://crbug.com/42240282): This is a workaround for an issue generating the
+        // binding numbers for expanded ExternalTexture entries. See comment in
+        // ConvertAndExpandBGLEntries.
+        // TODO(https://crbug.com/435317394): Remove this constraint that isn't necessary for
+        // dynamic binding arrays, except as a temporary workaround.
+        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+            UnpackedPtr<BindGroupLayoutEntry> entry;
+            DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i]));
+            DAWN_INVALID_IF(
+                entry.Has<ExternalTextureBindingLayout>(),
+                "entries[%i] is an ExternalTexture when a dynamic binding array is specified.", i);
+        }
     }
 
     // Map of binding number to entry index.
@@ -487,14 +502,30 @@ BindingInfo ConvertToBindingInfo(const UnpackedPtr<BindGroupLayoutEntry>& bindin
 struct ExpandedBindingInfo {
     ityp::vector<BindingIndex, BindingInfo> entries;
     ExternalTextureBindingExpansionMap externalTextureBindingExpansions;
+    std::optional<BindingNumber> dynamicArrayMetatada;
 };
 ExpandedBindingInfo ConvertAndExpandBGLEntries(
     const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor) {
     ExpandedBindingInfo result;
 
-    // When new bgl entries are created, we use binding numbers larger than kMaxBindingsPerBindGroup
-    // to ensure there are no collisions.
-    BindingNumber nextOpenBindingNumberForNewEntry = kMaxBindingsPerBindGroupTyped;
+    // When new BGL entries are created, we use binding numbers decreasing from the max uint32_t
+    // to ensure there are no collisions and that validation will prevent using these BindingNumbers
+    // when creating a bindgroup (so there is no risk of applications injecting their own buffer for
+    // the metadata for example).
+    // New BGL entries that are added internally we must ensure that there are no collisions with
+    // existing BindingNumbers and that validation will prevent using these BindingNumbers when
+    // creating a bindgroup. Otherwise a misbehaved application could try injecting its own planes
+    // for ExternalTextures or its own metadata buffer for dynamic binding array metadata.
+    //
+    // TODO(https://crbug.com/42240282): The scheme for ExternalTextures is to generate increasing
+    // BindingNumbers from maxBindingsPerBindGroup. This won't work with dynamic binding arrays as
+    // these can contain BindingNumbers way past maxBindingsPerBindGroup. Instead change to use the
+    // scheme decreasing from UINT32_MAX. (this couldn't be done immediately due to failures on
+    // D3D12).
+    // TODO(https://crbug.com/435317394): Changing the scheme will allow re-enabling use in
+    // ExternalTextures in bind group with dynamic binding arrays.
+    BindingNumber nextOpenBindingNumberForNewEntryET = kMaxBindingsPerBindGroupTyped;
+    BindingNumber nextOpenBindingNumberForNewEntryNonET = std::numeric_limits<BindingNumber>::max();
     for (uint32_t i = 0; i < descriptor->entryCount; i++) {
         UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
 
@@ -511,12 +542,12 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             result.entries.push_back(plane0Entry);
 
             BindingInfo plane1Entry = CreateSampledTextureBindingForExternalTexture(
-                nextOpenBindingNumberForNewEntry++, entry->visibility);
+                nextOpenBindingNumberForNewEntryET++, entry->visibility);
             bindingExpansion.plane1 = BindingNumber(plane1Entry.binding);
             result.entries.push_back(plane1Entry);
 
             BindingInfo paramsEntry = CreateUniformBindingForExternalTexture(
-                nextOpenBindingNumberForNewEntry++, entry->visibility);
+                nextOpenBindingNumberForNewEntryET++, entry->visibility);
             bindingExpansion.params = BindingNumber(paramsEntry.binding);
             result.entries.push_back(paramsEntry);
 
@@ -535,6 +566,22 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             info.binding++;
         }
     }
+
+    // Add an internal entry for the metadata buffer of the dynamic array if needed.
+    if (descriptor.Has<BindGroupLayoutDynamicBindingArray>()) {
+        BindingInfo metadataEntry = {
+            .binding = nextOpenBindingNumberForNewEntryNonET--,
+            .visibility = kAllStages,
+            .bindingLayout = BufferBindingInfo{{
+                .type = wgpu::BufferBindingType::ReadOnlyStorage,
+                // This is an internal buffer so it doesn't need its minBindingSize runtime-checked.
+                .minBindingSize = 4,
+                .hasDynamicOffset = false,
+            }}};
+        result.entries.push_back(metadataEntry);
+        result.dynamicArrayMetatada = metadataEntry.binding;
+    }
+
     return result;
 }
 
@@ -639,6 +686,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
         mHasDynamicArray = true;
         mAPIDynamicArrayStart = BindingNumber(dynamic->dynamicArray.start);
         mDynamicArrayKind = dynamic->dynamicArray.kind;
+        mDynamicArrayMetadataBinding = mBindingMap[unpackedBindings.dynamicArrayMetatada.value()];
 
         // Pack the dynamic array to start right after static bindings.
         mDynamicArrayStart = mBindingInfo.size();
@@ -710,11 +758,6 @@ const BindGroupLayoutInternalBase::BindingMap& BindGroupLayoutInternalBase::GetB
     return mBindingMap;
 }
 
-bool BindGroupLayoutInternalBase::HasBinding(BindingNumber bindingNumber) const {
-    DAWN_ASSERT(!IsError());
-    return mBindingMap.contains(bindingNumber);
-}
-
 BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingNumber) const {
     DAWN_ASSERT(!IsError());
     const auto& it = mBindingMap.find(bindingNumber);
@@ -729,11 +772,13 @@ bool BindGroupLayoutInternalBase::HasDynamicArray() const {
 
 BindingNumber BindGroupLayoutInternalBase::GetAPIDynamicArrayStart() const {
     DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mHasDynamicArray);
     return mAPIDynamicArrayStart;
 }
 
 BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayStart() const {
     DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mHasDynamicArray);
     return mDynamicArrayStart;
 }
 
@@ -745,8 +790,15 @@ BindingIndex BindGroupLayoutInternalBase::GetDynamicBindingIndex(BindingNumber b
     return BindingIndex(indexInArray);
 }
 
+BindingIndex BindGroupLayoutInternalBase::GetDynamicArrayMetadataBinding() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mHasDynamicArray);
+    return mDynamicArrayMetadataBinding;
+}
+
 wgpu::DynamicBindingKind BindGroupLayoutInternalBase::GetDynamicArrayKind() const {
     DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mHasDynamicArray);
     return mDynamicArrayKind;
 }
 

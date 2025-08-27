@@ -466,6 +466,28 @@ TEST_F(DynamicBindingArrayTests, DynamicEntryConflict) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
 }
 
+// Check that dynamic binding arrays are not allowed in combination with an external texture in the
+// static bindings part.
+// TODO(https://issues.chromium.org/435251399): Remove this constraint that's only a workaround
+// while prototyping.
+TEST_F(DynamicBindingArrayTests, NotAllowedWithExternalTextures) {
+    // Control case, static buffer binding + dynamic binding array is allowed.
+    MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture, 5,
+                        {{
+                            0,
+                            wgpu::ShaderStage::Fragment,
+                            wgpu::BufferBindingType::Uniform,
+                        }});
+
+    // Error case, static buffer binding + dynamic binding array is an error.
+    ASSERT_DEVICE_ERROR(MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture, 5,
+                                            {{
+                                                0,
+                                                wgpu::ShaderStage::Fragment,
+                                                &utils::kExternalTextureBindingLayout,
+                                            }}));
+}
+
 // Check that DynamicBindingKind::SampledTexture must be a texture entry.
 // TODO(https://issues.chromium.org/435251399): Figure out the additional validation rules for the
 // texture kind.

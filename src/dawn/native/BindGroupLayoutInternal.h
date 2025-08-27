@@ -87,7 +87,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // Getters for static bindings
     const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
-    bool HasBinding(BindingNumber bindingNumber) const;
     BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
 
     BindingIndex GetBindingCount() const;
@@ -113,6 +112,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BindingNumber GetAPIDynamicArrayStart() const;
     BindingIndex GetDynamicArrayStart() const;
     BindingIndex GetDynamicBindingIndex(BindingNumber binding) const;
+    BindingIndex GetDynamicArrayMetadataBinding() const;
     wgpu::DynamicBindingKind GetDynamicArrayKind() const;
 
     // Functions necessary for the unordered_set<BGLBase*>-based cache.
@@ -223,6 +223,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     bool mHasDynamicArray = false;
     BindingNumber mAPIDynamicArrayStart{0};
     BindingIndex mDynamicArrayStart{0};
+    BindingIndex mDynamicArrayMetadataBinding{0};
     wgpu::DynamicBindingKind mDynamicArrayKind = wgpu::DynamicBindingKind::Undefined;
 };
 
