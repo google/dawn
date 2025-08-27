@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include <string>
 
 #include "gtest/gtest.h"
@@ -78,12 +80,8 @@ TEST_P(CoreDiagnosticRuleParseTest, Parse) {
     EXPECT_EQ(expect, ParseCoreDiagnosticRule(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases,
-                         CoreDiagnosticRuleParseTest,
-                         testing::ValuesIn(kValidCoreDiagnosticRuleCases));
-INSTANTIATE_TEST_SUITE_P(InvalidCoreDiagnosticRuleCases,
-                         CoreDiagnosticRuleParseTest,
-                         testing::ValuesIn(kInvalidCoreDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases, CoreDiagnosticRuleParseTest, testing::ValuesIn(kValidCoreDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(InvalidCoreDiagnosticRuleCases, CoreDiagnosticRuleParseTest, testing::ValuesIn(kInvalidCoreDiagnosticRuleCases));
 
 using CoreDiagnosticRulePrintTest = testing::TestWithParam<CoreDiagnosticRuleCase>;
 
@@ -93,9 +91,7 @@ TEST_P(CoreDiagnosticRulePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases,
-                         CoreDiagnosticRulePrintTest,
-                         testing::ValuesIn(kValidCoreDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(ValidCoreDiagnosticRuleCases, CoreDiagnosticRulePrintTest, testing::ValuesIn(kValidCoreDiagnosticRuleCases));
 
 }  // namespace parse_print_tests
 }  // namespace core_diagnostic_rule_tests
@@ -134,12 +130,8 @@ TEST_P(ChromiumDiagnosticRuleParseTest, Parse) {
     EXPECT_EQ(expect, ParseChromiumDiagnosticRule(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases,
-                         ChromiumDiagnosticRuleParseTest,
-                         testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
-INSTANTIATE_TEST_SUITE_P(InvalidChromiumDiagnosticRuleCases,
-                         ChromiumDiagnosticRuleParseTest,
-                         testing::ValuesIn(kInvalidChromiumDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases, ChromiumDiagnosticRuleParseTest, testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(InvalidChromiumDiagnosticRuleCases, ChromiumDiagnosticRuleParseTest, testing::ValuesIn(kInvalidChromiumDiagnosticRuleCases));
 
 using ChromiumDiagnosticRulePrintTest = testing::TestWithParam<ChromiumDiagnosticRuleCase>;
 
@@ -149,9 +141,7 @@ TEST_P(ChromiumDiagnosticRulePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases,
-                         ChromiumDiagnosticRulePrintTest,
-                         testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
+INSTANTIATE_TEST_SUITE_P(ValidChromiumDiagnosticRuleCases, ChromiumDiagnosticRulePrintTest, testing::ValuesIn(kValidChromiumDiagnosticRuleCases));
 
 }  // namespace parse_print_tests
 }  // namespace chromium_diagnostic_rule_tests
@@ -176,12 +166,18 @@ static constexpr DiagnosticSeverityCase kValidDiagnosticSeverityCases[] = {
 };
 
 static constexpr DiagnosticSeverityCase kInvalidDiagnosticSeverityCases[] = {
-    {"eggor", DiagnosticSeverity::kUndefined},  {"VoX", DiagnosticSeverity::kUndefined},
-    {"erro3", DiagnosticSeverity::kUndefined},  {"infE", DiagnosticSeverity::kUndefined},
-    {"TTPfo", DiagnosticSeverity::kUndefined},  {"xxnfo", DiagnosticSeverity::kUndefined},
-    {"44ff", DiagnosticSeverity::kUndefined},   {"oSVVf", DiagnosticSeverity::kUndefined},
-    {"RR2", DiagnosticSeverity::kUndefined},    {"wFni9g", DiagnosticSeverity::kUndefined},
-    {"waring", DiagnosticSeverity::kUndefined}, {"VOORRHng", DiagnosticSeverity::kUndefined},
+    {"eggor", DiagnosticSeverity::kUndefined},
+    {"VoX", DiagnosticSeverity::kUndefined},
+    {"erro3", DiagnosticSeverity::kUndefined},
+    {"infE", DiagnosticSeverity::kUndefined},
+    {"TTPfo", DiagnosticSeverity::kUndefined},
+    {"xxnfo", DiagnosticSeverity::kUndefined},
+    {"44ff", DiagnosticSeverity::kUndefined},
+    {"oSVVf", DiagnosticSeverity::kUndefined},
+    {"RR2", DiagnosticSeverity::kUndefined},
+    {"wFni9g", DiagnosticSeverity::kUndefined},
+    {"waring", DiagnosticSeverity::kUndefined},
+    {"VOORRHng", DiagnosticSeverity::kUndefined},
 };
 
 using DiagnosticSeverityParseTest = testing::TestWithParam<DiagnosticSeverityCase>;
@@ -192,12 +188,8 @@ TEST_P(DiagnosticSeverityParseTest, Parse) {
     EXPECT_EQ(expect, ParseDiagnosticSeverity(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases,
-                         DiagnosticSeverityParseTest,
-                         testing::ValuesIn(kValidDiagnosticSeverityCases));
-INSTANTIATE_TEST_SUITE_P(InvalidDiagnosticSeverityCases,
-                         DiagnosticSeverityParseTest,
-                         testing::ValuesIn(kInvalidDiagnosticSeverityCases));
+INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases, DiagnosticSeverityParseTest, testing::ValuesIn(kValidDiagnosticSeverityCases));
+INSTANTIATE_TEST_SUITE_P(InvalidDiagnosticSeverityCases, DiagnosticSeverityParseTest, testing::ValuesIn(kInvalidDiagnosticSeverityCases));
 
 using DiagnosticSeverityPrintTest = testing::TestWithParam<DiagnosticSeverityCase>;
 
@@ -207,9 +199,7 @@ TEST_P(DiagnosticSeverityPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases,
-                         DiagnosticSeverityPrintTest,
-                         testing::ValuesIn(kValidDiagnosticSeverityCases));
+INSTANTIATE_TEST_SUITE_P(ValidDiagnosticSeverityCases, DiagnosticSeverityPrintTest, testing::ValuesIn(kValidDiagnosticSeverityCases));
 
 }  // namespace parse_print_tests
 }  // namespace diagnostic_severity_tests
@@ -295,12 +285,8 @@ TEST_P(ExtensionParseTest, Parse) {
     EXPECT_EQ(expect, ParseExtension(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidExtensionCases,
-                         ExtensionParseTest,
-                         testing::ValuesIn(kValidExtensionCases));
-INSTANTIATE_TEST_SUITE_P(InvalidExtensionCases,
-                         ExtensionParseTest,
-                         testing::ValuesIn(kInvalidExtensionCases));
+INSTANTIATE_TEST_SUITE_P(ValidExtensionCases, ExtensionParseTest, testing::ValuesIn(kValidExtensionCases));
+INSTANTIATE_TEST_SUITE_P(InvalidExtensionCases, ExtensionParseTest, testing::ValuesIn(kInvalidExtensionCases));
 
 using ExtensionPrintTest = testing::TestWithParam<ExtensionCase>;
 
@@ -310,9 +296,7 @@ TEST_P(ExtensionPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidExtensionCases,
-                         ExtensionPrintTest,
-                         testing::ValuesIn(kValidExtensionCases));
+INSTANTIATE_TEST_SUITE_P(ValidExtensionCases, ExtensionPrintTest, testing::ValuesIn(kValidExtensionCases));
 
 }  // namespace parse_print_tests
 
@@ -331,14 +315,12 @@ static constexpr LanguageFeatureCase kValidLanguageFeatureCases[] = {
     {"chromium_print", LanguageFeature::kChromiumPrint},
     {"chromium_testing_experimental", LanguageFeature::kChromiumTestingExperimental},
     {"chromium_testing_shipped", LanguageFeature::kChromiumTestingShipped},
-    {"chromium_testing_shipped_with_killswitch",
-     LanguageFeature::kChromiumTestingShippedWithKillswitch},
+    {"chromium_testing_shipped_with_killswitch", LanguageFeature::kChromiumTestingShippedWithKillswitch},
     {"chromium_testing_unimplemented", LanguageFeature::kChromiumTestingUnimplemented},
     {"chromium_testing_unsafe_experimental", LanguageFeature::kChromiumTestingUnsafeExperimental},
     {"packed_4x8_integer_dot_product", LanguageFeature::kPacked4X8IntegerDotProduct},
     {"pointer_composite_access", LanguageFeature::kPointerCompositeAccess},
-    {"readonly_and_readwrite_storage_textures",
-     LanguageFeature::kReadonlyAndReadwriteStorageTextures},
+    {"readonly_and_readwrite_storage_textures", LanguageFeature::kReadonlyAndReadwriteStorageTextures},
     {"sized_binding_array", LanguageFeature::kSizedBindingArray},
     {"texel_buffers", LanguageFeature::kTexelBuffers},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
@@ -391,12 +373,8 @@ TEST_P(LanguageFeatureParseTest, Parse) {
     EXPECT_EQ(expect, ParseLanguageFeature(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases,
-                         LanguageFeatureParseTest,
-                         testing::ValuesIn(kValidLanguageFeatureCases));
-INSTANTIATE_TEST_SUITE_P(InvalidLanguageFeatureCases,
-                         LanguageFeatureParseTest,
-                         testing::ValuesIn(kInvalidLanguageFeatureCases));
+INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases, LanguageFeatureParseTest, testing::ValuesIn(kValidLanguageFeatureCases));
+INSTANTIATE_TEST_SUITE_P(InvalidLanguageFeatureCases, LanguageFeatureParseTest, testing::ValuesIn(kInvalidLanguageFeatureCases));
 
 using LanguageFeaturePrintTest = testing::TestWithParam<LanguageFeatureCase>;
 
@@ -406,11 +384,11 @@ TEST_P(LanguageFeaturePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases,
-                         LanguageFeaturePrintTest,
-                         testing::ValuesIn(kValidLanguageFeatureCases));
+INSTANTIATE_TEST_SUITE_P(ValidLanguageFeatureCases, LanguageFeaturePrintTest, testing::ValuesIn(kValidLanguageFeatureCases));
 
 }  // namespace parse_print_tests
 
 }  // namespace
 }  // namespace tint::wgsl
+
+// clang-format on

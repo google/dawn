@@ -45,8 +45,6 @@ using TemplateNumberMatcher = tint::core::intrinsic::TemplateNumberMatcher<N>;
 template<size_t N>
 using TemplateTypeMatcher = tint::core::intrinsic::TemplateTypeMatcher<N>;
 
-// clang-format off
-
 {{  with $I.Sem -}}
 {{    range .Types -}}
 {{      template "Type" . }}
@@ -236,8 +234,6 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 {{-   end }}
 };
 {{- end }}
-
-// clang-format on
 
 }  // anonymous namespace
 

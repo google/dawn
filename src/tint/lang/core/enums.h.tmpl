@@ -28,6 +28,8 @@ See:
 #ifndef SRC_TINT_LANG_CORE_ENUMS_H_
 #define SRC_TINT_LANG_CORE_ENUMS_H_
 
+// clang-format off
+
 #include <cstdint>
 
 #include "src/tint/utils/reflection.h"
@@ -205,5 +207,7 @@ TINT_REFLECT_ENUM_RANGE(core::{{ Eval "EnumName" $access_enum }}, {{Eval "EnumFi
 TINT_REFLECT_ENUM_RANGE(core::{{ Eval "EnumName" $subgroup_matrix_kind_enum }}, {{Eval "EnumFirst" $subgroup_matrix_kind_enum }}, {{Eval "EnumLast" $subgroup_matrix_kind_enum}});
 
 }  // namespace tint
+
+// clang-format on
 
 #endif  // SRC_TINT_LANG_CORE_ENUMS_H_

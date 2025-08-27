@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include "src/tint/lang/core/enums.h"
 
 #include <gtest/gtest.h>
@@ -63,10 +65,14 @@ static constexpr AccessCase kValidAccessCases[] = {
 };
 
 static constexpr AccessCase kInvalidAccessCases[] = {
-    {"ccad", Access::kUndefined},       {"3", Access::kUndefined},
-    {"rVad", Access::kUndefined},       {"read1write", Access::kUndefined},
-    {"reaJqqrite", Access::kUndefined}, {"rea7ll_write", Access::kUndefined},
-    {"wrqHtpp", Access::kUndefined},    {"ve", Access::kUndefined},
+    {"ccad", Access::kUndefined},
+    {"3", Access::kUndefined},
+    {"rVad", Access::kUndefined},
+    {"read1write", Access::kUndefined},
+    {"reaJqqrite", Access::kUndefined},
+    {"rea7ll_write", Access::kUndefined},
+    {"wrqHtpp", Access::kUndefined},
+    {"ve", Access::kUndefined},
     {"Grbe", Access::kUndefined},
 };
 
@@ -79,9 +85,7 @@ TEST_P(AccessParseTest, Parse) {
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidAccessCases, AccessParseTest, testing::ValuesIn(kValidAccessCases));
-INSTANTIATE_TEST_SUITE_P(InvalidAccessCases,
-                         AccessParseTest,
-                         testing::ValuesIn(kInvalidAccessCases));
+INSTANTIATE_TEST_SUITE_P(InvalidAccessCases, AccessParseTest, testing::ValuesIn(kInvalidAccessCases));
 
 using AccessPrintTest = testing::TestWithParam<AccessCase>;
 
@@ -107,23 +111,36 @@ inline std::ostream& operator<<(std::ostream& out, AddressSpaceCase c) {
 }
 
 static constexpr AddressSpaceCase kValidAddressSpaceCases[] = {
-    {"function", AddressSpace::kFunction},      {"immediate", AddressSpace::kImmediate},
-    {"pixel_local", AddressSpace::kPixelLocal}, {"private", AddressSpace::kPrivate},
-    {"storage", AddressSpace::kStorage},        {"uniform", AddressSpace::kUniform},
+    {"function", AddressSpace::kFunction},
+    {"immediate", AddressSpace::kImmediate},
+    {"pixel_local", AddressSpace::kPixelLocal},
+    {"private", AddressSpace::kPrivate},
+    {"storage", AddressSpace::kStorage},
+    {"uniform", AddressSpace::kUniform},
     {"workgroup", AddressSpace::kWorkgroup},
 };
 
 static constexpr AddressSpaceCase kInvalidAddressSpaceCases[] = {
-    {"fuviition", AddressSpace::kUndefined},    {"fuWWcti8n", AddressSpace::kUndefined},
-    {"fxxcMion", AddressSpace::kUndefined},     {"iXediggte", AddressSpace::kUndefined},
-    {"immXVue", AddressSpace::kUndefined},      {"3mmediate", AddressSpace::kUndefined},
-    {"pixel_locaE", AddressSpace::kUndefined},  {"piTTel_locPl", AddressSpace::kUndefined},
-    {"pxxdxel_loal", AddressSpace::kUndefined}, {"p44ivate", AddressSpace::kUndefined},
-    {"prSSvaVVe", AddressSpace::kUndefined},    {"RriR22e", AddressSpace::kUndefined},
-    {"sFra9e", AddressSpace::kUndefined},       {"stoage", AddressSpace::kUndefined},
-    {"VOORRHge", AddressSpace::kUndefined},     {"unfoym", AddressSpace::kUndefined},
-    {"llnnrrf77rm", AddressSpace::kUndefined},  {"unif4r00", AddressSpace::kUndefined},
-    {"wooogup", AddressSpace::kUndefined},      {"wozzgrop", AddressSpace::kUndefined},
+    {"fuviition", AddressSpace::kUndefined},
+    {"fuWWcti8n", AddressSpace::kUndefined},
+    {"fxxcMion", AddressSpace::kUndefined},
+    {"iXediggte", AddressSpace::kUndefined},
+    {"immXVue", AddressSpace::kUndefined},
+    {"3mmediate", AddressSpace::kUndefined},
+    {"pixel_locaE", AddressSpace::kUndefined},
+    {"piTTel_locPl", AddressSpace::kUndefined},
+    {"pxxdxel_loal", AddressSpace::kUndefined},
+    {"p44ivate", AddressSpace::kUndefined},
+    {"prSSvaVVe", AddressSpace::kUndefined},
+    {"RriR22e", AddressSpace::kUndefined},
+    {"sFra9e", AddressSpace::kUndefined},
+    {"stoage", AddressSpace::kUndefined},
+    {"VOORRHge", AddressSpace::kUndefined},
+    {"unfoym", AddressSpace::kUndefined},
+    {"llnnrrf77rm", AddressSpace::kUndefined},
+    {"unif4r00", AddressSpace::kUndefined},
+    {"wooogup", AddressSpace::kUndefined},
+    {"wozzgrop", AddressSpace::kUndefined},
     {"o11pkgriiu", AddressSpace::kUndefined},
 };
 
@@ -135,12 +152,8 @@ TEST_P(AddressSpaceParseTest, Parse) {
     EXPECT_EQ(expect, ParseAddressSpace(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidAddressSpaceCases,
-                         AddressSpaceParseTest,
-                         testing::ValuesIn(kValidAddressSpaceCases));
-INSTANTIATE_TEST_SUITE_P(InvalidAddressSpaceCases,
-                         AddressSpaceParseTest,
-                         testing::ValuesIn(kInvalidAddressSpaceCases));
+INSTANTIATE_TEST_SUITE_P(ValidAddressSpaceCases, AddressSpaceParseTest, testing::ValuesIn(kValidAddressSpaceCases));
+INSTANTIATE_TEST_SUITE_P(InvalidAddressSpaceCases, AddressSpaceParseTest, testing::ValuesIn(kInvalidAddressSpaceCases));
 
 using AddressSpacePrintTest = testing::TestWithParam<AddressSpaceCase>;
 
@@ -150,9 +163,7 @@ TEST_P(AddressSpacePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidAddressSpaceCases,
-                         AddressSpacePrintTest,
-                         testing::ValuesIn(kValidAddressSpaceCases));
+INSTANTIATE_TEST_SUITE_P(ValidAddressSpaceCases, AddressSpacePrintTest, testing::ValuesIn(kValidAddressSpaceCases));
 
 }  // namespace parse_print_tests
 
@@ -169,8 +180,10 @@ inline std::ostream& operator<<(std::ostream& out, InterpolationSamplingCase c) 
 }
 
 static constexpr InterpolationSamplingCase kValidInterpolationSamplingCases[] = {
-    {"center", InterpolationSampling::kCenter}, {"centroid", InterpolationSampling::kCentroid},
-    {"either", InterpolationSampling::kEither}, {"first", InterpolationSampling::kFirst},
+    {"center", InterpolationSampling::kCenter},
+    {"centroid", InterpolationSampling::kCentroid},
+    {"either", InterpolationSampling::kEither},
+    {"first", InterpolationSampling::kFirst},
     {"sample", InterpolationSampling::kSample},
 };
 
@@ -200,12 +213,8 @@ TEST_P(InterpolationSamplingParseTest, Parse) {
     EXPECT_EQ(expect, ParseInterpolationSampling(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidInterpolationSamplingCases,
-                         InterpolationSamplingParseTest,
-                         testing::ValuesIn(kValidInterpolationSamplingCases));
-INSTANTIATE_TEST_SUITE_P(InvalidInterpolationSamplingCases,
-                         InterpolationSamplingParseTest,
-                         testing::ValuesIn(kInvalidInterpolationSamplingCases));
+INSTANTIATE_TEST_SUITE_P(ValidInterpolationSamplingCases, InterpolationSamplingParseTest, testing::ValuesIn(kValidInterpolationSamplingCases));
+INSTANTIATE_TEST_SUITE_P(InvalidInterpolationSamplingCases, InterpolationSamplingParseTest, testing::ValuesIn(kInvalidInterpolationSamplingCases));
 
 using InterpolationSamplingPrintTest = testing::TestWithParam<InterpolationSamplingCase>;
 
@@ -215,9 +224,7 @@ TEST_P(InterpolationSamplingPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidInterpolationSamplingCases,
-                         InterpolationSamplingPrintTest,
-                         testing::ValuesIn(kValidInterpolationSamplingCases));
+INSTANTIATE_TEST_SUITE_P(ValidInterpolationSamplingCases, InterpolationSamplingPrintTest, testing::ValuesIn(kValidInterpolationSamplingCases));
 
 }  // namespace parse_print_tests
 }  // namespace interpolation_sampling_tests
@@ -241,10 +248,14 @@ static constexpr InterpolationTypeCase kValidInterpolationTypeCases[] = {
 };
 
 static constexpr InterpolationTypeCase kInvalidInterpolationTypeCases[] = {
-    {"fat", InterpolationType::kUndefined},       {"flrrt", InterpolationType::kUndefined},
-    {"fGat", InterpolationType::kUndefined},      {"linFFar", InterpolationType::kUndefined},
-    {"lna", InterpolationType::kUndefined},       {"lrrnea", InterpolationType::kUndefined},
-    {"persetive", InterpolationType::kUndefined}, {"XrspJJcDive", InterpolationType::kUndefined},
+    {"fat", InterpolationType::kUndefined},
+    {"flrrt", InterpolationType::kUndefined},
+    {"fGat", InterpolationType::kUndefined},
+    {"linFFar", InterpolationType::kUndefined},
+    {"lna", InterpolationType::kUndefined},
+    {"lrrnea", InterpolationType::kUndefined},
+    {"persetive", InterpolationType::kUndefined},
+    {"XrspJJcDive", InterpolationType::kUndefined},
     {"pesect8v", InterpolationType::kUndefined},
 };
 
@@ -256,12 +267,8 @@ TEST_P(InterpolationTypeParseTest, Parse) {
     EXPECT_EQ(expect, ParseInterpolationType(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidInterpolationTypeCases,
-                         InterpolationTypeParseTest,
-                         testing::ValuesIn(kValidInterpolationTypeCases));
-INSTANTIATE_TEST_SUITE_P(InvalidInterpolationTypeCases,
-                         InterpolationTypeParseTest,
-                         testing::ValuesIn(kInvalidInterpolationTypeCases));
+INSTANTIATE_TEST_SUITE_P(ValidInterpolationTypeCases, InterpolationTypeParseTest, testing::ValuesIn(kValidInterpolationTypeCases));
+INSTANTIATE_TEST_SUITE_P(InvalidInterpolationTypeCases, InterpolationTypeParseTest, testing::ValuesIn(kInvalidInterpolationTypeCases));
 
 using InterpolationTypePrintTest = testing::TestWithParam<InterpolationTypeCase>;
 
@@ -271,9 +278,7 @@ TEST_P(InterpolationTypePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidInterpolationTypeCases,
-                         InterpolationTypePrintTest,
-                         testing::ValuesIn(kValidInterpolationTypeCases));
+INSTANTIATE_TEST_SUITE_P(ValidInterpolationTypeCases, InterpolationTypePrintTest, testing::ValuesIn(kValidInterpolationTypeCases));
 
 }  // namespace parse_print_tests
 }  // namespace interpolation_type_tests
@@ -290,89 +295,169 @@ inline std::ostream& operator<<(std::ostream& out, TexelFormatCase c) {
 }
 
 static constexpr TexelFormatCase kValidTexelFormatCases[] = {
-    {"bgra8unorm", TexelFormat::kBgra8Unorm},   {"r16float", TexelFormat::kR16Float},
-    {"r16sint", TexelFormat::kR16Sint},         {"r16snorm", TexelFormat::kR16Snorm},
-    {"r16uint", TexelFormat::kR16Uint},         {"r16unorm", TexelFormat::kR16Unorm},
-    {"r32float", TexelFormat::kR32Float},       {"r32sint", TexelFormat::kR32Sint},
-    {"r32uint", TexelFormat::kR32Uint},         {"r8sint", TexelFormat::kR8Sint},
-    {"r8snorm", TexelFormat::kR8Snorm},         {"r8uint", TexelFormat::kR8Uint},
-    {"r8unorm", TexelFormat::kR8Unorm},         {"rg11b10ufloat", TexelFormat::kRg11B10Ufloat},
-    {"rg16float", TexelFormat::kRg16Float},     {"rg16sint", TexelFormat::kRg16Sint},
-    {"rg16snorm", TexelFormat::kRg16Snorm},     {"rg16uint", TexelFormat::kRg16Uint},
-    {"rg16unorm", TexelFormat::kRg16Unorm},     {"rg32float", TexelFormat::kRg32Float},
-    {"rg32sint", TexelFormat::kRg32Sint},       {"rg32uint", TexelFormat::kRg32Uint},
-    {"rg8sint", TexelFormat::kRg8Sint},         {"rg8snorm", TexelFormat::kRg8Snorm},
-    {"rg8uint", TexelFormat::kRg8Uint},         {"rg8unorm", TexelFormat::kRg8Unorm},
-    {"rgb10a2uint", TexelFormat::kRgb10A2Uint}, {"rgb10a2unorm", TexelFormat::kRgb10A2Unorm},
-    {"rgba16float", TexelFormat::kRgba16Float}, {"rgba16sint", TexelFormat::kRgba16Sint},
-    {"rgba16snorm", TexelFormat::kRgba16Snorm}, {"rgba16uint", TexelFormat::kRgba16Uint},
-    {"rgba16unorm", TexelFormat::kRgba16Unorm}, {"rgba32float", TexelFormat::kRgba32Float},
-    {"rgba32sint", TexelFormat::kRgba32Sint},   {"rgba32uint", TexelFormat::kRgba32Uint},
-    {"rgba8sint", TexelFormat::kRgba8Sint},     {"rgba8snorm", TexelFormat::kRgba8Snorm},
-    {"rgba8uint", TexelFormat::kRgba8Uint},     {"rgba8unorm", TexelFormat::kRgba8Unorm},
+    {"bgra8unorm", TexelFormat::kBgra8Unorm},
+    {"r16float", TexelFormat::kR16Float},
+    {"r16sint", TexelFormat::kR16Sint},
+    {"r16snorm", TexelFormat::kR16Snorm},
+    {"r16uint", TexelFormat::kR16Uint},
+    {"r16unorm", TexelFormat::kR16Unorm},
+    {"r32float", TexelFormat::kR32Float},
+    {"r32sint", TexelFormat::kR32Sint},
+    {"r32uint", TexelFormat::kR32Uint},
+    {"r8sint", TexelFormat::kR8Sint},
+    {"r8snorm", TexelFormat::kR8Snorm},
+    {"r8uint", TexelFormat::kR8Uint},
+    {"r8unorm", TexelFormat::kR8Unorm},
+    {"rg11b10ufloat", TexelFormat::kRg11B10Ufloat},
+    {"rg16float", TexelFormat::kRg16Float},
+    {"rg16sint", TexelFormat::kRg16Sint},
+    {"rg16snorm", TexelFormat::kRg16Snorm},
+    {"rg16uint", TexelFormat::kRg16Uint},
+    {"rg16unorm", TexelFormat::kRg16Unorm},
+    {"rg32float", TexelFormat::kRg32Float},
+    {"rg32sint", TexelFormat::kRg32Sint},
+    {"rg32uint", TexelFormat::kRg32Uint},
+    {"rg8sint", TexelFormat::kRg8Sint},
+    {"rg8snorm", TexelFormat::kRg8Snorm},
+    {"rg8uint", TexelFormat::kRg8Uint},
+    {"rg8unorm", TexelFormat::kRg8Unorm},
+    {"rgb10a2uint", TexelFormat::kRgb10A2Uint},
+    {"rgb10a2unorm", TexelFormat::kRgb10A2Unorm},
+    {"rgba16float", TexelFormat::kRgba16Float},
+    {"rgba16sint", TexelFormat::kRgba16Sint},
+    {"rgba16snorm", TexelFormat::kRgba16Snorm},
+    {"rgba16uint", TexelFormat::kRgba16Uint},
+    {"rgba16unorm", TexelFormat::kRgba16Unorm},
+    {"rgba32float", TexelFormat::kRgba32Float},
+    {"rgba32sint", TexelFormat::kRgba32Sint},
+    {"rgba32uint", TexelFormat::kRgba32Uint},
+    {"rgba8sint", TexelFormat::kRgba8Sint},
+    {"rgba8snorm", TexelFormat::kRgba8Snorm},
+    {"rgba8uint", TexelFormat::kRgba8Uint},
+    {"rgba8unorm", TexelFormat::kRgba8Unorm},
 };
 
 static constexpr TexelFormatCase kInvalidTexelFormatCases[] = {
-    {"bg811kor", TexelFormat::kUndefined},        {"bgr8unorm", TexelFormat::kUndefined},
-    {"bgJa8unom", TexelFormat::kUndefined},       {"r16fcoat", TexelFormat::kUndefined},
-    {"r16floOt", TexelFormat::kUndefined},        {"r16floKK_vtt", TexelFormat::kUndefined},
-    {"xx8sint", TexelFormat::kUndefined},         {"__q16Fn", TexelFormat::kUndefined},
-    {"r16qint", TexelFormat::kUndefined},         {"r1633nor6", TexelFormat::kUndefined},
-    {"rtto6sn9QQm", TexelFormat::kUndefined},     {"r1666nor", TexelFormat::kUndefined},
-    {"r6Oizz66", TexelFormat::kUndefined},        {"r16uyynt", TexelFormat::kUndefined},
-    {"Z1HHnZ", TexelFormat::kUndefined},          {"qWW46unrm", TexelFormat::kUndefined},
-    {"r16OOnrm", TexelFormat::kUndefined},        {"16unoYm", TexelFormat::kUndefined},
-    {"rloat", TexelFormat::kUndefined},           {"r3fFoat", TexelFormat::kUndefined},
-    {"w32floa", TexelFormat::kUndefined},         {"fG2iKt", TexelFormat::kUndefined},
-    {"r32qKint", TexelFormat::kUndefined},        {"r32mmiFt", TexelFormat::kUndefined},
-    {"32uint", TexelFormat::kUndefined},          {"r2uinq", TexelFormat::kUndefined},
-    {"r32uibb", TexelFormat::kUndefined},         {"isint", TexelFormat::kUndefined},
-    {"rOOinq", TexelFormat::kUndefined},          {"r8siTvvt", TexelFormat::kUndefined},
-    {"r8FFnorm", TexelFormat::kUndefined},        {"P800oQm", TexelFormat::kUndefined},
-    {"rPsnorm", TexelFormat::kUndefined},         {"rssin77", TexelFormat::kUndefined},
-    {"r8CiRRbb", TexelFormat::kUndefined},        {"r8uinXX", TexelFormat::kUndefined},
-    {"q8CCnoOOm", TexelFormat::kUndefined},       {"r8nsrL", TexelFormat::kUndefined},
-    {"rXunorm", TexelFormat::kUndefined},         {"r11b10ufloat", TexelFormat::kUndefined},
-    {"g11b10ufqqo", TexelFormat::kUndefined},     {"rg122b10ufloat", TexelFormat::kUndefined},
-    {"rzzy6Xlo0t", TexelFormat::kUndefined},      {"rP1ifloat", TexelFormat::kUndefined},
-    {"rg6Cnnoat", TexelFormat::kUndefined},       {"rgqqAAHHn", TexelFormat::kUndefined},
-    {"g16sint", TexelFormat::kUndefined},         {"rg1fKin", TexelFormat::kUndefined},
-    {"lgg16snP", TexelFormat::kUndefined},        {"rg6snorm", TexelFormat::kUndefined},
-    {"4g16cTNorm", TexelFormat::kUndefined},      {"pgl6uin77", TexelFormat::kUndefined},
-    {"rz1Ngint", TexelFormat::kUndefined},        {"bg16uXXut", TexelFormat::kUndefined},
-    {"rg16norm", TexelFormat::kUndefined},        {"Q688norK", TexelFormat::kUndefined},
-    {"rg9unqrm", TexelFormat::kUndefined},        {"rg32flo11t", TexelFormat::kUndefined},
-    {"rgiiF22oat", TexelFormat::kUndefined},      {"r773float", TexelFormat::kUndefined},
-    {"rg3NNi2t", TexelFormat::kUndefined},        {"rg32VVint", TexelFormat::kUndefined},
-    {"WW1132swnF", TexelFormat::kUndefined},      {"rww32uin", TexelFormat::kUndefined},
-    {"rg32uiDt", TexelFormat::kUndefined},        {"rg32inK", TexelFormat::kUndefined},
-    {"rg8s1PPht", TexelFormat::kUndefined},       {"rg8snt", TexelFormat::kUndefined},
-    {"rYY8sint", TexelFormat::kUndefined},        {"kkHHsnVtm", TexelFormat::kUndefined},
-    {"rg8rrnorm", TexelFormat::kUndefined},       {"rs8snorWW", TexelFormat::kUndefined},
-    {"Y8uint", TexelFormat::kUndefined},          {"r8uqft", TexelFormat::kUndefined},
-    {"rgv22uiut", TexelFormat::kUndefined},       {"rgunor", TexelFormat::kUndefined},
-    {"Yg8norm", TexelFormat::kUndefined},         {"7YEg8unorm", TexelFormat::kUndefined},
-    {"oog10a2dinM", TexelFormat::kUndefined},     {"rgb0a2uinMM", TexelFormat::kUndefined},
-    {"rgb10a2uin55", TexelFormat::kUndefined},    {"rb0a2uNorm", TexelFormat::kUndefined},
-    {"Ogb330a23nrm", TexelFormat::kUndefined},    {"rgb1032unorm", TexelFormat::kUndefined},
-    {"rgbI6flomt", TexelFormat::kUndefined},      {"rrbK16flnnat", TexelFormat::kUndefined},
-    {"rba1flXX", TexelFormat::kUndefined},        {"Iga1pLLint", TexelFormat::kUndefined},
-    {"fb16sint", TexelFormat::kUndefined},        {"UgbRRDsinY", TexelFormat::kUndefined},
-    {"rgha16snorm", TexelFormat::kUndefined},     {"rba1quunIIr", TexelFormat::kUndefined},
-    {"rgba16Hnorm", TexelFormat::kUndefined},     {"gbaQQvvint", TexelFormat::kUndefined},
-    {"66a16uent", TexelFormat::kUndefined},       {"rW7a16uin", TexelFormat::kUndefined},
-    {"rg0a556unorDD", TexelFormat::kUndefined},   {"rgbH16unIIrm", TexelFormat::kUndefined},
-    {"rba16unorm", TexelFormat::kUndefined},      {"rba32flort", TexelFormat::kUndefined},
-    {"rlba32float", TexelFormat::kUndefined},     {"tGgb32loJJt", TexelFormat::kUndefined},
-    {"rgya3sint", TexelFormat::kUndefined},       {"rba32sint", TexelFormat::kUndefined},
-    {"IIgbaBB2sint", TexelFormat::kUndefined},    {"33Kb832uinTT", TexelFormat::kUndefined},
-    {"nngbaYYUUuindSS", TexelFormat::kUndefined}, {"dgba5x2uiZt", TexelFormat::kUndefined},
-    {"rkkba8sinq", TexelFormat::kUndefined},      {"5bapisin00", TexelFormat::kUndefined},
-    {"rnnba8siIIt", TexelFormat::kUndefined},     {"ccWbsnoKm", TexelFormat::kUndefined},
-    {"rgb8snKK", TexelFormat::kUndefined},        {"rgba8sno66m", TexelFormat::kUndefined},
-    {"rgaKPPuin", TexelFormat::kUndefined},       {"rgxxa8int", TexelFormat::kUndefined},
-    {"rgbq8uint", TexelFormat::kUndefined},       {"rMba8SSnyyrm", TexelFormat::kUndefined},
-    {"rgbuunrm", TexelFormat::kUndefined},        {"rgbSnrm", TexelFormat::kUndefined},
+    {"bg811kor", TexelFormat::kUndefined},
+    {"bgr8unorm", TexelFormat::kUndefined},
+    {"bgJa8unom", TexelFormat::kUndefined},
+    {"r16fcoat", TexelFormat::kUndefined},
+    {"r16floOt", TexelFormat::kUndefined},
+    {"r16floKK_vtt", TexelFormat::kUndefined},
+    {"xx8sint", TexelFormat::kUndefined},
+    {"__q16Fn", TexelFormat::kUndefined},
+    {"r16qint", TexelFormat::kUndefined},
+    {"r1633nor6", TexelFormat::kUndefined},
+    {"rtto6sn9QQm", TexelFormat::kUndefined},
+    {"r1666nor", TexelFormat::kUndefined},
+    {"r6Oizz66", TexelFormat::kUndefined},
+    {"r16uyynt", TexelFormat::kUndefined},
+    {"Z1HHnZ", TexelFormat::kUndefined},
+    {"qWW46unrm", TexelFormat::kUndefined},
+    {"r16OOnrm", TexelFormat::kUndefined},
+    {"16unoYm", TexelFormat::kUndefined},
+    {"rloat", TexelFormat::kUndefined},
+    {"r3fFoat", TexelFormat::kUndefined},
+    {"w32floa", TexelFormat::kUndefined},
+    {"fG2iKt", TexelFormat::kUndefined},
+    {"r32qKint", TexelFormat::kUndefined},
+    {"r32mmiFt", TexelFormat::kUndefined},
+    {"32uint", TexelFormat::kUndefined},
+    {"r2uinq", TexelFormat::kUndefined},
+    {"r32uibb", TexelFormat::kUndefined},
+    {"isint", TexelFormat::kUndefined},
+    {"rOOinq", TexelFormat::kUndefined},
+    {"r8siTvvt", TexelFormat::kUndefined},
+    {"r8FFnorm", TexelFormat::kUndefined},
+    {"P800oQm", TexelFormat::kUndefined},
+    {"rPsnorm", TexelFormat::kUndefined},
+    {"rssin77", TexelFormat::kUndefined},
+    {"r8CiRRbb", TexelFormat::kUndefined},
+    {"r8uinXX", TexelFormat::kUndefined},
+    {"q8CCnoOOm", TexelFormat::kUndefined},
+    {"r8nsrL", TexelFormat::kUndefined},
+    {"rXunorm", TexelFormat::kUndefined},
+    {"r11b10ufloat", TexelFormat::kUndefined},
+    {"g11b10ufqqo", TexelFormat::kUndefined},
+    {"rg122b10ufloat", TexelFormat::kUndefined},
+    {"rzzy6Xlo0t", TexelFormat::kUndefined},
+    {"rP1ifloat", TexelFormat::kUndefined},
+    {"rg6Cnnoat", TexelFormat::kUndefined},
+    {"rgqqAAHHn", TexelFormat::kUndefined},
+    {"g16sint", TexelFormat::kUndefined},
+    {"rg1fKin", TexelFormat::kUndefined},
+    {"lgg16snP", TexelFormat::kUndefined},
+    {"rg6snorm", TexelFormat::kUndefined},
+    {"4g16cTNorm", TexelFormat::kUndefined},
+    {"pgl6uin77", TexelFormat::kUndefined},
+    {"rz1Ngint", TexelFormat::kUndefined},
+    {"bg16uXXut", TexelFormat::kUndefined},
+    {"rg16norm", TexelFormat::kUndefined},
+    {"Q688norK", TexelFormat::kUndefined},
+    {"rg9unqrm", TexelFormat::kUndefined},
+    {"rg32flo11t", TexelFormat::kUndefined},
+    {"rgiiF22oat", TexelFormat::kUndefined},
+    {"r773float", TexelFormat::kUndefined},
+    {"rg3NNi2t", TexelFormat::kUndefined},
+    {"rg32VVint", TexelFormat::kUndefined},
+    {"WW1132swnF", TexelFormat::kUndefined},
+    {"rww32uin", TexelFormat::kUndefined},
+    {"rg32uiDt", TexelFormat::kUndefined},
+    {"rg32inK", TexelFormat::kUndefined},
+    {"rg8s1PPht", TexelFormat::kUndefined},
+    {"rg8snt", TexelFormat::kUndefined},
+    {"rYY8sint", TexelFormat::kUndefined},
+    {"kkHHsnVtm", TexelFormat::kUndefined},
+    {"rg8rrnorm", TexelFormat::kUndefined},
+    {"rs8snorWW", TexelFormat::kUndefined},
+    {"Y8uint", TexelFormat::kUndefined},
+    {"r8uqft", TexelFormat::kUndefined},
+    {"rgv22uiut", TexelFormat::kUndefined},
+    {"rgunor", TexelFormat::kUndefined},
+    {"Yg8norm", TexelFormat::kUndefined},
+    {"7YEg8unorm", TexelFormat::kUndefined},
+    {"oog10a2dinM", TexelFormat::kUndefined},
+    {"rgb0a2uinMM", TexelFormat::kUndefined},
+    {"rgb10a2uin55", TexelFormat::kUndefined},
+    {"rb0a2uNorm", TexelFormat::kUndefined},
+    {"Ogb330a23nrm", TexelFormat::kUndefined},
+    {"rgb1032unorm", TexelFormat::kUndefined},
+    {"rgbI6flomt", TexelFormat::kUndefined},
+    {"rrbK16flnnat", TexelFormat::kUndefined},
+    {"rba1flXX", TexelFormat::kUndefined},
+    {"Iga1pLLint", TexelFormat::kUndefined},
+    {"fb16sint", TexelFormat::kUndefined},
+    {"UgbRRDsinY", TexelFormat::kUndefined},
+    {"rgha16snorm", TexelFormat::kUndefined},
+    {"rba1quunIIr", TexelFormat::kUndefined},
+    {"rgba16Hnorm", TexelFormat::kUndefined},
+    {"gbaQQvvint", TexelFormat::kUndefined},
+    {"66a16uent", TexelFormat::kUndefined},
+    {"rW7a16uin", TexelFormat::kUndefined},
+    {"rg0a556unorDD", TexelFormat::kUndefined},
+    {"rgbH16unIIrm", TexelFormat::kUndefined},
+    {"rba16unorm", TexelFormat::kUndefined},
+    {"rba32flort", TexelFormat::kUndefined},
+    {"rlba32float", TexelFormat::kUndefined},
+    {"tGgb32loJJt", TexelFormat::kUndefined},
+    {"rgya3sint", TexelFormat::kUndefined},
+    {"rba32sint", TexelFormat::kUndefined},
+    {"IIgbaBB2sint", TexelFormat::kUndefined},
+    {"33Kb832uinTT", TexelFormat::kUndefined},
+    {"nngbaYYUUuindSS", TexelFormat::kUndefined},
+    {"dgba5x2uiZt", TexelFormat::kUndefined},
+    {"rkkba8sinq", TexelFormat::kUndefined},
+    {"5bapisin00", TexelFormat::kUndefined},
+    {"rnnba8siIIt", TexelFormat::kUndefined},
+    {"ccWbsnoKm", TexelFormat::kUndefined},
+    {"rgb8snKK", TexelFormat::kUndefined},
+    {"rgba8sno66m", TexelFormat::kUndefined},
+    {"rgaKPPuin", TexelFormat::kUndefined},
+    {"rgxxa8int", TexelFormat::kUndefined},
+    {"rgbq8uint", TexelFormat::kUndefined},
+    {"rMba8SSnyyrm", TexelFormat::kUndefined},
+    {"rgbuunrm", TexelFormat::kUndefined},
+    {"rgbSnrm", TexelFormat::kUndefined},
 };
 
 using TexelFormatParseTest = testing::TestWithParam<TexelFormatCase>;
@@ -383,12 +468,8 @@ TEST_P(TexelFormatParseTest, Parse) {
     EXPECT_EQ(expect, ParseTexelFormat(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidTexelFormatCases,
-                         TexelFormatParseTest,
-                         testing::ValuesIn(kValidTexelFormatCases));
-INSTANTIATE_TEST_SUITE_P(InvalidTexelFormatCases,
-                         TexelFormatParseTest,
-                         testing::ValuesIn(kInvalidTexelFormatCases));
+INSTANTIATE_TEST_SUITE_P(ValidTexelFormatCases, TexelFormatParseTest, testing::ValuesIn(kValidTexelFormatCases));
+INSTANTIATE_TEST_SUITE_P(InvalidTexelFormatCases, TexelFormatParseTest, testing::ValuesIn(kInvalidTexelFormatCases));
 
 using TexelFormatPrintTest = testing::TestWithParam<TexelFormatCase>;
 
@@ -398,9 +479,7 @@ TEST_P(TexelFormatPrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidTexelFormatCases,
-                         TexelFormatPrintTest,
-                         testing::ValuesIn(kValidTexelFormatCases));
+INSTANTIATE_TEST_SUITE_P(ValidTexelFormatCases, TexelFormatPrintTest, testing::ValuesIn(kValidTexelFormatCases));
 
 }  // namespace parse_print_tests
 
@@ -841,12 +920,8 @@ TEST_P(BuiltinTypeParseTest, Parse) {
     EXPECT_EQ(expect, ParseBuiltinType(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidBuiltinTypeCases,
-                         BuiltinTypeParseTest,
-                         testing::ValuesIn(kValidBuiltinTypeCases));
-INSTANTIATE_TEST_SUITE_P(InvalidBuiltinTypeCases,
-                         BuiltinTypeParseTest,
-                         testing::ValuesIn(kInvalidBuiltinTypeCases));
+INSTANTIATE_TEST_SUITE_P(ValidBuiltinTypeCases, BuiltinTypeParseTest, testing::ValuesIn(kValidBuiltinTypeCases));
+INSTANTIATE_TEST_SUITE_P(InvalidBuiltinTypeCases, BuiltinTypeParseTest, testing::ValuesIn(kInvalidBuiltinTypeCases));
 
 using BuiltinTypePrintTest = testing::TestWithParam<BuiltinTypeCase>;
 
@@ -856,9 +931,7 @@ TEST_P(BuiltinTypePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidBuiltinTypeCases,
-                         BuiltinTypePrintTest,
-                         testing::ValuesIn(kValidBuiltinTypeCases));
+INSTANTIATE_TEST_SUITE_P(ValidBuiltinTypeCases, BuiltinTypePrintTest, testing::ValuesIn(kValidBuiltinTypeCases));
 
 }  // namespace parse_print_tests
 
@@ -959,12 +1032,8 @@ TEST_P(BuiltinValueParseTest, Parse) {
     EXPECT_EQ(expect, ParseBuiltinValue(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidBuiltinValueCases,
-                         BuiltinValueParseTest,
-                         testing::ValuesIn(kValidBuiltinValueCases));
-INSTANTIATE_TEST_SUITE_P(InvalidBuiltinValueCases,
-                         BuiltinValueParseTest,
-                         testing::ValuesIn(kInvalidBuiltinValueCases));
+INSTANTIATE_TEST_SUITE_P(ValidBuiltinValueCases, BuiltinValueParseTest, testing::ValuesIn(kValidBuiltinValueCases));
+INSTANTIATE_TEST_SUITE_P(InvalidBuiltinValueCases, BuiltinValueParseTest, testing::ValuesIn(kInvalidBuiltinValueCases));
 
 using BuiltinValuePrintTest = testing::TestWithParam<BuiltinValueCase>;
 
@@ -974,9 +1043,7 @@ TEST_P(BuiltinValuePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidBuiltinValueCases,
-                         BuiltinValuePrintTest,
-                         testing::ValuesIn(kValidBuiltinValueCases));
+INSTANTIATE_TEST_SUITE_P(ValidBuiltinValueCases, BuiltinValuePrintTest, testing::ValuesIn(kValidBuiltinValueCases));
 
 }  // namespace parse_print_tests
 
@@ -1077,12 +1144,8 @@ TEST_P(AttributeParseTest, Parse) {
     EXPECT_EQ(expect, ParseAttribute(string));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidAttributeCases,
-                         AttributeParseTest,
-                         testing::ValuesIn(kValidAttributeCases));
-INSTANTIATE_TEST_SUITE_P(InvalidAttributeCases,
-                         AttributeParseTest,
-                         testing::ValuesIn(kInvalidAttributeCases));
+INSTANTIATE_TEST_SUITE_P(ValidAttributeCases, AttributeParseTest, testing::ValuesIn(kValidAttributeCases));
+INSTANTIATE_TEST_SUITE_P(InvalidAttributeCases, AttributeParseTest, testing::ValuesIn(kInvalidAttributeCases));
 
 using AttributePrintTest = testing::TestWithParam<AttributeCase>;
 
@@ -1092,11 +1155,11 @@ TEST_P(AttributePrintTest, Print) {
     EXPECT_EQ(expect, ToString(value));
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidAttributeCases,
-                         AttributePrintTest,
-                         testing::ValuesIn(kValidAttributeCases));
+INSTANTIATE_TEST_SUITE_P(ValidAttributeCases, AttributePrintTest, testing::ValuesIn(kValidAttributeCases));
 
 }  // namespace parse_print_tests
 
 }  // namespace
 }  // namespace tint::core
+
+// clang-format on

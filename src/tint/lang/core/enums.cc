@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include "src/tint/lang/core/enums.h"
 
 namespace tint::core {
@@ -124,8 +126,7 @@ std::string_view ToString(AddressSpace value) {
 
 /// ParseInterpolationSampling parses a InterpolationSampling from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be
-/// parsed.
+/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be parsed.
 InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     if (str == "center") {
         return InterpolationSampling::kCenter;
@@ -2061,12 +2062,14 @@ bool IsCoarseDerivative(BuiltinFn f) {
 }
 
 bool IsFineDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdxFine || f == BuiltinFn::kDpdyFine || f == BuiltinFn::kFwidthFine;
+    return f == BuiltinFn::kDpdxFine || f == BuiltinFn::kDpdyFine ||
+           f == BuiltinFn::kFwidthFine;
 }
 
 bool IsDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdx || f == BuiltinFn::kDpdy || f == BuiltinFn::kFwidth ||
-           IsCoarseDerivative(f) || IsFineDerivative(f);
+    return f == BuiltinFn::kDpdx || f == BuiltinFn::kDpdy ||
+           f == BuiltinFn::kFwidth || IsCoarseDerivative(f) ||
+           IsFineDerivative(f);
 }
 
 bool IsTexture(BuiltinFn f) {
@@ -2085,8 +2088,9 @@ bool IsTexture(BuiltinFn f) {
 }
 
 bool IsImageQuery(BuiltinFn f) {
-    return f == BuiltinFn::kTextureDimensions || f == BuiltinFn::kTextureNumLayers ||
-           f == BuiltinFn::kTextureNumLevels || f == BuiltinFn::kTextureNumSamples;
+    return f == BuiltinFn::kTextureDimensions ||
+           f == BuiltinFn::kTextureNumLayers || f == BuiltinFn::kTextureNumLevels ||
+           f == BuiltinFn::kTextureNumSamples;
 }
 
 bool IsDataPacking(BuiltinFn f) {
@@ -2108,8 +2112,9 @@ bool IsBarrier(BuiltinFn f) {
 
 bool IsAtomic(BuiltinFn f) {
     return f == BuiltinFn::kAtomicLoad || f == BuiltinFn::kAtomicStore ||
-           f == BuiltinFn::kAtomicAdd || f == BuiltinFn::kAtomicSub || f == BuiltinFn::kAtomicMax ||
-           f == BuiltinFn::kAtomicMin || f == BuiltinFn::kAtomicAnd || f == BuiltinFn::kAtomicOr ||
+           f == BuiltinFn::kAtomicAdd || f == BuiltinFn::kAtomicSub ||
+           f == BuiltinFn::kAtomicMax || f == BuiltinFn::kAtomicMin ||
+           f == BuiltinFn::kAtomicAnd || f == BuiltinFn::kAtomicOr ||
            f == BuiltinFn::kAtomicXor || f == BuiltinFn::kAtomicExchange ||
            f == BuiltinFn::kAtomicCompareExchangeWeak;
 }
@@ -2175,3 +2180,5 @@ bool HasSideEffects(BuiltinFn f) {
 }
 
 }  // namespace tint::core
+
+// clang-format on

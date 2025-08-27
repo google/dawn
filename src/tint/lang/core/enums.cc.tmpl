@@ -25,6 +25,8 @@ See:
 
 {{- Eval "OverrideEnumName" "Enum" $builtin_type_enum "Name" "BuiltinType" -}}
 
+// clang-format off
+
 #include "src/tint/lang/core/enums.h"
 
 namespace tint::core {
@@ -213,3 +215,5 @@ bool HasSideEffects(BuiltinFn f) {
 }
 
 }  // namespace tint::core
+
+// clang-format on

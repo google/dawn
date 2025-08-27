@@ -11,6 +11,8 @@ See:
 {{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
+// clang-format off
+
 #include "src/tint/lang/wgsl/enums.h"
 
 #include <string>
@@ -229,3 +231,5 @@ bool HasSideEffects(BuiltinFn f) {
 }
 
 }  // namespace tint::wgsl
+
+// clang-format on

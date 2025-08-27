@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include <limits>
 #include <string>
 
@@ -66,13 +68,11 @@ using Type = tint::core::type::Type;
 using TypeMatcher = tint::core::intrinsic::TypeMatcher;
 using TypeMatcherIndex = tint::core::intrinsic::TypeMatcherIndex;
 
-template <size_t N>
+template<size_t N>
 using TemplateNumberMatcher = tint::core::intrinsic::TemplateNumberMatcher<N>;
 
-template <size_t N>
+template<size_t N>
 using TemplateTypeMatcher = tint::core::intrinsic::TemplateTypeMatcher<N>;
-
-// clang-format off
 
 /// TypeMatcher for 'type bool'
 constexpr TypeMatcher kBoolMatcher {
@@ -4389,43 +4389,43 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
 };
 
-// clang-format on
-
 }  // anonymous namespace
 
 const core::intrinsic::TableData Dialect::kData{
-    /* templates */ kTemplates,
-    /* type_matcher_indices */ kMatcherIndices,
-    /* type_matchers */ kTypeMatchers,
-    /* number_matchers */ kNumberMatchers,
-    /* parameters */ kParameters,
-    /* overloads */ kOverloads,
-    /* const_eval_functions */ kConstEvalFunctions,
-    /* ctor_conv */ Empty,
-    /* builtins */ kBuiltins,
-    /* binary '+' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '-' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '*' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '/' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '%' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '^' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '&' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '|' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '&&' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '||' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '==' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '!=' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '<' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '>' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '<=' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '>=' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '<<' */ tint::core::intrinsic::kNoOverloads,
-    /* binary '>>' */ tint::core::intrinsic::kNoOverloads,
-    /* unary '!' */ tint::core::intrinsic::kNoOverloads,
-    /* unary '~' */ tint::core::intrinsic::kNoOverloads,
-    /* unary '-' */ tint::core::intrinsic::kNoOverloads,
-    /* unary '*' */ tint::core::intrinsic::kNoOverloads,
-    /* unary '&' */ tint::core::intrinsic::kNoOverloads,
+  /* templates */ kTemplates,
+  /* type_matcher_indices */ kMatcherIndices,
+  /* type_matchers */ kTypeMatchers,
+  /* number_matchers */ kNumberMatchers,
+  /* parameters */ kParameters,
+  /* overloads */ kOverloads,
+  /* const_eval_functions */ kConstEvalFunctions,
+  /* ctor_conv */ Empty,
+  /* builtins */ kBuiltins,
+  /* binary '+' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '-' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '*' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '/' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '%' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '^' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '&' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '|' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '&&' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '||' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '==' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '!=' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '<' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '>' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '<=' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '>=' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '<<' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '>>' */ tint::core::intrinsic::kNoOverloads,
+  /* unary '!' */ tint::core::intrinsic::kNoOverloads,
+  /* unary '~' */ tint::core::intrinsic::kNoOverloads,
+  /* unary '-' */ tint::core::intrinsic::kNoOverloads,
+  /* unary '*' */ tint::core::intrinsic::kNoOverloads,
+  /* unary '&' */ tint::core::intrinsic::kNoOverloads,
 };
 
 }  // namespace tint::glsl::intrinsic
+
+// clang-format on

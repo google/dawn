@@ -37,6 +37,8 @@
 #ifndef SRC_TINT_LANG_CORE_ENUMS_H_
 #define SRC_TINT_LANG_CORE_ENUMS_H_
 
+// clang-format off
+
 #include <cstdint>
 
 #include "src/tint/utils/reflection.h"
@@ -79,7 +81,7 @@ constexpr std::string_view kAccessStrings[] = {
 /// Address space of a given pointer.
 enum class AddressSpace : uint8_t {
     kUndefined,
-    kIn,   // Tint-internal enum entry - not parsed
+    kIn,  // Tint-internal enum entry - not parsed
     kOut,  // Tint-internal enum entry - not parsed
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
@@ -110,14 +112,21 @@ auto& operator<<(STREAM& out, AddressSpace value) {
 AddressSpace ParseAddressSpace(std::string_view str);
 
 constexpr std::string_view kAddressSpaceStrings[] = {
-    "function", "immediate", "pixel_local", "private", "storage", "uniform", "workgroup",
+    "function",
+    "immediate",
+    "pixel_local",
+    "private",
+    "storage",
+    "uniform",
+    "workgroup",
 };
 
 /// @returns true if the AddressSpace is host-shareable
 /// @param address_space the AddressSpace
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
 inline bool IsHostShareable(AddressSpace address_space) {
-    return address_space == AddressSpace::kUniform || address_space == AddressSpace::kStorage ||
+    return address_space == AddressSpace::kUniform ||
+           address_space == AddressSpace::kStorage ||
            address_space == AddressSpace::kImmediate;
 }
 
@@ -146,12 +155,15 @@ auto& operator<<(STREAM& out, InterpolationSampling value) {
 
 /// ParseInterpolationSampling parses a InterpolationSampling from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be
-/// parsed.
+/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be parsed.
 InterpolationSampling ParseInterpolationSampling(std::string_view str);
 
 constexpr std::string_view kInterpolationSamplingStrings[] = {
-    "center", "centroid", "either", "first", "sample",
+    "center",
+    "centroid",
+    "either",
+    "first",
+    "sample",
 };
 
 /// The interpolation type.
@@ -282,13 +294,46 @@ auto& operator<<(STREAM& out, TexelFormat value) {
 TexelFormat ParseTexelFormat(std::string_view str);
 
 constexpr std::string_view kTexelFormatStrings[] = {
-    "bgra8unorm",  "r16float",      "r16sint",     "r16snorm",     "r16uint",     "r16unorm",
-    "r32float",    "r32sint",       "r32uint",     "r8sint",       "r8snorm",     "r8uint",
-    "r8unorm",     "rg11b10ufloat", "rg16float",   "rg16sint",     "rg16snorm",   "rg16uint",
-    "rg16unorm",   "rg32float",     "rg32sint",    "rg32uint",     "rg8sint",     "rg8snorm",
-    "rg8uint",     "rg8unorm",      "rgb10a2uint", "rgb10a2unorm", "rgba16float", "rgba16sint",
-    "rgba16snorm", "rgba16uint",    "rgba16unorm", "rgba32float",  "rgba32sint",  "rgba32uint",
-    "rgba8sint",   "rgba8snorm",    "rgba8uint",   "rgba8unorm",
+    "bgra8unorm",
+    "r16float",
+    "r16sint",
+    "r16snorm",
+    "r16uint",
+    "r16unorm",
+    "r32float",
+    "r32sint",
+    "r32uint",
+    "r8sint",
+    "r8snorm",
+    "r8uint",
+    "r8unorm",
+    "rg11b10ufloat",
+    "rg16float",
+    "rg16sint",
+    "rg16snorm",
+    "rg16uint",
+    "rg16unorm",
+    "rg32float",
+    "rg32sint",
+    "rg32uint",
+    "rg8sint",
+    "rg8snorm",
+    "rg8uint",
+    "rg8unorm",
+    "rgb10a2uint",
+    "rgb10a2unorm",
+    "rgba16float",
+    "rgba16sint",
+    "rgba16snorm",
+    "rgba16uint",
+    "rgba16unorm",
+    "rgba32float",
+    "rgba32sint",
+    "rgba32uint",
+    "rgba8sint",
+    "rgba8snorm",
+    "rgba8uint",
+    "rgba8unorm",
 };
 
 /// An enumerator of builtin types.
@@ -527,7 +572,7 @@ constexpr std::string_view kBuiltinTypeStrings[] = {
 enum class BuiltinValue : uint8_t {
     kUndefined,
     kCullDistance,  // Tint-internal enum entry - not parsed
-    kPointSize,     // Tint-internal enum entry - not parsed
+    kPointSize,  // Tint-internal enum entry - not parsed
     kBarycentricCoord,
     kClipDistances,
     kFragDepth,
@@ -893,7 +938,7 @@ const char* str(BuiltinFn i);
 template <typename STREAM>
     requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, BuiltinFn i) {
-    return o << str(i);
+  return o << str(i);
 }
 
 /// All builtin functions
@@ -1276,5 +1321,7 @@ TINT_REFLECT_ENUM_RANGE(core::Access, kUndefined, kWrite);
 TINT_REFLECT_ENUM_RANGE(core::SubgroupMatrixKind, kUndefined, kRight);
 
 }  // namespace tint
+
+// clang-format on
 
 #endif  // SRC_TINT_LANG_CORE_ENUMS_H_

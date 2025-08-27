@@ -129,15 +129,6 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 
 			outPath := filepath.Join(tmplDir, relPath)
 
-			switch filepath.Ext(relPath) {
-			case ".cc", ".h", ".inl":
-				var err error
-				body, err = common.ClangFormat(body, cfg.OsWrapper)
-				if err != nil {
-					return err
-				}
-			}
-
 			// Load the old file
 			existing, err := cfg.OsWrapper.ReadFile(outPath)
 			if err != nil {

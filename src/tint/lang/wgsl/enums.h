@@ -37,6 +37,8 @@
 #ifndef SRC_TINT_LANG_WGSL_ENUMS_H_
 #define SRC_TINT_LANG_WGSL_ENUMS_H_
 
+// clang-format off
+
 #include <cstdint>
 #include <string>
 #include <variant>
@@ -100,8 +102,7 @@ auto& operator<<(STREAM& out, ChromiumDiagnosticRule value) {
 
 /// ParseChromiumDiagnosticRule parses a ChromiumDiagnosticRule from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or ChromiumDiagnosticRule::kUndefined if the string could not be
-/// parsed.
+/// @returns the parsed enum, or ChromiumDiagnosticRule::kUndefined if the string could not be parsed.
 ChromiumDiagnosticRule ParseChromiumDiagnosticRule(std::string_view str);
 
 constexpr std::string_view kChromiumDiagnosticRuleStrings[] = {
@@ -286,6 +287,7 @@ diag::Severity ToSeverity(DiagnosticSeverity sc);
 /// DiagnosticRuleSeverities is a map from diagnostic rule to diagnostic severity.
 using DiagnosticRuleSeverities = Hashmap<DiagnosticRule, DiagnosticSeverity, 1>;
 
+
 /// Enumerator of all builtin functions
 enum class BuiltinFn : uint8_t {
     kAbs,
@@ -459,7 +461,7 @@ const char* str(BuiltinFn i);
 template <typename STREAM>
     requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, BuiltinFn i) {
-    return o << str(i);
+  return o << str(i);
 }
 
 /// All builtin functions
@@ -848,5 +850,7 @@ bool IsQuadSwap(BuiltinFn f);
 bool HasSideEffects(BuiltinFn f);
 
 }  // namespace tint::wgsl
+
+// clang-format on
 
 #endif  // SRC_TINT_LANG_WGSL_ENUMS_H_

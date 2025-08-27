@@ -12,6 +12,9 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/spirv/spirv.def" -}}
+
+// clang-format off
+
 #include "src/tint/lang/spirv/builtin_fn.h"
 
 namespace tint::spirv {
@@ -151,3 +154,5 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
 }
 
 }  // namespace tint::spirv
+
+// clang-format on

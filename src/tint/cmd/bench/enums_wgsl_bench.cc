@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+// clang-format off
+
 #include <array>
 
 #include "benchmark/benchmark.h"
@@ -44,11 +46,20 @@ namespace {
 
 void CoreDiagnosticRuleParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "deriative_unccformity",   "dlivative_3iformiy",    "derivative_uniforVity",
-        "derivative_uniformity",   "derivative_uniform1ty", "derivativeJunifqrmity",
-        "derivative_unifllrmit77", "subgopppqquniformitHH", "subgrou_cformity",
-        "subgGoup_unifombty",      "subgroup_uniformity",   "suvgroup_uniformiiiy",
-        "subgroWWp8uniformity",    "subgroup_uifoxxmiMy",
+        "deriative_unccformity",
+        "dlivative_3iformiy",
+        "derivative_uniforVity",
+        "derivative_uniformity",
+        "derivative_uniform1ty",
+        "derivativeJunifqrmity",
+        "derivative_unifllrmit77",
+        "subgopppqquniformitHH",
+        "subgrou_cformity",
+        "subgGoup_unifombty",
+        "subgroup_uniformity",
+        "suvgroup_uniformiiiy",
+        "subgroWWp8uniformity",
+        "subgroup_uifoxxmiMy",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {
@@ -87,10 +98,34 @@ void ChromiumDiagnosticRuleParser(::benchmark::State& state) {
 BENCHMARK(ChromiumDiagnosticRuleParser);
 void DiagnosticSeverityParser(::benchmark::State& state) {
     const char* kStrings[] = {
-        "rryr",   "n77rrlrGr", "erro40",   "error",   "oor",    "erzz",     "1ippor",
-        "XXnfo",  "55nII9nn",  "iSSfHHaa", "info",    "kk",     "gRR",      "ib",
-        "ojf",    "of",        "q",        "off",     "oNN",    "ov",       "Qff",
-        "waffir", "warnijg",   "wNNwnin8", "warning", "waring", "wrrrning", "Garning",
+        "rryr",
+        "n77rrlrGr",
+        "erro40",
+        "error",
+        "oor",
+        "erzz",
+        "1ippor",
+        "XXnfo",
+        "55nII9nn",
+        "iSSfHHaa",
+        "info",
+        "kk",
+        "gRR",
+        "ib",
+        "ojf",
+        "of",
+        "q",
+        "off",
+        "oNN",
+        "ov",
+        "Qff",
+        "waffir",
+        "warnijg",
+        "wNNwnin8",
+        "warning",
+        "waring",
+        "wrrrning",
+        "Garning",
     };
     for (auto _ : state) {
         for (auto* str : kStrings) {
@@ -214,3 +249,5 @@ BENCHMARK(ExtensionParser);
 
 }  // namespace
 }  // namespace tint::wgsl
+
+// clang-format on

@@ -37,6 +37,8 @@
 #ifndef SRC_TINT_LANG_HLSL_BUILTIN_FN_H_
 #define SRC_TINT_LANG_HLSL_BUILTIN_FN_H_
 
+// clang-format off
+
 #include <cstdint>
 #include <string>
 
@@ -116,7 +118,7 @@ const char* str(BuiltinFn i);
 template <typename STREAM>
     requires(traits::IsOStream<STREAM>)
 auto& operator<<(STREAM& o, BuiltinFn i) {
-    return o << str(i);
+  return o << str(i);
 }
 
 /// @returns access restrictions for a function
@@ -124,5 +126,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn);
 
 }  // namespace tint::hlsl
 // \endcond
+
+// clang-format on
 
 #endif  // SRC_TINT_LANG_HLSL_BUILTIN_FN_H_

@@ -12,6 +12,9 @@ See:
 */ -}}
 
 {{- $I := LoadIntrinsics "src/tint/lang/msl/msl.def" -}}
+
+// clang-format off
+
 #include "src/tint/lang/msl/builtin_fn.h"
 
 namespace tint::msl {
@@ -84,3 +87,5 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
 }
 
 }  // namespace tint::msl
+
+// clang-format on
