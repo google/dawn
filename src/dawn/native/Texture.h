@@ -144,6 +144,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     SubresourceRange GetAllSubresources() const;
     uint32_t GetSampleCount() const;
     uint32_t GetSubresourceCount() const;
+    bool HasPinnedUsage() const;
+    wgpu::TextureUsage GetPinnedUsage() const;
 
     // |GetUsage| returns the usage with which the texture was created using the base WebGPU
     // API. The dawn-internal-usages extension may add additional usages. |GetInternalUsage|
@@ -186,6 +188,9 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     // GetMipLevelSingleSubresourceVirtualSize.
     Extent3D GetMipLevelSubresourceVirtualSize(uint32_t level, Aspect aspect) const;
 
+    MaybeError Pin(wgpu::TextureUsage usage);
+    void Unpin();
+
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
     Ref<TextureViewBase> CreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
@@ -206,6 +211,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     TextureViewBase* APICreateErrorView(const TextureViewDescriptor* descriptor = nullptr);
     void APIDestroy();
+    void APIPin(wgpu::TextureUsage usages);
+    void APIUnpin();
     uint32_t APIGetWidth() const;
     uint32_t APIGetHeight() const;
     uint32_t APIGetDepthOrArrayLayers() const;
@@ -225,6 +232,9 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     ExecutionSerial mLastSharedTextureMemoryUsageSerial{kBeginningOfGPUTime};
 
+    virtual MaybeError PinImpl(wgpu::TextureUsage usage);
+    virtual void UnpinImpl();
+
   private:
     struct TextureState {
         TextureState();
@@ -241,6 +251,9 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     ResultOrError<Ref<TextureViewBase>> GetOrCreateDefaultView();
 
+    MaybeError ValidatePin(wgpu::TextureUsage usages) const;
+    MaybeError ValidateUnpin() const;
+
     void WillAddFirstExternalRef() override;
     void WillDropLastExternalRef() override;
 
@@ -255,6 +268,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     uint32_t mSampleCount;
     wgpu::TextureUsage mUsage = wgpu::TextureUsage::None;
     wgpu::TextureUsage mInternalUsage = wgpu::TextureUsage::None;
+    wgpu::TextureUsage mPinnedUsage = wgpu::TextureUsage::None;  // None if not pinned.
     TextureState mState;
     wgpu::TextureFormat mFormatEnumForReflection;
 

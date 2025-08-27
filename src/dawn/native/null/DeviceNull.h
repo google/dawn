@@ -349,6 +349,10 @@ class SwapChain final : public SwapChainBase {
 class Texture : public TextureBase {
   public:
     Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);
+
+  private:
+    MaybeError PinImpl(wgpu::TextureUsage usage) override;
+    void UnpinImpl() override;
 };
 
 }  // namespace dawn::native::null

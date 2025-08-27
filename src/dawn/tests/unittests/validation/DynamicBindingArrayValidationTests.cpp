@@ -1135,5 +1135,110 @@ TEST_F(DynamicBindingArrayTests, GetBGLArrayStartMatchesBetweenStages) {
 //  - Test what happens when only DynamicArrayKind::Undefined is used in the defaulted layout. Is
 //    that even valid?
 
+// Test that pinning / unpinning is valid for a simple case. This is a control for the test that
+// errors are produced when the feature is not enabled.
+TEST_F(DynamicBindingArrayTests, PinUnpinTextureSuccess) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    tex.Unpin();
+}
+
+// Test that calling pin/unpin is an error when the feature is not enabled.
+TEST_F(DynamicBindingArrayTests_FeatureDisabled, PinUnpinTextureSuccess) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    ASSERT_DEVICE_ERROR(tex.Pin(wgpu::TextureUsage::TextureBinding));
+    ASSERT_DEVICE_ERROR(tex.Unpin());
+}
+
+// Test the validation of the usage parameter of Pin.
+TEST_F(DynamicBindingArrayTests, PinUnpinTextureUsageConstraint) {
+    wgpu::TextureDescriptor desc{
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+
+    desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
+                 wgpu::TextureUsage::StorageBinding;
+    wgpu::Texture testTexture = device.CreateTexture(&desc);
+
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture renderOnlyTexture = device.CreateTexture(&desc);
+
+    // Control case, pinning the sampled texture to TextureBinding is valid.
+    testTexture.Pin(wgpu::TextureUsage::TextureBinding);
+
+    // Error case, pinning to a usage not in the texture is invalid.
+    ASSERT_DEVICE_ERROR(renderOnlyTexture.Pin(wgpu::TextureUsage::TextureBinding));
+
+    // Error case, pinning to an invalid usage is invalid.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(static_cast<wgpu::TextureUsage>(0x8000'0000)));
+
+    // Error case, pinning must be to a shader usage.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::CopySrc));
+
+    // Error case, pinning must be to a shader usage.
+    // TODO(https://crbug.com/435317394): Lift this constraint and allow other shader usages.
+    ASSERT_DEVICE_ERROR(testTexture.Pin(wgpu::TextureUsage::StorageBinding));
+}
+
+// Test that pinning / unpinning don't need to be balanced.
+TEST_F(DynamicBindingArrayTests, PinUnpinUnbalancedIsValid) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    // Pinning right after creation is valid.
+    tex.Unpin();
+
+    // Pinning twice is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    // TODO(https://crbug.com/435317394): Use a different usage here when another is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+    // Unpinning twice (plus one more to make sure we are unbalanced) is valid.
+    tex.Unpin();
+    tex.Unpin();
+    tex.Unpin();
+}
+
+// Test that pinning is not allowed on a destroyed texture.
+TEST_F(DynamicBindingArrayTests, PinDestroyedTextureInvalid) {
+    wgpu::TextureDescriptor desc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&desc);
+
+    // Success case, pinning before Destroy() is valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    tex.Unpin();
+
+    // Error case, pinning a destroyed texture is not allowed.
+    tex.Destroy();
+    ASSERT_DEVICE_ERROR(tex.Pin(wgpu::TextureUsage::TextureBinding));
+}
+
+// TODO(https://crbug.com/435317394): This is missing the most important part of the pinned usage
+// validation: at submit time (or writeTexture and friends) we must ensure that the usages don't
+// conflict with the pinned usage. However adding this validation is a bit risky for the prototyping
+// of bindless as it could cause perf regressions. Instead backends will ASSERT when possible that
+// no barriers are emitted for the texture while it is pinned.
+
 }  // anonymous namespace
 }  // namespace dawn

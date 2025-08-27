@@ -602,4 +602,10 @@ bool Device::CanTextureLoadResolveTargetInTheSameRenderpass() const {
 Texture::Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor) {}
 
+MaybeError Texture::PinImpl(wgpu::TextureUsage usage) {
+    return {};
+}
+
+void Texture::UnpinImpl() {}
+
 }  // namespace dawn::native::null
