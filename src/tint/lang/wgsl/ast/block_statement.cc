@@ -33,19 +33,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BlockStatement);
 
 namespace tint::ast {
 
-BlockStatement::BlockStatement(GenerationID pid,
-                               NodeID nid,
+BlockStatement::BlockStatement(NodeID nid,
                                const Source& src,
                                VectorRef<const Statement*> stmts,
                                VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src), statements(std::move(stmts)), attributes(attrs) {
+    : Base(nid, src), statements(std::move(stmts)), attributes(attrs) {
     for (auto* stmt : statements) {
         TINT_ASSERT(stmt);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(stmt, generation_id);
     }
     for (auto* attr : attributes) {
         TINT_ASSERT(attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

@@ -39,11 +39,10 @@ namespace tint::ast {
 class IdAttribute final : public Castable<IdAttribute, Attribute> {
   public:
     /// Create an id attribute.
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the numeric id expression
-    IdAttribute(GenerationID pid, NodeID nid, const Source& src, const Expression* expr);
+    IdAttribute(NodeID nid, const Source& src, const Expression* expr);
     ~IdAttribute() override;
 
     /// @returns the WGSL name for the attribute

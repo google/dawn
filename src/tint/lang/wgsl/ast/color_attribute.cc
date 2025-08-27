@@ -35,12 +35,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ColorAttribute);
 
 namespace tint::ast {
 
-ColorAttribute::ColorAttribute(GenerationID pid,
-                               NodeID nid,
-                               const Source& src,
-                               const Expression* exp)
-    : Base(pid, nid, src), expr(exp) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL(exp, generation_id);
+ColorAttribute::ColorAttribute(NodeID nid, const Source& src, const Expression* exp)
+    : Base(nid, src), expr(exp) {
+    TINT_ASSERT(expr);
 }
 
 ColorAttribute::~ColorAttribute() = default;

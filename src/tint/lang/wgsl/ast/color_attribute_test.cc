@@ -51,15 +51,5 @@ TEST_F(ColorAttributeDeathTest, Assert_Null_Builtin) {
         "internal compiler error");
 }
 
-TEST_F(ColorAttributeDeathTest, Assert_DifferentGenerationID_Color) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.Color(b2.Expr(1_u));
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

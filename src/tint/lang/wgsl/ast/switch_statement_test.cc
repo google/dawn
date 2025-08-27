@@ -111,41 +111,5 @@ TEST_F(SwitchStatementDeathTest, Assert_Null_CaseStatement) {
         "internal compiler error");
 }
 
-TEST_F(SwitchStatementDeathTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.create<SwitchStatement>(b2.Expr(true),
-                                       tint::Vector{
-                                           b1.create<CaseStatement>(
-                                               tint::Vector{
-                                                   b1.CaseSelector(b1.Expr(1_i)),
-                                               },
-                                               b1.Block()),
-                                       },
-                                       tint::Empty, tint::Empty);
-        },
-        "internal compiler error");
-}
-
-TEST_F(SwitchStatementDeathTest, Assert_DifferentGenerationID_CaseStatement) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.create<SwitchStatement>(b1.Expr(true),
-                                       tint::Vector{
-                                           b2.create<CaseStatement>(
-                                               tint::Vector{
-                                                   b2.CaseSelector(b2.Expr(1_i)),
-                                               },
-                                               b2.Block()),
-                                       },
-                                       tint::Empty, tint::Empty);
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

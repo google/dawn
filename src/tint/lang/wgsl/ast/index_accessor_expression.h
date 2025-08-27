@@ -36,13 +36,11 @@ namespace tint::ast {
 class IndexAccessorExpression final : public Castable<IndexAccessorExpression, AccessorExpression> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param source the index accessor source
     /// @param obj the object
     /// @param idx the index expression
-    IndexAccessorExpression(GenerationID pid,
-                            NodeID nid,
+    IndexAccessorExpression(NodeID nid,
                             const Source& source,
                             const Expression* obj,
                             const Expression* idx);

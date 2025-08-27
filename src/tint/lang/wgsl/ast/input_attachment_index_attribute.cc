@@ -35,11 +35,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InputAttachmentIndexAttribute);
 
 namespace tint::ast {
 
-InputAttachmentIndexAttribute::InputAttachmentIndexAttribute(GenerationID pid,
-                                                             NodeID nid,
+InputAttachmentIndexAttribute::InputAttachmentIndexAttribute(NodeID nid,
                                                              const Source& src,
                                                              const Expression* exp)
-    : Base(pid, nid, src), expr(exp) {}
+    : Base(nid, src), expr(exp) {}
 
 InputAttachmentIndexAttribute::~InputAttachmentIndexAttribute() = default;
 

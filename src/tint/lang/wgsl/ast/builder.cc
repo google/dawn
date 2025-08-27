@@ -36,13 +36,10 @@ Builder::LetOptions::~LetOptions() = default;
 Builder::ConstOptions::~ConstOptions() = default;
 Builder::OverrideOptions::~OverrideOptions() = default;
 
-Builder::Builder()
-    : id_(GenerationID::New()),
-      ast_(ast_nodes_.Create<ast::Module>(id_, AllocateNodeID(), Source{})) {}
+Builder::Builder() : ast_(ast_nodes_.Create<ast::Module>(AllocateNodeID(), Source{})) {}
 
 Builder::Builder(Builder&& rhs)
-    : id_(std::move(rhs.id_)),
-      last_ast_node_id_(std::move(rhs.last_ast_node_id_)),
+    : last_ast_node_id_(std::move(rhs.last_ast_node_id_)),
       ast_nodes_(std::move(rhs.ast_nodes_)),
       ast_(rhs.ast_),
       symbols_(std::move(rhs.symbols_)),
@@ -55,7 +52,6 @@ Builder::~Builder() = default;
 Builder& Builder::operator=(Builder&& rhs) {
     rhs.MarkAsMoved();
     AssertNotMoved();
-    id_ = std::move(rhs.id_);
     last_ast_node_id_ = std::move(rhs.last_ast_node_id_);
     ast_nodes_ = std::move(rhs.ast_nodes_);
     ast_ = std::move(rhs.ast_);

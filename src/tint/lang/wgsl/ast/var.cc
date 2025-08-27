@@ -33,8 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Var);
 
 namespace tint::ast {
 
-Var::Var(GenerationID pid,
-         NodeID nid,
+Var::Var(NodeID nid,
          const Source& src,
          const Identifier* n,
          Type ty,
@@ -42,7 +41,7 @@ Var::Var(GenerationID pid,
          const Expression* access,
          const Expression* init,
          VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, n, ty, init, std::move(attrs)),
+    : Base(nid, src, n, ty, init, std::move(attrs)),
       declared_address_space(address_space),
       declared_access(access) {}
 

@@ -33,17 +33,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BinaryExpression);
 
 namespace tint::ast {
 
-BinaryExpression::BinaryExpression(GenerationID pid,
-                                   NodeID nid,
+BinaryExpression::BinaryExpression(NodeID nid,
                                    const Source& src,
                                    core::BinaryOp o,
                                    const Expression* l,
                                    const Expression* r)
-    : Base(pid, nid, src), op(o), lhs(l), rhs(r) {
+    : Base(nid, src), op(o), lhs(l), rhs(r) {
     TINT_ASSERT(lhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
     TINT_ASSERT(rhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(rhs, generation_id);
 }
 
 BinaryExpression::~BinaryExpression() = default;

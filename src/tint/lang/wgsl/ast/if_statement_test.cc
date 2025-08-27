@@ -86,35 +86,5 @@ TEST_F(IfStatementDeathTest, Assert_InvalidElse) {
         "internal compiler error");
 }
 
-TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_Cond) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.If(b2.Expr(true), b1.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.If(b1.Expr(true), b2.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(IfStatementDeathTest, Assert_DifferentGenerationID_ElseStatement) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.If(b1.Expr(true), b1.Block(), b2.Else(b2.If(b2.Expr("ident"), b2.Block())));
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

@@ -33,29 +33,24 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 
 namespace tint::ast {
 
-IfStatement::IfStatement(GenerationID pid,
-                         NodeID nid,
+IfStatement::IfStatement(NodeID nid,
                          const Source& src,
                          const Expression* cond,
                          const BlockStatement* b,
                          const Statement* else_stmt,
                          VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src),
+    : Base(nid, src),
       condition(cond),
       body(b),
       else_statement(else_stmt),
       attributes(std::move(attrs)) {
     TINT_ASSERT(condition);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
     TINT_ASSERT(body);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     if (else_statement) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(else_statement, generation_id);
         TINT_ASSERT((else_statement->IsAnyOf<IfStatement, BlockStatement>()));
     }
     for (auto* attr : attributes) {
         TINT_ASSERT(attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

@@ -33,13 +33,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IdentifierExpression);
 
 namespace tint::ast {
 
-IdentifierExpression::IdentifierExpression(GenerationID pid,
-                                           NodeID nid,
-                                           const Source& src,
-                                           const Identifier* ident)
-    : Base(pid, nid, src), identifier(ident) {
+IdentifierExpression::IdentifierExpression(NodeID nid, const Source& src, const Identifier* ident)
+    : Base(nid, src), identifier(ident) {
     TINT_ASSERT(identifier != nullptr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL(identifier, generation_id);
 }
 
 IdentifierExpression::~IdentifierExpression() = default;

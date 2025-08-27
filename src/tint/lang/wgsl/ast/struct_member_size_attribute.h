@@ -40,14 +40,10 @@ namespace tint::ast {
 class StructMemberSizeAttribute final : public Castable<StructMemberSizeAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the size expression
-    StructMemberSizeAttribute(GenerationID pid,
-                              NodeID nid,
-                              const Source& src,
-                              const Expression* expr);
+    StructMemberSizeAttribute(NodeID nid, const Source& src, const Expression* expr);
     ~StructMemberSizeAttribute() override;
 
     /// @returns the WGSL name for the attribute

@@ -36,14 +36,12 @@ namespace tint::ast {
 class LoopStatement final : public Castable<LoopStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param source the loop statement source
     /// @param body the body statements
     /// @param continuing the continuing statements
     /// @param attributes the while statement attributes
-    LoopStatement(GenerationID pid,
-                  NodeID nid,
+    LoopStatement(NodeID nid,
                   const Source& source,
                   const BlockStatement* body,
                   const BlockStatement* continuing,

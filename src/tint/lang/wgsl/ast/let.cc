@@ -35,14 +35,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Let);
 
 namespace tint::ast {
 
-Let::Let(GenerationID pid,
-         NodeID nid,
+Let::Let(NodeID nid,
          const Source& src,
          const Identifier* n,
          Type ty,
          const Expression* init,
          VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, n, ty, init, std::move(attrs)) {
+    : Base(nid, src, n, ty, init, std::move(attrs)) {
     TINT_ASSERT(init != nullptr);
 }
 

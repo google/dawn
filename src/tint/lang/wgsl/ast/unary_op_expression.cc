@@ -33,14 +33,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::UnaryOpExpression);
 
 namespace tint::ast {
 
-UnaryOpExpression::UnaryOpExpression(GenerationID pid,
-                                     NodeID nid,
+UnaryOpExpression::UnaryOpExpression(NodeID nid,
                                      const Source& src,
                                      core::UnaryOp o,
                                      const Expression* e)
-    : Base(pid, nid, src), op(o), expr(e) {
+    : Base(nid, src), op(o), expr(e) {
     TINT_ASSERT(expr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(expr, generation_id);
 }
 
 UnaryOpExpression::~UnaryOpExpression() = default;

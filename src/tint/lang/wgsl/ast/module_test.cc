@@ -69,27 +69,6 @@ TEST_F(ModuleDeathTest, Assert_Null_TypeDecl) {
         "internal compiler error");
 }
 
-TEST_F(ModuleDeathTest, Assert_DifferentGenerationID_Function) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.AST().AddFunction(b2.create<Function>(b2.Ident("func"), tint::Empty, b2.ty.f32(),
-                                                     b2.Block(), tint::Empty, tint::Empty));
-        },
-        "internal compiler error");
-}
-
-TEST_F(ModuleDeathTest, Assert_DifferentGenerationID_GlobalVariable) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.AST().AddGlobalVariable(b2.Var("var", b2.ty.i32(), core::AddressSpace::kPrivate));
-        },
-        "internal compiler error");
-}
-
 TEST_F(ModuleDeathTest, Assert_Null_Function) {
     EXPECT_DEATH_IF_SUPPORTED(
         {

@@ -44,14 +44,12 @@ namespace tint::ast {
 class StructMember final : public Castable<StructMember, Node> {
   public:
     /// Create a new struct member statement
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node for the struct member statement
     /// @param name The struct member name
     /// @param type The struct member type
     /// @param attributes The struct member attributes
-    StructMember(GenerationID pid,
-                 NodeID nid,
+    StructMember(NodeID nid,
                  const Source& src,
                  const Identifier* name,
                  Type type,

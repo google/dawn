@@ -33,8 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Alias);
 
 namespace tint::ast {
 
-Alias::Alias(GenerationID pid, NodeID nid, const Source& src, const Identifier* n, Type subtype)
-    : Base(pid, nid, src, n), type(subtype) {
+Alias::Alias(NodeID nid, const Source& src, const Identifier* n, Type subtype)
+    : Base(nid, src, n), type(subtype) {
     TINT_ASSERT(type);
 }
 

@@ -105,7 +105,6 @@ cc_library(
     "struct_member_size_attribute.cc",
     "switch_statement.cc",
     "templated_identifier.cc",
-    "type.cc",
     "type_decl.cc",
     "unary_op_expression.cc",
     "var.cc",

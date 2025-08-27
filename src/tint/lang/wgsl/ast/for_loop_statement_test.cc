@@ -82,45 +82,5 @@ TEST_F(ForLoopStatementDeathTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Initializer) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.For(b2.Block(), nullptr, nullptr, b1.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.For(nullptr, b2.Expr(true), nullptr, b1.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Continuing) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.For(nullptr, nullptr, b2.Block(), b1.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(ForLoopStatementDeathTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.For(nullptr, nullptr, nullptr, b2.Block());
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

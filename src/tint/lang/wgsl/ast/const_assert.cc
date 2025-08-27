@@ -33,10 +33,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstAssert);
 
 namespace tint::ast {
 
-ConstAssert::ConstAssert(GenerationID pid, NodeID nid, const Source& src, const Expression* cond)
-    : Base(pid, nid, src), condition(cond) {
+ConstAssert::ConstAssert(NodeID nid, const Source& src, const Expression* cond)
+    : Base(nid, src), condition(cond) {
     TINT_ASSERT(cond);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(cond, generation_id);
 }
 
 ConstAssert::~ConstAssert() = default;

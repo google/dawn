@@ -38,13 +38,11 @@ class MemberAccessorExpression final
     : public Castable<MemberAccessorExpression, AccessorExpression> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param source the member accessor expression source
     /// @param object the object
     /// @param member the member
-    MemberAccessorExpression(GenerationID pid,
-                             NodeID nid,
+    MemberAccessorExpression(NodeID nid,
                              const Source& source,
                              const Expression* object,
                              const Identifier* member);

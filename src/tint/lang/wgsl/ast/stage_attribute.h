@@ -39,11 +39,10 @@ namespace tint::ast {
 class StageAttribute final : public Castable<StageAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param stage the pipeline stage
     /// @param source the source of this attribute
-    StageAttribute(GenerationID pid, NodeID nid, const Source& source, PipelineStage stage);
+    StageAttribute(NodeID nid, const Source& source, PipelineStage stage);
     ~StageAttribute() override;
 
     /// @returns the WGSL name for the attribute

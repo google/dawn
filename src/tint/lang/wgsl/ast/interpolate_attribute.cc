@@ -36,11 +36,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateAttribute);
 
 namespace tint::ast {
 
-InterpolateAttribute::InterpolateAttribute(GenerationID pid,
-                                           NodeID nid,
+InterpolateAttribute::InterpolateAttribute(NodeID nid,
                                            const Source& src,
                                            core::Interpolation interp)
-    : Base(pid, nid, src), interpolation(interp) {}
+    : Base(nid, src), interpolation(interp) {}
 
 InterpolateAttribute::~InterpolateAttribute() = default;
 

@@ -39,14 +39,10 @@ namespace tint::ast {
 class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param builtin the builtin value
-    BuiltinAttribute(GenerationID pid,
-                     NodeID nid,
-                     const Source& src,
-                     const core::BuiltinValue builtin);
+    BuiltinAttribute(NodeID nid, const Source& src, const core::BuiltinValue builtin);
     ~BuiltinAttribute() override;
 
     /// @returns the WGSL name for the attribute

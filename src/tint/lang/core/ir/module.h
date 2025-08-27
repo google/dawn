@@ -55,9 +55,6 @@ namespace tint::core::ir {
 
 /// Main module class for the IR.
 class Module {
-    /// Program Id required to create other components
-    GenerationID prog_id_;
-
     /// Map of value to name
     Hashmap<const Value*, Symbol, 32> value_to_name_;
 
@@ -201,7 +198,7 @@ class Module {
     ConstPropagatingPtr<Block> root_block;
 
     /// The symbol table for the module
-    SymbolTable symbols{prog_id_};
+    SymbolTable symbols{GenerationID::New()};
 
     /// The map of core::constant::Value to their ir::Constant.
     Hashmap<const core::constant::Value*, ir::Constant*, 16> constants;

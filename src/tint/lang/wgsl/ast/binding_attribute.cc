@@ -35,11 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingAttribute);
 
 namespace tint::ast {
 
-BindingAttribute::BindingAttribute(GenerationID pid,
-                                   NodeID nid,
-                                   const Source& src,
-                                   const Expression* exp)
-    : Base(pid, nid, src), expr(exp) {}
+BindingAttribute::BindingAttribute(NodeID nid, const Source& src, const Expression* exp)
+    : Base(nid, src), expr(exp) {}
 
 BindingAttribute::~BindingAttribute() = default;
 

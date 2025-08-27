@@ -49,11 +49,10 @@ class Requires final : public Castable<Requires, Node> {
     using LanguageFeatures = UniqueVector<wgsl::LanguageFeature, 4>;
 
     /// Create a requires directive
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param feats the language features being required by this directive
-    Requires(GenerationID pid, NodeID nid, const Source& src, LanguageFeatures feats);
+    Requires(NodeID nid, const Source& src, LanguageFeatures feats);
 
     /// Destructor
     ~Requires() override;

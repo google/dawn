@@ -35,13 +35,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WorkgroupAttribute);
 
 namespace tint::ast {
 
-WorkgroupAttribute::WorkgroupAttribute(GenerationID pid,
-                                       NodeID nid,
+WorkgroupAttribute::WorkgroupAttribute(NodeID nid,
                                        const Source& src,
                                        const Expression* x_,
                                        const Expression* y_,
                                        const Expression* z_)
-    : Base(pid, nid, src), x(x_), y(y_), z(z_) {}
+    : Base(nid, src), x(x_), y(y_), z(z_) {}
 
 WorkgroupAttribute::~WorkgroupAttribute() = default;
 

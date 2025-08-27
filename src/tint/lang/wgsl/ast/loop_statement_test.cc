@@ -102,25 +102,5 @@ TEST_F(LoopStatementDeathTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(LoopStatementDeathTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.create<LoopStatement>(b2.Block(), b1.Block(), tint::Empty);
-        },
-        "internal compiler error");
-}
-
-TEST_F(LoopStatementDeathTest, Assert_DifferentGenerationID_Continuing) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.create<LoopStatement>(b1.Block(), b2.Block(), tint::Empty);
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

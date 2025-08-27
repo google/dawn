@@ -35,13 +35,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Parameter);
 
 namespace tint::ast {
 
-Parameter::Parameter(GenerationID pid,
-                     NodeID nid,
+Parameter::Parameter(NodeID nid,
                      const Source& src,
                      const Identifier* n,
                      Type ty,
                      VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, n, ty, nullptr, std::move(attrs)) {}
+    : Base(nid, src, n, ty, nullptr, std::move(attrs)) {}
 
 Parameter::~Parameter() = default;
 

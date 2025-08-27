@@ -38,10 +38,9 @@ namespace tint::ast {
 class InvariantAttribute final : public Castable<InvariantAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    InvariantAttribute(GenerationID pid, NodeID nid, const Source& src);
+    InvariantAttribute(NodeID nid, const Source& src);
     ~InvariantAttribute() override;
 
     /// @returns the WGSL name for the attribute

@@ -33,13 +33,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 
 namespace tint::ast {
 
-CallStatement::CallStatement(GenerationID pid,
-                             NodeID nid,
-                             const Source& src,
-                             const CallExpression* call)
-    : Base(pid, nid, src), expr(call) {
+CallStatement::CallStatement(NodeID nid, const Source& src, const CallExpression* call)
+    : Base(nid, src), expr(call) {
     TINT_ASSERT(expr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(expr, generation_id);
 }
 
 CallStatement::~CallStatement() = default;

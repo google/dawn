@@ -38,10 +38,9 @@ namespace tint::ast {
 class MustUseAttribute final : public Castable<MustUseAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    MustUseAttribute(GenerationID pid, NodeID nid, const Source& src);
+    MustUseAttribute(NodeID nid, const Source& src);
     ~MustUseAttribute() override;
 
     /// @returns the WGSL name for the attribute

@@ -86,25 +86,5 @@ TEST_F(WhileStatementDeathTest, Assert_Null_Body) {
         "internal compiler error");
 }
 
-TEST_F(WhileStatementDeathTest, Assert_DifferentGenerationID_Condition) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.While(b2.Expr(true), b1.Block());
-        },
-        "internal compiler error");
-}
-
-TEST_F(WhileStatementDeathTest, Assert_DifferentGenerationID_Body) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.While(b1.Expr(true), b2.Block());
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

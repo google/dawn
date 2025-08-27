@@ -44,11 +44,10 @@ namespace tint::ast {
 class Enable final : public Castable<Enable, Node> {
   public:
     /// Create a extension
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param exts the extensions being enabled by this directive
-    Enable(GenerationID pid, NodeID nid, const Source& src, VectorRef<const Extension*> exts);
+    Enable(NodeID nid, const Source& src, VectorRef<const Extension*> exts);
 
     /// Destructor
     ~Enable() override;

@@ -173,7 +173,6 @@ tint_add_target(tint_lang_wgsl_ast lib
   lang/wgsl/ast/templated_identifier.cc
   lang/wgsl/ast/templated_identifier.h
   lang/wgsl/ast/traverse_expressions.h
-  lang/wgsl/ast/type.cc
   lang/wgsl/ast/type.h
   lang/wgsl/ast/type_decl.cc
   lang/wgsl/ast/type_decl.h

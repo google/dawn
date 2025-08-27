@@ -33,14 +33,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAccessorExpression);
 
 namespace tint::ast {
 
-IndexAccessorExpression::IndexAccessorExpression(GenerationID pid,
-                                                 NodeID nid,
+IndexAccessorExpression::IndexAccessorExpression(NodeID nid,
                                                  const Source& src,
                                                  const Expression* obj,
                                                  const Expression* idx)
-    : Base(pid, nid, src, obj), index(idx) {
+    : Base(nid, src, obj), index(idx) {
     TINT_ASSERT(idx);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(idx, generation_id);
 }
 
 IndexAccessorExpression::~IndexAccessorExpression() = default;

@@ -43,20 +43,17 @@ namespace tint::ast {
 class DiagnosticRuleName final : public Castable<DiagnosticRuleName, Node> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param name the rule name
-    DiagnosticRuleName(GenerationID pid, NodeID nid, const Source& src, const Identifier* name);
+    DiagnosticRuleName(NodeID nid, const Source& src, const Identifier* name);
 
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param category the rule category.
     /// @param name the rule name
-    DiagnosticRuleName(GenerationID pid,
-                       NodeID nid,
+    DiagnosticRuleName(NodeID nid,
                        const Source& src,
                        const Identifier* category,
                        const Identifier* name);

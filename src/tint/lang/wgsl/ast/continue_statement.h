@@ -36,10 +36,9 @@ namespace tint::ast {
 class ContinueStatement final : public Castable<ContinueStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    ContinueStatement(GenerationID pid, NodeID nid, const Source& src);
+    ContinueStatement(NodeID nid, const Source& src);
 
     /// Destructor
     ~ContinueStatement() override;

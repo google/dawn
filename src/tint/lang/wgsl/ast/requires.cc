@@ -33,8 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Requires);
 
 namespace tint::ast {
 
-Requires::Requires(GenerationID pid, NodeID nid, const Source& src, LanguageFeatures feats)
-    : Base(pid, nid, src), features(std::move(feats)) {}
+Requires::Requires(NodeID nid, const Source& src, LanguageFeatures feats)
+    : Base(nid, src), features(std::move(feats)) {}
 
 Requires::~Requires() = default;
 

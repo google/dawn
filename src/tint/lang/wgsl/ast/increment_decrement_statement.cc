@@ -33,14 +33,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IncrementDecrementStatement);
 
 namespace tint::ast {
 
-IncrementDecrementStatement::IncrementDecrementStatement(GenerationID pid,
-                                                         NodeID nid,
+IncrementDecrementStatement::IncrementDecrementStatement(NodeID nid,
                                                          const Source& src,
                                                          const Expression* l,
                                                          bool inc)
-    : Base(pid, nid, src), lhs(l), increment(inc) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
-}
+    : Base(nid, src), lhs(l), increment(inc) {}
 
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;
 

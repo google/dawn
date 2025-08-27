@@ -33,12 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IntLiteralExpression);
 
 namespace tint::ast {
 
-IntLiteralExpression::IntLiteralExpression(GenerationID pid,
-                                           NodeID nid,
-                                           const Source& src,
-                                           int64_t val,
-                                           Suffix suf)
-    : Base(pid, nid, src), value(val), suffix(suf) {}
+IntLiteralExpression::IntLiteralExpression(NodeID nid, const Source& src, int64_t val, Suffix suf)
+    : Base(nid, src), value(val), suffix(suf) {}
 
 IntLiteralExpression::~IntLiteralExpression() = default;
 

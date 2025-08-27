@@ -33,8 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MustUseAttribute);
 
 namespace tint::ast {
 
-MustUseAttribute::MustUseAttribute(GenerationID pid, NodeID nid, const Source& src)
-    : Base(pid, nid, src) {}
+MustUseAttribute::MustUseAttribute(NodeID nid, const Source& src) : Base(nid, src) {}
 
 MustUseAttribute::~MustUseAttribute() = default;
 

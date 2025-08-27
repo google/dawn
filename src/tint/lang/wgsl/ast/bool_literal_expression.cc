@@ -33,11 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteralExpression);
 
 namespace tint::ast {
 
-BoolLiteralExpression::BoolLiteralExpression(GenerationID pid,
-                                             NodeID nid,
-                                             const Source& src,
-                                             bool val)
-    : Base(pid, nid, src), value(val) {}
+BoolLiteralExpression::BoolLiteralExpression(NodeID nid, const Source& src, bool val)
+    : Base(nid, src), value(val) {}
 
 BoolLiteralExpression::~BoolLiteralExpression() = default;
 

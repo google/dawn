@@ -179,7 +179,6 @@ libtint_source_set("ast") {
     "templated_identifier.cc",
     "templated_identifier.h",
     "traverse_expressions.h",
-    "type.cc",
     "type.h",
     "type_decl.cc",
     "type_decl.h",

@@ -39,11 +39,10 @@ namespace tint::ast {
 class DiagnosticAttribute final : public Castable<DiagnosticAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dc the diagnostic control
-    DiagnosticAttribute(GenerationID pid, NodeID nid, const Source& src, DiagnosticControl&& dc);
+    DiagnosticAttribute(NodeID nid, const Source& src, DiagnosticControl&& dc);
     ~DiagnosticAttribute() override;
 
     /// @returns the WGSL name for the attribute

@@ -39,14 +39,10 @@ namespace tint::ast {
 class InterpolateAttribute final : public Castable<InterpolateAttribute, Attribute> {
   public:
     /// Create an interpolate attribute.
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param interpolation the interpolate attribute values
-    InterpolateAttribute(GenerationID pid,
-                         NodeID nid,
-                         const Source& src,
-                         core::Interpolation interpolation);
+    InterpolateAttribute(NodeID nid, const Source& src, core::Interpolation interpolation);
     ~InterpolateAttribute() override;
 
     /// @returns the WGSL name for the attribute

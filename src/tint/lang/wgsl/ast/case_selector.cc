@@ -35,8 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseSelector);
 
 namespace tint::ast {
 
-CaseSelector::CaseSelector(GenerationID pid, NodeID nid, const Source& src, const Expression* e)
-    : Base(pid, nid, src), expr(e) {}
+CaseSelector::CaseSelector(NodeID nid, const Source& src, const Expression* e)
+    : Base(nid, src), expr(e) {}
 
 CaseSelector::~CaseSelector() = default;
 

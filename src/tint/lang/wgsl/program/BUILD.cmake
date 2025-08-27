@@ -74,7 +74,6 @@ tint_target_add_external_dependencies(tint_lang_wgsl_program lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_program_test test
-  lang/wgsl/program/program_builder_test.cc
   lang/wgsl/program/program_test.cc
 )
 

@@ -73,9 +73,6 @@ class Program {
     /// @return this Program
     Program& operator=(Program&& rhs);
 
-    /// @returns the unique identifier for this program
-    GenerationID ID() const { return id_; }
-
     /// @returns the last allocated (numerically highest) AST node identifier.
     ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
 
@@ -162,24 +159,17 @@ class Program {
     /// Asserts that the program has not been moved.
     void AssertNotMoved() const;
 
-    GenerationID id_;
     ast::NodeID highest_node_id_;
     core::constant::Manager constants_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
     ast::Module* ast_ = nullptr;
     sem::Info sem_;
-    SymbolTable symbols_{id_};
+    SymbolTable symbols_{GenerationID::New()};
     diag::List diagnostics_;
     bool is_valid_ = false;  // Not valid until it is built
     bool moved_ = false;
 };
-
-/// @param program the Program
-/// @returns the GenerationID of the Program
-inline GenerationID GenerationIDOf(const Program& program) {
-    return program.ID();
-}
 
 }  // namespace tint
 

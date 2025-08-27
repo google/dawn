@@ -302,9 +302,6 @@ class Builder {
     /// @return this builder
     Builder& operator=(Builder&& rhs);
 
-    /// @returns the unique identifier for this program
-    GenerationID ID() const { return id_; }
-
     /// @returns a reference to the program's AST nodes storage
     ASTNodeAllocator& ASTNodes() {
         AssertNotMoved();
@@ -376,7 +373,7 @@ class Builder {
         requires(traits::IsTypeOrDerived<T, ast::Node>)
     T* create(const Source& source, ARGS&&... args) {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source, std::forward<ARGS>(args)...);
+        return ast_nodes_.Create<T>(AllocateNodeID(), source, std::forward<ARGS>(args)...);
     }
 
     /// Creates a new ast::Node owned by the Builder, injecting the current
@@ -389,7 +386,7 @@ class Builder {
         requires(traits::IsTypeOrDerived<T, ast::Node>)
     T* create() {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_);
+        return ast_nodes_.Create<T>(AllocateNodeID(), source_);
     }
 
     /// Creates a new ast::Node owned by the Builder, injecting the current
@@ -407,7 +404,7 @@ class Builder {
                      T>*
     create(ARG0&& arg0, ARGS&&... args) {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_, std::forward<ARG0>(arg0),
+        return ast_nodes_.Create<T>(AllocateNodeID(), source_, std::forward<ARG0>(arg0),
                                     std::forward<ARGS>(args)...);
     }
 
@@ -3510,9 +3507,6 @@ class Builder {
     /// Asserts that the builder has not been moved.
     void AssertNotMoved() const;
 
-    /// The unique identifier for this program
-    GenerationID id_;
-
     /// The last Node identifier
     ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
 
@@ -3523,7 +3517,7 @@ class Builder {
     ast::Module* ast_ = nullptr;
 
     /// The symbol table
-    SymbolTable symbols_{id_};
+    SymbolTable symbols_{GenerationID::New()};
 
     /// The diagnostic list
     diag::List diagnostics_;
@@ -3608,15 +3602,5 @@ struct CanWrapInStatement<
     : std::true_type {};
 
 }  // namespace tint::ast
-
-namespace tint {
-
-/// @param builder the Builder
-/// @returns the GenerationID of the ast::Builder
-inline GenerationID GenerationIDOf(const ast::Builder* builder) {
-    return builder->ID();
-}
-
-}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_BUILDER_H_

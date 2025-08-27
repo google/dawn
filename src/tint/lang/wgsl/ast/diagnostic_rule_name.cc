@@ -35,33 +35,26 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticRuleName);
 
 namespace tint::ast {
 
-DiagnosticRuleName::DiagnosticRuleName(GenerationID pid,
-                                       NodeID nid,
-                                       const Source& src,
-                                       const Identifier* n)
-    : Base(pid, nid, src), name(n) {
+DiagnosticRuleName::DiagnosticRuleName(NodeID nid, const Source& src, const Identifier* n)
+    : Base(nid, src), name(n) {
     TINT_ASSERT(name != nullptr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(name, generation_id);
     if (name) {
         // It is invalid for a diagnostic rule name to be templated
         TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
 }
 
-DiagnosticRuleName::DiagnosticRuleName(GenerationID pid,
-                                       NodeID nid,
+DiagnosticRuleName::DiagnosticRuleName(NodeID nid,
                                        const Source& src,
                                        const Identifier* c,
                                        const Identifier* n)
-    : Base(pid, nid, src), category(c), name(n) {
+    : Base(nid, src), category(c), name(n) {
     TINT_ASSERT(name != nullptr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(name, generation_id);
     if (name) {
         // It is invalid for a diagnostic rule name to be templated
         TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
     if (category) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(category, generation_id);
         // It is invalid for a diagnostic rule category to be templated
         TINT_ASSERT(!category->Is<TemplatedIdentifier>());
     }

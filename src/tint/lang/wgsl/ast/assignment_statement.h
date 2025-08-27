@@ -37,13 +37,11 @@ namespace tint::ast {
 class AssignmentStatement final : public Castable<AssignmentStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param source the assignment statement source
     /// @param lhs the left side of the expression
     /// @param rhs the right side of the expression
-    AssignmentStatement(GenerationID pid,
-                        NodeID nid,
+    AssignmentStatement(NodeID nid,
                         const Source& source,
                         const Expression* lhs,
                         const Expression* rhs);

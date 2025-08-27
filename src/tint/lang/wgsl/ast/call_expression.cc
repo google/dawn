@@ -35,17 +35,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 
 namespace tint::ast {
 
-CallExpression::CallExpression(GenerationID pid,
-                               NodeID nid,
+CallExpression::CallExpression(NodeID nid,
                                const Source& src,
                                const IdentifierExpression* t,
                                VectorRef<const Expression*> a)
-    : Base(pid, nid, src), target(t), args(std::move(a)) {
+    : Base(nid, src), target(t), args(std::move(a)) {
     TINT_ASSERT(target);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(target, generation_id);
     for (auto* arg : args) {
         TINT_ASSERT(arg);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(arg, generation_id);
     }
 }
 

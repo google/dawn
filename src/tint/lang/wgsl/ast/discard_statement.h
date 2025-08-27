@@ -36,10 +36,9 @@ namespace tint::ast {
 class DiscardStatement final : public Castable<DiscardStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    DiscardStatement(GenerationID pid, NodeID nid, const Source& src);
+    DiscardStatement(NodeID nid, const Source& src);
 
     /// Destructor
     ~DiscardStatement() override;

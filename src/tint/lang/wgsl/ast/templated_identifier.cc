@@ -35,19 +35,18 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TemplatedIdentifier);
 
 namespace tint::ast {
 
-TemplatedIdentifier::TemplatedIdentifier(GenerationID pid,
-                                         NodeID nid,
+TemplatedIdentifier::TemplatedIdentifier(NodeID nid,
                                          const Source& src,
                                          const Symbol& sym,
                                          VectorRef<const Expression*> args,
                                          VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, sym), arguments(std::move(args)), attributes(std::move(attrs)) {
+    : Base(nid, src, sym), arguments(std::move(args)), attributes(std::move(attrs)) {
     TINT_ASSERT(!arguments.IsEmpty());  // Should have been an Identifier if this fires.
     for (auto* arg : arguments) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL(arg, generation_id);
+        TINT_ASSERT(arg);
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
+        TINT_ASSERT(attr);
     }
 }
 

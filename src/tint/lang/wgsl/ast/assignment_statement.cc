@@ -33,16 +33,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::AssignmentStatement);
 
 namespace tint::ast {
 
-AssignmentStatement::AssignmentStatement(GenerationID pid,
-                                         NodeID nid,
+AssignmentStatement::AssignmentStatement(NodeID nid,
                                          const Source& src,
                                          const Expression* l,
                                          const Expression* r)
-    : Base(pid, nid, src), lhs(l), rhs(r) {
+    : Base(nid, src), lhs(l), rhs(r) {
     TINT_ASSERT(lhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
     TINT_ASSERT(rhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(rhs, generation_id);
 }
 
 AssignmentStatement::~AssignmentStatement() = default;

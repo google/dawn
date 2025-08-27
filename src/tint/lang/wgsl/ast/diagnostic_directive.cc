@@ -33,11 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticDirective);
 
 namespace tint::ast {
 
-DiagnosticDirective::DiagnosticDirective(GenerationID pid,
-                                         NodeID nid,
-                                         const Source& src,
-                                         DiagnosticControl&& dc)
-    : Base(pid, nid, src), control(std::move(dc)) {}
+DiagnosticDirective::DiagnosticDirective(NodeID nid, const Source& src, DiagnosticControl&& dc)
+    : Base(nid, src), control(std::move(dc)) {}
 
 DiagnosticDirective::~DiagnosticDirective() = default;
 

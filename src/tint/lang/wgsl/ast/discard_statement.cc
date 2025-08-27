@@ -33,8 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiscardStatement);
 
 namespace tint::ast {
 
-DiscardStatement::DiscardStatement(GenerationID pid, NodeID nid, const Source& src)
-    : Base(pid, nid, src) {}
+DiscardStatement::DiscardStatement(NodeID nid, const Source& src) : Base(nid, src) {}
 
 DiscardStatement::~DiscardStatement() = default;
 

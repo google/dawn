@@ -39,11 +39,10 @@ namespace tint::ast {
 class BreakIfStatement final : public Castable<BreakIfStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param condition the if condition
-    BreakIfStatement(GenerationID pid, NodeID nid, const Source& src, const Expression* condition);
+    BreakIfStatement(NodeID nid, const Source& src, const Expression* condition);
 
     /// Destructor
     ~BreakIfStatement() override;

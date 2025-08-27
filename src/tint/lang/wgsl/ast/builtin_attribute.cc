@@ -35,11 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinAttribute);
 
 namespace tint::ast {
 
-BuiltinAttribute::BuiltinAttribute(GenerationID pid,
-                                   NodeID nid,
-                                   const Source& src,
-                                   const core::BuiltinValue b)
-    : Base(pid, nid, src), builtin(b) {}
+BuiltinAttribute::BuiltinAttribute(NodeID nid, const Source& src, const core::BuiltinValue b)
+    : Base(nid, src), builtin(b) {}
 
 BuiltinAttribute::~BuiltinAttribute() = default;
 

@@ -37,11 +37,10 @@ namespace tint::ast {
 class Identifier : public Castable<Identifier, Node> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param sym the symbol for the identifier
-    Identifier(GenerationID pid, NodeID nid, const Source& src, Symbol sym);
+    Identifier(NodeID nid, const Source& src, Symbol sym);
 
     /// Destructor
     ~Identifier() override;

@@ -36,11 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticAttribute);
 
 namespace tint::ast {
 
-DiagnosticAttribute::DiagnosticAttribute(GenerationID pid,
-                                         NodeID nid,
-                                         const Source& src,
-                                         DiagnosticControl&& dc)
-    : Base(pid, nid, src), control(std::move(dc)) {}
+DiagnosticAttribute::DiagnosticAttribute(NodeID nid, const Source& src, DiagnosticControl&& dc)
+    : Base(nid, src), control(std::move(dc)) {}
 
 DiagnosticAttribute::~DiagnosticAttribute() = default;
 

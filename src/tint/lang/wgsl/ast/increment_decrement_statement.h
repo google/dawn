@@ -37,16 +37,11 @@ namespace tint::ast {
 class IncrementDecrementStatement final : public Castable<IncrementDecrementStatement, Statement> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param lhs the LHS expression
     /// @param inc `true` for increment, `false` for decrement
-    IncrementDecrementStatement(GenerationID pid,
-                                NodeID nid,
-                                const Source& src,
-                                const Expression* lhs,
-                                bool inc);
+    IncrementDecrementStatement(NodeID nid, const Source& src, const Expression* lhs, bool inc);
 
     /// Destructor
     ~IncrementDecrementStatement() override;

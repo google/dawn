@@ -33,16 +33,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ReturnStatement);
 
 namespace tint::ast {
 
-ReturnStatement::ReturnStatement(GenerationID pid, NodeID nid, const Source& src)
-    : Base(pid, nid, src), value(nullptr) {}
+ReturnStatement::ReturnStatement(NodeID nid, const Source& src) : Base(nid, src), value(nullptr) {}
 
-ReturnStatement::ReturnStatement(GenerationID pid,
-                                 NodeID nid,
-                                 const Source& src,
-                                 const Expression* val)
-    : Base(pid, nid, src), value(val) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(value, generation_id);
-}
+ReturnStatement::ReturnStatement(NodeID nid, const Source& src, const Expression* val)
+    : Base(nid, src), value(val) {}
 
 ReturnStatement::~ReturnStatement() = default;
 

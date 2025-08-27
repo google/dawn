@@ -33,8 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 
 namespace tint::ast {
 
-Enable::Enable(GenerationID pid, NodeID nid, const Source& src, VectorRef<const Extension*> exts)
-    : Base(pid, nid, src), extensions(std::move(exts)) {}
+Enable::Enable(NodeID nid, const Source& src, VectorRef<const Extension*> exts)
+    : Base(nid, src), extensions(std::move(exts)) {}
 
 Enable::~Enable() = default;
 

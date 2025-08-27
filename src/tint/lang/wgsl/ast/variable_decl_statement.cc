@@ -33,13 +33,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDeclStatement);
 
 namespace tint::ast {
 
-VariableDeclStatement::VariableDeclStatement(GenerationID pid,
-                                             NodeID nid,
-                                             const Source& src,
-                                             const Variable* var)
-    : Base(pid, nid, src), variable(var) {
+VariableDeclStatement::VariableDeclStatement(NodeID nid, const Source& src, const Variable* var)
+    : Base(nid, src), variable(var) {
     TINT_ASSERT(variable);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(variable, generation_id);
 }
 
 VariableDeclStatement::~VariableDeclStatement() = default;

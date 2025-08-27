@@ -81,15 +81,5 @@ TEST_F(BlockStatementDeathTest, Assert_Null_Statement) {
         "internal compiler error");
 }
 
-TEST_F(BlockStatementDeathTest, Assert_DifferentGenerationID_Statement) {
-    EXPECT_DEATH_IF_SUPPORTED(
-        {
-            ProgramBuilder b1;
-            ProgramBuilder b2;
-            b1.create<BlockStatement>(tint::Vector{b2.create<DiscardStatement>()}, tint::Empty);
-        },
-        "internal compiler error");
-}
-
 }  // namespace
 }  // namespace tint::ast

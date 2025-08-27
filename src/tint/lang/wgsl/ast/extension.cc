@@ -36,8 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Extension);
 
 namespace tint::ast {
 
-Extension::Extension(GenerationID pid, NodeID nid, const Source& src, wgsl::Extension ext)
-    : Base(pid, nid, src), name(ext) {}
+Extension::Extension(NodeID nid, const Source& src, wgsl::Extension ext)
+    : Base(nid, src), name(ext) {}
 
 Extension::~Extension() = default;
 

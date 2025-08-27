@@ -35,14 +35,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Override);
 
 namespace tint::ast {
 
-Override::Override(GenerationID pid,
-                   NodeID nid,
+Override::Override(NodeID nid,
                    const Source& src,
                    const Identifier* n,
                    Type ty,
                    const Expression* init,
                    VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, n, ty, init, std::move(attrs)) {}
+    : Base(nid, src, n, ty, init, std::move(attrs)) {}
 
 Override::~Override() = default;
 

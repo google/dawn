@@ -73,7 +73,6 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
-    "program_builder_test.cc",
     "program_test.cc",
   ],
   deps = [

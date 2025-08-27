@@ -40,11 +40,10 @@ namespace tint::ast {
 class Extension final : public Castable<Extension, Node> {
   public:
     /// Create a extension
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param ext the extension
-    Extension(GenerationID pid, NodeID nid, const Source& src, wgsl::Extension ext);
+    Extension(NodeID nid, const Source& src, wgsl::Extension ext);
 
     /// Destructor
     ~Extension() override;

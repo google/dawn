@@ -199,12 +199,6 @@ class ProgramBuilder : public ast::Builder {
     sem::Info sem_;
 };
 
-/// @param builder the ProgramBuilder
-/// @returns the GenerationID of the ProgramBuilder
-inline GenerationID GenerationIDOf(const ProgramBuilder* builder) {
-    return builder->ID();
-}
-
 }  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_PROGRAM_PROGRAM_BUILDER_H_

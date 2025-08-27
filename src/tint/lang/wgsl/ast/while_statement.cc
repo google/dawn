@@ -35,21 +35,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WhileStatement);
 
 namespace tint::ast {
 
-WhileStatement::WhileStatement(GenerationID pid,
-                               NodeID nid,
+WhileStatement::WhileStatement(NodeID nid,
                                const Source& src,
                                const Expression* cond,
                                const BlockStatement* b,
                                VectorRef<const ast::Attribute*> attrs)
-    : Base(pid, nid, src), condition(cond), body(b), attributes(std::move(attrs)) {
+    : Base(nid, src), condition(cond), body(b), attributes(std::move(attrs)) {
     TINT_ASSERT(cond);
     TINT_ASSERT(body);
 
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     for (auto* attr : attributes) {
         TINT_ASSERT(attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

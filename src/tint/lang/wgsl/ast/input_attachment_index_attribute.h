@@ -44,14 +44,10 @@ class InputAttachmentIndexAttribute final
     : public Castable<InputAttachmentIndexAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param expr the input attachment index value
-    InputAttachmentIndexAttribute(GenerationID pid,
-                                  NodeID nid,
-                                  const Source& src,
-                                  const Expression* expr);
+    InputAttachmentIndexAttribute(NodeID nid, const Source& src, const Expression* expr);
     ~InputAttachmentIndexAttribute() override;
 
     /// @returns the WGSL name for the attribute

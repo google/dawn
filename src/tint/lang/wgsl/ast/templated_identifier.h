@@ -43,14 +43,12 @@ namespace tint::ast {
 class TemplatedIdentifier final : public Castable<TemplatedIdentifier, Identifier> {
   public:
     /// Constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param sym the symbol for the identifier
     /// @param args the template arguments
     /// @param attrs the identifier attributes
-    TemplatedIdentifier(GenerationID pid,
-                        NodeID nid,
+    TemplatedIdentifier(NodeID nid,
                         const Source& src,
                         const Symbol& sym,
                         VectorRef<const Expression*> args,

@@ -34,19 +34,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
 namespace tint::ast {
 
-Variable::Variable(GenerationID pid,
-                   NodeID nid,
+Variable::Variable(NodeID nid,
                    const Source& src,
                    const Identifier* n,
                    Type ty,
                    const Expression* init,
                    VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {
+    : Base(nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {
     TINT_ASSERT(name);
     if (name) {
         TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(initializer, generation_id);
 }
 
 Variable::~Variable() = default;

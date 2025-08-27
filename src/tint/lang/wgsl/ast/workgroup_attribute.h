@@ -44,14 +44,12 @@ namespace tint::ast {
 class WorkgroupAttribute final : public Castable<WorkgroupAttribute, Attribute> {
   public:
     /// constructor
-    /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param x the workgroup x dimension expression
     /// @param y the optional workgroup y dimension expression
     /// @param z the optional workgroup z dimension expression
-    WorkgroupAttribute(GenerationID pid,
-                       NodeID nid,
+    WorkgroupAttribute(NodeID nid,
                        const Source& src,
                        const Expression* x,
                        const Expression* y = nullptr,
