@@ -1254,12 +1254,13 @@ crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,e
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_3d:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_3d_coords:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_3d_coords:* [ RetryOnFailure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ RetryOnFailure ]
-crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_3d_coords:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ RetryOnFailure ]
+
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Failure ]
+crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
 
 # Seem to always get DXGI_ERROR_DEVICE_REMOVED on first try. Might work on second try? Not important to fix.
 [ dawn-backend-validation intel-0x9bc5 webgpu-dxc-disabled win ] webgpu:api,validation,capability_checks,limits,maxUniformBuffersPerShaderStage:createPipeline,at_over:* [ RetryOnFailure ]
