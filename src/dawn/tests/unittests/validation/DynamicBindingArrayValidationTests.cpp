@@ -29,6 +29,7 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -868,6 +869,237 @@ TEST_F(DynamicBindingArrayTests, ShaderTwoDynamicArraysSameGroupIsAnError) {
 //    DynamicArrayKind in the layout.
 //  - An error is produced at shader module compilation time if it uses the same binding_array with
 //    different DynamicArrayKinds.
+
+// Test that BGL defaulting works with dynamic binding arrays.
+TEST_F(DynamicBindingArrayTests, GetBGLSuccess) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = nullptr;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+        @group(0) @binding(0) var a : binding_array<texture_2d<f32>>;
+
+        @compute @workgroup_size(1) fn main() {
+            _ = a[42];
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    MakeBindGroup(pipeline.GetBindGroupLayout(0), 18, {});
+}
+
+// Test that the correct array start is defaulted.
+TEST_F(DynamicBindingArrayTests, GetBGLDefaultedArrayStart) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = nullptr;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+        @group(0) @binding(7) var a : binding_array<texture_2d<f32>>;
+
+        @compute @workgroup_size(1) fn main() {
+            _ = a[42];
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create the texture to use in the bind group.
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Success case, the array starts at 7 so a texture at binding 7 and 7 + 1 is valid.
+    MakeBindGroup(pipeline.GetBindGroupLayout(0), 2,
+                  {
+                      {7, tex.CreateView()},
+                      {8, tex.CreateView()},
+                  });
+
+    // Error case, the texture is before the start of the binding array.
+    ASSERT_DEVICE_ERROR(MakeBindGroup(pipeline.GetBindGroupLayout(0), 2,
+                                      {
+                                          {6, tex.CreateView()},
+                                      }));
+
+    // Error case, the texture is after the end of the binding array.
+    ASSERT_DEVICE_ERROR(MakeBindGroup(pipeline.GetBindGroupLayout(0), 2,
+                                      {
+                                          {9, tex.CreateView()},
+                                      }));
+}
+
+// Test that the correct array kind is defaulted.
+TEST_F(DynamicBindingArrayTests, GetBGLDefaultedArrayKind) {
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = nullptr;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+        @group(0) @binding(0) var a : binding_array<texture_2d<f32>>;
+
+        @compute @workgroup_size(1) fn main() {
+            _ = a[42];
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create the texture to use in the bind group.
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Success case, the BGL will have DynamicArrayKind::SampledTexture.
+    MakeBindGroup(pipeline.GetBindGroupLayout(0), 1,
+                  {
+                      {0, tex.CreateView()},
+                  });
+
+    // TODO(https://crbug.com/435317394): Add tests for the DynamicArrayKind. It is not possible to
+    // create other DynamicArrayKind than SampledTexture at the moment so we cannot test error
+    // cases.
+}
+
+// Test that defaulting fails if we go above maxBindingsPerBindGroup
+TEST_F(DynamicBindingArrayTests, GetBGLMaxBindingsPerGroupLimit) {
+    // Control case, we are just below the limit.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module =
+            utils::CreateShaderModule(device, R"(
+                enable chromium_experimental_dynamic_binding;
+                @group(0) @binding()" + std::to_string(kMaxBindingsPerBindGroup - 1) +
+                                                  R"() var a : binding_array<texture_2d<f32>>;
+
+                @compute @workgroup_size(1) fn main() {
+                    _ = a[42];
+                }
+            )");
+        device.CreateComputePipeline(&csDesc);
+    }
+
+    // Error case, we are above the limit.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module =
+            utils::CreateShaderModule(device, R"(
+                enable chromium_experimental_dynamic_binding;
+                @group(0) @binding()" + std::to_string(kMaxBindingsPerBindGroup) +
+                                                  R"() var a : binding_array<texture_2d<f32>>;
+
+                @compute @workgroup_size(1) fn main() {
+                    _ = a[42];
+                }
+            )");
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+    }
+}
+
+// Test that defaulting fails if we go above maxBindGroups
+TEST_F(DynamicBindingArrayTests, GetBGLMaxBindGroupsLimit) {
+    // Control case, we are just below the limit.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module =
+            utils::CreateShaderModule(device,
+                                      R"(
+                enable chromium_experimental_dynamic_binding;
+                @group()" + std::to_string(kMaxBindGroups - 1) +
+                                          R"() @binding(0) var a : binding_array<texture_2d<f32>>;
+
+                @compute @workgroup_size(1) fn main() {
+                    _ = a[42];
+                }
+            )");
+        device.CreateComputePipeline(&csDesc);
+    }
+
+    // Error case, we are above the limit.
+    {
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.layout = nullptr;
+        csDesc.compute.module =
+            utils::CreateShaderModule(device,
+                                      R"(
+                enable chromium_experimental_dynamic_binding;
+                @group()" + std::to_string(kMaxBindGroups) +
+                                          R"() @binding(0) var a : binding_array<texture_2d<f32>>;
+
+                @compute @workgroup_size(1) fn main() {
+                    _ = a[42];
+                }
+            )");
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+    }
+}
+
+// Test that the dynamic binding arrays start must match between stages.
+TEST_F(DynamicBindingArrayTests, GetBGLArrayStartMatchesBetweenStages) {
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.layout = nullptr;
+    pDesc.vertex.module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+        @group(0) @binding(38) var a : binding_array<texture_2d<f32>>;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            _ = a[42];
+            return vec4f();
+        }
+    )");
+
+    // Success case: dynamic binding arrays match between the stages.
+    {
+        pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_dynamic_binding;
+            @group(0) @binding(38) var a : binding_array<texture_2d<f32>>;
+
+            @fragment fn fs() -> @location(0) vec4f {
+                _ = a[42];
+                return vec4f();
+            }
+        )");
+        device.CreateRenderPipeline(&pDesc);
+    }
+
+    // Success case: dynamic binding arrays have different starts on different groups.
+    {
+        pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_dynamic_binding;
+            @group(1) @binding(3) var a : binding_array<texture_2d<f32>>;
+
+            @fragment fn fs() -> @location(0) vec4f {
+                _ = a[42];
+                return vec4f();
+            }
+        )");
+        device.CreateRenderPipeline(&pDesc);
+    }
+
+    // Error case: dynamic binding arrays have different starts on the same group.
+    {
+        pDesc.cFragment.module = utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_dynamic_binding;
+            @group(0) @binding(3) var a : binding_array<texture_2d<f32>>;
+
+            @fragment fn fs() -> @location(0) vec4f {
+                _ = a[42];
+                return vec4f();
+            }
+        )");
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc));
+    }
+}
+
+// TODO(https://crbug.com/435317394): Add tests for the DynamicArrayKind defaulting / merging
+// between stages. Tests to add are:
+//  - Using two incompatible kinds between stages produces an error.
+//  - Using DynamicArrayKind::Undefined in a stage and not the other makes the BGL default to the
+//    non-Unknown DynamicArrayKind. (test both VS-FS and FS-VS directions to be safe).
+//  - Test what happens when only DynamicArrayKind::Undefined is used in the defaulted layout. Is
+//    that even valid?
 
 }  // anonymous namespace
 }  // namespace dawn
