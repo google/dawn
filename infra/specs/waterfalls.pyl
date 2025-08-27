@@ -6,6 +6,18 @@
       'swarming_containment_auto',
     ],
     'machines': {
+      # TODO(crbug.com/441327468): Move any tests here to a child tester once
+      # Go binaries can be compiled and isolated.
+      'dawn-linux-x64-builder-fuzz-rel': {
+        'os_type': 'linux',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'linux-jammy',
+          'x86-64',
+        ],
+        'test_suites': {},
+      },
       'dawn-linux-x64-sws-rel': {
         'os_type': 'linux',
         'mixins': [

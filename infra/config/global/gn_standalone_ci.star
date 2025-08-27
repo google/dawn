@@ -67,17 +67,10 @@ ci.builder(
     ),
     gn_args = gn_args.config(
         configs = [
-            "clang",
-            "component",
-            "dawn_no_d3d12",
             "dawn_swiftshader",
-            "linux",
+            "linux_clang",
+            "component",
             "release",
-            "siso",
-            "tint_hlsl_writer",
-            "tint_msl_writer",
-            "tint_spv_reader_writer",
-            "tint_wgsl_reader_writer",
             "x64",
         ],
     ),
@@ -85,6 +78,43 @@ ci.builder(
     os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel",
+        short_name = "x64",
+    ),
+)
+
+# TODO(crbug.com/441327468): Add a child tester `dawn-linux-x64-fuzz-rel` once
+# Go binaries are supported in the build system, and thus Go-based tests can
+# be isolated.
+ci.builder(
+    name = "dawn-linux-x64-builder-fuzz-rel",
+    description_html = "Compiles Dawn binaries for 'tools/run fuzz' for Linux/x64",
+    schedule = "triggered",
+    triggered_by = [],
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "libfuzzer",
+            "linux_clang",
+            "non_component",
+            "release",
+            "x64",
+        ],
+    ),
+    cores = 8,
+    os = os.LINUX_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|rel|fuzz",
         short_name = "x64",
     ),
 )

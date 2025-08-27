@@ -58,9 +58,37 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "libfuzzer",
+    args = {
+        "use_libfuzzer": True,
+    },
+)
+
+gn_args.config(
     name = "linux",
     args = {
         "target_os": "linux",
+    },
+)
+
+gn_args.config(
+    name = "linux_clang",
+    configs = [
+        "clang",
+        "dawn_no_d3d12",
+        "linux",
+        "siso",
+        "tint_hlsl_writer",
+        "tint_msl_writer",
+        "tint_spv_reader_writer",
+        "tint_wgsl_reader_writer",
+    ],
+)
+
+gn_args.config(
+    name = "non_component",
+    args = {
+        "is_component_build": False,
     },
 )
 
