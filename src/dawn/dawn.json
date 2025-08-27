@@ -1138,6 +1138,7 @@
         "methods": [
             {
                 "name": "get bind group layout",
+                "no autolock": true,
                 "returns": "bind group layout",
                 "args": [
                     {"name": "group index", "type": "uint32_t"}
@@ -1293,6 +1294,7 @@
             },
             {
                 "name": "create compute pipeline async",
+                "no autolock": true,
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
@@ -1328,6 +1330,7 @@
             },
             {
                 "name": "create render pipeline async",
+                "no autolock": true,
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
@@ -1426,6 +1429,7 @@
             },
             {
                 "name": "get limits",
+                "no autolock": true,
                 "returns": "status",
                 "args": [
                     {"name": "limits", "type": "limits", "annotation": "*"}
@@ -1437,6 +1441,7 @@
             },
             {
                 "name": "has feature",
+                "no autolock": true,
                 "returns": "bool",
                 "args": [
                     {"name": "feature", "type": "feature name"}
@@ -1444,12 +1449,14 @@
             },
             {
                 "name": "get features",
+                "no autolock": true,
                 "args": [
                     {"name": "features", "type": "supported features", "annotation": "*"}
                 ]
             },
             {
                 "name": "get adapter info",
+                "no autolock": true,
                 "returns": "status",
                 "args": [
                     {"name": "adapter info", "type": "adapter info", "annotation": "*"}
@@ -1457,11 +1464,13 @@
             },
             {
                 "name": "get adapter",
+                "no autolock": true,
                 "returns": "adapter",
                 "tags": ["dawn"]
             },
             {
                 "name": "get queue",
+                "no autolock": true,
                 "returns": "queue"
             },
             {
@@ -3378,6 +3387,7 @@
         "methods": [
             {
                 "name": "get bind group layout",
+                "no autolock": true,
                 "returns": "bind group layout",
                 "args": [
                     {"name": "group index", "type": "uint32_t"}
@@ -3963,6 +3973,7 @@
         "methods": [
             {
                 "name": "create view",
+                "no autolock": true,
                 "returns": "texture view",
                 "args": [
                     {"name": "descriptor", "type": "texture view descriptor", "annotation": "const*", "optional": true}
@@ -3984,34 +3995,42 @@
             },
             {
                 "name": "get width",
+                "no autolock": true,
                 "returns": "uint32_t"
             },
             {
                 "name": "get height",
+                "no autolock": true,
                 "returns": "uint32_t"
             },
             {
                 "name": "get depth or array layers",
+                "no autolock": true,
                 "returns": "uint32_t"
             },
             {
                 "name": "get mip level count",
+                "no autolock": true,
                 "returns": "uint32_t"
             },
             {
                 "name": "get sample count",
+                "no autolock": true,
                 "returns": "uint32_t"
             },
             {
                 "name": "get dimension",
+                "no autolock": true,
                 "returns": "texture dimension"
             },
             {
                 "name": "get format",
+                "no autolock": true,
                 "returns": "texture format"
             },
             {
                 "name": "get usage",
+                "no autolock": true,
                 "returns": "texture usage"
             },
             {
