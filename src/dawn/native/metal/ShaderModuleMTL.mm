@@ -354,7 +354,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.tintOptions.buffer_size_ubo_index = kBufferLengthBufferSlot;
     req.tintOptions.fixed_sample_mask = sampleMask;
-    req.tintOptions.disable_workgroup_init = false;
+    req.tintOptions.disable_workgroup_init = device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.tintOptions.disable_demote_to_helper =
         device->IsToggleEnabled(Toggle::DisableDemoteToHelper);
     req.tintOptions.emit_vertex_point_size =
