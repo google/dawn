@@ -1237,6 +1237,11 @@ crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x6
 crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_scalar_vector:inputSource="storage_r";vectorize_rhs=3 [ Failure ]
 crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
 
+# CTS needs to support new storage formats from texture-feature-tier1,
+# will be removed after the latest CTS rolling into Dawn
+crbug.com/421941589 webgpu:api,operation,storage_texture,read_only:basic:* [ Failure ]
+crbug.com/421941589 webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:* [ Failure ]
+
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:stage="v";* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:stage="v";* [ RetryOnFailure ]
