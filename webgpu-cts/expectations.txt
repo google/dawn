@@ -862,6 +862,9 @@ crbug.com/407109059 [ amd-0x67ef mac ] webgpu:shader,execution,expression,call,b
 # All textureSampleBias tests marked failing on Mac M2
 crbug.com/407076135 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
+# Flaky dangling pointer crash
+crbug.com/438853288 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:api,validation,state,device_lost,destroy:command,renderPass,renderBundle:stage="finish";awaitLost=false [ Failure ]
+
 # All textureSampleBias tests marked failing on Linux NVIDIA
 crbug.com/407109061 [ clang-coverage dawn-no-backend-validation linux nvidia-0x2184 nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
