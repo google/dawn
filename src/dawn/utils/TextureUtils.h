@@ -310,13 +310,6 @@ constexpr std::array<wgpu::TextureFormat, 15> kTier2AdditionalStorageFormats = {
     wgpu::TextureFormat::RGBA16Sint, wgpu::TextureFormat::RGBA16Float,
     wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint,
     wgpu::TextureFormat::RGBA32Float};
-
-constexpr std::array<wgpu::TextureFormat, 10> kTier2AdditionalIntStorageFormats = {
-    wgpu::TextureFormat::R8Uint,     wgpu::TextureFormat::R8Sint,
-    wgpu::TextureFormat::RGBA8Uint,  wgpu::TextureFormat::RGBA8Sint,
-    wgpu::TextureFormat::R16Uint,    wgpu::TextureFormat::R16Sint,
-    wgpu::TextureFormat::RGBA16Uint, wgpu::TextureFormat::RGBA16Sint,
-    wgpu::TextureFormat::RGBA32Uint, wgpu::TextureFormat::RGBA32Sint};
 #endif  // __EMSCRIPTEN__
 
 class SubsamplingFactor {
@@ -337,6 +330,7 @@ bool TextureFormatSupportsStorageTexture(wgpu::TextureFormat format,
 bool TextureFormatSupportsReadWriteStorageTexture(wgpu::TextureFormat format);
 
 bool IsBCTextureFormat(wgpu::TextureFormat textureFormat);
+bool IsNormalizedUncompressedColorTextureFormat(wgpu::TextureFormat textureFormat);
 bool IsETC2TextureFormat(wgpu::TextureFormat textureFormat);
 bool IsASTCTextureFormat(wgpu::TextureFormat textureFormat);
 bool IsCompressedTextureFormat(wgpu::TextureFormat textureFormat);
@@ -378,6 +372,8 @@ const char* GetWGSLColorTextureComponentTypeStr(wgpu::TextureFormat textureForma
 const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat);
 uint32_t GetTextureComponentCount(wgpu::TextureFormat textureFormat);
 
+float GetNormalizedFormatMaxComponentValue(wgpu::TextureFormat textureFormat,
+                                           uint32_t componentIndex = 0);
 wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDimension dimension);
 }  // namespace dawn::utils
 

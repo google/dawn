@@ -82,6 +82,68 @@ bool IsBCTextureFormat(wgpu::TextureFormat textureFormat) {
     }
 }
 
+bool IsNormalizedUncompressedColorTextureFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R8Unorm:
+        case wgpu::TextureFormat::RG8Unorm:
+        case wgpu::TextureFormat::RGBA8Unorm:
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+        case wgpu::TextureFormat::BGRA8Unorm:
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+        case wgpu::TextureFormat::R8Snorm:
+        case wgpu::TextureFormat::RG8Snorm:
+        case wgpu::TextureFormat::RGBA8Snorm:
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
+float GetNormalizedFormatMaxComponentValue(wgpu::TextureFormat textureFormat,
+                                           uint32_t componentIndex) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R8Unorm:
+        case wgpu::TextureFormat::RG8Unorm:
+        case wgpu::TextureFormat::RGBA8Unorm:
+        case wgpu::TextureFormat::RGBA8UnormSrgb:
+        case wgpu::TextureFormat::BGRA8Unorm:
+        case wgpu::TextureFormat::BGRA8UnormSrgb:
+            return 255.0f;
+
+        case wgpu::TextureFormat::R8Snorm:
+        case wgpu::TextureFormat::RG8Snorm:
+        case wgpu::TextureFormat::RGBA8Snorm:
+            return 127.0f;
+
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
+            return 65535.0f;
+
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return 32767.0f;
+
+        case wgpu::TextureFormat::RGB10A2Unorm:
+            if (componentIndex < 3) {
+                return 1023.0f;
+            } else {
+                return 3.0f;
+            }
+
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 bool IsETC2TextureFormat(wgpu::TextureFormat textureFormat) {
     switch (textureFormat) {
         case wgpu::TextureFormat::ETC2RGB8Unorm:
