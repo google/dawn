@@ -1,8 +1,7 @@
 # Chromium Experimental Dynamic Binding
 
-The `chromium_experimental_dynamic_binding` is an experimental extension that allows using both
-runtime sized `binding_array` and type-less `binding_array`. This provides the needed basis for
-dynamic binding (a.k.a. bind-less).
+The `chromium_experimental_dynamic_binding` is an experimental extension that allows using a new
+`resource_binding` type. This provides the needed basis for dynamic binding (a.k.a. bind-less).
 
 # Status
 
@@ -22,47 +21,25 @@ extension it would be `enable chromium_experimental_dynamic_binding`.
 
 # Specification
 
-This extension adds new features to the `binding_array` feature added previously with the
-`sized_binding_arrays` extension [1].
+## `resource_binding`
 
-## `binding_array<T>`
-
-* A new `binding_array<T>` type is added.
-* `T` is a format-less storage texture (e.g. `texture_storage_2d<f32>`), sampled texture, multisampled
-  texture, or depth texture.
-* This is a runtime-array version of the `binding_array<T, N>` as added by `sized_binding_arrays`.
-* A runtime binding array may not be passed as a function parameter. This is because there is no way
-  in WGSL to currently write the needed pointer type (e.g.
-  `ptr<handle, binding_array<texture_1d<f32>>, write>`).
-* An out-of-bounds read from the `binding_array<T>` will return any value from the `binding_array`.
-
-
-### `arrayLength`
-```
-@must_use fn arrayLength(a: ptr<handle, binding_array<T>, RW>) -> u32
-```
-
-Similar to the runtime-array version, returns the length of the array.
-
-## `binding_array`
-
-* A new `binding_array` type is added
-* This is a type-less version of `binding_array<T>`. As such, any restrictions on runtime binding
-  array is relevant to `binding_array`.
-* A `binding_array` can not be accessed with the usual array subscript operators. e.g. the following
+* A new `resource_binding` type is added
+* A `resource_binding` cannot be passed as a function parameter. This is because there is no way
+  in WGSL to currently write the needed pointer type (e.g. `ptr<handle, resource_binding, write>`).
+* A `resource_binding` can not be accessed with the usual array subscript operators. e.g. the following
   is disallowed:
 
   ```
-  var a: binding_array;
+  var a: resource_binding;
   fn foo() {
       var b = a[0];
   }
   ```
-* Two helper methods `getBinding` and `hasBinding` are provided for accessing a `binding_array`.
+* Two helper methods `getBinding` and `hasBinding` are provided for accessing a `resource_binding`.
 
 ### `hasBinding`
 ```
-@must_use fn hasBinding<T>(a: binding_array, index: I) -> bool
+@must_use fn hasBinding<T>(a: resource_binding, index: I) -> bool
 ```
 * `I` is an `i32` or `u32`
 * `T` is a format-less storage texture (e.g. `texture_storage_2d<f32>`), sampled texture, multisampled
@@ -72,7 +49,7 @@ Similar to the runtime-array version, returns the length of the array.
 
 ### `getBinding`
 ```
-@must_use fn getBinding<T>(a: binding_array, index: I) -> T
+@must_use fn getBinding<T>(a: resource_binding, index: I) -> T
 ```
 * `I` is an `i32` or `u32`
 * `T` is a format-less storage texture (e.g. `texture_storage_2d<f32>`), sampled texture, multisampled
@@ -85,31 +62,17 @@ returned. If the item at `index` is not of type `T` then a default texture of ty
 
 ### `arrayLength`
 ```
-@must_use fn arrayLength(a: ptr<handle, binding_array, RW>) -> u32
+@must_use fn arrayLength(a: resource_binding) -> u32
 ```
 
-Similar to the runtime-array version, returns the length of the array.
+Returns the length of the array.
 
 # Example usage
 
-## `binding_array<T>`
-
 ```
 enable chromium_experimental_dynamic_binding;
 
-@group(0) @binding(0) var sampled_textures : binding_array<texture_2d<f32>>;
-
-@fragment fn fs() {
-    let texture_load = textureLoad(sampled_textures[0], vec2(0, 0), 0);
-}
-```
-
-## `binding_array`
-
-```
-enable chromium_experimental_dynamic_binding;
-
-@group(0) @binding(0) var textures : binding_array;
+@group(0) @binding(0) var textures : resource_binding;
 
 @fragment fn fs() {
     if (hasBinding<texture_2d<f32>>(textures, 0)) {
@@ -117,6 +80,3 @@ enable chromium_experimental_dynamic_binding;
     }
 }
 ```
-
-# References
-1.[Sized Binding Arrays](https://github.com/gpuweb/gpuweb/blob/main/proposals/sized-binding-arrays.md)
