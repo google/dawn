@@ -1272,6 +1272,25 @@ TEST_F(IR_ValidatorTest, ContinuingUseValueAfterContinue) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, BreakIf_UndefCondition) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, nullptr); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:8:9 error: break_if: break_if condition cannot be nullptr
+        break_if undef  # -> [t: exit_loop loop_1, f: $B2]
+        ^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {

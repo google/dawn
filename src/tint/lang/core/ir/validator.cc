@@ -3655,6 +3655,11 @@ void Validator::CheckTerminator(const Terminator* b) {
 }
 
 void Validator::CheckBreakIf(const BreakIf* b) {
+    if (b->Condition() == nullptr) {
+        AddError(b) << "break_if condition cannot be nullptr";
+        return;
+    }
+
     auto* loop = b->Loop();
     if (loop == nullptr) {
         AddError(b) << "has no associated loop";
