@@ -313,6 +313,9 @@ int main(int argc, const char** argv) {
 #endif
 
     auto info = tint::cmd::LoadProgramInfo(opts);
+    if (!info.program.IsValid()) {
+        return 1;
+    }
 
     if (options.emit_json) {
         EmitJson(info.program);

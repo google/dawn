@@ -1444,6 +1444,9 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
 #endif
 
     auto info = tint::cmd::LoadProgramInfo(opts);
+    if (!info.program.IsValid()) {
+        return 1;
+    }
 
     if (options.parse_only) {
         return 1;

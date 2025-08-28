@@ -258,10 +258,6 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
         fflush(stderr);
     }
 
-    if (!info.program.IsValid()) {
-        exit(1);
-    }
-
     return info;
 }
 
