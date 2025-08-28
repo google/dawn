@@ -94,6 +94,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/pointer.h
   lang/core/type/reference.cc
   lang/core/type/reference.h
+  lang/core/type/resource_binding.cc
+  lang/core/type/resource_binding.h
   lang/core/type/sampled_texture.cc
   lang/core/type/sampled_texture.h
   lang/core/type/sampler.cc
@@ -176,6 +178,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/multisampled_texture_test.cc
   lang/core/type/pointer_test.cc
   lang/core/type/reference_test.cc
+  lang/core/type/resource_binding_test.cc
   lang/core/type/sampled_texture_test.cc
   lang/core/type/sampler_test.cc
   lang/core/type/storage_texture_test.cc
