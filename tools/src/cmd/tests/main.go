@@ -139,7 +139,7 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 
 	var formatList, ignore, dxcPath, fxcPath, tintPath, xcrunPath string
 	var maxTableWidth int
-	var server, useIrReader bool
+	var server bool
 	numCPU := runtime.NumCPU()
 	verbose, generateExpected, generateSkip := false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
@@ -152,7 +152,6 @@ func run(fsReaderWriter oswrapper.FilesystemReaderWriter) error {
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.BoolVar(&server, "server", true, "run Tint in server mode")
-	flag.BoolVar(&useIrReader, "use-ir-reader", true, "force use of IR SPIR-V Reader")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.IntVar(&maxTableWidth, "table-width", terminalWidth, "maximum width of the results table")
 	flag.Usage = showUsage

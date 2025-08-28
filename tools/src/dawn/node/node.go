@@ -82,7 +82,6 @@ type Options struct {
 	DumpShaders       bool
 	DumpShadersPretty bool
 	UseFXC            bool
-	UseIR             bool
 }
 
 func (f *Flags) SetOptions(opts Options) error {

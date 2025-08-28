@@ -54,7 +54,6 @@ type flags struct {
 	dumpShaders          bool
 	dumpShadersPretty    bool
 	fxc                  bool
-	useIR                bool
 	unrollConstEvalLoops bool
 	genCoverage          bool
 	compatibilityMode    bool
