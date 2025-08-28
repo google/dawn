@@ -935,6 +935,14 @@ void Texture::TransitionUsageForPassImpl(
                                                               TextureSyncInfo* lastSyncInfo,
                                                               const TextureSyncInfo& newSyncInfo) {
         wgpu::TextureUsage newUsage = newSyncInfo.usage;
+
+        // This is an ASSERT in lieu of validation that pinned resources are only used with their
+        // pinned usage. A resource being pinned means that it should stay as a single usage until
+        // it is unpinned / repinned.
+        // TODO(https://crbug.com/435317394): When the validation is implemented, consider removing
+        // this ASSERT.
+        DAWN_ASSERT(!HasPinnedUsage() || IsSubset(newUsage, GetPinnedUsage()));
+
         if (newSyncInfo.shaderStages == wgpu::ShaderStage::None) {
             // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a
             // texture binding that isn't actually sampled in any shader.
@@ -1040,6 +1048,13 @@ void Texture::TransitionUsageAndGetResourceBarrierImpl(
     VkPipelineStageFlags* dstStages) {
     DAWN_ASSERT(imageBarriers != nullptr);
     const Format& format = GetFormat();
+
+    // This is an ASSERT in lieu of validation that pinned resources are only used with their pinned
+    // usage. A resource being pinned means that it should stay as a single usage until it is
+    // unpinned / repinned.
+    // TODO(https://crbug.com/435317394): When the validation is implemented, consider removing this
+    // ASSERT.
+    DAWN_ASSERT(!HasPinnedUsage() || IsSubset(usage, GetPinnedUsage()));
 
     if (shaderStages == wgpu::ShaderStage::None) {
         // If the image isn't used in any shader stages, ignore shader usages. Eg. ignore a texture
@@ -1256,6 +1271,33 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         device->IncrementLazyClearCountForTesting();
     }
     return {};
+}
+
+MaybeError Texture::PinImpl(wgpu::TextureUsage usage) {
+    // Pinning means that until unpinned, the texture will have specific usage and can be used
+    // freely in shaders without any further check or memory barrier tracking. Ensure all
+    // subresources are cleared and transitioned to the usage.
+    DAWN_ASSERT(!HasPinnedUsage());
+    SubresourceRange pinnedSubresources = GetAllSubresources();
+
+    CommandRecordingContext* recordingContext =
+        ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
+    DAWN_TRY(EnsureSubresourceContentInitialized(recordingContext, pinnedSubresources));
+
+    TransitionUsageNow(recordingContext, usage, kAllStages, pinnedSubresources);
+
+    // TODO(https://crbug.com/435317394): Investigate what to do for imported textures. Should we
+    // consider a pin/unpin pair similar to an access on a queue such that we need to wait on fences
+    // or export them?
+    return {};
+}
+
+void Texture::UnpinImpl() {
+    DAWN_ASSERT(HasPinnedUsage());
+
+    // TODO(https://crbug.com/435317394): Investigate what to do for imported textures. Should we
+    // consider a pin/unpin pair similar to an access on a queue such that we need to wait on fences
+    // or export them?
 }
 
 MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,

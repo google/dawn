@@ -116,6 +116,9 @@ class Texture : public TextureBase {
     Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
 
     void DestroyImpl() override;
+    MaybeError PinImpl(wgpu::TextureUsage usage) override;
+    void UnpinImpl() override;
+
     MaybeError ClearTexture(CommandRecordingContext* recordingContext,
                             const SubresourceRange& range,
                             TextureBase::ClearValue);

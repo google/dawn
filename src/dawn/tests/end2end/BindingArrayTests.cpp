@@ -780,6 +780,36 @@ TEST_P(DynamicBindingArrayTests, RecyclingDoesntReuseTooSmallAllocation) {
     }
 }
 
+// Tests that pinning / unpinning doesn't crash in backends. TextureVk has ASSERTs that the frontend
+// ensures pinning / unpinning is balanced to help backends.
+TEST_P(DynamicBindingArrayTests, PinningBalancedInBackends) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R16Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Frontend should skip that unpinning as the texture is not pinned.
+    tex.Unpin();
+
+    // Duplicate pinning should be skipped by the frontend.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+    // Duplicate unpinning should be skipped by the frontend.
+    tex.Unpin();
+    tex.Unpin();
+
+    // Force a queue submit to flush pending commands and potentially find more issues.
+    queue.Submit(0, nullptr);
+}
+
+// TODO(https://crbug.com/435317394): Once we have support for running shader with dynamic binding
+// arrays, add tests that pinning handles lazy clearing:
+//  - Check that a newly created resource that's pinned samples as zeroes.
+//  - Likewise for a texture written to, then discarded with a render pass.
+
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
