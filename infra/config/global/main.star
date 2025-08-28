@@ -161,6 +161,15 @@ luci.bucket(
             acl.BUILDBUCKET_TRIGGERER,
         ),
     ],
+    bindings = [
+        # Allow CI builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            users = [
+                "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
+            ],
+        ),
+    ],
 )
 
 luci.bucket(
@@ -171,6 +180,18 @@ luci.bucket(
             groups = [
                 "project-dawn-tryjob-access",
                 "service-account-cq",
+            ],
+        ),
+    ],
+    bindings = [
+        # Allow try builders to create invocations in their own builds.
+        luci.binding(
+            roles = "role/resultdb.invocationCreator",
+            groups = [
+                "project-dawn-tryjob-access",
+            ],
+            users = [
+                "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
             ],
         ),
     ],
