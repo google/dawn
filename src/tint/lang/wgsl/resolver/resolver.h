@@ -202,6 +202,10 @@ class Resolver {
     /// the identifier is not templated.
     const core::type::Type* Array(const ast::Identifier* ident);
 
+    /// @returns a resource_binding, if the `chromium_experimental_dynamic_binding` extension is
+    /// enabled, otherwise nullptr
+    const core::type::ResourceBinding* ResourceBinding(const ast::Identifier* ident);
+
     /// @returns a binding_array resolved from the templated identifier @p ident.
     const core::type::BindingArray* BindingArray(const ast::Identifier* ident);
 

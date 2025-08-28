@@ -51,6 +51,7 @@
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/resource_binding.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/string.h"
@@ -356,6 +357,22 @@ inline const type::Array* BuildRuntimeArray(intrinsic::MatchState& state,
                                             const type::Type*,
                                             const type::Type* el) {
     return state.types.runtime_array(el);
+}
+
+inline const type::ResourceBinding* BuildResourceBinding(intrinsic::MatchState& state,
+                                                         const type::Type*) {
+    return state.types.resource_binding();
+}
+
+inline bool MatchResourceBinding(intrinsic::MatchState&, const type::Type* ty) {
+    if (ty->Is<intrinsic::Any>()) {
+        return true;
+    }
+
+    if (ty->Is<type::ResourceBinding>()) {
+        return true;
+    }
+    return false;
 }
 
 inline const type::BindingArray* BuildBindingArray(intrinsic::MatchState& state,

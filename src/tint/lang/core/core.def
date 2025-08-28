@@ -179,6 +179,8 @@ enum builtin_type {
   subgroup_matrix_result
   // sized_binding_array
   binding_array
+  // type-less binding array
+  resource_binding
   // texel_buffers
   texel_buffer
 
@@ -306,6 +308,7 @@ type atomic<T>
 @display("array<{T}>") type runtime_array<T>
 type array<T, N: num>
 type binding_array<T, N: num>
+type resource_binding
 type sampler
 type sampler_comparison
 type texture_1d<T>

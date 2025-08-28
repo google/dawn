@@ -245,8 +245,8 @@ bool Validator::IsPlain(const core::type::Type* type) const {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Validator::IsStorable(const core::type::Type* type) const {
-    return IsPlain(type) ||
-           type->IsAnyOf<core::type::BindingArray, core::type::Texture, core::type::Sampler>();
+    return IsPlain(type) || type->IsAnyOf<core::type::BindingArray, core::type::ResourceBinding,
+                                          core::type::Texture, core::type::Sampler>();
 }
 
 const ast::Statement* Validator::ClosestContinuing(bool stop_at_loop,
@@ -456,6 +456,18 @@ bool Validator::InputAttachmentIndexAttribute(const ast::InputAttachmentIndexAtt
         AddNote(attr->source) << style::Attribute("@input_attachment_index")
                               << " must only be applied to declarations of "
                               << style::Type("input_attachment") << " type";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::ResourceBinding([[maybe_unused]] const core::type::ResourceBinding* t,
+                                const Source& source) const {
+    if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalDynamicBinding)) {
+        AddError(source) << "use of a " << style::Attribute("resource_binding")
+                         << " requires enabling extension "
+                         << style::Code("chromium_experimental_dynamic_binding");
         return false;
     }
 
@@ -992,7 +1004,7 @@ bool Validator::Parameter(const sem::Variable* var) const {
             AddError(decl->type->source) << "type of function parameter must be constructible";
             return false;
         }
-    } else if (is_runtime_binding_array ||
+    } else if (var->Type()->Is<core::type::ResourceBinding>() || is_runtime_binding_array ||
                (!var->Type()->Is<core::type::Pointer>() && !var->Type()->IsHandle())) {
         AddError(decl->source) << "type of function parameter cannot be "
                                << sem_.TypeNameOf(var->Type());
