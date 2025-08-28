@@ -3558,6 +3558,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
 }
 
 void Validator::CheckSwitch(const Switch* s) {
+    CheckResults(s);
     CheckOperand(s, Switch::kConditionOperandOffset);
 
     if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {

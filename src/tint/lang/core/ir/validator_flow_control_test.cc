@@ -2134,4 +2134,23 @@ TEST_F(IR_ValidatorTest, Switch_NoCondition) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_NullResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_u);
+        s->SetResults(Vector<InstructionResult*, 1>{nullptr});
+
+        b.Append(b.DefaultCase(s), [&] { b.Return(f); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: switch: result is undefined
+    undef = switch 1u [c: (default, $B2)] {  # switch_1
+    ^^^^^
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir
