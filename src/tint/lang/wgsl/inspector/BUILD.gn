@@ -51,7 +51,6 @@ libtint_source_set("inspector") {
     "inspector.h",
     "resource_binding.cc",
     "resource_binding.h",
-    "resource_binding_info.cc",
     "resource_binding_info.h",
     "scalar.cc",
     "scalar.h",

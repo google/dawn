@@ -1,15 +1,308 @@
-SKIP: FAILED
-
-../../src/tint/lang/spirv/writer/printer/printer.cc:698 internal compiler error: Switch() matched no cases. Type: tint::core::type::ResourceBinding
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 ;
 ; fragment_main
 ;
-
-tint executable returned error: signal: illegal instruction
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 50
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %27 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %hasBinding_53683f "hasBinding_53683f"
+               OpName %arg_1 "arg_1"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %5 DescriptorSet 1
+               OpDecorate %5 Binding 0
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %10 DescriptorSet 2
+               OpDecorate %10 Binding 0
+               OpDecorate %10 NonWritable
+        %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+      %float = OpTypeFloat 32
+          %8 = OpTypeImage %float Cube 0 0 0 1 Unknown
+%_runtimearr_8 = OpTypeRuntimeArray %8
+%_ptr_UniformConstant__runtimearr_8 = OpTypePointer UniformConstant %_runtimearr_8
+          %5 = OpVariable %_ptr_UniformConstant__runtimearr_8 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+         %16 = OpTypeFunction %int
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+    %uint_13 = OpConstant %uint 13
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+      %false = OpConstantFalse %bool
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+       %void = OpTypeVoid
+         %44 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+%hasBinding_53683f = OpFunction %int None %16
+         %17 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_uint Function
+        %res = OpVariable %_ptr_Function_bool Function
+               OpStore %arg_1 %uint_1
+         %21 = OpLoad %uint %arg_1 None
+         %22 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %10 %uint_1
+         %24 = OpArrayLength %uint %10 1
+         %25 = OpISub %uint %24 %uint_1
+         %26 = OpExtInst %uint %27 UMin %21 %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %26
+         %30 = OpLoad %uint %28 None
+         %31 = OpIEqual %bool %30 %uint_13
+               OpStore %res %31
+         %36 = OpLoad %bool %res None
+         %37 = OpLogicalEqual %bool %36 %false
+         %39 = OpSelect %int %37 %int_1 %int_0
+               OpReturnValue %39
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %44
+         %45 = OpLabel
+         %46 = OpFunctionCall %int %hasBinding_53683f
+         %47 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %47 %46 None
+               OpReturn
+               OpFunctionEnd
+;
+; compute_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 50
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %27 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %hasBinding_53683f "hasBinding_53683f"
+               OpName %arg_1 "arg_1"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %5 DescriptorSet 1
+               OpDecorate %5 Binding 0
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %10 DescriptorSet 2
+               OpDecorate %10 Binding 0
+               OpDecorate %10 NonWritable
+        %int = OpTypeInt 32 1
+%prevent_dce_block = OpTypeStruct %int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+      %float = OpTypeFloat 32
+          %8 = OpTypeImage %float Cube 0 0 0 1 Unknown
+%_runtimearr_8 = OpTypeRuntimeArray %8
+%_ptr_UniformConstant__runtimearr_8 = OpTypePointer UniformConstant %_runtimearr_8
+          %5 = OpVariable %_ptr_UniformConstant__runtimearr_8 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+         %16 = OpTypeFunction %int
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+    %uint_13 = OpConstant %uint 13
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+      %false = OpConstantFalse %bool
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+       %void = OpTypeVoid
+         %44 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+%hasBinding_53683f = OpFunction %int None %16
+         %17 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_uint Function
+        %res = OpVariable %_ptr_Function_bool Function
+               OpStore %arg_1 %uint_1
+         %21 = OpLoad %uint %arg_1 None
+         %22 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %10 %uint_1
+         %24 = OpArrayLength %uint %10 1
+         %25 = OpISub %uint %24 %uint_1
+         %26 = OpExtInst %uint %27 UMin %21 %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %26
+         %30 = OpLoad %uint %28 None
+         %31 = OpIEqual %bool %30 %uint_13
+               OpStore %res %31
+         %36 = OpLoad %bool %res None
+         %37 = OpLogicalEqual %bool %36 %false
+         %39 = OpSelect %int %37 %int_1 %int_0
+               OpReturnValue %39
+               OpFunctionEnd
+%compute_main = OpFunction %void None %44
+         %45 = OpLabel
+         %46 = OpFunctionCall %int %hasBinding_53683f
+         %47 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %47 %46 None
+               OpReturn
+               OpFunctionEnd
+;
+; vertex_main
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 69
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %31 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %vertex_main_position_Output "vertex_main_position_Output"
+               OpName %vertex_main_loc0_Output "vertex_main_loc0_Output"
+               OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
+               OpName %hasBinding_53683f "hasBinding_53683f"
+               OpName %arg_1 "arg_1"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpMemberName %VertexOutput 0 "pos"
+               OpMemberName %VertexOutput 1 "prevent_dce"
+               OpName %VertexOutput "VertexOutput"
+               OpName %out "out"
+               OpName %vertex_main "vertex_main"
+               OpDecorate %1 DescriptorSet 1
+               OpDecorate %1 Binding 0
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %6 DescriptorSet 2
+               OpDecorate %6 Binding 0
+               OpDecorate %6 NonWritable
+               OpDecorate %vertex_main_position_Output BuiltIn Position
+               OpDecorate %vertex_main_loc0_Output Location 0
+               OpDecorate %vertex_main_loc0_Output Flat
+               OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
+      %float = OpTypeFloat 32
+          %4 = OpTypeImage %float Cube 0 0 0 1 Unknown
+%_runtimearr_4 = OpTypeRuntimeArray %4
+%_ptr_UniformConstant__runtimearr_4 = OpTypePointer UniformConstant %_runtimearr_4
+          %1 = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+          %6 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+%vertex_main_loc0_Output = OpVariable %_ptr_Output_int Output
+%_ptr_Output_float = OpTypePointer Output %float
+%vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
+         %20 = OpTypeFunction %int
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+    %uint_13 = OpConstant %uint 13
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+      %false = OpConstantFalse %bool
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+%VertexOutput = OpTypeStruct %v4float %int
+         %48 = OpTypeFunction %VertexOutput
+%_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
+         %52 = OpConstantNull %VertexOutput
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+     %uint_0 = OpConstant %uint 0
+         %56 = OpConstantNull %v4float
+%_ptr_Function_int = OpTypePointer Function %int
+       %void = OpTypeVoid
+         %63 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+%hasBinding_53683f = OpFunction %int None %20
+         %21 = OpLabel
+      %arg_1 = OpVariable %_ptr_Function_uint Function
+        %res = OpVariable %_ptr_Function_bool Function
+               OpStore %arg_1 %uint_1
+         %25 = OpLoad %uint %arg_1 None
+         %26 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %6 %uint_1
+         %28 = OpArrayLength %uint %6 1
+         %29 = OpISub %uint %28 %uint_1
+         %30 = OpExtInst %uint %31 UMin %25 %29
+         %32 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_1 %30
+         %34 = OpLoad %uint %32 None
+         %35 = OpIEqual %bool %34 %uint_13
+               OpStore %res %35
+         %40 = OpLoad %bool %res None
+         %41 = OpLogicalEqual %bool %40 %false
+         %43 = OpSelect %int %41 %int_1 %int_0
+               OpReturnValue %43
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %VertexOutput None %48
+         %49 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %52
+         %53 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %53 %56 None
+         %57 = OpAccessChain %_ptr_Function_int %out %uint_1
+         %59 = OpFunctionCall %int %hasBinding_53683f
+               OpStore %57 %59 None
+         %60 = OpLoad %VertexOutput %out None
+               OpReturnValue %60
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %63
+         %64 = OpLabel
+         %65 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %66 = OpCompositeExtract %v4float %65 0
+               OpStore %vertex_main_position_Output %66 None
+         %67 = OpCompositeExtract %int %65 1
+               OpStore %vertex_main_loc0_Output %67 None
+               OpStore %vertex_main___point_size_Output %float_1 None
+               OpReturn
+               OpFunctionEnd

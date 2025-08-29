@@ -51,9 +51,9 @@
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/resource_type.h"
 #include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/inspector/resource_binding_info.h"
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
@@ -829,7 +829,7 @@ TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
                         auto exp = call->ExplicitTemplateParams();
                         TINT_ASSERT(exp.Length() == 1);
                         info.default_binding_type_order.push_back(
-                            tint::inspector::TypeToResourceType(exp[0]));
+                            tint::core::type::TypeToResourceType(exp[0]));
                     },
                     TINT_ICE_ON_NO_MATCH);
             }

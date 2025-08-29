@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/resource_type.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -108,6 +109,20 @@ struct State {
                                         b.LoadWithResult(call->DetachResult(), access);
                                     });
                                     to_delete.push_back(call);
+                                    break;
+                                case core::BuiltinFn::kHasBinding:
+                                    b.InsertBefore(call, [&] {
+                                        auto* access = b.Access(ty.ptr<storage, u32, read>(), sb,
+                                                                1_u, call->Args()[1]);
+                                        auto* v = b.Load(access);
+                                        auto* r =
+                                            b.Equal(ty.bool_(), v,
+                                                    u32(static_cast<uint32_t>(
+                                                        core::type::TypeToResourceType(
+                                                            call->ExplicitTemplateParams()[0]))));
+                                        call->Result()->ReplaceAllUsesWith(r->Result());
+                                        to_delete.push_back(call);
+                                    });
                                     break;
                                 default:
                                     TINT_UNREACHABLE();

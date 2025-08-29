@@ -1,12 +1,56 @@
-SKIP: FAILED
-
-../../src/tint/lang/spirv/writer/printer/printer.cc:698 internal compiler error: Switch() matched no cases. Type: tint::core::type::ResourceBinding
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %23 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %fs "fs"
+               OpName %t "t"
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 0
+               OpDecorate %6 NonWritable
+        %int = OpTypeInt 32 1
+          %4 = OpTypeImage %int 2D 0 0 0 1 Unknown
+%_runtimearr_4 = OpTypeRuntimeArray %4
+%_ptr_UniformConstant__runtimearr_4 = OpTypePointer UniformConstant %_runtimearr_4
+          %1 = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+          %6 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+     %uint_1 = OpConstant %uint 1
+      %int_4 = OpConstant %int 4
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_5 = OpConstant %uint 5
+       %bool = OpTypeBool
+         %fs = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %6 %uint_1
+         %18 = OpArrayLength %uint %6 1
+         %19 = OpISub %uint %18 %uint_1
+         %20 = OpBitcast %uint %int_4
+         %22 = OpExtInst %uint %23 UMin %20 %19
+         %24 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_1 %22
+         %26 = OpLoad %uint %24 None
+          %t = OpIEqual %bool %26 %uint_5
+               OpReturn
+               OpFunctionEnd

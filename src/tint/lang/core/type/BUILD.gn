@@ -102,6 +102,8 @@ libtint_source_set("type") {
     "reference.h",
     "resource_binding.cc",
     "resource_binding.h",
+    "resource_type.cc",
+    "resource_type.h",
     "sampled_texture.cc",
     "sampled_texture.h",
     "sampler.cc",

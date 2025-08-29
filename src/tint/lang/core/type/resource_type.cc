@@ -25,18 +25,81 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/wgsl/inspector/resource_binding_info.h"
+#include "src/tint/lang/core/type/resource_type.h"
 
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::inspector {
+namespace tint::core::type {
+
+const core::type::Type* ResourceTypeToType(core::type::Manager& ty, ResourceType type) {
+    switch (type) {
+        case ResourceType::kTexture1d_f32:
+            return ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
+        case ResourceType::kTexture1d_i32:
+            return ty.sampled_texture(core::type::TextureDimension::k1d, ty.i32());
+        case ResourceType::kTexture1d_u32:
+            return ty.sampled_texture(core::type::TextureDimension::k1d, ty.u32());
+        case ResourceType::kTexture2d_f32:
+            return ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
+        case ResourceType::kTexture2d_i32:
+            return ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32());
+        case ResourceType::kTexture2d_u32:
+            return ty.sampled_texture(core::type::TextureDimension::k2d, ty.u32());
+        case ResourceType::kTexture2dArray_f32:
+            return ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32());
+        case ResourceType::kTexture2dArray_i32:
+            return ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.i32());
+        case ResourceType::kTexture2dArray_u32:
+            return ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.u32());
+        case ResourceType::kTexture3d_f32:
+            return ty.sampled_texture(core::type::TextureDimension::k3d, ty.f32());
+        case ResourceType::kTexture3d_i32:
+            return ty.sampled_texture(core::type::TextureDimension::k3d, ty.i32());
+        case ResourceType::kTexture3d_u32:
+            return ty.sampled_texture(core::type::TextureDimension::k3d, ty.u32());
+        case ResourceType::kTextureCube_f32:
+            return ty.sampled_texture(core::type::TextureDimension::kCube, ty.f32());
+        case ResourceType::kTextureCube_i32:
+            return ty.sampled_texture(core::type::TextureDimension::kCube, ty.i32());
+        case ResourceType::kTextureCube_u32:
+            return ty.sampled_texture(core::type::TextureDimension::kCube, ty.u32());
+        case ResourceType::kTextureCubeArray_f32:
+            return ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.f32());
+        case ResourceType::kTextureCubeArray_i32:
+            return ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.i32());
+        case ResourceType::kTextureCubeArray_u32:
+            return ty.sampled_texture(core::type::TextureDimension::kCubeArray, ty.u32());
+
+        case ResourceType::kTextureMultisampled2d_f32:
+            return ty.multisampled_texture(core::type::TextureDimension::k2d, ty.f32());
+        case ResourceType::kTextureMultisampled2d_i32:
+            return ty.multisampled_texture(core::type::TextureDimension::k2d, ty.i32());
+        case ResourceType::kTextureMultisampled2d_u32:
+            return ty.multisampled_texture(core::type::TextureDimension::k2d, ty.u32());
+
+        case ResourceType::kTextureDepth2d:
+            return ty.depth_texture(core::type::TextureDimension::k2d);
+        case ResourceType::kTextureDepth2dArray:
+            return ty.depth_texture(core::type::TextureDimension::k2dArray);
+        case ResourceType::kTextureDepthCube:
+            return ty.depth_texture(core::type::TextureDimension::kCube);
+        case ResourceType::kTextureDepthCubeArray:
+            return ty.depth_texture(core::type::TextureDimension::kCubeArray);
+        case ResourceType::kTextureDepthMultisampled2d:
+            return ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
+
+        default:
+            TINT_UNREACHABLE();
+    }
+}
 
 ResourceType TypeToResourceType(const core::type::Type* in_type) {
     return tint::Switch(
@@ -117,4 +180,4 @@ ResourceType TypeToResourceType(const core::type::Type* in_type) {
         TINT_ICE_ON_NO_MATCH);
 }
 
-}  // namespace tint::inspector
+}  // namespace tint::core::type

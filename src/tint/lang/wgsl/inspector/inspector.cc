@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/resource_type.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
@@ -992,7 +993,7 @@ std::vector<ResourceBindingInfo> Inspector::GetResourceBindingInfo(const std::st
 
                     auto [iter, _] =
                         bp_to_types.try_emplace(bp.value(), std::unordered_set<ResourceType>{});
-                    iter->second.insert(TypeToResourceType(type_expr->Type()));
+                    iter->second.insert(core::type::TypeToResourceType(type_expr->Type()));
                 });
         }
     }
