@@ -82,7 +82,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         for (auto& input : inputs) {
             if (input.attributes.builtin) {
-                auto* param = b.FunctionParam(input.name.Name(), input.type);
+                auto* param = b.FunctionParam(input.type);
+                if (input.name) {
+                    ir.SetName(param, input.name);
+                }
                 param->SetInvariant(input.attributes.invariant);
                 param->SetBuiltin(input.attributes.builtin.value());
                 input_indices.Push(InputIndex{static_cast<uint32_t>(input_params.Length()), 0u});

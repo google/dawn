@@ -1213,5 +1213,56 @@ foo_inputs = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ShaderIOTest, UnnamedParameter) {
+    auto* ep = b.Function("foo", ty.void_());
+    auto* front_facing = b.FunctionParam(ty.bool_());
+    front_facing->SetBuiltin(core::BuiltinValue::kFrontFacing);
+    ep->SetParams({front_facing});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        auto* ifelse = b.If(front_facing);
+        b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%2:bool [@front_facing]):void {
+  $B1: {
+    if %2 [t: $B2] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo_inner = func(%2:bool):void {
+  $B1: {
+    if %2 [t: $B2] {  # if_1
+      $B2: {  # true
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+%foo = @fragment func(%4:bool [@front_facing]):void {
+  $B3: {
+    %5:void = call %foo_inner, %4
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise
