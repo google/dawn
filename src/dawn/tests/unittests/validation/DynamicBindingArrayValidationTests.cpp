@@ -553,6 +553,18 @@ TEST_F(DynamicBindingArrayTests, DestroyDisallowedOnStaticOnlyBindGroup) {
     ASSERT_DEVICE_ERROR(bgStatic.Destroy());
 }
 
+// Test that it is an error to call .Destroy() on an error bind group. This is a regression test for
+// an issues where doing so was triggering an ASSERT.
+TEST_F(DynamicBindingArrayTests, DestroyOnErrorBindGroup) {
+    // Create an error bind group.
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
+    wgpu::BindGroup bg;
+    ASSERT_DEVICE_ERROR(bg = utils::MakeBindGroup(device, layout, {}));
+
+    ASSERT_DEVICE_ERROR(bg.Destroy());
+}
+
 // Test that using a destroyed dynamic binding array in a render pass in a submit is an error.
 TEST_F(DynamicBindingArrayTests, DestroyedDynamicBindingArrayUsedInRenderPass) {
     // Create an empty dynamic bind group.

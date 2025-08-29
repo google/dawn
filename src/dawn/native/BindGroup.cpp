@@ -985,6 +985,8 @@ MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
 }
 
 MaybeError BindGroupBase::ValidateDestroy() const {
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+
     // On the queue we only validate that dynamic array bind groups are alive in a submit because
     // validating for all bind groups would be too expensive. For that reason only allow dynamic
     // arrays to be destroyed early.
