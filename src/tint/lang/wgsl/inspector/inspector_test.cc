@@ -2851,8 +2851,8 @@ enable chromium_experimental_dynamic_binding;
     ASSERT_EQ(2u, result[0].type_info.size());
 
     std::sort(result[0].type_info.begin(), result[0].type_info.end());
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTexture2d_f32, result[0].type_info[0]);
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTexture3d_i32, result[0].type_info[1]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32, result[0].type_info[0]);
+    EXPECT_EQ(ResourceType::kTexture3d_i32, result[0].type_info[1]);
 }
 
 TEST_F(InspectorGetResourceBindingInfoTest, ResourceBinding_Multiple) {
@@ -2882,13 +2882,13 @@ enable chromium_experimental_dynamic_binding;
     EXPECT_EQ(1u, arr.group);
     EXPECT_EQ(1u, arr.binding);
     EXPECT_EQ(1u, arr.type_info.size());
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTextureCube_f32, arr.type_info[0]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32, arr.type_info[0]);
 
     arr = result[1];
     EXPECT_EQ(2u, arr.group);
     EXPECT_EQ(0u, arr.binding);
     EXPECT_EQ(1u, arr.type_info.size());
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTexture1d_f32, arr.type_info[0]);
+    EXPECT_EQ(ResourceType::kTexture1d_f32, arr.type_info[0]);
 
     arr = result[2];
     EXPECT_EQ(0u, arr.group);
@@ -2896,8 +2896,8 @@ enable chromium_experimental_dynamic_binding;
     EXPECT_EQ(2u, arr.type_info.size());
 
     std::sort(arr.type_info.begin(), arr.type_info.end());
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTexture2d_f32, arr.type_info[0]);
-    EXPECT_EQ(ResourceBindingInfo::ResourceType::kTexture3d_f32, arr.type_info[1]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32, arr.type_info[0]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32, arr.type_info[1]);
 }
 
 class InspectorGetSamplerTextureUsesTest : public TestHelper, public testing::Test {

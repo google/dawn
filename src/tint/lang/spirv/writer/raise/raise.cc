@@ -43,6 +43,7 @@
 #include "src/tint/lang/core/ir/transform/prepare_immediate_data.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
+#include "src/tint/lang/core/ir/transform/resource_binding.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
@@ -77,6 +78,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     PopulateRemapperAndMultiplanarOptions(options, remapper_data, multiplanar_map);
 
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+
+    if (options.resource_binding.has_value()) {
+        RUN_TRANSFORM(core::ir::transform::ResourceBinding, module,
+                      options.resource_binding.value());
+    }
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config;

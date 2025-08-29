@@ -90,6 +90,8 @@ libtint_source_set("transform") {
     "remove_terminator_args.h",
     "rename_conflicts.cc",
     "rename_conflicts.h",
+    "resource_binding.cc",
+    "resource_binding.h",
     "robustness.cc",
     "robustness.h",
     "shader_io.cc",

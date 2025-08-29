@@ -34,6 +34,7 @@
 #include <unordered_set>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/common/resource_binding_config.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::spirv::writer {
@@ -185,6 +186,9 @@ struct Options {
     /// SPIR-V binary version.
     SpvVersion spirv_version = SpvVersion::kSpv13;
 
+    /// Resource binding information
+    std::optional<ResourceBindingConfig> resource_binding = std::nullopt;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  remapped_entry_point_name,
@@ -210,7 +214,8 @@ struct Options {
                  use_vulkan_memory_model,
                  dva_transform_handle,
                  depth_range_offsets,
-                 spirv_version);
+                 spirv_version,
+                 resource_binding);
 };
 
 }  // namespace tint::spirv::writer

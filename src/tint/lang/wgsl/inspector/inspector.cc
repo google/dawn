@@ -269,8 +269,7 @@ inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id)
     return override;
 }
 
-[[maybe_unused]] ResourceBindingInfo::ResourceType TypeToResourceType(
-    const core::type::Type* in_type) {
+ResourceType TypeToResourceType(const core::type::Type* in_type) {
     return tint::Switch(
         in_type,
         [&](const core::type::SampledTexture* sa) {
@@ -278,80 +277,44 @@ inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id)
                 case core::type::TextureDimension::k1d:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture1d_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture1d_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture1d_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTexture1d_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTexture1d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture1d_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::k2d:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2d_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2d_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2d_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTexture2d_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTexture2d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture2d_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::k2dArray:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2dArray_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2dArray_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture2dArray_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTexture2dArray_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTexture2dArray_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture2dArray_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::k3d:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture3d_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture3d_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTexture3d_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTexture3d_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTexture3d_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTexture3d_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::kCube:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCube_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCube_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCube_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTextureCube_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTextureCube_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTextureCube_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::kCubeArray:
                     return tint::Switch(
                         sa->Type(),
-                        [&](const core::type::F32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCubeArray_f32;
-                        },
-                        [&](const core::type::I32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCubeArray_i32;
-                        },
-                        [&](const core::type::U32*) {
-                            return ResourceBindingInfo::ResourceType::kTextureCubeArray_u32;
-                        },
+                        [&](const core::type::F32*) { return ResourceType::kTextureCubeArray_f32; },
+                        [&](const core::type::I32*) { return ResourceType::kTextureCubeArray_i32; },
+                        [&](const core::type::U32*) { return ResourceType::kTextureCubeArray_u32; },
                         TINT_ICE_ON_NO_MATCH);
                 case core::type::TextureDimension::kNone:
                     TINT_UNREACHABLE();
@@ -360,30 +323,24 @@ inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id)
         [&](const core::type::MultisampledTexture* ms) {
             return tint::Switch(
                 ms->Type(),
-                [&](const core::type::F32*) {
-                    return ResourceBindingInfo::ResourceType::kTextureMultisampled2d_f32;
-                },
-                [&](const core::type::I32*) {
-                    return ResourceBindingInfo::ResourceType::kTextureMultisampled2d_i32;
-                },
-                [&](const core::type::U32*) {
-                    return ResourceBindingInfo::ResourceType::kTextureMultisampled2d_u32;
-                },
+                [&](const core::type::F32*) { return ResourceType::kTextureMultisampled2d_f32; },
+                [&](const core::type::I32*) { return ResourceType::kTextureMultisampled2d_i32; },
+                [&](const core::type::U32*) { return ResourceType::kTextureMultisampled2d_u32; },
                 TINT_ICE_ON_NO_MATCH);
         },
         [&](const core::type::DepthMultisampledTexture*) {
-            return ResourceBindingInfo::ResourceType::kTextureDepthMultisampled2d;
+            return ResourceType::kTextureDepthMultisampled2d;
         },
         [&](const core::type::DepthTexture* de) {
             switch (de->Dim()) {
                 case core::type::TextureDimension::k2d:
-                    return ResourceBindingInfo::ResourceType::kTextureDepth2d;
+                    return ResourceType::kTextureDepth2d;
                 case core::type::TextureDimension::k2dArray:
-                    return ResourceBindingInfo::ResourceType::kTextureDepth2dArray;
+                    return ResourceType::kTextureDepth2dArray;
                 case core::type::TextureDimension::kCube:
-                    return ResourceBindingInfo::ResourceType::kTextureDepthCube;
+                    return ResourceType::kTextureDepthCube;
                 case core::type::TextureDimension::kCubeArray:
-                    return ResourceBindingInfo::ResourceType::kTextureDepthCubeArray;
+                    return ResourceType::kTextureDepthCubeArray;
                 default:
                     TINT_UNREACHABLE();
             }
@@ -1074,8 +1031,7 @@ std::vector<ResourceBindingInfo> Inspector::GetResourceBindingInfo(const std::st
     auto& sem = program_.Sem();
     Symbol entry_point_symbol = program_.Symbols().Get(entry_point);
 
-    std::unordered_map<BindingPoint, std::unordered_set<ResourceBindingInfo::ResourceType>>
-        bp_to_types;
+    std::unordered_map<BindingPoint, std::unordered_set<ResourceType>> bp_to_types;
 
     // Iterate the call graph in reverse topological order such that function callers come
     // before their callee.
@@ -1113,8 +1069,8 @@ std::vector<ResourceBindingInfo> Inspector::GetResourceBindingInfo(const std::st
                     auto* type_expr = sem.Get(ident->arguments[0])->As<sem::TypeExpression>();
                     TINT_ASSERT(type_expr);
 
-                    auto [iter, _] = bp_to_types.try_emplace(
-                        bp.value(), std::unordered_set<ResourceBindingInfo::ResourceType>{});
+                    auto [iter, _] =
+                        bp_to_types.try_emplace(bp.value(), std::unordered_set<ResourceType>{});
                     iter->second.insert(TypeToResourceType(type_expr->Type()));
                 });
         }
@@ -1129,11 +1085,10 @@ std::vector<ResourceBindingInfo> Inspector::GetResourceBindingInfo(const std::st
             continue;
         }
 
-        std::vector<ResourceBindingInfo::ResourceType> type_info;
+        std::vector<ResourceType> type_info;
         auto iter = bp_to_types.find(global->Attributes().binding_point.value());
         if (iter != bp_to_types.end()) {
-            auto vec = std::vector<ResourceBindingInfo::ResourceType>{iter->second.begin(),
-                                                                      iter->second.end()};
+            auto vec = std::vector<ResourceType>{iter->second.begin(), iter->second.end()};
             type_info = std::move(vec);
         }
 

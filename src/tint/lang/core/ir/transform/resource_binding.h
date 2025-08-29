@@ -25,28 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_
 
-#include <cstdint>
-#include <optional>
-#include <vector>
+#include "src/tint/api/common/resource_binding_config.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/utils/result.h"
 
-#include "src/tint/api/common/resource_type.h"
+// Forward declarations.
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
-namespace tint::inspector {
+namespace tint::core::ir::transform {
 
-/// Container for information about how a resource is bound
-struct ResourceBindingInfo {
-    /// Bind group the binding belongs
-    uint32_t group;
-    /// Identifier to identify this binding within the bind group
-    uint32_t binding;
+/// This transform updates the provided IR to support the necessary `resource_binding`
+/// restrictions/requirements.
+///
+/// We pull the `arrayLength` from the provided storage buffer and re-write the `getType` and
+/// `hasType` calls to use the provided storage buffer to validate the requested types.
+///
+/// @param module the module to transform
+/// @param config the transform configuration
+/// @returns success or failure
+Result<SuccessType> ResourceBinding(core::ir::Module& module, const ResourceBindingConfig& config);
 
-    /// The types used with the binding array
-    std::vector<ResourceType> type_info{};
-};
+}  // namespace tint::core::ir::transform
 
-}  // namespace tint::inspector
-
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_

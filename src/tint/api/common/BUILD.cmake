@@ -41,6 +41,8 @@
 tint_add_target(tint_api_common lib
   api/common/binding_point.h
   api/common/override_id.h
+  api/common/resource_binding_config.h
+  api/common/resource_type.h
   api/common/vertex_pulling_config.cc
   api/common/vertex_pulling_config.h
 )

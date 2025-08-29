@@ -25,28 +25,49 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#include "src/tint/lang/core/ir/transform/resource_binding.h"
 
-#include <cstdint>
-#include <optional>
-#include <vector>
+#include <utility>
 
-#include "src/tint/api/common/resource_type.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/manager.h"
 
-namespace tint::inspector {
+namespace tint::core::ir::transform {
+namespace {
 
-/// Container for information about how a resource is bound
-struct ResourceBindingInfo {
-    /// Bind group the binding belongs
-    uint32_t group;
-    /// Identifier to identify this binding within the bind group
-    uint32_t binding;
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
-    /// The types used with the binding array
-    std::vector<ResourceType> type_info{};
+/// PIMPL state for the transform.
+struct State {
+    /// The configuration.
+    const ResourceBindingConfig& config;
+
+    /// The IR module.
+    core::ir::Module& ir;
+
+    /// The IR builder.
+    core::ir::Builder b{ir};
+
+    /// The type manager.
+    core::type::Manager& ty{ir.Types()};
+
+    /// Process the module.
+    void Process() {}
 };
 
-}  // namespace tint::inspector
+}  // namespace
 
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+Result<SuccessType> ResourceBinding(core::ir::Module& ir, const ResourceBindingConfig& config) {
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ResourceBinding");
+    if (result != Success) {
+        return result.Failure();
+    }
+
+    State{config, ir}.Process();
+
+    return Success;
+}
+
+}  // namespace tint::core::ir::transform
