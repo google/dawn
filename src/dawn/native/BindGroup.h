@@ -35,7 +35,6 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/ityp_span.h"
-#include "dawn/common/ityp_vector.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Error.h"
@@ -48,6 +47,7 @@
 namespace dawn::native {
 
 class DeviceBase;
+class DynamicArrayState;
 
 ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
     DeviceBase* device,
@@ -86,9 +86,9 @@ class BindGroupBase : public ApiObjectBase {
 
     void ForEachUnverifiedBufferBindingIndex(std::function<void(BindingIndex, uint32_t)> fn) const;
 
-    // Getters and operations on the dynamic array part.
+    // Getters and operations on the dynamic array part for code that doesn't need to directly
+    // modify the state.
     bool HasDynamicArray() const;
-    BindingIndex GetDynamicArraySize() const;
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetDynamicArrayBindings() const;
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -133,26 +133,6 @@ class BindGroupBase : public ApiObjectBase {
 
     // The dynamic array is separate so as to not bloat the size and destructor of bind groups
     // without them.
-    class DynamicArrayState {
-      public:
-        explicit DynamicArrayState(DeviceBase* device, BindingIndex size);
-
-        MaybeError Initialize();
-
-        BindingIndex GetSize() const;
-        ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
-        BufferBase* GetMetadataBuffer() const;
-        bool IsDestroyed() const;
-
-        void Update(BindingIndex i, TextureViewBase* view);
-        void Destroy();
-
-      private:
-        bool mDestroyed = false;
-        ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
-        raw_ptr<DeviceBase> mDevice;
-        Ref<BufferBase> mMetadataBuffer;
-    };
     std::unique_ptr<DynamicArrayState> mDynamicArray;
 };
 
