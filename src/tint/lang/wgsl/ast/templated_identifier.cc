@@ -38,15 +38,11 @@ namespace tint::ast {
 TemplatedIdentifier::TemplatedIdentifier(NodeID nid,
                                          const Source& src,
                                          const Symbol& sym,
-                                         VectorRef<const Expression*> args,
-                                         VectorRef<const Attribute*> attrs)
-    : Base(nid, src, sym), arguments(std::move(args)), attributes(std::move(attrs)) {
+                                         VectorRef<const Expression*> args)
+    : Base(nid, src, sym), arguments(std::move(args)) {
     TINT_ASSERT(!arguments.IsEmpty());  // Should have been an Identifier if this fires.
     for (auto* arg : arguments) {
         TINT_ASSERT(arg);
-    }
-    for (auto* attr : attributes) {
-        TINT_ASSERT(attr);
     }
 }
 

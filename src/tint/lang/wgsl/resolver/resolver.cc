@@ -2825,11 +2825,6 @@ const core::type::Type* Resolver::Array(const ast::Identifier* ident) {
         return nullptr;
     }
 
-    // Look for explicit stride via @stride(n) attribute
-    if (!ArrayAttributes(tmpl_ident->attributes)) {
-        return nullptr;
-    }
-
     auto* out = Array(tmpl_ident->source,                             //
                       ast_el_ty->source,                              //
                       ast_count ? ast_count->source : ident->source,  //
@@ -4142,22 +4137,6 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
             return nullptr;
         }
     }
-}
-
-bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes) {
-    if (!validator_.NoDuplicateAttributes(attributes)) {
-        return false;
-    }
-
-    if (!attributes.IsEmpty()) {
-        for (auto* attribute : attributes) {
-            Mark(attribute);
-            ErrorInvalidAttribute(attribute, StyledText{} << style::Type("array") << " types");
-        }
-        return false;
-    }
-
-    return true;
 }
 
 sem::Array* Resolver::Array(const Source& array_source,

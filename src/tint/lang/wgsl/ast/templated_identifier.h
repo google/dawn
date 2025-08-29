@@ -47,21 +47,16 @@ class TemplatedIdentifier final : public Castable<TemplatedIdentifier, Identifie
     /// @param src the source of this node
     /// @param sym the symbol for the identifier
     /// @param args the template arguments
-    /// @param attrs the identifier attributes
     TemplatedIdentifier(NodeID nid,
                         const Source& src,
                         const Symbol& sym,
-                        VectorRef<const Expression*> args,
-                        VectorRef<const Attribute*> attrs);
+                        VectorRef<const Expression*> args);
 
     /// Destructor
     ~TemplatedIdentifier() override;
 
     /// The templated arguments
     const tint::Vector<const Expression*, 3> arguments;
-
-    /// Attributes on the identifier
-    const tint::Vector<const Attribute*, 0> attributes;
 };
 
 }  // namespace tint::ast

@@ -1026,13 +1026,13 @@ class State {
 
                 auto el = Type(a->ElemType());
                 if (a->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    return b.ty.array(el, {});
+                    return b.ty.array(el);
                 }
                 auto count = a->ConstantCount();
                 if (!count) {
                     TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                 }
-                return b.ty.array(el, u32(count.value()), {});
+                return b.ty.array(el, u32(count.value()));
             },
             [&](const core::type::Struct* s) { return Struct(s); },
             [&](const core::type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },

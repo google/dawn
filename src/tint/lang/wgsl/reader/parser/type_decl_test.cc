@@ -322,7 +322,6 @@ TEST_F(WGSLParserTest, TypeDecl_Array_ExpressionSize) {
 
     auto* arr = t->expr->identifier->As<ast::TemplatedIdentifier>();
     EXPECT_EQ(arr->symbol.Name(), "array");
-    EXPECT_TRUE(arr->attributes.IsEmpty());
 
     ASSERT_EQ(arr->arguments.Length(), 2u);
 

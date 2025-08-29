@@ -178,12 +178,6 @@ class Builder {
     using DisableIfInferOrAbstract =
         std::enable_if_t<!IsInferOrAbstract<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
 
-    /// A helper used to enable overloads if the first type in `TYPES` is Infer or an abstract
-    /// numeric.
-    template <typename... TYPES>
-    using EnableIfInferOrAbstract =
-        std::enable_if_t<IsInferOrAbstract<std::decay_t<traits::NthTypeOf<0, TYPES..., void>>>>;
-
     /// VarOptions is a helper for accepting an arbitrary number of order independent options for
     /// constructing an ast::Var.
     struct VarOptions {
@@ -913,101 +907,71 @@ class Builder {
         }
 
         /// @param subtype the array element type
-        /// @param attrs the optional attributes for the array
         /// @return an array of type `T`
-        ast::Type array(ast::Type subtype, VectorRef<const ast::Attribute*> attrs = Empty) const {
-            return array(builder->source_, subtype, std::move(attrs));
-        }
+        ast::Type array(ast::Type subtype) const { return array(builder->source_, subtype); }
 
         /// @param source the Source of the node
         /// @param subtype the array element type
-        /// @param attrs the optional attributes for the array
         /// @return an array of type `T`
-        ast::Type array(const Source& source,
-                        ast::Type subtype,
-                        VectorRef<const ast::Attribute*> attrs = Empty) const {
+        ast::Type array(const Source& source, ast::Type subtype) const {
             return ast::Type{builder->Expr(
                 builder->create<ast::TemplatedIdentifier>(source, builder->Sym("array"),
                                                           Vector{
                                                               subtype.expr,
-                                                          },
-                                                          std::move(attrs)))};
+                                                          }))};
         }
 
         /// @param subtype the array element type
         /// @param n the array size. nullptr represents a runtime-array
-        /// @param attrs the optional attributes for the array
         /// @return an array of size `n` of type `T`
         template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
-        ast::Type array(ast::Type subtype,
-                        COUNT&& n,
-                        VectorRef<const ast::Attribute*> attrs = Empty) const {
-            return array(builder->source_, subtype, std::forward<COUNT>(n), std::move(attrs));
+        ast::Type array(ast::Type subtype, COUNT&& n) const {
+            return array(builder->source_, subtype, std::forward<COUNT>(n));
         }
 
         /// @param source the Source of the node
         /// @param subtype the array element type
         /// @param n the array size. nullptr represents a runtime-array
-        /// @param attrs the optional attributes for the array
         /// @return an array of size `n` of type `T`
         template <typename COUNT, typename = DisableIfVectorLike<COUNT>>
-        ast::Type array(const Source& source,
-                        ast::Type subtype,
-                        COUNT&& n,
-                        VectorRef<const ast::Attribute*> attrs = Empty) const {
+        ast::Type array(const Source& source, ast::Type subtype, COUNT&& n) const {
             return ast::Type{builder->Expr(
                 builder->create<ast::TemplatedIdentifier>(source, builder->Sym("array"),
                                                           Vector{
                                                               subtype.expr,
                                                               builder->Expr(std::forward<COUNT>(n)),
-                                                          },
-                                                          std::move(attrs)))};
+                                                          }))};
         }
 
         /// @param source the Source of the node
-        /// @return a inferred-size or runtime-sized array of type `T`
-        template <typename T, int N = 0, typename = EnableIfInferOrAbstract<T>>
-        ast::Type array(const Source& source) const {
-            static_assert(N == 0, "arrays with a count cannot be inferred");
-            return (*this)(source, "array");
-        }
-
-        /// @return a inferred-size or runtime-sized array of type `T`
-        template <typename T, int N = 0, typename = EnableIfInferOrAbstract<T>>
-        ast::Type array() const {
-            static_assert(N == 0, "arrays with a count cannot be inferred");
-            return array<T>(builder->source_);
-        }
-
-        /// @param source the Source of the node
-        /// @param attrs the optional attributes for the array
         /// @return a inferred-size or runtime-sized array of type `T`
         template <typename T, int N = 0, typename = DisableIfInferOrAbstract<T>>
-        ast::Type array(const Source& source,
-                        VectorRef<const ast::Attribute*> attrs = Empty) const {
+        ast::Type array(const Source& source) const {
             if constexpr (N == 0) {
                 return ast::Type{builder->Expr(
                     builder->create<ast::TemplatedIdentifier>(source, builder->Sym("array"),
                                                               Vector<const ast::Expression*, 1>{
                                                                   Of<T>().expr,
-                                                              },
-                                                              std::move(attrs)))};
+                                                              }))};
             } else {
                 return ast::Type{builder->Expr(builder->create<ast::TemplatedIdentifier>(
                     source, builder->Sym("array"),
                     Vector{
                         Of<T>().expr,
                         builder->Expr(builder->source_, core::u32(N)),
-                    },
-                    std::move(attrs)))};
+                    }))};
             }
         }
 
-        /// @param attrs the optional attributes for the array
         /// @return an array of size `N` of type `T`
-        template <typename T, int N = 0, typename = DisableIfInferOrAbstract<T>>
-        ast::Type array(VectorRef<const ast::Attribute*> attrs = Empty) const {
-            return array<T, N>(builder->source_, std::move(attrs));
+        template <typename T, int N = 0>
+        ast::Type array() const {
+            if constexpr (std::is_same_v<T, core::fluent_types::Infer>) {
+                static_assert(N == 0, "arrays with a count cannot be inferred");
+                return (*this)(builder->source_, "array");
+            } else {
+                return array<T, N>(builder->source_);
+            }
         }
 
         /// Creates an alias type
@@ -1412,7 +1376,7 @@ class Builder {
             return create<ast::Identifier>(source, Sym(std::forward<IDENTIFIER>(identifier)));
         }
         return create<ast::TemplatedIdentifier>(source, Sym(std::forward<IDENTIFIER>(identifier)),
-                                                std::move(arg_exprs), Empty);
+                                                std::move(arg_exprs));
     }
 
     /// @param expr the expression

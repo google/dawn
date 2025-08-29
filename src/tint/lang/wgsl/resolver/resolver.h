@@ -478,11 +478,6 @@ class Resolver {
     /// @returns the number of elements in the array.
     const core::type::ArrayCount* ArrayCount(const ast::Expression* count_expr);
 
-    /// Resolves and validates the attributes on an array.
-    /// @param attributes the attributes on the array type.
-    /// @returns true on success, false on failure
-    bool ArrayAttributes(VectorRef<const ast::Attribute*> attributes);
-
     /// Builds and returns the semantic information for an array.
     /// @returns the semantic Array information, or nullptr if an error is raised.
     /// @param array_source the source of the array

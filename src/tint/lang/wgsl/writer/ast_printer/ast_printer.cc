@@ -291,10 +291,6 @@ void ASTPrinter::EmitIdentifier(StringStream& out, const ast::IdentifierExpressi
 
 void ASTPrinter::EmitIdentifier(StringStream& out, const ast::Identifier* ident) {
     if (auto* tmpl_ident = ident->As<ast::TemplatedIdentifier>()) {
-        if (!tmpl_ident->attributes.IsEmpty()) {
-            EmitAttributes(out, tmpl_ident->attributes);
-            out << " ";
-        }
         out << GetSymbolName(ident->symbol) << "<";
         TINT_DEFER(out << ">");
         for (auto* expr : tmpl_ident->arguments) {
