@@ -47,6 +47,7 @@
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/Sampler.h"
+#include "dawn/native/TexelBufferView.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 
@@ -254,6 +255,30 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         }
     }
 
+    if (auto* texelBufferLayout = entry.Get<TexelBufferBindingLayout>()) {
+        bindingMemberCount++;
+        DAWN_INVALID_IF(!device->AreTexelBuffersEnabled(), "%s is not enabled.",
+                        wgpu::WGSLLanguageFeatureName::TexelBuffers);
+
+        DAWN_TRY(ValidateTexelBufferAccess(texelBufferLayout->access));
+
+        // TODO(393558555): Support bindingArraySize > 1 for texel buffers.
+        DAWN_INVALID_IF(
+            arraySize > 1,
+            "bindingArraySize (%u) > 1 for a storage texture binding is not implemented yet.",
+            arraySize);
+
+        DAWN_INVALID_IF(entry->visibility & wgpu::ShaderStage::Vertex &&
+                            texelBufferLayout->access != wgpu::TexelBufferAccess::ReadOnly,
+                        "Vertex visibility requires read-only texel buffer access.");
+
+        const Format* format;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(texelBufferLayout->format));
+        DAWN_INVALID_IF(!IsFormatSupportedForTexelBuffer(format->format),
+                        "Texel buffer layout format (%s) is not allowed for texel buffers.",
+                        format->format);
+    }
+
     if (entry.Get<ExternalTextureBindingLayout>()) {
         bindingMemberCount++;
         DAWN_INVALID_IF(arraySize > 1,
@@ -264,11 +289,11 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
     DAWN_INVALID_IF(bindingMemberCount == 0,
                     "BindGroupLayoutEntry had none of buffer, sampler, texture, "
-                    "storageTexture, or externalTexture set");
+                    "storageTexture, texelBuffer, or externalTexture set");
 
     DAWN_INVALID_IF(bindingMemberCount != 1,
                     "BindGroupLayoutEntry had more than one of buffer, sampler, texture, "
-                    "storageTexture, or externalTexture set");
+                    "storageTexture, texelBuffer, or externalTexture set");
 
     DAWN_INVALID_IF(
         arraySize > 1 && entry->texture.sampleType == wgpu::TextureSampleType::BindingNotUsed,
@@ -486,6 +511,23 @@ BindingInfo ConvertToBindingInfo(const UnpackedPtr<BindGroupLayoutEntry>& bindin
         }
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         bindingInfo.bindingLayout = StorageTextureBindingInfo::From(binding->storageTexture);
+    } else if (auto* texelBufferLayout = binding.Get<TexelBufferBindingLayout>()) {
+        // TODO(382544164): Prototype texel buffer feature.
+        // Placeholder implementation for `TexelBufferBindingLayout` from `TexelBufferBindingInfo`.
+        BufferBindingInfo bufferInfo{};
+        switch (texelBufferLayout->access) {
+            case wgpu::TexelBufferAccess::ReadOnly:
+                bufferInfo.type = wgpu::BufferBindingType::ReadOnlyStorage;
+                break;
+            case wgpu::TexelBufferAccess::ReadWrite:
+                bufferInfo.type = wgpu::BufferBindingType::Storage;
+                break;
+            default:
+                DAWN_UNREACHABLE();
+        }
+        bufferInfo.minBindingSize = 0;
+        bufferInfo.hasDynamicOffset = false;
+        bindingInfo.bindingLayout = bufferInfo;
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
         bindingInfo.bindingLayout = StaticSamplerBindingInfo::From(*staticSamplerBindingLayout);
     } else {

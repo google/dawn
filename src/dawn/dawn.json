@@ -484,6 +484,16 @@
         ]
     },
 
+    "texel buffer binding entry": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["bind group entry"],
+        "members": [
+            {"name": "texel buffer view", "type": "texel buffer view"}
+        ]
+    },
+
     "external texture binding layout": {
         "category": "structure",
         "chained": "in",
@@ -502,6 +512,15 @@
             {"value": 4, "name": "read write"}
         ]
     },
+    "texel buffer access": {
+        "category": "enum",
+        "tags": ["dawn"],
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 1, "name": "read only"},
+            {"value": 2, "name": "read write"}
+        ]
+    },
     "storage texture binding layout": {
         "category": "structure",
         "extensible": "in",
@@ -511,7 +530,16 @@
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"}
         ]
     },
-
+    "texel buffer binding layout": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["bind group layout entry"],
+        "members": [
+            {"name": "access", "type": "texel buffer access", "default": "read write"},
+            {"name": "format", "type": "texture format"}
+        ]
+    },
     "bind group layout entry": {
         "category": "structure",
         "extensible": "in",
@@ -3973,7 +4001,9 @@
             {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
             {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
             {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]},
-            {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]}
+            {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]},
+            {"value": 77, "name": "texel buffer binding entry", "tags": ["dawn"]},
+            {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]}
         ]
     },
     "texture": {

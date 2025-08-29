@@ -171,6 +171,7 @@ struct PerStageBindingCounts {
     uint32_t samplerCount;
     uint32_t storageBufferCount;
     uint32_t storageTextureCount;
+    uint32_t texelBufferCount;
     uint32_t uniformBufferCount;
     uint32_t externalTextureCount;
     uint32_t staticSamplerCount;

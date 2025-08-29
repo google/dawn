@@ -28,11 +28,45 @@
 #include <vector>
 
 #include "dawn/tests/unittests/validation/ValidationTest.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
 
-class TexelBufferValidationTest : public ValidationTest {};
+class TexelBufferValidationTest : public ValidationTest {
+  protected:
+    wgpu::Buffer CreateTexelBuffer(uint64_t size, wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor desc;
+        desc.size = size;
+        desc.usage = usage;
+        return device.CreateBuffer(&desc);
+    }
+
+    struct TexelBufferLayoutDescriptor {
+        wgpu::TexelBufferBindingLayout layout;
+        wgpu::BindGroupLayoutEntry entry;
+        wgpu::BindGroupLayoutDescriptor desc;
+
+        TexelBufferLayoutDescriptor(wgpu::TexelBufferAccess access,
+                                    wgpu::ShaderStage visibility,
+                                    wgpu::TextureFormat format,
+                                    uint32_t bindingArraySize = 0) {
+            layout = {};
+            layout.access = access;
+            layout.format = format;
+
+            entry = {};
+            entry.binding = 0;
+            entry.visibility = visibility;
+            entry.bindingArraySize = bindingArraySize;
+            entry.nextInChain = &layout;
+
+            desc = {};
+            desc.entryCount = 1;
+            desc.entries = &entry;
+        }
+    };
+};
 
 // Creation succeeds when the feature is enabled.
 TEST_F(TexelBufferValidationTest, CreationSuccess) {
@@ -51,6 +85,61 @@ TEST_F(TexelBufferValidationTest, MappableUsageRequiresExtendedFeature) {
 
     desc.usage = wgpu::BufferUsage::TexelBuffer | wgpu::BufferUsage::MapWrite;
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&desc));
+}
+
+// bindingArraySize > 1 is invalid.
+TEST_F(TexelBufferValidationTest, BindingArraySize) {
+    TexelBufferLayoutDescriptor helper(wgpu::TexelBufferAccess::ReadOnly,
+                                       wgpu::ShaderStage::Fragment, wgpu::TextureFormat::RGBA8Uint,
+                                       2);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&helper.desc));
+}
+
+// Vertex visibility requires read-only access.
+TEST_F(TexelBufferValidationTest, VertexVisibilityRequiresReadOnly) {
+    TexelBufferLayoutDescriptor helper(wgpu::TexelBufferAccess::ReadWrite,
+                                       wgpu::ShaderStage::Vertex, wgpu::TextureFormat::RGBA8Uint);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&helper.desc));
+}
+
+// Access must not be undefined.
+TEST_F(TexelBufferValidationTest, UndefinedLayoutAccess) {
+    TexelBufferLayoutDescriptor helper(wgpu::TexelBufferAccess::Undefined,
+                                       wgpu::ShaderStage::Fragment, wgpu::TextureFormat::RGBA8Uint);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&helper.desc));
+}
+
+// Format must not be undefined.
+TEST_F(TexelBufferValidationTest, UndefinedLayoutFormat) {
+    TexelBufferLayoutDescriptor helper(wgpu::TexelBufferAccess::ReadOnly,
+                                       wgpu::ShaderStage::Fragment, wgpu::TextureFormat::Undefined);
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&helper.desc));
+}
+
+// BindingInitializationHelper should chain a TexelBufferBindingEntry when initialized
+// with a TexelBufferView.
+TEST_F(TexelBufferValidationTest, BindingHelperChainsTexelBufferBindingEntry) {
+    constexpr uint64_t kSize = 4 * 4;
+    wgpu::Buffer buffer = CreateTexelBuffer(kSize, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = kSize;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    utils::BindingInitializationHelper helper(0, view);
+    wgpu::BindGroupEntry entry = helper.GetAsBinding();
+
+    EXPECT_EQ(entry.buffer, nullptr);
+    EXPECT_EQ(entry.textureView, nullptr);
+
+    ASSERT_NE(entry.nextInChain, nullptr);
+    EXPECT_EQ(entry.nextInChain->sType, wgpu::SType::TexelBufferBindingEntry);
+
+    const auto* texelEntry =
+        reinterpret_cast<const wgpu::TexelBufferBindingEntry*>(entry.nextInChain);
+    EXPECT_EQ(texelEntry->texelBufferView.Get(), view.Get());
 }
 
 class TexelBufferValidationWithExtendedMapTest : public TexelBufferValidationTest {
@@ -106,11 +195,29 @@ class TexelBufferFeatureDisabledTest : public ValidationTest {
 };
 
 // Creating a buffer with texel buffer bit without enabling the feature fails.
-TEST_F(TexelBufferFeatureDisabledTest, RequiresFeature) {
+TEST_F(TexelBufferFeatureDisabledTest, BufferRequiresFeature) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
     desc.usage = wgpu::BufferUsage::TexelBuffer;
     ASSERT_DEVICE_ERROR(device.CreateBuffer(&desc));
+}
+
+// Creating a texel buffer layout without enabling the feature fails.
+TEST_F(TexelBufferFeatureDisabledTest, LayoutRequiresFeature) {
+    wgpu::TexelBufferBindingLayout layout = {};
+    layout.access = wgpu::TexelBufferAccess::ReadOnly;
+    layout.format = wgpu::TextureFormat::RGBA8Uint;
+
+    wgpu::BindGroupLayoutEntry entry = {};
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.nextInChain = &layout;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &entry;
+
+    ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
 }  // anonymous namespace
