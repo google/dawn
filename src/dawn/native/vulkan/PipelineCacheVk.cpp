@@ -28,7 +28,9 @@
 #include "dawn/native/vulkan/PipelineCacheVk.h"
 
 #include <memory>
+#include <utility>
 
+#include "dawn/native/Blob.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Toggles.h"
@@ -85,11 +87,29 @@ MaybeError PipelineCache::SerializeToBlobImpl(Blob* blob) {
         // changed vs what is stored in the BlobCache.
         return {};
     }
+
     *blob = CreateBlob(bufferSize);
-    DAWN_TRY(CheckVkSuccess(mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle,
-                                                             &bufferSize, blob->Data()),
-                            "GetPipelineCacheData"));
-    mStoredDataSize = bufferSize;
+    size_t bytesWritten = bufferSize;
+    auto result = mDevice->fn.GetPipelineCacheData(mDevice->GetVkDevice(), mHandle, &bytesWritten,
+                                                   blob->Data());
+    if (result == VK_INCOMPLETE) {
+        // The size of the pipeline cache changed between the two calls but VK_INCOMPLETE still
+        // signals success. Some data would be truncated from the end but it's still valid
+        // serialized data up to `bytesWritten`.
+        result = VK_SUCCESS;
+    }
+    DAWN_TRY(CheckVkSuccess(result, "GetPipelineCacheData"));
+
+    if (bytesWritten < bufferSize) {
+        // If `bytesWritten` is smaller than the allocate blob there will be uninitialized data at
+        // the end of the blob. Copy the data to a blob of the correct size to avoid loading that
+        // uninitialized data from cache in the future.
+        Blob temporaryBlob = std::move(*blob);
+        *blob = CreateBlob(bytesWritten);
+        memcpy(blob->Data(), temporaryBlob.Data(), bytesWritten);
+    }
+
+    mStoredDataSize = bytesWritten;
 
     return {};
 }
