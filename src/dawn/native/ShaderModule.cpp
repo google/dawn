@@ -420,12 +420,37 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
     DAWN_UNREACHABLE();
 }
 
-ResultOrError<wgpu::DynamicBindingKind> FromArrayResourceType(
-    tint::inspector::RuntimeBindingArrayInfo::ResourceType type) {
+using ResourceType = tint::inspector::ResourceBindingInfo::ResourceType;
+ResultOrError<wgpu::DynamicBindingKind> FromArrayResourceType(ResourceType type) {
     switch (type) {
-        case tint::inspector::RuntimeBindingArrayInfo::ResourceType::kSampledTexture:
+        case ResourceType::kTexture1d_f32:
+        case ResourceType::kTexture1d_i32:
+        case ResourceType::kTexture1d_u32:
+        case ResourceType::kTexture2d_f32:
+        case ResourceType::kTexture2d_i32:
+        case ResourceType::kTexture2d_u32:
+        case ResourceType::kTexture2dArray_f32:
+        case ResourceType::kTexture2dArray_i32:
+        case ResourceType::kTexture2dArray_u32:
+        case ResourceType::kTexture3d_f32:
+        case ResourceType::kTexture3d_i32:
+        case ResourceType::kTexture3d_u32:
+        case ResourceType::kTextureCube_f32:
+        case ResourceType::kTextureCube_i32:
+        case ResourceType::kTextureCube_u32:
+        case ResourceType::kTextureCubeArray_f32:
+        case ResourceType::kTextureCubeArray_i32:
+        case ResourceType::kTextureCubeArray_u32:
+        case ResourceType::kTextureMultisampled2d_f32:
+        case ResourceType::kTextureMultisampled2d_i32:
+        case ResourceType::kTextureMultisampled2d_u32:
+        case ResourceType::kTextureDepth2d:
+        case ResourceType::kTextureDepth2dArray:
+        case ResourceType::kTextureDepthCube:
+        case ResourceType::kTextureDepthCubeArray:
+        case ResourceType::kTextureDepthMultisampled2d:
             return wgpu::DynamicBindingKind::SampledTexture;
-        case tint::inspector::RuntimeBindingArrayInfo::ResourceType::kNone:
+        case ResourceType::kEmpty:
             return DAWN_VALIDATION_ERROR(
                 "Attempted to convert 'None' array resource type from Tint.");
     }
@@ -1221,8 +1246,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     }
 
     // Dynamic binding array reflection
-    for (const tint::inspector::RuntimeBindingArrayInfo& array :
-         inspector->GetRuntimeBindingArrayInfo(entryPoint.name)) {
+    for (const tint::inspector::ResourceBindingInfo& array :
+         inspector->GetResourceBindingInfo(entryPoint.name)) {
         BindGroupIndex group(array.group);
         if (DelayedInvalidIf(group >= kMaxBindGroupsTyped,
                              "The entry-point uses a binding with a group decoration (%u) "
@@ -1243,7 +1268,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         wgpu::DynamicBindingKind kind = wgpu::DynamicBindingKind::Undefined;
         for (const auto& type : array.type_info) {
             wgpu::DynamicBindingKind kindForType;
-            DAWN_TRY_ASSIGN(kindForType, FromArrayResourceType(type.type));
+            DAWN_TRY_ASSIGN(kindForType, FromArrayResourceType(type));
 
             // This is the first kind that we compute, just store it.
             if (kind == wgpu::DynamicBindingKind::Undefined) {

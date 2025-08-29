@@ -40,7 +40,7 @@
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
-#include "src/tint/lang/wgsl/inspector/runtime_binding_array_info.h"
+#include "src/tint/lang/wgsl/inspector/resource_binding_info.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 
@@ -78,8 +78,8 @@ class Inspector {
     std::vector<Override> Overrides();
 
     /// @param entry_point name of the entry point to get information about.
-    /// @returns vector of all `binding_array` entries
-    std::vector<RuntimeBindingArrayInfo> GetRuntimeBindingArrayInfo(const std::string& entry_point);
+    /// @returns vector of all `resource_binding` entries
+    std::vector<ResourceBindingInfo> GetResourceBindingInfo(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the resource bindings.

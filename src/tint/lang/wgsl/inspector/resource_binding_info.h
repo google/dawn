@@ -25,22 +25,48 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RUNTIME_BINDING_ARRAY_INFO_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_RUNTIME_BINDING_ARRAY_INFO_H_
+#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
 
 #include <cstdint>
 #include <optional>
 #include <vector>
 
-#include "src/tint/lang/wgsl/inspector/resource_binding.h"
-
 namespace tint::inspector {
 
 /// Container for information about how a resource is bound
-struct RuntimeBindingArrayInfo {
+struct ResourceBindingInfo {
     enum class ResourceType {
-        kNone,
-        kSampledTexture,
+        kEmpty,
+
+        kTexture1d_f32,
+        kTexture1d_i32,
+        kTexture1d_u32,
+        kTexture2d_f32,
+        kTexture2d_i32,
+        kTexture2d_u32,
+        kTexture2dArray_f32,
+        kTexture2dArray_i32,
+        kTexture2dArray_u32,
+        kTexture3d_f32,
+        kTexture3d_i32,
+        kTexture3d_u32,
+        kTextureCube_f32,
+        kTextureCube_i32,
+        kTextureCube_u32,
+        kTextureCubeArray_f32,
+        kTextureCubeArray_i32,
+        kTextureCubeArray_u32,
+
+        kTextureMultisampled2d_f32,
+        kTextureMultisampled2d_i32,
+        kTextureMultisampled2d_u32,
+
+        kTextureDepth2d,
+        kTextureDepth2dArray,
+        kTextureDepthCube,
+        kTextureDepthCubeArray,
+        kTextureDepthMultisampled2d,
     };
 
     /// Bind group the binding belongs
@@ -48,18 +74,10 @@ struct RuntimeBindingArrayInfo {
     /// Identifier to identify this binding within the bind group
     uint32_t binding;
 
-    // True if this is a typeless binding array
-    bool is_typeless;
-
-    struct Type {
-        ResourceType type = ResourceType::kNone;
-        ResourceBinding::TextureDimension dim = ResourceBinding::TextureDimension::kNone;
-        ResourceBinding::SampledKind sampled_kind = ResourceBinding::SampledKind::kUnknown;
-    };
     /// The types used with the binding array
-    std::vector<Type> type_info{};
+    std::vector<ResourceType> type_info{};
 };
 
 }  // namespace tint::inspector
 
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RUNTIME_BINDING_ARRAY_INFO_H_
+#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_

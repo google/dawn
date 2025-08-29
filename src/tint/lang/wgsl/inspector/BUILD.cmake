@@ -45,7 +45,7 @@ tint_add_target(tint_lang_wgsl_inspector lib
   lang/wgsl/inspector/inspector.h
   lang/wgsl/inspector/resource_binding.cc
   lang/wgsl/inspector/resource_binding.h
-  lang/wgsl/inspector/runtime_binding_array_info.h
+  lang/wgsl/inspector/resource_binding_info.h
   lang/wgsl/inspector/scalar.cc
   lang/wgsl/inspector/scalar.h
 )
