@@ -3922,6 +3922,11 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
             }
         }
     }
+
+    if (!l->Index()->Type()->IsIntegerScalar()) {
+        AddError(l, LoadVectorElement::kIndexOperandOffset)
+            << "load vector element index must be an integer scalar";
+    }
 }
 
 void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
@@ -3938,6 +3943,11 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
                     << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
+    }
+
+    if (!s->Index()->Type()->IsIntegerScalar()) {
+        AddError(s, StoreVectorElement::kIndexOperandOffset)
+            << "store vector element index must be an integer scalar";
     }
 }
 
