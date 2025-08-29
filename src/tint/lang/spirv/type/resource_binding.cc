@@ -25,32 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#include "src/tint/lang/spirv/type/resource_binding.h"
 
-#include <cstdint>
-#include <optional>
-#include <vector>
+#include <sstream>
 
-#include "src/tint/api/common/resource_type.h"
-#include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/manager.h"
 
-namespace tint::inspector {
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::type::ResourceBinding);
 
-/// Container for information about how a resource is bound
-struct ResourceBindingInfo {
-    /// Bind group the binding belongs
-    uint32_t group;
-    /// Identifier to identify this binding within the bind group
-    uint32_t binding;
+namespace tint::spirv::type {
 
-    /// The types used with the binding array
-    std::vector<ResourceType> type_info{};
-};
+ResourceBinding::ResourceBinding(const core::type::Type* binding_type)
+    : Base(static_cast<size_t>(Hash(tint::TypeCode::Of<ResourceBinding>().bits, binding_type)),
+           core::type::Flags{}),
+      binding_type_(binding_type) {}
 
-// Converts a `in_type` into a resource type
-ResourceType TypeToResourceType(const core::type::Type* in_type);
+bool ResourceBinding::Equals(const UniqueNode& other) const {
+    if (auto* o = other.As<ResourceBinding>()) {
+        return o->binding_type_ == binding_type_;
+    }
+    return false;
+}
 
-}  // namespace tint::inspector
+std::string ResourceBinding::FriendlyName() const {
+    std::stringstream str;
+    str << "spirv.resource_binding<" << binding_type_->FriendlyName() << ">";
+    return str.str();
+}
 
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+ResourceBinding* ResourceBinding::Clone(core::type::CloneContext& ctx) const {
+    auto* binding_type = binding_type_->Clone(ctx);
+    return ctx.dst.mgr->Get<ResourceBinding>(binding_type);
+}
+
+}  // namespace tint::spirv::type

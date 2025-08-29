@@ -1,12 +1,36 @@
-SKIP: FAILED
-
-../../src/tint/lang/spirv/writer/raise/builtin_polyfill.cc:367 internal compiler error: TINT_ASSERT(access)
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 14
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %fs "fs"
+               OpName %t "t"
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 1
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+         %fs = OpFunction %void None %8
+          %9 = OpLabel
+         %10 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+          %t = OpLoad %uint %10 None
+               OpReturn
+               OpFunctionEnd

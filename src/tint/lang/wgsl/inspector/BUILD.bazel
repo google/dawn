@@ -42,6 +42,7 @@ cc_library(
     "entry_point.cc",
     "inspector.cc",
     "resource_binding.cc",
+    "resource_binding_info.cc",
     "scalar.cc",
   ],
   hdrs = [

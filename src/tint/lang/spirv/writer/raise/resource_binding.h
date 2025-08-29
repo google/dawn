@@ -25,54 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_RESOURCE_BINDING_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_RAISE_RESOURCE_BINDING_H_
 
 #include <vector>
 
-#include "src/tint/api/common/resource_binding_config.h"
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/type.h"
-#include "src/tint/utils/result.h"
+#include "src/tint/lang/core/ir/transform/resource_binding.h"
 
-// Forward declarations.
-namespace tint::core::ir {
-class Module;
-}  // namespace tint::core::ir
+namespace tint::spirv::writer::raise {
 
-namespace tint::core::ir::transform {
-
-// Backend specific override methods for resource binding
-class ResourceBindingHelper {
+class ResourceBindingHelper : public core::ir::transform::ResourceBindingHelper {
   public:
-    virtual ~ResourceBindingHelper();
+    ~ResourceBindingHelper() override = default;
 
     // Returns a map of types to the var which is used to access the memory of that type
-    virtual Hashmap<const core::type::Type*, core::ir::Var*, 4> GenerateAliases(
+    Hashmap<const core::type::Type*, core::ir::Var*, 4> GenerateAliases(
         core::ir::Builder& b,
         core::ir::Var*,
-        const std::vector<ResourceType>& types) const = 0;
-
-    // Returns true if the original `resource_binding` var should be deleted
-    virtual bool DeleteSourceVar() const { return true; }
+        const std::vector<ResourceType>& types) const override;
 };
 
-/// This transform updates the provided IR to support the necessary `resource_binding`
-/// restrictions/requirements.
-///
-/// We pull the `arrayLength` from the provided storage buffer and re-write the `getType` and
-/// `hasType` calls to use the provided storage buffer to validate the requested types.
-///
-/// @param module the module to transform
-/// @param config the transform configuration
-/// @param helper the resource binding helper
-/// @returns success or failure
-Result<SuccessType> ResourceBinding(core::ir::Module& module,
-                                    const ResourceBindingConfig& config,
-                                    ResourceBindingHelper* helper);
+}  // namespace tint::spirv::writer::raise
 
-}  // namespace tint::core::ir::transform
-
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RESOURCE_BINDING_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_RESOURCE_BINDING_H_

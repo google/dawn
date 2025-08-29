@@ -1,12 +1,5 @@
 SKIP: FAILED
 
-../../src/tint/lang/core/ir/transform/array_length_from_uniform.cc:147 internal compiler error: TINT_UNREACHABLE unhandled source of a storage buffer pointer: tint::core::ir::Load
+resource_binding not supported by the HLSL backend
 
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+tint executable returned error: exit status 1

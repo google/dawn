@@ -25,32 +25,42 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#ifndef SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_BINDING_H_
+#define SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_BINDING_H_
 
-#include <cstdint>
-#include <optional>
-#include <vector>
+#include <string>
 
-#include "src/tint/api/common/resource_type.h"
+#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::inspector {
+namespace tint::spirv::type {
 
-/// Container for information about how a resource is bound
-struct ResourceBindingInfo {
-    /// Bind group the binding belongs
-    uint32_t group;
-    /// Identifier to identify this binding within the bind group
-    uint32_t binding;
+/// ResourceBinding represents an OpTypeRuntimeArray of resources
+class ResourceBinding final : public Castable<ResourceBinding, core::type::Type> {
+  public:
+    /// Constructor
+    /// @param binding_type the type of the binding
+    explicit ResourceBinding(const core::type::Type* binding_type);
 
-    /// The types used with the binding array
-    std::vector<ResourceType> type_info{};
+    /// @param other the other node to compare against
+    /// @returns true if the this type is equal to @p other
+    bool Equals(const UniqueNode& other) const override;
+
+    const core::type::Type* GetBindingType() const { return binding_type_; }
+
+    /// @returns the friendly name for this type
+    std::string FriendlyName() const override;
+
+    bool IsHandle() const override { return true; }
+
+    /// @param ctx the clone context
+    /// @returns a clone of this type
+    ResourceBinding* Clone(core::type::CloneContext& ctx) const override;
+
+  private:
+    const core::type::Type* binding_type_;
 };
 
-// Converts a `in_type` into a resource type
-ResourceType TypeToResourceType(const core::type::Type* in_type);
+}  // namespace tint::spirv::type
 
-}  // namespace tint::inspector
-
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_RESOURCE_BINDING_INFO_H_
+#endif  // SRC_TINT_LANG_SPIRV_TYPE_RESOURCE_BINDING_H_

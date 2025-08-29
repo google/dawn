@@ -43,6 +43,8 @@ tint_add_target(tint_lang_spirv_type lib
   lang/spirv/type/explicit_layout_array.h
   lang/spirv/type/image.cc
   lang/spirv/type/image.h
+  lang/spirv/type/resource_binding.cc
+  lang/spirv/type/resource_binding.h
   lang/spirv/type/sampled_image.cc
   lang/spirv/type/sampled_image.h
 )

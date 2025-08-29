@@ -59,6 +59,7 @@
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
+#include "src/tint/lang/spirv/writer/raise/resource_binding.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
@@ -80,8 +81,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
     if (options.resource_binding.has_value()) {
+        spirv::writer::raise::ResourceBindingHelper helper;
         RUN_TRANSFORM(core::ir::transform::ResourceBinding, module,
-                      options.resource_binding.value());
+                      options.resource_binding.value(), &helper);
     }
 
     if (!options.disable_robustness) {

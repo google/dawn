@@ -41,11 +41,13 @@ cc_library(
   srcs = [
     "explicit_layout_array.cc",
     "image.cc",
+    "resource_binding.cc",
     "sampled_image.cc",
   ],
   hdrs = [
     "explicit_layout_array.h",
     "image.h",
+    "resource_binding.h",
     "sampled_image.h",
   ],
   deps = [
