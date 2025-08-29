@@ -41,10 +41,8 @@ AccessorExpression::AccessorExpression(const ast::AccessorExpression* declaratio
                                        const ValueExpression* object,
                                        const Statement* statement,
                                        const core::constant::Value* constant,
-                                       bool has_side_effects,
                                        const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
-      object_(object) {}
+    : Base(declaration, type, stage, statement, constant, root_ident), object_(object) {}
 
 AccessorExpression::~AccessorExpression() = default;
 

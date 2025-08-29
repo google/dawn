@@ -48,14 +48,12 @@ class Call final : public Castable<Call, ValueExpression> {
     /// @param arguments the call arguments
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of this expression
-    /// @param has_side_effects whether this expression may have side effects
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
          core::EvaluationStage stage,
          VectorRef<const sem::ValueExpression*> arguments,
          const Statement* statement,
-         const core::constant::Value* constant,
-         bool has_side_effects);
+         const core::constant::Value* constant);
 
     /// Destructor
     ~Call() override;

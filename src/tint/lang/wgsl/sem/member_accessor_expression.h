@@ -59,7 +59,6 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Acces
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of the expression. May be null.
     /// @param object the object that holds the member being accessed
-    /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                              const core::type::Type* type,
@@ -67,7 +66,6 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Acces
                              const Statement* statement,
                              const core::constant::Value* constant,
                              const ValueExpression* object,
-                             bool has_side_effects,
                              const Variable* root_ident = nullptr);
 };
 
@@ -83,7 +81,6 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     /// @param constant the constant value of the expression. May be null
     /// @param object the object that holds the member being accessed
     /// @param member the structure member
-    /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                        const core::type::Type* type,
@@ -91,7 +88,6 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
                        const core::constant::Value* constant,
                        const ValueExpression* object,
                        const core::type::StructMember* member,
-                       bool has_side_effects,
                        const Variable* root_ident = nullptr);
 
     /// Destructor
@@ -115,7 +111,6 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     /// @param constant the constant value of the expression. May be null
     /// @param object the object that holds the member being accessed
     /// @param indices the swizzle indices
-    /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     Swizzle(const ast::MemberAccessorExpression* declaration,
             const core::type::Type* type,
@@ -123,7 +118,6 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
             const core::constant::Value* constant,
             const ValueExpression* object,
             VectorRef<uint32_t> indices,
-            bool has_side_effects,
             const Variable* root_ident = nullptr);
 
     /// Destructor

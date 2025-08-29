@@ -1393,8 +1393,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                 return b.create<sem::ValueExpression>(expr, b.create<core::type::Void>(),
                                                       core::EvaluationStage::kRuntime,
                                                       current_statement_,
-                                                      /* constant_value */ nullptr,
-                                                      /* has_side_effects */ false);
+                                                      /* constant_value */ nullptr);
             },  //
             TINT_ICE_ON_NO_MATCH);
         if (!sem_expr) {
@@ -1898,10 +1897,8 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
             val = res.Get();
         }
     }
-    bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
-    auto* sem = b.create<sem::IndexAccessorExpression>(expr, ty, stage, obj, idx,
-                                                       current_statement_, std::move(val),
-                                                       has_side_effects, obj->RootIdentifier());
+    auto* sem = b.create<sem::IndexAccessorExpression>(
+        expr, ty, stage, obj, idx, current_statement_, std::move(val), obj->RootIdentifier());
     sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
 }
@@ -1932,10 +1929,6 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         arg_behaviors.Add(arg->Behaviors());
     }
     arg_behaviors.Remove(sem::Behavior::kNext);
-
-    // Did any arguments have side effects?
-    bool has_side_effects =
-        std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
 
     // ctor_or_conv is a helper for building either a sem::ValueConstructor or
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
@@ -1996,7 +1989,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             value = r.Get();
         }
         return b.create<sem::Call>(expr, target_sem, stage, std::move(args), current_statement_,
-                                   value, has_side_effects);
+                                   value);
     };
 
     // arr_or_str_init is a helper for building a sem::ValueConstructor for an array or structure
@@ -2033,7 +2026,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         }
 
         return b.create<sem::Call>(expr, call_target, stage, std::move(args), current_statement_,
-                                   value, has_side_effects);
+                                   value);
     };
 
     auto ty_init_or_conv = [&](const core::type::Type* type) {
@@ -2130,7 +2123,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 }
 
                 return b.create<sem::Call>(expr, call_target, stage, std::move(args),
-                                           current_statement_, nullptr, has_side_effects);
+                                           current_statement_, nullptr);
             },
             [&](Default) {
                 AddError(expr->source) << "type is not constructible";
@@ -2317,11 +2310,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         value = r.Get();
     }
 
-    bool has_side_effects =
-        target->HasSideEffects() ||
-        std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
-    auto* call = b.create<sem::Call>(expr, target, stage, std::move(args), current_statement_,
-                                     value, has_side_effects);
+    auto* call =
+        b.create<sem::Call>(expr, target, stage, std::move(args), current_statement_, value);
 
     if (current_function_) {
         current_function_->AddDirectlyCalledBuiltin(target);
@@ -3144,10 +3134,8 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     auto stage = not_evaluated_.Contains(expr) ? core::EvaluationStage::kNotEvaluated
                                                : core::EvaluationStage::kRuntime;
 
-    // TODO(crbug.com/tint/1420): For now, assume all function calls have side effects.
-    bool has_side_effects = true;
     auto* call = b.create<sem::Call>(expr, target, stage, std::move(args), current_statement_,
-                                     /* constant_value */ nullptr, has_side_effects);
+                                     /* constant_value */ nullptr);
 
     target->AddCallSite(call);
 
@@ -3245,8 +3233,7 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 return nullptr;
             });
     }
-    return b.create<sem::ValueExpression>(literal, ty, stage, current_statement_, std::move(val),
-                                          /* has_side_effects */ false);
+    return b.create<sem::ValueExpression>(literal, ty, stage, current_statement_, std::move(val));
 }
 
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
@@ -3427,9 +3414,6 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
     const core::type::Type* ty = nullptr;
 
-    // Object may be a side-effecting expression (e.g. function call).
-    bool has_side_effects = object->HasSideEffects();
-
     Mark(expr->member);
 
     return Switch(
@@ -3463,7 +3447,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 val = obj_val->Index(static_cast<size_t>(member->Index()));
             }
             return b.create<sem::StructMemberAccess>(expr, ty, current_statement_, val, object,
-                                                     member, has_side_effects, root_ident);
+                                                     member, root_ident);
         },
 
         [&](const core::type::Vector* vec) -> sem::ValueExpression* {
@@ -3561,7 +3545,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 val = res.Get();
             }
             return b.create<sem::Swizzle>(expr, ty, current_statement_, val, obj_expr,
-                                          std::move(swizzle), has_side_effects, root_ident);
+                                          std::move(swizzle), root_ident);
         },
 
         [&](Default) {
@@ -3654,9 +3638,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         }
     }
 
-    bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
-    auto* sem = b.create<sem::ValueExpression>(expr, res_ty, stage, current_statement_, value,
-                                               has_side_effects);
+    auto* sem = b.create<sem::ValueExpression>(expr, res_ty, stage, current_statement_, value);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
     return sem;
@@ -3756,8 +3738,8 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
         }
     }
 
-    auto* sem = b.create<sem::ValueExpression>(unary, ty, stage, current_statement_, value,
-                                               expr->HasSideEffects(), root_ident);
+    auto* sem =
+        b.create<sem::ValueExpression>(unary, ty, stage, current_statement_, value, root_ident);
     sem->Behaviors() = expr->Behaviors();
     return sem;
 }

@@ -148,7 +148,6 @@ cc_library(
     "resolver_test.cc",
     "resource_binding_test.cc",
     "root_identifier_test.cc",
-    "side_effects_test.cc",
     "struct_address_space_use_test.cc",
     "struct_layout_test.cc",
     "struct_pipeline_stage_use_test.cc",

@@ -58,7 +58,6 @@ class AccessorExpression : public Castable<AccessorExpression, ValueExpression> 
     /// @param object the object expression that is being indexed
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of the expression. May be null
-    /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     AccessorExpression(const ast::AccessorExpression* declaration,
                        const core::type::Type* type,
@@ -66,7 +65,6 @@ class AccessorExpression : public Castable<AccessorExpression, ValueExpression> 
                        const ValueExpression* object,
                        const Statement* statement,
                        const core::constant::Value* constant,
-                       bool has_side_effects,
                        const Variable* root_ident = nullptr);
 
   private:

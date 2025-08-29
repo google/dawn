@@ -42,9 +42,8 @@ MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpr
                                                    const Statement* statement,
                                                    const core::constant::Value* constant,
                                                    const ValueExpression* object,
-                                                   bool has_side_effects,
                                                    const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, stage, object, statement, constant, has_side_effects, root_ident) {}
+    : Base(declaration, type, stage, object, statement, constant, root_ident) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
@@ -58,16 +57,8 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
                                        const core::constant::Value* constant,
                                        const ValueExpression* object,
                                        const core::type::StructMember* member,
-                                       bool has_side_effects,
                                        const Variable* root_ident /* = nullptr */)
-    : Base(declaration,
-           type,
-           object->Stage(),
-           statement,
-           constant,
-           object,
-           has_side_effects,
-           root_ident),
+    : Base(declaration, type, object->Stage(), statement, constant, object, root_ident),
       member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
@@ -78,16 +69,8 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const core::constant::Value* constant,
                  const ValueExpression* object,
                  VectorRef<uint32_t> indices,
-                 bool has_side_effects,
                  const Variable* root_ident /* = nullptr */)
-    : Base(declaration,
-           type,
-           object->Stage(),
-           statement,
-           constant,
-           object,
-           has_side_effects,
-           root_ident),
+    : Base(declaration, type, object->Stage(), statement, constant, object, root_ident),
       indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;

@@ -127,10 +127,6 @@ bool BuiltinFn::IsTexelBuffer() const {
     return false;
 }
 
-bool BuiltinFn::HasSideEffects() const {
-    return wgsl::HasSideEffects(fn_);
-}
-
 wgsl::LanguageFeature BuiltinFn::RequiredLanguageFeature() const {
     if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures;

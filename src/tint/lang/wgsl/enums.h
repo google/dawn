@@ -851,10 +851,6 @@ bool IsSubgroupMatrix(BuiltinFn f);
 /// @returns true if the given `f` is a quadSwap* builtin
 bool IsQuadSwap(BuiltinFn f);
 
-/// Determines if the given `f` may have side-effects (i.e. writes to at least one of its inputs)
-/// @returns true if intrinsic may have side-effects
-bool HasSideEffects(BuiltinFn f);
-
 }  // namespace tint::wgsl
 
 // clang-format on

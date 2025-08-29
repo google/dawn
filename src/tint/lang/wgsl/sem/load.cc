@@ -39,7 +39,6 @@ Load::Load(const ValueExpression* src, const Statement* statement, core::Evaluat
            /* stage */ stage,
            /* statement */ statement,
            /* constant */ nullptr,
-           /* has_side_effects */ src->HasSideEffects(),
            /* root_ident */ src->RootIdentifier()),
       source_(src) {
     TINT_ASSERT(src->Type()->Is<core::type::MemoryView>());
