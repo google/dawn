@@ -326,6 +326,10 @@ enable chromium_experimental_subgroup_matrix;
 enable subgroups;
 {{    end -}}
 
+{{- /* Emit 'enable chromium_experimental_dynamic_binding' if required */ -}}
+{{-   if OverloadUsesType $overload "resource_binding"}}
+enable chromium_experimental_dynamic_binding;
+{{    end -}}
 
 {{- /* Emit 'enable chromium_internal_input_attachments' if required */ -}}
 {{-   if eq "inputAttachmentLoad" $builtin_name}}
@@ -393,6 +397,7 @@ requires texel_buffers;
 {{-   else if HasPrefix $name "sampler" -}}handle
 {{-   else if HasPrefix $name "input_attachment" -}}handle
 {{-   else if HasPrefix $name "texel_buffer" -}}handle
+{{-   else if HasPrefix $name "resource_binding" -}}handle
 {{-   else if        eq $name "ptr"     -}}{{(index .TemplateArguments 0).Target.Name}}
 {{-   else                              -}}function
 {{-   end -}}

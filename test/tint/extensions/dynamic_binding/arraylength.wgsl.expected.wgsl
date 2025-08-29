@@ -1,15 +1,8 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/arraylength.wgsl:6:13 error: no matching call to 'arrayLength(resource_binding)'
+@group(0) @binding(0) var sampled_textures : resource_binding;
 
-2 candidate functions:
- • 'arrayLength(ptr<storage, array<T>, R>  ✗ ) -> u32' where:
-      ✗  'R' is 'read'
- • 'arrayLength(ptr<storage, array<T>, W>  ✗ ) -> u32' where:
-      ✗  'W' is 'write' or 'read_write'
-
-    let t = arrayLength(sampled_textures);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-tint executable returned error: exit status 1
+@fragment
+fn fs() {
+  let t = arrayLength(sampled_textures);
+}

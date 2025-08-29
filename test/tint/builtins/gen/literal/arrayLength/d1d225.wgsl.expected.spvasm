@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/core/ir/transform/array_length_from_uniform.cc:147 internal compiler error: TINT_UNREACHABLE unhandled source of a storage buffer pointer: tint::core::ir::Load
+../../src/tint/lang/spirv/writer/raise/builtin_polyfill.cc:367 internal compiler error: TINT_ASSERT(access)
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
@@ -8,5 +8,8 @@ SKIP: FAILED
 *  Please help us fix this issue by submitting a bug report at     *
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
+;
+; fragment_main
+;
 
 tint executable returned error: signal: illegal instruction

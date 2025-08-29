@@ -64,6 +64,7 @@ message Type {
         TypeBuiltinStruct builtin_struct = 19;
         TypeBindingArray binding_array = 20;
         TypeTexelBuffer texel_buffer = 21;
+        TypeResourceBinding resource_binding = 22;
     }
 }
 
@@ -147,6 +148,8 @@ message TypeStorageTexture {
     TexelFormat texel_format = 2;
     AccessControl access = 3;
 }
+
+message TypeResourceBinding {}
 
 message TypeExternalTexture {}
 

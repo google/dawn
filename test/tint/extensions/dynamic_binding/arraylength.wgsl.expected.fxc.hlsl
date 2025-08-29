@@ -1,15 +1,12 @@
 SKIP: FAILED
 
-<dawn>/test/tint/extensions/dynamic_binding/arraylength.wgsl:6:13 error: no matching call to 'arrayLength(resource_binding)'
+../../src/tint/lang/core/ir/transform/array_length_from_uniform.cc:147 internal compiler error: TINT_UNREACHABLE unhandled source of a storage buffer pointer: tint::core::ir::Load
 
-2 candidate functions:
- • 'arrayLength(ptr<storage, array<T>, R>  ✗ ) -> u32' where:
-      ✗  'R' is 'read'
- • 'arrayLength(ptr<storage, array<T>, W>  ✗ ) -> u32' where:
-      ✗  'W' is 'write' or 'read_write'
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-    let t = arrayLength(sampled_textures);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
-tint executable returned error: exit status 1
+tint executable returned error: signal: illegal instruction

@@ -8,5 +8,8 @@ SKIP: FAILED
 *  Please help us fix this issue by submitting a bug report at     *
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
+//
+// fragment_main
+//
 
 tint executable returned error: signal: illegal instruction

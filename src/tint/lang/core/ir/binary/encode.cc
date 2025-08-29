@@ -395,6 +395,9 @@ struct Encoder {
                 [&](const core::type::BindingArray* a) {
                     TypeBindingArray(*type_out.mutable_binding_array(), a);
                 },
+                [&](const core::type::ResourceBinding* a) {
+                    TypeResourceBinding(*type_out.mutable_resource_binding(), a);
+                },
                 [&](const core::type::DepthTexture* t) {
                     TypeDepthTexture(*type_out.mutable_depth_texture(), t);
                 },
@@ -526,6 +529,8 @@ struct Encoder {
             TINT_ICE_ON_NO_MATCH);
     }
 
+    void TypeResourceBinding(pb::TypeResourceBinding&, const core::type::ResourceBinding*) {}
+
     void TypeDepthTexture(pb::TypeDepthTexture& texture_out,
                           const core::type::DepthTexture* texture_in) {
         texture_out.set_dimension(TextureDimension(texture_in->Dim()));
@@ -562,6 +567,7 @@ struct Encoder {
     }
 
     void TypeExternalTexture(pb::TypeExternalTexture&, const core::type::ExternalTexture*) {}
+
     void TypeInputAttachment(pb::TypeInputAttachment& input_attachment_out,
                              const core::type::InputAttachment* input_attachment_in) {
         input_attachment_out.set_sub_type(Type(input_attachment_in->Type()));
