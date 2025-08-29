@@ -396,8 +396,7 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
     IncrementIndent();
     uint32_t offset = 0;
     for (auto* mem : str->members) {
-        // TODO(crbug.com/tint/798) move the @offset attribute handling to the transform::Wgsl
-        // sanitizer.
+        // Emit comments to show non-default struct member offsets.
         if (auto* mem_sem = program_.Sem().Get(mem)) {
             offset = tint::RoundUp(mem_sem->Align(), offset);
             if (mem_sem->Offset() != offset) {
@@ -412,17 +411,8 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
             offset += mem_sem->Size();
         }
 
-        // Offset attributes no longer exist in the WGSL spec, but are emitted
-        // by the SPIR-V reader and are consumed by the Resolver(). These should not
-        // be emitted, but instead struct padding fields should be emitted.
-        Vector<const ast::Attribute*, 4> attributes_sanitized;
-        attributes_sanitized.Reserve(mem->attributes.Length());
-        for (auto* attr : mem->attributes) {
-            attributes_sanitized.Push(attr);
-        }
-
-        if (!attributes_sanitized.IsEmpty()) {
-            EmitAttributes(Line(), attributes_sanitized);
+        if (!mem->attributes.IsEmpty()) {
+            EmitAttributes(Line(), mem->attributes);
         }
 
         auto out = Line();
