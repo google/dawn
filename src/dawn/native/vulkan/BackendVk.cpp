@@ -164,6 +164,12 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "vkAllocateMemory(): pAllocateInfo->pNext<VkMemoryDedicatedAllocateInfo>"},
     // crbug.com/324282958
     {"NVIDIA", "vkBindImageMemory: memoryTypeIndex"},
+
+    // crbug.com/441788589
+    {"VUID-vkCmdDraw-None-08114",
+     // vkCmdDraw(): the descriptor
+     "is being used in draw but has never been updated via vkUpdateDescriptorSets() or a similar "
+     "call."},
 };
 
 namespace dawn::native::vulkan {
