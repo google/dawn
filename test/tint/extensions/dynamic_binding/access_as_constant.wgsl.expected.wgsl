@@ -1,8 +1,8 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/access_as_constant.wgsl:6:13 error: unresolved call target 'getBinding'
-    let t = getBinding<texture_1d<f32>>(sampled_textures, 2);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@group(0) @binding(0) var sampled_textures : resource_binding;
 
-
-tint executable returned error: exit status 1
+@fragment
+fn fs() {
+  let texture_load = textureLoad(getBinding<texture_1d<f32>>(sampled_textures, 2), 0, 0);
+}

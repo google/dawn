@@ -1,8 +1,12 @@
 SKIP: FAILED
 
-<dawn>/test/tint/extensions/dynamic_binding/access_as_constant.wgsl:6:13 error: unresolved call target 'getBinding'
-    let t = getBinding<texture_1d<f32>>(sampled_textures, 2);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../src/tint/lang/wgsl/inspector/inspector.cc:547 internal compiler error: Switch() passed nullptr
 
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-tint executable returned error: exit status 1
+tint executable returned error: signal: illegal instruction

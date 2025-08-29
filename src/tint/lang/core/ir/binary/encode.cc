@@ -1401,6 +1401,8 @@ struct Encoder {
                 return pb::BuiltinFn::print;
             case core::BuiltinFn::kHasBinding:
                 return pb::BuiltinFn::has_binding;
+            case core::BuiltinFn::kGetBinding:
+                return pb::BuiltinFn::get_binding;
             case core::BuiltinFn::kNone:
                 break;
         }

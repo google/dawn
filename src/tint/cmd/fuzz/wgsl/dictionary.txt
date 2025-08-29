@@ -246,6 +246,7 @@
 "fwidthCoarse"
 "fwidthFine"
 "g"
+"getBinding"
 "global_invocation_id"
 "group"
 "group_operation"

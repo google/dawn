@@ -924,6 +924,7 @@ enum class BuiltinFn : uint8_t {
     kSubgroupMatrixMultiplyAccumulate,
     kPrint,
     kHasBinding,
+    kGetBinding,
     kNone,
 };
 
@@ -1098,6 +1099,7 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupMatrixMultiplyAccumulate,
     BuiltinFn::kPrint,
     BuiltinFn::kHasBinding,
+    BuiltinFn::kGetBinding,
 };
 
 /// All builtin function names
@@ -1253,6 +1255,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupMatrixMultiplyAccumulate",
     "print",
     "hasBinding",
+    "getBinding",
 };
 
 /// Determines if the given `f` is a coarse derivative.

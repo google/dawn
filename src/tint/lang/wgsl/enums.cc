@@ -761,6 +761,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "hasBinding") {
         return BuiltinFn::kHasBinding;
     }
+    if (name == "getBinding") {
+        return BuiltinFn::kGetBinding;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -1076,6 +1079,8 @@ const char* str(BuiltinFn i) {
             return "__tint_materialize";
         case BuiltinFn::kHasBinding:
             return "hasBinding";
+        case BuiltinFn::kGetBinding:
+            return "getBinding";
     }
     return "<unknown>";
 }

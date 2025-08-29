@@ -1155,3 +1155,16 @@ ctor mat4x4<T: f32_f16>(T, T, T, T,
 @must_use implicit(I: iu32) fn hasBinding<T: texture_depth_cube_array>(resource_binding, index: I) ->  bool
 @must_use implicit(I: iu32) fn hasBinding<T: texture_depth_multisampled_2d>(resource_binding, index: I) -> bool
 
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_1d<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_2d<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_2d_array<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_3d<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_cube<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_cube_array<K> >(resource_binding, index: I) -> T
+@must_use implicit(K: fiu32, I: iu32) fn getBinding<T: texture_multisampled_2d<K> >(resource_binding, index: I) -> T
+@must_use implicit(I: iu32) fn getBinding<T: texture_depth_2d>(resource_binding, index: I) -> T
+@must_use implicit(I: iu32) fn getBinding<T: texture_depth_2d_array>(resource_binding, index: I) -> T
+@must_use implicit(I: iu32) fn getBinding<T: texture_depth_cube>(resource_binding, index: I) -> T
+@must_use implicit(I: iu32) fn getBinding<T: texture_depth_cube_array>(resource_binding, index: I) ->  T
+@must_use implicit(I: iu32) fn getBinding<T: texture_depth_multisampled_2d>(resource_binding, index: I) -> T
+

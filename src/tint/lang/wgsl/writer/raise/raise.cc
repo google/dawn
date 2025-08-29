@@ -200,6 +200,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupMatrixMultiplyAccumulate)
         CASE(kPrint)
         CASE(kHasBinding)
+        CASE(kGetBinding)
         case core::BuiltinFn::kNone:
             break;
     }

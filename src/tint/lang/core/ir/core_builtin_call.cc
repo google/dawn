@@ -68,6 +68,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kTextureSampleLevel:
         case BuiltinFn::kTextureSampleBaseClampToEdge:
         case BuiltinFn::kTextureLoad:
+        case BuiltinFn::kGetBinding:
             return Accesses{Access::kLoad};
 
         case BuiltinFn::kSubgroupMatrixStore:
