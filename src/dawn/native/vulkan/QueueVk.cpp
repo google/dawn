@@ -170,7 +170,6 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
     }
 
     Device* device = ToBackend(GetDevice());
-    VkDevice vkDevice = device->GetVkDevice();
 
     // Ignore the result of QueueWaitIdle: it can return OOM which we can't really do anything
     // about, Device lost, which means workloads running on the GPU are no longer accessible
@@ -178,35 +177,8 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
     [[maybe_unused]] VkResult waitIdleResult =
         VkResult::WrapUnsafe(device->fn.QueueWaitIdle(mQueue));
 
-    // Make sure all fences are complete by explicitly waiting on them all
-    mFencesInFlight.Use([&](auto fencesInFlight) {
-        while (!fencesInFlight->empty()) {
-            VkFence fence = fencesInFlight->front().first;
-            VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
-            do {
-                // If WaitForIdleForDesctruction is called while we are Disconnected, it means that
-                // the device lost came from the ErrorInjector and we need to wait without allowing
-                // any more error to be injected. This is because the device lost was "fake" and
-                // commands might still be running.
-                if (GetDevice()->GetState() == Device::State::Disconnected) {
-                    result = VkResult::WrapUnsafe(
-                        device->fn.WaitForFences(vkDevice, 1, &*fence, true, UINT64_MAX));
-                    continue;
-                }
-
-                result = VkResult::WrapUnsafe(INJECT_ERROR_OR_RUN(
-                    device->fn.WaitForFences(vkDevice, 1, &*fence, true, UINT64_MAX),
-                    VK_ERROR_DEVICE_LOST));
-            } while (result == VK_TIMEOUT);
-            // Ignore errors from vkWaitForFences: it can be either OOM which we can't do anything
-            // about (and we need to keep going with the destruction of all fences), or device
-            // loss, which means the workload on the GPU is no longer accessible and we can
-            // safely destroy the fence.
-
-            device->fn.DestroyFence(vkDevice, fence, nullptr);
-            fencesInFlight->pop_front();
-        }
-    });
+    DAWN_TRY(WaitForQueueSerial(GetLastSubmittedCommandSerial(),
+                                std::numeric_limits<Nanoseconds>::max()));
     return {};
 }
 
@@ -497,6 +469,14 @@ ResultOrError<ExecutionSerial> Queue::WaitForQueueSerialImpl(ExecutionSerial wai
                 return VkResult::WrapUnsafe(VK_SUCCESS);
             }
             // Wait for the fence.
+            if (GetDevice()->GetState() == Device::State::Disconnected) [[unlikely]] {
+                // If WaitForQueueSerialImpl is called while we are Disconnected, it means that
+                // the device lost came from the ErrorInjector and we need to wait without allowing
+                // any more error to be injected. This is because the device lost was "fake" and
+                // commands might still be running.
+                return VkResult::WrapUnsafe(device->fn.WaitForFences(
+                    vkDevice, 1, &*waitFence, true, static_cast<uint64_t>(timeout)));
+            }
             return VkResult::WrapUnsafe(
                 INJECT_ERROR_OR_RUN(device->fn.WaitForFences(vkDevice, 1, &*waitFence, true,
                                                              static_cast<uint64_t>(timeout)),

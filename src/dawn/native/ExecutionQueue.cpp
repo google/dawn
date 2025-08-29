@@ -47,6 +47,10 @@ void PopWaitingTasksInto(ExecutionSerial serial,
 }
 }  // namespace
 
+ExecutionQueueBase::~ExecutionQueueBase() {
+    DAWN_ASSERT(mWaitingTasks.Empty());
+}
+
 ExecutionSerial ExecutionQueueBase::GetPendingCommandSerial() const {
     return ExecutionSerial(mLastSubmittedSerial.load(std::memory_order_acquire) + 1);
 }
@@ -135,7 +139,14 @@ MaybeError ExecutionQueueBase::WaitForIdleForDestruction() {
             mCv.wait(lock, [&] { return !mCallingCallbacks; });
         }
 
-        auto serial = GetCompletedCommandSerial();
+        // We finish tasks all the way up to the pending command serial because otherwise, pending
+        // tasks that may be for cleanup won't every be completed. Also, for |buffer.MapAsync|, a
+        // lot of backends queue up a clear to initialize the data on those buffers and that clear
+        // is pushed into the front of the next pending command, and the buffer's last usage serial
+        // is set to the pending command serial to reflect that. If the device is lost before that
+        // pending command is ever submitted, the map async task will be left dangling if we only
+        // clear up to the completed serial.
+        auto serial = GetPendingCommandSerial();
         PopWaitingTasksInto(serial, mWaitingTasks, tasks);
 
         if (tasks.size() > 0) {

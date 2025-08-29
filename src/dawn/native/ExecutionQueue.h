@@ -114,6 +114,8 @@ class ExecutionQueueBase : public ApiObjectBase {
   protected:
     using ApiObjectBase::ApiObjectBase;
 
+    ~ExecutionQueueBase() override;
+
     static constexpr ExecutionSerial kWaitSerialTimeout = kBeginningOfGPUTime;
 
     // Currently, the queue has two paths for serial updating, one is via DeviceBase::Tick which
