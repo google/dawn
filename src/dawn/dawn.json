@@ -675,6 +675,14 @@
                 ]
             },
             {
+                "name": "create texel view",
+                "returns": "texel buffer view",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "texel buffer view descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "set label",
                 "args": [
                     {"name": "label", "type": "string view"}

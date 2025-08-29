@@ -33,6 +33,40 @@
 
 namespace dawn::native {
 
+// Supported Texel buffer formats proposed in
+// https://github.com/gpuweb/gpuweb/blob/main/proposals/texel-buffers.md#plain-color-formats
+bool IsFormatSupportedForTexelBuffer(wgpu::TextureFormat format) {
+    switch (format) {
+        case wgpu::TextureFormat::RGBA8Unorm:
+        case wgpu::TextureFormat::RGBA8Uint:
+        case wgpu::TextureFormat::RGBA8Sint:
+        case wgpu::TextureFormat::RGBA16Uint:
+        case wgpu::TextureFormat::RGBA16Sint:
+        case wgpu::TextureFormat::RGBA16Float:
+        case wgpu::TextureFormat::R32Uint:
+        case wgpu::TextureFormat::R32Sint:
+        case wgpu::TextureFormat::R32Float:
+        case wgpu::TextureFormat::RGBA32Uint:
+        case wgpu::TextureFormat::RGBA32Sint:
+        case wgpu::TextureFormat::RGBA32Float:
+            return true;
+        default:
+            return false;
+    }
+}
+
+ResultOrError<const Format*> ValidateTexelBufferFormat(DeviceBase* device,
+                                                       wgpu::TextureFormat format) {
+    DAWN_INVALID_IF(format == wgpu::TextureFormat::Undefined, "Texel buffer format is undefined.");
+
+    const Format* internalFormat = nullptr;
+    DAWN_TRY_ASSIGN(internalFormat, device->GetInternalFormat(format));
+
+    DAWN_INVALID_IF(!IsFormatSupportedForTexelBuffer(format),
+                    "Texel buffer format (%s) is not allowed for texel buffers.", format);
+    return internalFormat;
+}
+
 TexelBufferViewBase::TexelBufferViewBase(BufferBase* buffer,
                                          const UnpackedPtr<TexelBufferViewDescriptor>& desc)
     : ApiObjectBase(buffer->GetDevice(), desc->label),

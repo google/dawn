@@ -79,6 +79,7 @@
 #include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/SwapChain.h"
+#include "dawn/native/TexelBufferView.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/native/WaitListEvent.h"
@@ -2331,6 +2332,29 @@ ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(
         descriptor, [&](const TextureViewQuery&) -> ResultOrError<Ref<TextureViewBase>> {
             return CreateTextureViewImpl(texture, descriptor);
         });
+}
+
+ResultOrError<Ref<TexelBufferViewBase>> DeviceBase::CreateTexelBufferView(
+    BufferBase* buffer,
+    const TexelBufferViewDescriptor* descriptor) {
+    DAWN_TRY(ValidateIsAlive());
+    DAWN_TRY(ValidateObject(buffer));
+
+    UnpackedPtr<TexelBufferViewDescriptor> unpacked;
+    if (IsValidationEnabled()) {
+        DAWN_TRY_ASSIGN_CONTEXT(unpacked, ValidateTexelBufferViewDescriptor(buffer, descriptor),
+                                "validating %s", descriptor);
+    } else {
+        unpacked = Unpack(descriptor);
+    }
+
+    return CreateTexelBufferViewImpl(buffer, unpacked);
+}
+
+ResultOrError<Ref<TexelBufferViewBase>> DeviceBase::CreateTexelBufferViewImpl(
+    BufferBase* buffer,
+    const UnpackedPtr<TexelBufferViewDescriptor>& descriptor) {
+    return AcquireRef(new TexelBufferViewBase(buffer, descriptor));
 }
 
 // Other implementation details

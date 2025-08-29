@@ -236,6 +236,9 @@ class DeviceBase : public ErrorSink,
     ResultOrError<Ref<TextureViewBase>> CreateTextureView(
         TextureBase* texture,
         const TextureViewDescriptor* descriptor = nullptr);
+    ResultOrError<Ref<TexelBufferViewBase>> CreateTexelBufferView(
+        BufferBase* buffer,
+        const TexelBufferViewDescriptor* descriptor);
 
     // Implementation of API object creation methods. DO NOT use them in a reentrant manner.
     BindGroupBase* APICreateBindGroup(const BindGroupDescriptor* descriptor);
@@ -516,6 +519,11 @@ class DeviceBase : public ErrorSink,
     virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor) = 0;
+    // TODO(crbug/382544164): Make this pure virtual once all backends support
+    // texel buffer views.
+    virtual ResultOrError<Ref<TexelBufferViewBase>> CreateTexelBufferViewImpl(
+        BufferBase* buffer,
+        const UnpackedPtr<TexelBufferViewDescriptor>& descriptor);
     virtual Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) = 0;
     virtual Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(

@@ -1134,5 +1134,113 @@ TEST_F(D32S8TextureViewValidationTests, TextureViewFormatCompatibility) {
     }
 }
 
+class TexelBufferViewValidationTest : public ValidationTest {
+  protected:
+    wgpu::Buffer CreateTexelBuffer(uint64_t size, wgpu::BufferUsage usage) {
+        wgpu::BufferDescriptor desc;
+        desc.size = size;
+        desc.usage = usage;
+        return device.CreateBuffer(&desc);
+    }
+};
+
+// Valid texel buffer view creation
+TEST_F(TexelBufferViewValidationTest, CreationSuccess) {
+    constexpr uint64_t kSize = 4 * 4;  // 4 texels of RGBA8Uint
+    wgpu::Buffer buffer =
+        CreateTexelBuffer(kSize, wgpu::BufferUsage::TexelBuffer | wgpu::BufferUsage::CopySrc);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = kSize;
+
+    buffer.CreateTexelView(&viewDesc);
+}
+
+// Format must not be undefined
+TEST_F(TexelBufferViewValidationTest, UndefinedFormat) {
+    wgpu::Buffer buffer = CreateTexelBuffer(256, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::Undefined;
+    viewDesc.offset = 0;
+    viewDesc.size = 256;
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
+// Offset must be aligned to the texel size
+TEST_F(TexelBufferViewValidationTest, OffsetAlignment) {
+    wgpu::Buffer buffer = CreateTexelBuffer(512, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 2;  // Not aligned to 4-byte texel
+    viewDesc.size = 256;
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
+// Size must be multiple of texel size
+TEST_F(TexelBufferViewValidationTest, SizeMustBeMultipleOfTexel) {
+    wgpu::Buffer buffer = CreateTexelBuffer(512, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 256;
+    viewDesc.size = 3;  // Not multiple of 4-byte texel
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
+// Range may not exceed buffer size
+TEST_F(TexelBufferViewValidationTest, RangeExceedsBuffer) {
+    wgpu::Buffer buffer = CreateTexelBuffer(256, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 512;  // Larger than buffer
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
+// Depth formats are not allowed
+TEST_F(TexelBufferViewValidationTest, DepthFormatNotAllowed) {
+    wgpu::Buffer buffer = CreateTexelBuffer(256, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::Depth24Plus;
+    viewDesc.offset = 0;
+    viewDesc.size = 256;
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
+// R32Float is allowed
+TEST_F(TexelBufferViewValidationTest, R32FloatAllowed) {
+    wgpu::Buffer buffer = CreateTexelBuffer(256, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::R32Float;
+    viewDesc.offset = 0;
+    viewDesc.size = 256;
+
+    buffer.CreateTexelView(&viewDesc);
+}
+
+// RG8Uint is not a supported texel format
+TEST_F(TexelBufferViewValidationTest, ColorFormatNotAllowed) {
+    wgpu::Buffer buffer = CreateTexelBuffer(256, wgpu::BufferUsage::TexelBuffer);
+
+    wgpu::TexelBufferViewDescriptor viewDesc;
+    viewDesc.format = wgpu::TextureFormat::RG8Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 256;
+
+    ASSERT_DEVICE_ERROR(buffer.CreateTexelView(&viewDesc));
+}
+
 }  // anonymous namespace
 }  // namespace dawn
