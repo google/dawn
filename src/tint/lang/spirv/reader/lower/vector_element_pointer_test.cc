@@ -489,5 +489,63 @@ str = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_VectorElementPointerTest, PreserveAccessMode) {
+    auto* str_ty = ty.Struct(mod.symbols.New("str"), {{
+                                                         mod.symbols.New("vec"),
+                                                         ty.vec4<u32>(),
+                                                     }});
+    auto* var = b.Var("var", ty.ptr(storage, str_ty, read));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+
+    auto* foo = b.Function("foo", ty.u32());
+    b.Append(foo->Block(), [&] {
+        auto* access = b.Access<ptr<storage, u32, read>>(var, 0_u, 2_u);
+        auto* load = b.Load(access);
+        b.Return(foo, load);
+    });
+
+    auto* src = R"(
+str = struct @align(16) {
+  vec:vec4<u32> @offset(0)
+}
+
+$B1: {  # root
+  %var:ptr<storage, str, read> = var undef @binding_point(0, 0)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<storage, u32, read> = access %var, 0u, 2u
+    %4:u32 = load %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+str = struct @align(16) {
+  vec:vec4<u32> @offset(0)
+}
+
+$B1: {  # root
+  %var:ptr<storage, str, read> = var undef @binding_point(0, 0)
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<storage, vec4<u32>, read> = access %var, 0u
+    %4:u32 = load_vector_element %3, 2u
+    ret %4
+  }
+}
+)";
+
+    Run(VectorElementPointer);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

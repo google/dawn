@@ -102,8 +102,11 @@ struct State {
             // Create a new access instruction that stops at the vector pointer.
             Vector<core::ir::Value*, 8> partial_indices{access.inst->Indices()};
             partial_indices.Pop();
-            auto addrspace = object->Type()->As<core::type::Pointer>()->AddressSpace();
-            auto* access_to_vec = b.Access(ty.ptr(addrspace, access.type), object, partial_indices);
+
+            auto* ptr = object->Type()->As<core::type::Pointer>();
+            auto addrspace = ptr->AddressSpace();
+            auto* access_to_vec =
+                b.Access(ty.ptr(addrspace, access.type, ptr->Access()), object, partial_indices);
             access_to_vec->InsertBefore(access.inst);
 
             object = access_to_vec->Result();
