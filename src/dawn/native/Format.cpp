@@ -205,7 +205,7 @@ FormatIndex ComputeFormatIndex(wgpu::TextureFormat format) {
             break;
     }
     // Invalid format. Return an index outside the format table.
-    return FormatIndex(~0);
+    return FormatIndex(~0u);
 }
 
 FormatTable BuildFormatTable(const DeviceBase* device) {
