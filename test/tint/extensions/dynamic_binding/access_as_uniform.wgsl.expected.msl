@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-../../src/tint/lang/wgsl/inspector/inspector.cc:547 internal compiler error: Switch() passed nullptr
+../../src/tint/lang/msl/writer/printer/printer.cc:1378 internal compiler error: Switch() matched no cases. Type: tint::core::type::ResourceBinding
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *

@@ -1,12 +1,77 @@
-SKIP: FAILED
-
-../../src/tint/lang/wgsl/inspector/inspector.cc:547 internal compiler error: Switch() passed nullptr
-
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 43
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpCapability ImageQuery
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %32 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpMemberName %index_block 0 "inner"
+               OpName %index_block "index_block"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_binding_buffer_tint_explicit_layout "tint_resource_binding_buffer_tint_explicit_layout"
+               OpName %fs "fs"
+               OpName %texture_load "texture_load"
+               OpMemberDecorate %index_block 0 Offset 0
+               OpDecorate %index_block Block
+               OpDecorate %1 DescriptorSet 1
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+               OpDecorate %5 DescriptorSet 0
+               OpDecorate %5 Binding 0
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_binding_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_binding_buffer_tint_explicit_layout Block
+               OpDecorate %10 DescriptorSet 1
+               OpDecorate %10 Binding 0
+               OpDecorate %10 NonWritable
+       %uint = OpTypeInt 32 0
+%index_block = OpTypeStruct %uint
+%_ptr_Uniform_index_block = OpTypePointer Uniform %index_block
+          %1 = OpVariable %_ptr_Uniform_index_block Uniform
+      %float = OpTypeFloat 32
+          %8 = OpTypeImage %float 3D 0 0 0 1 Unknown
+%_runtimearr_8 = OpTypeRuntimeArray %8
+%_ptr_UniformConstant__runtimearr_8 = OpTypePointer UniformConstant %_runtimearr_8
+          %5 = OpVariable %_ptr_UniformConstant__runtimearr_8 UniformConstant
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_binding_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_binding_buffer_tint_explicit_layout
+         %10 = OpVariable %_ptr_StorageBuffer_tint_resource_binding_buffer_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+     %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+     %v3uint = OpTypeVector %uint 3
+         %36 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
+      %v3int = OpTypeVector %int 3
+         %38 = OpConstantNull %v3int
+    %v4float = OpTypeVector %float 4
+         %fs = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0
+         %21 = OpLoad %uint %18 None
+         %22 = OpAccessChain %_ptr_UniformConstant_8 %5 %21
+         %24 = OpLoad %8 %22 None
+         %25 = OpImageQueryLevels %uint %24
+         %26 = OpISub %uint %25 %uint_1
+         %28 = OpBitcast %uint %int_0
+         %31 = OpExtInst %uint %32 UMin %28 %26
+         %33 = OpImageQuerySizeLod %v3uint %24 %31
+         %35 = OpISub %v3uint %33 %36
+         %37 = OpBitcast %v3uint %38
+         %40 = OpExtInst %v3uint %32 UMin %37 %35
+%texture_load = OpImageFetch %v4float %24 %40 Lod %31
+               OpReturn
+               OpFunctionEnd

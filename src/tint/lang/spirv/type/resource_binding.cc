@@ -53,6 +53,16 @@ std::string ResourceBinding::FriendlyName() const {
     return str.str();
 }
 
+core::type::TypeAndCount ResourceBinding::Elements(
+    [[maybe_unused]] const core::type::Type* type_if_unused,
+    uint32_t count_if_invalid) const {
+    return {binding_type_, count_if_invalid};
+}
+
+const core::type::Type* ResourceBinding::Element([[maybe_unused]] uint32_t index) const {
+    return binding_type_;
+}
+
 ResourceBinding* ResourceBinding::Clone(core::type::CloneContext& ctx) const {
     auto* binding_type = binding_type_->Clone(ctx);
     return ctx.dst.mgr->Get<ResourceBinding>(binding_type);

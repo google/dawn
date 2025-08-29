@@ -48,6 +48,13 @@ class ResourceBinding final : public Castable<ResourceBinding, core::type::Type>
 
     const core::type::Type* GetBindingType() const { return binding_type_; }
 
+    /// @copydoc core::type::Type::Elements
+    core::type::TypeAndCount Elements(const core::type::Type* type_if_invalid = nullptr,
+                                      uint32_t count_if_invalid = 0) const override;
+
+    /// @copydoc core::type::Type::Element
+    const core::type::Type* Element(uint32_t index) const override;
+
     /// @returns the friendly name for this type
     std::string FriendlyName() const override;
 

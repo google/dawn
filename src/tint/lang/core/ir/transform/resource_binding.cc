@@ -32,6 +32,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/resource_type.h"
 
@@ -101,17 +102,15 @@ struct State {
                             to_delete.push_back(l);
                         },
                         [&](core::ir::CoreBuiltinCall* call) {
-                            switch (call->Func()) {
-                                case core::BuiltinFn::kArrayLength:
-                                    b.InsertBefore(call, [&] {
+                            b.InsertBefore(call, [&] {
+                                switch (call->Func()) {
+                                    case core::BuiltinFn::kArrayLength: {
                                         auto* access =
                                             b.Access(ty.ptr<storage, u32, read>(), sb, 0_u);
                                         b.LoadWithResult(call->DetachResult(), access);
-                                    });
-                                    to_delete.push_back(call);
-                                    break;
-                                case core::BuiltinFn::kHasBinding:
-                                    b.InsertBefore(call, [&] {
+                                        break;
+                                    }
+                                    case core::BuiltinFn::kHasBinding: {
                                         auto* access = b.Access(ty.ptr<storage, u32, read>(), sb,
                                                                 1_u, call->Args()[1]);
                                         auto* v = b.Load(access);
@@ -121,12 +120,29 @@ struct State {
                                                         core::type::TypeToResourceType(
                                                             call->ExplicitTemplateParams()[0]))));
                                         call->Result()->ReplaceAllUsesWith(r->Result());
-                                        to_delete.push_back(call);
-                                    });
-                                    break;
-                                default:
-                                    TINT_UNREACHABLE();
-                            }
+                                        break;
+                                    }
+                                    case core::BuiltinFn::kGetBinding: {
+                                        auto* binding_ty = call->ExplicitTemplateParams()[0];
+                                        auto alias = alias_for_type.Get(binding_ty);
+                                        TINT_ASSERT(alias);
+
+                                        // TODO(439627523): Check index in range of storage buffer
+                                        //                  array_length
+                                        // TODO(439627523): Check hasBinding matches for type
+
+                                        // TODO(439627523): Fix pointer access
+                                        auto* access =
+                                            b.Access(ty.ptr(handle, binding_ty, read),
+                                                     (*alias)->Result(), call->Args()[1]);
+                                        b.LoadWithResult(call->DetachResult(), access);
+                                        break;
+                                    }
+                                    default:
+                                        TINT_UNREACHABLE();
+                                }
+                                to_delete.push_back(call);
+                            });
                         },
                         TINT_ICE_ON_NO_MATCH);
                 }

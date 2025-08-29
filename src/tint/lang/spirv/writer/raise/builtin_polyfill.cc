@@ -1315,7 +1315,11 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, PolyfillConfig config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "spirv.BuiltinPolyfill");
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.BuiltinPolyfill",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowDuplicateBindings,
+                                          });
+
     if (result != Success) {
         return result.Failure();
     }

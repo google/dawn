@@ -80,7 +80,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> CombineAccessInstructions(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.CombineAccessInstructions");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.CombineAccessInstructions",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowDuplicateBindings,
+                                          });
     if (result != Success) {
         return result;
     }

@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-../../src/tint/lang/wgsl/inspector/inspector.cc:547 internal compiler error: Switch() passed nullptr
+../../src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.cc:148 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *

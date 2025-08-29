@@ -666,6 +666,12 @@ const Inspector::EntryPointTextureMetadata& Inspector::ComputeTextureMetadata(
                         return;
                     }
 
+                    // A texture of `sem::Call` means we're dealing with a `getBinding` or
+                    // `hasBinding` call. Skip it.
+                    if (call->Arguments()[size_t(texture_index)]->Is<sem::Call>()) {
+                        return;
+                    }
+
                     // Compute the set of globals used for the texture/sampler parameter.
                     // It will either point to a GlobalSet on the stack when a global is used
                     // directly, or to the contents of globals_for_handle_parameters.

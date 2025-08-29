@@ -1,4 +1,4 @@
-SKIP: INVALID
+SKIP: FAILED
 
 ../../src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.cc:148 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
 
