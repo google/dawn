@@ -1,8 +1,8 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/has_binding.wgsl:6:13 error: unresolved call target 'hasBinding'
-    let t = hasBinding<texture_2d<i32>>(sampled_textures, 4);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@group(0) @binding(0) var sampled_textures : resource_binding;
 
-
-tint executable returned error: exit status 1
+@fragment
+fn fs() {
+  let t = hasBinding<texture_2d<i32>>(sampled_textures, 4);
+}

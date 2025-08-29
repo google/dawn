@@ -250,6 +250,7 @@
 "group"
 "group_operation"
 "handle"
+"hasBinding"
 "height"
 "i"
 "i32"

@@ -758,6 +758,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
+    if (name == "hasBinding") {
+        return BuiltinFn::kHasBinding;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -1071,6 +1074,8 @@ const char* str(BuiltinFn i) {
             return "print";
         case BuiltinFn::kTintMaterialize:
             return "__tint_materialize";
+        case BuiltinFn::kHasBinding:
+            return "hasBinding";
     }
     return "<unknown>";
 }

@@ -1399,6 +1399,8 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_matrix_multiply_accumulate;
             case core::BuiltinFn::kPrint:
                 return pb::BuiltinFn::print;
+            case core::BuiltinFn::kHasBinding:
+                return pb::BuiltinFn::has_binding;
             case core::BuiltinFn::kNone:
                 break;
         }

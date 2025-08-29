@@ -324,7 +324,6 @@ match workgroup
 @must_use @const implicit(N: num) fn any(vec<N, bool>) -> bool
 @must_use implicit(T, R: read) fn arrayLength(ptr<storage, runtime_array<T>, R>) -> u32
 @must_use @stage("fragment", "compute") implicit(T, W: writable) fn arrayLength(ptr<storage, runtime_array<T>, W>) -> u32
-@must_use fn arrayLength(resource_binding) -> u32
 @must_use @const implicit(T: fa_f32_f16) fn asin(@test_value(0.479425538604) T) -> T
 @must_use @const implicit(N: num, T: fa_f32_f16) fn asin(@test_value(0.479425538604) vec<N, T>) -> vec<N, T>
 @must_use @const implicit(T: fa_f32_f16) fn asinh(T) -> T
@@ -1116,3 +1115,22 @@ implicit(T: fa_f32_f16) ctor mat4x4(T, T, T, T,
 // Tint internal builtins                                                     //
 ////////////////////////////////////////////////////////////////////////////////
 @const("Identity") implicit(T) fn __tint_materialize(T) -> T
+
+////////////////////////////////////////////////////////////////////////////////
+// chromium_experimental_dynamic_binding                                      //
+////////////////////////////////////////////////////////////////////////////////
+@must_use fn arrayLength(resource_binding) -> u32
+
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_1d<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_2d<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_2d_array<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_3d<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_cube<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_cube_array<K> >(resource_binding, index: I) -> bool
+@must_use implicit(K: fiu32, I: iu32) fn hasBinding<T: texture_multisampled_2d<K> >(resource_binding, index: I) -> bool
+@must_use implicit(I: iu32) fn hasBinding<T: texture_depth_2d>(resource_binding, index: I) -> bool
+@must_use implicit(I: iu32) fn hasBinding<T: texture_depth_2d_array>(resource_binding, index: I) -> bool
+@must_use implicit(I: iu32) fn hasBinding<T: texture_depth_cube>(resource_binding, index: I) -> bool
+@must_use implicit(I: iu32) fn hasBinding<T: texture_depth_cube_array>(resource_binding, index: I) -> bool
+@must_use implicit(I: iu32) fn hasBinding<T: texture_depth_multisampled_2d>(resource_binding, index: I) -> bool
+

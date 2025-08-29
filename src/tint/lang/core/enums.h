@@ -724,6 +724,7 @@ enum class ParameterUsage : uint8_t {
     kId,
     kImage,
     kImageOperands,
+    kIndex,
     kInputAttachment,
     kInsert,
     kLevel,
@@ -922,6 +923,7 @@ enum class BuiltinFn : uint8_t {
     kSubgroupMatrixMultiply,
     kSubgroupMatrixMultiplyAccumulate,
     kPrint,
+    kHasBinding,
     kNone,
 };
 
@@ -1095,6 +1097,7 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupMatrixMultiply,
     BuiltinFn::kSubgroupMatrixMultiplyAccumulate,
     BuiltinFn::kPrint,
+    BuiltinFn::kHasBinding,
 };
 
 /// All builtin function names
@@ -1249,6 +1252,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupMatrixMultiply",
     "subgroupMatrixMultiplyAccumulate",
     "print",
+    "hasBinding",
 };
 
 /// Determines if the given `f` is a coarse derivative.

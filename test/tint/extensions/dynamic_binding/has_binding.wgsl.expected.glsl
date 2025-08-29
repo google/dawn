@@ -1,8 +1,12 @@
 SKIP: INVALID
 
-<dawn>/test/tint/extensions/dynamic_binding/has_binding.wgsl:6:13 error: unresolved call target 'hasBinding'
-    let t = hasBinding<texture_2d<i32>>(sampled_textures, 4);
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../src/tint/lang/glsl/writer/printer/printer.cc:729 internal compiler error: Switch() matched no cases. Type: tint::core::type::ResourceBinding
 
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-tint executable returned error: exit status 1
+tint executable returned error: signal: illegal instruction

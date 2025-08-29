@@ -1235,6 +1235,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "image";
         case ParameterUsage::kImageOperands:
             return "image_operands";
+        case ParameterUsage::kIndex:
+            return "index";
         case ParameterUsage::kInputAttachment:
             return "input_attachment";
         case ParameterUsage::kInsert:
@@ -1750,6 +1752,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "print") {
         return BuiltinFn::kPrint;
     }
+    if (name == "hasBinding") {
+        return BuiltinFn::kHasBinding;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -2057,6 +2062,8 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixMultiplyAccumulate";
         case BuiltinFn::kPrint:
             return "print";
+        case BuiltinFn::kHasBinding:
+            return "hasBinding";
     }
     return "<unknown>";
 }

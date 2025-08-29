@@ -736,4 +736,5 @@ enum BuiltinFn {
     subgroup_matrix_multiply = 147;
     subgroup_matrix_multiply_accumulate = 148;
     print = 149;
+    has_binding = 150;
 }
