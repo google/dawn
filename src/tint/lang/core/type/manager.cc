@@ -328,10 +328,6 @@ const core::type::BindingArray* Manager::binding_array(const core::type::Type* e
     return Get<core::type::BindingArray>(elem_ty, Get<ConstantArrayCount>(count));
 }
 
-const core::type::BindingArray* Manager::runtime_binding_array(const core::type::Type* elem_ty) {
-    return Get<core::type::BindingArray>(elem_ty, Get<RuntimeArrayCount>());
-}
-
 const core::type::Pointer* Manager::ptr(core::AddressSpace address_space,
                                         const core::type::Type* subtype,
                                         core::Access access /* = core::Access::kUndefined */) {

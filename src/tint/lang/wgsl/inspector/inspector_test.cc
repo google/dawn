@@ -2769,7 +2769,7 @@ TEST_F(InspectorGetResourceBindingsTest, BindingArray_Simple) {
     EXPECT_EQ(5u, result[0].array_size.value());
 }
 
-TEST_F(InspectorGetResourceBindingsTest, BindingArray_SkipRuntikme) {
+TEST_F(InspectorGetResourceBindingsTest, BindingArray_ResourceBinding) {
     auto* src = R"(
 enable chromium_experimental_dynamic_binding;
 

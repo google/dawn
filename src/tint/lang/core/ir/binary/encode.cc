@@ -525,7 +525,6 @@ struct Encoder {
                          << internal_limits::kMaxArrayElementCount << "\n";
                 }
             },
-            [&](const core::type::RuntimeArrayCount*) { array_out.set_count(0); },
             TINT_ICE_ON_NO_MATCH);
     }
 

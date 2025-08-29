@@ -2861,7 +2861,7 @@ const core::type::ResourceBinding* Resolver::ResourceBinding(const ast::Identifi
 }
 
 const core::type::BindingArray* Resolver::BindingArray(const ast::Identifier* ident) {
-    auto* tmpl_ident = TemplatedIdentifier(ident, 1, 2);
+    auto* tmpl_ident = TemplatedIdentifier(ident, 2);
     if (DAWN_UNLIKELY(!tmpl_ident)) {
         return nullptr;
     }
@@ -2871,9 +2871,7 @@ const core::type::BindingArray* Resolver::BindingArray(const ast::Identifier* id
         return nullptr;
     }
 
-    const core::type::ArrayCount* el_count = tmpl_ident->arguments.Length() > 1
-                                                 ? ArrayCount(tmpl_ident->arguments[1])
-                                                 : b.create<core::type::RuntimeArrayCount>();
+    const core::type::ArrayCount* el_count = ArrayCount(tmpl_ident->arguments[1]);
     if (!el_count) {
         return nullptr;
     }

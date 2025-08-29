@@ -615,16 +615,10 @@ class Printer {
                     }
                 },
                 [&](const core::type::BindingArray* arr) {
-                    if (auto* cnt = arr->Count()->As<core::type::ConstantArrayCount>()) {
-                        auto* count = b_.ConstantValue(u32(cnt->value));
-                        module_.PushType(spv::Op::OpTypeArray,
-                                         {id, Type(arr->ElemType()), Constant(count)});
-                    } else {
-                        TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
-                        module_.PushCapability(SpvCapabilityRuntimeDescriptorArray);
-                        module_.PushExtension("SPV_EXT_descriptor_indexing");
-                        module_.PushType(spv::Op::OpTypeRuntimeArray, {id, Type(arr->ElemType())});
-                    }
+                    auto* count = b_.ConstantValue(
+                        u32(arr->Count()->As<core::type::ConstantArrayCount>()->value));
+                    module_.PushType(spv::Op::OpTypeArray,
+                                     {id, Type(arr->ElemType()), Constant(count)});
                 },
                 [&](const core::type::Pointer* ptr) {
                     module_.PushType(spv::Op::OpTypePointer,

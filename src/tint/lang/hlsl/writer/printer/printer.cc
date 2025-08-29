@@ -1451,11 +1451,9 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        out << "[";
-        if (auto* cnt = ary->Count()->As<core::type::ConstantArrayCount>()) {
-            out << cnt->value;
-        }
-        out << "]";
+        auto* constant_count = ary->Count()->As<core::type::ConstantArrayCount>();
+        TINT_ASSERT(constant_count != nullptr);
+        out << "[" << constant_count->value << "]";
     }
 
     void EmitVectorType(StringStream& out, const core::type::Vector* vec) {

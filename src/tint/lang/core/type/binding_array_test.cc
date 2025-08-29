@@ -49,15 +49,6 @@ TEST_F(BindingArrayTest, Creation) {
     EXPECT_EQ(a->Count()->As<ConstantArrayCount>()->value, 3u);
 }
 
-TEST_F(BindingArrayTest, RuntimeCreation) {
-    Manager ty;
-    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
-    auto* a = ty.runtime_binding_array(t);
-
-    EXPECT_EQ(a->ElemType(), t);
-    EXPECT_TRUE(a->Count()->Is<RuntimeArrayCount>());
-}
-
 TEST_F(BindingArrayTest, Hash) {
     Manager ty;
     auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
@@ -76,24 +67,10 @@ TEST_F(BindingArrayTest, Equals) {
     auto* a2 = ty.binding_array(t1, 3u);
     auto* a_count = ty.binding_array(t1, 4u);
     auto* a_type = ty.binding_array(t2, 3u);
-    auto* r = ty.runtime_binding_array(t1);
-    auto* r1 = ty.runtime_binding_array(t1);
-    auto* r2 = ty.runtime_binding_array(t2);
 
     EXPECT_EQ(a, a2);
     EXPECT_NE(a, a_count);
     EXPECT_NE(a, a_type);
-
-    EXPECT_NE(a, r);
-    EXPECT_EQ(r, r1);
-    EXPECT_NE(r, r2);
-}
-
-TEST_F(BindingArrayTest, RuntimeFriendlyName) {
-    Manager ty;
-    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
-    auto* a = ty.runtime_binding_array(t);
-    EXPECT_EQ(a->FriendlyName(), "binding_array<texture_2d<f32>>");
 }
 
 TEST_F(BindingArrayTest, FriendlyName) {
@@ -111,28 +88,12 @@ TEST_F(BindingArrayTest, Element) {
     EXPECT_EQ(a->Element(3), nullptr);
 }
 
-TEST_F(BindingArrayTest, RuntimeElement) {
-    Manager ty;
-    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
-    auto* a = ty.runtime_binding_array(t);
-    EXPECT_EQ(a->Element(2), t);
-    EXPECT_EQ(a->Element(3), t);
-}
-
 TEST_F(BindingArrayTest, Elements) {
     Manager ty;
     auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
     auto* a = ty.binding_array(t, 3u);
     EXPECT_EQ(a->Elements().type, t);
     EXPECT_EQ(a->Elements().count, 3u);
-}
-
-TEST_F(BindingArrayTest, RuntimeElements) {
-    Manager ty;
-    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
-    auto* a = ty.runtime_binding_array(t);
-    EXPECT_EQ(a->Elements().type, t);
-    EXPECT_EQ(a->Elements().count, 0u);
 }
 
 TEST_F(BindingArrayTest, Clone) {
@@ -148,20 +109,6 @@ TEST_F(BindingArrayTest, Clone) {
     EXPECT_TRUE(s->ElemType()->As<SampledTexture>()->Type()->Is<F32>());
     EXPECT_TRUE(s->Count()->Is<ConstantArrayCount>());
     EXPECT_EQ(s->Count()->As<ConstantArrayCount>()->value, 3u);
-}
-
-TEST_F(BindingArrayTest, RuntimeClone) {
-    Manager ty;
-    auto* t = ty.sampled_texture(TextureDimension::k2d, ty.f32());
-    auto* a = ty.runtime_binding_array(t);
-
-    core::type::Manager mgr;
-    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
-
-    auto* s = a->Clone(ctx);
-    EXPECT_TRUE(s->ElemType()->Is<SampledTexture>());
-    EXPECT_TRUE(s->ElemType()->As<SampledTexture>()->Type()->Is<F32>());
-    EXPECT_TRUE(s->Count()->Is<RuntimeArrayCount>());
 }
 
 }  // namespace

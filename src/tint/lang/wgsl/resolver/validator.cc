@@ -491,7 +491,7 @@ bool Validator::BindingArray(const core::type::BindingArray* t, const Source& so
         }
     }
 
-    if (!t->Count()->IsAnyOf<core::type::ConstantArrayCount, core::type::RuntimeArrayCount>()) {
+    if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
         AddError(source) << "binding_array count must be a constant expression";
         return false;
     }

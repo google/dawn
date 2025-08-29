@@ -181,20 +181,6 @@ TEST_F(ResolverBindingArrayTest, ValidFunctionParameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverBindingArrayTest, Runtime_InvalidAsFunctionParameter) {
-    Enable(wgsl::Extension::kChromiumExperimentalDynamicBinding);
-    Func("foo",
-         Vector{
-             Param("a", ty("binding_array",
-                           ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()))),
-         },
-         ty.void_(), Empty);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(error: type of function parameter cannot be binding_array<texture_2d<f32>>)");
-}
-
 TEST_F(ResolverBindingArrayTest, InvalidFunctionPointerParameterWithHandleType) {
     Func("foo",
          Vector{
@@ -221,7 +207,15 @@ TEST_F(ResolverBindingArrayTest, InvalidNoTemplateType) {
     GlobalVar("a", Binding(0_a), Group(0_a), ty("binding_array", 4_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(error: cannot use value of type 'u32' as type)");
+    EXPECT_EQ(r()->error(), R"(error: 'binding_array' requires 2 template arguments)");
+}
+
+TEST_F(ResolverBindingArrayTest, InvalidNoTemplateCount) {
+    GlobalVar("a", Binding(0_a), Group(0_a),
+              ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: 'binding_array' requires 2 template arguments)");
 }
 
 TEST_F(ResolverBindingArrayTest, InvalidCountZero) {
@@ -320,24 +314,6 @@ TEST_F(ResolverBindingArrayTest, InvalidBindingArray) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(error: binding_array element type must be a sampled texture type)");
-}
-
-TEST_F(ResolverBindingArrayTest, RuntimeBindingArray) {
-    Enable(wgsl::Extension::kChromiumExperimentalDynamicBinding);
-    GlobalVar("a", Binding(0_a), Group(0_a),
-              ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverBindingArrayTest, RuntimeRequiresEnable) {
-    GlobalVar("a", Binding(0_a), Group(0_a),
-              ty("binding_array", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32())));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(error: use of a runtime 'binding_array' requires enabling extension 'chromium_experimental_dynamic_binding')");
 }
 
 // How to test as let / const / return since no constructor?

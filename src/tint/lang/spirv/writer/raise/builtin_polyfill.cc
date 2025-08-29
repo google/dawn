@@ -148,11 +148,8 @@ const core::type::Type* ReplacementType(core::type::Manager& ty, const core::typ
         },
         [&](const core::type::BindingArray* arr) -> const core::type::Type* {
             if (auto* replacement = ReplacementType(ty, arr->ElemType())) {
-                if (auto* cnt = arr->Count()->As<core::type::ConstantArrayCount>()) {
-                    return ty.binding_array(replacement, cnt->value);
-                }
-                TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
-                return ty.runtime_binding_array(replacement);
+                return ty.binding_array(replacement,
+                                        arr->Count()->As<core::type::ConstantArrayCount>()->value);
             }
             return nullptr;
         },

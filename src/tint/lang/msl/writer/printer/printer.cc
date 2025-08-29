@@ -1454,12 +1454,7 @@ class Printer : public tint::TextGenerator {
         out << "array<";
         EmitType(out, arr->ElemType());
         out << ", ";
-        if (auto* cnt = arr->Count()->As<core::type::ConstantArrayCount>()) {
-            out << cnt->value;
-        } else {
-            TINT_ASSERT(arr->Count()->Is<core::type::RuntimeArrayCount>());
-            out << "1";
-        }
+        out << arr->Count()->As<core::type::ConstantArrayCount>()->value;
         out << ">";
     }
 
