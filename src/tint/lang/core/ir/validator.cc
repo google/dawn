@@ -3771,6 +3771,11 @@ void Validator::CheckReturn(const Return* ret) {
         return;
     }
 
+    if (func != ContainingFunction(ret)) {
+        AddError(ret) << "function operand does not match containing function";
+        return;
+    }
+
     if (func->ReturnType()->Is<core::type::Void>()) {
         if (ret->HasValue()) {
             AddError(ret) << "unexpected return value";

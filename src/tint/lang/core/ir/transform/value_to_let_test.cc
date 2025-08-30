@@ -1056,7 +1056,7 @@ TEST_F(IR_ValueToLetTest, AccessToLetWithFunctionParams) {
     b.Append(f->Block(), [&] { b.Return(f, 0_i); });
 
     auto* g = b.Function("g", ty.i32());
-    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+    b.Append(g->Block(), [&] { b.Return(g, 0_i); });
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
@@ -1137,7 +1137,7 @@ TEST_F(IR_ValueToLetTest, AccessToLetWithNestedFunctionParams) {
     b.Append(f->Block(), [&] { b.Return(f, 0_i); });
 
     auto* g = b.Function("g", ty.i32());
-    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+    b.Append(g->Block(), [&] { b.Return(g, 0_i); });
 
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {

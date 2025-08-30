@@ -1911,6 +1911,27 @@ TEST_F(IR_ValidatorTest, Return_MissingFunction) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Return_WrongFunction) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {  //
+        b.Return(f);
+    });
+
+    auto* g = b.Function("g", ty.void_());
+    b.Append(g->Block(), [&] {  //
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:8:5 error: return: function operand does not match containing function
+    ret
+    ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {  //

@@ -579,7 +579,7 @@ TEST_F(SpirvReader_ShaderIOTest, Inputs_UsedByMultipleEntryPoints) {
         auto* group_value = b.Load(group_id);
         b.Add(ty.vec3<u32>(), group_value, group_value);
         b.Call(foo);
-        b.Return(ep1);
+        b.Return(ep2);
     });
 
     auto* src = R"(
