@@ -1910,6 +1910,10 @@ void Validator::CheckType(const core::type::Type* root,
                                << member->Type()->Size();
                         return false;
                     }
+                    if (member->Type()->Is<core::type::Void>()) {
+                        diag() << "struct member " << member->Index() << " cannot have void type";
+                        return false;
+                    }
                 }
                 return true;
             },

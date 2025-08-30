@@ -253,6 +253,23 @@ TEST_F(IR_ValidatorTest, AbstractInt_FunctionParam) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructMember_Void) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("v"), ty.void_(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot have void type
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, FunctionParam_InvalidAddressSpaceForHandleType) {
     auto* type = ty.ptr(AddressSpace::kFunction, ty.sampler());
     auto* fn = b.Function("my_func", ty.void_());
