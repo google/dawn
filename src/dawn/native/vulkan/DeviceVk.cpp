@@ -347,7 +347,6 @@ MaybeError Device::TickImpl() {
     Queue* queue = ToBackend(GetQueue());
 
     ExecutionSerial completedSerial = queue->GetCompletedCommandSerial();
-    queue->RecycleCompletedCommands(completedSerial);
 
     mDescriptorAllocatorsPendingDeallocation.Use([&](auto pending) {
         for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial)) {
