@@ -29,7 +29,6 @@
 #define SRC_TINT_LANG_WGSL_PROGRAM_PROGRAM_H_
 
 #include <string>
-#include <unordered_set>
 
 #include "src/tint/lang/core/constant/manager.h"
 #include "src/tint/lang/core/type/manager.h"
@@ -72,15 +71,6 @@ class Program {
     /// @return this Program
     Program& operator=(Program&& rhs);
 
-    /// @returns the last allocated (numerically highest) AST node identifier.
-    ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
-
-    /// @returns a reference to the program's constants
-    const core::constant::Manager& Constants() const {
-        AssertNotMoved();
-        return constants_;
-    }
-
     /// @returns a reference to the program's types
     const core::type::Manager& Types() const {
         AssertNotMoved();
@@ -91,12 +81,6 @@ class Program {
     const ASTNodeAllocator& ASTNodes() const {
         AssertNotMoved();
         return ast_nodes_;
-    }
-
-    /// @returns a reference to the program's semantic nodes storage
-    const SemNodeAllocator& SemNodes() const {
-        AssertNotMoved();
-        return sem_nodes_;
     }
 
     /// @returns a reference to the program's AST root Module
@@ -158,7 +142,6 @@ class Program {
     /// Asserts that the program has not been moved.
     void AssertNotMoved() const;
 
-    ast::NodeID highest_node_id_;
     core::constant::Manager constants_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;

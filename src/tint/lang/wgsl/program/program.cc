@@ -48,8 +48,7 @@ Program::Printer Program::printer = DefaultPrinter;
 Program::Program() = default;
 
 Program::Program(Program&& program)
-    : highest_node_id_(std::move(program.highest_node_id_)),
-      constants_(std::move(program.constants_)),
+    : constants_(std::move(program.constants_)),
       ast_nodes_(std::move(program.ast_nodes_)),
       sem_nodes_(std::move(program.sem_nodes_)),
       ast_(std::move(program.ast_)),
@@ -62,7 +61,6 @@ Program::Program(Program&& program)
 }
 
 Program::Program(ProgramBuilder&& builder) {
-    highest_node_id_ = builder.LastAllocatedNodeID();
     is_valid_ = builder.IsValid();
 
     // The above must be called *before* the calls to std::move() below
@@ -89,7 +87,6 @@ Program& Program::operator=(Program&& program) {
     program.AssertNotMoved();
     program.moved_ = true;
     moved_ = false;
-    highest_node_id_ = std::move(program.highest_node_id_);
     constants_ = std::move(program.constants_);
     ast_nodes_ = std::move(program.ast_nodes_);
     sem_nodes_ = std::move(program.sem_nodes_);
