@@ -332,7 +332,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::SharedBufferMemoryD3D12Resource,
      {"Support importing ID3D12Resource as shared buffer memory.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_buffer.md",
-      FeatureInfo::FeatureState::Experimental}},
+      FeatureInfo::FeatureState::Stable}},
     {Feature::R8UnormStorage,
      {"Supports using r8unorm texture as storage texture.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
