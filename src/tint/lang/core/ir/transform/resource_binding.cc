@@ -85,6 +85,14 @@ struct State {
 
             auto alias_for_type =
                 helper->GenerateAliases(b, var, iter->second.default_binding_type_order);
+
+            std::unordered_map<ResourceType, uint32_t> resource_type_to_idx;
+            size_t def_size = iter->second.default_binding_type_order.size();
+            for (size_t i = 0; i < def_size; ++i) {
+                auto res_ty = static_cast<ResourceType>(iter->second.default_binding_type_order[i]);
+                resource_type_to_idx.insert({res_ty, uint32_t(i)});
+            }
+
             auto* sb = InjectStorageBuffer(var, iter->second);
 
             std::vector<core::ir::Value*> to_fix;
@@ -111,50 +119,22 @@ struct State {
                                         break;
                                     }
                                     case core::BuiltinFn::kHasBinding: {
+                                        auto* binding_ty = call->ExplicitTemplateParams()[0];
                                         auto* idx = call->Args()[1];
-
                                         if (idx->Type()->IsSignedIntegerScalar()) {
                                             idx = b.Convert(ty.u32(), idx)->Result();
                                         }
-
-                                        auto* length =
-                                            b.Access(ty.ptr<storage, u32, read>(), sb, 0_u);
-                                        auto* len_check =
-                                            b.LessThan(ty.bool_(), idx, b.Load(length));
-
-                                        auto* has_check = b.If(len_check);
-                                        has_check->SetResult(call->DetachResult());
-
-                                        b.Append(has_check->True(), [&] {
-                                            auto* type_val = b.Access(ty.ptr<storage, u32, read>(),
-                                                                      sb, 1_u, idx);
-
-                                            auto* v = b.Load(type_val);
-                                            auto* eq = b.Equal(
-                                                ty.bool_(), v,
-                                                u32(static_cast<uint32_t>(
-                                                    core::type::TypeToResourceType(
-                                                        call->ExplicitTemplateParams()[0]))));
-                                            b.ExitIf(has_check, eq);
-                                        });
-
-                                        b.Append(has_check->False(),
-                                                 [&] { b.ExitIf(has_check, b.Constant(false)); });
-
+                                        GenHasBinding(call->DetachResult(), binding_ty, idx, sb);
                                         break;
                                     }
                                     case core::BuiltinFn::kGetBinding: {
                                         auto* binding_ty = call->ExplicitTemplateParams()[0];
-                                        auto alias = alias_for_type.Get(binding_ty);
-                                        TINT_ASSERT(alias);
-
-                                        // TODO(439627523): Check hasBinding matches for type
-
-                                        // TODO(439627523): Fix pointer access
-                                        auto* access =
-                                            b.Access(ty.ptr(handle, binding_ty, read),
-                                                     (*alias)->Result(), call->Args()[1]);
-                                        b.LoadWithResult(call->DetachResult(), access);
+                                        auto* idx = call->Args()[1];
+                                        if (idx->Type()->IsSignedIntegerScalar()) {
+                                            idx = b.Convert(ty.u32(), idx)->Result();
+                                        }
+                                        GenGetBinding(call->DetachResult(), binding_ty, idx, sb,
+                                                      alias_for_type, resource_type_to_idx);
                                         break;
                                     }
                                     default:
@@ -175,6 +155,67 @@ struct State {
         for (auto* inst : to_delete) {
             inst->Destroy();
         }
+    }
+
+    // Note, assumes it's called inside a builder append block.
+    void GenHasBinding(core::ir::InstructionResult* result,
+                       const core::type::Type* type,
+                       core::ir::Value* idx,
+                       core::ir::Var* storage_buffer) {
+        auto* length = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
+        auto* len_check = b.LessThan(ty.bool_(), idx, b.Load(length));
+
+        auto* has_check = b.If(len_check);
+        has_check->SetResult(result);
+
+        b.Append(has_check->True(), [&] {
+            auto* type_val = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 1_u, idx);
+
+            auto* v = b.Load(type_val);
+            auto* eq = b.Equal(ty.bool_(), v,
+                               u32(static_cast<uint32_t>(core::type::TypeToResourceType(type))));
+            b.ExitIf(has_check, eq);
+        });
+
+        b.Append(has_check->False(), [&] { b.ExitIf(has_check, b.Constant(false)); });
+    }
+
+    // Note, assumes it's called inside a builder append block.
+    void GenGetBinding(core::ir::InstructionResult* result,
+                       const core::type::Type* type,
+                       core::ir::Value* idx,
+                       core::ir::Var* storage_buffer,
+                       const Hashmap<const core::type::Type*, core::ir::Var*, 4>& alias_for_type,
+                       const std::unordered_map<ResourceType, uint32_t>& resource_type_to_idx) {
+        auto* has_result = b.InstructionResult(ty.bool_());
+        GenHasBinding(has_result, type, idx, storage_buffer);
+
+        auto* get_check = b.If(has_result);
+        auto* res = b.InstructionResult(ty.u32());
+        get_check->SetResult(res);
+
+        auto alias = alias_for_type.Get(type);
+        TINT_ASSERT(alias);
+
+        b.Append(get_check->True(), [&] { b.ExitIf(get_check, idx); });
+
+        b.Append(get_check->False(), [&] {
+            auto res_type = core::type::TypeToResourceType(type);
+            auto idx_iter = resource_type_to_idx.find(res_type);
+            TINT_ASSERT(idx_iter != resource_type_to_idx.end());
+
+            auto* len_access = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
+            auto* num_elements = b.Load(len_access);
+
+            auto* r = b.Add(ty.u32(), u32(idx_iter->second), num_elements);
+
+            b.ExitIf(get_check, r);
+        });
+
+        // TODO(439627523): Fix pointer access
+        auto* ptr_ty = ty.ptr(handle, type, read);
+        auto* access = b.Access(ptr_ty, (*alias)->Result(), res);
+        b.LoadWithResult(result, access);
     }
 
     core::ir::Var* InjectStorageBuffer(core::ir::Var* var, const ResourceBindingInfo& info) {
