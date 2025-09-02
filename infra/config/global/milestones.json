@@ -287,5 +287,15 @@
             "mac",
             "win"
         ]
+    },
+    "141": {
+        "name": "m141",
+        "chromium_project": "chromium-m141",
+        "ref": "refs/heads/chromium/7390",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
