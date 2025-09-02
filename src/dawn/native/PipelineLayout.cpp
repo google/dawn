@@ -430,7 +430,8 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             if (dynamicArrays[group]->kind == wgpu::DynamicBindingKind::Undefined) {
                 dynamicArrays[group]->kind = array.kind;
             } else {
-                DAWN_INVALID_IF(dynamicArrays[group]->kind != array.kind,
+                DAWN_INVALID_IF(array.kind != wgpu::DynamicBindingKind::Undefined &&
+                                    dynamicArrays[group]->kind != array.kind,
                                 "Dynamic array kind doesn't match for @group(%u) between shader "
                                 "stages (%s vs. %s).",
                                 group, dynamicArrays[group]->kind, array.kind);
