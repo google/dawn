@@ -161,6 +161,7 @@ class ExecutionQueueBase : public ApiObjectBase {
     std::condition_variable mCv;
     bool mCallingCallbacks = false;
     bool mWaitingForIdle = false;
+    bool mAssumeCompleted = false;
     SerialMap<ExecutionSerial, Task> mWaitingTasks;
 };
 
