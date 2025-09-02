@@ -877,6 +877,10 @@ struct Decoder {
                  << internal_limits::kMaxArrayElementCount << "\n";
             return mod_out_.Types().invalid();
         }
+        if (element == nullptr) {
+            err_ << "array element type is invalid\n";
+            return mod_out_.Types().invalid();
+        }
 
         return count > 0 ? mod_out_.Types().array(element, count)
                          : mod_out_.Types().runtime_array(element);
