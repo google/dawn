@@ -80,12 +80,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
 
-    if (options.resource_binding.has_value()) {
-        spirv::writer::raise::ResourceBindingHelper helper;
-        RUN_TRANSFORM(core::ir::transform::ResourceBinding, module,
-                      options.resource_binding.value(), &helper);
-    }
-
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config;
         if (options.disable_image_robustness) {
@@ -97,6 +91,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
 
         RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+    }
+
+    if (options.resource_binding.has_value()) {
+        spirv::writer::raise::ResourceBindingHelper helper;
+        RUN_TRANSFORM(core::ir::transform::ResourceBinding, module,
+                      options.resource_binding.value(), &helper);
     }
 
     // PrepareImmediateData must come before any transform that needs internal immediate data.

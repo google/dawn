@@ -4,12 +4,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 50
+; Bound: 51
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
                OpExtension "SPV_EXT_descriptor_indexing"
-         %27 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -53,42 +52,48 @@
          %16 = OpTypeFunction %int
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_1 = OpConstant %uint 1
-%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-    %uint_26 = OpConstant %uint 26
+     %uint_0 = OpConstant %uint 0
        %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
       %false = OpConstantFalse %bool
+%_ptr_Function_bool = OpTypePointer Function %bool
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
+    %uint_26 = OpConstant %uint 26
        %void = OpTypeVoid
-         %44 = OpTypeFunction %void
+         %46 = OpTypeFunction %void
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-     %uint_0 = OpConstant %uint 0
 %hasBinding_47f888 = OpFunction %int None %16
          %17 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_uint Function
         %res = OpVariable %_ptr_Function_bool Function
                OpStore %arg_1 %uint_1
          %21 = OpLoad %uint %arg_1 None
-         %22 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %10 %uint_1
-         %24 = OpArrayLength %uint %10 1
-         %25 = OpISub %uint %24 %uint_1
-         %26 = OpExtInst %uint %27 UMin %21 %25
-         %28 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %26
-         %30 = OpLoad %uint %28 None
-         %31 = OpIEqual %bool %30 %uint_26
+         %22 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_0
+         %25 = OpLoad %uint %22 None
+         %26 = OpULessThan %bool %21 %25
+               OpSelectionMerge %28 None
+               OpBranchConditional %26 %29 %30
+         %29 = OpLabel
+         %41 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %21
+         %42 = OpLoad %uint %41 None
+         %32 = OpIEqual %bool %42 %uint_26
+               OpBranch %28
+         %30 = OpLabel
+               OpBranch %28
+         %28 = OpLabel
+         %31 = OpPhi %bool %32 %29 %false %30
                OpStore %res %31
          %36 = OpLoad %bool %res None
          %37 = OpLogicalEqual %bool %36 %false
-         %39 = OpSelect %int %37 %int_1 %int_0
-               OpReturnValue %39
+         %38 = OpSelect %int %37 %int_1 %int_0
+               OpReturnValue %38
                OpFunctionEnd
-%fragment_main = OpFunction %void None %44
-         %45 = OpLabel
-         %46 = OpFunctionCall %int %hasBinding_47f888
-         %47 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %47 %46 None
+%fragment_main = OpFunction %void None %46
+         %47 = OpLabel
+         %48 = OpFunctionCall %int %hasBinding_47f888
+         %49 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %49 %48 None
                OpReturn
                OpFunctionEnd
 ;
@@ -97,12 +102,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 50
+; Bound: 51
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
                OpExtension "SPV_EXT_descriptor_indexing"
-         %27 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -146,42 +150,48 @@
          %16 = OpTypeFunction %int
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_1 = OpConstant %uint 1
-%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-    %uint_26 = OpConstant %uint 26
+     %uint_0 = OpConstant %uint 0
        %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
       %false = OpConstantFalse %bool
+%_ptr_Function_bool = OpTypePointer Function %bool
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
+    %uint_26 = OpConstant %uint 26
        %void = OpTypeVoid
-         %44 = OpTypeFunction %void
+         %46 = OpTypeFunction %void
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-     %uint_0 = OpConstant %uint 0
 %hasBinding_47f888 = OpFunction %int None %16
          %17 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_uint Function
         %res = OpVariable %_ptr_Function_bool Function
                OpStore %arg_1 %uint_1
          %21 = OpLoad %uint %arg_1 None
-         %22 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %10 %uint_1
-         %24 = OpArrayLength %uint %10 1
-         %25 = OpISub %uint %24 %uint_1
-         %26 = OpExtInst %uint %27 UMin %21 %25
-         %28 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %26
-         %30 = OpLoad %uint %28 None
-         %31 = OpIEqual %bool %30 %uint_26
+         %22 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_0
+         %25 = OpLoad %uint %22 None
+         %26 = OpULessThan %bool %21 %25
+               OpSelectionMerge %28 None
+               OpBranchConditional %26 %29 %30
+         %29 = OpLabel
+         %41 = OpAccessChain %_ptr_StorageBuffer_uint %10 %uint_1 %21
+         %42 = OpLoad %uint %41 None
+         %32 = OpIEqual %bool %42 %uint_26
+               OpBranch %28
+         %30 = OpLabel
+               OpBranch %28
+         %28 = OpLabel
+         %31 = OpPhi %bool %32 %29 %false %30
                OpStore %res %31
          %36 = OpLoad %bool %res None
          %37 = OpLogicalEqual %bool %36 %false
-         %39 = OpSelect %int %37 %int_1 %int_0
-               OpReturnValue %39
+         %38 = OpSelect %int %37 %int_1 %int_0
+               OpReturnValue %38
                OpFunctionEnd
-%compute_main = OpFunction %void None %44
-         %45 = OpLabel
-         %46 = OpFunctionCall %int %hasBinding_47f888
-         %47 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %47 %46 None
+%compute_main = OpFunction %void None %46
+         %47 = OpLabel
+         %48 = OpFunctionCall %int %hasBinding_47f888
+         %49 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %49 %48 None
                OpReturn
                OpFunctionEnd
 ;
@@ -190,12 +200,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 69
+; Bound: 70
 ; Schema: 0
                OpCapability Shader
                OpCapability RuntimeDescriptorArray
                OpExtension "SPV_EXT_descriptor_indexing"
-         %31 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
                OpMemberName %tint_resource_binding_buffer_tint_explicit_layout 0 "array_length"
@@ -247,24 +256,23 @@
          %20 = OpTypeFunction %int
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_1 = OpConstant %uint 1
-%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-    %uint_26 = OpConstant %uint 26
+     %uint_0 = OpConstant %uint 0
        %bool = OpTypeBool
-%_ptr_Function_bool = OpTypePointer Function %bool
       %false = OpConstantFalse %bool
+%_ptr_Function_bool = OpTypePointer Function %bool
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
+    %uint_26 = OpConstant %uint 26
 %VertexOutput = OpTypeStruct %v4float %int
-         %48 = OpTypeFunction %VertexOutput
+         %50 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %52 = OpConstantNull %VertexOutput
+         %54 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-     %uint_0 = OpConstant %uint 0
-         %56 = OpConstantNull %v4float
+         %57 = OpConstantNull %v4float
 %_ptr_Function_int = OpTypePointer Function %int
        %void = OpTypeVoid
-         %63 = OpTypeFunction %void
+         %64 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
 %hasBinding_47f888 = OpFunction %int None %20
          %21 = OpLabel
@@ -272,37 +280,44 @@
         %res = OpVariable %_ptr_Function_bool Function
                OpStore %arg_1 %uint_1
          %25 = OpLoad %uint %arg_1 None
-         %26 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %6 %uint_1
-         %28 = OpArrayLength %uint %6 1
-         %29 = OpISub %uint %28 %uint_1
-         %30 = OpExtInst %uint %31 UMin %25 %29
-         %32 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_1 %30
-         %34 = OpLoad %uint %32 None
-         %35 = OpIEqual %bool %34 %uint_26
+         %26 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0
+         %29 = OpLoad %uint %26 None
+         %30 = OpULessThan %bool %25 %29
+               OpSelectionMerge %32 None
+               OpBranchConditional %30 %33 %34
+         %33 = OpLabel
+         %45 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_1 %25
+         %46 = OpLoad %uint %45 None
+         %36 = OpIEqual %bool %46 %uint_26
+               OpBranch %32
+         %34 = OpLabel
+               OpBranch %32
+         %32 = OpLabel
+         %35 = OpPhi %bool %36 %33 %false %34
                OpStore %res %35
          %40 = OpLoad %bool %res None
          %41 = OpLogicalEqual %bool %40 %false
-         %43 = OpSelect %int %41 %int_1 %int_0
-               OpReturnValue %43
+         %42 = OpSelect %int %41 %int_1 %int_0
+               OpReturnValue %42
                OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %48
-         %49 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %52
-         %53 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %53 %56 None
-         %57 = OpAccessChain %_ptr_Function_int %out %uint_1
-         %59 = OpFunctionCall %int %hasBinding_47f888
-               OpStore %57 %59 None
-         %60 = OpLoad %VertexOutput %out None
-               OpReturnValue %60
+%vertex_main_inner = OpFunction %VertexOutput None %50
+         %51 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %54
+         %55 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %55 %57 None
+         %58 = OpAccessChain %_ptr_Function_int %out %uint_1
+         %60 = OpFunctionCall %int %hasBinding_47f888
+               OpStore %58 %60 None
+         %61 = OpLoad %VertexOutput %out None
+               OpReturnValue %61
                OpFunctionEnd
-%vertex_main = OpFunction %void None %63
-         %64 = OpLabel
-         %65 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %66 = OpCompositeExtract %v4float %65 0
-               OpStore %vertex_main_position_Output %66 None
-         %67 = OpCompositeExtract %int %65 1
-               OpStore %vertex_main_loc0_Output %67 None
+%vertex_main = OpFunction %void None %64
+         %65 = OpLabel
+         %66 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %67 = OpCompositeExtract %v4float %66 0
+               OpStore %vertex_main_position_Output %67 None
+         %68 = OpCompositeExtract %int %66 1
+               OpStore %vertex_main_loc0_Output %68 None
                OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

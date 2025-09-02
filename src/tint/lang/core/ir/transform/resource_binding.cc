@@ -111,15 +111,36 @@ struct State {
                                         break;
                                     }
                                     case core::BuiltinFn::kHasBinding: {
-                                        auto* access = b.Access(ty.ptr<storage, u32, read>(), sb,
-                                                                1_u, call->Args()[1]);
-                                        auto* v = b.Load(access);
-                                        auto* r =
-                                            b.Equal(ty.bool_(), v,
-                                                    u32(static_cast<uint32_t>(
-                                                        core::type::TypeToResourceType(
-                                                            call->ExplicitTemplateParams()[0]))));
-                                        call->Result()->ReplaceAllUsesWith(r->Result());
+                                        auto* idx = call->Args()[1];
+
+                                        if (idx->Type()->IsSignedIntegerScalar()) {
+                                            idx = b.Convert(ty.u32(), idx)->Result();
+                                        }
+
+                                        auto* length =
+                                            b.Access(ty.ptr<storage, u32, read>(), sb, 0_u);
+                                        auto* len_check =
+                                            b.LessThan(ty.bool_(), idx, b.Load(length));
+
+                                        auto* has_check = b.If(len_check);
+                                        has_check->SetResult(call->DetachResult());
+
+                                        b.Append(has_check->True(), [&] {
+                                            auto* type_val = b.Access(ty.ptr<storage, u32, read>(),
+                                                                      sb, 1_u, idx);
+
+                                            auto* v = b.Load(type_val);
+                                            auto* eq = b.Equal(
+                                                ty.bool_(), v,
+                                                u32(static_cast<uint32_t>(
+                                                    core::type::TypeToResourceType(
+                                                        call->ExplicitTemplateParams()[0]))));
+                                            b.ExitIf(has_check, eq);
+                                        });
+
+                                        b.Append(has_check->False(),
+                                                 [&] { b.ExitIf(has_check, b.Constant(false)); });
+
                                         break;
                                     }
                                     case core::BuiltinFn::kGetBinding: {
@@ -127,8 +148,6 @@ struct State {
                                         auto alias = alias_for_type.Get(binding_ty);
                                         TINT_ASSERT(alias);
 
-                                        // TODO(439627523): Check index in range of storage buffer
-                                        //                  array_length
                                         // TODO(439627523): Check hasBinding matches for type
 
                                         // TODO(439627523): Fix pointer access
