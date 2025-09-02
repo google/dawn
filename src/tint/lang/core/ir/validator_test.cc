@@ -1287,6 +1287,39 @@ TEST_F(IR_ValidatorTest, Binary_MissingResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Binary_LogicalOr) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Binary(core::BinaryOp::kLogicalOr, ty.bool_(), b.Constant(true), b.Constant(true));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: binary: logical-or is not valid in the IR
+    %2:bool = logical-or true, true
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Binary_LogicalAnd) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Binary(core::BinaryOp::kLogicalAnd, ty.bool_(), b.Constant(false), b.Constant(false));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: binary: logical-and is not valid in the IR
+    %2:bool = logical-and false, false
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Binary_Valid) {
     auto* i32 = ty.i32();
     auto* func = b.Function("foo", ty.void_());

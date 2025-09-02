@@ -3428,6 +3428,15 @@ void Validator::CheckBinary(const Binary* b) {
         return;
     }
 
+    if (b->Op() == core::BinaryOp::kLogicalAnd) {
+        AddError(b) << "logical-and is not valid in the IR";
+        return;
+    }
+    if (b->Op() == core::BinaryOp::kLogicalOr) {
+        AddError(b) << "logical-or is not valid in the IR";
+        return;
+    }
+
     if (b->LHS() && b->RHS()) {
         intrinsic::Context context{b->TableData(), type_mgr_, symbols_};
 
