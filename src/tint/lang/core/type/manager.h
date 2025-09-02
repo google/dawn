@@ -197,6 +197,9 @@ class Manager final {
         return types_.Find<TYPE>(std::forward<ARGS>(args)...);
     }
 
+    /// @returns the subtype for a given `format`
+    const Type* SubtypeFor(core::TexelFormat format);
+
     /// @returns an invalid type
     const core::type::Invalid* invalid();
 

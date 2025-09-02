@@ -935,15 +935,27 @@ struct Decoder {
         return mod_out_.Types().depth_multisampled_texture(dimension);
     }
 
-    const type::StorageTexture* CreateTypeStorageTexture(const pb::TypeStorageTexture& texture_in) {
+    const type::Type* CreateTypeStorageTexture(const pb::TypeStorageTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto texel_format = TexelFormat(texture_in.texel_format());
+        auto sub_ty = mod_out_.Types().SubtypeFor(texel_format);
+        if (!sub_ty) {
+            err_ << "unable to create a sub-type for " << texel_format << "\n";
+            return mod_out_.Types().invalid();
+        }
+
         auto access = AccessControl(texture_in.access());
         return mod_out_.Types().storage_texture(dimension, texel_format, access);
     }
 
-    const type::TexelBuffer* CreateTypeTexelBuffer(const pb::TypeTexelBuffer& buffer_in) {
+    const type::Type* CreateTypeTexelBuffer(const pb::TypeTexelBuffer& buffer_in) {
         auto texel_format = TexelFormat(buffer_in.texel_format());
+        auto sub_ty = mod_out_.Types().SubtypeFor(texel_format);
+        if (!sub_ty) {
+            err_ << "unable to create a sub-type for " << texel_format << "\n";
+            return mod_out_.Types().invalid();
+        }
+
         auto access = AccessControl(buffer_in.access());
         return mod_out_.Types().texel_buffer(texel_format, access);
     }
