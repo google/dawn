@@ -39,6 +39,7 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
+#include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/clone_context.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
@@ -472,6 +473,51 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                          std::make_tuple(false, TypeBuilder<f16>),
                                          std::make_tuple(false, TypeBuilder<core::type::Bool>),
                                          std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
+TEST_F(IR_ValidatorTest, BindingArray) {
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var(
+            "m", AddressSpace::kHandle,
+            ty.binding_array(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, BindingArrayRuntimeCount) {
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var("m", AddressSpace::kHandle,
+                          ty.Get<core::type::BindingArray>(
+                              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
+                              ty.Get<core::type::RuntimeArrayCount>()));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:2:3 error: var: binding_array count must be a constant expression
+  %m:ptr<handle, binding_array<texture_2d<f32>, >, read> = var undef @binding_point(0, 0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
+}
+
+TEST_F(IR_ValidatorTest, BindingArrayNonSampledTexture) {
+    b.Append(mod.root_block, [&] {
+        auto* var = b.Var("m", AddressSpace::kHandle, ty.binding_array(ty.external_texture(), 5));
+        var->SetBindingPoint(0, 0);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:3 error: var: binding_array element type must be a sampled texture type
+  %m:ptr<handle, binding_array<texture_external, 5>, read> = var undef @binding_point(0, 0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
+}
 
 using Type_MultisampledTextureTypeAndDimension =
     IRTestParamHelper<std::tuple<std::tuple<

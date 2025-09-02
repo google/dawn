@@ -377,7 +377,7 @@ tint_module_vars_struct = struct @align(1) {
 TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes_BindingArray) {
     auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
-    auto* var_s = b.Var("s", ty.ptr<handle>(ty.binding_array(ty.sampler(), 3u)));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);
     var_s->SetBindingPoint(3, 4);
     mod.root_block->Append(var_t);
@@ -386,7 +386,7 @@ TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes_BindingArray) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* load_t = b.Load(b.Access(ty.ptr<handle>(texture_type), var_t, 0_i));
-        auto* load_s = b.Load(b.Access(ty.ptr<handle>(ty.sampler()), var_s, 0_i));
+        auto* load_s = b.Load(var_s);
         b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s, b.Splat<vec2<f32>>(0_f));
         b.Return(func);
     });
@@ -394,16 +394,15 @@ TEST_F(MslWriter_ModuleScopeVarsTest, HandleTypes_BindingArray) {
     auto* src = R"(
 $B1: {  # root
   %t:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(1, 2)
-  %s:ptr<handle, binding_array<sampler, 3>, read> = var undef @binding_point(3, 4)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %4:ptr<handle, texture_2d<f32>, read> = access %t, 0i
     %5:texture_2d<f32> = load %4
-    %6:ptr<handle, sampler, read> = access %s, 0i
-    %7:sampler = load %6
-    %8:vec4<f32> = textureSample %5, %7, vec2<f32>(0.0f)
+    %6:sampler = load %s
+    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
     ret
   }
 }
@@ -413,18 +412,17 @@ $B1: {  # root
     auto* expect = R"(
 tint_module_vars_struct = struct @align(1) {
   t:binding_array<texture_2d<f32>, 3> @offset(0)
-  s:binding_array<sampler, 3> @offset(0)
+  s:sampler @offset(0)
 }
 
-%foo = @fragment func(%t:binding_array<texture_2d<f32>, 3> [@binding_point(1, 2)], %s:binding_array<sampler, 3> [@binding_point(3, 4)]):void {
+%foo = @fragment func(%t:binding_array<texture_2d<f32>, 3> [@binding_point(1, 2)], %s:sampler [@binding_point(3, 4)]):void {
   $B1: {
     %4:tint_module_vars_struct = construct %t, %s
     %tint_module_vars:tint_module_vars_struct = let %4
     %6:binding_array<texture_2d<f32>, 3> = access %tint_module_vars, 0u
     %7:texture_2d<f32> = access %6, 0i
-    %8:binding_array<sampler, 3> = access %tint_module_vars, 1u
-    %9:sampler = access %8, 0i
-    %10:vec4<f32> = textureSample %7, %9, vec2<f32>(0.0f)
+    %8:sampler = access %tint_module_vars, 1u
+    %9:vec4<f32> = textureSample %7, %8, vec2<f32>(0.0f)
     ret
   }
 }
@@ -882,7 +880,7 @@ tint_module_vars_struct = struct @align(1) {
 TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes_BindingArray) {
     auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
-    auto* var_s = b.Var("s", ty.ptr<handle>(ty.binding_array(ty.sampler(), 3u)));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);
     var_s->SetBindingPoint(3, 4);
     mod.root_block->Append(var_t);
@@ -893,7 +891,7 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes_Bindi
     foo->SetParams({param});
     b.Append(foo->Block(), [&] {
         auto* load_t = b.Load(b.Access(ty.ptr<handle>(texture_type), var_t, 0_i));
-        auto* load_s = b.Load(b.Access(ty.ptr<handle>(ty.sampler()), var_s, 0_i));
+        auto* load_s = b.Load(var_s);
         auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s,
                                          b.Splat<vec2<f32>>(0_f));
         b.Return(foo, result);
@@ -908,22 +906,21 @@ TEST_F(MslWriter_ModuleScopeVarsTest, CallFunctionThatUsesVars_HandleTypes_Bindi
     auto* src = R"(
 $B1: {  # root
   %t:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(1, 2)
-  %s:ptr<handle, binding_array<sampler, 3>, read> = var undef @binding_point(3, 4)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = func(%param:i32):vec4<f32> {
   $B2: {
     %5:ptr<handle, texture_2d<f32>, read> = access %t, 0i
     %6:texture_2d<f32> = load %5
-    %7:ptr<handle, sampler, read> = access %s, 0i
-    %8:sampler = load %7
-    %9:vec4<f32> = textureSample %6, %8, vec2<f32>(0.0f)
-    ret %9
+    %7:sampler = load %s
+    %8:vec4<f32> = textureSample %6, %7, vec2<f32>(0.0f)
+    ret %8
   }
 }
 %main = @fragment func():void {
   $B3: {
-    %11:vec4<f32> = call %foo, 42i
+    %10:vec4<f32> = call %foo, 42i
     ret
   }
 }
@@ -933,24 +930,23 @@ $B1: {  # root
     auto* expect = R"(
 tint_module_vars_struct = struct @align(1) {
   t:binding_array<texture_2d<f32>, 3> @offset(0)
-  s:binding_array<sampler, 3> @offset(0)
+  s:sampler @offset(0)
 }
 
 %foo = func(%param:i32, %tint_module_vars:tint_module_vars_struct):vec4<f32> {
   $B1: {
     %4:binding_array<texture_2d<f32>, 3> = access %tint_module_vars, 0u
     %5:texture_2d<f32> = access %4, 0i
-    %6:binding_array<sampler, 3> = access %tint_module_vars, 1u
-    %7:sampler = access %6, 0i
-    %8:vec4<f32> = textureSample %5, %7, vec2<f32>(0.0f)
-    ret %8
+    %6:sampler = access %tint_module_vars, 1u
+    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
+    ret %7
   }
 }
-%main = @fragment func(%t:binding_array<texture_2d<f32>, 3> [@binding_point(1, 2)], %s:binding_array<sampler, 3> [@binding_point(3, 4)]):void {
+%main = @fragment func(%t:binding_array<texture_2d<f32>, 3> [@binding_point(1, 2)], %s:sampler [@binding_point(3, 4)]):void {
   $B2: {
-    %12:tint_module_vars_struct = construct %t, %s
-    %tint_module_vars_1:tint_module_vars_struct = let %12  # %tint_module_vars_1: 'tint_module_vars'
-    %14:vec4<f32> = call %foo, 42i, %tint_module_vars_1
+    %11:tint_module_vars_struct = construct %t, %s
+    %tint_module_vars_1:tint_module_vars_struct = let %11  # %tint_module_vars_1: 'tint_module_vars'
+    %13:vec4<f32> = call %foo, 42i, %tint_module_vars_1
     ret
   }
 }

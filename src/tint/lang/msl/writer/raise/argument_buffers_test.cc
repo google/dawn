@@ -420,7 +420,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 TEST_F(MslWriter_ArgumentBuffersTest, HandleTypes_BindingArray) {
     auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
-    auto* var_s = b.Var("s", ty.ptr<handle>(ty.binding_array(ty.sampler(), 3u)));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);
     var_s->SetBindingPoint(3, 4);
     mod.root_block->Append(var_t);
@@ -429,7 +429,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, HandleTypes_BindingArray) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* load_t = b.Load(b.Access(ty.ptr<handle>(texture_type), var_t, 0_i));
-        auto* load_s = b.Load(b.Access(ty.ptr<handle>(ty.sampler()), var_s, 0_i));
+        auto* load_s = b.Load(var_s);
         b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s, b.Splat<vec2<f32>>(0_f));
         b.Return(func);
     });
@@ -437,16 +437,15 @@ TEST_F(MslWriter_ArgumentBuffersTest, HandleTypes_BindingArray) {
     auto* src = R"(
 $B1: {  # root
   %t:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(1, 2)
-  %s:ptr<handle, binding_array<sampler, 3>, read> = var undef @binding_point(3, 4)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %4:ptr<handle, texture_2d<f32>, read> = access %t, 0i
     %5:texture_2d<f32> = load %4
-    %6:ptr<handle, sampler, read> = access %s, 0i
-    %7:sampler = load %6
-    %8:vec4<f32> = textureSample %5, %7, vec2<f32>(0.0f)
+    %6:sampler = load %s
+    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
     ret
   }
 }
@@ -459,7 +458,7 @@ tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
 }
 
 tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
-  s:binding_array<sampler, 3> @offset(0), @binding_point(3, 4)
+  s:sampler @offset(0), @binding_point(3, 4)
 }
 
 %foo = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
@@ -468,9 +467,8 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
     %5:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
     %6:binding_array<texture_2d<f32>, 3> = access %5, 0u
     %7:texture_2d<f32> = access %6, 0i
-    %8:binding_array<sampler, 3> = access %4, 0u
-    %9:sampler = access %8, 0i
-    %10:vec4<f32> = textureSample %7, %9, vec2<f32>(0.0f)
+    %8:sampler = access %4, 0u
+    %9:vec4<f32> = textureSample %7, %8, vec2<f32>(0.0f)
     ret
   }
 }
@@ -937,7 +935,7 @@ tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
 TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_HandleTypes_BindingArray) {
     auto* texture_type = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
     auto* var_t = b.Var("t", ty.ptr<handle>(ty.binding_array(texture_type, 3u)));
-    auto* var_s = b.Var("s", ty.ptr<handle>(ty.binding_array(ty.sampler(), 3u)));
+    auto* var_s = b.Var("s", ty.ptr<handle>(ty.sampler()));
     var_t->SetBindingPoint(1, 2);
     var_s->SetBindingPoint(3, 4);
     mod.root_block->Append(var_t);
@@ -948,7 +946,7 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_HandleTypes_Bindi
     foo->SetParams({param});
     b.Append(foo->Block(), [&] {
         auto* load_t = b.Load(b.Access(ty.ptr<handle>(texture_type), var_t, 0_i));
-        auto* load_s = b.Load(b.Access(ty.ptr<handle>(ty.sampler()), var_s, 0_i));
+        auto* load_s = b.Load(var_s);
         auto* result = b.Call<vec4<f32>>(core::BuiltinFn::kTextureSample, load_t, load_s,
                                          b.Splat<vec2<f32>>(0_f));
         b.Return(foo, result);
@@ -963,22 +961,21 @@ TEST_F(MslWriter_ArgumentBuffersTest, CallFunctionThatUsesVars_HandleTypes_Bindi
     auto* src = R"(
 $B1: {  # root
   %t:ptr<handle, binding_array<texture_2d<f32>, 3>, read> = var undef @binding_point(1, 2)
-  %s:ptr<handle, binding_array<sampler, 3>, read> = var undef @binding_point(3, 4)
+  %s:ptr<handle, sampler, read> = var undef @binding_point(3, 4)
 }
 
 %foo = func(%param:i32):vec4<f32> {
   $B2: {
     %5:ptr<handle, texture_2d<f32>, read> = access %t, 0i
     %6:texture_2d<f32> = load %5
-    %7:ptr<handle, sampler, read> = access %s, 0i
-    %8:sampler = load %7
-    %9:vec4<f32> = textureSample %6, %8, vec2<f32>(0.0f)
-    ret %9
+    %7:sampler = load %s
+    %8:vec4<f32> = textureSample %6, %7, vec2<f32>(0.0f)
+    ret %8
   }
 }
 %main = @fragment func():void {
   $B3: {
-    %11:vec4<f32> = call %foo, 42i
+    %10:vec4<f32> = call %foo, 42i
     ret
   }
 }
@@ -991,24 +988,23 @@ tint_arg_buffer_struct_1 = struct @align(1), @core.explicit_layout {
 }
 
 tint_arg_buffer_struct_3 = struct @align(1), @core.explicit_layout {
-  s:binding_array<sampler, 3> @offset(0), @binding_point(3, 4)
+  s:sampler @offset(0), @binding_point(3, 4)
 }
 
-%foo = func(%param:i32, %t:binding_array<texture_2d<f32>, 3>, %s:binding_array<sampler, 3>):vec4<f32> {
+%foo = func(%param:i32, %t:binding_array<texture_2d<f32>, 3>, %s:sampler):vec4<f32> {
   $B1: {
     %5:texture_2d<f32> = access %t, 0i
-    %6:sampler = access %s, 0i
-    %7:vec4<f32> = textureSample %5, %6, vec2<f32>(0.0f)
-    ret %7
+    %6:vec4<f32> = textureSample %5, %s, vec2<f32>(0.0f)
+    ret %6
   }
 }
 %main = @fragment func(%tint_arg_buffer_1:ptr<uniform, tint_arg_buffer_struct_1, read> [@binding_point(0, 20)], %tint_arg_buffer_3:ptr<uniform, tint_arg_buffer_struct_3, read> [@binding_point(0, 30)]):void {
   $B2: {
-    %11:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
-    %12:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
-    %13:binding_array<texture_2d<f32>, 3> = access %12, 0u
-    %14:binding_array<sampler, 3> = access %11, 0u
-    %15:vec4<f32> = call %foo, 42i, %13, %14
+    %10:tint_arg_buffer_struct_3 = load %tint_arg_buffer_3
+    %11:tint_arg_buffer_struct_1 = load %tint_arg_buffer_1
+    %12:binding_array<texture_2d<f32>, 3> = access %11, 0u
+    %13:sampler = access %10, 0u
+    %14:vec4<f32> = call %foo, 42i, %12, %13
     ret
   }
 }
