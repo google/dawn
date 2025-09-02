@@ -3467,6 +3467,13 @@ void Validator::CheckIf(const If* if_) {
         AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
     }
 
+    if (if_->False() && if_->False()->Is<core::ir::MultiInBlock>()) {
+        AddError(if_) << "if false block must be a block";
+    }
+    if (if_->True() && if_->True()->Is<core::ir::MultiInBlock>()) {
+        AddError(if_) << "if true block must be a block";
+    }
+
     tasks_.Push([this] { control_stack_.Pop(); });
 
     if (!if_->False()->IsEmpty()) {

@@ -225,6 +225,44 @@ TEST_F(IR_ValidatorTest, If_EmptyFalse) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, If_TrueMultiInBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* if_ = b.If(true);
+    if_->SetTrue(b.MultiInBlock());
+    if_->True()->Append(b.Return(f));
+
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: if: if true block must be a block
+    if true [t: $B2] {  # if_1
+    ^^^^^^^^^^^^^^^^)"));
+}
+
+TEST_F(IR_ValidatorTest, If_FalseMultiInBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* if_ = b.If(true);
+    if_->True()->Append(b.Return(f));
+
+    if_->SetFalse(b.MultiInBlock());
+    if_->False()->Append(b.Return(f));
+
+    f->Block()->Append(if_);
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: if: if false block must be a block
+    if true [t: $B2, f: $B3] {  # if_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^)"));
+}
+
 TEST_F(IR_ValidatorTest, If_EmptyTrue) {
     auto* f = b.Function("my_func", ty.void_());
 
