@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/container/flat_hash_set.h"
 #include "dawn/common/LRUCache.h"
 #include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/common/WeakRef.h"
@@ -40,15 +41,16 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/Subresource.h"
-#include "partition_alloc/pointers/raw_ref.h"
-
 #include "dawn/native/dawn_platform.h"
+#include "partition_alloc/pointers/raw_ref.h"
 
 namespace dawn::native {
 
+class DynamicArrayState;
 class MemoryDump;
 
 enum class AllowMultiPlanarTextureFormat {
@@ -190,6 +192,8 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
 
     MaybeError Pin(wgpu::TextureUsage usage);
     void Unpin();
+    void AddDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
+    void RemoveDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i);
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
@@ -280,6 +284,19 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     using TextureViewCache =
         LRUCache<TextureViewQuery, Ref<TextureViewBase>, TextureViewCacheFuncs>;
     std::unique_ptr<TextureViewCache> mTextureViewCache;
+
+    // Keep a hash set of the places this texture is bound to in DynamicArrayStates.
+    struct DynamicArraySlot {
+        WeakRef<DynamicArrayState> dynamicArray;
+        BindingIndex slot;
+
+        struct HashFuncs {
+            size_t operator()(const DynamicArraySlot& query) const;
+            bool operator()(const DynamicArraySlot& a, const DynamicArraySlot& b) const;
+        };
+    };
+    absl::flat_hash_set<DynamicArraySlot, DynamicArraySlot::HashFuncs, DynamicArraySlot::HashFuncs>
+        mDynamicArraySlots;
 
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;

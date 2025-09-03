@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
@@ -689,6 +690,74 @@ class DynamicBindingArrayTests : public DawnTest {
 
         return device.CreateBindGroup(&descriptor);
     }
+
+    // Test that `dynamicArray` (with layout `bgl` and `dynamicArrayStart`), has bindings of
+    // `wgslType` in the `expected` slots.
+    void TestHasBinding(wgpu::BindGroupLayout bgl,
+                        wgpu::BindGroup dynamicArray,
+                        std::vector<bool> expected,
+                        uint32_t dynamicArrayStart = 0,
+                        std::string wgslType = "texture_2d<f32>") {
+        // Create the test pipeline.
+        std::array<wgpu::BindGroupLayout, 2> bgls = {
+            bgl,
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}}),
+        };
+        wgpu::PipelineLayoutDescriptor plDesc = {
+            .bindGroupLayoutCount = 2,
+            .bindGroupLayouts = bgls.data(),
+        };
+
+        wgpu::ShaderModule module =
+            utils::CreateShaderModule(device, R"(
+            enable chromium_experimental_dynamic_binding;
+            @group(0) @binding()" + std::to_string(dynamicArrayStart) +
+                                                  R"() var bindings : resource_binding;
+            @group(1) @binding(0) var<storage, read_write> results : array<u32>;
+
+            @compute @workgroup_size(1) fn main() {
+                for (var i = 0u; i < arrayLength(bindings); i++) {
+                    results[i] = u32(hasBinding<)" +
+                                                  wgslType + R"(>(bindings, i));
+                }
+            }
+        )");
+
+        wgpu::ComputePipelineDescriptor csDesc = {.layout = device.CreatePipelineLayout(&plDesc),
+                                                  .compute = {
+                                                      .module = module,
+                                                  }};
+        wgpu::ComputePipeline testPipeline = device.CreateComputePipeline(&csDesc);
+
+        // Create the result buffer.
+        wgpu::BufferDescriptor bDesc = {
+            .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+            .size = sizeof(uint32_t) * expected.size(),
+        };
+        wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+        wgpu::BindGroup resultBG = utils::MakeBindGroup(device, bgls[1], {{0, resultBuffer}});
+
+        // Run the test.
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, dynamicArray);
+        pass.SetBindGroup(1, resultBG);
+        pass.SetPipeline(testPipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+
+        // Check we have the expected results.
+        std::vector<uint32_t> expectedU32;
+        for (bool b : expected) {
+            expectedU32.push_back(b ? 1u : 0u);
+        }
+
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
+    }
 };
 
 // Tests that creating the bind group that's only a dynamic array doesn't crash in backends.
@@ -862,19 +931,185 @@ TEST_P(DynamicBindingArrayTests, ArrayLengthBuiltin) {
     EXPECT_BUFFER_U32_EQ(3, resultBuffer, 4);
 }
 
-// TODO(https://crbug.com/435317394): Add tests that texture pinning / unpinning is reflected in the
-// availability of the binding in the shader. This can be done with a compute shader that loops over
-// [0, arrayLength(&resource_binding)) and returns hasBinding<T>(i) in a result storage buffer.
-//  - Test adding one texture binding in the middle of a dynamic binding array, unpinned the pinned
-//  - Test adding one texture binding multiple times, pinning it then unpinning it.
-//  - Test adding multiple textures and the same texture twice (pinned). then unpinning one of them
-//  - Test adding a texture, pinning it, then destroying it.
-//  - Test adding the same texture to multiple dynamic binding arrays, pinning it, then destroying
-//  one of the arrays.
-//  - Add TODO to test with binding array updates in the future.
-//  - Test for each possible sampled type, a shader that check hasBinding on every possible sampled
-//  type as well (to know that we correctly pass in the type ID).
-//  - Start at other dynamicArrayStart
+// Test WGSL `hasBinding` reflects the state of a dynamic binding array.
+TEST_P(DynamicBindingArrayTests, HasBindingOneTexturePinUnpin) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 3, {{1, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false, false, false});
+
+    // After pinning it has the one valid entry valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {false, true, false});
+
+    // After unpinning it has the no more valid entries.
+    tex.Unpin();
+    TestHasBinding(bgl, bg, {false, false, false});
+}
+
+// Test pin/unpin updating the availability takes into account the static bindings (so even if it
+// doesn't start at BindingIndex 0, things still work)
+TEST_P(DynamicBindingArrayTests, HasBindingOneTexturePinUnpinWithStaticBindings) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(
+        wgpu::DynamicBindingKind::SampledTexture, 4,
+        {{0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat}});
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 3, {{0, tex.CreateView()}, {5, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false, false, false}, 4);
+
+    // After pinning it has the one valid entry valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {false, true, false}, 4);
+
+    // After unpinning it has the no more valid entries.
+    tex.Unpin();
+    TestHasBinding(bgl, bg, {false, false, false}, 4);
+}
+
+// Test that calling texture.Destroy() implicitly unpins it.
+TEST_P(DynamicBindingArrayTests, HasBindingOneTexturePinDestroy) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 3, {{1, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false, false, false});
+
+    // After pinning it has the one valid entry valid.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {false, true, false});
+
+    // After texture destruction it has the no more valid entries.
+    tex.Destroy();
+    TestHasBinding(bgl, bg, {false, false, false});
+}
+
+// Test that a texture used multiple times in the same dynamic binding array has its availability
+// correctly updated.
+TEST_P(DynamicBindingArrayTests, HasBindingSameTextureMultipleTimesPinUnpin) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 4, {{1, tex.CreateView()}, {3, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false, false, false, false});
+
+    // After pinning it has valid entries.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {false, true, false, true});
+
+    // After unpinning it has the no more valid entries.
+    tex.Unpin();
+    TestHasBinding(bgl, bg, {false, false, false, false});
+}
+
+// Test that creating a dynamic binding array with an already destroyed texture works, but doesn't
+// show that entry as available.
+TEST_P(DynamicBindingArrayTests, HasBindingDynamicArrayCreatedWithTextureAlreadyDestroyed) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    tex.Destroy();
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {{0, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false});
+}
+
+// Test that a texture used multiple times in the same dynamic binding array has its
+// availability correctly updated.
+TEST_P(DynamicBindingArrayTests, HasBindingSameTextureMultipleDynamicArrays) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg1 = MakeBindGroup(bgl, 3, {{1, tex.CreateView()}});
+    wgpu::BindGroup bg2 = MakeBindGroup(bgl, 1, {{0, tex.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg1, {false, false, false});
+    TestHasBinding(bgl, bg2, {false});
+
+    // After pinning it has valid entries.
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg1, {false, true, false});
+    TestHasBinding(bgl, bg2, {true});
+
+    // After destroying on dynamic binding array, the other still has the texture available.
+    bg1.Destroy();
+    TestHasBinding(bgl, bg2, {true});
+}
+
+// Test that texture availabililty is controlled per-texture.
+TEST_P(DynamicBindingArrayTests, HasBindingMultipleTexturesInDynamicArray) {
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex0 = device.CreateTexture(&tDesc);
+    wgpu::Texture tex1 = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 2, {{0, tex0.CreateView()}, {1, tex1.CreateView()}});
+
+    // Before pinning, the bind group has no valid entries.
+    TestHasBinding(bgl, bg, {false, false});
+
+    // After pinning tex0 it has one valid entry.
+    tex0.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {true, false});
+
+    // After pinning tex1 it has two valid entries.
+    tex1.Pin(wgpu::TextureUsage::TextureBinding);
+    TestHasBinding(bgl, bg, {true, true});
+
+    // After unpinning tex0 it has only one valid entry.
+    tex0.Unpin();
+    TestHasBinding(bgl, bg, {false, true});
+}
+
+// TODO(https://crbug.com/435317394): When wgpu::BindGroup::Update() or equivalent is added, test
+// that availability is updated when entries in the dynamic binding array are updated.
+// TODO(https://crbug.com/435317394): Add tests that hasBinding() works as expected for all support
+// types in WGSL.
 
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 

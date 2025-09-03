@@ -41,6 +41,7 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PassResourceUsage.h"
@@ -1587,6 +1588,22 @@ MaybeError TextureBase::Pin(wgpu::TextureUsage usage) {
 
     // Update the frontend state.
     mPinnedUsage = usage;
+
+    // Call OnPinned for each of the slots. We would like to prune the entries to now destroyed
+    // DynamicArrayStates using the `it = set.erase(it)` std:: idiom, but that's not possible with
+    // absl::flat_hash_set. Instead track a list of entries to prune and do it in a second pass.
+    std::vector<DynamicArraySlot> slotsToPrune;
+    for (const auto& slot : mDynamicArraySlots) {
+        if (Ref<DynamicArrayState> dynamicArray = slot.dynamicArray.Promote()) {
+            dynamicArray->OnPinned(slot.slot, this);
+        } else {
+            slotsToPrune.push_back(slot);
+        }
+    }
+    for (const auto& slot : slotsToPrune) {
+        mDynamicArraySlots.erase(slot);
+    }
+
     return {};
 }
 
@@ -1613,6 +1630,48 @@ void TextureBase::Unpin() {
 
     // Update the frontend state.
     mPinnedUsage = wgpu::TextureUsage::None;
+
+    // Call OnUnpinned for each of the slots. We would like to prune the entries to now destroyed
+    // DynamicArrayStates using the `it = set.erase(it)` std:: idiom, but that's not possible with
+    // absl::flat_hash_set. Instead track a list of entries to prune and do it in a second pass.
+    std::vector<DynamicArraySlot> slotsToPrune;
+    for (const auto& slot : mDynamicArraySlots) {
+        if (Ref<DynamicArrayState> dynamicArray = slot.dynamicArray.Promote()) {
+            dynamicArray->OnUnpinned(slot.slot, this);
+        } else {
+            slotsToPrune.push_back(slot);
+        }
+    }
+    for (const auto& slot : slotsToPrune) {
+        mDynamicArraySlots.erase(slot);
+    }
+}
+
+void TextureBase::AddDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i) {
+    DAWN_ASSERT(!IsError());
+    // Note that this can be called after the texture is destroyed.
+    DynamicArraySlot slot = {dynamicArray, i};
+    auto [_, inserted] = mDynamicArraySlots.insert(slot);
+    DAWN_ASSERT(inserted);
+}
+
+void TextureBase::RemoveDynamicArraySlot(DynamicArrayState* dynamicArray, BindingIndex i) {
+    DAWN_ASSERT(!IsError());
+    // Note that this can be called after the texture is destroyed.
+    DynamicArraySlot slot = {dynamicArray, i};
+    bool removed = mDynamicArraySlots.erase(slot);
+    DAWN_ASSERT(removed);
+}
+
+size_t TextureBase::DynamicArraySlot::HashFuncs::operator()(const DynamicArraySlot& query) const {
+    size_t hash = 0;
+    HashCombine(&hash, query.dynamicArray, query.slot);
+    return hash;
+}
+
+bool TextureBase::DynamicArraySlot::HashFuncs::operator()(const DynamicArraySlot& a,
+                                                          const DynamicArraySlot& b) const {
+    return std::tie(a.dynamicArray, a.slot) == std::tie(b.dynamicArray, b.slot);
 }
 
 void TextureBase::UnpinImpl() {

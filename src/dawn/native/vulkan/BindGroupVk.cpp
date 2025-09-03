@@ -223,14 +223,22 @@ MaybeError BindGroup::InitializeDynamicArray() {
 
     auto bindings = GetDynamicArrayBindings();
     for (auto [i, view] : Enumerate(bindings)) {
-        if (view != nullptr) {
-            VkDescriptorImageInfo imageWrite = {};
-            imageWrite.imageView = ToBackend(view)->GetHandle();
-            imageWrite.imageLayout =
-                VulkanImageLayout(view->GetFormat(), wgpu::TextureUsage::TextureBinding);
-            imageWrites.push_back(imageWrite);
-            arrayElements.push_back(uint32_t(i));
+        if (view == nullptr) {
+            continue;
         }
+
+        VkImageView handle = ToBackend(view)->GetHandle();
+        if (handle == nullptr) {
+            continue;
+        }
+
+        VkDescriptorImageInfo imageWrite = {
+            .sampler = VkSampler{},
+            .imageView = handle,
+            .imageLayout = VulkanImageLayout(view->GetFormat(), wgpu::TextureUsage::TextureBinding),
+        };
+        imageWrites.push_back(imageWrite);
+        arrayElements.push_back(uint32_t(i));
     }
 
     std::vector<VkWriteDescriptorSet> writes;

@@ -32,7 +32,7 @@
 
 namespace tint {
 
-enum class ResourceType {
+enum class ResourceType : uint32_t {
     kEmpty,
 
     kTexture1d_f32,

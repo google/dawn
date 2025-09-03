@@ -31,10 +31,12 @@
 #include <limits>
 #include <vector>
 
+#include "dawn/common/Enumerator.h"
 #include "dawn/native/BindGroupTracker.h"
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
+#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/ImmediateConstantsTracker.h"
@@ -226,11 +228,67 @@ class ImmediateConstantTracker : public T {
     }
 };
 
+// Updates a dynamic array metadata buffer by scheduling a copy for each u32 that needs to be
+// updated.
+// TODO(https://crbug.com/435317394): If we had a way to Dawn reentrantly now, we could use a
+// compute shader to dispatch the updates instead of individual copies for each update, and move
+// that logic in the frontend to share it between backends. (also a single dispatch could update
+// multiple metadata buffers potentially).
+MaybeError UpdateDynamicArrayBindings(Device* device,
+                                      CommandRecordingContext* recordingContext,
+                                      DynamicArrayState* dynamicArray) {
+    std::vector<DynamicArrayState::BindingStateUpdate> updates =
+        dynamicArray->AcquireDirtyBindingUpdates();
+
+    // Allocate enough space for all the data to modify and schedule the copies.
+    DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
+        sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
+        [&](UploadReservation reservation) -> MaybeError {
+            uint32_t* stagedData = static_cast<uint32_t*>(reservation.mappedPointer);
+
+            // The metadata buffer will be copied to.
+            Buffer* metadataBuffer = ToBackend(dynamicArray->GetMetadataBuffer());
+            DAWN_ASSERT(metadataBuffer->IsInitialized());
+            metadataBuffer->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
+
+            // Prepare the copies.
+            std::vector<VkBufferCopy> copies(updates.size());
+            for (auto [i, update] : Enumerate(updates)) {
+                stagedData[i] = update.data;
+
+                VkBufferCopy copy{
+                    .srcOffset = reservation.offsetInBuffer + i * sizeof(uint32_t),
+                    .dstOffset = update.offset,
+                    .size = sizeof(uint32_t),
+                };
+                copies[i] = copy;
+            }
+
+            // Enqueue the copy commands all at once.
+            device->fn.CmdCopyBuffer(recordingContext->commandBuffer,
+                                     ToBackend(reservation.buffer)->GetHandle(),
+                                     metadataBuffer->GetHandle(), copies.size(), copies.data());
+            return {};
+        }));
+
+    return {};
+}
+
 // Records the necessary barriers for a synchronization scope using the resource usage
 // data pre-computed in the frontend. Also performs lazy initialization if required.
-MaybeError TransitionAndClearForSyncScope(Device* device,
-                                          CommandRecordingContext* recordingContext,
-                                          const SyncScopeResourceUsage& scope) {
+MaybeError PrepareResourcesForSyncScope(Device* device,
+                                        CommandRecordingContext* recordingContext,
+                                        const SyncScopeResourceUsage& scope) {
+    // Update the dynamic binding array metadata buffers before transitioning resources. The
+    // metadata buffers are part of the resources and will be transitioned to Storage if needed
+    // then.
+    for (BindGroupBase* dynamicArrayBG : scope.dynamicBindingArrays) {
+        if (dynamicArrayBG->GetDynamicArray()->HasDirtyBindings()) {
+            DAWN_TRY(UpdateDynamicArrayBindings(device, recordingContext,
+                                                dynamicArrayBG->GetDynamicArray()));
+        }
+    }
+
     // Separate barriers with vertex stages in destination stages from all other barriers.
     // This avoids creating unnecessary fragment->vertex dependencies when merging barriers.
     // Eg. merging a compute->vertex barrier and a fragment->fragment barrier would create
@@ -639,7 +697,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
     auto PrepareResourcesForRenderPass = [](Device* device,
                                             CommandRecordingContext* recordingContext,
                                             const RenderPassResourceUsage& usages) -> MaybeError {
-        DAWN_TRY(TransitionAndClearForSyncScope(device, recordingContext, usages));
+        DAWN_TRY(PrepareResourcesForSyncScope(device, recordingContext, usages));
 
         // Reset all query set used on current render pass together before beginning render pass
         // because the reset command must be called outside render pass
@@ -1070,7 +1128,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
             case Command::Dispatch: {
                 DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
-                DAWN_TRY(TransitionAndClearForSyncScope(
+                DAWN_TRY(PrepareResourcesForSyncScope(
                     device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
                 immediates.Apply(device, commands);
@@ -1083,7 +1141,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                 DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
                 VkBuffer indirectBuffer = ToBackend(dispatch->indirectBuffer)->GetHandle();
 
-                DAWN_TRY(TransitionAndClearForSyncScope(
+                DAWN_TRY(PrepareResourcesForSyncScope(
                     device, recordingContext, resourceUsages.dispatchUsages[currentDispatch]));
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
                 immediates.Apply(device, commands);

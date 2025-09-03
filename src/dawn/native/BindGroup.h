@@ -29,7 +29,6 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
-#include <memory>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -133,8 +132,9 @@ class BindGroupBase : public ApiObjectBase {
     std::vector<Ref<ExternalTextureBase>> mBoundExternalTextures;
 
     // The dynamic array is separate so as to not bloat the size and destructor of bind groups
-    // without them.
-    std::unique_ptr<DynamicArrayState> mDynamicArray;
+    // without them. Note that this is the only persistent owning Ref. DynamicArray is a RefCounted
+    // only so WeakRef to it can be created.
+    Ref<DynamicArrayState> mDynamicArray;
 };
 
 }  // namespace dawn::native

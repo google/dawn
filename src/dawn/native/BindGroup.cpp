@@ -815,8 +815,7 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
 
     // Gather dynamic binding entries in a second loop to put the handling off the critical path.
     if (auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>()) {
-        mDynamicArray =
-            std::make_unique<DynamicArrayState>(BindingIndex(dynamic->dynamicArraySize));
+        mDynamicArray = AcquireRef(new DynamicArrayState(BindingIndex(dynamic->dynamicArraySize)));
         DAWN_TRY(mDynamicArray->Initialize(GetDevice()));
 
         for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
@@ -987,7 +986,7 @@ MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
 DynamicArrayState* BindGroupBase::GetDynamicArray() const {
     DAWN_ASSERT(!IsError());
     DAWN_ASSERT(HasDynamicArray());
-    return mDynamicArray.get();
+    return mDynamicArray.Get();
 }
 
 MaybeError BindGroupBase::ValidateDestroy() const {
