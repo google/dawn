@@ -493,12 +493,17 @@ MaybeError ValidateBindGroupDynamicBindingArray(DeviceBase* device,
         dynamicBindingsSeen.insert(binding);
 
         switch (layout->GetDynamicArrayKind()) {
-            case wgpu::DynamicBindingKind::SampledTexture:
-                // TODO(https://issues.chromium.org/435251399): Figure out the additional validation
-                // rules for the texture kind. Also figure out how we should honor the
-                // UsageValidationMode.
+            case wgpu::DynamicBindingKind::SampledTexture: {
                 DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
+                TextureViewBase* view = entry.textureView;
+                DAWN_INVALID_IF((view->GetUsage() & kTextureViewOnlyUsages) !=
+                                    wgpu::TextureUsage::TextureBinding,
+                                "In entries[%u], the %s's usages (%s) are not exactly %s.", i, view,
+                                view->GetUsage() & kTextureViewOnlyUsages,
+                                wgpu::TextureUsage::TextureBinding);
+                DAWN_INVALID_IF(view->IsYCbCr(), "In entries[%u], %s is YCbCr.", i, view);
                 break;
+            }
 
             case wgpu::DynamicBindingKind::Undefined:
                 DAWN_UNREACHABLE();

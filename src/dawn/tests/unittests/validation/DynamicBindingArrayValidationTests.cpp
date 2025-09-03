@@ -489,8 +489,6 @@ TEST_F(DynamicBindingArrayTests, NotAllowedWithExternalTextures) {
 }
 
 // Check that DynamicBindingKind::SampledTexture must be a texture entry.
-// TODO(https://issues.chromium.org/435251399): Figure out the additional validation rules for the
-// texture kind.
 TEST_F(DynamicBindingArrayTests, SampledTextureKindRequiresTexture) {
     wgpu::BindGroupLayoutDynamicBindingArray layoutDynamic;
     layoutDynamic.dynamicArray.kind = wgpu::DynamicBindingKind::SampledTexture;
@@ -531,6 +529,90 @@ TEST_F(DynamicBindingArrayTests, SampledTextureKindRequiresTexture) {
     bufferEntry.buffer = buffer;
     desc.entries = &bufferEntry;
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&desc));
+}
+
+// Check that the view must have only the TextureBinding usage for DynamicKind::SampledTexture.
+TEST_F(DynamicBindingArrayTests, SampledTextureKindRequiresTextureBindingOnlyView) {
+    wgpu::BindGroupLayout layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding |
+                 wgpu::TextureUsage::StorageBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Control case: limiting the usage to TextureBinding is valid to add to SampledTexture.
+    {
+        wgpu::TextureViewDescriptor vDesc{
+            .usage = wgpu::TextureUsage::TextureBinding,
+        };
+        wgpu::TextureView view = tex.CreateView(&vDesc);
+        MakeBindGroup(layout, 1, {{0, view}});
+    }
+
+    // Error case: having unrelated usages in the view is not allowed. RenderAttachment case.
+    {
+        wgpu::TextureViewDescriptor vDesc{
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+        };
+        wgpu::TextureView view = tex.CreateView(&vDesc);
+        ASSERT_DEVICE_ERROR(MakeBindGroup(layout, 1, {{0, view}}));
+    }
+
+    // Error case: having unrelated usages in the view is not allowed. StorageBinding case.
+    {
+        wgpu::TextureViewDescriptor vDesc{
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::StorageBinding,
+        };
+        wgpu::TextureView view = tex.CreateView(&vDesc);
+        ASSERT_DEVICE_ERROR(MakeBindGroup(layout, 1, {{0, view}}));
+    }
+
+    // Error case: the defaulted texture usages don't contain TextureBinding.
+    {
+        wgpu::TextureDescriptor tDesc2 = tDesc;
+        tDesc2.usage = wgpu::TextureUsage::CopyDst;
+        wgpu::TextureView view = device.CreateTexture(&tDesc2).CreateView();
+        ASSERT_DEVICE_ERROR(MakeBindGroup(layout, 1, {{0, view}}));
+    }
+}
+
+// Check that the view must have a single aspect for DynamicKind::SampledTexture.
+TEST_F(DynamicBindingArrayTests, SampledTextureKindRequiresSingleAspect) {
+    wgpu::BindGroupLayout layout = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::Depth24PlusStencil8,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    // Success case, only the depth aspect is selected.
+    {
+        wgpu::TextureViewDescriptor vDesc{
+            .aspect = wgpu::TextureAspect::DepthOnly,
+        };
+        wgpu::TextureView view = tex.CreateView(&vDesc);
+        MakeBindGroup(layout, 1, {{0, view}});
+    }
+
+    // Success case, only the stencil aspect is selected.
+    {
+        wgpu::TextureViewDescriptor vDesc{
+            .aspect = wgpu::TextureAspect::StencilOnly,
+        };
+        wgpu::TextureView view = tex.CreateView(&vDesc);
+        MakeBindGroup(layout, 1, {{0, view}});
+    }
+
+    // Error case: both aspects are selected.
+    {
+        wgpu::TextureView view = tex.CreateView();
+        ASSERT_DEVICE_ERROR(MakeBindGroup(layout, 1, {{0, view}}));
+    }
 }
 
 // Test that it is an error to call .Destroy() on a bind group without a dynamic array.
