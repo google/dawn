@@ -78,6 +78,33 @@
         'test': 'dawn_unittests',
       },
     },
+    'tint_fuzzer_corpus_tests': {
+      'tint_wgsl_fuzzer_corpus_tests': {
+        'args': [
+          'fuzz',
+          '-check',
+          '--append-cwd-as-build',
+        ],
+        'mixins': [
+          # TODO(crbug.com/441327468): Support running these tests on Swarming.
+          'no_swarming',
+        ],
+        'test': 'fuzzer_corpus_tests',
+      },
+      'tint_ir_fuzzer_corpus_tests': {
+        'args': [
+          'fuzz',
+          '-check',
+          '-ir',
+          '--append-cwd-as-build',
+        ],
+        'mixins': [
+          # TODO(crbug.com/441327468): Support running these tests on Swarming.
+          'no_swarming',
+        ],
+        'test': 'fuzzer_corpus_tests',
+      },
+    },
     'tint_unit_gtests': {
       'tint_unittests': {
         'mixins': [

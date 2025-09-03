@@ -34,6 +34,14 @@
 	path = tools/clang
 	url = https://chromium.googlesource.com/chromium/src/tools/clang
 	gclient-condition = dawn_standalone
+[submodule "tools/memory"]
+	path = tools/memory
+	url = https://chromium.googlesource.com/chromium/src/tools/memory
+	gclient-condition = dawn_standalone
+[submodule "tools/valgrind"]
+	path = tools/valgrind
+	url = https://chromium.googlesource.com/chromium/src/tools/valgrind
+	gclient-condition = dawn_standalone
 [submodule "tools/mb"]
 	path = tools/mb
 	url = https://chromium.googlesource.com/chromium/src/tools/mb

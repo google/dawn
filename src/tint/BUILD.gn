@@ -331,21 +331,37 @@ group("cmds") {
 
 group("fuzzers") {
   testonly = true
-  deps = []
+  data_deps = []
   if (tint_has_fuzzers) {
-    deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
+    data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
     if (tint_build_ir_binary) {
-      deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
     }
   }
 }
 
 group("fuzzer_corpus_tools") {
   testonly = true
-  deps = [ ":fuzzers" ]
+  data_deps = [ ":fuzzers" ]
   if (tint_has_fuzzers && tint_build_ir_binary) {
-    deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
+    data_deps += [ "${tint_src_dir}/cmd/fuzz/ir/as" ]
   }
+}
+
+group("fuzzer_corpus_tests") {
+  testonly = true
+  data_deps = [ ":fuzzer_corpus_tools" ]
+  data = [
+    # Needed by the Go code, as it is used to determine the Dawn root.
+    "//DEPS",
+    "//go.mod",
+    "//go.sum",
+    "//tools/run.py",
+
+    "//tools/golang/",
+    "//tools/src/",
+    "//test/tint/",
+  ]
 }
 
 group("tests") {

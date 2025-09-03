@@ -44,6 +44,7 @@
                    'swarming': {'dimensions': {'os': 'Ubuntu-22.04'}}},
   'no_gpu': { 'fail_if_unused': False,
               'swarming': {'dimensions': {'gpu': 'none'}}},
+  'no_swarming': {'swarming': {'can_use_on_swarming_builders': False}},
   'result_adapter_gtest_json': {'resultdb': {'result_format': 'gtest_json'}},
   'swarming_containment_auto': { 'fail_if_unused': False,
                                  'swarming': {'containment_type': 'AUTO'}},

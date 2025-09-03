@@ -232,7 +232,7 @@ if (tint_has_fuzzers) {
     if (fuzzer_name != target_name) {
       group(target_name) {
         testonly = true
-        deps = [ ":${fuzzer_name}" ]
+        data_deps = [ ":${fuzzer_name}" ]
       }
     }
   }

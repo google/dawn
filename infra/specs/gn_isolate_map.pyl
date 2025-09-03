@@ -7,6 +7,11 @@
     'label': '//src/dawn/tests:dawn_unittests',
     'type': 'windowed_test_launcher',
   },
+  'fuzzer_corpus_tests': {
+    'label': '//src/tint:fuzzer_corpus_tests',
+    'type': 'script',
+    'script': '//tools/run.py',
+  },
   'tint_unittests': {
     'label': '//src/tint/cmd/test:tint_unittests',
     'type': 'windowed_test_launcher',
