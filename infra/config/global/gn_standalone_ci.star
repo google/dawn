@@ -82,14 +82,10 @@ ci.builder(
     ),
 )
 
-# TODO(crbug.com/441327468): Add a child tester `dawn-linux-x64-fuzz-rel` once
-# Go binaries are supported in the build system, and thus Go-based tests can
-# be isolated.
 ci.builder(
-    name = "dawn-linux-x64-builder-fuzz-rel",
-    description_html = "Compiles Dawn binaries for 'tools/run fuzz' for Linux/x64",
+    name = "dawn-linux-x64-fuzz-rel",
+    description_html = "Compiles and runs Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
-    triggered_by = [],
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",

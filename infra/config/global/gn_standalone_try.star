@@ -90,7 +90,7 @@ dawn_linux_manual_builder(
     name = "dawn-try-linux-x64-fuzz-rel",
     description_html = "Runs Dawn fuzz tests on Linux/x64. Manual only.",
     mirrors = [
-        "ci/dawn-linux-x64-builder-fuzz-rel",
+        "ci/dawn-linux-x64-fuzz-rel",
     ],
-    gn_args = "ci/dawn-linux-x64-builder-fuzz-rel",
+    gn_args = "ci/dawn-linux-x64-fuzz-rel",
 )

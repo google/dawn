@@ -6,7 +6,7 @@
       'swarming_containment_auto',
     ],
     'machines': {
-      'dawn-linux-x64-builder-fuzz-rel': {
+      'dawn-linux-x64-fuzz-rel': {
         'os_type': 'linux',
         'mixins': [
           'gpu-swarming-pool',

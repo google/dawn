@@ -1,7 +1,7 @@
 {
   "ci": {
-    "dawn-linux-x64-builder-fuzz-rel": "ci/dawn-linux-x64-builder-fuzz-rel/gn-args.json",
-    "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json"
+    "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json",
+    "dawn-linux-x64-fuzz-rel": "ci/dawn-linux-x64-fuzz-rel/gn-args.json"
   },
   "try": {
     "dawn-cq-linux-x64-rel": "try/dawn-cq-linux-x64-rel/gn-args.json",
