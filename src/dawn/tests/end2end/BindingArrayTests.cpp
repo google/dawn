@@ -26,8 +26,10 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
+#include "dawn/common/Enumerator.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -756,7 +758,8 @@ class DynamicBindingArrayTests : public DawnTest {
             expectedU32.push_back(b ? 1u : 0u);
         }
 
-        EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size());
+        EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size())
+            << " for WGSL type " << wgslType;
     }
 };
 
@@ -1106,10 +1109,326 @@ TEST_P(DynamicBindingArrayTests, HasBindingMultipleTexturesInDynamicArray) {
     TestHasBinding(bgl, bg, {false, true});
 }
 
+constexpr auto kWgslSampledTextureTypes = std::array{
+    "texture_1d<f32>",
+    "texture_1d<i32>",
+    "texture_1d<u32>",
+    "texture_2d<f32>",
+    "texture_2d<i32>",
+    "texture_2d<u32>",
+    "texture_2d_array<f32>",
+    "texture_2d_array<i32>",
+    "texture_2d_array<u32>",
+    "texture_cube<f32>",
+    "texture_cube<i32>",
+    "texture_cube<u32>",
+    "texture_cube_array<f32>",
+    "texture_cube_array<i32>",
+    "texture_cube_array<u32>",
+    "texture_3d<f32>",
+    "texture_3d<i32>",
+    "texture_3d<u32>",
+
+    "texture_multisampled_2d<f32>",
+    "texture_multisampled_2d<i32>",
+    "texture_multisampled_2d<u32>",
+
+    "texture_depth_2d",
+    "texture_depth_2d_array",
+    "texture_depth_cube",
+    "texture_depth_cube_array",
+    "texture_depth_multisampled_2d",
+};
+
+struct TextureDescForTypeIDCase {
+    std::unordered_set<std::string_view> wgslTypes;
+    wgpu::TextureFormat format;
+    wgpu::TextureDimension dimension;
+    wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::Undefined;
+    uint32_t sampleCount = 1;
+    wgpu::TextureAspect viewAspect = wgpu::TextureAspect::All;
+
+    // Create a view for a pinned texture for this case.
+    wgpu::TextureView CreateTestView(const wgpu::Device& device) {
+        wgpu::TextureDescriptor tDesc = {
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc,
+            .dimension = dimension,
+            .size = {1, 1, 1},
+            .format = format,
+            .sampleCount = sampleCount,
+        };
+        if (viewDimension == wgpu::TextureViewDimension::Cube ||
+            viewDimension == wgpu::TextureViewDimension::CubeArray) {
+            tDesc.size.depthOrArrayLayers = 6;
+        }
+        if (sampleCount != 1) {
+            tDesc.usage |= wgpu::TextureUsage::RenderAttachment;
+        }
+
+        wgpu::TextureViewDescriptor vDesc{
+            .dimension = viewDimension,
+            .aspect = viewAspect,
+            .usage = wgpu::TextureUsage::TextureBinding,
+        };
+
+        wgpu::Texture texture = device.CreateTexture(&tDesc);
+        texture.Pin(wgpu::TextureUsage::TextureBinding);
+        return texture.CreateView(&vDesc);
+    }
+};
+
+std::vector<TextureDescForTypeIDCase> MakeTextureDescForTypeIDCases() {
+    std::vector<TextureDescForTypeIDCase> cases;
+
+    // TODO(https://crbug.com/435317394): Add tests of filterable vs. unfilterable floats when
+    // get/hasBinding is able to make the difference.
+
+    // Regular 1D textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_1d<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e1D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_1d<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e1D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_1d<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e1D,
+    });
+
+    // Regular 2D textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+
+    // Regular 2D array textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_2d_array<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d_array<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d_array<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+
+    // Regular cube textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_cube<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+
+    // Regular cube array textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_cube_array<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube_array<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube_array<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+
+    // Regular 3d textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_3d<f32>"}},
+        .format = wgpu::TextureFormat::RGBA32Float,
+        .dimension = wgpu::TextureDimension::e3D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_3d<i32>"}},
+        .format = wgpu::TextureFormat::RGBA32Sint,
+        .dimension = wgpu::TextureDimension::e3D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_3d<u32>"}},
+        .format = wgpu::TextureFormat::RGBA32Uint,
+        .dimension = wgpu::TextureDimension::e3D,
+    });
+
+    // Color multisampled textures.
+    cases.push_back({
+        .wgslTypes = {{"texture_multisampled_2d<f32>"}},
+        .format = wgpu::TextureFormat::RGBA16Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .sampleCount = 4,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_multisampled_2d<i32>"}},
+        .format = wgpu::TextureFormat::RGBA16Sint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .sampleCount = 4,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_multisampled_2d<u32>"}},
+        .format = wgpu::TextureFormat::RGBA16Uint,
+        .dimension = wgpu::TextureDimension::e2D,
+        .sampleCount = 4,
+    });
+
+    // Depth textures (including multisampled).
+    // TODO(https://crbug.com/435317394): In the future we should allow depth textures to be used as
+    // texture_*<f32>.
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_2d"}},
+        .format = wgpu::TextureFormat::Depth32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_2d_array"}},
+        .format = wgpu::TextureFormat::Depth32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_cube"}},
+        .format = wgpu::TextureFormat::Depth32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_cube_array"}},
+        .format = wgpu::TextureFormat::Depth32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_multisampled_2d"}},
+        .format = wgpu::TextureFormat::Depth32Float,
+        .dimension = wgpu::TextureDimension::e2D,
+        .sampleCount = 4,
+    });
+
+    // Stencil textures can be used as 2D.
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<u32>"}},
+        .format = wgpu::TextureFormat::Stencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d_array<u32>"}},
+        .format = wgpu::TextureFormat::Stencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::e2DArray,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube<u32>"}},
+        .format = wgpu::TextureFormat::Stencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::Cube,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_cube_array<u32>"}},
+        .format = wgpu::TextureFormat::Stencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewDimension = wgpu::TextureViewDimension::CubeArray,
+    });
+
+    // Depth-stencil textures with only one aspect selected.
+    cases.push_back({
+        .wgslTypes = {{"texture_depth_2d"}},
+        .format = wgpu::TextureFormat::Depth24PlusStencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewAspect = wgpu::TextureAspect::DepthOnly,
+    });
+    cases.push_back({
+        .wgslTypes = {{"texture_2d<u32>"}},
+        .format = wgpu::TextureFormat::Depth24PlusStencil8,
+        .dimension = wgpu::TextureDimension::e2D,
+        .viewAspect = wgpu::TextureAspect::StencilOnly,
+    });
+
+    return cases;
+}
+
 // TODO(https://crbug.com/435317394): When wgpu::BindGroup::Update() or equivalent is added, test
 // that availability is updated when entries in the dynamic binding array are updated.
-// TODO(https://crbug.com/435317394): Add tests that hasBinding() works as expected for all support
-// types in WGSL.
+
+// Test that hasBinding() works as expected for all support types in WGSL.
+TEST_P(DynamicBindingArrayTests, HasBindingTextureCompatibilityAllTypes) {
+    auto textureCases = MakeTextureDescForTypeIDCases();
+
+    // Make a dynamic binding array with all of our test textures.
+    std::vector<wgpu::BindGroupEntry> entries;
+    for (auto [i, textureCase] : Enumerate(textureCases)) {
+        wgpu::BindGroupEntry entry{
+            .binding = uint32_t(i),
+            .textureView = textureCase.CreateTestView(device),
+        };
+        entries.push_back(entry);
+    }
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+
+    wgpu::BindGroupDynamicBindingArray dynamic;
+    dynamic.dynamicArraySize = entries.size();
+
+    wgpu::BindGroupDescriptor bgDesc = {
+        .nextInChain = &dynamic,
+        .layout = bgl,
+        .entryCount = entries.size(),
+        .entries = entries.data(),
+    };
+    wgpu::BindGroup bg = device.CreateBindGroup(&bgDesc);
+
+    // Test hasBinding returning for each of the supported WGSL types, against each texture.
+    for (auto wgslType : kWgslSampledTextureTypes) {
+        std::vector<bool> expected;
+        for (auto textureCase : textureCases) {
+            expected.push_back(textureCase.wgslTypes.contains(wgslType));
+        }
+
+        TestHasBinding(bgl, bg, expected, 0, wgslType);
+    }
+}
 
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 

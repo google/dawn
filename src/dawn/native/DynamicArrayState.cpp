@@ -36,15 +36,113 @@ namespace dawn::native {
 
 namespace {
 
+// Compute the tint::ResourceType that should be in the metadata buffer for the binding.
 tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
-    // TODO(https://crbug.com/439522242): Add handling of all sampled texture types.
     if (view == nullptr) {
         return tint::ResourceType::kEmpty;
     }
+    const TextureBase* texture = view->GetTexture();
 
-    // TODO(https://crbug.com/435317394): Add support for all the other types that can be in
-    // DynamicBindingKind::SampledTexture. Hardcode to texture_2d<f32> for now.
-    return tint::ResourceType::kTexture2d_f32;
+    // TODO(https://crbug.com/435317394): In the future we should allow the same compatibility rules
+    // that exist between TextureView and BGLEntry. This means that a depth texture can be either a
+    // texture_depth_2d, or a texture_2d<f32> (unfilterable). We should also find a way to
+    // differentiate unfilterable and filterable texture_2d<f32>.
+
+    if (texture->IsMultisampledTexture()) {
+        DAWN_ASSERT(view->GetDimension() == wgpu::TextureViewDimension::e2D);
+
+        switch (view->GetAspects()) {
+            case Aspect::Color:
+                switch (view->GetFormat().GetAspectInfo(Aspect::Color).baseType) {
+                    case TextureComponentType::Float:
+                        return tint::ResourceType::kTextureMultisampled2d_f32;
+                    case TextureComponentType::Uint:
+                        return tint::ResourceType::kTextureMultisampled2d_u32;
+                    case TextureComponentType::Sint:
+                        return tint::ResourceType::kTextureMultisampled2d_i32;
+                    default:
+                        DAWN_UNREACHABLE();
+                }
+
+            case Aspect::Depth:
+                return tint::ResourceType::kTextureDepthMultisampled2d;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    }
+
+    if (view->GetAspects() == Aspect::Depth) {
+        DAWN_ASSERT(!texture->IsMultisampledTexture());
+
+        switch (view->GetDimension()) {
+            case wgpu::TextureViewDimension::e2D:
+                return tint::ResourceType::kTextureDepth2d;
+            case wgpu::TextureViewDimension::e2DArray:
+                return tint::ResourceType::kTextureDepth2dArray;
+            case wgpu::TextureViewDimension::Cube:
+                return tint::ResourceType::kTextureDepthCube;
+            case wgpu::TextureViewDimension::CubeArray:
+                return tint::ResourceType::kTextureDepthCubeArray;
+            default:
+                DAWN_UNREACHABLE();
+        }
+    }
+
+    switch (view->GetFormat().GetAspectInfo(view->GetAspects()).baseType) {
+        case TextureComponentType::Float:
+            switch (view->GetDimension()) {
+                case wgpu::TextureViewDimension::e1D:
+                    return tint::ResourceType::kTexture1d_f32;
+                case wgpu::TextureViewDimension::e2D:
+                    return tint::ResourceType::kTexture2d_f32;
+                case wgpu::TextureViewDimension::e2DArray:
+                    return tint::ResourceType::kTexture2dArray_f32;
+                case wgpu::TextureViewDimension::Cube:
+                    return tint::ResourceType::kTextureCube_f32;
+                case wgpu::TextureViewDimension::CubeArray:
+                    return tint::ResourceType::kTextureCubeArray_f32;
+                case wgpu::TextureViewDimension::e3D:
+                    return tint::ResourceType::kTexture3d_f32;
+                default:
+                    DAWN_UNREACHABLE();
+            }
+        case TextureComponentType::Uint:
+            switch (view->GetDimension()) {
+                case wgpu::TextureViewDimension::e1D:
+                    return tint::ResourceType::kTexture1d_u32;
+                case wgpu::TextureViewDimension::e2D:
+                    return tint::ResourceType::kTexture2d_u32;
+                case wgpu::TextureViewDimension::e2DArray:
+                    return tint::ResourceType::kTexture2dArray_u32;
+                case wgpu::TextureViewDimension::Cube:
+                    return tint::ResourceType::kTextureCube_u32;
+                case wgpu::TextureViewDimension::CubeArray:
+                    return tint::ResourceType::kTextureCubeArray_u32;
+                case wgpu::TextureViewDimension::e3D:
+                    return tint::ResourceType::kTexture3d_u32;
+                default:
+                    DAWN_UNREACHABLE();
+            }
+        case TextureComponentType::Sint:
+            switch (view->GetDimension()) {
+                case wgpu::TextureViewDimension::e1D:
+                    return tint::ResourceType::kTexture1d_i32;
+                case wgpu::TextureViewDimension::e2D:
+                    return tint::ResourceType::kTexture2d_i32;
+                case wgpu::TextureViewDimension::e2DArray:
+                    return tint::ResourceType::kTexture2dArray_i32;
+                case wgpu::TextureViewDimension::Cube:
+                    return tint::ResourceType::kTextureCube_i32;
+                case wgpu::TextureViewDimension::CubeArray:
+                    return tint::ResourceType::kTextureCubeArray_i32;
+                case wgpu::TextureViewDimension::e3D:
+                    return tint::ResourceType::kTexture3d_i32;
+                default:
+                    DAWN_UNREACHABLE();
+            }
+        default:
+            DAWN_UNREACHABLE();
+    }
 }
 
 }  // anonymous namespace
