@@ -27,12 +27,11 @@
 
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
 
-#include <limits>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "src/tint/lang/core/enums.h"
+#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
@@ -49,7 +48,6 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
-#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/macros/defer.h"

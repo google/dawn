@@ -29,7 +29,6 @@
 #define SRC_TINT_LANG_WGSL_SEM_BLOCK_STATEMENT_H_
 
 #include <cstddef>
-#include <vector>
 
 #include "src/tint/lang/wgsl/sem/statement.h"
 

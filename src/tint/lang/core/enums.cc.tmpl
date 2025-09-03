@@ -91,22 +91,6 @@ const char* str(BuiltinFn i) {
     return "<unknown>";
 }
 
-bool IsCoarseDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdxCoarse || f == BuiltinFn::kDpdyCoarse ||
-           f == BuiltinFn::kFwidthCoarse;
-}
-
-bool IsFineDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdxFine || f == BuiltinFn::kDpdyFine ||
-           f == BuiltinFn::kFwidthFine;
-}
-
-bool IsDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdx || f == BuiltinFn::kDpdy ||
-           f == BuiltinFn::kFwidth || IsCoarseDerivative(f) ||
-           IsFineDerivative(f);
-}
-
 bool IsTexture(BuiltinFn f) {
     return IsImageQuery(f) ||                                //
            f == BuiltinFn::kTextureGather ||                 //
@@ -128,23 +112,6 @@ bool IsImageQuery(BuiltinFn f) {
            f == BuiltinFn::kTextureNumSamples;
 }
 
-bool IsDataPacking(BuiltinFn f) {
-    return f == BuiltinFn::kPack4X8Snorm || f == BuiltinFn::kPack4X8Unorm ||
-           f == BuiltinFn::kPack2X16Snorm || f == BuiltinFn::kPack2X16Unorm ||
-           f == BuiltinFn::kPack2X16Float;
-}
-
-bool IsDataUnpacking(BuiltinFn f) {
-    return f == BuiltinFn::kUnpack4X8Snorm || f == BuiltinFn::kUnpack4X8Unorm ||
-           f == BuiltinFn::kUnpack2X16Snorm || f == BuiltinFn::kUnpack2X16Unorm ||
-           f == BuiltinFn::kUnpack2X16Float;
-}
-
-bool IsBarrier(BuiltinFn f) {
-    return f == BuiltinFn::kWorkgroupBarrier || f == BuiltinFn::kStorageBarrier ||
-           f == BuiltinFn::kTextureBarrier;
-}
-
 bool IsAtomic(BuiltinFn f) {
     return f == BuiltinFn::kAtomicLoad || f == BuiltinFn::kAtomicStore ||
            f == BuiltinFn::kAtomicAdd || f == BuiltinFn::kAtomicSub ||
@@ -152,13 +119,6 @@ bool IsAtomic(BuiltinFn f) {
            f == BuiltinFn::kAtomicAnd || f == BuiltinFn::kAtomicOr ||
            f == BuiltinFn::kAtomicXor || f == BuiltinFn::kAtomicExchange ||
            f == BuiltinFn::kAtomicCompareExchangeWeak;
-}
-
-bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
-    return f == BuiltinFn::kDot4I8Packed || f == BuiltinFn::kDot4U8Packed ||
-           f == BuiltinFn::kPack4XI8 || f == BuiltinFn::kPack4XU8 ||
-           f == BuiltinFn::kPack4XI8Clamp || f == BuiltinFn::kPack4XU8Clamp ||
-           f == BuiltinFn::kUnpack4XI8 || f == BuiltinFn::kUnpack4XU8;
 }
 
 bool IsSubgroup(BuiltinFn f) {

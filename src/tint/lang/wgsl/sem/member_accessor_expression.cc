@@ -30,26 +30,10 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::MemberAccessorExpression);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMemberAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Swizzle);
 
 namespace tint::sem {
-
-MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
-                                                   const core::type::Type* type,
-                                                   core::EvaluationStage stage,
-                                                   const Statement* statement,
-                                                   const core::constant::Value* constant,
-                                                   const ValueExpression* object,
-                                                   const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, stage, object, statement, constant, root_ident) {}
-
-MemberAccessorExpression::~MemberAccessorExpression() = default;
-
-const ast::MemberAccessorExpression* MemberAccessorExpression::Declaration() const {
-    return static_cast<const ast::MemberAccessorExpression*>(declaration_);
-}
 
 StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                                        const core::type::Type* type,
@@ -58,7 +42,7 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
                                        const ValueExpression* object,
                                        const core::type::StructMember* member,
                                        const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, object->Stage(), statement, constant, object, root_ident),
+    : Base(declaration, type, object->Stage(), object, statement, constant, root_ident),
       member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
@@ -70,7 +54,7 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const ValueExpression* object,
                  VectorRef<uint32_t> indices,
                  const Variable* root_ident /* = nullptr */)
-    : Base(declaration, type, object->Stage(), statement, constant, object, root_ident),
+    : Base(declaration, type, object->Stage(), object, statement, constant, root_ident),
       indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;

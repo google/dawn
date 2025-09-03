@@ -29,8 +29,6 @@
 
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 
-#include <utility>
-
 TINT_INSTANTIATE_TYPEINFO(tint::sem::IndexAccessorExpression);
 
 namespace tint::sem {

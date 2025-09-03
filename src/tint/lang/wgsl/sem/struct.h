@@ -28,9 +28,6 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_STRUCT_H_
 #define SRC_TINT_LANG_WGSL_SEM_STRUCT_H_
 
-#include <optional>
-
-#include "src/tint/lang/core/enums.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/wgsl/ast/struct.h"

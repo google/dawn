@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/wgsl/sem/load.h"
 
-#include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Load);

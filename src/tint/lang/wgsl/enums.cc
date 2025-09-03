@@ -1085,24 +1085,19 @@ const char* str(BuiltinFn i) {
     return "<unknown>";
 }
 
-bool IsCoarseDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdxCoarse || f == BuiltinFn::kDpdyCoarse ||
-           f == BuiltinFn::kFwidthCoarse;
-}
-
-bool IsFineDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdxFine || f == BuiltinFn::kDpdyFine ||
+bool IsDerivative(BuiltinFn f) {
+    return f == BuiltinFn::kDpdx || f == BuiltinFn::kDpdy ||
+           f == BuiltinFn::kFwidth || f == BuiltinFn::kDpdxCoarse || f == BuiltinFn::kDpdyCoarse ||
+           f == BuiltinFn::kFwidthCoarse ||
+           f == BuiltinFn::kDpdxFine || f == BuiltinFn::kDpdyFine ||
            f == BuiltinFn::kFwidthFine;
 }
 
-bool IsDerivative(BuiltinFn f) {
-    return f == BuiltinFn::kDpdx || f == BuiltinFn::kDpdy ||
-           f == BuiltinFn::kFwidth || IsCoarseDerivative(f) ||
-           IsFineDerivative(f);
-}
-
 bool IsTexture(BuiltinFn f) {
-    return IsImageQuery(f) ||                                //
+    return f == BuiltinFn::kTextureDimensions ||             //
+           f == BuiltinFn::kTextureNumLayers ||              //
+           f == BuiltinFn::kTextureNumLevels ||              //
+           f == BuiltinFn::kTextureNumSamples ||             //
            f == BuiltinFn::kTextureGather ||                 //
            f == BuiltinFn::kTextureGatherCompare ||          //
            f == BuiltinFn::kTextureLoad ||                   //
@@ -1114,24 +1109,6 @@ bool IsTexture(BuiltinFn f) {
            f == BuiltinFn::kTextureSampleGrad ||             //
            f == BuiltinFn::kTextureSampleLevel ||            //
            f == BuiltinFn::kTextureStore || f == BuiltinFn::kInputAttachmentLoad;
-}
-
-bool IsImageQuery(BuiltinFn f) {
-    return f == BuiltinFn::kTextureDimensions ||
-           f == BuiltinFn::kTextureNumLayers || f == BuiltinFn::kTextureNumLevels ||
-           f == BuiltinFn::kTextureNumSamples;
-}
-
-bool IsDataPacking(BuiltinFn f) {
-    return f == BuiltinFn::kPack4X8Snorm || f == BuiltinFn::kPack4X8Unorm ||
-           f == BuiltinFn::kPack2X16Snorm || f == BuiltinFn::kPack2X16Unorm ||
-           f == BuiltinFn::kPack2X16Float;
-}
-
-bool IsDataUnpacking(BuiltinFn f) {
-    return f == BuiltinFn::kUnpack4X8Snorm || f == BuiltinFn::kUnpack4X8Unorm ||
-           f == BuiltinFn::kUnpack2X16Snorm || f == BuiltinFn::kUnpack2X16Unorm ||
-           f == BuiltinFn::kUnpack2X16Float;
 }
 
 bool IsBarrier(BuiltinFn f) {
@@ -1194,17 +1171,6 @@ bool IsSubgroupMatrix(BuiltinFn f) {
         case BuiltinFn::kSubgroupMatrixStore:
         case BuiltinFn::kSubgroupMatrixMultiply:
         case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
-            return true;
-        default:
-            return false;
-    }
-}
-
-bool IsQuadSwap(BuiltinFn f) {
-    switch (f) {
-        case BuiltinFn::kQuadSwapX:
-        case BuiltinFn::kQuadSwapY:
-        case BuiltinFn::kQuadSwapDiagonal:
             return true;
         default:
             return false;

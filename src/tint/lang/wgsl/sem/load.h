@@ -28,7 +28,6 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_LOAD_H_
 #define SRC_TINT_LANG_WGSL_SEM_LOAD_H_
 
-#include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 
 namespace tint::sem {
@@ -49,11 +48,6 @@ class Load final : public Castable<Load, ValueExpression> {
 
     /// @return the source object being loaded
     const ValueExpression* Source() const { return source_; }
-
-    /// @returns the type of the memory view being loaded from.
-    const core::type::MemoryView* MemoryView() const {
-        return static_cast<const core::type::MemoryView*>(source_->Type());
-    }
 
   private:
     ValueExpression const* const source_;

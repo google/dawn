@@ -28,8 +28,6 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_INDEX_ACCESSOR_EXPRESSION_H_
 #define SRC_TINT_LANG_WGSL_SEM_INDEX_ACCESSOR_EXPRESSION_H_
 
-#include <vector>
-
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/accessor_expression.h"
 
@@ -58,11 +56,6 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, A
 
     /// Destructor
     ~IndexAccessorExpression() override;
-
-    /// @returns the AST node
-    const ast::IndexAccessorExpression* Declaration() const {
-        return static_cast<const ast::IndexAccessorExpression*>(declaration_);
-    }
 
     /// @returns the index expression
     ValueExpression const* Index() const { return index_; }

@@ -27,10 +27,6 @@
 
 #include "src/tint/lang/wgsl/sem/accessor_expression.h"
 
-#include <utility>
-
-#include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::sem::AccessorExpression);
 
 namespace tint::sem {

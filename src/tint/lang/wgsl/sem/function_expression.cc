@@ -39,8 +39,4 @@ FunctionExpression::FunctionExpression(const ast::IdentifierExpression* declarat
 
 FunctionExpression::~FunctionExpression() = default;
 
-const ast::IdentifierExpression* FunctionExpression::Declaration() const {
-    return static_cast<const ast::IdentifierExpression*>(Base::Declaration());
-}
-
 }  // namespace tint::sem

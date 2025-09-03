@@ -29,8 +29,6 @@
 #define SRC_TINT_LANG_WGSL_SEM_VARIABLE_H_
 
 #include <optional>
-#include <utility>
-#include <vector>
 
 #include "src/tint/api/common/override_id.h"
 

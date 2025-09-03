@@ -28,10 +28,8 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_CALL_H_
 #define SRC_TINT_LANG_WGSL_SEM_CALL_H_
 
-#include <vector>
-
 #include "src/tint/lang/wgsl/ast/call_expression.h"
-#include "src/tint/lang/wgsl/sem/builtin_fn.h"
+#include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/vector.h"
 
