@@ -1177,8 +1177,6 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
 // bindings.
 TEST_P(BindGroupTests, DynamicAndNonDynamicBindingsDoNotConflictAfterRemapping) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
-    // TODO(442593063): Fix vulkan validation error
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     auto RunTestWith = [&](bool dynamicBufferFirst) {
         uint32_t dynamicBufferBindingNumber = dynamicBufferFirst ? 0 : 1;
