@@ -984,6 +984,12 @@ MaybeError BindGroupBase::ValidateCanUseOnQueueNow() const {
     return {};
 }
 
+DynamicArrayState* BindGroupBase::GetDynamicArray() const {
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(HasDynamicArray());
+    return mDynamicArray.get();
+}
+
 MaybeError BindGroupBase::ValidateDestroy() const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
 

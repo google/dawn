@@ -91,6 +91,7 @@ class BindGroupBase : public ApiObjectBase {
     bool HasDynamicArray() const;
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetDynamicArrayBindings() const;
     MaybeError ValidateCanUseOnQueueNow() const;
+    DynamicArrayState* GetDynamicArray() const;
 
   protected:
     // To save memory, the size of a bind group is dynamically determined and the bind group is

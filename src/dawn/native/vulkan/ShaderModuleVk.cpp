@@ -222,6 +222,40 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         }
     }
 
+    // Add options for dynamic binding arrays. They need remapping like all regular bindings but
+    // also need to give information about additional bindings for the metadata buffer and the
+    // default bindings.
+    tint::ResourceBindingConfig resourceBindingConfig;
+    for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
+        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+        if (!bgl->HasDynamicArray()) {
+            continue;
+        }
+
+        tint::BindingPoint wgslDynamicArrayBindPoint = {
+            .group = uint32_t(group), .binding = uint32_t(bgl->GetAPIDynamicArrayStart())};
+        tint::BindingPoint remappedDynamicArrayBindPoint = {
+            .group = uint32_t(group),
+            .binding = uint32_t(bgl->GetDynamicArrayStart()),
+        };
+        tint::BindingPoint metadataBindPoint = {
+            .group = uint32_t(group),
+            .binding = uint32_t(bgl->GetDynamicArrayMetadataBinding()),
+        };
+
+        // TODO(https://crbug.com/442483669): This uses the texture binding remapper support to
+        // remap a `resource_binding`. It is a hack until Tint adds support for `resource_binding`
+        // to the binding remapper.
+        bindings.texture.emplace(wgslDynamicArrayBindPoint, remappedDynamicArrayBindPoint);
+
+        // The resourceBindingConfig only uses remapped bind points.
+        resourceBindingConfig.bindings[remappedDynamicArrayBindPoint] = {
+            .storage_buffer_binding = metadataBindPoint,
+            // TODO(https://crbug.com/435317394): Support for all the resource types.
+            .default_binding_type_order = {},
+        };
+    }
+
     const bool hasInputAttachment = !bindings.input_attachment.empty();
 
     SpirvCompilationRequest req = {};
@@ -253,6 +287,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.use_storage_input_output_16 =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseStorageInputOutput16);
     req.tintOptions.bindings = std::move(bindings);
+    req.tintOptions.resource_binding = std::move(resourceBindingConfig);
     req.tintOptions.disable_image_robustness =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseImageRobustAccess2);
     // Currently we can disable index clamping on all runtime-sized arrays in Tint robustness
