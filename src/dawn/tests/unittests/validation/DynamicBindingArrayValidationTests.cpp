@@ -1007,15 +1007,8 @@ TEST_F(DynamicBindingArrayTests, DynamicArrayKindWithoutTypeInfoValidWithAllLayo
     // TODO(https://crbug.com/435317394): Add tests with additional DynamicBindingKind.
 }
 
-// TODO(https://crbug.com/435317394): Add tests for the DynamicArrayKind. It is not possible to do
-// it at the moment because we cannot reflect DynamicArrayKind::Undefined (would require referencing
-// but not indexing the array) or any value that's not DynamicArrayKind::SampledTexture (no support
-// in Dawn or Tint for other cases). Tests to add after that are:
-//  - The kind in the layout must match the deduced kind for the shader.
-//     - Case with a resource_binding
-//  - An error is produced at shader module compilation time if it uses the same resource_binding
-//    with different DynamicArrayKinds.
-//
+// TODO(https://crbug.com/435317394): Add tests for an error being produced at shader module
+// compilation time if it uses the same resource_binding with different DynamicArrayKinds.
 
 // Test that BGL defaulting works with dynamic binding arrays.
 TEST_F(DynamicBindingArrayTests, GetBGLSuccess) {
