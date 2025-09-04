@@ -1430,6 +1430,70 @@ TEST_P(DynamicBindingArrayTests, HasBindingTextureCompatibilityAllTypes) {
     }
 }
 
+// Test that calling hasBinding() with values outside of [0, arrayLength) returns 0.
+TEST_P(DynamicBindingArrayTests, HasBindingOOBIsFalse) {
+    // Create the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+
+        @group(0) @binding(0) var<storage, read_write> result : array<u32, 4>;
+        @group(0) @binding(1) var a : resource_binding;
+
+        @compute @workgroup_size(1) fn getArrayLengths() {
+            result[0] = u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) - 1));
+            result[1] = u32(hasBinding<texture_2d<f32>>(a, arrayLength(a)));
+            result[2] = u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) + 1)) +
+                        u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) + 2)) +
+                        u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) + 3)) +
+                        u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) + 4));
+            result[3] = u32(hasBinding<texture_2d<f32>>(a, arrayLength(a) + 10000000));
+        }
+    )");
+    wgpu::ComputePipelineDescriptor csDesc = {.compute = {
+                                                  .module = module,
+                                              }};
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create the test resources.
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = 4 * sizeof(uint32_t),
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Float,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+    wgpu::BindGroup bg = MakeBindGroup(pipeline.GetBindGroupLayout(0), 3,
+                                       {
+                                           {0, resultBuffer},
+                                           {1, tex.CreateView()},
+                                           {2, tex.CreateView()},
+                                           {3, tex.CreateView()},
+                                       });
+
+    // Run the test and check results are the expected ones.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    device.GetQueue().Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1, resultBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(0, resultBuffer, 4);
+    EXPECT_BUFFER_U32_EQ(0, resultBuffer, 8);
+    EXPECT_BUFFER_U32_EQ(0, resultBuffer, 12);
+}
+
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
