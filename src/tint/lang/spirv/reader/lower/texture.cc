@@ -528,10 +528,27 @@ struct State {
     }
 
     void ProcessOffset(core::ir::Value* offset, Vector<core::ir::Value*, 5>& new_args) {
-        if (offset->Type()->IsUnsignedIntegerVector()) {
-            offset = b.Convert(ty.MatchWidth(ty.i32(), offset->Type()), offset)->Result();
+        if (offset->Type()->IsSignedIntegerVector()) {
+            new_args.Push(offset);
+            return;
         }
-        new_args.Push(offset);
+
+        auto* vec_ty = offset->Type()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
+
+        auto* ir_constant = offset->As<core::ir::Constant>();
+        TINT_ASSERT(ir_constant);
+
+        auto* constant_value = ir_constant->Value();
+
+        Vector<const core::constant::Value*, 4> new_values;
+        for (size_t i = 0; i < vec_ty->Width(); ++i) {
+            uint32_t v = constant_value->Index(i)->ValueAs<uint32_t>();
+            new_values.Push(b.ConstantValue(i32(v)));
+        }
+
+        auto* new_offset = b.Composite(ty.vec(ty.i32(), vec_ty->Width()), new_values);
+        new_args.Push(new_offset);
     }
 
     uint32_t GetOperandMask(core::ir::Value* val) {

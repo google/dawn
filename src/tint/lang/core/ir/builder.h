@@ -490,6 +490,15 @@ class Builder {
     }
 
     /// Creates a new ir::Constant
+    /// @param ty the constant type
+    /// @param values the composite values
+    /// @returns the new constant
+    ir::Constant* Composite(const core::type::Type* ty,
+                            VectorRef<const core::constant::Value*> values) {
+        return Constant(ir.constant_values.Composite(ty, values));
+    }
+
+    /// Creates a new ir::Constant
     /// @tparam TYPE the constant type
     /// @param values the composite values
     /// @returns the new constant
