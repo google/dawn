@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
 namespace tint::core::ir {
@@ -480,6 +481,139 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_AtomicCompareExchange_UserDeclaredResultS
             R"(error: atomicCompareExchangeWeak: call result type '__atomic_compare_exchange_result_u32' does not match builtin return type '__atomic_compare_exchange_result_u32'
     %3:__atomic_compare_exchange_result_u32 = atomicCompareExchangeWeak %a, 0u, 1u
                                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooSmall) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex =
+            b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, -2_i, t, s, coords, offset));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:11:34 error: textureGather: -2 outside range of [0, 3]
+    %7:vec4<i32> = textureGather -2i, %5, %6, %4, vec2<i32>(1i, 3i)
+                                 ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_Component_TooBig) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex =
+            b.Var(ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2d, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* offset = b.Composite<vec2<i32>>(1_i, 3_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 6_u, t, s, coords, offset));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:11:34 error: textureGather: 6 outside range of [0, 3]
+    %7:vec4<i32> = textureGather 6u, %5, %6, %4, vec2<i32>(1i, 3i)
+                                 ^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooSmall) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(1_i);
+        auto* offset = b.Composite<vec2<i32>>(1_i, -9_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx,
+                                     offset));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:11:54 error: textureGather: -9 outside range of [-8, 7]
+    %7:vec4<i32> = textureGather 2u, %5, %6, %4, 1i, vec2<i32>(1i, -9i)
+                                                     ^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooBig) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.i32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(handle, ty.sampler()));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(1_i);
+        auto* offset = b.Composite<vec2<i32>>(8_i, -2_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureGather, 2_u, t, s, coords, array_idx,
+                                     offset));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:11:54 error: textureGather: 8 outside range of [-8, 7]
+    %7:vec4<i32> = textureGather 2u, %5, %6, %4, 1i, vec2<i32>(8i, -2i)
+                                                     ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
 }
 

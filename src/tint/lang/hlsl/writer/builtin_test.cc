@@ -1393,7 +1393,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGatherCompare_Depth2dOffset) {
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1409,8 +1409,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGatherCompare_Depth2dOffset) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.GatherCmp(v_1, v_2, 3.0f, int2(int(4), int(5)));
+  float4 x = v.GatherCmp(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -1470,7 +1469,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGatherCompare_Depth2dArrayOffset) {
         auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(6_i);
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1487,8 +1486,7 @@ Texture2DArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  int2 v_3 = int2(int(4), int(5));
-  float4 x = v.GatherCmp(v_1, float3(v_2, float(int(6))), 3.0f, v_3);
+  float4 x = v.GatherCmp(v_1, float3(v_2, float(int(6))), 3.0f, int2(int(4), int(5)));
 }
 
 )");

@@ -2854,33 +2854,33 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
 
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
-    auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
-    func->SetParams({component, t, s, coords});
+    func->SetParams({t, s, coords});
 
     b.Append(func->Block(), [&] {
+        auto* component = b.Constant(1_i);
         auto* result =
             b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, component, t, s, coords);
         b.Return(func, result);
     });
 
     auto* src = R"(
-%foo = func(%component:i32, %t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %6:vec4<f32> = textureGather %component, %t, %s, %coords
-    ret %6
+    %5:vec4<f32> = textureGather 1i, %t, %s, %coords
+    ret %5
   }
 }
 )";
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%component:i32, %t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
-    %7:vec4<f32> = spirv.image_gather %6, %coords, %component, 0u
-    ret %7
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:vec4<f32> = spirv.image_gather %5, %coords, 1i, 0u
+    ret %6
   }
 }
 )";
@@ -2896,33 +2896,33 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
 
     auto* t = b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
-    auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
-    func->SetParams({t, s, component, coords});
+    func->SetParams({t, s, coords});
 
     b.Append(func->Block(), [&] {
+        auto* component = b.Constant(1_i);
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, component, t, s,
                               coords, b.Splat<vec2<i32>>(1_i));
         b.Return(func, result);
     });
 
     auto* src = R"(
-%foo = func(%t:texture_2d<f32>, %s:sampler, %component:i32, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %6:vec4<f32> = textureGather %component, %t, %s, %coords, vec2<i32>(1i)
-    ret %6
+    %5:vec4<f32> = textureGather 1i, %t, %s, %coords, vec2<i32>(1i)
+    ret %5
   }
 }
 )";
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %component:i32, %coords:vec2<f32>):vec4<f32> {
+%foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
-    %7:vec4<f32> = spirv.image_gather %6, %coords, %component, 8u, vec2<i32>(1i)
-    ret %7
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:vec4<f32> = spirv.image_gather %5, %coords, 1i, 8u, vec2<i32>(1i)
+    ret %6
   }
 }
 )";
@@ -2939,36 +2939,36 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
     auto* t =
         b.FunctionParam("t", ty.sampled_texture(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
-    auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
     auto* func = b.Function("foo", ty.vec4<f32>());
-    func->SetParams({t, s, component, coords, array_idx});
+    func->SetParams({t, s, coords, array_idx});
 
     b.Append(func->Block(), [&] {
+        auto* component = b.Constant(1_i);
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, component, t, s,
                               coords, array_idx, b.Splat<vec2<i32>>(1_i));
         b.Return(func, result);
     });
 
     auto* src = R"(
-%foo = func(%t:texture_2d_array<f32>, %s:sampler, %component:i32, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
+%foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
   $B1: {
-    %7:vec4<f32> = textureGather %component, %t, %s, %coords, %array_idx, vec2<i32>(1i)
-    ret %7
+    %6:vec4<f32> = textureGather 1i, %t, %s, %coords, %array_idx, vec2<i32>(1i)
+    ret %6
   }
 }
 )";
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %component:i32, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
+%foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
-    %8:f32 = convert %array_idx
-    %9:vec3<f32> = construct %coords, %8
-    %10:vec4<f32> = spirv.image_gather %7, %9, %component, 8u, vec2<i32>(1i)
-    ret %10
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:f32 = convert %array_idx
+    %8:vec3<f32> = construct %coords, %7
+    %9:vec4<f32> = spirv.image_gather %6, %8, 1i, 8u, vec2<i32>(1i)
+    ret %9
   }
 }
 )";

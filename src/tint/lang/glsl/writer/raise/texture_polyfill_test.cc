@@ -1274,7 +1274,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_Depth2dOffset) {
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1292,11 +1292,10 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %4:vec2<f32> = construct 1.0f, 2.0f
-    %5:vec2<i32> = construct 4i, 5i
-    %6:texture_depth_2d = load %1
-    %7:sampler_comparison = load %2
-    %8:vec4<f32> = textureGatherCompare %6, %7, %4, 3.0f, %5
-    %x:vec4<f32> = let %8
+    %5:texture_depth_2d = load %1
+    %6:sampler_comparison = load %2
+    %7:vec4<f32> = textureGatherCompare %5, %6, %4, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %7
     ret
   }
 }
@@ -1311,10 +1310,9 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:vec2<i32> = construct 4i, 5i
-    %5:texture_depth_2d = load %t_s
-    %6:vec4<f32> = glsl.textureGatherOffset %5, %3, 3.0f, %4
-    %x:vec4<f32> = let %6
+    %4:texture_depth_2d = load %t_s
+    %5:vec4<f32> = glsl.textureGatherOffset %4, %3, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -1413,7 +1411,7 @@ TEST_F(GlslWriter_TexturePolyfillTest, TextureGatherCompare_Depth2dArrayOffset) 
         auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
         auto* array_idx = b.Value(6_i);
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1431,11 +1429,10 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %4:vec2<f32> = construct 1.0f, 2.0f
-    %5:vec2<i32> = construct 4i, 5i
-    %6:texture_depth_2d_array = load %1
-    %7:sampler_comparison = load %2
-    %8:vec4<f32> = textureGatherCompare %6, %7, %4, 6i, 3.0f, %5
-    %x:vec4<f32> = let %8
+    %5:texture_depth_2d_array = load %1
+    %6:sampler_comparison = load %2
+    %7:vec4<f32> = textureGatherCompare %5, %6, %4, 6i, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %7
     ret
   }
 }
@@ -1450,12 +1447,11 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:vec2<i32> = construct 4i, 5i
-    %5:texture_depth_2d_array = load %t_s
-    %6:f32 = convert 6i
-    %7:vec3<f32> = construct %3, %6
-    %8:vec4<f32> = glsl.textureGatherOffset %5, %7, 3.0f, %4
-    %x:vec4<f32> = let %8
+    %4:texture_depth_2d_array = load %t_s
+    %5:f32 = convert 6i
+    %6:vec3<f32> = construct %3, %5
+    %7:vec4<f32> = glsl.textureGatherOffset %4, %6, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %7
     ret
   }
 }

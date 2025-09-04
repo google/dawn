@@ -1170,6 +1170,12 @@ class Validator {
     /// @param call the call to validate
     void CheckBuiltinCall(const BuiltinCall* call);
 
+    /// Validates a core builtin call
+    /// @param call the call to validate
+    /// @param overload the call intrinsic overload
+    void CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                              const core::intrinsic::Overload& overload);
+
     /// Validates the given member builtin call
     /// @param call the member call to validate
     void CheckMemberBuiltinCall(const MemberBuiltinCall* call);
@@ -3117,6 +3123,61 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
                        << " does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
+
+    if (auto* bc = call->As<CoreBuiltinCall>()) {
+        CheckCoreBuiltinCall(bc, builtin.Get());
+    }
+}
+
+void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
+                                     const core::intrinsic::Overload& overload) {
+    auto idx_for_usage = [&](core::ParameterUsage usage) -> std::optional<uint32_t> {
+        for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
+            auto& p = overload.parameters[i];
+            if (p.usage == usage) {
+                return int32_t(i);
+            }
+        }
+        return std::nullopt;
+    };
+
+    auto check_arg_in_range = [&](core::ParameterUsage usage, int32_t min, int32_t max) {
+        auto idx_opt = idx_for_usage(usage);
+        if (!idx_opt.has_value()) {
+            return;
+        }
+        uint32_t idx = idx_opt.value();
+        TINT_ASSERT(idx < call->Args().Length());
+
+        auto* val = call->Args()[idx];
+        if (auto* const_val = val->As<ir::Constant>()) {
+            auto* cnst = const_val->Value();
+
+            if (val->Type()->Is<core::type::Vector>()) {
+                for (size_t i = 0; i < cnst->NumElements(); i++) {
+                    auto value = cnst->Index(i)->ValueAs<int32_t>();
+                    if (value < min || value > max) {
+                        AddError(call, idx)
+                            << value << " outside range of [" << min << ", " << max << "]";
+                        return;
+                    }
+                }
+            } else {
+                auto value = cnst->ValueAs<int32_t>();
+                if (value < min || value > max) {
+                    AddError(call, idx)
+                        << value << " outside range of [" << min << ", " << max << "]";
+                    return;
+                }
+            }
+        } else {
+            AddError(call, idx) << "expected a constant value";
+            return;
+        }
+    };
+
+    check_arg_in_range(core::ParameterUsage::kComponent, 0, 3);
+    check_arg_in_range(core::ParameterUsage::kOffset, -8, 7);
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {

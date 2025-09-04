@@ -1776,7 +1776,7 @@ TEST_F(GlslWriterTest, BuiltinTextureGatherCompare_Depth2dOffset) {
     b.Append(func->Block(), [&] {
         auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1793,8 +1793,7 @@ precision highp int;
 
 uniform highp sampler2DShadow f_t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureGatherOffset(f_t_s, v, 3.0f, ivec2(4, 5));
+  vec4 x = textureGatherOffset(f_t_s, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));
 }
 )");
 }
