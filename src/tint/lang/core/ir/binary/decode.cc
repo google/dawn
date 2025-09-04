@@ -993,51 +993,80 @@ struct Decoder {
         }
 
         auto& ty = mod_out_.Types();
+        const core::type::Struct* res = nullptr;
         switch (builtin_struct_in) {
             case pb::TypeBuiltinStruct::AtomicCompareExchangeResultI32:
-                return type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.i32());
+                res = type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.i32());
+                break;
             case pb::TypeBuiltinStruct::AtomicCompareExchangeResultU32:
-                return type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.u32());
+                res = type::CreateAtomicCompareExchangeResult(ty, mod_out_.symbols, ty.u32());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultF16:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.f16());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.f16());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultF32:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.f32());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.f32());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec2F16:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec2F32:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f32>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec2<f32>());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec3F16:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f16>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f16>());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec3F32:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f32>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec3<f32>());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec4F16:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f16>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f16>());
+                break;
             case pb::TypeBuiltinStruct::FrexpResultVec4F32:
-                return type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f32>());
+                res = type::CreateFrexpResult(ty, mod_out_.symbols, ty.vec4<f32>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultF16:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.f16());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.f16());
+                break;
             case pb::TypeBuiltinStruct::ModfResultF32:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.f32());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.f32());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec2F16:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec2F32:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f32>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f32>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec3F16:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec3F32:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec3<f32>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec3<f32>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec4F16:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec2<f16>());
+                break;
             case pb::TypeBuiltinStruct::ModfResultVec4F32:
-                return type::CreateModfResult(ty, mod_out_.symbols, ty.vec4<f32>());
+                res = type::CreateModfResult(ty, mod_out_.symbols, ty.vec4<f32>());
+                break;
 
             case pb::TypeBuiltinStruct::TypeBuiltinStruct_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::TypeBuiltinStruct::TypeBuiltinStruct_INT_MAX_SENTINEL_DO_NOT_USE_:
                 break;
         }
 
-        err_ << "invalid TypeBuiltinStruct: " << std::to_string(builtin_struct_in) << "\n";
-        return mod_out_.Types().invalid();
+        if (!res) {
+            err_ << "invalid TypeBuiltinStruct: " << std::to_string(builtin_struct_in) << "\n";
+            return mod_out_.Types().invalid();
+        }
+
+        // Make sure this struct name wasn't already used by another struct in the module.
+        auto struct_name = res->Name().Name();
+        if (!struct_names_.Add(struct_name)) {
+            err_ << "duplicate struct name: " << struct_name << "\n";
+            return mod_out_.Types().invalid();
+        }
+        return res;
     }
 
     const type::Type* Type(size_t id) {
