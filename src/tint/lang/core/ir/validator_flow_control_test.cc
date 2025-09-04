@@ -2212,4 +2212,26 @@ TEST_F(IR_ValidatorTest, Switch_NullResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_CaseMultiBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_i);
+        s->Cases().Push({});
+
+        s->Cases()[0].block = b.MultiInBlock();
+        b.Append(s->Cases()[0].block, [&] { b.ExitSwitch(s); });
+
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: switch: case block must be a block
+    switch 1i [c: (, $B2)] {  # switch_1
+    ^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir

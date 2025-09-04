@@ -3667,6 +3667,10 @@ void Validator::CheckSwitch(const Switch* s) {
 
     bool found_default = false;
     for (auto& cse : s->Cases()) {
+        if (cse.block->Is<core::ir::MultiInBlock>()) {
+            AddError(s) << "case block must be a block";
+        }
+
         QueueBlock(cse.block);
 
         for (const auto& sel : cse.selectors) {
