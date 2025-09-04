@@ -150,8 +150,6 @@ Add a new enable extension, `chromium_experimental_subgroup_matrix`. Enables the
 
 Add new types:
 
-
-
 *   subgroup_matrix_left<_T_, _K_, _M_>: M rows x K columns matrix of T components.
 *   subgroup_matrix_right<_T_, _N_, _K_>: K rows x N columns matrix of T components
 *   subgroup_matrix_result<_T_, _N_, _M_>: M rows x N columns matrix of T components
@@ -172,114 +170,18 @@ Add new types:
     *   Can be expanded in the future to support more types (e.g. bfloat16) via new enables.
     *   The u8 and i8 cases are predeclared types that are not otherwise usable in WGSL. For layout calculations, they are of size 1 byte and have an alignment requirement of 1 byte.
 
-<table>
-  <tr>
-   <td>
-<strong>Type</strong>
-   </td>
-   <td><strong>Extra Enable</strong>
-   </td>
-   <td><strong>Element Stride (bytes)</strong>
-   </td>
-   <td><strong>Scalar Shader Type</strong>
-   </td>
-   <td><strong>Minimum Value</strong>
-   </td>
-   <td><strong>Maximum Value</strong>
-   </td>
-  </tr>
-  <tr>
-   <td>f32
-   </td>
-   <td>
-   </td>
-   <td>4
-   </td>
-   <td>f32
-   </td>
-   <td>
-   </td>
-   <td>
-   </td>
-  </tr>
-  <tr>
-   <td>f16
-   </td>
-   <td>f16
-   </td>
-   <td>2
-   </td>
-   <td>f16
-   </td>
-   <td>
-   </td>
-   <td>
-   </td>
-  </tr>
-  <tr>
-   <td>u32
-   </td>
-   <td>
-   </td>
-   <td>4
-   </td>
-   <td>u32
-   </td>
-   <td>
-   </td>
-   <td>
-   </td>
-  </tr>
-  <tr>
-   <td>i32
-   </td>
-   <td>
-   </td>
-   <td>4
-   </td>
-   <td>i32
-   </td>
-   <td>
-   </td>
-   <td>
-   </td>
-  </tr>
-  <tr>
-   <td>u8
-   </td>
-   <td>
-   </td>
-   <td>1
-   </td>
-   <td>u32
-   </td>
-   <td>0
-   </td>
-   <td>255
-   </td>
-  </tr>
-  <tr>
-   <td>i8
-   </td>
-   <td>
-   </td>
-   <td>1
-   </td>
-   <td>i32
-   </td>
-   <td>-128
-   </td>
-   <td>127
-   </td>
-  </tr>
-</table>
-
+| Type | Extra Enable | Element Stride (bytes) | Shader Scalar Type | Min Value | Max Value |
+| ---- | ------------ | ---------------------- | ------------------ | --------- | --------- |
+| f32  |              | 4                      | f32                |           |           |
+| f16  | f16          | 2                      | f16                |           |           |
+| u32  |              | 4                      | u32                |           |           |
+| i32  |              | 4                      | i32                |           |           |
+| u8   |              | 1                      | u32                | 0         | 255       |
+| i8   |              | 1                      | i32                | -128      | 127       |
 
 These types are not considered “composite” in the WGSL taxonomy, because they are not decomposible.  You can’t reference a sub-vector or a single component. The numeric dimensions must be override-expressions. These types cannot be part of any interface (i.e. they can only be instantiated in Function and Private address spaces). They are plain types (similar to atomics) so that they can be included in composite types.  An important use case is to make arrays of these matrices.
 
 It is a pipeline-creation error if any matrix type is not included in a supported `GPUSubgroupMatrixConfig`, `config`,  on the device:
-
-
 
 *   For `subgroup_matrix_left`:
     *   `M` equals `config.M`
@@ -311,8 +213,6 @@ A variable containing a subgroup matrix can only be instantiated in Function or 
 
 Builtin functions are used to load and store subgroup matrix values from variables in workgroup and storage address spaces.  The builtins do two things:
 
-
-
 *   Map matrix row and column indices to external memory locations.  This mapping has two parameters: majorness (row-major, or column-major), and an integer Stride.  Let Base be the byte address of the start of the external matrix, i.e. where the [0,0]’th element of the matrix is stored.  Then
     *   For row-major:
         *   Matrix entry [r,c] maps to the sizeof(T) bytes located at Base + Stride\*r\*sizeof(T) + sizeof(T)\*c
@@ -336,8 +236,6 @@ Note: this is where the requirement on the subgroups feature stems from in pract
 
 Supported expressions:
 
-
-
 *   Parenthesization
 *   Identifier expressions
 *   Indirection
@@ -347,53 +245,18 @@ Supported expressions:
 
 Explicitly not supported:
 
-
-
 *   Decomposition expressions
 
 Possible future expansion:
-
-
 
 *   Arithmetic expressions
 
 
 #### Built-in Values
 
-
-<table>
-  <tr>
-   <td><strong>Name</strong>
-   </td>
-   <td>subgroup_id
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Stage</strong>
-   </td>
-   <td>compute
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Direction</strong>
-   </td>
-   <td>input
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Type</strong>
-   </td>
-   <td>u32
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>The current invocation’s subgroup’s ID within the workgroup.
-   </td>
-  </tr>
-</table>
-
+New built-in value: `subgroup_id`.
+Input in compute shaders of type `u32`.
+It is the current invocation's subgroup's ID within the workgroup.
 
 _Note: This was not included in the subgroups feature because there was insufficient documentation detailing the mapping in HLSL between workgroups and subgroups. This experiment is not implemented on D3D so the built-in value is available on supported platforms. If guaranteed mapping from Microsoft is provided for D3D, subgroup_id could be added as a language feature on top of the subgroups feature._
 
@@ -402,158 +265,97 @@ _Note: This was not included in the subgroups feature because there was insuffic
 
 Calls to these functions:
 
-
-
 *   Must only be used in a compute shader stage.
 *   Trigger a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if uniformity analysis cannot prove the call is in subgroup uniform control flow.
 
 
 ##### Value constructors
 
+**Overloads**:
+```rust
+@must_use fn T(value : S) -> T
+@must_use fn T() -> T
+```
 
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
+**Preconditions**:<br>
+T is a subgroup matrix type whose shader scalar type is S.
 
+**Description**:<br>
+Create a subgroup matrix filled with value.
 
-
-<pre class="prettyprint">@must_use fn T(value : S) -> T
-@must_use fn T() -> T</pre>
-
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>T is a subgroup_matrix type whose scalar shader type is S.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Create a subgroup matrix filled with value.
-<p>
 When no value is provided, use S().
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove value is a subgroup uniform value.
-   </td>
-  </tr>
-</table>
 
-
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove value is a subgroup uniform value.
 
 ##### Load/store functions
 
-See [Loading and Storing](?tab=t.0#bookmark=id.amox2cfe2ajc) above.
+See Loading and Storing above.
 
-
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
-
-
-
-<pre class="prettyprint">@must_use fn
-subgroupMatrixLoad&lt;T>(p : ptr&lt;AS, SA, AM>,
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixLoad<T>(p : ptr<AS, SA, AM>,
                       offset : u32,
                       col_major : bool,
-                      stride : u32) -> T</pre>
+                      stride : u32) -> T
+```
 
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>T is a subgroup matrix type with scalar shader type S.
-<p>
-SA is an array with element type S.
-<p>
-AS is storage or workgroup.
-<p>
+**Preconditions**:<br>
+T is a subgroup matrix type with shader scalar type S.<br>
+SA is an array with type S.<br>
+AS is storage or workgroup.<br>
 AM is read or read_write.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Load a subgroup matrix from p, offset elements from the start of the array.
-<p>
-<code>col_major</code> must be an override-expression.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove p, offset, or stride are subgroup uniform values.
-<p>
-stride counts elements of the component type of T.  Behavior is undefined if stride is less than:<ul>
 
-<li>The number of rows of T if col_major is true
-<li>The number of columns of T is row_major is true</li></ul>
+**Description**:<br>
+Load a subgroup matrix from p, offset elements from the start of the array.
 
-   </td>
-  </tr>
-</table>
+col_major must be an override-expression.
+
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove p, offset, or stride are subgroup uniform
+values.
+
+stride counts elements of the component type of T.
+Behavior is undefined if stride is less than:
+
+* The number of rows of T if col_major is true
+* The number of columns of T is col_major is false
 
 
+**Overload**:<br>
+```rust
+fn subgroupMatrixStore(p : ptr<AS, SA, AM>,
+                       offset : u32,
+                       value : T,
+                       col_major : bool,
+                       stride : u32)
+```
 
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
-
-
-
-<pre class="prettyprint">@must_use fn
-subgroupMatrixStore(p : ptr&lt;AS, SA, AM>,
-                    offset : u32,
-                    value : T,
-                    col_major : bool,
-                    stride : u32)</pre>
-
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>T is a subgroup matrix type whose scalar shader type is S.
-<p>
-SA is an array with element type S.
-<p>
-AS is storage or workgroup.
-<p>
+**Preconditions**:<br>
+T is a subgroup matrix type whose scalar shader type is S.<br>
+SA is an array with element type S.<br>
+AS is storage or workgroup.<br>
 AM is write or read_write.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Store the subgroup matrix value into p, offset elements from the start of the array.
-<p>
-<code>col_major</code> must be an override-expression.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove p, offset, value, or stride are subgroup uniform values.
-<p>
-stride counts elements of the component type of T. Behavior is undefined if stride is less than:<ul>
 
-<li>The number of rows of T if col_major is true
-<li>The number of columns of T is row_major is true</li></ul>
+**Description**:<br>
+Store the subgroup matrix value into p, offset elements from the start of the array.
 
-   </td>
-  </tr>
-</table>
+col_major must be an override-expression.
 
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove p, offset, value, or stride are subgroup
+uniform values.
 
+stride counts elements of the component type of T.
+Behavior is undefined if stride is less than:
+
+* The number of rows of T if col_major is true
+* The number of columns of T is col_major is false
 
 ##### Matrix arithmetic functions
 
 The operands of a subgroup matrix arithmetic function comprise a **supported subgroup matrix configuration** if the device has a `GPUSubgroupMatrixConfig`, `config`, such that all operand types match as below:
-
-
 
 *   For `L`:
     *   `M` equals `config.M`
@@ -568,228 +370,126 @@ The operands of a subgroup matrix arithmetic function comprise a **supported sub
     *   `N` equals `config.N`
     *   `TR` matches `config.resultType`
 
-<table>
-  <tr>
-   <td>
-<strong>Overload</strong>
-   </td>
-   <td>
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixMultiply<RT>(left : L, right : R) -> RT
+```
 
+**Preconditions**:<br>
+L is a subgroup_matrix_left<T, M, K>.<br>
+R is a subgroup_matrix_right<T, K, N>.<br>
+RT is a subgroup_matrix_result<TR, M, N>.
 
+**Description**:<br>
+Matrix multiply.
 
-<pre class="prettyprint">@must_use fn
-subgroupMatrixMultiply&lt;TR>(left : L, right : R) -> RT</pre>
+It is a pipeline-creation error if L, R, and RT do not comprise a supported
+subgroup matrix configuration.
 
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove left or right are subgroup uniform values.
 
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>L is a subgroup_matrix_left&lt;T, M, K>.
-<p>
-R is a subgroup_matrix_right&lt;T, K, N>.
-<p>
-RT is a subgroup_matrix_result&lt;TR, M, N>.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Matrix multiply.
-<p>
-It is a pipeline-creation error if L, R, and RT do not comprise a supported subgroup matrix configuration.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove left or right are subgroup uniform values.
-   </td>
-  </tr>
-</table>
-
-
-
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
-
-
-
-<pre class="prettyprint">@must_use fn
-subgroupMatrixMultiplyAccumulate&lt;TR>(left : L,
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixMultiplyAccumulate<RT>(left : L,
                                      right : R,
-                                     acc : RT) -> RT</pre>
+                                     acc : RT) -> RT
+```
 
+**Preconditions**:<br>
+L is a subgroup_matrix_left<T, M, K>.<br>
+R is a subgroup_matrix_right<T, K, N>.<br>
+RT is a subgroup_matrix_result<TR, M, N>.
 
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>L is a subgroup_matrix_left&lt;T, M, K>.
-<p>
-R is a subgroup_matrix_right&lt;T, K, N>.
-<p>
-RT is a subgroup_matrix_result&lt;TR, M, N>.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Matrix multiply add (left * right + acc).
-<p>
-It is a pipeline-creation error if L, R, and RT do not comprise a supported subgroup matrix configuration.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove left or right are subgroup uniform values.
-   </td>
-  </tr>
-</table>
+**Description**:<br>
+Matrix multiply add (left * right + acc).
 
+It is a pipeline-creation error if L, R, and RT do not comprise a supported
+subgroup matrix configuration.
 
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove left or right are subgroup uniform values.
 
 ##### Scalar arithmetic functions
 
-These functions are useful for operations such as applying biases to a model. \
+These functions are useful for operations such as applying biases to a model.
 
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixScalarAdd(matrix : M, value : S) -> M
+```
 
+**Preconditions**:<br>
+M is a subgroup matrix type with scalar shader type S.
 
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
+**Description**:<br>
+Scalar addition.
 
+value is clamped to a valid range for the component type of M and then added to
+each element of matrix.
 
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove matrix or value are subgroup uniform values.
 
-<pre class="prettyprint">@must_use fn
-subgroupMatrixScalarAdd(matrix : M, value : S) -> M</pre>
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixScalarSubtract(matrix : M, value : S) -> M
+```
 
+**Preconditions**:<br>
+M is a subgroup matrix type with scalar shader type S.
 
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>M is a subgroup matrix type with scalar shader type S.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Scalar addition.
-<p>
-value is clamped to a valid range for the component type of M and then added to each element of matrix.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove matrix or value are subgroup uniform values.
-   </td>
-  </tr>
-</table>
+**Description**:<br>
+Scalar subtraction.
 
+value is clamped to a valid range for the component type of M and then added to
+each element of matrix.
 
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove matrix or value are subgroup uniform values.
 
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixScalarMultiply(matrix : M, value : S) -> M
+```
 
+**Preconditions**:<br>
+M is a subgroup matrix type with scalar shader type S.
 
+**Description**:<br>
+Scalar multiplication.
 
-<pre class="prettyprint">@must_use fn
-subgroupMatrixScalarSubtract(matrix : M, value : S) -> M</pre>
+value is clamped to a valid range for the component type of M and then added to
+each element of matrix.
 
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>M is a subgroup matrix type with scalar shader type S.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Scalar subtract.
-<p>
-Value is clamped to a valid range for the component type of M and then subtracted from each element of matrix.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove matrix or value are subgroup uniform values.
-   </td>
-  </tr>
-</table>
-
-
-
-<table>
-  <tr>
-   <td><strong>Overload</strong>
-   </td>
-   <td>
-
-
-
-<pre class="prettyprint">@must_use fn
-subgroupMatrixScalarMultiply(matrix : M, value : S) -> M</pre>
-
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Preconditions</strong>
-   </td>
-   <td>M is a subgroup matrix type with scalar shader type S.
-   </td>
-  </tr>
-  <tr>
-   <td><strong>Description</strong>
-   </td>
-   <td>Scalar multiply.
-<p>
-Value is clamped to a valid range for the component type of M and then each element of matrix is multiplied by it.
-<p>
-Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove matrix or value are subgroup uniform values.
-   </td>
-  </tr>
-</table>
+Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove matrix or value are subgroup uniform values.
 
 
 **REMOVED** (in an attempt to be safely forward compatible if Metal adds integral components, but no other operators)
 
+**Overload**:
+```rust
+@must_use fn
+subgroupMatrixScalarDivide(matrix : M, value : S) -> M
+```
 
-<table>
-  <tr>
-   <td><strong><del>Overload</del></strong>
-   </td>
-   <td>
+**Preconditions**:<br>
+~~M is a subgroup matrix type with scalar shader type S.~~
 
+**Description**:<br>
+~~Scalar division.~~
 
+~~value is clamped to a valid range for the component type of M and then added to
+each element of matrix.~~
 
-<pre class="prettyprint">@must_use fn
-subgroupMatrixScalarDivide(matrix : M, value : S) -> M</pre>
-
-
-   </td>
-  </tr>
-  <tr>
-   <td><strong><del>Preconditions</del></strong>
-   </td>
-   <td><del>M is a subgroup matrix type with scalar shader type S.</del>
-   </td>
-  </tr>
-  <tr>
-   <td><strong><del>Description</del></strong>
-   </td>
-   <td><del>Scalar division.</del>
-<p>
-<del>Value is clamped to a valid range for the component type of M and then each element of matrix is divided by it.</del>
-<p>
-<del>Triggers a <code>chromium_experimental.subgroup_matrix_uniformity</code> diagnostic if uniformity analysis cannot prove matrix or value are subgroup uniform values.</del>
-   </td>
-  </tr>
-</table>
-
-
+~~Triggers a `chromium_experimental.subgroup_matrix_uniformity` diagnostic if
+uniformity analysis cannot prove matrix or value are subgroup uniform values.~~
 
 #### Uniformity
 
@@ -809,8 +509,6 @@ For this experimental extension we should add a diagnostic, `chromium_experiment
 
 New GPUFeatureName `chromium-experimental-subgroup-matrix`
 
-
-
 *   Requires `subgroups` (for maxSubgroupSize)
 *   Vulkan:
     *   <code>[vkPhysicalDeviceCooperativeMatrixFeaturesKHR](https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#VkPhysicalDeviceCooperativeMatrixFeaturesKHR)::cooperativeMatrix</code> is <code>VK_TRUE</code>
@@ -827,7 +525,7 @@ New GPUFeatureName `chromium-experimental-subgroup-matrix`
 New immutable array, <code>subgroupMatrixConfigs</code>, added to <code>GPUAdapterInfo</code>.
 
 
-```
+```json
 partial interface GPUAdapterInfo {
   [SameObject] readonly attribute FrozenArray<GPUSubgroupMatrixConfig> subgroupMatrixConfigs;
 };
@@ -858,8 +556,6 @@ No specific API validation is necessary; however, it is likely easier to impleme
 
 WGSL pipeline-creation checks (repeated for ease of reference):
 
-
-
 *   All subgroup matrix types are part of a `GPUSubgroupMatrixConfig`
 *   All subgroup matrix operands in `subgroupMatrixMultiply` and `subgroupMatrixMultipleAccumulate` are part of a single `GPUSubgroupMatrixConfig`
 *   The x-dimension of `workgroup_size` is a multiple of `GPUSupportedLimits::maxSubgroupSize`
@@ -870,74 +566,11 @@ WGSL pipeline-creation checks (repeated for ease of reference):
 
 #### Types
 
-
-<table>
-  <tr>
-   <td><strong>Type</strong>
-   </td>
-   <td><strong>SPIR-V<sup>1,2</sup></strong>
-   </td>
-   <td><strong>MSL<sup>3</sup></strong>
-   </td>
-  </tr>
-  <tr>
-   <td>subgroup_matrix_left
-<p>
-<K, M, T>
-   </td>
-   <td>OpTypeCooperativeMatrixKHR
-<p>
-MatrixAKHR use
-<p>
-M rows
-<p>
-K cols
-<p>
-T component type
-   </td>
-   <td>simdgroup_matrix&lt;T, 8, 8>
-   </td>
-  </tr>
-  <tr>
-   <td>subgroup_matrix_right
-<p>
-<N, K, T>
-   </td>
-   <td>OpTypeCooperativeMatrixKHR
-<p>
-MatrixBKHR use
-<p>
-K rows
-<p>
-N cols
-<p>
-T component type
-   </td>
-   <td>simdgroup_matrix&lt;T, 8, 8>
-   </td>
-  </tr>
-  <tr>
-   <td>subgroup_matrix_result
-<p>
-<N, M, T>
-   </td>
-   <td>OpTypeCooperativeMatrixKHR
-<p>
-MatrixAccumulatorKHR use
-<p>
-M rows
-<p>
-N cols
-<p>
-T component type
-   </td>
-   <td>simdgroup_matrix&lt;T, 8, 8>
-   </td>
-  </tr>
-</table>
-
-
-
+| Type | SPIR-V<sup>1,2</sup> | MSL<sup>3</sup> |
+| ---- | -------------------- | --------------- |
+| subgroup_matrix_left<T, K, M> | OpTypeCooperativeMatrixKHR<br>MatrixAKHR use<br>M rows<br>K cols<br>T component type | simdgroup_matrix<T, 8, 8> |
+| subgroup_matrix_right<T, N, K> | OpTypeCooperativeMatrixKHR<br>MatrixBKHR use<br>K rows<br>N cols<br>T component type | simdgroup_matrix<T, 8, 8> |
+| subgroup_matrix_result<T, N, M> | OpTypeCooperativeMatrixKHR<br>MatrixAccumulatorKHR use<br>M rows<br>N cols<br>T component type | simdgroup_matrix<T, 8, 8> |
 
 1. All OpTypeCooperativeMatrixKHR use subgroup scope.
 2. Component type enum maps directly to SPIR-V type (e.g. i8 to OpTypeInt 8 1).
@@ -946,130 +579,23 @@ T component type
 
 #### Builtin-in Values
 
-
-<table>
-  <tr>
-   <td><strong>Value</strong>
-   </td>
-   <td><strong>SPIR-V</strong>
-   </td>
-   <td><strong>MSL</strong>
-   </td>
-  </tr>
-  <tr>
-   <td>subgroup_id
-   </td>
-   <td>SubgroupId
-   </td>
-   <td>simdgroup_index_in_threadgroup
-   </td>
-  </tr>
-</table>
-
-
+| Value | SPIR-V | MSL |
+| ----- | ------ | ---- |
+| subgroup_id | SubgroupId | simdgroup_index_in_threadgroup |
 
 #### Functions
 
-
-<table>
-  <tr>
-   <td><strong>Function</strong>
-   </td>
-   <td><strong>SPIR-V</strong>
-   </td>
-   <td><strong>MSL</strong>
-   </td>
-  </tr>
-  <tr>
-   <td>Value constructors
-   </td>
-   <td>OpCompositeConstruct with appropriate value
-<p>
-const-/override-expressions could use constant instructions
-   </td>
-   <td>make_filled_simdgroup_matrix
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixLoad
-   </td>
-   <td>OpCooperativeMatrixLoadKHR
-<p>
-Pointer operand is a direct translation of the WGSL pointer
-   </td>
-   <td>simdgroup_matrix_load
-<p>
-The WGSL pointer needs translated into the origin operand in MSL
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixStore
-   </td>
-   <td>OpCooperativeMatrixStoreKHR
-<p>
-Pointer operand is a direct translation of the WGSL pointer
-   </td>
-   <td>simdgroup_matrix_store
-<p>
-The WGSL pointer needs translated into the origin operand in MSL
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixMultiply
-   </td>
-   <td>OpCooperativeMatrixMulAddKHR
-<p>
-C is a zero value matrix matching the result type
-   </td>
-   <td>simdgroup_multiply
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixMultiplyAccumulate
-   </td>
-   <td>OpCooperativeMatrixMulAddKHR
-<p>
-Cooperative matrix operands must include signed values appropriately based on operand types
-   </td>
-   <td>simdgroup_multiply_accumulate
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixScalarAdd
-   </td>
-   <td>OpI/FAdd with composite constructed scalar
-   </td>
-   <td>simdgroup_multiply_accumulate with identity matrix for b and filled matrix scalar value for c
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixScalarSubtract
-   </td>
-   <td>OpI/FSub with composite constructed scalar
-   </td>
-   <td>simdgroup_multiply_accumulate with diagonal matrix for b and filled inverted matrix scalar value for c
-   </td>
-  </tr>
-  <tr>
-   <td>subgroupMatrixScalarMultiply
-   </td>
-   <td>OpI/FMul with composite constructed scalar or OpMatrixTimesScalar (for float components)
-   </td>
-   <td>simdgroup_multiply with diagonal matrix scalar value for b<sup>1</sup>
-   </td>
-  </tr>
-  <tr>
-   <td><del>subgroupMatrixScalarDivide</del>
-   </td>
-   <td><del>OpU/S/FDiv with composite constructed scalar or OpMatrixTimesScalar (for float components with reciprocal scalar value)</del>
-   </td>
-   <td><del>simdgroup_multiply with diagonal matrix reciprocal scalar value for b<sup>1</sup></del>
-   </td>
-  </tr>
-</table>
-
-
-
+| Function | SPIR-V | MSL |
+| -------- | ------ | ---- |
+| Value constructors | OpCompositeConstruct with appropriate value<br>const-/override-expressions could use constant instructions | make_filled_simdgroup_matrix |
+| subgroupMatrixLoad | OpCooperativeMatrixLoadKHR<br>Pointer operand is a direct translation of the WGSL pointer | simdgroup_matrix_load<br>The WGSL pointer needs translated into the origin operand in MSL |
+| subgroupMatrixStore | OpCooperativeMatrixStoreKHR<br>Pointer operand is a direct translation of the WGSL pointer | simdgroup_matrix_store<br>The WGSL pointer needs translated into the origin operand in MSL |
+| subgroupMatrixMultiply | OpCooperativeMatrixMulAddKHR<br>C is a zero value matrix matching the result type | simdgroup_multiply |
+| subgroupMatrixMultiplyAccumulate | OpCooperativeMatrixMulAddKHR | simdgroup_multiply_accumulate |
+| subgroupMatrixScalarAdd | OpI/FAdd with composite constructed value | simdgroup_multiply_accumulate with diagonal matrix for b and filled matrix scalar value for c |
+| subgroupMatrixScalarSubtract | OpI/FSub with composite constructed value | simdgroup_multiply_accumulate with diagonal matrix for b and filled inverted matrix scalar value for c |
+| subgroupMatrixScalarMultiply | OpI/FMul with composite constructed value | simdgroup_multiply with diagonal matrix scalar value for b<sup>1</sup> |
+| ~~subgroupMatrixScalarDivide~~ | ~~OpI/S/FDiv with composite constructed scalar or OpMatrixTimesScalar (for float components with reciprocal scalar value)~~ | ~~simdgroup_multiply with diagonal matrix reciprocal scalar value for b~~<sup>1</sup> |
 
 1. This works because MSL only supports floating-point component types.
 
@@ -1102,48 +628,10 @@ Filter the list returned from [vkGetPhysicalDeviceCooperativeMatrixPropertiesKHR
 
 Hardcode the following configurations if the feature is supported:
 
-
-<table>
-  <tr>
-   <td><strong>componentType</strong>
-   </td>
-   <td><strong>resultComponentType</strong>
-   </td>
-   <td><strong>M</strong>
-   </td>
-   <td><strong>N</strong>
-   </td>
-   <td><strong>K</strong>
-   </td>
-  </tr>
-  <tr>
-   <td>f32
-   </td>
-   <td>f32
-   </td>
-   <td>8
-   </td>
-   <td>8
-   </td>
-   <td>8
-   </td>
-  </tr>
-  <tr>
-   <td>f16<sup>1</sup>
-   </td>
-   <td>f16
-   </td>
-   <td>8
-   </td>
-   <td>8
-   </td>
-   <td>8
-   </td>
-  </tr>
-</table>
-
-
-
+| componentType | resultComponentType | M | N | K |
+| ------------- | ------------------- | ---- | ---- | ---- |
+| f32 | f32 | 8 | 8 | 8 |
+| f16 | f16 | 8 | 8 | 8 |
 
 1. Filter out f16 from the device properties if `shader-f16` is not requested on the device.
 
