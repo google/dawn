@@ -72,6 +72,7 @@ TEST_F(MutexTest, AutoLockAndHoldRef) {
     }
 }
 
+// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 using MutexDeathTest = MutexTest;
 
 // Double AutoLock calls should be cause assertion failure.

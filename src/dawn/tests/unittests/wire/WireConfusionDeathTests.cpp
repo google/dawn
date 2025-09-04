@@ -65,6 +65,7 @@ class WireTwo : public WireTest {};
 // Tests for intentional wire client CHECK crashes when trying to use objects
 // from the wrong wire which would have bogus IDs. (The crash is intended, but
 // in principle we shouldn't actually crash. See crbug.com/440387003.)
+// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
 class WireConfusionDeathTest : public WireOne,
                                public WireTwo,
                                public ::testing::WithParamInterface<TestState> {
