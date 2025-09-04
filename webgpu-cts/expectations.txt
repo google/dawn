@@ -1197,6 +1197,39 @@ crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x6
 crbug.com/421941589 webgpu:api,operation,storage_texture,read_only:basic:* [ Failure ]
 crbug.com/421941589 webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:* [ Failure ]
 
+# CTS needs to support new multisampling formats from texture-feature-tier1,
+# will be removed after the latest CTS rolling into Dawn
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="r16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="r16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="rg16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="rg16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="rgba16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_multisampled_2d";format="rgba16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="r16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="r16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="rg16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="rg16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="rgba16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_multisampled_2d";format="rgba16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="r16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="r16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="rg16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="rg16unorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="rgba16snorm" [ Failure ]
+crbug.com/6810487 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_multisampled_2d";format="rgba16unorm" [ Failure ]
+
+# CTS needs to add checks for renderable formats with texture-format-tier1 enabled，
+# will be removed after the latest CTS rolling into Dawn
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=false [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16snorm";awaitLost=true [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="r16unorm";awaitLost=true [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16snorm";awaitLost=false [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=false [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rg16unorm";awaitLost=true [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16snorm";awaitLost=false [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=false [ Failure ]
+crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
+
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:stage="v";* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:stage="v";* [ RetryOnFailure ]
