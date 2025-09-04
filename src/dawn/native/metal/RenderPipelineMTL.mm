@@ -381,10 +381,11 @@ MaybeError RenderPipeline::InitializeImpl() {
     const PerStage<ProgrammableStage>& allStages = GetAllStages();
     const ProgrammableStage& vertexStage = allStages[wgpu::ShaderStage::Vertex];
     ShaderModule::MetalFunctionData vertexData;
-    DAWN_TRY_CONTEXT(ToBackend(vertexStage.module.Get())
-                         ->CreateFunction(SingleShaderStage::Vertex, vertexStage,
-                                          ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF, this),
-                     " getting vertex MTLFunction for %s", this);
+    DAWN_TRY_CONTEXT(
+        ToBackend(vertexStage.module.Get())
+            ->CreateFunction(SingleShaderStage::Vertex, vertexStage, ToBackend(GetLayout()),
+                             GetImmediateMask(), &vertexData, 0xFFFFFFFF, this),
+        " getting vertex MTLFunction for %s", this);
 
     descriptorMTL.vertexFunction = vertexData.function.Get();
     if (vertexData.needsStorageBufferLength) {
@@ -397,7 +398,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         DAWN_TRY_CONTEXT(
             ToBackend(fragmentStage.module.Get())
                 ->CreateFunction(SingleShaderStage::Fragment, fragmentStage, ToBackend(GetLayout()),
-                                 &fragmentData, GetSampleMask(), this),
+                                 GetImmediateMask(), &fragmentData, GetSampleMask(), this),
             " getting fragment MTLFunction for %s", this);
 
         descriptorMTL.fragmentFunction = fragmentData.function.Get();

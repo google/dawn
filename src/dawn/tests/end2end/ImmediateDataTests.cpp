@@ -485,7 +485,11 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithPipelineSwitch) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(ImmediateDataTests, D3D11Backend(), D3D12Backend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(ImmediateDataTests,
+                      D3D11Backend(),
+                      D3D12Backend(),
+                      MetalBackend(),
+                      VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

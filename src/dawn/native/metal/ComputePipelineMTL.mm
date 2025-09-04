@@ -60,7 +60,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     DAWN_TRY(ToBackend(computeStage.module.Get())
                  ->CreateFunction(SingleShaderStage::Compute, computeStage, ToBackend(GetLayout()),
-                                  &computeData,
+                                  GetImmediateMask(), &computeData,
                                   /* sampleMask */ 0xFFFFFFFF,
                                   /* renderPipeline */ nullptr));
 

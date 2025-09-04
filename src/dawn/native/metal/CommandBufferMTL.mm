@@ -35,6 +35,7 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ExternalTexture.h"
+#include "dawn/native/ImmediateConstantsTracker.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/metal/BindGroupLayoutMTL.h"
@@ -436,10 +437,10 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
 
 // Metal uses a physical addressing mode which means buffers in the shading language are
 // just pointers to the virtual address of their start. This means there is no way to know
-// the length of a buffer to compute the length() of unsized arrays at the end of storage
-// buffers. Tint implements the length() of unsized arrays by requiring an extra
-// buffer that contains the length of other buffers. This structure that keeps track of the
-// length of storage buffers and can apply them to the reserved "buffer length buffer" when
+// the length of a buffer to compute the arrayLength() of unsized arrays at the end of storage
+// buffers. Tint implements the arrayLength() of unsized arrays by requiring immediate constants
+// that stores the length of other buffers. This structure that keeps track of the
+// length of storage buffers and apply them to the reserved "immediate blocks" when
 // needed for a draw or a dispatch.
 struct StorageBufferLengthTracker {
     wgpu::ShaderStage dirtyStages = wgpu::ShaderStage::None;
@@ -449,18 +450,34 @@ struct StorageBufferLengthTracker {
     // UBOs require we align the max buffer count to 4 elements (16 bytes).
     static constexpr size_t MaxBufferCount = ((kGenericMetalBufferSlots + 3) / 4) * 4;
     PerStage<std::array<uint32_t, MaxBufferCount>> data;
+    // The actual size in bytes of the buffer length data to upload for each shader stage.
+    // This is calculated as sizeof(uint32_t) * aligned_buffer_count and represents the
+    // number of bytes that need to be uploaded to the GPU buffer containing buffer lengths.
+    // This size accounts for the 4-element (16-byte) alignment requirement for UBOs.
+    PerStage<uint32_t> dataSize;
 
-    void Apply(id<MTLRenderCommandEncoder> render,
-               RenderPipeline* pipeline,
-               bool enableVertexPulling) {
-        wgpu::ShaderStage stagesToApply =
-            dirtyStages & pipeline->GetStagesRequiringStorageBufferLength();
-
-        if (stagesToApply == wgpu::ShaderStage::None) {
-            return;
+    // TODO(crbug.com/366291600): Remove this logic when merging
+    // StorageBufferLengthTracker in ImmediateConstantTracker.
+    void OnSetPipeline(RenderPipelineBase* pipeline) {
+        uint32_t immediateCount = pipeline->GetImmediateMask().count();
+        if (immediateCount != mLastImmediateCounts) {
+            mLastImmediateCounts = immediateCount;
+            dirtyStages |= (wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment);
         }
+    }
 
-        if (stagesToApply & wgpu::ShaderStage::Vertex) {
+    void OnSetPipeline(ComputePipelineBase* pipeline) {
+        uint32_t immediateCount = pipeline->GetImmediateMask().count();
+        if (immediateCount != mLastImmediateCounts) {
+            mLastImmediateCounts = immediateCount;
+            dirtyStages |= wgpu::ShaderStage::Compute;
+        }
+    }
+
+    // TODO(crbug.com/366291600): Remove unused storage buffer size in immediate block
+    // to avoid uploading unused data.
+    void Apply(RenderPipeline* pipeline, bool enableVertexPulling) {
+        if (dirtyStages & wgpu::ShaderStage::Vertex) {
             uint32_t bufferCount =
                 ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Vertex);
 
@@ -470,47 +487,166 @@ struct StorageBufferLengthTracker {
 
             bufferCount = Align(bufferCount, 4);
             DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Vertex].size());
-
-            [render setVertexBytes:data[SingleShaderStage::Vertex].data()
-                            length:sizeof(uint32_t) * bufferCount
-                           atIndex:kBufferLengthBufferSlot];
+            dataSize[SingleShaderStage::Vertex] = sizeof(uint32_t) * bufferCount;
         }
 
-        if (stagesToApply & wgpu::ShaderStage::Fragment) {
-            uint32_t bufferCount = ToBackend(pipeline->GetLayout())
-                                       ->GetBufferBindingCount(SingleShaderStage::Fragment);
-            bufferCount = Align(bufferCount, 4);
+        if (dirtyStages & wgpu::ShaderStage::Fragment) {
+            uint32_t bufferCount = Align(ToBackend(pipeline->GetLayout())
+                                             ->GetBufferBindingCount(SingleShaderStage::Fragment),
+                                         4);
             DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Fragment].size());
-
-            [render setFragmentBytes:data[SingleShaderStage::Fragment].data()
-                              length:sizeof(uint32_t) * bufferCount
-                             atIndex:kBufferLengthBufferSlot];
+            dataSize[SingleShaderStage::Fragment] = sizeof(uint32_t) * bufferCount;
         }
-
-        // Only mark clean stages that were actually applied.
-        dirtyStages ^= stagesToApply;
     }
 
-    void Apply(id<MTLComputeCommandEncoder> compute, ComputePipeline* pipeline) {
+    // TODO(crbug.com/366291600): Remove unused storage buffer size in immediate block
+    // to avoid uploading unused data.
+    void Apply(ComputePipeline* pipeline) {
         if (!(dirtyStages & wgpu::ShaderStage::Compute)) {
             return;
         }
 
-        if (!pipeline->RequiresStorageBufferLength()) {
+        uint32_t bufferCount = Align(
+            ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Compute), 4);
+        DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Compute].size());
+        dataSize[SingleShaderStage::Compute] = sizeof(uint32_t) * bufferCount;
+    }
+
+    uint32_t mLastImmediateCounts;
+};
+
+// Template class that manages immediate constants for Metal backend.
+// This tracker combines immediate constant data with buffer length information,
+// uploading both to a single buffer that can be accessed by shaders.
+// Template parameter T should be either RenderImmediateConstantsTrackerBase
+// or ComputeImmediateConstantsTrackerBase.
+// TODO(crbug.com/366291600): Merge StorageBufferLength in ImmediateConstantTracker
+template <typename T, typename EncoderType>
+class ImmediateConstantTracker : public T {
+  public:
+    ImmediateConstantTracker() = default;
+
+    // Applies immediate constants and buffer length data to the Metal command encoder.
+    // This method uploads both immediate constant values and storage buffer lengths
+    // to a single buffer, with buffer lengths appended after immediate constants.
+    // The data is uploaded using setVertexBytes/setFragmentBytes for render passes
+    // or setBytes for compute passes.
+    void Apply(EncoderType encoder, StorageBufferLengthTracker* lengthTracker) {
+        DAWN_ASSERT(this->mLastPipeline != nullptr);
+
+        // Update the stored immediate constants that have changed
+        ImmediateConstantMask pipelineMask = this->mLastPipeline->GetImmediateMask();
+        ImmediateConstantMask uploadBits = this->mDirty & pipelineMask;
+        constexpr wgpu::ShaderStage stages =
+            kIsRenderImmediateConstants ? wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment
+                                        : wgpu::ShaderStage::Compute;
+        for (auto [offset, size] : IterateRanges(uploadBits)) {
+            uint32_t immediateContentStartOffset =
+                static_cast<uint32_t>(offset) * kImmediateConstantElementByteSize;
+            uint32_t immediateRangeStartOffset =
+                GetImmediateIndexInPipeline(static_cast<uint32_t>(offset), pipelineMask);
+            WriteImmediateBlocks(stages, immediateRangeStartOffset,
+                                 this->mContent.template Get<uint32_t>(immediateContentStartOffset),
+                                 size * kImmediateConstantElementByteSize);
+        }
+
+        // Calculate buffer sizes start offset based on ImmediateBlock layouts
+        // describes in PipelineLayoutMTL.h
+        // - must be 16-byte aligned for UBO requirements
+        uint32_t bufferSizeOffset =
+            RoundUp(pipelineMask.count() * kImmediateConstantElementByteSize, 16);
+
+        // Update storage buffer length data that are needed and changed.
+        for (auto stage : IterateStages(lengthTracker->dirtyStages)) {
+            WriteImmediateBlocks(StageBit(stage),
+                                 bufferSizeOffset / kImmediateConstantElementByteSize,
+                                 lengthTracker->data[stage].data(), lengthTracker->dataSize[stage]);
+        }
+
+        // Update per stage dirty size. lengthTracker always keeps last valid length of buffer
+        // sizes.
+        for (auto stage : IterateStages(stages)) {
+            dirtySize[stage] = bufferSizeOffset + lengthTracker->dataSize[stage];
+        }
+
+        // Reset StorageBufferLengthTracker dirty stages
+        lengthTracker->dirtyStages = wgpu::ShaderStage::None;
+
+        UploadImmediates(encoder);
+
+        // Reset all dirty bits after uploading.
+        this->mDirty.reset();
+    }
+
+  private:
+    static constexpr bool kIsRenderImmediateConstants =
+        std::is_same_v<T, RenderImmediateConstantsTrackerBase>;
+    static constexpr bool kIsComputeImmediateConstants =
+        std::is_same_v<T, ComputeImmediateConstantsTrackerBase>;
+
+    // The lengths of buffers are stored as 32bit integers because that is the width the
+    // MSL code generated by Tint expects.
+    // UBOs require we align the max buffer count to 4 elements (16 bytes).
+    static constexpr size_t MaxBufferCount = StorageBufferLengthTracker::MaxBufferCount;
+    static constexpr size_t kMaxImmediateBlockSize =
+        kMaxImmediateConstantsPerPipeline + MaxBufferCount;
+
+    // Writes data to the immediate block content for the specified shader stages.
+    // This is used for both immediate constants and storage buffer length data.
+    void WriteImmediateBlocks(wgpu::ShaderStage stages,
+                              uint32_t offset,
+                              const void* data,
+                              size_t size) {
+        DAWN_ASSERT(offset < kMaxImmediateBlockSize);
+        DAWN_ASSERT(size <= sizeof(uint32_t) * (kMaxImmediateBlockSize - offset));
+        // Copy data to all affected shader stages
+        for (auto stage : IterateStages(stages)) {
+            std::memcpy(&mImmediateBlockContent[stage][offset], data, size);
+        }
+        dirtyStages |= stages;
+    }
+
+    // Uploads the immediate block content to the Metal render encoder.
+    void UploadImmediates(id<MTLRenderCommandEncoder> renderEncoder) {
+        if (dirtyStages & wgpu::ShaderStage::Vertex) {
+            [renderEncoder setVertexBytes:mImmediateBlockContent[SingleShaderStage::Vertex].data()
+                                   length:dirtySize[SingleShaderStage::Vertex]
+                                  atIndex:kImmediateBlockBufferSlot];
+        }
+
+        if (dirtyStages & wgpu::ShaderStage::Fragment) {
+            [renderEncoder
+                setFragmentBytes:mImmediateBlockContent[SingleShaderStage::Fragment].data()
+                          length:dirtySize[SingleShaderStage::Fragment]
+                         atIndex:kImmediateBlockBufferSlot];
+        }
+
+        // Reset dirty stage.
+        dirtyStages = wgpu::ShaderStage::None;
+    }
+
+    // Uploads the immediate block content to the Metal compute encoder.
+    void UploadImmediates(id<MTLComputeCommandEncoder> computeEncoder) {
+        if (dirtyStages == wgpu::ShaderStage::None) {
             return;
         }
 
-        uint32_t bufferCount =
-            ToBackend(pipeline->GetLayout())->GetBufferBindingCount(SingleShaderStage::Compute);
-        bufferCount = Align(bufferCount, 4);
-        DAWN_ASSERT(bufferCount <= data[SingleShaderStage::Compute].size());
+        [computeEncoder setBytes:mImmediateBlockContent[SingleShaderStage::Compute].data()
+                          length:dirtySize[SingleShaderStage::Compute]
+                         atIndex:kImmediateBlockBufferSlot];
 
-        [compute setBytes:data[SingleShaderStage::Compute].data()
-                   length:sizeof(uint32_t) * bufferCount
-                  atIndex:kBufferLengthBufferSlot];
-
-        dirtyStages ^= wgpu::ShaderStage::Compute;
+        // Reset dirty stage.
+        dirtyStages = wgpu::ShaderStage::None;
     }
+
+    // Per-stage storage for the immediate block content.
+    // Each stage maintains its own copy of the data combining immediate constants
+    // and buffer length information in a single contiguous block.
+    PerStage<std::array<uint32_t, kMaxImmediateBlockSize>> mImmediateBlockContent;
+    // Size of data to upload for each shader stage (in bytes)
+    PerStage<size_t> dirtySize;
+    // Tracks which shader stages have dirty data that needs to be uploaded
+    wgpu::ShaderStage dirtyStages = wgpu::ShaderStage::None;
 };
 
 // Keeps track of the dirty bind groups so they can be lazily applied when we know the
@@ -1442,6 +1578,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     SetDebugName(GetDevice(), encoder, "Dawn_ComputePassEncoder", computePassCmd->label);
 
     Command type;
+    ImmediateConstantTracker<ComputeImmediateConstantsTrackerBase, id<MTLComputeCommandEncoder>>
+        immediates = {};
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::EndComputePass: {
@@ -1476,7 +1614,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 }
 
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline);
+                storageBufferLengths.Apply(lastPipeline);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 [encoder dispatchThreadgroups:MTLSizeMake(dispatch->x, dispatch->y, dispatch->z)
                         threadsPerThreadgroup:lastPipeline->GetLocalWorkGroupSize()];
@@ -1487,7 +1626,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
 
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline);
+                storageBufferLengths.Apply(lastPipeline);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 Buffer* buffer = ToBackend(dispatch->indirectBuffer.Get());
                 buffer->TrackUsage();
@@ -1504,6 +1644,8 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 lastPipeline = ToBackend(cmd->pipeline).Get();
 
                 bindGroups.OnSetPipeline(lastPipeline);
+                immediates.OnSetPipeline(lastPipeline);
+                storageBufferLengths.OnSetPipeline(lastPipeline);
 
                 lastPipeline->Encode(encoder);
                 break;
@@ -1518,6 +1660,13 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
                 bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),
                                           cmd->dynamicOffsetCount, dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                uint8_t* value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1556,9 +1705,6 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
 
                 break;
             }
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 DAWN_UNREACHABLE();
@@ -1607,6 +1753,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
     SetDebugName(GetDevice(), encoder, "Dawn_RenderPassEncoder", renderPassCmd->label);
 
+    ImmediateConstantTracker<RenderImmediateConstantsTrackerBase, id<MTLRenderCommandEncoder>>
+        immediates = {};
     auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {
         switch (type) {
             case Command::Draw: {
@@ -1614,7 +1762,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 // The instance count must be non-zero, otherwise no-op
                 if (draw->instanceCount != 0) {
@@ -1642,7 +1791,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 // The index and instance count must be non-zero, otherwise no-op
                 if (draw->indexCount != 0 && draw->instanceCount != 0) {
@@ -1678,7 +1828,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 buffer->TrackUsage();
@@ -1695,7 +1846,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
                 DAWN_ASSERT(buffer != nullptr);
@@ -1717,7 +1869,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
                 multiDrawIndex++;
@@ -1728,7 +1881,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
                 bindGroups.Apply(encoder);
-                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+                storageBufferLengths.Apply(lastPipeline, enableVertexPulling);
+                immediates.Apply(encoder, &storageBufferLengths);
 
                 ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
                 multiDrawIndex++;
@@ -1769,6 +1923,8 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 vertexBuffers.OnSetPipeline(lastPipeline, newPipeline);
                 bindGroups.OnSetPipeline(newPipeline);
+                immediates.OnSetPipeline(newPipeline);
+                storageBufferLengths.OnSetPipeline(newPipeline);
 
                 [encoder setDepthStencilState:newPipeline->GetMTLDepthStencilState()];
                 [encoder setFrontFacingWinding:newPipeline->GetMTLFrontFace()];
@@ -1801,6 +1957,13 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 bindGroups.OnSetBindGroup(cmd->index, ToBackend(cmd->group.Get()),
                                           cmd->dynamicOffsetCount, dynamicOffsets);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                SetImmediateDataCmd* cmd = mCommands.NextCommand<SetImmediateDataCmd>();
+                uint8_t* value = mCommands.NextData<uint8_t>(cmd->size);
+                immediates.SetImmediateData(cmd->offset, value, cmd->size);
                 break;
             }
 
@@ -1950,9 +2113,6 @@ MaybeError CommandBuffer::EncodeRenderPass(
 
                 break;
             }
-
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
 
             default: {
                 EncodeRenderBundleCommand(&mCommands, type);
