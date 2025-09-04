@@ -46,6 +46,7 @@ struct DAWN_WIRE_EXPORT WireServerDescriptor {
     const DawnProcTable* procs;
     CommandSerializer* serializer;
     server::MemoryTransferService* memoryTransferService = nullptr;
+    bool useSpontaneousCallbacks = false;
 };
 
 class DAWN_WIRE_EXPORT WireServer : public CommandHandler {

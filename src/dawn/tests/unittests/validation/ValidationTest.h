@@ -185,9 +185,6 @@ class ValidationTest : public testing::Test {
                const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
     uint64_t GetInstanceDeprecationCountForTesting();
-    // Helps compute expected deprecated warning count for creating device with given descriptor.
-    uint32_t GetDeviceCreationDeprecationWarningExpectation(
-        const wgpu::DeviceDescriptor& descriptor);
     // Request device and handle deprecation warning emitted during creating device.
     wgpu::Device RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc);
 

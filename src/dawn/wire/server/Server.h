@@ -78,9 +78,11 @@ struct ForwardToServerHelper {
     struct ExtractedTypes;
 
     // An internal structure used to unpack the various types that compose the type of F
-    template <typename Return, typename Class, typename Userdata, typename... Args>
-    struct ExtractedTypes<Return (Class::*)(Userdata*, Args...)> {
+    template <typename Return, typename Class, typename UserdataT, typename... Args>
+    struct ExtractedTypes<Return (Class::*)(UserdataT*, Args...)> {
+        using Userdata = UserdataT;
         using UntypedCallback = Return (*)(Args..., void*, void*);
+
         static Return Callback(Args... args, void* userdata, void*) {
             // Acquire the userdata, and cast it to UserdataT.
             std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
@@ -91,16 +93,16 @@ struct ForwardToServerHelper {
             }
             // Forward the arguments and the typed userdata to the Server:: member function.
             (server.get()->*F)(data.get(), std::forward<decltype(args)>(args)...);
+            server.get()->Flush();
         }
     };
 
     static constexpr typename ExtractedTypes<decltype(F)>::UntypedCallback Create() {
         return ExtractedTypes<decltype(F)>::Callback;
     }
-};
 
-template <auto F>
-constexpr auto ForwardToServer = ForwardToServerHelper<F>::Create();
+    using Userdata = typename ExtractedTypes<decltype(F)>::Userdata;
+};
 
 struct MapUserdata : CallbackUserdata {
     using CallbackUserdata::CallbackUserdata;
@@ -174,7 +176,8 @@ class Server : public ServerBase {
   public:
     static std::shared_ptr<Server> Create(const DawnProcTable& procs,
                                           CommandSerializer* serializer,
-                                          MemoryTransferService* memoryTransferService);
+                                          MemoryTransferService* memoryTransferService,
+                                          bool useSpontaneousCallbacks);
     ~Server() override;
 
     // ChunkedCommandHandler implementation
@@ -190,16 +193,28 @@ class Server : public ServerBase {
     WGPUDevice GetDevice(uint32_t id, uint32_t generation);
     bool IsDeviceKnown(WGPUDevice device) const;
 
+    // Flushes the command serialized from server->client if spontaneous callbacks are enabled.
+    void Flush();
+
     template <typename T,
               typename Enable = std::enable_if<std::is_base_of<CallbackUserdata, T>::value>>
     std::unique_ptr<T> MakeUserdata() {
         return std::unique_ptr<T>(new T(mSelf));
     }
 
+    template <typename CallbackInfo,
+              auto F,
+              WGPUCallbackMode DefaultMode = WGPUCallbackMode_AllowProcessEvents>
+    CallbackInfo MakeCallbackInfo(ForwardToServerHelper<F>::Userdata* userdata) {
+        return {nullptr, mUseSpontaneousCallbacks ? WGPUCallbackMode_AllowSpontaneous : DefaultMode,
+                ForwardToServerHelper<F>::Create(), userdata, nullptr};
+    }
+
   private:
     Server(const DawnProcTable& procs,
            CommandSerializer* serializer,
-           MemoryTransferService* memoryTransferService);
+           MemoryTransferService* memoryTransferService,
+           bool useSpontaneousCallbacks);
 
     template <typename Cmd>
     void SerializeCommand(const Cmd& cmd) {
@@ -280,6 +295,7 @@ class Server : public ServerBase {
     DawnProcTable mProcs;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;
+    bool mUseSpontaneousCallbacks = false;
 
     // Weak pointer to self to facilitate creation of userdata.
     std::weak_ptr<Server> mSelf;

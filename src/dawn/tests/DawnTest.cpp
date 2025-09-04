@@ -1785,20 +1785,12 @@ void DawnTestBase::WaitABit(wgpu::Instance targetInstance) {
 void DawnTestBase::FlushWire() {
     if (gTestEnv->UsesWire()) {
         bool C2SFlushed = mWireHelper->FlushClient();
-        bool S2CFlushed = mWireHelper->FlushServer();
         DAWN_ASSERT(C2SFlushed);
-        DAWN_ASSERT(S2CFlushed);
     }
 }
 
 void DawnTestBase::WaitForAllOperations() {
-    do {
-        FlushWire();
-        if (UsesWire() && instance != nullptr) {
-            instance.ProcessEvents();
-        }
-    } while (dawn::native::InstanceProcessEvents(gTestEnv->GetInstance()->Get()) ||
-             !mWireHelper->IsIdle());
+    mWireHelper->WaitUntilIdle(gTestEnv->GetInstance(), instance);
 }
 
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(wgpu::Device targetDevice,

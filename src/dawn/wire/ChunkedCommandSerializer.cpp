@@ -34,6 +34,10 @@ ChunkedCommandSerializer::ChunkedCommandSerializer(CommandSerializer* serializer
     DAWN_ASSERT(mMaxAllocationSize > 0);
 }
 
+void ChunkedCommandSerializer::Flush() {
+    mSerializer->Flush();
+}
+
 void ChunkedCommandSerializer::SerializeChunkedCommand(const char* allocatedBuffer,
                                                        size_t remainingSize) {
     while (remainingSize > 0) {

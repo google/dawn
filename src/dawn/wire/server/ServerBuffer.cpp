@@ -115,8 +115,8 @@ WireResult Server::DoBufferMapAsync(Known<WGPUBuffer> buffer,
 
     mProcs.bufferMapAsync(
         buffer->handle, mode, offset, size,
-        {nullptr, WGPUCallbackMode_AllowProcessEvents,
-         ForwardToServer<&Server::OnBufferMapAsyncCallback>, userdata.release(), nullptr});
+        MakeCallbackInfo<WGPUBufferMapCallbackInfo, &Server::OnBufferMapAsyncCallback>(
+            userdata.release()));
 
     return WireResult::Success;
 }

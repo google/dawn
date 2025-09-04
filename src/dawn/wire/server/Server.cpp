@@ -35,16 +35,22 @@ CallbackUserdata::CallbackUserdata(const std::weak_ptr<Server>& server) : server
 // static
 std::shared_ptr<Server> Server::Create(const DawnProcTable& procs,
                                        CommandSerializer* serializer,
-                                       MemoryTransferService* memoryTransferService) {
-    auto server = std::shared_ptr<Server>(new Server(procs, serializer, memoryTransferService));
+                                       MemoryTransferService* memoryTransferService,
+                                       bool useSpontaneousCallbacks) {
+    auto server = std::shared_ptr<Server>(
+        new Server(procs, serializer, memoryTransferService, useSpontaneousCallbacks));
     server->mSelf = server;
     return server;
 }
 
 Server::Server(const DawnProcTable& procs,
                CommandSerializer* serializer,
-               MemoryTransferService* memoryTransferService)
-    : mSerializer(serializer), mProcs(procs), mMemoryTransferService(memoryTransferService) {
+               MemoryTransferService* memoryTransferService,
+               bool useSpontaneousCallbacks)
+    : mSerializer(serializer),
+      mProcs(procs),
+      mMemoryTransferService(memoryTransferService),
+      mUseSpontaneousCallbacks(useSpontaneousCallbacks) {
     if (mMemoryTransferService == nullptr) {
         // If a MemoryTransferService is not provided, fallback to inline memory.
         mOwnedMemoryTransferService = CreateInlineMemoryTransferService();
@@ -160,6 +166,12 @@ WGPUDevice Server::GetDevice(uint32_t id, uint32_t generation) {
 
 bool Server::IsDeviceKnown(WGPUDevice device) const {
     return Objects<WGPUDevice>().IsKnown(device);
+}
+
+void Server::Flush() {
+    if (mUseSpontaneousCallbacks) {
+        mSerializer->Flush();
+    }
 }
 
 namespace {

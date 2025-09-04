@@ -127,6 +127,7 @@ class WireHelperProxy : public WireHelper {
         dawn::wire::WireServerDescriptor serverDesc = {};
         serverDesc.procs = &procs;
         serverDesc.serializer = mS2cBuf.get();
+        serverDesc.useSpontaneousCallbacks = true;
 
         mWireServer.reset(new dawn::wire::WireServer(serverDesc));
         mC2sBuf->SetHandler(mWireServer.get());
@@ -190,6 +191,28 @@ std::pair<wgpu::Instance, std::unique_ptr<dawn::native::Instance>> WireHelper::C
     return {RegisterInstance(nativeInstance->Get(),
                              reinterpret_cast<const WGPUInstanceDescriptor*>(wireDesc)),
             std::move(nativeInstance)};
+}
+
+void WireHelper::WaitUntilIdle(dawn::native::Instance* serverInstance,
+                               wgpu::Instance clientInstance) {
+    while (true) {
+        bool C2SFlushed = FlushClient();
+        DAWN_ASSERT(C2SFlushed);
+
+        if (!dawn::native::InstanceProcessEvents(serverInstance->Get())) {
+            if (clientInstance != nullptr) {
+                clientInstance.ProcessEvents();
+                if (!IsIdle()) {
+                    continue;
+                }
+            }
+            break;
+        }
+
+        if (clientInstance != nullptr) {
+            clientInstance.ProcessEvents();
+        }
+    }
 }
 
 std::unique_ptr<WireHelper> CreateWireHelper(const DawnProcTable& procs,

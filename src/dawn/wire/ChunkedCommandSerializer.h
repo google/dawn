@@ -106,6 +106,8 @@ class ChunkedCommandSerializer {
             std::forward<Extensions>(extensions)...);
     }
 
+    void Flush();
+
   private:
     template <typename Cmd, typename SerializeCmdFn, typename... Extensions>
     void SerializeCommandImpl(const Cmd& cmd,
