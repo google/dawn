@@ -1223,10 +1223,12 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView1>> Texture::CreateD3D11ShaderResou
     }
 
     ComPtr<ID3D11ShaderResourceView1> srv;
-    DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
-                              ->GetD3D11Device3()
-                              ->CreateShaderResourceView1(GetD3D11Resource(), &srvDesc, &srv),
-                          "CreateShaderResourceView1"));
+    DAWN_TRY_CONTEXT(
+        CheckHRESULT(ToBackend(GetDevice())
+                         ->GetD3D11Device3()
+                         ->CreateShaderResourceView1(GetD3D11Resource(), &srvDesc, &srv),
+                     "CreateShaderResourceView1"),
+        "%s", SRVCreationStr(GetD3D11Resource(), srvDesc));
 
     return std::move(srv);
 }
