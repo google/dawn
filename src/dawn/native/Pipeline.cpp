@@ -28,6 +28,7 @@
 #include "dawn/native/Pipeline.h"
 
 #include <algorithm>
+#include <set>
 #include <utility>
 
 #include "absl/container/flat_hash_set.h"
@@ -43,6 +44,48 @@
 #include "src/utils/numeric.h"
 
 namespace dawn::native {
+
+namespace {
+
+// Number of texture+sampler combinations, computed as 1 for every texture+sampler
+// combination + 1 for every texture used without a sampler that wasn't previously counted.
+// Note: this is only used in compatibility mode.
+uint32_t ComputeNumTextureSamplerCombinations(const dawn::native::EntryPointMetadata& metadata) {
+    // separate sampled from non-sampled and put sampled in set
+    std::set<BindingSlot> sampledTextures;
+    std::set<BindingSlot> sampledExternalTextures;
+    std::vector<BindingSlot> nonSampled;
+    uint32_t numSamplerTexturePairs = 0;
+    uint32_t numSamplerExternalTexturePairs = 0;
+
+    for (const auto& pair : metadata.samplerAndNonSamplerTexturePairs) {
+        const auto& bindingGroupInfoMap = metadata.bindings[BindGroupIndex(pair.texture.group)];
+        const auto it = bindingGroupInfoMap.find(BindingNumber(pair.texture.binding));
+        auto isExternalTexture =
+            it != bindingGroupInfoMap.end() &&
+            std::holds_alternative<ExternalTextureBindingInfo>(it->second.bindingInfo);
+        if (isExternalTexture) {
+            ++numSamplerExternalTexturePairs;
+            sampledExternalTextures.insert(pair.texture);
+        } else if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
+            nonSampled.push_back(pair.texture);
+        } else {
+            ++numSamplerTexturePairs;
+            sampledTextures.insert(pair.texture);
+        }
+    }
+
+    // count the number of non-sampled that are not referenced by sampled pairs.
+    auto numNonSampled = std::count_if(nonSampled.begin(), nonSampled.end(),
+                                       [&](const BindingSlot& nonSampledBindingPoint) {
+                                           return !sampledTextures.contains(nonSampledBindingPoint);
+                                       });
+    return numSamplerTexturePairs + numNonSampled + numSamplerExternalTexturePairs * 3 +
+           sampledExternalTextures.size();
+}
+
+}  // namespace
+
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
                                                                 const ShaderModuleBase* module,
                                                                 StringView entryPointName,
@@ -103,11 +146,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     const CombinedLimits& limits = device->GetLimits();
     uint32_t maxCombos =
         std::min(limits.v1.maxSampledTexturesPerShaderStage, limits.v1.maxSamplersPerShaderStage);
+    uint32_t numTextureSamplerCombinations = ComputeNumTextureSamplerCombinations(metadata);
     DAWN_INVALID_IF(
-        device->IsCompatibilityMode() && metadata.numTextureSamplerCombinations > maxCombos,
+        device->IsCompatibilityMode() && numTextureSamplerCombinations > maxCombos,
         "Entry-point uses %u texture+sampler combinations which is more than the maximum of %u "
         "combinations in compatibility mode",
-        metadata.numTextureSamplerCombinations, maxCombos);
+        numTextureSamplerCombinations, maxCombos);
 
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor

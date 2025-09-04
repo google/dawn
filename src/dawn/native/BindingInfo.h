@@ -163,7 +163,27 @@ BindingInfoType GetBindingInfoType(const BindingInfo& bindingInfo);
 #define BINDING_SLOT_MEMBER(X) \
     X(BindGroupIndex, group)   \
     X(BindingNumber, binding)
-DAWN_SERIALIZABLE(struct, BindingSlot, BINDING_SLOT_MEMBER){};
+// clang-format off
+DAWN_SERIALIZABLE(struct, BindingSlot, BINDING_SLOT_MEMBER){
+    constexpr bool operator==(const BindingSlot& rhs) const {
+        return group == rhs.group && binding == rhs.binding;
+    }
+
+    constexpr bool operator!=(const BindingSlot& rhs) const {
+        return !(*this == rhs);
+    }
+
+    constexpr bool operator<(const BindingSlot& rhs) const {
+        if (group < rhs.group) {
+            return true;
+        }
+        if (group > rhs.group) {
+            return false;
+        }
+        return binding < rhs.binding;
+    }
+};
+// clang-format on
 #undef BINDING_SLOT_MEMBER
 
 struct PerStageBindingCounts {

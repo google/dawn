@@ -329,11 +329,7 @@ using OverridesMap = absl::flat_hash_map<std::string, Override>;
     X(bool, usesDepthTextureWithNonComparisonSampler)                                             \
     X(bool, usesSubgroupMatrix)                                                                   \
     /* Immediate Data block byte size */                                                          \
-    X(uint32_t, immediateDataRangeByteSize)                                                       \
-    /* Number of texture+sampler combinations, computed as 1 for every texture+sampler         */ \
-    /* combination + 1 for every texture used without a sampler that wasn't previously counted.*/ \
-    /* Note: this is only set in compatibility mode.                                           */ \
-    X(uint32_t, numTextureSamplerCombinations)
+    X(uint32_t, immediateDataRangeByteSize)
 DAWN_SERIALIZABLE(struct, EntryPointMetadata, ENTRY_POINT_METADATA_MEMBER) {
     using SamplerTexturePair = detail::SamplerTexturePair;
     // TODO(crbug.com/409438000): Remove the hack of sampler placeholders for non-sampler texture.

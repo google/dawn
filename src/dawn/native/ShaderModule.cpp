@@ -29,7 +29,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <set>
 #include <sstream>
 #include <utility>
 
@@ -1323,44 +1322,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                    std::back_inserter(metadata->textureQueries), FromTintLevelSampleInfo);
 
     metadata->usesSubgroupMatrix = entryPoint.uses_subgroup_matrix;
-
-    // Compute the texture+sampler combination count.
-    if (deviceInfo.isCompatibilityMode) {
-        // separate sampled from non-sampled and put sampled in set
-        std::set<tint::BindingPoint> sampledTextures;
-        std::set<tint::BindingPoint> sampledExternalTextures;
-        std::vector<tint::BindingPoint> nonSampled;
-        uint32_t numSamplerTexturePairs = 0;
-        uint32_t numSamplerExternalTexturePairs = 0;
-
-        for (const auto& pair : samplerAndNonSamplerTextureUses) {
-            const auto& bindingGroupInfoMap =
-                metadata->bindings[BindGroupIndex(pair.texture_binding_point.group)];
-            const auto it =
-                bindingGroupInfoMap.find(BindingNumber(pair.texture_binding_point.binding));
-            auto isExternalTexture =
-                std::holds_alternative<ExternalTextureBindingInfo>(it->second.bindingInfo);
-            if (isExternalTexture) {
-                ++numSamplerExternalTexturePairs;
-                sampledExternalTextures.insert(pair.texture_binding_point);
-            } else if (pair.sampler_binding_point == tintNonSamplerBindingPoint) {
-                nonSampled.push_back(pair.texture_binding_point);
-            } else {
-                ++numSamplerTexturePairs;
-                sampledTextures.insert(pair.texture_binding_point);
-            }
-        }
-
-        // count the number of non-sampled that are not referenced by sampled pairs.
-        auto numNonSampled =
-            std::count_if(nonSampled.begin(), nonSampled.end(),
-                          [&](const tint::BindingPoint& nonSampledBindingPoint) {
-                              return !sampledTextures.contains(nonSampledBindingPoint);
-                          });
-        metadata->numTextureSamplerCombinations = numSamplerTexturePairs + numNonSampled +
-                                                  numSamplerExternalTexturePairs * 3 +
-                                                  sampledExternalTextures.size();
-    }
 
 #undef DelayedInvalidIf
     return std::move(metadata);

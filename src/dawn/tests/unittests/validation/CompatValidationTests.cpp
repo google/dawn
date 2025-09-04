@@ -256,6 +256,45 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithTextureLoadOfDepthTexture) 
     }
 }
 
+// Test that large group ids don't crash
+TEST_F(CompatValidationTest, LargeGroupIds) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+@group(0) @binding(0) var smp: sampler;
+@group(2345) @binding(0) var tex1: texture_2d<f32>;
+@group(6789) @binding(0) var tex2: texture_2d<f32>;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+    let c = textureLoad(tex1, vec2u(0), 0) + textureLoad(tex2, vec2u(0), 0);
+    return c;
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+    let c = textureSample(tex1, smp, vec2f(0)) + textureSample(tex2, smp, vec2f(0));
+    return c;
+}
+
+@compute @workgroup_size(1) fn main() {
+    let c = textureSampleLevel(tex1, smp, vec2f(0), 0) + textureSampleLevel(tex2, smp, vec2f(0), 0);
+})");
+
+    {
+        wgpu::ComputePipelineDescriptor pDesc;
+        pDesc.compute.module = module;
+        ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&pDesc),
+                            testing::HasSubstr("exceeds maxBindGroups"));
+    }
+    {
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.cFragment.targetCount = 1;
+        pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc),
+                            testing::HasSubstr("exceeds maxBindGroups"));
+    }
+}
+
 TEST_F(CompatValidationTest, CanNotCreatePipelineWithDepthTextureUsedWithNonComparisonSampler) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @group(1) @binding(0) var s: sampler;
