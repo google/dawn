@@ -332,70 +332,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxDynamicUniformBuffersPerPipelineLayout = 10;
     limits->v1.maxDynamicStorageBuffersPerPipelineLayout = 8;
 
-    // https://docs.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits
-    // In DWORDS. Descriptor tables cost 1, Root constants cost 1, Root descriptors cost 2.
-    static constexpr uint32_t kMaxRootSignatureSize = 64u;
-    // Dawn maps WebGPU's binding model by:
-    //  - (maxBindGroups)
-    //    CBVs/UAVs/SRVs for bind group are a root descriptor table
-    //  - (maxBindGroups)
-    //    Samplers for each bind group are a root descriptor table
-    //  - dynamic uniform buffers - root descriptor
-    //  - dynamic storage buffers - root descriptor plus a root constant for the size
-    //  RESERVED:
-    //  - 3 = max of:
-    //    - 2 root constants for the baseVertex/baseInstance constants.
-    //    - 3 root constants for num workgroups X, Y, Z
-    static constexpr uint32_t kReservedSlots = 3;
-
-    // Costs:
-    //  - bind group: 2 = 1 cbv/uav/srv table + 1 sampler table
-    //  - dynamic uniform buffer: 2 slots for a root descriptor
-    //  - dynamic storage buffer: 3 slots for a root descriptor + root constant
-
-    // Available slots after base limits considered.
-    uint32_t availableRootSignatureSlots =
-        kMaxRootSignatureSize - kReservedSlots - 2 * limits->v1.maxBindGroups -
-        2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout -
-        3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout;
-
-    // Report kMaxSupportedImmediateDataBytes if availableRootSignatureSlots is enough.
-    // Otherwise, reserve all available slots for immediates.
-    constexpr uint32_t kMaxSupportedImmediateDataSlots =
-        kMaxSupportedImmediateDataBytes / kImmediateConstantElementByteSize;
-    uint32_t maxImmediateDataSlots =
-        std::min(availableRootSignatureSlots, kMaxSupportedImmediateDataSlots);
-    availableRootSignatureSlots -= maxImmediateDataSlots;
-    limits->v1.maxImmediateSize = maxImmediateDataSlots * kImmediateConstantElementByteSize;
-
-    // TODO(crbug.com/440381283): We used to allocate more root signature space toward other limits
-    // here, but the logic above effectively hardcodes limits very close to the max so this doesn't
-    // actually do much. If we free up space by moving things (e.g. immediates) out of the root
-    // signature, then revisit this.
-    while (availableRootSignatureSlots >= 2) {
-        // Start by incrementing maxDynamicStorageBuffersPerPipelineLayout since the
-        // default is just 4 and developers likely want more. This scheme currently
-        // gets us to 8.
-        if (availableRootSignatureSlots >= 3) {
-            limits->v1.maxDynamicStorageBuffersPerPipelineLayout += 1;
-            availableRootSignatureSlots -= 3;
-        }
-        if (availableRootSignatureSlots >= 2) {
-            limits->v1.maxBindGroups += 1;
-            availableRootSignatureSlots -= 2;
-        }
-        if (availableRootSignatureSlots >= 2) {
-            limits->v1.maxDynamicUniformBuffersPerPipelineLayout += 1;
-            availableRootSignatureSlots -= 2;
-        }
-    }
-
-    DAWN_ASSERT(limits->v1.maxImmediateSize >= 32);
-    DAWN_ASSERT(
-        2 * limits->v1.maxBindGroups + 2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
-            3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
-            limits->v1.maxImmediateSize / kImmediateConstantElementByteSize + kReservedSlots <=
-        kMaxRootSignatureSize);
+    // Minimum required for Graphite.
+    limits->v1.maxImmediateSize = 32;
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads
     limits->v1.maxComputeWorkgroupSizeX = D3D12_CS_THREAD_GROUP_MAX_X;
@@ -439,6 +377,35 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         limits->v1.maxStorageBufferBindingSize = 1 << 28;
     } else {
         limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
+    }
+
+    // Final check that the limits we computed don't exceed the root signature size. The inputs
+    // to this check should be the same on all devices, so this is basically a static_assert.
+    {
+        // https://docs.microsoft.com/en-us/windows/win32/direct3d12/root-signature-limits
+        // In DWORDS. Descriptor tables cost 1, Root constants cost 1, Root descriptors cost 2.
+        static constexpr uint32_t kMaxRootSignatureSize = 64u;
+
+        // Max of:
+        // - 2 root constants for the baseVertex/baseInstance constants.
+        // - 3 root constants for num workgroups X, Y, Z
+        static constexpr uint32_t kShaderBuiltinSlots = 3;
+
+        // Slots not used at all. (This is just for the assert. We could use these slots later.)
+        static constexpr uint32_t kUnusedSlots = 1;
+
+        DAWN_ASSERT(
+            // bind groups: 1 for CBV+UAV+SRV table + 1 for sampler table
+            2 * limits->v1.maxBindGroups +
+                // dynamic uniform buffers: 2 for root descriptor
+                2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
+                // dynamic storage buffers: 2 for root descriptor plus 1 for the size constant
+                3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
+                // immediates: 1 slot per 4 bytes
+                limits->v1.maxImmediateSize / kImmediateConstantElementByteSize +
+                // builtins and unused slots
+                kShaderBuiltinSlots + kUnusedSlots ==
+            kMaxRootSignatureSize);
     }
 
     return {};
