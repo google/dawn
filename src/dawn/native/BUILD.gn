@@ -719,6 +719,10 @@ source_set("sources") {
     sources += [
       "webgpu/BackendWGPU.cpp",
       "webgpu/BackendWGPU.h",
+      "webgpu/BindGroupLayoutWGPU.cpp",
+      "webgpu/BindGroupLayoutWGPU.h",
+      "webgpu/BindGroupWGPU.cpp",
+      "webgpu/BindGroupWGPU.h",
       "webgpu/BufferWGPU.cpp",
       "webgpu/BufferWGPU.h",
       "webgpu/CommandBufferWGPU.cpp",
