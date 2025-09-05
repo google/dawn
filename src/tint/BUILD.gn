@@ -333,7 +333,9 @@ group("fuzzers") {
   testonly = true
   data_deps = []
   if (tint_has_fuzzers) {
-    data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
+    if (tint_build_wgsl_reader) {
+      data_deps += [ "${tint_src_dir}/cmd/fuzz/wgsl" ]
+    }
     if (tint_build_ir_binary) {
       data_deps += [ "${tint_src_dir}/cmd/fuzz/ir" ]
     }
