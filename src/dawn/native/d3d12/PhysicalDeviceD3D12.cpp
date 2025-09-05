@@ -332,8 +332,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxDynamicUniformBuffersPerPipelineLayout = 10;
     limits->v1.maxDynamicStorageBuffersPerPipelineLayout = 8;
 
-    // Minimum required for Graphite.
-    limits->v1.maxImmediateSize = 32;
+    limits->v1.maxImmediateSize = kMaxSupportedImmediateDataBytes;
 
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-attributes-numthreads
     limits->v1.maxComputeWorkgroupSizeX = D3D12_CS_THREAD_GROUP_MAX_X;

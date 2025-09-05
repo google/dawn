@@ -114,7 +114,7 @@
 // Tired limits for immediate data sizes.
 //                                 compat  tier0  tier1
 #define LIMITS_IMMEDIATE_SIZE(X) \
-  X(v1, Maximum, maxImmediateSize,       0,    0,    16,  32,  64)
+  X(v1, Maximum, maxImmediateSize,       0,    0,    16,  32)
 
 // Limits for the dynamic binding array.
 //                                                                   compat  tier0
