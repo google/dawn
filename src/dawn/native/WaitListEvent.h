@@ -37,7 +37,7 @@
 #include <vector>
 
 #include "dawn/common/RefCounted.h"
-#include "dawn/native/IntegerTypes.h"
+#include "dawn/common/Time.h"
 #include "dawn/native/SystemEvent.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -163,9 +163,8 @@ bool WaitListEvent::WaitAny(It eventAndReadyStateBegin,
 
     // Any values larger than those representatable by std::chrono::nanoseconds will be treated as
     // infinite waits - in particular this covers values greater than INT64_MAX.
-    static constexpr uint64_t kMaxDurationNanos = std::chrono::nanoseconds::max().count();
     [[maybe_unused]] bool waitDone = false;
-    if (timeout > Nanoseconds(kMaxDurationNanos)) {
+    if (timeout > kMaxDurationNanos) {
         waiter.cv.wait(waiterLock, [&waiter]() { return waiter.waitDone; });
         DAWN_ASSERT(waiter.waitDone);
         waitDone = true;

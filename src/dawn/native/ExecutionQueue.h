@@ -35,6 +35,7 @@
 
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialMap.h"
+#include "dawn/common/Time.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/ObjectBase.h"

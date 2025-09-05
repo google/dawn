@@ -39,6 +39,7 @@
 #include "dawn/common/MutexProtected.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/Time.h"
 #include "dawn/common/WeakRef.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"

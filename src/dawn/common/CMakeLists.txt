@@ -97,6 +97,7 @@ set(private_headers
     "StringViewUtils.h"
     "SystemUtils.h"
     "ThreadLocal.h"
+    "Time.h"
     "TypedInteger.h"
     "TypeTraits.h"
     "UnderlyingType.h"

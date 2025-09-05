@@ -30,9 +30,9 @@
 
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/RefCounted.h"
+#include "dawn/common/Time.h"
 #include "dawn/common/egl_platform.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/opengl/DisplayEGL.h"
 
 namespace dawn::native::opengl {

@@ -132,8 +132,6 @@ constexpr ExecutionSerial kBeginningOfGPUTime = ExecutionSerial(0);
 using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
 constexpr PipelineCompatibilityToken kExplicitPCT = PipelineCompatibilityToken(0);
 
-using Nanoseconds = TypedInteger<struct NanosecondsT, uint64_t>;
-
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_INTEGERTYPES_H_

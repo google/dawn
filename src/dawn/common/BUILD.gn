@@ -335,6 +335,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
       "SystemUtils.h",
       "ThreadLocal.cpp",
       "ThreadLocal.h",
+      "Time.h",
       "TypeTraits.h",
       "TypedInteger.h",
       "UnderlyingType.h",

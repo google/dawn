@@ -35,7 +35,7 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/common/RefCounted.h"
-#include "dawn/native/IntegerTypes.h"
+#include "dawn/common/Time.h"
 #include "dawn/native/SystemHandle.h"
 
 namespace dawn::native {
