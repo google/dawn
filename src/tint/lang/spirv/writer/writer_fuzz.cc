@@ -29,6 +29,7 @@
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 #include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
@@ -43,6 +44,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
     }
 
     options.bindings = GenerateBindings(module);
+    options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
+
     auto output = Generate(module, options);
     if (output != Success) {
         TINT_ICE() << "Generate() failed after CanGenerate() succeeded: "

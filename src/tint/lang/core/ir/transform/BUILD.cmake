@@ -86,6 +86,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/rename_conflicts.h
   lang/core/ir/transform/resource_binding.cc
   lang/core/ir/transform/resource_binding.h
+  lang/core/ir/transform/resource_binding_helper.cc
+  lang/core/ir/transform/resource_binding_helper.h
   lang/core/ir/transform/robustness.cc
   lang/core/ir/transform/robustness.h
   lang/core/ir/transform/shader_io.cc

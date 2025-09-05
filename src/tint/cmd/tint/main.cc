@@ -41,12 +41,12 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
-#include "src/tint/api/common/resource_binding_config.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/load.h"
+#include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -775,74 +775,6 @@ Options:
 }
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
-[[maybe_unused]] std::optional<tint::ResourceBindingConfig> GenerateResourceBindingConfig(
-    tint::core::ir::Module& mod) {
-    tint::ResourceBindingConfig cfg;
-
-    uint32_t max_group = 0;
-    std::vector<tint::core::ir::Var*> resource_bindings;
-
-    for (auto* inst : *mod.root_block) {
-        auto* var = inst->As<tint::core::ir::Var>();
-        if (!var) {
-            continue;
-        }
-        if (!var->BindingPoint().has_value()) {
-            continue;
-        }
-
-        auto* ty = var->Result()->Type()->UnwrapPtr()->As<tint::core::type::ResourceBinding>();
-        if (!ty) {
-            continue;
-        }
-        resource_bindings.push_back(var);
-
-        max_group = std::max(max_group, var->BindingPoint()->group);
-    }
-    if (resource_bindings.empty()) {
-        return std::nullopt;
-    }
-
-    max_group += 1;
-    uint32_t binding = 0;
-    for (auto* var : resource_bindings) {
-        tint::ResourceBindingInfo info{
-            .storage_buffer_binding = tint::BindingPoint{.group = max_group, .binding = binding++},
-            .default_binding_type_order = {},
-        };
-
-        std::vector<tint::core::ir::Value*> to_check = {var->Result()};
-        while (!to_check.empty()) {
-            auto* next = to_check.back();
-            to_check.pop_back();
-
-            for (auto& usage : next->UsagesUnsorted()) {
-                tint::Switch(
-                    usage->instruction,
-                    [&](tint::core::ir::Load* l) { to_check.push_back(l->Result()); },
-                    [&](tint::core::ir::CoreBuiltinCall* call) {
-                        if (call->Func() != tint::core::BuiltinFn::kHasBinding &&
-                            call->Func() != tint::core::BuiltinFn::kGetBinding) {
-                            return;
-                        }
-
-                        auto exp = call->ExplicitTemplateParams();
-                        TINT_ASSERT(exp.Length() == 1);
-                        info.default_binding_type_order.push_back(
-                            tint::core::type::TypeToResourceType(exp[0]));
-                    },
-                    TINT_ICE_ON_NO_MATCH);
-            }
-        }
-        // Sort so we get stable generated results
-        std::sort(info.default_binding_type_order.begin(), info.default_binding_type_order.end());
-
-        cfg.bindings.insert({var->BindingPoint().value(), std::move(info)});
-    }
-
-    return cfg;
-}
-
 [[maybe_unused]] tint::diag::Result<tint::core::ir::transform::SubstituteOverridesConfig>
 CreateOverrideMap(const Options& options, tint::inspector::Inspector& inspector) {
     auto override_names = inspector.GetNamedOverrideIds();
@@ -945,7 +877,7 @@ bool GenerateSpirv([[maybe_unused]] const Options& options,
     }
 
     gen_options.bindings = tint::spirv::writer::GenerateBindings(ir);
-    gen_options.resource_binding = GenerateResourceBindingConfig(ir);
+    gen_options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(ir);
 
     // Enable the Vulkan Memory Model if needed.
     for (auto* ty : ir.Types()) {
