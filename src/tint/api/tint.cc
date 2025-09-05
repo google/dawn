@@ -60,10 +60,15 @@
 #endif
 
 #if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/writer/writer.h"  // nogncheck
 #endif
 
 // IWYU pragma: end_keep
+
+#if TINT_BUILD_SPV_READER && TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/core/ir/module.h"
+#endif
 
 namespace tint {
 
