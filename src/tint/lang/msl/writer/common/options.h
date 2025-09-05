@@ -162,6 +162,9 @@ struct Options {
     /// Set to `true` to generate polyfill for `subgroupBroadcast(f16)`
     bool polyfill_subgroup_broadcast_f16 = false;
 
+    /// Set to `true` to generate polyfill for `clamp(f16/f32)`
+    bool polyfill_clamp_float = false;
+
     /// Emit argument buffers
     bool use_argument_buffers = false;
 
@@ -206,6 +209,7 @@ struct Options {
                  scalarize_max_min_clamp,
                  disable_module_constant_f16,
                  polyfill_subgroup_broadcast_f16,
+                 polyfill_clamp_float,
                  use_argument_buffers,
                  buffer_size_ubo_index,
                  fixed_sample_mask,

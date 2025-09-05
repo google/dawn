@@ -72,8 +72,10 @@ struct State {
             if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
                     case core::BuiltinFn::kClamp:
-                        if (config.clamp_int &&
-                            builtin->Result()->Type()->IsIntegerScalarOrVector()) {
+                        if ((config.clamp_int &&
+                             builtin->Result()->Type()->IsIntegerScalarOrVector()) ||
+                            (config.clamp_float &&
+                             builtin->Result()->Type()->IsFloatScalarOrVector())) {
                             worklist.Push(builtin);
                         }
                         break;
@@ -205,7 +207,7 @@ struct State {
         for (auto* builtin : worklist) {
             switch (builtin->Func()) {
                 case core::BuiltinFn::kClamp:
-                    ClampInt(builtin);
+                    Clamp(builtin);
                     break;
                 case core::BuiltinFn::kAbs:
                     AbsSignedInt(builtin);
@@ -405,9 +407,9 @@ struct State {
         call->Destroy();
     }
 
-    /// Polyfill a `clamp()` builtin call for integers.
+    /// Polyfill a `clamp()` builtin call for integers and floats.
     /// @param call the builtin call instruction
-    void ClampInt(ir::CoreBuiltinCall* call) {
+    void Clamp(ir::CoreBuiltinCall* call) {
         auto* type = call->Result()->Type();
         auto* e = call->Args()[0];
         auto* low = call->Args()[1];

@@ -78,7 +78,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::TurnOffVsync,
      {"turn_off_vsync",
       "Turn off vsync when rendering. In order to do performance test or run perf tests, turn off "
-      "vsync so that the fps can exeed 60.",
+      "vsync so that the fps can exceed 60.",
       "https://crbug.com/dawn/237", ToggleStage::Device}},
     {Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy,
      {"use_temporary_buffer_in_texture_to_texture_copy",
@@ -587,6 +587,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::ScalarizeMaxMinClamp,
      {"scalarize_max_min_clamp", "Scalarize max, min, and clamp builtins.",
       "https://crbug.com/422144514", ToggleStage::Device}},
+    {Toggle::MetalPolyfillClampFloat,
+     {"metal_polyfill_clamp_float", "Polyfill clamp function for floating point (metal).",
+      "https://crbug.com/407109056", ToggleStage::Device}},
     {Toggle::SubgroupShuffleClamped,
      {"subgroup_shuffle_clamped",
       "Polyfill subgroupShuffle by clamping the id param to within maximum possible subgroup size.",

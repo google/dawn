@@ -141,6 +141,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     {
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
         core_polyfills.clamp_int = true;
+        core_polyfills.clamp_float = options.polyfill_clamp_float;
         core_polyfills.degrees = true;
         core_polyfills.dot_4x8_packed = true;
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;

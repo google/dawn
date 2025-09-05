@@ -378,6 +378,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         device->IsToggleEnabled(Toggle::MetalDisableModuleConstantF16);
     req.tintOptions.polyfill_subgroup_broadcast_f16 =
         device->IsToggleEnabled(Toggle::EnableSubgroupsIntelGen9);
+    req.tintOptions.polyfill_clamp_float = device->IsToggleEnabled(Toggle::MetalPolyfillClampFloat);
     req.tintOptions.polyfill_unpack_2x16_snorm =
         device->IsToggleEnabled(Toggle::MetalPolyfillUnpack2x16snorm);
     req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);

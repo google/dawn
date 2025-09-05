@@ -56,6 +56,8 @@ enum class BuiltinPolyfillLevel {
 struct BuiltinPolyfillConfig {
     /// Should `clamp()` be polyfilled for integer values?
     bool clamp_int = false;
+    /// Should `clamp()` be polyfilled for floating values?
+    bool clamp_float = false;
     /// Should `abs()` be polyfilled for signed integer values?
     bool abs_signed_int = false;
     /// Should `countLeadingZeros()` be polyfilled?
