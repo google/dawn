@@ -122,5 +122,25 @@ TEST_F(ITypSpanTest, SpanFromUntyped) {
     }
 }
 
+// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
+using ITypSpanDeathTest = ITypSpanTest;
+
+// Out of bounds accesses should crash even in release (the underlying container
+// should have asserts enabled).
+TEST_F(ITypSpanDeathTest, OutOfBounds) {
+    // MSVC doesn't have asserts (without _MSVC_STL_HARDENING).
+    if constexpr (DAWN_COMPILER_IS(MSVC)) {
+        GTEST_SKIP();
+    }
+
+    std::array<Val, 10> arr;
+
+    Span span(arr.data(), Key(arr.size()));
+    EXPECT_DEATH(span[Key(10)], "");
+
+    const Span& constSpan = span;
+    EXPECT_DEATH(constSpan[Key(10)], "");
+}
+
 }  // anonymous namespace
 }  // namespace dawn

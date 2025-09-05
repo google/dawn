@@ -77,22 +77,18 @@ class vector : public std::vector<Value> {
     }
 
     Value& operator[](Index i) {
-        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::operator[](static_cast<I>(i));
     }
 
     constexpr const Value& operator[](Index i) const {
-        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::operator[](static_cast<I>(i));
     }
 
     Value& at(Index i) {
-        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::at(static_cast<I>(i));
     }
 
     constexpr const Value& at(Index i) const {
-        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::at(static_cast<I>(i));
     }
 

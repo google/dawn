@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,47 +25,60 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_COMMON_ITYP_STACK_VEC_H_
-#define SRC_DAWN_COMMON_ITYP_STACK_VEC_H_
+#include <utility>
 
-#include <limits>
-#include <vector>
+#include "dawn/common/TypedInteger.h"
+#include "dawn/common/ityp_stack_vec.h"
+#include "gtest/gtest.h"
 
-#include "absl/container/inlined_vector.h"
-#include "dawn/common/Assert.h"
-#include "dawn/common/UnderlyingType.h"
+namespace dawn {
+namespace {
 
-namespace dawn::ityp {
+class ITypStackVecTest : public testing::Test {
+  protected:
+    using Key = TypedInteger<struct KeyT, uint32_t>;
+    using Val = TypedInteger<struct ValT, uint32_t>;
 
-template <typename Index, typename Value, size_t StaticCapacity>
-class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
-    using I = UnderlyingType<Index>;
-    using Base = absl::InlinedVector<Value, StaticCapacity>;
-    static_assert(StaticCapacity <= std::numeric_limits<I>::max());
-
-  public:
-    stack_vec() : Base() {}
-    explicit stack_vec(Index size) : Base() { Base::resize(static_cast<I>(size)); }
-
-    Value& operator[](Index i) {
-        return Base::operator[](static_cast<I>(i));
-    }
-
-    constexpr const Value& operator[](Index i) const {
-        return Base::operator[](static_cast<I>(i));
-    }
-
-    void resize(Index size) { Base::resize(static_cast<I>(size)); }
-
-    void reserve(Index size) { Base::reserve(static_cast<I>(size)); }
-
-    Value* data() { return Base::data(); }
-
-    const Value* data() const { return Base::data(); }
-
-    Index size() const { return Index(static_cast<I>(Base::size())); }
+    using StackVec = ityp::stack_vec<Key, Val, 10>;
 };
 
-}  // namespace dawn::ityp
+// Test creation and initialization of the stack_vec.
+TEST_F(ITypStackVecTest, Creation) {
+    // Default constructor initializes to 0
+    {
+        StackVec vec;
+        ASSERT_EQ(vec.size(), Key(0));
+    }
 
-#endif  // SRC_DAWN_COMMON_ITYP_STACK_VEC_H_
+    // Size constructor initializes contents to 0
+    {
+        StackVec vec(Key(10));
+        ASSERT_EQ(vec.size(), Key(10));
+
+        for (Key i(0); i < Key(10); ++i) {
+            ASSERT_EQ(vec[i], Val(0));
+        }
+    }
+}
+
+// Name "*DeathTest" per https://google.github.io/googletest/advanced.html#death-test-naming
+using ITypStackVecDeathTest = ITypStackVecTest;
+
+// Out of bounds accesses should crash even in release (the underlying container
+// should have asserts enabled).
+TEST_F(ITypStackVecDeathTest, OutOfBounds) {
+    // MSVC doesn't have asserts (without _MSVC_STL_HARDENING).
+    if constexpr (DAWN_COMPILER_IS(MSVC)) {
+        GTEST_SKIP();
+    }
+
+    StackVec vec(Key(10));
+
+    EXPECT_DEATH(vec[Key(10)], "");
+
+    const StackVec& constVec = vec;
+    EXPECT_DEATH(constVec[Key(10)], "");
+}
+
+}  // anonymous namespace
+}  // namespace dawn
