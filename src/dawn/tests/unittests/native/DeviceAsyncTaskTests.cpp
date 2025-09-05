@@ -49,12 +49,12 @@ TEST_F(DeviceAsyncTaskTests, LongAsyncTaskFinishesBeforeDeviceIsDropped) {
     std::atomic_bool done(false);
 
     // Simulate that an async task would take a long time to finish.
-    AsyncTaskFunction task([&done] {
+    dawn::native::AsyncTask asyncTask([&done] {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         done = true;
     });
 
-    mDeviceMock->GetAsyncTaskManager()->PostTask<AsyncTask>(std::move(task));
+    mDeviceMock->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
     DropDevice();
     // Dropping the device should force the async task to finish.
     EXPECT_TRUE(done.load());

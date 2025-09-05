@@ -31,12 +31,8 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <utility>
-#include <vector>
 
-#include "absl/container/flat_hash_set.h"
-#include "dawn/common/MutexProtected.h"
-#include "dawn/common/NonCopyable.h"
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -53,74 +49,32 @@ namespace dawn::native {
 // shutting down the device. RunNow() could be used for more advanced scenarios, for example
 // always doing ShaderModule initial compilation asynchronously, but being able to steal the
 // task if we need it for synchronous pipeline compilation.
-
-enum class AsyncTaskState : uint8_t {
-    Pending = 0,
-    Running = 1,
-    Completed = 2,
-};
-
-using AsyncTaskFunction = std::function<void()>;
-using AsyncTaskCompletionCallback = std::function<void()>;
-
-class AsyncTask : public RefCounted {
-  public:
-    explicit AsyncTask(AsyncTaskFunction task);
-
-    AsyncTaskState GetState() const { return mState; }
-
-    void Wait();
-
-    void AddCompletionCallback(AsyncTaskCompletionCallback completionCallback);
-
-  private:
-    // Friends with the task manager to privately manage when tasks are executed.
-    friend class AsyncTaskManager;
-    void Run();
-
-    AsyncTaskFunction mTask;
-
-    // Use a mutex to guard changes to mCompletionCallbacks, mWaitableEvent and transitioning mState
-    // to Completed.
-    // mState is atomic for a lockless getter and Pending -> Running transition.
-    std::mutex mMutex;
-    std::atomic<AsyncTaskState> mState = AsyncTaskState::Pending;
-    std::vector<AsyncTaskCompletionCallback> mCompletionCallbacks;
-
-    // Hold onto the waitable platform event until the task has completed. Released before the
-    // destruction of the AsyncTask to be as light weight as possible.
-    std::unique_ptr<dawn::platform::WaitableEvent> mWaitableEvent;
-};
+using AsyncTask = std::function<void()>;
 
 class AsyncTaskManager {
   public:
     explicit AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool);
-    ~AsyncTaskManager();
 
-    template <typename TaskType, class... Args>
-    Ref<TaskType> PostTask(Args&&... args) {
-        Ref<TaskType> asyncTask = AcquireRef(new TaskType(std::forward<Args>(args)...));
-        PostConstructedTask(asyncTask);
-        return asyncTask;
-    }
-
+    void PostTask(AsyncTask asyncTask);
     void WaitAllPendingTasks();
     bool HasPendingTasks();
 
   private:
-    struct WaitableTask : NonCopyable {
-        Ref<AsyncTask> asyncTask;
+    class WaitableTask : public RefCounted {
+      public:
+        WaitableTask();
+        ~WaitableTask() override;
+
+        AsyncTask asyncTask;
         raw_ptr<AsyncTaskManager> taskManager;
+        std::unique_ptr<dawn::platform::WaitableEvent> waitableEvent;
     };
 
-    void PostConstructedTask(Ref<AsyncTask> asyncTask);
-
-    static void RunTask(void* task);
+    static void DoWaitableTask(void* task);
     void HandleTaskCompletion(WaitableTask* task);
 
-    using PendingTasksSet = absl::flat_hash_set<std::unique_ptr<WaitableTask>>;
-    MutexProtected<PendingTasksSet> mPendingTasks;
-
+    std::mutex mPendingTasksMutex;
+    absl::flat_hash_map<WaitableTask*, Ref<WaitableTask>> mPendingTasks;
     raw_ptr<dawn::platform::WorkerTaskPool> mWorkerTaskPool;
 };
 
