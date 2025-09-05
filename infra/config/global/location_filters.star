@@ -27,15 +27,18 @@
 
 """Starlark code related to common CQ location filters for standalone builders."""
 
-# These are commonly touched locations which do not have relevant testing on
-# standard CQ builders.
-_COMMON_LOCATIONS_EXCLUDED_FROM_CQ = [
+_WEBGPU_CTS_LOCATIONS_EXCLUDED_FROM_CQ = [
     # WebGPU CTS expectations, only affects builders that run WebGPU CTS, i.e.
     # Chromium builders.
     cq.location_filter(
         path_regexp = "webgpu-cts/[^/]*expectations.txt",
         exclude = True,
     ),
+]
+
+# These are commonly touched locations which do not have relevant testing on
+# builders which do not use `tools/run` for tests.
+_GO_LOCATIONS_EXCLUDED_FROM_CQ = [
     # Tools written in Go.
     cq.location_filter(
         path_regexp = "tools/src/.+",
@@ -47,6 +50,10 @@ _COMMON_LOCATIONS_EXCLUDED_FROM_CQ = [
         exclude = True,
     ),
 ]
+
+# These are commonly touched locations which do not have relevant testing on
+# standard CQ builders.
+_COMMON_LOCATIONS_EXCLUDED_FROM_CQ = _WEBGPU_CTS_LOCATIONS_EXCLUDED_FROM_CQ + _GO_LOCATIONS_EXCLUDED_FROM_CQ
 
 # Exclusions for all non-CMake CQ builders.
 _NON_CMAKE_LOCATIONS_EXCLUDED_FROM_CQ = [
@@ -70,10 +77,14 @@ _CMAKE_CQ_FILE_EXCLUSIONS = _COMMON_LOCATIONS_EXCLUDED_FROM_CQ + [
 # touched.
 _GN_CLANG_CQ_FILE_EXCLUSIONS = _COMMON_LOCATIONS_EXCLUDED_FROM_CQ + _NON_CMAKE_LOCATIONS_EXCLUDED_FROM_CQ
 
+# Fuzz builders rely on both Go tools and Tint test data.
+_GN_CLANG_CQ_FUZZ_FILE_EXCLUSIONS = _WEBGPU_CTS_LOCATIONS_EXCLUDED_FROM_CQ
+
 _GN_MSVC_CQ_FILE_EXCLUSIONS = _COMMON_LOCATIONS_EXCLUDED_FROM_CQ + _NON_CMAKE_LOCATIONS_EXCLUDED_FROM_CQ
 
 exclusion_filters = struct(
     cmake_cq_file_exclusions = _CMAKE_CQ_FILE_EXCLUSIONS,
     gn_clang_cq_file_exclusions = _GN_CLANG_CQ_FILE_EXCLUSIONS,
+    gn_clang_cq_fuzz_file_exclusions = _GN_CLANG_CQ_FUZZ_FILE_EXCLUSIONS,
     gn_msvc_cq_file_exclusions = _GN_MSVC_CQ_FILE_EXCLUSIONS,
 )

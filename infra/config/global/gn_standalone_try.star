@@ -65,6 +65,21 @@ try_.builder(
     ),
 )
 
+try_.builder(
+    name = "dawn-cq-linux-x64-fuzz-rel",
+    description_html = "Compiles and runs Dawn binaries for 'tools/run fuzz' for Linux/x64. Blocks CL submission.",
+    max_concurrent_builds = 3,
+    os = os.LINUX_DEFAULT,
+    ssd = None,
+    mirrors = [
+        "ci/dawn-linux-x64-fuzz-rel",
+    ],
+    gn_args = "ci/dawn-linux-x64-fuzz-rel",
+    tryjob = try_.job(
+        location_filters = exclusion_filters.gn_clang_cq_fuzz_file_exclusions,
+    ),
+)
+
 # Manual trybots
 
 def dawn_linux_manual_builder(*, name, **kwargs):

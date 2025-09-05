@@ -4,6 +4,7 @@
     "dawn-linux-x64-fuzz-rel": "ci/dawn-linux-x64-fuzz-rel/gn-args.json"
   },
   "try": {
+    "dawn-cq-linux-x64-fuzz-rel": "try/dawn-cq-linux-x64-fuzz-rel/gn-args.json",
     "dawn-cq-linux-x64-rel": "try/dawn-cq-linux-x64-rel/gn-args.json",
     "dawn-try-linux-x64-fuzz-rel": "try/dawn-try-linux-x64-fuzz-rel/gn-args.json",
     "dawn-try-linux-x64-sws-rel": "try/dawn-try-linux-x64-sws-rel/gn-args.json"
