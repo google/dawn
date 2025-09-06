@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/type/resource_binding.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/struct.h"
+#include "src/tint/lang/core/type/texel_buffer.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u64.h"
@@ -167,7 +168,7 @@ bool Type::IsNumericScalarOrVector() const {
 }
 
 bool Type::IsHandle() const {
-    if (IsAnyOf<Sampler, Texture, ResourceBinding>()) {
+    if (IsAnyOf<Sampler, TexelBuffer, Texture, ResourceBinding>()) {
         return true;
     }
     if (auto* binding_array = As<BindingArray>()) {

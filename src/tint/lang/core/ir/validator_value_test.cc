@@ -746,6 +746,23 @@ TEST_F(IR_ValidatorTest, Var_BindingArray_Texture_NonHandleAddressSpace) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_TexelBuffer_NonHandleAddressSpace) {
+    auto* v =
+        b.Var(ty.ptr(AddressSpace::kPrivate,
+                     ty.texel_buffer(core::TexelFormat::kRgba32Float, core::Access::kRead), read));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
+  %1:ptr<private, texel_buffer<rgba32float, read>, read> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_ResourceBinding_NonHandleAddressSpace) {
     auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.resource_binding(), read));
     mod.root_block->Append(v);
