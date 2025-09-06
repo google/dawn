@@ -73,7 +73,6 @@ TEST_F(ITypStackVecDeathTest, OutOfBounds) {
     }
 
     StackVec vec(Key(10));
-
     EXPECT_DEATH(vec[Key(10)], "");
 
     const StackVec& constVec = vec;
