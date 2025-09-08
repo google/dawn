@@ -242,6 +242,7 @@ case $BUILD_SYSTEM in
     CMAKE_FLAGS+=("-DTINT_BUILD_MSL_WRITER=1")
     CMAKE_FLAGS+=("-DTINT_BUILD_SPV_WRITER=1")
     CMAKE_FLAGS+=("-DTINT_BUILD_WGSL_WRITER=1")
+    CMAKE_FLAGS+=("-DTINT_BUILD_SPV_READER=1")
     # tintd requires third_party/jsoncpp and third_party/langsvr
     # which are only downloaded when dawn_tintd=True in .gclient
     if grep 'dawn_tintd.*True' .gclient >/dev/null; then
