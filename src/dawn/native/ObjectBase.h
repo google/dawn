@@ -67,16 +67,33 @@ class ErrorMonad : public RefCounted {
     struct ErrorTag {};
     static constexpr ErrorTag kError = {};
 
+    struct DelayedInitializationTag {};
+    static constexpr DelayedInitializationTag kDelayedInitialization = {};
+
     ErrorMonad();
     explicit ErrorMonad(ErrorTag tag);
+    explicit ErrorMonad(DelayedInitializationTag tag);
+
+    // Test if the error state is valid yet. It is an error to check the error state before the
+    // object is initialized.
+    bool IsInitialized() const;
 
     bool IsError() const;
+
+  protected:
+    // Transition from the initializing state to either an error or valid object. Can only be done
+    // once and only if this object was marked as having delayed initialization.
+    // These are payload modifications and must be externally synchronized with calls to
+    // IsInitialized and IsError.
+    void SetInitializedError();
+    void SetInitializedNoError();
 };
 
 class ObjectBase : public ErrorMonad {
   public:
     explicit ObjectBase(DeviceBase* device);
     ObjectBase(DeviceBase* device, ErrorTag tag);
+    ObjectBase(DeviceBase* device, DelayedInitializationTag tag);
 
     InstanceBase* GetInstance() const;
     DeviceBase* GetDevice() const;
@@ -125,6 +142,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
     ApiObjectBase(DeviceBase* device, StringView label);
     ApiObjectBase(DeviceBase* device, ErrorTag tag, StringView label = {});
+    ApiObjectBase(DeviceBase* device, DelayedInitializationTag tag, StringView label = {});
     ~ApiObjectBase() override;
 
     virtual ObjectType GetType() const = 0;
