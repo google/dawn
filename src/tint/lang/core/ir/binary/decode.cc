@@ -1112,6 +1112,10 @@ struct Decoder {
 
     ir::InstructionResult* InstructionResult(const pb::InstructionResult& res_in) {
         auto* type = Type(res_in.type());
+        if (type == nullptr || type->Is<core::type::Invalid>()) {
+            err_ << "result '" << res_in.name() << "' has invalid type\n";
+            return nullptr;
+        }
         auto* res_out = b.InstructionResult(type);
         if (!res_in.name().empty()) {
             if (DAWN_UNLIKELY(res_in.name().find('\0') != std::string::npos)) {
@@ -1126,6 +1130,10 @@ struct Decoder {
 
     ir::FunctionParam* FunctionParameter(const pb::FunctionParameter& param_in) {
         auto* type = Type(param_in.type());
+        if (type == nullptr || type->Is<core::type::Invalid>()) {
+            err_ << "param '" << param_in.name() << "' has invalid type\n";
+            return nullptr;
+        }
         auto* param_out = b.FunctionParam(type);
         if (!param_in.name().empty()) {
             if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
@@ -1164,6 +1172,10 @@ struct Decoder {
 
     ir::BlockParam* BlockParameter(const pb::BlockParameter& param_in) {
         auto* type = Type(param_in.type());
+        if (type == nullptr || type->Is<core::type::Invalid>()) {
+            err_ << "block parameter '" << param_in.name() << "' has invalid type\n";
+            return nullptr;
+        }
         auto* param_out = b.BlockParam(type);
         if (!param_in.name().empty()) {
             if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
