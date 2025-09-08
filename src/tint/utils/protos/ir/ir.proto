@@ -92,8 +92,9 @@ message TypeMatrix {
 }
 
 message TypeArray {
+    reserved 2;          // TODO(422199551): Remove in v2
+    reserved "stride";   // TODO(422199551): Remove in v2
     uint32 element = 1;  // Module.types
-    uint32 stride = 2;
     uint32 count = 3;
 }
 
