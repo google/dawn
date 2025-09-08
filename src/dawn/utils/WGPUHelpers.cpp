@@ -213,7 +213,8 @@ wgpu::TexelCopyBufferLayout CreateTexelCopyBufferLayout(uint64_t offset,
 }
 
 wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
-                                             const wgpu::BindGroupLayout* bindGroupLayout) {
+                                             const wgpu::BindGroupLayout* bindGroupLayout,
+                                             uint32_t immediateDataByteSize) {
     wgpu::PipelineLayoutDescriptor descriptor;
     if (bindGroupLayout != nullptr) {
         descriptor.bindGroupLayoutCount = 1;
@@ -222,6 +223,11 @@ wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
         descriptor.bindGroupLayoutCount = 0;
         descriptor.bindGroupLayouts = nullptr;
     }
+
+    if (immediateDataByteSize > 0) {
+        descriptor.immediateSize = immediateDataByteSize;
+    }
+
     return device.CreatePipelineLayout(&descriptor);
 }
 

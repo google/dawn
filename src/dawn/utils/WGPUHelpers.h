@@ -111,7 +111,8 @@ BasicRenderPass CreateBasicRenderPass(
     wgpu::TextureFormat format = BasicRenderPass::kDefaultColorFormat);
 
 wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
-                                             const wgpu::BindGroupLayout* bindGroupLayout);
+                                             const wgpu::BindGroupLayout* bindGroupLayout,
+                                             uint32_t immediateDataByteSize = 0);
 
 wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
                                         std::vector<wgpu::BindGroupLayout> bgls);
