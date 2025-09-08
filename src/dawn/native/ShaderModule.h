@@ -433,8 +433,9 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     void WillDropLastExternalRef() override;
 
     // The original data in the descriptor for caching.
-    enum class Type { Undefined, Spirv, Wgsl };
+    enum class Type : uint8_t { Undefined, Spirv, Wgsl };
     Type mType;
+    bool mAllowSpirvNonUniformDerivitives = false;
     std::vector<uint32_t> mOriginalSpirv;
     std::string mWgsl;
 
