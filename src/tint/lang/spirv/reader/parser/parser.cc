@@ -130,6 +130,7 @@ class Parser {
             auto name = ext.GetOperand(0).AsString();
             if (name != "SPV_KHR_storage_buffer_storage_class" &&
                 name != "SPV_KHR_non_semantic_info" &&     //
+                name != "SPV_KHR_16bit_storage" &&         //
                 name != "SPV_KHR_terminate_invocation" &&  //
                 // TODO(423644565): We assume the barriers are correct. We should check for any
                 // operation that makes barrier assumptions that aren't consistent with WGSL and
