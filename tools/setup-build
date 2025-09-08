@@ -261,9 +261,6 @@ case $BUILD_SYSTEM in
     if [[ -x $(command -v ccache) ]]; then
       CMAKE_FLAGS+=("-DCMAKE_CXX_COMPILER_LAUNCHER=ccache")
     fi
-    if [[ -n "$SHARED" ]]; then
-      CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=ON")
-    fi
     case $BUILD_TYPE in
       "debug")
         CMAKE_FLAGS+=("-DCMAKE_BUILD_TYPE=Debug")
@@ -293,10 +290,17 @@ case $BUILD_SYSTEM in
       CMAKE_FLAGS+=("-DCMAKE_INSTALL_PREFIX=out/install")
       CMAKE_FLAGS+=("-DTINT_ENABLE_INSTALL=ON")
       CMAKE_FLAGS+=("-DDAWN_ENABLE_INSTALL=ON")
+      # Build Dawn as a monolithic library.  This is incompatible
+      # with BUILD_SHARED_LIBS=ON
+      CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=OFF")
       if [[ -n "$SHARED" ]]; then
         CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED")
       else
         CMAKE_FLAGS+=("-DDAWN_BUILD_MONOLITHIC_LIBRARY=STATIC")
+      fi
+    else
+      if [[ -n "$SHARED" ]]; then
+        CMAKE_FLAGS+=("-DBUILD_SHARED_LIBS=ON")
       fi
     fi
     generate "cmake"             \
