@@ -330,7 +330,7 @@ message(STATUS "Go exe: ${GO_EXECUTABLE}")
 message(STATUS "")
 
 # Handling of the type of monolithic library to build, if any.
-set(DAWN_BUILD_MONOLITHIC_LIBRARY "OFF" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")
+set(DAWN_BUILD_MONOLITHIC_LIBRARY "STATIC" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")
 set_property(CACHE DAWN_BUILD_MONOLITHIC_LIBRARY PROPERTY STRINGS SHARED SHARED STATIC)
 
 string(TOUPPER "${DAWN_BUILD_MONOLITHIC_LIBRARY}" _option_upper)
