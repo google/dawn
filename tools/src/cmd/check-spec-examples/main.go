@@ -43,7 +43,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -79,16 +78,15 @@ func main() {
 	}
 
 	err := run()
-	switch err {
-	case nil:
-		return
-	case errInvalidArg:
-		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
-		flag.Usage()
-	default:
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+	if err != nil {
+		if errors.Is(err, errInvalidArg) {
+			fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
+			flag.Usage()
+		} else {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		os.Exit(1)
 	}
-	os.Exit(1)
 }
 
 func run() error {
@@ -171,7 +169,7 @@ func run() error {
 	}
 
 	// Create a temporary directory to hold the examples as separate files
-	tmpDir, err := ioutil.TempDir("", "wgsl-spec-examples")
+	tmpDir, err := os.MkdirTemp("", "wgsl-spec-examples")
 	if err != nil {
 		return err
 	}
@@ -241,7 +239,7 @@ func tryCompile(compiler, wd string, e example) error {
 func compile(compiler, wd, name, code string) error {
 	filename := name + ".wgsl"
 	path := filepath.Join(wd, filename)
-	if err := ioutil.WriteFile(path, []byte(code), 0666); err != nil {
+	if err := os.WriteFile(path, []byte(code), 0666); err != nil {
 		return fmt.Errorf("Failed to write example file '%v'", path)
 	}
 	cmd := exec.Command(compiler, filename)
@@ -301,7 +299,7 @@ func printNodeText(node *html.Node, sb *strings.Builder) {
 	}
 }
 
-// hasClass returns true iff node is has the given "class" attribute.
+// hasClass returns true iff node has the given "class" attribute.
 func hasClass(node *html.Node, class string) bool {
 	for _, attr := range node.Attr {
 		if attr.Key == "class" {

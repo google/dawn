@@ -98,19 +98,19 @@ func run() error {
 	if *afterFlag != "" {
 		after, err = time.Parse(yyyymmdd, *afterFlag)
 		if err != nil {
-			return fmt.Errorf("Couldn't parse after date: %w", err)
+			return fmt.Errorf("couldn't parse after date: %w", err)
 		}
 	} else {
 		after = before.Add(-time.Hour * time.Duration(24**daysFlag))
 	}
 
 	ctx := context.Background()
-	auth, err := authFlags.Options()
+	options, err := authFlags.Options()
 	if err != nil {
 		return err
 	}
 
-	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
+	g, err := gerrit.New(ctx, options, dawn.GerritURL)
 	if err != nil {
 		return err
 	}
@@ -141,10 +141,6 @@ func run() error {
 	}
 
 	return nil
-}
-
-func today() time.Time {
-	return time.Now()
 }
 
 func date(t time.Time) string {

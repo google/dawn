@@ -108,12 +108,12 @@ func run() error {
 	}
 
 	ctx := context.Background()
-	auth, err := authFlags.Options()
+	options, err := authFlags.Options()
 	if err != nil {
 		return err
 	}
 
-	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
+	g, err := gerrit.New(ctx, options, dawn.GerritURL)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func run() error {
 		"before:"+date(before),
 		"repo:"+*repoFlag)
 	if err != nil {
-		return fmt.Errorf("Query failed: %w", err)
+		return fmt.Errorf("query failed: %w", err)
 	}
 
 	reviewed, reviewQuery, err := g.QueryChanges(
@@ -135,7 +135,7 @@ func run() error {
 		"before:"+date(before),
 		"repo:"+*repoFlag)
 	if err != nil {
-		return fmt.Errorf("Query failed: %w", err)
+		return fmt.Errorf("query failed: %w", err)
 	}
 
 	ignorelist := []*regexp.Regexp{
@@ -181,10 +181,6 @@ func run() error {
 	fmt.Printf("Review query: %vq/%v\n", dawn.GerritURL, url.QueryEscape(reviewQuery))
 
 	return nil
-}
-
-func today() time.Time {
-	return time.Now()
 }
 
 func date(t time.Time) string {

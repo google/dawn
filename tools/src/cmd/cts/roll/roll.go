@@ -32,7 +32,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -104,11 +104,11 @@ type cmd struct {
 	flags rollerFlags
 }
 
-func (cmd) Name() string {
+func (c *cmd) Name() string {
 	return "roll"
 }
 
-func (cmd) Desc() string {
+func (c *cmd) Desc() string {
 	return "roll CTS and re-generate expectations"
 }
 
@@ -140,7 +140,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Validate command line arguments
-	auth, err := c.flags.auth.Options()
+	options, err := c.flags.auth.Options()
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
 	}
@@ -160,11 +160,11 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Create the various service clients and ensure required permissions are
 	// available.
-	git, err := git.New(c.flags.gitPath)
+	gitInstance, err := git.New(c.flags.gitPath)
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
 	}
-	gerrit, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
+	gerritInstance, err := gerrit.New(ctx, options, cfg.Gerrit.Host)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
-	bb, err := buildbucket.New(ctx, auth)
+	bb, err := buildbucket.New(ctx, options)
 	if err != nil {
 		return err
 	}
@@ -205,12 +205,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	r := roller{
 		cfg:                 cfg,
 		flags:               c.flags,
-		auth:                auth,
+		auth:                options,
 		bb:                  bb,
 		parentSwarmingRunID: c.flags.parentSwarmingRunID,
 		client:              client,
-		git:                 git,
-		gerrit:              gerrit,
+		git:                 gitInstance,
+		gerrit:              gerritInstance,
 		gitiles:             gitilesRepos{dawn: dawn},
 		ctsDir:              ctsDir,
 	}
@@ -542,7 +542,7 @@ func (r *roller) roll(ctx context.Context) error {
 		}
 		defer resp.Body.Close()
 
-		jsonResponse, err := ioutil.ReadAll(resp.Body)
+		jsonResponse, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}

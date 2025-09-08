@@ -33,9 +33,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/bench"
@@ -69,7 +67,7 @@ func main() {
 }
 
 func run(pathA, pathB string) error {
-	fileA, err := ioutil.ReadFile(pathA)
+	fileA, err := os.ReadFile(pathA)
 	if err != nil {
 		return err
 	}
@@ -78,7 +76,7 @@ func run(pathA, pathB string) error {
 		return err
 	}
 
-	fileB, err := ioutil.ReadFile(pathB)
+	fileB, err := os.ReadFile(pathB)
 	if err != nil {
 		return err
 	}
@@ -101,9 +99,4 @@ func run(pathA, pathB string) error {
 	fmt.Println(diff)
 
 	return nil
-}
-
-func fileName(path string) string {
-	_, name := filepath.Split(path)
-	return name
 }

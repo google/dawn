@@ -63,11 +63,11 @@ type cmd struct {
 	query string
 }
 
-func (cmd) Name() string {
+func (c *cmd) Name() string {
 	return "chrome"
 }
 
-func (cmd) Desc() string {
+func (c *cmd) Desc() string {
 	return "runs the CTS with chrome"
 }
 

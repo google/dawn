@@ -103,12 +103,12 @@ func run() error {
 	}
 
 	ctx := context.Background()
-	auth, err := authFlags.Options()
+	options, err := authFlags.Options()
 	if err != nil {
 		return err
 	}
 
-	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
+	g, err := gerrit.New(ctx, options, dawn.GerritURL)
 	if err != nil {
 		return err
 	}

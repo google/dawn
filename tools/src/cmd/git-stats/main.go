@@ -400,11 +400,3 @@ func combine(a, b AuthorStats) AuthorStats {
 	}
 	return out
 }
-
-func today() time.Time {
-	return time.Now()
-}
-
-func date(t time.Time) string {
-	return t.Format(yyyymmdd)
-}

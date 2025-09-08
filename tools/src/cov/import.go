@@ -62,10 +62,10 @@ type Env struct {
 	TurboCov string // path to the turbo-cov tool (one of Cov or TurboCov must be supplied)
 }
 
-// TODO(crbug.com/344014313): Add unittest coverage.
 // AllSourceFiles returns a *Coverage containing all the source files without
 // coverage data. This populates the coverage view with files even if they
 // didn't get compiled.
+// TODO(crbug.com/344014313): Add unittest coverage.
 func (e Env) AllSourceFiles(fsReader oswrapper.FilesystemReader) *Coverage {
 	var ignorePaths = map[string]bool{
 		//
@@ -99,10 +99,10 @@ func (e Env) AllSourceFiles(fsReader oswrapper.FilesystemReader) *Coverage {
 	return &cov
 }
 
-// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
-// dependency injection.
 // Import uses the llvm-profdata and llvm-cov tools to import the coverage
 // information from a .profraw file.
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 func (e Env) Import(profrawPath string, fsReader oswrapper.FilesystemReader) (*Coverage, error) {
 	profdata := profrawPath + ".profdata"
 	defer os.Remove(profdata)

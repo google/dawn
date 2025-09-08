@@ -101,7 +101,6 @@ func (c *cmd) runServer(
 	var port int
 	testCaseLog := &bytes.Buffer{}
 
-	stopServer := func() {}
 	startServer := func() error {
 		args := []string{
 			"-e", "require('./out-node/common/runtime/server.js');",
@@ -192,7 +191,7 @@ func (c *cmd) runServer(
 
 		return nil
 	}
-	stopServer = func() {
+	stopServer := func() {
 		if port > 0 {
 			go http.Post(fmt.Sprintf("http://localhost:%v/terminate", port), "", &bytes.Buffer{})
 			time.Sleep(time.Millisecond * 100)

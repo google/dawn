@@ -97,8 +97,8 @@ type Credentials struct {
 }
 
 // Empty return true if there's no username or password for authentication
-func (a Credentials) Empty() bool {
-	return a.Username == "" && a.Password == ""
+func (c Credentials) Empty() bool {
+	return c.Username == "" && c.Password == ""
 }
 
 // addToURL returns the url with the credentials appended
@@ -138,19 +138,19 @@ type CloneOptions struct {
 }
 
 // Clone performs a clone of the repository at url to path.
-func (g Git) Clone(path, url string, opt *CloneOptions) (*Repository, error) {
+func (g Git) Clone(path, urlStr string, opt *CloneOptions) (*Repository, error) {
 	if err := os.MkdirAll(path, 0777); err != nil {
 		return nil, err
 	}
 	if opt == nil {
 		opt = &CloneOptions{}
 	}
-	url, err := opt.Credentials.addToURL(url)
+	urlStr, err := opt.Credentials.addToURL(urlStr)
 	if err != nil {
 		return nil, err
 	}
 	r := &Repository{g, path}
-	args := []string{"clone", url, "."}
+	args := []string{"clone", urlStr, "."}
 	if opt.Branch != "" {
 		args = append(args, "--branch", opt.Branch)
 	}
@@ -215,15 +215,15 @@ func (r Repository) Push(localRef, remoteRef string, opt *PushOptions) error {
 	if opt.Remote == "" {
 		opt.Remote = "origin"
 	}
-	url, err := r.run(nil, opt.Timeout, "remote", "get-url", opt.Remote)
+	urlStr, err := r.run(nil, opt.Timeout, "remote", "get-url", opt.Remote)
 	if err != nil {
 		return err
 	}
-	url, err = opt.Credentials.addToURL(url)
+	urlStr, err = opt.Credentials.addToURL(urlStr)
 	if err != nil {
 		return err
 	}
-	if _, err := r.run(nil, opt.Timeout, "push", url, localRef+":"+remoteRef); err != nil {
+	if _, err := r.run(nil, opt.Timeout, "push", urlStr, localRef+":"+remoteRef); err != nil {
 		return err
 	}
 	return nil
@@ -267,13 +267,6 @@ func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
 		opt = &CommitOptions{}
 	}
 
-	args := []string{"commit"}
-	if opt.Amend {
-		args = append(args, "--amend")
-	} else {
-		args = append(args, "-m", msg)
-	}
-
 	var env []string
 	if opt.AuthorName != "" || opt.AuthorEmail != "" {
 		env = []string{
@@ -283,7 +276,14 @@ func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
 			fmt.Sprintf("GIT_COMMITTER_EMAIL=%v", opt.AuthorEmail),
 		}
 	}
-	if _, err := r.run(env, opt.Timeout, "commit", "-m", msg); err != nil {
+
+	args := []string{"commit"}
+	if opt.Amend {
+		args = append(args, "--amend")
+	} else {
+		args = append(args, "-m", msg)
+	}
+	if _, err := r.run(env, opt.Timeout, args...); err != nil {
 		return Hash{}, err
 	}
 	out, err := r.run(nil, 0, "rev-parse", "HEAD")

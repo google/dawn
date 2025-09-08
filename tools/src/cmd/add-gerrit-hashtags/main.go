@@ -53,14 +53,13 @@ const (
 )
 
 var (
-	repoFlag    = flag.String("repo", "dawn", "the project (tint or dawn)")
-	userFlag    = flag.String("user", defaultUser(), "user name / email")
-	afterFlag   = flag.String("after", "", "start date")
-	beforeFlag  = flag.String("before", "", "end date")
-	daysFlag    = flag.Int("days", 30, "interval in days (used if --after is not specified)")
-	verboseFlag = flag.Bool("v", false, "verbose mode - lists all the changes")
-	dryrunFlag  = flag.Bool("dry", false, "dry mode. Don't apply any changes")
-	authFlags   = authcli.Flags{}
+	repoFlag   = flag.String("repo", "dawn", "the project (tint or dawn)")
+	userFlag   = flag.String("user", defaultUser(), "user name / email")
+	afterFlag  = flag.String("after", "", "start date")
+	beforeFlag = flag.String("before", "", "end date")
+	daysFlag   = flag.Int("days", 30, "interval in days (used if --after is not specified)")
+	dryrunFlag = flag.Bool("dry", false, "dry mode. Don't apply any changes")
+	authFlags  = authcli.Flags{}
 )
 
 func defaultUser() string {
@@ -119,12 +118,12 @@ func run() error {
 	}
 
 	ctx := context.Background()
-	auth, err := authFlags.Options()
+	options, err := authFlags.Options()
 	if err != nil {
 		return err
 	}
 
-	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
+	g, err := gerrit.New(ctx, options, dawn.GerritURL)
 	if err != nil {
 		return err
 	}
@@ -177,10 +176,6 @@ func parseHashtags(subject string) container.Set[string] {
 		out.Add(match[1])
 	}
 	return out
-}
-
-func today() time.Time {
-	return time.Now()
 }
 
 func date(t time.Time) string {

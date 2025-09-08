@@ -32,7 +32,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -91,7 +90,7 @@ func run() error {
 	}
 
 	// Read the template file
-	tmpl, err := ioutil.ReadFile(templatePath)
+	tmpl, err := os.ReadFile(templatePath)
 	if err != nil {
 		return fmt.Errorf("failed to open template file '%v'", templatePath)
 	}
@@ -101,7 +100,7 @@ func run() error {
 
 	// Parse each of the WebIDL files and add the declarations to idl
 	for _, path := range idlFiles {
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to open file '%v'", path)
 		}
@@ -532,7 +531,7 @@ func is(prototypes ...interface{}) func(interface{}) bool {
 	return func(v interface{}) bool {
 		ty := reflect.TypeOf(v)
 		for _, rty := range types {
-			if ty == rty || ty == reflect.PtrTo(rty) {
+			if ty == rty || ty == reflect.PointerTo(rty) {
 				return true
 			}
 		}

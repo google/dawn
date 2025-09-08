@@ -46,7 +46,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -110,16 +109,15 @@ func main() {
 	}
 
 	err := run()
-	switch err {
-	case nil:
-		return
-	case errInvalidArg:
-		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
-		flag.Usage()
-	default:
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+	if err != nil {
+		if errors.Is(err, errInvalidArg) {
+			fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
+			flag.Usage()
+		} else {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		os.Exit(1)
 	}
-	os.Exit(1)
 }
 
 func run() error {
@@ -217,7 +215,7 @@ func getSectionRange(rules []rule, s []int) (start, end int, err error) {
 			continue
 		}
 
-		dim := -1
+		var dim int
 		if len(sectionDims) == len(s) {
 			//x.y is the same as x.y.0
 			dim = 0
@@ -304,7 +302,7 @@ func writeFile(path, content string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
 		return fmt.Errorf("failed to create directory for '%v': %w", path, err)
 	}
-	if err := ioutil.WriteFile(path, []byte(content), 0666); err != nil {
+	if err := os.WriteFile(path, []byte(content), 0666); err != nil {
 		return fmt.Errorf("failed to write file '%v': %w", path, err)
 	}
 	return nil
@@ -416,7 +414,7 @@ type Parser struct {
 }
 
 func Parse(node *html.Node) (*Parser, error) {
-	var p *Parser = new(Parser)
+	p := new(Parser)
 	p.firstSectionContainingRule = -1
 	p.lastSectionContainingRule = -1
 	return p, p.getRules(node)
@@ -768,7 +766,6 @@ func testName(id string, desc string, section string) (testName, builtinName str
 		return "", "", err
 	}
 
-	builtinName = ""
 	index := strings.Index(desc, ":")
 	if strings.Contains(id, "builtin_functions") && index > -1 {
 		builtinName = reName.ReplaceAllString(desc[:index], "_")
@@ -952,7 +949,7 @@ func executionTestPlan(rules []rule, path string) error {
 			continue
 		}
 
-		index := -1
+		var index int
 		sectionDims, err := parseSection(r.SubSection)
 		if err != nil || len(sectionDims) == 0 {
 			return err

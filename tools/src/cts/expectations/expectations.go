@@ -59,7 +59,7 @@ type Chunk struct {
 	Expectations Expectations // Expectations for the chunk
 }
 
-// Type + enum for whether an Expectation's Query contains globs or not.
+// ExpectationType is a Type + enum for whether an Expectation's Query contains globs or not.
 type ExpectationType int
 
 const (
@@ -97,7 +97,7 @@ func Load(path string) (Content, error) {
 }
 
 // Save saves the Content file to 'path'.
-func (c Content) Save(path string) error {
+func (c *Content) Save(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (c Content) Save(path string) error {
 }
 
 // Clone makes a deep-copy of the Content.
-func (c Content) Clone() Content {
+func (c *Content) Clone() Content {
 	chunks := make([]Chunk, len(c.Chunks))
 	for i, c := range c.Chunks {
 		chunks[i] = c.Clone()
@@ -117,12 +117,12 @@ func (c Content) Clone() Content {
 }
 
 // Empty returns true if the Content has no chunks.
-func (c Content) Empty() bool {
+func (c *Content) Empty() bool {
 	return len(c.Chunks) == 0
 }
 
 // Write writes the Content, in textual form, to the writer w.
-func (c Content) Write(w io.Writer) error {
+func (c *Content) Write(w io.Writer) error {
 	for i, chunk := range c.Chunks {
 		if i > 0 {
 			if _, err := fmt.Fprintln(w); err != nil {
@@ -144,7 +144,7 @@ func (c Content) Write(w io.Writer) error {
 }
 
 // String returns the Content as a string.
-func (c Content) String() string {
+func (c *Content) String() string {
 	sb := strings.Builder{}
 	c.Write(&sb)
 	return sb.String()
@@ -214,9 +214,7 @@ func (c Chunk) IsCommentOnly() bool {
 // Clone returns a deep-copy of the Chunk
 func (c Chunk) Clone() Chunk {
 	comments := make([]string, len(c.Comments))
-	for i, c := range c.Comments {
-		comments[i] = c
-	}
+	copy(comments, c.Comments)
 	expectations := make([]Expectation, len(c.Expectations))
 	for i, e := range c.Expectations {
 		expectations[i] = e.Clone()
@@ -268,7 +266,7 @@ func (e *Expectation) ensureGlobMatcherIsSet() {
 
 // AppliesToResult returns whether the Expectation applies to the test + config
 // represented by the Result.
-func (e Expectation) AppliesToResult(r result.Result) bool {
+func (e *Expectation) AppliesToResult(r result.Result) bool {
 	// Tags apply as long as the Expectation's tags are a subset of the Result's
 	// tags.
 	tagsApply := r.Tags.ContainsAll(e.Tags)
@@ -280,7 +278,7 @@ func (e Expectation) AppliesToResult(r result.Result) bool {
 // AppliesToTest returns whether the Expectation applies to the test |name|.
 // This does NOT take into account the tags contained within the Expectation,
 // only whether the name matches.
-func (e Expectation) AppliesToTest(name string) bool {
+func (e *Expectation) AppliesToTest(name string) bool {
 	// The query is a glob expectation, we need to perform a more complex
 	// comparison. Otherwise, we can just check for an exact match.
 	if e.IsGlobExpectation() {
@@ -293,7 +291,7 @@ func (e Expectation) AppliesToTest(name string) bool {
 
 // AsExpectationFileString returns the human-readable form of the expectation
 // that matches the syntax of the expectation files.
-func (e Expectation) AsExpectationFileString() string {
+func (e *Expectation) AsExpectationFileString() string {
 	parts := []string{}
 	if e.Bug != "" {
 		parts = append(parts, e.Bug)
@@ -310,7 +308,7 @@ func (e Expectation) AsExpectationFileString() string {
 }
 
 // Clone makes a deep-copy of the Expectation.
-func (e Expectation) Clone() Expectation {
+func (e *Expectation) Clone() Expectation {
 	out := Expectation{
 		Line:    e.Line,
 		Bug:     e.Bug,
@@ -333,7 +331,7 @@ func (e Expectation) Clone() Expectation {
 //	 0 if a and b are identical
 //
 // Note: Only comparing bug, tags, and query (in that order).
-func (e Expectation) Compare(b Expectation) int {
+func (e *Expectation) Compare(b Expectation) int {
 	switch strings.Compare(e.Bug, b.Bug) {
 	case -1:
 		return -1
@@ -357,7 +355,7 @@ func (e Expectation) Compare(b Expectation) int {
 
 // ComparePrioritizeQuery is the same as Compare, but compares in the following
 // order: query, tags, bug.
-func (e Expectation) ComparePrioritizeQuery(other Expectation) int {
+func (e *Expectation) ComparePrioritizeQuery(other Expectation) int {
 	switch strings.Compare(e.Query, other.Query) {
 	case -1:
 		return -1

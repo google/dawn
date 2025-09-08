@@ -56,11 +56,11 @@ func init() {
 type Cmd struct {
 }
 
-func (Cmd) Name() string {
+func (c *Cmd) Name() string {
 	return "templates"
 }
 
-func (Cmd) Desc() string {
+func (c *Cmd) Desc() string {
 	return `templates generates files from <file>.tmpl files found in the Tint source and test directories`
 }
 
@@ -69,7 +69,7 @@ func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, 
 }
 
 // TODO(crbug.com/344014313): Add unittest coverage.
-func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
+func (c *Cmd) Run(ctx context.Context, cfg *common.Config) error {
 	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot(cfg.OsWrapper)
 
@@ -372,7 +372,7 @@ func is(ty any) func(any) bool {
 	rty := reflect.TypeOf(ty)
 	return func(v any) bool {
 		ty := reflect.TypeOf(v)
-		return ty == rty || ty == reflect.PtrTo(rty)
+		return ty == rty || ty == reflect.PointerTo(rty)
 	}
 }
 

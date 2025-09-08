@@ -31,7 +31,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
@@ -99,7 +99,7 @@ func (g GitProject) HttpsURL() string {
 
 // LoadConfig loads the JSON config file at the given path
 func LoadConfig(path string) (*Config, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open '%v': %w", path, err)
 	}

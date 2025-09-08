@@ -32,7 +32,6 @@ package template
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -131,7 +130,7 @@ type generator struct {
 
 func (g *generator) bindAndParse(t *template.Template, tmpl string) error {
 	_, err := t.
-		Funcs(map[string]any(g.funcs)).
+		Funcs(g.funcs).
 		Option("missingkey=error").
 		Parse(tmpl)
 	return err
@@ -192,7 +191,7 @@ func (g *generator) importTmpl(path string) (string, error) {
 	if err := g.bindAndParse(t, string(data)); err != nil {
 		return "", fmt.Errorf("failed to parse '%v': %w", path, err)
 	}
-	if err := t.Execute(ioutil.Discard, nil); err != nil {
+	if err := t.Execute(io.Discard, nil); err != nil {
 		return "", fmt.Errorf("failed to execute '%v': %w", path, err)
 	}
 	return "", nil

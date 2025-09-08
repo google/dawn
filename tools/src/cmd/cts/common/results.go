@@ -29,7 +29,6 @@ package common
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -130,17 +129,17 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 	// CTS roll.
 	if ps.Change == 0 {
 		fmt.Println("no change specified, scanning gerrit for last CTS roll...")
-		gerrit, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
+		instance, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
 		if err != nil {
 			return nil, err
 		}
-		latest, err := LatestCTSRoll(gerrit)
+		latest, err := LatestCTSRoll(instance)
 		if err != nil {
 			return nil, err
 		}
 		fmt.Printf("scanning for latest patchset of %v...\n", latest.Number)
 		var resultsByExecutionMode result.ResultsByExecutionMode
-		resultsByExecutionMode, *ps, err = getRecentResults(ctx, cfg, r.CacheDir, gerrit, bb, client, latest.Number)
+		resultsByExecutionMode, *ps, err = getRecentResults(ctx, cfg, r.CacheDir, instance, bb, client, latest.Number)
 		if err != nil {
 			return nil, err
 		}
@@ -151,11 +150,11 @@ func (r *ResultSource) getResultsImpl(ctx context.Context, cfg Config, auth auth
 	// If a change, but no patchset was specified, then query the most recent
 	// patchset.
 	if ps.Patchset == 0 {
-		gerrit, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
+		instance, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
 		if err != nil {
 			return nil, err
 		}
-		*ps, err = gerrit.LatestPatchset(strconv.Itoa(ps.Change))
+		*ps, err = instance.LatestPatchset(strconv.Itoa(ps.Change))
 		if err != nil {
 			err := fmt.Errorf("failed to find latest patchset of change %v: %w",
 				ps.Change, err)
@@ -351,7 +350,7 @@ func getRawResultsImpl(
 				}
 
 				if !strings.HasPrefix(r.TestId, prefix) {
-					return errors.New(fmt.Sprintf("Test ID %s did not start with %s even though query should have filtered.", r.TestId, prefix))
+					return fmt.Errorf("Test ID %s did not start with %s even though query should have filtered.", r.TestId, prefix)
 				}
 
 				testName := r.TestId[len(prefix):]
@@ -588,7 +587,7 @@ func CacheRecentUniqueSuppressedCompatResults(
 	return resultsByExecutionMode["compat"], nil
 }
 
-// CacheRecentRexpectationAffectedCiResults looks in the cache at 'cacheDir' for
+// CacheRecentUniqueSuppressedResults looks in the cache at 'cacheDir' for
 // CI results from the recent history. If the cache contains the results, they
 // are loaded and returned. If the cache does not contain the results, they are
 // fetched, cleaned with CleanResults(), saved to the cache directory, and
