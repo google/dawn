@@ -356,7 +356,6 @@ MaybeError Device::TickImpl() {
     });
 
     GetResourceMemoryAllocator()->Tick(completedSerial);
-    GetFencedDeleter()->Tick(completedSerial);
 
     DAWN_TRY(queue->SubmitPendingCommands());
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
@@ -1001,9 +1000,7 @@ void Device::DestroyImpl() {
     // Destroy the VkPipelineCache before VkDevice.
     mMonolithicPipelineCache = nullptr;
 
-    // Delete all the remaining VkDevice child objects immediately since the GPU timeline is
-    // finished.
-    GetFencedDeleter()->Tick(kMaxExecutionSerial);
+    // Destroying the deleter ensures that any remaining object deletions are flushed.
     mDeleter = nullptr;
 
     // VkQueues are destroyed when the VkDevice is destroyed

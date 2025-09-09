@@ -201,6 +201,11 @@ void ExecutionQueueBase::TrackSerialTask(ExecutionSerial serial, Task&& task) {
 }
 
 void ExecutionQueueBase::UpdateCompletedSerialTo(ExecutionSerial completedSerial) {
+    UpdateCompletedSerialToInternal(completedSerial);
+}
+
+void ExecutionQueueBase::UpdateCompletedSerialToInternal(ExecutionSerial completedSerial,
+                                                         bool forceTasks) {
     std::vector<Task> tasks;
     {
         std::unique_lock<std::mutex> lock(mMutex);
@@ -209,7 +214,7 @@ void ExecutionQueueBase::UpdateCompletedSerialTo(ExecutionSerial completedSerial
         // that we almost always process as many callbacks as possible.
         FetchMax(mCompletedSerial, uint64_t(completedSerial));
 
-        if (mWaitingForIdle) {
+        if (mWaitingForIdle && !forceTasks) {
             // If we are waiting for idle, then the callbacks will be fired there. It is currently
             // necessary to avoid calling the callbacks in this function and doing it in the
             // |WaitForIdleForDestruction| call because |WaitForIdleForDestruction| is called while
@@ -277,7 +282,9 @@ void ExecutionQueueBase::AssumeCommandsComplete() {
     // thread-safe yet. Two threads calling destroy would race setting these serials.
     ExecutionSerial completed =
         ExecutionSerial(mLastSubmittedSerial.fetch_add(1u, std::memory_order_release) + 1);
-    UpdateCompletedSerialTo(completed);
+    // Force any waiting tasks to execute. This will ensure that any tasks that were scheduled
+    // after WaitForIdleForDestruction being called are completed.
+    UpdateCompletedSerialToInternal(completed, true);
 }
 
 void ExecutionQueueBase::IncrementLastSubmittedCommandSerial() {

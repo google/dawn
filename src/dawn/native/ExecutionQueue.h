@@ -144,6 +144,8 @@ class ExecutionQueueBase : public ApiObjectBase {
     // Submit any pending commands that are enqueued.
     virtual MaybeError SubmitPendingCommandsImpl() = 0;
 
+    void UpdateCompletedSerialToInternal(ExecutionSerial completedSerial, bool forceTasks = false);
+
     // |mCompletedSerial| tracks the last completed command serial that the fence has returned. This
     // is currently implicitly guarded by the lock for |mWaitingTasks| since we only update this
     // value when holding that lock.
