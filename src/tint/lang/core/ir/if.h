@@ -58,6 +58,8 @@ namespace tint::core::ir {
 /// ```
 class If : public Castable<If, ControlInstruction> {
   public:
+    /// The number of supported operands
+    static constexpr size_t kNumOperands = 1;
     /// The index of the condition operand
     static constexpr size_t kConditionOperandOffset = 0;
 

@@ -3546,7 +3546,7 @@ void Validator::CheckUnary(const Unary* u) {
 
 void Validator::CheckIf(const If* if_) {
     CheckResults(if_);
-    CheckOperand(if_, If::kConditionOperandOffset);
+    CheckOperands(if_, If::kNumOperands);
 
     if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
         AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
@@ -3655,7 +3655,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
 
 void Validator::CheckSwitch(const Switch* s) {
     CheckResults(s);
-    CheckOperand(s, Switch::kConditionOperandOffset);
+    CheckOperands(s, Switch::kNumOperands);
 
     if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
         auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;

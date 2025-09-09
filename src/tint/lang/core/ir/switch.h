@@ -60,6 +60,8 @@ namespace tint::core::ir {
 /// ```
 class Switch final : public Castable<Switch, ControlInstruction> {
   public:
+    /// The number of supported operands
+    static constexpr size_t kNumOperands = 1;
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;
 

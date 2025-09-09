@@ -2189,7 +2189,8 @@ TEST_F(IR_ValidatorTest, Switch_NoCondition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(error: switch: operand is undefined
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(error: switch: expected exactly 1 operands, got 0
 )")) << res.Failure();
 }
 
