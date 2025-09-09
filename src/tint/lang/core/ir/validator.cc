@@ -161,7 +161,14 @@ bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
 /// Note: Does not handle corner cases like if certain capabilities are
 /// enabled.
 bool IsValidFunctionParamType(const core::type::Type* ty) {
-    return ty->IsConstructible() || ty->Is<core::type::Pointer>() || ty->IsHandle();
+    if (ty->IsConstructible() || ty->IsHandle()) {
+        return true;
+    }
+
+    if (auto* ptr = ty->As<core::type::Pointer>()) {
+        return ptr->AddressSpace() != core::AddressSpace::kHandle;
+    }
+    return false;
 }
 
 /// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a

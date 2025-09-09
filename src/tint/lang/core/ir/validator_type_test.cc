@@ -302,6 +302,23 @@ TEST_F(IR_ValidatorTest, FunctionParam_InvalidTypeForHandleAddressSpace) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, FunctionParam_InvalidHandlePointer) {
+    auto* type =
+        ty.ptr(AddressSpace::kHandle, ty.sampled_texture(type::TextureDimension::k1d, ty.f32()));
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("function parameter type, 'ptr<handle, texture_1d<f32>, read>', "
+                                   "must be constructible, a pointer, or a handle"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, NonCoreType) {
     auto* fn = b.Function("my_func", ty.void_());
     fn->AppendParam(b.FunctionParam(ty.Get<tint::mock::NonCoreType>()));
