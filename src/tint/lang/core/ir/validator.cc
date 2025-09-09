@@ -208,6 +208,11 @@ void CheckIOAttributes(const MSG_ANCHOR* msg_anchor,
     if (auto* ty_struct = ty->As<core::type::Struct>()) {
         for (const auto* mem : ty_struct->Members()) {
             is_struct_impl(msg_anchor, mem->Attributes());
+
+            if (mem->Type()->Is<core::type::Struct>()) {
+                CheckIOAttributes(msg_anchor, ty_attr, mem->Type(), is_not_struct_impl,
+                                  is_struct_impl);
+            }
         }
     } else {
         is_not_struct_impl(msg_anchor, ty_attr);
@@ -1093,7 +1098,7 @@ class Validator {
         };
     }
 
-    /// @returns a function that validates that type is bool iff decorated with
+    /// @returns a function that validates that type is bool only if it is decorated with
     /// @builtin(front_facing)
     /// @param err error message to log when check fails
     template <typename MSG_ANCHOR>
@@ -2291,9 +2296,9 @@ void Validator::CheckFunction(const Function* func) {
         CheckFunctionParamAttributes(
             param,
             CheckInvariantFunc<FunctionParam>(
-                "invariant can only decorate a param iff it is also decorated with position"),
+                "invariant can only decorate a param if it is also decorated with position"),
             CheckInvariantFunc<FunctionParam>(
-                "invariant can only decorate a param member iff it is also "
+                "invariant can only decorate a param member if it is also "
                 "decorated with position"));
 
         if (func->IsFragment()) {
@@ -2368,9 +2373,9 @@ void Validator::CheckFunction(const Function* func) {
     CheckFunctionReturnAttributes(
         func,
         CheckInvariantFunc<Function>(
-            "invariant can only decorate outputs iff they are also position builtins"),
+            "invariant can only decorate outputs if they are also position builtins"),
         CheckInvariantFunc<Function>(
-            "invariant can only decorate output members iff they are also position builtins"));
+            "invariant can only decorate output members if they are also position builtins"));
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
     if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
@@ -2552,9 +2557,9 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
         CheckIOAttributes(
             ep, attr, ty,
             CheckInvariantFunc<Function>(
-                "invariant can only decorate vars iff they are also position builtins"),
+                "invariant can only decorate vars if they are also position builtins"),
             CheckInvariantFunc<Function>(
-                "invariant can only decorate members iff they are also position builtins"));
+                "invariant can only decorate members if they are also position builtins"));
 
         // Builtin rules are not checked on module-scope variables, because they are often generated
         // as part of the backend transforms, and have different rules for correctness.

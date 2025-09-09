@@ -482,7 +482,7 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:17 error: invariant can only decorate a param iff it is also decorated with position
+            R"(:1:17 error: invariant can only decorate a param if it is also decorated with position
 %my_func = func(%my_param:vec4<f32> [@invariant]):void {
                 ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -527,7 +527,33 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:17 error: invariant can only decorate a param member iff it is also decorated with position
+            R"(:5:17 error: invariant can only decorate a param member if it is also decorated with position
+%my_func = func(%my_param:MyStruct):void {
+                ^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+
+    auto* inner_ty =
+        ty.Struct(mod.symbols.New("Inner"), {{mod.symbols.New("pos"), ty.vec4<f32>(), attr}});
+
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {{mod.symbols.New("i"), inner_ty}});
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:9:17 error: invariant can only decorate a param member if it is also decorated with position
 %my_func = func(%my_param:MyStruct):void {
                 ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -662,7 +688,7 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: invariant can only decorate outputs iff they are also position builtins
+            R"(:1:1 error: invariant can only decorate outputs if they are also position builtins
 %my_func = func():vec4<f32> [@invariant] {
 ^^^^^^^^
 )")) << res.Failure();
@@ -701,7 +727,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: invariant can only decorate output members iff they are also position builtins
+            R"(:5:1 error: invariant can only decorate output members if they are also position builtins
 %my_func = func():MyStruct {
 ^^^^^^^^
 )")) << res.Failure();
