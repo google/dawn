@@ -40,6 +40,53 @@
 
 namespace dawn::native::d3d12 {
 
+namespace {
+
+enum class HeapAccessType {
+    Upload,
+    Readback,
+    GPUQueueAccessible,
+};
+
+ResultOrError<HeapAccessType> MapToHeapAccessType(const D3D12_HEAP_PROPERTIES& heapProperties,
+                                                  const Device* device) {
+    switch (heapProperties.Type) {
+        case D3D12_HEAP_TYPE_UPLOAD:
+            return HeapAccessType::Upload;
+        case D3D12_HEAP_TYPE_READBACK:
+            return HeapAccessType::Readback;
+        case D3D12_HEAP_TYPE_DEFAULT:
+            return HeapAccessType::GPUQueueAccessible;
+        case D3D12_HEAP_TYPE_CUSTOM:
+            if (device->GetDeviceInfo().isUMA) {
+                // On UMA systems, all heaps are always GPU accessible.
+                return HeapAccessType::GPUQueueAccessible;
+            }
+
+            // Map D3D12_HEAP_TYPE_CUSTOM heap to one of the standard heap types if possible.
+            // See:
+            // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-getcustomheapproperties(uint_d3d12_heap_type)
+            if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE &&
+                heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L1) {
+                // A CUSTOM heap with no CPU access and in L1 is equivalent to a DEFAULT heap.
+                return HeapAccessType::GPUQueueAccessible;
+            } else if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_BACK &&
+                       heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0) {
+                // A CUSTOM heap with WRITE_BACK + L0 is equivalent to a READBACK heap.
+                return HeapAccessType::Readback;
+            } else if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE &&
+                       heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0) {
+                // A CUSTOM heap with WRITE_COMBINE + L0 is equivalent to a UPLOAD heap.
+                return HeapAccessType::Upload;
+            } else {
+                return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
+            }
+        default:
+            return DAWN_VALIDATION_ERROR("ID3D12Resources allocated on unsupported heap.");
+    }
+}
+}  // namespace
+
 SharedBufferMemory::SharedBufferMemory(Device* device,
                                        StringView label,
                                        SharedBufferMemoryProperties properties,
@@ -74,15 +121,17 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     d3d12Resource->GetHeapProperties(&heapProperties, &heapFlags);
 
     wgpu::BufferUsage usages = wgpu::BufferUsage::None;
+    HeapAccessType heapType;
+    DAWN_TRY_ASSIGN(heapType, MapToHeapAccessType(heapProperties, device));
 
-    switch (heapProperties.Type) {
-        case D3D12_HEAP_TYPE_UPLOAD:
+    switch (heapType) {
+        case HeapAccessType::Upload:
             usages |= wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
             break;
-        case D3D12_HEAP_TYPE_READBACK:
+        case HeapAccessType::Readback:
             usages |= wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopyDst;
             break;
-        case D3D12_HEAP_TYPE_DEFAULT:
+        case HeapAccessType::GPUQueueAccessible:
             usages |= wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst |
                       wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index |
                       wgpu::BufferUsage::Indirect | wgpu::BufferUsage::QueryResolve;
@@ -92,14 +141,26 @@ ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
             if (IsAligned(desc.Width, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT)) {
                 usages |= wgpu::BufferUsage::Uniform;
             }
+
+            if (device->GetDeviceInfo().isUMA &&
+                device->HasFeature(Feature::BufferMapExtendedUsages)) {
+                // On UMA systems, buffers with WRITE_COMBINE or WRITE_BACK heaps can also be
+                // mapped.
+                if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_COMBINE) {
+                    usages |= wgpu::BufferUsage::MapWrite;
+                } else if (heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_BACK) {
+                    // On cache-coherent UMA systems, writes are immediately visible to the GPU. On
+                    // non-cache-coherent UMA systems, writes are flushed to the GPU when unmapping
+                    // or submitting work to the queue (driver dependent). Since Dawn doesn't
+                    // support submitting work to the queue while the buffer is mapped, it should be
+                    // safe to allow MapWrite on WRITE_BACK heaps. For reads, the data is guaranteed
+                    // to be available to the CPU after Map().
+                    usages |= wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;
+                }
+            }
             break;
-        case D3D12_HEAP_TYPE_CUSTOM:
-            return DAWN_VALIDATION_ERROR(
-                "ID3D12Resources allocated on D3D12_HEAP_TYPE_CUSTOM heaps are not supported by "
-                "SharedBufferMemory.");
-        default:
-            DAWN_UNREACHABLE();
     }
+
     SharedBufferMemoryProperties properties;
     properties.size = desc.Width;
     properties.usage = usages;
