@@ -1226,6 +1226,23 @@ crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,dest
 crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=false [ Failure ]
 crbug.com/6810487 [ nvidia-0x2184 ] webgpu:api,validation,state,device_lost,destroy:createRenderBundleEncoder:format="rgba16unorm";awaitLost=true [ Failure ]
 
+# CTS needs to support new read-write accessible formats from texture-feature-tier2,
+# will be removed after the latest CTS rolling into Dawn
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r8unorm";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r8uint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r8sint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba8unorm";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba8sint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r16uint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r16sint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="r16float";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba16uint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba16sint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba16float";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba32uint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba32sint";* [ Failure ]
+crbug.com/6898548 webgpu:api,operation,storage_texture,read_write:basic:format="rgba32float";* [ Failure ]
+
 # Unsure if these ever pass on retry, or if they also are flaky-but-fail-on-retry
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:stage="v";* [ RetryOnFailure ]
 crbug.com/432291885 [ dawn-no-backend-validation intel sequoia ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:stage="v";* [ RetryOnFailure ]
