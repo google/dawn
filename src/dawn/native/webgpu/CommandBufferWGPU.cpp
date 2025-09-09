@@ -33,7 +33,9 @@
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
@@ -162,7 +164,8 @@ WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info) 
     return {
         .nextInChain = nullptr,
         .view = ToBackend(info.view)->GetInnerHandle(),
-        .depthSlice = info.depthSlice,
+        // depthSlice is set to 0 for undefined in native::CommandEncoder.
+        .depthSlice = info.depthSlice == 0 ? WGPU_DEPTH_SLICE_UNDEFINED : info.depthSlice,
         .resolveTarget = info.resolveTarget == nullptr
                              ? nullptr
                              : ToBackend(info.resolveTarget)->GetInnerHandle(),
@@ -191,12 +194,17 @@ void EncodeComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
                        CommandIterator& commands,
                        BeginComputePassCmd* computePassCmd) {
-    WGPUPassTimestampWrites timestampWrites = ToWGPU(computePassCmd->timestampWrites);
     WGPUComputePassDescriptor passDescriptor{
         .nextInChain = nullptr,
         .label = ToOutputStringView(computePassCmd->label),
-        .timestampWrites = &timestampWrites,
+        .timestampWrites = nullptr,
     };
+    WGPUPassTimestampWrites timestampWrites;
+    if (computePassCmd->timestampWrites.querySet) {
+        timestampWrites = ToWGPU(computePassCmd->timestampWrites);
+        passDescriptor.timestampWrites = &timestampWrites;
+    }
+
     WGPUComputePassEncoder passEncoder =
         wgpu.commandEncoderBeginComputePass(innerEncoder, &passDescriptor);
 
@@ -224,11 +232,9 @@ void EncodeComputePass(const DawnProcTable& wgpu,
             }
 
             case Command::SetComputePipeline: {
-                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-                // ComputePipelineWGPU
-                /*auto cmd = */ commands.NextCommand<SetComputePipelineCmd>();
-                wgpu.computePassEncoderSetPipeline(
-                    passEncoder, nullptr /*ToBackend(cmd->pipeline)->GetInnerHandle()*/);
+                auto cmd = commands.NextCommand<SetComputePipelineCmd>();
+                wgpu.computePassEncoderSetPipeline(passEncoder,
+                                                   ToBackend(cmd->pipeline)->GetInnerHandle());
                 break;
             }
 
@@ -362,10 +368,8 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
             if (cmd->dynamicOffsetCount > 0) {
                 dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
-            // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-            // BindGroupWGPU
             wgpu.renderPassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
-                                               nullptr /*ToBackend(cmd->group)->GetInnerHandle()*/,
+                                               ToBackend(cmd->group)->GetInnerHandle(),
                                                cmd->dynamicOffsetCount, dynamicOffsets);
             break;
         }
@@ -379,11 +383,9 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
         }
 
         case Command::SetRenderPipeline: {
-            // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-            // RenderPipelineWGPU
-            /*auto cmd = */ commands.NextCommand<SetRenderPipelineCmd>();
-            wgpu.renderPassEncoderSetPipeline(
-                passEncoder, nullptr /*ToBackend(cmd->pipeline)->GetInnerHandle()*/);
+            auto cmd = commands.NextCommand<SetRenderPipelineCmd>();
+            wgpu.renderPassEncoderSetPipeline(passEncoder,
+                                              ToBackend(cmd->pipeline)->GetInnerHandle());
             break;
         }
 
@@ -421,21 +423,28 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
     }
 
     colorAttachments.reserve(colorAttachments.size());
-    WGPURenderPassDepthStencilAttachment depthStencilAttachment =
-        ToWGPU(renderPassCmd->depthStencilAttachment);
-    WGPUPassTimestampWrites timestampWrites = ToWGPU(renderPassCmd->timestampWrites);
 
     WGPURenderPassDescriptor passDescriptor{
         .nextInChain = nullptr,
         .label = ToOutputStringView(renderPassCmd->label),
         .colorAttachmentCount = colorAttachments.size(),
         .colorAttachments = colorAttachments.data(),
-        .depthStencilAttachment = &depthStencilAttachment,
+        .depthStencilAttachment = nullptr,
         // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
         // QuerySetWGPU
         .occlusionQuerySet = nullptr /*ToBackend(cmd->occlusionQuerySet)->GetInnerHandle()*/,
-        .timestampWrites = &timestampWrites,
+        .timestampWrites = nullptr,
     };
+    WGPURenderPassDepthStencilAttachment depthStencilAttachment;
+    if (renderPassCmd->attachmentState->HasDepthStencilAttachment()) {
+        depthStencilAttachment = ToWGPU(renderPassCmd->depthStencilAttachment);
+        passDescriptor.depthStencilAttachment = &depthStencilAttachment;
+    }
+    WGPUPassTimestampWrites timestampWrites;
+    if (renderPassCmd->timestampWrites.querySet) {
+        timestampWrites = ToWGPU(renderPassCmd->timestampWrites);
+        passDescriptor.timestampWrites = &timestampWrites;
+    }
     WGPURenderPassEncoder passEncoder =
         wgpu.commandEncoderBeginRenderPass(innerEncoder, &passDescriptor);
 

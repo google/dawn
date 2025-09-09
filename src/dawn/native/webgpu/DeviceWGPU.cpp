@@ -31,9 +31,9 @@
 #include <utility>
 
 #include "dawn/common/Constants.h"
+#include "dawn/common/Log.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/BackendConnection.h"
-#include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
@@ -42,10 +42,8 @@
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
-#include "dawn/native/PipelineLayout.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
-#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/SwapChain.h"
@@ -55,8 +53,11 @@
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
+#include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
+#include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
+#include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/ShaderModuleWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 
@@ -108,7 +109,18 @@ Device::Device(AdapterBase* adapter,
         },
         nullptr, reinterpret_cast<void*>(outerDeviceRef)};
     // TODO(crbug.com/413053623): revisit for error scope.
-    apiDesc.uncapturedErrorCallbackInfo = {nullptr, nullptr, nullptr, nullptr};
+    apiDesc.uncapturedErrorCallbackInfo = {
+        nullptr,
+        [](WGPUDevice const*, WGPUErrorType errorType, WGPUStringView message, void*,
+           void* outerDeviceRef) {
+            Ref<Device>* deviceWGPURef = reinterpret_cast<Ref<Device>*>(outerDeviceRef);
+            Device* deviceWGPU = deviceWGPURef->Get();
+            if (!deviceWGPU || deviceWGPU->IsLost()) {
+                return;
+            }
+            deviceWGPU->EmitLog(wgpu::LoggingType::Error, ToString(message));
+        },
+        nullptr, reinterpret_cast<void*>(outerDeviceRef)};
 
     // TODO(crbug.com/413053623): use adapterRequestDevice instead as dawn_wire doesn't support
     // adapterCreateDevice.
@@ -150,21 +162,21 @@ ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
 }
 Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
     const UnpackedPtr<ComputePipelineDescriptor>& descriptor) {
-    return Ref<ComputePipelineBase>{nullptr};
+    return ComputePipeline::CreateUninitialized(this, descriptor);
 }
+
 ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
     const UnpackedPtr<PipelineLayoutDescriptor>& descriptor) {
-    // TODO(crbug.com/413053623): Replace with webgpu::PipelineLayout object.
-    // This placeholder implementation is needed because device is creating empty PipelineLayout
-    // and getting content hash.
-    return AcquireRef(new PipelineLayoutBase(this, descriptor));
+    return PipelineLayout::Create(this, descriptor);
 }
+
 ResultOrError<Ref<QuerySetBase>> Device::CreateQuerySetImpl(const QuerySetDescriptor* descriptor) {
     return Ref<QuerySetBase>{nullptr};
 }
+
 Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
-    return Ref<RenderPipelineBase>{nullptr};
+    return RenderPipeline::CreateUninitialized(this, descriptor);
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
     return Ref<SamplerBase>{nullptr};

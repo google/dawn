@@ -115,6 +115,7 @@ class PipelineCachingTests : public DawnTest {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }
 
+    // This entry counts doesn't include shaderModule frontend cache.
     struct EntryCounts {
         unsigned pipeline;
         unsigned shaderModule;
@@ -122,8 +123,9 @@ class PipelineCachingTests : public DawnTest {
     const EntryCounts counts = {
         // pipeline caching is only implemented on D3D12/Vulkan
         IsD3D12() || IsVulkan() ? 1u : 0u,
-        // One blob per shader module
-        1u,
+        // WebGPU backend simply passthrough but doesn't compile shader binary to store in blob
+        // cache.
+        IsWebGPUOnWebGPU() ? 0u : 1u,
     };
     NiceMock<CachingInterfaceMock> mMockCache;
 };
@@ -166,7 +168,7 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineNoCache) {
 }
 
 // Tests that pipeline creation on the same device uses frontend cache when possible.
-TEST_P(SinglePipelineCachingTests, ComputePipelineFrontedCache) {
+TEST_P(SinglePipelineCachingTests, ComputePipelineFrontendCache) {
     wgpu::ComputePipelineDescriptor desc;
     desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
@@ -326,7 +328,7 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineNoCache) {
 }
 
 // Tests that pipeline creation on the same device uses frontend cache when possible.
-TEST_P(SinglePipelineCachingTests, RenderPipelineFrontedCache) {
+TEST_P(SinglePipelineCachingTests, RenderPipelineFrontendCache) {
     utils::ComboRenderPipelineDescriptor desc;
     desc.layout = utils::MakeBasicPipelineLayout(device, nullptr);
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
@@ -681,7 +683,8 @@ DAWN_INSTANTIATE_TEST(SinglePipelineCachingTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

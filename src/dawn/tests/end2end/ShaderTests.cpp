@@ -2744,7 +2744,8 @@ DAWN_INSTANTIATE_TEST(ShaderTests,
                       OpenGLBackend({"disable_symbol_renaming"}),
                       OpenGLESBackend({"disable_symbol_renaming"}),
                       OpenGLESBackend({"gl_use_array_length_from_uniform"}),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
