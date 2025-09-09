@@ -188,6 +188,7 @@ using ShaderBindingInfoVariant = std::variant<BufferBindingInfo,
                                               SamplerBindingInfo,
                                               TextureBindingInfo,
                                               StorageTextureBindingInfo,
+                                              TexelBufferBindingInfo,
                                               ExternalTextureBindingInfo,
                                               InputAttachmentBindingInfo>;
 #define SHADER_BINDING_INFO_MEMBER(X)              \

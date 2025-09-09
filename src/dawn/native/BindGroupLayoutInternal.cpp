@@ -512,22 +512,7 @@ BindingInfo ConvertToBindingInfo(const UnpackedPtr<BindGroupLayoutEntry>& bindin
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         bindingInfo.bindingLayout = StorageTextureBindingInfo::From(binding->storageTexture);
     } else if (auto* texelBufferLayout = binding.Get<TexelBufferBindingLayout>()) {
-        // TODO(382544164): Prototype texel buffer feature.
-        // Placeholder implementation for `TexelBufferBindingLayout` from `TexelBufferBindingInfo`.
-        BufferBindingInfo bufferInfo{};
-        switch (texelBufferLayout->access) {
-            case wgpu::TexelBufferAccess::ReadOnly:
-                bufferInfo.type = wgpu::BufferBindingType::ReadOnlyStorage;
-                break;
-            case wgpu::TexelBufferAccess::ReadWrite:
-                bufferInfo.type = wgpu::BufferBindingType::Storage;
-                break;
-            default:
-                DAWN_UNREACHABLE();
-        }
-        bufferInfo.minBindingSize = 0;
-        bufferInfo.hasDynamicOffset = false;
-        bindingInfo.bindingLayout = bufferInfo;
+        bindingInfo.bindingLayout = TexelBufferBindingInfo::From(*texelBufferLayout);
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
         bindingInfo.bindingLayout = StaticSamplerBindingInfo::From(*staticSamplerBindingLayout);
     } else {
@@ -706,6 +691,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
                     mNeedsCrossBindingValidation = true;
                 }
             },
+            [&](const TexelBufferBindingInfo&) { counts[Order_TexelBuffer]++; },
             [&](const InputAttachmentBindingInfo&) { counts[Order_InputAttachment]++; });
     }
 
@@ -753,6 +739,7 @@ bool BindGroupLayoutInternalBase::SortBindingsCompare(const BindingInfo& a, cons
             [&](const StorageTextureBindingInfo&) { return Order_StorageTexture; },
             [&](const SamplerBindingInfo&) { return Order_RegularSampler; },
             [&](const StaticSamplerBindingInfo&) { return Order_StaticSampler; },
+            [&](const TexelBufferBindingInfo&) { return Order_TexelBuffer; },
             [&](const InputAttachmentBindingInfo&) { return Order_InputAttachment; });
     };
 
@@ -876,6 +863,9 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
                 recorder.Record(BindingInfoType::StorageTexture, layout.access, layout.format,
                                 layout.viewDimension);
             },
+            [&](const TexelBufferBindingInfo& layout) {
+                recorder.Record(BindingInfoType::TexelBuffer, layout.format, layout.access);
+            },
             [&](const StaticSamplerBindingInfo& layout) {
                 recorder.Record(BindingInfoType::StaticSampler, layout.sampler->GetContentHash());
             },
@@ -959,6 +949,10 @@ BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetBufferIndices() cons
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetStorageTextureIndices() const {
     return Range(GetBindingTypeStart(Order_StorageTexture),
                  GetBindingTypeEnd(Order_StorageTexture));
+}
+
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetTexelBufferIndices() const {
+    return Range(GetBindingTypeStart(Order_TexelBuffer), GetBindingTypeEnd(Order_TexelBuffer));
 }
 
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSampledTextureIndices() const {

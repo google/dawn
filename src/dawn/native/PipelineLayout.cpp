@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include "absl/container/inlined_vector.h"
@@ -274,9 +275,12 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     };
 
     // Does the trivial conversions from a ShaderBindingInfo to a BindGroupLayoutEntry
+    std::vector<std::unique_ptr<wgpu::TexelBufferBindingLayout>> texelBufferLayouts;
+
     auto ConvertMetadataToEntry =
-        [](const ShaderBindingInfo& shaderBinding,
-           const ExternalTextureBindingLayout* externalTextureBindingEntry) -> EntryData {
+        [&texelBufferLayouts](
+            BindGroupIndex /*group*/, const ShaderBindingInfo& shaderBinding,
+            const ExternalTextureBindingLayout* externalTextureBindingEntry) -> EntryData {
         EntryData entry = {};
         entry.bindingArraySize = uint32_t(shaderBinding.arraySize);
 
@@ -302,6 +306,13 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 entry.storageTexture.access = bindingInfo.access;
                 entry.storageTexture.format = bindingInfo.format;
                 entry.storageTexture.viewDimension = bindingInfo.viewDimension;
+            },
+            [&](const TexelBufferBindingInfo& bindingInfo) {
+                auto layout = std::make_unique<wgpu::TexelBufferBindingLayout>();
+                layout->format = bindingInfo.format;
+                layout->access = bindingInfo.access;
+                texelBufferLayouts.push_back(std::move(layout));
+                entry.nextInChain = texelBufferLayouts.back().get();
             },
             [&](const ExternalTextureBindingInfo&) {
                 entry.nextInChain = externalTextureBindingEntry;
@@ -373,7 +384,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             for (const auto& [bindingNumber, shaderBinding] : groupBindings) {
                 // Create the BindGroupLayoutEntry
                 EntryData entry =
-                    ConvertMetadataToEntry(shaderBinding, &externalTextureBindingLayout);
+                    ConvertMetadataToEntry(group, shaderBinding, &externalTextureBindingLayout);
                 entry.binding = uint32_t(bindingNumber);
                 entry.visibility = StageBit(stage.shaderStage);
 

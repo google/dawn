@@ -133,6 +133,12 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                     }
                     return kInvalidSlots;
                 },
+                [&](const TexelBufferBindingInfo&) -> PerStage<uint32_t> {
+                    // D3D11 does not support texel buffers.
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
+                    return kInvalidSlots;
+                },
                 [&](const InputAttachmentBindingInfo&) -> PerStage<uint32_t> {
                     DAWN_UNREACHABLE();
                     return kInvalidSlots;

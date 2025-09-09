@@ -549,6 +549,35 @@ TEST_F(GetBindGroupLayoutTests, ExternalTextureBindingType) {
                 BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
 }
 
+// Tests that the texel buffer binding type matches with a texel_buffer declared in the shader.
+TEST_F(GetBindGroupLayoutTests, TexelBufferBindingType) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::TexelBufferBindingLayout layout = {};
+    layout.access = wgpu::TexelBufferAccess::ReadOnly;
+    layout.format = wgpu::TextureFormat::RGBA8Uint;
+
+    wgpu::BindGroupLayoutEntry entry = {};
+    entry.binding = 0;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.nextInChain = &layout;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &entry;
+
+    wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
+            requires texel_buffers;
+            @group(0) @binding(0) var myTexelBuffer: texel_buffer<rgba8uint, read>;
+
+            @fragment fn main() {
+                _ = textureDimensions(myTexelBuffer);
+            })");
+
+    EXPECT_THAT(device.CreateBindGroupLayout(&desc),
+                BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
+}
+
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureViewDimension) {
     DAWN_SKIP_TEST_IF(UsesWire());

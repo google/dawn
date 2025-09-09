@@ -101,6 +101,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BeginEndRange<BindingIndex> GetDynamicBufferIndices() const;
     BeginEndRange<BindingIndex> GetBufferIndices() const;
     BeginEndRange<BindingIndex> GetStorageTextureIndices() const;
+    BeginEndRange<BindingIndex> GetTexelBufferIndices() const;
     BeginEndRange<BindingIndex> GetSampledTextureIndices() const;
     BeginEndRange<BindingIndex> GetTextureIndices() const;
     BeginEndRange<BindingIndex> GetSamplerIndices() const;
@@ -196,6 +197,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
         // Samplers
         Order_StaticSampler,
         Order_RegularSampler,
+        // Texel Buffers
+        Order_TexelBuffer,
         Order_Count,
     };
     static bool SortBindingsCompare(const BindingInfo& a, const BindingInfo& b);

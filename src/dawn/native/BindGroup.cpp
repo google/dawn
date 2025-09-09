@@ -47,6 +47,7 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Sampler.h"
+#include "dawn/native/TexelBufferView.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/utils/WGPUHelpers.h"
 
@@ -315,6 +316,32 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateTexelBufferBinding(DeviceBase* device,
+                                      const BindGroupEntry& entry,
+                                      const TexelBufferBindingEntry* texelBufferBindingEntry,
+                                      const TexelBufferBindingInfo& layout,
+                                      UsageValidationMode mode) {
+    DAWN_INVALID_IF(
+        entry.buffer != nullptr || entry.sampler != nullptr || entry.textureView != nullptr,
+        "Expected only texelBufferView to be set for binding entry.");
+
+    DAWN_TRY(device->ValidateObject(texelBufferBindingEntry->texelBufferView));
+
+    BufferBase* buffer = texelBufferBindingEntry->texelBufferView->GetBuffer();
+    DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::TexelBuffer));
+
+    DAWN_INVALID_IF(texelBufferBindingEntry->texelBufferView->GetFormat() != layout.format,
+                    "Format (%s) of %s expected to be (%s).",
+                    texelBufferBindingEntry->texelBufferView->GetFormat(),
+                    texelBufferBindingEntry->texelBufferView, layout.format);
+
+    if (layout.access == wgpu::TexelBufferAccess::ReadWrite) {
+        DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Storage));
+    }
+
+    return {};
+}
+
 MaybeError ValidateSamplerBinding(const DeviceBase* device,
                                   const BindGroupEntry& entry,
                                   const SamplerBindingInfo& layout) {
@@ -569,9 +596,10 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
         // TODO(42240282): Store external textures in
         // BindGroupLayoutBase::BindingDataPointers::bindings so checking external textures can
         // be moved in the switch below.
+        UnpackedPtr<BindGroupEntry> unpacked;
+        DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&entry));
+
         if (layout->GetExternalTextureBindingExpansionMap().contains(binding)) {
-            UnpackedPtr<BindGroupEntry> unpacked;
-            DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(&entry));
             if (auto* externalTextureBindingEntry = unpacked.Get<ExternalTextureBindingEntry>()) {
                 DAWN_TRY(ValidateExternalTextureBinding(
                     device, entry, externalTextureBindingEntry,
@@ -590,7 +618,12 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                 "entry.",
                 i);
         }
-        DAWN_INVALID_IF(entry.nextInChain != nullptr, "nextInChain must be nullptr.");
+
+        const TexelBufferBindingEntry* texelBufferEntry = unpacked.Get<TexelBufferBindingEntry>();
+        DAWN_INVALID_IF(
+            texelBufferEntry != nullptr &&
+                !std::holds_alternative<TexelBufferBindingInfo>(bindingInfo.bindingLayout),
+            "nextInChain must be nullptr.");
 
         // Perform binding-type specific validation.
         DAWN_TRY(MatchVariant(
@@ -621,6 +654,20 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                                  "\nExpected entry layout: %s",
                                  i, layout);
                 return {};
+            },
+            [&](const TexelBufferBindingInfo& layout) -> MaybeError {
+                if (texelBufferEntry) {
+                    DAWN_TRY_CONTEXT(
+                        ValidateTexelBufferBinding(device, entry, texelBufferEntry, layout, mode),
+                        "validating entries[%u] as a Texel Buffer."
+                        "\nExpected entry layout: %s",
+                        i, layout);
+                    return {};
+                }
+                return DAWN_VALIDATION_ERROR(
+                    "entries[%u] not a TexelBuffer when the layout contains an TexelBuffer "
+                    "entry.",
+                    i);
             },
             [&](const SamplerBindingInfo& layout) -> MaybeError {
                 DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, layout),
@@ -771,6 +818,12 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
         if (entry->sampler != nullptr) {
             DAWN_ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
             mBindingData.bindings[bindingIndex] = entry->sampler;
+            continue;
+        }
+
+        if (auto* texelBufferBindingEntry = entry.Get<TexelBufferBindingEntry>()) {
+            DAWN_ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
+            mBindingData.bindings[bindingIndex] = texelBufferBindingEntry->texelBufferView;
             continue;
         }
 
@@ -955,6 +1008,15 @@ BufferBinding BindGroupBase::GetBindingAsBufferBinding(BindingIndex bindingIndex
     DAWN_ASSERT(!IsError());
     return {GetBindingAsBuffer(bindingIndex), mBindingData.bufferData[bindingIndex].offset,
             mBindingData.bufferData[bindingIndex].size};
+}
+
+TexelBufferViewBase* BindGroupBase::GetBindingAsTexelBufferView(BindingIndex bindingIndex) {
+    DAWN_ASSERT(!IsError());
+    const BindGroupLayoutInternalBase* layout = GetLayout();
+    DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
+    DAWN_ASSERT(std::holds_alternative<TexelBufferBindingInfo>(
+        layout->GetBindingInfo(bindingIndex).bindingLayout));
+    return static_cast<TexelBufferViewBase*>(mBindingData.bindings[bindingIndex].Get());
 }
 
 const std::vector<Ref<ExternalTextureBase>>& BindGroupBase::GetBoundExternalTextures() const {

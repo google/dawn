@@ -200,6 +200,11 @@ MaybeError BindGroup::InitializeImpl() {
                         DAWN_UNREACHABLE();
                 }
             },
+            [&](const TexelBufferBindingInfo&) {
+                // D3D12 does not support texel buffers.
+                // TODO(crbug/382544164): Prototype texel buffer feature
+                DAWN_UNREACHABLE();
+            },
             [](const StaticSamplerBindingInfo&) {
                 // Static samplers are already initialized in the pipeline layout.
             },

@@ -275,7 +275,7 @@ bool GenerateArrayLengthFromuniformData(const BindingInfoArray& moduleBindingInf
                 },
                 [](const StaticSamplerBindingInfo&) {}, [](const SamplerBindingInfo&) {},
                 [](const TextureBindingInfo&) {}, [](const StorageTextureBindingInfo&) {},
-                [](const InputAttachmentBindingInfo&) {});
+                [](const TexelBufferBindingInfo&) {}, [](const InputAttachmentBindingInfo&) {});
         }
     }
 

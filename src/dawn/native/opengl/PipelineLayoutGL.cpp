@@ -84,6 +84,11 @@ PipelineLayout::PipelineLayout(Device* device,
                     mIndexInfo[group][bindingIndex] = storageTextureIndex;
                     storageTextureIndex++;
                 },
+                [&](const TexelBufferBindingInfo&) {
+                    // OpenGL does not support texel buffers.
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
+                },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }

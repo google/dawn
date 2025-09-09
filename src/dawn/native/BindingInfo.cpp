@@ -46,6 +46,9 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
         [](const StorageTextureBindingInfo&) -> BindingInfoType {
             return BindingInfoType::StorageTexture;
         },
+        [](const TexelBufferBindingInfo&) -> BindingInfoType {
+            return BindingInfoType::TexelBuffer;
+        },
         [](const StaticSamplerBindingInfo&) -> BindingInfoType {
             return BindingInfoType::StaticSampler;
         },
@@ -320,6 +323,17 @@ TextureBindingInfo TextureBindingInfo::From(const TextureBindingLayout& layout) 
         .sampleType = defaultedLayout.sampleType,
         .viewDimension = defaultedLayout.viewDimension,
         .multisampled = defaultedLayout.multisampled,
+    }};
+}
+
+// TexelBufferBindingInfo
+
+// static
+TexelBufferBindingInfo TexelBufferBindingInfo::From(const TexelBufferBindingLayout& layout) {
+    TexelBufferBindingLayout defaultedLayout = layout.WithTrivialFrontendDefaults();
+    return {{
+        .format = defaultedLayout.format,
+        .access = defaultedLayout.access,
     }};
 }
 

@@ -487,6 +487,12 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                                              texture->GetGLFormat().internalFormat));
                     return {};
                 },
+                [&](const TexelBufferBindingInfo&) -> MaybeError {
+                    // OpenGL does not support texel buffers.
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
+                    return {};
+                },
                 [](const InputAttachmentBindingInfo&) -> MaybeError { DAWN_UNREACHABLE(); }));
         }
 

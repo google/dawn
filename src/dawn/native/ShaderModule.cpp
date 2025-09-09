@@ -89,6 +89,9 @@ BindingInfoType TintResourceTypeToBindingInfoType(
         case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
         case tint::inspector::ResourceBinding::ResourceType::kReadWriteStorageTexture:
             return BindingInfoType::StorageTexture;
+        case tint::inspector::ResourceBinding::ResourceType::kReadOnlyTexelBuffer:
+        case tint::inspector::ResourceBinding::ResourceType::kReadWriteTexelBuffer:
+            return BindingInfoType::TexelBuffer;
         case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
             return BindingInfoType::ExternalTexture;
         case tint::inspector::ResourceBinding::ResourceType::kInputAttachment:
@@ -287,6 +290,19 @@ ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess
             return wgpu::StorageTextureAccess::ReadWrite;
         default:
             return DAWN_VALIDATION_ERROR("Attempted to convert non-storage texture resource type");
+    }
+    DAWN_UNREACHABLE();
+}
+
+ResultOrError<wgpu::TexelBufferAccess> TintResourceTypeToTexelBufferAccess(
+    tint::inspector::ResourceBinding::ResourceType resource_type) {
+    switch (resource_type) {
+        case tint::inspector::ResourceBinding::ResourceType::kReadOnlyTexelBuffer:
+            return wgpu::TexelBufferAccess::ReadOnly;
+        case tint::inspector::ResourceBinding::ResourceType::kReadWriteTexelBuffer:
+            return wgpu::TexelBufferAccess::ReadWrite;
+        default:
+            return DAWN_VALIDATION_ERROR("Attempted to convert non-texel buffer resource type");
     }
     DAWN_UNREACHABLE();
 }
@@ -576,6 +592,7 @@ BindingInfoType GetShaderBindingType(const ShaderBindingInfo& shaderInfo) {
         [](const SamplerBindingInfo&) { return BindingInfoType::Sampler; },
         [](const TextureBindingInfo&) { return BindingInfoType::Texture; },
         [](const StorageTextureBindingInfo&) { return BindingInfoType::StorageTexture; },
+        [](const TexelBufferBindingInfo&) { return BindingInfoType::TexelBuffer; },
         [](const ExternalTextureBindingInfo&) { return BindingInfoType::ExternalTexture; },
         [](const InputAttachmentBindingInfo&) { return BindingInfoType::InputAttachment; });
 }
@@ -695,6 +712,23 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                             "The layout's binding dimension (%s) doesn't match the "
                             "shader's binding dimension (%s).",
                             bindingLayout.viewDimension, bindingInfo.viewDimension);
+            return {};
+        },
+        [&](const TexelBufferBindingInfo& bindingInfo) -> MaybeError {
+            const TexelBufferBindingInfo& bindingLayout =
+                std::get<TexelBufferBindingInfo>(layoutInfo.bindingLayout);
+            DAWN_ASSERT(bindingLayout.format != wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(bindingInfo.format != wgpu::TextureFormat::Undefined);
+
+            DAWN_INVALID_IF(bindingLayout.access != bindingInfo.access,
+                            "The layout's binding access (%s) doesn't match the shader's binding "
+                            "access (%s).",
+                            bindingLayout.access, bindingInfo.access);
+
+            DAWN_INVALID_IF(bindingLayout.format != bindingInfo.format,
+                            "The layout's binding format (%s) doesn't match the shader's binding "
+                            "format (%s).",
+                            bindingLayout.format, bindingInfo.format);
             return {};
         },
         [&](const BufferBindingInfo& bindingInfo) -> MaybeError {
@@ -1198,6 +1232,16 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 bindingInfo.format = TintImageFormatToTextureFormat(resource.image_format);
                 bindingInfo.viewDimension =
                     TintTextureDimensionToTextureViewDimension(resource.dim);
+
+                info.bindingInfo = bindingInfo;
+                break;
+            }
+
+            case BindingInfoType::TexelBuffer: {
+                TexelBufferBindingInfo bindingInfo = {};
+                DAWN_TRY_ASSIGN(bindingInfo.access,
+                                TintResourceTypeToTexelBufferAccess(resource.resource_type));
+                bindingInfo.format = TintImageFormatToTextureFormat(resource.image_format);
 
                 info.bindingInfo = bindingInfo;
                 break;

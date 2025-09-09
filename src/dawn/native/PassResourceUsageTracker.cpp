@@ -36,6 +36,7 @@
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/QuerySet.h"
+#include "dawn/native/TexelBufferView.h"
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {
@@ -198,6 +199,27 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
         TextureViewUsedAs(view, usage, bindingInfo.visibility);
     }
 
+    for (BindingIndex i : layout->GetTexelBufferIndices()) {
+        const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(i);
+        const TexelBufferBindingInfo& texelInfo =
+            std::get<TexelBufferBindingInfo>(bindingInfo.bindingLayout);
+
+        wgpu::BufferUsage usage = wgpu::BufferUsage::None;
+        switch (texelInfo.access) {
+            case wgpu::TexelBufferAccess::ReadOnly:
+                usage = kReadOnlyTexelBuffer;
+                break;
+            case wgpu::TexelBufferAccess::ReadWrite:
+                usage = wgpu::BufferUsage::Storage;
+                break;
+            case wgpu::TexelBufferAccess::Undefined:
+                DAWN_UNREACHABLE();
+        }
+
+        BufferBase* buffer = group->GetBindingAsTexelBufferView(i)->GetBuffer();
+        BufferUsedAs(buffer, usage, bindingInfo.visibility);
+    }
+
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {
         mExternalTextureUsages.insert(externalTexture.Get());
     }
@@ -261,6 +283,10 @@ void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGrou
 
     for (BindingIndex i : layout->GetTextureIndices()) {
         mUsage.referencedTextures.insert(group->GetBindingAsTextureView(i)->GetTexture());
+    }
+
+    for (BindingIndex i : layout->GetTexelBufferIndices()) {
+        mUsage.referencedBuffers.insert(group->GetBindingAsTexelBufferView(i)->GetBuffer());
     }
 
     for (const Ref<ExternalTextureBase>& externalTexture : group->GetBoundExternalTextures()) {

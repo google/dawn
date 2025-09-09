@@ -142,6 +142,85 @@ TEST_F(TexelBufferValidationTest, BindingHelperChainsTexelBufferBindingEntry) {
     EXPECT_EQ(texelEntry->texelBufferView.Get(), view.Get());
 }
 
+// The format of a bound texel buffer view must match the layout.
+TEST_F(TexelBufferValidationTest, ViewFormatMustMatchLayout) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 256;
+    desc.usage = wgpu::BufferUsage::TexelBuffer;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    wgpu::TexelBufferViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 256;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    wgpu::TexelBufferBindingLayout layout = {};
+    layout.access = wgpu::TexelBufferAccess::ReadOnly;
+    layout.format = wgpu::TextureFormat::R32Uint;
+
+    wgpu::BindGroupLayout bgl =
+        utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Compute, &layout}});
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, view}}));
+}
+
+// Read-write texel buffer bindings require the buffer to also have STORAGE usage.
+TEST_F(TexelBufferValidationTest, ReadWriteBindingRequiresStorageUsage) {
+    wgpu::BufferDescriptor desc;
+    desc.size = 256;
+    desc.usage = wgpu::BufferUsage::TexelBuffer;
+    wgpu::Buffer buffer = device.CreateBuffer(&desc);
+
+    wgpu::TexelBufferViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::R32Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 4;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    wgpu::TexelBufferBindingLayout layout = {};
+    layout.access = wgpu::TexelBufferAccess::ReadWrite;
+    layout.format = wgpu::TextureFormat::R32Uint;
+
+    wgpu::BindGroupLayout bgl =
+        utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Compute, &layout}});
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, view}}));
+}
+
+// Binding a TexelBuffer to a texture binding slot fails.
+TEST_F(TexelBufferValidationTest, TexelBufferCannotBindToTextureSlot) {
+    wgpu::BindGroupLayoutEntry textureEntry = {};
+    textureEntry.binding = 0;
+    textureEntry.visibility = wgpu::ShaderStage::Compute;
+    textureEntry.texture.sampleType = wgpu::TextureSampleType::Float;
+    textureEntry.texture.viewDimension = wgpu::TextureViewDimension::e2D;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc = {};
+    bglDesc.entryCount = 1;
+    bglDesc.entries = &textureEntry;
+    wgpu::BindGroupLayout bgl = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::Buffer buffer = CreateTexelBuffer(4, wgpu::BufferUsage::TexelBuffer);
+    wgpu::TexelBufferViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::R32Uint;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    wgpu::TexelBufferBindingEntry texelEntry = {};
+    texelEntry.texelBufferView = view;
+
+    wgpu::BindGroupEntry bgEntry = {};
+    bgEntry.binding = 0;
+    bgEntry.nextInChain = &texelEntry;
+
+    wgpu::BindGroupDescriptor bgDesc = {};
+    bgDesc.layout = bgl;
+    bgDesc.entryCount = 1;
+    bgDesc.entries = &bgEntry;
+
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
+}
+
 class TexelBufferValidationWithExtendedMapTest : public TexelBufferValidationTest {
   protected:
     void SetUp() override {
