@@ -1168,7 +1168,8 @@ DAWN_INSTANTIATE_TEST(TextureViewTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class TextureView3DTest : public TextureViewTestBase {};
 
@@ -1256,9 +1257,9 @@ DAWN_INSTANTIATE_TEST(TextureView1DTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
-                      VulkanBackend(),
                       OpenGLBackend(),
-                      OpenGLESBackend());
+                      OpenGLESBackend(),
+                      VulkanBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

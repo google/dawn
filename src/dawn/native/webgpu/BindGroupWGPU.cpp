@@ -32,6 +32,7 @@
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -47,7 +48,9 @@ WGPUBindGroupEntry ToWGPU(const BindGroupEntry* entry) {
         // TODO(crbug.com/413053623): replace with the following when the object implementation is
         // done.
         .sampler = nullptr,
-        .textureView = nullptr,
+        .textureView = entry->textureView == nullptr
+                           ? nullptr
+                           : ToBackend(entry->textureView)->GetInnerHandle(),
     };
 }
 

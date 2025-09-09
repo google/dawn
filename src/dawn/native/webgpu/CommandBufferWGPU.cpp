@@ -161,11 +161,11 @@ WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy) {
 WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info) {
     return {
         .nextInChain = nullptr,
-        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
-        .view = nullptr /* ToBackend(info.view)->GetInnerHandle()*/,
+        .view = ToBackend(info.view)->GetInnerHandle(),
         .depthSlice = info.depthSlice,
-        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
-        .resolveTarget = nullptr /* ToBackend(info.resolveTarget)->GetInnerHandle()*/,
+        .resolveTarget = info.resolveTarget == nullptr
+                             ? nullptr
+                             : ToBackend(info.resolveTarget)->GetInnerHandle(),
         .loadOp = ToWGPU(info.loadOp),
         .storeOp = ToWGPU(info.storeOp),
         .clearValue = ToWGPU(info.clearColor),
@@ -175,8 +175,7 @@ WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info) 
 WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachmentInfo& info) {
     return {
         .nextInChain = nullptr,
-        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for TextureViewWGPU
-        .view = nullptr /* ToBackend(info.view)->GetInnerHandle()*/,
+        .view = info.view == nullptr ? nullptr : ToBackend(info.view)->GetInnerHandle(),
         .depthLoadOp = ToWGPU(info.depthLoadOp),
         .depthStoreOp = ToWGPU(info.depthStoreOp),
         .depthClearValue = info.clearDepth,

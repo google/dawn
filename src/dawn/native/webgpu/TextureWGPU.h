@@ -50,6 +50,19 @@ class Texture final : public TextureBase, public ObjectWGPU<WGPUTexture> {
     void DestroyImpl() override;
 };
 
+class TextureView final : public TextureViewBase, public ObjectWGPU<WGPUTextureView> {
+  public:
+    static ResultOrError<Ref<TextureView>> Create(
+        TextureBase* texture,
+        const UnpackedPtr<TextureViewDescriptor>& descriptor);
+
+  private:
+    TextureView(TextureBase* texture,
+                const UnpackedPtr<TextureViewDescriptor>& descriptor,
+                WGPUTextureView innerView);
+    ~TextureView() override = default;
+};
+
 }  // namespace dawn::native::webgpu
 
 #endif  // SRC_DAWN_NATIVE_WEBGPU_TEXTUREWGPU_H_

@@ -187,7 +187,7 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& descriptor) {
-    return Ref<TextureViewBase>{nullptr};
+    return TextureView::Create(texture, descriptor);
 }
 
 void Device::DestroyImpl() {
