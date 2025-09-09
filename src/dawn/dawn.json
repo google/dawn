@@ -728,6 +728,7 @@
             },
             {
                 "name": "get map state",
+                "no autolock": true,
                 "returns": "buffer map state"
             },
             {
