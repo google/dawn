@@ -211,6 +211,7 @@ class DawnTestEnvironment : public testing::Environment {
     const std::vector<std::string>& GetDisabledToggles() const;
 
     bool RunSuppressedTests() const;
+    bool IsTestLauncherBotMode() const;
 
   protected:
     std::unique_ptr<native::Instance> CreateInstance(platform::Platform* platform = nullptr);
@@ -237,6 +238,7 @@ class DawnTestEnvironment : public testing::Environment {
     wgpu::BackendType mBackendTypeFilter;
     std::string mWireTraceDir;
     bool mRunSuppressedTests = false;
+    bool mIsTestLauncherBotMode = false;
 
     ToggleParser mToggleParser;
 
@@ -298,6 +300,7 @@ class DawnTestBase {
     bool IsCompatibilityMode() const;
     bool IsCPU() const;
     bool RunSuppressedTests() const;
+    bool IsTestLauncherBotMode() const;
 
     bool IsDXC() const;
 
