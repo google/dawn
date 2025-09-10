@@ -353,6 +353,24 @@ TEST_F(IR_ValidatorTest, Loop_RootBlock) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Loop_InitializerNotTerminatedWithNextIteration) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto* l = b.Loop();
+    l->Initializer()->Append(b.Return(f));
+    l->Body()->Append(b.ExitLoop(l));
+
+    auto sb = b.Append(f->Block());
+    sb.Append(l);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:4:7 error: loop initializer must have a NextIteration terminator)"));
+}
+
 TEST_F(IR_ValidatorTest, Loop_OnlyBody) {
     auto* f = b.Function("my_func", ty.void_());
 

@@ -3625,6 +3625,13 @@ void Validator::CheckLoop(const Loop* l) {
     CheckResults(l);
     CheckOperands(l, 0);
 
+    if (!l->Initializer()->IsEmpty()) {
+        if (!l->Initializer()->Terminator() ||
+            !l->Initializer()->Terminator()->Is<core::ir::NextIteration>()) {
+            AddError(l->Initializer()) << "loop initializer must have a NextIteration terminator";
+        }
+    }
+
     // Note: Tasks are queued in reverse order of their execution
     tasks_.Push([this, l] {
         first_continues_.Remove(l);  // No need for this any more. Free memory.
