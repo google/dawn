@@ -767,6 +767,26 @@ Result<SuccessType, IOAnnotation> AddIOAnnotationsFromIOAttributes(
     return Success;
 }
 
+/// The kind of shader IO being validated.
+enum class ShaderIOKind : uint8_t {
+    kInputParam,
+    kResultValue,
+    kModuleScopeVar,
+};
+
+/// @returns text describing the shader IO kind for error logging
+std::string ToString(ShaderIOKind value) {
+    switch (value) {
+        case ShaderIOKind::kInputParam:
+            return "input param";
+        case ShaderIOKind::kResultValue:
+            return "return value";
+        case ShaderIOKind::kModuleScopeVar:
+            return "module scope variable";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(ShaderIOKind)";
+}
+
 /// The core IR validator.
 class Validator {
   public:
@@ -1146,21 +1166,17 @@ class Validator {
         AddressSpace address_space,
         const std::string& target_str = "variable");
 
-    /// Validates shader IO annotations for entry point input/output
-    /// Note: Call is required to ensure that the value being validated is associated with an entry
-    ///       point function
+    /// Validates annotations related to shader IO
     /// @param ty type of the value under test
     /// @param binding_point the binding information associated with the value
     /// @param attr IO attributes associated with the values
-    /// @param target_str string to insert in error message describing what has a binding_point,
-    /// something like 'input param' or 'return value'
-    /// @returns Success if one, and only one, shader IO is present, otherwise a Failure with the
-    /// error reason is returned
+    /// @param kind the kind Shader IO being performed
+    /// @returns Success if passes validation, otherwise a Failure with the error reason is returned
     Result<SuccessType, std::string> ValidateShaderIOAnnotations(
         const core::type::Type* ty,
         const std::optional<struct BindingPoint>& binding_point,
         const core::IOAttributes& attr,
-        const std::string& target_str);
+        ShaderIOKind kind);
 
     /// Validates the given let
     /// @param l the let to validate
@@ -2329,8 +2345,9 @@ void Validator::CheckFunction(const Function* func) {
 
         if (func->IsEntryPoint()) {
             {
-                auto result = ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
-                                                          param->Attributes(), "input param");
+                auto result =
+                    ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
+                                                param->Attributes(), ShaderIOKind::kInputParam);
                 if (result != Success) {
                     AddError(param) << result.Failure();
                 }
@@ -2399,8 +2416,8 @@ void Validator::CheckFunction(const Function* func) {
     }
 
     if (func->IsEntryPoint()) {
-        auto result = ValidateShaderIOAnnotations(func->ReturnType(), std::nullopt,
-                                                  func->ReturnAttributes(), "return values");
+        auto result = ValidateShaderIOAnnotations(
+            func->ReturnType(), std::nullopt, func->ReturnAttributes(), ShaderIOKind::kResultValue);
         if (result != Success) {
             AddError(func) << result.Failure();
         }
@@ -2834,10 +2851,10 @@ void Validator::CheckVar(const Var* var) {
     }
 
     if (var->Block() == mod_.root_block) {
-        if ((mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) &&
-            !capabilities_.Contains(Capability::kAllowUnannotatedModuleIOVariables)) {
-            auto result = ValidateShaderIOAnnotations(var->Result()->Type(), var->BindingPoint(),
-                                                      var->Attributes(), "module scope variable");
+        if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
+            auto result =
+                ValidateShaderIOAnnotations(var->Result()->Type(), var->BindingPoint(),
+                                            var->Attributes(), ShaderIOKind::kModuleScopeVar);
             if (result != Success) {
                 AddError(var) << result.Failure();
             }
@@ -2885,7 +2902,7 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
     const core::type::Type* ty,
     const std::optional<struct BindingPoint>& binding_point,
     const core::IOAttributes& attr,
-    const std::string& target_str) {
+    ShaderIOKind kind) {
     EnumSet<IOAnnotation> annotations;
 
     // Since there is no entries in the set at this point, this should never fail.
@@ -2902,7 +2919,7 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
 
     if (ty->Is<core::type::Void>()) {
         if (!annotations.Empty()) {
-            return target_str + " with void type should never be annotated";
+            return ToString(kind) + " with void type should never be annotated";
         }
         return Success;
     }
@@ -2912,7 +2929,7 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
             EnumSet<IOAnnotation> mem_annotations = annotations;
             auto add_result = AddIOAnnotationsFromIOAttributes(mem_annotations, mem->Attributes());
             if (add_result != Success) {
-                return target_str +
+                return ToString(kind) +
                        " struct member has same IO annotation, as top-level struct, '" +
                        ToString(add_result.Failure()) + "'";
             }
@@ -2926,23 +2943,27 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
             }
 
             if (mem_annotations.Empty()) {
-                return target_str +
+                return ToString(kind) +
                        " struct members must have at least one IO annotation, e.g. a binding "
                        "point, a location, etc";
             }
 
             if (mem_annotations.Size() > 1) {
-                return target_str + " struct member has more than one IO annotation, " +
+                return ToString(kind) + " struct member has more than one IO annotation, " +
                        ToString(mem_annotations);
             }
         }
     } else {
         if (annotations.Empty()) {
-            return target_str +
-                   " must have at least one IO annotation, e.g. a binding point, a location, etc";
+            if (!(capabilities_.Contains(Capability::kAllowUnannotatedModuleIOVariables) &&
+                  kind == ShaderIOKind::kModuleScopeVar)) {
+                return ToString(kind) +
+                       " must have at least one IO annotation, e.g. a binding point, a location, "
+                       "etc";
+            }
         }
         if (annotations.Size() > 1) {
-            return target_str + " has more than one IO annotation, " + ToString(annotations);
+            return ToString(kind) + " has more than one IO annotation, " + ToString(annotations);
         }
     }
     return Success;

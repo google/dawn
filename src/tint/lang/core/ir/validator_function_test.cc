@@ -588,7 +588,7 @@ TEST_F(IR_ValidatorTest, Function_Return_MultipleIOAnnotations) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: return values has more than one IO annotation, [ @location, built-in ]
+            R"(:1:1 error: return value has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():vec4<f32> [@location(0), @position] {
 ^^^^^^^^
 )")) << res.Failure();
@@ -610,7 +610,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_MultipleIOAnnotations) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: return values struct member has more than one IO annotation, [ @location, built-in ]
+            R"(:5:1 error: return value struct member has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():MyStruct {
 ^^^^^^^^
 )")) << res.Failure();
@@ -625,7 +625,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Void_IOAnnotation) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason,
-        testing::HasSubstr(R"(:1:1 error: return values with void type should never be annotated
+        testing::HasSubstr(R"(:1:1 error: return value with void type should never be annotated
 %f = @fragment func():void [@location(0)] {
 ^^
 )")) << res.Failure();
@@ -641,7 +641,7 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingIOAnnotations) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: return values must have at least one IO annotation, e.g. a binding point, a location, etc
+            R"(:1:1 error: return value must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():f32 {
 ^^^^^^^^
 )")) << res.Failure();
@@ -660,7 +660,7 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingIOAnnotations) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: return values struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+            R"(:5:1 error: return value struct members must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():MyStruct {
 ^^^^^^^^
 )")) << res.Failure();
