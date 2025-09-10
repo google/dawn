@@ -926,6 +926,26 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_InvalidIndexType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, LoadVectorElement_ConstantIndexOutOfRange) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec4<f32>>());
+        b.LoadVectorElement(var->Result(), 7_u);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:4:38 error: load_vector_element: load vector element index must be in range [0, 3]
+    %3:f32 = load_vector_element %2, 7u
+                                     ^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, StoreVectorElement_NullTo) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -1039,6 +1059,26 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_InvalidIndexType) {
             R"(:4:30 error: store_vector_element: store vector element index must be an integer scalar
     store_vector_element %2, 1.0f, 1.0f
                              ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StoreVectorElement_ConstantIndexOutOfRange) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, vec2<f32>>());
+        b.StoreVectorElement(var->Result(), 7_u, 1_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:4:30 error: store_vector_element: store vector element index must be in range [0, 1]
+    store_vector_element %2, 7u, 1.0f
+                             ^^
 )")) << res.Failure();
 }
 

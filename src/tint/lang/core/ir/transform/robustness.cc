@@ -213,9 +213,9 @@ struct State {
 
         ir::Value* clamped_idx = nullptr;
         if (const_idx && const_limit) {
-            // Generate a new constant index that is clamped to the limit.
-            clamped_idx = b.Constant(u32(std::min(const_idx->Value()->ValueAs<uint32_t>(),
-                                                  const_limit->Value()->ValueAs<uint32_t>())));
+            TINT_ASSERT(const_idx->Value()->ValueAs<uint32_t>() <=
+                        const_limit->Value()->ValueAs<uint32_t>());
+            clamped_idx = b.Constant(u32(const_idx->Value()->ValueAs<uint32_t>()));
         } else if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
             clamped_idx = b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(idx), limit)->Result();
