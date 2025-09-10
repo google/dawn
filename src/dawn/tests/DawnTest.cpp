@@ -170,12 +170,12 @@ std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(
     // this.
     std::string prefix = mTest + ".TheTestNameUsuallyGoesHere/";
     std::string testFormat = prefix + sanitizedName;
-    if (testFormat.length() > 220) {
+    if (testFormat.length() > 210) {
         // The bots don't support test names longer than 256. Shorten the name and append a unique
         // index if we're close. The failure log will still print the full param name.
         std::string suffix = std::string("__") + std::to_string(index);
         size_t targetLength = sanitizedName.length();
-        targetLength -= testFormat.length() - 220;
+        targetLength -= testFormat.length() - 210;
         targetLength -= suffix.length();
         sanitizedName.resize(targetLength);
         sanitizedName = sanitizedName + suffix;
