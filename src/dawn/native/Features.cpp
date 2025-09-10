@@ -432,7 +432,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::PrimitiveIndex,
      {"Supports the \"enable primitive_index;\" directive in WGSL",
       "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-primitive-index",
-      FeatureInfo::FeatureState::Experimental}},
+      FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalBindless,
      {"Experimental support for the prototype of a bindless extension",
       "https://hackmd.io/@kangz/bindless-proposal", FeatureInfo::FeatureState::Experimental}}};
