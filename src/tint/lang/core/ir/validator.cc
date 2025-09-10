@@ -2477,6 +2477,8 @@ void Validator::CheckWorkgroupSize(const Function* func) {
     // array, so will always have 3 elements at this point.
     TINT_ASSERT(workgroup_sizes.size() == 3);
 
+    uint64_t total_size = 1;
+
     std::optional<const core::type::Type*> sizes_ty;
     for (auto* size : workgroup_sizes) {
         if (!size || !size->Type()) {
@@ -2505,6 +2507,7 @@ void Validator::CheckWorkgroupSize(const Function* func) {
                 AddError(func) << "@workgroup_size params must be greater than 0";
                 return;
             }
+            total_size *= c->Value()->ValueAs<uint64_t>();
             continue;
         }
 
@@ -2537,6 +2540,11 @@ void Validator::CheckWorkgroupSize(const Function* func) {
             //            fail
             //    pass
         }
+    }
+
+    constexpr uint64_t kMaxGridSize = 0xffffffff;
+    if (total_size > kMaxGridSize) {
+        AddError(func) << "workgroup grid size cannot exceed 0x" << std::hex << kMaxGridSize;
     }
 }
 

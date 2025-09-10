@@ -923,6 +923,36 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamZero) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(0_i), b.Constant(2_i), b.Constant(3_i)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: @workgroup_size params must be greater than 0
+%f = @compute @workgroup_size(0i, 2i, 3i) func():void {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooLarge) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1048576_i), b.Constant(1048576_i), b.Constant(1048576_i)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:1 error: workgroup grid size cannot exceed 0xffffffff
+%f = @compute @workgroup_size(1048576i, 1048576i, 1048576i) func():void {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
     auto* o = b.Override(ty.u32());
     auto* f = ComputeEntryPoint();
