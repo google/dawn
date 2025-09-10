@@ -616,7 +616,7 @@ Result<SuccessType, std::string> ValidateBuiltinClipDistances(Function::Pipeline
         if (!ty->Is<core::type::F32>() && !is_valid_array()) {
             return std::string("clip_distances must be an f32 or an array<f32, N>, where N <= 8");
         }
-    } else if (!is_valid_array()) {
+    } else if (!ty->Is<core::type::Array>() || !is_valid_array()) {
         return std::string("clip_distances must be an array<f32, N>, where N <= 8");
     }
 

@@ -212,6 +212,22 @@ TEST_F(IR_ValidatorTest, Builtin_ClipDistances_WrongIODirection) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_ClipDistances_WrongType_Vec) {
+    auto* f = VertexEntryPoint();
+    AddBuiltinReturn(f, "distances", BuiltinValue::kClipDistances, ty.vec2<f32>());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:6:1 error: clip_distances must be an array<f32, N>, where N <= 8
+%f = @vertex func():OutputStruct {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Builtin_ClipDistances_WrongType) {
     auto* f = VertexEntryPoint();
     AddBuiltinReturn(f, "distances", BuiltinValue::kClipDistances, ty.f32());
