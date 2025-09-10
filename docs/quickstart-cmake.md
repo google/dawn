@@ -69,8 +69,12 @@ Now, create a `hello_webgpu.cpp` C++ file within the `TestDawn` directory.
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  wgpu::InstanceDescriptor instanceDescriptor{};
-  instanceDescriptor.capabilities.timedWaitAnyEnable = true;
+  static constexpr auto kTimedWaitAny = wgpu::InstanceFeatureName::TimedWaitAny;
+  wgpu::InstanceDescriptor instanceDescriptor{
+    .requiredFeatureCount = 1,
+    .requiredFeatures = &kTimedWaitAny
+  };
+
   wgpu::Instance instance = wgpu::CreateInstance(&instanceDescriptor);
   if (instance == nullptr) {
     std::cerr << "Instance creation failed!\n";
