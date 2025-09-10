@@ -345,10 +345,10 @@ struct State {
                 return access->Result();
             }
 
-            TINT_ASSERT(group_to_dynamic_offset_buffer.Contains(group));
-
             core::ir::Value* offset_buffer = group_to_dynamic_offset_buffer.GetOr(group, nullptr);
-            TINT_ASSERT(offset_buffer);
+            if (!offset_buffer) {
+                return access->Result();
+            }
 
             core::ir::Value* result = nullptr;
             b.InsertAfter(access, [&] {
