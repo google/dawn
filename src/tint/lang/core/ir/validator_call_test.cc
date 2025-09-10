@@ -617,4 +617,22 @@ TEST_F(IR_ValidatorTest, CallBuiltinFn_Offset_TooBig) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, CallBuiltinFn_QuadBroadcast_NonConstId) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* id = b.Let("a", 2_u);
+        b.Let("x", b.Call<i32>(core::BuiltinFn::kQuadBroadcast, 2_i, id));
+        b.Return(func);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:4:32 error: quadBroadcast: non-constant ID provided
+    %3:i32 = quadBroadcast 2i, %a
+                               ^^
+
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir

@@ -3172,6 +3172,16 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
 void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                                      const core::intrinsic::Overload& overload) {
+    if (call->Func() == core::BuiltinFn::kQuadBroadcast) {
+        TINT_ASSERT(call->Args().Length() == 2);
+        constexpr uint32_t kIdArg = 1;
+        auto* id = call->Args()[kIdArg];
+        if (!id->Is<core::ir::Constant>()) {
+            AddError(call, kIdArg) << "non-constant ID provided";
+        }
+        return;
+    }
+
     auto idx_for_usage = [&](core::ParameterUsage usage) -> std::optional<uint32_t> {
         for (uint32_t i = 0; i < overload.parameters.Length(); ++i) {
             auto& p = overload.parameters[i];
