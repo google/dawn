@@ -926,6 +926,29 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_InvalidIndexType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, LoadVectorElement_InvalidFromType) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam(ty.mat2x3<f32>());
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] {
+        auto* res = b.InstructionResult(ty.f32());
+        auto* lve = mod.CreateInstruction<ir::LoadVectorElement>(res, p, b.Constant(1_u));
+        b.Append(lve);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:34 error: load_vector_element: operand 'mat2x3<f32>' must be a pointer to a vector
+    %3:f32 = load_vector_element %2, 1u
+                                 ^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, LoadVectorElement_ConstantIndexOutOfRange) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -1059,6 +1082,29 @@ TEST_F(IR_ValidatorTest, StoreVectorElement_InvalidIndexType) {
             R"(:4:30 error: store_vector_element: store vector element index must be an integer scalar
     store_vector_element %2, 1.0f, 1.0f
                              ^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StoreVectorElement_InvalidFromType) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam(ty.mat2x3<f32>());
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] {
+        auto* sve =
+            mod.CreateInstruction<ir::StoreVectorElement>(p, b.Constant(1_u), b.Constant(2_u));
+        b.Append(sve);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:26 error: store_vector_element: operand 'mat2x3<f32>' must be a pointer to a vector
+    store_vector_element %2, 1u, 2u
+                         ^^
 )")) << res.Failure();
 }
 

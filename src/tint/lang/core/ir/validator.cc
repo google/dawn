@@ -4077,12 +4077,14 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
     }
 
     if (auto* res = l->Result(0)) {
-        if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
-            if (res->Type() != el_ty) {
-                AddResultError(l, 0)
-                    << "result type " << NameOf(res->Type())
-                    << " does not match vector pointer element type " << NameOf(el_ty);
-            }
+        auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset);
+        if (!el_ty) {
+            return;
+        }
+        if (res->Type() != el_ty) {
+            AddResultError(l, 0) << "result type " << NameOf(res->Type())
+                                 << " does not match vector pointer element type " << NameOf(el_ty);
+            return;
         }
     }
 
@@ -4111,12 +4113,15 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
     }
 
     if (auto* value = s->Value()) {
-        if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {
-            if (value->Type() != el_ty) {
-                AddError(s, StoreVectorElement::kValueOperandOffset)
-                    << "value type " << NameOf(value->Type())
-                    << " does not match vector pointer element type " << NameOf(el_ty);
-            }
+        auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset);
+        if (!el_ty) {
+            return;
+        }
+        if (value->Type() != el_ty) {
+            AddError(s, StoreVectorElement::kValueOperandOffset)
+                << "value type " << NameOf(value->Type())
+                << " does not match vector pointer element type " << NameOf(el_ty);
+            return;
         }
     }
 
@@ -4182,11 +4187,13 @@ void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
 const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operands()[idx];
     if (DAWN_UNLIKELY(!operand)) {
+        AddError(inst, idx) << "missing element operand";
         return nullptr;
     }
 
     auto* type = operand->Type();
     if (DAWN_UNLIKELY(!type)) {
+        AddError(inst, idx) << "missing operand type";
         return nullptr;
     }
 
