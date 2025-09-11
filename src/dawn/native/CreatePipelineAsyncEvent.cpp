@@ -176,7 +176,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
                             "CreatePipelineAsyncEvent::InitializeAsync", this, "label", eventLabel);
 
     auto asyncTask = [event = Ref<CreatePipelineAsyncEvent>(this)] { event->InitializeImpl(true); };
-    device->GetAsyncTaskManager()->PostTask<AsyncTask>(std::move(asyncTask));
+    device->GetAsyncTaskManager()->PostTask(std::move(asyncTask));
 }
 
 template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
