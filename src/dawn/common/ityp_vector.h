@@ -55,42 +55,26 @@ class vector : public std::vector<Value> {
 
   public:
     vector() : Base() {}
-
     explicit vector(Index size) : Base(static_cast<I>(size)) {}
-
     vector(Index size, const Value& init) : Base(static_cast<I>(size), init) {}
-
     vector(const vector& rhs) : Base(static_cast<const Base&>(rhs)) {}
-
     vector(vector&& rhs) : Base(static_cast<Base&&>(rhs)) {}
-
     vector(std::initializer_list<Value> init) : Base(init) {}
 
     vector& operator=(const vector& rhs) {
         Base::operator=(static_cast<const Base&>(rhs));
         return *this;
     }
-
     vector& operator=(vector&& rhs) noexcept {
         Base::operator=(static_cast<Base&&>(rhs));
         return *this;
     }
 
-    Value& operator[](Index i) {
-        return Base::operator[](static_cast<I>(i));
-    }
+    Value& operator[](Index i) { return Base::operator[](static_cast<I>(i)); }
+    constexpr const Value& operator[](Index i) const { return Base::operator[](static_cast<I>(i)); }
 
-    constexpr const Value& operator[](Index i) const {
-        return Base::operator[](static_cast<I>(i));
-    }
-
-    Value& at(Index i) {
-        return Base::at(static_cast<I>(i));
-    }
-
-    constexpr const Value& at(Index i) const {
-        return Base::at(static_cast<I>(i));
-    }
+    Value& at(Index i) { return Base::at(static_cast<I>(i)); }
+    constexpr const Value& at(Index i) const { return Base::at(static_cast<I>(i)); }
 
     constexpr Index size() const {
         DAWN_ASSERT(std::numeric_limits<I>::max() >= Base::size());
