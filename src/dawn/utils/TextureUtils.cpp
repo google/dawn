@@ -248,11 +248,11 @@ bool IsRenderableFormat(const wgpu::Device& device, wgpu::TextureFormat textureF
 
     switch (textureFormat) {
         case wgpu::TextureFormat::RGB9E5Ufloat:
+            return false;
         case wgpu::TextureFormat::R8Snorm:
         case wgpu::TextureFormat::RG8Snorm:
         case wgpu::TextureFormat::RGBA8Snorm:
-            return false;
-
+            return device.HasFeature(wgpu::FeatureName::TextureFormatsTier1);
         case wgpu::TextureFormat::RG11B10Ufloat:
             return device.HasFeature(wgpu::FeatureName::RG11B10UfloatRenderable);
 

@@ -383,14 +383,25 @@ class CopyTextureForBrowserTests : public Parent {
             case wgpu::TextureFormat::RGB10A2Unorm:
             case wgpu::TextureFormat::RGBA16Float:
             case wgpu::TextureFormat::RGBA32Float:
+            case wgpu::TextureFormat::RGBA16Unorm:
+            case wgpu::TextureFormat::RGBA16Snorm:
+            case wgpu::TextureFormat::RGBA8Snorm:
                 return 4;
+            case wgpu::TextureFormat::RG11B10Ufloat:
+                return 3;
             case wgpu::TextureFormat::RG8Unorm:
             case wgpu::TextureFormat::RG16Float:
             case wgpu::TextureFormat::RG32Float:
+            case wgpu::TextureFormat::RG16Unorm:
+            case wgpu::TextureFormat::RG16Snorm:
+            case wgpu::TextureFormat::RG8Snorm:
                 return 2;
             case wgpu::TextureFormat::R8Unorm:
             case wgpu::TextureFormat::R16Float:
             case wgpu::TextureFormat::R32Float:
+            case wgpu::TextureFormat::R16Unorm:
+            case wgpu::TextureFormat::R16Snorm:
+            case wgpu::TextureFormat::R8Snorm:
                 return 1;
             default:
                 DAWN_UNREACHABLE();
@@ -588,6 +599,14 @@ class CopyTextureForBrowser_Basic : public CopyTextureForBrowserTests<DawnTest> 
 class CopyTextureForBrowser_Formats
     : public CopyTextureForBrowserTests<DawnTestWithParams<FormatTestParams>> {
   protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::TextureFormatsTier1})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TextureFormatsTier1);
+        }
+        return requiredFeatures;
+    }
+
     bool IsDstFormatSrgbFormats() {
         return GetParam().mDstFormat == wgpu::TextureFormat::RGBA8UnormSrgb ||
                GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb;
@@ -698,6 +717,7 @@ class CopyTextureForBrowser_Formats
 
         TextureSpec dstTextureSpec;
         dstTextureSpec.format = GetParam().mDstFormat;
+        DAWN_TEST_UNSUPPORTED_IF(!utils::IsRenderableFormat(device, dstTextureSpec.format));
 
         wgpu::Extent3D copySize = {kDefaultTextureWidth, kDefaultTextureHeight};
         wgpu::CopyTextureForBrowserOptions options = {};
@@ -1154,19 +1174,25 @@ TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     DoColorConversionTest();
 }
 
-DAWN_INSTANTIATE_TEST_P(
-    CopyTextureForBrowser_Formats,
-    {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-    std::vector<wgpu::TextureFormat>({wgpu::TextureFormat::RGBA8Unorm,
-                                      wgpu::TextureFormat::BGRA8Unorm,
-                                      wgpu::TextureFormat::RGBA16Float}),
-    std::vector<wgpu::TextureFormat>(
-        {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R32Float,
-         wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RG16Float,
-         wgpu::TextureFormat::RG32Float, wgpu::TextureFormat::RGBA8Unorm,
-         wgpu::TextureFormat::RGBA8UnormSrgb, wgpu::TextureFormat::BGRA8Unorm,
-         wgpu::TextureFormat::BGRA8UnormSrgb, wgpu::TextureFormat::RGB10A2Unorm,
-         wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RGBA32Float}));
+DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_Formats,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                         VulkanBackend()},
+                        std::vector<wgpu::TextureFormat>({wgpu::TextureFormat::RGBA8Unorm,
+                                                          wgpu::TextureFormat::BGRA8Unorm,
+                                                          wgpu::TextureFormat::RGBA16Float}),
+                        std::vector<wgpu::TextureFormat>(
+                            {wgpu::TextureFormat::R8Unorm,      wgpu::TextureFormat::R16Float,
+                             wgpu::TextureFormat::R32Float,     wgpu::TextureFormat::RG8Unorm,
+                             wgpu::TextureFormat::RG16Float,    wgpu::TextureFormat::RG32Float,
+                             wgpu::TextureFormat::RGBA8Unorm,   wgpu::TextureFormat::RGBA8UnormSrgb,
+                             wgpu::TextureFormat::BGRA8Unorm,   wgpu::TextureFormat::BGRA8UnormSrgb,
+                             wgpu::TextureFormat::RGB10A2Unorm, wgpu::TextureFormat::RGBA16Float,
+                             wgpu::TextureFormat::RGBA32Float,  wgpu::TextureFormat::R16Unorm,
+                             wgpu::TextureFormat::RG16Unorm,    wgpu::TextureFormat::RGBA16Unorm,
+                             wgpu::TextureFormat::R16Snorm,     wgpu::TextureFormat::RG16Snorm,
+                             wgpu::TextureFormat::RGBA16Snorm,  wgpu::TextureFormat::R8Snorm,
+                             wgpu::TextureFormat::RG8Snorm,     wgpu::TextureFormat::RGBA8Snorm,
+                             wgpu::TextureFormat::RG11B10Ufloat}));
 
 // Verify |CopyTextureForBrowser| doing subrect copy.
 // Source texture is a full red texture and dst texture is a full
