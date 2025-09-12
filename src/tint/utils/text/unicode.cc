@@ -511,14 +511,11 @@ std::pair<CodePoint, size_t> Decode(const uint16_t* ptr, size_t len) {
     uint32_t low = b - 0xdc00;
     return {CodePoint{0x10000 + ((high << 10) | low)}, 2};
 }
-TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 std::pair<CodePoint, size_t> Decode(std::string_view utf16_string) {
     return Decode(reinterpret_cast<const uint16_t*>(utf16_string.data()), utf16_string.size() / 2);
 }
 
-// This is a C-style API that will always trigger -Wunsafe-buffer-usage
-TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 size_t Encode(CodePoint code_point, uint16_t* ptr) {
     if (code_point <= 0xd7ff || (code_point >= 0xe000 && code_point <= 0xffff)) {
         if (ptr) {
