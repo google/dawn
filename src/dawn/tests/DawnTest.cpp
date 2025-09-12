@@ -166,16 +166,20 @@ std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(
         sanitizedName.resize(sanitizedName.length() - 1);
     }
 
-    // We don't know the test name at this point, but the format usually looks like
-    // this.
-    std::string prefix = mTest + ".TheTestNameUsuallyGoesHere/";
-    std::string testFormat = prefix + sanitizedName;
-    if (testFormat.length() > 210) {
+    // We don't know the test name, so assume that it is the longest one we
+    // have found in the wild for the purposes of calculating length.
+    std::string longestKnownTest =
+        (std::string("OpenGLES_EGLSync/SharedTextureMemoryTests.") +
+         std::string("GetPropertiesAHardwareBufferPropertiesRequiresAHBFeature/"));
+    std::string testFormat = longestKnownTest + sanitizedName;
+    if (testFormat.length() > 240) {
         // The bots don't support test names longer than 256. Shorten the name and append a unique
         // index if we're close. The failure log will still print the full param name.
+        // We use a number < 256 to leave a bit of buffer in case a new test gets added that is
+        // slightly longer than our longest known test.
         std::string suffix = std::string("__") + std::to_string(index);
         size_t targetLength = sanitizedName.length();
-        targetLength -= testFormat.length() - 210;
+        targetLength -= testFormat.length() - 240;
         targetLength -= suffix.length();
         sanitizedName.resize(targetLength);
         sanitizedName = sanitizedName + suffix;
