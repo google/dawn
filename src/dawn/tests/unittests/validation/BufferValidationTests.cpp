@@ -36,7 +36,6 @@
 
 using testing::_;
 using testing::HasSubstr;
-using testing::Invoke;
 using testing::MockCppCallback;
 using testing::TestParamInfo;
 using testing::Values;
@@ -476,9 +475,7 @@ TEST_P(BufferMappingValidationTest, MapAsync_UnmapCalledInCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce(Invoke([&] {
-        buffer.Unmap();
-    }));
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce([&] { buffer.Unmap(); });
 
     buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
     WaitForAllOperations();
@@ -489,9 +486,7 @@ TEST_P(BufferMappingValidationTest, MapAsync_DestroyCalledInCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce(Invoke([&] {
-        buffer.Destroy();
-    }));
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce([&] { buffer.Destroy(); });
 
     buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
     WaitForAllOperations();
@@ -502,13 +497,13 @@ TEST_P(BufferMappingValidationTest, MapAsync_RetryInSuccessCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce(Invoke([&] {
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).WillOnce([&] {
         // MapAsync call on destroyed buffer should be invalid
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("already mapped")))
             .Times(1);
         ASSERT_DEVICE_ERROR(buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowSpontaneous,
                                             mockCb.Callback()));
-    }));
+    });
 
     buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
     WaitForAllOperations();
@@ -519,12 +514,12 @@ TEST_P(BufferMappingValidationTest, MapAsync_RetryInErrorCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).WillOnce(Invoke([&] {
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, _)).WillOnce([&] {
         // Retry with valid parameter and it should succeed
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
         buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                         mockCb.Callback());
-    }));
+    });
 
     // Wrong map mode on buffer is invalid and it should reject with validation error
     ASSERT_DEVICE_ERROR(buffer.MapAsync(
@@ -538,12 +533,12 @@ TEST_P(BufferMappingValidationTest, MapAsync_RetryInUnmappedCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).WillOnce(Invoke([&] {
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).WillOnce([&] {
         // MapAsync call on unmapped buffer should be valid
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
         buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                         mockCb.Callback());
-    }));
+    });
 
     buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
     buffer.Unmap();
@@ -555,12 +550,12 @@ TEST_P(BufferMappingValidationTest, MapAsync_RetryInDestroyedCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
 
     MockMapAsyncCallback mockCb;
-    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).WillOnce(Invoke([&] {
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, _)).WillOnce([&] {
         // MapAsync call on destroyed buffer should be invalid
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("destroyed"))).Times(1);
         ASSERT_DEVICE_ERROR(buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowSpontaneous,
                                             mockCb.Callback()));
-    }));
+    });
 
     buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
     buffer.Destroy();

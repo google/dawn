@@ -27,15 +27,13 @@
 
 #include "dawn/tests/mocks/platform/CachingInterfaceMock.h"
 
-using ::testing::Invoke;
-
 CachingInterfaceMock::CachingInterfaceMock() {
-    ON_CALL(*this, LoadData).WillByDefault(Invoke([this](auto&&... args) {
+    ON_CALL(*this, LoadData).WillByDefault([this](auto&&... args) {
         return LoadDataDefault(args...);
-    }));
-    ON_CALL(*this, StoreData).WillByDefault(Invoke([this](auto&&... args) {
+    });
+    ON_CALL(*this, StoreData).WillByDefault([this](auto&&... args) {
         return StoreDataDefault(args...);
-    }));
+    });
 }
 
 void CachingInterfaceMock::Enable() {

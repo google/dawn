@@ -46,7 +46,6 @@ namespace {
 
 using testing::_;
 using testing::EmptySizedString;
-using testing::Invoke;
 using testing::InvokeWithoutArgs;
 using testing::IsNull;
 using testing::NonEmptySizedString;
@@ -96,13 +95,13 @@ TEST_P(WireInstanceTests, RequestAdapterPassesOptions) {
         RequestAdapter(&options);
 
         EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), _))
-            .WillOnce(WithArg<1>(Invoke([&](const WGPURequestAdapterOptions* apiOptions) {
+            .WillOnce(WithArg<1>([&](const WGPURequestAdapterOptions* apiOptions) {
                 EXPECT_EQ(apiOptions->powerPreference,
                           static_cast<WGPUPowerPreference>(options.powerPreference));
                 EXPECT_EQ(apiOptions->forceFallbackAdapter, options.forceFallbackAdapter);
                 api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Error,
                                                        nullptr, kEmptyOutputStringView);
-            })));
+            }));
 
         FlushClient();
         FlushFutures();
@@ -148,20 +147,20 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
             EXPECT_CALL(api, AdapterHasFeature(apiAdapter, _)).WillRepeatedly(Return(false));
 
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
+                .WillOnce(WithArg<1>([&](WGPUAdapterInfo* info) {
                     *info = fakeInfo;
                     return WGPUStatus_Success;
-                })));
+                }));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPULimits* limits) {
+                .WillOnce(WithArg<1>([&](WGPULimits* limits) {
                     *reinterpret_cast<wgpu::Limits*>(limits) = fakeLimits;
                     return WGPUStatus_Success;
-                })));
+                }));
 
             EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(
-                    Invoke([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; })));
+                .WillOnce(
+                    WithArg<1>([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -174,7 +173,7 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb,
                     Call(wgpu::RequestAdapterStatus::Success, NotNull(), EmptySizedString()))
-            .WillOnce(WithArg<1>(Invoke([&](wgpu::Adapter adapter) {
+            .WillOnce(WithArg<1>([&](wgpu::Adapter adapter) {
                 WGPUAdapterInfo info = {};
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 EXPECT_NE(info.vendor.length, WGPU_STRLEN);
@@ -207,7 +206,7 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 for (WGPUFeatureName feature : featuresList) {
                     EXPECT_EQ(featureSet.erase(feature), 1u);
                 }
-            })));
+            }));
 
         FlushCallbacks();
     });
@@ -266,14 +265,14 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
         .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull())).Times(1);
             EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(
-                    Invoke([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; })));
+                .WillOnce(
+                    WithArg<1>([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; }));
 
             for (WGPUFeatureName feature : fakeFeaturesList) {
                 EXPECT_CALL(api, AdapterHasFeature(apiAdapter, feature)).WillOnce(Return(true));
             }
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
+                .WillOnce(WithArg<1>([&](WGPUAdapterInfo* info) {
                     WGPUChainedStruct* chain = info->nextInChain;
                     while (chain != nullptr) {
                         auto* next = chain->next;
@@ -308,7 +307,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                         chain = next;
                     }
                     return WGPUStatus_Success;
-                })));
+                }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -321,7 +320,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb,
                     Call(wgpu::RequestAdapterStatus::Success, NotNull(), EmptySizedString()))
-            .WillOnce(WithArg<1>(Invoke([&](wgpu::Adapter adapter) {
+            .WillOnce(WithArg<1>([&](wgpu::Adapter adapter) {
                 // Request info without a chained struct.
                 // It should be nullptr.
                 WGPUAdapterInfo info = {};
@@ -388,7 +387,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 // Expect them to match.
                 EXPECT_EQ(powerProperties.powerPreference, fakePowerProperties.powerPreference);
-            })));
+            }));
 
         FlushCallbacks();
     });
@@ -416,8 +415,8 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull())).Times(1);
 
             EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(
-                    Invoke([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; })));
+                .WillOnce(
+                    WithArg<1>([&](WGPUSupportedFeatures* features) { *features = fakeFeatures; }));
 
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -430,12 +429,12 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb,
                     Call(wgpu::RequestAdapterStatus::Success, NotNull(), EmptySizedString()))
-            .WillOnce(WithArg<1>(Invoke([&](wgpu::Adapter adapter) {
+            .WillOnce(WithArg<1>([&](wgpu::Adapter adapter) {
                 WGPUSupportedFeatures features = {};
                 adapter.GetFeatures(reinterpret_cast<wgpu::SupportedFeatures*>(&features));
                 ASSERT_EQ(features.featureCount, 1u);
                 EXPECT_EQ(*features.features, WGPUFeatureName_Depth32FloatStencil8);
-            })));
+            }));
 
         FlushCallbacks();
     });
