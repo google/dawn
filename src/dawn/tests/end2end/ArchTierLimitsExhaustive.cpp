@@ -63,6 +63,20 @@ class TierArchInfoTest_TieredMaxLimits : public TierArchInfoTestBase {
                            dawn::utils::ComboLimits& required) override {
         supported.UnlinkedCopyTo(&required);
     }
+
+    std::string GetFullParamString(int alternate) {
+        std::stringstream param_names_all;
+        param_names_all << this->GetParam();
+
+        DawnTestBase::PrintToStringParamName param_printer{""};
+        std::string full_param =
+            param_printer.SanitizeParamName(param_names_all.str(), this->GetAdapterProperties(), 0);
+        if (alternate != 0) {
+            full_param += "_alt";
+            full_param += std::to_string(alternate);
+        }
+        return full_param;
+    }
 };
 
 #define ENUM_LIST_LIMITS                                           \
@@ -114,18 +128,12 @@ static_assert(
     kNumElements == utils::ComboLimits::kMemberCount,
     "Combo limits structure has a different number of limits than the above ENUM_LIST_LIMITS");
 
+// clang-format off
 TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFields) {
     // SwiftShader will return a lower limit than any modern device on CQ.
     DAWN_TEST_UNSUPPORTED_IF(IsSwiftshader());
 
-    std::stringstream param_names_all;
-    param_names_all << this->GetParam();
-    DawnTestBase::PrintToStringParamName param_printer{""};
-    std::string full_param =
-        param_printer.SanitizeParamName(param_names_all.str(), this->GetAdapterProperties(), 0);
-
     std::map<std::string, std::array<uint64_t, kNumElements>> device_map;
-    // clang-format off
 device_map["D3D12_NVIDIA_GeForce_GTX_1660"]                 = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["Vulkan_llvmpipe__LLVM_19_1_7__256_bits"]        = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 30, 2048, 28, 8,  32, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___0x0000C0DE____SwiftShader_driver_5_0_0__compat"]
@@ -143,7 +151,8 @@ device_map["D3D12_Intel_R__UHD_Graphics_630"]               = {  16384, 16384, 2
 device_map["D3D11_Intel_R__UHD_Graphics_630"]               = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["OpenGLES_ANGLE__Intel__Intel_R__UHD_Graphics_630__0x00009BC5__Direct3D11_vs_5_0_ps_5_0__D3D11_31_0_101_2127__compat"]
                                                             = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 16, 2048, 16, 8,  32, 32768, 1024, 1024, 1024, 64, 65535,  0, 10, 8, 10, 8,};
-device_map["OpenGLES_Mali_G78_compat"]                      = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536,  268435456, 256, 256, 8, 2147483648, 30, 2048, 16, 8,  32, 32768,  256,  256,  256, 64, 65535,  0,  0, 0,  4, 4,};
+device_map["OpenGLES_Mali_G78_compat"]                      = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 16, 8,  32, 32768,  256,  256,  256, 64, 65535,  0,  0, 0,  4, 4,};
+device_map["OpenGLES_Mali_G78_compat_alt1"]                 = {   8192,  8192, 2048,  256, 4, 24, 1000,  8, 4, 16, 16,  8, 4, 12, 65536,  268435456, 256, 256, 8, 2147483648, 30, 2048, 16, 8,  32, 32768,  256,  256,  256, 64, 65535,  0,  0,  0, 4, 4,};
 device_map["OpenGLES_ANGLE__NVIDIA__NVIDIA_GeForce_GTX_1660__0x00002184__Direct3D11_vs_5_0_ps_5_0__D3D11_31_0_15_4601__compat"]
                                                             = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 16, 2048, 16, 8,  32, 32768, 1024, 1024, 1024, 64, 65535,  0, 10, 8, 10, 8,};
 device_map["Vulkan_Intel_R__UHD_Graphics_630"]              = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  536870912, 256, 256, 8, 4294967296, 30, 2048, 28, 8,  32, 32768,  256,  256,  256, 64, 65535, 32, 10, 8, 10, 8,};
@@ -161,56 +170,77 @@ device_map["OpenGLES_ANGLE__Intel__Intel_R__UHD_Graphics_770__0x00004680__Direct
 device_map["OpenGLES_ANGLE__NVIDIA__NVIDIA_GeForce_GTX_1660__0x00002184__Direct3D11_vs_5_0_ps_5_0__D3D11_32_0_15_7602__compat"]
                                                             = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 16, 2048, 16, 8,  32, 32768, 1024, 1024, 1024, 64, 65535,  0, 10, 8, 10, 8,};
 device_map["Vulkan_Adreno__TM__640"]                        = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  536870912, 256, 256, 8, 1073741824, 30, 2048, 16, 8,  32, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
-device_map["Vulkan_Mali_G78"]                               = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  268435456, 256, 256, 8, 4294967296, 30, 2048, 28, 8,  32, 32768,  256,  256,  256, 64, 65535, 32, 10, 8, 10, 8,};
+device_map["Vulkan_Mali_G78"]                               = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8,  32, 32768,  256,  256,  256, 64, 65535, 32, 10, 8, 10, 8,};
+device_map["Vulkan_Mali_G78_alt1"]                          = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  268435456, 256, 256, 8, 4294967296, 30, 2048, 28, 8,  32, 32768,  256,  256,  256, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["Vulkan_GeForce_GTX_1660"]                       = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8,  32, 49152, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["Vulkan_Intel_R__UHD_Graphics_630__CML_GT2"]     = {  16384, 16384, 2048, 2048, 4, 24, 1000,  8, 4, 16, 16, 10, 4, 12, 65536, 4294967292, 256, 256, 8, 4294967296, 16, 2048, 28, 8,  32, 65536,  256,  256,  256, 64, 65535, 32, 10, 4, 10, 4,};
 device_map["Metal_Apple_M2"]                                = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 4294967292, 256, 256, 8, 4294967296, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
-    // clang-format on
+device_map["Metal_AMD_Radeon_Pro_560X"]                     = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
+
     auto& supported_limits = GetSupportedLimits();
 
+    // We need alternates mostly due to differences in driver versions.
+    // Some devices might be on one driver that supports limit X while others might be on a driver that
+    // supports limit Y.
+    // In the case of alternates we append a "_alt{n}" where n starts at 1 (first alternate).
     bool encountered_error = false;
-    auto iter_curr_limits = device_map.find(full_param);
-    if (iter_curr_limits == device_map.end()) {
-        // CQ bots will pass in '--test-launcher-bot-mode' as a command line parameter.
-        // In this case, we didn't find any results, so we want to make sure we report an error as
-        // this is a new CQ bot and we need to update the  test results.
-        if (IsTestLauncherBotMode()) {
-            encountered_error = true;
-        } else {
-            // Skipping the test when the device params does not match limits us to only testing
-            // known CQ (and try) bots.
-            GTEST_SKIP();
+    int alternate_index = 0;
+    bool has_next_alternate = true;
+    std::string full_param;
+    do {
+        encountered_error = false;
+        full_param = GetFullParamString(alternate_index);
+        auto iter_curr_limits = device_map.find(full_param);
+        alternate_index++;
+        has_next_alternate =  device_map.contains(GetFullParamString(alternate_index));
+        if (iter_curr_limits == device_map.end()) {
+            // CQ bots will pass in '--test-launcher-bot-mode' as a command line parameter.
+            // In this case, we didn't find any results, so we want to make sure we report an error as
+            // this is a new CQ bot and we need to update the  test results.
+            if (IsTestLauncherBotMode()) {
+                encountered_error = true;
+            } else {
+                // Skipping the test when the device params does not match limits us to only testing
+                // known CQ (and try) bots.
+                GTEST_SKIP();
+            }
         }
-    }
 
-    int curr_idx = 0;
-#define ENUM_LIMIT_PROPERTY(fieldName)                                                           \
-    if (!encountered_error &&                                                                    \
-        supported_limits.fieldName != static_cast<decltype(supported_limits.fieldName)>(         \
-                                          (iter_curr_limits->second)[curr_idx])) {               \
-        EXPECT_EQ(supported_limits.fieldName, static_cast<decltype(supported_limits.fieldName)>( \
-                                                  (iter_curr_limits->second)[curr_idx]));        \
-        /*Report first error only*/                                                              \
-        encountered_error = true;                                                                \
-    }                                                                                            \
-    curr_idx++;
+        int curr_idx = 0;
+        #define ENUM_LIMIT_PROPERTY(fieldName)                                                             \
+        if (!encountered_error &&                                                                          \
+            supported_limits.fieldName !=                                                                  \
+                static_cast<decltype(supported_limits.fieldName)>((iter_curr_limits->second)[curr_idx])) { \
+            /* maybe the alternate will pass. Do not surface error.*/                                      \
+            if(!has_next_alternate){                                                                       \
+            EXPECT_EQ(supported_limits.fieldName, static_cast<decltype(supported_limits.fieldName)>(       \
+                                                    (iter_curr_limits->second)[curr_idx]));                \
+            }                                                                                              \
+            /*Report first error only*/                                                                    \
+            encountered_error = true;                                                                      \
+        }                                                                                                  \
+        curr_idx++;
 
-    ENUM_LIST_LIMITS
-#undef ENUM_LIMIT_PROPERTY
+        ENUM_LIST_LIMITS
+        #undef ENUM_LIMIT_PROPERTY
+    } while(has_next_alternate && encountered_error);
+
 
     if (encountered_error) {
         std::string expected_str =
             "\n Mismatch found! The full set of correct limits for device are:\n "
             "device_map[\"" +
             full_param + "\"] = { " +
-#define ENUM_LIMIT_PROPERTY(fieldName) " " + std::to_string(supported_limits.fieldName) + "," +
+    #define ENUM_LIMIT_PROPERTY(fieldName) " " + std::to_string(supported_limits.fieldName) + "," +
             ENUM_LIST_LIMITS
-#undef ENUM_LIMIT_PROPERTY
+    #undef ENUM_LIMIT_PROPERTY
             "};";
         SCOPED_TRACE(expected_str);
         EXPECT_FALSE(encountered_error);
     }
 }
+
+// clang-format on
 
 DAWN_INSTANTIATE_TEST(TierArchInfoTest_TieredMaxLimits,
                       D3D11Backend(),
