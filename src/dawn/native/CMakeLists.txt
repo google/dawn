@@ -25,6 +25,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Include Windows SDK DLL copying utilities
+include("${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/CopyWindowsSDKDLL.cmake")
+
 DawnJSONGenerator(
     TARGET "native_utils"
     PRINT_NAME "Dawn native utilities"
@@ -1026,4 +1029,10 @@ endif ()
 # doesn't work well with shared libs
 if (DAWN_USE_BUILT_DXC)
     target_link_libraries(dawn_native PRIVATE dxcompiler)
+endif()
+
+# Copy d3dcompiler_47.dll from Windows SDK when not using system component loading
+if (WIN32 AND NOT DAWN_FORCE_SYSTEM_COMPONENT_LOAD AND (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12))
+    AddCopyWindowsSDKDLLTarget(copy_d3dcompiler_dll "d3dcompiler_47.dll")
+    add_dependencies(dawn_native copy_d3dcompiler_dll)
 endif()
