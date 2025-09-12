@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_COMMON_MUTEXPROTECTED_H_
 #define SRC_DAWN_COMMON_MUTEXPROTECTED_H_
 
+#include <chrono>
+#include <condition_variable>
 #include <mutex>
 #include <utility>
 
@@ -37,6 +39,7 @@
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/StackAllocated.h"
+#include "dawn/common/Time.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 #include "partition_alloc/pointers/raw_ptr_exclusion.h"
 
@@ -44,6 +47,9 @@ namespace dawn {
 
 template <typename T, template <typename, typename> class Guard>
 class MutexProtected;
+
+template <typename T, template <typename, typename> class Guard>
+class MutexCondVarProtected;
 
 template <typename T, template <typename, typename> class Guard>
 class MutexProtectedSupport;
@@ -85,6 +91,11 @@ struct MutexProtectedSupportTraits {
     static const auto* GetObj(const T* const obj) { return &obj->mImpl; }
 };
 
+template <typename T, typename Traits>
+class Guard;
+template <typename T, typename Traits>
+class CondVarGuard;
+
 // Guard class is a wrapping class that gives access to a protected resource after acquiring the
 // lock related to it. For the lifetime of this class, the lock is held.
 template <typename T, typename Traits>
@@ -117,6 +128,7 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
 
   private:
     using NonConstT = typename std::remove_const<T>::type;
+    friend class CondVarGuard<T, Traits>;
     friend class MutexProtectedSupport<NonConstT, Guard>;
     friend class MutexProtected<NonConstT, Guard>;
 
@@ -126,6 +138,63 @@ class DAWN_SCOPED_LOCKABLE Guard : public NonMovable, StackAllocated {
     // unlikely to be used after it is freed.
     RAW_PTR_EXCLUSION T* mObj = nullptr;
     raw_ptr<class Defer> mDefer = nullptr;
+};
+
+// CondVarGuard is a different guard class that internally holds a Guard, but provides additional
+// functionality w.r.t condition variables. Specifically, the non-const version of this Guard will
+// automatically call notify_all() on the underlying condition variable so that calls to |Wait*()|
+// will unblock when |Pred| is true.
+template <typename T, typename Traits>
+class CondVarGuard : public NonMovable, StackAllocated {
+  public:
+    // It's the programmer's burden to not save the pointer/reference and reuse it without the lock.
+    auto* operator->() const { return mGuard.Get(); }
+    auto& operator*() const { return *mGuard.Get(); }
+
+    template <typename Predicate>
+    void Wait(Predicate pred) {
+        DAWN_ASSERT(mNotifyScope.cv);
+        mNotifyScope.cv->wait(mGuard.mLock, [&] { return pred((*Get())); });
+    }
+    template <typename Predicate>
+    bool WaitFor(Nanoseconds timeout, Predicate pred) {
+        DAWN_ASSERT(mNotifyScope.cv);
+        if (timeout < kMaxDurationNanos) {
+            return mNotifyScope.cv->wait_for(
+                mGuard.mLock, std::chrono::nanoseconds(static_cast<uint64_t>(timeout)),
+                [&] { return pred(*Get()); });
+        } else {
+            Wait(pred);
+            return true;
+        }
+    }
+
+  protected:
+    CondVarGuard(T* obj,
+                 typename Traits::MutexType& mutex,
+                 class Defer* defer = nullptr,
+                 std::condition_variable* cv = nullptr)
+        : mNotifyScope(cv), mGuard(obj, mutex, defer) {}
+
+    auto* Get() const { return mGuard.Get(); }
+
+  private:
+    using NonConstT = typename std::remove_const<T>::type;
+    friend class MutexProtected<NonConstT, CondVarGuard>;
+    friend class MutexCondVarProtected<NonConstT, CondVarGuard>;
+
+    struct NotifyScope {
+        explicit NotifyScope(std::condition_variable* cv) : cv(cv) { DAWN_ASSERT(cv); }
+        ~NotifyScope() {
+            if constexpr (!std::is_const_v<T>) {
+                cv->notify_all();
+            }
+        }
+
+        raw_ptr<std::condition_variable> cv = nullptr;
+    };
+    NotifyScope mNotifyScope;
+    Guard<T, Traits> mGuard;
 };
 
 template <typename T, typename Traits, template <typename, typename> class Guard = detail::Guard>
@@ -146,7 +215,11 @@ class MutexProtectedBase {
     }
     template <typename Fn>
     auto Use(Fn&& fn) const {
-        return fn(Use());
+        return fn(ConstUse());
+    }
+    template <typename Fn>
+    auto ConstUse(Fn&& fn) const {
+        return fn(ConstUse());
     }
 
     template <typename Fn>
@@ -158,7 +231,7 @@ class MutexProtectedBase {
   protected:
     virtual Usage Use() = 0;
     virtual Usage UseWithDefer(Defer& defer) = 0;
-    virtual ConstUsage Use() const = 0;
+    virtual ConstUsage ConstUse() const = 0;
 
     mutable typename Traits::MutexType mMutex;
 };
@@ -213,12 +286,57 @@ class MutexProtected
     using Base::Use;
     using Base::UseWithDefer;
 
+  protected:
+    T mObj;
+
   private:
     Usage Use() override { return Usage(&mObj, this->mMutex); }
     Usage UseWithDefer(Defer& defer) override { return Usage(&mObj, this->mMutex, &defer); }
-    ConstUsage Use() const override { return ConstUsage(&mObj, this->mMutex); }
+    ConstUsage ConstUse() const override { return ConstUsage(&mObj, this->mMutex); }
+};
 
-    T mObj;
+// Wrapping class for object members to provide the protections with a mutex of a MutexProtected
+// with some additional helpers to allow waiting with a conditional variable as well. The general
+// usage should look the same as MutexProtected above, with additional usages like the following
+// example:
+//     class Example {
+//       public:
+//         void Complete() {
+//             mDone.Use([](auto done) {
+//                 // Do something
+//                 mDone = true;
+//             });
+//         }
+//         void WaitUntilDone() {
+//             mDone.Use([](auto done) {
+//                 done.Wait([](auto& done) { return done; });
+//             });
+//         }
+//       private:
+//         MutexCondVarProtected<bool> mDone = false;
+//     };
+template <typename T, template <typename, typename> class Guard = detail::CondVarGuard>
+class MutexCondVarProtected : public MutexProtected<T, Guard> {
+  public:
+    using Base = MutexProtected<T, Guard>;
+    using typename Base::ConstUsage;
+    using typename Base::Usage;
+
+    using Base::Base;
+
+    // Note that unlike in MutexProtected where |Use| and |ConstUse| guarantee the lock for the
+    // entire critical section, if a user calls |Wait| within |Fn|, the lock may be released and
+    // reacquired in order for another thread to update the condition.
+    using Base::Base::ConstUse;
+    using Base::Base::Use;
+
+  private:
+    Usage Use() override { return Usage(&this->mObj, this->mMutex, nullptr, &mCv); }
+    ConstUsage ConstUse() const override {
+        return ConstUsage(&this->mObj, this->mMutex, nullptr, &mCv);
+    }
+
+    mutable std::condition_variable mCv;
 };
 
 // CRTP wrapper to help create classes that are generally MutexProtected, but may wish to implement
@@ -259,7 +377,7 @@ class MutexProtectedSupport
     Usage UseWithDefer(Defer& defer) override {
         return Usage(static_cast<T*>(this), this->mMutex, &defer);
     }
-    ConstUsage Use() const override {
+    ConstUsage ConstUse() const override {
         return ConstUsage(static_cast<const T*>(this), this->mMutex);
     }
 };
