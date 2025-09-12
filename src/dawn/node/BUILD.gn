@@ -133,6 +133,7 @@ static_library("dawn_node_interop") {
     ":idlgen_webgpu_cpp",
     ":idlgen_webgpu_h",
     "$dawn_root/include/dawn:cpp_headers",
+    "$dawn_root/src/utils",
   ]
 }
 
@@ -208,8 +209,8 @@ static_library("dawn_node_binding") {
     "binding/TogglesLoader.h",
   ]
   include_dirs = [ "${dawn_node_gen_dir}" ]
+  public_deps = [ ":dawn_node_interop" ]
   deps = [
-    ":dawn_node_interop",
     "$dawn_root/src/dawn/native:native",
     "$dawn_root/src/dawn/utils:wgpu_utils",
   ]
@@ -266,11 +267,13 @@ shared_library("dawn_node") {
     "Module.cpp",
   ]
   deps = [
-    ":copy_cts_js",
-    ":copy_index_js",
     ":dawn_node_binding",
     ":gen_napi_symbols",
     "$dawn_root/src/dawn:proc",
+  ]
+  data_deps = [
+    ":copy_cts_js",
+    ":copy_index_js",
   ]
   if (is_win) {
     deps += [ ":napi_symbols_lib" ]

@@ -28,6 +28,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
+          'isolated_scripts': 'dawn_node_cts_sws_tests',
         },
       },
     },

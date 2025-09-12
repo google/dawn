@@ -42,6 +42,22 @@
         'test': 'dawn_end2end_tests',
       },
     },
+    'dawn_node_cts_sws_tests': {
+      'dawn_node_sws_cts': {
+        'args': [
+          '-backend',
+          'vulkan',
+          '-adapter',
+          'SwiftShader',
+          'webgpu:api,operation,adapter,requestDevice:default:*',
+        ],
+        'mixins': [
+          # TODO(crbug.com/441328362): Support running these tests on Swarming.
+          'no_swarming',
+        ],
+        'test': 'dawn_node_cts',
+      },
+    },
     'dawn_unit_gtests': {
       'dawn_unittests': {
         'mixins': [

@@ -352,18 +352,11 @@ group("fuzzer_corpus_tools") {
 
 group("fuzzer_corpus_tests") {
   testonly = true
-  data_deps = [ ":fuzzer_corpus_tools" ]
-  data = [
-    # Needed by the Go code, as it is used to determine the Dawn root.
-    "//DEPS",
-    "//go.mod",
-    "//go.sum",
-    "//tools/run.py",
-
-    "//tools/golang/",
-    "//tools/src/",
-    "//test/tint/",
+  data_deps = [
+    ":fuzzer_corpus_tools",
+    "${dawn_root}/tools:go_tools",
   ]
+  data = [ "${dawn_root}/test/tint/" ]
 }
 
 group("tests") {

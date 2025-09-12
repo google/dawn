@@ -144,6 +144,20 @@
         "test": "tint_unittests",
         "test_id_prefix": "ninja://src/tint/cmd/test:tint_unittests/"
       }
+    ],
+    "isolated_scripts": [
+      {
+        "args": [
+          "-backend",
+          "vulkan",
+          "-adapter",
+          "SwiftShader",
+          "webgpu:api,operation,adapter,requestDevice:default:*"
+        ],
+        "name": "dawn_node_sws_cts",
+        "test": "dawn_node_cts",
+        "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      }
     ]
   }
 }

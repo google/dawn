@@ -3,6 +3,11 @@
     'label': '//src/dawn/tests:dawn_end2end_tests',
     'type': 'windowed_test_launcher',
   },
+  'dawn_node_cts': {
+    'label': '//scripts/dawn_node_cts:dawn_node_cts',
+    'type': 'script',
+    'script': '//scripts/dawn_node_cts/run_dawn_node_cts.py',
+  },
   'dawn_unittests': {
     'label': '//src/dawn/tests:dawn_unittests',
     'type': 'windowed_test_launcher',

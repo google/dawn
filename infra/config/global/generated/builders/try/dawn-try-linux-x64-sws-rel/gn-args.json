@@ -1,5 +1,6 @@
 {
   "gn_args": {
+    "dawn_build_node_bindings": true,
     "dawn_enable_d3d12": false,
     "dawn_use_swiftshader": true,
     "is_clang": true,

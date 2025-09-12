@@ -51,6 +51,13 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "dawn_node_bindings",
+    args = {
+        "dawn_build_node_bindings": True,
+    },
+)
+
+gn_args.config(
     name = "dawn_swiftshader",
     args = {
         "dawn_use_swiftshader": True,

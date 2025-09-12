@@ -68,6 +68,9 @@ group("tests") {
     "src/dawn/tests",
     "src/tint:tests",
   ]
+  if (dawn_build_node_bindings) {
+    deps += [ "scripts/dawn_node_cts" ]
+  }
 }
 
 group("cmds") {
