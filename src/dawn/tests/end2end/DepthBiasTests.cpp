@@ -162,6 +162,9 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
     // NVIDIA GPUs under Vulkan seem to be using a different scale than everyone else.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
+    // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsIntel() && IsAndroid());
+
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
                      kPointTwoFiveBiasForPointTwoFiveZOnFloat, 0, 0);

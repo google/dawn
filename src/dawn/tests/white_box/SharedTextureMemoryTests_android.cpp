@@ -297,6 +297,9 @@ TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
 
 // Test writing the memory on the CPU, then sampling on the device.
 TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
+    // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -373,6 +376,9 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
 TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
 
+    // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -405,6 +411,9 @@ TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProper
 // Test querying YCbCr info from the Device.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
+    // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
 
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
@@ -468,6 +477,9 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
 // Test querying YCbCr info from the SharedTextureMemory without external format.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithoutExternalFormat) {
     DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
+    // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsIntel() && IsAndroid());
 
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
