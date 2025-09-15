@@ -154,15 +154,17 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowMultipleEntryPoints,
-                                              core::ir::Capability::kAllowOverrides,
-                                              core::ir::Capability::kAllowVectorElementPointer,
-                                              core::ir::Capability::kAllowPhonyInstructions,
-                                              core::ir::Capability::kAllowNonCoreTypes,
-                                              core::ir::Capability::kAllowStructMatrixDecorations,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowMultipleEntryPoints,
+                                    core::ir::Capability::kAllowOverrides,
+                                    core::ir::Capability::kAllowVectorElementPointer,
+                                    core::ir::Capability::kAllowPhonyInstructions,
+                                    core::ir::Capability::kAllowNonCoreTypes,
+                                    core::ir::Capability::kAllowStructMatrixDecorations,
+                                    core::ir::Capability::kAllowLocationForNumericElements,
+                                });
     if (result != Success) {
         return result.Failure();
     }

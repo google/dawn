@@ -81,6 +81,8 @@ enum class Capability : uint8_t {
     kAllowNonCoreTypes,
     /// Allows matrix annotations on structure members
     kAllowStructMatrixDecorations,
+    /// Allows @location on structs, matrices, and arrays that have numeric elements
+    kAllowLocationForNumericElements,
 };
 
 /// Capabilities is a set of Capability

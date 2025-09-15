@@ -39,7 +39,10 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 class SpirvReader_ShaderIOTest : public core::ir::transform::TransformTest {
   public:
-    void SetUp() override { capabilities.Add(core::ir::Capability::kAllowMultipleEntryPoints); }
+    void SetUp() override {
+        capabilities.Add(core::ir::Capability::kAllowMultipleEntryPoints);
+        capabilities.Add(core::ir::Capability::kAllowLocationForNumericElements);
+    }
 
   protected:
     core::IOAttributes BuiltinAttrs(core::BuiltinValue builtin) {

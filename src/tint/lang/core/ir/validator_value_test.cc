@@ -698,6 +698,75 @@ TEST_F(IR_ValidatorTest, Var_Struct_MissingIOAnnotations) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_Location_InvalidType) {
+    auto* v = b.Var<AddressSpace::kIn, bool>();
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:30 error: var: module scope variable with a location attribute must be a numeric scalar or vector, but has type ptr<__in, bool, read>
+  %1:ptr<__in, bool, read> = var undef @location(0)
+                             ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Struct_Location_InvalidType) {
+    IOAttributes attr;
+    attr.location = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.bool_(), attr},
+                                               });
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, str_ty, read_write));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:41 error: var: module scope variable struct member with a location attribute must be a numeric scalar or vector, but has type bool
+  %1:ptr<__out, MyStruct, read_write> = var undef
+                                        ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Location_Struct_WithCapability) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                          });
+    auto* v = b.Var(ty.ptr(AddressSpace::kIn, str_ty, read));
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowLocationForNumericElements});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Var_Location_Struct_WithoutCapability) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32()},
+                                                          });
+    auto* v = b.Var(ty.ptr(AddressSpace::kIn, str_ty, read));
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:34 error: var: module scope variable with a location attribute must be a numeric scalar or vector, but has type ptr<__in, MyStruct, read>
+  %1:ptr<__in, MyStruct, read> = var undef @location(0)
+                                 ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_Sampler_NonHandleAddressSpace) {
     auto* v = b.Var(ty.ptr(AddressSpace::kPrivate, ty.sampler(), read_write));
     mod.root_block->Append(v);
