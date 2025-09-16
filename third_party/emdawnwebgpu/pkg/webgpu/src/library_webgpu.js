@@ -36,12 +36,20 @@
     // Note that we use |convertToU31| for values we assume should always be small so that we only
     // assert it in debug mode. We use |convertToU32| for values that may be unsigned values that
     // can validly be larger than 2^31 such that the signed bit may be flipped.
-    convertToU31: function(value) {
+    convertToU31: function(variable) {
       if (!ASSERTIONS) return '';
-      return `assert(${value} >= 0);`;
+      return `assert(${variable} >= 0);`;
     },
-    convertToU32: function(value) {
-      return `${value} >>>= 0;`;
+    convertToU32: function(variable) {
+      return `${variable} >>>= 0;`;
+    },
+
+    // Provide very limited support for mismatches between the compile options for webgpu.cpp and
+    // the link options for the program, in a specific unknown case where negative pointers get
+    // passed from Wasm to JS. TODO(b/422847728): We shouldn't need this. Try to remove it.
+    ensurePointerUnsigned: function(variable) {
+      if (MEMORY64) return '';
+      return `${variable} >>>= 0`;
     },
 
     makeGetBool: function(struct, offset) {
@@ -105,10 +113,8 @@ var LibraryWebGPU = {
       // care about object type, and is keyed on the pointer address.
       jsObjects: [],
       jsObjectInsert: (ptr, jsObject) => {
-        // TODO(crbug.com/422847728): If the bindings aren't built with the same
-        // linkopts as dependencies, i.e. in google3, the pointers can be signed
-        // ints and results in crashes, so force the pointers to be unsigned.
-        WebGPU.Internals.jsObjects[(ptr >>>= 0)] = jsObject;
+        {{{ gpu.ensurePointerUnsigned('ptr') }}}
+        WebGPU.Internals.jsObjects[ptr] = jsObject;
       },
 
       // Buffer unmapping callbacks are stored in a separate table to keep
@@ -144,14 +150,11 @@ var LibraryWebGPU = {
     // because importing is not a "move" into the API, rather just a "copy".
     getJsObject: (ptr) => {
       if (!ptr) return undefined;
-      // TODO(crbug.com/422847728): If the bindings aren't built with the same
-      // linkopts as dependencies, i.e. in google3, the pointers can be signed
-      // ints and results in crashes, so force the pointers to be unsigned.
-      var key = (ptr >>>= 0);
+      {{{ gpu.ensurePointerUnsigned('ptr') }}}
 #if ASSERTIONS
-      assert(key in WebGPU.Internals.jsObjects);
+      assert(ptr in WebGPU.Internals.jsObjects);
 #endif
-      return WebGPU.Internals.jsObjects[key];
+      return WebGPU.Internals.jsObjects[ptr];
     },
     {{{ gpu.makeImportJsObject('Adapter') }}}
     {{{ gpu.makeImportJsObject('BindGroup') }}}
