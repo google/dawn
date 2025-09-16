@@ -31,8 +31,13 @@
 # Python module interface for Emscripten ports.
 
 import os
+import sys
 import zlib
-from typing import Union, Dict, Optional
+from typing import Dict, Optional
+
+if __name__ == '__main__':
+    print('Please see README.md for details on how to use this port.')
+    sys.exit(1)
 
 LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (available under both MIT License and University of Illinois/NCSA Open Source License)"
 
@@ -81,8 +86,8 @@ _srcs = [
 # Check for a generated file that would only be there in the built package
 if not os.path.isfile(os.path.join(_c_include_dir, 'webgpu', 'webgpu.h')):
     raise Exception(
-        "emdawnwebgpu.port.py may only be used from a built emdawnwebgpu_pkg, "
-        "not from Dawn's source tree. You can use pre-built packages from "
+        "emdawnwebgpu.port.py must sit in a built emdawnwebgpu_pkg, not be used standalone or "
+        "from Dawn's source tree. Download a pre-built package from "
         "https://github.com/google/dawn/releases or build it locally.")
 
 # Collect a list of all files that affect the compiled port so that we know

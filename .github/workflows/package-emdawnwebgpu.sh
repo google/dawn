@@ -81,18 +81,30 @@ cat << EOF > "$REMOTE_PORT_FILE"
 
 # https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md
 r"""
-The full README of Emdawnwebgpu follows.
+This "remote port" instructs Emscripten (4.0.10+) how to automatically download
+the actual port for Emdawnwebgpu. See README below for instructions.
 
 $(cat out/wasm/emdawnwebgpu_pkg/README.md)
 """
 
-TAG = '${PKG_VERSION}'
+import sys
 
-EXTERNAL_PORT = f'https://github.com/${GITHUB_REPOSITORY}/releases/download/{TAG}/emdawnwebgpu_pkg-{TAG}.zip'
+if __name__ == '__main__':
+    print('Please see documentation inside this file for details on how to use this port.')
+    sys.exit(1)
+
+_VERSION = '${PKG_VERSION}'
+
+# Remote-specific port information
+
+# - Where to download the port
+EXTERNAL_PORT = f'https://github.com/${GITHUB_REPOSITORY}/releases/download/{_VERSION}/emdawnwebgpu_pkg-{_VERSION}.zip'
+# - Hash to verify the download integrity
 SHA512 = '${PKG_FILE_SHA512}'
+# - Path of the port inside the zip file
 PORT_FILE = 'emdawnwebgpu_pkg/emdawnwebgpu.port.py'
 
-# Port information (required)
+# General port information
 
 # - Visible in emcc --show-ports and emcc --use-port=emdawnwebgpu:help
 LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (available under both MIT License and University of Illinois/NCSA Open Source License)"
@@ -100,6 +112,12 @@ LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (
 # - Visible in emcc --use-port=emdawnwebgpu:help
 DESCRIPTION = "Emdawnwebgpu implements webgpu.h on WebGPU, replacing -sUSE_WEBGPU. **For info on usage and filing feedback, see link below.**"
 URL = 'https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md'
+
+# Emscripten <4.0.10 won't notice EXTERNAL_PORT and will try to use this.
+def get(ports, settings, shared):
+    raise Exception('Remote ports require Emscripten 4.0.10+.')
+def clear(ports, settings, shared):
+    pass
 EOF
 
 # Create RELEASE_INFO.md
