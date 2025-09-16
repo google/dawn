@@ -1,12 +1,16 @@
 {
   "ci": {
+    "dawn-linux-x64-builder-dbg": "ci/dawn-linux-x64-builder-dbg/gn-args.json",
     "dawn-linux-x64-builder-rel": "ci/dawn-linux-x64-builder-rel/gn-args.json",
+    "dawn-linux-x64-fuzz-dbg": "ci/dawn-linux-x64-fuzz-dbg/gn-args.json",
     "dawn-linux-x64-fuzz-rel": "ci/dawn-linux-x64-fuzz-rel/gn-args.json"
   },
   "try": {
     "dawn-cq-linux-x64-fuzz-rel": "try/dawn-cq-linux-x64-fuzz-rel/gn-args.json",
     "dawn-cq-linux-x64-rel": "try/dawn-cq-linux-x64-rel/gn-args.json",
+    "dawn-try-linux-x64-fuzz-dbg": "try/dawn-try-linux-x64-fuzz-dbg/gn-args.json",
     "dawn-try-linux-x64-fuzz-rel": "try/dawn-try-linux-x64-fuzz-rel/gn-args.json",
+    "dawn-try-linux-x64-sws-dbg": "try/dawn-try-linux-x64-sws-dbg/gn-args.json",
     "dawn-try-linux-x64-sws-rel": "try/dawn-try-linux-x64-sws-rel/gn-args.json"
   }
 }

@@ -51,7 +51,7 @@ try_.defaults.set(
 
 try_.builder(
     name = "dawn-cq-linux-x64-rel",
-    description_html = "Tests Dawn on Linux/x64 on multiple hardware configs. Blocks CL submission",
+    description_html = "Tests release Dawn on Linux/x64 on multiple hardware configs. Blocks CL submission",
     max_concurrent_builds = 3,
     os = os.LINUX_DEFAULT,
     ssd = None,
@@ -67,7 +67,7 @@ try_.builder(
 
 try_.builder(
     name = "dawn-cq-linux-x64-fuzz-rel",
-    description_html = "Compiles and runs Dawn binaries for 'tools/run fuzz' for Linux/x64. Blocks CL submission.",
+    description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x64. Blocks CL submission.",
     max_concurrent_builds = 3,
     os = os.LINUX_DEFAULT,
     ssd = None,
@@ -92,8 +92,18 @@ def dawn_linux_manual_builder(*, name, **kwargs):
     )
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-sws-dbg",
+    description_html = "Tests debug Dawn on Linux/x64 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-builder-dbg",
+        "ci/dawn-linux-x64-sws-dbg",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-dbg",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x64-sws-rel",
-    description_html = "Tests Dawn on Linux/x64 with SwiftShader. Manual only.",
+    description_html = "Tests release Dawn on Linux/x64 with SwiftShader. Manual only.",
     mirrors = [
         "ci/dawn-linux-x64-builder-rel",
         "ci/dawn-linux-x64-sws-rel",
@@ -102,8 +112,17 @@ dawn_linux_manual_builder(
 )
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-fuzz-dbg",
+    description_html = "Runs debug Dawn fuzz tests on Linux/x64. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-fuzz-dbg",
+    ],
+    gn_args = "ci/dawn-linux-x64-fuzz-dbg",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x64-fuzz-rel",
-    description_html = "Runs Dawn fuzz tests on Linux/x64. Manual only.",
+    description_html = "Runs release Dawn fuzz tests on Linux/x64. Manual only.",
     mirrors = [
         "ci/dawn-linux-x64-fuzz-rel",
     ],
