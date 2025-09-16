@@ -912,16 +912,23 @@ struct Decoder {
         return mod_out_.Types().depth_texture(dimension);
     }
 
-    const type::SampledTexture* CreateTypeSampledTexture(const pb::TypeSampledTexture& texture_in) {
+    const type::Type* CreateTypeSampledTexture(const pb::TypeSampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
+        if (!sub_type) {
+            err_ << "invalid Sampled texture subtype\n";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().sampled_texture(dimension, sub_type);
     }
 
-    const type::MultisampledTexture* CreateTypeMultisampledTexture(
-        const pb::TypeMultisampledTexture& texture_in) {
+    const type::Type* CreateTypeMultisampledTexture(const pb::TypeMultisampledTexture& texture_in) {
         auto dimension = TextureDimension(texture_in.dimension());
         auto sub_type = Type(texture_in.sub_type());
+        if (!sub_type) {
+            err_ << "invalid Multisampled texture subtype\n";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().multisampled_texture(dimension, sub_type);
     }
 
@@ -973,9 +980,12 @@ struct Decoder {
         return mod_out_.Types().Get<type::Sampler>(kind);
     }
 
-    const type::InputAttachment* CreateTypeInputAttachment(
-        const pb::TypeInputAttachment& input_in) {
+    const type::Type* CreateTypeInputAttachment(const pb::TypeInputAttachment& input_in) {
         auto sub_type = Type(input_in.sub_type());
+        if (!sub_type) {
+            err_ << "invalid Input attachment subtype\n";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().input_attachment(sub_type);
     }
 
