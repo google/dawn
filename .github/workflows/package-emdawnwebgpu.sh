@@ -48,6 +48,7 @@ python3 tools/activate-emsdk
 # First build the link test in debug mode as a basic test.
 third_party/emsdk/upstream/emscripten/emcmake cmake -S=. -B=out/wasm \
     -C=.github/workflows/dawn-ci.cmake \
+    -DDAWN_ENABLE_INSTALL=0 \
     -DCMAKE_BUILD_TYPE=Debug
 make -j4 -C out/wasm emdawnwebgpu_link_test
 
