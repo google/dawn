@@ -128,3 +128,22 @@ dawn_linux_manual_builder(
     ],
     gn_args = "ci/dawn-linux-x64-fuzz-rel",
 )
+
+dawn_linux_manual_builder(
+    name = "dawn-try-linux-x86-sws-rel",
+    description_html = "Tests release Dawn on Linux/x86 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x86-builder-rel",
+        "ci/dawn-linux-x86-sws-rel",
+    ],
+    gn_args = "ci/dawn-linux-x86-builder-rel",
+)
+
+dawn_linux_manual_builder(
+    name = "dawn-try-linux-x86-fuzz-rel",
+    description_html = "Runs release Dawn fuzz tests on Linux/x86. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x86-fuzz-rel",
+    ],
+    gn_args = "ci/dawn-linux-x86-fuzz-rel",
+)

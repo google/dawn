@@ -50,6 +50,26 @@
           'isolated_scripts': 'dawn_node_cts_sws_tests',
         },
       },
+      'dawn-linux-x86-fuzz-rel': {
+        'os_type': 'linux',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'linux-jammy',
+          'x86-64',
+        ],
+        'test_suites': {},
+      },
+      'dawn-linux-x86-sws-rel': {
+        'os_type': 'linux',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'linux-jammy',
+          'x86-64',
+        ],
+        'test_suites': {},
+      },
     },
   },
 ]

@@ -161,5 +161,7 @@
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
     ]
-  }
+  },
+  "dawn-linux-x86-fuzz-rel": {},
+  "dawn-linux-x86-sws-rel": {}
 }

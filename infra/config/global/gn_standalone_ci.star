@@ -157,6 +157,41 @@ ci.builder(
 )
 
 ci.builder(
+    name = "dawn-linux-x86-builder-rel",
+    description_html = "Compiles release Dawn test binaries for Linux/x86",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            # dawn_node is intentionally omitted since the original standalone
+            # Linux/x86/Clang builders did not build/test with node.
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 32,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "dawn_swiftshader",
+            "linux_clang",
+            "component",
+            "release",
+            "x86",
+        ],
+    ),
+    cores = 8,
+    os = os.LINUX_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|rel",
+        short_name = "x86",
+    ),
+)
+
+ci.builder(
     name = "dawn-linux-x64-fuzz-rel",
     description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x64",
     schedule = "triggered",
@@ -186,6 +221,39 @@ ci.builder(
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel|fuzz",
         short_name = "x64",
+    ),
+)
+
+ci.builder(
+    name = "dawn-linux-x86-fuzz-rel",
+    description_html = "Compiles and runs release Dawn binaries for 'tools/run fuzz' for Linux/x86",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 32,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "libfuzzer",
+            "linux_clang",
+            "non_component",
+            "release",
+            "x86",
+        ],
+    ),
+    cores = 8,
+    os = os.LINUX_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|rel|fuzz",
+        short_name = "x86",
     ),
 )
 
@@ -233,6 +301,30 @@ ci.thin_tester(
     ),
     console_view_entry = consoles.console_view_entry(
         category = "linux|test|clang|rel|x64",
+        short_name = "sws",
+    ),
+)
+
+ci.thin_tester(
+    name = "dawn-linux-x86-sws-rel",
+    description_html = "Tests release Dawn on Linux/x86 with SwiftShader",
+    parent = "dawn-linux-x86-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 32,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|test|clang|rel|x86",
         short_name = "sws",
     ),
 )
