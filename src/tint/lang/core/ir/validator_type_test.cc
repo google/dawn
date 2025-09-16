@@ -336,6 +336,40 @@ using TypeTest = IRTestParamHelper<std::tuple<
     /* allowed */ bool,
     /* type_builder */ TypeBuilderFn>>;
 
+using Type_ArrayElements = TypeTest;
+
+TEST_P(Type_ArrayElements, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("v", AddressSpace::kFunction, ty.array(type, 4));
+        b.Return(f);
+    });
+
+    if (allowed) {
+        auto res = ir::Validate(mod);
+        ASSERT_EQ(res, Success) << res.Failure();
+    } else {
+        auto res = ir::Validate(mod);
+        ASSERT_NE(res, Success) << res.Failure();
+        EXPECT_THAT(res.Failure().reason,
+                    testing::HasSubstr(R"(:3:5 error: var: array elements, ')" +
+                                       ty.array(type, 4)->FriendlyName() +
+                                       R"(', must have creation-fixed footprint
+ )")) << res.Failure();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_ArrayElements,
+                         testing::Values(std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(true, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
 using Type_VectorElements = TypeTest;
 
 TEST_P(Type_VectorElements, Test) {

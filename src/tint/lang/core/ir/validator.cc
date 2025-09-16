@@ -2031,6 +2031,11 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Array* arr) {
+                if (!arr->ElemType()->UnwrapPtrOrRef()->HasCreationFixedFootprint()) {
+                    diag() << "array elements, " << NameOf(type)
+                           << ", must have creation-fixed footprint";
+                    return false;
+                }
                 if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                     auto* mv = root->As<core::type::MemoryView>();
                     if (mv && mv->AddressSpace() != AddressSpace::kStorage) {
