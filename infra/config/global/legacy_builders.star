@@ -575,9 +575,14 @@ luci.console_view_entry(
     short_name = "cts",
 )
 
+# The following standalone builders have been replaced with functionally
+# equivalent ones using the gn_v2 recipe. See crbug.com/385317083.
+# * linux-clang-rel-x64
+#   * dawn-cq-linux-x64-rel
+#   * dawn-cq-linux-x64-fuzz-rel
+
 dawn_standalone_builder("linux-clang-dbg-x64", clang = True, debug = True, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("linux-clang-dbg-x86", clang = True, debug = True, cpu = "x86", fuzzer = False)
-dawn_standalone_builder("linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("linux-clang-rel-x86", clang = True, debug = False, cpu = "x86", fuzzer = False)
 dawn_standalone_builder("mac-dbg", clang = True, debug = True, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("mac-rel", clang = True, debug = False, cpu = "x64", fuzzer = False)
