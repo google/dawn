@@ -1250,6 +1250,11 @@ struct Decoder {
     const core::constant::Value* CreateConstantComposite(
         const pb::ConstantValueComposite& composite_in) {
         auto* type = Type(composite_in.type());
+        if (!type) {
+            err_ << "invalid type for constant composite\n";
+            return b.InvalidConstant()->Value();
+        }
+
         auto type_elements = type->Elements();
         size_t num_values = static_cast<size_t>(composite_in.elements().size());
         if (DAWN_UNLIKELY(type_elements.count == 0)) {
@@ -1277,6 +1282,11 @@ struct Decoder {
 
     const core::constant::Value* CreateConstantSplat(const pb::ConstantValueSplat& splat_in) {
         auto* type = Type(splat_in.type());
+        if (!type) {
+            err_ << "invalid type for constant splat\n";
+            return b.InvalidConstant()->Value();
+        }
+
         uint32_t num_elements = type->Elements().count;
         if (DAWN_UNLIKELY(num_elements == 0)) {
             err_ << "cannot create a splat of type " << type->FriendlyName() << "\n";
