@@ -163,5 +163,6 @@
     ]
   },
   "dawn-linux-x86-fuzz-rel": {},
-  "dawn-linux-x86-sws-rel": {}
+  "dawn-linux-x86-sws-rel": {},
+  "dawn-win-x64-sws-rel": {}
 }

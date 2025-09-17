@@ -181,6 +181,26 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "win",
+    args = {
+        "target_os": "win",
+    },
+)
+
+gn_args.config(
+    name = "win_clang",
+    configs = [
+        "clang",
+        "siso",
+        "tint_hlsl_writer",
+        "tint_msl_writer",
+        "tint_spv_reader_writer",
+        "tint_wgsl_reader_writer",
+        "win",
+    ],
+)
+
+gn_args.config(
     name = "x64",
     args = {
         "target_cpu": "x64",

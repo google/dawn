@@ -70,6 +70,16 @@
         ],
         'test_suites': {},
       },
+      'dawn-win-x64-sws-rel': {
+        'os_type': 'win',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'win10',
+          'x86-64',
+        ],
+        'test_suites': {},
+      },
     },
   },
 ]
