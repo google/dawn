@@ -14,7 +14,9 @@
           'linux-jammy',
           'x86-64',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'isolated_scripts': 'tint_fuzzer_corpus_tests',
+        },
       },
       'dawn-linux-x64-fuzz-rel': {
         'os_type': 'linux',
@@ -36,6 +38,10 @@
           'linux-jammy',
           'x86-64',
         ],
+        'test_suites': {
+          'gtest_tests': 'swiftshader_gtests',
+          'isolated_scripts': 'dawn_node_cts_sws_tests',
+        },
       },
       'dawn-linux-x64-sws-rel': {
         'os_type': 'linux',
