@@ -27,8 +27,10 @@
 
 #include "src/tint/lang/glsl/writer/writer.h"
 
+#include <vector>
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -63,9 +65,8 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
     // otherwise TextureBuiltinsFromUniform will fail.
     // TODO(https://issues.chromium.org/427172887) Be more precise for the
-    // texture_builtins_from_uniform checks. Also make sure there is at most one user-declared
-    // immediate, and make a note of its size.
-    uint32_t user_immediate_size = 0;
+    // texture_builtins_from_uniform checks. Also ensure there is at most one user-declared
+    // immediate.
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
 
@@ -125,14 +126,15 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             }
         }
 
-        if (ptr->AddressSpace() == core::AddressSpace::kImmediate) {
-            if (user_immediate_size > 0) {
-                // We've already seen a user-declared immediate data.
-                return Failure("multiple user-declared immediate data");
-            }
-            user_immediate_size = tint::RoundUp(4u, ptr->StoreType()->Size());
-        }
+        // user-declared immediate validation handled later by helper.
     }
+
+    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir);
+    if (user_immediate_res != Success) {
+        return user_immediate_res.Failure();
+    }
+
+    uint32_t user_immediate_size = user_immediate_res.Get();
 
     // Check for calls to unsupported builtin functions.
     for (auto* inst : ir.Instructions()) {
@@ -184,40 +186,22 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
-    static constexpr uint32_t kMaxOffset = 0x1000;
-    Hashset<uint32_t, 4> immediate_word_offsets;
-    auto check_immediate_offset = [&](uint32_t offset) {
-        // Excessive values can cause OOM / timeouts when padding structures in the printer.
-        if (offset > kMaxOffset) {
-            return false;
+    {
+        std::vector<core::ir::ImmediateInfo> immediates;
+        if (options.first_instance_offset) {
+            immediates.push_back({*options.first_instance_offset, 4u});
         }
-        // Offset must be 4-byte aligned.
-        if (offset & 0x3) {
-            return false;
+        if (options.first_vertex_offset) {
+            immediates.push_back({*options.first_vertex_offset, 4u});
         }
-        // Offset must not have already been used.
-        if (!immediate_word_offsets.Add(offset >> 2)) {
-            return false;
+        if (options.depth_range_offsets) {
+            immediates.push_back({options.depth_range_offsets->max, 4u});
+            immediates.push_back({options.depth_range_offsets->min, 4u});
         }
-        // Offset must be after the user-defined immediate data.
-        if (offset < user_immediate_size) {
-            return false;
-        }
-        return true;
-    };
-
-    if (options.first_instance_offset && !check_immediate_offset(*options.first_instance_offset)) {
-        return Failure("invalid offset for first_instance_offset immediate data");
-    }
-
-    if (options.first_vertex_offset && !check_immediate_offset(*options.first_vertex_offset)) {
-        return Failure("invalid offset for first_vertex_offset immediate data");
-    }
-
-    if (options.depth_range_offsets) {
-        if (!check_immediate_offset(options.depth_range_offsets->max) ||
-            !check_immediate_offset(options.depth_range_offsets->min)) {
-            return Failure("invalid offsets for depth range immediate data");
+        if (auto res =
+                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
+            res != Success) {
+            return res.Failure();
         }
     }
 

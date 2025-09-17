@@ -29,9 +29,11 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -66,21 +68,51 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
     }
 
     // Check for unsupported module-scope variable address spaces and types.
-    for (auto* inst : *ir.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            // Check the pixel_local variables have corresponding entries in the PLS attachment map.
-            auto* str = ptr->StoreType()->As<core::type::Struct>();
-            for (uint32_t i = 0; i < str->Members().Length(); i++) {
-                if (options.pixel_local.attachments.count(i) == 0) {
-                    return Failure("missing pixel local attachment for member index " +
-                                   std::to_string(i));
+    {
+        for (auto* inst : *ir.root_block) {
+            auto* var = inst->As<core::ir::Var>();
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+            if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+                // Check the pixel_local variables have corresponding entries in the PLS attachment
+                // map.
+                auto* str = ptr->StoreType()->As<core::type::Struct>();
+                for (uint32_t i = 0; i < str->Members().Length(); i++) {
+                    if (options.pixel_local.attachments.count(i) == 0) {
+                        return Failure("missing pixel local attachment for member index " +
+                                       std::to_string(i));
+                    }
                 }
             }
+            if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+                return Failure("input attachments are not supported by the HLSL backend");
+            }
         }
-        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return Failure("input attachments are not supported by the HLSL backend");
+    }
+
+    auto user_immediate_res = core::ir::ValidateSingleUserImmediate(ir);
+    if (user_immediate_res != Success) {
+        return user_immediate_res.Failure();
+    }
+
+    uint32_t user_immediate_size = user_immediate_res.Get();
+
+    // Validate internal immediate offsets using shared helper.
+    {
+        std::vector<core::ir::ImmediateInfo> immediates;
+        if (options.first_index_offset) {
+            immediates.push_back({*options.first_index_offset, 4u});
+        }
+        if (options.first_instance_offset) {
+            immediates.push_back({*options.first_instance_offset, 4u});
+        }
+        if (options.num_workgroups_start_offset) {
+            immediates.push_back({*options.num_workgroups_start_offset, 4u});
+        }
+        // Pass user immediate size so internal offsets don't overlap user region.
+        if (auto res =
+                core::ir::ValidateInternalImmediateOffset(0x1000, user_immediate_size, immediates);
+            res != Success) {
+            return res.Failure();
         }
     }
 
