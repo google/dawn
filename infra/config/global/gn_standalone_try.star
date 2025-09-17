@@ -145,6 +145,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x86-sws-dbg",
+    description_html = "Tests debug Dawn on Linux/x86 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x86-builder-dbg",
+        "ci/dawn-linux-x86-sws-dbg",
+    ],
+    gn_args = "ci/dawn-linux-x86-builder-dbg",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x86-sws-rel",
     description_html = "Tests release Dawn on Linux/x86 with SwiftShader. Manual only.",
     mirrors = [
@@ -152,6 +162,15 @@ dawn_linux_manual_builder(
         "ci/dawn-linux-x86-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x86-builder-rel",
+)
+
+dawn_linux_manual_builder(
+    name = "dawn-try-linux-x86-fuzz-dbg",
+    description_html = "Runs debug Dawn fuzz tests on Linux/x86. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x86-fuzz-dbg",
+    ],
+    gn_args = "ci/dawn-linux-x86-fuzz-dbg",
 )
 
 dawn_linux_manual_builder(
