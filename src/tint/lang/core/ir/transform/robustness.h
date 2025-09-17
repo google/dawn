@@ -43,7 +43,8 @@ class Module;
 namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
-const Capabilities kRobustnessCapabilities{Capability::kAllowDuplicateBindings};
+const Capabilities kRobustnessCapabilities{Capability::kAllowDuplicateBindings,
+                                           Capability::kAllowResourceBinding};
 
 /// Configuration options that control when to clamp accesses.
 struct RobustnessConfig {

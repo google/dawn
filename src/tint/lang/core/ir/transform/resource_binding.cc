@@ -244,7 +244,8 @@ ResourceBindingHelper::~ResourceBindingHelper() = default;
 Result<SuccessType> ResourceBinding(core::ir::Module& ir,
                                     const ResourceBindingConfig& config,
                                     ResourceBindingHelper* helper) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ResourceBinding");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ResourceBinding",
+                                          Capabilities{Capability::kAllowResourceBinding});
     if (result != Success) {
         return result.Failure();
     }
