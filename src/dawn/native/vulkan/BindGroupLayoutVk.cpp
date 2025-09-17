@@ -97,7 +97,7 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
     // bindings of the same type.
     res.bindings.reserve(layout->GetBindingCount());
 
-    for (const auto& [_, bindingIndex] : layout->GetBindingMap()) {
+    for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
         // This texture will be bound into the VkDescriptorSet at the index for the sampler itself.
         if (res.textureToStaticSamplerIndex.contains(bindingIndex)) {
             continue;
@@ -118,38 +118,14 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
             .stageFlags = VulkanShaderStageFlags(bindingInfo.visibility),
             .pImmutableSamplers = nullptr,
         };
+        size_t descriptorCount = vkBinding.descriptorCount;
 
         // Static samplers are set at VkDescriptorSetLayout creation time.
         if (std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
             auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
             auto sampler = ToBackend(samplerLayout.sampler);
             vkBinding.pImmutableSamplers = &sampler->GetHandle().GetHandle();
-        }
 
-        res.bindings.emplace_back(vkBinding);
-    }
-
-    // Compute the size of descriptor pools used for this layout.
-    for (BindingIndex bindingIndex{0}; bindingIndex < layout->GetBindingCount(); ++bindingIndex) {
-        if (res.textureToStaticSamplerIndex.contains(bindingIndex)) {
-            // This texture will be bound into the VkDescriptorSet at the index
-            // for the sampler itself.
-            continue;
-        }
-
-        // Vulkan descriptor set layouts have one entry for binding_array. Only handle their first
-        // element as subsequent ones will be part of the already counted descriptors.
-        const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
-        if (bindingInfo.indexInArray != BindingIndex(0)) {
-            continue;
-        }
-
-        VkDescriptorType vulkanType = VulkanDescriptorType(bindingInfo);
-
-        size_t numVkDescriptors = uint32_t(bindingInfo.arraySize);
-        if (vulkanType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
-            auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
-            auto sampler = ToBackend(samplerLayout.sampler);
             if (sampler->IsYCbCr()) {
                 // A YCbCr sampler can take up multiple Vk descriptor slots.  There is a
                 // recommended Vulkan API to query how many slots a YCbCr sampler should take, but
@@ -164,12 +140,14 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
                 // of overall YCbCr descriptors will be relatively small and these pools are not an
                 // overall bottleneck on memory usage.
                 DAWN_ASSERT(bindingInfo.arraySize == BindingIndex(1));
-                numVkDescriptors = 3;
+                descriptorCount = 3;
             }
         }
 
+        res.bindings.emplace_back(vkBinding);
+
         // absl:flat_hash_map::operator[] will return 0 if the key doesn't exist.
-        res.descriptorCountPerType[vulkanType] += numVkDescriptors;
+        res.descriptorCountPerType[vkBinding.descriptorType] += descriptorCount;
     }
 
     return res;
