@@ -26,7 +26,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """Helper code for running isolated versions of NodeJS."""
 
-import glob
 import functools
 import os
 
@@ -42,16 +41,12 @@ def get_node_path() -> str:
     Returns:
         A filepath to the standalone node executable.
     """
-    paths = glob.glob(os.path.join('*', 'bin', 'node'), root_dir=NODE_DIR)
-    if not paths:
+    path = os.path.join(NODE_DIR, 'bin', 'node')
+    if not os.path.exists(path):
         raise RuntimeError(
             f'Unable to find the node binary under {NODE_DIR}. Is the '
             f'dawn_node gclient variable set?')
-    if len(paths) > 1:
-        raise RuntimeError(
-            f'Found multiple node binaries when one is expected. Found: '
-            f'{", ".join(paths)}')
-    return os.path.join(NODE_DIR, paths[0])
+    return path
 
 
 @functools.cache
@@ -62,20 +57,15 @@ def get_npm_command() -> list[str]:
         A list of strings that will run "npm" when run as a command for a
         subprocess.
     """
-    paths = glob.glob(os.path.join('*', 'lib', 'node_modules', 'npm', 'bin',
-                                   'npm-cli.js'),
-                      root_dir=NODE_DIR)
-    if not paths:
+    path = os.path.join(NODE_DIR, 'lib', 'node_modules', 'npm', 'bin',
+                        'npm-cli.js')
+    if not os.path.exists(path):
         raise RuntimeError(
             f'Unable to find the npm-cli.js file under {NODE_DIR}. Is the '
             f'dawn_node gclient variable set?')
-    if len(paths) > 1:
-        raise RuntimeError(
-            f'Found multiple npm-cli.js files when one is expected. Found: '
-            f'{", ".join(paths)}')
     cmd = [
         get_node_path(),
-        os.path.join(NODE_DIR, paths[0]),
+        os.path.join(NODE_DIR, path),
     ]
     return cmd
 

@@ -26,11 +26,7 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
   'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
   'dawn_go_version': 'version:2@1.21.3',
-
-  'node_darwin_arm64_sha': '864780996d3be6c9aca03f371a4bd672728f0a75',
-  'node_darwin_x64_sha': '85ccc2202fd4f1615a443248c01a866ae227ba78',
-  'node_linux_x64_sha': '46795170ff5df9831955f163f6966abde581c8af',
-  'node_win_x64_sha': '2cb36010af52bc5e2a2d1e3675c10361c80d8f8d',
+  'dawn_node_version': 'version:2@20.11.0',
 
   # GN variable required by //testing that will be output in the gclient_args.gni
   'generate_location_tags': False,
@@ -394,6 +390,18 @@ deps = {
     'condition': 'dawn_node',
   },
 
+  # Node binaries, when dawn_node or dawn_wasm is enabled
+  'third_party/node': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/${{platform}}',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'dawn_node or dawn_wasm',
+    'dep_type': 'cipd',
+  },
+
   # Upstream webgpu.h headers for testing purposes
   'third_party/webgpu-headers/src': {
     'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@53a87a3d8cb4c32ec026978ce003020741df6f53',
@@ -631,59 +639,6 @@ hooks = [
     'condition': 'dawn_standalone',
     'action': ['python3', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
-  },
-
-  # Node binaries, when dawn_node or dawn_wasm is enabled
-  {
-    'name': 'node_linux',
-    'pattern': '.',
-    'condition': '(dawn_node or dawn_wasm) and host_os == "linux"',
-    'action': [ 'python3',
-                'third_party/depot_tools/download_from_google_storage.py',
-                '--no_resume',
-                '--extract',
-                '--bucket', 'chromium-nodejs/20.11.0',
-                Var('node_linux_x64_sha'),
-                '-o', 'third_party/node/node-linux-x64.tar.gz',
-    ],
-  },
-  {
-    'name': 'node_mac_x64',
-    'pattern': '.',
-    'condition': '(dawn_node or dawn_wasm) and host_os == "mac" and host_cpu == "x64"',
-    'action': [ 'python3',
-                'third_party/depot_tools/download_from_google_storage.py',
-                '--no_resume',
-                '--extract',
-                '--bucket', 'chromium-nodejs/20.11.0',
-                Var('node_darwin_x64_sha'),
-                '-o', 'third_party/node/node-darwin-x64.tar.gz',
-    ],
-  },
-  {
-    'name': 'node_mac_arm64',
-    'pattern': '.',
-    'condition': '(dawn_node or dawn_wasm) and host_os == "mac" and host_cpu == "arm64"',
-    'action': [ 'python3',
-                'third_party/depot_tools/download_from_google_storage.py',
-                '--no_resume',
-                '--extract',
-                '--bucket', 'chromium-nodejs/20.11.0',
-                Var('node_darwin_arm64_sha'),
-                '-o', 'third_party/node/node-darwin-arm64.tar.gz',
-    ],
-  },
-  {
-    'name': 'node_win',
-    'pattern': '.',
-    'condition': '(dawn_node or dawn_wasm) and host_os == "win"',
-    'action': [ 'python3',
-                'third_party/depot_tools/download_from_google_storage.py',
-                '--no_resume',
-                '--bucket', 'chromium-nodejs/20.11.0',
-                Var('node_win_x64_sha'),
-                '-o', 'third_party/node/node.exe',
-    ],
   },
 
   # Activate emsdk for WebAssembly builds
