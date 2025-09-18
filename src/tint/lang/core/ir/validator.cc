@@ -2310,12 +2310,18 @@ void Validator::CheckFunction(const Function* func) {
             Capabilities{Capability::kAllowRefTypes});
 
         if (!IsValidFunctionParamType(param->Type())) {
+            auto ptr_ty = param->Type()->As<core::type::Pointer>();
+            bool allowed_ptr_to_handle =
+                capabilities_.Contains(Capability::kAllowPointerToHandle) && ptr_ty != nullptr &&
+                ptr_ty->StoreType()->IsHandle();
+
             auto struct_ty = param->Type()->As<core::type::Struct>();
-            if (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
-                (struct_ty == nullptr) ||
-                struct_ty->Members().Any([](const core::type::StructMember* m) {
-                    return !IsValidFunctionParamType(m->Type());
-                })) {
+            if (!allowed_ptr_to_handle &&
+                (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
+                 (struct_ty == nullptr) ||
+                 struct_ty->Members().Any([](const core::type::StructMember* m) {
+                     return !IsValidFunctionParamType(m->Type());
+                 }))) {
                 AddError(param) << "function parameter type, " << NameOf(param->Type())
                                 << ", must be constructible, a pointer, or a handle";
             }

@@ -87,6 +87,8 @@ enum class Capability : uint8_t {
     // Allows resource_binding to be used. Should not be present after
     // core::core::ir::transform::ResourceBinding runs
     kAllowResourceBinding,
+    /// Allows a pointer to a handle type
+    kAllowPointerToHandle,
 };
 
 /// Capabilities is a set of Capability

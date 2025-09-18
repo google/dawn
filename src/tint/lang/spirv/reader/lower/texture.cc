@@ -91,6 +91,8 @@ struct State {
 
     /// Process the module.
     void Process() {
+        ReplacePointerToHandle();
+
         for (auto* inst : *ir.root_block) {
             auto* var = inst->As<core::ir::Var>();
             if (!var) {
@@ -255,6 +257,78 @@ struct State {
             if (res.value->Alive()) {
                 res.value->Destroy();
             }
+        }
+    }
+
+    void ReplacePointerToHandle() {
+        Vector<core::ir::Value*, 4> usages_to_update;
+        Hashset<core::ir::Function*, 4> called_functions_to_fixup;
+        for (auto& func : ir.DependencyOrderedFunctions()) {
+            for (auto* param : func->Params()) {
+                auto* ptr = param->Type()->As<core::type::Pointer>();
+                if (!ptr || !ptr->StoreType()->IsHandle()) {
+                    continue;
+                }
+
+                param->SetType(ptr->StoreType());
+                usages_to_update.Push(param);
+                called_functions_to_fixup.Add(func);
+            }
+        }
+
+        Vector<core::ir::Instruction*, 4> inst_to_delete;
+        while (!usages_to_update.IsEmpty()) {
+            auto* val = usages_to_update.Pop();
+            for (auto& usage : val->UsagesSorted()) {
+                tint::Switch(
+                    usage.instruction,  //
+                    [&](core::ir::Load* ld) {
+                        ld->Result()->ReplaceAllUsesWith(ld->From());
+                        inst_to_delete.Push(ld);
+                    },
+                    [&](core::ir::Let* l) {
+                        for (auto& u : l->Result()->UsagesSorted()) {
+                            usages_to_update.Push(u.instruction->Result());
+                        }
+                        l->Result()->ReplaceAllUsesWith(l->Value());
+                        inst_to_delete.Push(l);
+                    });
+            }
+        }
+
+        for (auto& fn : called_functions_to_fixup) {
+            for (auto& usage : fn->UsagesUnsorted()) {
+                auto* call = usage->instruction->As<core::ir::UserCall>();
+                if (!call) {
+                    continue;
+                }
+
+                auto args = call->Args();
+                for (size_t i = 0; i < args.Length(); ++i) {
+                    auto& arg = args[i];
+
+                    auto* ptr_ty = arg->Type()->As<core::type::Pointer>();
+                    if (!ptr_ty) {
+                        continue;
+                    }
+
+                    if (!ptr_ty->StoreType()->IsHandle()) {
+                        continue;
+                    }
+
+                    // We inject the load here but it will get cleaned up when we deal with the
+                    // function itself, if required.
+                    b.InsertBefore(usage->instruction, [&] {
+                        auto* ld = b.Load(arg);
+                        call->SetArg(i, ld->Result());
+                    });
+                }
+            }
+        }
+
+        while (!inst_to_delete.IsEmpty()) {
+            auto* inst = inst_to_delete.Pop();
+            inst->Destroy();
         }
     }
 
@@ -968,6 +1042,7 @@ Result<SuccessType> Texture(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowNonCoreTypes,
+                                              core::ir::Capability::kAllowPointerToHandle,
                                           });
     if (result != Success) {
         return result.Failure();

@@ -761,6 +761,7 @@ Result<SuccessType> TransposeRowMajor(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowStructMatrixDecorations,
                                               core::ir::Capability::kAllowNonCoreTypes,
                                               core::ir::Capability::kAllowOverrides,
+                                              core::ir::Capability::kAllowPointerToHandle,
                                           });
     if (result != Success) {
         return result.Failure();

@@ -4415,5 +4415,82 @@ $B1: {  # root
 )");
 }
 
+// https://crbug.com/441874372
+TEST_F(SpirvReaderTest, TexSamplerAsParams) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %main "main"
+               OpName %helper "helper"
+               OpName %t "t"
+               OpName %s "s"
+               OpName %tex "tex"
+               OpName %samp "samp"
+               OpDecorate %tex DescriptorSet 1
+               OpDecorate %tex Binding 1
+               OpDecorate %samp DescriptorSet 2
+               OpDecorate %samp Binding 1
+       %void = OpTypeVoid
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+    %v4float = OpTypeVector %float 4
+    %texture = OpTypeImage %float 2D 0 0 0 1 Unknown
+    %ptr_tex = OpTypePointer UniformConstant %texture
+    %sampler = OpTypeSampler
+%ptr_sampler = OpTypePointer UniformConstant %sampler
+         %26 = OpTypeSampledImage %texture
+    %float_1 = OpConstant %float 1
+         %23 = OpConstantComposite %v2float %float_1 %float_1
+
+          %3 = OpTypeFunction %void
+         %12 = OpTypeFunction %void %ptr_tex %ptr_sampler
+        %tex = OpVariable %ptr_tex UniformConstant
+       %samp = OpVariable %ptr_sampler UniformConstant
+
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+         %39 = OpFunctionCall %void %helper %tex %samp
+               OpReturn
+               OpFunctionEnd
+
+     %helper = OpFunction %void None %12
+          %t = OpFunctionParameter %ptr_tex
+          %s = OpFunctionParameter %ptr_sampler
+         %16 = OpLabel
+         %24 = OpLoad %texture %t
+         %25 = OpLoad %sampler %s
+         %27 = OpSampledImage %26 %24 %25
+         %31 = OpImageSampleExplicitLod %v4float %27 %23 Lod %float_1
+
+         %50 = OpCopyObject %ptr_tex %t
+
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read> = var undef @binding_point(1, 1)
+  %samp:ptr<handle, sampler, read> = var undef @binding_point(2, 1)
+}
+
+%main = @fragment func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:void = call %helper, %4, %5
+    ret
+  }
+}
+%helper = func(%t:texture_2d<f32>, %s:sampler):void {
+  $B3: {
+    %10:vec4<f32> = textureSampleLevel %t, %s, vec2<f32>(1.0f), 1.0f
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

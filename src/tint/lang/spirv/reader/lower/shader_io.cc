@@ -755,6 +755,7 @@ Result<SuccessType> ShaderIO(core::ir::Module& ir) {
                                     core::ir::Capability::kAllowNonCoreTypes,
                                     core::ir::Capability::kAllowStructMatrixDecorations,
                                     core::ir::Capability::kAllowLocationForNumericElements,
+                                    core::ir::Capability::kAllowPointerToHandle,
                                 });
     if (result != Success) {
         return result.Failure();
