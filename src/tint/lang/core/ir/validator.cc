@@ -3251,7 +3251,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
 void Validator::CheckCoreBuiltinCall(const CoreBuiltinCall* call,
                                      const core::intrinsic::Overload& overload) {
-    if (call->Func() == core::BuiltinFn::kQuadBroadcast) {
+    if (call->Func() == core::BuiltinFn::kQuadBroadcast ||
+        call->Func() == core::BuiltinFn::kSubgroupBroadcast) {
         TINT_ASSERT(call->Args().Length() == 2);
         constexpr uint32_t kIdArg = 1;
         auto* id = call->Args()[kIdArg];

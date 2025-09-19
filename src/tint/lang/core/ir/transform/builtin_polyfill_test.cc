@@ -2851,13 +2851,29 @@ TEST_F(IR_BuiltinPolyfillTest, Dot4U8Packed) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_NoPolyfill) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.f16(), Vector{ty.f16(), ty.u32()});
+class IR_SubgroupBroadcastPolyfillTest : public TransformTest {
+  protected:
+    /// Helper to build a function that calls subgroupBroadcast with the given type.
+    /// @param type the type
+    void Build(const core::type::Type* type) {
+        auto* param = b.FunctionParam("arg", type);
+        auto* func = b.Function("foo", type);
+        func->SetParams({param});
+        b.Append(func->Block(), [&] {
+            auto* result = b.Call(type, BuiltinFn::kSubgroupBroadcast, param, 1_u);
+            b.Return(func, result);
+            mod.SetName(result, "result");
+        });
+    }
+};
+
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_NoPolyfill) {
+    Build(ty.f16());
 
     auto* src = R"(
-%foo = func(%arg:f16, %arg_1:u32):f16 {  # %arg_1: 'arg'
+%foo = func(%arg:f16):f16 {
   $B1: {
-    %result:f16 = subgroupBroadcast %arg, %arg_1
+    %result:f16 = subgroupBroadcast %arg, 1u
     ret %result
   }
 }
@@ -2873,13 +2889,13 @@ TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_NoPolyfill) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcast_F32_NotPolyfilled) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.f32(), Vector{ty.f32(), ty.u32()});
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF32_NoPolyfill) {
+    Build(ty.f32());
 
     auto* src = R"(
-%foo = func(%arg:f32, %arg_1:u32):f32 {  # %arg_1: 'arg'
+%foo = func(%arg:f32):f32 {
   $B1: {
-    %result:f32 = subgroupBroadcast %arg, %arg_1
+    %result:f32 = subgroupBroadcast %arg, 1u
     ret %result
   }
 }
@@ -2895,59 +2911,27 @@ TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcast_F32_NotPolyfilled) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Scalar) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.f16(), Vector{ty.f16(), ty.u32()});
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Scalar) {
+    Build(ty.f16());
 
     auto* src = R"(
-%foo = func(%arg:f16, %arg_1:u32):f16 {  # %arg_1: 'arg'
+%foo = func(%arg:f16):f16 {
   $B1: {
-    %result:f16 = subgroupBroadcast %arg, %arg_1
+    %result:f16 = subgroupBroadcast %arg, 1u
     ret %result
   }
 }
 )";
 
     auto* expect = R"(
-%foo = func(%arg:f16, %arg_1:u32):f16 {  # %arg_1: 'arg'
+%foo = func(%arg:f16):f16 {
   $B1: {
-    %4:vec2<f16> = construct %arg, 0.0h
-    %5:u32 = bitcast %4
-    %6:u32 = subgroupBroadcast %5, %arg_1
-    %7:vec2<f16> = bitcast %6
-    %8:f16 = access %7, 0u
-    ret %8
-  }
-}
-)";
-
-    EXPECT_EQ(src, str());
-
-    BuiltinPolyfillConfig config;
-    config.subgroup_broadcast_f16 = true;
-    Run(BuiltinPolyfill, config);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Vec2) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.vec2<f16>(), Vector{ty.vec2<f16>(), ty.u32()});
-
-    auto* src = R"(
-%foo = func(%arg:vec2<f16>, %arg_1:u32):vec2<f16> {  # %arg_1: 'arg'
-  $B1: {
-    %result:vec2<f16> = subgroupBroadcast %arg, %arg_1
-    ret %result
-  }
-}
-)";
-
-    auto* expect = R"(
-%foo = func(%arg:vec2<f16>, %arg_1:u32):vec2<f16> {  # %arg_1: 'arg'
-  $B1: {
-    %4:u32 = bitcast %arg
-    %5:u32 = subgroupBroadcast %4, %arg_1
+    %3:vec2<f16> = construct %arg, 0.0h
+    %4:u32 = bitcast %3
+    %5:u32 = subgroupBroadcast %4, 1u
     %6:vec2<f16> = bitcast %5
-    ret %6
+    %7:f16 = access %6, 0u
+    ret %7
   }
 }
 )";
@@ -2961,27 +2945,25 @@ TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Vec2) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Vec3) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.vec3<f16>(), Vector{ty.vec3<f16>(), ty.u32()});
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec2) {
+    Build(ty.vec2<f16>());
 
     auto* src = R"(
-%foo = func(%arg:vec3<f16>, %arg_1:u32):vec3<f16> {  # %arg_1: 'arg'
+%foo = func(%arg:vec2<f16>):vec2<f16> {
   $B1: {
-    %result:vec3<f16> = subgroupBroadcast %arg, %arg_1
+    %result:vec2<f16> = subgroupBroadcast %arg, 1u
     ret %result
   }
 }
 )";
 
     auto* expect = R"(
-%foo = func(%arg:vec3<f16>, %arg_1:u32):vec3<f16> {  # %arg_1: 'arg'
+%foo = func(%arg:vec2<f16>):vec2<f16> {
   $B1: {
-    %4:vec4<f16> = construct %arg, 0.0h
-    %5:vec2<u32> = bitcast %4
-    %6:vec2<u32> = subgroupBroadcast %5, %arg_1
-    %7:vec4<f16> = bitcast %6
-    %8:vec3<f16> = swizzle %7, xyz
-    ret %8
+    %3:u32 = bitcast %arg
+    %4:u32 = subgroupBroadcast %3, 1u
+    %5:vec2<f16> = bitcast %4
+    ret %5
   }
 }
 )";
@@ -2995,25 +2977,59 @@ TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Vec3) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, SubgroupBroadcastF16_Vec4) {
-    Build(core::BuiltinFn::kSubgroupBroadcast, ty.vec4<f16>(), Vector{ty.vec4<f16>(), ty.u32()});
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec3) {
+    Build(ty.vec3<f16>());
 
     auto* src = R"(
-%foo = func(%arg:vec4<f16>, %arg_1:u32):vec4<f16> {  # %arg_1: 'arg'
+%foo = func(%arg:vec3<f16>):vec3<f16> {
   $B1: {
-    %result:vec4<f16> = subgroupBroadcast %arg, %arg_1
+    %result:vec3<f16> = subgroupBroadcast %arg, 1u
     ret %result
   }
 }
 )";
 
     auto* expect = R"(
-%foo = func(%arg:vec4<f16>, %arg_1:u32):vec4<f16> {  # %arg_1: 'arg'
+%foo = func(%arg:vec3<f16>):vec3<f16> {
   $B1: {
-    %4:vec2<u32> = bitcast %arg
-    %5:vec2<u32> = subgroupBroadcast %4, %arg_1
+    %3:vec4<f16> = construct %arg, 0.0h
+    %4:vec2<u32> = bitcast %3
+    %5:vec2<u32> = subgroupBroadcast %4, 1u
     %6:vec4<f16> = bitcast %5
-    ret %6
+    %7:vec3<f16> = swizzle %6, xyz
+    ret %7
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.subgroup_broadcast_f16 = true;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SubgroupBroadcastPolyfillTest, SubgroupBroadcastF16_Vec4) {
+    Build(ty.vec4<f16>());
+
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %result:vec4<f16> = subgroupBroadcast %arg, 1u
+    ret %result
+  }
+}
+)";
+
+    auto* expect = R"(
+%foo = func(%arg:vec4<f16>):vec4<f16> {
+  $B1: {
+    %3:vec2<u32> = bitcast %arg
+    %4:vec2<u32> = subgroupBroadcast %3, 1u
+    %5:vec4<f16> = bitcast %4
+    ret %5
   }
 }
 )";
