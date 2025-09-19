@@ -35,15 +35,18 @@ if (dawn_build_node_bindings) {
     testonly = true
     data_deps = [
       "${dawn_root}/src/dawn/node:dawn_node",
+      "${dawn_root}/testing:test_scripts_shared",
       "${dawn_root}/tools:go_tools",
     ]
     data = [
       "node_helpers.py",
       "run_dawn_node_cts.py",
       "run_npx.py",
-      "run_npx.sh",
       "${dawn_root}/third_party/node/",
       "${dawn_root}/third_party/webgpu-cts/",
     ]
+    if (is_win) {
+      data += [ "run_npx.bat" ]
+    }
   }
 }

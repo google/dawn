@@ -28,6 +28,7 @@
 
 import functools
 import os
+import sys
 
 THIS_DIR = os.path.dirname(__file__)
 DAWN_ROOT = os.path.realpath(os.path.join(THIS_DIR, '..', '..'))
@@ -42,6 +43,8 @@ def get_node_path() -> str:
         A filepath to the standalone node executable.
     """
     path = os.path.join(NODE_DIR, 'bin', 'node')
+    if sys.platform == 'win32':
+        path = os.path.join(NODE_DIR, 'node.exe')
     if not os.path.exists(path):
         raise RuntimeError(
             f'Unable to find the node binary under {NODE_DIR}. Is the '
@@ -59,6 +62,9 @@ def get_npm_command() -> list[str]:
     """
     path = os.path.join(NODE_DIR, 'lib', 'node_modules', 'npm', 'bin',
                         'npm-cli.js')
+    if sys.platform == 'win32':
+        path = os.path.join(NODE_DIR, 'node_modules', 'npm', 'bin',
+                            'npm-cli.js')
     if not os.path.exists(path):
         raise RuntimeError(
             f'Unable to find the npm-cli.js file under {NODE_DIR}. Is the '

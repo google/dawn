@@ -42,6 +42,26 @@
         'test': 'dawn_end2end_tests',
       },
     },
+    'dawn_end2end_warp_gtests': {
+      'dawn_end2end_warp_tests': {
+        'args': [
+          '--adapter-vendor-id=0x1414',
+        ],
+        'mixins': [
+          'result_adapter_gtest_json',
+        ],
+        'merge': {
+          # This should be removed in favor of updating the recipe code to allow
+          # the merge script to be skipped entirely. noop is needed currently
+          # because standard_gtest_merge does not work properly with the
+          # results output by --gtest_output. However, noop_merge locks us to
+          # a single shard, and we should not have any need for the outputs of
+          # merge scripts for Dawn.
+          'script': '//testing/merge_scripts/noop_merge.py',
+        },
+        'test': 'dawn_end2end_tests',
+      },
+    },
     'dawn_node_cts_sws_tests': {
       'dawn_node_sws_cts': {
         'args': [
@@ -142,6 +162,15 @@
     'swiftshader_gtests': [
       'dawn_end2end_swangle_gtests',
       'dawn_end2end_sws_gtests',
+      'dawn_unit_gtests',
+      'dawn_wire_unit_gtests',
+      'tint_unit_gtests',
+    ],
+    # Same as swiftshader_gtests but with the addition of WARP end2end tests.
+    'win_software_renderer_gtests': [
+      'dawn_end2end_swangle_gtests',
+      'dawn_end2end_sws_gtests',
+      'dawn_end2end_warp_gtests',
       'dawn_unit_gtests',
       'dawn_wire_unit_gtests',
       'tint_unit_gtests',

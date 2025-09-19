@@ -112,7 +112,10 @@
           'win10',
           'x86-64',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'win_software_renderer_gtests',
+          'isolated_scripts': 'dawn_node_cts_sws_tests',
+        },
       },
     },
   },

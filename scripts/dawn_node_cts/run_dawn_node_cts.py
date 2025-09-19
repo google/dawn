@@ -54,6 +54,9 @@ def install_npm_deps_in_current_dir() -> None:
 
 def run_node_cts(output_directory: str, args_to_forward: list[str]) -> None:
     logging.info('Running CTS via node in %s', os.getcwd())
+    npx_wrapper = os.path.join(THIS_DIR, 'run_npx.py')
+    if sys.platform == 'win32':
+        npx_wrapper = os.path.join(THIS_DIR, 'run_npx.bat')
     cmd = [
         sys.executable,
         os.path.join(TOOLS_DIR, 'run.py'),
@@ -61,7 +64,7 @@ def run_node_cts(output_directory: str, args_to_forward: list[str]) -> None:
         '-bin',
         output_directory,
         '-npx',
-        os.path.join(THIS_DIR, 'run_npx.sh'),
+        npx_wrapper,
     ] + args_to_forward
     subprocess.run(cmd, check=True)
 

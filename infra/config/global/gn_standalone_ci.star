@@ -228,6 +228,7 @@ ci.builder(
     ),
     cores = 8,
     os = os.WINDOWS_DEFAULT,
+    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|rel",
         short_name = "x64",
