@@ -1172,6 +1172,9 @@ crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x6
 crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_scalar_vector:inputSource="storage_r";vectorize_rhs=3 [ Failure ]
 crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
 
+# rgb10a2unorm precision issue on Intel 770
+crbug.com/445458866 [ linux intel-0x4680 ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
+
 # CTS needs to support new storage formats from texture-feature-tier1,
 # will be removed after the latest CTS rolling into Dawn
 crbug.com/421941589 [ android-chromium android-pixel-4 android-r angle-opengles graphite-disabled mobile no-asan no-clang-coverage qualcomm renderer-skia-gl target-cpu-32 ] webgpu:api,operation,storage_texture,read_only:basic:* [ Failure ]
