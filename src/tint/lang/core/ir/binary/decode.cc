@@ -781,6 +781,10 @@ struct Decoder {
             return mod_out_.Types().invalid();
         }
         auto* el_ty = Type(matrix_in.element_type());
+        if (el_ty == nullptr) {
+            err_ << "matrix element type is invalid\n";
+            return mod_out_.Types().invalid();
+        }
         auto* column_ty = mod_out_.Types().vec(el_ty, matrix_in.num_rows());
         return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
     }
