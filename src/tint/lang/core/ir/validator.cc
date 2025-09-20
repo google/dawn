@@ -3485,6 +3485,11 @@ void Validator::CheckUserCall(const UserCall* call) {
             << "call target must not have a pipeline stage";
     }
 
+    if (call->Target()->ReturnType() != call->Result()->Type()) {
+        AddError(call) << "result type does not match function return type";
+        return;
+    }
+
     auto args = call->Args();
     auto params = call->Target()->Params();
     if (args.Length() != params.Length()) {

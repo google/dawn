@@ -2404,23 +2404,23 @@ TEST_F(IRToProgramTest, If_Else_Chain) {
     b.Append(fn->Block(), [&] {
         auto if1 = b.If(pa);
         b.Append(if1->True(), [&] {
-            b.Call(ty.void_(), x, 0_i);
+            b.Call(ty.bool_(), x, 0_i);
             b.ExitIf(if1);
         });
         b.Append(if1->False(), [&] {
             auto* if2 = b.If(pb);
             b.Append(if2->True(), [&] {
-                b.Call(ty.void_(), x, 1_i);
+                b.Call(ty.bool_(), x, 1_i);
                 b.ExitIf(if2);
             });
             b.Append(if2->False(), [&] {
                 auto* if3 = b.If(pc);
                 b.Append(if3->True(), [&] {
-                    b.Call(ty.void_(), x, 2_i);
+                    b.Call(ty.bool_(), x, 2_i);
                     b.ExitIf(if3);
                 });
                 b.Append(if3->False(), [&] {
-                    b.Call(ty.void_(), x, 3_i);
+                    b.Call(ty.bool_(), x, 3_i);
                     b.ExitIf(if3);
                 });
                 b.ExitIf(if2);

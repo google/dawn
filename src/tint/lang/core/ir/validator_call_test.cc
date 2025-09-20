@@ -209,6 +209,26 @@ TEST_F(IR_ValidatorTest, CallToFunctionNoResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, CallToFunction_ResultTypeMismatch) {
+    auto* f = b.Function("my_func", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 42_i); });
+
+    auto* main = b.Function("main", ty.void_());
+    b.Append(main->Block(), [&] {
+        b.Call(ty.u32(), f);
+        b.Return(main);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:8:14 error: call: result type does not match function return type
+    %3:u32 = call %my_func
+             ^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionNoOperands) {
     auto* g = b.Function("g", ty.void_());
     b.Append(g->Block(), [&] { b.Return(g); });
