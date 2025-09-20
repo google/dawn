@@ -103,6 +103,7 @@ function(tint_default_compile_options TARGET)
   set(COMMON_CLANG_OPTIONS
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
+    -Wno-deprecated-copy-with-dtor
     -Wno-format-pedantic
     -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
@@ -141,6 +142,7 @@ function(tint_default_compile_options TARGET)
       /bigobj
       /EHsc
       /W4
+      /wd4018 # '>=': signed/unsigned mismatch (Comes from protobuf library)
       /wd4068 # unknown pragma
       /wd4127 # conditional expression is constant
       /wd4244 # 'conversion' conversion from 'type1' to 'type2', possible loss of data

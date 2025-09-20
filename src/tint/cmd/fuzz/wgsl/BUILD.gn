@@ -45,7 +45,7 @@ if (tint_build_wgsl_reader) {
       "fuzz.h",
     ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}:thread",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
@@ -84,7 +84,7 @@ if (tint_build_wgsl_reader) {
     output_name = "tint_wgsl_fuzzer"
     sources = [ "main_fuzz.cc" ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",

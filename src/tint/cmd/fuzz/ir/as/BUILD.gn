@@ -43,7 +43,7 @@ if (tint_build_ir_binary && tint_build_wgsl_reader) {
     output_name = "ir_fuzz_as"
     sources = [ "main.cc" ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}/api",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/common",

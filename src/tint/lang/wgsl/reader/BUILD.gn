@@ -50,7 +50,7 @@ if (tint_build_wgsl_reader) {
       "reader.h",
     ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
@@ -87,7 +87,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [ "options_test.cc" ]
       deps = [
-        "${dawn_root}/src/utils:utils",
+        "${dawn_root}/src/utils",
         "${tint_src_dir}:gmock_and_gtest",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/utils",

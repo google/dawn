@@ -43,7 +43,7 @@ tint_executable("info") {
   output_name = "tint_info"
   sources = [ "main.cc" ]
   deps = [
-    "${dawn_root}/src/utils:utils",
+    "${dawn_root}/src/utils",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/cmd/common",
     "${tint_src_dir}/lang/core",

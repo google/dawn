@@ -52,7 +52,7 @@ libtint_source_set("memory") {
     "memory.cc",
   ]
   deps = [
-    "${dawn_root}/src/utils:utils",
+    "${dawn_root}/src/utils",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
   ]
@@ -65,7 +65,7 @@ if (tint_build_unittests) {
       "bump_allocator_test.cc",
     ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",

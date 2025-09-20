@@ -881,6 +881,7 @@ absl_source_set("stacktrace") {
     ":core_headers",
     ":debugging_internal",
     ":dynamic_annotations",
+    ":malloc_internal",
     ":raw_logging_internal",
   ]
 }
@@ -928,6 +929,7 @@ absl_source_set("any_invocable") {
   deps = [
     ":config",
     ":core_headers",
+    ":nullability",
     ":type_traits",
     ":utility",
   ]
@@ -1115,6 +1117,7 @@ absl_source_set("check_op") {
     ":base",
     ":config",
     ":core_headers",
+    ":has_ostream_operator",
     ":leak_check",
     ":nullability",
     ":nullguard",
@@ -1211,7 +1214,6 @@ absl_source_set("log_message") {
   sources = [ "${dawn_abseil_dir}/absl/log/internal/log_message.cc" ]
   public = [ "${dawn_abseil_dir}/absl/log/internal/log_message.h" ]
   deps = [
-    ":_log_globals",
     ":_log_globals",
     ":append_truncated",
     ":base",

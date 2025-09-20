@@ -49,7 +49,7 @@ if (tint_build_spv_reader) {
       "options.h",
     ]
     deps = [
-      "${dawn_root}/src/utils:utils",
+      "${dawn_root}/src/utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/utils",
@@ -69,7 +69,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [ "helper_test.h" ]
       deps = [
-        "${dawn_root}/src/utils:utils",
+        "${dawn_root}/src/utils",
         "${tint_src_dir}/utils",
         "${tint_src_dir}/utils/ice",
         "${tint_src_dir}/utils/macros",
