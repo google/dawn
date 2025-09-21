@@ -359,7 +359,7 @@ WGPUFuture Buffer::APIMapAsync(WGPUMapMode mode,
                                const WGPUBufferMapCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<MapAsyncEvent>(callbackInfo, this));
+        GetEventManager().TrackEvent(AcquireRef(new MapAsyncEvent(callbackInfo, this)));
     if (!tracked) {
         return {futureIDInternal};
     }

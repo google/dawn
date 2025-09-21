@@ -27,6 +27,8 @@
 
 #include "dawn/wire/client/Client.h"
 
+#include <algorithm>
+
 #include "dawn/common/Compiler.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Device.h"
@@ -121,8 +123,26 @@ ReservedInstance Client::ReserveInstance(const WGPUInstanceDescriptor* descripto
         return {nullptr, {0, 0}};
     }
 
+    // Check for future related features and limits that are relevant to the EventManager.
+    bool enabledTimedWaitAny = false;
+    size_t timedWaitAnyMaxCount = 0;
+    if (descriptor) {
+        auto instanceFeatures =
+            std::span(descriptor->requiredFeatures, descriptor->requiredFeatureCount);
+        enabledTimedWaitAny =
+            std::find(instanceFeatures.begin(), instanceFeatures.end(),
+                      WGPUInstanceFeatureName_TimedWaitAny) != instanceFeatures.end();
+        if (enabledTimedWaitAny) {
+            if (descriptor->requiredLimits) {
+                timedWaitAnyMaxCount = descriptor->requiredLimits->timedWaitAnyMaxCount;
+            }
+            timedWaitAnyMaxCount = std::max(timedWaitAnyMaxCount, kTimedWaitAnyMaxCountDefault);
+        }
+    }
+
     // Reserve an EventManager for the given instance and make the association in the map.
-    mEventManagers.emplace(instance->GetWireHandle(this), std::make_unique<EventManager>());
+    mEventManagers.emplace(instance->GetWireHandle(this),
+                           std::make_unique<EventManager>(timedWaitAnyMaxCount));
 
     ReservedInstance result;
     result.handle = instance->GetWireHandle(this);

@@ -437,15 +437,12 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
     wgpu::InstanceDescriptor instanceDesc{};
     instanceDesc.nextInChain = &dawnInstanceDesc;
     std::vector<wgpu::InstanceFeatureName> features = {
-        wgpu::InstanceFeatureName::MultipleDevicesPerAdapter};
-    if (!UsesWire()) {
-        features.push_back(wgpu::InstanceFeatureName::TimedWaitAny);
-    }
+        wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
+        wgpu::InstanceFeatureName::TimedWaitAny};
     instanceDesc.requiredFeatureCount = features.size();
     instanceDesc.requiredFeatures = features.data();
 
-    auto instance = std::make_unique<native::Instance>(
-        reinterpret_cast<const WGPUInstanceDescriptor*>(&instanceDesc));
+    auto instance = std::make_unique<native::Instance>(&instanceDesc);
 
 #ifdef DAWN_ENABLE_BACKEND_OPENGLES
     if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").first.empty()) {
@@ -1129,6 +1126,10 @@ native::Adapter DawnTestBase::GetAdapter() const {
     return mBackendAdapter;
 }
 
+utils::WireHelper* DawnTestBase::GetWireHelper() const {
+    return mWireHelper.get();
+}
+
 std::vector<wgpu::FeatureName> DawnTestBase::GetRequiredFeatures() {
     return {};
 }
@@ -1298,6 +1299,9 @@ void DawnTestBase::SetUp() {
     // By default we enable all the WGSL language features (including experimental, testing and
     // unsafe ones) in the tests.
     WGPUInstanceDescriptor instanceDesc = {};
+    std::vector<WGPUInstanceFeatureName> features = {WGPUInstanceFeatureName_TimedWaitAny};
+    instanceDesc.requiredFeatureCount = features.size();
+    instanceDesc.requiredFeatures = features.data();
     WGPUDawnWireWGSLControl wgslControl;
     wgslControl.chain.sType = WGPUSType_DawnWireWGSLControl;
     wgslControl.enableExperimental = 1u;

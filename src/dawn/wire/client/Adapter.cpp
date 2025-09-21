@@ -289,7 +289,7 @@ WGPUFuture Adapter::APIRequestDevice(const WGPUDeviceDescriptor* descriptor,
     Client* client = GetClient();
     Ref<Device> device = client->Make<Device>(GetEventManagerHandle(), this, descriptor);
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(callbackInfo, device));
+        GetEventManager().TrackEvent(AcquireRef(new RequestDeviceEvent(callbackInfo, device)));
     if (!tracked) {
         return {futureIDInternal};
     }

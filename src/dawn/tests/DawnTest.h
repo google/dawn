@@ -670,6 +670,9 @@ class DawnTestBase {
     // Exposed device creation helper for tests to use when needing more than 1 device.
     wgpu::Device CreateDevice(std::string isolationKey = "");
 
+    // Get the WireHelper to assist in creating additional Instances when relevant in tests.
+    utils::WireHelper* GetWireHelper() const;
+
     // Called in SetUp() to get the features required to be enabled in the tests. The tests must
     // check if the required features are supported by the adapter in this function and guarantee
     // the returned features are all supported by the adapter. The tests may provide different

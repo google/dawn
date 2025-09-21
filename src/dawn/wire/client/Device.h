@@ -100,7 +100,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
 
     struct DeviceLostInfo {
         FutureID futureID = kNullFutureID;
-        std::unique_ptr<TrackedEvent> event = nullptr;
+        Ref<TrackedEvent> event = nullptr;
     };
     DeviceLostInfo mDeviceLostInfo;
 

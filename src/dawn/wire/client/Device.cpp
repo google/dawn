@@ -261,7 +261,7 @@ Device::Device(const ObjectBaseParams& params,
     if (descriptor != nullptr && descriptor->deviceLostCallbackInfo.callback != nullptr) {
         deviceLostCallbackInfo = descriptor->deviceLostCallbackInfo;
     }
-    mDeviceLostInfo.event = std::make_unique<DeviceLostEvent>(deviceLostCallbackInfo, this);
+    mDeviceLostInfo.event = AcquireRef(new DeviceLostEvent(deviceLostCallbackInfo, this));
 
     mUncapturedErrorCallbackInfo = kDefaultUncapturedErrorCallbackInfo;
     if (descriptor != nullptr && descriptor->uncapturedErrorCallbackInfo.callback != nullptr) {
@@ -358,7 +358,7 @@ WireResult Client::DoDeviceLostCallback(ObjectHandle eventManager,
 WGPUFuture Device::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(callbackInfo));
+        GetEventManager().TrackEvent(AcquireRef(new PopErrorScopeEvent(callbackInfo)));
     if (!tracked) {
         return {futureIDInternal};
     }
@@ -429,7 +429,7 @@ WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
     Client* client = GetClient();
     Ref<Pipeline> pipeline = client->Make<Pipeline>();
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<Event>(callbackInfo, pipeline));
+        GetEventManager().TrackEvent(AcquireRef(new Event(callbackInfo, pipeline)));
     if (!tracked) {
         return {futureIDInternal};
     }

@@ -102,7 +102,7 @@ WGPUFuture Queue::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& ca
 
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<WorkDoneEvent>(callbackInfo));
+        GetEventManager().TrackEvent(AcquireRef(new WorkDoneEvent(callbackInfo)));
     if (!tracked) {
         return {futureIDInternal};
     }
