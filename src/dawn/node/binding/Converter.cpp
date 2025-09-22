@@ -543,11 +543,33 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
             out = wgpu::TextureFormat::ASTC12x12UnormSrgb;
             requiredFeature = wgpu::FeatureName::TextureCompressionASTC;
             break;
-
-        default:
-            std::stringstream err;
-            err << "unknown GPUTextureFormat(" << static_cast<int>(in) << ")";
-            return Throw(err.str());
+        case interop::GPUTextureFormat::kR16Unorm:
+            out = wgpu::TextureFormat::R16Unorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+        case interop::GPUTextureFormat::kR16Snorm:
+            out = wgpu::TextureFormat::R16Snorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+        case interop::GPUTextureFormat::kRg16Unorm:
+            out = wgpu::TextureFormat::RG16Unorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+        case interop::GPUTextureFormat::kRg16Snorm:
+            out = wgpu::TextureFormat::RG16Snorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+        case interop::GPUTextureFormat::kRgba16Unorm:
+            out = wgpu::TextureFormat::RGBA16Unorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+        case interop::GPUTextureFormat::kRgba16Snorm:
+            out = wgpu::TextureFormat::RGBA16Snorm;
+            requiredFeature = wgpu::FeatureName::TextureFormatsTier1;
+            break;
+            // default is left off intentionally so we get an error if
+            // new formats are added and they are not handled here.
+            // Note: they need to be added below as well.
     }
 
     assert(requiredFeature != wgpu::FeatureName(0u));
@@ -662,10 +684,14 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         CASE(RGBA8Unorm, kRgba8Unorm);
         CASE(RGBA8UnormSrgb, kRgba8UnormSrgb);
         CASE(Stencil8, kStencil8);
+        CASE(R16Snorm, kR16Snorm);
+        CASE(R16Unorm, kR16Unorm);
+        CASE(RG16Snorm, kRg16Snorm);
+        CASE(RG16Unorm, kRg16Unorm);
+        CASE(RGBA16Snorm, kRgba16Snorm);
+        CASE(RGBA16Unorm, kRgba16Unorm);
 #undef CASE
 
-        case wgpu::TextureFormat::R16Snorm:
-        case wgpu::TextureFormat::R16Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar422Unorm:
         case wgpu::TextureFormat::R8BG8Biplanar444Unorm:
@@ -673,10 +699,6 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar422Unorm:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar444Unorm:
-        case wgpu::TextureFormat::RG16Snorm:
-        case wgpu::TextureFormat::RG16Unorm:
-        case wgpu::TextureFormat::RGBA16Snorm:
-        case wgpu::TextureFormat::RGBA16Unorm:
         case wgpu::TextureFormat::External:
 
         case wgpu::TextureFormat::Undefined:
