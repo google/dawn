@@ -1498,7 +1498,7 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
             ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.i32(), 2u, 128u, 8u, 32u,
                                              core::IOAttributes{}),
         },
-        128u, 256u, 160u);
+        256u, 160u);
     structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
@@ -1517,7 +1517,7 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
     });
 
     auto* src = R"(
-MyStruct = struct @align(128), @block {
+MyStruct = struct @align(32), @block {
   a:i32 @offset(0) @size(16)
   m:mat4x2<f32> @offset(64) @size(64)
   b:i32 @offset(128) @size(32)
@@ -1545,13 +1545,13 @@ $B1: {  # root
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-MyStruct = struct @align(128), @block {
+MyStruct = struct @align(32), @block {
   a:i32 @offset(0) @size(16)
   m:mat4x2<f32> @offset(64) @size(64)
   b:i32 @offset(128) @size(32)
 }
 
-MyStruct_std140 = struct @align(128), @block {
+MyStruct_std140 = struct @align(8), @block {
   a:i32 @offset(0) @size(16)
   m_col0:vec2<f32> @offset(64)
   m_col1:vec2<f32> @offset(72)

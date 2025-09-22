@@ -46,9 +46,8 @@ using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {
     Manager ty;
-    auto* s = ty.Get<Struct>(Symbol(), tint::Empty, 4u /* align */, 8u /* size */,
-                             16u /* size_no_padding */);
-    EXPECT_EQ(s->Align(), 4u);
+    auto* s = ty.Get<Struct>(Symbol(), tint::Empty, 8u /* size */, 16u /* size_no_padding */);
+    EXPECT_EQ(s->Align(), 0u);
     EXPECT_EQ(s->Size(), 8u);
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
@@ -56,10 +55,8 @@ TEST_F(TypeStructTest, Creation) {
 TEST_F(TypeStructTest, Equals) {
     Manager ty;
     SymbolTable st{};
-    auto* a = ty.Get<Struct>(st.New("a"), tint::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
-    auto* b = ty.Get<Struct>(st.New("b"), tint::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
+    auto* a = ty.Get<Struct>(st.New("a"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
+    auto* b = ty.Get<Struct>(st.New("b"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
@@ -69,8 +66,8 @@ TEST_F(TypeStructTest, Equals) {
 TEST_F(TypeStructTest, FriendlyName) {
     Manager ty;
     SymbolTable st{};
-    auto* s = ty.Get<Struct>(st.New("my_struct"), tint::Empty, 4u /* align */, 4u /* size */,
-                             4u /* size_no_padding */);
+    auto* s =
+        ty.Get<Struct>(st.New("my_struct"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
@@ -228,7 +225,7 @@ TEST_F(TypeStructTest, Clone) {
         tint::Vector{
             ty.Get<StructMember>(syms.New("b"), ty.vec3<f32>(), 0u, 0u, 16u, 12u, attrs_location_2),
             ty.Get<StructMember>(syms.New("a"), ty.i32(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
-        4u /* align */, 8u /* size */, 16u /* size_no_padding */);
+        8u /* size */, 16u /* size_no_padding */);
 
     SymbolTable new_st{};
 
@@ -240,7 +237,7 @@ TEST_F(TypeStructTest, Clone) {
     EXPECT_TRUE(new_st.Get("my_struct").IsValid());
     EXPECT_EQ(st->Name().Name(), "my_struct");
 
-    EXPECT_EQ(st->Align(), 4u);
+    EXPECT_EQ(st->Align(), 16u);
     EXPECT_EQ(st->Size(), 8u);
     EXPECT_EQ(st->SizeNoPadding(), 16u);
 

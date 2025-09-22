@@ -4401,9 +4401,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         ICE(str->source) << "calculated struct stride exceeds uint32";
     }
 
-    auto* out = b.create<sem::Struct>(
-        str, str->name->symbol, std::move(sem_members), static_cast<uint32_t>(struct_align),
-        static_cast<uint32_t>(struct_size), static_cast<uint32_t>(size_no_padding));
+    auto* out = b.create<sem::Struct>(str, str->name->symbol, std::move(sem_members),
+                                      static_cast<uint32_t>(struct_size),
+                                      static_cast<uint32_t>(size_no_padding));
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();

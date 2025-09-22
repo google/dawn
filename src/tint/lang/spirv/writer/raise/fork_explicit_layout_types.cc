@@ -195,10 +195,9 @@ struct State {
 
         // Create a new struct with the rewritten members.
         auto name = sym.New(original_struct->Name().Name() + "_tint_explicit_layout");
-        auto* new_str = ty.Get<core::type::Struct>(name,                      //
-                                                   std::move(new_members),    //
-                                                   original_struct->Align(),  //
-                                                   original_struct->Size(),   //
+        auto* new_str = ty.Get<core::type::Struct>(name,                     //
+                                                   std::move(new_members),   //
+                                                   original_struct->Size(),  //
                                                    original_struct->SizeNoPadding());
         new_str->SetStructFlag(core::type::kExplicitLayout);
         for (auto flag : original_struct->StructFlags()) {

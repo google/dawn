@@ -96,9 +96,7 @@ TEST_F(MslWriterTest, EmitType_RuntimeArray) {
     auto* param =
         b.FunctionParam("param", ty.ptr(core::AddressSpace::kStorage, ty.array<bool, 0>()));
     func->SetParams({param});
-    b.Append(func->Block(), [&] {
-        b.Return(func);
-    });
+    b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
@@ -462,7 +460,7 @@ core::type::Struct* MkStruct(core::ir::Module& mod,
         size = offset + mem_size;
     }
 
-    return ty.Get<core::type::Struct>(mod.symbols.New(name), std::move(members), align,
+    return ty.Get<core::type::Struct>(mod.symbols.New(name), std::move(members),
                                       tint::RoundUp(align, size), size);
 }
 

@@ -191,7 +191,7 @@ struct State {
                     // Create a new struct with the rewritten members.
                     auto* new_str = ty.Get<core::type::Struct>(
                         sym.New(str->Name().Name() + "_std140"), std::move(new_members),
-                        str->Align(), str->Size(), str->SizeNoPadding());
+                        str->Size(), str->SizeNoPadding());
                     for (auto flag : str->StructFlags()) {
                         new_str->SetStructFlag(flag);
                     }
@@ -219,8 +219,7 @@ struct State {
 
                     // Create a new struct with the rewritten members.
                     return ty.Get<core::type::Struct>(
-                        sym.New(name.str()), std::move(members), col->Align(),
-                        col->Align() * mat->Columns(),
+                        sym.New(name.str()), std::move(members), col->Align() * mat->Columns(),
                         (col->Align() * (mat->Columns() - 1)) + col->Size());
                 },
                 [&](Default) {

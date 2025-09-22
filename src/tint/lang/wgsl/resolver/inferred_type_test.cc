@@ -157,7 +157,7 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
         str, str->name->symbol,
         Vector{create<sem::StructMember>(member, member->name->symbol, create<core::type::I32>(),
                                          0u, 0u, 0u, 4u, core::IOAttributes{})},
-        0u, 4u, 4u);
+        4u, 4u);
 
     auto* ctor_expr = Call(ty.Of(str));
 

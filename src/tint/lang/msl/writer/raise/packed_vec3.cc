@@ -230,9 +230,9 @@ struct State {
         }
 
         // Create a new struct with the rewritten members.
-        auto* new_str = ty.Get<core::type::Struct>(sym.New(str->Name().Name() + "_packed_vec3"),
-                                                   std::move(new_members), str->Align(),
-                                                   str->Size(), str->SizeNoPadding());
+        auto* new_str =
+            ty.Get<core::type::Struct>(sym.New(str->Name().Name() + "_packed_vec3"),
+                                       std::move(new_members), str->Size(), str->SizeNoPadding());
 
         return new_str;
     }
