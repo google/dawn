@@ -211,7 +211,7 @@ static_library("dawn_node_binding") {
   include_dirs = [ "${dawn_node_gen_dir}" ]
   public_deps = [ ":dawn_node_interop" ]
   deps = [
-    "$dawn_root/src/dawn/native:native",
+    "$dawn_root/src/dawn/native",
     "$dawn_root/src/dawn/utils:wgpu_utils",
   ]
 }
@@ -252,8 +252,8 @@ copy("copy_index_js") {
   outputs = [ "$root_build_dir/index.js" ]
 }
 copy("copy_cts_js") {
-  sources = [ "$dawn_root/src/dawn/node/cts.js" ]
-  outputs = [ "$root_build_dir/cts.js" ]
+  sources = [ "$dawn_root/src/dawn/node/cts.cjs" ]
+  outputs = [ "$root_build_dir/cts.cjs" ]
 }
 
 shared_library("dawn_node") {

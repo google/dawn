@@ -96,7 +96,7 @@ func (c *cmd) runTestCaseWithCmdline(ctx context.Context, testCase common.TestCa
 		// start at 1, so just inject a placeholder argument.
 		"placeholder-arg",
 		// Actual arguments begin here
-		"--gpu-provider", filepath.Join(c.flags.bin, "cts.js"),
+		"--gpu-provider", filepath.Join(c.flags.bin, "cts.cjs"),
 		"--verbose", // always required to emit test pass results
 		"--quiet",
 	}

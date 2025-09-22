@@ -237,7 +237,7 @@ Open or create the `.vscode/launch.json` file, and add:
         "--",
         "placeholder-arg",
         "--gpu-provider",
-        "[path-to-cts.js]", // REPLACE: [path-to-cts.js]
+        "[path-to-cts.cjs]", // REPLACE: [path-to-cts.cjs]
         "[test-query]" // REPLACE: [test-query]
       ],
       "cwd": "[cts-root]" // REPLACE: [cts-root]
@@ -249,7 +249,7 @@ Open or create the `.vscode/launch.json` file, and add:
 Replacing:
 
 - `[cts-root]` with the path to the CTS root directory. If you are editing the `.vscode/launch.json` from within the CTS workspace, then you may use `${workspaceFolder}`.
-- `[cts.js]` this is the path to the `cts.js` file that should be copied to the output directory by the [build step](#build)
+- `[cts.cjs]` this is the path to the `cts.cjs` file that should be copied to the output directory by the [build step](#build)
 - `test-query` with the test query string. Example: `webgpu:shader,execution,builtin,abs:*`
 
 ## Debugging C++
@@ -262,7 +262,7 @@ cd <cts-root-dir>
     -e "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');" \
     -- \
     placeholder-arg \
-    --gpu-provider [path to cts.js] \
+    --gpu-provider [path to cts.cjs] \
     [test-query]
 ```
 
@@ -278,7 +278,7 @@ launch.json. For example:
 loop:nested_loops:preventValueOptimizations=false'
 <SNIP>
 Running:
-  Cmd: /home/user/src/dawn/third_party/node/node-linux-x64/bin/node -e "require('./out-node/common/runtime/cmdline.js');" -- placeholder-arg --gpu-provider /home/user/src/dawn/build-clang/cts.js --verbose --quiet --gpu-provider-flag verbose=1 --colors --gpu-provider-flag enable-dawn-features=allow_unsafe_apis "webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false"
+  Cmd: /home/user/src/dawn/third_party/node/node-linux-x64/bin/node -e "require('./out-node/common/runtime/cmdline.js');" -- placeholder-arg --gpu-provider /home/user/src/dawn/build-clang/cts.cjs --verbose --quiet --gpu-provider-flag verbose=1 --colors --gpu-provider-flag enable-dawn-features=allow_unsafe_apis "webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false"
   Dir: /home/user/src/dawn/third_party/webgpu-cts
 
   For VS Code launch.json:
@@ -289,7 +289,7 @@ Running:
         "--",
         "placeholder-arg",
         "--gpu-provider",
-        "/home/user/src/dawn/build-clang/cts.js",
+        "/home/user/src/dawn/build-clang/cts.cjs",
         "--verbose",
         "--quiet",
         "--gpu-provider-flag",

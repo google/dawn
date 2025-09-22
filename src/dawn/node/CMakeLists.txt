@@ -190,4 +190,4 @@ macro(javascript file)
 endmacro()
 
 javascript("index.js")
-javascript("cts.js")
+javascript("cts.cjs")

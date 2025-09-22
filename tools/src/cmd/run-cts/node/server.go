@@ -110,7 +110,7 @@ func (c *cmd) runServer(
 			// start at 1, so just inject a placeholder argument.
 			"placeholder-arg",
 			// Actual arguments begin here
-			"--gpu-provider", filepath.Join(c.flags.bin, "cts.js"),
+			"--gpu-provider", filepath.Join(c.flags.bin, "cts.cjs"),
 		}
 		if c.flags.Colors {
 			args = append(args, "--colors")
