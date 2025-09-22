@@ -461,7 +461,7 @@ core::type::Struct* MkStruct(core::ir::Module& mod,
     }
 
     return ty.Get<core::type::Struct>(mod.symbols.New(name), std::move(members),
-                                      tint::RoundUp(align, size), size);
+                                      tint::RoundUp(align, size));
 }
 
 TEST_F(MslWriterTest, EmitType_Struct_Layout_NumericTypes) {

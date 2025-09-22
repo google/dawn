@@ -77,8 +77,7 @@ struct TypeTest : public TestHelper {
                                          /* size */ 4u,
                                          /* attributes */ core::IOAttributes{}),
                                  },
-                                 /* size*/ 4u,
-                                 /* size_no_padding*/ 4u);
+                                 /* size*/ 4u);
         str_f16 = ty.Get<Struct>(st.New("str_f16"),
                                  tint::Vector{
                                      ty.Get<StructMember>(
@@ -90,8 +89,7 @@ struct TypeTest : public TestHelper {
                                          /* size */ 4u,
                                          /* attributes */ core::IOAttributes{}),
                                  },
-                                 /* size*/ 4u,
-                                 /* size_no_padding*/ 4u);
+                                 /* size*/ 4u);
         str_af = ty.Get<Struct>(st.New("str_af"),
                                 tint::Vector{
                                     ty.Get<StructMember>(
@@ -103,8 +101,7 @@ struct TypeTest : public TestHelper {
                                         /* size */ 4u,
                                         /* attributes */ core::IOAttributes{}),
                                 },
-                                /* size*/ 4u,
-                                /* size_no_padding*/ 4u);
+                                /* size*/ 4u);
         str_af->SetConcreteTypes(tint::Vector{str_f32, str_f16});
 
         arr_i32 = ty.array(i32, 5);

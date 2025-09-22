@@ -45,18 +45,25 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {
+    SymbolTable st{};
     Manager ty;
-    auto* s = ty.Get<Struct>(Symbol(), tint::Empty, 8u /* size */, 16u /* size_no_padding */);
-    EXPECT_EQ(s->Align(), 0u);
+    auto* s = ty.Get<Struct>(st.New("my_struct"),
+                             tint::Vector{ty.Get<StructMember>(st.New("b"), ty.vec3<f32>(), 0u, 0u,
+                                                               16u, 12u, core::IOAttributes{}),
+                                          ty.Get<StructMember>(st.New("a"), ty.i32(), 1u, 16u, 4u,
+                                                               4u, core::IOAttributes{})},
+                             8u /* size */);
+
+    EXPECT_EQ(s->Align(), 16u);
     EXPECT_EQ(s->Size(), 8u);
-    EXPECT_EQ(s->SizeNoPadding(), 16u);
+    EXPECT_EQ(s->SizeNoPadding(), 20u);
 }
 
 TEST_F(TypeStructTest, Equals) {
     Manager ty;
     SymbolTable st{};
-    auto* a = ty.Get<Struct>(st.New("a"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
-    auto* b = ty.Get<Struct>(st.New("b"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
+    auto* a = ty.Get<Struct>(st.New("a"), tint::Empty, 4u /* size */);
+    auto* b = ty.Get<Struct>(st.New("b"), tint::Empty, 4u /* size */);
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
@@ -66,8 +73,7 @@ TEST_F(TypeStructTest, Equals) {
 TEST_F(TypeStructTest, FriendlyName) {
     Manager ty;
     SymbolTable st{};
-    auto* s =
-        ty.Get<Struct>(st.New("my_struct"), tint::Empty, 4u /* size */, 4u /* size_no_padding */);
+    auto* s = ty.Get<Struct>(st.New("my_struct"), tint::Empty, 4u /* size */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
@@ -225,7 +231,7 @@ TEST_F(TypeStructTest, Clone) {
         tint::Vector{
             ty.Get<StructMember>(syms.New("b"), ty.vec3<f32>(), 0u, 0u, 16u, 12u, attrs_location_2),
             ty.Get<StructMember>(syms.New("a"), ty.i32(), 1u, 16u, 4u, 4u, core::IOAttributes{})},
-        8u /* size */, 16u /* size_no_padding */);
+        8u /* size */);
 
     SymbolTable new_st{};
 
@@ -239,7 +245,7 @@ TEST_F(TypeStructTest, Clone) {
 
     EXPECT_EQ(st->Align(), 16u);
     EXPECT_EQ(st->Size(), 8u);
-    EXPECT_EQ(st->SizeNoPadding(), 16u);
+    EXPECT_EQ(st->SizeNoPadding(), 20u);
 
     auto members = st->Members();
     ASSERT_EQ(members.Length(), 2u);

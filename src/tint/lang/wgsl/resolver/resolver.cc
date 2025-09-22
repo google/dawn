@@ -4388,7 +4388,6 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         struct_align = std::max(struct_align, align);
     }
 
-    uint64_t size_no_padding = struct_size;
     struct_size = tint::RoundUp(struct_align, struct_size);
 
     if (struct_size > std::numeric_limits<uint32_t>::max()) {
@@ -4401,8 +4400,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     auto* out = b.create<sem::Struct>(str, str->name->symbol, std::move(sem_members),
-                                      static_cast<uint32_t>(struct_size),
-                                      static_cast<uint32_t>(size_no_padding));
+                                      static_cast<uint32_t>(struct_size));
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();

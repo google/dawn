@@ -1498,7 +1498,7 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
             ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.i32(), 2u, 128u, 8u, 32u,
                                              core::IOAttributes{}),
         },
-        256u, 160u);
+        256u);
     structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));

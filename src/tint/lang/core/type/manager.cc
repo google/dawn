@@ -348,7 +348,7 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
         max_align = std::max(max_align, m->Align());
     }
     uint32_t size = members.Back()->Offset() + members.Back()->Size();
-    return Get<core::type::Struct>(name, std::move(members), tint::RoundUp(max_align, size), size);
+    return Get<core::type::Struct>(name, std::move(members), tint::RoundUp(max_align, size));
 }
 
 core::type::Struct* Manager::Struct(Symbol name,
@@ -371,7 +371,7 @@ core::type::Struct* Manager::Struct(Symbol name,
         max_align = std::max(max_align, align);
     }
     return Get<core::type::Struct>(name, std::move(members), tint::RoundUp(max_align, current_size),
-                                   current_size, is_wgsl_internal);
+                                   is_wgsl_internal);
 }
 
 }  // namespace tint::core::type

@@ -189,9 +189,9 @@ struct State {
                     }
 
                     // Create a new struct with the rewritten members.
-                    auto* new_str = ty.Get<core::type::Struct>(
-                        sym.New(str->Name().Name() + "_std140"), std::move(new_members),
-                        str->Size(), str->SizeNoPadding());
+                    auto* new_str =
+                        ty.Get<core::type::Struct>(sym.New(str->Name().Name() + "_std140"),
+                                                   std::move(new_members), str->Size());
                     for (auto flag : str->StructFlags()) {
                         new_str->SetStructFlag(flag);
                     }
@@ -218,9 +218,8 @@ struct State {
                     }
 
                     // Create a new struct with the rewritten members.
-                    return ty.Get<core::type::Struct>(
-                        sym.New(name.str()), std::move(members), col->Align() * mat->Columns(),
-                        (col->Align() * (mat->Columns() - 1)) + col->Size());
+                    return ty.Get<core::type::Struct>(sym.New(name.str()), std::move(members),
+                                                      col->Align() * mat->Columns());
                 },
                 [&](Default) {
                     // This type cannot contain a matrix, so no changes needed.
