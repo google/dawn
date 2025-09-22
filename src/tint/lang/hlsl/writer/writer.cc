@@ -125,6 +125,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         for (auto* param : func->Params()) {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
+                    if (member->Attributes().color.has_value()) {
+                        return Failure("@color attribute is not supported by the HLSL backend");
+                    }
                     if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId) {
                         return Failure("subgroup_id is not yet supported by the HLSL backend");
                     }
@@ -136,6 +139,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                     }
                 }
             } else {
+                if (param->Color().has_value()) {
+                    return Failure("@color attribute is not supported by the HLSL backend");
+                }
                 if (param->Builtin() == core::BuiltinValue::kSubgroupId) {
                     return Failure("subgroup_id is not yet supported by the HLSL backend");
                 }
