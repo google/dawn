@@ -33,7 +33,6 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/Enumerator.h"
-#include "dawn/common/MatchVariant.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
@@ -244,38 +243,27 @@ bool GenerateArrayLengthFromuniformData(const BindingInfoArray& moduleBindingInf
 
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
-        for (const auto& [binding, shaderBindingInfo] : moduleBindingInfo[group]) {
-            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
-            const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
 
-            // TODO(crbug.com/408010433): capturing binding directly in lambda is C++20
-            // extension in cmake
-            uint32_t capturedBindingNumber = static_cast<uint32_t>(binding);
+        for (BindingIndex binding : bgl->GetBufferIndices()) {
+            const BindingInfo& bindingInfo = bgl->GetBindingInfo(binding);
 
-            MatchVariant(
-                bindingInfo.bindingLayout,
-                [&](const BufferBindingInfo& bufferBinding) {
-                    switch (bufferBinding.type) {
-                        case wgpu::BufferBindingType::Storage:
-                        case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
-                        case kInternalReadOnlyStorageBufferBinding: {
-                            // Use ssbo index as the indices for the buffer size lookups
-                            // in the array length from uniform transform.
-                            tint::BindingPoint srcBindingPoint = {static_cast<uint32_t>(group),
-                                                                  capturedBindingNumber};
-                            FlatBindingIndex ssboIndex = indexInfo[group][bindingIndex];
-                            bindings.array_length_from_uniform.bindpoint_to_size_index.emplace(
-                                srcBindingPoint, uint32_t(ssboIndex));
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                },
-                [](const StaticSamplerBindingInfo&) {}, [](const SamplerBindingInfo&) {},
-                [](const TextureBindingInfo&) {}, [](const StorageTextureBindingInfo&) {},
-                [](const TexelBufferBindingInfo&) {}, [](const InputAttachmentBindingInfo&) {});
+            switch (std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type) {
+                case wgpu::BufferBindingType::Storage:
+                case kInternalStorageBufferBinding:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
+                case kInternalReadOnlyStorageBufferBinding: {
+                    // Use ssbo index as the indices for the buffer size lookups
+                    // in the array length from uniform transform.
+                    tint::BindingPoint srcBindingPoint = {uint32_t(group),
+                                                          uint32_t(bindingInfo.binding)};
+                    FlatBindingIndex ssboIndex = indexInfo[group][binding];
+                    bindings.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                        srcBindingPoint, uint32_t(ssboIndex));
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
 
