@@ -191,8 +191,7 @@ TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
     b.Append(b.ir.root_block, [&] {  //
         auto* cnt = ty.Get<core::type::ConstantArrayCount>(4_u);
         auto* ex = ty.Get<type::ExplicitLayoutArray>(/* element */ ty.f32(), /* count */ cnt,
-                                                     /* align */ 4_u, /* size */ 4_u * 4_u,
-                                                     /* stride */ 16_u);
+                                                     /* size */ 4_u * 4_u, /* stride */ 16_u);
         auto* v = b.Var("v", ty.ptr<storage>(ex));
         v->SetBindingPoint(0, 0);
     });
@@ -229,9 +228,8 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
 TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
     b.Append(b.ir.root_block, [&] {  //
         auto* cnt = ty.Get<core::type::RuntimeArrayCount>();
-        auto* ex =
-            ty.Get<type::ExplicitLayoutArray>(/* element */ ty.f32(), /* count */ cnt,
-                                              /* align */ 4_u, /* size */ 16_u, /* stride */ 16_u);
+        auto* ex = ty.Get<type::ExplicitLayoutArray>(/* element */ ty.f32(), /* count */ cnt,
+                                                     /* size */ 16_u, /* stride */ 16_u);
         auto* v = b.Var("v", ty.ptr<storage, read_write>(ex));
         v->SetBindingPoint(0, 0);
     });

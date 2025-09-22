@@ -111,27 +111,23 @@ struct TypeTest : public TestHelper {
         arr_ai = ty.Get<Array>(
             /* element */ ai,
             /* count */ ty.Get<ConstantArrayCount>(5u),
-            /* align */ 4u,
             /* size */ 5u * 4u);
         arr_vec3_i32 = ty.array(vec3_i32, 5);
         arr_vec3_ai = ty.Get<Array>(
             /* element */ vec3_ai,
             /* count */ ty.Get<ConstantArrayCount>(5u),
-            /* align */ 16u,
             /* size */ 5u * 16u);
         arr_mat4x3_f16 = ty.array(mat4x3_f16, 5);
         arr_mat4x3_f32 = ty.array(mat4x3_f32, 5);
         arr_mat4x3_af = ty.Get<Array>(
             /* element */ mat4x3_af,
             /* count */ ty.Get<ConstantArrayCount>(5u),
-            /* align */ 64u,
             /* size */ 5u * 64u);
         arr_str_f16 = ty.array(str_f16, 5);
         arr_str_af = ty.array(str_af, 5);
         arr_str_af = ty.Get<Array>(
             /* element */ str_af,
             /* count */ ty.Get<ConstantArrayCount>(5u),
-            /* align */ 4u,
             /* size */ 5u * 4u);
     }
 

@@ -33,11 +33,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
 
-Array::Array(core::type::Type const* element,
-             const core::type::ArrayCount* count,
-             uint32_t align,
-             uint32_t size)
-    : Base(element, count, align, size) {}
+Array::Array(core::type::Type const* element, const core::type::ArrayCount* count, uint32_t size)
+    : Base(element, count, size) {}
 
 Array::~Array() = default;
 

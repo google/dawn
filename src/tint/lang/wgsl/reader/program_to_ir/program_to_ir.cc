@@ -1248,8 +1248,7 @@ class Impl {
                     auto* ary_count =
                         builder_.ir.Types().Get<core::ir::type::ValueArrayCount>(count);
                     store_ty = builder_.ir.Types().Get<core::type::Array>(
-                        ary->ElemType()->Clone(clone_ctx_.type_ctx), ary_count, ary->Align(),
-                        ary->Size());
+                        ary->ElemType()->Clone(clone_ctx_.type_ctx), ary_count, ary->Size());
                 } else {
                     store_ty = ref->StoreType()->Clone(clone_ctx_.type_ctx);
                 }

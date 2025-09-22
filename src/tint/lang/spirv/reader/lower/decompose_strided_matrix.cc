@@ -133,7 +133,7 @@ struct State {
                     TINT_ASSERT(stride % mat->ColumnStride() == 0);
                     return ty.Get<spirv::type::ExplicitLayoutArray>(
                         mat->ColumnType(), ty.Get<core::type::ConstantArrayCount>(mat->Columns()),
-                        stride, stride * mat->Columns(), stride);
+                        stride * mat->Columns(), stride);
                 },
                 [&](const core::type::Array* arr) { return RewriteArray(arr, stride); },
                 [&](const core::type::Struct* str) { return RewriteStruct(str); },
@@ -156,10 +156,10 @@ struct State {
         // the array itself, which may either be the natural stride or an larger stride in the case
         // of an explicitly laid out array.
         if (auto* ex = arr->As<spirv::type::ExplicitLayoutArray>()) {
-            return ty.Get<spirv::type::ExplicitLayoutArray>(
-                new_element_type, arr->Count(), arr->Align(), arr->Size(), ex->Stride());
+            return ty.Get<spirv::type::ExplicitLayoutArray>(new_element_type, arr->Count(),
+                                                            arr->Size(), ex->Stride());
         }
-        return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Align(), arr->Size());
+        return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Size());
     }
 
     /// Rewrite a structure type to replace structure members that have matrix stride attributes.

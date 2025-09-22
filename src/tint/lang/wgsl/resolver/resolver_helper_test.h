@@ -747,7 +747,6 @@ struct DataType<core::fluent_types::array<T, N>> {
         return b.create<sem::Array>(
             /* element */ el,
             /* count */ count,
-            /* align */ el->Align(),
             /* size */ N * el->Size());
     }
     /// @param b the ProgramBuilder

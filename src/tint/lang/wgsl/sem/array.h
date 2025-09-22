@@ -44,13 +44,9 @@ class Array final : public Castable<Array, core::type::Array> {
     /// Constructor
     /// @param element the array element type
     /// @param count the number of elements in the array.
-    /// @param align the byte alignment of the array
     /// @param size the byte size of the array. The size will be 0 if the array element count is
     ///        pipeline overridable.
-    Array(core::type::Type const* element,
-          const core::type::ArrayCount* count,
-          uint32_t align,
-          uint32_t size);
+    Array(core::type::Type const* element, const core::type::ArrayCount* count, uint32_t size);
 
     /// Destructor
     ~Array() override;

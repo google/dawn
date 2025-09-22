@@ -43,13 +43,11 @@ class ExplicitLayoutArray : public Castable<ExplicitLayoutArray, core::type::Arr
     /// Constructor
     /// @param element the array element type
     /// @param count the number of elements in the array.
-    /// @param align the byte alignment of the array
     /// @param size the byte size of the array.
     /// @param stride the number of bytes from the start of one element of the array to the start of
     /// the next element
     ExplicitLayoutArray(Type const* element,
                         const core::type::ArrayCount* count,
-                        uint32_t align,
                         uint32_t size,
                         uint32_t stride);
 

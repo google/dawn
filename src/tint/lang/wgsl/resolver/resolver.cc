@@ -4125,9 +4125,8 @@ sem::Array* Resolver::Array(const Source& array_source,
                             const Source& count_source,
                             const core::type::Type* el_ty,
                             const core::type::ArrayCount* el_count) {
-    uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
-    uint64_t implicit_stride = el_size ? tint::RoundUp<uint64_t>(el_align, el_size) : 0;
+    uint64_t implicit_stride = el_size ? tint::RoundUp<uint64_t>(el_ty->Align(), el_size) : 0;
     uint64_t size = 0;
 
     if (auto const_count = el_count->As<core::type::ConstantArrayCount>()) {
@@ -4140,7 +4139,7 @@ sem::Array* Resolver::Array(const Source& array_source,
     } else if (el_count->Is<core::type::RuntimeArrayCount>()) {
         size = implicit_stride;
     }
-    auto* out = b.create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size));
+    auto* out = b.create<sem::Array>(el_ty, el_count, static_cast<uint32_t>(size));
 
     // Maximum nesting depth of composite types
     //  https://gpuweb.github.io/gpuweb/wgsl/#limits

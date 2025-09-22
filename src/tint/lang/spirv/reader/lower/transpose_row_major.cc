@@ -641,10 +641,10 @@ struct State {
         // the array itself, which may either be the natural stride or an larger stride in the case
         // of an explicitly laid out array.
         if (auto* ex = arr->As<spirv::type::ExplicitLayoutArray>()) {
-            return ty.Get<spirv::type::ExplicitLayoutArray>(elem_ty, arr->Count(), arr->Align(),
-                                                            arr->Size(), ex->Stride());
+            return ty.Get<spirv::type::ExplicitLayoutArray>(elem_ty, arr->Count(), arr->Size(),
+                                                            ex->Stride());
         }
-        return ty.Get<core::type::Array>(elem_ty, arr->Count(), arr->Align(), arr->Size());
+        return ty.Get<core::type::Array>(elem_ty, arr->Count(), arr->Size());
     }
 
     const core::type::Type* RewriteStruct(const core::type::Struct* old_struct) {

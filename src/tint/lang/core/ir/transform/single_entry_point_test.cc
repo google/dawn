@@ -879,10 +879,10 @@ TEST_F(IR_SingleEntryPointTest, OverrideInArrayType) {
     core::ir::Value* v2 = nullptr;
     b.Append(mod.root_block, [&] {
         auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o1);
-        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u);
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u);
 
         auto* c2 = ty.Get<core::ir::type::ValueArrayCount>(o2);
-        auto* a2 = ty.Get<core::type::Array>(ty.i32(), c2, 4u, 4u);
+        auto* a2 = ty.Get<core::type::Array>(ty.i32(), c2, 4u);
 
         v1 = b.Var("a", ty.ptr(workgroup, a1, read_write))->Result();
         v2 = b.Var("b", ty.ptr(workgroup, a2, read_write))->Result();

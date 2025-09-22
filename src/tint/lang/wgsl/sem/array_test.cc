@@ -39,9 +39,9 @@ using SemArrayTest = core::type::TestHelper;
 TEST_F(SemArrayTest, IsConstructable) {
     core::type::Manager ty;
     auto* named_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 8u);
     auto* unnamed_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 8u);
 
     EXPECT_FALSE(named_override_sized->IsConstructible());
     EXPECT_FALSE(unnamed_override_sized->IsConstructible());
@@ -50,9 +50,9 @@ TEST_F(SemArrayTest, IsConstructable) {
 TEST_F(SemArrayTest, HasCreationFixedFootprint) {
     core::type::Manager ty;
     auto* named_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 8u);
     auto* unnamed_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 8u);
 
     EXPECT_FALSE(named_override_sized->HasCreationFixedFootprint());
     EXPECT_FALSE(unnamed_override_sized->HasCreationFixedFootprint());
@@ -61,9 +61,9 @@ TEST_F(SemArrayTest, HasCreationFixedFootprint) {
 TEST_F(SemArrayTest, HasFixedFootprint) {
     core::type::Manager ty;
     auto* named_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<NamedOverrideArrayCount>(nullptr), 8u);
     auto* unnamed_override_sized =
-        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 4u, 8u);
+        ty.Get<core::type::Array>(ty.u32(), ty.Get<UnnamedOverrideArrayCount>(nullptr), 8u);
 
     EXPECT_TRUE(named_override_sized->HasFixedFootprint());
     EXPECT_TRUE(unnamed_override_sized->HasFixedFootprint());

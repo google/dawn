@@ -4,7 +4,6 @@ struct tint_padded_array_element {
 }
 
 struct SSBO_1_1 {
-  @align(8u)
   m : array<tint_padded_array_element, 2u>,
 }
 

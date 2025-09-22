@@ -50,10 +50,9 @@ class Array : public Castable<Array, Type> {
     /// Constructor
     /// @param element the array element type
     /// @param count the number of elements in the array.
-    /// @param align the byte alignment of the array
     /// @param size the byte size of the array. The size will be 0 if the array element count is
     ///        pipeline overridable.
-    Array(Type const* element, const ArrayCount* count, uint32_t align, uint32_t size);
+    Array(Type const* element, const ArrayCount* count, uint32_t size);
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
@@ -74,9 +73,7 @@ class Array : public Castable<Array, Type> {
     }
 
     /// @returns the byte alignment of the array
-    /// @note this may differ from the alignment of a structure member of this
-    /// array type, if the member is annotated with the `@align(n)` attribute.
-    uint32_t Align() const override;
+    uint32_t Align() const override { return element_->Align(); }
 
     /// @returns the byte size of the array
     /// @note this may differ from the size of a structure member of this array
@@ -106,13 +103,11 @@ class Array : public Castable<Array, Type> {
     /// @param hash the immutable hash for the node
     /// @param element the array element type
     /// @param count the number of elements in the array.
-    /// @param align the byte alignment of the array
     /// @param size the byte size of the array.
-    Array(size_t hash, Type const* element, const ArrayCount* count, uint32_t align, uint32_t size);
+    Array(size_t hash, Type const* element, const ArrayCount* count, uint32_t size);
 
     Type const* const element_;
     const ArrayCount* count_;
-    const uint32_t align_;
     const uint32_t size_;
 };
 

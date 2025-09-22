@@ -736,7 +736,7 @@ class Parser {
                     }
 
                     return ty_.Get<spirv::type::ExplicitLayoutArray>(
-                        elem_ty, ty_.Get<core::type::RuntimeArrayCount>(), elem_ty->Align(),
+                        elem_ty, ty_.Get<core::type::RuntimeArrayCount>(),
                         static_cast<uint32_t>(array_stride), array_stride);
                 }
                 case spvtools::opt::analysis::Type::kStruct: {
@@ -889,7 +889,7 @@ class Parser {
 
         return ty_.Get<spirv::type::ExplicitLayoutArray>(
             elem_ty, ty_.Get<core::type::ConstantArrayCount>(static_cast<uint32_t>(count_val)),
-            elem_ty->Align(), static_cast<uint32_t>(array_stride * count_val), array_stride);
+            static_cast<uint32_t>(array_stride * count_val), array_stride);
     }
 
     /// Calculate the size of a struct member type that has a matrix stride decoration.

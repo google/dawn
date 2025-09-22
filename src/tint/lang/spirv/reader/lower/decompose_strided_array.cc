@@ -144,13 +144,11 @@ struct State {
                         padded_structures.Add(element_struct);
                     }
 
-                    return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Align(),
-                                                     arr->Size());
+                    return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Size());
                 },
                 [&](const core::type::Array* arr) {
                     auto* new_element_type = RewriteType(arr->ElemType());
-                    return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Align(),
-                                                     arr->Size());
+                    return ty.Get<core::type::Array>(new_element_type, arr->Count(), arr->Size());
                 },
                 [&](const core::type::Struct* str) -> const core::type::Struct* {
                     // Rewrite members of the struct that contain arrays with non-default strides.

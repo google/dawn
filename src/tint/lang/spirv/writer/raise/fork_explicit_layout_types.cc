@@ -224,7 +224,6 @@ struct State {
 
         return ty.Get<type::ExplicitLayoutArray>(new_element_type,         //
                                                  original_array->Count(),  //
-                                                 original_array->Align(),  //
                                                  original_array->Size(),   //
                                                  stride);
     }

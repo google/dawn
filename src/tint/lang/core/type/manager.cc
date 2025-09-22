@@ -302,7 +302,6 @@ const core::type::Array* Manager::array(const core::type::Type* elem_ty, uint32_
 
     return Get<core::type::Array>(/* element type */ elem_ty,
                                   /* element count */ Get<ConstantArrayCount>(count),
-                                  /* array alignment */ elem_ty->Align(),
                                   /* array size */ count * implicit_stride);
 }
 
@@ -312,7 +311,6 @@ const core::type::Array* Manager::runtime_array(const core::type::Type* elem_ty)
     return Get<core::type::Array>(
         /* element type */ elem_ty,
         /* element count */ Get<RuntimeArrayCount>(),
-        /* array alignment */ elem_ty->Align(),
         /* array size */ implicit_stride);
 }
 
