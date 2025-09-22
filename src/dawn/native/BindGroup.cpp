@@ -620,66 +620,44 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
             "nextInChain must be nullptr.");
 
         // Perform binding-type specific validation.
-        DAWN_TRY(MatchVariant(
-            bindingInfo.bindingLayout,
-            [&](const BufferBindingInfo& layout) -> MaybeError {
-                // TODO(dawn:1485): Validate buffer binding with usage validation mode.
-                DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, layout),
-                                 "validating entries[%u] as a Buffer."
-                                 "\nExpected entry layout: %s",
-                                 i, layout);
-                return {};
-            },
-            [&](const TextureBindingInfo& layout) -> MaybeError {
-                DAWN_TRY_CONTEXT(ValidateSampledTextureBinding(device, entry, layout, mode),
-                                 "validating entries[%u] as a Sampled Texture."
-                                 "\nExpected entry layout: %s",
-                                 i, layout);
-                if (entry.textureView->IsYCbCr()) {
-                    // Need to validate that the YCbCr texture is statically sampled.
-                    needsCrossBindingValidation = true;
-                }
+        DAWN_TRY_CONTEXT(
+            MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const BufferBindingInfo& layout) -> MaybeError {
+                    // TODO(dawn:1485): Validate buffer binding with usage validation mode.
+                    return ValidateBufferBinding(device, entry, layout);
+                },
+                [&](const TextureBindingInfo& layout) -> MaybeError {
+                    DAWN_TRY(ValidateSampledTextureBinding(device, entry, layout, mode));
 
-                return {};
-            },
-            [&](const StorageTextureBindingInfo& layout) -> MaybeError {
-                DAWN_TRY_CONTEXT(ValidateStorageTextureBinding(device, entry, layout, mode),
-                                 "validating entries[%u] as a Storage Texture."
-                                 "\nExpected entry layout: %s",
-                                 i, layout);
-                return {};
-            },
-            [&](const TexelBufferBindingInfo& layout) -> MaybeError {
-                if (texelBufferEntry) {
-                    DAWN_TRY_CONTEXT(
-                        ValidateTexelBufferBinding(device, entry, texelBufferEntry, layout, mode),
-                        "validating entries[%u] as a Texel Buffer."
-                        "\nExpected entry layout: %s",
-                        i, layout);
+                    if (entry.textureView->IsYCbCr()) {
+                        // Need to validate that the YCbCr texture is statically sampled.
+                        needsCrossBindingValidation = true;
+                    }
                     return {};
-                }
-                return DAWN_VALIDATION_ERROR(
-                    "entries[%u] not a TexelBuffer when the layout contains an TexelBuffer "
-                    "entry.",
-                    i);
-            },
-            [&](const SamplerBindingInfo& layout) -> MaybeError {
-                DAWN_TRY_CONTEXT(ValidateSamplerBinding(device, entry, layout),
-                                 "validating entries[%u] as a Sampler."
-                                 "\nExpected entry layout: %s",
-                                 i, layout);
-                return {};
-            },
-            [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
-                return DAWN_VALIDATION_ERROR(
-                    "entries[%u] is provided when the layout contains a static sampler for that "
-                    "binding.",
-                    i);
-            },
-            [](const InputAttachmentBindingInfo&) -> MaybeError {
-                // Internal use only. No validation.
-                return {};
-            }));
+                },
+                [&](const StorageTextureBindingInfo& layout) -> MaybeError {
+                    return ValidateStorageTextureBinding(device, entry, layout, mode);
+                },
+                [&](const TexelBufferBindingInfo& layout) -> MaybeError {
+                    if (texelBufferEntry) {
+                        return ValidateTexelBufferBinding(device, entry, texelBufferEntry, layout,
+                                                          mode);
+                    }
+                    return DAWN_VALIDATION_ERROR("Entry is not a texel buffer.");
+                },
+                [&](const SamplerBindingInfo& layout) -> MaybeError {
+                    return ValidateSamplerBinding(device, entry, layout);
+                },
+                [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
+                    return DAWN_VALIDATION_ERROR("An entry is provided for a static sampler.");
+                },
+
+                [](const InputAttachmentBindingInfo&) -> MaybeError {
+                    // Internal use only. No validation.
+                    return {};
+                }),
+            "validating entries[%u] against %s.", i, bindingInfo);
     }
 
     // Check that we have all the required static entries.
