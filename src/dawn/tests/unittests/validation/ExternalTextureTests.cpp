@@ -684,29 +684,6 @@ TEST_F(ExternalTextureTest, BindGroupDoesNotMatchLayout) {
     }
 }
 
-class ExternalTextureTestEnabledToggle : public ExternalTextureTest {
-  protected:
-    std::vector<const char*> GetEnabledToggles() override {
-        return {"disable_texture_view_binding_used_as_external_texture"};
-    }
-};
-
-// Regression test for crbug.com/1343099 where BindGroup validation let other binding types be used
-// for external texture bindings.
-TEST_F(ExternalTextureTestEnabledToggle, TextureViewBindingDoesntMatch) {
-    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
-
-    wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
-    wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
-
-    // The bug was that this passed validation and crashed inside the backends with a null
-    // dereference. It passed validation because the number of bindings matched (1 == 1) and that
-    // the validation didn't check that an external texture binding was required, fell back to
-    // checking for the binding type of entry 0 that had been decayed to be a sampled texture view.
-    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, texture.CreateView()}}));
-}
-
 // Ensure that bind group validation catches error external textures.
 TEST_F(ExternalTextureTest, UseErrorExternalTextureInBindGroup) {
     // Control case should succeed.

@@ -173,10 +173,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::MetalEnableVertexPulling,
      {"metal_enable_vertex_pulling", "Uses vertex pulling to protect out-of-bounds reads on Metal",
       "https://crbug.com/dawn/480", ToggleStage::Device}},
-    {Toggle::DisableTextureViewBindingUsedAsExternalTexture,
-     {"disable_texture_view_binding_used_as_external_texture",
-      "Disable using a texture view for an externalTexture binding.", "http://crbug.com/398752857",
-      ToggleStage::Device}},
     {Toggle::AllowUnsafeAPIs,
      {"allow_unsafe_apis",
       "Suppresses validation errors on API entry points or parameter combinations that aren't "

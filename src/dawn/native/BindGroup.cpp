@@ -606,17 +606,11 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                     layout->GetExternalTextureBindingExpansionMap()));
                 continue;
             }
-            if (!device->IsToggleEnabled(Toggle::DisableTextureViewBindingUsedAsExternalTexture)) {
                 DAWN_TRY_CONTEXT(ValidateTextureViewBindingUsedAsExternalTexture(device, entry),
                                  "validating entries[%u] as a TextureView."
                                  "\nExpected entry layout: %s",
                                  i, layout);
                 continue;
-            }
-            return DAWN_VALIDATION_ERROR(
-                "entries[%u] not an ExternalTexture when the layout contains an ExternalTexture "
-                "entry.",
-                i);
         }
 
         const TexelBufferBindingEntry* texelBufferEntry = unpacked.Get<TexelBufferBindingEntry>();
