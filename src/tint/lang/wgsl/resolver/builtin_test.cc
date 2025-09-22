@@ -2217,7 +2217,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
 
     void add_call_param(std::string name, ast::Type type, ExpressionList* call_params) {
         std::string type_name = type->identifier->symbol.Name();
-        if (tint::HasPrefix(type_name, "texture") || tint::HasPrefix(type_name, "sampler")) {
+        if (type_name.starts_with("texture") || type_name.starts_with("sampler")) {
             GlobalVar(name, type, Binding(0_a), Group(0_a));
         } else {
             GlobalVar(name, type, core::AddressSpace::kPrivate);

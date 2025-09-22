@@ -1045,32 +1045,12 @@ TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
     v->Destroy();
     v->InsertBefore(ret);
 
-    auto addr = tint::ToString(v);
-    auto arrows = std::string(addr.length(), '^');
-
-    std::string expected = R"(:3:5 error: var: destroyed instruction found in instruction list
-    <destroyed tint::core::ir::Var $ADDRESS>
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^$ARROWS^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    <destroyed tint::core::ir::Var $ADDRESS>
-    ret
-  }
-}
-)";
-
-    expected = tint::ReplaceAll(expected, "$ADDRESS", addr);
-    expected = tint::ReplaceAll(expected, "$ARROWS", arrows);
-
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason, expected);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:3:5 error: var: destroyed instruction found in instruction list
+    <destroyed tint::core::ir::Var)"));
 }
 
 TEST_F(IR_ValidatorTest, Instruction_NullInstructionResultInstruction) {

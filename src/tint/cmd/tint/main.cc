@@ -199,28 +199,28 @@ Format InferFormat(const std::string& filename) {
     (void)filename;
 
 #if TINT_BUILD_SPV_WRITER
-    if (tint::HasSuffix(filename, ".spv")) {
+    if (filename.ends_with(".spv")) {
         return Format::kSpirv;
     }
-    if (tint::HasSuffix(filename, ".spvasm")) {
+    if (filename.ends_with(".spvasm")) {
         return Format::kSpvAsm;
     }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_WGSL_WRITER
-    if (tint::HasSuffix(filename, ".wgsl")) {
+    if (filename.ends_with(".wgsl")) {
         return Format::kWgsl;
     }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-    if (tint::HasSuffix(filename, ".metal")) {
+    if (filename.ends_with(".metal")) {
         return Format::kMsl;
     }
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
-    if (tint::HasSuffix(filename, ".hlsl")) {
+    if (filename.ends_with(".hlsl")) {
         return Format::kHlsl;
     }
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -764,7 +764,7 @@ Options:
     auto files = result.Get();
     if (files.Length() > 1) {
         std::cerr << "More than one input file specified: "
-                  << tint::Join(Transform(files, tint::Quote), ", ") << "\n";
+                  << tint::Join(Transform(files, tint::cmd::Quote), ", ") << "\n";
         return false;
     }
     if (files.Length() == 1) {
@@ -849,10 +849,9 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]]
-bool GenerateSpirv([[maybe_unused]] const Options& options,
-                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                   [[maybe_unused]] tint::core::ir::Module& ir) {
+[[maybe_unused]] bool GenerateSpirv([[maybe_unused]] const Options& options,
+                                    [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                    [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
     if (options.rename_all) {
@@ -990,10 +989,9 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]]
-bool GenerateMsl([[maybe_unused]] const Options& options,
-                 [[maybe_unused]] tint::inspector::Inspector& inspector,
-                 [[maybe_unused]] tint::core::ir::Module& ir) {
+[[maybe_unused]] bool GenerateMsl([[maybe_unused]] const Options& options,
+                                  [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                  [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
     if (!options.use_argument_buffers) {
         // Remap resource numbers to a flat namespace.
@@ -1102,10 +1100,9 @@ bool GenerateMsl([[maybe_unused]] const Options& options,
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]]
-bool GenerateHlsl([[maybe_unused]] const Options& options,
-                  [[maybe_unused]] tint::inspector::Inspector& inspector,
-                  [[maybe_unused]] tint::core::ir::Module& ir) {
+[[maybe_unused]] bool GenerateHlsl([[maybe_unused]] const Options& options,
+                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                   [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_HLSL_WRITER
     const bool for_fxc = options.format == Format::kHlslFxc;
     // Set up the backend options.
@@ -1228,10 +1225,9 @@ bool GenerateHlsl([[maybe_unused]] const Options& options,
 /// @param inspector the inspector
 /// @param ir the module to generate
 /// @returns true on success
-[[maybe_unused]]
-bool GenerateGlsl([[maybe_unused]] const Options& options,
-                  [[maybe_unused]] tint::inspector::Inspector& inspector,
-                  [[maybe_unused]] tint::core::ir::Module& ir) {
+[[maybe_unused]] bool GenerateGlsl([[maybe_unused]] const Options& options,
+                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
+                                   [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_GLSL_WRITER
     tint::glsl::writer::Options gen_options;
     gen_options.strip_all_names = options.rename_all;

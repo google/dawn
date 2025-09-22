@@ -129,7 +129,7 @@ Options:
     auto args = result.Get();
     if (args.Length() != 2) {
         std::cerr << "Expected exactly 2 args, found: "
-                  << tint::Join(Transform(args, tint::Quote), ", ") << "\n";
+                  << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
         return false;
     }
 

@@ -242,6 +242,12 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
     return true;
 }
 
+/// @param str the string to quote
+/// @returns @p str quoted with <code>'</code>
+inline std::string Quote(std::string_view str) {
+    return "'" + std::string(str) + "'";
+}
+
 }  // namespace tint::cmd
 
 #endif  // SRC_TINT_CMD_COMMON_HELPER_H_

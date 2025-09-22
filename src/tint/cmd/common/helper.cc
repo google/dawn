@@ -84,11 +84,11 @@ auto& operator<<(STREAM& out, InputFormat value) {
 
 InputFormat InputFormatFromFilename(const std::string& filename) {
     auto input_format = InputFormat::kUnknown;
-    if (tint::HasSuffix(filename, ".wgsl")) {
+    if (filename.ends_with(".wgsl")) {
         input_format = InputFormat::kWgsl;
-    } else if (tint::HasSuffix(filename, ".spv")) {
+    } else if (filename.ends_with(".spv")) {
         input_format = InputFormat::kSpirvBin;
-    } else if (tint::HasSuffix(filename, ".spvasm")) {
+    } else if (filename.ends_with(".spvasm")) {
         input_format = InputFormat::kSpirvAsm;
     }
     return input_format;

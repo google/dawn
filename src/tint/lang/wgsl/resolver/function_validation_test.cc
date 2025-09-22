@@ -1099,9 +1099,9 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedP
         ss << param.address_space;
         EXPECT_FALSE(r.Resolve());
         if (param.expectation == Expectation::kInvalid) {
-            std::string err = R"(12:34 error: unresolved address space '${addr_space}'
+            std::string err = R"(12:34 error: unresolved address space ')" +
+                              tint::ToString(param.address_space) + R"('
 12:34 note: Possible values: 'function', 'immediate', 'pixel_local', 'private', 'storage', 'uniform', 'workgroup')";
-            err = tint::ReplaceAll(err, "${addr_space}", tint::ToString(param.address_space));
             EXPECT_EQ(r.error(), err);
         } else {
             EXPECT_EQ(r.error(), "12:34 error: function parameter of pointer type cannot be in '" +
@@ -1126,9 +1126,9 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithUnrestrictedPoin
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (param.expectation == Expectation::kInvalid) {
-            std::string err = R"(12:34 error: unresolved address space '${addr_space}'
+            std::string err = R"(12:34 error: unresolved address space ')" +
+                              tint::ToString(param.address_space) + R"('
 12:34 note: Possible values: 'function', 'immediate', 'pixel_local', 'private', 'storage', 'uniform', 'workgroup')";
-            err = tint::ReplaceAll(err, "${addr_space}", tint::ToString(param.address_space));
             EXPECT_EQ(r()->error(), err);
         } else {
             EXPECT_EQ(r()->error(),

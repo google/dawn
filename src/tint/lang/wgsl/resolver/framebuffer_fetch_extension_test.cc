@@ -205,10 +205,9 @@ TEST_P(FramebufferFetchExtensionTest_Types, Param) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        auto expected =
-            ReplaceAll(R"(12:34 error: cannot apply '@color' to declaration of type '$TYPE'
-56:78 note: '@color' must only be applied to declarations of numeric scalar or numeric vector type)",
-                       "$TYPE", GetParam().name);
+        auto expected = R"(12:34 error: cannot apply '@color' to declaration of type ')" +
+                        GetParam().name + R"('
+56:78 note: '@color' must only be applied to declarations of numeric scalar or numeric vector type)";
         EXPECT_EQ(r()->error(), expected);
     }
 }
@@ -229,10 +228,9 @@ TEST_P(FramebufferFetchExtensionTest_Types, Struct) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
         EXPECT_FALSE(r()->Resolve());
-        auto expected =
-            ReplaceAll(R"(12:34 error: cannot apply '@color' to declaration of type '$TYPE'
-56:78 note: '@color' must only be applied to declarations of numeric scalar or numeric vector type)",
-                       "$TYPE", GetParam().name);
+        auto expected = R"(12:34 error: cannot apply '@color' to declaration of type ')" +
+                        GetParam().name + R"('
+56:78 note: '@color' must only be applied to declarations of numeric scalar or numeric vector type)";
         EXPECT_EQ(r()->error(), expected);
     }
 }

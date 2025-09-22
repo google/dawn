@@ -105,17 +105,15 @@ enum class Format : uint8_t {
 /// @param filename the filename to inspect
 /// @returns the inferred format for the filename suffix
 Format InferFormat(const std::string& filename) {
-    if (tint::HasSuffix(filename, ".spv")) {
+    if (filename.ends_with(".spv")) {
         return Format::kSpirv;
     }
-    if (tint::HasSuffix(filename, ".spvasm")) {
+    if (filename.ends_with(".spvasm")) {
         return Format::kSpvAsm;
     }
-
-    if (tint::HasSuffix(filename, ".wgsl")) {
+    if (filename.ends_with(".wgsl")) {
         return Format::kWgsl;
     }
-
     return Format::kUnknown;
 }
 
@@ -208,7 +206,7 @@ Options:
     auto args = result.Get();
     if (args.Length() > 1) {
         std::cerr << "More than one input arg specified: "
-                  << tint::Join(Transform(args, tint::Quote), ", ") << "\n";
+                  << tint::Join(Transform(args, tint::cmd::Quote), ", ") << "\n";
         return false;
     }
 

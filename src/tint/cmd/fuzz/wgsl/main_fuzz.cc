@@ -42,12 +42,23 @@ namespace {
 
 tint::fuzz::wgsl::Options options;
 
+[[nodiscard]] inline std::string ReplaceAll(std::string str,
+                                            std::string_view substr,
+                                            std::string_view replacement) {
+    size_t pos = 0;
+    while ((pos = str.find(substr, pos)) != std::string_view::npos) {
+        str.replace(pos, substr.length(), replacement);
+        pos += replacement.length();
+    }
+    return str;
+}
+
 std::string get_default_dxc_path(char*** argv) {
     std::string default_dxc_path = "";
 #if TINT_BUILD_HLSL_WRITER
     // Assume the DXC library is in the same directory as this executable
     std::string exe_path = (*argv)[0];
-    exe_path = tint::ReplaceAll(exe_path, "\\", "/");
+    exe_path = ReplaceAll(exe_path, "\\", "/");
     auto pos = exe_path.rfind('/');
     if (pos != std::string::npos) {
         default_dxc_path = exe_path.substr(0, pos) + '/' + tint::hlsl::validate::kDxcDLLName;
@@ -139,7 +150,8 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     print_dxc_path_found(options.dxc);
 #if DAWN_ASAN_ENABLED() && !defined(NDEBUG)
     // TODO(crbug.com/352402877): Avoid DXC timeouts on asan + debug fuzzer builds
-    std::cout << "DXC validation disabled in asan + debug builds" << "\n";
+    std::cout << "DXC validation disabled in asan + debug builds"
+              << "\n";
     options.dxc = "";
 #endif
 

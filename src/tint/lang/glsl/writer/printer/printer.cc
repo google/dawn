@@ -269,7 +269,7 @@ class Printer : public tint::TextGenerator {
     std::string StructName(const core::type::Struct* s) {
         return names_.GetOrAdd(s, [&] {
             auto name = s->Name().Name();
-            if (HasPrefix(name, "__")) {
+            if (name.starts_with("__")) {
                 name = builtin_struct_names_.GetOrAdd(
                     s, [&] { return UniqueIdentifier(name.substr(2)); });
             }

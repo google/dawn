@@ -910,13 +910,13 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
     err << "\n";
 
-    if (strings == wgsl::kExtensionStrings && !HasPrefix(ident, "chromium")) {
+    if (strings == wgsl::kExtensionStrings && !ident.starts_with("chromium")) {
         // Filter out 'chromium' prefixed extensions. We don't want to advertise experimental
         // extensions to end users (unless it looks like they've actually mis-typed a chromium
         // extension name)
         Vector<std::string_view, 8> filtered;
         for (auto str : strings) {
-            if (!HasPrefix(str, "chromium")) {
+            if (!str.starts_with("chromium")) {
                 filtered.Push(str);
             }
         }
