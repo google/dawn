@@ -1950,6 +1950,16 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "struct member " << member->Index() << " cannot have void type";
                         return false;
                     }
+                    if (member->Align() == 0) {
+                        diag() << "struct member must not have an alignment of 0";
+                        return false;
+                    }
+                    if (member->Align() % member->Type()->Align() != 0) {
+                        diag() << "struct member alignment (" << member->Align()
+                               << ") must be divisible by type alignment ("
+                               << member->Type()->Align() << ")";
+                        return false;
+                    }
                 }
                 return true;
             },

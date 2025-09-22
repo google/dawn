@@ -46,6 +46,10 @@ bool Sampler::Equals(const UniqueNode& other) const {
     return false;
 }
 
+uint32_t Sampler::Align() const {
+    return 1;
+}
+
 std::string Sampler::FriendlyName() const {
     return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }

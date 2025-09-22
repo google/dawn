@@ -53,6 +53,9 @@ class BindingArray : public Castable<BindingArray, Type> {
     /// @return the array element type
     Type const* ElemType() const { return element_; }
 
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
+
     /// @returns the number of elements in the array.
     const ArrayCount* Count() const { return count_; }
 

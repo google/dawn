@@ -55,6 +55,9 @@ class Sampler final : public Castable<Sampler, Type> {
     /// @returns true if this is a comparison sampler
     bool IsComparison() const { return kind_ == SamplerKind::kComparisonSampler; }
 
+    /// @returns the alignment in bytes of the type.
+    uint32_t Align() const override;
+
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
     std::string FriendlyName() const override;

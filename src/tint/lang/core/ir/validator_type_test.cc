@@ -272,6 +272,48 @@ TEST_F(IR_ValidatorTest, StructMember_Void) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructMember_AlignZero) {
+    core::IOAttributes attrs = {};
+    tint::Vector<const core::type::StructMember*, 4> members;
+    members.Push(ty.Get<core::type::StructMember>(mod.symbols.New("v"), ty.u32(), 0u, 0u,
+                                                  /* align */ 0u, 16u, std::move(attrs)));
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), std::move(members),
+                                              tint::RoundUp(0u, 16u));
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:3 error: var: struct member must not have an alignment of 0
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_AlignNotDivisibleByTypeAlignment) {
+    core::IOAttributes attrs = {};
+    tint::Vector<const core::type::StructMember*, 4> members;
+    members.Push(ty.Get<core::type::StructMember>(mod.symbols.New("v"), ty.u32(), 0u, 0u,
+                                                  /* align */ 10u, 16u, std::move(attrs)));
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), std::move(members),
+                                              tint::RoundUp(0u, 16u));
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:3 error: var: struct member alignment (10) must be divisible by type alignment (4)
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, FunctionParam_InvalidAddressSpaceForHandleType) {
     auto* type = ty.ptr(AddressSpace::kFunction, ty.sampler());
     auto* fn = b.Function("my_func", ty.void_());

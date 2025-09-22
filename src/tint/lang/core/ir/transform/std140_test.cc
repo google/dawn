@@ -1491,7 +1491,7 @@ TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
     auto* structure = ty.Get<core::type::Struct>(
         mod.symbols.New("MyStruct"),
         Vector{
-            ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 0u, 16u,
+            ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 4u, 16u,
                                              core::IOAttributes{}),
             ty.Get<core::type::StructMember>(mod.symbols.New("m"), mat, 1u, 64u, 32u, 64u,
                                              core::IOAttributes{}),

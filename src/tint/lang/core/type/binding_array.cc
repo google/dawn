@@ -53,6 +53,10 @@ bool BindingArray::Equals(const UniqueNode& other) const {
     return false;
 }
 
+uint32_t BindingArray::Align() const {
+    return 1;
+}
+
 std::string BindingArray::FriendlyName() const {
     StringStream out;
     out << "binding_array<" << element_->FriendlyName() << ", " << count_->FriendlyName() << ">";

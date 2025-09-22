@@ -939,7 +939,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, DeeplyNested) {
     //   buffer.arr[0].m[3] = m[2];
     // }
     auto* matrix_member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), ty.mat4x3<f32>(),
-                                                           0u, 16u, 24u, 48u, core::IOAttributes{});
+                                                           0u, 16u, 16u, 48u, core::IOAttributes{});
     matrix_member->SetRowMajor();
 
     auto* inner_strct = ty.Struct(mod.symbols.New("Inner"), Vector{matrix_member});
@@ -960,11 +960,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, DeeplyNested) {
     });
 
     auto* before = R"(
-Inner = struct @align(24) {
+Inner = struct @align(16) {
   m:mat4x3<f32> @offset(16) @size(48), @row_major
 }
 
-Outer = struct @align(24) {
+Outer = struct @align(16) {
   arr:array<Inner, 4> @offset(0)
 }
 
@@ -988,19 +988,19 @@ $B1: {  # root
     ASSERT_EQ(before, str());
 
     auto* after = R"(
-Inner = struct @align(24) {
+Inner = struct @align(16) {
   m:mat4x3<f32> @offset(16) @size(48), @row_major
 }
 
-Outer = struct @align(24) {
+Outer = struct @align(16) {
   arr:array<Inner, 4> @offset(0)
 }
 
-Inner_1 = struct @align(24) {
+Inner_1 = struct @align(16) {
   m:mat3x4<f32> @offset(16)
 }
 
-Outer_1 = struct @align(24) {
+Outer_1 = struct @align(16) {
   arr:array<Inner_1, 4> @offset(0)
 }
 
@@ -1061,11 +1061,11 @@ TEST_F(SpirvReader_TransposeRowMajorTest, MultipleColumnHelpers) {
     //   s.m2[3] = ps.m2[3];
     // }
     auto* matrix_member_0 = ty.Get<core::type::StructMember>(
-        mod.symbols.New("m"), ty.mat2x3<f32>(), 0u, 0u, 24u, 24u, core::IOAttributes{});
+        mod.symbols.New("m"), ty.mat2x3<f32>(), 0u, 0u, 16u, 24u, core::IOAttributes{});
     matrix_member_0->SetRowMajor();
 
     auto* matrix_member_1 = ty.Get<core::type::StructMember>(
-        mod.symbols.New("m"), ty.mat4x2<f32>(), 1u, 32u, 24u, 48u, core::IOAttributes{});
+        mod.symbols.New("m"), ty.mat4x2<f32>(), 1u, 32u, 16u, 48u, core::IOAttributes{});
     matrix_member_1->SetRowMajor();
 
     auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member_0, matrix_member_1});
@@ -1103,7 +1103,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, MultipleColumnHelpers) {
     });
 
     auto* before = R"(
-S = struct @align(24) {
+S = struct @align(16) {
   m:mat2x3<f32> @offset(0) @size(24), @row_major
   m_1:mat4x2<f32> @offset(32) @size(48), @row_major
 }
@@ -1147,12 +1147,12 @@ $B1: {  # root
     ASSERT_EQ(before, str());
 
     auto* after = R"(
-S = struct @align(24) {
+S = struct @align(16) {
   m:mat2x3<f32> @offset(0) @size(24), @row_major
   m_1:mat4x2<f32> @offset(32) @size(48), @row_major
 }
 
-S_1 = struct @align(24) {
+S_1 = struct @align(16) {
   m:mat3x2<f32> @offset(0)
   m_1:mat2x4<f32> @offset(32) @size(48)
 }
