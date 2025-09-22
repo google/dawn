@@ -449,6 +449,15 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     usedKnobs.features.shaderSampledImageArrayDynamicIndexing = VK_TRUE;
     usedKnobs.features.shaderStorageImageArrayDynamicIndexing = VK_TRUE;
 
+    // Always enable pipeline robustness if available as it allows both better control of robustness
+    // when we want it, and to give hints to not do any robustness when we don't need it.
+    if (mDeviceInfo.HasExt(DeviceExt::PipelineRobustness)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::PipelineRobustness));
+
+        usedKnobs.pipelineRobustnessFeatures = mDeviceInfo.pipelineRobustnessFeatures;
+        featuresChain.Add(&usedKnobs.pipelineRobustnessFeatures);
+    }
+
     if (IsRobustnessEnabled()) {
         usedKnobs.features.robustBufferAccess = VK_TRUE;
 
@@ -460,14 +469,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
 
             usedKnobs.robustness2Features = mDeviceInfo.robustness2Features;
             featuresChain.Add(&usedKnobs.robustness2Features);
-        }
-
-        // Enable pipelineRobustness to better control where robustness happens.
-        if (mDeviceInfo.HasExt(DeviceExt::PipelineRobustness)) {
-            DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::PipelineRobustness));
-
-            usedKnobs.pipelineRobustnessFeatures = mDeviceInfo.pipelineRobustnessFeatures;
-            featuresChain.Add(&usedKnobs.pipelineRobustnessFeatures);
         }
 
         // robustBufferAccess requires robustBufferAccessUpdateAfterBind to be used with bindless
