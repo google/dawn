@@ -375,6 +375,17 @@ ci.builder(
 # Child Testers                                                                #
 ################################################################################
 
+# TODO(crbug.com/441328362): Remove this and use normal/actually thin
+# Linux-based testers once all tests are run on Swarming. Currently, the
+# non-Swarmed tests fail since we try to run Windows binaries on a Linux host.
+def win_thin_tester(**kwargs):
+    ci.thin_tester(
+        os = os.WINDOWS_DEFAULT,
+        cores = 8,
+        ssd = None,
+        **kwargs
+    )
+
 ci.thin_tester(
     name = "dawn-linux-x64-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x64 with SwiftShader",
@@ -471,7 +482,7 @@ ci.thin_tester(
     ),
 )
 
-ci.thin_tester(
+win_thin_tester(
     name = "dawn-win-x64-sws-rel",
     description_html = "Tests release Dawn on Windows/x64 with SwiftShader",
     parent = "dawn-win-x64-builder-rel",
