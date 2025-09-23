@@ -1308,23 +1308,34 @@ TEST_P(AddressSpace_AccessMode, Test) {
         mod.root_block->Append(v);
     }
 
-    auto pass = true;
+    const char* expected_error = nullptr;
     switch (access) {
         case core::Access::kWrite:
+            if (aspace == AddressSpace::kUniform || aspace == AddressSpace::kHandle) {
+                expected_error = "uniform and handle pointers must be read access";
+            } else if (aspace == AddressSpace::kWorkgroup) {
+                expected_error = "workgroup pointers must be read_write access";
+            }
+            break;
         case core::Access::kReadWrite:
-            pass = aspace != AddressSpace::kUniform && aspace != AddressSpace::kHandle;
+            if (aspace == AddressSpace::kUniform || aspace == AddressSpace::kHandle) {
+                expected_error = "uniform and handle pointers must be read access";
+            }
             break;
         case core::Access::kRead:
+            if (aspace == AddressSpace::kWorkgroup) {
+                expected_error = "workgroup pointers must be read_write access";
+            }
+            break;
         default:
             break;
     }
     auto res = ir::Validate(mod);
-    if (pass) {
+    if (expected_error == nullptr) {
         ASSERT_EQ(res, Success);
     } else {
         ASSERT_NE(res, Success);
-        EXPECT_THAT(res.Failure().reason,
-                    testing::HasSubstr("uniform and handle pointers must be read access"));
+        EXPECT_THAT(res.Failure().reason, testing::HasSubstr(expected_error));
     }
 }
 

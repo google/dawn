@@ -2033,6 +2033,13 @@ void Validator::CheckType(const core::type::Type* root,
                     }
                 }
 
+                if (ptr->AddressSpace() == AddressSpace::kWorkgroup) {
+                    if (ptr->Access() != core::Access::kReadWrite) {
+                        diag() << "workgroup pointers must be read_write access";
+                        return false;
+                    }
+                }
+
                 if (ptr->AddressSpace() == AddressSpace::kHandle) {
                     if (!ptr->StoreType()->IsHandle()) {
                         diag() << "the 'handle' address space can only be used for handle types";
