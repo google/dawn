@@ -491,8 +491,9 @@ MaybeError BlitBufferToTexture(DeviceBase* device,
         Ref<RenderPassEncoder> pass = commandEncoder->BeginRenderPass(&rpDesc);
         // Bind the resources.
         pass->APISetBindGroup(0, bindGroup.Get());
-        pass->APISetViewport(dst.origin.x, dst.origin.y, copyExtent.width, copyExtent.height, 0.f,
-                             1.f);
+        pass->APISetViewport(static_cast<float>(dst.origin.x), static_cast<float>(dst.origin.y),
+                             static_cast<float>(copyExtent.width),
+                             static_cast<float>(copyExtent.height), 0.f, 1.f);
 
         // Draw to perform the blit.
         pass->APISetPipeline(pipeline.Get());

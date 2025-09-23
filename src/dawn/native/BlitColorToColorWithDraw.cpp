@@ -365,8 +365,10 @@ MaybeError ExpandResolveTextureWithDraw(
     }
 
     Ref<RenderPipelineBase> pipeline;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateExpandMultisamplePipeline(
-                                  device, pipelineKey, renderPassDescriptor->colorAttachmentCount));
+    DAWN_TRY_ASSIGN(
+        pipeline,
+        GetOrCreateExpandMultisamplePipeline(
+            device, pipelineKey, static_cast<uint8_t>(renderPassDescriptor->colorAttachmentCount)));
 
     Ref<BindGroupLayoutBase> bgl;
     DAWN_TRY_ASSIGN(bgl, pipeline->GetBindGroupLayout(0));

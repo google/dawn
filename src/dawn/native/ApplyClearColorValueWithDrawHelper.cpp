@@ -407,10 +407,10 @@ bool GetKeyOfApplyClearColorValueWithDrawPipelines(
         return false;
     }
 
-    key->colorAttachmentCount = renderPassDescriptor->colorAttachmentCount;
+    key->colorAttachmentCount = static_cast<uint8_t>(renderPassDescriptor->colorAttachmentCount);
 
     auto colorAttachments = ityp::SpanFromUntyped<ColorAttachmentIndex>(
-        renderPassDescriptor->colorAttachments, renderPassDescriptor->colorAttachmentCount);
+        renderPassDescriptor->colorAttachments, key->colorAttachmentCount);
 
     key->colorTargetFormats.fill(wgpu::TextureFormat::Undefined);
     for (auto [i, attachment] : Enumerate(colorAttachments)) {

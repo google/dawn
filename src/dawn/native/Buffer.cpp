@@ -327,7 +327,7 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 
         DAWN_INVALID_IF(!device->HasFeature(Feature::HostMappedPointer), "%s requires %s.",
                         hostMappedDesc->sType, ToAPI(Feature::HostMappedPointer));
-        DAWN_INVALID_IF(!IsAligned(descriptor->size, requiredAlignment),
+        DAWN_INVALID_IF(!IsAligned(static_cast<uint32_t>(descriptor->size), requiredAlignment),
                         "Buffer size (%u) wrapping host-mapped memory was not aligned to %u.",
                         descriptor->size, requiredAlignment);
         DAWN_INVALID_IF(!IsPtrAligned(hostMappedDesc->pointer, requiredAlignment),

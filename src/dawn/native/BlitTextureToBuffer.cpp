@@ -1249,10 +1249,10 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
 
         params[8] = bytesPerRow;
         params[9] = rowsPerImage;
-        params[10] = shaderStartOffset;
+        params[10] = static_cast<uint32_t>(shaderStartOffset);
 
         // These params are only used for formats smaller than 4 bytes
-        params[11] = (shaderStartOffset % 4) / bytesPerTexel;  // shift
+        params[11] = (static_cast<uint32_t>(shaderStartOffset) % 4) / bytesPerTexel;  // shift
 
         params[16] = bytesPerTexel;
         params[17] = numU32PerRowNeedsWriting;

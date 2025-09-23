@@ -1916,9 +1916,9 @@ void CommandEncoder::APICopyTextureToTexture(const TexelCopyTextureInfo* sourceO
                 // Calculate needed buffer size to hold copied texel data.
                 const TexelBlockInfo& blockInfo =
                     source.texture->GetFormat().GetAspectInfo(aspect).block;
-                const uint64_t bytesPerRow =
+                const uint32_t bytesPerRow =
                     Align(4 * copySize->width, kTextureBytesPerRowAlignment);
-                const uint64_t rowsPerImage = copySize->height;
+                const uint32_t rowsPerImage = copySize->height;
                 uint64_t requiredBytes;
                 DAWN_TRY_ASSIGN(
                     requiredBytes,
