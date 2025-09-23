@@ -33,6 +33,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/Enumerator.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
@@ -346,62 +347,62 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             const auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
             FlatBindingIndex shaderIndex = bindingIndexInfo[bindingIndex];
-            tint::BindingPoint dstBindingPoint{0, uint32_t(shaderIndex)};
+            tint::glsl::writer::BindingInfo dstBindingPoint{uint32_t(shaderIndex)};
 
-            auto* const bufferBindingInfo =
-                std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
+            MatchVariant(
+                shaderBindingInfo.bindingInfo,
+                [&](const BufferBindingInfo& bindingInfo) {
+                    switch (bindingInfo.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
+                            break;
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::Storage:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding:
+                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
+                            break;
+                        case wgpu::BufferBindingType::BindingNotUsed:
+                        case wgpu::BufferBindingType::Undefined:
+                            DAWN_UNREACHABLE();
+                            break;
+                    }
+                },
+                [&](const SamplerBindingInfo& bindingInfo) {
+                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const TextureBindingInfo& bindingInfo) {
+                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const StorageTextureBindingInfo& bindingInfo) {
+                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const ExternalTextureBindingInfo& bindingInfo) {
+                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                    const auto& expansion = etBindingMap.find(binding);
+                    DAWN_ASSERT(expansion != etBindingMap.end());
 
-            if (bufferBindingInfo) {
-                switch (bufferBindingInfo->type) {
-                    case wgpu::BufferBindingType::Uniform:
-                        bindings.uniform.emplace(srcBindingPoint, tint::glsl::writer::BindingInfo{
-                                                                      dstBindingPoint.binding});
-                        break;
-                    case kInternalStorageBufferBinding:
-                    case wgpu::BufferBindingType::Storage:
-                    case wgpu::BufferBindingType::ReadOnlyStorage:
-                    case kInternalReadOnlyStorageBufferBinding:
-                        bindings.storage.emplace(srcBindingPoint, tint::glsl::writer::BindingInfo{
-                                                                      dstBindingPoint.binding});
-                        break;
-                    case wgpu::BufferBindingType::BindingNotUsed:
-                    case wgpu::BufferBindingType::Undefined:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-            } else if (std::holds_alternative<SamplerBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.sampler.emplace(srcBindingPoint,
-                                         tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
-            } else if (std::holds_alternative<TextureBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.texture.emplace(srcBindingPoint,
-                                         tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
-            } else if (std::holds_alternative<StorageTextureBindingInfo>(
-                           shaderBindingInfo.bindingInfo)) {
-                bindings.storage_texture.emplace(
-                    srcBindingPoint, tint::glsl::writer::BindingInfo{dstBindingPoint.binding});
-            } else if (std::holds_alternative<ExternalTextureBindingInfo>(
-                           shaderBindingInfo.bindingInfo)) {
-                const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                const auto& expansion = etBindingMap.find(binding);
-                DAWN_ASSERT(expansion != etBindingMap.end());
+                    using BindingInfo = tint::glsl::writer::BindingInfo;
 
-                using BindingInfo = tint::glsl::writer::BindingInfo;
+                    const auto& bindingExpansion = expansion->second;
+                    const BindingInfo plane0{
+                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)])};
+                    const BindingInfo plane1{
+                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)])};
+                    const BindingInfo metadata{
+                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)])};
 
-                const auto& bindingExpansion = expansion->second;
-                const BindingInfo plane0{
-                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)])};
-                const BindingInfo plane1{
-                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)])};
-                const BindingInfo metadata{
-                    uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)])};
+                    tint::BindingPoint plane1WGSLBindingPoint{
+                        static_cast<uint32_t>(group),
+                        static_cast<uint32_t>(bindingExpansion.plane1)};
+                    externalTextureExpansionMap[srcBindingPoint] = plane1WGSLBindingPoint;
 
-                tint::BindingPoint plane1WGSLBindingPoint{
-                    static_cast<uint32_t>(group), static_cast<uint32_t>(bindingExpansion.plane1)};
-                externalTextureExpansionMap[srcBindingPoint] = plane1WGSLBindingPoint;
-
-                bindings.external_texture.emplace(
-                    srcBindingPoint, tint::glsl::writer::ExternalTexture{metadata, plane0, plane1});
-            }
+                    bindings.external_texture.emplace(
+                        srcBindingPoint,
+                        tint::glsl::writer::ExternalTexture{metadata, plane0, plane1});
+                },
+                [&](const TexelBufferBindingInfo& bindingInfo) { DAWN_UNREACHABLE(); },
+                [&](const InputAttachmentBindingInfo& bindingInfo) { DAWN_UNREACHABLE(); });
         }
     }
     return {bindings, externalTextureExpansionMap};
