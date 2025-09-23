@@ -493,7 +493,8 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     DAWN_UNREACHABLE();
                     return {};
                 },
-                [](const InputAttachmentBindingInfo&) -> MaybeError { DAWN_UNREACHABLE(); }));
+                [](const InputAttachmentBindingInfo&) -> MaybeError { DAWN_UNREACHABLE(); },
+                [](const ExternalTextureBindingInfo&) -> MaybeError { DAWN_UNREACHABLE(); }));
         }
 
         return {};

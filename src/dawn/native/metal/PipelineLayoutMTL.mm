@@ -89,7 +89,8 @@ PipelineLayout::PipelineLayout(Device* device,
                         // Metal backend.
                         DAWN_UNREACHABLE();
                     },
-                    [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
+                    [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
+                    [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
             }
         }
 

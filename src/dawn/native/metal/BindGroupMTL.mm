@@ -108,7 +108,8 @@ MaybeError BindGroup::InitializeImpl() {
                 // TODO(crbug/382544164): Prototype texel buffer feature
                 DAWN_CHECK(false);
             },
-            [](const InputAttachmentBindingInfo&) { DAWN_CHECK(false); });
+            [](const InputAttachmentBindingInfo&) { DAWN_CHECK(false); },
+            [](const ExternalTextureBindingInfo&) { DAWN_CHECK(false); });
     }
 
     return {};

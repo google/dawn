@@ -207,7 +207,8 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
             return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
         },
 
-        [](const InputAttachmentBindingInfo&) { return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; });
+        [](const InputAttachmentBindingInfo&) { return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT; },
+        [](const ExternalTextureBindingInfo&) -> VkDescriptorType { DAWN_UNREACHABLE(); });
 }
 
 // static

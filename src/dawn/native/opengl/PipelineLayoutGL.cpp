@@ -89,7 +89,8 @@ PipelineLayout::PipelineLayout(Device* device,
                     // TODO(crbug/382544164): Prototype texel buffer feature
                     DAWN_UNREACHABLE();
                 },
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); },
+                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
 

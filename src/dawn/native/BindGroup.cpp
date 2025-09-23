@@ -652,6 +652,7 @@ ResultOrError<UnpackedPtr<BindGroupDescriptor>> ValidateBindGroupDescriptor(
                 [&](const StaticSamplerBindingInfo& layout) -> MaybeError {
                     return DAWN_VALIDATION_ERROR("An entry is provided for a static sampler.");
                 },
+                [&](const ExternalTextureBindingInfo& layout) -> MaybeError { DAWN_UNREACHABLE(); },
 
                 [](const InputAttachmentBindingInfo&) -> MaybeError {
                     // Internal use only. No validation.

@@ -144,6 +144,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
         },
         [&](const InputAttachmentBindingInfo& layout) {
             s->Append(absl::StrFormat("%s: %s ", BindingInfoType::InputAttachment, layout));
+        },
+        [&](const ExternalTextureBindingInfo&) {
+            s->Append(absl::StrFormat("%s: {} ", BindingInfoType::ExternalTexture));
         });
 
     s->Append(absl::StrFormat("}"));

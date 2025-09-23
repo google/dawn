@@ -161,6 +161,7 @@ struct BindingInfo {
                  TextureBindingInfo,
                  TexelBufferBindingInfo,
                  StorageTextureBindingInfo,
+                 ExternalTextureBindingInfo,
                  StaticSamplerBindingInfo,
                  InputAttachmentBindingInfo>
         bindingLayout;

@@ -692,7 +692,8 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
                 }
             },
             [&](const TexelBufferBindingInfo&) { counts[Order_TexelBuffer]++; },
-            [&](const InputAttachmentBindingInfo&) { counts[Order_InputAttachment]++; });
+            [&](const InputAttachmentBindingInfo&) { counts[Order_InputAttachment]++; },
+            [&](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
     }
 
     // Do a prefix sum to store the start offset of each binding type.
@@ -740,7 +741,8 @@ bool BindGroupLayoutInternalBase::SortBindingsCompare(const BindingInfo& a, cons
             [&](const SamplerBindingInfo&) { return Order_RegularSampler; },
             [&](const StaticSamplerBindingInfo&) { return Order_StaticSampler; },
             [&](const TexelBufferBindingInfo&) { return Order_TexelBuffer; },
-            [&](const InputAttachmentBindingInfo&) { return Order_InputAttachment; });
+            [&](const InputAttachmentBindingInfo&) { return Order_InputAttachment; },
+            [&](const ExternalTextureBindingInfo&) -> BindingTypeOrder { DAWN_UNREACHABLE(); });
     };
 
     auto aOrder = TypeOrder(a);
@@ -871,7 +873,8 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
             },
             [&](const InputAttachmentBindingInfo& layout) {
                 recorder.Record(BindingInfoType::InputAttachment, layout.sampleType);
-            });
+            },
+            [&](const ExternalTextureBindingInfo& layout) { DAWN_UNREACHABLE(); });
     }
 
     recorder.Record(mHasDynamicArray, mAPIDynamicArrayStart, mDynamicArrayKind);

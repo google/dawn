@@ -54,6 +54,9 @@ BindingInfoType GetBindingInfoType(const BindingInfo& info) {
         },
         [](const InputAttachmentBindingInfo&) -> BindingInfoType {
             return BindingInfoType::InputAttachment;
+        },
+        [](const ExternalTextureBindingInfo&) -> BindingInfoType {
+            return BindingInfoType::ExternalTexture;
         });
 }
 

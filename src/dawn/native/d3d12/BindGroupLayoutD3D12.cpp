@@ -83,11 +83,12 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
             // D3D12 does not support texel buffers.
             // TODO(crbug/382544164): Prototype texel buffer feature
             DAWN_UNREACHABLE();
-            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
         },
         [](const InputAttachmentBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
             DAWN_UNREACHABLE();
-            return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+        },
+        [](const ExternalTextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_TYPE {
+            DAWN_UNREACHABLE();
         });
 }
 }  // anonymous namespace
@@ -203,11 +204,12 @@ BindGroupLayout::BindGroupLayout(Device* device,
                 // D3D12 does not support texel buffers.
                 // TODO(crbug/382544164): Prototype texel buffer feature
                 DAWN_UNREACHABLE();
-                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
             },
             [](const InputAttachmentBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
                 DAWN_UNREACHABLE();
-                return D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE;
+            },
+            [](const ExternalTextureBindingInfo&) -> D3D12_DESCRIPTOR_RANGE_FLAGS {
+                DAWN_UNREACHABLE();
             });
 
         std::vector<D3D12_DESCRIPTOR_RANGE1>& descriptorRanges =
