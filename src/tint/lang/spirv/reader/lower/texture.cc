@@ -79,10 +79,8 @@ struct State {
 
     Vector<core::ir::Let*, 8> lets_to_inline_{};
 
-    /// Function to texture replacements, this is done by hashcode since the
-    /// function pointer is combined with the parameters which are converted to
-    /// textures.
-    Hashmap<size_t, core::ir::Function*, 4> func_hash_to_func_{};
+    /// Function to texture replacements
+    Hashmap<core::ir::Function*, core::ir::Function*, 4> func_to_rewritten_{};
 
     /// Set of textures used in dref calls which need to be depth textures.
     Hashset<core::ir::Value*, 4> textures_to_convert_to_depth_{};
@@ -457,12 +455,7 @@ struct State {
             return;
         }
 
-        // Hash based on the original function pointer and the specific
-        // parameters we're converting.
-        auto hash = Hash(target);
-        hash = HashCombine(hash, to_convert);
-
-        auto* new_fn = func_hash_to_func_.GetOrAdd(hash, [&] {
+        auto* new_fn = func_to_rewritten_.GetOrAdd(target, [&] {
             core::ir::CloneContext ctx{ir};
             auto* fn = uc->Target()->Clone(ctx);
             ir.functions.Push(fn);
