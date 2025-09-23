@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -217,19 +218,30 @@ class SurfaceTests : public DawnTest {
 // Basic test for creating a surface and presenting one frame.
 TEST_P(SurfaceTests, Basic) {
     wgpu::Surface surface = CreateTestSurface();
-
-    // Configure
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    surface.Configure(&config);
 
-    // Get texture
-    wgpu::SurfaceTexture surfaceTexture;
-    surface.GetCurrentTexture(&surfaceTexture);
-    ASSERT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
-    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    // Test the preferred modes and Undefined=Fifo which are required to be supported.
+    std::set<wgpu::PresentMode> presentModes{
+        wgpu::PresentMode::Undefined,
+        wgpu::PresentMode::Fifo,
+        config.presentMode,
+    };
+    for (wgpu::PresentMode presentMode : presentModes) {
+        SCOPED_TRACE(absl::StrFormat("present mode: %d", presentMode));
 
-    // Present
-    ASSERT_EQ(wgpu::Status::Success, surface.Present());
+        // Configure
+        config.presentMode = presentMode;
+        surface.Configure(&config);
+
+        // Get texture
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ASSERT_EQ(surfaceTexture.status, wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal);
+        ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+
+        // Present
+        ASSERT_EQ(wgpu::Status::Success, surface.Present());
+    }
 }
 
 // Test reconfiguring the surface
