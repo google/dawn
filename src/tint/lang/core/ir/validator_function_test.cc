@@ -589,9 +589,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnStruct) {
 )")) << res.Failure();
 }
 
-// TODO(446695014): Re-enable once either failing examples have been updated, or capability
-/*
- TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InParam) {
+TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InParam) {
     auto* f = ComputeEntryPoint("my_func");
 
     auto* p = b.FunctionParam("p", ty.f32());
@@ -610,8 +608,7 @@ TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnStruct) {
 )")) << res.Failure();
 }
 
- TODO(446695014): Re-enable once either failing examples have been updated, or capability
- TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InMSV) {
+TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InMSV) {
     auto* f = ComputeEntryPoint("my_func");
 
     auto* v = b.Var("v", AddressSpace::kIn, ty.f32());
@@ -632,7 +629,6 @@ TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnStruct) {
                             ^^^
 )")) << res.Failure();
 }
-*/
 
 TEST_F(IR_ValidatorTest, EntryPoint_Compute_OutputLocation) {
     auto* f = ComputeEntryPoint("my_func");

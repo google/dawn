@@ -3005,12 +3005,9 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
     }
 
     if (attr.location.has_value()) {
-        // TODO(446695014): Re-enable once either failing examples have been updated, or capability
-        //  added to selectively disable this check has been added
-        //        if (stage == Function::PipelineStage::kCompute && dir == IODirection::kInput) {
-        //            AddError(target) << "location attribute is not valid for compute shader
-        //            inputs";
-        //        }
+        if (stage == Function::PipelineStage::kCompute && dir == IODirection::kInput) {
+            AddError(target) << "location attribute is not valid for compute shader inputs";
+        }
 
         // TODO(446624478): Handle location + blend_src interactions
         if (attr.blend_src.has_value()) {
