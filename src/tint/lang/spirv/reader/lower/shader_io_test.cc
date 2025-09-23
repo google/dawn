@@ -1272,7 +1272,7 @@ TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
     color1->SetLocation(1u);
 
     auto* color2 = b.Var("color2", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    color2->SetLocation(1u);
+    color2->SetLocation(2u);
     color2->SetInterpolation(core::Interpolation{core::InterpolationType::kPerspective,
                                                  core::InterpolationSampling::kCentroid});
 
@@ -1292,7 +1292,7 @@ TEST_F(SpirvReader_ShaderIOTest, MultipleOutputs) {
 $B1: {  # root
   %position:ptr<__out, vec4<f32>, read_write> = var undef @invariant @builtin(position)
   %color1:ptr<__out, vec4<f32>, read_write> = var undef @location(1)
-  %color2:ptr<__out, vec4<f32>, read_write> = var undef @location(1) @interpolate(perspective, centroid)
+  %color2:ptr<__out, vec4<f32>, read_write> = var undef @location(2) @interpolate(perspective, centroid)
 }
 
 %foo = @vertex func():void {
@@ -1310,7 +1310,7 @@ $B1: {  # root
 tint_symbol = struct @align(16) {
   position:vec4<f32> @offset(0), @invariant, @builtin(position)
   color1:vec4<f32> @offset(16), @location(1)
-  color2:vec4<f32> @offset(32), @location(1), @interpolate(perspective, centroid)
+  color2:vec4<f32> @offset(32), @location(2), @interpolate(perspective, centroid)
 }
 
 $B1: {  # root

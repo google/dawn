@@ -302,6 +302,19 @@ void CheckFunctionParamAttributesAndType(const FunctionParam* param, IMPL&& impl
     CheckIOAttributesAndType(param, param->Attributes(), param->Type(), std::forward<IMPL>(impl));
 }
 
+/// The IO direction of a operation.
+enum class IODirection : uint8_t { kInput, kOutput };
+
+std::string_view ToString(IODirection value) {
+    switch (value) {
+        case IODirection::kInput:
+            return "input";
+        case IODirection::kOutput:
+            return "output";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(IODirection)";
+}
+
 /// A BuiltinChecker is the interface used to check that a usage of a builtin attribute meets the
 /// basic spec rules, i.e. correct shader stage, data type, and IO direction.
 /// It does not test more sophisticated rules like location and builtins being mutually exclusive or
@@ -313,7 +326,6 @@ struct BuiltinChecker {
     /// What type of entry point is this builtin legal for
     EnumSet<Function::PipelineStage> stages;
 
-    enum IODirection : uint8_t { kInput, kOutput };
     /// Is this expected to be a param going into the entry point or a result coming out
     IODirection direction;
 
@@ -327,20 +339,10 @@ struct BuiltinChecker {
     const char* type_error;
 };
 
-std::string_view ToString(BuiltinChecker::IODirection value) {
-    switch (value) {
-        case BuiltinChecker::IODirection::kInput:
-            return "input";
-        case BuiltinChecker::IODirection::kOutput:
-            return "output";
-    }
-    TINT_ICE() << "Unknown enum passed to ToString(BuiltinChecker::IODirection)";
-}
-
 constexpr BuiltinChecker kPointSizeChecker{
     /* name */ "__point_size",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* direction */ IODirection::kOutput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
     /* type_error */ "__point_size must be a f32",
 };
@@ -348,7 +350,7 @@ constexpr BuiltinChecker kPointSizeChecker{
 constexpr BuiltinChecker kCullDistanceChecker{
     /* name */ "__cull_distance",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* direction */ IODirection::kOutput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
@@ -359,7 +361,7 @@ constexpr BuiltinChecker kCullDistanceChecker{
 constexpr BuiltinChecker kFragDepthChecker{
     /* name */ "frag_depth",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* direction */ IODirection::kOutput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
     /* type_error */ "frag_depth must be a f32",
 };
@@ -367,7 +369,7 @@ constexpr BuiltinChecker kFragDepthChecker{
 constexpr BuiltinChecker kFrontFacingChecker{
     /* name */ "front_facing",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::Bool>(); },
     /* type_error */ "front_facing must be a bool",
 };
@@ -375,7 +377,7 @@ constexpr BuiltinChecker kFrontFacingChecker{
 constexpr BuiltinChecker kGlobalInvocationIdChecker{
     /* name */ "global_invocation_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -386,7 +388,7 @@ constexpr BuiltinChecker kGlobalInvocationIdChecker{
 constexpr BuiltinChecker kInstanceIndexChecker{
     /* name */ "instance_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "instance_index must be an u32",
 };
@@ -394,7 +396,7 @@ constexpr BuiltinChecker kInstanceIndexChecker{
 constexpr BuiltinChecker kLocalInvocationIdChecker{
     /* name */ "local_invocation_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -405,7 +407,7 @@ constexpr BuiltinChecker kLocalInvocationIdChecker{
 constexpr BuiltinChecker kLocalInvocationIndexChecker{
     /* name */ "local_invocation_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "local_invocation_index must be an u32",
 };
@@ -413,7 +415,7 @@ constexpr BuiltinChecker kLocalInvocationIndexChecker{
 constexpr BuiltinChecker kNumWorkgroupsChecker{
     /* name */ "num_workgroups",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -424,7 +426,7 @@ constexpr BuiltinChecker kNumWorkgroupsChecker{
 constexpr BuiltinChecker kSampleIndexChecker{
     /* name */ "sample_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "sample_index must be an u32",
 };
@@ -433,7 +435,7 @@ constexpr BuiltinChecker kSubgroupIdChecker{
     /* name */ "subgroup_id",
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_id must be an u32",
 };
@@ -443,7 +445,7 @@ constexpr BuiltinChecker kSubgroupInvocationIdChecker{
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
                                      Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_invocation_id must be an u32",
 };
@@ -453,7 +455,7 @@ constexpr BuiltinChecker kSubgroupSizeChecker{
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
                                      Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_size must be an u32",
 };
@@ -461,7 +463,7 @@ constexpr BuiltinChecker kSubgroupSizeChecker{
 constexpr BuiltinChecker kVertexIndexChecker{
     /* name */ "vertex_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "vertex_index must be an u32",
 };
@@ -469,7 +471,7 @@ constexpr BuiltinChecker kVertexIndexChecker{
 constexpr BuiltinChecker kWorkgroupIdChecker{
     /* name */ "workgroup_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -480,7 +482,7 @@ constexpr BuiltinChecker kWorkgroupIdChecker{
 constexpr BuiltinChecker kPrimitiveIndexChecker{
     /* name */ "primitive_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "primitive_index must be an u32",
@@ -489,7 +491,7 @@ constexpr BuiltinChecker kPrimitiveIndexChecker{
 constexpr BuiltinChecker kBarycentricCoordChecker{
     /* name */ "barycentric_coord",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* direction */ IODirection::kInput,
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsFloatVector() && ty->Elements().count == 3;
@@ -673,8 +675,7 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
         return msg.str();
     }
 
-    auto io_direction =
-        is_input ? BuiltinChecker::IODirection::kInput : BuiltinChecker::IODirection::kOutput;
+    auto io_direction = is_input ? IODirection::kInput : IODirection::kOutput;
     if (io_direction != checker.direction) {
         msg << checker.name << " must be an " << ToString(checker.direction)
             << " of a shader entry point";
@@ -862,6 +863,11 @@ class Validator {
     /// @returns the diagnostic
     diag::Diagnostic& AddError(const FunctionParam* param);
 
+    /// Adds an error for the castable base @p base and highlights it in the disassembly
+    /// @param base the declaration to add an error for
+    /// @returns the diagnostic
+    diag::Diagnostic& AddError(const CastableBase* base);
+
     /// Adds an error the @p block and highlights the block header in the disassembly
     /// @param src the source lines to highlight
     /// @returns the diagnostic
@@ -1033,6 +1039,10 @@ class Validator {
     /// @param func the function to validate
     void CheckWorkgroupSize(const Function* func);
 
+    /// Validates the entry point IO locations for a entry point.
+    /// @param func the function to validate
+    void CheckEntryPointLocations(const Function* func);
+
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
     void CheckVertexEntryPoint(const Function* ep);
@@ -1178,6 +1188,20 @@ class Validator {
         const std::optional<struct BindingPoint>& binding_point,
         const core::IOAttributes& attr,
         ShaderIOKind kind);
+
+    /// Validates location annotations on entry point IO.
+    /// @param locations the map of locations used so far for the current IO direction.
+    /// @param target the object that has the location attribute.
+    /// @param attr the IO attributes for the object.
+    /// @param stage the pipeline stage of the entry point.
+    /// @param type the type of the IO object.
+    /// @param dir the IO direction (input or output).
+    void CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
+                       const CastableBase* target,
+                       const IOAttributes& attr,
+                       Function::PipelineStage stage,
+                       const core::type::Type* type,
+                       IODirection dir);
 
     /// Validates the given let
     /// @param l the let to validate
@@ -1606,6 +1630,20 @@ diag::Diagnostic& Validator::AddError(const Function* func) {
 diag::Diagnostic& Validator::AddError(const FunctionParam* param) {
     auto src = Disassemble().FunctionParamSource(param);
     return AddError(src);
+}
+
+diag::Diagnostic& Validator::AddError(const CastableBase* base) {
+    diag::Diagnostic* diag = nullptr;
+    tint::Switch(
+        base,  //
+        [&](const Block* block) { diag = &AddError(block); },
+        [&](const BlockParam* param) { diag = &AddError(param); },
+        [&](const Function* fn) { diag = &AddError(fn); },
+        [&](const FunctionParam* param) { diag = &AddError(param); },
+        [&](const Instruction* inst) { diag = &AddError(inst); },
+        [&](const InstructionResult* res) { diag = &AddError(res); });
+    TINT_ASSERT(diag);
+    return *diag;
 }
 
 diag::Diagnostic& Validator::AddNote(const Instruction* inst) {
@@ -2452,6 +2490,8 @@ void Validator::CheckFunction(const Function* func) {
             AddError(func) << result.Failure();
         }
 
+        CheckEntryPointLocations(func);
+
         CheckFunctionReturnAttributesAndType(
             func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
             CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
@@ -2504,6 +2544,30 @@ void Validator::CheckFunction(const Function* func) {
 
     QueueBlock(func->Block());
     ProcessTasks();
+}
+
+void Validator::CheckEntryPointLocations(const Function* func) {
+    Hashmap<uint32_t, const CastableBase*, 4> input_locations;
+    Hashmap<uint32_t, const CastableBase*, 4> output_locations;
+    for (auto* param : func->Params()) {
+        CheckLocation(input_locations, param, param->Attributes(), func->Stage(), param->Type(),
+                      IODirection::kInput);
+    }
+    CheckLocation(output_locations, func, func->ReturnAttributes(), func->Stage(),
+                  func->ReturnType(), IODirection::kOutput);
+    for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
+        auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+        if (mv != nullptr) {
+            if (mv->AddressSpace() == AddressSpace::kIn) {
+                CheckLocation(input_locations, var, var->Attributes(), func->Stage(),
+                              mv->StoreType(), IODirection::kInput);
+            }
+            if (mv->AddressSpace() == AddressSpace::kOut) {
+                CheckLocation(output_locations, var, var->Attributes(), func->Stage(),
+                              mv->StoreType(), IODirection::kOutput);
+            }
+        }
+    }
 }
 
 void Validator::CheckWorkgroupSize(const Function* func) {
@@ -2926,6 +2990,42 @@ Result<SuccessType, std::string> Validator::ValidateBindingPoint(
             break;
     }
     return Success;
+}
+
+void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
+                              const CastableBase* target,
+                              const IOAttributes& attr,
+                              Function::PipelineStage stage,
+                              const core::type::Type* type,
+                              IODirection dir) {
+    if (auto* str = type->As<core::type::Struct>()) {
+        for (auto* member : str->Members()) {
+            CheckLocation(locations, target, member->Attributes(), stage, member->Type(), dir);
+        }
+    }
+
+    if (attr.location.has_value()) {
+        // TODO(446695014): Re-enable once either failing examples have been updated, or capability
+        //  added to selectively disable this check has been added
+        //        if (stage == Function::PipelineStage::kCompute && dir == IODirection::kInput) {
+        //            AddError(target) << "location attribute is not valid for compute shader
+        //            inputs";
+        //        }
+
+        // TODO(446624478): Handle location + blend_src interactions
+        if (attr.blend_src.has_value()) {
+            return;
+        }
+
+        auto loc = attr.location.value();
+        if (auto conflict = locations.Get(loc)) {
+            AddError(target) << "duplicate location(" << loc << ") on entry point "
+                             << ToString(dir);
+            AddDeclarationNote(*conflict);
+        } else {
+            locations.Add(loc, target);
+        }
+    }
 }
 
 Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(

@@ -482,6 +482,207 @@ TEST_F(IR_ValidatorTest, Function_Param_Location_Struct_WithoutCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, EntryPoint_InputLocation_Duplicate_InParams) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p1 = b.FunctionParam("p1", ty.f32());
+    p1->SetLocation(0);
+    auto* p2 = b.FunctionParam("p2", ty.f32());
+    p2->SetLocation(0);
+    f->SetParams({p1, p2});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:51 error: duplicate location(0) on entry point input
+%my_func = @fragment func(%p1:f32 [@location(0)], %p2:f32 [@location(0)]):void {
+                                                  ^^^^^^^
+
+:1:27 note: %p1 declared here
+%my_func = @fragment func(%p1:f32 [@location(0)], %p2:f32 [@location(0)]):void {
+                          ^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_InputLocation_Duplicate_InParamAndMSV) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p1 = b.FunctionParam("p1", ty.f32());
+    p1->SetLocation(0);
+    f->SetParams({p1});
+
+    auto* v = b.Var("v", AddressSpace::kIn, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Load(v);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:2:29 error: var: duplicate location(0) on entry point input
+  %v:ptr<__in, f32, read> = var undef @location(0)
+                            ^^^
+
+:5:27 note: %p1 declared here
+%my_func = @fragment func(%p1:f32 [@location(0)]):void {
+                          ^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnAndMSV) {
+    auto* f = FragmentEntryPoint("my_func");
+    f->SetReturnType(ty.f32());
+    f->SetReturnLocation(0);
+
+    auto* v = b.Var("v", AddressSpace::kOut, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, 1.0_f);
+        b.Return(f, 1.0_f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:2:36 error: var: duplicate location(0) on entry point output
+  %v:ptr<__out, f32, read_write> = var undef @location(0)
+                                   ^^^
+
+:5:1 note: %my_func declared here
+%my_func = @fragment func():f32 [@location(0)] {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_OutputLocation_Duplicate_InReturnStruct) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.location = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                                   {mod.symbols.New("b"), ty.f32(), attr},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:1 error: duplicate location(0) on entry point output
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+
+:6:1 note: %my_func declared here
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+// TODO(446695014): Re-enable once either failing examples have been updated, or capability
+/*
+ TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InParam) {
+    auto* f = ComputeEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.f32());
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:54 error: location attribute is not valid for compute shader inputs
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%p:f32 [@location(0)]):void {
+                                                     ^^^^^^
+)")) << res.Failure();
+}
+
+ TODO(446695014): Re-enable once either failing examples have been updated, or capability
+ TEST_F(IR_ValidatorTest, EntryPoint_Compute_InputLocation_InMSV) {
+    auto* f = ComputeEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kIn, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Load(v);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:29 error: var: location attribute is not valid for compute shader inputs
+  %v:ptr<__in, f32, read> = var undef @location(0)
+                            ^^^
+)")) << res.Failure();
+}
+*/
+
+TEST_F(IR_ValidatorTest, EntryPoint_Compute_OutputLocation) {
+    auto* f = ComputeEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kOut, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, 1.0_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_SameLocation_InputAndOutput) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("p", ty.f32());
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    f->SetReturnType(ty.f32());
+    f->SetReturnLocation(0);
+
+    b.Append(f->Block(), [&] { b.Return(f, 1.0_f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_SameLocation_DifferentEntryPoints) {
+    auto* f1 = FragmentEntryPoint("f1");
+    auto* p1 = b.FunctionParam("p1", ty.f32());
+    p1->SetLocation(0);
+    f1->SetParams({p1});
+    b.Append(f1->Block(), [&] { b.Return(f1); });
+
+    auto* f2 = FragmentEntryPoint("f2");
+    auto* p2 = b.FunctionParam("p2", ty.f32());
+    p2->SetLocation(0);
+    f2->SetParams({p2});
+    b.Append(f2->Block(), [&] { b.Return(f2); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowMultipleEntryPoints});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());

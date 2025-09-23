@@ -858,7 +858,7 @@ TEST_F(SpirvWriter_ShaderIOTest, InterpolationOnVertexInput) {
 
     auto* str_param = b.FunctionParam("input", str_ty);
     auto* ival = b.FunctionParam("ival", ty.i32());
-    ival->SetLocation(1);
+    ival->SetLocation(2);
     ival->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat});
     ep->SetParams({str_param, ival});
 
@@ -871,7 +871,7 @@ MyStruct = struct @align(4) {
   color:f32 @offset(0), @location(1), @interpolate(linear, sample)
 }
 
-%vert = @vertex func(%input:MyStruct, %ival:i32 [@location(1), @interpolate(flat)]):vec4<f32> [@invariant, @position] {
+%vert = @vertex func(%input:MyStruct, %ival:i32 [@location(2), @interpolate(flat)]):vec4<f32> [@invariant, @position] {
   $B1: {
     %4:vec4<f32> = construct 0.5f
     ret %4
@@ -887,7 +887,7 @@ MyStruct = struct @align(4) {
 
 $B1: {  # root
   %vert_loc1_Input:ptr<__in, f32, read> = var undef @location(1)
-  %vert_loc1_Input_1:ptr<__in, i32, read> = var undef @location(1)  # %vert_loc1_Input_1: 'vert_loc1_Input'
+  %vert_loc2_Input:ptr<__in, i32, read> = var undef @location(2)
   %vert_position_Output:ptr<__out, vec4<f32>, write> = var undef @invariant @builtin(position)
 }
 
@@ -901,7 +901,7 @@ $B1: {  # root
   $B3: {
     %9:f32 = load %vert_loc1_Input
     %10:MyStruct = construct %9
-    %11:i32 = load %vert_loc1_Input_1
+    %11:i32 = load %vert_loc2_Input
     %12:vec4<f32> = call %vert_inner, %10, %11
     store %vert_position_Output, %12
     ret
