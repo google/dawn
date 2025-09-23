@@ -147,20 +147,70 @@ tint::ResourceType ComputeTypeId(const TextureViewBase* view) {
 
 }  // anonymous namespace
 
-DynamicArrayState::DynamicArrayState(BindingIndex size) {
-    mBindings.resize(size);
+ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder(
+    wgpu::DynamicBindingKind kind) {
+    DAWN_ASSERT(kind == wgpu::DynamicBindingKind::SampledTexture);
+    static constexpr auto kSampledTextureBindings = std::array{
+        tint::ResourceType::kTexture1d_f32,
+        tint::ResourceType::kTexture2d_f32,
+        tint::ResourceType::kTexture2dArray_f32,
+        tint::ResourceType::kTextureCube_f32,
+        tint::ResourceType::kTextureCubeArray_f32,
+        tint::ResourceType::kTexture3d_f32,
+
+        tint::ResourceType::kTexture1d_u32,
+        tint::ResourceType::kTexture2d_u32,
+        tint::ResourceType::kTexture2dArray_u32,
+        tint::ResourceType::kTextureCube_u32,
+        tint::ResourceType::kTextureCubeArray_u32,
+        tint::ResourceType::kTexture3d_u32,
+
+        tint::ResourceType::kTexture1d_i32,
+        tint::ResourceType::kTexture2d_i32,
+        tint::ResourceType::kTexture2dArray_i32,
+        tint::ResourceType::kTextureCube_i32,
+        tint::ResourceType::kTextureCubeArray_i32,
+        tint::ResourceType::kTexture3d_i32,
+
+        tint::ResourceType::kTextureMultisampled2d_f32,
+        tint::ResourceType::kTextureMultisampled2d_u32,
+        tint::ResourceType::kTextureMultisampled2d_i32,
+
+        tint::ResourceType::kTextureDepth2d,
+        tint::ResourceType::kTextureDepth2dArray,
+        tint::ResourceType::kTextureDepthCube,
+        tint::ResourceType::kTextureDepthCubeArray,
+        tint::ResourceType::kTextureDepthMultisampled2d,
+    };
+
+    return {kSampledTextureBindings.data(), BindingIndex(uint32_t(kSampledTextureBindings.size()))};
+}
+
+BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind) {
+    return GetDefaultBindingOrder(kind).size();
+}
+
+DynamicArrayState::DynamicArrayState(BindingIndex size, wgpu::DynamicBindingKind kind)
+    : mKind(kind), mAPISize(size) {
+    mBindings.resize(size + GetDefaultBindingCount(mKind));
 
     DAWN_ASSERT(ComputeTypeId(nullptr) == BindingState{}.typeId);
-    mBindingState.resize(size);
+    mBindingState.resize(mBindings.size());
 }
 
 MaybeError DynamicArrayState::Initialize(DeviceBase* device) {
-    // TODO(https://crbug.com/435317394): Default bindings will be included in mBindings in the
-    // future such that we should use the dynamicArraySize passed in the BindGroup creation instead
-    // of the size of mBindings.
-    uint32_t metadataArrayLength = uint32_t(mBindings.size());
+    // Add the default bindings at the end of mBindings
+    ityp::span<BindingIndex, Ref<TextureViewBase>> defaultBindings;
+    DAWN_TRY_ASSIGN(
+        defaultBindings,
+        device->GetDynamicArrayDefaultBindings()->GetOrCreateSampledTextureDefaults(device));
+
+    for (auto [i, defaultBinding] : Enumerate(defaultBindings)) {
+        Update(mAPISize + i, defaultBinding.Get());
+    }
 
     // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
+    uint32_t metadataArrayLength = uint32_t(mAPISize);
     BufferDescriptor metadataDesc{
         .label = "binding array metadata",
         .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst,
@@ -195,15 +245,13 @@ void DynamicArrayState::Destroy() {
     mBindings.clear();
     mBindingState.clear();
     mDirtyBindings.clear();
-    mMetadataBuffer->Destroy();
-    mMetadataBuffer = nullptr;
+
+    if (mMetadataBuffer != nullptr) {
+        mMetadataBuffer->Destroy();
+        mMetadataBuffer = nullptr;
+    }
 
     mDestroyed = true;
-}
-
-BindingIndex DynamicArrayState::GetSize() const {
-    DAWN_ASSERT(!mDestroyed);
-    return mBindings.size();
 }
 
 ityp::span<BindingIndex, const Ref<TextureViewBase>> DynamicArrayState::GetBindings() const {
@@ -265,10 +313,6 @@ void DynamicArrayState::OnUnpinned(BindingIndex i, TextureBase* texture) {
     MarkStateDirty(i);
 }
 
-bool DynamicArrayState::HasDirtyBindings() const {
-    return !mDirtyBindings.empty();
-}
-
 std::vector<DynamicArrayState::BindingStateUpdate> DynamicArrayState::AcquireDirtyBindingUpdates() {
     DAWN_ASSERT(!mDestroyed);
 
@@ -276,6 +320,12 @@ std::vector<DynamicArrayState::BindingStateUpdate> DynamicArrayState::AcquireDir
     for (BindingIndex dirtyIndex : mDirtyBindings) {
         DAWN_ASSERT(mBindingState[dirtyIndex].dirty);
         mBindingState[dirtyIndex].dirty = false;
+
+        // Don't update metadata for default bindings as that would be past the end of the metadata
+        // buffer that has space only for non-default bindings.
+        if (dirtyIndex >= mAPISize) {
+            continue;
+        }
 
         tint::ResourceType effectiveType = mBindingState[dirtyIndex].pinned
                                                ? mBindingState[dirtyIndex].typeId
@@ -297,6 +347,141 @@ void DynamicArrayState::MarkStateDirty(BindingIndex i) {
         mDirtyBindings.push_back(i);
         mBindingState[i].dirty = true;
     }
+}
+
+// DynamicArrayDefaultBindings
+
+ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>>
+DynamicArrayDefaultBindings::GetOrCreateSampledTextureDefaults(DeviceBase* device) {
+    if (!mSampledTextureDefaults.empty()) {
+        return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};
+    }
+
+    auto AddDefaultBinding = [&](TextureBase* texture,
+                                 const TextureViewDescriptor* viewDesc = nullptr) -> MaybeError {
+        DAWN_TRY(texture->Pin(wgpu::TextureUsage::TextureBinding));
+
+        Ref<TextureViewBase> view;
+        DAWN_TRY_ASSIGN(view, device->CreateTextureView(texture, viewDesc));
+
+        // Check that the binding we will have will match the order of default textures that we will
+        // give to the shader compilation.
+        DAWN_ASSERT(ComputeTypeId(view.Get()) ==
+                    GetDefaultBindingOrder(
+                        wgpu::DynamicBindingKind::SampledTexture)[mSampledTextureDefaults.size()]);
+        mSampledTextureDefaults.push_back(view);
+
+        return {};
+    };
+
+    // Create the color format single-sampled views.
+    for (auto format :
+         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R8Uint, wgpu::TextureFormat::R8Sint}) {
+        // Create the necessary 1/2/3D textures.
+        TextureDescriptor tDesc{
+            .label = "default SampledTexture binding",
+            .usage = wgpu::TextureUsage::TextureBinding,
+            .size = {1},
+            .format = format,
+        };
+
+        tDesc.size = {1};
+        tDesc.dimension = wgpu::TextureDimension::e1D;
+        Ref<TextureBase> t1D;
+        DAWN_TRY_ASSIGN(t1D, device->CreateTexture(&tDesc));
+
+        tDesc.size = {1, 1, 6};
+        tDesc.dimension = wgpu::TextureDimension::e2D;
+        Ref<TextureBase> t2D;
+        DAWN_TRY_ASSIGN(t2D, device->CreateTexture(&tDesc));
+
+        tDesc.size = {1, 1, 1};
+        tDesc.dimension = wgpu::TextureDimension::e3D;
+        Ref<TextureBase> t3D;
+        DAWN_TRY_ASSIGN(t3D, device->CreateTexture(&tDesc));
+
+        // Create all the default binding view, reusing the 2D texture between
+        // 2D/2DArray/Cube/CubeArray.
+        DAWN_TRY(AddDefaultBinding(t1D.Get()));
+
+        TextureViewDescriptor vDesc{
+            .label = "default SampledTexture binding",
+        };
+        vDesc.arrayLayerCount = 1;
+        vDesc.dimension = wgpu::TextureViewDimension::e2D;
+        DAWN_TRY(AddDefaultBinding(t2D.Get(), &vDesc));
+        vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+        DAWN_TRY(AddDefaultBinding(t2D.Get(), &vDesc));
+        vDesc.arrayLayerCount = 6;
+        vDesc.dimension = wgpu::TextureViewDimension::Cube;
+        DAWN_TRY(AddDefaultBinding(t2D.Get(), &vDesc));
+        vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+        DAWN_TRY(AddDefaultBinding(t2D.Get(), &vDesc));
+
+        DAWN_TRY(AddDefaultBinding(t3D.Get()));
+    }
+
+    // Create the color format multi-sampled views.
+    for (auto format :
+         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R8Uint, wgpu::TextureFormat::R8Sint}) {
+        TextureDescriptor tDesc{
+            .label = "default SampledTexture binding",
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {1, 1},
+            .format = format,
+            .sampleCount = 4,
+        };
+
+        Ref<TextureBase> t;
+        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
+        DAWN_TRY(AddDefaultBinding(t.Get()));
+    }
+
+    // Create the single-sampled depth texture default bindings.
+    {
+        TextureDescriptor tDesc{
+            .label = "default SampledTexture binding",
+            .usage = wgpu::TextureUsage::TextureBinding,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {1, 1, 6},
+            .format = wgpu::TextureFormat::Depth16Unorm,
+        };
+        Ref<TextureBase> t;
+        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
+
+        TextureViewDescriptor vDesc{
+            .label = "default SampledTexture binding",
+        };
+        vDesc.arrayLayerCount = 1;
+        vDesc.dimension = wgpu::TextureViewDimension::e2D;
+        DAWN_TRY(AddDefaultBinding(t.Get(), &vDesc));
+        vDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+        DAWN_TRY(AddDefaultBinding(t.Get(), &vDesc));
+        vDesc.arrayLayerCount = 6;
+        vDesc.dimension = wgpu::TextureViewDimension::Cube;
+        DAWN_TRY(AddDefaultBinding(t.Get(), &vDesc));
+        vDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+        DAWN_TRY(AddDefaultBinding(t.Get(), &vDesc));
+    }
+
+    // Create the multi-sampled depth texture default binding.
+    {
+        TextureDescriptor tDesc{
+            .label = "default SampledTexture binding",
+            .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {1, 1},
+            .format = wgpu::TextureFormat::Depth16Unorm,
+            .sampleCount = 4,
+        };
+
+        Ref<TextureBase> t;
+        DAWN_TRY_ASSIGN(t, device->CreateTexture(&tDesc));
+        DAWN_TRY(AddDefaultBinding(t.Get()));
+    }
+
+    return {{mSampledTextureDefaults.data(), mSampledTextureDefaults.size()}};
 }
 
 }  // namespace dawn::native

@@ -240,6 +240,10 @@ MaybeError UpdateDynamicArrayBindings(Device* device,
     std::vector<DynamicArrayState::BindingStateUpdate> updates =
         dynamicArray->AcquireDirtyBindingUpdates();
 
+    if (updates.empty()) {
+        return {};
+    }
+
     // Allocate enough space for all the data to modify and schedule the copies.
     DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
         sizeof(uint32_t) * updates.size(), kCopyBufferToBufferOffsetAlignment,
@@ -283,10 +287,8 @@ MaybeError PrepareResourcesForSyncScope(Device* device,
     // metadata buffers are part of the resources and will be transitioned to Storage if needed
     // then.
     for (BindGroupBase* dynamicArrayBG : scope.dynamicBindingArrays) {
-        if (dynamicArrayBG->GetDynamicArray()->HasDirtyBindings()) {
-            DAWN_TRY(UpdateDynamicArrayBindings(device, recordingContext,
-                                                dynamicArrayBG->GetDynamicArray()));
-        }
+        DAWN_TRY(UpdateDynamicArrayBindings(device, recordingContext,
+                                            dynamicArrayBG->GetDynamicArray()));
     }
 
     // Separate barriers with vertex stages in destination stages from all other barriers.

@@ -30,6 +30,7 @@
 
 #include <vector>
 
+#include "dawn/common/NonMovable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/common/WeakRefSupport.h"
@@ -47,6 +48,12 @@ enum class ResourceType : uint32_t;
 
 namespace dawn::native {
 
+// Returns the order in which we will put the default bindings at the end of the dynamic binding
+// array.
+ityp::span<BindingIndex, const tint::ResourceType> GetDefaultBindingOrder(
+    wgpu::DynamicBindingKind kind);
+BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind);
+
 // An optional component of a BindGroup that's used to track the resources that are in the dynamic
 // binding array part. It helps maintain the metadata buffer that's used in shaders to know if it is
 // valid to access an entry of the dynamic binding array with a given type (note that the writing of
@@ -57,12 +64,11 @@ namespace dawn::native {
 // WeakRef to avoid a reference cycle between the dynamic array and its bindings).
 class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayState> {
   public:
-    explicit DynamicArrayState(BindingIndex size);
+    DynamicArrayState(BindingIndex size, wgpu::DynamicBindingKind kind);
 
     MaybeError Initialize(DeviceBase* device);
     void Destroy();
 
-    BindingIndex GetSize() const;
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
@@ -80,11 +86,12 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
         uint32_t offset;
         uint32_t data;
     };
-    bool HasDirtyBindings() const;
     std::vector<BindingStateUpdate> AcquireDirtyBindingUpdates();
 
   private:
     bool mDestroyed = false;
+    wgpu::DynamicBindingKind mKind;
+    BindingIndex mAPISize;
 
     ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
     // Buffer that contains a WGSL metadata struct of the following shape:
@@ -107,6 +114,15 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     // The list of bindings that need to be updated before the next use of the dynamic array.
     std::vector<BindingIndex> mDirtyBindings;
     void MarkStateDirty(BindingIndex i);
+};
+
+class DynamicArrayDefaultBindings : public NonMovable {
+  public:
+    ResultOrError<ityp::span<BindingIndex, Ref<TextureViewBase>>> GetOrCreateSampledTextureDefaults(
+        DeviceBase* device);
+
+  private:
+    ityp::vector<BindingIndex, Ref<TextureViewBase>> mSampledTextureDefaults;
 };
 
 }  // namespace dawn::native

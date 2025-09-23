@@ -41,6 +41,7 @@
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/PhysicalDevice.h"
@@ -253,10 +254,10 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         bindings.texture.emplace(wgslDynamicArrayBindPoint, remappedDynamicArrayBindPoint);
 
         // The resourceBindingConfig only uses remapped bind points.
+        auto bindingTypeOrder = GetDefaultBindingOrder(bgl->GetDynamicArrayKind());
         resourceBindingConfig.bindings[remappedDynamicArrayBindPoint] = {
             .storage_buffer_binding = metadataBindPoint,
-            // TODO(https://crbug.com/435317394): Support for all the resource types.
-            .default_binding_type_order = {},
+            .default_binding_type_order = {bindingTypeOrder.begin(), bindingTypeOrder.end()},
         };
     }
 

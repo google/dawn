@@ -1494,6 +1494,85 @@ TEST_P(DynamicBindingArrayTests, HasBindingOOBIsFalse) {
     EXPECT_BUFFER_U32_EQ(0, resultBuffer, 12);
 }
 
+// Check that the default bindings are of size 1 and filled with zeroes. This is not an exhaustive
+// test (that's for the CTS) but tries to check a few different interesting cases (MS, DS, Cube, 2D
+// array).
+TEST_P(DynamicBindingArrayTests, DefaultBindingsAreZeroAndSizeOne) {
+    // Create the test pipeline
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+
+        @group(0) @binding(0) var<storage, read_write> error : u32;
+        @group(0) @binding(1) var s : sampler;
+        @group(0) @binding(2) var a : resource_binding;
+
+        var<private> checkIndex = 0u;
+        fn check(b : bool) {
+            if (!b && error == 0) {
+                error = 1 + checkIndex;
+            }
+            checkIndex++;
+        }
+
+        @compute @workgroup_size(1) fn checkDefault() {
+            // Default texture_2d<f32>
+            check(!hasBinding<texture_2d<f32>>(a, 0));
+            check(all(textureDimensions(getBinding<texture_2d<f32>>(a, 0)) == vec2(1)));
+            check(textureNumLevels(getBinding<texture_2d<f32>>(a, 0)) == 1);
+            check(all(textureLoad(getBinding<texture_2d<f32>>(a, 0), vec2(0), 0) == vec4(0, 0, 0, 1)));
+
+            // Default texture_multisampled_2d
+            check(!hasBinding<texture_multisampled_2d<u32>>(a, 0));
+            check(all(textureDimensions(getBinding<texture_multisampled_2d<u32>>(a, 0)) == vec2(1)));
+            check(textureNumSamples(getBinding<texture_multisampled_2d<u32>>(a, 0)) == 4);
+            check(all(textureLoad(getBinding<texture_multisampled_2d<u32>>(a, 0), vec2(0), 0) == vec4(0, 0, 0, 1)));
+
+            // Default texture_depth_cube
+            check(!hasBinding<texture_depth_cube>(a, 0));
+            check(all(textureDimensions(getBinding<texture_depth_cube>(a, 0)) == vec2(1)));
+            check(textureNumLevels(getBinding<texture_depth_cube>(a, 0)) == 1);
+            check(textureSampleLevel(getBinding<texture_depth_cube>(a, 0), s, vec3(0), 0) == 0);
+
+            // Default texture_2d_array<i32>
+            check(!hasBinding<texture_2d_array<i32>>(a, 0));
+            check(all(textureDimensions(getBinding<texture_2d_array<i32>>(a, 0)) == vec2(1)));
+            check(textureNumLevels(getBinding<texture_2d_array<i32>>(a, 0)) == 1);
+            check(textureNumLayers(getBinding<texture_2d_array<i32>>(a, 0)) == 1);
+            check(all(textureLoad(getBinding<texture_2d_array<i32>>(a, 0), vec2(0), 0, 0) == vec4(0, 0, 0, 1)));
+        }
+    )");
+    wgpu::ComputePipelineDescriptor csDesc = {.compute = {
+                                                  .module = module,
+                                              }};
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create the test resources.
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t),
+    };
+    wgpu::Buffer errorBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::BindGroup bg = MakeBindGroup(pipeline.GetBindGroupLayout(0), 1,
+                                       {
+                                           {0, errorBuffer},
+                                           {1, device.CreateSampler()},
+                                       });
+
+    // Run the test and check results are the expected ones.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    device.GetQueue().Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(0, errorBuffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace

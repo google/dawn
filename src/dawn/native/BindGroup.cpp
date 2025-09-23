@@ -845,7 +845,8 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
 
     // Gather dynamic binding entries in a second loop to put the handling off the critical path.
     if (auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>()) {
-        mDynamicArray = AcquireRef(new DynamicArrayState(BindingIndex(dynamic->dynamicArraySize)));
+        mDynamicArray = AcquireRef(new DynamicArrayState(BindingIndex(dynamic->dynamicArraySize),
+                                                         layout->GetDynamicArrayKind()));
         DAWN_TRY(mDynamicArray->Initialize(GetDevice()));
 
         for (uint32_t i = 0; i < descriptor->entryCount; ++i) {

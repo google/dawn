@@ -77,6 +77,7 @@ class AttachmentStateBlueprint;
 class Blob;
 class BlobCache;
 class CallbackTaskManager;
+class DynamicArrayDefaultBindings;
 class DynamicUploader;
 class ErrorScopeStack;
 class SharedTextureMemory;
@@ -270,6 +271,7 @@ class DeviceBase : public ErrorSink,
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
 
     InternalPipelineStore* GetInternalPipelineStore();
+    DynamicArrayDefaultBindings* GetDynamicArrayDefaultBindings();
 
     // For Dawn Wire
     BufferBase* APICreateErrorBuffer(const BufferDescriptor* desc);
@@ -622,6 +624,7 @@ class DeviceBase : public ErrorSink,
     FeaturesSet mEnabledFeatures;
     tint::wgsl::AllowedFeatures mWGSLAllowedFeatures;
 
+    std::unique_ptr<DynamicArrayDefaultBindings> mDynamicArrayDefaultBindings;
     std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
     Ref<BufferBase> mTemporaryUniformBuffer;
 

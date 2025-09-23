@@ -57,6 +57,7 @@
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ErrorData.h"
@@ -450,6 +451,9 @@ MaybeError DeviceBase::Initialize(const UnpackedPtr<DeviceDescriptor>& descripto
     mDynamicUploader = std::make_unique<DynamicUploader>(this);
     mCallbackTaskManager = AcquireRef(new CallbackTaskManager());
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
+    if (HasFeature(Feature::ChromiumExperimentalBindless)) {
+        mDynamicArrayDefaultBindings = std::make_unique<DynamicArrayDefaultBindings>();
+    }
 
     DAWN_ASSERT(GetPlatform() != nullptr);
     mWorkerTaskPool = GetPlatform()->CreateWorkerTaskPool();
@@ -673,6 +677,7 @@ void DeviceBase::Destroy() {
     // implementations of DestroyImpl checks that we are disconnected before doing work.
     mState = State::Disconnected;
 
+    mDynamicArrayDefaultBindings = nullptr;
     mDynamicUploader = nullptr;
     mEmptyBindGroupLayout = nullptr;
     mEmptyPipelineLayout = nullptr;
@@ -972,6 +977,12 @@ dawn::platform::Platform* DeviceBase::GetPlatform() const {
 
 InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
     return mInternalPipelineStore.get();
+}
+
+DynamicArrayDefaultBindings* DeviceBase::GetDynamicArrayDefaultBindings() {
+    DAWN_ASSERT(HasFeature(Feature::ChromiumExperimentalBindless));
+    DAWN_ASSERT(mDynamicArrayDefaultBindings != nullptr);
+    return mDynamicArrayDefaultBindings.get();
 }
 
 bool DeviceBase::HasPendingTasks() {

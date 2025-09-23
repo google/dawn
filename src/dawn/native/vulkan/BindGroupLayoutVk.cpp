@@ -34,6 +34,7 @@
 #include "dawn/common/Range.h"
 #include "dawn/common/ityp_vector.h"
 #include "dawn/native/CacheKey.h"
+#include "dawn/native/DynamicArrayState.h"
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -400,7 +401,8 @@ ResultOrError<Ref<BindGroup>> BindGroupLayoutDynamicArray::AllocateBindGroup(
 
     uint32_t variableSize = 0;
     if (auto* dynamicArray = descriptor.Get<BindGroupDynamicBindingArray>()) {
-        variableSize = dynamicArray->dynamicArraySize;
+        variableSize = dynamicArray->dynamicArraySize +
+                       uint32_t(GetDefaultBindingCount(GetDynamicArrayKind()));
     }
 
     DescriptorSetAllocation descriptorSetAllocation;
