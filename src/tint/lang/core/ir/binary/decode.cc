@@ -789,9 +789,14 @@ struct Decoder {
         return mod_out_.Types().mat(column_ty, matrix_in.num_columns());
     }
 
-    const type::Pointer* CreateTypePointer(const pb::TypePointer& pointer_in) {
+    const type::Type* CreateTypePointer(const pb::TypePointer& pointer_in) {
         auto address_space = AddressSpace(pointer_in.address_space());
         auto* store_ty = Type(pointer_in.store_type());
+        if (!store_ty) {
+            err_ << "pointer must have a store type\n";
+            return mod_out_.Types().invalid();
+        }
+
         auto access = AccessControl(pointer_in.access());
         return mod_out_.Types().ptr(address_space, store_ty, access);
     }
