@@ -1573,6 +1573,110 @@ TEST_P(DynamicBindingArrayTests, DefaultBindingsAreZeroAndSizeOne) {
     EXPECT_BUFFER_U32_EQ(0, errorBuffer, 0);
 }
 
+// Check that Pin forces zero-initialization of the resources.
+TEST_P(DynamicBindingArrayTests, PinDoesZeroInit) {
+    // Create the pipeline reading back from the texture.
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_dynamic_binding;
+
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+        @group(0) @binding(1) var a : resource_binding;
+
+        @compute @workgroup_size(1) fn readbackPixel() {
+            let errorIfNotPresent = u32(!hasBinding<texture_2d<u32>>(a, 0));
+            let texel = textureLoad(getBinding<texture_2d<u32>>(a, 0), vec2u(0), 0).r;
+            result = errorIfNotPresent + texel;
+        }
+    )");
+
+    wgpu::ComputePipelineDescriptor csDesc = {.compute = {
+                                                  .module = module,
+                                              }};
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    // Create the test resources.
+    wgpu::BufferDescriptor bDesc = {
+        .usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc,
+        .size = sizeof(uint32_t),
+    };
+    wgpu::Buffer resultBuffer = device.CreateBuffer(&bDesc);
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::TextureViewDescriptor vDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::BindGroup bg = MakeBindGroup(pipeline.GetBindGroupLayout(0), 3,
+                                       {
+                                           {0, resultBuffer},
+                                           {1, tex.CreateView(&vDesc)},
+                                       });
+
+    // Check that Pin does the initial zero init.
+    {
+        tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bg);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+
+        EXPECT_BUFFER_U32_EQ(0, resultBuffer, 0);
+    }
+
+    // Use a render pass discard to mark the texture as uninitialized again. Use a LoadOp::Clear to
+    // set some non-zero value in the texture which hopefully would tell us if the lazy clear didn't
+    // happen.
+    {
+        tex.Unpin();
+
+        wgpu::RenderPassColorAttachment attachment = {
+            .view = tex.CreateView(),
+            .loadOp = wgpu::LoadOp::Clear,
+            .storeOp = wgpu::StoreOp::Discard,
+            .clearValue = {.r = 1.0, .g = 0.0, .b = 0.0, .a = 0.0},
+        };
+        wgpu::RenderPassDescriptor rpDesc = {
+            .colorAttachmentCount = 1,
+            .colorAttachments = &attachment,
+        };
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+    }
+
+    // Check that Pin does the zero init after a discard.
+    {
+        tex.Pin(wgpu::TextureUsage::TextureBinding);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bg);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        device.GetQueue().Submit(1, &commands);
+        tex.Unpin();
+
+        EXPECT_BUFFER_U32_EQ(0, resultBuffer, 0);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(DynamicBindingArrayTests, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 }  // anonymous namespace
