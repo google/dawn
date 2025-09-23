@@ -713,35 +713,39 @@ bool Converter::Convert(wgpu::TextureUsage& out, const interop::GPUTextureUsageF
     return true;
 }
 
-bool Converter::Convert(wgpu::TextureComponentSwizzle& out,
-                        const interop::GPUTextureComponentSwizzle& in) {
-    return Convert(out.r, in.r) && Convert(out.g, in.g) && Convert(out.b, in.b) &&
-           Convert(out.a, in.a);
+bool Converter::Convert(wgpu::TextureComponentSwizzle& out, const std::string& in) {
+    if (in.length() != 4) {
+        return Throw(Napi::TypeError::New(
+            env, "TextureComponentSwizzle must be exactly a four-character string."));
+    }
+
+    return Convert(out.r, in[0]) && Convert(out.g, in[1]) && Convert(out.b, in[2]) &&
+           Convert(out.a, in[3]);
 }
 
-bool Converter::Convert(wgpu::ComponentSwizzle& out, const interop::GPUComponentSwizzle& in) {
+bool Converter::Convert(wgpu::ComponentSwizzle& out, const char& in) {
     out = wgpu::ComponentSwizzle::Undefined;
     switch (in) {
-        case interop::GPUComponentSwizzle::kZero:
-            out = wgpu::ComponentSwizzle::Zero;
-            return true;
-        case interop::GPUComponentSwizzle::kOne:
-            out = wgpu::ComponentSwizzle::One;
-            return true;
-        case interop::GPUComponentSwizzle::kR:
+        case 'r':
             out = wgpu::ComponentSwizzle::R;
             return true;
-        case interop::GPUComponentSwizzle::kG:
+        case 'g':
             out = wgpu::ComponentSwizzle::G;
             return true;
-        case interop::GPUComponentSwizzle::kB:
+        case 'b':
             out = wgpu::ComponentSwizzle::B;
             return true;
-        case interop::GPUComponentSwizzle::kA:
+        case 'a':
             out = wgpu::ComponentSwizzle::A;
             return true;
+        case '0':
+            out = wgpu::ComponentSwizzle::Zero;
+            return true;
+        case '1':
+            out = wgpu::ComponentSwizzle::One;
+            return true;
     }
-    return Throw("invalid value for ComponentSwizzle");
+    return Throw(Napi::TypeError::New(env, "invalid value for ComponentSwizzle."));
 }
 
 bool Converter::Convert(interop::GPUTextureUsageFlags& out, wgpu::TextureUsage in) {

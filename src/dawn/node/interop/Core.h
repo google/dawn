@@ -745,11 +745,11 @@ inline Result FromJS(Napi::Env env, Napi::Value value, T& out) {
     return Converter<T>::FromJS(env, value, out);
 }
 
-// FromJSOptional() is similar to FromJS(), but if 'value' is either null
-// or undefined then 'out' is left unassigned.
+// FromJSOptional() is similar to FromJS(), but if 'value' is undefined
+// then 'out' is left unassigned.
 template <typename T>
 inline Result FromJSOptional(Napi::Env env, Napi::Value value, T& out) {
-    if (value.IsNull() || value.IsUndefined()) {
+    if (value.IsUndefined()) {
         return Success;
     }
     return Converter<T>::FromJS(env, value, out);
@@ -799,7 +799,9 @@ inline Result FromJS(const Napi::CallbackInfo& info, PARAM_TYPES& args) {
         if constexpr (IsDefaultedParameter<T>::value) {
             // Parameter has a default value.
             // Check whether the argument was provided.
-            if (value.IsNull() || value.IsUndefined()) {
+            if (value.IsNull()) {
+                return Success;
+            } else if (value.IsUndefined()) {
                 // Use default value for this parameter
                 out.value = out.default_value;
             } else {
