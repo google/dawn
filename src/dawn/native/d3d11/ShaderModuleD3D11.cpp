@@ -32,7 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/native/ImmediateConstantsLayout.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
@@ -131,48 +131,56 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             tint::BindingPoint dstBindingPoint{0u, indices[bindingIndex][stage]};
             DAWN_ASSERT(dstBindingPoint.binding != PipelineLayout::kInvalidSlot);
 
-            auto* const bufferBindingInfo =
-                std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
+            MatchVariant(
+                shaderBindingInfo.bindingInfo,
+                [&](const BufferBindingInfo& bindingInfo) {
+                    switch (bindingInfo.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
+                            break;
+                        case kInternalStorageBufferBinding:
+                        case wgpu::BufferBindingType::Storage:
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                        case kInternalReadOnlyStorageBufferBinding:
+                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
+                            break;
+                        case wgpu::BufferBindingType::BindingNotUsed:
+                        case wgpu::BufferBindingType::Undefined:
+                            DAWN_UNREACHABLE();
+                            break;
+                    }
+                },
+                [&](const SamplerBindingInfo& bindingInfo) {
+                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const TextureBindingInfo& bindingInfo) {
+                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const StorageTextureBindingInfo& bindingInfo) {
+                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
+                },
+                [&](const TexelBufferBindingInfo& bindingInfo) {
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
+                },
+                [&](const ExternalTextureBindingInfo& bindingInfo) {
+                    const auto& bindingMap = bgl->GetExternalTextureBindingExpansionMap();
+                    const auto& expansion = bindingMap.find(binding);
+                    DAWN_ASSERT(expansion != bindingMap.end());
 
-            if (bufferBindingInfo) {
-                switch (bufferBindingInfo->type) {
-                    case wgpu::BufferBindingType::Uniform:
-                        bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
-                        break;
-                    case kInternalStorageBufferBinding:
-                    case wgpu::BufferBindingType::Storage:
-                    case wgpu::BufferBindingType::ReadOnlyStorage:
-                    case kInternalReadOnlyStorageBufferBinding:
-                        bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-                        break;
-                    case wgpu::BufferBindingType::BindingNotUsed:
-                    case wgpu::BufferBindingType::Undefined:
-                        DAWN_UNREACHABLE();
-                        break;
-                }
-            } else if (std::holds_alternative<SamplerBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
-            } else if (std::holds_alternative<TextureBindingInfo>(shaderBindingInfo.bindingInfo)) {
-                bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
-            } else if (std::holds_alternative<StorageTextureBindingInfo>(
-                           shaderBindingInfo.bindingInfo)) {
-                bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
-            } else if (std::holds_alternative<ExternalTextureBindingInfo>(
-                           shaderBindingInfo.bindingInfo)) {
-                const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                const auto& expansion = etBindingMap.find(binding);
-                DAWN_ASSERT(expansion != etBindingMap.end());
+                    const auto& bindingExpansion = expansion->second;
+                    tint::BindingPoint plane0{
+                        0u, indices[bgl->GetBindingIndex(bindingExpansion.plane0)][stage]};
+                    tint::BindingPoint plane1{
+                        0u, indices[bgl->GetBindingIndex(bindingExpansion.plane1)][stage]};
+                    tint::BindingPoint metadata{
+                        0u, indices[bgl->GetBindingIndex(bindingExpansion.params)][stage]};
+                    bindings.external_texture.emplace(
+                        srcBindingPoint,
+                        tint::hlsl::writer::ExternalTexture{metadata, plane0, plane1});
+                },
 
-                const auto& bindingExpansion = expansion->second;
-                tint::BindingPoint plane0{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane0)][stage]};
-                tint::BindingPoint plane1{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.plane1)][stage]};
-                tint::BindingPoint metadata{
-                    0u, indices[bgl->GetBindingIndex(bindingExpansion.params)][stage]};
-                bindings.external_texture.emplace(
-                    srcBindingPoint, tint::hlsl::writer::ExternalTexture{metadata, plane0, plane1});
-            }
+                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
     }
 
