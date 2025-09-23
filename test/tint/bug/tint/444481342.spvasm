@@ -1,0 +1,49 @@
+          OpCapability Shader
+          OpMemoryModel Logical GLSL450
+          OpEntryPoint GLCompute %4 "main"
+          OpExecutionMode %4 LocalSize 16 16 1
+
+  %void = OpTypeVoid
+  %bool = OpTypeBool
+  %uint = OpTypeInt 32 0
+     %3 = OpTypeFunction %void
+
+%uint_1 = OpConstant %uint 1
+  %true = OpConstantTrue %bool
+
+     %4 = OpFunction %void None %3
+     %5 = OpLabel
+          OpBranch %10
+
+    %10 = OpLabel
+          OpLoopMerge %11 %12 None
+          OpBranch %13
+    %13 = OpLabel
+    %14 = OpCopyObject %uint %uint_1
+          OpBranch %12
+
+    %12 = OpLabel
+          ; Break-if
+          OpBranchConditional %true %10 %11
+
+          ; loop merge block
+    %11 = OpLabel
+          OpBranch %15
+
+          ; second loop header
+    %15 = OpLabel
+          ; the %14 value needs to propagate through the break-if statement
+    %16 = OpPhi %uint %14 %11 %uint_1 %17
+
+          OpLoopMerge %18 %17 None
+          OpBranch %19
+    %19 = OpLabel
+          OpBranch %17
+    %17 = OpLabel
+          OpBranchConditional %true %15 %18
+    %18 = OpLabel
+          OpBranch %20
+
+    %20 = OpLabel
+          OpReturn
+          OpFunctionEnd

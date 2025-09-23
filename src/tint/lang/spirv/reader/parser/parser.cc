@@ -2782,6 +2782,13 @@ class Parser {
                 block_phi_values_[blk_id] = {value_id};
             }
 
+            auto v = values_.Get(value_id);
+            if (v) {
+                // If the value exists, then try to get it to force the propagation. If it doesn't
+                // exist, then it will come later in the header and we'll deal with it later.
+                Value(value_id);
+            }
+
             core::ir::Terminator* term = nullptr;
             // The referenced block hasn't been emitted yet (continue blocks have this
             // behaviour). So, store the fact that it needs to return a given value away for
@@ -2798,7 +2805,7 @@ class Parser {
                     continue;
                 }
 
-                // The loop header is the terminator, so synthesize a continue blockhand append
+                // The loop header is the terminator, so synthesize a continue block and append
                 // to that a next iteration.
                 if (loop->Continuing()->IsEmpty()) {
                     b_.Append(loop->Continuing(), [&] { term = b_.NextIteration(loop); });
