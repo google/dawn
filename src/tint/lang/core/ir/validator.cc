@@ -2683,7 +2683,11 @@ void Validator::CheckWorkgroupSize(const Function* func) {
             //        if  not constant expression && not override expression:
             //            fail
             //    pass
+
+            continue;
         }
+
+        AddError(func) << "@workgroup_size must be an InstructionResult or a Constant";
     }
 
     constexpr uint64_t kMaxGridSize = 0xffffffff;

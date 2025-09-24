@@ -1227,6 +1227,22 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsSameType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_InvalidValueKind) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(1_u), b.FunctionParam("p", ty.u32()), b.Constant(3_u)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:1:1 error: @workgroup_size must be an InstructionResult or a Constant
+%f = @compute @workgroup_size(1u, %p, 3u) func():void {
+^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
     auto* f = ComputeEntryPoint();
     f->SetWorkgroupSize({b.Constant(-1_i), b.Constant(2_i), b.Constant(3_i)});
