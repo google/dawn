@@ -33,49 +33,11 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/common/bindings.h"
 #include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::msl::writer {
-
-/// An external texture
-struct ExternalTexture {
-    /// Metadata
-    BindingPoint metadata{};
-    /// Plane0 binding data
-    BindingPoint plane0{};
-    /// Plane1 binding data;
-    BindingPoint plane1{};
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
-    TINT_REFLECT_EQUALS(ExternalTexture);
-    TINT_REFLECT_HASH_CODE(ExternalTexture);
-};
-
-using BindingMap = std::unordered_map<BindingPoint, BindingPoint>;
-using ExternalTextureBindings = std::unordered_map<BindingPoint, ExternalTexture>;
-
-/// Binding information
-struct Bindings {
-    /// Uniform bindings
-    BindingMap uniform{};
-    /// Storage bindings
-    BindingMap storage{};
-    /// Texture bindings
-    BindingMap texture{};
-    /// Storage texture bindings
-    BindingMap storage_texture{};
-    /// Sampler bindings
-    BindingMap sampler{};
-    /// External bindings
-    ExternalTextureBindings external_texture{};
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(Bindings, uniform, storage, texture, storage_texture, sampler, external_texture);
-    TINT_REFLECT_EQUALS(Bindings);
-    TINT_REFLECT_HASH_CODE(Bindings);
-};
 
 /// Options used to specify a mapping of binding points to indices into a UBO
 /// from which to load buffer sizes.

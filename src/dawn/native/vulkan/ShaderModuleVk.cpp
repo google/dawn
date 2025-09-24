@@ -143,7 +143,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 #if TINT_BUILD_SPV_WRITER
     // Creation of module and spirv is deferred to this point when using tint generator
 
-    tint::spirv::writer::Bindings bindings;
+    tint::Bindings bindings;
     std::unordered_set<tint::BindingPoint> statically_paired_texture_binding_points;
 
     const BindingInfoArray& moduleBindingInfo =
@@ -218,8 +218,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                         static_cast<uint32_t>(bgl->GetBindingIndex(bindingExpansion.params))};
 
                     bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::spirv::writer::ExternalTexture{metadata, plane0, plane1});
+                        srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
                 },
                 [&](const InputAttachmentBindingInfo& bindingInfo) {
                     bindings.input_attachment.emplace(srcBindingPoint, dstBindingPoint);

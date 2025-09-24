@@ -35,60 +35,12 @@
 #include <vector>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/common/bindings.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::hlsl::writer {
-
-/// An external texture
-struct ExternalTexture {
-    /// Metadata
-    BindingPoint metadata{};
-    /// Plane0 binding data
-    BindingPoint plane0{};
-    /// Plane1 binding data;
-    BindingPoint plane1{};
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
-};
-
-using BindingMap = std::unordered_map<BindingPoint, BindingPoint>;
-using ExternalTextureBindings = std::unordered_map<BindingPoint, ExternalTexture>;
-
-/// Binding information
-struct Bindings {
-    /// Uniform bindings
-    BindingMap uniform{};
-    /// Storage bindings
-    BindingMap storage{};
-    /// Texture bindings
-    BindingMap texture{};
-    /// Storage texture bindings
-    BindingMap storage_texture{};
-    /// Sampler bindings
-    BindingMap sampler{};
-    /// External bindings
-    ExternalTextureBindings external_texture{};
-    /// Mapping of BindingPoint to new Access
-    std::unordered_map<BindingPoint, tint::core::Access> access_controls;
-    /// The binding points that will be ignored by the rebustness transform.
-    std::vector<BindingPoint> ignored_by_robustness_transform;
-
-    bool operator==(const Bindings& other) const = default;
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(Bindings,
-                 uniform,
-                 storage,
-                 texture,
-                 storage_texture,
-                 sampler,
-                 external_texture,
-                 access_controls,
-                 ignored_by_robustness_transform);
-};
 
 /// kMaxInterStageLocations == D3D11_PS_INPUT_REGISTER_COUNT - 2
 /// D3D11_PS_INPUT_REGISTER_COUNT == D3D12_PS_INPUT_REGISTER_COUNT
@@ -227,6 +179,12 @@ struct Options {
     /// The bindings
     Bindings bindings;
 
+    /// Mapping of BindingPoint to new Access
+    std::unordered_map<BindingPoint, tint::core::Access> access_controls;
+
+    /// The binding points that will be ignored by the rebustness transform.
+    std::vector<BindingPoint> ignored_by_robustness_transform;
+
     /// Pixel local configuration
     PixelLocalOptions pixel_local;
 
@@ -255,6 +213,8 @@ struct Options {
                  first_instance_offset,
                  num_workgroups_start_offset,
                  bindings,
+                 access_controls,
+                 ignored_by_robustness_transform,
                  pixel_local);
 };
 

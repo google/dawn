@@ -127,13 +127,12 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
 
 namespace {
 
-tint::msl::writer::Bindings GenerateBindingInfo(
-    SingleShaderStage stage,
-    const PipelineLayout* layout,
-    const BindingInfoArray& moduleBindingInfo,
-    tint::msl::writer::ArrayLengthOptions& arrayLengthFromConstants,
-    bool useArgumentBuffers) {
-    tint::msl::writer::Bindings bindings;
+tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
+                                   const PipelineLayout* layout,
+                                   const BindingInfoArray& moduleBindingInfo,
+                                   tint::msl::writer::ArrayLengthOptions& arrayLengthFromConstants,
+                                   bool useArgumentBuffers) {
+    tint::Bindings bindings;
 
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
@@ -217,8 +216,7 @@ tint::msl::writer::Bindings GenerateBindingInfo(
                     };
 
                     bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::msl::writer::ExternalTexture{metadata, plane0, plane1});
+                        srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
                 },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
@@ -294,8 +292,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
     bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
 
-    tint::msl::writer::Bindings bindings = GenerateBindingInfo(
-        stage, layout, moduleBindingInfo, arrayLengthFromConstants, useArgumentBuffers);
+    tint::Bindings bindings = GenerateBindingInfo(stage, layout, moduleBindingInfo,
+                                                  arrayLengthFromConstants, useArgumentBuffers);
 
     std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> argumentBufferInfo =
         GenerateArgumentBufferInfo(stage, layout, moduleBindingInfo, useArgumentBuffers);

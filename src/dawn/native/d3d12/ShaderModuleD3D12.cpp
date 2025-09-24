@@ -169,7 +169,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
                                           layout->GetDynamicStorageBufferLengthsShaderRegister()};
 
-    tint::hlsl::writer::Bindings bindings;
+    tint::Bindings bindings;
+    std::vector<BindingPoint> ignored_by_robustness;
+    std::unordered_map<BindingPoint, tint::core::Access> access_controls;
 
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
@@ -237,8 +239,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                         bgl->GetShaderRegister(bgl->GetBindingIndex(bindingExpansion.params))};
 
                     bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::hlsl::writer::ExternalTexture{metadata, plane0, plane1});
+                        srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
                 },
 
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
@@ -253,7 +254,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
             if (bufferInfo.type == wgpu::BufferBindingType::Storage ||
                 bufferInfo.type == kInternalStorageBufferBinding) {
-                bindings.access_controls.emplace(
+                access_controls.emplace(
                     tint::BindingPoint{.group = uint32_t(group),
                                        .binding = uint32_t(bindingInfo.binding)},
                     tint::core::Access::kReadWrite);
@@ -292,7 +293,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
             if ((bufferInfo.type == wgpu::BufferBindingType::Storage ||
                  bufferInfo.type == wgpu::BufferBindingType::ReadOnlyStorage) &&
                 !bufferInfo.hasDynamicOffset) {
-                bindings.ignored_by_robustness_transform.emplace_back(tint::BindingPoint{
+                ignored_by_robustness.emplace_back(tint::BindingPoint{
                     .group = uint32_t(group), .binding = uint32_t(bindingInfo.binding)});
             }
         }
@@ -317,6 +318,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.bindings = std::move(bindings);
+    req.hlsl.tintOptions.access_controls = std::move(access_controls);
+    req.hlsl.tintOptions.ignored_by_robustness_transform = std::move(ignored_by_robustness);
 
     req.hlsl.tintOptions.compiler = req.bytecode.compiler == d3d::Compiler::FXC
                                         ? tint::hlsl::writer::Options::Compiler::kFXC

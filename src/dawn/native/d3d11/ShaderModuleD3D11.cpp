@@ -117,7 +117,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
 
-    tint::hlsl::writer::Bindings bindings;
+    tint::Bindings bindings;
 
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
@@ -176,8 +176,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                     tint::BindingPoint metadata{
                         0u, indices[bgl->GetBindingIndex(bindingExpansion.params)][stage]};
                     bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::hlsl::writer::ExternalTexture{metadata, plane0, plane1});
+                        srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
                 },
 
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });

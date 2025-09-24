@@ -122,9 +122,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
-        config.bindings_ignored = std::unordered_set<BindingPoint>(
-            options.bindings.ignored_by_robustness_transform.cbegin(),
-            options.bindings.ignored_by_robustness_transform.cend());
+        config.bindings_ignored =
+            std::unordered_set<BindingPoint>(options.ignored_by_robustness_transform.cbegin(),
+                                             options.ignored_by_robustness_transform.cend());
 
         // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
         // according to the description of the assembly store_uav_typed, out of bounds addressing
