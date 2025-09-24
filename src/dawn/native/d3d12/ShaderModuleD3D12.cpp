@@ -242,70 +242,69 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 },
 
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
+        }
 
-            // WGSL read-only storage buffers are translated to a SRVs in HLSL. However they are
-            // compatible with read-write storage buffers in BindGroupLayout, in which case we need
-            // to force use of an UAV by telling Tint that the buffer is read-write.
-            for (BindingIndex index : bgl->GetBufferIndices()) {
-                const auto& bindingInfo = bgl->GetBindingInfo(index);
-                const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
+        // WGSL read-only storage buffers are translated to a SRVs in HLSL. However they are
+        // compatible with read-write storage buffers in BindGroupLayout, in which case we need to
+        // force use of an UAV by telling Tint that the buffer is read-write.
+        for (BindingIndex index : bgl->GetBufferIndices()) {
+            const auto& bindingInfo = bgl->GetBindingInfo(index);
+            const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
 
-                if (bufferInfo.type == wgpu::BufferBindingType::Storage ||
-                    bufferInfo.type == kInternalStorageBufferBinding) {
-                    bindings.access_controls.emplace(
-                        tint::BindingPoint{.group = uint32_t(group),
-                                           .binding = uint32_t(bindingInfo.binding)},
-                        tint::core::Access::kReadWrite);
-                }
+            if (bufferInfo.type == wgpu::BufferBindingType::Storage ||
+                bufferInfo.type == kInternalStorageBufferBinding) {
+                bindings.access_controls.emplace(
+                    tint::BindingPoint{.group = uint32_t(group),
+                                       .binding = uint32_t(bindingInfo.binding)},
+                    tint::core::Access::kReadWrite);
             }
+        }
 
-            // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be
-            // bound to root descriptor tables, where D3D12 runtime can guarantee that OOB-read will
-            // always return 0 and OOB-write will always take no action, so we don't need to do
-            // robustness transform on them. Note that we still need to do robustness transform on
-            // uniform buffers because only sized array is allowed in uniform buffers, so FXC will
-            // report compilation error when the indexing to the array in a cBuffer is out of bound
-            // and can be checked at compilation time. Storage buffers are OK because they are
-            // always translated with RWByteAddressBuffers, which has no such sized arrays.
-            //
-            // For example below WGSL shader will cause compilation error when we skip robustness
-            // transform on uniform buffers:
-            //
-            // struct TestData {
-            //     data: array<vec4<u32>, 3>,
-            // };
-            // @group(0) @binding(0) var<uniform> s: TestData;
-            //
-            // fn test() -> u32 {
-            //     let index = 1000000u;
-            //     if (s.data[index][0] != 0u) {    // error X3504: array index out of
-            //     bounds
-            //         return 0x1004u;
-            //     }
-            //     return 0u;
-            // }
-            for (BindingIndex index : bgl->GetBufferIndices()) {
-                const auto& bindingInfo = bgl->GetBindingInfo(index);
-                const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
+        // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be bound
+        // to root descriptor tables, where D3D12 runtime can guarantee that OOB-read will always
+        // return 0 and OOB-write will always take no action, so we don't need to do robustness
+        // transform on them. Note that we still need to do robustness transform on uniform buffers
+        // because only sized array is allowed in uniform buffers, so FXC will report compilation
+        // error when the indexing to the array in a cBuffer is out of bound and can be checked at
+        // compilation time. Storage buffers are OK because they are always translated with
+        // RWByteAddressBuffers, which has no such sized arrays.
+        //
+        // For example below WGSL shader will cause compilation error when we skip robustness
+        // transform on uniform buffers:
+        //
+        // struct TestData {
+        //     data: array<vec4<u32>, 3>,
+        // };
+        // @group(0) @binding(0) var<uniform> s: TestData;
+        //
+        // fn test() -> u32 {
+        //     let index = 1000000u;
+        //     if (s.data[index][0] != 0u) {    // error X3504: array index out of
+        //     bounds
+        //         return 0x1004u;
+        //     }
+        //     return 0u;
+        // }
+        for (BindingIndex index : bgl->GetBufferIndices()) {
+            const auto& bindingInfo = bgl->GetBindingInfo(index);
+            const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
 
-                if ((bufferInfo.type == wgpu::BufferBindingType::Storage ||
-                     bufferInfo.type == wgpu::BufferBindingType::ReadOnlyStorage) &&
-                    !bufferInfo.hasDynamicOffset) {
-                    bindings.ignored_by_robustness_transform.emplace_back(tint::BindingPoint{
-                        .group = uint32_t(group), .binding = uint32_t(bindingInfo.binding)});
-                }
+            if ((bufferInfo.type == wgpu::BufferBindingType::Storage ||
+                 bufferInfo.type == wgpu::BufferBindingType::ReadOnlyStorage) &&
+                !bufferInfo.hasDynamicOffset) {
+                bindings.ignored_by_robustness_transform.emplace_back(tint::BindingPoint{
+                    .group = uint32_t(group), .binding = uint32_t(bindingInfo.binding)});
             }
+        }
 
-            // Add arrayLengthFromUniform options
-            for (const auto& bindingAndRegisterOffset :
-                 layout->GetDynamicStorageBufferLengthInfo()[group].bindingAndRegisterOffsets) {
-                BindingNumber bindingNum = bindingAndRegisterOffset.binding;
-                uint32_t registerOffset = bindingAndRegisterOffset.registerOffset;
-                BindingPoint bindingPoint{static_cast<uint32_t>(group),
-                                          static_cast<uint32_t>(bindingNum)};
-                arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint,
-                                                                       registerOffset);
-            }
+        // Add arrayLengthFromUniform options
+        for (const auto& bindingAndRegisterOffset :
+             layout->GetDynamicStorageBufferLengthInfo()[group].bindingAndRegisterOffsets) {
+            BindingNumber bindingNum = bindingAndRegisterOffset.binding;
+            uint32_t registerOffset = bindingAndRegisterOffset.registerOffset;
+            BindingPoint bindingPoint{static_cast<uint32_t>(group),
+                                      static_cast<uint32_t>(bindingNum)};
+            arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint, registerOffset);
         }
     }
 
