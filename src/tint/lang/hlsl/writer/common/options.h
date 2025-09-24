@@ -179,9 +179,6 @@ struct Options {
     /// The bindings
     Bindings bindings;
 
-    /// Mapping of BindingPoint to new Access
-    std::unordered_map<BindingPoint, tint::core::Access> access_controls;
-
     /// The binding points that will be ignored by the rebustness transform.
     std::vector<BindingPoint> ignored_by_robustness_transform;
 
@@ -213,7 +210,6 @@ struct Options {
                  first_instance_offset,
                  num_workgroups_start_offset,
                  bindings,
-                 access_controls,
                  ignored_by_robustness_transform,
                  pixel_local);
 };

@@ -171,7 +171,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     tint::Bindings bindings;
     std::vector<BindingPoint> ignored_by_robustness;
-    std::unordered_map<BindingPoint, tint::core::Access> access_controls;
 
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
@@ -245,22 +244,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
 
-        // WGSL read-only storage buffers are translated to a SRVs in HLSL. However they are
-        // compatible with read-write storage buffers in BindGroupLayout, in which case we need to
-        // force use of an UAV by telling Tint that the buffer is read-write.
-        for (BindingIndex index : bgl->GetBufferIndices()) {
-            const auto& bindingInfo = bgl->GetBindingInfo(index);
-            const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
-
-            if (bufferInfo.type == wgpu::BufferBindingType::Storage ||
-                bufferInfo.type == kInternalStorageBufferBinding) {
-                access_controls.emplace(
-                    tint::BindingPoint{.group = uint32_t(group),
-                                       .binding = uint32_t(bindingInfo.binding)},
-                    tint::core::Access::kReadWrite);
-            }
-        }
-
         // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be bound
         // to root descriptor tables, where D3D12 runtime can guarantee that OOB-read will always
         // return 0 and OOB-write will always take no action, so we don't need to do robustness
@@ -318,7 +301,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.tintOptions.bindings = std::move(bindings);
-    req.hlsl.tintOptions.access_controls = std::move(access_controls);
     req.hlsl.tintOptions.ignored_by_robustness_transform = std::move(ignored_by_robustness);
 
     req.hlsl.tintOptions.compiler = req.bytecode.compiler == d3d::Compiler::FXC
