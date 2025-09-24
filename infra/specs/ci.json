@@ -609,6 +609,7 @@
       }
     ]
   },
+  "dawn-mac-x64-sws-rel": {},
   "dawn-win-x64-sws-dbg": {},
   "dawn-win-x64-sws-rel": {
     "gtest_tests": [

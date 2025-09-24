@@ -191,6 +191,17 @@ def dawn_linux_manual_builder(*, name, **kwargs):
         **kwargs
     )
 
+def dawn_mac_manual_builder(*, name, **kwargs):
+    return try_.builder(
+        name = name,
+        max_concurrent_builds = 1,
+        os = os.MAC_DEFAULT,
+        # TODO(crbug.com/441328362): Remove the architecture restriction once
+        # all tests are run on Swarming.
+        cpu = "x86-64",
+        **kwargs
+    )
+
 def dawn_win_manual_builder(*, name, **kwargs):
     return try_.builder(
         name = name,
@@ -242,6 +253,16 @@ dawn_linux_manual_builder(
         "ci/dawn-linux-x86-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x86-builder-rel",
+)
+
+dawn_mac_manual_builder(
+    name = "dawn-try-mac-x64-sws-rel",
+    description_html = "Tests release Dawn on Mac/x64 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-rel",
+        "ci/dawn-mac-x64-sws-rel",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-rel",
 )
 
 dawn_win_manual_builder(

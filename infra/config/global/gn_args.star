@@ -100,6 +100,27 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "mac",
+    args = {
+        "target_os": "mac",
+    },
+)
+
+gn_args.config(
+    name = "mac_clang",
+    configs = [
+        "clang",
+        "dawn_no_d3d12",
+        "mac",
+        "siso",
+        "tint_hlsl_writer",
+        "tint_msl_writer",
+        "tint_spv_reader_writer",
+        "tint_wgsl_reader_writer",
+    ],
+)
+
+gn_args.config(
     name = "non_component",
     args = {
         "is_component_build": False,

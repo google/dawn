@@ -198,6 +198,41 @@ ci.builder(
 )
 
 ci.builder(
+    name = "dawn-mac-x64-builder-rel",
+    description_html = "Compiles release Dawn test binaries for Mac/x64",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_node",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "component",
+            "dawn_node_bindings",
+            "mac_clang",
+            "release",
+            "x64",
+        ],
+    ),
+    os = os.MAC_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|build|clang|rel",
+        short_name = "x64",
+    ),
+)
+
+ci.builder(
     name = "dawn-win-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -487,6 +522,18 @@ ci.builder(
 
 # TODO(crbug.com/441328362): Remove this and use normal/actually thin
 # Linux-based testers once all tests are run on Swarming. Currently, the
+# non-Swarmed tests fail since we try to run Mac binaries on a Linux host.
+def mac_thin_tester(**kwargs):
+    ci.thin_tester(
+        os = os.MAC_DEFAULT,
+        # Necessary since the testers that use this are testing x64.
+        cpu = "x86-64",
+        cores = None,
+        **kwargs
+    )
+
+# TODO(crbug.com/441328362): Remove this and use normal/actually thin
+# Linux-based testers once all tests are run on Swarming. Currently, the
 # non-Swarmed tests fail since we try to run Windows binaries on a Linux host.
 def win_thin_tester(**kwargs):
     ci.thin_tester(
@@ -588,6 +635,30 @@ ci.thin_tester(
     ),
     console_view_entry = consoles.console_view_entry(
         category = "linux|test|clang|rel|x86",
+        short_name = "sws",
+    ),
+)
+
+mac_thin_tester(
+    name = "dawn-mac-x64-sws-rel",
+    description_html = "Tests release Dawn on Mac/x64 with SwiftShader",
+    parent = "dawn-mac-x64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|test|clang|rel|x64",
         short_name = "sws",
     ),
 )
