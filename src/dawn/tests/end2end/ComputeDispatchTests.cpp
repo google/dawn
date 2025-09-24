@@ -236,6 +236,9 @@ TEST_P(ComputeDispatchTests, IndirectBasicWithoutNumWorkgroups) {
 
 // Test no-op indirect
 TEST_P(ComputeDispatchTests, IndirectNoop) {
+    // TODO(crbug.com/446944886): Flaky with WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
     // All dimensions are 0s
     IndirectTest({0, 0, 0}, 0);
 
