@@ -216,6 +216,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
                                               core::ir::Capability::kAllowMultipleEntryPoints,
                                               core::ir::Capability::kAllowOverrides,
                                               core::ir::Capability::kAllowResourceBinding,
+                                              core::ir::Capability::kAllow8BitIntegers,
                                           });
     if (res != Success) {
         return res.Failure();

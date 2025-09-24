@@ -46,6 +46,7 @@ namespace tint::core::ir::transform {
 const core::ir::Capabilities kSubstituteOverridesCapabilities{
     core::ir::Capability::kAllowOverrides,
     core::ir::Capability::kAllowResourceBinding,
+    core::ir::Capability::kAllow8BitIntegers,
 };
 
 /// Configuration options for the transform

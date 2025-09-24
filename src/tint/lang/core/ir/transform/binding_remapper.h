@@ -51,8 +51,11 @@ namespace tint::core::ir::transform {
 // TODO(crbug.com/363031535): Remove kAllowDuplicateBindings when MSL no
 // longer needs FlattenBindings. binding_remapper_fuzz.cc will need to be
 // updated to have kAllowDuplicateBindings as a post-run capability.
-const Capabilities kBindingRemapperCapabilities{Capability::kAllowDuplicateBindings,
-                                                Capability::kAllowResourceBinding};
+const Capabilities kBindingRemapperCapabilities{
+    Capability::kAllowDuplicateBindings,
+    Capability::kAllowResourceBinding,
+    Capability::kAllow8BitIntegers,
+};
 
 /// BindingRemapper is a transform that remaps binding point indices and access controls.
 /// @param module the module to transform

@@ -39,8 +39,11 @@ class Module;
 namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
-const Capabilities kPreventInfiniteLoopsCapabilities{Capability::kAllowDuplicateBindings,
-                                                     Capability::kAllowResourceBinding};
+const Capabilities kPreventInfiniteLoopsCapabilities{
+    Capability::kAllowDuplicateBindings,
+    Capability::kAllowResourceBinding,
+    Capability::kAllow8BitIntegers,
+};
 
 /// PreventInfiniteLoops is a transform that injects an additional exit condition into loops that
 /// may be infinite, to prevent downstream compilers from making bad assumptions due to the

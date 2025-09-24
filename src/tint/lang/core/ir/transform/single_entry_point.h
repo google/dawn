@@ -43,6 +43,7 @@ const Capabilities kSingleEntryPointCapabilities{
     Capability::kAllowMultipleEntryPoints,
     Capability::kAllowOverrides,
     Capability::kAllowResourceBinding,
+    Capability::kAllow8BitIntegers,
 };
 
 /// Strip a module down to a single entry point, removing any unused functions and module-scope

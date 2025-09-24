@@ -39,7 +39,11 @@ class Module;
 namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
-const Capabilities kZeroInitWorkgroupMemoryCapabilities{Capability::kAllowDuplicateBindings};
+const Capabilities kZeroInitWorkgroupMemoryCapabilities{
+    Capability::kAllowDuplicateBindings,
+    Capability::kAllowNonCoreTypes,
+    Capability::kAllow8BitIntegers,
+};
 
 /// ZeroInitWorkgroupMemory is a transform that injects code at the top of each entry point to
 /// zero-initialize workgroup memory used by that entry point.

@@ -46,6 +46,7 @@ const core::ir::Capabilities kForkExplicitLayoutTypesCapabilities{
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kAllow8BitIntegers,
 };
 
 /// ForkExplicitLayoutTypes is a transform that forks array and structures types that are shared

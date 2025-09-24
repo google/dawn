@@ -43,6 +43,7 @@ const core::ir::Capabilities kVarForDynamicIndex{
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kAllow8BitIntegers,
 };
 
 /// VarForDynamicIndex is a transform that copies array and matrix values that are dynamically

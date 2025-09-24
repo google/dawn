@@ -41,6 +41,7 @@ namespace tint::spirv::writer::raise {
 // The capabilities that the transform can support.
 const core::ir::Capabilities kKeepBindingArrayAsPointerCapabilities{
     core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
 };
 
 /// KeepBindingArrayAsPointer is a transform that ensures that binding_arrays are never stored by

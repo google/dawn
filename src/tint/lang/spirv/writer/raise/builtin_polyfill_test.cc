@@ -4398,6 +4398,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U3
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* mat = ty.subgroup_matrix_result(ty.i8(), 8, 8);
     auto* p = b.FunctionParam<ptr<storage, array<i32, 256>>>("p");
     auto* func = b.Function("foo", mat);
@@ -4437,6 +4439,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_ColMajor_I8) 
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Workgroup_RowMajor_U8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* mat = ty.subgroup_matrix_result(ty.u8(), 8, 8);
     auto* p = b.FunctionParam<ptr<workgroup, array<u32, 256>>>("p");
     auto* func = b.Function("foo", mat);
@@ -4548,6 +4552,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_I8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* p = b.FunctionParam<ptr<storage, array<i32, 256>>>("p");
     auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.i8(), 8, 8));
     auto* func = b.Function("foo", ty.void_());
@@ -4586,6 +4592,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Storage_ColMajor_I8)
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixStore_Workgroup_RowMajor_U8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* p = b.FunctionParam<ptr<workgroup, array<u32, 256>>>("p");
     auto* m = b.FunctionParam("m", ty.subgroup_matrix_result(ty.u8(), 8, 8));
     auto* func = b.Function("foo", ty.void_());
@@ -4776,6 +4784,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I32_I32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I8_I32) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.i8(), 8, 4));
     auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.i8(), 2, 8));
     auto* result = ty.subgroup_matrix_result(ty.i32(), 2, 4);
@@ -4814,6 +4824,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_I8_I32) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiply_U8_U32) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.u8(), 8, 4));
     auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.u8(), 2, 8));
     auto* result = ty.subgroup_matrix_result(ty.u32(), 2, 4);
@@ -5004,6 +5016,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_I32_I32
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_I8_I32) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.i8(), 8, 4));
     auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.i8(), 2, 8));
     auto* acc = b.FunctionParam("acc", ty.subgroup_matrix_result(ty.i32(), 2, 4));
@@ -5042,6 +5056,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_I8_I32)
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_U8_U32) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
     auto* left = b.FunctionParam("left", ty.subgroup_matrix_left(ty.u8(), 8, 4));
     auto* right = b.FunctionParam("right", ty.subgroup_matrix_right(ty.u8(), 2, 8));
     auto* acc = b.FunctionParam("acc", ty.subgroup_matrix_result(ty.u32(), 2, 4));

@@ -41,7 +41,11 @@ namespace tint::core::ir::transform {
 
 /// The capabilities that the transform can support.
 const core::ir::Capabilities kDirectVariableAccessCapabilities{
-    core::ir::Capability::kAllowClipDistancesOnF32, core::ir::Capability::kAllowDuplicateBindings};
+    core::ir::Capability::kAllowClipDistancesOnF32,
+    core::ir::Capability::kAllowDuplicateBindings,
+    core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kAllow8BitIntegers,
+};
 
 /// DirectVariableAccessOptions adjusts the behaviour of the transform.
 struct DirectVariableAccessOptions {

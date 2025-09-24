@@ -132,6 +132,8 @@ Result<ImmediateDataLayout> PrepareImmediateData(Module& ir,
     auto result = ValidateAndDumpIfNeeded(ir, "core.PrepareImmediateData",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowDuplicateBindings,
+                                              core::ir::Capability::kAllow8BitIntegers,
+                                              core::ir::Capability::kAllowNonCoreTypes,
                                           });
     if (result != Success) {
         return result.Failure();

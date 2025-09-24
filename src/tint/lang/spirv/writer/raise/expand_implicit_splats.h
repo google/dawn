@@ -43,6 +43,7 @@ const core::ir::Capabilities kExpandImplicitSplatsCapabilities{
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kAllow8BitIntegers,
 };
 
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct

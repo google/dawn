@@ -1969,6 +1969,8 @@ void Validator::CheckType(const core::type::Type* root,
                 }
 
                 for (auto* member : str->Members()) {
+                    CheckType(member->Type(), diag, ignore_caps);
+
                     if (member->RowMajor()) {
                         diag() << "Row major annotation not allowed on structures";
                         return false;
@@ -1992,6 +1994,10 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "struct member must not have an alignment of 0";
                         return false;
                     }
+                    if (member->Type()->Align() == 0) {
+                        diag() << "struct member type must not have an alignment of 0";
+                        return false;
+                    }
                     if (member->Align() % member->Type()->Align() != 0) {
                         diag() << "struct member alignment (" << member->Align()
                                << ") must be divisible by type alignment ("
@@ -2002,6 +2008,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Reference* ref) {
+                CheckType(ref->StoreType(), diag, ignore_caps);
+
                 if (ref->StoreType()->Is<core::type::Void>()) {
                     diag() << "references to void are not permitted";
                     return false;
@@ -2020,6 +2028,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Pointer* ptr) {
+                CheckType(ptr->StoreType(), diag, ignore_caps);
+
                 if (ptr->StoreType()->Is<core::type::Void>()) {
                     diag() << "pointers to void are not permitted";
                     return false;
@@ -2087,6 +2097,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Array* arr) {
+                CheckType(arr->ElemType(), diag, ignore_caps);
+
                 if (!arr->ElemType()->UnwrapPtrOrRef()->HasCreationFixedFootprint()) {
                     diag() << "array elements, " << NameOf(type)
                            << ", must have creation-fixed footprint";
@@ -2102,6 +2114,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Vector* v) {
+                CheckType(v->Type(), diag, ignore_caps);
+
                 if (!v->Type()->IsScalar()) {
                     diag() << "vector elements, " << NameOf(type) << ", must be scalars";
                     return false;
@@ -2109,6 +2123,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::Matrix* m) {
+                CheckType(m->Type(), diag, ignore_caps);
+
                 if (!m->Type()->IsFloatScalar()) {
                     diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
                     return false;
@@ -2116,6 +2132,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::SampledTexture* s) {
+                CheckType(s->Type(), diag, ignore_caps);
+
                 if (!s->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid sampled texture sample type: " << NameOf(s->Type());
                     return false;
@@ -2123,6 +2141,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::MultisampledTexture* ms) {
+                CheckType(ms->Type(), diag, ignore_caps);
+
                 if (!ms->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid multisampled texture sample type: " << NameOf(ms->Type());
                     return false;
@@ -2154,6 +2174,8 @@ void Validator::CheckType(const core::type::Type* root,
                 }
             },
             [&](const core::type::InputAttachment* i) {
+                CheckType(i->Type(), diag, ignore_caps);
+
                 if (!i->Type()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
                     diag() << "invalid input attachment component type: " << NameOf(i->Type());
                     return false;
@@ -2161,6 +2183,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::SubgroupMatrix* m) {
+                CheckType(m->Type(), diag, ignore_caps);
+
                 if (!m->Type()
                          ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8,
                                    core::type::I32, core::type::U8, core::type::U32>()) {
@@ -2170,6 +2194,8 @@ void Validator::CheckType(const core::type::Type* root,
                 return true;
             },
             [&](const core::type::BindingArray* t) {
+                CheckType(t->ElemType(), diag, ignore_caps);
+
                 if (!t->Count()->Is<core::type::ConstantArrayCount>()) {
                     diag() << "binding_array count must be a constant expression";
                     return false;
