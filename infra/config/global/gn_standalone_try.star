@@ -245,6 +245,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-x64-sws-dbg",
+    description_html = "Tests debug Dawn on Windows/x64 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-dbg",
+        "ci/dawn-win-x64-sws-dbg",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-dbg",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-sws-rel",
     description_html = "Tests release Dawn on Windows/x64 with SwiftShader. Manual only.",
     mirrors = [
@@ -252,6 +262,26 @@ dawn_win_manual_builder(
         "ci/dawn-win-x64-sws-rel",
     ],
     gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_manual_builder(
+    name = "dawn-try-win-x86-sws-dbg",
+    description_html = "Tests debug Dawn on Windows/x86 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x86-builder-dbg",
+        "ci/dawn-win-x86-sws-dbg",
+    ],
+    gn_args = "ci/dawn-win-x86-builder-dbg",
+)
+
+dawn_win_manual_builder(
+    name = "dawn-try-win-x86-sws-rel",
+    description_html = "Tests release Dawn on Windows/x86 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x86-builder-rel",
+        "ci/dawn-win-x86-sws-rel",
+    ],
+    gn_args = "ci/dawn-win-x86-builder-rel",
 )
 
 ## Fuzz testers

@@ -609,6 +609,7 @@
       }
     ]
   },
+  "dawn-win-x64-sws-dbg": {},
   "dawn-win-x64-sws-rel": {
     "gtest_tests": [
       {
@@ -766,5 +767,7 @@
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
     ]
-  }
+  },
+  "dawn-win-x86-sws-dbg": {},
+  "dawn-win-x86-sws-rel": {}
 }

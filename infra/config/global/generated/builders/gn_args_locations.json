@@ -8,7 +8,10 @@
     "dawn-linux-x86-builder-rel": "ci/dawn-linux-x86-builder-rel/gn-args.json",
     "dawn-linux-x86-fuzz-dbg": "ci/dawn-linux-x86-fuzz-dbg/gn-args.json",
     "dawn-linux-x86-fuzz-rel": "ci/dawn-linux-x86-fuzz-rel/gn-args.json",
-    "dawn-win-x64-builder-rel": "ci/dawn-win-x64-builder-rel/gn-args.json"
+    "dawn-win-x64-builder-dbg": "ci/dawn-win-x64-builder-dbg/gn-args.json",
+    "dawn-win-x64-builder-rel": "ci/dawn-win-x64-builder-rel/gn-args.json",
+    "dawn-win-x86-builder-dbg": "ci/dawn-win-x86-builder-dbg/gn-args.json",
+    "dawn-win-x86-builder-rel": "ci/dawn-win-x86-builder-rel/gn-args.json"
   },
   "try": {
     "dawn-cq-linux-x64-dbg": "try/dawn-cq-linux-x64-dbg/gn-args.json",
@@ -27,6 +30,9 @@
     "dawn-try-linux-x86-fuzz-rel": "try/dawn-try-linux-x86-fuzz-rel/gn-args.json",
     "dawn-try-linux-x86-sws-dbg": "try/dawn-try-linux-x86-sws-dbg/gn-args.json",
     "dawn-try-linux-x86-sws-rel": "try/dawn-try-linux-x86-sws-rel/gn-args.json",
-    "dawn-try-win-x64-sws-rel": "try/dawn-try-win-x64-sws-rel/gn-args.json"
+    "dawn-try-win-x64-sws-dbg": "try/dawn-try-win-x64-sws-dbg/gn-args.json",
+    "dawn-try-win-x64-sws-rel": "try/dawn-try-win-x64-sws-rel/gn-args.json",
+    "dawn-try-win-x86-sws-dbg": "try/dawn-try-win-x86-sws-dbg/gn-args.json",
+    "dawn-try-win-x86-sws-rel": "try/dawn-try-win-x86-sws-rel/gn-args.json"
   }
 }
