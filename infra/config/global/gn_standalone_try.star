@@ -63,6 +63,15 @@ def apply_linux_cq_builder_defaults(kwargs):
     kwargs.setdefault("ssd", None)
     return kwargs
 
+def apply_win_cq_builder_defaults(kwargs):
+    kwargs = apply_cq_builder_defaults(kwargs)
+    kwargs.setdefault("os", os.WINDOWS_DEFAULT)
+
+    # This can be changed to prefer SSDs once the GPU Windows GCE fleet has
+    # been switched to primarily using SSDs.
+    kwargs.setdefault("ssd", None)
+    return kwargs
+
 def apply_functional_builder_with_node_defaults(kwargs):
     kwargs.setdefault("tryjob", try_.job(
         location_filters = exclusion_filters.gn_clang_cq_file_exclusions,
@@ -86,8 +95,18 @@ def dawn_linux_functional_cq_tester(**kwargs):
     kwargs = apply_functional_builder_with_node_defaults(kwargs)
     try_.builder(**kwargs)
 
+def dawn_win_functional_cq_tester(**kwargs):
+    kwargs = apply_win_cq_builder_defaults(kwargs)
+    kwargs = apply_functional_builder_with_node_defaults(kwargs)
+    try_.builder(**kwargs)
+
 def dawn_linux_functional_cq_tester_without_node(**kwargs):
     kwargs = apply_linux_cq_builder_defaults(kwargs)
+    kwargs = apply_functional_builder_without_node_defaults(kwargs)
+    try_.builder(**kwargs)
+
+def dawn_win_functional_cq_tester_without_node(**kwargs):
+    kwargs = apply_win_cq_builder_defaults(kwargs)
     kwargs = apply_functional_builder_without_node_defaults(kwargs)
     try_.builder(**kwargs)
 
@@ -136,6 +155,46 @@ dawn_linux_functional_cq_tester_without_node(
         "ci/dawn-linux-x86-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x86-builder-rel",
+)
+
+dawn_win_functional_cq_tester(
+    name = "dawn-cq-win-x64-dbg",
+    description_html = "Tests debug Dawn on Win/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-builder-dbg",
+        "ci/dawn-win-x64-sws-dbg",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-dbg",
+)
+
+dawn_win_functional_cq_tester(
+    name = "dawn-cq-win-x64-rel",
+    description_html = "Tests release Dawn on Win/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-builder-rel",
+        "ci/dawn-win-x64-sws-rel",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_functional_cq_tester_without_node(
+    name = "dawn-cq-win-x86-dbg",
+    description_html = "Tests debug Dawn on Win/x86 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x86-builder-dbg",
+        "ci/dawn-win-x86-sws-dbg",
+    ],
+    gn_args = "ci/dawn-win-x86-builder-dbg",
+)
+
+dawn_win_functional_cq_tester_without_node(
+    name = "dawn-cq-win-x86-rel",
+    description_html = "Tests release Dawn on Win/x86 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x86-builder-rel",
+        "ci/dawn-win-x86-sws-rel",
+    ],
+    gn_args = "ci/dawn-win-x86-builder-rel",
 )
 
 ## Fuzz testers
