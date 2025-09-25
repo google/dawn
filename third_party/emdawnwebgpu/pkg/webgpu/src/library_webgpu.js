@@ -713,7 +713,7 @@ var LibraryWebGPU = {
   emwgpuGetPreferredFormat__deps: ['$emwgpuStringToInt_PreferredFormat'],
   emwgpuGetPreferredFormat__sig: 'i',
   emwgpuGetPreferredFormat: () => {
-    var format = navigator["gpu"]["getPreferredCanvasFormat"]();
+    var format = navigator.gpu.getPreferredCanvasFormat();
     return emwgpuStringToInt_PreferredFormat[format];
   },
 
@@ -751,14 +751,14 @@ var LibraryWebGPU = {
     var featuresPtr = _malloc(adapter.features.size * 4);
     var offset = 0;
     var numFeatures = 0;
-    adapter.features.forEach(feature => {
+    for (const feature of adapter.features) {
       var featureEnumValue = emwgpuStringToInt_FeatureName[feature];
       if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
       }
-    });
+    };
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.features, 'featuresPtr', '*') }}};
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.featureCount, 'numFeatures', '*') }}};
   },
@@ -866,9 +866,9 @@ var LibraryWebGPU = {
       );
     }
 
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // requestDevice
     WebGPU.Internals.futureInsert(futureId, adapter.requestDevice(desc).then((device) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // requestDevice fulfilled
       WebGPU.Internals.jsObjectInsert(queuePtr, device.queue);
       WebGPU.Internals.jsObjectInsert(devicePtr, device);
 
@@ -876,9 +876,9 @@ var LibraryWebGPU = {
 
       // Set up device lost promise resolution.
       if (deviceLostFutureId) {
-        {{{ runtimeKeepalivePush() }}}
+        {{{ runtimeKeepalivePush() }}} // deviceLost
         WebGPU.Internals.futureInsert(deviceLostFutureId, device.lost.then((info) => {
-          {{{ runtimeKeepalivePop() }}}
+          {{{ runtimeKeepalivePop() }}} // deviceLost fulfilled (assumed not to reject)
           // Unset the uncaptured error handler.
           device.onuncapturederror = (ev) => {};
           var sp = stackSave();
@@ -909,7 +909,7 @@ var LibraryWebGPU = {
       _emwgpuOnRequestDeviceCompleted(futureId, {{{ gpu.RequestDeviceStatus.Success }}},
         {{{ gpu.passAsPointer('devicePtr') }}}, {{{ gpu.NULLPTR }}});
     }, (ex) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // requestDevice rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       _emwgpuOnRequestDeviceCompleted(futureId, {{{ gpu.RequestDeviceStatus.Error }}},
@@ -1053,13 +1053,13 @@ var LibraryWebGPU = {
 
     {{{ gpu.convertSentinelToUndefined('size', true) }}}
 
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // mapAsync
     WebGPU.Internals.futureInsert(futureId, buffer.mapAsync(mode, offset, size).then(() => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // mapAsync fulfilled
       _emwgpuOnMapAsyncCompleted(futureId, {{{ gpu.MapAsyncStatus.Success }}},
         {{{ gpu.NULLPTR }}});
     }, (ex) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // mapAsync rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       var status =
@@ -1621,14 +1621,14 @@ var LibraryWebGPU = {
   emwgpuDeviceCreateComputePipelineAsync: (devicePtr, futureId, descriptor, pipelinePtr) => {
     var desc = WebGPU.makeComputePipelineDesc(descriptor);
     var device = WebGPU.getJsObject(devicePtr);
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // createComputePipelineAsync
     WebGPU.Internals.futureInsert(futureId, device.createComputePipelineAsync(desc).then((pipeline) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // createComputePipelineAsync fulfilled
       WebGPU.Internals.jsObjectInsert(pipelinePtr, pipeline);
       _emwgpuOnCreateComputePipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}},
         {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.NULLPTR }}});
     }, (pipelineError) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // createComputePipelineAsync rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(pipelineError.message);
       var status =
@@ -1731,14 +1731,14 @@ var LibraryWebGPU = {
   emwgpuDeviceCreateRenderPipelineAsync: (devicePtr, futureId, descriptor, pipelinePtr) => {
     var desc = WebGPU.makeRenderPipelineDesc(descriptor);
     var device = WebGPU.getJsObject(devicePtr);
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // createRenderPipelineAsync
     WebGPU.Internals.futureInsert(futureId, device.createRenderPipelineAsync(desc).then((pipeline) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // createRenderPipelineAsync fulfilled
       WebGPU.Internals.jsObjectInsert(pipelinePtr, pipeline);
       _emwgpuOnCreateRenderPipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}},
         {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.NULLPTR }}});
     }, (pipelineError) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // createRenderPipelineAsync rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(pipelineError.message);
       var status =
@@ -1864,14 +1864,14 @@ var LibraryWebGPU = {
     var featuresPtr = _malloc(device.features.size * 4);
     var offset = 0;
     var numFeatures = 0;
-    device.features.forEach(feature => {
+    for (const feature of device.features) {
       var featureEnumValue = emwgpuStringToInt_FeatureName[feature];
       if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
       }
-    });
+    };
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.features, 'featuresPtr', '*') }}};
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.featureCount, 'numFeatures', '*') }}};
   },
@@ -1897,9 +1897,9 @@ var LibraryWebGPU = {
   emwgpuDevicePopErrorScope__sig: 'vpj',
   emwgpuDevicePopErrorScope: (devicePtr, futureId) => {
     var device = WebGPU.getJsObject(devicePtr);
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // popErrorScope
     WebGPU.Internals.futureInsert(futureId, device.popErrorScope().then((gpuError) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // popErrorScope fulfilled
       var type = {{{ gpu.ErrorType.Unknown }}};
       if (!gpuError) type = {{{ gpu.ErrorType.NoError }}};
       else if (gpuError instanceof GPUValidationError) type = {{{ gpu.ErrorType.Validation }}};
@@ -1915,7 +1915,7 @@ var LibraryWebGPU = {
         {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }, (ex) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // popErrorScope rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       _emwgpuOnPopErrorScopeCompleted(futureId,
@@ -1992,25 +1992,25 @@ var LibraryWebGPU = {
   },
 
   wgpuInstanceHasWGSLLanguageFeature: (instance, featureEnumValue) => {
-    if (!('wgslLanguageFeatures' in navigator["gpu"])) {
+    if (!('wgslLanguageFeatures' in navigator.gpu)) {
       return false;
     }
-    return navigator["gpu"]["wgslLanguageFeatures"].has(WebGPU.WGSLLanguageFeatureName[featureEnumValue]);
+    return navigator.gpu.wgslLanguageFeatures.has(WebGPU.WGSLLanguageFeatureName[featureEnumValue]);
   },
 
   wgpuInstanceGetWGSLLanguageFeatures: (instance, supportedFeatures) => {
     // Always allocate enough space for all the features, though some may be unused.
-    var featuresPtr = _malloc(navigator["gpu"]["wgslLanguageFeatures"].size * 4);
+    var featuresPtr = _malloc(navigator.gpu.wgslLanguageFeatures.size * 4);
     var offset = 0;
     var numFeatures = 0;
-    navigator["gpu"]["wgslLanguageFeatures"].forEach(feature => {
+    for (const feature of navigator.wgslLanguageFeatures) {
       var featureEnumValue = WebGPU.WGSLLanguageFeatureName.indexOf(feature);
       if (featureEnumValue >= 0) {
         {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
         offset += 4;
         numFeatures++;
       }
-    });
+    };
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedWGSLLanguageFeatures.features, 'featuresPtr', '*') }}};
     {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedWGSLLanguageFeatures.featureCount, 'numFeatures', '*') }}};
   },
@@ -2052,9 +2052,9 @@ var LibraryWebGPU = {
       return;
     }
 
-    {{{ runtimeKeepalivePush() }}}
-    WebGPU.Internals.futureInsert(futureId, navigator["gpu"]["requestAdapter"](opts).then((adapter) => {
-      {{{ runtimeKeepalivePop() }}}
+    {{{ runtimeKeepalivePush() }}} // requestAdapter
+    WebGPU.Internals.futureInsert(futureId, navigator.gpu.requestAdapter(opts).then((adapter) => {
+      {{{ runtimeKeepalivePop() }}} // requestAdapter fulfilled
       if (adapter) {
         WebGPU.Internals.jsObjectInsert(adapterPtr, adapter);
         _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Success }}},
@@ -2067,7 +2067,7 @@ var LibraryWebGPU = {
         stackRestore(sp);
       }
     }, (ex) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // requestAdapter rejected
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Error }}},
@@ -2107,14 +2107,10 @@ var LibraryWebGPU = {
   emwgpuQueueOnSubmittedWorkDone: (queuePtr, futureId) => {
     var queue = WebGPU.getJsObject(queuePtr);
 
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // onSubmittedWorkDone
     WebGPU.Internals.futureInsert(futureId, queue.onSubmittedWorkDone().then(() => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // onSubmittedWorkDone fulfilled (assumed not to reject)
       _emwgpuOnWorkDoneCompleted(futureId, {{{ gpu.QueueWorkDoneStatus.Success }}});
-    }, () => {
-      {{{ runtimeKeepalivePop() }}}
-      // We could translate this into a status+message, but it's not supposed to ever happen.
-      abort('Unexpected failure in GPUQueue.onSubmittedWorkDone().')
     }));
   },
 
@@ -2433,9 +2429,9 @@ var LibraryWebGPU = {
   emwgpuShaderModuleGetCompilationInfo__sig: 'vpjp',
   emwgpuShaderModuleGetCompilationInfo: (shaderModulePtr, futureId, compilationInfoPtr) => {
     var shaderModule = WebGPU.getJsObject(shaderModulePtr);
-    {{{ runtimeKeepalivePush() }}}
+    {{{ runtimeKeepalivePush() }}} // getCompilationInfo
     WebGPU.Internals.futureInsert(futureId, shaderModule.getCompilationInfo().then((compilationInfo) => {
-      {{{ runtimeKeepalivePop() }}}
+      {{{ runtimeKeepalivePop() }}} // getCompilationInfo fulfilled (assumed not to reject)
       const messageCount = compilationInfo.messages.length;
       {{{ makeSetValue('compilationInfoPtr', C_STRUCTS.WGPUCompilationInfo.messageCount, 'messageCount', '*') }}}
 
