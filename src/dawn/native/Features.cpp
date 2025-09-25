@@ -384,12 +384,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Supports some new GPUTextureFormats with the RENDER_ATTACHMENT, blendable, multisampling "
       "capabilities and the STORAGE_BINDING capability with the 'read-only' and 'write-only'"
       "GPUStorageTextureAccesses.",
-      "https://gpuweb.github.io/gpuweb/#texture-formats-tier1",
-      FeatureInfo::FeatureState::Experimental}},
+      "https://gpuweb.github.io/gpuweb/#texture-formats-tier1", FeatureInfo::FeatureState::Stable}},
     {Feature::TextureFormatsTier2,
      {"Supports StorageTextureAccess 'read-write' on several additional formats.",
-      "https://gpuweb.github.io/gpuweb/#texture-formats-tier2",
-      FeatureInfo::FeatureState::Experimental}},
+      "https://gpuweb.github.io/gpuweb/#texture-formats-tier2", FeatureInfo::FeatureState::Stable}},
     {Feature::TextureComponentSwizzle,
      {"Texture component swizzle lets you to specify how the channels of a texture (red, green, "
       "blue, and alpha) are mapped to the color components when accessed by a shader.",
