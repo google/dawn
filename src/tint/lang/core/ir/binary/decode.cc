@@ -909,6 +909,10 @@ struct Decoder {
                  << internal_limits::kMaxArrayElementCount << "\n";
             return mod_out_.Types().invalid();
         }
+        if (element == nullptr) {
+            err_ << "binding array element type is invalid\n";
+            return mod_out_.Types().invalid();
+        }
 
         return mod_out_.Types().binding_array(element, count);
     }
