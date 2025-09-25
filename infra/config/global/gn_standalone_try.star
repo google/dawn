@@ -256,6 +256,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_mac_manual_builder(
+    name = "dawn-try-mac-x64-sws-dbg",
+    description_html = "Tests debug Dawn on Mac/x64 with SwiftShader. Manual only.",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-dbg",
+        "ci/dawn-mac-x64-sws-dbg",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-dbg",
+)
+
+dawn_mac_manual_builder(
     name = "dawn-try-mac-x64-sws-rel",
     description_html = "Tests release Dawn on Mac/x64 with SwiftShader. Manual only.",
     mirrors = [
