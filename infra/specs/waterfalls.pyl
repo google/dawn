@@ -109,7 +109,10 @@
         'mixins': [
           'mac_mini_intel_gpu_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'swiftshader_gtests',
+          'isolated_scripts': 'dawn_node_cts_sws_tests',
+        },
       },
       'dawn-win-x64-sws-dbg': {
         'os_type': 'win',
