@@ -836,6 +836,11 @@ struct Decoder {
 
             auto symbol = mod_out_.symbols.Register(member_name);
             auto* type = Type(member_in.type());
+            if (type == nullptr) {
+                err_ << "struct member '" << member_name << "' type  is invalid\n";
+                return mod_out_.Types().invalid();
+            }
+
             auto index = static_cast<uint32_t>(members_out.Length());
             auto align = member_in.align();
             auto size = member_in.size();
