@@ -47,6 +47,7 @@ ci.defaults.set(
     siso_project = siso.project.DEFAULT_TRUSTED,
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
     thin_tester_cores = 2,
+    builderless = True,
 )
 
 ################################################################################
