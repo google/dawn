@@ -296,6 +296,54 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, StorageVar_Restrict) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpExtension "SPV_KHR_storage_buffer_storage_class"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %str Block
+               OpMemberDecorate %str 0 Offset 0
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+               OpDecorate %6 Restrict
+       %void = OpTypeVoid
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+        %str = OpTypeStruct %uint
+%_ptr_StorageBuffer_str = OpTypePointer StorageBuffer %str
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_StorageBuffer_str StorageBuffer
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+          %8 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0
+          %9 = OpLoad %uint %8
+               OpStore %8 %9
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_1 = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %3:ptr<storage, u32, read_write> = access %1, 0u
+    %4:u32 = load %3
+    store %3, %4
+    ret
+  }
+}
+)");
+}
+
 TEST_F(SpirvParserTest, StorageVar_ReadOnly_And_ReadWrite) {
     EXPECT_IR(R"(
                OpCapability Shader

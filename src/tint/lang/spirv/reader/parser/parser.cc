@@ -4350,6 +4350,9 @@ class Parser {
                 case spv::Decoration::Coherent:
                     // Tint has coherent memory semantics, so this is a no-op.
                     break;
+                case spv::Decoration::Restrict:
+                    // Hint to the compiler that it may compile as if there is no aliasing. Ignore.
+                    break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
             }
