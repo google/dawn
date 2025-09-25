@@ -259,7 +259,8 @@ DAWN_INSTANTIATE_TEST(SamplerTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class StaticSamplerTest : public SamplerTest {
   protected:
@@ -357,7 +358,8 @@ DAWN_INSTANTIATE_TEST(StaticSamplerTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -44,7 +44,6 @@
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/Queue.h"
-#include "dawn/native/Sampler.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/SwapChain.h"
 #include "dawn/native/Texture.h"
@@ -58,6 +57,7 @@
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
+#include "dawn/native/webgpu/SamplerWGPU.h"
 #include "dawn/native/webgpu/ShaderModuleWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 
@@ -179,7 +179,7 @@ Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
     return RenderPipeline::CreateUninitialized(this, descriptor);
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
-    return Ref<SamplerBase>{nullptr};
+    return Sampler::Create(this, descriptor);
 }
 ResultOrError<Ref<ShaderModuleBase>> Device::CreateShaderModuleImpl(
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
