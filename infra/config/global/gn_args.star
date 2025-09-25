@@ -121,6 +121,20 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "msvc",
+    args = {
+        "is_clang": False,
+    },
+)
+
+gn_args.config(
+    name = "no_custom_libcxx",
+    args = {
+        "use_custom_libcxx": False,
+    },
+)
+
+gn_args.config(
     name = "non_component",
     args = {
         "is_component_build": False,
@@ -212,6 +226,20 @@ gn_args.config(
     name = "win_clang",
     configs = [
         "clang",
+        "siso",
+        "tint_hlsl_writer",
+        "tint_msl_writer",
+        "tint_spv_reader_writer",
+        "tint_wgsl_reader_writer",
+        "win",
+    ],
+)
+
+gn_args.config(
+    name = "win_msvc",
+    configs = [
+        "msvc",
+        "no_custom_libcxx",
         "siso",
         "tint_hlsl_writer",
         "tint_msl_writer",

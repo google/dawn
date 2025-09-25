@@ -744,6 +744,7 @@
       }
     ]
   },
+  "dawn-win-x64-sws-msvc-rel": {},
   "dawn-win-x64-sws-rel": {
     "gtest_tests": [
       {
