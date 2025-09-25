@@ -169,12 +169,6 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                         case kInternalReadOnlyStorageBufferBinding:
                             bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-
-                            // Use the ShaderIndex as the indices for the buffer size lookups in
-                            // the array length uniform transform. This is used to compute the
-                            // size of variable length arrays in storage buffers.
-                            arrayLengthFromConstants.bindpoint_to_size_index.emplace(
-                                srcBindingPoint, dstBindingPoint.binding);
                             break;
                         case wgpu::BufferBindingType::BindingNotUsed:
                         case wgpu::BufferBindingType::Undefined:
@@ -219,6 +213,35 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                         srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
                 },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
+        }
+
+        // Use the ShaderIndex as the indices for the buffer size lookups in the array length
+        // uniform transform. This is used to compute the size of variable length arrays in storage
+        // buffers.
+        for (BindingIndex index : bgl->GetBufferIndices()) {
+            const auto& bindingInfo = bgl->GetBindingInfo(index);
+            if (!(bindingInfo.visibility & StageBit(stage))) {
+                continue;
+            }
+
+            const auto& bufferInfo = std::get<BufferBindingInfo>(bindingInfo.bindingLayout);
+            switch (bufferInfo.type) {
+                case kInternalStorageBufferBinding:
+                case wgpu::BufferBindingType::Storage:
+                case wgpu::BufferBindingType::ReadOnlyStorage:
+                case kInternalReadOnlyStorageBufferBinding:
+                    arrayLengthFromConstants.bindpoint_to_size_index.emplace(
+                        tint::BindingPoint{uint32_t(group), uint32(bindingInfo.binding)},
+                        layout->GetBindingIndexInfo(stage)[group][index]);
+                    break;
+
+                case wgpu::BufferBindingType::Uniform:
+                    break;
+                case wgpu::BufferBindingType::BindingNotUsed:
+                case wgpu::BufferBindingType::Undefined:
+                    DAWN_UNREACHABLE();
+                    break;
+            }
         }
     }
     return bindings;
