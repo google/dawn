@@ -126,10 +126,10 @@ DeviceMock::DeviceMock(AdapterBase* adapter,
     ON_CALL(*this, TickImpl).WillByDefault([]() -> MaybeError { return {}; });
 
     // Initialize the device.
-    GetInstance()->GetEventManager()->TrackEvent(mLostEvent);
     QueueDescriptor desc = {};
     EXPECT_FALSE(
         Initialize(descriptor, AcquireRef(new NiceMock<QueueMock>(this, &desc))).IsError());
+    GetInstance()->GetEventManager()->TrackEvent(mLostEvent);
 }
 
 DeviceMock::~DeviceMock() = default;
