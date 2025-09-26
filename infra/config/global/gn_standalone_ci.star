@@ -227,6 +227,10 @@ ci.builder(
         ],
     ),
     os = os.MAC_DEFAULT,
+    # TODO(crbug.com/441328362): Remove this CPU restriction once both x64 and
+    # ARM64 copies of Node are made available regardless of the host
+    # architecture.
+    cpu = "x86-64",
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|dbg",
         short_name = "x64",
@@ -262,6 +266,10 @@ ci.builder(
         ],
     ),
     os = os.MAC_DEFAULT,
+    # TODO(crbug.com/441328362): Remove this CPU restriction once both x64 and
+    # ARM64 copies of Node are made available regardless of the host
+    # architecture.
+    cpu = "x86-64",
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|rel",
         short_name = "x64",
