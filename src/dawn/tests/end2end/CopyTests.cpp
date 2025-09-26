@@ -416,6 +416,13 @@ class CopyTests_WithFormatParam : public CopyTests,
         return requiredFeatures;
     }
 
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        // Some backends use compute shaders to implement copies. Adjust storage buffers' alignment
+        // to make sure the copies still work with non-default alignments.
+        required.minStorageBufferOffsetAlignment = supported.minStorageBufferOffsetAlignment;
+    }
+
     uint32_t GetTextureBytesPerRowAlignment() const {
         if (!device.HasFeature(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
             return kTextureBytesPerRowAlignment;

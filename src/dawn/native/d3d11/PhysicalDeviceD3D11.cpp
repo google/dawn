@@ -303,6 +303,12 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // The BlitTextureToBuffer helper requires the alignment to be 4.
     limits->texelCopyBufferRowAlignmentLimits.minTexelCopyBufferRowAlignment = 4;
 
+    // D3D11 Debug layer enforces that when creating a RAW Shader Resource View, the offset of the
+    // first element from the start of the buffer must be a multiple of 16 bytes. There is no
+    // official document about it but we have to adhere to the debug layer. So set SSBO alignment
+    // to 16.
+    limits->v1.minStorageBufferOffsetAlignment = 16;
+
     return {};
 }
 
