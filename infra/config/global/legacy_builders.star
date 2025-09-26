@@ -589,13 +589,17 @@ luci.console_view_entry(
 # * linux-clang-rel-x86
 #   * dawn-cq-linux-x86-rel
 #   * dawn-cq-linux-x86-fuzz-rel
+# * win-clang-dbg-x64
+#   * dawn-cq-win-x64-dbg
+# * win-clang-dbg-x86
+#   * dawn-cq-win-x86-dbg
+# * win-clang-rel-x64
+#   * dawn-cq-win-x64-rel
+# * win-clang-rel-x86
+#   * dawn-cq-win-x86-rel
 
 dawn_standalone_builder("mac-dbg", clang = True, debug = True, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("mac-rel", clang = True, debug = False, cpu = "x64", fuzzer = False)
-dawn_standalone_builder("win-clang-dbg-x64", clang = True, debug = True, cpu = "x64", fuzzer = False)
-dawn_standalone_builder("win-clang-dbg-x86", clang = True, debug = True, cpu = "x86", fuzzer = False)
-dawn_standalone_builder("win-clang-rel-x64", clang = True, debug = False, cpu = "x64", fuzzer = False)
-dawn_standalone_builder("win-clang-rel-x86", clang = True, debug = False, cpu = "x86", fuzzer = False)
 dawn_standalone_builder("win-msvc-dbg-x64", clang = False, debug = True, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("win-msvc-rel-x64", clang = False, debug = False, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("cron-linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", fuzzer = True)
