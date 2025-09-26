@@ -65,7 +65,6 @@ template <>
 void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo>::
     AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
-    auto deviceGuard = device->GetGuard();
     if (device->GetState() == DeviceBase::State::Alive) {
         mPipeline = device->AddOrGetCachedComputePipeline(std::move(mPipeline));
     }
@@ -85,7 +84,6 @@ template <>
 void CreatePipelineAsyncEvent<RenderPipelineBase,
                               WGPUCreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
-    auto deviceGuard = device->GetGuard();
     if (device->GetState() == DeviceBase::State::Alive) {
         mPipeline = device->AddOrGetCachedRenderPipeline(std::move(mPipeline));
     }
@@ -195,7 +193,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
 
     DeviceBase* device = mPipeline->GetDevice();
     // TODO(dawn:2353): Device losts later than this check could potentially lead to racing
-    // condition.
+    // condition when not using implicit synchronization.
+    auto deviceGuard = device->GetGuard();
     if (device->IsLost()) {
         // Invalid async creation should "succeed" if the device is already lost.
         if (!mPipeline->IsError()) {
