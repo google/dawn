@@ -6,6 +6,16 @@
       'swarming_containment_auto',
     ],
     'machines': {
+      'dawn-linux-x64-builder-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-linux-x64-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-linux-x64-fuzz-dbg': {
         'os_type': 'linux',
         'mixins': [
@@ -56,6 +66,16 @@
           'isolated_scripts': 'dawn_node_cts_sws_tests',
         },
       },
+      'dawn-linux-x86-builder-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-linux-x86-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-linux-x86-fuzz-dbg': {
         'os_type': 'linux',
         'mixins': [
@@ -104,6 +124,16 @@
           'gtest_tests': 'swiftshader_gtests',
         },
       },
+      'dawn-mac-x64-builder-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-mac-x64-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
         'mixins': [
@@ -123,6 +153,21 @@
           'gtest_tests': 'swiftshader_gtests',
           'isolated_scripts': 'dawn_node_cts_sws_tests',
         },
+      },
+      'dawn-win-x64-builder-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-win-x64-builder-msvc-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-win-x64-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
       },
       'dawn-win-x64-sws-dbg': {
         'os_type': 'win',
@@ -159,6 +204,16 @@
           'gtest_tests': 'win_software_renderer_gtests',
           'isolated_scripts': 'dawn_node_cts_sws_tests',
         },
+      },
+      'dawn-win-x86-builder-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
+      'dawn-win-x86-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
       },
       'dawn-win-x86-sws-dbg': {
         'os_type': 'win',
