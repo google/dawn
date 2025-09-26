@@ -57,7 +57,7 @@ WGPUCallbackMode TrackedEvent::GetCallbackMode() const {
 }
 
 bool TrackedEvent::IsReady() const {
-    return mEventState == EventState::Ready || mEventState == EventState::Running;
+    return mEventState == EventState::Ready;
 }
 
 void TrackedEvent::SetReady() {
@@ -66,47 +66,24 @@ void TrackedEvent::SetReady() {
 }
 
 void TrackedEvent::Complete(FutureID futureID, EventCompletionType type) {
-    EventState state = mEventState.load(std::memory_order::acquire);
-
-    auto TryComplete = [&]() -> bool {
-        switch (state) {
-            case EventState::Pending:
-                // If we are completing a Pending future, it must be a shutdown.
-                DAWN_ASSERT(type == EventCompletionType::Shutdown);
-                [[fallthrough]];
-            case EventState::Ready: {
-                if (mEventState.compare_exchange_strong(state, EventState::Running,
-                                                        std::memory_order::acq_rel)) {
-                    // Only one thread is ever be allowed to run |CompleteImpl|.
-                    CompleteImpl(futureID, type);
-                    mEventState = EventState::Complete;
-                    mEventState.notify_all();
-                    return true;
-                }
-                return false;
-            }
-            case EventState::Running: {
-                // Wait until the event is no longer in the |Running| state.
-                if (type == EventCompletionType::Shutdown) {
-                    // If we are running, but we see a completion type of Shutdown, we don't wait
-                    // for the state to transition because the shutdown could have been caused by
-                    // the callback. Instead, just return true.
-                    mEventState = EventState::Complete;
-                    return true;
-                }
-                mEventState.wait(EventState::Running, std::memory_order::acq_rel);
-                return true;
-            }
-            case EventState::Complete:
-                return true;
-        }
-    };
-
-    bool completed = false;
-    while (!completed) {
-        completed = TryComplete();
+    // If the callback is already in a running state, that means that the std::call_once below is
+    // already running on some thread. Normally |Complete| is not called re-entrantly, however, in
+    // the case when a callback may drop the last reference to the Instance, because we only remove
+    // the Event from the tracking list after the callback is completed, the teardown of the
+    // EventManager will cause us to re-iterate all events and call |Complete| again on this one
+    // with EventCompletionType::Shutdown. In that case, we don't want to call the std::call_once
+    // below because it would cause a self-deadlock. During shutdown, it's not as important that
+    // |Complete| waits until the callback completes, and instead we rely on the destructor's ASSERT
+    // to ensure the invariant.
+    if (type == EventCompletionType::Shutdown && mEventState == EventState::Running) {
+        return;
     }
-    DAWN_ASSERT(mEventState == EventState::Complete);
+
+    std::call_once(mFlag, [&]() {
+        mEventState = EventState::Running;
+        CompleteImpl(futureID, type);
+        mEventState = EventState::Complete;
+    });
 }
 
 // EventManager
