@@ -35,6 +35,7 @@
 #include <atomic>
 #include <memory>
 #include <queue>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -666,6 +667,7 @@ class DawnTestBase {
     void WaitForAllOperations();
 
     bool SupportsFeatures(const std::vector<wgpu::FeatureName>& features);
+    std::set<wgpu::FeatureName> GetSupportedFeatures();
 
     // Exposed device creation helper for tests to use when needing more than 1 device.
     wgpu::Device CreateDevice(std::string isolationKey = "");
