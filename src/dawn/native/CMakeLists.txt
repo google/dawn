@@ -927,6 +927,7 @@ endif()
 
 if (DAWN_USE_X11)
     target_include_directories(dawn_native PRIVATE ${X11_INCLUDE_DIR})
+    target_include_directories(dawn_native_objects PRIVATE ${X11_INCLUDE_DIR})
 endif()
 
 if (DAWN_ENABLE_D3D12)
@@ -997,6 +998,10 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY)
                 "WGPU_SHARED_LIBRARY"
                 "DAWN_NATIVE_SHARED_LIBRARY"
         )
+    endif()
+
+    if (DAWN_USE_X11)
+        target_include_directories(webgpu_dawn_objects PRIVATE ${X11_INCLUDE_DIR})
     endif()
 
     # Do the bundling of all the objects and dependencies together.
