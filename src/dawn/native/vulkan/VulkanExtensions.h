@@ -101,6 +101,7 @@ enum class DeviceExt {
     ExternalSemaphore,
     _16BitStorage,
     SamplerYCbCrConversion,
+    Multiview,
 
     // Promoted to 1.2
     DriverProperties,
@@ -112,6 +113,8 @@ enum class DeviceExt {
     ShaderFloatControls,
     Spirv14,
     DescriptorIndexing,
+    CreateRenderPass2,
+    DepthStencilResolve,
 
     // Promoted to 1.3
     ShaderIntegerDotProduct,
@@ -119,9 +122,11 @@ enum class DeviceExt {
     DemoteToHelperInvocation,
     Maintenance4,
     SubgroupSizeControl,
+    DynamicRendering,
 
     // Promoted to 1.4
     PipelineRobustness,
+    Maintenance5,
 
     // Others
     DepthClipEnable,

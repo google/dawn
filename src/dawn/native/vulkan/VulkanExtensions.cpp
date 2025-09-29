@@ -164,6 +164,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ExternalSemaphore, "VK_KHR_external_semaphore", VulkanVersion_1_1},
     {DeviceExt::_16BitStorage, "VK_KHR_16bit_storage", VulkanVersion_1_1},
     {DeviceExt::SamplerYCbCrConversion, "VK_KHR_sampler_ycbcr_conversion", VulkanVersion_1_1},
+    {DeviceExt::Multiview, "VK_KHR_multiview", VulkanVersion_1_1},
 
     {DeviceExt::DriverProperties, "VK_KHR_driver_properties", VulkanVersion_1_2},
     {DeviceExt::ImageFormatList, "VK_KHR_image_format_list", VulkanVersion_1_2},
@@ -175,6 +176,8 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ShaderFloatControls, "VK_KHR_shader_float_controls", VulkanVersion_1_2},
     {DeviceExt::Spirv14, "VK_KHR_spirv_1_4", VulkanVersion_1_2},
     {DeviceExt::DescriptorIndexing, "VK_EXT_descriptor_indexing", VulkanVersion_1_2},
+    {DeviceExt::CreateRenderPass2, "VK_KHR_create_renderpass2", VulkanVersion_1_2},
+    {DeviceExt::DepthStencilResolve, "VK_KHR_depth_stencil_resolve", VulkanVersion_1_2},
 
     {DeviceExt::ShaderIntegerDotProduct, "VK_KHR_shader_integer_dot_product", VulkanVersion_1_3},
     {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
@@ -183,8 +186,10 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
      VulkanVersion_1_3},
     {DeviceExt::Maintenance4, "VK_KHR_maintenance4", VulkanVersion_1_3},
     {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", VulkanVersion_1_3},
+    {DeviceExt::DynamicRendering, "VK_KHR_dynamic_rendering", VulkanVersion_1_3},
 
     {DeviceExt::PipelineRobustness, "VK_EXT_pipeline_robustness", VulkanVersion_1_4},
+    {DeviceExt::Maintenance5, "VK_KHR_maintenance5", VulkanVersion_1_4},
 
     {DeviceExt::DepthClipEnable, "VK_EXT_depth_clip_enable", NeverPromoted},
     {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
@@ -302,6 +307,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::VulkanMemoryModel:
             case DeviceExt::CooperativeMatrix:
             case DeviceExt::ShaderFloatControls:
+            case DeviceExt::Multiview:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                 break;
 
@@ -346,6 +352,14 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
                                   HasDep(DeviceExt::Maintenance3);
                 break;
 
+            case DeviceExt::CreateRenderPass2:
+                hasDependencies = HasDep(DeviceExt::Multiview) && HasDep(DeviceExt::Maintenance2);
+                break;
+
+            case DeviceExt::DepthStencilResolve:
+                hasDependencies = HasDep(DeviceExt::CreateRenderPass2);
+                break;
+
             case DeviceExt::DisplayTiming:
                 hasDependencies = HasDep(DeviceExt::Swapchain);
                 break;
@@ -353,6 +367,15 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::Spirv14:
                 hasDependencies =
                     version >= VK_VERSION_1_1 && HasDep(DeviceExt::ShaderFloatControls);
+                break;
+
+            case DeviceExt::DynamicRendering:
+                hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2) &&
+                                  HasDep(DeviceExt::DepthStencilResolve);
+                break;
+
+            case DeviceExt::Maintenance5:
+                hasDependencies = version >= VK_VERSION_1_1 && HasDep(DeviceExt::DynamicRendering);
                 break;
 
             case DeviceExt::EnumCount:

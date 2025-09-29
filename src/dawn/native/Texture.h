@@ -89,6 +89,14 @@ static constexpr wgpu::TextureComponentSwizzle kRGBASwizzle = {
     wgpu::ComponentSwizzle::A,
 };
 
+// The swizzle typically used for depth and stencil textures.
+static constexpr wgpu::TextureComponentSwizzle kR001Swizzle = {
+    wgpu::ComponentSwizzle::R,
+    wgpu::ComponentSwizzle::Zero,
+    wgpu::ComponentSwizzle::Zero,
+    wgpu::ComponentSwizzle::One,
+};
+
 static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
     wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::TextureBinding | kReadOnlyRenderAttachment |
     kReadOnlyStorageTexture;

@@ -913,12 +913,6 @@ std::optional<MTLTextureSwizzleChannels> TextureView::ComputeMetalSwizzle() {
     // A backend swizzle is always used for depth-stencil if supported.
     // If not, we returned {} above so G/B/A will be undefined.
     if (GetTexture()->GetFormat().HasDepthOrStencil()) {
-        static constexpr wgpu::TextureComponentSwizzle kR001Swizzle = {
-            wgpu::ComponentSwizzle::R,
-            wgpu::ComponentSwizzle::Zero,
-            wgpu::ComponentSwizzle::Zero,
-            wgpu::ComponentSwizzle::One,
-        };
         return ToMetalTextureSwizzleChannels(ComposeSwizzle(kR001Swizzle, GetSwizzle()));
     }
 
