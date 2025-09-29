@@ -679,6 +679,512 @@ TEST_F(IR_ValidatorTest, EntryPoint_SameLocation_DifferentEntryPoints) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_Valid) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_TooManyLocations) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    IOAttributes attr2;
+    attr2.location = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                                   {mod.symbols.New("c"), ty.f32(), attr2},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:7:1 error: structs with blend_src members must have exactly 2 members with location annotations
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_Input) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    auto* p = b.FunctionParam("p", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:6:27 error: blend_src can only be used on fragment shader outputs
+%my_func = @fragment func(%p:MyStruct):void {
+                          ^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NotFragment) {
+    auto* f = ComputeEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:6:1 error: blend_src can only be used on fragment shader outputs
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_WrongMemberCount) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {{mod.symbols.New("a"), ty.f32(), attr0}});
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:1 error: structs with blend_src members must have exactly 2 members with location annotations
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_WrongLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 1;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 1;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: struct members with blend_src must be located at 0
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_MissingLocation) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: struct members with blend_src must be located at 0
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DifferentMemberTypes) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: blend_src type f32 does not match other blend_src type vec4<f32>
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_InvalidMemberType) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.bool_(), attr0},
+                                                   {mod.symbols.New("b"), ty.bool_(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: blend_src must be a numeric scalar or vector, but has type bool
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_MissingBlendSrc0) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.location = 0;
+    attr.blend_src = 1;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                                   {mod.symbols.New("b"), ty.f32(), attr},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:1 error: if any @blend_src is used on an output, then @blend_src(0) and @blend_src(1) must be used
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_MissingBlendSrc1) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.location = 0;
+    attr.blend_src = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                                   {mod.symbols.New("b"), ty.f32(), attr},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:1 error: if any @blend_src is used on an output, then @blend_src(0) and @blend_src(1) must be used
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_InvalidBlendSrcValue) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 2;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:1 error: blend_src value must be 0 or 1
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DuplicateBlendSrcValue) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:1 error: duplicate blend_src(0) on entry point output
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DuplicateLocation_Unused) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    // A valid blend_src struct at location 0.
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    // Another output variable also at location 0.
+    auto* v = b.Var("v", AddressSpace::kOut, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DuplicateLocation_Used) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    // A valid blend_src struct at location 0.
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                                   {mod.symbols.New("b"), ty.f32(), attr1},
+                                               });
+    f->SetReturnType(str_ty);
+
+    // Another output variable also at location 0.
+    auto* v = b.Var("v", AddressSpace::kOut, ty.f32());
+    v->SetLocation(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, 1.0_f);
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:7:36 error: var: duplicate location(0) on entry point output
+  %v:ptr<__out, f32, read_write> = var undef @location(0)
+                                   ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_PartialStruct) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.location = 0;
+    attr.blend_src = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                               });
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:1 error: structs with blend_src members must have exactly 2 members with location annotations
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+
+:5:1 error: if any @blend_src is used on an output, then @blend_src(0) and @blend_src(1) must be used
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_PartialStructAndMSV) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr0},
+                                               });
+    f->SetReturnType(str_ty);
+
+    // MSV for the missing blend_src
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+    auto* v = b.Var("v", AddressSpace::kOut, ty.f32());
+    v->SetAttributes(attr1);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, 1.0_f);
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:9:1 error: structs with blend_src members must have exactly 2 members with location annotations
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());

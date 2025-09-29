@@ -789,6 +789,15 @@ std::string ToString(ShaderIOKind value) {
     TINT_ICE() << "Unknown enum passed to ToString(ShaderIOKind)";
 }
 
+/// State for validating blend_src attributes.
+struct BlendSrcContext {
+    Function::PipelineStage stage;
+    Hashmap<uint32_t, const CastableBase*, 4> locations;
+    Hashset<uint32_t, 2> blend_srcs;
+    const core::type::Type* blend_src_type = nullptr;
+    IODirection dir;
+};
+
 /// The core IR validator.
 class Validator {
   public:
@@ -1039,9 +1048,10 @@ class Validator {
     /// @param func the function to validate
     void CheckWorkgroupSize(const Function* func);
 
-    /// Validates the entry point IO locations for a entry point.
+    /// Validates the entry point IO locations for an entry point.
+    /// Additionally validates usages of blend_src, since they are intrinsically tied with location.
     /// @param func the function to validate
-    void CheckEntryPointLocations(const Function* func);
+    void CheckEntryPointLocationsAndBlendSrc(const Function* func);
 
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
@@ -1203,6 +1213,35 @@ class Validator {
         const std::optional<struct BindingPoint>& binding_point,
         const core::IOAttributes& attr,
         ShaderIOKind kind);
+
+    /// Validates the blend_src annotations for a ty.
+    /// Note: Assumes that it is being called on a non-struct member
+    /// @param ctx the blend_src context.
+    /// @param target the object that has the struct ty.
+    /// @param ty the ty to validate.
+    /// @param attr the IO attributes for the object.
+    void CheckBlendSrc(BlendSrcContext& ctx,
+                       const CastableBase* target,
+                       const core::type::Type* ty,
+                       const IOAttributes& attr);
+
+    /// Validates the blend_src annotations for members of a struct.
+    /// @param ctx the blend_src context.
+    /// @param target the object that has the struct type.
+    /// @param str the struct type to validate.
+    void CheckBlendSrcStructMembers(BlendSrcContext& ctx,
+                                    const CastableBase* target,
+                                    const core::type::Struct* str);
+
+    /// Validates blend_src annotations on a single IO object.
+    /// @param ctx the blend_src context.
+    /// @param target the object that has the struct type.
+    /// @param ty the type to validate.
+    /// @param attr the IO attributes for the object.
+    void CheckBlendSrcAnnotation(BlendSrcContext& ctx,
+                                 const CastableBase* target,
+                                 const core::type::Type* ty,
+                                 const IOAttributes& attr);
 
     /// Validates location annotations on entry point IO.
     /// @param locations the map of locations used so far for the current IO direction.
@@ -2539,7 +2578,7 @@ void Validator::CheckFunction(const Function* func) {
             AddError(func) << result.Failure();
         }
 
-        CheckEntryPointLocations(func);
+        CheckEntryPointLocationsAndBlendSrc(func);
 
         CheckFunctionReturnAttributesAndType(
             func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
@@ -2595,24 +2634,57 @@ void Validator::CheckFunction(const Function* func) {
     ProcessTasks();
 }
 
-void Validator::CheckEntryPointLocations(const Function* func) {
-    Hashmap<uint32_t, const CastableBase*, 4> input_locations;
-    Hashmap<uint32_t, const CastableBase*, 4> output_locations;
+void Validator::CheckEntryPointLocationsAndBlendSrc(const Function* func) {
+    BlendSrcContext input_ctx{func->Stage(), {}, {}, nullptr, IODirection::kInput};
+    BlendSrcContext output_ctx{func->Stage(), {}, {}, nullptr, IODirection::kOutput};
+
+    // First pass validates blend_src usages and pre-populates location hash with related values
     for (auto* param : func->Params()) {
-        CheckLocation(input_locations, param, param->Attributes(), func->Stage(), param->Type(),
-                      IODirection::kInput);
+        CheckBlendSrc(input_ctx, param, param->Type(), param->Attributes());
     }
-    CheckLocation(output_locations, func, func->ReturnAttributes(), func->Stage(),
-                  func->ReturnType(), IODirection::kOutput);
+    CheckBlendSrc(output_ctx, func, func->ReturnType(), func->ReturnAttributes());
+
     for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
         auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
         if (mv != nullptr) {
             if (mv->AddressSpace() == AddressSpace::kIn) {
-                CheckLocation(input_locations, var, var->Attributes(), func->Stage(),
+                CheckBlendSrc(input_ctx, var, mv->StoreType(), var->Attributes());
+            }
+
+            if (mv->AddressSpace() == AddressSpace::kOut) {
+                CheckBlendSrc(output_ctx, var, mv->StoreType(), var->Attributes());
+            }
+        }
+    }
+
+    // No check for number inputs, since there is no case where blend_src on an input value is
+    // allowed, and will cause errors earlier, so don't need a duplicate error here.
+
+    if (!output_ctx.blend_srcs.IsEmpty()) {
+        if (output_ctx.blend_srcs.Count() != 2) {
+            AddError(func) << "if any @blend_src is used on an output, then @blend_src(0) and "
+                              "@blend_src(1) must be used";
+        }
+    }
+
+    // Second pass validates all non-blend_src usages
+    for (auto* param : func->Params()) {
+        CheckLocation(input_ctx.locations, param, param->Attributes(), func->Stage(), param->Type(),
+                      IODirection::kInput);
+    }
+    CheckLocation(output_ctx.locations, func, func->ReturnAttributes(), func->Stage(),
+                  func->ReturnType(), IODirection::kOutput);
+
+    for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
+        auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+        if (mv != nullptr) {
+            if (mv->AddressSpace() == AddressSpace::kIn) {
+                CheckLocation(input_ctx.locations, var, var->Attributes(), func->Stage(),
                               mv->StoreType(), IODirection::kInput);
             }
+
             if (mv->AddressSpace() == AddressSpace::kOut) {
-                CheckLocation(output_locations, var, var->Attributes(), func->Stage(),
+                CheckLocation(output_ctx.locations, var, var->Attributes(), func->Stage(),
                               mv->StoreType(), IODirection::kOutput);
             }
         }
@@ -3045,6 +3117,86 @@ Result<SuccessType, std::string> Validator::ValidateBindingPoint(
     return Success;
 }
 
+void Validator::CheckBlendSrc(BlendSrcContext& ctx,
+                              const CastableBase* target,
+                              const core::type::Type* ty,
+                              const IOAttributes& attr) {
+    if (attr.blend_src.has_value()) {
+        // TODO(447433149): Restrict allowing blend_src on non-struct-member types to only be
+        // allowed when dealing with ShaderIO
+        CheckBlendSrcAnnotation(ctx, target, ty, attr);
+    }
+
+    tint::Switch(
+        ty, [&](const core::type::Struct* s) { CheckBlendSrcStructMembers(ctx, target, s); },
+        [&](const core::type::Array* a) { CheckBlendSrc(ctx, a, a->ElemType(), attr); },
+        [&](Default) {});
+}
+
+void Validator::CheckBlendSrcStructMembers(BlendSrcContext& ctx,
+                                           const CastableBase* target,
+                                           const core::type::Struct* str) {
+    if (!str->Members().Any([](auto* m) { return m->Attributes().blend_src.has_value(); })) {
+        return;
+    }
+
+    auto location_count = 0u;
+    for (const auto* mem : str->Members()) {
+        auto& attr = mem->Attributes();
+        if (attr.location.has_value()) {
+            location_count++;
+        }
+        CheckBlendSrcAnnotation(ctx, target, mem->Type(), mem->Attributes());
+    }
+
+    if (location_count != 2) {
+        AddError(target) << "structs with blend_src members must have exactly 2 members with "
+                            "location annotations";
+    }
+}
+
+void Validator::CheckBlendSrcAnnotation(BlendSrcContext& ctx,
+                                        const CastableBase* target,
+                                        const core::type::Type* ty,
+                                        const IOAttributes& attr) {
+    if (!attr.blend_src.has_value()) {
+        return;
+    }
+
+    auto bs_val = attr.blend_src.value();
+    if (bs_val != 0 && bs_val != 1) {
+        AddError(target) << "blend_src value must be 0 or 1";
+    }
+    if (!ctx.blend_srcs.Add(bs_val)) {
+        AddError(target) << "duplicate blend_src(" << bs_val << ") on entry point "
+                         << ToString(ctx.dir);
+    }
+
+    if (ctx.dir != IODirection::kOutput || ctx.stage != Function::PipelineStage::kFragment) {
+        AddError(target) << "blend_src can only be used on fragment shader outputs";
+        return;
+    }
+    if (!attr.location.has_value() || attr.location.value() != 0) {
+        AddError(target) << "struct members with blend_src must be located at 0";
+    }
+
+    if (attr.location.has_value()) {
+        ctx.locations.Add(attr.location.value(), target);
+    }
+
+    if (!ctx.blend_src_type) {
+        if (!ty->IsNumericScalarOrVector()) {
+            AddError(target) << "blend_src must be a numeric scalar or vector, but has type "
+                             << ty->FriendlyName();
+        }
+        ctx.blend_src_type = ty;
+    } else if (ctx.blend_src_type != ty) {
+        AddError(target) << "blend_src type " << ty->FriendlyName()
+                         << " does not match other blend_src type "
+                         << ctx.blend_src_type->FriendlyName();
+    }
+}
+
 void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
                               const CastableBase* target,
                               const IOAttributes& attr,
@@ -3053,8 +3205,15 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
                               IODirection dir) {
     if (auto* str = type->As<core::type::Struct>()) {
         for (auto* member : str->Members()) {
-            CheckLocation(locations, target, member->Attributes(), stage, member->Type(), dir);
+            if (!member->Attributes().blend_src.has_value()) {
+                CheckLocation(locations, target, member->Attributes(), stage, member->Type(), dir);
+            }
         }
+    }
+
+    if (attr.blend_src) {
+        // locations associated with a blend_src usage should already be pre-populated in locations
+        return;
     }
 
     if (attr.location.has_value()) {
@@ -3062,16 +3221,11 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
             AddError(target) << "location attribute is not valid for compute shader inputs";
         }
 
-        // TODO(446624478): Handle location + blend_src interactions
-        if (attr.blend_src.has_value()) {
-            return;
-        }
-
         auto loc = attr.location.value();
         if (auto conflict = locations.Get(loc)) {
             AddError(target) << "duplicate location(" << loc << ") on entry point "
                              << ToString(dir);
-            AddDeclarationNote(*conflict);
+            AddDeclarationNote(*conflict.value);
         } else {
             locations.Add(loc, target);
         }
