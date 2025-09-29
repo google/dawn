@@ -770,6 +770,10 @@ struct Decoder {
             return mod_out_.Types().invalid();
         }
         auto* el_ty = Type(vector_in.element_type());
+        if (el_ty == nullptr) {
+            err_ << "vector element type is invalid\n";
+            return mod_out_.Types().invalid();
+        }
         return mod_out_.Types().vec(el_ty, vector_in.width());
     }
 
