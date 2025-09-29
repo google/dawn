@@ -1011,11 +1011,15 @@ struct Decoder {
         return mod_out_.Types().input_attachment(sub_type);
     }
 
-    const type::SubgroupMatrix* CreateTypeSubgroupMatrix(
-        SubgroupMatrixKind kind,
-        const pb::TypeSubgroupMatrix& subgroup_matrix) {
-        return mod_out_.Types().subgroup_matrix(kind, Type(subgroup_matrix.sub_type()),
-                                                subgroup_matrix.columns(), subgroup_matrix.rows());
+    const type::Type* CreateTypeSubgroupMatrix(SubgroupMatrixKind kind,
+                                               const pb::TypeSubgroupMatrix& subgroup_matrix) {
+        const auto el_ty = Type(subgroup_matrix.sub_type());
+        if (el_ty == nullptr) {
+            err_ << "invalid subtype for subgroup matrix\n";
+            return mod_out_.Types().invalid();
+        }
+        return mod_out_.Types().subgroup_matrix(kind, el_ty, subgroup_matrix.columns(),
+                                                subgroup_matrix.rows());
     }
 
     const type::Type* CreateTypeBuiltinStruct(pb::TypeBuiltinStruct builtin_struct_in) {
