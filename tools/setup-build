@@ -220,6 +220,7 @@ case $BUILD_SYSTEM in
     fi
     if [[ -n "$SISO" ]]; then
         GN_ARGS+=" use_siso=true"
+        GN_ARGS+=" use_remoteexec=true"
     else
         GN_ARGS+=" use_siso=false"
     fi
