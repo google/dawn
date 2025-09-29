@@ -1129,6 +1129,21 @@ class Validator {
         };
     }
 
+    /// @returns a function that validates color attributes on function params
+    auto CheckColorFunctionParam(const std::string& err) {
+        return [this, err](const FunctionParam* param, const IOAttributes& attr,
+                           const core::type::Type*) {
+            if (!attr.color.has_value()) {
+                return;
+            }
+
+            auto* func = param->Function();
+            if (func->IsEntryPoint() && func->Stage() != Function::PipelineStage::kFragment) {
+                AddError(param) << err << "@color can only be used on fragment shader inputs";
+            }
+        };
+    }
+
     /// @returns a function that validates that type is bool only if it is decorated with
     /// @builtin(front_facing)
     /// @param err error message to log when check fails
@@ -2409,6 +2424,7 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         CheckFunctionParamAttributesAndType(param, CheckBuiltinFunctionParam(""));
+        CheckFunctionParamAttributesAndType(param, CheckColorFunctionParam(""));
 
         CheckFunctionParamAttributes(
             param,

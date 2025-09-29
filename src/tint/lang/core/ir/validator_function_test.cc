@@ -840,6 +840,49 @@ TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Param_Color_NonFragment) {
+    auto* f = b.ComputeFunction("my_func");
+    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    p->SetColor(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:54 error: @color can only be used on fragment shader inputs
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:vec4<f32> [@color(0)]):void {
+                                                     ^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_Color_NonFragment) {
+    IOAttributes attr;
+    attr.color = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = b.ComputeFunction("my_func");
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:5:54 error: @color can only be used on fragment shader inputs
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
+                                                     ^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
