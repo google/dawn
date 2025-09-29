@@ -121,6 +121,8 @@ class TextureView final : public TextureViewBase {
     void DestroyImpl() override;
     void SetLabelImpl() override;
 
+    std::optional<MTLTextureSwizzleChannels> ComputeMetalSwizzle();
+
     NSPRef<id<MTLTexture>> mMtlTextureView;
 };
 

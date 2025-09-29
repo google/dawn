@@ -832,4 +832,8 @@ id<MTLTexture> CreateTextureMtlForPlane(MTLTextureUsage mtlUsage,
                                                       plane:plane];
 }
 
+bool SupportTextureComponentSwizzle(id<MTLDevice> device) {
+    return [device supportsFamily:MTLGPUFamilyMac2] || [device supportsFamily:MTLGPUFamilyApple2];
+}
+
 }  // namespace dawn::native::metal

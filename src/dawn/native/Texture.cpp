@@ -712,8 +712,8 @@ wgpu::TextureUsage AddInternalUsages(const DeviceBase* device,
     return internalUsage;
 }
 
-wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::ComponentSwizzle component,
-                                               wgpu::TextureComponentSwizzle swizzle) {
+wgpu::ComponentSwizzle ComposeSwizzleComponent(wgpu::TextureComponentSwizzle swizzle,
+                                               wgpu::ComponentSwizzle component) {
     switch (component) {
         case wgpu::ComponentSwizzle::Zero:
             return wgpu::ComponentSwizzle::Zero;
@@ -985,6 +985,28 @@ bool IsValidSampleCount(uint32_t sampleCount) {
         default:
             return false;
     }
+}
+
+wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle firstSwizzle,
+                                             wgpu::TextureComponentSwizzle secondSwizzle) {
+    return {
+        .r = ComposeSwizzleComponent(firstSwizzle, secondSwizzle.r),
+        .g = ComposeSwizzleComponent(firstSwizzle, secondSwizzle.g),
+        .b = ComposeSwizzleComponent(firstSwizzle, secondSwizzle.b),
+        .a = ComposeSwizzleComponent(firstSwizzle, secondSwizzle.a),
+    };
+}
+
+bool AreSwizzleEquivalent(wgpu::TextureComponentSwizzle lhs, wgpu::TextureComponentSwizzle rhs) {
+    // TODO(414312052): Refine this condition. A view might not be strictly necessary
+    // in case of the given swizzle works identically to default with the original
+    // format, e.g. a R8Unorm texture with swizzle.r set to R and swizzle.g set to One.
+    // This current check provides a correct, though potentially overly broad,
+    // first approximation.
+    if (lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a) {
+        return true;
+    }
+    return false;
 }
 
 // TextureBase
@@ -1889,6 +1911,15 @@ wgpu::TextureUsage TextureViewBase::GetInternalUsage() const {
     return mInternalUsage;
 }
 
+wgpu::TextureComponentSwizzle TextureViewBase::GetSwizzle() const {
+    return {
+        .r = mSwizzleRed,
+        .g = mSwizzleGreen,
+        .b = mSwizzleBlue,
+        .a = mSwizzleAlpha,
+    };
+}
+
 wgpu::ComponentSwizzle TextureViewBase::GetSwizzleRed() const {
     return mSwizzleRed;
 }
@@ -1903,26 +1934,6 @@ wgpu::ComponentSwizzle TextureViewBase::GetSwizzleBlue() const {
 
 wgpu::ComponentSwizzle TextureViewBase::GetSwizzleAlpha() const {
     return mSwizzleAlpha;
-}
-
-bool TextureViewBase::UsesNonDefaultSwizzle() const {
-    // TODO(414312052): Refine this condition. A view might not be strictly necessary
-    // in case of the given swizzle works identically to default with the original
-    // format, e.g. a R8Unorm texture with swizzle.r set to R and swizzle.g set to One.
-    // This current check provides a correct, though potentially overly broad,
-    // first approximation.
-    return mSwizzleRed != wgpu::ComponentSwizzle::R || mSwizzleGreen != wgpu::ComponentSwizzle::G ||
-           mSwizzleBlue != wgpu::ComponentSwizzle::B || mSwizzleAlpha != wgpu::ComponentSwizzle::A;
-}
-
-wgpu::TextureComponentSwizzle TextureViewBase::ComposeSwizzle(
-    wgpu::TextureComponentSwizzle swizzle) const {
-    wgpu::TextureComponentSwizzle result;
-    result.r = ComposeSwizzleComponent(mSwizzleRed, swizzle);
-    result.g = ComposeSwizzleComponent(mSwizzleGreen, swizzle);
-    result.b = ComposeSwizzleComponent(mSwizzleBlue, swizzle);
-    result.a = ComposeSwizzleComponent(mSwizzleAlpha, swizzle);
-    return result;
 }
 
 bool TextureViewBase::IsYCbCr() const {

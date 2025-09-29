@@ -144,6 +144,8 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
 bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device);
 bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device);
 
+bool SupportTextureComponentSwizzle(id<MTLDevice> device);
+
 }  // namespace dawn::native::metal
 
 #endif  // SRC_DAWN_NATIVE_METAL_UTILSMETAL_H_

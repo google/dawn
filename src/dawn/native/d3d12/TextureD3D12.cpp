@@ -960,7 +960,7 @@ TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDesc
                     .a = wgpu::ComponentSwizzle::One,
                 };
             }
-            swizzle = ComposeSwizzle(stencilSwizzle);
+            swizzle = ComposeSwizzle(stencilSwizzle, swizzle);
         }
 
         mSrvDesc.Shader4ComponentMapping = D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(
