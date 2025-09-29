@@ -63,6 +63,15 @@ def apply_linux_cq_builder_defaults(kwargs):
     kwargs.setdefault("ssd", None)
     return kwargs
 
+def apply_mac_cq_builder_defaults(kwargs):
+    kwargs = apply_cq_builder_defaults(kwargs)
+    kwargs.setdefault("os", os.MAC_DEFAULT)
+
+    # TODO(crbug.com/441328362): Remove the architecture restriction once
+    # all tests are run on Swarming.
+    kwargs.setdefault("cpu", "x86-64")
+    return kwargs
+
 def apply_win_cq_builder_defaults(kwargs):
     kwargs = apply_cq_builder_defaults(kwargs)
     kwargs.setdefault("os", os.WINDOWS_DEFAULT)
@@ -92,6 +101,11 @@ def apply_fuzz_builder_defaults(kwargs):
 
 def dawn_linux_functional_cq_tester(**kwargs):
     kwargs = apply_linux_cq_builder_defaults(kwargs)
+    kwargs = apply_functional_builder_with_node_defaults(kwargs)
+    try_.builder(**kwargs)
+
+def dawn_mac_functional_cq_tester(**kwargs):
+    kwargs = apply_mac_cq_builder_defaults(kwargs)
     kwargs = apply_functional_builder_with_node_defaults(kwargs)
     try_.builder(**kwargs)
 
@@ -155,6 +169,26 @@ dawn_linux_functional_cq_tester_without_node(
         "ci/dawn-linux-x86-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x86-builder-rel",
+)
+
+dawn_mac_functional_cq_tester(
+    name = "dawn-cq-mac-x64-dbg",
+    description_html = "Tests debug Dawn on Mac/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-dbg",
+        "ci/dawn-mac-x64-sws-dbg",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-dbg",
+)
+
+dawn_mac_functional_cq_tester(
+    name = "dawn-cq-mac-x64-rel",
+    description_html = "Tests release Dawn on Mac/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-rel",
+        "ci/dawn-mac-x64-sws-rel",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-rel",
 )
 
 dawn_win_functional_cq_tester(
