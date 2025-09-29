@@ -206,12 +206,6 @@ void DeviceBase::DeviceLostEvent::SetLost(EventManager* eventManager,
     mReason = reason;
     mMessage = message;
     eventManager->SetFutureReady(this);
-    if (mDevice) {
-        // If the device was already set, then the device must be associated with this event. Since
-        // the event should only be set and triggered once, unset the event in the device now.
-        mDevice->mLostFuture = GetFuture();
-        mDevice->mLostEvent = nullptr;
-    }
 }
 
 void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
@@ -244,7 +238,13 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     }
 
     // Break the ref cycle between DeviceBase and DeviceLostEvent.
-    mDevice = nullptr;
+    if (mDevice) {
+        // If the device was already set, then the device must be associated with this event. Since
+        // the event should only be set and triggered once, unset the event in the device now.
+        mDevice->mLostFuture = GetFuture();
+        mDevice->mLostEvent = nullptr;
+        mDevice = nullptr;
+    }
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetComputePipelineDescriptorWithDefaults(
