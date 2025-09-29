@@ -3534,6 +3534,16 @@ void Validator::CheckConstruct(const Construct* construct) {
             AddError(construct, 0u) << "scalar construct argument type " << NameOf(args[0]->Type())
                                     << " does not match result type " << NameOf(result_type);
         }
+    } else if (auto* sg_mat = result_type->As<core::type::SubgroupMatrix>()) {
+        if (args.Length() > 1) {
+            AddError(construct) << "subgroup matrix construct must not have more than 1 argument";
+        } else {
+            if (args[0]->Type() != sg_mat->Type()) {
+                AddError(construct)
+                    << "subgroup matrix construct argument type " << NameOf(args[0]->Type())
+                    << " does not match matrix type " << NameOf(sg_mat->Type());
+            }
+        }
     } else if (auto* vec = result_type->As<core::type::Vector>()) {
         auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
         auto ctor_conv = intrinsic::VectorCtorConv(vec->Width());

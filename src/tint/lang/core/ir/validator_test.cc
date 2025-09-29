@@ -227,6 +227,42 @@ TEST_F(IR_ValidatorTest, Construct_Scalar_TooManyArguments) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:42 error: construct: subgroup matrix construct argument type '<function>' does not match matrix type 'f32'
+    %2:subgroup_matrix_left<f32, 2, 3> = construct %f
+                                         ^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_TooManyArguments) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(ty.subgroup_matrix_left(ty.f32(), 2, 3), 42_f, 43_f);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:3:42 error: construct: subgroup matrix construct must not have more than 1 argument
+    %2:subgroup_matrix_left<f32, 2, 3> = construct 42.0f, 43.0f
+                                         ^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Array_WrongArgType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
