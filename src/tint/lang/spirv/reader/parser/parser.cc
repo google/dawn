@@ -586,6 +586,8 @@ class Parser {
                 return core::AddressSpace::kHandle;
             case spv::StorageClass::Workgroup:
                 return core::AddressSpace::kWorkgroup;
+            case spv::StorageClass::PushConstant:
+                return core::AddressSpace::kImmediate;
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
