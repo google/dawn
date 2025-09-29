@@ -974,6 +974,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::VulkanDirectVariableAccessTransformHandle, true);
     }
 
+    if (IsPixel10()) {
+        // Pixel 10 has a bug in vkGetPipelineCacheData(), see https://crbug.com/437807243.
+        // TODO(crbug.com/437807243): If newer driver version without bug is released then we can
+        // gate this on driver version.
+        deviceToggles->Default(Toggle::VulkanIncompletePipelineCacheWorkaround, true);
+    }
+
     if (IsAndroidARM()) {
         // dawn:1550: Resolving multiple color targets in a single pass fails on ARM GPUs. To
         // work around the issue, passes that resolve to multiple color targets will instead be
@@ -1226,6 +1233,19 @@ bool PhysicalDevice::IsAndroidHuawei() const {
 #else
     return false;
 #endif
+}
+
+bool PhysicalDevice::IsAndroidImgTec() const {
+#if DAWN_PLATFORM_IS(ANDROID)
+    return gpu_info::IsImgTec(GetVendorId());
+#else
+    return false;
+#endif
+}
+
+bool PhysicalDevice::IsPixel10() const {
+    // Pixel 10 is the only device seen with PowerVR D-Series DXT-48-1536 so far.
+    return IsAndroidImgTec() && GetDeviceId() == 0x71061212;
 }
 
 bool PhysicalDevice::IsIntelMesa() const {

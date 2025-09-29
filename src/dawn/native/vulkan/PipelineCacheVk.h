@@ -56,11 +56,15 @@ class PipelineCache final : public PipelineCacheBase {
     MaybeError SerializeToBlobImpl(Blob* blob) override;
 
     const raw_ptr<Device> mDevice;
+    const bool mInvalidResultWorkaround = false;
+
     VkPipelineCache mHandle = VK_NULL_HANDLE;
 
     // Only a single thread should be inside SerializeToBlobImpl() at one time so this should never
     // be accessed concurrently on multiple threads.
     size_t mStoredDataSize = 0;
+
+    bool mSkipSerialize = false;
 };
 
 }  // namespace dawn::native::vulkan

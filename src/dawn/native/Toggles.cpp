@@ -643,6 +643,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Use a monolithic VkPipelineCache per device. The embedder is responsible for calling "
       "PerformIdleTasks() on the device to serialize VkPipelineCache to BlobCache if needed.",
       "crbug.com/370343334", ToggleStage::Device}},
+    {Toggle::VulkanIncompletePipelineCacheWorkaround,
+     {"vulkan_incomplete_pipeline_cache_workaround",
+      "Some drivers encounter corruption when serializing VkPipelineCache data. If VK_INCOMPLETE"
+      "is returned ignore it and skip serializing the pipeline cache again.",
+      "crbug.com/446113735", ToggleStage::Device}},
     {Toggle::MetalSerializeTimestampGenerationAndResolution,
      {"metal_serialize_timestamp_generation_and_resolution",
       "Newer Apple GPUs can race on query set resolution with timestamp writing from earlier "

@@ -64,6 +64,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsAndroidQualcomm() const;
     bool IsAndroidARM() const;
     bool IsAndroidSamsung() const;
+    bool IsAndroidImgTec() const;
+    bool IsPixel10() const;
     bool IsIntelMesa() const;
     bool IsAndroidHuawei() const;
     bool IsSwiftshader() const;
