@@ -883,8 +883,13 @@ struct Decoder {
         return mod_out_.Types().Struct(name, std::move(members_out));
     }
 
-    const type::Atomic* CreateTypeAtomic(const pb::TypeAtomic& atomic_in) {
-        return mod_out_.Types().atomic(Type(atomic_in.type()));
+    const type::Type* CreateTypeAtomic(const pb::TypeAtomic& atomic_in) {
+        const auto* el_ty = Type(atomic_in.type());
+        if (el_ty == nullptr) {
+            err_ << "invalid atomic element type\n";
+            return mod_out_.Types().invalid();
+        }
+        return mod_out_.Types().atomic(el_ty);
     }
 
     const type::Type* CreateTypeArray(const pb::TypeArray& array_in) {
