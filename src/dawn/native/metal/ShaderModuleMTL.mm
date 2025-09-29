@@ -231,7 +231,7 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                 case kInternalReadOnlyStorageBufferBinding:
                     arrayLengthFromConstants.bindpoint_to_size_index.emplace(
-                        tint::BindingPoint{uint32_t(group), uint32(bindingInfo.binding)},
+                        tint::BindingPoint{uint32_t(group), uint32_t(bindingInfo.binding)},
                         layout->GetBindingIndexInfo(stage)[group][index]);
                     break;
 
