@@ -202,6 +202,11 @@ class Parser {
                 access_mode = core::Access::kRead;
             }
 
+            // Storage buffer can not be `write` only
+            if (access_mode == core::Access::kWrite) {
+                access_mode = core::Access::kReadWrite;
+            }
+
             var->Result()->SetType(ty_.ptr(core::AddressSpace::kStorage, str, access_mode));
             UpdateUsagesToStorageAddressSpace(var->Result(), access_mode);
         }

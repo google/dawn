@@ -1315,6 +1315,9 @@ TEST_P(AddressSpace_AccessMode, Test) {
                 expected_error = "uniform and handle pointers must be read access";
             } else if (aspace == AddressSpace::kWorkgroup) {
                 expected_error = "workgroup pointers must be read_write access";
+            } else if (aspace == AddressSpace::kStorage) {
+                expected_error =
+                    "vars in the 'storage' address space must have access 'read' or 'read-write'";
             }
             break;
         case core::Access::kReadWrite:

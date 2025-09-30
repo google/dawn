@@ -399,30 +399,6 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
                OpFunctionEnd)");
 }
 
-TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
-    auto* v = b.Var("v", ty.ptr<storage, i32, write>());
-    v->SetBindingPoint(0, 0);
-    mod.root_block->Append(v);
-
-    auto* func = b.ComputeFunction("foo");
-    b.Append(func->Block(), [&] {
-        b.Store(v, 42_i);
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST(R"(
-               OpDecorate %v_block Block
-               OpDecorate %1 DescriptorSet 0
-               OpDecorate %1 Binding 0
-               OpDecorate %1 NonReadable
-)");
-    EXPECT_INST(R"(
-          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %9 %int_42 None
-)");
-}
-
 TEST_F(SpirvWriterTest, UniformVar) {
     auto* v = b.Var("v", ty.ptr<uniform, i32>());
     v->SetBindingPoint(0, 0);

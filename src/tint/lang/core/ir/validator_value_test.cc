@@ -521,6 +521,22 @@ TEST_F(IR_ValidatorTest, Var_Storage_NotHostShareable) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Var_Storage_WriteOnly) {
+    auto* v = b.Var(ty.ptr<storage, i32, write>());
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:33 error: var: vars in the 'storage' address space must have access 'read' or 'read-write'
+  %1:ptr<storage, i32, write> = var undef @binding_point(0, 0)
+                                ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Var_DuplicateBindingPoints_NeitherReferenced) {
     auto* var_a = b.Var<uniform, f32>();
     var_a->SetBindingPoint(1, 2);

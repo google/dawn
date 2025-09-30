@@ -765,7 +765,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOStructWithAttributes_NotUsedForInterface
                                                   },
                                               });
 
-    auto* var = b.Var(ty.ptr(storage, str_ty, core::Access::kWrite));
+    auto* var = b.Var(ty.ptr(storage, str_ty, core::Access::kReadWrite));
     var->SetBindingPoint(0, 0);
 
     auto* buffer = mod.root_block->Append(var);
@@ -784,7 +784,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {
@@ -804,7 +804,7 @@ Outputs = struct @align(16) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, Outputs, write> = var undef @binding_point(0, 0)
+  %1:ptr<storage, Outputs, read_write> = var undef @binding_point(0, 0)
 }
 
 %frag = @fragment func():void {

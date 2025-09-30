@@ -3046,6 +3046,11 @@ void Validator::CheckVar(const Var* var) {
             AddError(var) << "vars in the 'storage' address space must be host-shareable";
             return;
         }
+        if (mv->Access() != core::Access::kReadWrite && mv->Access() != core::Access::kRead) {
+            AddError(var)
+                << "vars in the 'storage' address space must have access 'read' or 'read-write'";
+            return;
+        }
     }
 
     if (mv->AddressSpace() == AddressSpace::kUniform) {

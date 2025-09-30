@@ -493,7 +493,7 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -511,7 +511,6 @@ TEST_F(SpirvParserTest, UniformVar_BufferBlock_Propagate) {
                OpEntryPoint GLCompute %1 "main"
                OpExecutionMode %1 LocalSize 1 1 1
                OpMemberDecorate %str 0 Offset 0
-               OpDecorate %6 NonReadable
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 2
                OpDecorate %str BufferBlock
@@ -538,14 +537,14 @@ tint_symbol_1 = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, tint_symbol_1, write> = var undef @binding_point(1, 2)
+  %1:ptr<storage, tint_symbol_1, read_write> = var undef @binding_point(1, 2)
 }
 
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
-    %3:ptr<storage, tint_symbol_1, write> = let %1
-    %4:ptr<storage, u32, write> = access %3, 0u
-    %5:ptr<storage, u32, write> = let %4
+    %3:ptr<storage, tint_symbol_1, read_write> = let %1
+    %4:ptr<storage, u32, read_write> = access %3, 0u
+    %5:ptr<storage, u32, read_write> = let %4
     store %5, 0u
     ret
   }
