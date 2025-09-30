@@ -3667,9 +3667,10 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
                 auto* array = unary->expr->As<ast::IndexAccessorExpression>();
                 auto* member = unary->expr->As<ast::MemberAccessorExpression>();
-                if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<core::type::Vector>()) ||
+                if ((array &&
+                     sem_.TypeOf(array->object)->UnwrapPtrOrRef()->Is<core::type::Vector>()) ||
                     (member &&
-                     sem_.TypeOf(member->object)->UnwrapRef()->Is<core::type::Vector>())) {
+                     sem_.TypeOf(member->object)->UnwrapPtrOrRef()->Is<core::type::Vector>())) {
                     AddError(unary->expr->source)
                         << "cannot take the address of a vector component";
                     return nullptr;
