@@ -12,6 +12,10 @@
     'label': '//src/dawn/tests:dawn_unittests',
     'type': 'windowed_test_launcher',
   },
+  'default': {
+    'label': '//:default',
+    'type': 'additional_compile_target',
+  },
   'fuzzer_corpus_tests': {
     'label': '//src/tint:fuzzer_corpus_tests',
     'type': 'script',
