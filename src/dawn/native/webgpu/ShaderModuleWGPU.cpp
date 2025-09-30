@@ -38,36 +38,25 @@ namespace dawn::native::webgpu {
 ResultOrError<Ref<ShaderModule>> ShaderModule::Create(
     Device* device,
     const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-    const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* parseResult) {
-    Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor, internalExtensions));
-    DAWN_TRY(module->Initialize(descriptor, parseResult));
-    return module;
+    const std::vector<tint::wgsl::Extension>& internalExtensions) {
+    auto desc = ToAPI(*descriptor);
+    WGPUShaderModule innerShaderModule =
+        device->wgpu.deviceCreateShaderModule(device->GetInnerHandle(), desc);
+    DAWN_ASSERT(innerShaderModule);
+
+    Ref<ShaderModule> shader =
+        AcquireRef(new ShaderModule(device, descriptor, internalExtensions, innerShaderModule));
+    shader->Initialize();
+    return shader;
 }
 
 ShaderModule::ShaderModule(Device* device,
                            const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-                           std::vector<tint::wgsl::Extension> internalExtensions)
+                           std::vector<tint::wgsl::Extension> internalExtensions,
+                           WGPUShaderModule innerShaderModule)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)),
-      ObjectWGPU(device->wgpu.shaderModuleRelease) {}
-
-MaybeError ShaderModule::Initialize(const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-                                    ShaderModuleParseResult* parseResult) {
-    DAWN_TRY(InitializeBase(parseResult));
-
-    if (GetCompilationMessages()->HasWarningsOrErrors()) {
-        // Cached parse result already shows it is an invalid shader.
-        // No need to create the real shader module on the backend.
-        return {};
-    }
-
-    auto desc = ToAPI(*descriptor);
-    mInnerHandle =
-        ToBackend(GetDevice())
-            ->wgpu.deviceCreateShaderModule(ToBackend(GetDevice())->GetInnerHandle(), desc);
-    DAWN_ASSERT(mInnerHandle);
-
-    return {};
+      ObjectWGPU(device->wgpu.shaderModuleRelease) {
+    mInnerHandle = innerShaderModule;
 }
 
 }  // namespace dawn::native::webgpu

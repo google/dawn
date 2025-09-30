@@ -54,14 +54,7 @@ Ref<ShaderModuleMock> ShaderModuleMock::Create(
 
     Ref<ShaderModuleMock> shaderModule =
         AcquireRef(new NiceMock<ShaderModuleMock>(device, descriptor));
-
-    ShaderModuleParseResult parseResult =
-        ParseShaderModule(BuildShaderModuleParseRequest(device, shaderModule->GetHash(), descriptor,
-                                                        {},
-                                                        /* needReflection*/ true))
-            .AcquireSuccess();
-
-    shaderModule->InitializeBase(&parseResult).AcquireSuccess();
+    shaderModule->Initialize();
     return shaderModule;
 }
 

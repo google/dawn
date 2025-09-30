@@ -43,16 +43,14 @@ class ShaderModule final : public ShaderModuleBase, public ObjectWGPU<WGPUShader
     static ResultOrError<Ref<ShaderModule>> Create(
         Device* device,
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-        const std::vector<tint::wgsl::Extension>& internalExtensions,
-        ShaderModuleParseResult* parseResult);
+        const std::vector<tint::wgsl::Extension>& internalExtensions);
 
   private:
     ShaderModule(Device* device,
                  const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-                 std::vector<tint::wgsl::Extension> internalExtensions);
+                 std::vector<tint::wgsl::Extension> internalExtensions,
+                 WGPUShaderModule innerShaderModule);
     ~ShaderModule() override = default;
-    MaybeError Initialize(const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
-                          ShaderModuleParseResult* parseResult);
 };
 
 }  // namespace dawn::native::webgpu

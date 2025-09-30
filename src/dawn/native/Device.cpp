@@ -1458,31 +1458,40 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
     utils::TraceLabel label = utils::GetLabelForTrace(descriptor->label);
     TRACE_EVENT1(GetPlatform(), General, "DeviceBase::APICreateShaderModule", "label", label.label);
 
-    // parseResult is modified by CreateShaderModule via pointer to provide compilation messages in
-    // error cases.
-    ShaderModuleParseResult parseResult;
-    auto creationResult = CreateShaderModule(descriptor, /*internalExtensions=*/{}, &parseResult);
-
+    Ref<ShaderModuleBase> shaderModule;
+    std::unique_ptr<ErrorData> errorData;
+    auto creationResult = CreateShaderModule(descriptor, /*internalExtensions=*/{});
     if (creationResult.IsSuccess()) {
-        Ref<ShaderModuleBase> validShaderModule = creationResult.AcquireSuccess();
-        DAWN_ASSERT(validShaderModule != nullptr && !validShaderModule->IsError());
-        EmitCompilationLog(validShaderModule.Get());
-        return ReturnToAPI(std::move(validShaderModule));
+        // CreateShaderModule can succeed but still return a shader module which failed compilation.
+        // TODO(crbug.com/406522796): Remove this once ShaderModuleBase writes directly to the error
+        // scope.
+        shaderModule = creationResult.AcquireSuccess();
+        if (shaderModule->IsError()) {
+            errorData = shaderModule->GetInitializationError();
+        }
+    } else {
+        // If CreateShaderModule failed, it was due to internal errors that should not surface as
+        // compilation errors.
+        shaderModule = ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr,
+                                                   ParsedCompilationMessages());
+        DAWN_ASSERT(shaderModule->IsError());
+        errorData = creationResult.AcquireError();
     }
 
-    // If shader creation failed, create an error shader module with compilation messages so the
-    // application can later retrieve it with GetCompilationInfo.
-    Ref<ShaderModuleBase> errorShaderModule = ShaderModuleBase::MakeError(
-        this, descriptor ? descriptor->label : nullptr, std::move(parseResult.compilationMessages));
-    DAWN_ASSERT(errorShaderModule != nullptr && errorShaderModule->IsError());
+    DAWN_ASSERT(shaderModule != nullptr);
 
-    // Acquire the device lock for error handling, and return the error shader module.
-    auto deviceGuard = GetGuard();
-    // Emit error, including Tint errors and warnings for the error shader module.
-    auto consumedError = ConsumedError(creationResult.AcquireError(), InternalErrorType::Internal,
-                                       "calling %s.CreateShaderModule(%s).", this, descriptor);
-    DAWN_ASSERT(consumedError);
-    return ReturnToAPI(std::move(errorShaderModule));
+    if (errorData != nullptr) {
+        // Acquire the device lock for error handling.
+        auto deviceGuard = GetGuard();
+        // Emit error, including Tint errors and warnings.
+        auto consumedError = ConsumedError(std::move(errorData), InternalErrorType::Internal,
+                                           "calling %s.CreateShaderModule(%s).", this, descriptor);
+        DAWN_ASSERT(consumedError);
+    }
+
+    DAWN_ASSERT(errorData == nullptr);
+
+    return ReturnToAPI(std::move(shaderModule));
 }
 
 ShaderModuleBase* DeviceBase::APICreateErrorShaderModule(const ShaderModuleDescriptor* descriptor,
@@ -2191,8 +2200,7 @@ ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSampler(const SamplerDescripto
 
 ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
-    const std::vector<tint::wgsl::Extension>& internalExtensions,
-    ShaderModuleParseResult* outputParseResult) {
+    const std::vector<tint::wgsl::Extension>& internalExtensions) {
     DAWN_TRY(ValidateIsAlive());
 
     // Unpack and validate the descriptor chain before doing further validation or cache
@@ -2242,50 +2250,14 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     const size_t blueprintHash = blueprint.ComputeContentHash();
     blueprint.SetContentHash(blueprintHash);
 
-    // Check in-memory shader module cache first, and if missed check the blob cache, and if missed
-    // again call ParseShaderModule.
+    // Check in-memory shader module cache first, and if missed create a new ShaderModule which may
+    // use the BlobCache.
     return GetOrCreate(
         mCaches->shaderModules, &blueprint, [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
-            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetPlatform(), "CreateShaderModuleUS");
-
-            auto resultOrError = [&]() -> ResultOrError<Ref<ShaderModuleBase>> {
-                ShaderModuleParseRequest req = BuildShaderModuleParseRequest(
-                    this, blueprint.GetHash(), unpacked, internalExtensions,
-                    /* needReflection */ true);
-
-                // Check blob cache first before calling ParseShaderModule. ShaderModuleParseResult
-                // returned from blob cache or ParseShaderModule will hold compilation messages and
-                // validation errors if any. ShaderModuleParseResult from ParseShaderModule also
-                // holds tint program.
-                CacheResult<ShaderModuleParseResult> result;
-                DAWN_TRY_LOAD_OR_RUN(result, this, std::move(req),
-                                     ShaderModuleParseResult::FromBlob, ParseShaderModule,
-                                     "ShaderModuleParsing");
-                GetBlobCache()->EnsureStored(result);
-                ShaderModuleParseResult parseResult = result.Acquire();
-
-                // If ShaderModuleParseResult has validation error, move the compilation messages to
-                // *outputParseResult so that we can create an error shader module from it, and then
-                // return the validation error.
-                if (parseResult.HasError()) {
-                    auto error = parseResult.cachedValidationError->ToErrorData();
-                    if (outputParseResult) {
-                        *outputParseResult = std::move(parseResult);
-                    }
-                    return error;
-                }
-                // Otherwise with no error, create a shader module from parse result and return it.
-                Ref<ShaderModuleBase> shaderModule;
-                DAWN_TRY_ASSIGN(shaderModule,
-                                CreateShaderModuleImpl(unpacked, internalExtensions, &parseResult));
-                shaderModule->SetContentHash(blueprintHash);
-                return shaderModule;
-            }();
-
-            DAWN_HISTOGRAM_BOOLEAN(GetPlatform(), "CreateShaderModuleSuccess",
-                                   resultOrError.IsSuccess());
-
-            return resultOrError;
+            Ref<ShaderModuleBase> shaderModule;
+            DAWN_TRY_ASSIGN(shaderModule, CreateShaderModuleImpl(unpacked, internalExtensions));
+            shaderModule->SetContentHash(blueprintHash);
+            return shaderModule;
         });
 }
 

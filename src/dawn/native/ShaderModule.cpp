@@ -39,6 +39,7 @@
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/Pipeline.h"
@@ -1745,7 +1746,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
                                    std::vector<tint::wgsl::Extension> internalExtensions,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
-    : Base(device, descriptor->label),
+    : Base(device, ObjectBase::kDelayedInitialization, descriptor->label),
       mType(Type::Undefined),
       mInternalExtensions(std::move(internalExtensions)) {
     size_t shaderCodeByteSize = 0;
@@ -1825,6 +1826,85 @@ Ref<ShaderModuleBase> ShaderModuleBase::MakeError(DeviceBase* device,
         new ShaderModuleBase(device, ObjectBase::kError, label, std::move(compilationMessages)));
 }
 
+void ShaderModuleBase::Initialize() {
+    auto task = [&, shaderModuleRef = Ref<ShaderModuleBase>(this)]() {
+        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(GetDevice()->GetPlatform(), "CreateShaderModuleUS");
+
+        auto taskMaybeError = [&]() -> MaybeError {
+            // Check blob cache first before calling ParseShaderModule. ShaderModuleParseResult
+            // returned from blob cache or ParseShaderModule will hold compilation messages and
+            // validation errors if any. ShaderModuleParseResult from ParseShaderModule also
+            // holds tint program.
+            CacheResult<ShaderModuleParseResult> cacheResult;
+            DAWN_TRY_LOAD_OR_RUN(cacheResult, GetDevice(), GenerateShaderModuleParseRequest(true),
+                                 ShaderModuleParseResult::FromBlob, ParseShaderModule,
+                                 "ShaderModuleParsing");
+            GetDevice()->GetBlobCache()->EnsureStored(cacheResult);
+
+            ShaderModuleParseResult parseResult = cacheResult.Acquire();
+
+            // Move the compilation messages regardless of compilation success. Compilation messages
+            // should be inject only once for each shader module.
+            DAWN_ASSERT(mCompilationMessages == nullptr);
+            // Move the compilationMessages into the shader module and emit the tint errors and
+            // warnings
+            mCompilationMessages = std::make_unique<OwnedCompilationMessages>(
+                std::move(parseResult.compilationMessages));
+
+            // If ShaderModuleParseResult has validation error, notify the caller that compilation
+            // failed. The compilation messages have already been stored.
+            if (parseResult.HasError()) {
+                return parseResult.cachedValidationError->ToErrorData();
+            }
+
+            DAWN_ASSERT(!parseResult.HasError());
+            if (parseResult.HasTintProgram()) {
+                mTintData.Use([&](auto tintData) {
+                    tintData->tintProgram =
+                        std::move(parseResult.tintProgram.UnsafeGetValue().value());
+                });
+            }
+
+            // Gather the metadata and default entry point names
+            DAWN_ASSERT(parseResult.metadataTable.has_value());
+            mEntryPoints = std::move(parseResult.metadataTable.value());
+
+            for (auto stage : IterateStages(kAllStages)) {
+                mEntryPointCounts[stage] = 0;
+            }
+            for (auto& [name, metadata] : mEntryPoints) {
+                SingleShaderStage stage = metadata->stage;
+                if (mEntryPointCounts[stage] == 0) {
+                    mDefaultEntryPointNames[stage] = name;
+                }
+                mEntryPointCounts[stage]++;
+            }
+
+            return {};
+        }();
+
+        DAWN_HISTOGRAM_BOOLEAN(GetDevice()->GetPlatform(), "CreateShaderModuleSuccess",
+                               taskMaybeError.IsSuccess());
+        if (taskMaybeError.IsError()) {
+            SetInitializedError();
+            mInitializationError = CachedValidationError(taskMaybeError.AcquireError());
+        } else {
+            SetInitializedNoError();
+
+            // On successful compilation, emit the compilation log
+            GetDevice()->EmitCompilationLog(this);
+        }
+    };
+
+    task();
+    DAWN_ASSERT(IsInitialized());
+}
+
+std::unique_ptr<ErrorData> ShaderModuleBase::GetInitializationError() {
+    DAWN_ASSERT(mInitializationError.has_value());
+    return mInitializationError->ToErrorData();
+}
+
 ObjectType ShaderModuleBase::GetType() const {
     return ObjectType::ShaderModule;
 }
@@ -1895,34 +1975,9 @@ Ref<TintProgram> ShaderModuleBase::GetTintProgram() {
         // shader source code, Dawn will look up from the cache and return the same
         // ShaderModuleBase. In this case, we have to recreate the released mTintProgram for
         // initializing new pipelines.
-        ShaderModuleDescriptor descriptor;
-        ShaderSourceWGSL wgslDescriptor;
-        ShaderSourceSPIRV spirvDescriptor;
-        DawnShaderModuleSPIRVOptionsDescriptor spirvOptionsDescriptor;
-
-        switch (mType) {
-            case Type::Spirv:
-                spirvOptionsDescriptor.allowNonUniformDerivatives =
-                    mAllowSpirvNonUniformDerivitives;
-                spirvDescriptor.nextInChain = &spirvOptionsDescriptor;
-
-                spirvDescriptor.codeSize = mOriginalSpirv.size();
-                spirvDescriptor.code = mOriginalSpirv.data();
-                descriptor.nextInChain = &spirvDescriptor;
-                break;
-            case Type::Wgsl:
-                wgslDescriptor.code = std::string_view(mWgsl);
-                descriptor.nextInChain = &wgslDescriptor;
-                break;
-            default:
-                DAWN_UNREACHABLE();
-        }
-
         // Assuming ParseShaderModule will not throw error for regenerating.
         ShaderModuleParseResult regeneratedParseResult =
-            ParseShaderModule(BuildShaderModuleParseRequest(GetDevice(), mHash, Unpack(&descriptor),
-                                                            mInternalExtensions,
-                                                            /* needReflection */ false))
+            ParseShaderModule(GenerateShaderModuleParseRequest(/* needReflection */ false))
                 .AcquireSuccess();
         DAWN_ASSERT(regeneratedParseResult.HasTintProgram() && !regeneratedParseResult.HasError());
 
@@ -2006,42 +2061,39 @@ void ShaderModuleBase::SetCompilationMessagesForTesting(
     mCompilationMessages = std::move(*compilationMessages);
 }
 
-MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
-    DAWN_ASSERT(!parseResult->HasError());
-    if (parseResult->HasTintProgram()) {
-        mTintData.Use([&](auto tintData) {
-            tintData->tintProgram = std::move(parseResult->tintProgram.UnsafeGetValue().value());
-        });
-    }
-    DAWN_ASSERT(parseResult->metadataTable.has_value());
-    mEntryPoints = std::move(parseResult->metadataTable.value());
-
-    for (auto stage : IterateStages(kAllStages)) {
-        mEntryPointCounts[stage] = 0;
-    }
-    for (auto& [name, metadata] : mEntryPoints) {
-        SingleShaderStage stage = metadata->stage;
-        if (mEntryPointCounts[stage] == 0) {
-            mDefaultEntryPointNames[stage] = name;
-        }
-        mEntryPointCounts[stage]++;
-    }
-
-    // Move the compilation messages if initialized successfully. Compilation messages should be
-    // inject only once for each shader module.
-    DAWN_ASSERT(mCompilationMessages == nullptr);
-    // Move the compilationMessages into the shader module and emit the tint errors and warnings
-    mCompilationMessages =
-        std::make_unique<OwnedCompilationMessages>(std::move(parseResult->compilationMessages));
-
-    return {};
-}
-
 void ShaderModuleBase::WillDropLastExternalRef() {
     // The last external ref being dropped indicates that the application is not currently using,
     // and no pending task will use the shader module. In this case we can free the memory for the
     // parsed module.
     mTintData.Use([&](auto tintData) { tintData->tintProgram = nullptr; });
+}
+
+ShaderModuleParseRequest ShaderModuleBase::GenerateShaderModuleParseRequest(
+    bool needReflection) const {
+    ShaderModuleDescriptor descriptor;
+    ShaderSourceWGSL wgslDescriptor;
+    ShaderSourceSPIRV spirvDescriptor;
+    DawnShaderModuleSPIRVOptionsDescriptor spirvOptionsDescriptor;
+
+    switch (mType) {
+        case Type::Spirv:
+            spirvOptionsDescriptor.allowNonUniformDerivatives = mAllowSpirvNonUniformDerivitives;
+            spirvDescriptor.nextInChain = &spirvOptionsDescriptor;
+
+            spirvDescriptor.codeSize = mOriginalSpirv.size();
+            spirvDescriptor.code = mOriginalSpirv.data();
+            descriptor.nextInChain = &spirvDescriptor;
+            break;
+        case Type::Wgsl:
+            wgslDescriptor.code = std::string_view(mWgsl);
+            descriptor.nextInChain = &wgslDescriptor;
+            break;
+        default:
+            DAWN_UNREACHABLE();
+    }
+
+    return BuildShaderModuleParseRequest(GetDevice(), mHash, Unpack(&descriptor),
+                                         mInternalExtensions, needReflection);
 }
 
 }  // namespace dawn::native
