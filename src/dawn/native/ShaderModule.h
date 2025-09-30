@@ -382,7 +382,9 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     bool HasEntryPoint(absl::string_view entryPoint) const;
 
     // Return the number of entry points for a stage.
-    size_t GetEntryPointCount(SingleShaderStage stage) const { return mEntryPointCounts[stage]; }
+    size_t GetEntryPointCount(SingleShaderStage stage) const {
+        return mCompiledState.entryPointCounts[stage];
+    }
 
     // Return the entry point for a stage. If no entry point name, returns the default one.
     ShaderModuleEntryPoint ReifyEntryPointName(StringView entryPointName,
@@ -451,20 +453,28 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     // Right now D3D uses strictness by default, and Vulkan/Metal use fast math by default.
     std::optional<bool> mStrictMath;
 
-    EntryPointMetadataTable mEntryPoints;
-    PerStage<std::string> mDefaultEntryPointNames;
-    PerStage<size_t> mEntryPointCounts;
+    const std::vector<tint::wgsl::Extension> mInternalExtensions;
 
     struct TintData {
         // tintProgram is nullable so that it can be lazily (re)generated right before actual using.
         Ref<TintProgram> tintProgram = nullptr;
         int tintProgramRecreateCount = 0;
     };
-    MutexProtected<TintData> mTintData;
 
-    std::unique_ptr<const OwnedCompilationMessages> mCompilationMessages;
+    // Encapsulation of all state that is written during (async) initialization.
+    struct CompiledState {
+        EntryPointMetadataTable entryPoints;
+        PerStage<std::string> defaultEntryPointNames;
+        PerStage<size_t> entryPointCounts;
 
-    const std::vector<tint::wgsl::Extension> mInternalExtensions;
+        MutexProtected<TintData> tintData;
+
+        std::unique_ptr<const OwnedCompilationMessages> compilationMessages;
+
+        // Explicit move operator to copy the mutex protected tintData instead of moving it.
+        CompiledState& operator=(CompiledState&& source);
+    };
+    CompiledState mCompiledState;
 
     // Storage of any error generated during initialization. When initialization is fully
     // asynchronous, this will be removed and inserted into a stored error scope during
