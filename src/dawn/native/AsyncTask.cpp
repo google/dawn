@@ -33,62 +33,119 @@
 
 namespace dawn::native {
 
+AsyncTask::AsyncTask(std::function<void()> task) : mTask(task) {}
+
+void AsyncTask::Wait() {
+    std::unique_ptr<dawn::platform::WaitableEvent> waitableEvent;
+    {
+        std::scoped_lock<std::mutex> lock(mMutex);
+        waitableEvent = std::move(mWaitableEvent);
+    }
+
+    if (waitableEvent) {
+        waitableEvent->Wait();
+    }
+}
+
+void AsyncTask::AddCompletionCallback(AsyncTaskCompletionCallback completionCallback) {
+    std::scoped_lock<std::mutex> lock(mMutex);
+
+    // If this task has already completed, call the completion callback immediately.
+    if (mState == AsyncTaskState::Completed) {
+        completionCallback();
+        return;
+    }
+
+    mCompletionCallbacks.push_back(completionCallback);
+}
+
+void AsyncTask::Run() {
+    {
+        AsyncTaskState prevState = mState.exchange(AsyncTaskState::Running);
+        DAWN_ASSERT(prevState == AsyncTaskState::Pending);
+    }
+
+    mTask();
+
+    // AsyncTask may have a much longer life time than the task itself.
+    // Reset it to release any references that were captured.
+    mTask = nullptr;
+
+    // Grab the completion callbacks while locked but call them outside the lock.
+    std::vector<AsyncTaskCompletionCallback> completionCallbacks;
+    {
+        std::scoped_lock<std::mutex> lock(mMutex);
+        AsyncTaskState prevState = mState.exchange(AsyncTaskState::Completed);
+        DAWN_ASSERT(prevState == AsyncTaskState::Running);
+        completionCallbacks = std::move(mCompletionCallbacks);
+        mCompletionCallbacks.clear();
+        mWaitableEvent = nullptr;
+    }
+
+    for (auto completionCallback : completionCallbacks) {
+        completionCallback();
+    }
+}
+
 AsyncTaskManager::AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool)
     : mWorkerTaskPool(workerTaskPool) {}
 
-void AsyncTaskManager::PostTask(AsyncTask asyncTask) {
-    // If these allocations becomes expensive, we can slab-allocate tasks.
-    Ref<WaitableTask> waitableTask = AcquireRef(new WaitableTask());
-    waitableTask->taskManager = this;
-    waitableTask->asyncTask = std::move(asyncTask);
+AsyncTaskManager::~AsyncTaskManager() {
+    // Pending tasks call back into this task manager. Make sure they all finish before destructing.
+    WaitAllPendingTasks();
+}
 
-    {
-        // We insert new waitableTask objects into mPendingTasks in main thread (PostTask()),
-        // and we may remove waitableTask objects from mPendingTasks in either main thread
-        // (WaitAllPendingTasks()) or sub-thread (TaskCompleted), so mPendingTasks should be
-        // protected by a mutex.
-        std::lock_guard<std::mutex> lock(mPendingTasksMutex);
-        mPendingTasks.emplace(waitableTask.Get(), waitableTask);
-    }
+void AsyncTaskManager::PostConstructedTask(Ref<AsyncTask> asyncTask) {
+    // We insert new waitableTask objects into mPendingTasks in main thread (PostTask()),
+    // and we may remove waitableTask objects from mPendingTasks in either main thread
+    // (WaitAllPendingTasks()) or sub-thread (TaskCompleted), so mPendingTasks should be
+    // protected by a mutex.
+    // Hold the mutex until the task is fully posted otherwise it could complete and be deleted
+    // from mPending tasks before it is fully initialized.
+    mPendingTasks.Use(
+        [&asyncTask, taskManager = this, taskPool = mWorkerTaskPool](auto pendingTasks) {
+            // If these allocations becomes expensive, we can slab-allocate tasks.
+            auto iter = pendingTasks->emplace(std::make_unique<WaitableTask>());
 
-    // Ref the task since it is accessed inside the worker function.
-    // The worker function will acquire and release the task upon completion.
-    waitableTask->AddRef();
-    waitableTask->waitableEvent =
-        mWorkerTaskPool->PostWorkerTask(DoWaitableTask, waitableTask.Get());
+            // Should never be inserting the same value twice.
+            DAWN_ASSERT(iter.second);
+
+            WaitableTask* waitableTask = iter.first->get();
+            waitableTask->taskManager = taskManager;
+            waitableTask->asyncTask = asyncTask;
+
+            // Hold the task's mutex while writing to mWaitableEvent. The task could run and try to
+            // modify the waitable event while this write is happening.
+            std::scoped_lock<std::mutex> lock(asyncTask->mMutex);
+            asyncTask->mWaitableEvent = taskPool->PostWorkerTask(RunTask, waitableTask);
+        });
 }
 
 void AsyncTaskManager::HandleTaskCompletion(WaitableTask* task) {
-    std::lock_guard<std::mutex> lock(mPendingTasksMutex);
-    mPendingTasks.erase(task);
+    DAWN_ASSERT(task);
+    DAWN_ASSERT(task->asyncTask->GetState() == AsyncTaskState::Completed);
+
+    mPendingTasks.Use([&task](auto pendingTasks) { return pendingTasks->erase(task); });
 }
 
 void AsyncTaskManager::WaitAllPendingTasks() {
-    absl::flat_hash_map<WaitableTask*, Ref<WaitableTask>> allPendingTasks;
+    PendingTasksSet allPendingTasks;
+    mPendingTasks.Use(
+        [&allPendingTasks](auto pendingTasks) { allPendingTasks.swap(*pendingTasks); });
 
-    {
-        std::lock_guard<std::mutex> lock(mPendingTasksMutex);
-        allPendingTasks.swap(mPendingTasks);
-    }
-
-    for (auto& [_, task] : allPendingTasks) {
-        task->waitableEvent->Wait();
+    for (auto& task : allPendingTasks) {
+        task->asyncTask->Wait();
     }
 }
 
 bool AsyncTaskManager::HasPendingTasks() {
-    std::lock_guard<std::mutex> lock(mPendingTasksMutex);
-    return !mPendingTasks.empty();
+    return mPendingTasks.Use([](auto pendingTasks) { return !pendingTasks->empty(); });
 }
 
-void AsyncTaskManager::DoWaitableTask(void* task) {
-    Ref<WaitableTask> waitableTask = AcquireRef(static_cast<WaitableTask*>(task));
-    waitableTask->asyncTask();
-    waitableTask->taskManager->HandleTaskCompletion(waitableTask.Get());
+void AsyncTaskManager::RunTask(void* task) {
+    WaitableTask* waitableTask = static_cast<WaitableTask*>(task);
+    waitableTask->asyncTask->Run();
+    waitableTask->taskManager->HandleTaskCompletion(waitableTask);
 }
-
-AsyncTaskManager::WaitableTask::WaitableTask() = default;
-
-AsyncTaskManager::WaitableTask::~WaitableTask() = default;
 
 }  // namespace dawn::native
