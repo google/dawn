@@ -755,10 +755,13 @@ void BufferBase::APIUnmap() {
     if (GetDevice()->ConsumedError(ValidateUnmap(), "calling %s.Unmap().", this)) {
         return;
     }
-    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-        UnmapInternal(WGPUMapAsyncStatus_Aborted,
-                      "Buffer was unmapped before mapping was resolved."),
-        "calling %s.Unmap().", this);
+    auto unmap = [&]() -> MaybeError {
+        DAWN_TRY(UnmapInternal(WGPUMapAsyncStatus_Aborted,
+                               "Buffer was unmapped before mapping was resolved."));
+        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+    };
+    [[maybe_unused]] bool hadError =
+        GetDevice()->ConsumedError(unmap(), "calling %s.Unmap().", this);
 }
 
 MaybeError BufferBase::Unmap() {

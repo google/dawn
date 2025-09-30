@@ -59,6 +59,7 @@ class DynamicUploader : NonMovable {
     // Transiently makes a reservation for an upload area for the functor passed in argument.
     template <typename F>
     MaybeError WithUploadReservation(uint64_t size, uint64_t offsetAlignment, F&& f) {
+        // TODO(crbug.com/448168642): Assert that pending command serial doesn't change.
         UploadReservation reservation;
         DAWN_TRY_ASSIGN(reservation, Reserve(size, offsetAlignment));
         DAWN_TRY(f(reservation));
@@ -66,8 +67,12 @@ class DynamicUploader : NonMovable {
     }
 
     // Notifies the dynamic uploader that some freeing of memory is associated with the pending
-    // submit. The dynamic uploader may take some action in this case, like forcing an early submit.
+    // submit. The dynamic uploader tracks this info, and if enough memory is freed before the
+    // next submit, MaybeSubmitPendingCommands will submit early.
     MaybeError OnStagingMemoryFreePendingOnSubmit(uint64_t size);
+
+    // May submit pending commands on the queue if enough memory was freed since the last submit.
+    MaybeError MaybeSubmitPendingCommands();
 
     void Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll = false);
 

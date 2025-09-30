@@ -313,10 +313,13 @@ void QueueBase::APIWriteBuffer(BufferBase* buffer,
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) {
-    [[maybe_unused]] bool hadError =
-        GetDevice()->ConsumedError(WriteBuffer(buffer, bufferOffset, data, size),
-                                   "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this,
-                                   buffer, bufferOffset, size);
+    auto writeBuffer = [&]() -> MaybeError {
+        DAWN_TRY(WriteBuffer(buffer, bufferOffset, data, size));
+        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+    };
+    [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
+        writeBuffer(), "calling %s.WriteBuffer(%s, (%d bytes), data, (%d bytes))", this, buffer,
+        bufferOffset, size);
 }
 
 MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
@@ -342,10 +345,13 @@ void QueueBase::APIWriteTexture(const TexelCopyTextureInfo* destination,
                                 size_t dataSize,
                                 const TexelCopyBufferLayout* dataLayout,
                                 const Extent3D* writeSize) {
+    auto writeTexture = [&]() -> MaybeError {
+        DAWN_TRY(WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize));
+        return GetDevice()->GetDynamicUploader()->MaybeSubmitPendingCommands();
+    };
     [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
-        WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize),
-        "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination, dataSize, dataLayout,
-        writeSize);
+        writeTexture(), "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination,
+        dataSize, dataLayout, writeSize);
 }
 
 MaybeError QueueBase::WriteTextureInternal(const TexelCopyTextureInfo* destinationOrig,
