@@ -189,7 +189,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -323,7 +339,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -767,7 +799,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "display_attached": "1",
+            "gpu": "8086:3e9b",
+            "os": "Mac-14.5"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -901,7 +949,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "display_attached": "1",
+            "gpu": "8086:3e9b",
+            "os": "Mac-14.5"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -1050,7 +1114,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -1208,7 +1288,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }
@@ -1366,7 +1462,23 @@
           "SwiftShader",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "dawn_node_sws_cts",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
       }

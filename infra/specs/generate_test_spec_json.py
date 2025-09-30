@@ -61,6 +61,11 @@ ADDITIONAL_MIXINS = {
             'result_format': 'gtest_json',
         },
     },
+    'result_adapter_single': {
+        'resultdb': {
+            'result_format': 'single',
+        },
+    },
 }
 
 MIXIN_FILEPATH = os.path.join(THIS_DIR, 'mixins.pyl')

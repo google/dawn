@@ -31,10 +31,12 @@ import argparse
 import contextlib
 import functools
 import glob
+import json
 import logging
 import os
 import subprocess
 import sys
+import tempfile
 
 import node_helpers
 
@@ -52,7 +54,8 @@ def install_npm_deps_in_current_dir() -> None:
     subprocess.run(cmd, check=True)
 
 
-def run_node_cts(output_directory: str, args_to_forward: list[str]) -> None:
+def run_node_cts(output_directory: str, args_to_forward: list[str],
+                 output_filepath: str) -> None:
     logging.info('Running CTS via node in %s', os.getcwd())
     npx_wrapper = os.path.join(THIS_DIR, 'run_npx.py')
     if sys.platform == 'win32':
@@ -63,10 +66,34 @@ def run_node_cts(output_directory: str, args_to_forward: list[str]) -> None:
         'run-cts',
         '-bin',
         output_directory,
+        '-output',
+        output_filepath,
         '-npx',
         npx_wrapper,
     ] + args_to_forward
     subprocess.run(cmd, check=True)
+
+
+def convert_results_for_resultdb_ingestion(
+        test_output_filepath: str, isolated_output_filepath: str) -> None:
+    # This is a very crude conversion, although the output of run-cts does not
+    # give us a lot to work with. If the information it provides is ever
+    # improved, this conversion can likely be substituted for native ResultDB
+    # integration instead of relying on result_adapter.
+    with open(test_output_filepath, encoding='utf-8') as infile:
+        test_results = json.load(infile)
+
+    converted_test_results = {
+        'failures': [],
+        'valid': True,
+    }
+
+    for r in test_results:
+        if r['Status'] != 'pass':
+            converted_test_results['failures'].append(r['TestCase'])
+
+    with open(isolated_output_filepath, 'w', encoding='utf-8') as outfile:
+        json.dump(converted_test_results, outfile)
 
 
 def main() -> None:
@@ -89,7 +116,15 @@ def main() -> None:
     with contextlib.chdir(CTS_DIR):
         node_helpers.add_node_to_path()
         install_npm_deps_in_current_dir()
-        run_node_cts(args.output_directory, unknown_args)
+        output_fd, output_filepath = tempfile.mkstemp()
+        os.close(output_fd)
+        try:
+            run_node_cts(args.output_directory, unknown_args, output_filepath)
+            if args.isolated_script_test_output:
+                convert_results_for_resultdb_ingestion(
+                    output_filepath, args.isolated_script_test_output)
+        finally:
+            os.remove(output_filepath)
 
 
 if __name__ == '__main__':

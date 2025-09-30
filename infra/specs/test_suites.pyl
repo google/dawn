@@ -72,9 +72,17 @@
           'webgpu:api,operation,adapter,requestDevice:default:*',
         ],
         'mixins': [
-          # TODO(crbug.com/441328362): Support running these tests on Swarming.
-          'no_swarming',
+          'result_adapter_single',
         ],
+        'merge': {
+          # This should be removed in favor of updating the recipe code to allow
+          # the merge script to be skipped entirely. noop is needed currently
+          # because standard_isolated_script_merge does not work properly
+          # without some additional Python dependencies. However, noop_merge
+          # locks us to a single shard, and we should not have any need for the
+          # outputs of merge scripts for Dawn.
+          'script': '//testing/merge_scripts/noop_merge.py',
+        },
         'test': 'dawn_node_cts',
       },
     },
