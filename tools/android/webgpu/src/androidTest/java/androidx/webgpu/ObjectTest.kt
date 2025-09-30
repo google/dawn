@@ -1,11 +1,13 @@
 package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.Util
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@SmallTest
 class ObjectTest {
     init {
         Util  // Hack to force library initialization.

@@ -3,6 +3,7 @@ package androidx.webgpu
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.services.storage.TestStorage
 import androidx.webgpu.helper.asString
@@ -16,11 +17,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ImageTest {
     @Test
+    @MediumTest
     fun imageCompareGreen() {
         triangleTest(Color(0.2, 0.9, 0.1, 1.0), "green.png")
     }
 
     @Test
+    @MediumTest
     fun imageCompareRed() {
         triangleTest(Color(0.9, 0.1, 0.2, 1.0), "red.png")
     }

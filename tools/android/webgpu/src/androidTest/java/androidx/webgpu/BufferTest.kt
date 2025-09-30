@@ -1,10 +1,12 @@
 package androidx.webgpu
 
+import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
+@SmallTest
 class BufferTest {
     @Test
     /**

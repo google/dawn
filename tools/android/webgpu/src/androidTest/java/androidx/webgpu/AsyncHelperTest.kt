@@ -1,6 +1,7 @@
 package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -8,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@SmallTest
 class AsyncHelperTest {
     @Test
     fun asyncMethodTest() {
