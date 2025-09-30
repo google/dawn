@@ -1,11 +1,9 @@
 package androidx.webgpu
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.services.storage.TestStorage
 import androidx.webgpu.helper.asString
 import androidx.webgpu.helper.createBitmap
 import androidx.webgpu.helper.createWebGpu
@@ -16,6 +14,9 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ImageTest {
+    private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+    private val storage = StorageFactory.createStore(appContext)
+
     @Test
     @MediumTest
     fun imageCompareGreen() {
@@ -32,7 +33,6 @@ class ImageTest {
         runBlocking {
             val webGpu = createWebGpu()
             val device = webGpu.device
-            val appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
             val shaderModule = device.createShaderModule(
                 ShaderModuleDescriptor(
@@ -96,9 +96,7 @@ class ImageTest {
 
             // Write the generated bitmap to test storage for inspection in the event of test
             // failures.
-            TestStorage(appContext.contentResolver).openOutputFile("generated_image.png").use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-            }
+            storage.writeImage("generated_image.png", bitmap)
 
             val testAssets = appContext.assets
             val matched = testAssets.list("compare")!!.filter {
