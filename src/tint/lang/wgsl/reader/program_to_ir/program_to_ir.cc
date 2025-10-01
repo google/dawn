@@ -1117,8 +1117,12 @@ class Impl {
                     return;
                 }
 
-                const auto* sem = impl.program_.Sem().GetVal(expr->lhs);
-                const bool is_const_eval = sem->Stage() == core::EvaluationStage::kOverride;
+                const auto* lhs_sem = impl.program_.Sem().GetVal(expr->lhs);
+                const auto* rhs_sem = impl.program_.Sem().GetVal(expr->rhs);
+
+                const bool is_const_eval = lhs_sem->Stage() <= core::EvaluationStage::kOverride &&
+                                           rhs_sem->Stage() <= core::EvaluationStage::kOverride;
+
                 auto& b = impl.builder_;
                 core::ir::If* if_inst = nullptr;
                 if (is_const_eval) {
