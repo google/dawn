@@ -2018,32 +2018,23 @@ void Validator::CheckType(const core::type::Type* root,
         return tint::Switch(
             type,
             [&](const core::type::Struct* str) {
-                if (capabilities_.Contains(Capability::kAllowStructMatrixDecorations)) {
-                    return true;
-                }
-
                 for (auto* member : str->Members()) {
                     CheckType(member->Type(), diag, ignore_caps);
 
-                    if (member->RowMajor()) {
-                        diag() << "Row major annotation not allowed on structures";
-                        return false;
-                    }
-                    if (member->HasMatrixStride()) {
-                        diag() << "Matrix stride annotation not allowed on structures";
-                        return false;
-                    }
-                    if (member->Size() < member->Type()->Size()) {
-                        diag() << "struct member " << member->Index()
-                               << " with size=" << member->Size()
-                               << " must be at least as large as the type with size "
-                               << member->Type()->Size();
-                        return false;
-                    }
                     if (member->Type()->Is<core::type::Void>()) {
                         diag() << "struct member " << member->Index() << " cannot have void type";
                         return false;
                     }
+
+                    if (auto* arr = member->Type()->As<core::type::Array>();
+                        arr && arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                        if (member != str->Members().Back()) {
+                            diag() << "runtime-sized arrays can only be the last member of a "
+                                      "struct";
+                            return false;
+                        }
+                    }
+
                     if (member->Align() == 0) {
                         diag() << "struct member must not have an alignment of 0";
                         return false;
@@ -2052,11 +2043,34 @@ void Validator::CheckType(const core::type::Type* root,
                         diag() << "struct member type must not have an alignment of 0";
                         return false;
                     }
-                    if (member->Align() % member->Type()->Align() != 0) {
-                        diag() << "struct member alignment (" << member->Align()
-                               << ") must be divisible by type alignment ("
-                               << member->Type()->Align() << ")";
-                        return false;
+
+                    if (!capabilities_.Contains(Capability::kAllowStructMatrixDecorations)) {
+                        if (member->RowMajor()) {
+                            diag() << "Row major annotation not allowed on structures";
+                            return false;
+                        }
+                        if (member->HasMatrixStride()) {
+                            diag() << "Matrix stride annotation not allowed on structures";
+                            return false;
+                        }
+                    }
+
+                    // TODO(448608979): Remove guard once updated to handle RowMajor correctly
+                    if (!member->RowMajor()) {
+                        if (member->Size() < member->Type()->Size()) {
+                            diag() << "struct member " << member->Index()
+                                   << " with size=" << member->Size()
+                                   << " must be at least as large as the type with size "
+                                   << member->Type()->Size();
+                            return false;
+                        }
+
+                        if (member->Align() % member->Type()->Align() != 0) {
+                            diag() << "struct member alignment (" << member->Align()
+                                   << ") must be divisible by type alignment ("
+                                   << member->Type()->Align() << ")";
+                            return false;
+                        }
                     }
                 }
                 return true;

@@ -314,6 +314,164 @@ TEST_F(IR_ValidatorTest, StructMember_AlignNotDivisibleByTypeAlignment) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructureMember_SizeTooSmall) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"),
+                  Vector{
+                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
+                                                 4u, 4u, IOAttributes{}),
+                  });
+    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            "struct member 0 with size=4 must be at least as large as the type with size 12"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RuntimeArrayNotLast) {
+    auto* s1 = ty.Struct(mod.symbols.New("S1"), {{mod.symbols.New("a"), ty.u32()}});
+    auto* rta = ty.runtime_array(s1);
+
+    auto* str_ty = ty.Struct(mod.symbols.New("OuterS"), {
+                                                            {mod.symbols.New("a1"), rta},
+                                                            {mod.symbols.New("j"), ty.u32()},
+                                                        });
+
+    auto* v = b.Var(ty.ptr(storage, str_ty, read_write));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:11:3 error: var: runtime-sized arrays can only be the last member of a struct
+  %1:ptr<storage, OuterS, read_write> = var undef @binding_point(0, 0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RuntimeArrayIsLast) {
+    auto* s1 = ty.Struct(mod.symbols.New("S1"), {{mod.symbols.New("a"), ty.u32()}});
+    auto* rta = ty.runtime_array(s1);
+
+    auto* str_ty = ty.Struct(mod.symbols.New("OuterS"), {
+                                                            {mod.symbols.New("j"), ty.u32()},
+                                                            {mod.symbols.New("a1"), rta},
+                                                        });
+
+    auto* v = b.Var(ty.ptr(storage, str_ty, read_write));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_MultipleRuntimeArrays) {
+    auto* s1 = ty.Struct(mod.symbols.New("S1"), {{mod.symbols.New("a"), ty.u32()}});
+    auto* rta = ty.runtime_array(s1);
+
+    auto* str_ty = ty.Struct(mod.symbols.New("OuterS"), {
+                                                            {mod.symbols.New("a1"), rta},
+                                                            {mod.symbols.New("a2"), rta},
+                                                        });
+
+    auto* v = b.Var(ty.ptr(storage, str_ty, read_write));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:11:3 error: var: runtime-sized arrays can only be the last member of a struct
+  %1:ptr<storage, OuterS, read_write> = var undef @binding_point(0, 0)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithoutCapability) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* member = ty.Get<core::type::StructMember>(
+        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    member->SetRowMajor();
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, mat_ty->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:6:3 error: var: Row major annotation not allowed on structures
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithCapability) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* member = ty.Get<core::type::StructMember>(
+        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    member->SetRowMajor();
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, mat_ty->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowStructMatrixDecorations});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutCapability) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* member = ty.Get<core::type::StructMember>(
+        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    member->SetMatrixStride(32);
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, mat_ty->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:6:3 error: var: Matrix stride annotation not allowed on structures
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithCapability) {
+    auto* mat_ty = ty.mat2x2<f32>();
+    auto* member = ty.Get<core::type::StructMember>(
+        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    member->SetMatrixStride(32);
+    auto* str_ty =
+        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, mat_ty->Size());
+
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowStructMatrixDecorations});
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, FunctionParam_InvalidAddressSpaceForHandleType) {
     auto* type = ty.ptr(AddressSpace::kFunction, ty.sampler());
     auto* fn = b.Function("my_func", ty.void_());
@@ -1340,27 +1498,6 @@ TEST_P(AddressSpace_AccessMode, Test) {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason, testing::HasSubstr(expected_error));
     }
-}
-
-TEST_F(IR_ValidatorTest, StructureMemberSizeTooSmall) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("S"),
-                  Vector{
-                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
-                                                 4u, 4u, IOAttributes{}),
-                  });
-    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
-
-    auto* fn = b.Function("F", ty.void_());
-    b.Append(fn->Block(), [&] { b.Return(fn); });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            "struct member 0 with size=4 must be at least as large as the type with size 12"))
-        << res.Failure();
 }
 
 INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
