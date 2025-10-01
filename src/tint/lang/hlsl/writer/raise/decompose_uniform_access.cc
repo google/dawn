@@ -33,7 +33,6 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/hlsl/builtin_fn.h"
 #include "src/tint/lang/hlsl/ir/builtin_call.h"
-#include "src/tint/lang/hlsl/ir/ternary.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -359,10 +358,7 @@ struct State {
             auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
 
             Vector<core::ir::Value*, 3> args{false_, true_, cond->Result()};
-            auto* shift_amt =
-                b.ir.CreateInstruction<hlsl::ir::Ternary>(b.InstructionResult(ty.u32()), args);
-            b.Append(shift_amt);
-
+            auto* shift_amt = b.Call(ty.u32(), core::BuiltinFn::kSelect, args);
             load = b.ShiftRight(ty.u32(), load, shift_amt);
         }
         load = b.Call<hlsl::ir::BuiltinCall>(ty.f32(), hlsl::BuiltinFn::kF16Tof32, load);
@@ -421,9 +417,7 @@ struct State {
                 Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(),
                                                  cond->Result()};
 
-                load = b.ir.CreateInstruction<hlsl::ir::Ternary>(
-                    b.InstructionResult(ty.vec2<u32>()), args);
-                b.Append(load);
+                load = b.Call(ty.vec2<u32>(), core::BuiltinFn::kSelect, args);
             }
         } else {
             TINT_IR_UNREACHABLE(ir);
@@ -466,9 +460,7 @@ struct State {
                 auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
                 auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
                 auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond->Result()};
-                load = b.ir.CreateInstruction<hlsl::ir::Ternary>(
-                    b.InstructionResult(ty.vec2<u32>()), std::move(args));
-                b.Append(load);
+                load = b.Call(ty.vec2<u32>(), core::BuiltinFn::kSelect, std::move(args));
             }
             if (result_ty->Width() == 3) {
                 auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), load);

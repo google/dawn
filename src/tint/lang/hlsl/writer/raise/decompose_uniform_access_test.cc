@@ -415,7 +415,7 @@ $B1: {  # root
     %19:u32 = load_vector_element %16, %18
     %20:u32 = mod %14, 4u
     %21:bool = eq %20, 0u
-    %22:u32 = hlsl.ternary 16u, 0u, %21
+    %22:u32 = select 16u, 0u, %21
     %23:u32 = shr %19, %22
     %24:f32 = hlsl.f16tof32 %23
     %25:f16 = convert %24
@@ -506,7 +506,7 @@ $B1: {  # root
     %23:vec2<u32> = swizzle %22, zw
     %24:vec2<u32> = swizzle %22, xy
     %25:bool = eq %21, 2u
-    %26:vec2<u32> = hlsl.ternary %24, %23, %25
+    %26:vec2<u32> = select %24, %23, %25
     %27:vec4<f16> = bitcast %26
     %28:vec3<f16> = swizzle %27, xyz
     %29:u32 = add 8u, %start_byte_offset
@@ -518,7 +518,7 @@ $B1: {  # root
     %35:vec2<u32> = swizzle %34, zw
     %36:vec2<u32> = swizzle %34, xy
     %37:bool = eq %33, 2u
-    %38:vec2<u32> = hlsl.ternary %36, %35, %37
+    %38:vec2<u32> = select %36, %35, %37
     %39:vec4<f16> = bitcast %38
     %40:vec3<f16> = swizzle %39, xyz
     %41:mat2x3<f16> = construct %28, %40
