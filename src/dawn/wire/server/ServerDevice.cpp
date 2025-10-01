@@ -101,8 +101,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
     ObjectHandle pipelineObjectHandle,
     const WGPUComputePipelineDescriptor* descriptor) {
     Reserved<WGPUComputePipeline> pipeline;
-    WIRE_TRY(Objects<WGPUComputePipeline>().Allocate(&pipeline, pipelineObjectHandle,
-                                                     AllocationState::Reserved));
+    WIRE_TRY(Allocate(&pipeline, pipelineObjectHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();
@@ -142,8 +141,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
     ObjectHandle pipelineObjectHandle,
     const WGPURenderPipelineDescriptor* descriptor) {
     Reserved<WGPURenderPipeline> pipeline;
-    WIRE_TRY(Objects<WGPURenderPipeline>().Allocate(&pipeline, pipelineObjectHandle,
-                                                    AllocationState::Reserved));
+    WIRE_TRY(Allocate(&pipeline, pipelineObjectHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<CreatePipelineAsyncUserData>();
     userdata->device = device.AsHandle();

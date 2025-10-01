@@ -34,7 +34,7 @@ WireResult Server::DoSurfaceGetCurrentTexture(Known<WGPUSurface> surface,
                                               Known<WGPUDevice> configuredDevice,
                                               ObjectHandle textureHandle) {
     Reserved<WGPUTexture> texture;
-    WIRE_TRY(Objects<WGPUTexture>().Allocate(&texture, textureHandle, AllocationState::Reserved));
+    WIRE_TRY(Allocate(&texture, textureHandle, AllocationState::Reserved));
 
     WGPUSurfaceTexture surfaceTexture;
     mProcs.surfaceGetCurrentTexture(surface->handle, &surfaceTexture);

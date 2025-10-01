@@ -53,7 +53,7 @@ namespace dawn::wire::server {
                 {% set cType = as_cType(member.handle_type.name) %}
                 {% set name = as_varName(member.name) %}
                 Reserved<{{cType}}> {{name}}Data;
-                WIRE_TRY(Objects<{{cType}}>().Allocate(&{{name}}Data, cmd.{{name}}));
+                WIRE_TRY(Allocate(&{{name}}Data, cmd.{{name}}));
                 {{name}}Data->generation = cmd.{{name}}.generation;
             {%- endfor %}
 
@@ -62,7 +62,7 @@ namespace dawn::wire::server {
                 {% set cType = as_cType(member.id_type.name) %}
                 {% set name = as_varName(member.name) %}
                 Known<{{cType}}> {{name}}Handle;
-                WIRE_TRY(Objects<{{cType}}>().Get(cmd.{{name}}, &{{name}}Handle));
+                WIRE_TRY(Get(cmd.{{name}}, &{{name}}Handle));
             {% endfor %}
 
             //* Do command
@@ -124,7 +124,7 @@ namespace dawn::wire::server {
         // After the server handles all the commands from the stream, we additionally run
         // ProcessEvents on all known Instances so that any work done on the server side can be
         // forwarded through to the client.
-        for (auto instance : Objects<WGPUInstance>().GetAllHandles()) {
+        for (auto instance : GetAllInstanceHandles()) {
             if (DoInstanceProcessEvents(instance) != WireResult::Success) {
                 return nullptr;
             }

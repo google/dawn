@@ -43,7 +43,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                           WGPUFuture deviceLostFuture,
                                           const WGPUDeviceDescriptor* descriptor) {
     Reserved<WGPUDevice> device;
-    WIRE_TRY(Objects<WGPUDevice>().Allocate(&device, deviceHandle, AllocationState::Reserved));
+    WIRE_TRY(Allocate(&device, deviceHandle, AllocationState::Reserved));
 
     auto userdata = MakeUserdata<RequestDeviceUserdata>();
     userdata->eventManager = eventManager;

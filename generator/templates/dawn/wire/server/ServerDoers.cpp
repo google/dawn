@@ -82,19 +82,19 @@ namespace dawn::wire::server {
             {% for type in by_category["object"] %}
                 {% set cType = as_cType(type.name) %}
                 case ObjectType::{{type.name.CamelCase()}}: {
-                    Reserved<{{cType}}> obj;
-                    WIRE_TRY(Objects<{{cType}}>().Get(objectId, &obj));
+                    ObjectData<{{cType}}> data;
+                    WIRE_TRY(Free<{{cType}}>(objectId, &data));
 
-                    if (obj->state == AllocationState::Allocated) {
-                        DAWN_ASSERT(obj->handle != nullptr);
+                    //* Handle actually releasing the object after untracking it.
+                    if (data.state == AllocationState::Allocated) {
+                        DAWN_ASSERT(data.handle != nullptr);
                         {% if type.name.get() == "device" %}
                             //* Deregisters uncaptured error and device lost callbacks since
                             //* they should not be forwarded if the device no longer exists on the wire.
-                            ClearDeviceCallbacks(obj->handle);
+                            ClearDeviceCallbacks(data.handle);
                         {% endif %}
-                        Release(obj->handle);
+                        Release(data.handle);
                     }
-                    Objects<{{cType}}>().Free(objectId);
                     return WireResult::Success;
                 }
             {% endfor %}
