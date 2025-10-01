@@ -338,8 +338,8 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %4:u32 = load_vector_element %3, 0u
-    %5:f32 = hlsl.f16tof32 %4
-    %6:f16 = convert %5
+    %5:vec2<f16> = bitcast %4
+    %6:f16 = access %5, 0u
     %a:f16 = let %6
     ret
   }
@@ -404,8 +404,8 @@ $B1: {  # root
     %a:vec4<f16> = let %7
     %9:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %10:u32 = load_vector_element %9, 0u
-    %11:f32 = hlsl.f16tof32 %10
-    %12:f16 = convert %11
+    %11:vec2<f16> = bitcast %10
+    %12:f16 = access %11, 0u
     %b:f16 = let %12
     %14:u32 = mul %x, 2u
     %15:u32 = div %14, 16u
@@ -415,22 +415,20 @@ $B1: {  # root
     %19:u32 = load_vector_element %16, %18
     %20:u32 = mod %14, 4u
     %21:bool = eq %20, 0u
-    %22:u32 = select 16u, 0u, %21
-    %23:u32 = shr %19, %22
-    %24:f32 = hlsl.f16tof32 %23
-    %25:f16 = convert %24
-    %c:f16 = let %25
-    %27:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %28:u32 = load_vector_element %27, 1u
-    %29:f32 = hlsl.f16tof32 %28
-    %30:f16 = convert %29
-    %d:f16 = let %30
-    %32:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %33:u32 = load_vector_element %32, 1u
-    %34:u32 = shr %33, 16u
-    %35:f32 = hlsl.f16tof32 %34
-    %36:f16 = convert %35
-    %e:f16 = let %36
+    %22:u32 = select 1u, 0u, %21
+    %23:vec2<f16> = bitcast %19
+    %24:f16 = access %23, %22
+    %c:f16 = let %24
+    %26:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %27:u32 = load_vector_element %26, 1u
+    %28:vec2<f16> = bitcast %27
+    %29:f16 = access %28, 0u
+    %d:f16 = let %29
+    %31:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %32:u32 = load_vector_element %31, 1u
+    %33:vec2<f16> = bitcast %32
+    %34:f16 = access %33, 1u
+    %e:f16 = let %34
     ret
   }
 }
@@ -490,8 +488,8 @@ $B1: {  # root
     %b:vec3<f16> = let %10
     %12:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %13:u32 = load_vector_element %12, 3u
-    %14:f32 = hlsl.f16tof32 %13
-    %15:f16 = convert %14
+    %14:vec2<f16> = bitcast %13
+    %15:f16 = access %14, 0u
     %c:f16 = let %15
     ret
   }

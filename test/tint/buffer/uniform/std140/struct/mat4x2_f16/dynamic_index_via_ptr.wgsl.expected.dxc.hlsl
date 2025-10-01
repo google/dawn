@@ -101,6 +101,7 @@ void f() {
   vector<float16_t, 2> l_a_i_a_i_m_i = tint_bitcast_to_f16(a[(((v_21 + v_22) + v_23) / 16u)][((((v_21 + v_22) + v_23) % 16u) / 4u)]);
   uint v_24 = (((v_21 + v_22) + v_23) + (min(uint(i()), 1u) * 2u));
   uint v_25 = a[(v_24 / 16u)][((v_24 % 16u) / 4u)];
-  float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32((v_25 >> ((((v_24 % 4u) == 0u)) ? (0u) : (16u)))));
+  uint v_26 = ((((v_24 % 4u) == 0u)) ? (0u) : (1u));
+  float16_t l_a_i_a_i_m_i_i = tint_bitcast_to_f16(v_25)[v_26];
 }
 

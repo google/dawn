@@ -31,8 +31,6 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/hlsl/builtin_fn.h"
-#include "src/tint/lang/hlsl/ir/builtin_call.h"
 
 namespace tint::hlsl::writer::raise {
 namespace {
@@ -330,39 +328,40 @@ struct State {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    core::ir::Call* MakeScalarLoad(core::ir::Var* var,
-                                   const core::type::Type* result_ty,
-                                   core::ir::Value* byte_idx) {
+    core::ir::Instruction* MakeScalarLoad(core::ir::Var* var,
+                                          const core::type::Type* result_ty,
+                                          core::ir::Value* byte_idx) {
         auto* array_idx = OffsetValueToArrayIndex(byte_idx);
         auto* access = b.Access(ty.ptr(uniform, ty.vec4<u32>()), var, array_idx);
 
         auto* vec_idx = CalculateVectorOffset(byte_idx);
         core::ir::Instruction* load = b.LoadVectorElement(access, vec_idx);
         if (result_ty->Is<core::type::F16>()) {
-            return MakeScalarLoadF16(load, result_ty, byte_idx);
+            return ExtractScalarF16(load, byte_idx);
         }
         return b.Bitcast(result_ty, load);
     }
 
-    core::ir::Call* MakeScalarLoadF16(core::ir::Instruction* load,
-                                      const core::type::Type* result_ty,
-                                      core::ir::Value* byte_idx) {
-        // Handle F16
+    core::ir::Access* ExtractScalarF16(core::ir::Instruction* load, core::ir::Value* byte_idx) {
+        // We will bitcast the u32 to a vec2h and then extract the element that we want.
+        core::ir::Value* element_index = nullptr;
         if (auto* cnst = byte_idx->As<core::ir::Constant>()) {
-            if (cnst->Value()->ValueAs<uint32_t>() % 4 != 0) {
-                load = b.ShiftRight(ty.u32(), load, 16_u);
+            if (cnst->Value()->ValueAs<uint32_t>() % 4 == 0) {
+                element_index = b.Constant(0_u);
+            } else {
+                element_index = b.Constant(1_u);
             }
         } else {
-            auto* false_ = b.Value(16_u);
+            auto* false_ = b.Value(1_u);
             auto* true_ = b.Value(0_u);
             auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
 
             Vector<core::ir::Value*, 3> args{false_, true_, cond->Result()};
-            auto* shift_amt = b.Call(ty.u32(), core::BuiltinFn::kSelect, args);
-            load = b.ShiftRight(ty.u32(), load, shift_amt);
+            element_index = b.Call(ty.u32(), core::BuiltinFn::kSelect, args)->Result();
         }
-        load = b.Call<hlsl::ir::BuiltinCall>(ty.f32(), hlsl::BuiltinFn::kF16Tof32, load);
-        return b.Convert(result_ty, load);
+
+        auto* bitcast = b.Bitcast<vec2<f16>>(load);
+        return b.Access<f16>(bitcast, element_index);
     }
 
     // When loading a vector we have to take the alignment into account to determine which part of

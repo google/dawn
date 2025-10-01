@@ -47,7 +47,7 @@ void f() {
   p = v_10;
   p[1u] = v_2(32u);
   p[1u][0u] = tint_bitcast_to_f16(u[0u].y).yx;
-  p[1u][0u].x = float16_t(f16tof32(u[0u].y));
+  p[1u][0u].x = tint_bitcast_to_f16(u[0u].y).x;
   s.Store<float16_t>(0u, p[1u][0u].x);
 }
 

@@ -30,6 +30,6 @@ void f() {
   v_2(0u, v_3(0u));
   s.Store<vector<float16_t, 2> >(4u, tint_bitcast_to_f16(u[0u].x));
   s.Store<vector<float16_t, 2> >(4u, tint_bitcast_to_f16(u[0u].x).yx);
-  s.Store<float16_t>(2u, float16_t(f16tof32(u[0u].y)));
+  s.Store<float16_t>(2u, tint_bitcast_to_f16(u[0u].y).x);
 }
 

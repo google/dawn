@@ -30,7 +30,7 @@ void f() {
   a(v_2(0u));
   b(tint_bitcast_to_f16(u[0u].y));
   b(tint_bitcast_to_f16(u[0u].y).yx);
-  c(float16_t(f16tof32(u[0u].y)));
+  c(tint_bitcast_to_f16(u[0u].y).x);
   c(tint_bitcast_to_f16(u[0u].y).yx.x);
 }
 

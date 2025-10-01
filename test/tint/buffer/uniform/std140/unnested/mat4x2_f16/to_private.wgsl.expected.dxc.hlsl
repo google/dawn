@@ -23,6 +23,6 @@ void f() {
   p = v_2(0u);
   p[1u] = tint_bitcast_to_f16(u[0u].x);
   p[1u] = tint_bitcast_to_f16(u[0u].x).yx;
-  p[0u].y = float16_t(f16tof32(u[0u].y));
+  p[0u].y = tint_bitcast_to_f16(u[0u].y).x;
 }
 
