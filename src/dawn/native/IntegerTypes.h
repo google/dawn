@@ -55,7 +55,10 @@ namespace dawn::native {
 using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
 constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindingsPerBindGroup);
 
-// Binding numbers get mapped to a packed range of indices
+// Binding numbers get mapped to a packed range of indices. APIBindingIndex is for user-facing
+// indices in the packed range, while BindingIndex is Dawn-facing. See comment for the
+// BindGroupLayoutInternal class for more details.
+using APIBindingIndex = TypedInteger<struct APIBindingIndexT, uint32_t>;
 using BindingIndex = TypedInteger<struct BindingIndexT, uint32_t>;
 
 // Bind group indinces represent the index in the SetBindGroup, the index in

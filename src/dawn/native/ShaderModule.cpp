@@ -624,8 +624,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
     const auto& bindingIt = layoutBindings.find(bindingNumber);
     DAWN_INVALID_IF(bindingIt == layoutBindings.end(), "Binding doesn't exist in %s.", layout);
 
-    BindingIndex bindingIndex(bindingIt->second);
-    const BindingInfo& layoutInfo = layout->GetBindingInfo(bindingIndex);
+    APIBindingIndex bindingIndex(bindingIt->second);
+    const BindingInfo& layoutInfo = layout->GetAPIBindingInfo(bindingIndex);
 
     BindingInfoType bindingLayoutType = GetBindingInfoType(layoutInfo);
     BindingInfoType shaderBindingType = GetShaderBindingType(shaderInfo);
@@ -1645,37 +1645,47 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
         if (pair.sampler == EntryPointMetadata::nonSamplerBindingPoint) {
             continue;
         }
-        const BindGroupLayoutInternalBase* samplerBGL =
-            layout->GetBindGroupLayout(pair.sampler.group);
-        const BindingInfo& samplerInfo =
-            samplerBGL->GetBindingInfo(samplerBGL->GetBindingIndex(pair.sampler.binding));
+
         bool samplerIsFiltering = false;
-        if (std::holds_alternative<StaticSamplerBindingInfo>(samplerInfo.bindingLayout)) {
-            const StaticSamplerBindingInfo& samplerLayout =
-                std::get<StaticSamplerBindingInfo>(samplerInfo.bindingLayout);
-            samplerIsFiltering = samplerLayout.sampler->IsFiltering();
-        } else {
-            const SamplerBindingInfo& samplerLayout =
-                std::get<SamplerBindingInfo>(samplerInfo.bindingLayout);
-            samplerIsFiltering = (samplerLayout.type == wgpu::SamplerBindingType::Filtering);
+        {
+            const BindGroupLayoutInternalBase* samplerBGL =
+                layout->GetBindGroupLayout(pair.sampler.group);
+            const BindingInfo& samplerInfo =
+                samplerBGL->GetAPIBindingInfo(samplerBGL->GetAPIBindingIndex(pair.sampler.binding));
+            if (std::holds_alternative<StaticSamplerBindingInfo>(samplerInfo.bindingLayout)) {
+                const StaticSamplerBindingInfo& samplerLayout =
+                    std::get<StaticSamplerBindingInfo>(samplerInfo.bindingLayout);
+                samplerIsFiltering = samplerLayout.sampler->IsFiltering();
+            } else {
+                const SamplerBindingInfo& samplerLayout =
+                    std::get<SamplerBindingInfo>(samplerInfo.bindingLayout);
+                samplerIsFiltering = (samplerLayout.type == wgpu::SamplerBindingType::Filtering);
+            }
         }
-        if (!samplerIsFiltering) {
-            continue;
+
+        wgpu::TextureSampleType sampleType = wgpu::TextureSampleType::Undefined;
+        {
+            const BindGroupLayoutInternalBase* textureBGL =
+                layout->GetBindGroupLayout(pair.texture.group);
+            const BindingInfo& textureInfo =
+                textureBGL->GetAPIBindingInfo(textureBGL->GetAPIBindingIndex(pair.texture.binding));
+
+            if (std::holds_alternative<ExternalTextureBindingInfo>(textureInfo.bindingLayout)) {
+                sampleType = wgpu::TextureSampleType::Float;
+            } else {
+                const TextureBindingInfo& sampledTextureBindingInfo =
+                    std::get<TextureBindingInfo>(textureInfo.bindingLayout);
+                sampleType = sampledTextureBindingInfo.sampleType;
+            }
         }
-        const BindGroupLayoutInternalBase* textureBGL =
-            layout->GetBindGroupLayout(pair.texture.group);
-        const BindingInfo& textureInfo =
-            textureBGL->GetBindingInfo(textureBGL->GetBindingIndex(pair.texture.binding));
-        const TextureBindingInfo& sampledTextureBindingInfo =
-            std::get<TextureBindingInfo>(textureInfo.bindingLayout);
 
         DAWN_INVALID_IF(
-            sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Float &&
-                sampledTextureBindingInfo.sampleType != kInternalResolveAttachmentSampleType,
+            samplerIsFiltering && sampleType != wgpu::TextureSampleType::Float &&
+                sampleType != kInternalResolveAttachmentSampleType,
             "Texture binding (group:%u, binding:%u) is %s but used statically with a sampler "
             "(group:%u, binding:%u) that's %s",
-            pair.texture.group, pair.texture.binding, sampledTextureBindingInfo.sampleType,
-            pair.sampler.group, pair.sampler.binding, wgpu::SamplerBindingType::Filtering);
+            pair.texture.group, pair.texture.binding, sampleType, pair.sampler.group,
+            pair.sampler.binding, wgpu::SamplerBindingType::Filtering);
     }
 
     // Validate compatibility of the pixel local storage.

@@ -865,7 +865,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                     DAWN_CHECK(false);
                 },
                 [](const InputAttachmentBindingInfo&) { DAWN_CHECK(false); },
-                [](const ExternalTextureBindingInfo&) { DAWN_UNREACHABLE(); });
+                [](const ExternalTextureBindingInfo&) { DAWN_CHECK(false); });
         }
 
         uint32_t offset_size = uint32_t(dynamicOffsets.size());

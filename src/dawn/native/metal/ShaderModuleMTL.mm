@@ -132,29 +132,27 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        for (const auto& currentModuleBindingInfo : moduleBindingInfo[group]) {
-            // We cannot use structured binding here because lambda expressions can only capture
-            // variables, while structured binding doesn't introduce variables.
-            const auto& binding = currentModuleBindingInfo.first;
-            const auto& shaderBindingInfo = currentModuleBindingInfo.second;
-
+        for (const auto& [bindingNumber, apiBindingIndex] : bgl->GetBindingMap()) {
             tint::BindingPoint srcBindingPoint{
                 .group = uint32_t(group),
-                .binding = uint32_t(binding),
+                .binding = uint32_t(bindingNumber),
             };
 
-            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
             auto& bindingIndexInfo = layout->GetBindingIndexInfo(stage)[group];
-            uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
 
-            tint::BindingPoint dstBindingPoint{
-                .group = useArgumentBuffers ? uint32_t(group) : 0,
-                .binding = shaderIndex,
+            auto ComputeDestinationBindingPoint = [&](BindingIndex bindingIndex) {
+                uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
+                return tint::BindingPoint{
+                    .group = useArgumentBuffers ? uint32_t(group) : 0,
+                    .binding = shaderIndex,
+                };
             };
 
             MatchVariant(
-                shaderBindingInfo.bindingInfo,
+                bgl->GetAPIBindingInfo(apiBindingIndex).bindingLayout,
                 [&](const BufferBindingInfo& bindingInfo) {
+                    tint::BindingPoint dstBindingPoint =
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
                     switch (bindingInfo.type) {
                         case wgpu::BufferBindingType::Uniform:
                             bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
@@ -172,13 +170,19 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                     }
                 },
                 [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.sampler.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
                 },
                 [&](const TextureBindingInfo& bindingInfo) {
-                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.texture.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
                 },
                 [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.storage_texture.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
                 },
                 [&](const TexelBufferBindingInfo& bindingInfo) {
                     // Metal does not support texel buffers.
@@ -186,27 +190,14 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                     DAWN_UNREACHABLE();
                 },
                 [&](const ExternalTextureBindingInfo& bindingInfo) {
-                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                    const auto& expansion = etBindingMap.find(binding);
-                    DAWN_ASSERT(expansion != etBindingMap.end());
-
-                    const auto& bindingExpansion = expansion->second;
-                    tint::BindingPoint plane0{
-                        .group = dstBindingPoint.group,
-                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)],
-                    };
-                    tint::BindingPoint plane1{
-                        .group = dstBindingPoint.group,
-                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)],
-                    };
-                    tint::BindingPoint metadata{
-                        .group = dstBindingPoint.group,
-                        .binding = bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)],
-                    };
-
                     bindings.external_texture.emplace(
-                        srcBindingPoint, tint::ExternalTexture{metadata, plane0, plane1});
+                        srcBindingPoint,
+                        tint::ExternalTexture{
+                            .metadata = ComputeDestinationBindingPoint(bindingInfo.params),
+                            .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
+                            .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
                 },
+                [](const StaticSamplerBindingInfo&) { DAWN_UNREACHABLE(); },
                 [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
         }
 

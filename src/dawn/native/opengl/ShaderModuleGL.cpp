@@ -105,8 +105,6 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
     DAWN_UNREACHABLE();
 }
 
-using BindingMap = absl::flat_hash_map<tint::BindingPoint, tint::BindingPoint>;
-
 // Returns information about the texture/sampler pairs used by the entry point. This is necessary
 // because GL uses combined texture/sampler bindings while WGSL allows mixing and matching textures
 // and samplers in the shader. GL also uses a placeholder sampler to use with textures when they
@@ -117,77 +115,98 @@ using BindingMap = absl::flat_hash_map<tint::BindingPoint, tint::BindingPoint>;
 void GenerateCombinedSamplerInfo(
     const EntryPointMetadata& metadata,
     const tint::glsl::writer::Bindings& bindings,
-    const BindingMap& externalTextureExpansionMap,
+    const PipelineLayout* layout,
     std::vector<CombinedSampler>* combinedSamplers,
     tint::glsl::writer::CombinedTextureSamplerInfo* samplerTextureToName) {
-    // Helper to avoid duplicated logic for when a CombinedSampler is determined.
-    auto AddCombinedSampler = [&](tint::BindingPoint textureWGSL,
-                                  tint::BindingPoint textureRemapped,
-                                  std::optional<tint::BindingPoint> samplerWGSL,
-                                  BindingIndex textureArraySize, bool isPlane1 = false) {
-        // Dawn needs pre-remapping WGSL bind points.
+    // Helper to avoid duplicated logic for when a CombinedSampler is determined. It takes a bunch
+    // of information for both the texture and the sampler and translate to what Dawn/Tint need.
+    struct CombinedBindingInfo {
+        // Dawn takes BindGroupIndex + BindingIndex.
+        BindGroupIndex group;
+        BindingIndex index;
+        BindingIndex shaderArraySize = BindingIndex(1);
+        // Tint takes the post-remapping binding point.
+        tint::glsl::writer::BindingInfo remappedBinding;
+    };
+    auto AddCombinedSampler = [&](CombinedBindingInfo texture,
+                                  std::optional<CombinedBindingInfo> sampler,
+                                  bool isPlane1 = false) {
+        // Reflect to the pipeline the combination with BindGroupIndex + BindingIndex in that BGL.
         CombinedSampler combinedSampler = {{
             .samplerLocation = std::nullopt,
             .textureLocation = {{
-                .group = BindGroupIndex(textureWGSL.group),
-                .binding = BindingNumber(textureWGSL.binding),
-                .arraySize = textureArraySize,
+                .group = texture.group,
+                .index = texture.index,
+                .shaderArraySize = texture.shaderArraySize,
             }},
         }};
-        if (samplerWGSL.has_value()) {
+        if (sampler.has_value()) {
             combinedSampler.samplerLocation = {{{
-                .group = BindGroupIndex(samplerWGSL->group),
-                .binding = BindingNumber(samplerWGSL->binding),
+                .group = sampler->group,
+                .index = sampler->index,
+                .shaderArraySize = sampler->shaderArraySize,
             }}};
         }
         combinedSamplers->push_back(combinedSampler);
 
-        // Tint uses post-remapping bind points.
+        // Let Tint know to generate a new GLSL sampler for this combination.
         tint::BindingPoint samplerRemapped = bindings.placeholder_sampler_bind_point;
-        if (samplerWGSL.has_value()) {
-            samplerRemapped = {.group = 0,
-                               .binding = bindings.sampler.at(samplerWGSL.value()).binding};
+        if (sampler.has_value()) {
+            samplerRemapped = {0, sampler->remappedBinding.binding};
         }
-
         samplerTextureToName->emplace(
-            tint::glsl::writer::CombinedTextureSamplerPair{textureRemapped, samplerRemapped,
-                                                           isPlane1},
+            tint::glsl::writer::CombinedTextureSamplerPair{
+                {0, texture.remappedBinding.binding}, samplerRemapped, isPlane1},
             combinedSampler.GetName());
     };
 
     for (const auto& use : metadata.samplerAndNonSamplerTexturePairs) {
         // Replace uses of the placeholder sampler with its actual binding point.
-        std::optional<tint::BindingPoint> sampler = std::nullopt;
+        std::optional<CombinedBindingInfo> sampler = std::nullopt;
         if (use.sampler != EntryPointMetadata::nonSamplerBindingPoint) {
-            sampler = ToTint(use.sampler);
+            const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(use.sampler.group);
+            sampler = {
+                .group = use.sampler.group,
+                .index = bgl->AsBindingIndex(bgl->GetBindingMap().at(use.sampler.binding)),
+                .remappedBinding = bindings.sampler.at(ToTint(use.sampler)),
+            };
         }
 
         // Tint reflection returns information about uses of both regular textures and sampled
         // textures so we need to differentiate both cases here.
+        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(use.texture.group);
+        APIBindingIndex textureAPIIndex = bgl->GetBindingMap().at(use.texture.binding);
+        const auto& bindingInfo = bgl->GetAPIBindingInfo(textureAPIIndex);
 
         // The easy case is when a regular texture is being handled.
-        if (!externalTextureExpansionMap.contains(ToTint(use.texture))) {
-            tint::BindingPoint textureWGSL = ToTint(use.texture);
-            tint::BindingPoint textureRemapped = {0, bindings.texture.at(textureWGSL).binding};
-            BindingIndex arraySizeInShader = metadata.bindings.at(BindGroupIndex(textureWGSL.group))
-                                                 .at(BindingNumber(textureWGSL.binding))
-                                                 .arraySize;
-            AddCombinedSampler(textureWGSL, textureRemapped, sampler, arraySizeInShader);
+        if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
+            CombinedBindingInfo texture = {
+                .group = use.texture.group,
+                .index = bgl->AsBindingIndex(textureAPIIndex),
+                .shaderArraySize =
+                    metadata.bindings.at(use.texture.group).at(use.texture.binding).arraySize,
+                .remappedBinding = bindings.texture.at(ToTint(use.texture)),
+            };
+            AddCombinedSampler(texture, sampler);
             continue;
         }
 
-        // Add plane 0 of the external texture (this happen to be the same code as for regular
-        // textures because plane0 uses the original WGSL bind point).
-        tint::BindingPoint plane0WGSL = ToTint(use.texture);
-        tint::BindingPoint plane0Remapped = {
-            0, bindings.external_texture.at(plane0WGSL).plane0.binding};
-        AddCombinedSampler(plane0WGSL, plane0Remapped, sampler, BindingIndex(1));
+        // This is an external texture, add planes individually.
+        const auto& bindingLayout = std::get<ExternalTextureBindingInfo>(bindingInfo.bindingLayout);
 
-        // Plane 1 needs its pre-remapping bind point queried from the expansion map.
-        tint::BindingPoint plane1WGSL = externalTextureExpansionMap.at(plane0WGSL);
-        tint::BindingPoint plane1Remapped = {
-            0, bindings.external_texture.at(plane0WGSL).plane1.binding};
-        AddCombinedSampler(plane1WGSL, plane1Remapped, sampler, BindingIndex(1), true);
+        CombinedBindingInfo plane0 = {
+            .group = use.texture.group,
+            .index = bindingLayout.plane0,
+            .remappedBinding = bindings.external_texture.at(ToTint(use.texture)).plane0,
+        };
+        AddCombinedSampler(plane0, sampler, false);
+
+        CombinedBindingInfo plane1 = {
+            .group = use.texture.group,
+            .index = bindingLayout.plane1,
+            .remappedBinding = bindings.external_texture.at(ToTint(use.texture)).plane1,
+        };
+        AddCombinedSampler(plane1, sampler, true);
     }
 }
 
@@ -281,7 +300,8 @@ std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber) {
 }
 
 bool operator<(const CombinedSamplerElement& a, const CombinedSamplerElement& b) {
-    return std::tie(a.group, a.binding, a.arraySize) < std::tie(b.group, b.binding, b.arraySize);
+    return std::tie(a.group, a.index, a.shaderArraySize) <
+           std::tie(b.group, b.index, b.shaderArraySize);
 }
 
 bool operator<(const CombinedSampler& a, const CombinedSampler& b) {
@@ -296,10 +316,10 @@ std::string CombinedSampler::GetName() const {
         o << "_placeholder_sampler";
     } else {
         o << "_" << static_cast<uint32_t>(samplerLocation->group) << "_"
-          << static_cast<uint32_t>(samplerLocation->binding);
+          << static_cast<uint32_t>(samplerLocation->index);
     }
     o << "_with_" << static_cast<uint32_t>(textureLocation.group) << "_"
-      << static_cast<uint32_t>(textureLocation.binding);
+      << static_cast<uint32_t>(textureLocation.index);
     return o.str();
 }
 
@@ -318,33 +338,32 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)) {}
 
-std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
-    SingleShaderStage stage,
-    const PipelineLayout* layout,
-    const BindingInfoArray& moduleBindingInfo,
-    GLSLCompilationRequest& req) {
-    // Because of the way the rest of the backend uses the binding information, we need to pass
-    // through the original WGSL values in the combined shader map. That means, we need to store
-    // that data for the external texture, otherwise it ends up getting lost.
-    BindingMap externalTextureExpansionMap;
-
+tint::glsl::writer::Bindings GenerateBindingInfo(SingleShaderStage stage,
+                                                 const PipelineLayout* layout,
+                                                 const BindingInfoArray& moduleBindingInfo,
+                                                 GLSLCompilationRequest& req) {
     tint::glsl::writer::Bindings bindings;
 
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+        const auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
 
-        for (const auto& [binding, shaderBindingInfo] : moduleBindingInfo[group]) {
-            tint::BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
-                                               static_cast<uint32_t>(binding)};
+        for (const auto& [bindingNumber, apiBindingIndex] : bgl->GetBindingMap()) {
+            tint::BindingPoint srcBindingPoint{
+                .group = uint32_t(group),
+                .binding = uint32_t(bindingNumber),
+            };
 
-            BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
-            const auto& bindingIndexInfo = layout->GetBindingIndexInfo()[group];
-            FlatBindingIndex shaderIndex = bindingIndexInfo[bindingIndex];
-            tint::glsl::writer::BindingInfo dstBindingPoint{uint32_t(shaderIndex)};
+            auto ComputeDestinationBindingPoint = [&](BindingIndex bindingIndex) {
+                return tint::glsl::writer::BindingInfo{
+                    .binding = uint32_t(bindingIndexInfo[bindingIndex])};
+            };
 
             MatchVariant(
-                shaderBindingInfo.bindingInfo,
+                bgl->GetAPIBindingInfo(apiBindingIndex).bindingLayout,
                 [&](const BufferBindingInfo& bindingInfo) {
+                    tint::glsl::writer::BindingInfo dstBindingPoint =
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
                     switch (bindingInfo.type) {
                         case wgpu::BufferBindingType::Uniform:
                             bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
@@ -362,43 +381,41 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                     }
                 },
                 [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.sampler.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
+                },
+                [&](const StaticSamplerBindingInfo& bindingInfo) {
+                    bindings.sampler.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
                 },
                 [&](const TextureBindingInfo& bindingInfo) {
-                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.texture.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
                 },
                 [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(srcBindingPoint, dstBindingPoint);
+                    bindings.storage_texture.emplace(
+                        srcBindingPoint,
+                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
+                },
+                [&](const TexelBufferBindingInfo& bindingInfo) {
+                    // TODO(crbug/382544164): Prototype texel buffer feature
+                    DAWN_UNREACHABLE();
                 },
                 [&](const ExternalTextureBindingInfo& bindingInfo) {
-                    const auto& etBindingMap = bgl->GetExternalTextureBindingExpansionMap();
-                    const auto& expansion = etBindingMap.find(binding);
-                    DAWN_ASSERT(expansion != etBindingMap.end());
-
-                    using BindingInfo = tint::glsl::writer::BindingInfo;
-
-                    const auto& bindingExpansion = expansion->second;
-                    const BindingInfo plane0{
-                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane0)])};
-                    const BindingInfo plane1{
-                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.plane1)])};
-                    const BindingInfo metadata{
-                        uint32_t(bindingIndexInfo[bgl->GetBindingIndex(bindingExpansion.params)])};
-
-                    tint::BindingPoint plane1WGSLBindingPoint{
-                        static_cast<uint32_t>(group),
-                        static_cast<uint32_t>(bindingExpansion.plane1)};
-                    externalTextureExpansionMap[srcBindingPoint] = plane1WGSLBindingPoint;
-
                     bindings.external_texture.emplace(
                         srcBindingPoint,
-                        tint::glsl::writer::ExternalTexture{metadata, plane0, plane1});
+                        tint::glsl::writer::ExternalTexture{
+                            .metadata = ComputeDestinationBindingPoint(bindingInfo.params),
+                            .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
+                            .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
                 },
-                [&](const TexelBufferBindingInfo& bindingInfo) { DAWN_UNREACHABLE(); },
-                [&](const InputAttachmentBindingInfo& bindingInfo) { DAWN_UNREACHABLE(); });
+                [](const InputAttachmentBindingInfo& bindingInfo) { DAWN_UNREACHABLE(); });
         }
     }
-    return {bindings, externalTextureExpansionMap};
+    return bindings;
 }
 
 ResultOrError<GLuint> ShaderModule::CompileShader(
@@ -428,8 +445,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const EntryPointMetadata& entryPointMetaData = GetEntryPoint(programmableStage.entryPoint);
     const BindingInfoArray& moduleBindingInfo = entryPointMetaData.bindings;
 
-    auto [bindings, externalTextureExpansionMap] =
-        GenerateBindingInfo(stage, layout, moduleBindingInfo, req);
+    auto bindings = GenerateBindingInfo(stage, layout, moduleBindingInfo, req);
 
     // When textures are accessed without a sampler (e.g., textureLoad()), returned
     // CombinedSamplerInfo should use this sentinel value as sampler binding point.
@@ -440,8 +456,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     {
         std::vector<CombinedSampler> combinedSamplers;
         tint::glsl::writer::CombinedTextureSamplerInfo samplerTextureToName;
-        GenerateCombinedSamplerInfo(entryPointMetaData, bindings, externalTextureExpansionMap,
-                                    &combinedSamplers, &samplerTextureToName);
+        GenerateCombinedSamplerInfo(entryPointMetaData, bindings, layout, &combinedSamplers,
+                                    &samplerTextureToName);
 
         bindings.sampler_texture_to_name = std::move(samplerTextureToName);
         *combinedSamplersOut = std::move(combinedSamplers);

@@ -50,13 +50,14 @@
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
-// TODO(dawn:1082): Minor optimization to use BindingIndex instead of BindingNumber
+// TODO(https://crbug.com/42240282): The expansion information is now stored in
+// ExternalTextureBindingInfo. Remove this structure and the map once backends transition to using
+// ExternalTextureBindingInfo.
 struct ExternalTextureBindingExpansion {
     BindingNumber plane0;
     BindingNumber plane1;
     BindingNumber params;
 };
-
 using ExternalTextureBindingExpansionMap =
     absl::flat_hash_map<BindingNumber, ExternalTextureBindingExpansion>;
 
@@ -65,9 +66,58 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
     const BindGroupLayoutDescriptor* descriptor,
     bool allowInternalBinding = false);
 
-// Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
-// These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
-// into a packed range of |BindingIndex| integers.
+// In the BindGroupLayout, entries are sorted by type for more efficient lookup and iteration.
+// This enum is the order that's used and can also be used to index various ranges of entries.
+// The enum is public so that helper function can use it during creation of the BindGroupLayout,
+// but the order is not meant to be used anywhere else. Use the accessors on the BindGroupLayout for
+// logic that relies on the packing or the order.
+enum BindingTypeOrder : uint32_t {
+    // Buffers
+    BindingTypeOrder_DynamicBuffer,
+    BindingTypeOrder_RegularBuffer,
+    // Textures
+    BindingTypeOrder_SampledTexture,
+    BindingTypeOrder_StorageTexture,
+    BindingTypeOrder_InputAttachment,
+    // Samplers
+    BindingTypeOrder_StaticSampler,
+    BindingTypeOrder_RegularSampler,
+    // Texel Buffers
+    BindingTypeOrder_TexelBuffer,
+    // Start of entries that are expanded in the frontend and aren't actually stored in the bind
+    // groups.
+    BindingTypeOrder_ExternalTexture,
+    BindingTypeOrder_Count,
+};
+
+// BindGroupLayout stores the information passed in the BindGroupLayoutDescriptor but processes it
+// in various ways to make it more efficient to use internally and to add internal bindings used to
+// implement WebGPU feature that don't exist in backend APIs.
+//
+// Storing information in hashmap<BindingNumber, T> would be inefficient because these numbers may
+// be sparse. Instead the are compacted into vectors, and reordered using |BindingTypeOrder| to make
+// it efficient to iterate over all the bindings of a same kind. Indexing the packed bindings is
+// done with |BindingIndex| or |APIBindingIndex| (see below for the explanation).
+//
+// In some cases bindings need to be expanded because a single BGLEntry can match multiple
+// BGEntries when bindingArraySize > 1. To make handling more regular, a fake BGLEntry is created
+// for each array element such that most code doesn't need to be aware of bindingArraySize.
+//
+// We also need to have private bindings that cannot be set by the users: dynamic binding array or
+// ExternalTextures add additional bindings for their inner workings which are private to Dawn.
+// Conversely ExternalTexture is a pure frontend object and doesn't exist in backends, so
+// dawn::native must mostly be unaware about it. This is where |BindingIndex| and |APIBindingIndex|
+// are different:
+//
+//  - |APIBindingIndex| are user-facing bindings and cannot be used to access private bindings. It
+//  is used in code for BindGroup validation and opertations and when reflecting/validating WGSL
+//  bind points.
+//  - |BindingIndex| are Dawn-facing bindings where ExternalTexture shouldn't be accessed and
+//  instead can be used to access internal bindings.
+//
+// Internally both |APIBindingIndex| and |BindingIndex| are used to access the same vector, but the
+// types are used to force uses of different BindGroupLayout accessors that ASSERT the invariant
+// above.
 class BindGroupLayoutInternalBase : public ApiObjectBase,
                                     public CachedObject,
                                     public ContentLessObjectCacheable<BindGroupLayoutInternalBase> {
@@ -81,14 +131,21 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     ObjectType GetType() const override;
 
-    // A map from the BindingNumber to its packed BindingIndex.
-    using BindingMap = std::map<BindingNumber, BindingIndex>;
+    // A map from the BindingNumber to its packed APIBindingIndex.
+    using BindingMap = std::map<BindingNumber, APIBindingIndex>;
 
     // Getters for static bindings
     const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const;
+    const BindingInfo& GetAPIBindingInfo(APIBindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
+    BindingIndex AsBindingIndex(APIBindingIndex index) const;
+    // TODO(https://crbug.com/42240282): BindingNumbers are always user-facing and can only
+    // represent APIBindingIndex. Remove this getter once backends don't need to use the
+    // ExternalTextureBindingExpansionMap anymore.
     BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
+    APIBindingIndex GetAPIBindingIndex(BindingNumber bindingNumber) const;
 
+    // Returns the number of internal bindings, excluding things like ExternalTexture.
     BindingIndex GetBindingCount() const;
     // Returns |BindingIndex| because dynamic buffers are packed at the front.
     BindingIndex GetDynamicBufferCount() const;
@@ -131,6 +188,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     const BindingCounts& GetValidationBindingCounts() const;
 
     // Used to specify unpacked external texture binding slots when transforming shader modules.
+    // TODO(https://crbug.com/42240282): The expansion information is now stored in
+    // ExternalTextureBindingInfo. Remove this getter once all the backends are updated to use it.
     const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const;
 
     uint32_t GetUnexpandedBindingCount() const;
@@ -183,38 +242,19 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // The entries with arbitrary BindingNumber are repacked into a compact BindingIndex range.
     ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
 
-    // When they are packed, the entries are also sorted by type for more efficient lookup and
-    // iteration. This enum is the order that's used and can also be used to index various ranges of
-    // entries.
-    enum BindingTypeOrder : uint32_t {
-        // Buffers
-        Order_DynamicBuffer,
-        Order_RegularBuffer,
-        // Textures
-        Order_SampledTexture,
-        Order_StorageTexture,
-        Order_InputAttachment,
-        // Samplers
-        Order_StaticSampler,
-        Order_RegularSampler,
-        // Texel Buffers
-        Order_TexelBuffer,
-        Order_Count,
-    };
-    static bool SortBindingsCompare(const BindingInfo& a, const BindingInfo& b);
-
     // Keep a list of the start indices for each kind of binding. Then (exclusive) end of a range
     // of bindings is the start of the next range. (that's why we use count + 1 entry, to have the
     // "end" of the last binding type)
     BindingIndex GetBindingTypeStart(BindingTypeOrder type) const;
     BindingIndex GetBindingTypeEnd(BindingTypeOrder type) const;
-    std::array<BindingIndex, Order_Count + 1> mBindingTypeStart;
+    std::array<BindingIndex, BindingTypeOrder_Count + 1> mBindingTypeStart;
 
     // Additional counts for types of bindings.
     uint32_t mUnverifiedBufferCount = 0;
     uint32_t mDynamicStorageBufferCount = 0;
 
     // Map from BindGroupLayoutEntry.binding as BindingNumber to packed indices as BindingIndex.
+    // TODO(https://issues.chromium.org/448578977): Use a more optimized map type.
     BindingMap mBindingMap;
     // Map from the BindingNumber of the ExternalTexture to the BindingNumber of the expansion.
     ExternalTextureBindingExpansionMap mExternalTextureBindingExpansionMap;
