@@ -75,17 +75,6 @@ MaybeError ValidateStorageTextureFormat(DeviceBase* device,
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
     DAWN_ASSERT(format != nullptr);
 
-    // TODO(427681156): Remove this deprecation warning
-    if (storageTextureFormat == wgpu::TextureFormat::BGRA8Unorm &&
-        access == wgpu::StorageTextureAccess::ReadOnly) {
-        DAWN_HISTOGRAM_BOOLEAN(device->GetPlatform(), "BGRA8UnormStorageTextureReadOnlyUsage",
-                               true);
-        device->EmitWarningOnce(
-            "bgra8unorm with read-only access is deprecated. bgra8unorm only supports write-only "
-            "access. Note: allowing this usage was a bug in Chrome. The spec disallows it as it is "
-            "not portable.");
-    }
-
     DAWN_INVALID_IF(!TextureFormatSupportStorageAccess(*format, access),
                     "Texture format %s does not support storage texture access %s.",
                     storageTextureFormat, access);

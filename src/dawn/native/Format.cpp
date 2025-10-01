@@ -577,8 +577,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     const UnsupportedReason externalUnsupportedReason = device->HasFeature(Feature::YCbCrVulkanSamplers) ?  Format::supported : RequiresFeature{wgpu::FeatureName::YCbCrVulkanSamplers};
     AddConditionalColorFormat(wgpu::TextureFormat::External, externalUnsupportedReason, Cap::None, ByteSize(1), SampleTypeBit::External, ComponentCount(0));
 
-    // TODO(427681156): Change StorageROrW to StorageW as bgra8unorm is not supposed to support read-only access
-    auto BGRA8UnormSupportsStorageUsage = device->HasFeature(Feature::BGRA8UnormStorage) ? Cap::StorageROrW : Cap::None;
+    auto BGRA8UnormSupportsStorageUsage = device->HasFeature(Feature::BGRA8UnormStorage) ? Cap::StorageW : Cap::None;
     auto rgb10a2uintSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
     auto rgb10a2unormSupportsStorage = device->HasFeature(Feature::TextureFormatsTier1) ? Cap::StorageROrW : Cap::None;
     AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, Cap::Renderable | BGRA8UnormSupportsStorageUsage | Cap::Multisample | Cap::Resolve | Cap::Blendable, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1));
