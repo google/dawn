@@ -37,9 +37,6 @@
             {% else %}
                 {{ arg_to_jni_type(member) }} {{ as_varName(member.name) }};
             {% endif %}
-            {% if as_varName(member.name) == 'callback' %}
-                jobject executor;
-            {% endif %}
         {% endfor%}
     };
 {% endmacro %}
@@ -53,9 +50,6 @@
         {% for member in kotlin_record_members(members) %}
             {
                 auto& in = inStruct.{{member.name.camelCase()}};
-                {% if as_varName(member.name) == 'callback' %}
-                    auto& in_executor = inStruct.executor;
-                {% endif %}
                 auto& out = outStruct->{{member.name.camelCase()}};
                 {% if member.constant_length == 1 %}
                     {% if member.type.category == 'structure' %}
@@ -176,30 +170,21 @@
 
                         //* Get the client (Kotlin) callback so we can call it.
                         {% set callbackName = 'on' + member.type.name.chunks[:-1] | map('title') | join %}
-                        jclass executorClass = env->FindClass("java/util/concurrent/Executor");
-                        jmethodID executeMethodID = env->GetMethodID(executorClass,
-                                                                     "execute",
-                                                                     "(Ljava/lang/Runnable;)V");
-                        jmethodID methodId = env->GetMethodID(
-                            classes->{{ member.type.name.camelCase() }}Runnable,
-                            "<init>", "(L{{ jni_name(member.type) }};
+                        jmethodID callbackMethod = env->GetMethodID(
+                                classes->{{ member.type.name.camelCase() }}, "{{ callbackName }}", "(
                             {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
                                 {{- jni_signature(callbackArg) -}}
                             {%- endfor %})V");
 
-                        jobject runnable =
-                            env->NewObject(classes->{{ member.type.name.camelCase() }}Runnable,
-                                           methodId,
-                                           userData1->callback
-                                           {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
-                                               {{- ', ' }}_{{ callbackArg.name.camelCase() }}
-                                           {%- endfor %});
-
-                        env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
+                        //* Call the callback with all converted parameters.
+                        env->CallVoidMethod(userData1->callback, callbackMethod
+                        {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
+                             {{- ', ' }}_{{ callbackArg.name.camelCase() }}
+                        {%- endfor %});
                     };
                     //* TODO(b/330293719): free associated resources.
                     outStruct->{{ userdata }} = new UserData(
-                        {.callback = env->NewGlobalRef(in), .executor = inStruct.executor, .jvm = c->jvm});
+                            {.callback = env->NewGlobalRef(in), .jvm = c->jvm});
 
                 {% else %}
                     {{ unreachable_code() }}

@@ -33,7 +33,6 @@ class JNIContext;
 
 struct UserData {
     jobject callback;
-    jobject executor;
     JavaVM *jvm;
 };
 
