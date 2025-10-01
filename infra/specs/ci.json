@@ -15,22 +15,52 @@
     "isolated_scripts": [
       {
         "args": [
-          "fuzz",
           "-check",
           "-ir",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_ir_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       },
       {
         "args": [
-          "fuzz",
           "-check",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_wgsl_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       }
@@ -40,22 +70,52 @@
     "isolated_scripts": [
       {
         "args": [
-          "fuzz",
           "-check",
           "-ir",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_ir_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       },
       {
         "args": [
-          "fuzz",
           "-check",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_wgsl_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       }
@@ -375,22 +435,52 @@
     "isolated_scripts": [
       {
         "args": [
-          "fuzz",
           "-check",
           "-ir",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_ir_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       },
       {
         "args": [
-          "fuzz",
           "-check",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_wgsl_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       }
@@ -400,22 +490,52 @@
     "isolated_scripts": [
       {
         "args": [
-          "fuzz",
           "-check",
           "-ir",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_ir_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       },
       {
         "args": [
-          "fuzz",
           "-check",
           "--append-cwd-as-build"
         ],
+        "merge": {
+          "script": "//testing/merge_scripts/noop_merge.py"
+        },
         "name": "tint_wgsl_fuzzer_corpus_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
         "test": "fuzzer_corpus_tests",
         "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
       }

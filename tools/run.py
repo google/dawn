@@ -45,24 +45,12 @@ def _get_available_tools() -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description='Builds and runs the specified Go tool in //tools/src/cmd')
+        description='Builds and runs the specified Go tool in //tools/src/cmd',
+        add_help=False)
     parser.add_argument(
         'tool_name',
         help='The name of the tool under //tools/src/cmd to run',
         choices=_get_available_tools())
-    # Doing the opposite (passing in . for build and making other paths relative
-    # to it) doesn't work properly in some cases. For example, "fuzz" doesn't
-    # work properly when checking IR due to it not generating .tirb files due
-    # to the -input value not matching the default WGSL corpus directory.
-    parser.add_argument(
-        '--append-cwd-as-build',
-        action='store_true',
-        help=('Automatically appends the current directory as a -build '
-              'argument. Meant for use on bots.'))
-    parser.add_argument('--isolated-script-test-output',
-                        help='Currently unused, needed for bot support.')
-    parser.add_argument('--isolated-script-test-perf-output',
-                        help='Currently unused, needed for bot support.')
     args, unknown_args = parser.parse_known_args()
 
     cmd = [
@@ -71,11 +59,6 @@ def main() -> int:
         os.path.join(CMD_DIR, args.tool_name),
     ]
     cmd.extend(unknown_args)
-    if args.append_cwd_as_build:
-        cmd.extend([
-            '-build',
-            os.getcwd(),
-        ])
 
     proc = subprocess.run(cmd, check=False, cwd=DAWN_ROOT)
     return proc.returncode

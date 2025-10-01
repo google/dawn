@@ -356,7 +356,10 @@ group("fuzzer_corpus_tests") {
     ":fuzzer_corpus_tools",
     "${dawn_root}/tools:go_tools",
   ]
-  data = [ "${dawn_root}/test/tint/" ]
+  data = [
+    "${dawn_root}/scripts/run_tint_fuzzer_corpus_tests.py",
+    "${dawn_root}/test/tint/",
+  ]
 }
 
 group("tests") {

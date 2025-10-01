@@ -19,7 +19,7 @@
   'fuzzer_corpus_tests': {
     'label': '//src/tint:fuzzer_corpus_tests',
     'type': 'script',
-    'script': '//tools/run.py',
+    'script': '//scripts/run_tint_fuzzer_corpus_tests.py',
   },
   'tint_unittests': {
     'label': '//src/tint/cmd/test:tint_unittests',
