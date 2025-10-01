@@ -291,6 +291,15 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     // TODO(crbug.com/413053623): implement webgpu::ShaderModule
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
+    // TODO(crbug.com/447823475) This test is flaky on several platforms
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
+    DAWN_SUPPRESS_TEST_IF(IsNull());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -338,6 +347,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     // TODO(crbug.com/413053623): implement webgpu::ShaderModule
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+    // TODO(crbug.com/448426209) This test is flaky on Pixel 6 and Mac AMD
+    DAWN_SUPPRESS_TEST_IF(IsAndroid());
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -398,6 +410,9 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     // TODO(crbug.com/413053623): implement webgpu::ShaderModule
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+    // TODO(crbug.com/448426209) This test is flaky on Pixel 6 and Mac AMD
+    DAWN_SUPPRESS_TEST_IF(IsAndroid());
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
