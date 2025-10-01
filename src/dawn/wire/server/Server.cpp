@@ -47,8 +47,8 @@ Server::Server(const DawnProcTable& procs,
                CommandSerializer* serializer,
                MemoryTransferService* memoryTransferService,
                bool useSpontaneousCallbacks)
-    : mSerializer(serializer),
-      mProcs(procs),
+    : ServerBase(procs),
+      mSerializer(serializer),
       mMemoryTransferService(memoryTransferService),
       mUseSpontaneousCallbacks(useSpontaneousCallbacks) {
     if (mMemoryTransferService == nullptr) {
@@ -64,7 +64,7 @@ Server::~Server() {
     for (WGPUDevice device : Objects<WGPUDevice>().GetAllHandles()) {
         ClearDeviceCallbacks(device);
     }
-    DestroyAllObjects(mProcs);
+    DestroyAllObjects();
 }
 
 WireResult Server::InjectBuffer(WGPUBuffer buffer,

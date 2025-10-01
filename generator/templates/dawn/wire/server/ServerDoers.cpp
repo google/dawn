@@ -92,7 +92,7 @@ namespace dawn::wire::server {
                             //* they should not be forwarded if the device no longer exists on the wire.
                             ClearDeviceCallbacks(obj->handle);
                         {% endif %}
-                        Release(mProcs, obj->handle);
+                        Release(obj->handle);
                     }
                     Objects<{{cType}}>().Free(objectId);
                     return WireResult::Success;

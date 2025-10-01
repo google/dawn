@@ -42,10 +42,13 @@ namespace dawn::wire::server {
 
     class ServerBase : public ChunkedCommandHandler, public ObjectIdResolver {
       public:
-        ServerBase() = default;
+        ServerBase(const DawnProcTable& procs) : mProcs(procs) {}
         ~ServerBase() override = default;
 
       protected:
+        // Proc table may be used by children as well.
+        DawnProcTable mProcs;
+
         template <typename T>
         const KnownObjects<T>& Objects() const {
             return std::get<KnownObjects<T>>(mKnown);
@@ -56,16 +59,15 @@ namespace dawn::wire::server {
         }
 
         template <typename T>
-        void Release(const DawnProcTable& procs, T handle) {
-            (procs.*WGPUTraits<T>::Release)(handle);
+        void Release(T handle) {
+            (mProcs.*WGPUTraits<T>::Release)(handle);
         }
-
-        void DestroyAllObjects(const DawnProcTable& procs) {
+        void DestroyAllObjects() {
             //* Release devices first to force completion of any async work.
             {
                 std::vector<WGPUDevice> handles = Objects<WGPUDevice>().AcquireAllHandles();
                 for (WGPUDevice handle : handles) {
-                    Release(procs, handle);
+                    Release(handle);
                 }
             }
             //* Free all objects when the server is destroyed
@@ -74,7 +76,7 @@ namespace dawn::wire::server {
                 {
                     std::vector<{{cType}}> handles = Objects<{{cType}}>().AcquireAllHandles();
                     for ({{cType}} handle : handles) {
-                        Release(procs, handle);
+                        Release(handle);
                     }
                 }
             {% endfor %}
