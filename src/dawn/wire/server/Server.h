@@ -61,7 +61,7 @@ class MemoryTransferService;
 // userdata->foo = 2;
 //
 // callMyCallbackHandler(
-//      ForwardToServer<&Server::MyCallbackHandler>,
+//      ForwardToServer<&Server::MyCallbackHandler>::Callback,
 //      userdata.release());
 //
 // void Server::MyCallbackHandler(MyUserdata* userdata, Other args) { }
@@ -72,36 +72,25 @@ struct CallbackUserdata {
     explicit CallbackUserdata(const std::weak_ptr<Server>& server);
 };
 
-template <auto F>
-struct ForwardToServerHelper {
-    template <typename _>
-    struct ExtractedTypes;
+template <auto F, typename _ = decltype(F)>
+struct ForwardToServerHelper;
 
-    // An internal structure used to unpack the various types that compose the type of F
-    template <typename Return, typename Class, typename UserdataT, typename... Args>
-    struct ExtractedTypes<Return (Class::*)(UserdataT*, Args...)> {
-        using Userdata = UserdataT;
-        using UntypedCallback = Return (*)(Args..., void*, void*);
+template <auto F, typename UserdataT, typename... Args>
+struct ForwardToServerHelper<F, void (Server::*)(UserdataT*, Args...)> {
+    using Userdata = UserdataT;
 
-        static Return Callback(Args... args, void* userdata, void*) {
-            // Acquire the userdata, and cast it to UserdataT.
-            std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
-            auto server = data->server.lock();
-            if (!server) {
-                // Do nothing if the server has already been destroyed.
-                return;
-            }
-            // Forward the arguments and the typed userdata to the Server:: member function.
-            (server.get()->*F)(data.get(), std::forward<decltype(args)>(args)...);
-            server.get()->Flush();
+    static void Callback(Args... args, void* userdata, void*) {
+        // Acquire the userdata, and cast it to UserdataT.
+        std::unique_ptr<Userdata> data(static_cast<Userdata*>(userdata));
+        auto server = data->server.lock();
+        if (!server) {
+            // Do nothing if the server has already been destroyed.
+            return;
         }
-    };
-
-    static constexpr typename ExtractedTypes<decltype(F)>::UntypedCallback Create() {
-        return ExtractedTypes<decltype(F)>::Callback;
+        // Forward the arguments and the typed userdata to the Server:: member function.
+        (server.get()->*F)(data.get(), std::forward<decltype(args)>(args)...);
+        server.get()->Flush();
     }
-
-    using Userdata = typename ExtractedTypes<decltype(F)>::Userdata;
 };
 
 struct MapUserdata : CallbackUserdata {
@@ -207,7 +196,7 @@ class Server : public ServerBase {
               WGPUCallbackMode DefaultMode = WGPUCallbackMode_AllowProcessEvents>
     CallbackInfo MakeCallbackInfo(ForwardToServerHelper<F>::Userdata* userdata) {
         return {nullptr, mUseSpontaneousCallbacks ? WGPUCallbackMode_AllowSpontaneous : DefaultMode,
-                ForwardToServerHelper<F>::Create(), userdata, nullptr};
+                &ForwardToServerHelper<F>::Callback, userdata, nullptr};
     }
 
   private:
