@@ -25,14 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
 
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::hlsl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -100,7 +100,7 @@ struct State {
                 }
 
                 OffsetData od{};
-                Switch(
+                tint::Switch(
                     inst,  //
                     [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var, od); },
                     [&](core::ir::Load* l) { Load(l, var, od); },
@@ -118,7 +118,7 @@ struct State {
                     TINT_ICE_ON_NO_MATCH);
             }
 
-            // Swap the result type of the `var` to the new HLSL result type
+            // Swap the result type of the `var` to the new result type
             auto array_length = (var_ty->StoreType()->Size() + 15) / 16;
             result->SetType(ty.ptr(var_ty->AddressSpace(), ty.array(ty.vec4<u32>(), array_length),
                                    var_ty->Access()));
@@ -606,7 +606,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeUniformAccess",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.DecomposeUniformAccess",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowClipDistancesOnF32,
                                               core::ir::Capability::kAllowDuplicateBindings,
@@ -621,4 +621,4 @@ Result<SuccessType> DecomposeUniformAccess(core::ir::Module& ir) {
     return Success;
 }
 
-}  // namespace tint::hlsl::writer::raise
+}  // namespace tint::core::ir::transform

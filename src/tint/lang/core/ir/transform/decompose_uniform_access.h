@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_UNIFORM_ACCESS_H_
-#define SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_UNIFORM_ACCESS_H_
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DECOMPOSE_UNIFORM_ACCESS_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_DECOMPOSE_UNIFORM_ACCESS_H_
 
 #include "src/tint/utils/result.h"
 
@@ -35,7 +35,7 @@ namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
 
-namespace tint::hlsl::writer::raise {
+namespace tint::core::ir::transform {
 
 /// DecomposeUniformAccess is a transform used to replace uniform buffer accesses with a
 /// the correct load of the HLSL primitive objects
@@ -44,6 +44,6 @@ namespace tint::hlsl::writer::raise {
 /// @returns success or failure
 Result<SuccessType> DecomposeUniformAccess(core::ir::Module& module);
 
-}  // namespace tint::hlsl::writer::raise
+}  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_DECOMPOSE_UNIFORM_ACCESS_H_
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_DECOMPOSE_UNIFORM_ACCESS_H_

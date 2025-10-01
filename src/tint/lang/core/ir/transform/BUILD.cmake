@@ -65,6 +65,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/conversion_polyfill.h
   lang/core/ir/transform/dead_code_elimination.cc
   lang/core/ir/transform/dead_code_elimination.h
+  lang/core/ir/transform/decompose_uniform_access.cc
+  lang/core/ir/transform/decompose_uniform_access.h
   lang/core/ir/transform/demote_to_helper.cc
   lang/core/ir/transform/demote_to_helper.h
   lang/core/ir/transform/direct_variable_access.cc
@@ -153,6 +155,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/combine_access_instructions_test.cc
   lang/core/ir/transform/conversion_polyfill_test.cc
   lang/core/ir/transform/dead_code_elimination_test.cc
+  lang/core/ir/transform/decompose_uniform_access_test.cc
   lang/core/ir/transform/demote_to_helper_test.cc
   lang/core/ir/transform/direct_variable_access_test.cc
   lang/core/ir/transform/helper_test.h

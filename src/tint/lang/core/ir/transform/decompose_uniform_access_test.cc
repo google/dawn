@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/decompose_uniform_access.h"
+#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
 
 #include <gtest/gtest.h>
 
@@ -37,12 +37,12 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::hlsl::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
-using HlslWriterDecomposeUniformAccessTest = core::ir::transform::TransformTest;
+using IR_DecomposeUniformAccessTest = core::ir::transform::TransformTest;
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, NoBufferAccess) {
+TEST_F(IR_DecomposeUniformAccessTest, NoBufferAccess) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] { b.Return(func); });
 
@@ -61,7 +61,7 @@ TEST_F(HlslWriterDecomposeUniformAccessTest, NoBufferAccess) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainFromUnnamedAccessChain) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainFromUnnamedAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                           {mod.symbols.New("d"), ty.u32()},
@@ -145,7 +145,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainFromLetAccessChain) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -230,7 +230,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessVectorLoad) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessVectorLoad) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -303,7 +303,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessScalarF16) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessScalarF16) {
     auto* var = b.Var<uniform, f16, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -349,7 +349,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessVectorF16) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessVectorF16) {
     auto* var = b.Var<uniform, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -437,7 +437,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessMat2x3F16) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessMat2x3F16) {
     auto* var = b.Var<uniform, mat2x3<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -528,7 +528,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessMatrix) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessMatrix) {
     auto* var = b.Var<uniform, mat4x4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -613,7 +613,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessArray) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessArray) {
     auto* var = b.Var<uniform, array<vec3<f32>, 5>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -699,7 +699,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessArrayWhichCanHaveSizesOtherThenFive) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessArrayWhichCanHaveSizesOtherThenFive) {
     auto* var = b.Var<uniform, array<vec3<f32>, 42>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -785,7 +785,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessStruct) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessStruct) {
     auto* SB = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.f32()},
@@ -870,7 +870,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessStructNested) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1062,7 +1062,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainReused) {
+TEST_F(IR_DecomposeUniformAccessTest, UniformAccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
                                                     {mod.symbols.New("d"), ty.vec3<f32>()},
@@ -1132,7 +1132,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromVar) {
+TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromVar) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1271,7 +1271,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromAccess) {
+TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfLetFromAccess) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1411,7 +1411,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriterDecomposeUniformAccessTest, Determinism_MultipleUsesOfAccess) {
+TEST_F(IR_DecomposeUniformAccessTest, Determinism_MultipleUsesOfAccess) {
     auto* sb =
         ty.Struct(mod.symbols.New("SB"), {
                                              {mod.symbols.New("a"), ty.array<vec4<f32>, 2>()},
@@ -1551,4 +1551,4 @@ $B1: {  # root
 }
 
 }  // namespace
-}  // namespace tint::hlsl::writer::raise
+}  // namespace tint::core::ir::transform
