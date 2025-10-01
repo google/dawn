@@ -53,6 +53,7 @@ const core::ir::Capabilities kValueToLetCapabilities{
     core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kLoosenValidationForShaderIO,
 };
 
 /// Configuration for ValueToLet transform.

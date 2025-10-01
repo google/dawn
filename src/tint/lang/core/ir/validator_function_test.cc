@@ -1185,6 +1185,58 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_PartialStructAndMSV) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithoutCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* var0 = b.Var("var0", ty.ptr(AddressSpace::kOut, ty.f32()));
+    var0->SetLocation(0);
+    var0->SetBlendSrc(0);
+    mod.root_block->Append(var0);
+
+    auto* var1 = b.Var("var1", ty.ptr(AddressSpace::kOut, ty.f32()));
+    var1->SetLocation(0);
+    var1->SetBlendSrc(1);
+    mod.root_block->Append(var1);
+
+    b.Append(f->Block(), [&] {
+        b.Store(var0, 1_f);
+        b.Store(var1, 1_f);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:2:39 error: var: blend_src cannot be used on non-struct-member types
+  %var0:ptr<__out, f32, read_write> = var undef @location(0) @blend_src(0)
+                                      ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NonMember_WithCapability) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* var0 = b.Var("var0", ty.ptr(AddressSpace::kOut, ty.f32()));
+    var0->SetLocation(0);
+    var0->SetBlendSrc(0);
+    mod.root_block->Append(var0);
+
+    auto* var1 = b.Var("var1", ty.ptr(AddressSpace::kOut, ty.f32()));
+    var1->SetLocation(0);
+    var1->SetBlendSrc(1);
+    mod.root_block->Append(var1);
+
+    b.Append(f->Block(), [&] {
+        b.Store(var0, 1_f);
+        b.Store(var1, 1_f);
+        b.Return(f);
+    });
+    auto res = ir::Validate(mod, Capabilities{
+                                     Capability::kLoosenValidationForShaderIO,
+                                 });
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.u32());

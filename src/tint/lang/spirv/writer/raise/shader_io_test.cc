@@ -583,6 +583,7 @@ $B1: {  # root
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
+    capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
     auto* str_ty = ty.Struct(mod.symbols.New("Output"), {
                                                             {
                                                                 mod.symbols.New("color1"),

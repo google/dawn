@@ -46,6 +46,7 @@ const core::ir::Capabilities kShaderIOCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,
+    core::ir::Capability::kLoosenValidationForShaderIO,
 };
 
 /// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.

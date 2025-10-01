@@ -54,6 +54,7 @@ const core::ir::Capabilities kRenameConflictsCapabilities{
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kLoosenValidationForShaderIO,
 };
 
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from

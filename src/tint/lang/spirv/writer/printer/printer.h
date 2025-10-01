@@ -46,6 +46,7 @@ const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllowAnyInputAttachmentIndexType,
     core::ir::Capability::kAllowNonCoreTypes,
     core::ir::Capability::kAllow8BitIntegers,
+    core::ir::Capability::kLoosenValidationForShaderIO,
 };
 
 /// @returns the generated SPIR-V instructions on success, or failure

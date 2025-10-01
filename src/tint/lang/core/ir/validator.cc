@@ -3127,8 +3127,9 @@ void Validator::CheckBlendSrc(BlendSrcContext& ctx,
                               const core::type::Type* ty,
                               const IOAttributes& attr) {
     if (attr.blend_src.has_value()) {
-        // TODO(447433149): Restrict allowing blend_src on non-struct-member types to only be
-        // allowed when dealing with ShaderIO
+        if (!capabilities_.Contains(Capability::kLoosenValidationForShaderIO)) {
+            AddError(target) << "blend_src cannot be used on non-struct-member types";
+        }
         CheckBlendSrcAnnotation(ctx, target, ty, attr);
     }
 

@@ -116,6 +116,7 @@ Result<SuccessType> OffsetFirstIndex(core::ir::Module& ir, const OffsetFirstInde
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                               core::ir::Capability::kAllowDuplicateBindings,
+                                              core::ir::Capability::kLoosenValidationForShaderIO,
                                           });
     if (result != Success) {
         return result.Failure();

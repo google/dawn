@@ -54,6 +54,7 @@ const core::ir::Capabilities kRemoveTerminatorArgsCapabilities{
     core::ir::Capability::kAllowWorkspacePointerInputToEntryPoint,
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
+    core::ir::Capability::kLoosenValidationForShaderIO,
 };
 
 /// RemoveTerminatorArgs is a transform that removes all arguments from terminator instructions and
