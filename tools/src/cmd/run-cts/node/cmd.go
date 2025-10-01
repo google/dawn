@@ -159,6 +159,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	results, err := common.StreamResults(ctx,
 		c.flags.Colors,
+		c.flags.FailuresOnly,
 		c.state,
 		c.flags.Verbose,
 		c.coverage,

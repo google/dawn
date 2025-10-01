@@ -86,6 +86,7 @@ type Coverage struct {
 func StreamResults(
 	ctx context.Context,
 	colors bool,
+	failuresOnly bool,
 	state State,
 	verbose bool,
 	coverage *Coverage, // Optional coverage generation info
@@ -127,7 +128,7 @@ func StreamResults(
 
 	start := time.Now()
 	for res := range stream {
-		state.Log.logResults(res)
+		state.Log.logResults(res, failuresOnly)
 		results[res.TestCase] = res
 		expected := state.Expectations[res.TestCase]
 		exStatus := expectedStatus{
