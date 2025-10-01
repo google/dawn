@@ -129,7 +129,7 @@ struct State {
                     break;
 
                 default:
-                    TINT_UNREACHABLE() << "unhandled matrix arithmetic instruction";
+                    TINT_IR_UNREACHABLE(ir) << "unhandled matrix arithmetic instruction";
             }
         });
 

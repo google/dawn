@@ -365,12 +365,12 @@ struct State {
         while (auto* let = tint::As<core::ir::Let>(ptr->Instruction())) {
             ptr = let->Value()->As<core::ir::InstructionResult>();
         }
-        TINT_ASSERT(ptr);
+        TINT_IR_ASSERT(ir, ptr);
 
         auto* access = ptr->Instruction()->As<core::ir::Access>();
-        TINT_ASSERT(access);
-        TINT_ASSERT(access->Indices().Length() == 1u);
-        TINT_ASSERT(access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>());
+        TINT_IR_ASSERT(ir, access);
+        TINT_IR_ASSERT(ir, access->Indices().Length() == 1u);
+        TINT_IR_ASSERT(ir, access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>());
         auto* const_idx = access->Indices()[0]->As<core::ir::Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
@@ -394,7 +394,7 @@ struct State {
                 case core::AddressSpace::kStorage:
                     return b.Constant(u32(SpvScopeDevice));
                 default:
-                    TINT_UNREACHABLE() << "unhandled atomic address space";
+                    TINT_IR_UNREACHABLE(ir) << "unhandled atomic address space";
             }
         }();
         auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));
@@ -478,7 +478,7 @@ struct State {
                 call->AppendArg(builtin->Args()[1]);
                 break;
             default:
-                TINT_UNREACHABLE() << "unhandled atomic builtin";
+                TINT_IR_UNREACHABLE(ir) << "unhandled atomic builtin";
         }
 
         call->InsertBefore(builtin);
@@ -736,7 +736,7 @@ struct State {
                 operands.offset = next_arg();
                 break;
             default:
-                TINT_UNREACHABLE() << "unhandled texture sample builtin";
+                TINT_IR_UNREACHABLE(ir) << "unhandled texture sample builtin";
         }
 
         // Start building the argument list for the function.
@@ -819,7 +819,7 @@ struct State {
                 operands.offset = next_arg();
                 break;
             default:
-                TINT_UNIMPLEMENTED() << "unhandled texture gather builtin";
+                TINT_IR_UNIMPLEMENTED(ir) << "unhandled texture gather builtin";
         }
 
         // Start building the argument list for the function.
@@ -1061,7 +1061,7 @@ struct State {
     void QuantizeToF16Vec(core::ir::CoreBuiltinCall* builtin) {
         auto* arg = builtin->Args()[0];
         auto* vec = arg->Type()->As<core::type::Vector>();
-        TINT_ASSERT(vec);
+        TINT_IR_ASSERT(ir, vec);
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.
         Vector<core::ir::Value*, 4> args;
@@ -1080,7 +1080,7 @@ struct State {
     /// Handle an inputAttachmentLoad() builtin.
     /// @param builtin the builtin call instruction
     void InputAttachmentLoad(core::ir::CoreBuiltinCall* builtin) {
-        TINT_ASSERT(builtin->Args().Length() == 1);
+        TINT_IR_ASSERT(ir, builtin->Args().Length() == 1);
 
         auto* texture = builtin->Args()[0];
         // coords for input_attachment are always (0, 0)
@@ -1095,7 +1095,7 @@ struct State {
         // Call the builtin.
         // The result is always a vec4 in SPIR-V.
         auto* result_ty = builtin->Result()->Type();
-        TINT_ASSERT(result_ty->Is<core::type::Vector>());
+        TINT_IR_ASSERT(ir, result_ty->Is<core::type::Vector>());
 
         core::ir::Instruction* result = b.Call<spirv::ir::BuiltinCall>(
             result_ty, spirv::BuiltinFn::kImageRead, std::move(builtin_args));
@@ -1109,7 +1109,7 @@ struct State {
     /// builtins.
     /// @param builtin the builtin call instruction
     void SubgroupShuffle(core::ir::CoreBuiltinCall* builtin, bool clamp_subgroup_shuffle) {
-        TINT_ASSERT(builtin->Args().Length() == 2);
+        TINT_IR_ASSERT(ir, builtin->Args().Length() == 2);
         // The second argument is either 'id' , 'delta', or 'mask'.
         // All must be bound by [0, 128)
         auto* arg2 = builtin->Args()[1];
@@ -1135,9 +1135,9 @@ struct State {
     /// Handle a SubgroupBroadcast() builtin.
     /// @param builtin the builtin call instruction
     void SubgroupBroadcast(core::ir::CoreBuiltinCall* builtin) {
-        TINT_ASSERT(builtin->Args().Length() == 2);
+        TINT_IR_ASSERT(ir, builtin->Args().Length() == 2);
         auto* id = builtin->Args()[1];
-        TINT_ASSERT(id->Is<core::ir::Constant>());
+        TINT_IR_ASSERT(ir, id->Is<core::ir::Constant>());
 
         // For const signed int IDs, compile-time convert to u32 to maintain constness.
         if (id->Type()->IsSignedIntegerScalar()) {
@@ -1148,9 +1148,9 @@ struct State {
     /// Handle a QuadBroadcast() builtin.
     /// @param builtin the builtin call instruction
     void QuadBroadcast(core::ir::CoreBuiltinCall* builtin) {
-        TINT_ASSERT(builtin->Args().Length() == 2);
+        TINT_IR_ASSERT(ir, builtin->Args().Length() == 2);
         auto* id = builtin->Args()[1];
-        TINT_ASSERT(id->Is<core::ir::Constant>());
+        TINT_IR_ASSERT(ir, id->Is<core::ir::Constant>());
 
         // For const signed int IDs, compile-time convert to u32 to maintain constness.
         if (id->Type()->IsSignedIntegerScalar()) {

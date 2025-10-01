@@ -261,7 +261,7 @@ struct State {
             [&](ir::BuiltinCall* call) {
                 // The only builtin function that takes an array pointer is arrayLength().
                 // No change is needed, as it will operate on the explicitly laid out array type.
-                TINT_ASSERT(call->Func() == BuiltinFn::kArrayLength);
+                TINT_IR_ASSERT(ir, call->Func() == BuiltinFn::kArrayLength);
             },
             [&](core::ir::Let* let) {
                 // A let usage will propagate the pointer to a type that has been forked, so we need
@@ -320,7 +320,7 @@ struct State {
                     auto* dst_arr = dst_type->As<core::type::Array>();
                     b.Return(func, ConvertArray(src_arr, dst_arr, param));
                 } else {
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
                 }
             });
             return func;
@@ -351,7 +351,7 @@ struct State {
         // Runtime-sized arrays will never be converted as you cannot load/store them, and
         // pipeline-overrides will already have been substituted before this transform.
         auto* count = src_array->Count()->As<core::type::ConstantArrayCount>();
-        TINT_ASSERT(count && count == dst_array->Count());
+        TINT_IR_ASSERT(ir, count && count == dst_array->Count());
 
         // Create a local variable to hold the converted result.
         // Convert each element one at a time, writing into the local variable.

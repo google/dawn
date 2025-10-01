@@ -174,7 +174,7 @@ struct State {
             }
 
             auto wgs = func->WorkgroupSize();
-            TINT_ASSERT(wgs.has_value());
+            TINT_IR_ASSERT(ir, wgs.has_value());
 
             std::array<ir::Value*, 3> new_wg{};
             for (size_t i = 0; i < 3; ++i) {
@@ -191,11 +191,11 @@ struct State {
         // not proper usages.
         for (auto var : vars_with_value_array_count) {
             auto* old_ptr = var->Result()->Type()->As<core::type::Pointer>();
-            TINT_ASSERT(old_ptr);
+            TINT_IR_ASSERT(ir, old_ptr);
 
             auto* old_ty = old_ptr->UnwrapPtr()->As<core::type::Array>();
             auto* cnt = old_ty->Count()->As<core::ir::type::ValueArrayCount>();
-            TINT_ASSERT(cnt);
+            TINT_IR_ASSERT(ir, cnt);
 
             auto new_value = CalculateOverride(cnt->value);
             if (new_value != Success) {
@@ -296,10 +296,10 @@ struct State {
                 return res.Failure();
             }
 
-            TINT_ASSERT(res.Get());
+            TINT_IR_ASSERT(ir, res.Get());
             auto* inline_block =
                 res.Get()->Value()->ValueAs<bool>() ? constexpr_if->True() : constexpr_if->False();
-            TINT_ASSERT(inline_block->Terminator());
+            TINT_IR_ASSERT(ir, inline_block->Terminator());
             for (;;) {
                 auto block_inst = *inline_block->begin();
                 if (block_inst->Is<core::ir::Terminator>()) {
@@ -323,7 +323,7 @@ struct State {
             return r.Failure();
         }
         // Must be able to evaluate the constant.
-        TINT_ASSERT(r.Get());
+        TINT_IR_ASSERT(ir, r.Get());
 
         return r;
     }

@@ -141,7 +141,7 @@ struct State {
                     limits.high_limit_f = b.MatchWidth(f16(MAX_F16), res_ty);
                 }
             } else {
-                TINT_UNIMPLEMENTED() << "unhandled floating-point type";
+                TINT_IR_UNIMPLEMENTED(ir) << "unhandled floating-point type";
             }
 
             // Create the helper function.

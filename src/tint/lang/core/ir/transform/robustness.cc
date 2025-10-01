@@ -163,7 +163,7 @@ struct State {
     /// @returns true if pointer accesses in @p param should be clamped
     bool ShouldClamp(Value* value) {
         auto* ptr = value->Type()->As<type::Pointer>();
-        TINT_ASSERT(ptr);
+        TINT_IR_ASSERT(ir, ptr);
         switch (ptr->AddressSpace()) {
             case AddressSpace::kFunction:
                 return config.clamp_function;
@@ -213,8 +213,8 @@ struct State {
 
         ir::Value* clamped_idx = nullptr;
         if (const_idx && const_limit) {
-            TINT_ASSERT(const_idx->Value()->ValueAs<uint32_t>() <=
-                        const_limit->Value()->ValueAs<uint32_t>());
+            TINT_IR_ASSERT(ir, const_idx->Value()->ValueAs<uint32_t>() <=
+                                   const_limit->Value()->ValueAs<uint32_t>());
             clamped_idx = b.Constant(u32(const_idx->Value()->ValueAs<uint32_t>()));
         } else if (IndexMayOutOfBound(idx, limit)) {
             // Clamp it to the dynamic limit.
@@ -250,7 +250,7 @@ struct State {
             return true;
         }
 
-        TINT_ASSERT(const_limit->Value()->Type()->Is<type::U32>());
+        TINT_IR_ASSERT(ir, const_limit->Value()->Type()->Is<type::U32>());
         uint32_t const_limit_value = const_limit->Value()->ValueAs<uint32_t>();
 
         using SignedIntegerRange = ir::analysis::IntegerRangeInfo::SignedIntegerRange;
@@ -293,7 +293,7 @@ struct State {
                     if (arr->ConstantCount()) {
                         return b.Constant(u32(arr->ConstantCount().value() - 1u));
                     }
-                    TINT_ASSERT(arr->Count()->Is<type::RuntimeArrayCount>());
+                    TINT_IR_ASSERT(ir, arr->Count()->Is<type::RuntimeArrayCount>());
 
                     // Skip clamping runtime-sized array indices if requested.
                     if (config.disable_runtime_sized_array_index_clamping) {
@@ -305,8 +305,8 @@ struct State {
                         // Generate a pointer to the runtime-sized array if it isn't the base of
                         // this access instruction.
                         auto* base_ptr = object->Type()->As<type::Pointer>();
-                        TINT_ASSERT(base_ptr != nullptr);
-                        TINT_ASSERT(i == 1);
+                        TINT_IR_ASSERT(ir, base_ptr != nullptr);
+                        TINT_IR_ASSERT(ir, i == 1);
                         auto* arr_ptr = ty.ptr(base_ptr->AddressSpace(), arr, base_ptr->Access());
                         object = b.Access(arr_ptr, object, indices[0])->Result();
                     }
@@ -423,7 +423,7 @@ struct State {
             stride = args[4];
             stride_index = 4;
         } else {
-            TINT_UNREACHABLE();
+            TINT_IR_UNREACHABLE(ir);
         }
 
         // Determine the minimum valid stride, and the value that we will multiply the stride by to
@@ -459,19 +459,20 @@ struct State {
         if (matrix_ty->Type()->IsAnyOf<type::I8, type::U8>()) {
             components_per_element = 4;
         } else {
-            TINT_ASSERT((matrix_ty->Type()->IsAnyOf<type::F16, type::F32, type::I32, type::U32>()));
+            TINT_IR_ASSERT(
+                ir, (matrix_ty->Type()->IsAnyOf<type::F16, type::F32, type::I32, type::U32>()));
             components_per_element = 1;
         }
 
         // Get the length of the array (in terms of matrix elements).
         auto* arr_ty = arr->Type()->UnwrapPtr()->As<core::type::Array>();
-        TINT_ASSERT(arr_ty);
+        TINT_IR_ASSERT(ir, arr_ty);
         Value* array_length = nullptr;
         if (arr_ty->ConstantCount()) {
             array_length =
                 b.Constant(u32(arr_ty->ConstantCount().value() * components_per_element));
         } else {
-            TINT_ASSERT(arr_ty->Count()->Is<type::RuntimeArrayCount>());
+            TINT_IR_ASSERT(ir, arr_ty->Count()->Is<type::RuntimeArrayCount>());
             array_length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, arr)->Result(0);
             if (components_per_element > 1) {
                 array_length = b.Multiply<u32>(array_length, u32(components_per_element))->Result();
@@ -519,7 +520,7 @@ struct State {
                     b.ExitIf(if_);
                 });
             } else {
-                TINT_UNREACHABLE();
+                TINT_IR_UNREACHABLE(ir);
             }
         });
     }
@@ -529,7 +530,7 @@ struct State {
     Var* RootVarFor(Value* value) {
         Var* result = nullptr;
         while (value) {
-            TINT_ASSERT(value->Alive());
+            TINT_IR_ASSERT(ir, value->Alive());
             value = tint::Switch(
                 value,  //
                 [&](InstructionResult* res) {

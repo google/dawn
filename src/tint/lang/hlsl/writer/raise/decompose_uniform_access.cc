@@ -228,7 +228,7 @@ struct State {
                     auto* cnst = idx_value->As<core::ir::Constant>();
 
                     // A struct index must be a constant
-                    TINT_ASSERT(cnst);
+                    TINT_IR_ASSERT(ir, cnst);
 
                     uint32_t idx = cnst->Value()->ValueAs<uint32_t>();
                     auto* mem = s->Members()[idx];
@@ -396,7 +396,7 @@ struct State {
             return MakeVectorLoadF16(access, result_ty, byte_idx);
         }
 
-        TINT_ASSERT(result_ty->DeepestElement()->Size() == 4);
+        TINT_IR_ASSERT(ir, result_ty->DeepestElement()->Size() == 4);
         core::ir::Instruction* load = nullptr;
         if (result_ty->Width() == 4) {
             load = b.Load(access);
@@ -426,7 +426,7 @@ struct State {
                 b.Append(load);
             }
         } else {
-            TINT_UNREACHABLE();
+            TINT_IR_UNREACHABLE(ir);
         }
         return b.Bitcast(result_ty, load);
     }
@@ -490,7 +490,7 @@ struct State {
             return b.Bitcast(result_ty, load);
         }
 
-        TINT_UNREACHABLE();
+        TINT_IR_UNREACHABLE(ir);
     }
 
     // Creates a load function for the given `var` and `matrix` combination. Essentially creates
@@ -560,7 +560,7 @@ struct State {
                 auto* result_arr = b.Var<function>("a", b.Zero(arr));
 
                 auto* count = arr->Count()->As<core::type::ConstantArrayCount>();
-                TINT_ASSERT(count);
+                TINT_IR_ASSERT(ir, count);
 
                 b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()))->Result();

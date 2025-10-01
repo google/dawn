@@ -152,7 +152,7 @@ struct State {
                     TextureStore(call);
                     break;
                 default:
-                    TINT_UNREACHABLE() << call->Func();
+                    TINT_IR_UNREACHABLE(ir) << call->Func();
             }
         }
 
@@ -185,11 +185,11 @@ struct State {
             [&](core::ir::Load* load) -> HandleVariablePath { return PathForHandle(load->From()); },
             [&](core::ir::Access* access) -> HandleVariablePath {
                 auto* binding_array = access->Object();
-                TINT_ASSERT(access->Indices().Length() == 1);
+                TINT_IR_ASSERT(ir, access->Indices().Length() == 1);
                 auto* index = access->Indices()[0];
 
                 HandleVariablePath path = PathForHandle(binding_array);
-                TINT_ASSERT(path.index == nullptr);
+                TINT_IR_ASSERT(ir, path.index == nullptr);
                 path.index = index;
                 return path;
             },
@@ -226,7 +226,7 @@ struct State {
             case core::BuiltinFn::kTextureSampleLevel:
                 return {PathForHandle(args[0]), PathForHandle(args[1])};
             default:
-                TINT_UNREACHABLE() << "unhandled texture function: " << call->Func();
+                TINT_IR_UNREACHABLE(ir) << "unhandled texture function: " << call->Func();
         }
     }
 
@@ -239,7 +239,8 @@ struct State {
         // Create a combined texture sampler variable and insert it into the root block.
         // TODO(411573957): Support binding_array<sampler> by expanding the result's type here to
         // be a binding_array<T, NTextures * NSamplers>.
-        TINT_ASSERT(!sampler || sampler->Result()->Type()->UnwrapPtr()->Is<core::type::Sampler>());
+        TINT_IR_ASSERT(
+            ir, !sampler || sampler->Result()->Type()->UnwrapPtr()->Is<core::type::Sampler>());
         auto* result = b.InstructionResult(ty.ptr<handle>(handle_type));
         auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
                                                                               key.sampler);
@@ -416,7 +417,7 @@ struct State {
                         break;
                     }
                     default:
-                        TINT_UNREACHABLE() << "unknown usage instruction for texture";
+                        TINT_IR_UNREACHABLE(ir) << "unknown usage instruction for texture";
                 }
             }
         }
@@ -458,7 +459,7 @@ struct State {
 
     void UpgradeLoadOf1DTexture(core::ir::Instruction* inst) {
         auto* ld = inst->As<core::ir::Load>();
-        TINT_ASSERT(ld);
+        TINT_IR_ASSERT(ir, ld);
 
         auto new_type = UpgradeTexture1D(ld->Result());
         if (!new_type.has_value()) {
@@ -476,18 +477,18 @@ struct State {
             auto sampler_path = PathForHandle(sampler);
             // TODO(411573957): Support binding_array<sampler> by combining the sampler's index in
             // its array to the texture's index in its array (if any).
-            TINT_ASSERT(sampler_path.index == nullptr);
+            TINT_IR_ASSERT(ir, sampler_path.index == nullptr);
 
             auto t_bp = texture_path.var->BindingPoint();
             auto s_bp = sampler_path.var->BindingPoint();
-            TINT_ASSERT(t_bp.has_value() && s_bp.has_value());
+            TINT_IR_ASSERT(ir, t_bp.has_value() && s_bp.has_value());
             CombinedTextureSamplerPair key{t_bp.value(), s_bp.value()};
 
             replacement_var = *texture_sampler_to_replacement_.Get(key).value;
         } else {
             replacement_var = *texture_to_replacement_.Get(texture_path.var).value;
         }
-        TINT_ASSERT(replacement_var != nullptr);
+        TINT_IR_ASSERT(ir, replacement_var != nullptr);
 
         // In the storage case, we'll return the original texture. Nothing else to do in that case.
         if (replacement_var == texture_path.var) {
@@ -608,7 +609,7 @@ struct State {
             auto* tex = GetNewTexture(source_tex);
 
             // No loading from a depth texture in GLSL, so we should never have gotten here.
-            TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>());
+            TINT_IR_ASSERT(ir, !tex->Type()->Is<core::type::DepthTexture>());
 
             auto* tex_type = tex->Type()->As<core::type::Texture>();
 
@@ -654,7 +655,7 @@ struct State {
                     break;
                 }
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             // If we had a depth texture source, then that means we've swapped the depth type for a
@@ -683,7 +684,7 @@ struct State {
             auto args = call->Args();
             auto* tex = GetNewTexture(args[idx++]);
             auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             Vector<core::ir::Value*, 3> new_args;
             new_args.Push(tex);
@@ -697,7 +698,7 @@ struct State {
                 auto* array = b.InsertConvertIfNeeded(ty.i32(), args[idx++]);
 
                 auto* coords_ty = coords->Type()->As<core::type::Vector>();
-                TINT_ASSERT(coords_ty);
+                TINT_IR_ASSERT(ir, coords_ty);
 
                 auto* new_coords = b.Construct(ty.vec3<i32>(), coords, array);
                 new_args.Push(new_coords->Result());
@@ -728,7 +729,7 @@ struct State {
             core::ir::Value* component = nullptr;
             if (!args[idx]->Type()->Is<core::type::Texture>()) {
                 component = args[idx++];
-                TINT_ASSERT(component);
+                TINT_IR_ASSERT(ir, component);
             }
 
             uint32_t tex_arg = idx++;
@@ -736,7 +737,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             bool is_depth = tex_type->Is<core::type::DepthTexture>();
             params.Push(tex);
@@ -759,7 +760,7 @@ struct State {
                         b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             // Depth gather requires a `refz` param in GLSL.
             if (is_depth) {
@@ -791,7 +792,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             Vector<core::ir::Value*, 4> params;
             params.Push(tex);
@@ -814,7 +815,7 @@ struct State {
                         b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             params.Push(args[idx++]);
@@ -841,7 +842,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -891,7 +892,7 @@ struct State {
                     }
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             auto fn = glsl::BuiltinFn::kTexture;
@@ -930,7 +931,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -956,7 +957,7 @@ struct State {
                         b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             // Bias comes before offset, so pull it out before handling the offset.
@@ -987,7 +988,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -1040,7 +1041,7 @@ struct State {
                     }
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             params.Push(b.InsertConvertIfNeeded(ty.f32(), args[idx++]));
@@ -1068,7 +1069,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -1095,7 +1096,7 @@ struct State {
                         b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))->Result());
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             params.Push(args[idx++]);  // dPdx
@@ -1123,7 +1124,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -1159,7 +1160,7 @@ struct State {
                     params.Push(b.Value(args[idx++]));
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             auto fn = glsl::BuiltinFn::kTexture;
@@ -1198,7 +1199,7 @@ struct State {
 
             auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            TINT_ASSERT(tex_type);
+            TINT_IR_ASSERT(ir, tex_type);
 
             params.Push(tex);
 
@@ -1235,7 +1236,7 @@ struct State {
                     params.Push(b.Value(args[idx++]));
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
 
             auto fn = glsl::BuiltinFn::kTexture;

@@ -839,7 +839,7 @@ struct State {
                     break;
                 case core::type::TextureDimension::k1d:
                 case core::type::TextureDimension::kNone:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             args[grad_idx] = b.Construct(ty.Get<msl::type::Gradient>(dim), ddx, ddy)->Result();
 

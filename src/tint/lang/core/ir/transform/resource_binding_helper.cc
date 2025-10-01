@@ -89,7 +89,7 @@ std::optional<ResourceBindingConfig> GenerateResourceBindingConfig(Module& mod) 
                         }
 
                         auto exp = call->ExplicitTemplateParams();
-                        TINT_ASSERT(exp.Length() == 1);
+                        TINT_IR_ASSERT(mod, exp.Length() == 1);
                         info.default_binding_type_order.push_back(type::TypeToResourceType(exp[0]));
                     },
                     TINT_ICE_ON_NO_MATCH);

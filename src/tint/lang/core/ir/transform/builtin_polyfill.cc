@@ -667,7 +667,7 @@ struct State {
                 call->Destroy();
             } break;
             default:
-                TINT_UNIMPLEMENTED() << "extractBits polyfill level";
+                TINT_IR_UNIMPLEMENTED(ir) << "extractBits polyfill level";
         }
     }
 
@@ -878,7 +878,7 @@ struct State {
                 call->Destroy();
             } break;
             default:
-                TINT_UNIMPLEMENTED() << "insertBits polyfill level";
+                TINT_IR_UNIMPLEMENTED(ir) << "insertBits polyfill level";
         }
     }
 
@@ -907,7 +907,7 @@ struct State {
         auto* e2 = call->Args()[1];
         auto* vec_ty = e1->Type()->As<core::type::Vector>();
         // Only polyfills vec2<f32> (crbug.com/tint/1798)
-        TINT_ASSERT(vec_ty && vec_ty->Width() == 2 && vec_ty->Type()->Is<core::type::F32>());
+        TINT_IR_ASSERT(ir, vec_ty && vec_ty->Width() == 2 && vec_ty->Type()->Is<core::type::F32>());
 
         b.InsertBefore(call, [&] {
             // The generated HLSL must effectively be emitted as:
@@ -1233,7 +1233,7 @@ struct State {
                         break;
                     }
                     default:
-                        TINT_UNREACHABLE()
+                        TINT_IR_UNREACHABLE(ir)
                             << "unhandled f16 vector width in subgroupBroadcast polyfill";
                 }
             } else {  // Scalar f16

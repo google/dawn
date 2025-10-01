@@ -89,7 +89,7 @@ struct State {
             }
 
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            TINT_ASSERT(ptr);
+            TINT_IR_ASSERT(ir_, ptr);
 
             auto space = ptr->AddressSpace();
             if (space != core::AddressSpace::kOut && space != core::AddressSpace::kIn &&

@@ -75,7 +75,7 @@ struct State {
     /// @param call the print call to replace
     void Replace(core::ir::CoreBuiltinCall* call) {
         SetupGlobals();
-        TINT_ASSERT(entry_point != nullptr);
+        TINT_IR_ASSERT(ir, entry_point != nullptr);
 
         b.InsertBefore(call, [&] {
             auto* id = b.Load(invocation_id);
@@ -112,7 +112,7 @@ struct State {
                     args.Push(b.Swizzle<u32>(id, Vector{1u})->Result());
                     break;
                 case core::ir::Function::PipelineStage::kUndefined:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             args.Push(value);
 
@@ -158,17 +158,17 @@ struct State {
         for (auto func : ir.functions) {
             switch (func->Stage()) {
                 case core::ir::Function::PipelineStage::kCompute:
-                    TINT_ASSERT(entry_point == nullptr);
+                    TINT_IR_ASSERT(ir, entry_point == nullptr);
                     entry_point = func;
                     SetupComputeInvocationId(func);
                     break;
                 case core::ir::Function::PipelineStage::kFragment:
-                    TINT_ASSERT(entry_point == nullptr);
+                    TINT_IR_ASSERT(ir, entry_point == nullptr);
                     entry_point = func;
                     SetupFragmentInvocationId(func);
                     break;
                 case core::ir::Function::PipelineStage::kVertex:
-                    TINT_ASSERT(entry_point == nullptr);
+                    TINT_IR_ASSERT(ir, entry_point == nullptr);
                     entry_point = func;
                     SetupVertexInvocationId(func);
                     break;
@@ -176,7 +176,7 @@ struct State {
                     break;
             }
         }
-        TINT_ASSERT(invocation_id && entry_point);
+        TINT_IR_ASSERT(ir, invocation_id && entry_point);
     }
 
     /// Set up the invocation ID for a compute shader.

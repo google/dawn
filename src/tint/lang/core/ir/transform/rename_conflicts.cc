@@ -276,7 +276,7 @@ struct State {
         // Add the declaration to the current scope, and make sure that it was either successfully
         // added or has already been added.
         auto add = scopes.Back().Add(name.NameView(), thing);
-        TINT_ASSERT(add || add.value == thing);
+        TINT_IR_ASSERT(ir, add || add.value == thing);
     }
 
     /// Rename changes the name of @p thing with the old name of @p old_name

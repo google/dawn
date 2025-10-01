@@ -405,7 +405,7 @@ struct State {
     AccessChain AccessChainFor(Value* value) {
         AccessChain chain;
         while (value) {
-            TINT_ASSERT(value->Alive());
+            TINT_IR_ASSERT(ir, value->Alive());
             value = tint::Switch(
                 value,  //
                 [&](InstructionResult* res) {
@@ -426,7 +426,7 @@ struct State {
                                 if (auto* str = obj_ty->As<type::Struct>()) {
                                     // Struct type accesses must be constant, representing the index
                                     // of the member being accessed.
-                                    TINT_ASSERT(idx->Is<Constant>());
+                                    TINT_IR_ASSERT(ir, idx->Is<Constant>());
                                     auto i = idx->As<Constant>()->Value()->ValueAs<uint32_t>();
                                     auto* member = str->Members()[i];
                                     ops.Push(MemberAccess{member});
@@ -456,7 +456,7 @@ struct State {
                                 chain.indices.Push(idx);
                             }
 
-                            TINT_ASSERT(obj_ty == access->Result()->Type()->UnwrapPtr());
+                            TINT_IR_ASSERT(ir, obj_ty == access->Result()->Type()->UnwrapPtr());
                             return access->Object();
                         },
                         [&](Load* load) { return load->From(); },  //
@@ -529,7 +529,7 @@ struct State {
                     // Root pointer is a module-scope var
                     root_ptr = global->var->Result();
                 } else {
-                    TINT_ICE() << "unhandled AccessShape root variant";
+                    TINT_IR_ICE(ir) << "unhandled AccessShape root variant";
                 }
 
                 // Build the access indices parameter, if required.
@@ -560,7 +560,7 @@ struct State {
                     // access chain call.
                     auto* access_type = old_param->Type();
                     if (!access_type->Is<type::Pointer>()) {
-                        TINT_ASSERT(access_type->IsHandle());
+                        TINT_IR_ASSERT(ir, access_type->IsHandle());
                         access_type = ty.ptr<handle>(access_type);
                     }
 
@@ -617,7 +617,7 @@ struct State {
 
         if (auto* ptr = param_type->As<type::Pointer>()) {
             // DVA needs to be updated if handles start to be passed by pointer.
-            TINT_ASSERT(ptr->AddressSpace() != core::AddressSpace::kHandle);
+            TINT_IR_ASSERT(ir, ptr->AddressSpace() != core::AddressSpace::kHandle);
             switch (ptr->AddressSpace()) {
                 case core::AddressSpace::kStorage:
                 case core::AddressSpace::kUniform:

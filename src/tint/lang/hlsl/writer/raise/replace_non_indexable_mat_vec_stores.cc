@@ -142,7 +142,7 @@ struct State {
 
             store->Destroy();
         });
-        TINT_ASSERT(!new_stores.IsEmpty());
+        TINT_IR_ASSERT(ir, !new_stores.IsEmpty());
         return new_stores;
     }
 
@@ -173,9 +173,9 @@ struct State {
     // Replaces the vector element store with a full vector store that masks in the indexed
     // value. Example HLSL: vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
     void ReplaceStoreVectorElement(core::ir::StoreVectorElement* store) {
-        TINT_ASSERT(!IsConstant(store->Index()));
+        TINT_IR_ASSERT(ir, !IsConstant(store->Index()));
         auto* to_ptr = store->To()->Type()->As<core::type::Pointer>();
-        TINT_ASSERT(to_ptr);
+        TINT_IR_ASSERT(ir, to_ptr);
 
         b.InsertBefore(store, [&] {
             auto* vec_param = store->Operands()[0];

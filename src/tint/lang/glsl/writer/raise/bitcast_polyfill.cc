@@ -153,7 +153,7 @@ struct State {
                                              const core::type::Type* dst_type) {
         return bitcast_funcs_.GetOrAdd(
             BitcastType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
-                TINT_ASSERT(src_type->Is<core::type::Vector>());
+                TINT_IR_ASSERT(ir, src_type->Is<core::type::Vector>());
 
                 // Generate a helper function that performs the following (in GLSL):
                 //
@@ -185,7 +185,7 @@ struct State {
                                                           b.Swizzle(ty.vec2<f16>(), src, {2, 3}));
                         packed = b.Construct(ty.vec2<u32>(), left, right)->Result();
                     } else {
-                        TINT_UNREACHABLE();
+                        TINT_IR_UNREACHABLE(ir);
                     }
 
                     if (dst_type->DeepestElement()->Is<core::type::F32>()) {
@@ -215,7 +215,7 @@ struct State {
                                            const core::type::Type* dst_type) {
         return bitcast_funcs_.GetOrAdd(
             BitcastType{{src_type, dst_type}}, [&]() -> core::ir::Function* {
-                TINT_ASSERT(dst_type->Is<core::type::Vector>());
+                TINT_IR_ASSERT(ir, dst_type->Is<core::type::Vector>());
 
                 // Generate a helper function that performs the following (in GLSL):
                 //

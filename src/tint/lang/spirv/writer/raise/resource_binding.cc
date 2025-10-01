@@ -44,7 +44,7 @@ Hashmap<const core::type::Type*, core::ir::Var*, 4> ResourceBindingHelper::Gener
     Hashmap<const core::type::Type*, core::ir::Var*, 4> res;
 
     auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-    TINT_ASSERT(ptr);
+    TINT_IR_ASSERT(b.ir, ptr);
 
     for (auto& type : types) {
         auto* t = core::type::ResourceTypeToType(b.ir.Types(), type);

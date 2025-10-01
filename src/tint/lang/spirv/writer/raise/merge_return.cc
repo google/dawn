@@ -245,7 +245,7 @@ struct State {
             // Propagate results from the conditional `if` through the new exit.
             Vector<core::ir::Value*, 8> exit_args;
             exit_args.Resize(control->Block()->Parent()->Results().Length());
-            TINT_ASSERT(cond->Results().Length() == exit_args.Length());
+            TINT_IR_ASSERT(ir, cond->Results().Length() == exit_args.Length());
             for (size_t i = 0; i < cond->Results().Length(); ++i) {
                 exit_args[i] = cond->Results()[i];
             }

@@ -259,7 +259,8 @@ struct State {
                         helper->InsertBefore(call);
                         call->Destroy();
                     } else {
-                        TINT_ICE() << "unhandled texture_external builtin call: " << call->Func();
+                        TINT_IR_ICE(ir)
+                            << "unhandled texture_external builtin call: " << call->Func();
                     }
                 },
                 [&](UserCall* call) {

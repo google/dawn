@@ -144,7 +144,7 @@ struct State {
             auto* result = ifelse->True()->Append(inst);
 
             auto results = inst->Results();
-            TINT_ASSERT(results.Length() < 2);
+            TINT_IR_ASSERT(ir, results.Length() < 2);
             if (!results.IsEmpty() && !results[0]->Type()->Is<core::type::Void>()) {
                 // The original instruction had a result, so return it from the if instruction.
                 ifelse->SetResult(b.InstructionResult(results[0]->Type()));
@@ -205,7 +205,7 @@ struct State {
                 },
                 [&](BuiltinCall*) {
                     // TODO(crbug.com/tint/2102): Catch this with the validator instead.
-                    TINT_UNREACHABLE() << "unexpected non-core instruction";
+                    TINT_IR_UNREACHABLE(ir) << "unexpected non-core instruction";
                 });
         }
     }

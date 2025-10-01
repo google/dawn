@@ -129,7 +129,7 @@ struct State {
         core::ir::Function* ep = nullptr;
         for (auto& func : ir.functions) {
             if (func->IsVertex()) {
-                TINT_ASSERT(!ep);
+                TINT_IR_ASSERT(ir, !ep);
                 ep = func;
             }
         }
@@ -157,7 +157,7 @@ struct State {
                     // instance indices. Replace any user-declared indices with the ones that we
                     // created when setting up the buffers.
                     auto builtin = param->Builtin();
-                    TINT_ASSERT(builtin);
+                    TINT_IR_ASSERT(ir, builtin);
                     switch (*builtin) {
                         case core::BuiltinValue::kVertexIndex:
                             if (vertex_index_) {
@@ -176,7 +176,7 @@ struct State {
                             }
                             break;
                         default:
-                            TINT_UNREACHABLE();
+                            TINT_IR_UNREACHABLE(ir);
                     }
                 }
             }
@@ -232,7 +232,7 @@ struct State {
             }
             if (buffer.array_stride != 4) {
                 // Multiply the index by the stride in words.
-                TINT_ASSERT((buffer.array_stride & 3u) == 0u);
+                TINT_IR_ASSERT(ir, (buffer.array_stride & 3u) == 0u);
                 index = b.Multiply<u32>(index, u32(buffer.array_stride / 4))->Result();
                 ir.SetName(index, buffer_name + "_base");
             }
@@ -258,7 +258,7 @@ struct State {
                 // Other parameters should be builtins, which can only be the vertex and instance
                 // indices. Use the separate parameters that we created for these indices. Because
                 // there are no duplicates, this doesn't conflict with the param handling above.
-                TINT_ASSERT(member->Attributes().builtin);
+                TINT_IR_ASSERT(ir, member->Attributes().builtin);
                 switch (*member->Attributes().builtin) {
                     case core::BuiltinValue::kVertexIndex:
                         construct_args.Push(GetVertexIndex());
@@ -267,7 +267,7 @@ struct State {
                         construct_args.Push(GetInstanceIndex());
                         break;
                     default:
-                        TINT_UNREACHABLE();
+                        TINT_IR_UNREACHABLE(ir);
                 }
             }
         }
@@ -280,7 +280,7 @@ struct State {
     /// @returns the loaded attribute value
     core::ir::Value* Load(uint32_t location, const core::type::Type* shader_type) {
         auto info = locations_.Get(location);
-        TINT_ASSERT(info);
+        TINT_IR_ASSERT(ir, info);
 
         // Load the attribute data from the buffer.
         auto* value = LoadFromBuffer(*info, shader_type->DeepestElement());
@@ -306,7 +306,7 @@ struct State {
                     value = b.Swizzle(shader_type, value, Vector{0u, 1u, 2u})->Result();
                     break;
                 default:
-                    TINT_UNREACHABLE() << dst_width;
+                    TINT_IR_UNREACHABLE(ir) << dst_width;
             }
         } else if (dst_width > src_width) {
             // The type declared in the shader is wider than the vertex attribute format, so append
@@ -379,15 +379,15 @@ struct State {
                     } else if (bits == 16) {
                         shift_left = b.ShiftLeft(vec, splat, b.Composite(uvec, 16_u, 0_u));
                     } else {
-                        TINT_UNREACHABLE();
+                        TINT_IR_UNREACHABLE(ir);
                     }
                     break;
                 case 4:
-                    TINT_ASSERT(bits == 8);
+                    TINT_IR_ASSERT(ir, bits == 8);
                     shift_left = b.ShiftLeft(vec, splat, b.Composite(uvec, 24_u, 16_u, 8_u, 0_u));
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             // 0000xxxx, 0000yyyy
             return b.ShiftRight(vec, shift_left, b.Splat(uvec, u32(32 - bits)))->Result();
@@ -677,7 +677,7 @@ struct State {
                 return float_value(b.Divide<vec4<f32>>(b.Convert<vec4<f32>>(mask), div)->Result());
             }
         }
-        TINT_UNREACHABLE();
+        TINT_IR_UNREACHABLE(ir);
     }
 };
 

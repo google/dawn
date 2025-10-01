@@ -128,7 +128,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             default:
                 break;
         }
-        TINT_UNREACHABLE() << "Unhandled builtin value: " << ToString(builtin);
+        TINT_IR_UNREACHABLE(ir) << "Unhandled builtin value: " << ToString(builtin);
     }
 
     struct MemberInfo {
@@ -234,7 +234,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (config.first_index_offset_binding.has_value() && has_vertex_or_instance_index) {
             // Create a FirstIndexOffset uniform buffer. GetInput will use this to offset the
             // vertex/instance index.
-            TINT_ASSERT(func->IsVertex());
+            TINT_IR_ASSERT(ir, func->IsVertex());
             tint::Vector<tint::core::type::Manager::StructMemberDesc, 2> members;
             auto* str = ty.Struct(ir.symbols.New("tint_first_index_offset_struct"),
                                   {
@@ -281,7 +281,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     input_struct->AddUsage(core::type::PipelineStageUsage::kComputeInput);
                     break;
                 case core::ir::Function::PipelineStage::kUndefined:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             input_param = b.FunctionParam("inputs", input_struct);
             return {input_param};
@@ -307,7 +307,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 // Compute new member element counts
                 auto* arr = type->As<core::type::Array>();
                 uint32_t arr_count = *arr->ConstantCount();
-                TINT_ASSERT(arr_count >= 1 && arr_count <= 8);
+                TINT_IR_ASSERT(ir, arr_count >= 1 && arr_count <= 8);
                 uint32_t count0, count1;
                 if (arr_count >= 4) {
                     count0 = 4;
@@ -379,7 +379,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 output_struct->AddUsage(core::type::PipelineStageUsage::kComputeOutput);
                 break;
             case core::ir::Function::PipelineStage::kUndefined:
-                TINT_UNREACHABLE();
+                TINT_IR_UNREACHABLE(ir);
         }
         return output_struct;
     }
@@ -453,14 +453,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         } else if (config.first_index_offset_binding.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
             // Apply vertex_index offset
-            TINT_ASSERT(tint_first_index_offset);
+            TINT_IR_ASSERT(ir, tint_first_index_offset);
             auto* vertex_index_offset =
                 builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 0_u);
             v = builder.Add<u32>(v, builder.Load(vertex_index_offset))->Result();
         } else if (config.first_index_offset_binding.has_value() &&
                    inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
             // Apply instance_index offset
-            TINT_ASSERT(tint_first_index_offset);
+            TINT_IR_ASSERT(ir, tint_first_index_offset);
             auto* instance_index_offset =
                 builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 1_u);
             v = builder.Add<u32>(v, builder.Load(instance_index_offset))->Result();
@@ -491,7 +491,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                                                 uint32_t src_array_first_index) {
         // Copy from the array `src_array`
         auto* src_array_ty = src_array->Type()->As<core::type::Array>();
-        TINT_ASSERT(src_array_ty);
+        TINT_IR_ASSERT(ir, src_array_ty);
 
         core::ir::Value* dst_value;
         if (auto* dst_vec_ty = outputs[output_index].type->As<core::type::Vector>()) {
@@ -502,7 +502,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             }
             dst_value = builder.Construct(dst_vec_ty, std::move(init))->Result();
         } else {
-            TINT_ASSERT(outputs[output_index].type->As<core::type::Scalar>());
+            TINT_IR_ASSERT(ir, outputs[output_index].type->As<core::type::Scalar>());
             dst_value = builder.Access<f32>(src_array, u32(src_array_first_index))->Result();
         }
         return dst_value;
@@ -512,7 +512,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     void SetOutput(core::ir::Builder& builder, uint32_t idx, core::ir::Value* value) override {
         if (truncated_indices.Contains(idx)) {
             // Leave this output value as nullptr
-            TINT_ASSERT(!output_values[output_indices[idx]]);
+            TINT_IR_ASSERT(ir, !output_values[output_indices[idx]]);
             return;
         }
 
@@ -544,7 +544,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             output_values.EraseIf([](auto* v) { return v == nullptr; });
         }
 
-        TINT_ASSERT(output_values.Length() == output_struct->Members().Length());
+        TINT_IR_ASSERT(ir, output_values.Length() == output_struct->Members().Length());
         return builder.Construct(output_struct, std::move(output_values))->Result();
     }
 };

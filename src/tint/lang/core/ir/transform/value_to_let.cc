@@ -72,7 +72,7 @@ struct State {
 
         for (ir::Instruction* inst = block->Front(); inst; inst = inst->next) {
             // This transform assumes that all multi-result instructions have been replaced
-            TINT_ASSERT(inst->Results().Length() < 2);
+            TINT_IR_ASSERT(ir, inst->Results().Length() < 2);
 
             // The memory accesses of this instruction
             auto accesses = inst->GetSideEffects();

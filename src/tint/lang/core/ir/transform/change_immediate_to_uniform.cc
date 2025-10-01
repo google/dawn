@@ -83,7 +83,7 @@ struct State {
             }
 
             if (immediate) {
-                TINT_ICE() << "multiple immediate variables";
+                TINT_IR_ICE(ir) << "multiple immediate variables";
             }
 
             immediate = var;

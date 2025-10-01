@@ -89,7 +89,7 @@ struct State {
                     TextureFromUniform(call);
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
         }
     }
@@ -137,11 +137,11 @@ struct State {
             },
             [&](core::ir::Access* access) -> TextureVariablePath {
                 auto* binding_array = access->Object();
-                TINT_ASSERT(access->Indices().Length() == 1);
+                TINT_IR_ASSERT(ir, access->Indices().Length() == 1);
                 auto* index = access->Indices()[0];
 
                 TextureVariablePath path = PathForTexture(binding_array);
-                TINT_ASSERT(path.index == nullptr);
+                TINT_IR_ASSERT(ir, path.index == nullptr);
                 path.index = index;
                 return path;
             },

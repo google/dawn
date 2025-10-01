@@ -148,11 +148,11 @@ struct State {
                     ptr = let->Value();
                     continue;
                 }
-                TINT_UNREACHABLE() << "unhandled source of a storage buffer pointer: "
-                                   << result->Instruction()->TypeInfo().name;
+                TINT_IR_UNREACHABLE(ir) << "unhandled source of a storage buffer pointer: "
+                                        << result->Instruction()->TypeInfo().name;
             }
-            TINT_UNREACHABLE() << "unhandled source of a storage buffer pointer: "
-                               << ptr->TypeInfo().name;
+            TINT_IR_UNREACHABLE(ir)
+                << "unhandled source of a storage buffer pointer: " << ptr->TypeInfo().name;
         }
     }
 
@@ -194,7 +194,7 @@ struct State {
             if (func->IsEntryPoint()) {
                 // Create a placeholder construct instruction for the lengths structure that will be
                 // filled in later when we know all of the structure members.
-                TINT_ASSERT(lengths_constructor == nullptr);
+                TINT_IR_ASSERT(ir, lengths_constructor == nullptr);
                 lengths_constructor = b.ConstructWithResult(ir.CreateValue<InstructionResult>());
                 lengths_constructor->InsertBefore(func->Block()->Front());
                 return lengths_constructor->Result();
@@ -227,7 +227,7 @@ struct State {
     /// @returns the length of the array, or nullptr if the original builtin should be used
     Value* ComputeArrayLength(Var* var, Instruction* insertion_point) {
         auto binding = var->BindingPoint();
-        TINT_ASSERT(binding);
+        TINT_IR_ASSERT(ir, binding);
 
         auto idx_it = bindpoint_to_size_index.find(*binding);
         if (idx_it == bindpoint_to_size_index.end()) {
@@ -286,8 +286,8 @@ struct State {
         b.InsertBefore(lengths_constructor->Block()->Front(), [&] {
             Vector<Value*, 8> constructor_values;
             for (auto info : ordered_bindpoints) {
-                TINT_ASSERT(bindpoint_to_size_index.contains(info.binding_point));
-                TINT_ASSERT(bindpoint_to_length_member_index.Contains(info.binding_point));
+                TINT_IR_ASSERT(ir, bindpoint_to_size_index.contains(info.binding_point));
+                TINT_IR_ASSERT(ir, bindpoint_to_length_member_index.Contains(info.binding_point));
 
                 // Load the total storage buffer size from the immediate block.
                 // The sizes are packed into vec4s to satisfy the 16-byte alignment requirement for
@@ -319,7 +319,7 @@ struct State {
                 } else {
                     array_type = info.store_type->As<core::type::Array>();
                 }
-                TINT_ASSERT(array_type);
+                TINT_IR_ASSERT(ir, array_type);
 
                 auto* length =
                     b.Divide<u32>(array_size, u32(array_type->ImplicitStride()))->Result();

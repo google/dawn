@@ -47,7 +47,8 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
         }
         if (ir.NameOf(func).NameView() == entry_point_name) {
             if (entry_point) {
-                TINT_ICE() << "multiple entry points named '" << entry_point_name << "' were found";
+                TINT_IR_ICE(ir) << "multiple entry points named '" << entry_point_name
+                                << "' were found";
             }
             entry_point = func;
         }
@@ -85,8 +86,9 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
         if (!referenced_vars.Contains(inst)) {
             // There shouldn't be any remaining references to the variable.
             if (inst->Result()->NumUsages() != 0) {
-                TINT_ICE() << " Unexpected usages remain when applying single entry point IR for  '"
-                           << entry_point_name << "' ";
+                TINT_IR_ICE(ir)
+                    << " Unexpected usages remain when applying single entry point IR for  '"
+                    << entry_point_name << "' ";
             }
             inst->Destroy();
         }

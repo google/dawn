@@ -100,7 +100,7 @@ struct Impl {
 
     void OperandRefToPtr(const core::ir::Usage& use) {
         auto* operand = use.instruction->Operand(use.operand_index);
-        TINT_ASSERT(operand);
+        TINT_IR_ASSERT(mod, operand);
         if (auto* ref_ty = As<core::type::Reference>(operand->Type())) {
             auto* as_ptr = b.InstructionResult(RefToPtr(ref_ty));
             mod.CreateInstruction<wgsl::ir::Unary>(as_ptr, core::UnaryOp::kAddressOf, operand)

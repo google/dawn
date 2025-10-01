@@ -102,9 +102,9 @@ struct State {
     template <typename T>
     core::ir::Instruction* GetSingularUse(core::ir::Instruction* inst) {
         auto& usages = inst->Result()->UsagesUnsorted();
-        TINT_ASSERT(usages.Count() == 1);
+        TINT_IR_ASSERT(ir, usages.Count() == 1);
         auto* index = usages.begin()->instruction->As<T>();
-        TINT_ASSERT(index);
+        TINT_IR_ASSERT(ir, index);
         return index;
     }
 };

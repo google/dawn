@@ -179,7 +179,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     }
 
     if (array_length_from_constants.buffer_sizes_offset) {
-        TINT_ASSERT(!array_length_from_constants.ubo_binding);
+        TINT_IR_ASSERT(module, !array_length_from_constants.ubo_binding);
         auto array_length_from_immediate_result = core::ir::transform::ArrayLengthFromImmediates(
             module, immediate_data_layout.Get(),
             array_length_from_constants.buffer_sizes_offset.value(),

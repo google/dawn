@@ -155,7 +155,7 @@ struct State {
                     Barrier(call);
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
         }
     }
@@ -250,7 +250,7 @@ struct State {
         auto args = call->Args();
 
         auto* vec_ty = call->Args()[0]->Type()->As<core::type::Vector>();
-        TINT_ASSERT(vec_ty);
+        TINT_IR_ASSERT(ir, vec_ty);
 
         b.InsertBefore(call, [&] {
             if (!vec_ty->DeepestElement()->IsIntegerScalar()) {

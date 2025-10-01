@@ -273,7 +273,7 @@ class State {
                         attrs.Push(b.Builtin(core::BuiltinValue::kPrimitiveIndex));
                         break;
                     default:
-                        TINT_UNIMPLEMENTED() << builtin.value();
+                        TINT_IR_UNIMPLEMENTED(mod) << builtin.value();
                 }
             }
             if (auto loc = param->Location()) {
@@ -330,7 +330,7 @@ class State {
                     ret_attrs.Push(b.Builtin(core::BuiltinValue::kSampleMask));
                     break;
                 default:
-                    TINT_UNIMPLEMENTED() << builtin.value();
+                    TINT_IR_UNIMPLEMENTED(mod) << builtin.value();
             }
         }
         if (auto loc = fn->ReturnLocation()) {
@@ -594,7 +594,7 @@ class State {
 
         // Return has arguments - this is the return value.
         if (ret->Args().Length() != 1) {
-            TINT_ICE() << "expected 1 value for return, got " << ret->Args().Length();
+            TINT_IR_ICE(mod) << "expected 1 value for return, got " << ret->Args().Length();
         }
 
         Append(b.Return(Expr(ret->Args().Front())));
@@ -603,7 +603,7 @@ class State {
     void Var(const core::ir::Var* var) {
         auto* val = var->Result();
         auto* ref = As<core::type::Reference>(val->Type());
-        TINT_ASSERT(ref /* converted by PtrToRef */);
+        TINT_IR_ASSERT(mod, ref /* converted by PtrToRef */);
         auto ty = Type(ref->StoreType());
         Symbol name = NameFor(var->Result());
         Bind(var->Result(), name);
@@ -827,12 +827,13 @@ class State {
                 [&](const core::type::Struct* s) {
                     if (auto* c = index->As<core::ir::Constant>()) {
                         auto i = c->Value()->ValueAs<uint32_t>();
-                        TINT_ASSERT(i < s->Members().Length());
+                        TINT_IR_ASSERT(mod, i < s->Members().Length());
                         auto* member = s->Members()[i];
                         obj_ty = member->Type();
                         expr = b.MemberAccessor(expr, SanitizedMemberName(member));
                     } else {
-                        TINT_ICE() << "invalid index for struct type: " << index->TypeInfo().name;
+                        TINT_IR_ICE(mod)
+                            << "invalid index for struct type: " << index->TypeInfo().name;
                     }
                 },  //
                 TINT_ICE_ON_NO_MATCH);
@@ -846,7 +847,7 @@ class State {
         Vector<char, 4> components;
         for (uint32_t i : s->Indices()) {
             if (i >= 4) {
-                TINT_ICE() << "invalid swizzle index: " << i;
+                TINT_IR_ICE(mod) << "invalid swizzle index: " << i;
             }
             components.Push(xyzw[i]);
         }
@@ -934,8 +935,8 @@ class State {
 
         auto lookup = bindings_.Get(value);
         if (!lookup) {
-            TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
-                       << ") value has no expression";
+            TINT_IR_ICE(mod) << "Expr(" << (value ? value->TypeInfo().name : "null")
+                             << ") value has no expression";
         }
 
         if (lookup->ast_expr != nullptr) {
@@ -1030,7 +1031,7 @@ class State {
                 }
                 auto count = a->ConstantCount();
                 if (!count) {
-                    TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
+                    TINT_IR_ICE(mod) << core::type::Array::kErrExpectedConstantCount;
                 }
                 return b.ty.array(el, u32(count.value()));
             },
@@ -1068,7 +1069,7 @@ class State {
                 return b.ty.ptr(address_space, el, access);
             },
             [&](const core::type::Reference*) -> ast::Type {
-                TINT_ICE() << "reference types should never appear in the IR";
+                TINT_IR_ICE(mod) << "reference types should never appear in the IR";
             },
             [&](const core::type::InputAttachment* i) {
                 Enable(wgsl::Extension::kChromiumInternalInputAttachments);
@@ -1090,14 +1091,14 @@ class State {
         }
 
         auto n = structs_.GetOrAdd(s, [&] {
-            TINT_ASSERT(s->Members().Length() > 0);
+            TINT_IR_ASSERT(mod, s->Members().Length() > 0);
             uint32_t current_offset = s->Members()[0]->Offset();
 
             Vector<const ast::StructMember*, 8> members;
 
             // Add padding before the first member if necessary.
             if (current_offset > 0) {
-                TINT_ASSERT(current_offset % 4 == 0);
+                TINT_IR_ASSERT(mod, current_offset % 4 == 0);
                 for (uint32_t i = 0; i < current_offset; i += 4) {
                     members.Push(b.Member("tint_pad_" + std::to_string(i), b.ty.u32()));
                 }
@@ -1108,7 +1109,7 @@ class State {
                 const auto& ir_attrs = m->Attributes();
                 Vector<const ast::Attribute*, 4> ast_attrs;
 
-                TINT_ASSERT(current_offset == m->Offset());
+                TINT_IR_ASSERT(mod, current_offset == m->Offset());
 
                 // If the next member requires an offset that is not automatically satisfied by
                 // its required alignment, we will need to increase the size of this member.
@@ -1119,7 +1120,7 @@ class State {
                     auto next_member_required_offset = next_member->Offset();
                     if (next_offset < next_member_required_offset) {
                         uint32_t new_size = next_member_required_offset - current_offset;
-                        TINT_ASSERT(new_size > size);
+                        TINT_IR_ASSERT(mod, new_size > size);
                         size = new_size;
                     }
                     current_offset = next_member_required_offset;
@@ -1237,7 +1238,7 @@ class State {
     }
 
     void Bind(const core::ir::Value* value, const core::ir::Value* expr) {
-        TINT_ASSERT(value);
+        TINT_IR_ASSERT(mod, value);
         if (value->IsUsed()) {
             bindings_.Replace(value, ValueBinding{.ir_expr = expr});
         } else {
@@ -1248,10 +1249,11 @@ class State {
     /// Associates the IR value @p value with the AST expression @p expr if it is used, otherwise
     /// creates a phony assignment with @p expr.
     void Bind(const core::ir::Value* value, const ast::Expression* expr) {
-        TINT_ASSERT(value);
+        TINT_IR_ASSERT(mod, value);
         if (value->IsUsed()) {
             if (!bindings_.Add(value, ValueBinding{.ast_expr = expr})) {
-                TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+                TINT_IR_ICE(mod) << "Bind(" << value->TypeInfo().name
+                                 << ") called twice for same value";
             }
         } else {
             Append(b.Assign(b.Phony(), expr));
@@ -1261,9 +1263,10 @@ class State {
     /// Associates the IR value @p value with the AST 'var', 'let' or parameter with the name @p
     /// name.
     void Bind(const core::ir::Value* value, Symbol name) {
-        TINT_ASSERT(value);
+        TINT_IR_ASSERT(mod, value);
         if (!bindings_.Add(value, ValueBinding{.name = name})) {
-            TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+            TINT_IR_ICE(mod) << "Bind(" << value->TypeInfo().name
+                             << ") called twice for same value";
         }
     }
 

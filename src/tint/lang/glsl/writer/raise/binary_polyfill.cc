@@ -110,7 +110,7 @@ struct State {
                     ConvertRelational(binary);
                     break;
                 default:
-                    TINT_UNIMPLEMENTED();
+                    TINT_IR_UNIMPLEMENTED(ir);
             }
         }
     }
@@ -137,7 +137,7 @@ struct State {
                 func = glsl::BuiltinFn::kGreaterThanEqual;
                 break;
             default:
-                TINT_UNREACHABLE();
+                TINT_IR_UNREACHABLE(ir);
         }
         b.InsertBefore(binary, [&] {
             b.CallWithResult<glsl::ir::BuiltinCall>(binary->DetachResult(), func, binary->LHS(),
@@ -161,7 +161,7 @@ struct State {
                     result = b.Or(res_ty, lhs, rhs)->Result();
                     break;
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_IR_UNREACHABLE(ir);
             }
             b.ConvertWithResult(binary->DetachResult(), result);
         });

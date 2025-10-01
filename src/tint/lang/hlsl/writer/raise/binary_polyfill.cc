@@ -96,7 +96,7 @@ struct State {
                     Mul(binary);
                     break;
                 default:
-                    TINT_UNIMPLEMENTED();
+                    TINT_IR_UNIMPLEMENTED(ir);
             }
         }
     }

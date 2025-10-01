@@ -132,14 +132,14 @@ struct State {
         auto* local_index = GetLocalInvocationIndex(func);
 
         auto wgsizes = func->WorkgroupSizeAsConst();
-        TINT_ASSERT(wgsizes);
+        TINT_IR_ASSERT(ir, wgsizes);
         auto wgsize = wgsizes.value()[0] * wgsizes.value()[1] * wgsizes.value()[2];
 
         // Insert instructions to zero-initialize every variable.
         b.InsertBefore(function_start, [&] {
             for (auto count : sorted_iteration_counts) {
                 auto element_stores = stores.Get(count);
-                TINT_ASSERT(count);
+                TINT_IR_ASSERT(ir, count);
                 // No loop is required if we have at least as many invocations than counts.
                 if (count <= wgsize) {
                     // Make the first |count| invocations in the group perform the arrayed stores.
@@ -185,7 +185,7 @@ struct State {
             type,
             [&](const type::Array* arr) {
                 // Add an array index to the list and recurse into the element type.
-                TINT_ASSERT(arr->ConstantCount());
+                TINT_IR_ASSERT(ir, arr->ConstantCount());
                 auto count = arr->ConstantCount().value();
                 auto new_indices = indices;
                 if (count > 1) {

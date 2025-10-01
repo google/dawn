@@ -133,7 +133,7 @@ struct State {
                     // Accesses are replaced with accesses of the extracted variable.
                     [&](core::ir::Access* access) {
                         auto* ba = ptr->StoreType()->As<core::type::BindingArray>();
-                        TINT_ASSERT(ba != nullptr);
+                        TINT_IR_ASSERT(ir, ba != nullptr);
                         auto* elem_type = ba->ElemType();
 
                         access->SetOperand(core::ir::Access::kObjectOperandOffset,
@@ -144,7 +144,7 @@ struct State {
                         // but the new access returns a T. We need to modify all the previous load
                         // through the ptr<T> to direct accesses.
                         access->Result()->ForEachUseUnsorted([&](core::ir::Usage access_use) {
-                            TINT_ASSERT(access_use.instruction->Is<core::ir::Load>());
+                            TINT_IR_ASSERT(ir, access_use.instruction->Is<core::ir::Load>());
                             access_use.instruction->Result()->ReplaceAllUsesWith(access->Result());
                             to_destroy.Push(access_use.instruction);
                         });
@@ -328,7 +328,7 @@ struct State {
             auto binding = var->BindingPoint()->binding;
 
             auto arg_buffer = id_to_arg_buffer.find(group);
-            TINT_ASSERT(arg_buffer != id_to_arg_buffer.end());
+            TINT_IR_ASSERT(ir, arg_buffer != id_to_arg_buffer.end());
 
             auto idx = *var_to_struct_idx.Get(var);
 
