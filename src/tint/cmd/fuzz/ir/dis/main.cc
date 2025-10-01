@@ -273,6 +273,7 @@ bool EmitWGSL(const Options& options, tint::core::ir::Module& module) {
     }
 
     tint::wgsl::writer::Options writer_options;
+    writer_options.allowed_features = tint::wgsl::AllowedFeatures::Everything();
     auto output = tint::wgsl::writer::WgslFromIR(module, writer_options);
     if (output != tint::Success) {
         std::cerr << "Failed to convert IR to WGSL Program: " << output.Failure() << "\n";
