@@ -113,9 +113,13 @@ LICENSE = "Some files: BSD 3-Clause License. Other files: Emscripten's license (
 DESCRIPTION = "Emdawnwebgpu implements webgpu.h on WebGPU, replacing -sUSE_WEBGPU. **For info on usage and filing feedback, see link below.**"
 URL = 'https://dawn.googlesource.com/dawn/+/${SHA}/src/emdawnwebgpu/pkg/README.md'
 
+
 # Emscripten <4.0.10 won't notice EXTERNAL_PORT and will try to use this.
 def get(ports, settings, shared):
     raise Exception('Remote ports require Emscripten 4.0.10+.')
+
+
+# (Make this look like a port so that the error message above can be hit.)
 def clear(ports, settings, shared):
     pass
 EOF

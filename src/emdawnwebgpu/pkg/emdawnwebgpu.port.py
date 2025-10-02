@@ -181,6 +181,11 @@ def linker_setup(ports, settings):
     if settings.USE_WEBGPU:
         raise Exception('emdawnwebgpu may not be used with -sUSE_WEBGPU=1')
 
+    if not settings.LINK_AS_CXX:
+        raise Exception(
+            'emdawnwebgpu requires C++. Link using em++ (or emcc -sDEFAULT_TO_CXX), instead of emcc.'
+        )
+
     # These will be processed in order; library_webgpu.js must come after
     # the generated files, because it depends on them.
     settings.JS_LIBRARIES += [
@@ -189,6 +194,7 @@ def linker_setup(ports, settings):
         os.path.join(_src_dir, 'library_webgpu_generated_sig_info.js'),
         os.path.join(_src_dir, 'library_webgpu.js'),
     ]
+
     if 'CLOSURE_ARGS' in settings.keys():
         # This works in Emscripten >4.0.7. In <=4.0.7, the user has to pass it.
         settings.CLOSURE_ARGS += [
