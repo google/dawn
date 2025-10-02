@@ -55,7 +55,7 @@ def install_npm_deps_in_current_dir() -> None:
 
 
 def run_node_cts(output_directory: str, args_to_forward: list[str],
-                 output_filepath: str) -> None:
+                 output_filepath: str) -> subprocess.CompletedProcess:
     logging.info('Running CTS via node in %s', os.getcwd())
     npx_wrapper = os.path.join(THIS_DIR, 'run_npx.py')
     if sys.platform == 'win32':
@@ -71,7 +71,7 @@ def run_node_cts(output_directory: str, args_to_forward: list[str],
         '-npx',
         npx_wrapper,
     ] + args_to_forward
-    subprocess.run(cmd, check=True)
+    return subprocess.run(cmd, check=False)
 
 
 def convert_results_for_resultdb_ingestion(
@@ -81,7 +81,18 @@ def convert_results_for_resultdb_ingestion(
     # improved, this conversion can likely be substituted for native ResultDB
     # integration instead of relying on result_adapter.
     with open(test_output_filepath, encoding='utf-8') as infile:
-        test_results = json.load(infile)
+        try:
+            test_results = json.load(infile)
+        except json.JSONDecodeError:
+            logging.error(
+                'Could not decode test output file. Tests likely did not run '
+                'properly')
+            test_results = [
+                {
+                    'TestCase': 'result_conversion',
+                    'Status': 'fail',
+                },
+            ]
 
     converted_test_results = {
         'failures': [],
@@ -108,7 +119,7 @@ def main() -> None:
         help='Output directory to use. Passed to the underlying runner as -bin.'
     )
     parser.add_argument('--isolated-script-test-output',
-                        help='Currently unused, needed for bot support.')
+                        help='Path to the location to output JSON results.')
     parser.add_argument('--isolated-script-test-perf-output',
                         help='Currently unused, needed for bot support.')
     args, unknown_args = parser.parse_known_args()
@@ -119,10 +130,12 @@ def main() -> None:
         output_fd, output_filepath = tempfile.mkstemp()
         os.close(output_fd)
         try:
-            run_node_cts(args.output_directory, unknown_args, output_filepath)
+            proc = run_node_cts(args.output_directory, unknown_args,
+                                output_filepath)
             if args.isolated_script_test_output:
                 convert_results_for_resultdb_ingestion(
                     output_filepath, args.isolated_script_test_output)
+            proc.check_returncode()
         finally:
             os.remove(output_filepath)
 
