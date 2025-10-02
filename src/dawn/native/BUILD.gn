@@ -164,6 +164,11 @@ source_set("headers") {
   ]
 }
 
+if (dawn_standalone && (dawn_enable_d3d11 || dawn_enable_d3d12)) {
+  # Use ANGLE's target as it's always available in standalone builds
+  _copy_fxc_dll_target = "//third_party/angle:copy_compiler_dll"
+}
+
 # The meat of the compilation for dawn native so that we can cheaply have
 # shared_library / static_library versions of it. It compiles all the files
 # except those that define exported symbols.
@@ -199,6 +204,10 @@ source_set("sources") {
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
   ]
+
+  if (defined(_copy_fxc_dll_target)) {
+    deps += [ _copy_fxc_dll_target ]
+  }
 
   sources = get_target_outputs(":utils_gen")
   sources += [
