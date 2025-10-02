@@ -1229,15 +1229,15 @@
       {
         "args": [
           "-backend",
-          "vulkan",
+          "d3d12",
           "-adapter",
-          "SwiftShader",
+          "Microsoft Basic Render Driver",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
         "merge": {
           "script": "//testing/merge_scripts/noop_merge.py"
         },
-        "name": "dawn_node_sws_cts",
+        "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
         },
@@ -1403,15 +1403,15 @@
       {
         "args": [
           "-backend",
-          "vulkan",
+          "d3d12",
           "-adapter",
-          "SwiftShader",
+          "Microsoft Basic Render Driver",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
         "merge": {
           "script": "//testing/merge_scripts/noop_merge.py"
         },
-        "name": "dawn_node_sws_cts",
+        "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
         },
@@ -1577,15 +1577,15 @@
       {
         "args": [
           "-backend",
-          "vulkan",
+          "d3d12",
           "-adapter",
-          "SwiftShader",
+          "Microsoft Basic Render Driver",
           "webgpu:api,operation,adapter,requestDevice:default:*"
         ],
         "merge": {
           "script": "//testing/merge_scripts/noop_merge.py"
         },
-        "name": "dawn_node_sws_cts",
+        "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
         },
