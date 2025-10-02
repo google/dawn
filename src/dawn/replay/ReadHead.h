@@ -25,40 +25,38 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#ifndef SRC_DAWN_REPLAY_READHEAD_H_
+#define SRC_DAWN_REPLAY_READHEAD_H_
 
-#include "dawn/native/Buffer.h"
+#include <cstdint>
+#include <span>
+#include <string>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include "dawn/replay/Error.h"
 
-namespace dawn::native::webgpu {
+namespace dawn::replay {
 
-class Device;
-
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
+class ReadHead {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+    explicit ReadHead(std::span<const uint8_t> data);
+    explicit ReadHead(const ReadHead&) = delete;
+    ReadHead& operator=(const ReadHead&) = delete;
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+    MaybeError ReadBytes(std::span<uint8_t> dest);
+
+    ResultOrError<const uint32_t*> GetData(size_t size);
+    bool IsBad() const;
+    bool IsDone() const;
 
   private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+    using iterator = typename std::span<const uint8_t>::iterator;
 
-    raw_ptr<void> mMappedData = nullptr;
+    bool mBad = false;
+
+    std::span<const uint8_t> mData;
+    iterator mReadHead;
 };
 
-}  // namespace dawn::native::webgpu
+}  // namespace dawn::replay
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#endif  // SRC_DAWN_REPLAY_READHEAD_H_

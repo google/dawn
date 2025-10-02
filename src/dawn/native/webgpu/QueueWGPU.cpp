@@ -33,6 +33,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/WebGPUError.h"
@@ -75,10 +76,15 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
+    if (IsCapturing()) {
+        mCaptureContext->CaptureQueueWriteBuffer(buffer, bufferOffset, data, size);
+    }
+
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
     ToBackend(GetDevice())
         ->wgpu.queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
     buffer->MarkUsedInPendingCommands();
+
     return {};
 }
 
@@ -190,6 +196,21 @@ MaybeError Queue::WaitForIdleForDestructionImpl() {
         }
     });
     mHasPendingCommands = false;
+    return {};
+}
+
+bool Queue::IsCapturing() const {
+    return mCaptureContext != nullptr;
+}
+
+MaybeError Queue::SetCaptureContext(std::unique_ptr<CaptureContext> captureContext) {
+    if (captureContext) {
+        DAWN_INVALID_IF(mCaptureContext != nullptr, "A capture is already in progress.");
+        mCaptureContext = std::move(captureContext);
+    } else {
+        DAWN_INVALID_IF(!mCaptureContext, "No capture is in progress.");
+        mCaptureContext.reset();
+    }
     return {};
 }
 

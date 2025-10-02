@@ -25,40 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#include "dawn/native/webgpu/Serialization.h"
 
-#include "dawn/native/Buffer.h"
+#include <string>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 
 namespace dawn::native::webgpu {
 
-class Device;
+void WriteBytes(CaptureContext& context, const void* data, size_t size) {
+    context.WriteCommandBytes(data, size);
+}
 
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
-  public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+void Serialize(CaptureContext& context, int32_t v) {
+    WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
+}
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+void Serialize(CaptureContext& context, uint32_t v) {
+    WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
+}
 
-  private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+void Serialize(CaptureContext& context, uint64_t v) {
+    WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
+}
 
-    raw_ptr<void> mMappedData = nullptr;
-};
+void Serialize(CaptureContext& context, const std::string& v) {
+    Serialize(context, v.size());
+    WriteBytes(context, v.data(), v.size());
+}
 
 }  // namespace dawn::native::webgpu
-
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_

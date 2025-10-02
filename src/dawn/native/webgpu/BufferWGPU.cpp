@@ -34,14 +34,19 @@
 #include "dawn/native/Buffer.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
+#include "dawn/native/webgpu/Serialization.h"
 
 namespace dawn::native::webgpu {
 
 // static
 ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
                                           const UnpackedPtr<BufferDescriptor>& descriptor) {
-    auto desc = ToAPI(*descriptor);
-    WGPUBuffer innerBuffer = device->wgpu.deviceCreateBuffer(device->GetInnerHandle(), desc);
+    WGPUBufferDescriptor desc = *ToAPI(*descriptor);
+    // Make the inner buffer copyable for readback if possible.
+    if (!(desc.usage & WGPUBufferUsage_MapRead)) {
+        desc.usage |= WGPUBufferUsage_CopySrc;
+    }
+    WGPUBuffer innerBuffer = device->wgpu.deviceCreateBuffer(device->GetInnerHandle(), &desc);
     if (innerBuffer == nullptr) {
         // innerBuffer can be nullptr when mappedAtCreation == true and fails.
         // Return an error buffer.
@@ -56,7 +61,9 @@ ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
 Buffer::Buffer(Device* device,
                const UnpackedPtr<BufferDescriptor>& descriptor,
                WGPUBuffer innerBuffer)
-    : BufferBase(device, descriptor), ObjectWGPU(device->wgpu.bufferRelease) {
+    : BufferBase(device, descriptor),
+      RecordableObject(schema::ObjectType::Buffer),
+      ObjectWGPU(device->wgpu.bufferRelease) {
     mInnerHandle = innerBuffer;
     mAllocatedSize = GetSize();
 }
@@ -134,6 +141,18 @@ void Buffer::DestroyImpl() {
     BufferBase::DestroyImpl();
     auto& wgpu = ToBackend(GetDevice())->wgpu;
     wgpu.bufferDestroy(mInnerHandle);
+}
+
+void Buffer::AddReferenced(CaptureContext& captureContext) const {
+    // Buffers do not reference other objects.
+}
+
+void Buffer::CaptureCreationParameters(CaptureContext& captureContext) const {
+    schema::Buffer buf{{
+        .size = GetSize(),
+        .usage = GetUsage(),
+    }};
+    Serialize(captureContext, buf);
 }
 
 }  // namespace dawn::native::webgpu

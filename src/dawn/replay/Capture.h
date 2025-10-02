@@ -25,40 +25,40 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#ifndef SRC_DAWN_REPLAY_CAPTURE_H_
+#define SRC_DAWN_REPLAY_CAPTURE_H_
 
-#include "dawn/native/Buffer.h"
+#include <istream>
+#include <memory>
+#include <vector>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include "dawn/replay/ReadHead.h"
 
-namespace dawn::native::webgpu {
+namespace dawn::replay {
 
-class Device;
+using CaptureStream = std::istream;
 
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
+// For now we just expect to load the entire capture into memory.
+// In the future we'd expect to be able to stream it though we may
+// have to scan it once to find all the commands for a UI.
+class Capture {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+    static std::unique_ptr<Capture> Create(CaptureStream& commandStream,
+                                           size_t commandSize,
+                                           CaptureStream& contentStream,
+                                           size_t contentSize);
+    ~Capture();
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+    ReadHead GetCommandReadHead() const;
+    ReadHead GetContentReadHead() const;
 
   private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+    Capture(std::vector<uint8_t> commands, std::vector<uint8_t> content);
 
-    raw_ptr<void> mMappedData = nullptr;
+    std::vector<uint8_t> mCommands;
+    std::vector<uint8_t> mContent;
 };
 
-}  // namespace dawn::native::webgpu
+}  // namespace dawn::replay
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#endif  // SRC_DAWN_REPLAY_CAPTURE_H_

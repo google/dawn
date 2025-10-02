@@ -33,6 +33,7 @@
 
 #include "dawn/native/Device.h"
 #include "dawn/native/ToBackend.h"
+#include "dawn/native/WebGPUBackend.h"
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -56,6 +57,9 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
     float GetTimestampPeriodInNS() const override;
 
     WGPUInstance GetInnerInstance() const;
+
+    void StartCapture(CaptureStream& commandStream, CaptureStream& contentStream);
+    void EndCapture();
 
     const DawnProcTable& wgpu;
 

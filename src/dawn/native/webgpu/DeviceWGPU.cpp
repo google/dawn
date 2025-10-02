@@ -51,6 +51,7 @@
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
@@ -246,6 +247,20 @@ uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
 
 float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
+}
+
+void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentStream) {
+    MaybeError result = ToBackend(GetQueue())
+                            ->SetCaptureContext(std::unique_ptr<CaptureContext>(
+                                new CaptureContext(this, commandStream, contentStream)));
+    [[maybe_unused]] bool hadError =
+        ConsumedError(std::move(result), "calling %s.StartCapture()", this);
+}
+
+void Device::EndCapture() {
+    MaybeError result = ToBackend(GetQueue())->SetCaptureContext(nullptr);
+    [[maybe_unused]] bool hadError =
+        ConsumedError(std::move(result), "calling %s.EndCapture()", this);
 }
 
 }  // namespace dawn::native::webgpu

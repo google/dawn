@@ -25,40 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#include "dawn/replay/Deserialization.h"
 
-#include "dawn/native/Buffer.h"
+#include <cstdint>
+#include <span>
+#include <string>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include "dawn/replay/ReadHead.h"
 
-namespace dawn::native::webgpu {
+namespace dawn::replay {
 
-class Device;
+MaybeError ReadBytes(ReadHead& s, void* data, size_t size) {
+    return s.ReadBytes(std::span<uint8_t>(static_cast<uint8_t*>(data), size));
+}
 
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
-  public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+MaybeError Deserialize(ReadHead& s, int32_t* v) {
+    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
+}
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+MaybeError Deserialize(ReadHead& s, uint32_t* v) {
+    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
+}
 
-  private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+MaybeError Deserialize(ReadHead& s, uint64_t* v) {
+    return ReadBytes(s, reinterpret_cast<char*>(v), sizeof(*v));
+}
 
-    raw_ptr<void> mMappedData = nullptr;
-};
+MaybeError Deserialize(ReadHead& s, std::string* v) {
+    size_t size = 0;
+    DAWN_TRY(Deserialize(s, &size));
+    v->resize(size);
+    return ReadBytes(s, v->data(), size);
+}
 
-}  // namespace dawn::native::webgpu
-
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+}  // namespace dawn::replay

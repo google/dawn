@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_WEBGPU_QUEUEWGPU_H_
 
 #include <deque>
+#include <memory>
 #include <utility>
 #include "dawn/common/MutexProtected.h"
 #include "dawn/native/Queue.h"
@@ -37,11 +38,15 @@
 
 namespace dawn::native::webgpu {
 
+class CaptureContext;
 class Device;
 
 class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
   public:
     static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
+
+    bool IsCapturing() const;
+    MaybeError SetCaptureContext(std::unique_ptr<CaptureContext> captureContext);
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);
@@ -61,6 +66,8 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
 
     MutexProtected<std::deque<std::pair<WGPUFuture, ExecutionSerial>>> mFuturesInFlight;
     bool mHasPendingCommands = false;
+
+    std::unique_ptr<CaptureContext> mCaptureContext;
 };
 
 }  // namespace dawn::native::webgpu

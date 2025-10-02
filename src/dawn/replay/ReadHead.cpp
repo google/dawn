@@ -25,40 +25,48 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#include "dawn/replay/ReadHead.h"
 
-#include "dawn/native/Buffer.h"
+#include <algorithm>
 
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+namespace dawn::replay {
 
-namespace dawn::native::webgpu {
+ReadHead::ReadHead(std::span<const uint8_t> data) : mData(data), mReadHead(data.begin()) {}
 
-class Device;
+MaybeError ReadHead::ReadBytes(std::span<uint8_t> dest) {
+    auto newHead = mReadHead + dest.size();
+    if (newHead <= mData.end()) {
+        std::copy_n(mReadHead, dest.size(), dest.begin());
+        mReadHead = newHead;
+        return {};
+    }
+    mBad = true;
+    return DAWN_INTERNAL_ERROR("Read past end of data");
+}
 
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
-  public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+ResultOrError<const uint32_t*> ReadHead::GetData(size_t size) {
+    if (size % 4 != 0) {
+        mBad = true;
+        return DAWN_INTERNAL_ERROR("GetData size not multiple of 4");
+    }
+    size_t alignedSize = (size + 3) & ~3;
+    auto newHead = mReadHead + alignedSize;
+    if (newHead <= mData.end()) {
+        const uint32_t* data = reinterpret_cast<const uint32_t*>(&*mReadHead);
+        mReadHead = newHead;
+        return {data};
+    }
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+    mBad = true;
+    return DAWN_INTERNAL_ERROR("GetData past end of data");
+}
 
-  private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
+bool ReadHead::IsBad() const {
+    return mBad;
+}
 
-    raw_ptr<void> mMappedData = nullptr;
-};
+bool ReadHead::IsDone() const {
+    return mBad || mReadHead == mData.end();
+}
 
-}  // namespace dawn::native::webgpu
-
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+}  // namespace dawn::replay

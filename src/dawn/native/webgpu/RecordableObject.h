@@ -25,40 +25,26 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_
+#define SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_
 
-#include "dawn/native/Buffer.h"
-
-#include "dawn/native/webgpu/Forward.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include "dawn/native/webgpu/Serialization.h"
 
 namespace dawn::native::webgpu {
 
-class Device;
-
-class Buffer final : public BufferBase, public RecordableObject, public ObjectWGPU<WGPUBuffer> {
+class CaptureContext;
+class RecordableObject {
   public:
-    static ResultOrError<Ref<Buffer>> Create(Device* device,
-                                             const UnpackedPtr<BufferDescriptor>& descriptor);
-    Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, WGPUBuffer innerBuffer);
+    explicit RecordableObject(schema::ObjectType objectType) : mObjectType(objectType) {}
+    schema::ObjectType GetObjectType() const { return mObjectType; }
 
-    void AddReferenced(CaptureContext& captureContext) const override;
-    void CaptureCreationParameters(CaptureContext& context) const override;
+    virtual void AddReferenced(CaptureContext& captureContext) const = 0;
+    virtual void CaptureCreationParameters(CaptureContext& context) const = 0;
 
   private:
-    MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override;
-    void UnmapImpl() override;
-    void FinalizeMapImpl() override;
-    bool IsCPUWritableAtCreation() const override;
-    MaybeError MapAtCreationImpl() override;
-    void* GetMappedPointerImpl() override;
-    void DestroyImpl() override;
-
-    raw_ptr<void> mMappedData = nullptr;
+    schema::ObjectType mObjectType;
 };
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_BUFFERWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_
