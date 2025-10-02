@@ -125,12 +125,13 @@ bool RequiresCreatingNewTextureView(
         return true;
     }
 
-    // TODO(414312052): Use TextureViewBase::UsesNonDefaultSwizzle() instead of
-    // textureViewDescriptor.
+    // TODO(414312052): We're doing a simple check against the default kRGBASwizzle, even though a
+    // more rigorous check against the implicitly inherited swizzle would be technically better.
+    // We're deferring that complexity because the simple check is "good enough" for now, and the
+    // issue is minimal (only affecting Desktop GL).
     if (auto* swizzleDesc = textureViewDescriptor.Get<TextureComponentSwizzleDescriptor>()) {
         auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
-        if (swizzle.r != wgpu::ComponentSwizzle::R || swizzle.g != wgpu::ComponentSwizzle::G ||
-            swizzle.b != wgpu::ComponentSwizzle::B || swizzle.a != wgpu::ComponentSwizzle::A) {
+        if (!AreSwizzleEquivalent(*ToCppAPI(&swizzle), kRGBASwizzle)) {
             return true;
         }
     }

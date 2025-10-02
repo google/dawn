@@ -1920,22 +1920,6 @@ wgpu::TextureComponentSwizzle TextureViewBase::GetSwizzle() const {
     };
 }
 
-wgpu::ComponentSwizzle TextureViewBase::GetSwizzleRed() const {
-    return mSwizzleRed;
-}
-
-wgpu::ComponentSwizzle TextureViewBase::GetSwizzleGreen() const {
-    return mSwizzleGreen;
-}
-
-wgpu::ComponentSwizzle TextureViewBase::GetSwizzleBlue() const {
-    return mSwizzleBlue;
-}
-
-wgpu::ComponentSwizzle TextureViewBase::GetSwizzleAlpha() const {
-    return mSwizzleAlpha;
-}
-
 bool TextureViewBase::IsYCbCr() const {
     return false;
 }

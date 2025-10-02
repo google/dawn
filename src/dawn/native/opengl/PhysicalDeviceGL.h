@@ -57,6 +57,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
         InstanceBase* instance,
         const Surface* surface) const override;
 
+    bool SupportTextureComponentSwizzle() const;
+
   private:
     PhysicalDevice(wgpu::BackendType backendType, Ref<DisplayEGL> display);
 

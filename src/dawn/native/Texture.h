@@ -371,10 +371,6 @@ class TextureViewBase : public ApiObjectBase {
     wgpu::TextureUsage GetInternalUsage() const;
 
     wgpu::TextureComponentSwizzle GetSwizzle() const;
-    wgpu::ComponentSwizzle GetSwizzleRed() const;
-    wgpu::ComponentSwizzle GetSwizzleGreen() const;
-    wgpu::ComponentSwizzle GetSwizzleBlue() const;
-    wgpu::ComponentSwizzle GetSwizzleAlpha() const;
 
     virtual bool IsYCbCr() const;
     // Valid to call only if `IsYCbCr()` is true.

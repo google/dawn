@@ -933,13 +933,7 @@ TextureView::TextureView(TextureBase* texture, const UnpackedPtr<TextureViewDesc
     mSrvDesc.Format =
         d3d::D3DShaderResourceViewFormat(GetDevice(), textureFormat, GetFormat(), aspects);
     if (mSrvDesc.Format != DXGI_FORMAT_UNKNOWN) {
-        wgpu::TextureComponentSwizzle swizzle = {
-            .r = GetSwizzleRed(),
-            .g = GetSwizzleGreen(),
-            .b = GetSwizzleBlue(),
-            .a = GetSwizzleAlpha(),
-        };
-
+        auto swizzle = GetSwizzle();
         // Stencil is accessed using the .g component in the shader.
         DXGI_FORMAT textureDxgiFormat = d3d::DXGITextureFormat(GetDevice(), textureFormat.format);
         if (d3d::IsDepthStencil(textureDxgiFormat) && aspects == Aspect::Stencil) {
