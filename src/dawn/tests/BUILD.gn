@@ -583,7 +583,6 @@ source_set("end2end_tests_sources") {
     "${dawn_root}/src/dawn/native:headers",
     "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
     "${dawn_root}/src/dawn/platform",
-    "${dawn_root}/src/dawn/replay",
     "${dawn_root}/src/dawn/utils:system_utils",
     "${dawn_root}/src/dawn/utils:test_utils",
     "${dawn_root}/src/dawn/utils:wgpu_utils",
@@ -709,10 +708,6 @@ source_set("end2end_tests_sources") {
     "end2end/ViewportTests.cpp",
   ]
 
-  if (dawn_enable_webgpu_on_webgpu) {
-    sources += [ "end2end/CaptureAndReplayTests.cpp" ]
-  }
-
   if (!is_debug) {
     sources += [ "end2end/RuntimeTimeoutCompute.cpp" ]
   }
@@ -817,6 +812,11 @@ source_set("white_box_tests_sources") {
   ]
   libs = []
 
+  if (dawn_enable_webgpu_on_webgpu) {
+    deps += [ "${dawn_root}/src/dawn/replay" ]
+    sources += [ "white_box/CaptureAndReplayTests.cpp" ]
+  }
+
   if (is_mac || is_ios) {
     sources += [ "white_box/SharedTextureMemoryTests_apple.mm" ]
   }
@@ -909,7 +909,6 @@ dawn_test("dawn_end2end_tests") {
     ":end2end_tests_sources",
     ":test_infra_sources",
     ":white_box_tests_sources",
-    "${dawn_root}/src/dawn/replay",
     "${dawn_root}/src/utils/chromium_test_compat",
   ]
 
