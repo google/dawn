@@ -587,7 +587,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     struct ExternalTextureExpansion {
         BindingNumber plane0;
         BindingNumber plane1;
-        BindingNumber params;
+        BindingNumber metadata;
     };
     absl::flat_hash_map<BindingNumber, ExternalTextureExpansion> externalTextureExpansions;
 
@@ -610,16 +610,16 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             entries.push_back(plane1Entry);
             internalEntries.insert(plane1Entry.binding);
 
-            BindingInfo paramsEntry = CreateUniformBindingForExternalTexture(
+            BindingInfo metadataEntry = CreateUniformBindingForExternalTexture(
                 nextOpenBindingNumberForNewEntryET++, entry->visibility);
-            entries.push_back(paramsEntry);
-            internalEntries.insert(paramsEntry.binding);
+            entries.push_back(metadataEntry);
+            internalEntries.insert(metadataEntry.binding);
 
             externalTextureExpansions.insert({BindingNumber(entry->binding),
                                               {
                                                   .plane0 = BindingNumber(plane0Entry.binding),
                                                   .plane1 = BindingNumber(plane1Entry.binding),
-                                                  .params = BindingNumber(paramsEntry.binding),
+                                                  .metadata = BindingNumber(metadataEntry.binding),
                                               }});
         }
 
@@ -665,7 +665,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     for (const auto& [etBindingNumber, expansion] : externalTextureExpansions) {
         auto& layout = entries[fullBindingMap[etBindingNumber]];
         layout.bindingLayout = ExternalTextureBindingInfo{{
-            .params = fullBindingMap[expansion.params],
+            .metadata = fullBindingMap[expansion.metadata],
             .plane0 = fullBindingMap[expansion.plane0],
             .plane1 = fullBindingMap[expansion.plane1],
         }};
@@ -941,7 +941,7 @@ size_t BindGroupLayoutInternalBase::ComputeContentHash() {
                 recorder.Record(BindingInfoType::InputAttachment, layout.sampleType);
             },
             [&](const ExternalTextureBindingInfo& layout) {
-                recorder.Record(BindingInfoType::ExternalTexture, layout.params, layout.plane0,
+                recorder.Record(BindingInfoType::ExternalTexture, layout.metadata, layout.plane0,
                                 layout.plane1);
             });
     }

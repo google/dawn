@@ -193,7 +193,7 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                     bindings.external_texture.emplace(
                         srcBindingPoint,
                         tint::ExternalTexture{
-                            .metadata = ComputeDestinationBindingPoint(bindingInfo.params),
+                            .metadata = ComputeDestinationBindingPoint(bindingInfo.metadata),
                             .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
                             .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
                 },

@@ -781,11 +781,11 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
                     mBindingData.bindings[info.plane1] =
                         externalTextureBindingEntry->externalTexture->GetTextureViews()[1];
 
-                    DAWN_ASSERT(mBindingData.bindings[info.params] == nullptr);
-                    mBindingData.bindings[info.params] =
+                    DAWN_ASSERT(mBindingData.bindings[info.metadata] == nullptr);
+                    mBindingData.bindings[info.metadata] =
                         externalTextureBindingEntry->externalTexture->GetParamsBuffer();
-                    mBindingData.bufferData[info.params].offset = 0;
-                    mBindingData.bufferData[info.params].size =
+                    mBindingData.bufferData[info.metadata].offset = 0;
+                    mBindingData.bufferData[info.metadata].size =
                         sizeof(dawn::native::ExternalTextureParams);
                     return {};
                 }
@@ -801,13 +801,13 @@ MaybeError BindGroupBase::Initialize(const UnpackedPtr<BindGroupDescriptor>& des
                 DAWN_TRY_ASSIGN(mBindingData.bindings[info.plane1],
                                 GetDevice()->GetOrCreatePlaceholderTextureViewForExternalTexture());
 
-                DAWN_ASSERT(mBindingData.bindings[info.params] == nullptr);
+                DAWN_ASSERT(mBindingData.bindings[info.metadata] == nullptr);
                 Ref<BufferBase> paramsBuffer;
                 DAWN_TRY_ASSIGN(paramsBuffer,
                                 MakeParamsBufferForSimpleView(GetDevice(), entry->textureView));
-                mBindingData.bindings[info.params] = paramsBuffer;
-                mBindingData.bufferData[info.params].offset = 0;
-                mBindingData.bufferData[info.params].size = paramsBuffer->GetSize();
+                mBindingData.bindings[info.metadata] = paramsBuffer;
+                mBindingData.bufferData[info.metadata].offset = 0;
+                mBindingData.bufferData[info.metadata].size = paramsBuffer->GetSize();
                 return {};
             },
 

@@ -124,7 +124,7 @@ DAWN_SERIALIZABLE(struct, SamplerBindingInfo, SAMPLER_BINDING_INFO_MEMBER) {
 
 // The binding layout for ExternalTexture contains the indices of the expanded entries for it.
 #define EXTERNAL_TEXTURE_BINDING_INFO_MEMBER(X) \
-    X(BindingIndex, params)                     \
+    X(BindingIndex, metadata)                   \
     X(BindingIndex, plane0)                     \
     X(BindingIndex, plane1)
 DAWN_SERIALIZABLE(struct, ExternalTextureBindingInfo, EXTERNAL_TEXTURE_BINDING_INFO_MEMBER){};
