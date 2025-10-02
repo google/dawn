@@ -1116,8 +1116,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // By default try to skip injecting robustness checks on textures using VK_EXT_robustness2. But
     // disable that optimization when the feature is not available.
-    if (deviceToggles->IsSet(Toggle::DisableRobustness) ||
-        !GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
+    if (!GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
         GetDeviceInfo().robustness2Features.robustImageAccess2 == VK_FALSE) {
         deviceToggles->ForceSet(Toggle::VulkanUseImageRobustAccess2, false);
     } else {
@@ -1127,8 +1126,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     // By default try to skip injecting robustness checks on buffers using VK_EXT_robustness2. But
     // disable that optimization when the feature is not available or if it conflicts with bindless
     // support (see comment in the detection of bindless support for more details).
-    if (deviceToggles->IsSet(Toggle::DisableRobustness) ||
-        !GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
+    if (!GetDeviceInfo().HasExt(DeviceExt::Robustness2) ||
         GetDeviceInfo().robustness2Features.robustBufferAccess2 == VK_FALSE) {
         deviceToggles->ForceSet(Toggle::VulkanUseBufferRobustAccess2, false);
     } else if (GetDeviceInfo().HasExt(DeviceExt::DescriptorIndexing) &&
