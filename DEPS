@@ -390,15 +390,68 @@ deps = {
     'condition': 'dawn_node',
   },
 
-  # Node binaries, when dawn_node or dawn_wasm is enabled
-  'third_party/node': {
+  # Node binaries, when dawn_node or dawn_wasm is enabled. Architectures are
+  # listed out explicitly instead of using ${{platform}} because the
+  # architecture that these are fetched on can differ from the architecture that
+  # tests are ultimately run on, such as x64 vs. ARM64 Mac.
+  'third_party/node/linux-amd64': {
     'packages': [
       {
-        'package': 'infra/3pp/tools/nodejs/${{platform}}',
+        'package': 'infra/3pp/tools/nodejs/linux-amd64',
         'version': Var('dawn_node_version'),
       },
     ],
-    'condition': 'dawn_node or dawn_wasm',
+    'condition': 'checkout_linux and (dawn_node or dawn_wasm)',
+    'dep_type': 'cipd',
+  },
+  'third_party/node/linux-arm64': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/linux-arm64',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'checkout_linux and (dawn_node or dawn_wasm)',
+    'dep_type': 'cipd',
+  },
+  'third_party/node/mac-amd64': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/mac-amd64',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'checkout_mac and (dawn_node or dawn_wasm)',
+    'dep_type': 'cipd',
+  },
+  'third_party/node/mac-arm64': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/mac-arm64',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'checkout_mac and (dawn_node or dawn_wasm)',
+    'dep_type': 'cipd',
+  },
+  'third_party/node/windows-amd64': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/windows-amd64',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'checkout_win and (dawn_node or dawn_wasm)',
+    'dep_type': 'cipd',
+  },
+  'third_party/node/windows-arm64': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/nodejs/windows-arm64',
+        'version': Var('dawn_node_version'),
+      },
+    ],
+    'condition': 'checkout_win and (dawn_node or dawn_wasm)',
     'dep_type': 'cipd',
   },
 
