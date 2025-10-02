@@ -90,7 +90,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-09-12 10:20:24AM
+# Last rolled: 2025-10-01 03:33:09AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -1017,7 +1017,6 @@ crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,op
 crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm-srgb";dstFormat="etc2-rgba8unorm";dimension="2d" [ Failure ]
 crbug.com/419842532 [ dawn-backend-validation intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,compressed,non_array:srcFormat="etc2-rgba8unorm-srgb";dstFormat="etc2-rgba8unorm-srgb";dimension="2d" [ Failure ]
 
-
 # WebGPU-WebGPU canvas copy crashes in D3D12 debug layer on Windows Nvidia with Graphite enabled
 crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x64 target-cpu-64 webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;* [ RetryOnFailure ]
 crbug.com/412395829 [ dawn-backend-validation graphite-enabled nvidia release-x64 target-cpu-64 webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;* [ RetryOnFailure ]
@@ -1073,7 +1072,7 @@ crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x6
 crbug.com/432824058 [ dawn-no-backend-validation intel-0x4680 no-asan release-x64 target-cpu-64 webgpu-dxc-enabled win ] webgpu:shader,execution,expression,binary,i32_arithmetic:remainder_vector_scalar:inputSource="storage_rw";vectorize_lhs=2 [ Failure ]
 
 # rgb10a2unorm precision issue on Intel 770
-crbug.com/445458866 [ linux intel-0x4680 ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
+crbug.com/445458866 [ intel-0x4680 linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
 
 # CTS needs to support new storage formats from texture-feature-tier1,
 # will be removed after the latest CTS rolling into Dawn
@@ -1083,7 +1082,6 @@ crbug.com/421941589 [ angle-opengl arch-x86_64 desktop display-server-x graphite
 crbug.com/421941589 [ android-chromium android-pixel-4 android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage qualcomm renderer-skia-gl target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:* [ Failure ]
 crbug.com/421941589 [ angle-metal arch-x86_64 dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b memory_ge_16gb no-asan no-clang-coverage release renderer-skia-gl sequoia target-cpu-64 ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:* [ Failure ]
 crbug.com/421941589 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgb10a2unorm";* [ Failure ]
-
 
 # CTS needs to add checks for renderable formats with texture-format-tier1 enabled，
 # will be removed after the latest CTS rolling into Dawn
@@ -1128,6 +1126,39 @@ crbug.com/432291885 [ dawn-no-backend-validation intel-0x3e9b sequoia ] webgpu:s
 crbug.com/444196974 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInFragmentStage:* [ Failure ]
 crbug.com/444196974 webgpu:api,validation,capability_checks,limits,maxStorageBuffersInVertexStage:* [ Failure ]
 
+# The app should be able to copy to these texture formats from Tier1, but Dawn forbids it.
+# The web_platform failures emit so much output that it causes timeouts. So skip for now
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="r16snorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="r16unorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="r8snorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rg11b10ufloat" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rg16snorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rg16unorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rg8snorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rgba16snorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rgba16unorm" [ Failure ]
+crbug.com/448129221 webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,format:format="rgba8snorm" [ Failure ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="r16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="r16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="r8snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rg11b10ufloat"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rg16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rg16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rg8snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rgba16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rgba16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstFormat="rgba8snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="r16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="r16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="r8snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rg11b10ufloat"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rg16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rg16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rg8snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rgba16snorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rgba16unorm"* [ Skip ]
+crbug.com/448129221 webgpu:web_platform,copyToTexture,*dstColorFormat="rgba8snorm"* [ Skip ]
+
 # Failures on brya devices running Android Desktop.
 crbug.com/445230380 [ android android-brya ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/445232714 [ android android-brya webgpu-no-worker ] webgpu:api,operation,storage_texture,read_only:basic:format="rgb10a2unorm";* [ Failure ]
@@ -1148,6 +1179,18 @@ crbug.com/445244210 [ android android-brya webgpu-dedicated-worker ] webgpu:web_
 crbug.com/445245324 [ android android-brya webgpu-no-worker ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="*bt601*";* [ Failure ]
 crbug.com/445245324 [ android android-brya webgpu-no-worker ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="*bt709*";* [ Failure ]
 crbug.com/445537566 [ android android-brya webgpu-dedicated-worker ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";* [ Failure ]
+
+# Pixel 4 timeouts
+crbug.com/448716473 [ android-pixel-4 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync:* [ Skip ]
+crbug.com/448716479 [ android-pixel-4 ] webgpu:shader,validation,expression,call,builtin,quadSwap:*;op="quadSwapX";* [ Skip ]
+
+# FXC compiler crashes, flaky since 2025-09-24
+crbug.com/448727574 [ webgpu-dxc-disabled ] webgpu:shader,validation,expression,binary,add_sub_mul:scalar_vector:* [ Failure ]
+
+# textureLoad failures on mac AMD for depth2plus-stencil8 format
+crbug.com/448397616 [ mac amd ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="f";format="depth24plus-stencil8";texture_type="texture_2d_array" [ Failure ]
+crbug.com/448397616 [ mac amd ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="v";format="depth24plus-stencil8";texture_type="texture_2d_array" [ Failure ]
+crbug.com/448397616 [ mac amd ] webgpu:shader,execution,expression,call,builtin,textureLoad:depth:stage="c";format="depth32float-stencil8" [ Failure ]
 
 ################################################################################
 # Autogenerated Failure expectations. Please triage.
