@@ -289,6 +289,9 @@ def dawn_mac_manual_builder(*, name, **kwargs):
         name = name,
         max_concurrent_builds = 1,
         os = os.MAC_DEFAULT,
+        # TODO(crbug.com/441328362): Remove the architecture restriction once
+        # all tests are run on Swarming.
+        cpu = "x86-64",
         **kwargs
     )
 
