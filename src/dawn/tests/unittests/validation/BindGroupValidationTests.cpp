@@ -437,6 +437,7 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
 
             wgpu::ExternalTextureBindingEntry errorExternalBindingEntry;
             errorExternalBindingEntry.externalTexture = errorExternalTexture;
+
             binding.nextInChain = &errorExternalBindingEntry;
             ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
             binding.nextInChain = nullptr;
@@ -454,18 +455,60 @@ TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
             wgpu::ExternalTexture externalTexture2 = device.CreateExternalTexture(&externalDesc);
             wgpu::ExternalTextureBindingEntry externalBindingEntry2;
             externalBindingEntry2.externalTexture = externalTexture2;
+
             externalBindingEntry.nextInChain = &externalBindingEntry2;
-
             ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
-        }
-
-        // Chaining a struct that isn't an external texture binding entry is an error.
-        {
-            wgpu::ExternalTextureBindingLayout externalBindingLayout;
-            binding.nextInChain = &externalBindingLayout;
-            ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+            externalBindingEntry.nextInChain = nullptr;
         }
     }
+}
+
+// Test that an external texture entry must not have more chained structs
+TEST_F(BindGroupValidationTest, ExternalTextureAdditionalChain) {
+    // Create an external texture
+    wgpu::Texture texture =
+        CreateTexture(wgpu::TextureUsage::TextureBinding, kDefaultTextureFormat, 1);
+    wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+    externalDesc.plane0 = texture.CreateView();
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+    // Create a bind group layout for a single external texture
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+
+    // Prepare
+    wgpu::ExternalTextureBindingEntry externalBindingEntry;
+    externalBindingEntry.externalTexture = externalTexture;
+
+    wgpu::BindGroupEntry binding;
+    binding.binding = 0;
+    binding.nextInChain = &externalBindingEntry;
+
+    wgpu::BindGroupDescriptor bgDesc;
+    bgDesc.layout = layout;
+    bgDesc.entryCount = 1;
+    bgDesc.entries = &binding;
+
+    // Success case, having only the ExternalTextureBindingEntry is valid.
+    device.CreateBindGroup(&bgDesc);
+
+    // Error case, adding more to the chain produces an error.
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 256;
+    bufferDesc.usage = wgpu::BufferUsage::TexelBuffer;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::TexelBufferViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::R32Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 4;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    wgpu::TexelBufferBindingEntry texelEntry = {};
+    texelEntry.texelBufferView = view;
+
+    externalBindingEntry.nextInChain = &texelEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
 }
 
 // Check that a texture binding must have the correct usage

@@ -221,6 +221,73 @@ TEST_F(TexelBufferValidationTest, TexelBufferCannotBindToTextureSlot) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
 }
 
+// Check that TexelBufferBindingEntry cannot be chained with something else.
+TEST_F(TexelBufferValidationTest, AdditionalChain) {
+    // Make the BGL using a texel buffer.
+    wgpu::TexelBufferBindingLayout layout = {};
+    layout.access = wgpu::TexelBufferAccess::ReadWrite;
+    layout.format = wgpu::TextureFormat::R32Uint;
+
+    wgpu::BindGroupLayout bgl =
+        utils::MakeBindGroupLayout(device, {{0, wgpu::ShaderStage::Compute, &layout}});
+
+    // Make the texel buffer
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = 256;
+    bufferDesc.usage = wgpu::BufferUsage::TexelBuffer | wgpu::BufferUsage::Storage;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::TexelBufferViewDescriptor viewDesc = {};
+    viewDesc.format = wgpu::TextureFormat::R32Uint;
+    viewDesc.offset = 0;
+    viewDesc.size = 4;
+    wgpu::TexelBufferView view = buffer.CreateTexelView(&viewDesc);
+
+    // Make the texel buffer binding.
+    wgpu::TexelBufferBindingEntry texelEntry = {};
+    texelEntry.texelBufferView = view;
+
+    wgpu::BindGroupEntry bgEntry = {};
+    bgEntry.binding = 0;
+    bgEntry.nextInChain = &texelEntry;
+
+    wgpu::BindGroupDescriptor bgDesc = {};
+    bgDesc.layout = bgl;
+    bgDesc.entryCount = 1;
+    bgDesc.entries = &bgEntry;
+
+    // Success case, having only a texel buffer chained is valid.
+    device.CreateBindGroup(&bgDesc);
+
+    // Error case, an external texture is also chained.
+    wgpu::ExternalTexture externalTexture;
+    {
+        wgpu::TextureDescriptor plane0Desc;
+        plane0Desc.size = {1, 1};
+        plane0Desc.format = wgpu::TextureFormat::RGBA8Unorm;
+        plane0Desc.usage = wgpu::TextureUsage::TextureBinding;
+        wgpu::Texture plane0 = device.CreateTexture(&plane0Desc);
+
+        std::array<float, 12> placeholderConstants;
+
+        wgpu::ExternalTextureDescriptor desc;
+        desc.yuvToRgbConversionMatrix = placeholderConstants.data();
+        desc.gamutConversionMatrix = placeholderConstants.data();
+        desc.srcTransferFunctionParameters = placeholderConstants.data();
+        desc.dstTransferFunctionParameters = placeholderConstants.data();
+        desc.cropSize = {1, 1};
+        desc.apparentSize = {1, 1};
+        desc.plane0 = plane0.CreateView();
+        externalTexture = device.CreateExternalTexture(&desc);
+    }
+
+    wgpu::ExternalTextureBindingEntry externalTextureEntry;
+    externalTextureEntry.externalTexture = externalTexture;
+
+    texelEntry.nextInChain = &externalTextureEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&bgDesc));
+}
+
 class TexelBufferValidationWithExtendedMapTest : public TexelBufferValidationTest {
   protected:
     void SetUp() override {
