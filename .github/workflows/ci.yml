@@ -194,7 +194,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           ninja -C ${{ matrix.output_dir }}
 
-      - name: Strip debug symbols Android binaries
+      - name: Strip debug symbols
         run: |
           ${{ matrix.strip_tool }} --strip-debug ${{ matrix.output_dir }}/${{ matrix.library_path }}
 
