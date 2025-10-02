@@ -103,7 +103,7 @@ TEST_F(GlslWriterTest, LoopBodyVarInContinue) {
             auto* v = b.Var("v", true);
             b.Continue(l);
 
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });
@@ -143,7 +143,7 @@ TEST_F(GlslWriterTest, LoopInitializer) {
             b.NextIteration(l);
 
             b.Append(l->Body(), [&] { b.Continue(l); });
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });

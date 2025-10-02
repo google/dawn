@@ -157,7 +157,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue) {
             auto* v = b.Var("v", true);
             b.Continue(l);
 
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });
@@ -196,7 +196,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
             auto* v = b.Var("v", true);
             b.Continue(l);
 
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });
@@ -228,7 +228,7 @@ TEST_F(MslWriterTest, LoopInitializer) {
             b.NextIteration(l);
 
             b.Append(l->Body(), [&] { b.Continue(l); });
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });
@@ -268,7 +268,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
             b.NextIteration(l);
 
             b.Append(l->Body(), [&] { b.Continue(l); });
-            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, b.Load(v)); });
         });
         b.Return(func);
     });

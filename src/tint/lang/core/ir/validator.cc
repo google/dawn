@@ -4248,6 +4248,11 @@ void Validator::CheckBreakIf(const BreakIf* b) {
         return;
     }
 
+    if (!b->Condition()->Type() || !b->Condition()->Type()->Is<core::type::Bool>()) {
+        AddError(b) << "condition must be a 'bool'";
+        return;
+    }
+
     auto* loop = b->Loop();
     if (loop == nullptr) {
         AddError(b) << "has no associated loop";
