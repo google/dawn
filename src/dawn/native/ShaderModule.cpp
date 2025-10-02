@@ -603,23 +603,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                                                           SingleShaderStage entryPointStage,
                                                           BindingNumber bindingNumber,
                                                           const ShaderBindingInfo& shaderInfo) {
+    // Check that the binding exists.
     const BindGroupLayoutInternalBase::BindingMap& layoutBindings = layout->GetBindingMap();
-
-    // An external texture binding found in the shader will later be expanded into multiple
-    // bindings at compile time. This expansion will have already happened in the bgl - so
-    // the shader and bgl will always mismatch at this point. Expansion info is contained in
-    // the bgl object, so we can still verify the bgl used to have an external texture in
-    // the slot corresponding to the shader reflection.
-    if (std::holds_alternative<ExternalTextureBindingInfo>(shaderInfo.bindingInfo)) {
-        // If an external texture binding used to exist in the bgl, it will be found as a
-        // key in the ExternalTextureBindingExpansions map.
-        // TODO(dawn:563): Provide info about the binding types.
-        DAWN_INVALID_IF(!layout->GetExternalTextureBindingExpansionMap().contains(bindingNumber),
-                        "Binding type in the shader (texture_external) doesn't match the "
-                        "type in the layout.");
-
-        return {};
-    }
 
     const auto& bindingIt = layoutBindings.find(bindingNumber);
     DAWN_INVALID_IF(bindingIt == layoutBindings.end(), "Binding doesn't exist in %s.", layout);
@@ -627,30 +612,21 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
     APIBindingIndex bindingIndex(bindingIt->second);
     const BindingInfo& layoutInfo = layout->GetAPIBindingInfo(bindingIndex);
 
-    BindingInfoType bindingLayoutType = GetBindingInfoType(layoutInfo);
+    // Check that it is of the same type as in the layout.
     BindingInfoType shaderBindingType = GetShaderBindingType(shaderInfo);
-
-    if (bindingLayoutType == BindingInfoType::StaticSampler) {
-        DAWN_INVALID_IF(shaderBindingType != BindingInfoType::Sampler,
-                        "Binding type in the shader (%s) doesn't match the required type of %s for "
-                        "the %s type in the layout.",
-                        shaderBindingType, BindingInfoType::Sampler, bindingLayoutType);
-        return {};
+    BindingInfoType requiredType = GetBindingInfoType(layoutInfo);
+    if (requiredType == BindingInfoType::StaticSampler) {
+        requiredType = BindingInfoType::Sampler;
     }
-
-    DAWN_INVALID_IF(bindingLayoutType != shaderBindingType,
+    DAWN_INVALID_IF(requiredType != shaderBindingType,
                     "Binding type in the shader (%s) doesn't match the type in the layout (%s).",
-                    shaderBindingType, bindingLayoutType);
-
-    ExternalTextureBindingExpansionMap expansions = layout->GetExternalTextureBindingExpansionMap();
-    DAWN_INVALID_IF(expansions.contains(bindingNumber),
-                    "Binding type (buffer vs. texture vs. sampler vs. external) doesn't "
-                    "match the type in the layout.");
+                    shaderBindingType, requiredType);
 
     DAWN_INVALID_IF((layoutInfo.visibility & StageBit(entryPointStage)) == 0,
                     "Entry point's stage (%s) is not in the binding visibility in the layout (%s).",
                     StageBit(entryPointStage), layoutInfo.visibility);
 
+    // Check the arraySize matches the layout and that the shader has the start of the array.
     DAWN_INVALID_IF(layoutInfo.arraySize < shaderInfo.arraySize,
                     "Binding type in the shader is a binding_array with %u elements but the "
                     "layout only provides %u elements",
@@ -661,6 +637,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                     shaderInfo.binding, layoutInfo.indexInArray,
                     uint32_t(layoutInfo.binding) - uint32_t(layoutInfo.indexInArray));
 
+    // Validation specific to each type of binding.
     return MatchVariant(
         shaderInfo.bindingInfo,
         [&](const TextureBindingInfo& bindingInfo) -> MaybeError {
@@ -760,19 +737,26 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             return {};
         },
         [&](const SamplerBindingInfo& bindingInfo) -> MaybeError {
-            const SamplerBindingInfo& bindingLayout =
-                std::get<SamplerBindingInfo>(layoutInfo.bindingLayout);
+            bool comparisonInShader = bindingInfo.type == wgpu::SamplerBindingType::Comparison;
+            bool comparisonInLayout;
+            if (auto* staticBindingLayout =
+                    std::get_if<StaticSamplerBindingInfo>(&layoutInfo.bindingLayout)) {
+                comparisonInLayout = staticBindingLayout->sampler->IsComparison();
+            } else {
+                const SamplerBindingInfo& bindingLayout =
+                    std::get<SamplerBindingInfo>(layoutInfo.bindingLayout);
+                comparisonInLayout = bindingLayout.type == wgpu::SamplerBindingType::Comparison;
+            }
+
             DAWN_INVALID_IF(
-                (bindingLayout.type == wgpu::SamplerBindingType::Comparison) !=
-                    (bindingInfo.type == wgpu::SamplerBindingType::Comparison),
+                comparisonInShader != comparisonInLayout,
                 "The sampler type in the shader (comparison: %u) doesn't match the type in "
                 "the layout (comparison: %u).",
-                bindingInfo.type == wgpu::SamplerBindingType::Comparison,
-                bindingLayout.type == wgpu::SamplerBindingType::Comparison);
+                comparisonInShader, comparisonInLayout);
             return {};
         },
         [](const ExternalTextureBindingInfo&) -> MaybeError {
-            DAWN_UNREACHABLE();
+            // There are no other things to validate for the external textures.
             return {};
         },
         [&](const InputAttachmentBindingInfo& bindingInfo) -> MaybeError {

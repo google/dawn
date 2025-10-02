@@ -50,16 +50,6 @@
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
-// TODO(https://crbug.com/42240282): The expansion information is now stored in
-// ExternalTextureBindingInfo. Remove this structure and the map once backends transition to using
-// ExternalTextureBindingInfo.
-struct ExternalTextureBindingExpansion {
-    BindingNumber plane0;
-    BindingNumber plane1;
-    BindingNumber params;
-};
-using ExternalTextureBindingExpansionMap =
-    absl::flat_hash_map<BindingNumber, ExternalTextureBindingExpansion>;
 
 ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDescriptor(
     DeviceBase* device,
@@ -187,11 +177,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // used to get the stored counts.
     const BindingCounts& GetValidationBindingCounts() const;
 
-    // Used to specify unpacked external texture binding slots when transforming shader modules.
-    // TODO(https://crbug.com/42240282): The expansion information is now stored in
-    // ExternalTextureBindingInfo. Remove this getter once all the backends are updated to use it.
-    const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const;
-
     uint32_t GetUnexpandedBindingCount() const;
 
     bool NeedsCrossBindingValidation() const;
@@ -256,8 +241,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     // Map from BindGroupLayoutEntry.binding as BindingNumber to packed indices as BindingIndex.
     // TODO(https://issues.chromium.org/448578977): Use a more optimized map type.
     BindingMap mBindingMap;
-    // Map from the BindingNumber of the ExternalTexture to the BindingNumber of the expansion.
-    ExternalTextureBindingExpansionMap mExternalTextureBindingExpansionMap;
 
     BindingCounts mValidationBindingCounts = {};
     bool mNeedsCrossBindingValidation = false;

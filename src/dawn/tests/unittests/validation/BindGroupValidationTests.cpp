@@ -2434,6 +2434,80 @@ TEST_F(BindGroupLayoutWithStaticSamplersValidationTest, StaticSamplerWithArraySi
     ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&desc));
 }
 
+// Test that the BGL visibility of a static sampler contain the shader's stage.
+TEST_F(BindGroupLayoutWithStaticSamplersValidationTest, BGLVisibilityContainsShaderStage) {
+    // Set up the static sampler binding but don't create the BGL yet.
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+    staticSamplerBinding.sampler = device.CreateSampler();
+
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    binding.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    // Set up the compute pipeline but don't create it yet.
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var s : sampler;
+        @compute @workgroup_size(1) fn main() {
+            _ = s;
+        }
+    )");
+
+    // Success case, the BGL contains compute.
+    binding.visibility = wgpu::ShaderStage::Compute;
+    wgpu::BindGroupLayout bglCompute = device.CreateBindGroupLayout(&desc);
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, &bglCompute);
+    device.CreateComputePipeline(&csDesc);
+
+    // Error case, the BGL doesn't contains compute.
+    binding.visibility = wgpu::ShaderStage::Fragment;
+    wgpu::BindGroupLayout bglFragment = device.CreateBindGroupLayout(&desc);
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, &bglFragment);
+    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+}
+
+// Test that the BGL comparisoness for static sampler must match the shader.
+TEST_F(BindGroupLayoutWithStaticSamplersValidationTest, BGLComparisonessMatchesShader) {
+    // Set up the static sampler binding but don't create the BGL yet.
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+
+    wgpu::BindGroupLayoutEntry binding = {};
+    binding.binding = 0;
+    binding.visibility = wgpu::ShaderStage::Compute;
+    binding.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutDescriptor desc = {};
+    desc.entryCount = 1;
+    desc.entries = &binding;
+
+    // Set up the compute pipeline but don't create it yet.
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var s : sampler;
+        @compute @workgroup_size(1) fn main() {
+            _ = s;
+        }
+    )");
+
+    // Success case, the BGL contains a non-comparison sampler, like the shader.
+    staticSamplerBinding.sampler = device.CreateSampler();
+    wgpu::BindGroupLayout bglCompute = device.CreateBindGroupLayout(&desc);
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, &bglCompute);
+    device.CreateComputePipeline(&csDesc);
+
+    // Error case, the BGL contains a comparison sampler unlike the shader.
+    wgpu::SamplerDescriptor comparisonDesc = {};
+    comparisonDesc.compare = wgpu::CompareFunction::Never;
+    staticSamplerBinding.sampler = device.CreateSampler(&comparisonDesc);
+    wgpu::BindGroupLayout bglFragment = device.CreateBindGroupLayout(&desc);
+    csDesc.layout = utils::MakeBasicPipelineLayout(device, &bglFragment);
+    ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&csDesc));
+}
+
 constexpr uint32_t kBindingSize = 8;
 
 class SetBindGroupValidationTest : public ValidationTest {
@@ -3554,6 +3628,25 @@ TEST_F(BindGroupLayoutCompatibilityTest, ExternalTextureBindGroupLayoutCompatibi
                 _ = myTexture;
             })",
                                                {bgl}));
+}
+
+// Test that the ExternalTexture in the BGL must have visibility that's a superset of the shader.
+TEST_F(BindGroupLayoutCompatibilityTest, ExternalTextureLayoutVisibility) {
+    const char shader[] = R"(
+        @group(0) @binding(0) var myExternalTexture: texture_external;
+        @fragment fn main() {
+            _ = myExternalTexture;
+        })";
+
+    // Success case, visibility in the BGL contains Fragment.
+    wgpu::BindGroupLayout bglFragment = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+    CreateFSRenderPipeline(shader, {bglFragment});
+
+    // Error case, visibility in the BGL doesn't have Fragment.
+    wgpu::BindGroupLayout bglCompute = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, &utils::kExternalTextureBindingLayout}});
+    ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(shader, {bglCompute}));
 }
 
 // Test that a BGL is compatible with a pipeline if a binding's array size is at least as big as the
