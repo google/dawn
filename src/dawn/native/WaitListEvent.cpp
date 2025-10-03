@@ -35,7 +35,6 @@ namespace dawn::native {
 
 WaitListEvent::WaitListEvent(uint64_t requiredSignalCount)
     : mRemainingSignalCount(requiredSignalCount) {
-    DAWN_ASSERT(mRemainingSignalCount > 0);
 }
 WaitListEvent::~WaitListEvent() = default;
 

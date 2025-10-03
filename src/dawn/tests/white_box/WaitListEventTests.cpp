@@ -358,5 +358,12 @@ TEST(WaitListEventTests, MultipleSignals) {
     EXPECT_TRUE(event1->IsSignaled());
 }
 
+// Test that events can be created with 0 required signals and they are immediately in the signaled
+// state.
+TEST(WaitListEventTests, ZeroRequiredSignals) {
+    Ref<WaitListEvent> event1 = AcquireRef(new WaitListEvent(0));
+    EXPECT_TRUE(event1->IsSignaled());
+}
+
 }  // namespace
 }  // namespace dawn::native
