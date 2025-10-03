@@ -45,6 +45,7 @@ ci.defaults.set(
     service_account = "dawn-ci-builder@chops-service-accounts.iam.gserviceaccount.com",
     shadow_service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     siso_project = siso.project.DEFAULT_TRUSTED,
+    shadow_siso_project = siso.project.DEFAULT_UNTRUSTED,
     siso_remote_jobs = siso.remote_jobs.DEFAULT,
     thin_tester_cores = 2,
     builderless = True,
