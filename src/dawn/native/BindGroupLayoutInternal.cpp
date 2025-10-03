@@ -373,21 +373,6 @@ ResultOrError<UnpackedPtr<BindGroupLayoutDescriptor>> ValidateBindGroupLayoutDes
                 },
         };
         IncrementBindingCounts(&bindingCounts, Unpack(&availabilityEntry));
-
-        // Check that no ExternalTexture entry is in the static bindings part. It is redundant with
-        // validation below but since this is a temporary constraint only, it is fine.
-        // TODO(https://crbug.com/42240282): This is a workaround for an issue generating the
-        // binding numbers for expanded ExternalTexture entries. See comment in
-        // ConvertAndExpandBGLEntries.
-        // TODO(https://crbug.com/435317394): Remove this constraint that isn't necessary for
-        // dynamic binding arrays, except as a temporary workaround.
-        for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-            UnpackedPtr<BindGroupLayoutEntry> entry;
-            DAWN_TRY_ASSIGN(entry, ValidateAndUnpack(&descriptor->entries[i]));
-            DAWN_INVALID_IF(
-                entry.Has<ExternalTextureBindingLayout>(),
-                "entries[%i] is an ExternalTexture when a dynamic binding array is specified.", i);
-        }
     }
 
     // Map of binding number to entry index.
@@ -565,20 +550,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     // to ensure there are no collisions and that validation will prevent using these BindingNumbers
     // when creating a bindgroup (so there is no risk of applications injecting their own buffer for
     // the metadata for example).
-    // New BGL entries that are added internally we must ensure that there are no collisions with
-    // existing BindingNumbers and that validation will prevent using these BindingNumbers when
-    // creating a bindgroup. Otherwise a misbehaved application could try injecting its own planes
-    // for ExternalTextures or its own metadata buffer for dynamic binding array metadata.
-    //
-    // TODO(https://crbug.com/42240282): The scheme for ExternalTextures is to generate increasing
-    // BindingNumbers from maxBindingsPerBindGroup. This won't work with dynamic binding arrays as
-    // these can contain BindingNumbers way past maxBindingsPerBindGroup. Instead change to use the
-    // scheme decreasing from UINT32_MAX. (this couldn't be done immediately due to failures on
-    // D3D12).
-    // TODO(https://crbug.com/435317394): Changing the scheme will allow re-enabling use in
-    // ExternalTextures in bind group with dynamic binding arrays.
-    BindingNumber nextOpenBindingNumberForNewEntryET = kMaxBindingsPerBindGroupTyped;
-    BindingNumber nextOpenBindingNumberForNewEntryNonET = std::numeric_limits<BindingNumber>::max();
+    BindingNumber nextOpenBindingNumberForNewEntry = std::numeric_limits<BindingNumber>::max();
 
     ityp::vector<BindingIndex, BindingInfo> entries;
     absl::flat_hash_set<BindingNumber> internalEntries;
@@ -606,17 +578,17 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             DAWN_ASSERT(entry->bindingArraySize <= 1);
 
             BindingInfo plane0Entry = CreateSampledTextureBindingForExternalTexture(
-                nextOpenBindingNumberForNewEntryET++, entry->visibility);
+                nextOpenBindingNumberForNewEntry--, entry->visibility);
             entries.push_back(plane0Entry);
             internalEntries.insert(plane0Entry.binding);
 
             BindingInfo plane1Entry = CreateSampledTextureBindingForExternalTexture(
-                nextOpenBindingNumberForNewEntryET++, entry->visibility);
+                nextOpenBindingNumberForNewEntry--, entry->visibility);
             entries.push_back(plane1Entry);
             internalEntries.insert(plane1Entry.binding);
 
             BindingInfo metadataEntry = CreateUniformBindingForExternalTexture(
-                nextOpenBindingNumberForNewEntryET++, entry->visibility);
+                nextOpenBindingNumberForNewEntry--, entry->visibility);
             entries.push_back(metadataEntry);
             internalEntries.insert(metadataEntry.binding);
 
@@ -651,7 +623,7 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     // BindingNumber to convert it to a BindingIndex after sorting of bindings.
     BindingNumber dynamicArrayMetadataBindingNumber;
     if (descriptor.Has<BindGroupLayoutDynamicBindingArray>()) {
-        dynamicArrayMetadataBindingNumber = nextOpenBindingNumberForNewEntryNonET--;
+        dynamicArrayMetadataBindingNumber = nextOpenBindingNumberForNewEntry--;
         BindingInfo metadataEntry = {
             .binding = dynamicArrayMetadataBindingNumber,
             .visibility = kAllStages,

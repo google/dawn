@@ -114,7 +114,7 @@ BindGroupLayout::BindGroupLayout(Device* device,
 
         D3D12_DESCRIPTOR_RANGE_TYPE descriptorRangeType =
             WGPUBindingInfoToDescriptorRangeType(bindingInfo);
-        mShaderRegisters[bindingIndex] = uint32_t(bindingInfo.binding);
+        mShaderRegisters[bindingIndex] = uint32_t(bindingIndex);
 
         // Static samplers aren't stored in the descriptor heap. Handle them separately.
         if (std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
