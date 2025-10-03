@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_SERIALIZATION_H_
 #define SRC_DAWN_NATIVE_WEBGPU_SERIALIZATION_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <cstdint>
 #include <string>
 #include <type_traits>

@@ -15,8 +15,6 @@
 #ifndef SRC_DAWN_SERIALIZATION_SCHEMA_H_
 #define SRC_DAWN_SERIALIZATION_SCHEMA_H_
 
-#include <webgpu/webgpu_cpp.h>
-
 #include <cstdint>
 #include <string>
 

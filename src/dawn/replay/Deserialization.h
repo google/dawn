@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_REPLAY_DESERIALIZATION_H_
 #define SRC_DAWN_REPLAY_DESERIALIZATION_H_
 
+#include <webgpu/webgpu_cpp.h>
+
 #include <cstdint>
 #include <string>
 #include <type_traits>
