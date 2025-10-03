@@ -76,21 +76,16 @@ VulkanStaticBindings ComputeVulkanStaticBindings(const BindGroupLayoutInternalBa
 
     // Build a map of texture indices to sampler indices. This maps the texture to
     // the sampler which will be used in VK in the combined image sampler entry.
-    for (BindingIndex bindingIndex : Range(layout->GetBindingCount())) {
-        const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
-        if (!std::holds_alternative<StaticSamplerBindingInfo>(bindingInfo.bindingLayout)) {
-            continue;
-        }
-
-        auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
-        if (!samplerLayout.isUsedForSingleTextureBinding) {
+    for (BindingIndex bindingIndex : layout->GetStaticSamplerIndices()) {
+        auto samplerBindingInfo =
+            std::get<StaticSamplerBindingInfo>(layout->GetBindingInfo(bindingIndex).bindingLayout);
+        if (!samplerBindingInfo.isUsedForSingleTexture) {
             // The client did not specify that this sampler should be paired
             // with a single texture binding.
             continue;
         }
 
-        res.textureToStaticSamplerIndex[layout->GetBindingIndex(
-            samplerLayout.sampledTextureBinding)] = bindingIndex;
+        res.textureToStaticSamplerIndex[samplerBindingInfo.sampledTextureIndex] = bindingIndex;
     }
 
     // Compute the bindings that will be chained in the DescriptorSetLayout create info. We add
@@ -195,9 +190,8 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
         [](const StaticSamplerBindingInfo& layout) {
             // Make this entry into a combined image sampler iff the client
             // specified a single texture binding to be paired with it.
-            return (layout.isUsedForSingleTextureBinding)
-                       ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-                       : VK_DESCRIPTOR_TYPE_SAMPLER;
+            return (layout.isUsedForSingleTexture) ? VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+                                                   : VK_DESCRIPTOR_TYPE_SAMPLER;
         },
         [](const TextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE; },
         [](const StorageTextureBindingInfo&) { return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; },

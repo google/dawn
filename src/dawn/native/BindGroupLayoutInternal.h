@@ -129,10 +129,6 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     const BindingInfo& GetAPIBindingInfo(APIBindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
     BindingIndex AsBindingIndex(APIBindingIndex index) const;
-    // TODO(https://crbug.com/42240282): BindingNumbers are always user-facing and can only
-    // represent APIBindingIndex. Remove this getter once backends don't need to use the
-    // ExternalTextureBindingExpansionMap anymore.
-    BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
     APIBindingIndex GetAPIBindingIndex(BindingNumber bindingNumber) const;
 
     // Returns the number of internal bindings, excluding things like ExternalTexture.
@@ -152,6 +148,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BeginEndRange<BindingIndex> GetSampledTextureIndices() const;
     BeginEndRange<BindingIndex> GetTextureIndices() const;
     BeginEndRange<BindingIndex> GetSamplerIndices() const;
+    BeginEndRange<BindingIndex> GetStaticSamplerIndices() const;
     BeginEndRange<BindingIndex> GetNonStaticSamplerIndices() const;
     BeginEndRange<BindingIndex> GetInputAttachmentIndices() const;
 

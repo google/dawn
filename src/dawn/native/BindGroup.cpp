@@ -418,36 +418,44 @@ void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* 
 MaybeError ValidateStaticSamplersWithSampledTextures(
     const UnpackedPtr<BindGroupDescriptor>& descriptor,
     const BindGroupLayoutInternalBase* layout) {
-    absl::flat_hash_map<BindingNumber, uint32_t> bindingNumberToEntryIndexMap;
+    // Cache the position of all the sampled texture in descriptor->entries to later validate them
+    // against their static sampler (if they are used with the static sampler).
+    absl::flat_hash_map<BindingIndex, uint32_t> textureIndexToEntryIndex;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
-        bindingNumberToEntryIndexMap[BindingNumber(descriptor->entries[i].binding)] = i;
+        APIBindingIndex apiIndex =
+            layout->GetBindingMap().at(BindingNumber(descriptor->entries[i].binding));
+        const auto& bindingInfo = layout->GetAPIBindingInfo(apiIndex);
+        if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout)) {
+            textureIndexToEntryIndex[layout->AsBindingIndex(apiIndex)] = i;
+        }
     }
 
-    // Entry indices of YCbCr textures sampled by a static sampler.
+    // Gather the indices of YCbCr textures sampled by a static sampler.
     ityp::bitset<uint32_t, kMaxBindingsPerPipelineLayout> sampledYcbcrTextures;
     for (BindingIndex index{0}; index < layout->GetBindingCount(); ++index) {
         const BindingInfo& bindingInfo = layout->GetBindingInfo(index);
         auto* staticSamplerLayout =
             std::get_if<StaticSamplerBindingInfo>(&bindingInfo.bindingLayout);
-        if (staticSamplerLayout && staticSamplerLayout->isUsedForSingleTextureBinding) {
-            const SamplerBase* sampler = staticSamplerLayout->sampler.Get();
+        if (!staticSamplerLayout || !staticSamplerLayout->isUsedForSingleTexture) {
+            continue;
+        }
 
-            uint32_t textureEntryIndex = bindingNumberToEntryIndexMap.at(
-                BindingNumber(staticSamplerLayout->sampledTextureBinding));
-            const TextureViewBase* textureView = descriptor->entries[textureEntryIndex].textureView;
+        const SamplerBase* sampler = staticSamplerLayout->sampler.Get();
+        uint32_t textureEntryIndex =
+            textureIndexToEntryIndex.at(staticSamplerLayout->sampledTextureIndex);
+        const TextureViewBase* textureView = descriptor->entries[textureEntryIndex].textureView;
 
-            // Compare static sampler and sampled textures to make sure they are compatible.
-            if (sampler->IsYCbCr()) {
-                DAWN_INVALID_IF(!textureView->IsYCbCr(),
-                                "YCbCr static sampler at binding (%u) samples a non-YCbCr texture.",
-                                bindingInfo.binding);
+        // Compare static sampler and sampled textures to make sure they are compatible.
+        if (sampler->IsYCbCr()) {
+            DAWN_INVALID_IF(!textureView->IsYCbCr(),
+                            "YCbCr static sampler at binding (%u) samples a non-YCbCr texture.",
+                            bindingInfo.binding);
 
-                sampledYcbcrTextures.set(textureEntryIndex);
-            } else {
-                DAWN_INVALID_IF(textureView->IsYCbCr(),
-                                "Non-YCbCr static sampler at binding (%u) samples a YCbCr texture.",
-                                bindingInfo.binding);
-            }
+            sampledYcbcrTextures.set(textureEntryIndex);
+        } else {
+            DAWN_INVALID_IF(textureView->IsYCbCr(),
+                            "Non-YCbCr static sampler at binding (%u) samples a YCbCr texture.",
+                            bindingInfo.binding);
         }
     }
 

@@ -137,15 +137,17 @@ DAWN_SERIALIZABLE(struct, InputAttachmentBindingInfo, INPUT_ATTACHMENT_BINDING_I
 
 // A mirror of wgpu::StaticSamplerBindingLayout for use inside dawn::native.
 struct StaticSamplerBindingInfo {
+    // Note that this doesn't initialize the BindingIndex member as it is computed after sorting the
+    // entries in the BindGroupLayout.
     static StaticSamplerBindingInfo From(const StaticSamplerBindingLayout& layout);
 
-    // Holds a ref instead of an unowned pointer.
+    // Hold a ref as the sampler to keep it alive even if it is freed after BGL creation.
     Ref<SamplerBase> sampler;
-    // Holds the BindingNumber of the single texture with which this sampler is
-    // statically paired, if any.
-    BindingNumber sampledTextureBinding;
+    // Holds the BindingIndex of the single texture with which this sampler is statically paired, if
+    // any.
+    BindingIndex sampledTextureIndex = BindingIndex(0);
     // Whether this instance is statically paired with a single texture.
-    bool isUsedForSingleTextureBinding = false;
+    bool isUsedForSingleTexture = false;
 
     bool operator==(const StaticSamplerBindingInfo& other) const = default;
 };

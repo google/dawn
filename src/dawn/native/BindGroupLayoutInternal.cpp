@@ -503,6 +503,7 @@ BindingInfo ConvertToBindingInfo(const UnpackedPtr<BindGroupLayoutEntry>& bindin
     } else if (auto* texelBufferLayout = binding.Get<TexelBufferBindingLayout>()) {
         bindingInfo.bindingLayout = TexelBufferBindingInfo::From(*texelBufferLayout);
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
+        // The sampledTextureIndex will be filled later, after reordering of bindings.
         bindingInfo.bindingLayout = StaticSamplerBindingInfo::From(*staticSamplerBindingLayout);
     } else if (binding.Has<ExternalTextureBindingLayout>()) {
         // The BindingIndex members are filled later once we know the order of bindings.
@@ -591,6 +592,10 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
     };
     absl::flat_hash_map<BindingNumber, ExternalTextureExpansion> externalTextureExpansions;
 
+    // Likewise keep track of the "single texture binding" for static samplers so that we can link
+    // StaticSamplerBindingInfo::sampledTextureIndex to the BindingIndex post reordering.
+    absl::flat_hash_map<BindingNumber, BindingNumber> staticSamplerToSingleTextureBinding;
+
     for (uint32_t i = 0; i < descriptor->entryCount; i++) {
         UnpackedPtr<BindGroupLayoutEntry> entry = Unpack(&descriptor->entries[i]);
 
@@ -621,6 +626,14 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
                                                   .plane1 = BindingNumber(plane1Entry.binding),
                                                   .metadata = BindingNumber(metadataEntry.binding),
                                               }});
+        }
+
+        if (auto* staticSampler = entry.Get<StaticSamplerBindingLayout>()) {
+            if (staticSampler->sampledTextureBinding < WGPU_LIMIT_U32_UNDEFINED) {
+                staticSamplerToSingleTextureBinding.insert(
+                    {BindingNumber(entry->binding),
+                     BindingNumber(staticSampler->sampledTextureBinding)});
+            }
         }
 
         // Add one BindingInfo per element of the array with increasing indexInArray for backends to
@@ -669,6 +682,13 @@ ExpandedBindingInfo ConvertAndExpandBGLEntries(
             .plane0 = fullBindingMap[expansion.plane0],
             .plane1 = fullBindingMap[expansion.plane1],
         }};
+    }
+
+    // Store the location of the single texture binding in the StaticSamplerBindingInfo.
+    for (auto [samplerNumber, textureNumber] : staticSamplerToSingleTextureBinding) {
+        auto& samplerBindingInfo = std::get<StaticSamplerBindingInfo>(
+            entries[fullBindingMap[samplerNumber]].bindingLayout);
+        samplerBindingInfo.sampledTextureIndex = fullBindingMap[textureNumber];
     }
 
     // Now build the result.
@@ -761,7 +781,7 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
             [&](const SamplerBindingInfo&) { counts[BindingTypeOrder_RegularSampler]++; },
             [&](const StaticSamplerBindingInfo& layout) {
                 counts[BindingTypeOrder_StaticSampler]++;
-                if (layout.isUsedForSingleTextureBinding) {
+                if (layout.isUsedForSingleTexture) {
                     mNeedsCrossBindingValidation = true;
                 }
             },
@@ -838,10 +858,6 @@ const BindingInfo& BindGroupLayoutInternalBase::GetAPIBindingInfo(
 const BindGroupLayoutInternalBase::BindingMap& BindGroupLayoutInternalBase::GetBindingMap() const {
     DAWN_ASSERT(!IsError());
     return mBindingMap;
-}
-
-BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingNumber) const {
-    return AsBindingIndex(GetAPIBindingIndex(bindingNumber));
 }
 
 APIBindingIndex BindGroupLayoutInternalBase::GetAPIBindingIndex(BindingNumber bindingNumber) const {
@@ -1044,6 +1060,11 @@ BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetTextureIndices() con
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetSamplerIndices() const {
     return Range(GetBindingTypeStart(BindingTypeOrder_StaticSampler),
                  GetBindingTypeEnd(BindingTypeOrder_RegularSampler));
+}
+
+BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetStaticSamplerIndices() const {
+    return Range(GetBindingTypeStart(BindingTypeOrder_StaticSampler),
+                 GetBindingTypeEnd(BindingTypeOrder_StaticSampler));
 }
 
 BeginEndRange<BindingIndex> BindGroupLayoutInternalBase::GetNonStaticSamplerIndices() const {

@@ -227,7 +227,8 @@ void GenerateTextureBuiltinFromUniformData(
     for (auto [i, query] : Enumerate(metadata.textureQueries)) {
         BindGroupIndex group = BindGroupIndex(query.group);
         const auto* bgl = layout->GetBindGroupLayout(group);
-        BindingIndex binding = bgl->GetBindingIndex(BindingNumber{query.binding});
+        BindingIndex binding =
+            bgl->AsBindingIndex(bgl->GetAPIBindingIndex(BindingNumber{query.binding}));
 
         // Register that the query needs to be emulated and get the offset in the UBO where the data
         // will be passed.
