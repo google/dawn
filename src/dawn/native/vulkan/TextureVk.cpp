@@ -1162,8 +1162,25 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 beginCmd.height = mipSize.height;
 
                 TextureViewDescriptor viewDesc = {};
+                viewDesc.label = "Dawn_ClearTexture_View";
                 viewDesc.format = GetFormat().format;
-                viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+
+                uint32_t depthSliceCount = 1;
+                switch (GetDimension()) {
+                    case wgpu::TextureDimension::e2D:
+                        viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+                        break;
+                    case wgpu::TextureDimension::e3D:
+                        viewDesc.dimension = wgpu::TextureViewDimension::e3D;
+                        depthSliceCount = mipSize.depthOrArrayLayers;
+                        DAWN_ASSERT(layer == 0);
+                        break;
+                    case wgpu::TextureDimension::e1D:
+                    case wgpu::TextureDimension::Undefined:
+                        DAWN_UNREACHABLE();
+                        break;
+                }
+
                 viewDesc.baseMipLevel = level;
                 viewDesc.mipLevelCount = 1u;
                 viewDesc.baseArrayLayer = layer;
@@ -1177,6 +1194,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
 
                 RenderPassColorAttachment colorAttachment{};
                 colorAttachment.view = beginCmd.colorAttachments[ca0].view.Get();
+
                 beginCmd.colorAttachments[ca0].clearColor = colorAttachment.clearValue = {
                     fClearColor, fClearColor, fClearColor, fClearColor};
                 beginCmd.colorAttachments[ca0].loadOp = colorAttachment.loadOp =
@@ -1187,11 +1205,18 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 RenderPassDescriptor passDesc{};
                 passDesc.colorAttachmentCount = 1u;
                 passDesc.colorAttachments = &colorAttachment;
-                beginCmd.attachmentState = device->GetOrCreateAttachmentState(Unpack(&passDesc));
 
-                DAWN_TRY(
-                    RecordBeginRenderPass(recordingContext, ToBackend(GetDevice()), &beginCmd));
-                ToBackend(GetDevice())->fn.CmdEndRenderPass(recordingContext->commandBuffer);
+                for (uint32_t depthSlice = 0; depthSlice < depthSliceCount; ++depthSlice) {
+                    beginCmd.colorAttachments[ca0].depthSlice = colorAttachment.depthSlice =
+                        depthSlice;
+
+                    beginCmd.attachmentState =
+                        device->GetOrCreateAttachmentState(Unpack(&passDesc));
+
+                    DAWN_TRY(
+                        RecordBeginRenderPass(recordingContext, ToBackend(GetDevice()), &beginCmd));
+                    ToBackend(GetDevice())->fn.CmdEndRenderPass(recordingContext->commandBuffer);
+                }
             }
         }
     } else if (GetFormat().HasDepthOrStencil()) {
