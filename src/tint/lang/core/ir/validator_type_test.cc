@@ -1460,7 +1460,8 @@ TEST_P(AddressSpace_AccessMode, Test) {
         const core::type::Type* u32_ty = ty.u32();
         auto* type = aspace == AddressSpace::kHandle ? sampler_ty : u32_ty;
         auto* v = b.Var("v", aspace, type, access);
-        if (aspace != AddressSpace::kPrivate && aspace != AddressSpace::kWorkgroup) {
+        if (aspace != AddressSpace::kPrivate && aspace != AddressSpace::kWorkgroup &&
+            aspace != AddressSpace::kImmediate) {
             v->SetBindingPoint(0, 0);
         }
         mod.root_block->Append(v);
@@ -1476,11 +1477,15 @@ TEST_P(AddressSpace_AccessMode, Test) {
             } else if (aspace == AddressSpace::kStorage) {
                 expected_error =
                     "vars in the 'storage' address space must have access 'read' or 'read-write'";
+            } else if (aspace == AddressSpace::kImmediate) {
+                expected_error = "immediate pointers must be read access";
             }
             break;
         case core::Access::kReadWrite:
             if (aspace == AddressSpace::kUniform || aspace == AddressSpace::kHandle) {
                 expected_error = "uniform and handle pointers must be read access";
+            } else if (aspace == AddressSpace::kImmediate) {
+                expected_error = "immediate pointers must be read access";
             }
             break;
         case core::Access::kRead:
@@ -1507,7 +1512,8 @@ INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
                                                           AddressSpace::kWorkgroup,
                                                           AddressSpace::kUniform,
                                                           AddressSpace::kStorage,
-                                                          AddressSpace::kHandle),
+                                                          AddressSpace::kHandle,
+                                                          AddressSpace::kImmediate),
                                           testing::Values(core::Access::kRead,
                                                           core::Access::kWrite,
                                                           core::Access::kReadWrite)));
