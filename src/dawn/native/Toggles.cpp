@@ -566,6 +566,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "and unpack4xU8() on D3D12 backends. Note that these functions are always polyfilled on all "
       "other backends right now.",
       "https://crbug.com/tint/1497", ToggleStage::Device}},
+    {Toggle::VulkanPolyfillSwitchWithIf,
+     {"vulkan_polyfill_switch_with_if",
+      "Polyfill switch statements with if/else statements on Vulkan.",
+      "https://crbug.com/443906252", ToggleStage::Device}},
     {Toggle::ExposeWGSLTestingFeatures,
      {"expose_wgsl_testing_features",
       "Make the Instance expose the ChromiumTesting* features for testing of "

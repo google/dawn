@@ -1355,8 +1355,11 @@ class Printer {
                 }
                 break;
             }
-            default:
-                TINT_IR_UNIMPLEMENTED(ir_) << binary->Op();
+            default: {
+                TINT_IR_UNIMPLEMENTED(ir_)
+                    << "\"" << binary->Op() << "\"  (enum value=" << static_cast<int>(binary->Op())
+                    << ")";
+            }
         }
 
         // Emit the instruction.

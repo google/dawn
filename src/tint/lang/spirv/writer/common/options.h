@@ -118,6 +118,9 @@ struct Options {
     /// `unpack4x8unorm` builtins
     bool polyfill_pack_unpack_4x8_norm = false;
 
+    /// Set to `true` to generate a polyfill for switch statements using if/else statements.
+    bool polyfill_case_switch = false;
+
     /// Set to `true` to generate a polyfill clamp of `id` param of subgroupShuffle to within the
     /// spec max subgroup size.
     bool subgroup_shuffle_clamped = false;
@@ -163,6 +166,7 @@ struct Options {
                  pass_matrix_by_pointer,
                  polyfill_dot_4x8_packed,
                  polyfill_pack_unpack_4x8_norm,
+                 polyfill_case_switch,
                  subgroup_shuffle_clamped,
                  polyfill_subgroup_broadcast_f16,
                  disable_polyfill_integer_div_mod,

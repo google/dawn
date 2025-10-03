@@ -52,6 +52,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/spirv/writer/raise/case_switch_to_if_else.h"
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
 #include "src/tint/lang/spirv/writer/raise/fork_explicit_layout_types.h"
 #include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
@@ -204,6 +205,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // kAllowAnyInputAttachmentIndexType required after ExpandImplicitSplats
     RUN_TRANSFORM(raise::HandleMatrixArithmetic, module);
     RUN_TRANSFORM(raise::MergeReturn, module);
+    if (options.polyfill_case_switch) {
+        RUN_TRANSFORM(raise::CaseSwitchToIfElse, module);
+    }
     RUN_TRANSFORM(raise::RemoveUnreachableInLoopContinuing, module);
     RUN_TRANSFORM(
         raise::ShaderIO, module,

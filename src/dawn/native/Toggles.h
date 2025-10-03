@@ -138,6 +138,7 @@ enum class Toggle {
     PolyfillPackUnpack4x8Norm,
     EnableSubgroupsIntelGen9,
     D3D12PolyFillPackUnpack4x8,
+    VulkanPolyfillSwitchWithIf,
     ExposeWGSLTestingFeatures,
     ExposeWGSLExperimentalFeatures,
     DisablePolyfillsOnIntegerDivisonAndModulo,

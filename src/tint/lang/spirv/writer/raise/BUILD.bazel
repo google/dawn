@@ -40,6 +40,7 @@ cc_library(
   name = "raise",
   srcs = [
     "builtin_polyfill.cc",
+    "case_switch_to_if_else.cc",
     "expand_implicit_splats.cc",
     "fork_explicit_layout_types.cc",
     "handle_matrix_arithmetic.cc",
@@ -54,6 +55,7 @@ cc_library(
   ],
   hdrs = [
     "builtin_polyfill.h",
+    "case_switch_to_if_else.h",
     "expand_implicit_splats.h",
     "fork_explicit_layout_types.h",
     "handle_matrix_arithmetic.h",
@@ -78,6 +80,7 @@ cc_library(
     "//src/tint/lang/spirv/intrinsic",
     "//src/tint/lang/spirv/ir",
     "//src/tint/lang/spirv/type",
+    "//src/tint/lang/wgsl/ast",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
@@ -108,6 +111,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_polyfill_test.cc",
+    "case_switch_to_if_else_test.cc",
     "expand_implicit_splats_test.cc",
     "fork_explicit_layout_types_test.cc",
     "handle_matrix_arithmetic_test.cc",
