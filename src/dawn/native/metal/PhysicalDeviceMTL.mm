@@ -308,8 +308,15 @@ PhysicalDevice::PhysicalDevice(InstanceBase* instance,
     NSString* osVersion = [[NSProcessInfo processInfo] operatingSystemVersionString];
     mDriverDescription = "Metal driver on " + std::string(systemName) + [osVersion UTF8String];
 
-    mSubgroupMinSize = 4;   // The 4 comes from the minimum derivative group.
-    mSubgroupMaxSize = 64;  // In MSL, a ballot is a uint64, so the max subgroup size is 64.
+    if (gpu_info::IsApple(mVendorId)) {
+        // Apple M1 tech talk: https://developer.apple.com/videos/play/wwdc2022/10159/
+        // "on all Apple GPUs, it is equal to 32"
+        mSubgroupMinSize = 32;
+        mSubgroupMaxSize = 32;
+    } else {
+        mSubgroupMinSize = 4;   // The 4 comes from the minimum derivative group.
+        mSubgroupMaxSize = 64;  // In MSL, a ballot is a uint64, so the max subgroup size is 64.
+    }
 }
 
 bool PhysicalDevice::IsMetalValidationEnabled() const {
