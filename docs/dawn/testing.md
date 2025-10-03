@@ -67,3 +67,56 @@ binding, and uploading data to the GPU. The rationale for this is the following:
     precomputed in a render bundle.
   - Static/Dynamic data: Updating data for each draw is a common use case. It also tests
     the efficiency of resource transitions.
+
+## Testing with the CTS
+
+There are various ways to test dawn against the [WebGPU CTS](https://github.com/gpuweb/cts).
+
+### With dawn.node
+See [src/dawn/node/README.md](../../src/dawn/node/README.md).
+
+### With a Chromium build manually
+Go to [https://gpuweb.github.io/cts/standalone/](https://gpuweb.github.io/cts/standalone)
+or clone [the CTS repo](https://github.com/gpuweb/cts) and serve it locally
+
+```sh
+git clone https://github.com/gpuweb/cts.git
+cd cts
+npm ci
+npm start
+```
+
+Then open `http://localhost:8080/standalone`.
+
+### On the CQ
+You can run a specific version of the CTS with top of tree Dawn in Chromium.
+First, upload the version you want to test to your own github fork of the CTS.
+Note the commit-hash. Then run:
+
+```sh
+./tools/run cts roll --max-attempts 0 --repo <repo-url> --revision <commit-hash>
+```
+
+Example:
+
+```sh
+./tools/run cts roll --max-attempts 0 --repo https://github.com/greggman/cts.git --revision 1b3173b36a1084917e0ff29e5f40c6290b6f8adc
+```
+
+The roll script take a couple of minutes as it downloads that version of the CTS and
+creates a roll patch. Once the roll script says it's waiting on the bots to finish
+you can kill (Ctrl-C) the script. The CQ will continue to run the tests.
+
+#### Filtering - running less than the full CTS
+You can also specify a CTS query with `--test-query <query>`, for example, test all the
+WGSL builtins `... --test-query "webgpu:shader,execution,expression,call,builtin,*"`.
+You can also filter tests with a glob `--test-filter <glob>`, for example, only run tests
+with `BindGroup` in the test name `... --test-filter "*BindGroup*"`.
+
+See  `tools/src/cmd/cts/roll/roll.go` for other options.
+
+#### Testing with a different version of Dawn
+
+The roll is just a normal CL on gerrit so, after creating a roll CL, follow the instructions
+on gerrit to download that CL. Apply any dawn changes. Then re-upload with
+`git cl upload --force --bypass-hooks` and start a dry run on gerrit.
