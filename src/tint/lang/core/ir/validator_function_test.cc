@@ -1120,6 +1120,74 @@ TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_DuplicateLocation_Used) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_ArrayOfStructs) {
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+    auto* blend_struct_ty =
+        ty.Struct(mod.symbols.New("BlendStruct"), {
+                                                      {mod.symbols.New("a"), ty.f32(), attr0},
+                                                      {mod.symbols.New("b"), ty.f32(), attr1},
+                                                  });
+
+    auto* array_ty = ty.array(blend_struct_ty, 2u);
+    auto* v = b.Var("v", AddressSpace::kOut, array_ty);
+    mod.root_block->Append(v);
+
+    auto* f = FragmentEntryPoint("my_func");
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(array_ty));
+        b.Unreachable();
+    });
+
+    // Need to add Capability::kAllowUnannotatedModuleIOVariables to prevent earlier checks
+    // rejecting the shader
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowUnannotatedModuleIOVariables});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:7:54 error: var: blend_src cannot be used on members of non-top level structs
+  %v:ptr<__out, array<BlendStruct, 2>, read_write> = var undef
+                                                     ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_NestedStruct) {
+    IOAttributes attr0;
+    attr0.location = 0;
+    attr0.blend_src = 0;
+    IOAttributes attr1;
+    attr1.location = 0;
+    attr1.blend_src = 1;
+    auto* blend_struct_ty =
+        ty.Struct(mod.symbols.New("BlendStruct"), {
+                                                      {mod.symbols.New("a"), ty.f32(), attr0},
+                                                      {mod.symbols.New("b"), ty.f32(), attr1},
+                                                  });
+
+    auto* outer_struct_ty =
+        ty.Struct(mod.symbols.New("OuterStruct"), {{mod.symbols.New("inner"), blend_struct_ty}});
+    auto* v = b.Var("v", AddressSpace::kOut, outer_struct_ty);
+    mod.root_block->Append(v);
+
+    auto* f = FragmentEntryPoint("my_func");
+    b.Append(f->Block(), [&] { b.Store(v, b.Zero(outer_struct_ty)); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowUnannotatedModuleIOVariables});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:11:44 error: var: blend_src cannot be used on members of non-top level structs
+  %v:ptr<__out, OuterStruct, read_write> = var undef
+                                           ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, EntryPoint_BlendSrc_PartialStruct) {
     auto* f = FragmentEntryPoint("my_func");
 
