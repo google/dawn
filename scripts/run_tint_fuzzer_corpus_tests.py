@@ -95,6 +95,12 @@ def main() -> None:
                         help='Path to the location to output JSON results.')
     parser.add_argument('--isolated-script-test-perf-output',
                         help='Currently unused, needed for bot support.')
+    parser.add_argument('--isolated-script-test-launcher-retry-limit',
+                        help='Currently unused, needed for bot support.')
+    parser.add_argument('--isolated-script-test-repeat',
+                        help='Currently unused, needed for bot support.')
+    parser.add_argument('--isolated-script-test-filter',
+                        help='Currently unused, needed for bot support.')
     args, unknown_args = parser.parse_known_args()
 
     proc = run_fuzzer_corpus_tests(unknown_args, args.append_cwd_as_build)
