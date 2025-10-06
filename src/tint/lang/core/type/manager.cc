@@ -347,8 +347,11 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
     for (const auto& m : members) {
         max_align = std::max(max_align, m->Align());
     }
-    uint32_t size = members.Back()->Offset() + members.Back()->Size();
-    return Get<core::type::Struct>(name, std::move(members), tint::RoundUp(max_align, size));
+
+    auto& mem = members.Back();
+    uint32_t size = std::max(mem->Size(), mem->MinimumRequiredSize());
+    return Get<core::type::Struct>(name, std::move(members),
+                                   tint::RoundUp(max_align, mem->Offset() + size));
 }
 
 core::type::Struct* Manager::Struct(Symbol name,

@@ -242,6 +242,9 @@ class StructMember : public Castable<StructMember, Node> {
     /// @returns byte size
     uint32_t Size() const { return size_; }
 
+    /// @returns the minimum size required for this struct member.
+    uint32_t MinimumRequiredSize() const;
+
     /// @returns the optional attributes
     const IOAttributes& Attributes() const { return attributes_; }
 

@@ -34,7 +34,10 @@
 #include <string_view>
 #include <utility>
 
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/array_count.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -248,6 +251,28 @@ StructMember::StructMember(Symbol name,
       attributes_(attributes) {}
 
 StructMember::~StructMember() = default;
+
+uint32_t StructMember::MinimumRequiredSize() const {
+    auto* ty = type_;
+    uint32_t array_multiplier = 1;
+    while (ty->Is<core::type::Array>()) {
+        auto* arr = ty->As<core::type::Array>();
+        if (auto* count = arr->Count()->As<core::type::ConstantArrayCount>()) {
+            array_multiplier *= count->value;
+        }
+
+        ty = arr->ElemType();
+    }
+
+    auto* mat = ty->As<core::type::Matrix>();
+    if (!mat) {
+        return type_->Size();
+    }
+
+    uint32_t dim = is_row_major_ ? mat->Rows() : mat->Columns();
+    auto s = HasMatrixStride() ? matrix_stride_ * dim : mat->Size();
+    return (s * array_multiplier);
+}
 
 StructMember* StructMember::Clone(CloneContext& ctx) const {
     auto sym = ctx.dst.st->Register(name_.Name());

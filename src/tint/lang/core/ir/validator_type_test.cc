@@ -314,6 +314,47 @@ TEST_F(IR_ValidatorTest, StructMember_AlignNotDivisibleByTypeAlignment) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Structure_LargePaddingSizeAtEnd) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"),
+                  Vector{
+                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
+                                                 4u, 40'000'000u, IOAttributes{}),
+                  });
+    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("struct padding (39999988) is larger then the max (10485760)"))
+        << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructureMember_LargePaddingSize) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"),
+                  Vector{
+                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
+                                                 4u, 40'000'000u, IOAttributes{}),
+                      ty.Get<type::StructMember>(mod.symbols.New("b"), ty.array<u32, 3>(), 0u, 0u,
+                                                 4u, 16u, IOAttributes{}),
+                  });
+    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("struct member padding (4294967284) is larger then the max (10485760)"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, StructureMember_SizeTooSmall) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"),
@@ -558,11 +599,10 @@ TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithoutCapability) {
 
 TEST_F(IR_ValidatorTest, StructMember_MatrixStride_WithCapability) {
     auto* mat_ty = ty.mat2x2<f32>();
-    auto* member = ty.Get<core::type::StructMember>(
-        mod.symbols.New("m"), mat_ty, 0u, 0u, mat_ty->Align(), mat_ty->Size(), IOAttributes{});
+    auto* member = ty.Get<core::type::StructMember>(mod.symbols.New("m"), mat_ty, 0u, 0u,
+                                                    mat_ty->Align(), 64u, IOAttributes{});
     member->SetMatrixStride(32);
-    auto* str_ty =
-        ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, mat_ty->Size());
+    auto* str_ty = ty.Get<core::type::Struct>(mod.symbols.New("MyStruct"), Vector{member}, 64u);
 
     auto* v = b.Var(ty.ptr(private_, str_ty));
     mod.root_block->Append(v);

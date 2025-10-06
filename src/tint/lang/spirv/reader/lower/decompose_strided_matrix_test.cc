@@ -55,16 +55,15 @@ class SpirvReader_DecomposeStridedMatrixTest : public core::ir::transform::Trans
             ty.Get<core::type::StructMember>(mod.symbols.New("b"), member_type, 1u, matrix_stride,
                                              matrix_stride, member_size, core::IOAttributes{});
         matrix_member->SetMatrixStride(matrix_stride);
-        return ty.Struct(
-            mod.symbols.New("S"),
-            Vector{
-                ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.u32(), 0u, 0u, 4u, 4u,
-                                                 core::IOAttributes{}),
-                matrix_member,
-                ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.u32(), 2u,
-                                                 matrix_member->Offset() + matrix_member->Size(),
-                                                 4u, 4u, core::IOAttributes{}),
-            });
+        return ty.Struct(mod.symbols.New("S"),
+                         Vector{
+                             ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.u32(), 0u,
+                                                              0u, 4u, 4u, core::IOAttributes{}),
+                             matrix_member,
+                             ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.u32(), 2u,
+                                                              matrix_member->Offset() + member_size,
+                                                              4u, 4u, core::IOAttributes{}),
+                         });
     }
 };
 

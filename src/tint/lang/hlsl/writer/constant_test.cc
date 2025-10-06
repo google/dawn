@@ -755,7 +755,7 @@ TEST_F(HlslWriterTest, ConstantTypeStructEmpty) {
                                          core::IOAttributes{}),
         ty.Get<core::type::StructMember>(b.ir.symbols.New("c"), ty.vec3<i32>(), 2u, 8u, 16u, 16u,
                                          core::IOAttributes{}),
-        ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.array<f32, 3>(), 2u, 8u, 16u,
+        ty.Get<core::type::StructMember>(b.ir.symbols.New("d"), ty.array<f32, 3>(), 2u, 24u, 16u,
                                          16u, core::IOAttributes{}),
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));

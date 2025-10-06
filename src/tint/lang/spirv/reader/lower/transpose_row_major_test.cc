@@ -2234,8 +2234,8 @@ TEST_F(SpirvReader_TransposeRowMajorTest, AccessSiblingToMatrix) {
                                                            0u, 16u, 64u, 64u, core::IOAttributes{});
     matrix_member->SetRowMajor();
 
-    auto* vec_member = ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.vec4<i32>(), 64u,
-                                                        64u, 16u, 16u, core::IOAttributes{});
+    auto* vec_member = ty.Get<core::type::StructMember>(mod.symbols.New("c"), ty.vec4<i32>(), 1u,
+                                                        80u, 16u, 16u, core::IOAttributes{});
 
     auto* strct = ty.Struct(mod.symbols.New("S"), Vector{matrix_member, vec_member});
 
@@ -2255,7 +2255,7 @@ TEST_F(SpirvReader_TransposeRowMajorTest, AccessSiblingToMatrix) {
     auto* before = R"(
 S = struct @align(64) {
   m:mat4x4<f32> @offset(16), @row_major
-  c:vec4<i32> @offset(64)
+  c:vec4<i32> @offset(80)
 }
 
 $B1: {  # root
@@ -2277,12 +2277,12 @@ $B1: {  # root
     auto* after = R"(
 S = struct @align(64) {
   m:mat4x4<f32> @offset(16), @row_major
-  c:vec4<i32> @offset(64)
+  c:vec4<i32> @offset(80)
 }
 
 S_1 = struct @align(64) {
   m:mat4x4<f32> @offset(16)
-  c:vec4<i32> @offset(64)
+  c:vec4<i32> @offset(80)
 }
 
 $B1: {  # root
