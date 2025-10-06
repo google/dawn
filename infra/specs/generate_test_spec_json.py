@@ -66,6 +66,11 @@ ADDITIONAL_MIXINS = {
             'result_format': 'single',
         },
     },
+    'true_noop_merge': {
+        'merge': {
+            'script': '//scripts/merge_scripts/true_noop_merge.py',
+        },
+    },
 }
 
 MIXIN_FILEPATH = os.path.join(THIS_DIR, 'mixins.pyl')

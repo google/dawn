@@ -54,6 +54,7 @@
   'result_adapter_single': {'resultdb': {'result_format': 'single'}},
   'swarming_containment_auto': { 'fail_if_unused': False,
                                  'swarming': {'containment_type': 'AUTO'}},
+  'true_noop_merge': { 'merge': { 'script': '//scripts/merge_scripts/true_noop_merge.py'}},
   'win10': {'swarming': {'dimensions': {'os': 'Windows-10-19045'}}},
   'x86-64': { 'fail_if_unused': False,
               'swarming': {'dimensions': {'cpu': 'x86-64'}}}}
