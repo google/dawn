@@ -124,5 +124,14 @@ TEST_F(StringStreamTest, Precision) {
     }
 }
 
+TEST_F(StringStreamTest, Assign) {
+    StringStream a;
+    StringStream b;
+    a << "a";
+    b << "b";
+    a = b;
+    EXPECT_EQ(a.str(), "b");
+}
+
 }  // namespace
 }  // namespace tint::utils

@@ -392,7 +392,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, NestedSwitch) {
     auto* src = R"(
 %foo = func(%cond1:i32, %cond2:i32):void {
   $B1: {
-    switch %cond1 [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond1 [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         switch %cond2 [c: (-2i 2i, $B4), c: (default, $B5)] {  # switch_2
           $B4: {  # case
@@ -490,7 +490,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, MixedIfAndSwitch) {
     auto* src = R"(
 %foo = func(%cond1:i32, %cond2:bool):void {
   $B1: {
-    switch %cond1 [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond1 [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         if %cond2 [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
@@ -660,7 +660,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, SwitchMultiSelectorCase_VarAssignment
 %foo = func(%param0:i32):void {
   $B1: {
     %v:ptr<function, i32, read_write> = var 0i
-    switch %param0 [c: (1i- -2, $B2), c: (default, $B3)] {  # switch_1
+    switch %param0 [c: (-2i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         store %v, 10i
         exit_switch  # switch_1
@@ -741,9 +741,9 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, NestedSwitch_VarAssignment) {
 %foo = func(%cond1:i32, %cond2:i32):void {
   $B1: {
     %v:ptr<function, i32, read_write> = var 0i
-    switch %cond1 [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond1 [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
-        switch %cond2 [c: (2i- -2, $B4), c: (default, $B5)] {  # switch_2
+        switch %cond2 [c: (-2i 2i, $B4), c: (default, $B5)] {  # switch_2
           $B4: {  # case
             store %v, 10i
             exit_switch  # switch_2
@@ -851,7 +851,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, MixedIfAndSwitch_VarAssignment) {
 %foo = func(%cond1:i32, %cond2:bool):void {
   $B1: {
     %v:ptr<function, i32, read_write> = var 0i
-    switch %cond1 [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond1 [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         if %cond2 [t: $B4, f: $B5] {  # if_1
           $B4: {  # true
@@ -1194,7 +1194,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, BreakInsideIfInCase) {
 %foo = func(%cond:i32, %pred:bool):void {
   $B1: {
     %v:ptr<function, i32, read_write> = var 0i
-    switch %cond [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         store %v, 10i
         if %pred [t: $B4] {  # if_1
@@ -1295,7 +1295,7 @@ TEST_F(SpirvWriter_CaseSwitchToIfElseTest, MultipleBreaksInCase) {
 %foo = func(%cond:i32, %pred1:bool, %pred2:bool):void {
   $B1: {
     %v:ptr<function, i32, read_write> = var 0i
-    switch %cond [c: (1i- -1, $B2), c: (default, $B3)] {  # switch_1
+    switch %cond [c: (-1i 1i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
         store %v, 10i
         if %pred1 [t: $B4] {  # if_1
