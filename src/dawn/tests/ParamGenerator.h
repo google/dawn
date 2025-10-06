@@ -194,7 +194,7 @@ class ParamGenerator {
       public:
         using iterator_category = std::forward_iterator_tag;
         using value_type = ParamStruct;
-        using difference_type = size_t;
+        using difference_type = std::ptrdiff_t;
         using pointer = ParamStruct*;
         using reference = ParamStruct&;
 
@@ -213,6 +213,12 @@ class ParamGenerator {
             // Set a marker that the iterator has reached the end.
             mEnd = true;
             return *this;
+        }
+
+        Iterator operator++(int) {
+            Iterator old = *this;
+            ++(*this);
+            return old;
         }
 
         bool operator==(const Iterator& other) const {
