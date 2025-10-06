@@ -243,12 +243,13 @@ def CheckIRBinaryCompatibility(input_api, output_api):
 
 def CheckNoStaleGen(input_api, output_api):
     """Checks that Tint generated files are not stale."""
+    sys.path += [input_api.change.RepositoryRoot()]
+
+    import go_presubmit_support
+
     results = []
     try:
-        go = input_api.os_path.join(input_api.change.RepositoryRoot(), "tools",
-                                    "golang", "bin", "go")
-        if input_api.is_windows:
-            go += '.exe'
+        go = go_presubmit_support.go_path(input_api)
         input_api.subprocess.check_call_out(
             [go, "run", "tools/src/cmd/gen/main.go", "--check-stale"],
             stdout=input_api.subprocess.PIPE,
