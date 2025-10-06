@@ -28,12 +28,12 @@ package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
 
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration, kotlin_definition with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
 
 {% for function in by_category['function'] if include_method(function) %}
     @FastNative
-    public external fun {{ function.name.camelCase() }}(
+    {{ kotlin_annotation(kotlin_return(function)) }} public external fun {{ function.name.camelCase() }}(
         {%- for arg in function.arguments -%}
-            {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
+            {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{' '}}
         {%- endfor %}): {{ kotlin_declaration(kotlin_return(function)) }}
 {% endfor %}

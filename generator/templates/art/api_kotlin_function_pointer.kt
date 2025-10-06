@@ -25,7 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration with context %}
 
 {% set callbackName = 'on' + function_pointer.name.chunks[:-1] | map('title') | join %}
 
@@ -34,6 +34,6 @@ public fun interface {{ function_pointer.name.CamelCase() }} {
     @JvmName("{{ callbackName }}")  //* Required to access Inline Value Class parameters via JNI.
     public fun {{ callbackName }}(
     {%- for arg in kotlin_record_members(function_pointer.arguments) -%}
-        {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},{{ ' ' }}
+        {{ kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},{{ ' ' }}
     {%- endfor -%});
 }

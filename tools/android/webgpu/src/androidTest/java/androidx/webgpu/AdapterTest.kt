@@ -24,7 +24,7 @@ class AdapterTest {
             val adapterInfo = adapter.getInfo()
 
             assertEquals("The backend type should be Vulkan",
-                BackendType.Vulkan.value, adapterInfo.backendType.value
+                BackendType.Vulkan, adapterInfo.backendType
             )
         }
     }

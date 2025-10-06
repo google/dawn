@@ -41,9 +41,9 @@
         java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
     {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
-        {%- if type.category in ['bitmask', 'callback function', 'callback info', 'enum', 'function pointer', 'object', 'structure'] -%}
+        {%- if type.category in ['callback function', 'callback info', 'function pointer', 'object', 'structure'] -%}
             Array<{{ type.name.CamelCase() }}>{{ ' = arrayOf()' if emit_defaults }}
-        {%- elif type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
+        {%- elif type.category in ['bitmask', 'enum'] or type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
             IntArray{{ ' = intArrayOf()' if emit_defaults }}
         {%- else -%}
             {{ unreachable_code() }}
@@ -71,7 +71,7 @@
             {%- endif %}
         {%- endif %}
     {%- elif type.category in ['bitmask', 'enum'] -%}
-        {{ type.name.CamelCase() }}
+        Int
         {%- if emit_defaults %}
             {%- for value in type.values if value.name.name == (default_value or 'undefined') -%}
                 {{ ' ' }}= {{ type.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }}
@@ -137,3 +137,11 @@
     {{ declaration_with_defaults(arg, false) }}
 {%- endmacro %}
 
+{% macro kotlin_annotation(arg) -%}
+    {%- if arg != None -%}
+        {% set type = arg.type %}
+        {% if type.category in ['bitmask', 'enum'] -%}
+            @{{ type.name.CamelCase() -}}
+        {% endif -%}
+    {% endif -%}
+{% endmacro %}

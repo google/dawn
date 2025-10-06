@@ -135,9 +135,8 @@ class MappedNamedConstantsTest {
 
             for ((key, constantName) in namesMap) {
                 val constantProperty = companionConstants[constantName]
-                val actual = (constantProperty as KProperty1<*, *>).getter.call(companionObject)
-                val expected = clazz.primaryConstructor?.call(key)
-                assertEquals(expected, actual)
+                val actual = (constantProperty as KProperty1<*, *>).getter.call()
+                assertEquals(key, actual)
             }
         }
     }

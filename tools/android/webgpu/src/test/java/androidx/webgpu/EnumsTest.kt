@@ -7,7 +7,7 @@ import org.junit.Assert.assertTrue
 class EnumsTest {
     @Test
     fun uniqueEnumsBufferBindingType() {
-        val values = HashSet<BufferBindingType>()
+        val values = mutableListOf<Int>()
         arrayOf(
             BufferBindingType.BindingNotUsed,
             BufferBindingType.Uniform,

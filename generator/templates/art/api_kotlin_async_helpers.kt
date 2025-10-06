@@ -28,7 +28,7 @@ package {{ kotlin_package }}
 
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration, kotlin_definition with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
 
 //* Provide an async wrapper for the 'callback info' type of async methods.
 {% for obj in by_category['object'] %}
@@ -41,7 +41,7 @@ import kotlin.coroutines.suspendCoroutine
         //* (without callbacks) in a suspend (async) function.
         public class {{ return_name }}(
             {% for arg in kotlin_record_members(callback_function.arguments) %}
-                public val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
+                {{ kotlin_annotation(arg) }} public val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
             {% endfor %}) {
             //* Required for destructuring declarations. These come for free in a 'data' class but
             //* we don't make it a data class because that can cause binary compatibility issues.
@@ -55,7 +55,7 @@ import kotlin.coroutines.suspendCoroutine
         //* call with a suspend function.
         public suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
             {%- for arg in method.arguments[:-1] %}
-                {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
+                {{ kotlin_annotation(arg) }}  {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
             {%- endfor %}): {{ return_name }} = suspendCoroutine {
                 {{ method.name.camelCase() }}(
                     {%- for arg in method.arguments %}

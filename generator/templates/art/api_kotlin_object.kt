@@ -29,16 +29,16 @@ package {{ kotlin_package }}
 import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
 
-{% from 'art/api_kotlin_types.kt' import kotlin_declaration, kotlin_definition with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
 
 public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable {
     {% for method in obj.methods if include_method(method) %}
         @FastNative
         @JvmName("{{ method.name.camelCase() }}")
-        public external fun {{ method.name.camelCase() }}(
+        {{ kotlin_annotation(kotlin_return(method)) }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
-            {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
+            {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
         {%- endfor -%}): {{ kotlin_declaration(kotlin_return(method)) }}
 
         {% if method.name.chunks[0] == 'get' and not method.arguments %}
