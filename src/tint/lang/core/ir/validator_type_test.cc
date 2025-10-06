@@ -421,6 +421,105 @@ TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithoutCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, StructMember_Pointer) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("p"), ty.ptr<function, i32>(), {}},
+                             });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:6:3 error: var: struct member 0 cannot be a pointer type
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_Pointer_WithCapability) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("p"), ty.ptr<function, i32>(), {}},
+                             });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    Capabilities caps;
+    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+
+    auto res = ir::Validate(mod, caps);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, StructMember_Texture) {
+    auto* str_ty = ty.Struct(
+        mod.symbols.New("MyStruct"),
+        {
+            {mod.symbols.New("t"), ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), {}},
+        });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot be a texture type
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_Texture_WithCapability) {
+    auto* str_ty = ty.Struct(
+        mod.symbols.New("MyStruct"),
+        {
+            {mod.symbols.New("t"), ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), {}},
+        });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    Capabilities caps;
+    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+
+    auto res = ir::Validate(mod, caps);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, StructMember_Sampler) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("s"), ty.sampler(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:6:3 error: var: struct member 0 cannot be a sampler type
+  %1:ptr<private, MyStruct, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, StructMember_Sampler_WithCapability) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("s"), ty.sampler(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    Capabilities caps;
+    caps.Add(Capability::kAllowPointersAndHandlesInStructures);
+
+    auto res = ir::Validate(mod, caps);
+    ASSERT_EQ(res, Success);
+}
+
 TEST_F(IR_ValidatorTest, StructMember_RowMajor_WithCapability) {
     auto* mat_ty = ty.mat2x2<f32>();
     auto* member = ty.Get<core::type::StructMember>(
@@ -1072,7 +1171,7 @@ TEST_F(IR_ValidatorTest, PointerToPointer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("nested pointer types are not permitted"))
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("pointers to pointers are not allowed"))
         << res.Failure();
 }
 
@@ -1123,37 +1222,6 @@ TEST_F(IR_ValidatorTest, ReferenceToVoid) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr("references to void are not permitted"))
         << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, PointerInStructure_WithoutCapability) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("S"), {
-                                            {mod.symbols.New("a"), ty.ptr<private_, i32>()},
-                                        });
-    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
-
-    auto* fn = b.Function("F", ty.void_());
-    b.Append(fn->Block(), [&] { b.Return(fn); });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr("nested pointer types are not permitted"))
-        << res.Failure();
-}
-
-TEST_F(IR_ValidatorTest, PointerInStructure_WithCapability) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("S"), {
-                                            {mod.symbols.New("a"), ty.ptr<private_, i32>()},
-                                        });
-
-    auto* fn = b.Function("F", ty.void_());
-    auto* param = b.FunctionParam("param", str_ty);
-    fn->SetParams({param});
-    b.Append(fn->Block(), [&] { b.Return(fn); });
-
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
-    EXPECT_EQ(res, Success) << res.Failure();
 }
 
 using IR_Validator8BitIntTypeTest = IRTestParamHelper<std::tuple<
