@@ -460,56 +460,13 @@ deps = {
     'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@53a87a3d8cb4c32ec026978ce003020741df6f53',
   },
 
-  # Like the Node dependency, architectures are listed out explicitly instead of
-  # using ${{platform}} because the architecture that these are fetched on
-  # can differ from the architecture that they are ultimately run on.
-  'tools/golang/linux-amd64': {
+  'tools/golang': {
     'packages': [{
-      'package': 'infra/3pp/tools/go/linux-amd64',
+      'package': 'infra/3pp/tools/go/${{platform}}',
       'version': Var('dawn_go_version'),
     }],
     'dep_type': 'cipd',
-    'condition': 'checkout_linux and non_git_source',
-  },
-  'tools/golang/linux-arm64': {
-    'packages': [{
-      'package': 'infra/3pp/tools/go/linux-arm64',
-      'version': Var('dawn_go_version'),
-    }],
-    'dep_type': 'cipd',
-    'condition': 'checkout_linux and non_git_source',
-  },
-  'tools/golang/mac-amd64': {
-    'packages': [{
-      'package': 'infra/3pp/tools/go/mac-amd64',
-      'version': Var('dawn_go_version'),
-    }],
-    'dep_type': 'cipd',
-    'condition': 'checkout_mac and non_git_source',
-  },
-  'tools/golang/mac-arm64': {
-    'packages': [{
-      'package': 'infra/3pp/tools/go/mac-arm64',
-      'version': Var('dawn_go_version'),
-    }],
-    'dep_type': 'cipd',
-    'condition': 'checkout_mac and non_git_source',
-  },
-  'tools/golang/windows-amd64': {
-    'packages': [{
-      'package': 'infra/3pp/tools/go/windows-amd64',
-      'version': Var('dawn_go_version'),
-    }],
-    'dep_type': 'cipd',
-    'condition': 'checkout_win and non_git_source',
-  },
-  'tools/golang/windows-arm64': {
-    'packages': [{
-      'package': 'infra/3pp/tools/go/windows-arm64',
-      'version': Var('dawn_go_version'),
-    }],
-    'dep_type': 'cipd',
-    'condition': 'checkout_win and non_git_source',
+    'condition': 'non_git_source',
   },
 
   'tools/cmake': {

@@ -34,10 +34,9 @@ import sys
 SCRIPT_DIR = os.path.dirname(__file__)
 CMD_DIR = os.path.join(SCRIPT_DIR, 'src', 'cmd')
 DAWN_ROOT = os.path.realpath(os.path.join(SCRIPT_DIR, '..'))
-
-sys.path.insert(0, DAWN_ROOT)
-
-from tools.python import cipd_deps
+GO_BINARY = os.path.join(DAWN_ROOT, 'tools', 'golang', 'bin', 'go')
+if sys.platform == 'win32':
+    GO_BINARY += '.exe'
 
 
 def _get_available_tools() -> list[str]:
@@ -54,13 +53,8 @@ def main() -> int:
         choices=_get_available_tools())
     args, unknown_args = parser.parse_known_args()
 
-    go_binary = os.path.join(DAWN_ROOT, 'tools', 'golang',
-                             cipd_deps.get_cipd_platform(), 'bin', 'go')
-    if sys.platform == 'win32':
-        go_binary += '.exe'
-
     cmd = [
-        go_binary,
+        GO_BINARY,
         'run',
         os.path.join(CMD_DIR, args.tool_name),
     ]

@@ -26,13 +26,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-from tools.python import cipd_deps
-
-
 def go_bin_path(input_api):
-    return input_api.os_path.join(input_api.change.RepositoryRoot(),
-                                  'tools', 'golang',
-                                  cipd_deps.get_cipd_platform(), 'bin')
+    return input_api.os_path.join(input_api.change.RepositoryRoot(), 'tools',
+                                  'golang', 'bin')
 
 
 def go_path(input_api):

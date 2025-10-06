@@ -34,16 +34,50 @@ import sys
 THIS_DIR = os.path.dirname(__file__)
 DAWN_ROOT = os.path.realpath(os.path.join(THIS_DIR, '..', '..'))
 
-sys.path.insert(0, DAWN_ROOT)
-
-from tools.python import cipd_deps
-
 
 @functools.cache
 def get_node_dir() -> str:
     """Retrieves the directory that NodeJS should be available in."""
-    cipd_platform = cipd_deps.get_cipd_platform()
+    cipd_os = get_cipd_compatible_current_os()
+    cipd_arch = get_cipd_compatible_current_arch()
+    cipd_platform = f'{cipd_os}-{cipd_arch}'
     return os.path.join(DAWN_ROOT, 'third_party', 'node', cipd_platform)
+
+
+@functools.cache
+def get_cipd_compatible_current_os() -> str:
+    """Retrieves the current OS name.
+
+    The returned string is compatible with CIPD's package naming scheme.
+    """
+    current_platform = sys.platform
+    if current_platform in ('linux', 'cygwin'):
+        return 'linux'
+    if current_platform == 'win32':
+        return 'windows'
+    if current_platform == 'darwin':
+        return 'mac'
+    raise ValueError(f'Unknown platform {current_platform}')
+
+
+@functools.cache
+def get_cipd_compatible_current_arch() -> str:
+    """Retrieves the current architecture.
+
+    The returned string is compatible with CIPD's package naming scheme.
+    """
+    native_arm = platform.machine().lower() in ('arm', 'arm64')
+    # This is necessary for the case of running x86 Python on arm devices via
+    # an emulator. In this case, platform.machine() will show up as an x86
+    # processor.
+    emulated_x86 = 'armv8' in platform.processor().lower()
+    if native_arm or emulated_x86:
+        return 'arm64'
+
+    native_x86 = platform.machine().lower() in ('x86', 'x86_64', 'amd64')
+    if native_x86:
+        return 'amd64'
+    raise ValueError('Unable to determine architecture')
 
 
 @functools.cache
