@@ -601,7 +601,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/PhysicalDeviceWGPU.h"
         "webgpu/PipelineLayoutWGPU.h"
         "webgpu/QueueWGPU.h"
-        "webgpu/RecordableObject.h",
+        "webgpu/RecordableObject.h"
         "webgpu/RenderPipelineWGPU.h"
         "webgpu/SamplerWGPU.h"
         "webgpu/Serialization.h"
