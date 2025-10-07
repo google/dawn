@@ -175,7 +175,7 @@ ObjectType ComputePassEncoder::GetType() const {
 
 void ComputePassEncoder::APIEnd() {
     if (mEnded && IsValidationEnabled()) {
-        GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
+        GetDevice()->HandleEncoderError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
         return;
     }
 

@@ -87,6 +87,35 @@ void AsyncTask::Run() {
     }
 }
 
+ErrorGeneratingAsyncTask::ErrorGeneratingAsyncTask(std::function<MaybeError()> task)
+    : AsyncTask([this, task] {
+          // Wrap the task which returns a MaybeError in a void function and store the error in a
+          // member.
+          MaybeError taskResult = task();
+          if (taskResult.IsError()) {
+              mErrorData = taskResult.AcquireError();
+          }
+      }) {}
+
+bool ErrorGeneratingAsyncTask::IsSuccess() const {
+    DAWN_ASSERT(GetState() == AsyncTaskState::Completed);
+    return mErrorData == nullptr;
+}
+
+bool ErrorGeneratingAsyncTask::IsError() const {
+    DAWN_ASSERT(GetState() == AsyncTaskState::Completed);
+    return mErrorData != nullptr;
+}
+
+InternalErrorType ErrorGeneratingAsyncTask::GetErrorType() const {
+    return mErrorData ? mErrorData->GetType() : InternalErrorType::None;
+}
+
+std::unique_ptr<ErrorData> ErrorGeneratingAsyncTask::AcquireError() {
+    DAWN_ASSERT(GetState() == AsyncTaskState::Completed);
+    return std::move(mErrorData);
+}
+
 AsyncTaskManager::AsyncTaskManager(dawn::platform::WorkerTaskPool* workerTaskPool)
     : mWorkerTaskPool(workerTaskPool) {}
 

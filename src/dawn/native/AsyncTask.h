@@ -39,6 +39,7 @@
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
+#include "dawn/native/Error.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::platform {
@@ -90,6 +91,19 @@ class AsyncTask : public RefCounted {
     // Hold onto the waitable platform event until the task has completed. Released before the
     // destruction of the AsyncTask to be as light weight as possible.
     std::unique_ptr<dawn::platform::WaitableEvent> mWaitableEvent;
+};
+
+class ErrorGeneratingAsyncTask : public AsyncTask {
+  public:
+    explicit ErrorGeneratingAsyncTask(std::function<MaybeError()> task);
+
+    bool IsSuccess() const;
+    bool IsError() const;
+    InternalErrorType GetErrorType() const;
+    std::unique_ptr<ErrorData> AcquireError();
+
+  private:
+    std::unique_ptr<ErrorData> mErrorData;
 };
 
 class AsyncTaskManager {
