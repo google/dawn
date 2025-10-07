@@ -37,3 +37,21 @@ public fun interface {{ function_pointer.name.CamelCase() }} {
         {{ kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},{{ ' ' }}
     {%- endfor -%});
 }
+
+{% set args_list = kotlin_record_members(function_pointer.arguments) | list %}
+
+internal class {{ function_pointer.name.CamelCase() }}Runnable(
+private val callback: {{ function_pointer.name.CamelCase() }},
+{% for arg in args_list %}
+    private val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }}{{ ','
+    if not loop.last }}
+{% endfor %}
+) : Runnable {
+    override fun run() {
+        callback.{{ callbackName }}(
+            {%- for arg in args_list -%}
+            {{ as_varName(arg.name) }}{{ ', ' if not loop.last }}
+            {%- endfor -%}
+        )
+    }
+}

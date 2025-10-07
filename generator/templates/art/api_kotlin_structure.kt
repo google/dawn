@@ -27,8 +27,16 @@
 package {{ kotlin_package }}
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_definition with context %}
 
+{% for member in kotlin_record_members(structure.members) %}
+    import java.util.concurrent.Executor
+    {% break %}
+{% endfor %}
+
 public class {{ structure.name.CamelCase() }}(
     {% for member in kotlin_record_members(structure.members) %}
+        {% if member.type.category in ['callback function']%}
+            public var executor: Executor? = Executor(Runnable::run),
+        {% endif %}
         {{ kotlin_annotation(member) }} public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
     {% for structure in chain_children[structure.name.get()] %}
