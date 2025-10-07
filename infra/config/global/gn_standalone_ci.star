@@ -336,9 +336,11 @@ ci.builder(
     ),
     gn_args = gn_args.config(
         configs = [
-            "component",
+            # Component builds cause compile failures for the `default` target
+            # with MSVC, so use non_component. See crbug.com/449779009.
             "dawn_node_bindings",
             "dawn_swiftshader",
+            "non_component",
             "release",
             "win_msvc",
             "x64",
