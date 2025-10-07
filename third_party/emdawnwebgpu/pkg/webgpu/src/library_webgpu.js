@@ -15,14 +15,17 @@
 
   // Helper functions for code generation
   globalThis.gpu = {
-    convertSentinelToUndefined: function(name, argIsSizeT) {
+    convertSentinelToUndefined: function(name, type) {
       // The sentinel value SIZE_MAX is passed as a "p" (pointer) arg, so it comes through as
       // either `0xFFFFFFFF` or `-1` depending on whether `CAN_ADDRESS_2GB` is enabled.
-      if (CAN_ADDRESS_2GB && argIsSizeT) {
-        // Note CAN_ADDRESS_2GB is always false for MEMORY64 builds.
+      if (type === '*') type = MEMORY64 ? 'i53' : CAN_ADDRESS_2GB ? 'u32' : 'i32';
+
+      if (type === 'u32') {
         return `if (${name} == 0xFFFFFFFF) ${name} = undefined;`;
-      } else {
+      } else if (type === 'i32' || type === 'i53') {
         return `if (${name} == -1) ${name} = undefined;`;
+      } else {
+        throw new Error('type not supported: ' + type);
       }
     },
 
@@ -960,7 +963,7 @@ var LibraryWebGPU = {
 
     if (size === 0) warnOnce('getMappedRange size=0 no longer means WGPU_WHOLE_MAP_SIZE');
 
-    {{{ gpu.convertSentinelToUndefined('size', true) }}}
+    {{{ gpu.convertSentinelToUndefined('size', '*') }}}
 
     var mapped;
     try {
@@ -984,7 +987,7 @@ var LibraryWebGPU = {
 
     if (size === 0) warnOnce('getMappedRange size=0 no longer means WGPU_WHOLE_MAP_SIZE');
 
-    {{{ gpu.convertSentinelToUndefined('size', true) }}}
+    {{{ gpu.convertSentinelToUndefined('size', '*') }}}
 
     var mapped;
     try {
@@ -1056,7 +1059,7 @@ var LibraryWebGPU = {
     var buffer = WebGPU.getJsObject(bufferPtr);
     WebGPU.Internals.bufferOnUnmaps[bufferPtr] = [];
 
-    {{{ gpu.convertSentinelToUndefined('size', true) }}}
+    {{{ gpu.convertSentinelToUndefined('size', '*') }}}
 
     {{{ runtimeKeepalivePush() }}} // mapAsync
     WebGPU.Internals.futureInsert(futureId, buffer.mapAsync(mode, offset, size).then(() => {
@@ -1138,7 +1141,7 @@ var LibraryWebGPU = {
       }
 
       var depthSlice = {{{ makeGetValue('caPtr', C_STRUCTS.WGPURenderPassColorAttachment.depthSlice, 'i32') }}};
-      {{{ gpu.convertSentinelToUndefined('depthSlice') }}}
+      {{{ gpu.convertSentinelToUndefined('depthSlice', 'i32') }}}
 
       var loadOpInt = {{{ makeGetValue('caPtr', C_STRUCTS.WGPURenderPassColorAttachment.loadOp, 'u32') }}};
 #if ASSERTIONS
@@ -1231,7 +1234,7 @@ var LibraryWebGPU = {
 
   wgpuCommandEncoderClearBuffer: (encoderPtr, bufferPtr, offset, size) => {
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
 
     var buffer = WebGPU.getJsObject(bufferPtr);
     commandEncoder.clearBuffer(buffer, offset, size);
@@ -1403,7 +1406,7 @@ var LibraryWebGPU = {
 
       if (bufferPtr) {
         var size = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUBindGroupEntry.size, 'i53') }}};
-        {{{ gpu.convertSentinelToUndefined('size') }}}
+        {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
 
         return {
           "binding": binding,
@@ -2213,7 +2216,7 @@ var LibraryWebGPU = {
   wgpuRenderBundleEncoderSetIndexBuffer: (passPtr, bufferPtr, format, offset, size) => {
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
     pass.setIndexBuffer(buffer, WebGPU.IndexFormat[format], offset, size);
   },
 
@@ -2227,7 +2230,7 @@ var LibraryWebGPU = {
     {{{ gpu.convertToU31('slot') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
     pass.setVertexBuffer(slot, buffer, offset, size);
   },
 
@@ -2344,7 +2347,7 @@ var LibraryWebGPU = {
   wgpuRenderPassEncoderSetIndexBuffer: (passPtr, bufferPtr, format, offset, size) => {
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
     pass.setIndexBuffer(buffer, WebGPU.IndexFormat[format], offset, size);
   },
 
@@ -2373,7 +2376,7 @@ var LibraryWebGPU = {
     {{{ gpu.convertToU31('slot') }}}
     var pass = WebGPU.getJsObject(passPtr);
     var buffer = WebGPU.getJsObject(bufferPtr);
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', 'i53') }}}
     pass.setVertexBuffer(slot, buffer, offset, size);
   },
 
