@@ -22,7 +22,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_ir_fuzzer_corpus_tests",
+        "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -47,7 +47,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_wgsl_fuzzer_corpus_tests",
+        "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -77,7 +77,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_ir_fuzzer_corpus_tests",
+        "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -102,7 +102,119 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_wgsl_fuzzer_corpus_tests",
+        "name": "tint_wgsl_fuzzer_corpus_check_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "fuzzer_corpus_tests",
+        "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
+      }
+    ]
+  },
+  "dawn-linux-x64-sws-clusterfuzz": {
+    "gtest_tests": [
+      {
+        "args": [
+          "--adapter-vendor-id=0x1AE0",
+          "--use-wire",
+          "--wire-trace-dir=${ISOLATED_OUTDIR}"
+        ],
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "dawn_wire_trace_end2end_sws_tests",
+        "resultdb": {
+          "result_format": "gtest_json"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "dawn_end2end_tests",
+        "test_id_prefix": "ninja://src/dawn/tests:dawn_end2end_tests/"
+      },
+      {
+        "args": [
+          "--use-wire",
+          "--wire-trace-dir=${ISOLATED_OUTDIR}"
+        ],
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "dawn_wire_trace_unittests",
+        "resultdb": {
+          "result_format": "gtest_json"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "dawn_unittests",
+        "test_id_prefix": "ninja://src/dawn/tests:dawn_unittests/"
+      }
+    ],
+    "isolated_scripts": [
+      {
+        "args": [
+          "-generate",
+          "-out",
+          "${ISOLATED_OUTDIR}",
+          "-ir",
+          "--append-cwd-as-build"
+        ],
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_ir_fuzzer_corpus_generate_tests",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "fuzzer_corpus_tests",
+        "test_id_prefix": "ninja://src/tint:fuzzer_corpus_tests/"
+      },
+      {
+        "args": [
+          "-generate",
+          "-out",
+          "${ISOLATED_OUTDIR}",
+          "--append-cwd-as-build"
+        ],
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_wgsl_fuzzer_corpus_generate_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -446,7 +558,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_ir_fuzzer_corpus_tests",
+        "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -471,7 +583,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_wgsl_fuzzer_corpus_tests",
+        "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -501,7 +613,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_ir_fuzzer_corpus_tests",
+        "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },
@@ -526,7 +638,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
-        "name": "tint_wgsl_fuzzer_corpus_tests",
+        "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
         },

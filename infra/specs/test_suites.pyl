@@ -17,6 +17,20 @@
         'test': 'dawn_end2end_tests',
       },
     },
+    'dawn_wire_trace_end2end_sws_gtests': {
+      'dawn_wire_trace_end2end_sws_tests': {
+        'args': [
+          '--adapter-vendor-id=0x1AE0',
+          '--use-wire',
+          '--wire-trace-dir=${ISOLATED_OUTDIR}',
+        ],
+        'mixins': [
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+      },
+    },
     'dawn_end2end_sws_gtests': {
       'dawn_end2end_sws_tests': {
         'args': [
@@ -84,6 +98,19 @@
         ],
       },
     },
+    'dawn_wire_trace_unit_gtests': {
+      'dawn_wire_trace_unittests': {
+        'args': [
+          '--use-wire',
+          '--wire-trace-dir=${ISOLATED_OUTDIR}',
+        ],
+        'mixins': [
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_unittests',
+      },
+    },
     'dawn_wire_unit_gtests': {
       'dawn_wire_unittests': {
         'args': [
@@ -96,8 +123,8 @@
         'test': 'dawn_unittests',
       },
     },
-    'tint_fuzzer_corpus_tests': {
-      'tint_wgsl_fuzzer_corpus_tests': {
+    'tint_fuzzer_corpus_check_tests': {
+      'tint_wgsl_fuzzer_corpus_check_tests': {
         'args': [
           '-check',
           '--append-cwd-as-build',
@@ -108,9 +135,38 @@
         ],
         'test': 'fuzzer_corpus_tests',
       },
-      'tint_ir_fuzzer_corpus_tests': {
+      'tint_ir_fuzzer_corpus_check_tests': {
         'args': [
           '-check',
+          '-ir',
+          '--append-cwd-as-build',
+        ],
+        'mixins': [
+          'result_adapter_single',
+          'true_noop_merge',
+        ],
+        'test': 'fuzzer_corpus_tests',
+      },
+    },
+    'tint_fuzzer_corpus_generate_tests': {
+      'tint_wgsl_fuzzer_corpus_generate_tests': {
+        'args': [
+          '-generate',
+          '-out',
+          '${ISOLATED_OUTDIR}',
+          '--append-cwd-as-build',
+        ],
+        'mixins': [
+          'result_adapter_single',
+          'true_noop_merge',
+        ],
+        'test': 'fuzzer_corpus_tests',
+      },
+      'tint_ir_fuzzer_corpus_generate_tests': {
+        'args': [
+          '-generate',
+          '-out',
+          '${ISOLATED_OUTDIR}',
           '-ir',
           '--append-cwd-as-build',
         ],
@@ -146,6 +202,10 @@
       'dawn_unit_gtests',
       'dawn_wire_unit_gtests',
       'tint_unit_gtests',
+    ],
+    'wire_trace_gtests': [
+      'dawn_wire_trace_end2end_sws_gtests',
+      'dawn_wire_trace_unit_gtests',
     ],
   },
 }

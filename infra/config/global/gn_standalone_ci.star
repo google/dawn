@@ -601,6 +601,42 @@ ci.builder(
     ),
 )
 
+ci.builder(
+    name = "dawn-linux-x64-sws-clusterfuzz",
+    description_html = "Generates ClusterFuzz corpora using Linux/x64 binaries and data from running with SwiftShader",
+    # Run daily at 5PM Pacific.
+    schedule = "0 0 * * *",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "component",
+            "dawn_swiftshader",
+            "linux_clang",
+            "release",
+            "tint_build_ir_binary",
+            "tint_has_fuzzers",
+            "x64",
+        ],
+    ),
+    cores = 8,
+    os = os.LINUX_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|build|clang|rel|cf",
+        short_name = "x64",
+    ),
+)
+
 ################################################################################
 # Child Testers                                                                #
 ################################################################################
