@@ -2061,7 +2061,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_1D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:f32):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 1d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_sample_implicit_lod %5, %coords, 0u
     ret %6
   }
@@ -2101,7 +2101,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_sample_implicit_lod %5, %coords, 0u
     ret %6
   }
@@ -2142,7 +2142,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_sample_implicit_lod %5, %coords, 8u, vec2<i32>(1i)
     ret %6
   }
@@ -2185,7 +2185,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = convert %array_idx
     %8:vec3<f32> = construct %coords, %7
     %9:vec4<f32> = spirv.image_sample_implicit_lod %6, %8, 8u, vec2<i32>(1i)
@@ -2229,7 +2229,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %bias:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_sample_implicit_lod %6, %coords, 1u, %bias
     ret %7
   }
@@ -2271,7 +2271,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %bias:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_sample_implicit_lod %6, %coords, 9u, %bias, vec2<i32>(1i)
     ret %7
   }
@@ -2315,7 +2315,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %bias:f32):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
     %10:vec4<f32> = spirv.image_sample_implicit_lod %7, %9, 9u, %bias, vec2<i32>(1i)
@@ -2358,7 +2358,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 0u
     ret %7
   }
@@ -2399,7 +2399,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 8u, vec2<i32>(1i)
     ret %7
   }
@@ -2442,7 +2442,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
     %10:f32 = spirv.image_sample_dref_implicit_lod %7, %9, %bias, 8u, vec2<i32>(1i)
@@ -2486,7 +2486,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = spirv.image_sample_dref_explicit_lod %6, %coords, %dref, 2u, 0.0f
     ret %7
   }
@@ -2528,7 +2528,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = spirv.image_sample_dref_explicit_lod %6, %coords, %dref, 10u, 0.0f, vec2<i32>(1i)
     ret %7
   }
@@ -2571,7 +2571,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
     %10:f32 = spirv.image_sample_dref_explicit_lod %7, %9, %bias, 10u, 0.0f, vec2<i32>(1i)
@@ -2616,7 +2616,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:vec4<f32> = spirv.image_sample_explicit_lod %7, %coords, 4u, %ddx, %ddy
     ret %8
   }
@@ -2659,7 +2659,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:vec4<f32> = spirv.image_sample_explicit_lod %7, %coords, 12u, %ddx, %ddy, vec2<i32>(1i)
     ret %8
   }
@@ -2704,7 +2704,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> {
   $B1: {
-    %8:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %8:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %9:f32 = convert %array_idx
     %10:vec3<f32> = construct %coords, %9
     %11:vec4<f32> = spirv.image_sample_explicit_lod %8, %10, 12u, %ddx, %ddy, vec2<i32>(1i)
@@ -2748,7 +2748,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %lod:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_sample_explicit_lod %6, %coords, 2u, %lod
     ret %7
   }
@@ -2790,7 +2790,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %lod:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_sample_explicit_lod %6, %coords, 10u, %lod, vec2<i32>(1i)
     ret %7
   }
@@ -2834,7 +2834,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %lod:f32):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
     %10:vec4<f32> = spirv.image_sample_explicit_lod %7, %9, 10u, %lod, vec2<i32>(1i)
@@ -2878,7 +2878,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_gather %5, %coords, 1i, 0u
     ret %6
   }
@@ -2920,7 +2920,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_gather %5, %coords, 1i, 8u, vec2<i32>(1i)
     ret %6
   }
@@ -2964,7 +2964,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>, %array_idx:i32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, not_depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:f32 = convert %array_idx
     %8:vec3<f32> = construct %coords, %7
     %9:vec4<f32> = spirv.image_gather %6, %8, 1i, 8u, vec2<i32>(1i)
@@ -3006,7 +3006,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler, %coords:vec2<f32>):vec4<f32> {
   $B1: {
-    %5:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %5:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %6:vec4<f32> = spirv.image_gather %5, %coords, 0u, 0u
     ret %6
   }
@@ -3048,7 +3048,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 0u
     ret %7
   }
@@ -3090,7 +3090,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> {
   $B1: {
-    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %6:spirv.sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, non_arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 8u, vec2<i32>(1i)
     ret %7
   }
@@ -3133,7 +3133,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     auto* expect = R"(
 %foo = func(%t:spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> {
   $B1: {
-    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
+    %7:spirv.sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> = spirv.op_sampled_image<spirv.image<f32, 2d, depth, arrayed, single_sampled, sampling_compatible, undefined, read_write>> %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
     %10:vec4<f32> = spirv.image_dref_gather %7, %9, %depth, 0u

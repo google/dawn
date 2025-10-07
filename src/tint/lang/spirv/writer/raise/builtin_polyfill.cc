@@ -688,7 +688,7 @@ struct State {
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kSampledImage,
+            ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kOpSampledImage,
             Vector{texture_ty}, Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
@@ -793,7 +793,7 @@ struct State {
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image = b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kSampledImage,
+            ty.Get<type::SampledImage>(texture_ty), spirv::BuiltinFn::kOpSampledImage,
             Vector{texture_ty}, Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 

@@ -2998,7 +2998,7 @@ class Parser {
     void EmitImage(const spvtools::opt::Instruction& inst) {
         auto* si = Value(inst.GetSingleWordInOperand(0));
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(
-                 Type(inst.type_id()), spirv::BuiltinFn::kImage,
+                 Type(inst.type_id()), spirv::BuiltinFn::kOpImage,
                  Vector{si->Type()->As<spirv::type::SampledImage>()->Image()}, Args(inst, 2)),
              inst.result_id());
     }
@@ -3012,7 +3012,7 @@ class Parser {
                 << "Creating an OpTypeSampledImage from a multisampled image is not supported";
         }
         Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(Type(inst.type_id()),
-                                                     spirv::BuiltinFn::kSampledImage,
+                                                     spirv::BuiltinFn::kOpSampledImage,
                                                      Vector{tex->Type()}, Args(inst, 2)),
              inst.result_id());
     }

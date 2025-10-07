@@ -112,10 +112,10 @@ const char* str(BuiltinFn i) {
             return "image_sample_dref_explicit_lod";
         case BuiltinFn::kImageWrite:
             return "image_write";
-        case BuiltinFn::kImage:
-            return "image";
-        case BuiltinFn::kSampledImage:
-            return "sampled_image";
+        case BuiltinFn::kOpImage:
+            return "op_image";
+        case BuiltinFn::kOpSampledImage:
+            return "op_sampled_image";
         case BuiltinFn::kMatrixTimesMatrix:
             return "matrix_times_matrix";
         case BuiltinFn::kMatrixTimesScalar:
@@ -279,8 +279,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kImageSampleDrefExplicitLod:
         case BuiltinFn::kImageSampleProjDrefImplicitLod:
         case BuiltinFn::kImageSampleProjDrefExplicitLod:
-        case BuiltinFn::kImage:
-        case BuiltinFn::kSampledImage:
+        case BuiltinFn::kOpImage:
+        case BuiltinFn::kOpSampledImage:
         case BuiltinFn::kCooperativeMatrixLoad:
             return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
 

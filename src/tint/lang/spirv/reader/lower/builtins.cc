@@ -265,8 +265,8 @@ struct State {
                 case spirv::BuiltinFn::kAtomicIDecrement:
                     // Ignore Atomics, they'll be handled by the `Atomics` transform.
                     break;
-                case spirv::BuiltinFn::kImage:
-                case spirv::BuiltinFn::kSampledImage:
+                case spirv::BuiltinFn::kOpImage:
+                case spirv::BuiltinFn::kOpSampledImage:
                 case spirv::BuiltinFn::kImageRead:
                 case spirv::BuiltinFn::kImageFetch:
                 case spirv::BuiltinFn::kImageGather:

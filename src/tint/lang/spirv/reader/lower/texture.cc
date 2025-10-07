@@ -131,7 +131,7 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
-                    case spirv::BuiltinFn::kSampledImage:
+                    case spirv::BuiltinFn::kOpSampledImage:
                         SampledImage(builtin);
                         break;
                     case spirv::BuiltinFn::kImageDrefGather:
@@ -181,7 +181,7 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<spirv::ir::BuiltinCall>()) {
                 switch (builtin->Func()) {
-                    case spirv::BuiltinFn::kSampledImage:
+                    case spirv::BuiltinFn::kOpSampledImage:
                         // Note, we _also_ do this here even though it was done above. The one above
                         // registers for the depth functions, but, we may have forked functions in
                         // the `UpdateValues` when it does the `ConvertUserCalls`. This would then
@@ -189,7 +189,7 @@ struct State {
                         // worse case, we just write the same data twice.
                         SampledImage(builtin);
                         break;
-                    case spirv::BuiltinFn::kImage:
+                    case spirv::BuiltinFn::kOpImage:
                     case spirv::BuiltinFn::kImageRead:
                     case spirv::BuiltinFn::kImageFetch:
                     case spirv::BuiltinFn::kImageGather:
@@ -212,7 +212,7 @@ struct State {
 
         for (auto* builtin : builtin_worklist) {
             switch (builtin->Func()) {
-                case spirv::BuiltinFn::kImage:
+                case spirv::BuiltinFn::kOpImage:
                     Image(builtin);
                     break;
                 case spirv::BuiltinFn::kImageRead:
