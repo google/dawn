@@ -1856,6 +1856,11 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (inst->Is<core::ir::ControlInstruction>() && result->Type()->Is<core::type::Pointer>()) {
+        AddResultError(inst, idx) << "result type cannot be a pointer";
+        return false;
+    }
+
     return true;
 }
 

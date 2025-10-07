@@ -2271,4 +2271,22 @@ TEST_F(IR_ValidatorTest, Switch_CaseMultiBlock) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Loop_PtrResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->SetResults(b.InstructionResult(ty.ptr(function, ty.f32())));
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: loop: result type cannot be a pointer
+    %2:ptr<function, f32, read_write> = loop [b: $B2] {  # loop_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 }  // namespace tint::core::ir
