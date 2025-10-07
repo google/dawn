@@ -381,7 +381,7 @@
     "buffer binding type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "binding not used"},
+            {"value": 0, "name": "binding not used", "jsrepr": "undefined"},
             {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 2, "name": "uniform"},
             {"value": 3, "name": "storage"},
@@ -401,7 +401,7 @@
     "sampler binding type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "binding not used"},
+            {"value": 0, "name": "binding not used", "jsrepr": "undefined"},
             {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 2, "name": "filtering"},
             {"value": 3, "name": "non filtering"},
@@ -428,7 +428,7 @@
     "texture sample type": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "binding not used"},
+            {"value": 0, "name": "binding not used", "jsrepr": "undefined"},
             {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 2, "name": "float"},
             {"value": 3, "name": "unfilterable float"},
@@ -505,7 +505,7 @@
     "storage texture access": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "binding not used"},
+            {"value": 0, "name": "binding not used", "jsrepr": "undefined"},
             {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 2, "name": "write only"},
             {"value": 3, "name": "read only"},

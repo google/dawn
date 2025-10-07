@@ -90,8 +90,8 @@ list is a best effort to enumerate them, but definitely isn't complete.
 - In package build:
   - `tools/gen_struct_info.py`
 - In `library_webgpu.js`:
-  - Various items from `parseTools`
-    - `i53abi`
+  - Various items from `parseTools` and `jsifier`
+    - `*__i53abi: true`
     - `makeGetValue`
     - `runtimeKeepalivePush`/`runtimeKeepalivePop`
   - Public settings:
@@ -108,7 +108,7 @@ list is a best effort to enumerate them, but definitely isn't complete.
     - `stringToUTF8OnStack`, `UTF8ToString`, `stringToNewUTF8`, `lengthBytesUTF8`
     - `callUserCallback`
     - `warnOnce`
-    - `readI53FromI64`
+    - `readI53FromI64`/`writeI53ToI64`
     - `findCanvasEventTarget`
 - In `webgpu.cpp`:
   - Public APIs:
