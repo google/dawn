@@ -43,7 +43,22 @@ dawn_node_api_headers_dir = "$dawn_root/third_party/node-api-headers"
 dawn_webgpu_idl_path = "$dawn_root/third_party/gpuweb/webgpu.idl"
 
 # Golang executable for running the IDL generator
-dawn_go_executable = "$dawn_root/tools/golang/bin/go${_exe}"
+_cipd_os = ""
+_cipd_arch = ""
+if (host_os == "linux") {
+  _cipd_os = "linux"
+} else if (host_os == "mac") {
+  _cipd_os = "mac"
+} else if (host_os == "win") {
+  _cipd_os = "windows"
+}
+if (host_cpu == "x64") {
+  _cipd_arch = "amd64"
+} else if (host_cpu == "arm64") {
+  _cipd_arch = "arm64"
+}
+dawn_go_executable =
+    "$dawn_root/tools/golang/${_cipd_os}-${_cipd_arch}/bin/go${_exe}"
 
 # TODO(amaiorano): Figure out why path_exists doesn't work
 # assert(path_exists(dawn_node_addon_api_dir) && path_exists(dawn_node_api_headers_dir) && path_exists(dawn_webgpu_idl_path), "dawn_build_node_bindings missing dependencies. Please follow the 'Fetch dependencies' instructions at: ./src/dawn/node/README.md")
@@ -69,6 +84,13 @@ template("idlgen") {
   assert(defined(invoker.idls), "must set 'idls'")
 
   action(target_name) {
+    assert(
+        _cipd_os != "",
+        "Tried to build on an unsupported OS. Allowlist may need to be updated")
+    assert(
+        _cipd_arch != "",
+        "Tried to build on an unsupported architecture. Allowlist may need to be updated")
+
     idlgen_tool_dir = "$dawn_root/tools/src/cmd/idlgen"
     inputs = [
                "$idlgen_tool_dir/main.go",
