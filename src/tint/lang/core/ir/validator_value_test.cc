@@ -1030,9 +1030,9 @@ TEST_F(IR_ValidatorTest, Let_VoidResultWithCapability) {
     auto res = ir::Validate(mod, Capabilities{ir::Capability::kAllowAnyLetType});
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:3:15 error: let: result type cannot be void
+                                          R"(:3:5 error: let: result type cannot be void
     %2:void = let 1i
-              ^^^
+    ^^^^^^^
 )")) << res.Failure();
 }
 
@@ -1046,12 +1046,10 @@ TEST_F(IR_ValidatorTest, Let_VoidResultWithoutCapability) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:3:15 error: let: result type, 'void', must be concrete constructible type or a pointer type
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:3:5 error: let: result type cannot be void
     %2:void = let 1i
-              ^^^
+    ^^^^^^^
 )")) << res.Failure();
 }
 

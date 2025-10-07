@@ -1861,6 +1861,11 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (!inst->Is<core::ir::Call>() && result->Type()->Is<core::type::Void>()) {
+        AddResultError(inst, idx) << "result type cannot be void";
+        return false;
+    }
+
     return true;
 }
 
@@ -3487,11 +3492,7 @@ void Validator::CheckLet(const Let* l) {
     }
 
     auto* result_ty = l->Result()->Type();
-    if (capabilities_.Contains(Capability::kAllowAnyLetType)) {
-        if (result_ty->Is<core::type::Void>()) {
-            AddError(l) << "result type cannot be void";
-        }
-    } else {
+    if (!capabilities_.Contains(Capability::kAllowAnyLetType)) {
         if (!result_ty->IsConstructible() && !result_ty->Is<core::type::Pointer>()) {
             AddError(l) << "result type, " << NameOf(result_ty)
                         << ", must be concrete constructible type or a pointer type";
