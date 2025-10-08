@@ -638,6 +638,7 @@ ci.builder(
     description_html = "Generates ClusterFuzz corpora using Linux/x64 binaries and data from running with SwiftShader",
     # Run daily at 5PM Pacific.
     schedule = "0 0 * * *",
+    triggered_by = [],
     builder_spec = builder_config.builder_spec(
         gclient_config = builder_config.gclient_config(
             config = "dawn",
