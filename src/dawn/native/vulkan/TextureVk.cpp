@@ -2175,7 +2175,7 @@ VkImageViewCreateInfo TextureView::GetCreateInfo(wgpu::TextureFormat format,
         isDepthOrStencilFormat ? kR001Swizzle : kRGBASwizzle;
 
     auto swizzle = ComposeSwizzle(kDefaultSwizzle, GetSwizzle());
-    if (AreSwizzleEquivalent(swizzle, kDefaultSwizzle)) {
+    if (swizzle == kDefaultSwizzle) {
         // We must use identity swizzle for render views.
         // https://docs.vulkan.org/spec/latest/chapters/renderpass.html#VUID-VkFramebufferCreateInfo-pAttachments-00884
         createInfo.components = VkComponentMapping{VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G,

@@ -76,11 +76,11 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension, uint3
     }
 }
 
+// Note this only applies to Desktop OpenGL (texture views don't exist in GLES).
+// In compatibility mode, validation should mean we never need texture views.
 bool RequiresCreatingNewTextureView(
     const TextureBase* texture,
     const UnpackedPtr<TextureViewDescriptor>& textureViewDescriptor) {
-    // Compatibility mode validation should prevent the need for creation of
-    // new texture views.
     if (ToBackend(texture->GetDevice())->IsCompatibilityMode()) {
         return false;
     }
@@ -125,13 +125,12 @@ bool RequiresCreatingNewTextureView(
         return true;
     }
 
-    // TODO(414312052): We're doing a simple check against the default kRGBASwizzle, even though a
-    // more rigorous check against the implicitly inherited swizzle would be technically better.
-    // We're deferring that complexity because the simple check is "good enough" for now, and the
-    // issue is minimal (only affecting Desktop GL).
+    // Note: For formats with <4 channels, this could be refined to consider that some channels are
+    // nonexistent. We don't bother to optimize that, because such swizzles are not actually useful.
+    // (Also, this code is only reached on Desktop GL anyway.)
     if (auto* swizzleDesc = textureViewDescriptor.Get<TextureComponentSwizzleDescriptor>()) {
         auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
-        if (!AreSwizzleEquivalent(*ToCppAPI(&swizzle), kRGBASwizzle)) {
+        if (*ToCppAPI(&swizzle) != kRGBASwizzle) {
             return true;
         }
     }

@@ -78,9 +78,6 @@ bool IsValidSampleCount(uint32_t sampleCount);
 wgpu::TextureComponentSwizzle ComposeSwizzle(wgpu::TextureComponentSwizzle firstSwizzle,
                                              wgpu::TextureComponentSwizzle secondSwizzle);
 
-// Checks if two swizzles are functionally identical.
-bool AreSwizzleEquivalent(wgpu::TextureComponentSwizzle lhs, wgpu::TextureComponentSwizzle rhs);
-
 // The default swizzle as defined by the WebGPU specification.
 static constexpr wgpu::TextureComponentSwizzle kRGBASwizzle = {
     wgpu::ComponentSwizzle::R,

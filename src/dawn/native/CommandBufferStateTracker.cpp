@@ -270,8 +270,6 @@ Return FindStorageBufferBindingAliasing(const PipelineLayoutBase* pipelineLayout
 
 bool TextureViewsMatch(const TextureViewBase* a, const TextureViewBase* b) {
     DAWN_ASSERT(a->GetTexture() == b->GetTexture());
-    auto swizzleA = a->GetSwizzle();
-    auto swizzleB = b->GetSwizzle();
     // If the texture format is multiplanar, the view formats are permitted to differ (e.g., R8
     // and RG8), referring to different planes of the same YUV texture. This cannot happen in
     // OpenGL that actually needs the validation of texture views matching so it's safe for
@@ -283,8 +281,7 @@ bool TextureViewsMatch(const TextureViewBase* a, const TextureViewBase* b) {
            a->GetDimension() == b->GetDimension() && a->GetBaseMipLevel() == b->GetBaseMipLevel() &&
            a->GetLevelCount() == b->GetLevelCount() &&
            a->GetBaseArrayLayer() == b->GetBaseArrayLayer() &&
-           a->GetLayerCount() == b->GetLayerCount() && swizzleA.r == swizzleB.r &&
-           swizzleA.g == swizzleB.g && swizzleA.b == swizzleB.b && swizzleA.a == swizzleB.a;
+           a->GetLayerCount() == b->GetLayerCount() && a->GetSwizzle() == b->GetSwizzle();
 }
 
 using VectorOfTextureViews = absl::InlinedVector<const TextureViewBase*, 8>;
