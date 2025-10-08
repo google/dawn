@@ -328,7 +328,7 @@ class Impl {
         Vector<core::ir::FunctionParam*, 1> params;
         for (auto* p : ast_func->params) {
             const auto* param_sem = program_.Sem().Get(p)->As<sem::Parameter>();
-            auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
+            auto* ty = RemapOverrideSizedArrayIfNeeded(param_sem->Type());
             auto* param = builder_.FunctionParam(p->name->symbol.NameView(), ty);
 
             for (auto* attr : p->attributes) {
@@ -1228,35 +1228,7 @@ class Impl {
             var,
             [&](const ast::Var* v) {
                 auto* ref = sem->Type()->As<core::type::Reference>();
-                const core::type::Type* store_ty = nullptr;
-
-                const auto* ary = ref->StoreType()->As<core::type::Array>();
-                // If the array has an override count
-                if (ary && !ary->Count()
-                                ->IsAnyOf<core::type::RuntimeArrayCount,
-                                          core::type::ConstantArrayCount>()) {
-                    core::ir::Value* count = tint::Switch(
-                        ary->Count(),  //
-                        [&](const sem::UnnamedOverrideArrayCount* u) {
-                            return EmitValueExpression(u->expr->Declaration());
-                        },
-                        [&](const sem::NamedOverrideArrayCount* n) {
-                            return scopes_.Get(n->variable->Declaration()->name->symbol);
-                        },
-                        TINT_ICE_ON_NO_MATCH);
-
-                    if (!count) {
-                        return;
-                    }
-
-                    auto* ary_count =
-                        builder_.ir.Types().Get<core::ir::type::ValueArrayCount>(count);
-                    store_ty = builder_.ir.Types().Get<core::type::Array>(
-                        ary->ElemType()->Clone(clone_ctx_.type_ctx), ary_count, ary->Size());
-                } else {
-                    store_ty = ref->StoreType()->Clone(clone_ctx_.type_ctx);
-                }
-
+                auto* store_ty = RemapOverrideSizedArrayIfNeeded(ref->StoreType());
                 auto* ty = builder_.ir.Types().Get<core::type::Pointer>(ref->AddressSpace(),
                                                                         store_ty, ref->Access());
 
@@ -1374,6 +1346,38 @@ class Impl {
                 TINT_ICE() << "short circuit op should have already been handled";
         }
         TINT_UNREACHABLE();
+    }
+
+    const core::type::Type* RemapOverrideSizedArrayIfNeeded(const core::type::Type* ty) {
+        // Check that we have an override-sized array, or a pointer to one.
+        const auto* ary = ty->UnwrapPtr()->As<core::type::Array>();
+        if (!ary ||
+            !ary->Count()
+                 ->IsAnyOf<sem::NamedOverrideArrayCount, sem::UnnamedOverrideArrayCount>()) {
+            return ty->Clone(clone_ctx_.type_ctx);
+        }
+
+        // If the array has an override count, we need to remap it to a value array count.
+        core::ir::Value* count = tint::Switch(
+            ary->Count(),  //
+            [&](const sem::UnnamedOverrideArrayCount* u) {
+                return EmitValueExpression(u->expr->Declaration());
+            },
+            [&](const sem::NamedOverrideArrayCount* n) {
+                return scopes_.Get(n->variable->Declaration()->name->symbol);
+            },
+            TINT_ICE_ON_NO_MATCH);
+
+        auto* ary_count = builder_.ir.Types().Get<core::ir::type::ValueArrayCount>(count);
+        const core::type::Type* remapped_ty = builder_.ir.Types().Get<core::type::Array>(
+            ary->ElemType()->Clone(clone_ctx_.type_ctx), ary_count, ary->Size());
+
+        // If the original type was a pointer, wrap the remapped array in a pointer too.
+        if (auto* ptr = ty->As<core::type::Pointer>()) {
+            remapped_ty = builder_.ir.Types().ptr(ptr->AddressSpace(), remapped_ty, ptr->Access());
+        }
+
+        return remapped_ty;
     }
 };
 

@@ -1523,5 +1523,41 @@ fn main() { }
 )");
 }
 
+TEST_F(IR_FromProgramTest, OverrideSizedArrayInPointerParameter) {
+    auto* src = R"(
+override x = 1;
+
+var<workgroup> arr : array<u32, x>;
+
+fn a(p: ptr<workgroup, array<u32, x>>) {
+}
+
+fn b() {
+  a(&arr);
+}
+)";
+    auto res = Build(src);
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+    EXPECT_EQ(Dis(m), R"($B1: {  # root
+  %x:i32 = override 1i @id(0)
+  %arr:ptr<workgroup, array<u32, %x>, read_write> = var undef
+}
+
+%a = func(%p:ptr<workgroup, array<u32, %x>, read_write>):void {
+  $B2: {
+    ret
+  }
+}
+%b = func():void {
+  $B3: {
+    %6:void = call %a, %arr
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl::reader

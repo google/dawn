@@ -79,7 +79,10 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// @returns the generated module
     Result<core::ir::Module> Build(std::string wgsl) {
         Source::File file("test.wgsl", std::move(wgsl));
-        auto result = wgsl::reader::WgslToIR(&file);
+        wgsl::reader::Options options{
+            .allowed_features = wgsl::AllowedFeatures::Everything(),
+        };
+        auto result = wgsl::reader::WgslToIR(&file, options);
         if (result != Success) {
             return result.Failure();
         }
