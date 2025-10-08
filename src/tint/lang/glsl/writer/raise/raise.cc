@@ -114,8 +114,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // _post-remapping_ data.
     if (options.use_array_length_from_uniform) {
         RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform, module,
-                      options.bindings.array_length_from_uniform.ubo_binding,
-                      options.bindings.array_length_from_uniform.bindpoint_to_size_index);
+                      options.array_length_from_uniform.ubo_binding,
+                      options.array_length_from_uniform.bindpoint_to_size_index);
     }
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
@@ -175,8 +175,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Note, this must come after remapping as it uses post-remapping indices for its options.
     // Note, this must come after DirectVariableAccess as it doesn't handle tracing through function
     // calls.
-    RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
-                  options.bindings.texture_builtins_from_uniform);
+    RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module, options.texture_builtins_from_uniform);
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
@@ -192,7 +191,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     {
         // Must come after DirectVariableAccess
         raise::TexturePolyfillConfig tex_config;
-        tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;
+        tex_config.placeholder_sampler_bind_point = options.placeholder_sampler_bind_point;
         RUN_TRANSFORM(raise::TexturePolyfill, module, tex_config);
     }
 

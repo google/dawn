@@ -37,10 +37,15 @@ class Module;
 
 namespace tint::glsl::writer {
 
+struct BindingData {
+    Bindings bindings;
+    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform;
+};
+
 /// Generate the resource bindings
 /// @param module the module to generate from
 /// @returns the bindings
-Bindings GenerateBindings(const core::ir::Module& module);
+BindingData GenerateBindings(const core::ir::Module& module);
 
 }  // namespace tint::glsl::writer
 

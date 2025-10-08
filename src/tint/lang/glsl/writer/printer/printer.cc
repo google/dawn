@@ -806,7 +806,8 @@ class Printer : public tint::TextGenerator {
         // anything it depends on will emit to the preamble first, and then it copies the text
         // buffer into the preamble.
         TextBuffer str_buf;
-        Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
+        Line(&str_buf) << "\n"
+                       << "struct " << StructName(str) << " {";
 
         str_buf.IncrementIndent();
 
@@ -1107,8 +1108,8 @@ class Printer : public tint::TextGenerator {
         if (auto* combined_texture_sampler = var->As<ir::CombinedTextureSamplerVar>()) {
             CombinedTextureSamplerPair key{combined_texture_sampler->TextureBindingPoint(),
                                            combined_texture_sampler->SamplerBindingPoint()};
-            auto itr = options_.bindings.sampler_texture_to_name.find(key);
-            if (itr != options_.bindings.sampler_texture_to_name.end()) {
+            auto itr = options_.sampler_texture_to_name.find(key);
+            if (itr != options_.sampler_texture_to_name.end()) {
                 names_.Add(var->Result(), itr->second);
             }
         }

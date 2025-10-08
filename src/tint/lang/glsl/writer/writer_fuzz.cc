@@ -46,7 +46,10 @@ Options GenerateOptions(core::ir::Module& module) {
     options.disable_robustness = false;
     options.disable_workgroup_init = false;
     options.disable_polyfill_integer_div_mod = false;
-    options.bindings = GenerateBindings(module);
+
+    auto data = GenerateBindings(module);
+    options.bindings = std::move(data.bindings);
+    options.texture_builtins_from_uniform = std::move(data.texture_builtins_from_uniform);
 
     // Leave some room for user-declared immediate data.
     uint32_t next_immediate_offset = 0x800;

@@ -93,7 +93,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 !handle_type->IsAnyOf<core::type::StorageTexture, core::type::ExternalTexture>()) {
                 bool found = false;
                 auto binding = options.bindings.texture.at(var->BindingPoint().value());
-                for (auto& bp : options.bindings.texture_builtins_from_uniform.ubo_contents) {
+                for (auto& bp : options.texture_builtins_from_uniform.ubo_contents) {
                     if (bp.binding == binding) {
                         if (bp.count < count) {
                             return Failure(

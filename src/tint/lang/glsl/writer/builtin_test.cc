@@ -878,9 +878,8 @@ TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithU32Lod) {
 
     Options opts{};
     opts.bindings.texture[{0, 0}] = {0};
-    opts.bindings.texture_builtins_from_uniform.ubo_binding = {0};
-    opts.bindings.texture_builtins_from_uniform.ubo_contents = {
-        {.offset = 0, .count = 1, .binding = {0}}};
+    opts.texture_builtins_from_uniform.ubo_binding = {.group = 0, .binding = 0};
+    opts.texture_builtins_from_uniform.ubo_contents = {{.offset = 0, .count = 1, .binding = {0}}};
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;

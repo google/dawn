@@ -25,15 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <string>
-
 #include "src/tint/cmd/bench/bench.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
-#include "src/tint/lang/wgsl/ast/identifier.h"
-#include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::glsl::writer {
@@ -55,7 +50,9 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
             state.SkipWithError(ir.Failure().reason);
             return;
         }
-        gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
+        auto data = tint::glsl::writer::GenerateBindings(ir.Get());
+        gen_options.bindings = std::move(data.bindings);
+        gen_options.texture_builtins_from_uniform = std::move(data.texture_builtins_from_uniform);
 
         // Get the list of entry point names.
         for (auto func : ir->functions) {

@@ -1253,7 +1253,9 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     }
 
     // Generate binding options.
-    gen_options.bindings = tint::glsl::writer::GenerateBindings(ir);
+    auto data = tint::glsl::writer::GenerateBindings(ir);
+    gen_options.bindings = std::move(data.bindings);
+    gen_options.texture_builtins_from_uniform = std::move(data.texture_builtins_from_uniform);
 
     // Check that the module and options are supported by the backend.
     auto check = tint::glsl::writer::CanGenerate(ir, gen_options);

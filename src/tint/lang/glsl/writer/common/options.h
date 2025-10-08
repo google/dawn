@@ -35,40 +35,10 @@
 #include <vector>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/common/bindings.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 
 namespace tint::glsl::writer {
-
-/// Generic binding point
-struct BindingInfo {
-    /// The binding
-    uint32_t binding = 0;
-
-    /// Equality operator
-    /// @param rhs the BindingInfo to compare against
-    /// @returns true if this BindingInfo is equal to `rhs`
-    inline bool operator==(const BindingInfo& rhs) const { return binding == rhs.binding; }
-    /// Inequality operator
-    /// @param rhs the BindingInfo to compare against
-    /// @returns true if this BindingInfo is not equal to `rhs`
-    inline bool operator!=(const BindingInfo& rhs) const { return !(*this == rhs); }
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(BindingInfo, binding);
-};
-
-/// An external texture
-struct ExternalTexture {
-    /// Metadata
-    BindingInfo metadata{};
-    /// Plane0 binding data
-    BindingInfo plane0{};
-    /// Plane1 binding data
-    BindingInfo plane1{};
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ExternalTexture, metadata, plane0, plane1);
-};
 
 /// A combined texture/sampler pair
 // Note, these are the WGSL binding points that are used to create the combined samplers
@@ -109,17 +79,6 @@ struct CombinedTextureSamplerPair {
 
 namespace std {
 
-/// Custom std::hash specialization for tint::glsl::writer::BindingInfo
-template <>
-class hash<tint::glsl::writer::BindingInfo> {
-  public:
-    /// @param n the binding info
-    /// @return the hash value
-    inline std::size_t operator()(const tint::glsl::writer::BindingInfo& n) const {
-        return tint::Hash(n.binding);
-    }
-};
-
 /// Custom std::hash specialization for tint::glsl::writer::CombinedTextureSamplerPair
 template <>
 class hash<tint::glsl::writer::CombinedTextureSamplerPair> {
@@ -135,8 +94,6 @@ class hash<tint::glsl::writer::CombinedTextureSamplerPair> {
 
 namespace tint::glsl::writer {
 
-using BindingMap = std::unordered_map<BindingPoint, BindingInfo>;
-using ExternalTextureBindings = std::unordered_map<BindingPoint, ExternalTexture>;
 using CombinedTextureSamplerInfo = std::unordered_map<CombinedTextureSamplerPair, std::string>;
 
 /// Options used to specify a mapping of binding points to indices into a UBO
@@ -144,14 +101,14 @@ using CombinedTextureSamplerInfo = std::unordered_map<CombinedTextureSamplerPair
 struct TextureBuiltinsFromUniformOptions {
     /// The binding point to use to generate a uniform buffer from which to read texture builtin
     /// values. Note that this is a post-remapping binding.
-    BindingInfo ubo_binding = {};
+    BindingPoint ubo_binding = {};
 
     /// Ordered list of post-remapping bindings in the uniform buffer for polyfilling
     /// `textureNumSamples` and `textureNumLevels`.
     struct EmulatedBuiltin {
         uint32_t offset;
         uint32_t count;
-        BindingInfo binding;
+        BindingPoint binding;
 
         TINT_REFLECT(EmulatedBuiltin, offset, count, binding);
     };
@@ -172,63 +129,6 @@ struct ArrayLengthFromUniformOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
-};
-
-/// Binding information
-struct Bindings {
-    /// Constructor
-    Bindings();
-    /// Destructor
-    ~Bindings();
-
-    /// Copy constructor
-    Bindings(const Bindings&) = default;
-
-    /// Copy assign
-    Bindings& operator=(const Bindings&) = default;
-
-    /// Uniform bindings
-    BindingMap uniform{};
-    /// Storage bindings
-    BindingMap storage{};
-    /// Texture bindings
-    BindingMap texture{};
-    /// Storage texture bindings
-    BindingMap storage_texture{};
-    /// Sampler bindings
-    BindingMap sampler{};
-    /// External bindings
-    ExternalTextureBindings external_texture{};
-
-    /// A map of SamplerTexturePair to combined sampler names for the
-    /// CombineSamplers transform
-    CombinedTextureSamplerInfo sampler_texture_to_name;
-
-    /// The binding point to use for placeholder samplers.
-    BindingPoint placeholder_sampler_bind_point;
-
-    /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
-    /// buffer values. If not specified, emits corresponding GLSL builtins
-    /// textureQueryLevels/textureSamples directly.
-    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
-
-    /// Options used to specify a mapping of binding points to indices into a UBO
-    /// from which to load buffer sizes. If not specified, emits corresponding GLSL builtins
-    /// length() directly
-    ArrayLengthFromUniformOptions array_length_from_uniform = {};
-
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(Bindings,
-                 uniform,
-                 storage,
-                 texture,
-                 storage_texture,
-                 sampler,
-                 external_texture,
-                 sampler_texture_to_name,
-                 placeholder_sampler_bind_point,
-                 texture_builtins_from_uniform,
-                 array_length_from_uniform);
 };
 
 /// Configuration options used for generating GLSL.
@@ -285,6 +185,23 @@ struct Options {
     /// Vertex inputs to perform BGRA swizzle on.
     std::unordered_set<uint32_t> bgra_swizzle_locations;
 
+    /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
+    /// buffer values. If not specified, emits corresponding GLSL builtins
+    /// textureQueryLevels/textureSamples directly.
+    TextureBuiltinsFromUniformOptions texture_builtins_from_uniform = {};
+
+    /// Options used to specify a mapping of binding points to indices into a UBO
+    /// from which to load buffer sizes. If not specified, emits corresponding GLSL builtins
+    /// length() directly
+    ArrayLengthFromUniformOptions array_length_from_uniform = {};
+
+    /// A map of SamplerTexturePair to combined sampler names for the
+    /// CombineSamplers transform
+    CombinedTextureSamplerInfo sampler_texture_to_name;
+
+    /// The binding point to use for placeholder samplers.
+    BindingPoint placeholder_sampler_bind_point;
+
     /// The bindings
     Bindings bindings{};
 
@@ -301,6 +218,10 @@ struct Options {
                  first_instance_offset,
                  depth_range_offsets,
                  bgra_swizzle_locations,
+                 texture_builtins_from_uniform,
+                 array_length_from_uniform,
+                 sampler_texture_to_name,
+                 placeholder_sampler_bind_point,
                  bindings);
 };
 

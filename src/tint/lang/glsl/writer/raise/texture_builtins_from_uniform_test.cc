@@ -101,7 +101,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 1, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 1, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -158,7 +160,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 1, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 1, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -215,7 +219,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 42, .count = 1, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 42, .count = 1, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -277,7 +283,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 3, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 3, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -340,7 +348,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 3, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 3, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -405,7 +415,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 3, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 3, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -471,7 +483,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 1, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 1, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -537,7 +551,9 @@ $B1: {  # root
 }
 )";
 
-    TextureBuiltinsFromUniformOptions cfg = {{30u}, {{.offset = 0, .count = 1, .binding = {0}}}};
+    TextureBuiltinsFromUniformOptions cfg = {
+        {.group = 0, .binding = 30u},
+        {{.offset = 0, .count = 1, .binding = {.group = 0, .binding = 0}}}};
     Run(TextureBuiltinsFromUniform, cfg);
     EXPECT_EQ(expect, str());
 }
