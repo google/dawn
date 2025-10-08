@@ -4645,6 +4645,15 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
                 << " does not match vector pointer element type " << NameOf(el_ty);
             return;
         }
+
+        // The `GetVectorPtrElementType` has already validated that the pointer exists.
+        auto* mv = s->To()->Type()->As<core::type::MemoryView>();
+        if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+            AddError(s, StoreVectorElement::kToOperandOffset)
+                << "store_vector_element target operand has a non-writeable access type, "
+                << style::Literal(ToString(mv->Access()));
+            return;
+        }
     }
 
     if (!s->Index()->Type()->IsIntegerScalar()) {

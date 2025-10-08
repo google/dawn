@@ -927,53 +927,6 @@ $B1: {  # root
     EXPECT_EQ(GetParam() ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, ImmediateData_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(immediate, ty.vec4<u32>()));
-    mod.root_block->Append(vec);
-
-    auto* func = b.Function("foo", ty.void_());
-    auto* idx = b.FunctionParam("idx", ty.u32());
-    func->SetParams({idx});
-    b.Append(func->Block(), [&] {
-        b.StoreVectorElement(vec, idx, b.Constant(0_u));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %vec:ptr<immediate, vec4<u32>, read> = var undef
-}
-
-%foo = func(%idx:u32):void {
-  $B2: {
-    store_vector_element %vec, %idx, 0u
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %vec:ptr<immediate, vec4<u32>, read> = var undef
-}
-
-%foo = func(%idx:u32):void {
-  $B2: {
-    %4:u32 = min %idx, 3u
-    store_vector_element %vec, %4, 0u
-    ret
-  }
-}
-)";
-
-    RobustnessConfig cfg;
-    cfg.clamp_immediate_data = GetParam();
-    Run(Robustness, cfg);
-
-    EXPECT_EQ(GetParam() ? expect : src, str());
-}
-
 TEST_P(IR_RobustnessTest, ImmediateData_Access) {
     auto* arr = b.Var("arr", ty.ptr(immediate, ty.array<u32, 4>()));
     mod.root_block->Append(arr);
@@ -1217,57 +1170,6 @@ $B1: {  # root
     %4:u32 = min %idx, 3u
     %5:u32 = load_vector_element %vec, %4
     ret %5
-  }
-}
-)";
-
-    RobustnessConfig cfg;
-    cfg.clamp_uniform = GetParam().enabled;
-    if (GetParam().ignore_bindings) {
-        cfg.bindings_ignored = {{0, 0}};
-    }
-    Run(Robustness, cfg);
-
-    EXPECT_EQ((GetParam().enabled && !GetParam().ignore_bindings) ? expect : src, str());
-}
-
-TEST_P(IR_BindingVariableRobustnessTest, Unifom_StoreVectorElement) {
-    auto* vec = b.Var("vec", ty.ptr(uniform, ty.vec4<u32>()));
-    vec->SetBindingPoint(0, 0);
-    mod.root_block->Append(vec);
-
-    auto* func = b.Function("foo", ty.void_());
-    auto* idx = b.FunctionParam("idx", ty.u32());
-    func->SetParams({idx});
-    b.Append(func->Block(), [&] {
-        b.StoreVectorElement(vec, idx, b.Constant(0_u));
-        b.Return(func);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %vec:ptr<uniform, vec4<u32>, read> = var undef @binding_point(0, 0)
-}
-
-%foo = func(%idx:u32):void {
-  $B2: {
-    store_vector_element %vec, %idx, 0u
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %vec:ptr<uniform, vec4<u32>, read> = var undef @binding_point(0, 0)
-}
-
-%foo = func(%idx:u32):void {
-  $B2: {
-    %4:u32 = min %idx, 3u
-    store_vector_element %vec, %4, 0u
-    ret
   }
 }
 )";
