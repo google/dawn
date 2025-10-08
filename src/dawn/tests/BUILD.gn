@@ -471,7 +471,10 @@ dawn_test("dawn_unittests") {
   }
 
   if (dawn_enable_vulkan) {
-    sources += [ "unittests/validation/YCbCrInfoValidationTests.cpp" ]
+    sources += [
+      "unittests/validation/YCbCrInfoValidationTests.cpp",
+      "unittests/vulkan/MemoryTypeSelectorTests.cpp",
+    ]
   }
 
   if (tint_build_spv_reader) {
