@@ -28,10 +28,11 @@
 #ifndef SRC_TINT_UTILS_BYTES_BUFFER_READER_H_
 #define SRC_TINT_UTILS_BYTES_BUFFER_READER_H_
 
+#include <cstddef>
+#include <span>
 #include <string_view>
 
 #include "src/tint/utils/bytes/reader.h"
-#include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/ice/ice.h"
 
 namespace tint::bytes {
@@ -55,10 +56,10 @@ class BufferReader final : public Reader {
         : data_(reinterpret_cast<const std::byte*>(str.data())), bytes_remaining_(str.length()) {}
 
     /// Constructor
-    /// @param slice the byte slice to read from
-    explicit BufferReader(Slice<const std::byte> slice)
-        : data_(slice.data), bytes_remaining_(slice.len) {
-        TINT_ASSERT(slice.data);
+    /// @param span the byte span to read from
+    explicit BufferReader(std::span<const std::byte> span)
+        : data_(span.data()), bytes_remaining_(span.size()) {
+        TINT_ASSERT(span.data());
     }
 
     /// @copydoc Reader::Read

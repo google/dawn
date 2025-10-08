@@ -34,6 +34,7 @@
 #include <atomic>
 #include <iterator>
 #include <new>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -826,6 +827,12 @@ class Vector {
 
     /// @returns the internal slice of the vector
     tint::Slice<const T> Slice() const { return impl_.slice; }
+
+    /// @returns the internal data of the vector as a std::span
+    std::span<T> AsSpan() { return {impl_.slice.data, impl_.slice.len}; }
+
+    /// @returns the internal data of the vector as a std::span
+    std::span<const T> AsSpan() const { return {impl_.slice.data, impl_.slice.len}; }
 
   private:
     /// Friend class (differing specializations of this class)

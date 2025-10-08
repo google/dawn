@@ -44,7 +44,7 @@ Result<SuccessType> IRBinaryRoundtripFuzzer(core::ir::Module& module, const fuzz
         return Failure{"Failed to encode module to binary"};
     }
 
-    auto decoded = Decode(encoded->Slice());
+    auto decoded = Decode(encoded->AsSpan());
     if (decoded != Success) {
         TINT_ICE() << "Decode() failed\n" << decoded.Failure();
     }

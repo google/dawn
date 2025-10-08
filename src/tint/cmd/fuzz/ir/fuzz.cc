@@ -30,6 +30,7 @@
 #include <cstddef>
 #include <functional>
 #include <iostream>
+#include <span>
 #include <string>
 #include <thread>
 
@@ -66,7 +67,7 @@ void Register(const IRFuzzer& fuzzer) {
         fuzzer.name,
         [fn = fuzzer.fn, pre_capabilities = fuzzer.pre_capabilities](
             const Program& program, const fuzz::wgsl::Context& context,
-            Slice<const std::byte> data) {
+            std::span<const std::byte> data) {
             if (program.AST().Enables().Any(tint::wgsl::reader::IsUnsupportedByIR)) {
                 if (context.options.verbose) {
                     std::cout << "   - Features are not supported by IR.\n";
@@ -121,7 +122,7 @@ void Register(const IRFuzzer& fuzzer) {
 #if TINT_BUILD_IR_BINARY
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
          const Options& options,
-         Slice<const std::byte> data) {
+         std::span<const std::byte> data) {
     // Ensure that fuzzers are sorted. Without this, the fuzzers may be registered in any order,
     // leading to non-determinism, which we must avoid.
     TINT_STATIC_INIT(Fuzzers().Sort([](auto& a, auto& b) { return a.name < b.name; }));

@@ -25,7 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstddef>
 #include <iostream>
+#include <span>
 #include <string>
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
@@ -88,7 +90,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     if (size > 0) {
         std::string_view wgsl(reinterpret_cast<const char*>(input), size);
         auto data = tint::DecodeBase64FromComments(wgsl);
-        tint::fuzz::wgsl::Run(wgsl, options, data.Slice());
+        tint::fuzz::wgsl::Run(wgsl, options, data.AsSpan());
     }
     return 0;
 }

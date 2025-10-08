@@ -2053,11 +2053,11 @@ struct Decoder {
 
 }  // namespace
 
-Result<Module> Decode(Slice<const std::byte> encoded) {
+Result<Module> Decode(std::span<const std::byte> encoded) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     pb::Module mod_in;
-    if (!mod_in.ParseFromArray(encoded.data, static_cast<int>(encoded.len))) {
+    if (!mod_in.ParseFromArray(encoded.data(), static_cast<int>(encoded.size()))) {
         return Failure{"failed to deserialize protobuf"};
     }
 

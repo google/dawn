@@ -54,7 +54,7 @@ class IRBinaryRoundtripTestBase : public IRTestParamHelper<T> {
         if (encoded != Success) {
             return {pre, encoded.Failure().reason};
         }
-        auto decoded = Decode(encoded->Slice());
+        auto decoded = Decode(encoded->AsSpan());
         if (decoded != Success) {
             return {pre, decoded.Failure().reason};
         }

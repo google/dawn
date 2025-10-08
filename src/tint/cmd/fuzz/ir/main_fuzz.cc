@@ -25,6 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstddef>
+#include <span>
+
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -75,8 +78,8 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
         return out;
     };
 
-    tint::Slice<const std::byte> data(reinterpret_cast<const std::byte*>(pb.data().data()),
-                                      pb.data().length());
+    std::span<const std::byte> data(reinterpret_cast<const std::byte*>(pb.data().data()),
+                                    pb.data().length());
     tint::fuzz::ir::Run(acquire_module, options, data);
 }
 
