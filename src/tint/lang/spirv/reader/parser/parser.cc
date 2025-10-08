@@ -1482,9 +1482,15 @@ class Parser {
                 case spv::Op::OpVariable:
                     EmitVar(inst);
                     break;
-                case spv::Op::OpUndef:
-                    AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                case spv::Op::OpUndef: {
+                    auto* ty = Type(inst.type_id());
+
+                    if (ty->Is<core::type::MemoryView>()) {
+                        TINT_ICE() << "cannot create an undef memory view in WGSL";
+                    }
+                    AddValue(inst.result_id(), b_.Zero(ty));
                     break;
+                }
                 default:
                     break;
             }
