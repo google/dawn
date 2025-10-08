@@ -228,10 +228,6 @@ ci.builder(
         ],
     ),
     os = os.MAC_DEFAULT,
-    # TODO(crbug.com/441328362): Remove this CPU restriction once both x64 and
-    # ARM64 copies of Node are made available regardless of the host
-    # architecture.
-    cpu = "x86-64",
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|dbg",
         short_name = "x64",
@@ -267,10 +263,6 @@ ci.builder(
         ],
     ),
     os = os.MAC_DEFAULT,
-    # TODO(crbug.com/441328362): Remove this CPU restriction once both x64 and
-    # ARM64 copies of Node are made available regardless of the host
-    # architecture.
-    cpu = "x86-64",
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|rel",
         short_name = "x64",
@@ -641,18 +633,6 @@ ci.builder(
 # Child Testers                                                                #
 ################################################################################
 
-# TODO(crbug.com/441328362): Remove this and use normal/actually thin
-# Linux-based testers once all tests are run on Swarming. Currently, the
-# non-Swarmed tests fail since we try to run Mac binaries on a Linux host.
-def mac_thin_tester(**kwargs):
-    ci.thin_tester(
-        os = os.MAC_DEFAULT,
-        # Necessary since the testers that use this are testing x64.
-        cpu = "x86-64",
-        cores = None,
-        **kwargs
-    )
-
 ci.thin_tester(
     name = "dawn-linux-x64-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x64 with SwiftShader",
@@ -749,7 +729,7 @@ ci.thin_tester(
     ),
 )
 
-mac_thin_tester(
+ci.thin_tester(
     name = "dawn-mac-x64-sws-dbg",
     description_html = "Tests debug Dawn on Mac/x64 with SwiftShader",
     parent = "dawn-mac-x64-builder-dbg",
@@ -773,7 +753,7 @@ mac_thin_tester(
     ),
 )
 
-mac_thin_tester(
+ci.thin_tester(
     name = "dawn-mac-x64-sws-rel",
     description_html = "Tests release Dawn on Mac/x64 with SwiftShader",
     parent = "dawn-mac-x64-builder-rel",
