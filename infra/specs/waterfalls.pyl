@@ -172,6 +172,11 @@
           'default',
         ],
       },
+      'dawn-win-x64-builder-msvc-dbg': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-win-x64-builder-msvc-rel': {
         'additional_compile_targets': [
           'default',
@@ -183,6 +188,19 @@
         ],
       },
       'dawn-win-x64-sws-dbg': {
+        'os_type': 'win',
+        'mixins': [
+          'gpu-swarming-pool',
+          'no_gpu',
+          'win10',
+          'x86-64',
+        ],
+        'test_suites': {
+          'gtest_tests': 'win_software_renderer_gtests',
+          'isolated_scripts': 'dawn_node_cts_win_software_tests',
+        },
+      },
+      'dawn-win-x64-sws-msvc-dbg': {
         'os_type': 'win',
         'mixins': [
           'gpu-swarming-pool',

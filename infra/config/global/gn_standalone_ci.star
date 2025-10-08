@@ -308,6 +308,46 @@ ci.builder(
 )
 
 ci.builder(
+    name = "dawn-win-x64-builder-msvc-dbg",
+    description_html = "Compiles debug Dawn test binaries for Windows/x64 using MSVC",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_node",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.DEBUG,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.WIN,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            # Component builds cause compile failures for the `default` target
+            # with MSVC, so use non_component. See crbug.com/449779009.
+            "dawn_node_bindings",
+            "dawn_swiftshader",
+            "debug",
+            "non_component",
+            "win_msvc",
+            "x64",
+        ],
+    ),
+    cores = 8,
+    os = os.WINDOWS_DEFAULT,
+    ssd = None,
+    console_view_entry = consoles.console_view_entry(
+        category = "win|build|msvc|dbg",
+        short_name = "x64",
+    ),
+)
+
+ci.builder(
     name = "dawn-win-x64-builder-msvc-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x64 using MSVC",
     schedule = "triggered",
@@ -797,6 +837,30 @@ ci.thin_tester(
     ),
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|dbg|x64",
+        short_name = "sws",
+    ),
+)
+
+ci.thin_tester(
+    name = "dawn-win-x64-sws-msvc-dbg",
+    description_html = "Tests debug Dawn on Windows/x64 with SwiftShader using binaries built with MSVC",
+    parent = "dawn-win-x64-builder-msvc-dbg",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.DEBUG,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.WIN,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "win|test|msvc|dbg|x64",
         short_name = "sws",
     ),
 )

@@ -372,6 +372,16 @@ dawn_win_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-x64-sws-msvc-dbg",
+    description_html = "Tests debug Dawn on Windows/x64 with SwiftShader using binaries built with MSVC. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-msvc-dbg",
+        "ci/dawn-win-x64-sws-msvc-dbg",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-msvc-dbg",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-sws-msvc-rel",
     description_html = "Tests release Dawn on Windows/x64 with SwiftShader using binaries built with MSVC. Manual only.",
     mirrors = [
