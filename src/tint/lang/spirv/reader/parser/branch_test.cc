@@ -7249,5 +7249,77 @@ TEST_F(SpirvParserTest, SwitchWithSwitchInDefault) {
 )");
 }
 
+TEST_F(SpirvParserTest, LoopInContinuing) {
+    EXPECT_IR(R"(
+                 OpCapability Shader
+                 OpMemoryModel Logical GLSL450
+                 OpEntryPoint Fragment %fn "main"
+                 OpExecutionMode %fn OriginUpperLeft
+         %void = OpTypeVoid
+         %bool = OpTypeBool
+        %false = OpConstantFalse %bool
+      %void_fn = OpTypeFunction %void
+
+           %fn = OpFunction %void None %void_fn
+        %entry = OpLabel
+                 OpBranch %loop1
+        %loop1 = OpLabel
+
+                 OpLoopMerge %loop1_merge %loop2 None
+                 OpBranch %loop1_body
+   %loop1_body = OpLabel
+                 OpBranchConditional %false %loop1_merge %loop2
+        %loop2 = OpLabel
+
+                 OpLoopMerge %loop2_merge %loop2 None
+                 OpBranchConditional %false %loop2_merge %loop2
+  %loop2_merge = OpLabel
+                 OpBranch %loop1
+
+  %loop1_merge = OpLabel
+                 OpReturn
+                 OpFunctionEnd
+)",
+              R"(
+%main = @fragment func():void {
+  $B1: {
+    loop [b: $B2, c: $B3] {  # loop_1
+      $B2: {  # body
+        if false [t: $B4, f: $B5] {  # if_1
+          $B4: {  # true
+            exit_loop  # loop_1
+          }
+          $B5: {  # false
+            continue  # -> $B3
+          }
+        }
+        unreachable
+      }
+      $B3: {  # continuing
+        loop [b: $B6, c: $B7] {  # loop_2
+          $B6: {  # body
+            if false [t: $B8, f: $B9] {  # if_2
+              $B8: {  # true
+                exit_loop  # loop_2
+              }
+              $B9: {  # false
+                continue  # -> $B7
+              }
+            }
+            unreachable
+          }
+          $B7: {  # continuing
+            next_iteration  # -> $B6
+          }
+        }
+        next_iteration  # -> $B2
+      }
+    }
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

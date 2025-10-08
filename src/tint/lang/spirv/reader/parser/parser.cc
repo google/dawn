@@ -1791,6 +1791,12 @@ class Parser {
     }
 
     void EmitContinueBlock(uint32_t src_id, uint32_t continue_id, core::ir::Loop* loop) {
+        // We're emitting the continue block, so remove it from the continue targets as it can no
+        // longer be a target for this loop. This will allow it to be _reused_ as the continue
+        // target for a single block loop if needed (which may have this same block as the
+        // continue).
+        continue_targets_.erase(continue_id);
+
         // Push id stack entry for the continuing block. We don't use EmitBlockParent to do this
         // because we need the scope to exist until after we process any `continue_blk_phis_`.
         id_stack_.emplace_back();
