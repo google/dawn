@@ -38,7 +38,7 @@
         {%- endif %}
     {% elif type.name.get() == 'void' %}
         {{- assert(arg.length and arg.constant_length != 1) -}}  {# void with length is binary data #}
-        java.nio.ByteBuffer{{ ' = java.nio.ByteBuffer.allocateDirect(0)' if emit_defaults }}
+        java.nio.ByteBuffer{{ ' = ByteBuffer.allocateDirect(0)' if emit_defaults }}
     {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['callback function', 'callback info', 'function pointer', 'object', 'structure'] -%}
