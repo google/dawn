@@ -50,7 +50,7 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
 
         {% endif %}
     {% endfor %}
-    external override fun close();
+    external override fun close()
 
     //* By default, the equals() function implements referential equality.
     //* see: https://kotlinlang.org/docs/equality.html#structural-equality
