@@ -44,6 +44,7 @@
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native::d3d11 {
 namespace {
@@ -482,9 +483,13 @@ MaybeError RenderPipeline::InitializeShaders() {
                                       ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
                                       GetImmediateMask(), usedInterstageVariables));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
-        DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateVertexShader(
-                                  shaderBlob.Data(), shaderBlob.Size(), nullptr, &mVertexShader),
-                              "D3D11 create vertex shader"));
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateVertexShaderUs");
+            DAWN_TRY(
+                CheckHRESULT(device->GetD3D11Device()->CreateVertexShader(
+                                 shaderBlob.Data(), shaderBlob.Size(), nullptr, &mVertexShader),
+                             "D3D11 create vertex shader"));
+        }
         DAWN_TRY(InitializeInputLayout(shaderBlob));
     }
 
@@ -548,11 +553,14 @@ MaybeError RenderPipeline::InitializeShaders() {
                 ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
                           compileFlags | additionalCompileFlags, GetImmediateMask(),
                           usedInterstageVariables, pixelLocalOptions));
-        DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreatePixelShader(
-                                  compiledShader[SingleShaderStage::Fragment].shaderBlob.Data(),
-                                  compiledShader[SingleShaderStage::Fragment].shaderBlob.Size(),
-                                  nullptr, &mPixelShader),
-                              "D3D11 create pixel shader"));
+        {
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreatePixelShaderUs");
+            DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreatePixelShader(
+                                      compiledShader[SingleShaderStage::Fragment].shaderBlob.Data(),
+                                      compiledShader[SingleShaderStage::Fragment].shaderBlob.Size(),
+                                      nullptr, &mPixelShader),
+                                  "D3D11 create pixel shader"));
+        }
     }
 
     return {};
