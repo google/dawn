@@ -132,6 +132,7 @@ if (tint_build_msl_writer) {
     deps = [
       "${dawn_root}/src/utils",
       "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/helpers",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
@@ -154,7 +155,6 @@ if (tint_build_msl_writer) {
       deps += [
         "${tint_src_dir}/lang/msl/writer",
         "${tint_src_dir}/lang/msl/writer/common",
-        "${tint_src_dir}/lang/msl/writer/helpers",
         "${tint_src_dir}/lang/msl/writer/printer",
       ]
     }

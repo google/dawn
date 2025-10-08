@@ -1,4 +1,4 @@
-/// Copyright 2023 The Dawn & Tint Authors
+/// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,12 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
+#include "src/tint/api/helpers/generate_bindings.h"
 
 #include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -38,16 +35,12 @@
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/storage_texture.h"
-#include "src/tint/lang/msl/writer/common/options.h"
-#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::msl::writer {
+namespace tint {
 
-Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buffers) {
+Bindings GenerateBindings(const core::ir::Module& module, bool set_group_to_zero) {
     Bindings bindings{};
-
-    std::unordered_set<tint::BindingPoint> seen_binding_points;
 
     // Collect next valid binding number per group
     Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
@@ -74,7 +67,7 @@ Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buff
             }
 
             tint::BindingPoint info{
-                .group = use_argument_buffers ? bp->group : 0,
+                .group = set_group_to_zero ? 0 : bp->group,
                 .binding = bp->binding,
             };
             switch (ptr->AddressSpace()) {
@@ -109,26 +102,15 @@ Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buff
 
     for (auto bp : ext_tex_bps) {
         uint32_t& next_num = group_to_next_binding_number.GetOrAddZero(bp.group);
+        uint32_t g = set_group_to_zero ? 0 : bp.group;
 
-        uint32_t g = use_argument_buffers ? bp.group : 0;
-
-        tint::BindingPoint plane0{
-            .group = g,
-            .binding = bp.binding,
-        };
-        tint::BindingPoint plane1{
-            .group = g,
-            .binding = next_num++,
-        };
-        tint::BindingPoint metadata{
-            .group = g,
-            .binding = next_num++,
-        };
-
+        tint::BindingPoint plane0{.group = g, .binding = bp.binding};
+        tint::BindingPoint plane1{.group = g, .binding = next_num++};
+        tint::BindingPoint metadata{.group = g, .binding = next_num++};
         bindings.external_texture.emplace(bp, ExternalTexture{metadata, plane0, plane1});
     }
 
     return bindings;
 }
 
-}  // namespace tint::msl::writer
+}  // namespace tint

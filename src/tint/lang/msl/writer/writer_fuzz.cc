@@ -27,11 +27,10 @@
 
 #include <iostream>
 
+#include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/writer.h"
 
@@ -41,7 +40,7 @@ namespace {
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              Options options) {
-    options.bindings = GenerateBindings(module, false);
+    options.bindings = GenerateBindings(module, true);
     options.array_length_from_constants.ubo_binding = 30;
 
     // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.

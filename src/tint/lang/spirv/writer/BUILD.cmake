@@ -35,7 +35,6 @@
 ################################################################################
 
 include(lang/spirv/writer/common/BUILD.cmake)
-include(lang/spirv/writer/helpers/BUILD.cmake)
 include(lang/spirv/writer/printer/BUILD.cmake)
 include(lang/spirv/writer/raise/BUILD.cmake)
 
@@ -170,6 +169,7 @@ tint_add_target(tint_lang_spirv_writer_fuzz fuzz
 
 tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
   tint_api_common
+  tint_api_helpers
   tint_cmd_fuzz_ir_fuzz
   tint_lang_core
   tint_lang_core_constant
@@ -206,7 +206,6 @@ if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
     tint_lang_spirv_writer
     tint_lang_spirv_writer_common
-    tint_lang_spirv_writer_helpers
     tint_lang_spirv_writer_printer
   )
 endif(TINT_BUILD_SPV_WRITER)

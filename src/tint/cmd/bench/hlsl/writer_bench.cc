@@ -27,8 +27,8 @@
 
 #include <string>
 
+#include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/bench/bench.h"
-#include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
@@ -50,7 +50,7 @@ void GenerateHLSL(benchmark::State& state, std::string input_name) {
         }
 
         Options gen_options;
-        gen_options.bindings = GenerateBindings(ir.Get());
+        gen_options.bindings = GenerateBindings(ir.Get(), false);
         auto gen_res = Generate(ir.Get(), gen_options);
         if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason);

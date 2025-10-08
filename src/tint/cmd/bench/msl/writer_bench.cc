@@ -27,9 +27,9 @@
 
 #include <string>
 
+#include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/bench/bench.h"
 #include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
-#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
@@ -79,7 +79,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
             return;
         }
 
-        gen_options.bindings = tint::msl::writer::GenerateBindings(ir.Get(), false);
+        gen_options.bindings = tint::GenerateBindings(ir.Get(), true);
     }
 
     for (auto _ : state) {

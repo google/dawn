@@ -33,7 +33,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/command/args.h"
 #include "src/tint/utils/text/color_mode.h"
 
@@ -41,26 +40,21 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
-#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
-#include "src/tint/lang/core/type/resource_type.h"
-#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
-#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
-#include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
@@ -71,7 +65,6 @@
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER
-#include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
@@ -80,14 +73,13 @@
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
+#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 #include "src/tint/lang/msl/validate/validate.h"
-#include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
 #include "src/tint/lang/hlsl/validate/validate.h"
-#include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -875,7 +867,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
         offset += 8;
     }
 
-    gen_options.bindings = tint::spirv::writer::GenerateBindings(ir);
+    gen_options.bindings = tint::GenerateBindings(ir, false);
     gen_options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(ir);
 
     // Enable the Vulkan Memory Model if needed.
@@ -1011,7 +1003,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
-    gen_options.bindings = tint::msl::writer::GenerateBindings(ir, options.use_argument_buffers);
+    gen_options.bindings = tint::GenerateBindings(ir, !options.use_argument_buffers);
     // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
     gen_options.array_length_from_constants.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
@@ -1119,7 +1111,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
         options.hlsl_shader_model < kMinShaderModelForPackUnpack4x8InHLSL;
     gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
                                    : tint::hlsl::writer::Options::Compiler::kDXC;
-    gen_options.bindings = tint::hlsl::writer::GenerateBindings(ir);
+    gen_options.bindings = tint::GenerateBindings(ir, false);
 
     // Check that the module and options are supported by the backend.
     auto check = tint::hlsl::writer::CanGenerate(ir, gen_options);

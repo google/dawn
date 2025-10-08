@@ -27,11 +27,11 @@
 
 #include "src/tint/lang/spirv/writer/writer.h"
 
+#include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/spirv/validate/validate.h"
-#include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
 namespace tint::spirv::writer {
@@ -43,7 +43,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
         return Failure{check.Failure().reason};
     }
 
-    options.bindings = GenerateBindings(module);
+    options.bindings = GenerateBindings(module, false);
     options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto output = Generate(module, options);

@@ -1,4 +1,4 @@
-/// Copyright 2023 The Dawn & Tint Authors
+/// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
-#define SRC_TINT_LANG_MSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
+#ifndef SRC_TINT_API_HELPERS_GENERATE_BINDINGS_H_
+#define SRC_TINT_API_HELPERS_GENERATE_BINDINGS_H_
 
-#include "src/tint/lang/msl/writer/common/options.h"
+#include "src/tint/api/common/bindings.h"
 
 // Forward declarations
 namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
 
-namespace tint::msl::writer {
+namespace tint {
 
 /// Generate the resource bindings
 /// @param module the module to generate from
+/// @param set_group_to_zero if true, the group used for bindings will always be zero
 /// @returns the bindings
-Bindings GenerateBindings(const core::ir::Module& module, bool use_argument_buffers);
+Bindings GenerateBindings(const core::ir::Module& module, bool set_group_to_zero);
 
-}  // namespace tint::msl::writer
+}  // namespace tint
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
+#endif  // SRC_TINT_API_HELPERS_GENERATE_BINDINGS_H_

@@ -152,6 +152,7 @@ if (tint_build_spv_writer) {
     deps = [
       "${dawn_root}/src/utils",
       "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/helpers",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
@@ -183,7 +184,6 @@ if (tint_build_spv_writer) {
       deps += [
         "${tint_src_dir}/lang/spirv/writer",
         "${tint_src_dir}/lang/spirv/writer/common",
-        "${tint_src_dir}/lang/spirv/writer/helpers",
         "${tint_src_dir}/lang/spirv/writer/printer",
       ]
     }

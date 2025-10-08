@@ -50,6 +50,7 @@ if (tint_build_benchmarks) {
         "${dawn_root}/src/utils",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
+        "${tint_src_dir}/api/helpers",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/ir",
@@ -75,7 +76,6 @@ if (tint_build_benchmarks) {
         deps += [
           "${tint_src_dir}/lang/msl/writer",
           "${tint_src_dir}/lang/msl/writer/common",
-          "${tint_src_dir}/lang/msl/writer/helpers",
         ]
       }
 
