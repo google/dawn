@@ -90,7 +90,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-10-08 08:56:01AM
+# Last rolled: 2025-10-09 08:49:21AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -747,6 +747,7 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTe
 crbug.com/0000 [ intel linux ] webgpu:api,operation,compute,basic:large_dispatch:dispatchSize="maximum" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="queue-op";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"b2t-copy","in":"command-encoder"};read={"op":"sample","in":"render-bundle-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"b2t-copy","in":"command-encoder"};read={"op":"sample","in":"render-pass-encoder"} [ Failure ]
@@ -760,6 +761,7 @@ crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_sub
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="queue-op";write={"op":"t2t-copy","in":"command-encoder"};read={"op":"sample","in":"render-pass-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="queue-op";write={"op":"write-texture","in":"queue"};read={"op":"sample","in":"render-bundle-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="queue-op";write={"op":"write-texture","in":"queue"};read={"op":"sample","in":"render-pass-encoder"} [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
@@ -787,6 +789,7 @@ crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:me
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba32uint";sampleCount=1;viewUsageMethod="minimal" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8sint";sampleCount=1;viewUsageMethod="inherit" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8sint";sampleCount=1;viewUsageMethod="minimal" [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8uint";sampleCount=1;viewUsageMethod="inherit" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8uint";sampleCount=1;viewUsageMethod="minimal" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8unorm";sampleCount=1;viewUsageMethod="inherit" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:api,operation,texture_view,write:format:method="storage-write-fragment";format="rgba8unorm";sampleCount=1;viewUsageMethod="minimal" [ Failure ]
@@ -952,6 +955,7 @@ crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,t
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba32uint";viewDimension="2d";stage="fragment";access="write";mipLevel=0 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba32uint";viewDimension="2d";stage="fragment";access="write";mipLevel=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba32uint";viewDimension="2d";stage="fragment";access="write";mipLevel=2 [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8sint";viewDimension="1d";stage="fragment";access="write";mipLevel=0 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8sint";viewDimension="2d";stage="fragment";access="write";mipLevel=0 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8sint";viewDimension="2d";stage="fragment";access="write";mipLevel=1 [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8sint";viewDimension="2d";stage="fragment";access="write";mipLevel=2 [ Failure ]
