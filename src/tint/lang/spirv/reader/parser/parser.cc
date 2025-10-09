@@ -647,7 +647,8 @@ class Parser {
             case spv::BuiltIn::PrimitiveId:
                 return core::BuiltinValue::kPrimitiveIndex;
             default:
-                TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << static_cast<uint32_t>(b);
+                TINT_UNIMPLEMENTED() << "unhandled SPIR-V BuiltIn: " << spv::BuiltInToString(b)
+                                     << " (val = " << static_cast<uint32_t>(b) << ")";
         }
     }
 
