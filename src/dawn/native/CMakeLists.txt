@@ -592,7 +592,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/BindGroupWGPU.h"
         "webgpu/BindGroupLayoutWGPU.h"
         "webgpu/BufferWGPU.h"
-        "webgpu/CaptureContext.h",
+        "webgpu/CaptureContext.h"
         "webgpu/CommandBufferWGPU.h"
         "webgpu/ComputePipelineWGPU.h"
         "webgpu/DeviceWGPU.h"
@@ -615,7 +615,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/BindGroupWGPU.cpp"
         "webgpu/BindGroupLayoutWGPU.cpp"
         "webgpu/BufferWGPU.cpp"
-        "webgpu/CaptureContext.cpp",
+        "webgpu/CaptureContext.cpp"
         "webgpu/CommandBufferWGPU.cpp"
         "webgpu/ComputePipelineWGPU.cpp"
         "webgpu/DeviceWGPU.cpp"
@@ -624,7 +624,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/QueueWGPU.cpp"
         "webgpu/RenderPipelineWGPU.cpp"
         "webgpu/SamplerWGPU.cpp"
-        "webgpu/Serialization.cpp",
+        "webgpu/Serialization.cpp"
         "webgpu/ShaderModuleWGPU.cpp"
         "webgpu/ToWGPU.cpp"
         "webgpu/TextureWGPU.cpp"
