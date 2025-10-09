@@ -79,6 +79,7 @@ if (tint_build_spv_reader) {
 
     if (tint_build_spv_reader || tint_build_spv_writer) {
       deps += [
+        "${tint_spirv_headers_dir}:spv_headers",
         "${tint_spirv_tools_dir}:spvtools",
         "${tint_spirv_tools_dir}:spvtools_headers",
         "${tint_spirv_tools_dir}:spvtools_opt",

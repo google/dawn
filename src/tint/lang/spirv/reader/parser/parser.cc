@@ -37,6 +37,9 @@
 #include <utility>
 #include <vector>
 
+#define SPV_ENABLE_UTILITY_CODE
+#include "spirv/unified1/spirv.hpp11"
+
 // This header is in an external dependency, so warnings cannot be fixed without upstream changes.
 TINT_BEGIN_DISABLE_WARNING(NEWLINE_EOF);
 TINT_BEGIN_DISABLE_WARNING(OLD_STYLE_CAST);
@@ -790,8 +793,9 @@ class Parser {
                     if (img->dim() != spv::Dim::Dim1D && img->dim() != spv::Dim::Dim2D &&
                         img->dim() != spv::Dim::Dim3D && img->dim() != spv::Dim::Cube &&
                         img->dim() != spv::Dim::SubpassData) {
-                        TINT_ICE() << "Unsupported texture dimension: "
-                                   << static_cast<uint32_t>(img->dim());
+                        TINT_ICE()
+                            << "Unsupported texture dimension: " << spv::DimToString(img->dim())
+                            << " (val = " << static_cast<uint32_t>(img->dim()) << ")";
                     }
                     if (img->sampled() == 0) {
                         TINT_ICE() << "Unsupported texture sample setting: Known at Runtime";
