@@ -691,8 +691,11 @@ class Parser {
             }
             // ArrayStride is only handled on the array type for now
             if (array_stride > 0) {
-                TINT_ASSERT(type->kind() == spvtools::opt::analysis::Type::kArray ||
-                            type->kind() == spvtools::opt::analysis::Type::kRuntimeArray);
+                if (type->kind() != spvtools::opt::analysis::Type::kArray &&
+                    type->kind() != spvtools::opt::analysis::Type::kRuntimeArray) {
+                    TINT_UNREACHABLE()
+                        << "ArrayStride is only accepted on an Array or RuntimeArray";
+                }
             }
 
             switch (type->kind()) {
