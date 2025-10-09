@@ -111,16 +111,10 @@ private suspend fun requestDevice(adapter: Adapter, @FeatureName requiredFeature
         adapter.requestDevice(
             DeviceDescriptor(
                 requiredFeatures = requiredFeatures,
-                deviceLostCallbackInfo =
-                    DeviceLostCallbackInfo(
-                        callback =
-                            DeviceLostCallback { device, reason, message ->
+                deviceLostCallback = { device, reason, message ->
                                 throw DeviceLostException(device, reason, message)
                             },
-                        mode = AllowSpontaneous,
-                    ),
-                uncapturedErrorCallbackInfo =
-                    UncapturedErrorCallbackInfo { device, type, message ->
+                uncapturedErrorCallback = { device, type, message ->
                         throw UncapturedErrorException(device, type, message)
                     },
             )

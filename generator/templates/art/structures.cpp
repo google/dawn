@@ -157,7 +157,10 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
     {% set Struct = as_cType(structure.name) %}
     {% set KotlinRecord = "KotlinRecord" + structure.name.CamelCase() %}
     {{ define_kotlin_record_structure(KotlinRecord, structure.members)}}
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members)}}
+    {# Check if the structure has a member whose type is a 'callback info' struct #}
+    {% set has_callbackInfoStruct = (structure.members | selectattr('type.category', 'equalto', 'callback info') | list) | length > 0 %}
+
+    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members, has_callbackInfoStruct)}}
     void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
         JNIClasses* classes = JNIClasses::getInstance(env);
         jclass clz = classes->{{ structure.name.camelCase() }};
@@ -169,11 +172,14 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                 jmethodID getter = env->GetMethodID(clz, "get{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
                 CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}});
             }
+
+            {% if "callback" in as_varName(member.name) | lower %}
+                {
+                    jmethodID getter = env->GetMethodID(clz, "get{{member.name.CamelCase()}}Executor", "()Ljava/util/concurrent/Executor;");
+                    CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}}Executor);
+                }
+            {% endif %}
         {% endfor %}
-        {% if structure.category == 'callback info' %}
-                jmethodID getter = env->GetMethodID(clz, "getExecutor", "()Ljava/util/concurrent/Executor;");
-                CallGetter(env, getter, obj, &kotlinRecord.executor);
-        {% endif %}
 
         //* Fill all struct members from the Kotlin record.
         ConvertInternal(c, kotlinRecord, converted);

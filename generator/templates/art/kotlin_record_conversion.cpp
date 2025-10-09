@@ -37,14 +37,14 @@
             {% else %}
                 {{ arg_to_jni_type(member) }} {{ as_varName(member.name) }};
             {% endif %}
-            {% if as_varName(member.name) == 'callback' %}
-                jobject executor;
+            {% if "callback" in as_varName(member.name) | lower %}
+                jobject {{as_varName(member.name)}}Executor;
             {% endif %}
         {% endfor%}
     };
 {% endmacro %}
 
-{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members) %}
+{% macro define_kotlin_to_struct_conversion(function_name, kotlin_name, struct_name, members, has_callbackInfoStruct = False) %}
     inline void {{function_name}}(JNIContext* c, const {{kotlin_name}}& inStruct, {{struct_name}}* outStruct) {
         JNIEnv* env = c->env;
         JNIClasses* classes = JNIClasses::getInstance(env);
@@ -52,11 +52,24 @@
 
         {% for member in kotlin_record_members(members) %}
             {
-                auto& in = inStruct.{{member.name.camelCase()}};
-                {% if as_varName(member.name) == 'callback' %}
-                    auto& in_executor = inStruct.executor;
+                {# If the parent structure has a 'callback info' member, convert the member to a 'callback info' object #}
+                {% if has_callbackInfoStruct and "callback" in as_varName(member.name) | lower %}
+                    jclass callbackInfoClass = classes->{{member.type.name.camelCase() ~ "Info"}};
+                    jmethodID constructorId = env->GetMethodID(
+                        callbackInfoClass,
+                        "<init>",
+                        "(Ljava/util/concurrent/Executor;Landroidx/webgpu/{{member.type.name.CamelCase()}};)V");
+                    jobject _callbackInfo = env->NewObject(
+                        callbackInfoClass,
+                        constructorId,
+                        inStruct.{{as_varName(member.name)}}Executor,
+                        inStruct.{{as_varName(member.name)}});
+                    auto& in = _callbackInfo;
+                    auto& out = outStruct->{{member.name.camelCase() ~ "Info"}};
+                {% else %}
+                    auto& in = inStruct.{{member.name.camelCase()}};
+                    auto& out = outStruct->{{member.name.camelCase()}};
                 {% endif %}
-                auto& out = outStruct->{{member.name.camelCase()}};
                 {% if member.constant_length == 1 %}
                     {% if member.type.category == 'structure' %}
                         if (in != nullptr) {
@@ -113,7 +126,7 @@
                     } else {
                         out = nullptr;
                     }
-                {% elif member.type.category in ['callback info', 'structure'] %}
+                {% elif (has_callbackInfoStruct == true and member.type.category == 'callback function') or (member.type.category == 'structure') %}
                     //* Mandatory structure.
                     ToNative(c, env, in, &out);
                 {% elif member.name.get() == "window" and member.type.name.get() == "void *" %}
@@ -123,7 +136,7 @@
                     out = reinterpret_cast<{{as_cType(member.type.name)}}>(static_cast<uintptr_t>(in));
                 {% elif member.type.category in ["native", "enum", "bitmask"] %}
                     out = static_cast<{{as_cType(member.type.name)}}>(in);
-                {% elif member.type.category in ['callback function', 'function pointer'] %}
+                {% elif (has_callbackInfoStruct == false and member.type.category == 'callback function') or (member.type.category in 'function pointer') %}
                     //* Function pointers and callback functions require each argument converting.
                     //* A custom native callback is generated to wrap the Kotlin callback.
                     out = [](
@@ -165,8 +178,6 @@
                                                  callbackArg) }}
                         {% endfor %}
 
-                        //* Get the client (Kotlin) callback so we can call it.
-                        {% set callbackName = 'on' + member.type.name.chunks[:-1] | map('title') | join %}
                         jclass executorClass = env->FindClass("java/util/concurrent/Executor");
                         jmethodID executeMethodID = env->GetMethodID(executorClass,
                                                                      "execute",
@@ -190,7 +201,7 @@
                     };
                     //* TODO(b/330293719): free associated resources.
                     outStruct->{{ userdata }} = new UserData(
-                        {.callback = env->NewGlobalRef(in), .executor = env->NewGlobalRef(inStruct.executor), .jvm = c->jvm});
+                        {.callback = env->NewGlobalRef(in), .executor = env->NewGlobalRef(inStruct.{{as_varName(member.name)}}Executor), .jvm = c->jvm});
 
                 {% else %}
                     {{ unreachable_code() }}
