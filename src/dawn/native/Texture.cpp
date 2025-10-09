@@ -486,42 +486,17 @@ wgpu::TextureUsage GetTextureViewUsage(wgpu::TextureUsage sourceTextureUsage,
 MaybeError ValidateTextureComponentSwizzle(const DeviceBase* device,
                                            const TextureBase* texture,
                                            const UnpackedPtr<TextureViewDescriptor>& descriptor) {
-    auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>();
-    if (!swizzleDesc) {
-        return {};
+    if (auto* swizzleDesc = descriptor.Get<TextureComponentSwizzleDescriptor>()) {
+        DAWN_INVALID_IF(!device->HasFeature(Feature::TextureComponentSwizzle),
+                        "swizzle used without the %s feature enabled.",
+                        wgpu::FeatureName::TextureComponentSwizzle);
+
+        auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
+        DAWN_TRY(ValidateComponentSwizzle(swizzle.r));
+        DAWN_TRY(ValidateComponentSwizzle(swizzle.g));
+        DAWN_TRY(ValidateComponentSwizzle(swizzle.b));
+        DAWN_TRY(ValidateComponentSwizzle(swizzle.a));
     }
-
-    DAWN_INVALID_IF(!device->HasFeature(Feature::TextureComponentSwizzle),
-                    "swizzle used without the %s feature enabled.",
-                    wgpu::FeatureName::TextureComponentSwizzle);
-
-    wgpu::TextureUsage usage = GetTextureViewUsage(texture->GetUsage(), descriptor->usage);
-    if ((usage & (wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageBinding)) ==
-        0) {
-        return {};
-    }
-
-    auto swizzle = swizzleDesc->swizzle.WithTrivialFrontendDefaults();
-    DAWN_INVALID_IF(swizzle.r != wgpu::ComponentSwizzle::R,
-                    "The texture view's component swizzle r (%s) must be %s when usage "
-                    "includes %s or %s.",
-                    swizzle.r, wgpu::ComponentSwizzle::R, wgpu::TextureUsage::RenderAttachment,
-                    wgpu::TextureUsage::StorageBinding);
-    DAWN_INVALID_IF(swizzle.g != wgpu::ComponentSwizzle::G,
-                    "The texture view's component swizzle g (%s) must be %s when usage "
-                    "includes %s or %s.",
-                    swizzle.g, wgpu::ComponentSwizzle::G, wgpu::TextureUsage::RenderAttachment,
-                    wgpu::TextureUsage::StorageBinding);
-    DAWN_INVALID_IF(swizzle.b != wgpu::ComponentSwizzle::B,
-                    "The texture view's component swizzle b (%s) must be %s when usage "
-                    "includes %s or %s.",
-                    swizzle.b, wgpu::ComponentSwizzle::B, wgpu::TextureUsage::RenderAttachment,
-                    wgpu::TextureUsage::StorageBinding);
-    DAWN_INVALID_IF(swizzle.a != wgpu::ComponentSwizzle::A,
-                    "The texture view's component swizzle a (%s) must be %s when usage "
-                    "includes %s or %s.",
-                    swizzle.a, wgpu::ComponentSwizzle::A, wgpu::TextureUsage::RenderAttachment,
-                    wgpu::TextureUsage::StorageBinding);
 
     return {};
 }
@@ -1784,6 +1759,7 @@ TextureViewBase::TextureViewBase(TextureBase* texture,
         mSwizzleBlue = swizzle.b;
         mSwizzleAlpha = swizzle.a;
     }
+    mIsSwizzleIdentity = GetSwizzle() == kRGBASwizzle;
 
     GetObjectTrackingList()->Track(this);
 
@@ -1906,6 +1882,10 @@ wgpu::TextureComponentSwizzle TextureViewBase::GetSwizzle() const {
         .b = mSwizzleBlue,
         .a = mSwizzleAlpha,
     };
+}
+
+bool TextureViewBase::IsSwizzleIdentity() const {
+    return mIsSwizzleIdentity;
 }
 
 bool TextureViewBase::IsYCbCr() const {

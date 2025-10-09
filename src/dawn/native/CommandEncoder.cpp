@@ -493,6 +493,11 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
         "The resolve target %s format (%s) does not support being used as resolve target.",
         resolveTarget, resolveTargetFormat);
 
+    // TODO(450506641): Precompute allowed usages of texture views (including swizzle identity
+    // check) instead of recomputing.
+    DAWN_INVALID_IF(!resolveTarget->IsSwizzleIdentity(),
+                    "The resolve target swizzle must be identity.");
+
     return {};
 }
 
@@ -629,6 +634,12 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     DAWN_TRY(ValidateStoreOp(colorAttachment.storeOp));
     DAWN_INVALID_IF(colorAttachment.loadOp == wgpu::LoadOp::Undefined, "loadOp must be set.");
     DAWN_INVALID_IF(colorAttachment.storeOp == wgpu::StoreOp::Undefined, "storeOp must be set.");
+
+    // TODO(450506641): Precompute allowed usages of texture views (including swizzle identity
+    // check) instead of recomputing.
+    DAWN_INVALID_IF(!attachment->IsSwizzleIdentity(),
+                    "The color attachment swizzle must be identity.");
+
     if (attachment->GetUsage() & wgpu::TextureUsage::TransientAttachment) {
         DAWN_INVALID_IF(colorAttachment.loadOp != wgpu::LoadOp::Clear &&
                             colorAttachment.loadOp != wgpu::LoadOp::ExpandResolveTexture,
@@ -761,6 +772,11 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
     }
 
     DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
+
+    // TODO(450506641): Precompute allowed usages of texture views (including swizzle identity
+    // check) instead of recomputing.
+    DAWN_INVALID_IF(!attachment->IsSwizzleIdentity(),
+                    "The depth stencil attachment swizzle must be identity.");
 
     DAWN_TRY(validationState->AddAttachment(attachment, AttachmentType::DepthStencilAttachment));
 

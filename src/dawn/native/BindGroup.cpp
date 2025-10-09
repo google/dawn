@@ -309,6 +309,10 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
     DAWN_INVALID_IF(view->GetLevelCount() != 1, "mipLevelCount (%u) of %s expected to be 1.",
                     view->GetLevelCount(), view);
 
+    // TODO(450506641): Precompute allowed usages of texture views (including swizzle identity
+    // check) instead of recomputing.
+    DAWN_INVALID_IF(!view->IsSwizzleIdentity(), "Swizzle of %s must be identity.", view);
+
     if (!device->HasFlexibleTextureViews()) {
         DAWN_TRY(ValidateCompatibilityModeTextureViewArrayLayer(device, view, texture));
     }
