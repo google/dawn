@@ -1434,6 +1434,9 @@ class Validator {
     /// @returns the vector pointer type for the given instruction operand
     const core::type::Type* GetVectorPtrElementType(const Instruction* inst, size_t idx);
 
+    /// @returns true if @p ty and its elements can be loaded
+    bool CanLoad(const core::type::Type* ty);
+
     /// Executes all the pending tasks
     void ProcessTasks();
 
@@ -4519,6 +4522,30 @@ void Validator::CheckExitLoop(const ExitLoop* l) {
     }
 }
 
+bool Validator::CanLoad(const core::type::Type* ty) {
+    return tint::Switch(
+        ty,  //
+        [&](const core::type::Array* arr) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                return false;
+            }
+            return CanLoad(arr->Elements().type);
+        },
+        [&](const core::type::Struct* str) {
+            for (auto* member : str->Members()) {
+                if (member->Type()->Is<core::type::Pointer>() &&
+                    capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+                    continue;
+                }
+                if (!CanLoad(member->Type())) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        [&](Default) { return ty->IsConstructible() || ty->IsHandle(); });
+}
+
 void Validator::CheckLoad(const Load* l) {
     if (!CheckResultsAndOperands(l, Load::kNumResults, Load::kNumOperands)) {
         return;
@@ -4545,11 +4572,10 @@ void Validator::CheckLoad(const Load* l) {
                 << " does not match source store type " << NameOf(mv->StoreType());
         }
 
-        if (auto* arr = mv->StoreType()->As<core::type::Array>()) {
-            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                AddError(l) << "cannot load a runtime-sized array";
-                return;
-            }
+        if (!CanLoad(mv->StoreType())) {
+            AddError(l, Load::kFromOperandOffset)
+                << "type " << NameOf(mv->StoreType()) << " cannot be loaded";
+            return;
         }
     }
 }

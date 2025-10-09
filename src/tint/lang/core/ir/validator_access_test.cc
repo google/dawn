@@ -629,9 +629,78 @@ TEST_F(IR_ValidatorTest, Load_RuntimeSizedArray) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
-                                          R"(:7:21 error: load: cannot load a runtime-sized array
+                                          R"(:7:26 error: load: type 'array<u32>' cannot be loaded
     %3:array<u32> = load %a
-                    ^^^^
+                         ^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Load_RuntimeSizedArray_InStruct) {
+    auto* s = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                         {mod.symbols.New("a"), ty.array<u32>()},
+                                                     });
+    auto* a = b.Var("a", ty.ptr<storage>(s));
+    a->SetBindingPoint(0, 0);
+    mod.root_block->Append(a);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Load(a);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:11:24 error: load: type 'MyStruct' cannot be loaded
+    %3:MyStruct = load %a
+                       ^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Load_Atomic) {
+    auto* a = b.Var("a", ty.ptr<storage, atomic<u32>, read_write>());
+    a->SetBindingPoint(0, 0);
+    mod.root_block->Append(a);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Load(a);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:7:27 error: load: type 'atomic<u32>' cannot be loaded
+    %3:atomic<u32> = load %a
+                          ^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Load_Atomic_InStruct) {
+    auto* s = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                         {mod.symbols.New("a"), ty.atomic<u32>()},
+                                                     });
+    auto* a = b.Var("a", ty.ptr<storage>(s));
+    a->SetBindingPoint(0, 0);
+    mod.root_block->Append(a);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Load(a);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(
+                                          R"(:11:24 error: load: type 'MyStruct' cannot be loaded
+    %3:MyStruct = load %a
+                       ^^
 )")) << res.Failure();
 }
 

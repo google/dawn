@@ -728,7 +728,7 @@ struct inner {
     mod.root_block->Append(var);
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Load(var);
+        b.Let(var);
         b.Return(func);
     });
 
