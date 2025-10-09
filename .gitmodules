@@ -97,10 +97,6 @@
 	path = third_party/glslang/src
 	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/glslang
 	gclient-condition = dawn_standalone
-[submodule "third_party/spirv-cross/src"]
-	path = third_party/spirv-cross/src
-	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Cross
-	gclient-condition = dawn_standalone
 [submodule "third_party/spirv-headers/src"]
 	path = third_party/spirv-headers/src
 	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/SPIRV-Headers
