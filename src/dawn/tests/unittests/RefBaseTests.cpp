@@ -311,6 +311,32 @@ TEST(RefBase, TCopyAssignmentAlternate) {
                                              Event{Action::kMarker, 30}));
 }
 
+TEST(RefBase, AssignNull) {
+    Events events;
+    RefTracker tracker(1, &events);
+    Ref ref(tracker);
+
+    events.clear();
+    ref = nullptr;
+    EXPECT_EQ(ref.Get(), RefTrackerTraits::kNullValue);
+    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release tracker
+                                             Event{Action::kAssign, 1, 0}  // assign null
+                                             ));
+}
+
+TEST(RefBase, Reset) {
+    Events events;
+    RefTracker tracker(1, &events);
+    Ref ref(tracker);
+
+    events.clear();
+    ref.Reset();
+    EXPECT_EQ(ref.Get(), RefTrackerTraits::kNullValue);
+    EXPECT_THAT(events, testing::ElementsAre(Event{Action::kRelease, 1},   // release tracker
+                                             Event{Action::kAssign, 1, 0}  // assign null
+                                             ));
+}
+
 // Regression test for an issue where RefBase<T*> comparison would end up using operator bool
 // depending on the order in which the compiler did implicit conversions.
 struct FakePtrRefTraits {
