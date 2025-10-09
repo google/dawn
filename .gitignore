@@ -42,7 +42,6 @@
 /third_party/partition_alloc
 /third_party/protobuf
 /third_party/siso/cipd/
-/third_party/spirv-cross/src/
 /third_party/spirv-headers/src/
 /third_party/spirv-tools/src/
 /third_party/swiftshader
