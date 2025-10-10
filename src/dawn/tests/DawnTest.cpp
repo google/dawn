@@ -890,6 +890,10 @@ bool DawnTestBase::IsWebGPUOnWebGPU() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU;
 }
 
+bool DawnTestBase::IsWebGPUOnSwiftshader() const {
+    return IsWebGPUOnWebGPU() && IsSwiftshader();
+}
+
 bool DawnTestBase::IsOpenGL() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::OpenGL;
 }

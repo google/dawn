@@ -2040,7 +2040,8 @@ DAWN_INSTANTIATE_TEST(BufferMapExtendedUsagesTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

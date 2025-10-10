@@ -288,9 +288,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
 
 // Test that the device can be dropped while createPipelineAsync is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     // TODO(crbug.com/447823475) This test is flaky on several platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
@@ -299,6 +296,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -319,8 +317,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
 
 // Test that the device can be dropped inside a createPipelineAsync callback
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
     // TODO(crbug.com/448426209) This test is flaky on many platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
@@ -329,6 +325,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -353,8 +350,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 // Test that the device can be dropped while createPipelineAsync which will hit the frontend cache
 // is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
     // TODO(crbug.com/448426209) This test is flaky on many platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
@@ -363,6 +358,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -391,8 +387,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will hit the
 // frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
     // TODO(crbug.com/448426209) This test is flaky on many platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
@@ -401,6 +395,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -429,8 +424,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped while createPipelineAsync which will race with a compilation
 // to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
     // TODO(crbug.com/448426209) This test is flaky on many platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());
@@ -439,6 +432,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
@@ -463,8 +457,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
 // Test that the device can be dropped inside a createPipelineAsync callback which will race
 // with a compilation to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
-    // TODO(crbug.com/413053623): implement webgpu::ShaderModule
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
     // TODO(crbug.com/448426209) This test is flaky on many platforms
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
     DAWN_SUPPRESS_TEST_IF(IsD3D12());

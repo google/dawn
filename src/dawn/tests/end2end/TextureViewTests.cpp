@@ -1119,7 +1119,8 @@ DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(TextureViewRenderingTest,
                       D3D11Backend(),
@@ -1129,7 +1130,8 @@ DAWN_INSTANTIATE_TEST(TextureViewRenderingTest,
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class TextureViewTest : public DawnTest {};
 
@@ -1185,7 +1187,8 @@ DAWN_INSTANTIATE_TEST(TextureView3DTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class TextureView1DTest : public DawnTest {};
 
@@ -1259,7 +1262,8 @@ DAWN_INSTANTIATE_TEST(TextureView1DTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

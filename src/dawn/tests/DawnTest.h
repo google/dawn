@@ -264,6 +264,7 @@ class DawnTestBase {
     bool IsMetal() const;
     bool IsNull() const;
     bool IsWebGPUOnWebGPU() const;
+    bool IsWebGPUOnSwiftshader() const;
     bool IsOpenGL() const;
     bool IsOpenGLES() const;
     bool IsVulkan() const;

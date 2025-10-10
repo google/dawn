@@ -205,9 +205,6 @@ TEST_P(QueueWriteBufferTests, MaxBufferSizeWriteBuffer) {
 // Test a special code path: writing when dynamic uploader already contatins some unaligned
 // data, it might be necessary to use a ring buffer with properly aligned offset.
 TEST_P(QueueWriteBufferTests, UnalignedDynamicUploader) {
-    // TODO(crbug.com/413053623): implement webgpu::Texture
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     utils::UnalignDynamicUploader(device);
 
     wgpu::BufferDescriptor descriptor;

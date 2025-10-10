@@ -2004,7 +2004,8 @@ DAWN_INSTANTIATE_TEST_P(CopyTests_T2B,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend(),
                          VulkanBackend({"use_blit_for_snorm_texture_to_buffer_copy",
-                                        "use_blit_for_bgra8unorm_texture_to_buffer_copy"})},
+                                        "use_blit_for_bgra8unorm_texture_to_buffer_copy"}),
+                         WebGPUBackend()},
                         {
                             wgpu::TextureFormat::R8Unorm,
                             wgpu::TextureFormat::RG8Unorm,
@@ -2111,7 +2112,8 @@ DAWN_INSTANTIATE_TEST(CopyTests_T2B_No_Format_Param,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend(),
-                      VulkanBackend({"use_blit_for_depth32float_texture_to_buffer_copy"}));
+                      VulkanBackend({"use_blit_for_depth32float_texture_to_buffer_copy"}),
+                      WebGPUBackend());
 
 class CopyTests_T2B_Compat : public CopyTests_T2B {
   protected:
@@ -3373,7 +3375,7 @@ DAWN_INSTANTIATE_TEST_P(
                    "mip_level"}),
      D3D12Backend(
          {"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions"}),
-     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
     {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGB9E5Ufloat});
 
 // Test copying between textures that have srgb compatible texture formats;
@@ -3388,7 +3390,7 @@ TEST_P(CopyTests_T2T_Srgb, FullCopy) {
 
 DAWN_INSTANTIATE_TEST_P(CopyTests_T2T_Srgb,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend()},
+                         OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
                         {wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA8UnormSrgb,
                          wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::BGRA8UnormSrgb});
 
@@ -3454,7 +3456,8 @@ DAWN_INSTANTIATE_TEST(ClearBufferTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Regression tests to reproduce a flaky failure when running whole WebGPU CTS on Intel GPUs.
 // See crbug.com/dawn/1487 for more details.
@@ -3833,7 +3836,8 @@ DAWN_INSTANTIATE_TEST(T2TCopyFromDirtyHeapTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

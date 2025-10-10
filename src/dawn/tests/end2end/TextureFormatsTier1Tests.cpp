@@ -338,8 +338,9 @@ DAWN_INSTANTIATE_TEST(RenderAttachmentFormatsTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
                       VulkanBackend(),
-                      OpenGLBackend());
+                      WebGPUBackend());
 
 class BlendableFormatsTest : public TextureFormatsTier1Test {
   protected:
@@ -446,8 +447,9 @@ DAWN_INSTANTIATE_TEST(BlendableFormatsTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
                       VulkanBackend(),
-                      OpenGLBackend());
+                      WebGPUBackend());
 
 class MultisampleResolveFormatsTest : public TextureFormatsTier1Test {
   protected:
@@ -539,8 +541,9 @@ DAWN_INSTANTIATE_TEST(MultisampleResolveFormatsTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
                       VulkanBackend(),
-                      OpenGLBackend());
+                      WebGPUBackend());
 
 class MultisampleFormatsTest : public TextureFormatsTier1Test {
   protected:
@@ -730,8 +733,9 @@ DAWN_INSTANTIATE_TEST(MultisampleFormatsTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
+                      OpenGLBackend(),
                       VulkanBackend(),
-                      OpenGLBackend());
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

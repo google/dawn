@@ -31,12 +31,41 @@
 #include <webgpu/webgpu.h>
 #include <string>
 #include <vector>
+#include "dawn/native/Commands.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/wgpu_structs_autogen.h"
 
 // A bunch of ToWGPU helper functions to convert dawn::native descriptors to WGPU C descriptors.
 
 namespace dawn::native::webgpu {
+
+WGPUExtent3D ToWGPU(const Extent3D& extent);
+
+WGPUOrigin3D ToWGPU(const Origin3D& origin);
+
+WGPUColor ToWGPU(const dawn::native::Color& color);
+
+WGPUTexelCopyBufferLayout ToWGPU(const TexelCopyBufferLayout& copy);
+
+WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy);
+
+WGPUTexelCopyBufferInfo ToWGPU(const TexelCopyBufferLayout& copy, const BufferBase* buffer);
+
+WGPUTextureAspect ToWGPU(const Aspect aspect);
+
+WGPULoadOp ToWGPU(const wgpu::LoadOp op);
+
+WGPUStoreOp ToWGPU(const wgpu::StoreOp op);
+
+WGPUIndexFormat ToWGPU(const wgpu::IndexFormat format);
+
+WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes);
+
+WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy);
+
+WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info);
+
+WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachmentInfo& info);
 
 WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
 

@@ -776,7 +776,7 @@ TEST_P(TextureFormatTest, RGBA32Float) {
 TEST_P(TextureFormatTest, R16Float) {
     // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
     // swiftshader
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE() || IsWebGPUOnSwiftshader());
 
     DoFloat16Test({wgpu::TextureFormat::R16Float, 2, TextureComponentType::Float, 1});
 }
@@ -785,7 +785,7 @@ TEST_P(TextureFormatTest, R16Float) {
 TEST_P(TextureFormatTest, RG16Float) {
     // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
     // swiftshader
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE() || IsWebGPUOnSwiftshader());
 
     DoFloat16Test({wgpu::TextureFormat::RG16Float, 4, TextureComponentType::Float, 2});
 }
@@ -794,7 +794,7 @@ TEST_P(TextureFormatTest, RG16Float) {
 TEST_P(TextureFormatTest, RGBA16Float) {
     // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY isn't handled correctly by
     // swiftshader
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() || IsANGLE() || IsWebGPUOnSwiftshader());
 
     DoFloat16Test({wgpu::TextureFormat::RGBA16Float, 8, TextureComponentType::Float, 4});
 }
@@ -906,6 +906,8 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
     DAWN_TEST_UNSUPPORTED_IF(!IsRG11B10UfloatRenderableSupported());
     // TODO(crbug.com/388318201): expected: 0xf87e0000, actual: 0xfffff800
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
+    // TODO(crbug.com/413053623): expected: 0xf87e0000, actual: 0x003ff800
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnSwiftshader());
 
     constexpr uint32_t kFloat11Zero = 0;
     constexpr uint32_t kFloat11Infinity = 0x7C0;
@@ -1013,7 +1015,8 @@ DAWN_INSTANTIATE_TEST(TextureFormatTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn
