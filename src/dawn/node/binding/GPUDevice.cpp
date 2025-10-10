@@ -317,6 +317,13 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
         return {};
     }
 
+    if (desc.mappedAtCreation && desc.size % 4 != 0) {
+        Napi::RangeError::New(
+            env, "createBuffer failed, size is not a multiple of 4 when mappedAtCreation is true.")
+            .ThrowAsJavaScriptException();
+        return {};
+    }
+
     wgpu::Buffer dawnBuffer = device_.CreateBuffer(&desc);
     // Buffer creation may return nullptr if it fails to map at creation. Translate that to a
     // RangeError as required by the spec.
