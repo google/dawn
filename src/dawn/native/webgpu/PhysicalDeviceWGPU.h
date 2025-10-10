@@ -77,6 +77,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     raw_ptr<Backend> mBackend;
     WGPUAdapter mInnerAdapter = nullptr;
+    WGPUBackendType mInnerBackendType = WGPUBackendType_Undefined;
 };
 
 }  // namespace dawn::native::webgpu

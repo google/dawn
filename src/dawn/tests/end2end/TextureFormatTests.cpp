@@ -906,7 +906,7 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
     DAWN_TEST_UNSUPPORTED_IF(!IsRG11B10UfloatRenderableSupported());
     // TODO(crbug.com/388318201): expected: 0xf87e0000, actual: 0xfffff800
     DAWN_SUPPRESS_TEST_IF(IsD3D11());
-    // TODO(crbug.com/413053623): expected: 0xf87e0000, actual: 0x003ff800
+    // TODO(crbug.com/440123094): expected: 0xf87e0000, actual: 0x003ff800
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOnSwiftshader());
 
     constexpr uint32_t kFloat11Zero = 0;

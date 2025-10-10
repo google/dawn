@@ -1601,6 +1601,7 @@ TEST_P(ExternalTextureTests, MultipleBindings) {
     ASSERT_NE(pipeline.Get(), nullptr);
 }
 
+// TODO(crbug.com/440123094): Implement external texture for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(ExternalTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),

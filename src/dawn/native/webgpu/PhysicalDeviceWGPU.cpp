@@ -64,6 +64,7 @@ PhysicalDevice::PhysicalDevice(Backend* backend, WGPUAdapter innerAdapter)
     mDriverDescription = ToString(info.description);
     mSubgroupMinSize = info.subgroupMinSize;
     mSubgroupMaxSize = info.subgroupMaxSize;
+    mInnerBackendType = info.backendType;
 
     GetFunctions().adapterInfoFreeMembers(info);
 }
@@ -117,6 +118,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             EnableFeature(feature);
         }
     }
+    EnableFeature(Feature::AdapterPropertiesWGPU);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -143,6 +145,9 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {
     // TODO(crbug.com/413053623): Populate other AdapterInfo Chained extensions when necessary.
+    if (auto* wgpuProperties = info.Get<AdapterPropertiesWGPU>()) {
+        wgpuProperties->backendType = FromAPI(mInnerBackendType);
+    }
 }
 
 FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(

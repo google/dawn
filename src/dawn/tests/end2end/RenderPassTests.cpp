@@ -191,7 +191,8 @@ DAWN_INSTANTIATE_TEST(RenderPassTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Test that clearing the lower mips of an R8Unorm texture works. This is a regression test for
 // dawn:1071 where Intel Metal devices fail to do that correctly, requiring a workaround.
@@ -251,7 +252,8 @@ DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
                       MetalBackend({"metal_render_r8_rg8_unorm_small_mip_to_temp_texture"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Test that clearing a depth16unorm texture with multiple subresources works. This is a regression
 // test for dawn:1389 where Intel Metal devices fail to do that correctly, requiring a workaround.
@@ -391,7 +393,8 @@ DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1389,
                       MetalBackend({"use_blit_for_buffer_to_depth_texture_copy"}),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

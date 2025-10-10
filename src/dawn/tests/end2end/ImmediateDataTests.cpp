@@ -489,7 +489,9 @@ DAWN_INSTANTIATE_TEST(ImmediateDataTests,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
-                      VulkanBackend());
+                      VulkanBackend()
+                      // TODO(crbug.com/440123094): Fix limits and Add WebGPUBackend.
+);
 
 }  // anonymous namespace
 }  // namespace dawn

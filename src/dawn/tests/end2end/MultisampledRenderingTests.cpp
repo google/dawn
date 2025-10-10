@@ -582,6 +582,9 @@ TEST_P(MultisampledRenderingTest, ResolveIntoNonZeroLocation) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
+    // TODO(crbug.com/440123094): Fix fragment stage output writeMask assignment for WebGPUBackend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
 
@@ -2865,6 +2868,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      WebGPUBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
                       VulkanBackend({"resolve_multiple_attachments_in_separate_passes"}),
@@ -2881,6 +2885,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingWithTransientAttachmentTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      WebGPUBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
@@ -2896,6 +2901,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      WebGPUBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
@@ -2903,6 +2909,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
                       MetalBackend({"always_resolve_into_zero_level_and_layer",
                                     "emulate_store_and_msaa_resolve"}));
 
+// TODO(crbug.com/440123094): Fix loadOp assignment for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(DawnLoadResolveTextureTest,
                       D3D11Backend(),
                       D3D12Backend(),

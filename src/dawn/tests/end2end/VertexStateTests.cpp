@@ -553,6 +553,9 @@ TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
 
 // Checks that using the last vertex buffer doesn't overflow the vertex buffer table in Metal.
 TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
+    // TODO(crbug.com/440123094): Fix vertex buffer slot 0 was not set bug.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     constexpr uint32_t kBufferIndex = kMaxVertexBuffers - 1;
 
     utils::ComboVertexState vertexState;
@@ -668,7 +671,8 @@ DAWN_INSTANTIATE_TEST(VertexStateTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class OptionalVertexStateTest : public DawnTest {};
 
@@ -715,7 +719,8 @@ DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

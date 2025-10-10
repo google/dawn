@@ -2451,7 +2451,8 @@
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
             {"value": 58, "name": "texture component swizzle", "tags": ["dawn"]},
-            {"value": 60, "name": "chromium experimental bindless", "tags": ["dawn"]}
+            {"value": 60, "name": "chromium experimental bindless", "tags": ["dawn"]},
+            {"value": 61, "name": "adapter properties WGPU", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -4014,7 +4015,8 @@
             {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]},
             {"value": 77, "name": "texel buffer binding entry", "tags": ["dawn"]},
             {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]},
-            {"value": 79, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]}
+            {"value": 79, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
+            {"value": 80, "name": "adapter properties WGPU", "tags": ["dawn"]}
         ]
     },
     "texture": {
@@ -4656,6 +4658,15 @@
       "tags": ["dawn"],
       "members": [
           {"name": "driver version", "type": "uint32_t"}
+      ]
+    },
+    "adapter properties WGPU": {
+      "category": "structure",
+      "chained": "out",
+      "chain roots": ["adapter info"],
+      "tags": ["dawn"],
+      "members": [
+          {"name": "backend type", "type": "backend type"}
       ]
     },
     "dawn buffer descriptor error info from wire client": {

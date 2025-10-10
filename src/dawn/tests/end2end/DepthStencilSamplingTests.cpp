@@ -1009,13 +1009,15 @@ TEST_P(StencilSamplingTest, SampleStencilOnly) {
 DAWN_INSTANTIATE_TEST_P(DepthStencilSamplingTest,
                         {D3D11Backend(), D3D11Backend({"use_packed_depth24_unorm_stencil8_format"}),
                          D3D12Backend(), D3D12Backend({"use_packed_depth24_unorm_stencil8_format"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend(),
+                         WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthAndStencilFormats.begin(),
                                                          utils::kDepthAndStencilFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(DepthSamplingTest,
                         {D3D11Backend(), D3D11Backend({"use_packed_depth24_unorm_stencil8_format"}),
-                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend(),
+                         WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kDepthFormats.begin(),
                                                          utils::kDepthFormats.end()));
 
@@ -1023,7 +1025,7 @@ DAWN_INSTANTIATE_TEST_P(StencilSamplingTest,
                         {D3D12Backend(), D3D12Backend({"use_packed_depth24_unorm_stencil8_format"}),
                          MetalBackend(),
                          MetalBackend({"metal_use_combined_depth_stencil_format_for_stencil8"}),
-                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
 

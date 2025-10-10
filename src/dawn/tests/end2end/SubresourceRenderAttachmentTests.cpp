@@ -186,7 +186,8 @@ DAWN_INSTANTIATE_TEST(SubresourceRenderAttachmentTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

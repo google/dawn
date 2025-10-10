@@ -150,7 +150,8 @@ DAWN_INSTANTIATE_TEST(FeatureArchInfoTest_MaxLimits,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(FeatureArchInfoTest_TieredMaxLimits,
                       D3D11Backend(),
@@ -158,7 +159,8 @@ DAWN_INSTANTIATE_TEST(FeatureArchInfoTest_TieredMaxLimits,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

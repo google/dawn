@@ -359,10 +359,12 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                 mBackendTypeFilter = wgpu::BackendType::OpenGLES;
             } else if (strcmp("vulkan", param) == 0) {
                 mBackendTypeFilter = wgpu::BackendType::Vulkan;
+            } else if (strcmp("webgpu", param) == 0) {
+                mBackendTypeFilter = wgpu::BackendType::WebGPU;
             } else {
-                ErrorLog()
-                    << "Invalid backend \"" << param
-                    << "\". Valid backends are: d3d12, metal, null, opengl, opengles, vulkan.";
+                ErrorLog() << "Invalid backend \"" << param
+                           << "\". Valid backends are: d3d12, metal, null, opengl, opengles, "
+                              "vulkan, webgpu.";
                 DAWN_UNREACHABLE();
             }
             mHasBackendTypeFilter = true;
@@ -515,6 +517,17 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
+            // Unless it is WebGPU adapter, the wgpuBackendType stays undefined.
+            wgpu::BackendType wgpuBackendType = wgpu::BackendType::Undefined;
+            if (info.backendType == wgpu::BackendType::WebGPU) {
+                // Chain in the extension to get the inner backend type of the WebGPU adapter.
+                wgpu::AdapterPropertiesWGPU wgpuProperties;
+                wgpu::AdapterInfo wgpuInfo;
+                wgpuInfo.nextInChain = &wgpuProperties;
+                adapter.GetInfo(&wgpuInfo);
+                wgpuBackendType = wgpuProperties.backendType;
+            }
+
             // Skip non-OpenGLES/D3D11 compat adapters. Metal/Vulkan/D3D12 support
             // core WebGPU.
             bool isDefaultingCompatibilityMode =
@@ -567,7 +580,8 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
                                                        isDefaultingCompatibilityMode);
             if (adapterNameSet.find(adapterTypeAndName) == adapterNameSet.end()) {
                 adapterNameSet.insert(adapterTypeAndName);
-                mAdapterProperties.emplace_back(info, selected, isDefaultingCompatibilityMode);
+                mAdapterProperties.emplace_back(info, selected, isDefaultingCompatibilityMode,
+                                                wgpuBackendType);
             }
         }
     }
@@ -888,6 +902,10 @@ bool DawnTestBase::IsNull() const {
 
 bool DawnTestBase::IsWebGPUOnWebGPU() const {
     return mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU;
+}
+
+bool DawnTestBase::IsWebGPUOn(wgpu::BackendType backend) const {
+    return IsWebGPUOnWebGPU() && mParam.adapterProperties.innerBackendType == backend;
 }
 
 bool DawnTestBase::IsWebGPUOnSwiftshader() const {

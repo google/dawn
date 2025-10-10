@@ -351,6 +351,9 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 //  2 - Write ones into it with a compute shader.
 //  3 - Use the indirect buffer in a Dispatch while also reading its data.
 TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
+    // TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
     step2PipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
         struct Buf {
@@ -423,7 +426,8 @@ DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

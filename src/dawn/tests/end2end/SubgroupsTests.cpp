@@ -282,7 +282,8 @@ DAWN_INSTANTIATE_TEST(SubgroupsShaderTests,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_dxc"}),
                       MetalBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class SubgroupsShaderTestsFragment : public SubgroupsTestsBase<AdapterTestParam> {
   protected:
@@ -394,7 +395,8 @@ DAWN_INSTANTIATE_TEST(SubgroupsShaderTestsFragment,
                       D3D12Backend(),
                       D3D12Backend({}, {"use_dxc"}),
                       MetalBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 enum class BroadcastType {
     I32,

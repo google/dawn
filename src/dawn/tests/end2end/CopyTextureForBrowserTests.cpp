@@ -1156,7 +1156,8 @@ DAWN_INSTANTIATE_TEST(CopyTextureForBrowser_Basic,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Verify |CopyTextureForBrowser| doing color conversion correctly when
 // the source texture is RGBA8Unorm format.

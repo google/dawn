@@ -520,7 +520,8 @@ DAWN_INSTANTIATE_TEST(ImmediateDataBufferLengthComputePipelineTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 // Test: Render pipeline with SetBindGroup + SetImmediateData + Draw
 // This tests the basic case for render pipelines
@@ -680,7 +681,8 @@ DAWN_INSTANTIATE_TEST(ImmediateDataBufferLengthRenderPipelineTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

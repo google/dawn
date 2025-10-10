@@ -3637,7 +3637,7 @@ DAWN_INSTANTIATE_TEST_P(
     CopyToDepthStencilTextureAfterDestroyingBigBufferTests,
     {D3D11Backend(), D3D12Backend(),
      D3D12Backend({"d3d12_force_clear_copyable_depth_stencil_texture_on_creation"}), MetalBackend(),
-     OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+     OpenGLBackend(), OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
     {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Stencil8},
     {InitializationMethod::CopyBufferToTexture, InitializationMethod::WriteTexture,
      InitializationMethod::CopyTextureToTexture},

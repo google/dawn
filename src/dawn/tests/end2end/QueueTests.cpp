@@ -799,7 +799,8 @@ DAWN_INSTANTIATE_TEST_P(QueueWriteTextureTests,
                          MetalBackend({"use_blit_for_buffer_to_depth_texture_copy",
                                        "use_blit_for_buffer_to_stencil_texture_copy"}),
                          OpenGLBackend(), OpenGLESBackend(),
-                         OpenGLESBackend({"use_blit_for_stencil_texture_write"}), VulkanBackend()},
+                         OpenGLESBackend({"use_blit_for_stencil_texture_write"}), VulkanBackend(),
+                         WebGPUBackend()},
                         {
                             wgpu::TextureFormat::R8Unorm,
                             wgpu::TextureFormat::RG8Unorm,
@@ -997,7 +998,8 @@ DAWN_INSTANTIATE_TEST(QueueWriteTextureSimpleTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -2730,7 +2730,7 @@ DAWN_INSTANTIATE_TEST_B(VideoViewsRenderTargetTests,
 
 DAWN_INSTANTIATE_TEST_B(VideoViewsExtendedUsagesTests,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend()},
+                         OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
                         {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
                          wgpu::TextureFormat::R8BG8Biplanar422Unorm,
                          wgpu::TextureFormat::R8BG8Biplanar444Unorm,

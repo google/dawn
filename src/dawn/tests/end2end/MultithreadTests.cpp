@@ -1610,6 +1610,9 @@ TEST_P(MultithreadDrawIndexedIndirectTests, IndirectOffsetInParallel) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
+    // TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 
@@ -1713,7 +1716,8 @@ DAWN_INSTANTIATE_TEST(MultithreadTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
                       D3D11Backend(),
@@ -1723,7 +1727,8 @@ DAWN_INSTANTIATE_TEST(MultithreadCachingTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       D3D11Backend(),
@@ -1736,7 +1741,8 @@ DAWN_INSTANTIATE_TEST(MultithreadEncodingTests,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend(),
-                      VulkanBackend({"always_resolve_into_zero_level_and_layer"}));
+                      VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
+                      WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(
     MultithreadTextureCopyTests,
@@ -1748,7 +1754,8 @@ DAWN_INSTANTIATE_TEST(
     MetalBackend({"use_blit_for_buffer_to_stencil_texture_copy"}),
     OpenGLBackend(),
     OpenGLESBackend(),
-    VulkanBackend());
+    VulkanBackend(),
+    WebGPUBackend());
 
 DAWN_INSTANTIATE_TEST(MultithreadDrawIndexedIndirectTests,
                       D3D11Backend(),
@@ -1756,8 +1763,10 @@ DAWN_INSTANTIATE_TEST(MultithreadDrawIndexedIndirectTests,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
+// TODO(crbug.com/440123094): Implement QuerySets in WebGPUBackend.
 DAWN_INSTANTIATE_TEST(MultithreadTimestampQueryTests,
                       D3D11Backend(),
                       D3D12Backend(),

@@ -134,6 +134,7 @@ TEST_P(DrawIndirectTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, 4 * sizeof(uint32_t), notFilled, filled);
 }
 
+// TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(DrawIndirectTest,
                       D3D11Backend(),
                       D3D12Backend(),

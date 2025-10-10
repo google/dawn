@@ -318,6 +318,7 @@ TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
     IndirectTest({1, 2, 3, max + 1, 4, 5}, 3 * sizeof(uint32_t));
 }
 
+// TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(ComputeDispatchTests,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -579,6 +580,7 @@ TEST_P(ComputeMultipleDispatchesTests, ExceedsMaxWorkgroupsWithOffsetNoop) {
     IndirectTest({max + 1, 1, 1, 2, 3, 4}, {3 * sizeof(uint32_t), 0});
 }
 
+// TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
 DAWN_INSTANTIATE_TEST_P(ComputeMultipleDispatchesTests,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend()},

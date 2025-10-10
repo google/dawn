@@ -1280,7 +1280,8 @@ TEST_P(CompressedTextureFormatTest, CopyMultiple2DArrayLayers) {
 DAWN_INSTANTIATE_TEST_P(CompressedTextureFormatTest,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
                          OpenGLESBackend(), VulkanBackend(),
-                         VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"})},
+                         VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}),
+                         WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kCompressedFormats.begin(),
                                                          utils::kCompressedFormats.end()));
 
@@ -1344,7 +1345,8 @@ DAWN_INSTANTIATE_TEST(CompressedTextureFormatSpecificTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend(),
-                      VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}));
+                      VulkanBackend({"use_temporary_buffer_in_texture_to_texture_copy"}),
+                      WebGPUBackend());
 
 class CompressedTextureWriteTextureTest : public CompressedTextureFormatTest {
   protected:
@@ -1475,7 +1477,7 @@ TEST_P(CompressedTextureWriteTextureTest,
 
 DAWN_INSTANTIATE_TEST_P(CompressedTextureWriteTextureTest,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                         OpenGLESBackend(), VulkanBackend()},
+                         OpenGLESBackend(), VulkanBackend(), WebGPUBackend()},
                         std::vector<wgpu::TextureFormat>(utils::kCompressedFormats.begin(),
                                                          utils::kCompressedFormats.end()));
 

@@ -626,6 +626,7 @@ TEST_P(SizedBindingArrayTests, TextureNumLevels) {
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(3, 2, 1, 0), rp.color, 0, 0);
 }
 
+// TODO(crbug.com/440123094): Implement nextInChain of dynamic binding in WebGPUBackend.
 DAWN_INSTANTIATE_TEST(SizedBindingArrayTests,
                       D3D11Backend(),
                       D3D12Backend(),

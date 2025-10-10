@@ -297,7 +297,8 @@ DAWN_INSTANTIATE_TEST(OpArrayLengthTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       OpenGLESBackend({"gl_use_array_length_from_uniform"}),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

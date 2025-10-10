@@ -1619,6 +1619,9 @@ TEST_P(BufferMapExtendedUsagesTests, MapWriteIndexBufferAndDraw) {
 // Test that mapping an occlusion QueryResolve buffer then draw with the buffer then mapping again
 // works.
 TEST_P(BufferMapExtendedUsagesTests, MapWriteQueryBufferThenDrawThenMapWrite) {
+    // TODO(crbug.com/440123094): Implement QuerySetWGPU
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
     constexpr uint64_t kExpectedVal2 = 1;
     constexpr uint64_t kExpectedVal3 = 2;
     constexpr size_t kQueryResolveBufferSize = 3 * sizeof(uint64_t);

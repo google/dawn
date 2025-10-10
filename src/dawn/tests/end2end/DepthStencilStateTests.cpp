@@ -860,7 +860,8 @@ DAWN_INSTANTIATE_TEST(DepthStencilStateTest,
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       VulkanBackend({"vulkan_use_d32s8"}, {}),
-                      VulkanBackend({}, {"vulkan_use_d32s8"}));
+                      VulkanBackend({}, {"vulkan_use_d32s8"}),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -140,6 +140,8 @@ DAWN_INSTANTIATE_TEST(NonzeroBufferCreationTests,
                       OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                       {"lazy_clear_resource_on_first_use"}),
                       VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"},
+                                    {"lazy_clear_resource_on_first_use"}),
+                      WebGPUBackend({"nonzero_clear_resources_on_creation_for_testing"},
                                     {"lazy_clear_resource_on_first_use"}));
 
 }  // anonymous namespace

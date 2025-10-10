@@ -402,6 +402,7 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
     DoBasicCopyTest(srcOrigin, dstOrigin, copySize, naturalSize, dstTextureSize, options);
 }
 
+// TODO(crbug.com/440123094): Implement external texture for WebGPUBackend.
 DAWN_INSTANTIATE_TEST_P(
     CopyExternalTextureForBrowserTests_Basic,
     {D3D11Backend(), D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),

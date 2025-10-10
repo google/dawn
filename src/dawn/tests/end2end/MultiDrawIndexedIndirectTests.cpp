@@ -431,6 +431,7 @@ TEST_P(MultiDrawIndexedIndirectTest, ValidateMultiAndSingleDrawsInSingleRenderPa
 
 DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectTest,
                       VulkanBackend(),
+                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 
@@ -557,6 +558,7 @@ TEST_P(MultiDrawIndexedIndirectUsingFirstVertexTest, IndirectOffset) {
 
 DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingFirstVertexTest,
                       VulkanBackend(),
+                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 
@@ -614,6 +616,7 @@ TEST_P(MultiDrawIndexedIndirectUsingInstanceIndexTest, IndirectOffset) {
 
 DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingInstanceIndexTest,
                       VulkanBackend(),
+                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 

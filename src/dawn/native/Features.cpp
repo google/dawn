@@ -433,7 +433,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalBindless,
      {"Experimental support for the prototype of a bindless extension",
-      "https://hackmd.io/@kangz/bindless-proposal", FeatureInfo::FeatureState::Experimental}}};
+      "https://hackmd.io/@kangz/bindless-proposal", FeatureInfo::FeatureState::Experimental}},
+    {Feature::AdapterPropertiesWGPU,
+     {"Support querying WebGPU backend info from the adapter.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "adapter_properties.md",
+      FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace
 

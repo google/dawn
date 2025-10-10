@@ -394,6 +394,11 @@ TEST_P(EventCompletionTests, WorkDoneAfterDeviceLoss) {
 
 // WorkDone event twice after submitting some trivial work.
 TEST_P(EventCompletionTests, WorkDoneTwice) {
+    // TODO(crbug.com/440123094): Investigate crash on WebGPU on Metal.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) &&
+                          GetParam().mWaitTypeAndCallbackMode ==
+                              WaitTypeAndCallbackMode::Spin_AllowSpontaneous);
+
     TrivialSubmit();
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
     TrackForTest(OnSubmittedWorkDone(wgpu::QueueWorkDoneStatus::Success));
