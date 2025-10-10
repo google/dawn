@@ -208,6 +208,7 @@ ci.builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "dawn_wasm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -243,6 +244,7 @@ ci.builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "dawn_wasm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
