@@ -66,6 +66,7 @@ def apply_linux_cq_builder_defaults(kwargs):
 def apply_mac_cq_builder_defaults(kwargs):
     kwargs = apply_cq_builder_defaults(kwargs)
     kwargs.setdefault("os", os.MAC_DEFAULT)
+    kwargs.setdefault("cpu", "arm64")
     return kwargs
 
 def apply_win_cq_builder_defaults(kwargs):
@@ -281,6 +282,7 @@ def dawn_linux_manual_builder(*, name, **kwargs):
     )
 
 def dawn_mac_manual_builder(*, name, **kwargs):
+    kwargs.setdefault("cpu", "arm64")
     return try_.builder(
         name = name,
         max_concurrent_builds = 1,
