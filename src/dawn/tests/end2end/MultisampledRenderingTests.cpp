@@ -582,9 +582,6 @@ TEST_P(MultisampledRenderingTest, ResolveIntoNonZeroLocation) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
-    // TODO(crbug.com/440123094): Fix fragment stage output writeMask assignment for WebGPUBackend.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
 

@@ -1200,9 +1200,6 @@ TEST_P(ColorStateTest, SparseAttachmentsDifferentColorMask) {
 
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
 
-    // TODO(crbug.com/440123094): Fix setting color target fragment stage writeMask
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         struct Outputs {
             @location(1) o1 : vec4f,

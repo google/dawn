@@ -278,18 +278,18 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
                       WGPUCommandEncoder innerEncoder,
                       CommandIterator& commands,
                       BeginRenderPassCmd* renderPassCmd) {
-    std::vector<WGPURenderPassColorAttachment> colorAttachments;
+    PerColorAttachment<WGPURenderPassColorAttachment> colorAttachments = {};
 
+    size_t colorAttachmentCount = 0;
     for (auto i : renderPassCmd->attachmentState->GetColorAttachmentsMask()) {
-        colorAttachments.push_back(ToWGPU(renderPassCmd->colorAttachments[i]));
+        colorAttachments[i] = ToWGPU(renderPassCmd->colorAttachments[i]);
+        colorAttachmentCount = static_cast<size_t>(i) + 1;
     }
-
-    colorAttachments.reserve(colorAttachments.size());
 
     WGPURenderPassDescriptor passDescriptor{
         .nextInChain = nullptr,
         .label = ToOutputStringView(renderPassCmd->label),
-        .colorAttachmentCount = colorAttachments.size(),
+        .colorAttachmentCount = colorAttachmentCount,
         .colorAttachments = colorAttachments.data(),
         .depthStencilAttachment = nullptr,
         // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for

@@ -54,15 +54,15 @@ MaybeError RenderPipeline::InitializeImpl() {
     WGPURenderPipelineDescriptor desc;
     std::vector<WGPUConstantEntry> vertexConstants;
     std::vector<std::string> vertexConstantsKeys;
-    std::array<WGPUVertexBufferLayout, kMaxVertexBuffers> vertexBuffers;
-    std::array<absl::InlinedVector<WGPUVertexAttribute, kMaxVertexAttributes>, kMaxVertexBuffers>
-        vertexAttributes;
+    PerVertexBuffer<WGPUVertexBufferLayout> vertexBuffers = {};
+    PerVertexBuffer<absl::InlinedVector<WGPUVertexAttribute, kMaxVertexAttributes>>
+        vertexAttributes = {};
     WGPUDepthStencilState depthStencil;
     WGPUFragmentState fragmentState;
     std::vector<WGPUConstantEntry> fragmentConstants;
     std::vector<std::string> fragmentConstantsKeys;
-    std::array<WGPUColorTargetState, kMaxColorAttachments> colorTargets;
-    std::array<WGPUBlendState, kMaxColorAttachments> blends;
+    PerColorAttachment<WGPUColorTargetState> colorTargets = {};
+    PerColorAttachment<WGPUBlendState> blends = {};
 
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
@@ -85,7 +85,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     // Vertex Buffers
     for (VertexAttributeLocation location : GetAttributeLocationsUsed()) {
         const VertexAttributeInfo& dawnAttr = GetAttribute(location);
-        vertexAttributes[static_cast<size_t>(dawnAttr.vertexBufferSlot)].push_back({
+        vertexAttributes[dawnAttr.vertexBufferSlot].push_back({
             .nextInChain = nullptr,
             .format = ToAPI(dawnAttr.format),
             .offset = dawnAttr.offset,
@@ -96,14 +96,14 @@ MaybeError RenderPipeline::InitializeImpl() {
     size_t bufferCount = 0;
     for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
         const VertexBufferInfo& dawnBuffer = GetVertexBuffer(slot);
-        WGPUVertexBufferLayout* wgpuBuffer = &vertexBuffers[bufferCount];
+        WGPUVertexBufferLayout* wgpuBuffer = &vertexBuffers[slot];
         wgpuBuffer->arrayStride = dawnBuffer.arrayStride;
         wgpuBuffer->stepMode = ToAPI(dawnBuffer.stepMode);
 
-        auto& wgpuAttributes = vertexAttributes[static_cast<size_t>(slot)];
+        auto& wgpuAttributes = vertexAttributes[slot];
         wgpuBuffer->attributes = wgpuAttributes.data();
         wgpuBuffer->attributeCount = wgpuAttributes.size();
-        bufferCount++;
+        bufferCount = static_cast<size_t>(slot) + 1;
     }
     desc.vertex.bufferCount = bufferCount;
     desc.vertex.buffers = vertexBuffers.data();
@@ -147,18 +147,18 @@ MaybeError RenderPipeline::InitializeImpl() {
         uint32_t targetCount = 0;
         for (auto i : GetColorAttachmentsMask()) {
             const ColorTargetState* dawnTarget = GetColorTargetState(i);
-            WGPUColorTargetState* wgpuTarget = &colorTargets[targetCount];
+            WGPUColorTargetState* wgpuTarget = &colorTargets[i];
             wgpuTarget->nextInChain = nullptr;
             wgpuTarget->format = ToAPI(dawnTarget->format);
 
             if (dawnTarget->blend != nullptr) {
-                blends[targetCount] = ToWGPU(dawnTarget->blend);
-                wgpuTarget->blend = &blends[targetCount];
+                blends[i] = ToWGPU(dawnTarget->blend);
+                wgpuTarget->blend = &blends[i];
             } else {
                 wgpuTarget->blend = nullptr;
             }
             wgpuTarget->writeMask = ToAPI(dawnTarget->writeMask);
-            targetCount++;
+            targetCount = static_cast<size_t>(i) + 1;
         }
         fragmentState.targetCount = targetCount;
         fragmentState.targets = colorTargets.data();
