@@ -37,7 +37,7 @@ public class {{ structure.name.CamelCase() }}(
     {% for member in kotlin_record_members(structure.members) %}
         {% if member.type.category in ['callback function']%}
         {{'     '}}@get:JvmName("get{{member.name.CamelCase()}}Executor")
-        {{'     '}}public var {{member.name.camelCase()}}Executor: Executor? = Executor(Runnable::run),
+        {{'     '}}public var {{member.name.camelCase()}}Executor: Executor = Executor(Runnable::run),
         {% endif %}
         {{ kotlin_annotation(member) }} public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
         {% if kotlin_annotation(member) == '@CallbackMode'%}
