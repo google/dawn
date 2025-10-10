@@ -2140,6 +2140,15 @@
             {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
         ]
     },
+    "shared texture memory metal end access state": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared texture memory end access state"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "commands scheduled future", "type": "future"}
+        ]
+    },
     "shared texture memory vk image layout begin state": {
         "category": "structure",
         "chained": "in",
@@ -4004,7 +4013,8 @@
             {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]},
             {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]},
             {"value": 77, "name": "texel buffer binding entry", "tags": ["dawn"]},
-            {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]}
+            {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]},
+            {"value": 79, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

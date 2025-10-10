@@ -216,10 +216,19 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
     TextureBase* texture,
     ExecutionSerial lastUsageSerial,
     UnpackedPtr<EndAccessState>& state) {
-    DAWN_TRY(state.ValidateSubset<>());
+    DAWN_TRY(state.ValidateSubset<SharedTextureMemoryMetalEndAccessState>());
     DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceMTLSharedEvent),
                     "Required feature (%s) is missing.",
                     wgpu::FeatureName::SharedFenceMTLSharedEvent);
+
+    auto* metalEndAccessState = state.Get<SharedTextureMemoryMetalEndAccessState>();
+    if (metalEndAccessState) {
+        DAWN_INVALID_IF(metalEndAccessState->commandsScheduledFuture.id != kNullFutureID,
+                        "Commands scheduled future has already been set.");
+        metalEndAccessState->commandsScheduledFuture.id =
+            ToBackend(GetDevice()->GetQueue())->GetCommandsScheduledFuture();
+    }
+
     Ref<SharedFence> fence;
     DAWN_TRY_ASSIGN(fence, ToBackend(GetDevice()->GetQueue())->GetOrCreateSharedFence());
     return FenceAndSignalValue{std::move(fence), static_cast<uint64_t>(lastUsageSerial)};

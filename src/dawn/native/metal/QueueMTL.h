@@ -49,11 +49,15 @@ class Queue final : public QueueBase {
 
     CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
     MaybeError SubmitPendingCommandBuffer();
+
+    // TODO(crbug.com/444702048): Remove after migrating Chromium to commands scheduled futures.
     void WaitForCommandsToBeScheduled();
+
+    FutureID GetCommandsScheduledFuture();
+
     id<MTLSharedEvent> GetMTLSharedEvent() const;
     ResultOrError<Ref<SharedFence>> GetOrCreateSharedFence();
 
-    Ref<WaitListEvent> CreateWorkDoneEvent(ExecutionSerial serial);
     ResultOrError<ExecutionSerial> WaitForQueueSerialImpl(ExecutionSerial waitSerial,
                                                           Nanoseconds timeout) override;
 
@@ -62,7 +66,8 @@ class Queue final : public QueueBase {
     ~Queue() override;
 
     MaybeError Initialize();
-    void UpdateWaitingEvents(ExecutionSerial completedSerial);
+    void UpdateCommandsScheduledEvents(ExecutionSerial scheduledSerial);
+    void UpdateCommandsCompletedEvents(ExecutionSerial completedSerial);
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
@@ -75,17 +80,18 @@ class Queue final : public QueueBase {
     NSPRef<id<MTLCommandQueue>> mCommandQueue;
     CommandRecordingContext mCommandContext{this};
 
-    // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
-    // a different thread so we guard access to it with a mutex.
-    std::mutex mLastSubmittedCommandsMutex;
-    NSPRef<id<MTLCommandBuffer>> mLastSubmittedCommands;
-
-    // This mutex must be held to access mWaitingEvents (which may happen in a Metal driver
-    // thread).
+    // The following fields will be accessed in an async Metal command buffer handler that can be
+    // fired on a different thread so we guard access to them with mutexes.
+    // We need to keep the last submitted command buffer around to call waitUntilScheduled on it
+    // for WaitForCommandsToBeScheduled. Note that what's mutex protected is just the pointer to the
+    // last submitted command buffer; the command buffer itself is safe to use across threads.
+    MutexProtected<NSPRef<id<MTLCommandBuffer>>> mLastSubmittedCommands;
+    MutexProtected<SerialMap<ExecutionSerial, Ref<EventManager::TrackedEvent>>>
+        mCommandsScheduledEvents;
     // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
-    // mWaitingEvents serials, we could avoid taking this lock sometimes. Optimize if needed.
-    // See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
-    MutexProtected<SerialMap<ExecutionSerial, Ref<WaitListEvent>>> mWaitingEvents;
+    // mCommandsCompletedEvents serials, we could avoid taking this lock sometimes. Optimize if
+    // needed. See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
+    MutexProtected<SerialMap<ExecutionSerial, Ref<WaitListEvent>>> mCommandsCompletedEvents;
 
     // A shared event that can be exported for synchronization with other users of Metal.
     // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.

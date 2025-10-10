@@ -32,8 +32,11 @@
 
 #import <Metal/Metal.h>
 
+#include <thread>
+
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
+#include "dawn/native/MetalBackend.h"
 #include "dawn/native/metal/Forward.h"
 #include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
@@ -63,6 +66,28 @@ wgpu::SharedTextureMemory CreateSharedTextureMemoryHelper(const wgpu::Device& de
     desc.nextInChain = &ioSurfaceDesc;
 
     return device.ImportSharedTextureMemory(&desc);
+}
+
+void SubmitClearPass(const wgpu::Device& device,
+                     const wgpu::Queue& queue,
+                     const wgpu::Texture& texture) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassColorAttachment attachment;
+    attachment.view = texture.CreateView();
+    attachment.loadOp = wgpu::LoadOp::Clear;
+    attachment.storeOp = wgpu::StoreOp::Store;
+    wgpu::RenderPassDescriptor renderPassDesc;
+    renderPassDesc.colorAttachmentCount = 1;
+    renderPassDesc.colorAttachments = &attachment;
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
+void WaitForFuture(const wgpu::Device& device, wgpu::Future future) {
+    auto waitStatus = device.GetAdapter().GetInstance().WaitAny(future, UINT64_MAX);
+    EXPECT_EQ(waitStatus, wgpu::WaitStatus::Success);
 }
 
 class Backend : public SharedTextureMemoryTestBackend {
@@ -301,6 +326,79 @@ TEST_P(SharedTextureMemoryTests, DisallowStorageBinding) {
     EXPECT_FALSE(memoryMtl->GetMtlTextureUsage() & MTLTextureUsageShaderWrite);
     EXPECT_TRUE(memoryMtl->GetMtlPlaneTextures()[0]);
     EXPECT_EQ(memoryMtl->GetMtlPlaneTextures()[0].Get().usage, memoryMtl->GetMtlTextureUsage());
+}
+
+// Test that a WGPUFuture is returned on EndAccess and can be waited on.
+TEST_P(SharedTextureMemoryTests, CommandsScheduledFuture) {
+    wgpu::SharedTextureMemory memory = CreateSharedTextureMemoryHelper(device);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    memory.BeginAccess(texture, &beginDesc);
+
+    SubmitClearPass(device, queue, texture);
+
+    wgpu::SharedTextureMemoryMetalEndAccessState metalEndState = {};
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    endState.nextInChain = &metalEndState;
+    memory.EndAccess(texture, &endState);
+
+    WaitForFuture(device, metalEndState.commandsScheduledFuture);
+}
+
+// Test that a WGPUFuture is returned on EndAccess and can be waited on from another thread.
+TEST_P(SharedTextureMemoryTests, CommandsScheduledFutureThreadSafe) {
+    wgpu::SharedTextureMemory memory = CreateSharedTextureMemoryHelper(device);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    memory.BeginAccess(texture, &beginDesc);
+
+    SubmitClearPass(device, queue, texture);
+
+    wgpu::SharedTextureMemoryMetalEndAccessState metalEndState = {};
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    endState.nextInChain = &metalEndState;
+    memory.EndAccess(texture, &endState);
+
+    std::thread thread([&]() { WaitForFuture(device, metalEndState.commandsScheduledFuture); });
+    thread.join();
+}
+
+// Test that a WGPUFuture is returned on EndAccess and can be waited on after the work is done.
+TEST_P(SharedTextureMemoryTests, CommandsScheduledFutureAfterWorkDone) {
+    wgpu::SharedTextureMemory memory = CreateSharedTextureMemoryHelper(device);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    memory.BeginAccess(texture, &beginDesc);
+
+    SubmitClearPass(device, queue, texture);
+
+    wgpu::SharedTextureMemoryMetalEndAccessState metalEndState = {};
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    endState.nextInChain = &metalEndState;
+    memory.EndAccess(texture, &endState);
+
+    WaitForAllOperations();
+
+    WaitForFuture(device, metalEndState.commandsScheduledFuture);
+}
+
+// Test that a null WGPUFuture is returned on EndAccess if no work is done.
+TEST_P(SharedTextureMemoryTests, CommandsScheduledFutureNoWork) {
+    wgpu::SharedTextureMemory memory = CreateSharedTextureMemoryHelper(device);
+    wgpu::Texture texture = memory.CreateTexture();
+
+    wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+    memory.BeginAccess(texture, &beginDesc);
+
+    wgpu::SharedTextureMemoryMetalEndAccessState metalEndState = {};
+    wgpu::SharedTextureMemoryEndAccessState endState = {};
+    endState.nextInChain = &metalEndState;
+    memory.EndAccess(texture, &endState);
+
+    EXPECT_EQ(metalEndState.commandsScheduledFuture.id, 0u);
 }
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Metal,
