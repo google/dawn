@@ -61,6 +61,9 @@ class Texture final : public TextureBase {
 
     Texture(DeviceBase* device, const UnpackedPtr<TextureDescriptor>& descriptor);
 
+    MTLTextureType GetMTLTextureType() const;
+    MTLTextureUsage GetMTLTextureUsage() const;
+
     id<MTLTexture> GetMTLTexture(Aspect aspect) const;
     IOSurfaceRef GetIOSurface();
     NSPRef<id<MTLTexture>> CreateFormatView(wgpu::TextureFormat format);
@@ -94,9 +97,11 @@ class Texture final : public TextureBase {
                             TextureBase::ClearValue clearValue);
 
     absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
-    MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
 
+    MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
+    MTLTextureType mMtlTextureType;
     MTLTextureUsage mMtlUsage;
+
     CFRef<IOSurfaceRef> mIOSurface = nullptr;
 };
 

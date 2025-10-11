@@ -130,63 +130,38 @@ MTLTextureSwizzleChannels ToMetalTextureSwizzleChannels(wgpu::TextureComponentSw
     return mtlSwizzle;
 }
 
-bool ShouldCreateNewTextureView(const TextureBase* texture,
-                                wgpu::TextureUsage internalViewUsage,
-                                const UnpackedPtr<TextureViewDescriptor>& textureViewDescriptor,
-                                bool needsSwizzle) {
-    constexpr wgpu::TextureUsage kShaderUsageNeedsView =
-        wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
-    constexpr wgpu::TextureUsage kUsageNeedsView = kShaderUsageNeedsView |
-                                                   wgpu::TextureUsage::RenderAttachment |
-                                                   wgpu::TextureUsage::StorageAttachment;
-    if ((internalViewUsage & kUsageNeedsView) == 0) {
-        return false;
-    }
+bool RequiresCreatingNewTextureView(const Texture* texture,
+                                    bool viewMtlFormatDiffers,
+                                    wgpu::TextureUsage internalViewUsage,
+                                    const UnpackedPtr<TextureViewDescriptor>& textureViewDescriptor,
+                                    MTLTextureType textureViewType,
+                                    const std::optional<MTLTextureSwizzleChannels>& swizzle) {
+    // A view can have render attachment usages, shader binding usages, or both, so those are the
+    // cases handled below. (Technically they can have copy-only usages, but such views can't be
+    // used for anything, so we don't bother to optimize to avoid creating views in that case.)
 
-    if (texture->GetFormat().format != textureViewDescriptor->format &&
-        !texture->GetFormat().HasDepthOrStencil()) {
-        // Color format reinterpretation required.
-        // Note: Depth/stencil formats don't support reinterpretation.
-        // See also TextureView::GetAttachmentInfo when modifying this condition.
+    // Different format (color format reinterpretation or aspect subsetting) always requires a view.
+    if (viewMtlFormatDiffers) {
         return true;
     }
 
-    // Reinterpretation not required. Now, we only need a new view if the view dimension or
-    // set of subresources for the shader is different from the base texture.
-    if ((texture->GetInternalUsage() & kShaderUsageNeedsView) == 0) {
-        return false;
-    }
-
-    if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount ||
-        (texture->GetArrayLayers() == 1 && texture->GetDimension() == wgpu::TextureDimension::e2D &&
-         textureViewDescriptor->dimension == wgpu::TextureViewDimension::e2DArray)) {
-        // If the view has a different number of array layers, we need a new view.
-        // And, if the original texture is a 2D texture with one array layer, we need a new
-        // view to view it as a 2D array texture.
-        return true;
-    }
-
-    if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
-        return true;
-    }
-
-    // If the texture is created with MTLTextureUsagePixelFormatView, we need
-    // a new view to perform format reinterpretation.
-    if ((MetalTextureUsage(texture->GetFormat(), texture->GetInternalUsage()) &
-         MTLTextureUsagePixelFormatView) != 0) {
-        return true;
-    }
-
-    switch (textureViewDescriptor->dimension) {
-        case wgpu::TextureViewDimension::Cube:
-        case wgpu::TextureViewDimension::CubeArray:
+    // A view is only needed for any other parameters if used from a shader. (For attachments,
+    // subresource indices are passed elsewhere in the backend, not as part of the Metal view.)
+    bool hasShaderUsages = internalViewUsage & (wgpu::TextureUsage::StorageBinding |
+                                                wgpu::TextureUsage::TextureBinding);
+    if (hasShaderUsages) {
+        if (texture->GetNumMipLevels() != textureViewDescriptor->mipLevelCount) {
             return true;
-        default:
-            break;
-    }
-
-    if (needsSwizzle) {
-        return true;
+        }
+        if (texture->GetArrayLayers() != textureViewDescriptor->arrayLayerCount) {
+            return true;
+        }
+        if (texture->GetMTLTextureType() != textureViewType) {
+            return true;
+        }
+        if (swizzle.has_value()) {
+            return true;
+        }
     }
 
     return false;
@@ -272,7 +247,7 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     if (GetDevice()->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
         GetFormat().format == wgpu::TextureFormat::Stencil8) {
         // If we used a combined depth stencil format instead of stencil8, we need
-        // MTLTextureUsagePixelFormatView to reinterpet as stencil8.
+        // MTLTextureUsagePixelFormatView to reinterpret as stencil8.
         mtlDesc.usage |= MTLTextureUsagePixelFormatView;
     }
     mtlDesc.mipmapLevelCount = GetNumMipLevels();
@@ -370,6 +345,7 @@ MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescrip
 
     if (!GetFormat().IsMultiPlanar()) {
         NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
+        mMtlTextureType = [*mtlDesc textureType];
         mMtlUsage = [*mtlDesc usage];
         mMtlFormat = [*mtlDesc pixelFormat];
         mMtlPlaneTextures.resize(1);
@@ -395,6 +371,7 @@ MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescrip
             "Usage flags (%s) include %s, which is not compatible with creation from IOSurface.",
             GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
 
+        mMtlTextureType = MTLTextureType2D;
         mMtlUsage = MetalTextureUsage(GetFormat(), GetInternalUsage());
         // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
         mMtlFormat = MTLPixelFormatInvalid;
@@ -417,6 +394,7 @@ MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescrip
 void Texture::InitializeAsWrapping(const UnpackedPtr<TextureDescriptor>& descriptor,
                                    NSPRef<id<MTLTexture>> wrapped) {
     NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor();
+    mMtlTextureType = [*mtlDesc textureType];
     mMtlUsage = [*mtlDesc usage];
     mMtlFormat = [*mtlDesc pixelFormat];
     mMtlPlaneTextures.resize(1);
@@ -433,6 +411,7 @@ MaybeError Texture::InitializeFromSharedTextureMemory(
         GetInternalUsage(), wgpu::TextureUsage::TransientAttachment);
 
     mIOSurface = memory->GetIOSurface();
+    mMtlTextureType = MTLTextureType2D;
     mMtlUsage = memory->GetMtlTextureUsage();
     mMtlFormat = memory->GetMtlPixelFormat();
     mMtlPlaneTextures = memory->GetMtlPlaneTextures();
@@ -484,6 +463,14 @@ void Texture::SetLabelImpl() {
                          absl::StrFormat("Dawn_Plane_Texture[%zu]", i).c_str(), GetLabel());
         }
     }
+}
+
+MTLTextureType Texture::GetMTLTextureType() const {
+    return mMtlTextureType;
+}
+
+MTLTextureUsage Texture::GetMTLTextureUsage() const {
+    return mMtlUsage;
 }
 
 id<MTLTexture> Texture::GetMTLTexture(Aspect aspect) const {
@@ -807,59 +794,56 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     Aspect aspect = SelectFormatAspects(texture->GetFormat(), descriptor->aspect);
     id<MTLTexture> mtlTexture = texture->GetMTLTexture(aspect);
 
-    std::optional<MTLTextureSwizzleChannels> mtlSwizzle = ComputeMetalSwizzle();
-    bool needsNewView =
-        ShouldCreateNewTextureView(texture, GetInternalUsage(), descriptor, mtlSwizzle.has_value());
-    if (device->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
-        GetTexture()->GetFormat().format == wgpu::TextureFormat::Stencil8) {
-        // If MetalUseCombinedDepthStencilFormatForStencil8 is true and the format is Stencil8,
-        // we used a combined format instead on texture allocation.
-        // We need a new view to view it as stencil8.
-        needsNewView = true;
-    }
-    if (!needsNewView) {
-        mMtlTextureView = mtlTexture;
-    } else if (texture->GetFormat().IsMultiPlanar()) {
+    if (texture->GetFormat().IsMultiPlanar()) {
         // For multiplanar texture, plane view is already created in
         // InitializeFromInternalMultiPlanarTexture(). The view is only nullptr if aspect is
         // invalid.
         DAWN_ASSERT(mtlTexture != nullptr);
         mMtlTextureView = mtlTexture;
     } else {
-        MTLPixelFormat viewFormat = MetalPixelFormat(device, descriptor->format);
-        MTLPixelFormat textureFormat = MetalPixelFormat(device, GetTexture()->GetFormat().format);
+        MTLTextureType textureViewType =
+            MetalTextureViewType(descriptor->dimension, texture->GetSampleCount());
+        std::optional<MTLTextureSwizzleChannels> mtlSwizzle = ComputeMetalSwizzle();
 
+        MTLPixelFormat viewFormat = MetalPixelFormat(device, descriptor->format);
+        MTLPixelFormat textureFormat = MetalPixelFormat(device, texture->GetFormat().format);
         if (aspect == Aspect::Stencil && textureFormat != MTLPixelFormatStencil8) {
+            // Note we never use MTLPixelFormatDepth24Unorm_Stencil8 (doesn't exist on Apple GPUs).
             DAWN_ASSERT(textureFormat == MTLPixelFormatDepth32Float_Stencil8);
             viewFormat = MTLPixelFormatX32_Stencil8;
-        } else if (GetTexture()->GetFormat().HasDepth() && GetTexture()->GetFormat().HasStencil()) {
+        } else if (texture->GetFormat().HasDepth() && texture->GetFormat().HasStencil()) {
             // Depth-only views for depth/stencil textures in Metal simply use the original
             // texture's format.
             viewFormat = textureFormat;
         }
 
-        MTLTextureType textureViewType =
-            MetalTextureViewType(descriptor->dimension, texture->GetSampleCount());
-        auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->mipLevelCount);
-        auto arrayLayerRange = NSMakeRange(descriptor->baseArrayLayer, descriptor->arrayLayerCount);
-
-        if (mtlSwizzle) {
-            mMtlTextureView =
-                AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:viewFormat
-                                                            textureType:textureViewType
-                                                                 levels:mipLevelRange
-                                                                 slices:arrayLayerRange
-                                                                swizzle:mtlSwizzle.value()]);
+        if (!RequiresCreatingNewTextureView(texture, viewFormat != textureFormat,
+                                            GetInternalUsage(), descriptor, textureViewType,
+                                            mtlSwizzle)) {
+            mMtlTextureView = mtlTexture;
         } else {
-            mMtlTextureView =
-                AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:viewFormat
-                                                            textureType:textureViewType
-                                                                 levels:mipLevelRange
-                                                                 slices:arrayLayerRange]);
-        }
+            auto mipLevelRange = NSMakeRange(descriptor->baseMipLevel, descriptor->mipLevelCount);
+            auto arrayLayerRange =
+                NSMakeRange(descriptor->baseArrayLayer, descriptor->arrayLayerCount);
 
-        if (mMtlTextureView == nil) {
-            return DAWN_INTERNAL_ERROR("Failed to create MTLTexture view.");
+            if (mtlSwizzle) {
+                mMtlTextureView =
+                    AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:viewFormat
+                                                                textureType:textureViewType
+                                                                     levels:mipLevelRange
+                                                                     slices:arrayLayerRange
+                                                                    swizzle:mtlSwizzle.value()]);
+            } else {
+                mMtlTextureView =
+                    AcquireNSPRef([mtlTexture newTextureViewWithPixelFormat:viewFormat
+                                                                textureType:textureViewType
+                                                                     levels:mipLevelRange
+                                                                     slices:arrayLayerRange]);
+            }
+
+            if (mMtlTextureView == nil) {
+                return DAWN_INTERNAL_ERROR("Failed to create MTLTexture view.");
+            }
         }
     }
 
