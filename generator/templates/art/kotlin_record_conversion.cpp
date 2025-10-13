@@ -54,18 +54,22 @@
             {
                 {# If the parent structure has a 'callback info' member, convert the member to a 'callback info' object #}
                 {% if has_callbackInfoStruct and "callback" in as_varName(member.name) | lower %}
-                    jclass callbackInfoClass = classes->{{member.type.name.camelCase() ~ "Info"}};
-                    jmethodID constructorId = env->GetMethodID(
-                        callbackInfoClass,
-                        "<init>",
-                        "(Ljava/util/concurrent/Executor;Landroidx/webgpu/{{member.type.name.CamelCase()}};)V");
-                    jobject _callbackInfo = env->NewObject(
-                        callbackInfoClass,
-                        constructorId,
-                        inStruct.{{as_varName(member.name)}}Executor,
-                        inStruct.{{as_varName(member.name)}});
-                    auto& in = _callbackInfo;
-                    auto& out = outStruct->{{member.name.camelCase() ~ "Info"}};
+                    if (inStruct.{{ as_varName(member.name) }})
+                    {
+                        jclass callbackInfoClass = classes->{{ member.type.name.camelCase() ~ "Info" }};
+                        jmethodID constructorId = env->GetMethodID(
+                              callbackInfoClass,
+                              "<init>",
+                              "(Ljava/util/concurrent/Executor;Landroidx/webgpu/{{ member.type.name.CamelCase() }};)V");
+                        jobject _callbackInfo = env->NewObject(
+                              callbackInfoClass,
+                              constructorId,
+                              inStruct.{{ as_varName(member.name) }}Executor,
+                              inStruct.{{ as_varName(member.name) }});
+                        auto& in = _callbackInfo;
+                        auto& out = outStruct->{{ member.name.camelCase() ~ "Info" }};
+                        ToNative(c, env, in, &out);
+                    }
                 {% else %}
                     auto& in = inStruct.{{member.name.camelCase()}};
                     auto& out = outStruct->{{member.name.camelCase()}};
@@ -126,7 +130,9 @@
                     } else {
                         out = nullptr;
                     }
-                {% elif (has_callbackInfoStruct == true and member.type.category == 'callback function') or (member.type.category == 'structure') %}
+                {% elif has_callbackInfoStruct and "callback" in as_varName(member.name) | lower  %}
+                    {# Do nothing for this case #}
+                {% elif member.type.category == 'structure' %}
                     //* Mandatory structure.
                     ToNative(c, env, in, &out);
                 {% elif member.name.get() == "window" and member.type.name.get() == "void *" %}
