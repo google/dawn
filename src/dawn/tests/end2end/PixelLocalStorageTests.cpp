@@ -595,18 +595,27 @@ TEST_P(PixelLocalStorageTests, InvertedOffsetOrder) {
 
 // Test implicit pixel local slot.
 TEST_P(PixelLocalStorageTests, ImplicitSlot) {
+    // crbug.com/450817278.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsD3D11() && IsWARP());
+
     PLSSpec spec = {4, {}, CheckMethod::StorageBuffer};
     DoTest(spec);
 }
 
 // Test multiple implicit pixel local slot.
 TEST_P(PixelLocalStorageTests, MultipleImplicitSlot) {
+    // crbug.com/450817278.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsD3D11() && IsWARP());
+
     PLSSpec spec = {16, {}, CheckMethod::StorageBuffer};
     DoTest(spec);
 }
 
 // Test mixed implicit / explicit pixel local slot.
 TEST_P(PixelLocalStorageTests, MixedImplicitExplicit) {
+    // crbug.com/450817278.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsD3D11() && IsWARP());
+
     {
         PLSSpec spec = {16,
                         {{4, wgpu::TextureFormat::R32Uint}, {8, wgpu::TextureFormat::R32Float}},

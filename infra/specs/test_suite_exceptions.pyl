@@ -1,11 +1,1 @@
-{
-  'dawn_end2end_warp_tests': {
-    'remove_from': [
-      # Running with WARP in debug builds is quite slow. These can be enabled
-      # once sharding works properly and this can be more heavily sharded on
-      # debug testers.
-      'dawn-win-x64-sws-dbg',
-      'dawn-win-x86-sws-dbg',
-    ],
-  },
-}
+{}

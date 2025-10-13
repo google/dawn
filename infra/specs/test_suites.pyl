@@ -56,6 +56,10 @@
           'true_noop_merge',
         ],
         'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Very slow on debug builds.
+          'shards': 6,
+        },
       },
     },
     'dawn_node_cts_sws_tests': {
