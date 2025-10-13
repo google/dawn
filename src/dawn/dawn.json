@@ -3178,11 +3178,6 @@
             {"name": "timestamp writes", "type": "pass timestamp writes", "annotation": "const*", "optional": true}
         ]
     },
-    "render pass descriptor max draw count": {
-        "category": "typedef",
-        "type": "render pass max draw count",
-        "tags": ["dawn"]
-    },
     "render pass max draw count": {
         "category": "structure",
         "chained": "in",
@@ -3634,11 +3629,6 @@
             {"name": "label", "type": "string view", "optional": true}
         ]
     },
-    "shader module SPIRV descriptor": {
-        "category": "typedef",
-        "type": "shader source SPIRV",
-        "tags": ["dawn"]
-    },
     "shader source SPIRV": {
         "category": "structure",
         "chained": "in",
@@ -3647,11 +3637,6 @@
             {"name": "code size", "type": "uint32_t"},
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
         ]
-    },
-    "shader module WGSL descriptor": {
-        "category": "typedef",
-        "type": "shader source WGSL",
-        "tags": ["dawn"]
     },
     "shader source WGSL": {
         "category": "structure",
@@ -3760,11 +3745,6 @@
             {"name": "label", "type": "string view", "optional": true}
         ]
     },
-    "surface descriptor from android native window": {
-        "category": "typedef",
-        "type": "surface source android native window",
-        "tags": ["art", "native", "dawn"]
-    },
     "surface source android native window": {
         "category": "structure",
         "chained": "in",
@@ -3783,11 +3763,6 @@
             {"name": "selector", "type": "string view"}
         ]
     },
-    "surface descriptor from metal layer": {
-        "category": "typedef",
-        "type": "surface source metal layer",
-        "tags": ["native", "dawn"]
-    },
     "surface source metal layer": {
         "category": "structure",
         "chained": "in",
@@ -3796,11 +3771,6 @@
         "members": [
             {"name": "layer", "type": "void", "annotation": "*"}
         ]
-    },
-    "surface descriptor from windows HWND": {
-        "category": "typedef",
-        "type": "surface source windows HWND",
-        "tags": ["native", "dawn"]
     },
     "surface source windows HWND": {
         "category": "structure",
@@ -3812,11 +3782,6 @@
             {"name": "hwnd", "type": "void", "annotation": "*"}
         ]
     },
-    "surface descriptor from xcb window": {
-        "category": "typedef",
-        "type": "surface source XCB window",
-        "tags": ["native", "dawn"]
-    },
     "surface source XCB window": {
         "category": "structure",
         "chained": "in",
@@ -3827,11 +3792,6 @@
             {"name": "window", "type": "uint32_t"}
         ]
     },
-    "surface descriptor from xlib window": {
-        "category": "typedef",
-        "type": "surface source xlib window",
-        "tags": ["native", "dawn"]
-    },
     "surface source xlib window": {
         "category": "structure",
         "chained": "in",
@@ -3841,11 +3801,6 @@
             {"name": "display", "type": "void", "annotation": "*"},
             {"name": "window", "type": "uint64_t"}
         ]
-    },
-    "surface descriptor from wayland surface": {
-        "category": "typedef",
-        "type": "surface source wayland surface",
-        "tags": ["native", "dawn"]
     },
     "surface source wayland surface": {
         "category": "structure",
