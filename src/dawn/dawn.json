@@ -2450,7 +2450,7 @@
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
-            {"value": 58, "name": "texture component swizzle", "tags": ["dawn"]},
+            {"value": 58, "name": "texture component swizzle", "tags": ["dawn", "emscripten"]},
             {"value": 60, "name": "chromium experimental bindless", "tags": ["dawn"]},
             {"value": 61, "name": "adapter properties WGPU", "tags": ["dawn"]}
         ]
@@ -3962,7 +3962,7 @@
             {"value": 68, "name": "render pass descriptor resolve rect", "tags": ["dawn"]},
             {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
             {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
-            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn"]},
+            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn", "emscripten"]},
             {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
             {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
             {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
@@ -4282,7 +4282,7 @@
     },
     "texture component swizzle descriptor": {
         "category": "structure",
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "chained": "in",
         "chain roots": ["texture view descriptor"],
         "members": [
@@ -4326,7 +4326,7 @@
     },
     "texture component swizzle": {
         "category": "structure",
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "extensible": false,
         "members": [
             {"name": "r", "type": "component swizzle", "default": "r"},
@@ -4337,15 +4337,15 @@
     },
     "component swizzle": {
         "category": "enum",
-        "tags": ["dawn"],
+        "tags": ["dawn", "emscripten"],
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "zero"},
-            {"value": 2, "name": "one"},
-            {"value": 3, "name": "r"},
-            {"value": 4, "name": "g"},
-            {"value": 5, "name": "b"},
-            {"value": 6, "name": "a"}
+            {"value": 1, "name": "zero", "jsrepr": "'0'"},
+            {"value": 2, "name": "one", "jsrepr": "'1'"},
+            {"value": 3, "name": "r", "jsrepr": "'r'"},
+            {"value": 4, "name": "g", "jsrepr": "'g'"},
+            {"value": 5, "name": "b", "jsrepr": "'b'"},
+            {"value": 6, "name": "a", "jsrepr": "'a'"}
         ]
     },
     "y cb cr vk descriptor": {

@@ -138,6 +138,22 @@ TEST_F(SpotTests, ExternalRefCount) {
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
 }
 
+TEST_F(SpotTests, InvalidComponentSwizzle) {
+    wgpu::TextureDescriptor textureDesc = {};
+    textureDesc.size = {1, 1, 0};
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    wgpu::TextureComponentSwizzleDescriptor swizzleDesc = {};
+    // An invalid ComponentSwizzle value doesn't crash.
+    swizzleDesc.swizzle.r = static_cast<wgpu::ComponentSwizzle>(-1);
+    viewDesc.nextInChain = &swizzleDesc;
+    wgpu::TextureView view = texture.CreateView(&viewDesc);
+    ASSERT_TRUE(view);
+}
+
 template <typename T>
 void TestGetFeatures(T o) {  // o is either wgpu::Adapter or wgpu::Device.
     wgpu::SupportedFeatures f;

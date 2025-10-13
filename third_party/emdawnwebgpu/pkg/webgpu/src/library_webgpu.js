@@ -2591,7 +2591,24 @@ var LibraryWebGPU = {
   wgpuTextureCreateView: (texturePtr, descriptor) => {
     var desc;
     if (descriptor) {
-      {{{ gpu.makeCheckDescriptor('descriptor') }}}
+      var swizzle;
+      var nextInChainPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.nextInChain, '*') }}};
+      if (nextInChainPtr !== 0) {
+        var sType = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType, 'i32') }}};
+#if ASSERTIONS
+        assert(sType === {{{ gpu.SType.TextureComponentSwizzleDescriptor }}});
+        assert(0 === {{{ makeGetValue('nextInChainPtr', gpu.kOffsetOfNextInChainMember, '*') }}});
+#endif
+        var swizzleDescriptor = nextInChainPtr;
+        {{{ gpu.makeCheckDescriptor('swizzleDescriptor') }}}
+        var swizzlePtr = swizzleDescriptor + {{{ C_STRUCTS.WGPUTextureComponentSwizzleDescriptor.swizzle }}};
+        var r = {{{ gpu.makeGetEnum('swizzlePtr', C_STRUCTS.WGPUTextureComponentSwizzle.r, 'ComponentSwizzle') }}} || 'r';
+        var g = {{{ gpu.makeGetEnum('swizzlePtr', C_STRUCTS.WGPUTextureComponentSwizzle.g, 'ComponentSwizzle') }}} || 'g';
+        var b = {{{ gpu.makeGetEnum('swizzlePtr', C_STRUCTS.WGPUTextureComponentSwizzle.b, 'ComponentSwizzle') }}} || 'b';
+        var a = {{{ gpu.makeGetEnum('swizzlePtr', C_STRUCTS.WGPUTextureComponentSwizzle.a, 'ComponentSwizzle') }}} || 'a';
+        swizzle = `${r}${g}${b}${a}`;
+      }
+
       var mipLevelCount = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.mipLevelCount, 'u32') }}};
       var arrayLayerCount = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.arrayLayerCount, 'u32') }}};
       desc = {
@@ -2604,6 +2621,7 @@ var LibraryWebGPU = {
         "baseArrayLayer": {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.baseArrayLayer, 'u32') }}},
         "arrayLayerCount": arrayLayerCount === {{{ gpu.ARRAY_LAYER_COUNT_UNDEFINED }}} ? undefined : arrayLayerCount,
         "aspect": {{{ gpu.makeGetEnum('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.aspect, 'TextureAspect') }}},
+        "swizzle": swizzle,
       };
     }
 
