@@ -17,9 +17,10 @@ class AdapterTest {
 
         val instance = createInstance()
         runBlocking {
-            val (status1, adapter, message1) = instance.requestAdapter()
-            check(status1 == RequestAdapterStatus.Success && adapter != null) {
-                message1 ?: "Error requesting the adapter"
+            val result = instance.requestAdapter()
+            val adapter = result.adapter
+            check(result.status == RequestAdapterStatus.Success && adapter != null) {
+                result.message ?: "Error requesting the adapter"
             }
             val adapterInfo = adapter.getInfo()
 
