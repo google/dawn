@@ -64,6 +64,7 @@ ci.builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "dawn_wasm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -101,6 +102,7 @@ ci.builder(
             config = "dawn",
             apply_configs = [
                 "dawn_node",
+                "dawn_wasm",
             ],
         ),
         chromium_config = builder_config.chromium_config(
@@ -138,6 +140,9 @@ ci.builder(
             config = "dawn",
             # dawn_node is intentionally omitted since the original standalone
             # Linux/x86/Clang builders did not build/test with node.
+            apply_configs = [
+                "dawn_wasm",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
@@ -173,6 +178,9 @@ ci.builder(
             config = "dawn",
             # dawn_node is intentionally omitted since the original standalone
             # Linux/x86/Clang builders did not build/test with node.
+            apply_configs = [
+                "dawn_wasm",
+            ],
         ),
         chromium_config = builder_config.chromium_config(
             config = "dawn_base",
