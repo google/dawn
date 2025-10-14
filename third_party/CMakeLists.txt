@@ -120,6 +120,9 @@ if (EMSCRIPTEN)
     return()
 endif()
 
+# Force ENABLE_RTTI in spirv-tools and glslang.
+set(ENABLE_RTTI ${DAWN_ENABLE_RTTI} CACHE BOOL "" FORCE)
+
 if (NOT TARGET SPIRV-Headers)
     set(SPIRV_HEADERS_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
     set(SPIRV_HEADERS_SKIP_INSTALL ON CACHE BOOL "" FORCE)
@@ -138,9 +141,6 @@ if (NOT TARGET SPIRV-Tools AND
     set(SPIRV_SKIP_EXECUTABLES ON CACHE BOOL "" FORCE)
     set(SKIP_SPIRV_TOOLS_INSTALL ON CACHE BOOL "" FORCE)
     set(SPIRV_WERROR OFF CACHE BOOL OFF FORCE)
-    # ENABLE_RTTI is defined in spirv-tools's CMakeLists.txt
-    set(ENABLE_RTTI ${DAWN_ENABLE_RTTI} CACHE BOOL "" FORCE)
-
     message(STATUS "Dawn: using SPIRV-Tools at ${DAWN_SPIRV_TOOLS_DIR}")
     add_subdirectory(${DAWN_SPIRV_TOOLS_DIR} "${CMAKE_CURRENT_BINARY_DIR}/spirv-tools" EXCLUDE_FROM_ALL)
 endif()
