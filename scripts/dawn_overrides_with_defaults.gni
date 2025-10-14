@@ -116,6 +116,7 @@ if (!defined(dawn_egl_registry_dir)) {
 }
 
 # Defaults to the value inherited from .gclient.
+# Enable by setting "custom_vars": { "dawn_wasm": True }.
 if (!defined(dawn_wasm)) {
   dawn_wasm = false
 }

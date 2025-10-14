@@ -100,6 +100,12 @@ if (!build_with_chromium) {
       ":gtest",
     ]
   }
+
+  static_library("gmock_main") {
+    testonly = true
+    sources = [ "${googletest_dir}/googlemock/src/gmock_main.cc" ]
+    public_deps = [ ":gmock_and_gtest" ]
+  }
 } else {
   # When we are in Chromium we reuse its targets, and also add some deps that
   # are needed to launch the test in swarming mode.

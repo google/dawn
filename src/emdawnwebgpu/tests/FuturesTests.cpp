@@ -417,7 +417,7 @@ TEST_F(DeviceLevelTests, GetCompilationInfo) {
                                                           const wgpu::CompilationInfo* info) {
                           ASSERT_EQ(s, wgpu::CompilationInfoRequestStatus::Success);
                           ASSERT_NE(info, nullptr);
-                          ASSERT_EQ(info->messageCount, 1);
+                          ASSERT_EQ(info->messageCount, 1u);
 
                           message = info->messages[0].message;
                           messageType = info->messages[0].type;
@@ -430,7 +430,7 @@ TEST_F(DeviceLevelTests, GetCompilationInfo) {
                               }
                               chainLength++;
                           }
-                          ASSERT_EQ(chainLength, 1);
+                          ASSERT_EQ(chainLength, 1u);
                       }),
                   UINT64_MAX),
               wgpu::WaitStatus::Success);

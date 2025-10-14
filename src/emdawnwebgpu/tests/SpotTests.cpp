@@ -49,15 +49,15 @@ class SpotTests : public testing::Test {
             std::array{wgpu::InstanceFeatureName::TimedWaitAny};
         wgpu::InstanceDescriptor instanceDesc{.requiredFeatureCount = kInstanceFeatures.size(),
                                               .requiredFeatures = kInstanceFeatures.data()};
-        instance = wgpu::CreateInstance(&instanceDesc);
+        mInstance = wgpu::CreateInstance(&instanceDesc);
 
         wgpu::Adapter adapter;
         EXPECT_EQ(wgpu::WaitStatus::Success,
-                  instance.WaitAny(instance.RequestAdapter(
-                                       nullptr, wgpu::CallbackMode::WaitAnyOnly,
-                                       [&adapter](wgpu::RequestAdapterStatus, wgpu::Adapter a,
-                                                  wgpu::StringView) { adapter = std::move(a); }),
-                                   UINT64_MAX));
+                  mInstance.WaitAny(mInstance.RequestAdapter(
+                                        nullptr, wgpu::CallbackMode::WaitAnyOnly,
+                                        [&adapter](wgpu::RequestAdapterStatus, wgpu::Adapter a,
+                                                   wgpu::StringView) { adapter = std::move(a); }),
+                                    UINT64_MAX));
         EXPECT_TRUE(adapter);
         wgpu::SupportedFeatures features;
         adapter.GetFeatures(&features);
@@ -68,26 +68,26 @@ class SpotTests : public testing::Test {
         deviceDesc.requiredFeatures = features.features;
         wgpu::Device device;
         EXPECT_EQ(wgpu::WaitStatus::Success,
-                  instance.WaitAny(
+                  mInstance.WaitAny(
                       adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::WaitAnyOnly,
                                             [&device](wgpu::RequestDeviceStatus, wgpu::Device d,
                                                       wgpu::StringView) { device = std::move(d); }),
                       UINT64_MAX));
         EXPECT_TRUE(device);
-        this->adapter = adapter;
-        this->device = device;
+        this->mAdapter = adapter;
+        this->mDevice = device;
     }
 
   protected:
-    wgpu::Instance instance;
-    wgpu::Adapter adapter;
-    wgpu::Device device;
+    wgpu::Instance mInstance;
+    wgpu::Adapter mAdapter;
+    wgpu::Device mDevice;
 };
 
 TEST_F(SpotTests, QuerySet) {
     // Spot test wgpuQuerySetGetType which uses indexOf on an int-to-string table.
     wgpu::QuerySetDescriptor querySetDesc{.type = wgpu::QueryType::Timestamp, .count = 1};
-    wgpu::QuerySet querySet = device.CreateQuerySet(&querySetDesc);
+    wgpu::QuerySet querySet = mDevice.CreateQuerySet(&querySetDesc);
     EXPECT_TRUE(querySet);
     EXPECT_EQ(querySet.GetType(), querySetDesc.type);
 }
@@ -96,7 +96,7 @@ TEST_F(SpotTests, BufferGetMapState) {
     // Spot test one of the string-to-int tables (Int_BufferMapState) to make sure
     // that Closure's minification didn't minify its keys.
     wgpu::BufferDescriptor bufferDesc{.usage = wgpu::BufferUsage::CopyDst, .size = 4};
-    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer buffer = mDevice.CreateBuffer(&bufferDesc);
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Unmapped);
 }
 
@@ -107,7 +107,7 @@ TEST_F(SpotTests, GetCompilationInfo) {
 
         wgpu::ShaderModuleDescriptor descriptor{};
         descriptor.nextInChain = &wgslDesc;
-        auto sm = device.CreateShaderModule(&descriptor);
+        auto sm = mDevice.CreateShaderModule(&descriptor);
         auto future = sm.GetCompilationInfo(
             wgpu::CallbackMode::WaitAnyOnly,
             [](wgpu::CompilationInfoRequestStatus, const wgpu::CompilationInfo* compilationInfo) {
@@ -117,7 +117,7 @@ TEST_F(SpotTests, GetCompilationInfo) {
                 // After this, any compilation info will be freed. (There was a bug here which
                 // this test catches, but only in ASAN builds.)
             });
-        EXPECT_EQ(wgpu::WaitStatus::Success, instance.WaitAny(future, UINT64_MAX));
+        EXPECT_EQ(wgpu::WaitStatus::Success, mInstance.WaitAny(future, UINT64_MAX));
     }
 }
 
@@ -125,7 +125,7 @@ TEST_F(SpotTests, ExternalRefCount) {
     wgpu::BufferDescriptor bufferDesc{
         .usage = wgpu::BufferUsage::MapRead, .size = 16, .mappedAtCreation = true};
 
-    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+    wgpu::Buffer buffer = mDevice.CreateBuffer(&bufferDesc);
     ASSERT_TRUE(buffer);
     EXPECT_EQ(buffer.GetMapState(), wgpu::BufferMapState::Mapped);
     {
@@ -143,7 +143,7 @@ TEST_F(SpotTests, InvalidComponentSwizzle) {
     textureDesc.size = {1, 1, 0};
     textureDesc.usage = wgpu::TextureUsage::TextureBinding;
     textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
-    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::Texture texture = mDevice.CreateTexture(&textureDesc);
 
     wgpu::TextureViewDescriptor viewDesc = {};
     wgpu::TextureComponentSwizzleDescriptor swizzleDesc = {};
@@ -194,18 +194,18 @@ void TestGetFeatures(T o) {  // o is either wgpu::Adapter or wgpu::Device.
 
 // Test GetFeatures and HasFeature enum lookups.
 TEST_F(SpotTests, GetFeatures) {
-    TestGetFeatures(adapter);
-    TestGetFeatures(device);
+    TestGetFeatures(mAdapter);
+    TestGetFeatures(mDevice);
 }
 
 TEST_F(SpotTests, GetWGSLLanguageFeatures) {
     wgpu::SupportedWGSLLanguageFeatures f;
-    instance.GetWGSLLanguageFeatures(&f);
+    mInstance.GetWGSLLanguageFeatures(&f);
     auto features = std::span(f.features, f.featureCount);
     for (auto feature : features) {
         // GetWGSLLanguageFeatures should filter out any unknown features.
         EXPECT_NE(feature, wgpu::WGSLLanguageFeatureName{0});
-        EXPECT_TRUE(instance.HasWGSLLanguageFeature(feature));
+        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
     }
 
     // Test a specific feature to make sure minification worked.
@@ -216,7 +216,7 @@ TEST_F(SpotTests, GetWGSLLanguageFeatures) {
         })) {
         auto feature = wgpu::WGSLLanguageFeatureName::UnrestrictedPointerParameters;
         EXPECT_NE(std::find(features.begin(), features.end(), feature), features.end());
-        EXPECT_TRUE(instance.HasWGSLLanguageFeature(feature));
+        EXPECT_TRUE(mInstance.HasWGSLLanguageFeature(feature));
     }
 }
 

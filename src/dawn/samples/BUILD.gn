@@ -76,11 +76,10 @@ template("sample") {
     }
 
     if (is_wasm) {
-      # The Dawn samples require either JSPI or ASYNCIFY to run. Note that
-      # JSPI is still experimental, so we need to turn off warnings.
+      # The Dawn samples require either JSPI or Asyncify to run.
       ldflags = [
-        "-Wno-experimental",
-        "-sJSPI=1",
+        "-Wno-experimental",  # -sJSPI is experimental.
+        "-sJSPI",
       ]
     }
   }

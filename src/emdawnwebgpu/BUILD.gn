@@ -189,4 +189,89 @@ if (is_wasm) {
       "../../third_party/emdawnwebgpu/pkg/webgpu/src/library_webgpu.js",
     ]
   }
+
+  # Tests
+
+  group("tests") {
+    testonly = true
+    deps = [
+      ":emdawnwebgpu",
+      ":emdawnwebgpu_link_test",
+      ":emdawnwebgpu_tests_asyncify",
+      ":emdawnwebgpu_tests_jspi",
+    ]
+  }
+
+  config("emdawnwebgpu_base_test_config") {
+    cflags = []
+    ldflags = [
+      "-Wno-limited-postlink-optimizations",
+      # TODO(crbug.com/450959456): We should enable Closure, but it is missing
+      # from the CQ builders. Fix this.
+    ]
+
+    # is_asan and is_ubsan are never true when using the Emscripten toolchain,
+    # so force enable them for all builds. (If this is fixed in sanitizers.gni,
+    # then remove this, but turn on -sSAFE_HEAP for non-ASAN debug builds.)
+    # Note this makes GN builds unsuitable for testing code size.
+    cflags += [
+      "-fsanitize=address",
+      "-fsanitize=undefined",
+    ]
+    ldflags += [
+      "-fsanitize=address",
+      "-fsanitize=undefined",
+    ]
+  }
+
+  source_set("emdawnwebgpu_tests") {
+    testonly = true
+    public_configs = [ ":emdawnwebgpu_base_test_config" ]
+    public_deps = [
+      ":emdawnwebgpu",
+      "../dawn/tests:gmock_main",
+    ]
+    sources = [
+      "tests/FuturesTests.cpp",
+      "tests/SpotTests.cpp",
+    ]
+  }
+
+  executable("emdawnwebgpu_tests_asyncify") {
+    testonly = true
+    deps = [ ":emdawnwebgpu_tests" ]
+    ldflags = [
+      "-sASYNCIFY=1",
+      "-sASYNCIFY_STACK_SIZE=10000",  # Needed when building with ASAN.
+    ]
+  }
+
+  executable("emdawnwebgpu_tests_jspi") {
+    testonly = true
+    deps = [ ":emdawnwebgpu_tests" ]
+    ldflags = [
+      "-Wno-experimental",  # -sJSPI is experimental.
+      "-sJSPI",
+    ]
+  }
+
+  # A "sample" that makes real (bogus) API calls to serve as a basic code size test.
+  dawn_json_generator("emdawnwebgpu_link_test_cpp_gen") {
+    target = "emdawnwebgpu_link_test_cpp"
+    outputs = [ "src/emdawnwebgpu/LinkTest.cpp" ]
+  }
+  executable("emdawnwebgpu_link_test") {
+    # The test is just that this links, not that it runs (it will just
+    # crash), so just build to .js. Since it has a main() function, this is
+    # the same as building to .html, but skipping the .html file.
+    output_extension = "js"
+
+    testonly = true
+    configs += [ ":emdawnwebgpu_base_test_config" ]
+    deps = [
+      ":emdawnwebgpu",
+      ":emdawnwebgpu_link_test_cpp_gen",
+    ]
+    sources = get_target_outputs(":emdawnwebgpu_link_test_cpp_gen")
+  }
 }
