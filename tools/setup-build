@@ -230,6 +230,7 @@ case $BUILD_SYSTEM in
     if grep 'dawn_node.*True' .gclient >/dev/null; then
         GN_ARGS+=" dawn_build_node_bindings=true"
     fi
+    GN_ARGS+=" use_clang_modules=false"
     if [[ -z "$FORCE" && -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]]; then
       generate "gn" "gen" $GN_OPTIONS "out/active" # keep existing args
     else
