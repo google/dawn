@@ -139,6 +139,7 @@ option(DAWN_ENABLE_INSTALL "Enable install step for Dawn libraries" OFF)
 option(DAWN_ENABLE_TSAN "Enable thread sanitizer" OFF)
 option(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
+option(DAWN_ENABLE_RTTI "Enable RTTI (needed when using some sanitizers)" OFF)
 
 option(DAWN_ENABLE_D3D11 "Enable compilation of the D3D11 backend" ${ENABLE_D3D11})
 option(DAWN_ENABLE_D3D12 "Enable compilation of the D3D12 backend" ${ENABLE_D3D12})
@@ -207,6 +208,11 @@ if (DAWN_BUILD_MONOLITHIC_LIBRARY AND BUILD_SHARED_LIBS)
     message(FATAL_ERROR "DAWN_BUILD_MONOLITHIC_LIBRARY SHARED/STATIC requires BUILD_SHARED_LIBS=OFF. Otherwise the bundled library will depend on other shared libraries which defeats the purpose.")
 endif()
 option(DAWN_FETCH_DEPENDENCIES "Use fetch_dawn_dependencies.py as an alternative to using depot_tools" OFF)
+
+# -fsanitizer=undefined includes -fsanitizer=vptr which does not work without rtti
+if (DAWN_ENABLE_UBSAN AND NOT DAWN_ENABLE_RTTI)
+    message(FATAL_ERROR "DAWN_ENABLE_UBSAN requires DAWN_ENABLE_RTTI to support some of the sanitizers")
+endif()
 
 if (DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_DESKTOP_GL)
   set(TINT_DEFAULT_GLSL ON)

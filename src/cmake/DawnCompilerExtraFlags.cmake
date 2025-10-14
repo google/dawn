@@ -25,8 +25,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-option(DAWN_ENABLE_RTTI "Enable RTTI" OFF)
-
 if (${DAWN_ENABLE_TSAN})
   add_compile_options(-stdlib=libc++)
   add_link_options(-stdlib=libc++)
@@ -54,9 +52,7 @@ function(common_compile_options target)
         "-Wno-switch-default"
         "-Wno-nrvo"
     )
-    if (NOT DAWN_ENABLE_UBSAN AND NOT DAWN_ENABLE_RTTI)
-      # -fsanitizer=undefined includes -fsanitizer=vptr which does not work
-      # without rtti
+    if (NOT DAWN_ENABLE_RTTI)
       target_compile_options(${target} PRIVATE "-fno-rtti")
     endif()
     if (${DAWN_WERROR})
