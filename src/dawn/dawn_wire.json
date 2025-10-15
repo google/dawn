@@ -221,6 +221,14 @@
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}
         ]
     },
+    "special commands": {
+        "chunked command": [
+            {"name": "id", "type": "uint64_t"},
+            {"name": "size", "type": "uint64_t"},
+            {"name": "chunk data", "type": "char", "annotation": "const*", "length": "chunk size", "wire_is_data_only": true},
+            {"name": "chunk size", "type": "uint32_t"}
+        ]
+    },
     "special items": {
         "client_side_structures": [
             "FutureWaitInfo",

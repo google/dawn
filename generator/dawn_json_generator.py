@@ -700,6 +700,7 @@ def compute_wire_params(api_params, wire_json):
 
     commands = []
     return_commands = []
+    special_commands = []
 
     wire_json['special items']['client_handwritten_commands'] += wire_json[
         'special items']['client_side_commands']
@@ -765,9 +766,14 @@ def compute_wire_params(api_params, wire_json):
         return_commands.append(
             Command(name, linked_record_members(json_data, types)))
 
+    for (name, json_data) in wire_json['special commands'].items():
+        special_commands.append(
+            Command(name, linked_record_members(json_data, types)))
+
     wire_params['cmd_records'] = {
         'command': commands,
-        'return command': return_commands
+        'return command': return_commands,
+        'special command': special_commands
     }
 
     for commands in wire_params['cmd_records'].values():
