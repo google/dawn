@@ -25,7 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-{%- macro declaration_with_defaults(arg, emit_defaults) -%}
+{%- macro kotlin_declaration(arg) -%}
     {%- set type = arg.type %}
     {%- set optional = arg.optional %}
     {%- set default_value = arg.default_value %}
@@ -33,52 +33,27 @@
         Unit
     {%- elif arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional }}
-        {%- if emit_defaults and optional-%}
-            {{ ' ' }}= null
-        {%- endif %}
-    {% elif type.name.get() == 'void' %}
+    {%- elif type.name.get() == 'void' %}
         {{- assert(arg.length and arg.constant_length != 1) -}}  {# void with length is binary data #}
-        java.nio.ByteBuffer{{ ' = ByteBuffer.allocateDirect(0)' if emit_defaults }}
+        java.nio.ByteBuffer
     {%- elif arg.length and arg.length != 'constant' %}
         {# * annotation can mean an array, e.g. an output argument #}
         {%- if type.category in ['callback function', 'callback info', 'function pointer', 'object', 'structure'] -%}
-            Array<{{ type.name.CamelCase() }}>{{ ' = arrayOf()' if emit_defaults }}
+            Array<{{ type.name.CamelCase() }}>
         {%- elif type.category in ['bitmask', 'enum'] or type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
-            IntArray{{ ' = intArrayOf()' if emit_defaults }}
+            IntArray
         {%- else -%}
             {{ unreachable_code() }}
         {% endif %}
     {%- elif type.category in ['callback function', 'function pointer', 'object'] %}
         {{- type.name.CamelCase() }}
-        {%- if optional or default_value %}?{{ ' = null' if emit_defaults }}{% endif %}
+        {%- if optional or default_value %}?{% endif %}
     {%- elif type.category == 'structure' or type.category == 'callback info' %}
         {{- type.name.CamelCase() }}{{ '?' if optional }}
-        {%- if emit_defaults -%}
-            {%- if type.has_basic_constructor -%}
-                {{ ' ' }}= {{ type.name.CamelCase() }}(
-                    {%- if arg.default_value == 'zero' %}
-                        {%- for member in kotlin_record_members(type.members) %}
-                            {% if member.type.category in ['bitmask', 'enum'] %}
-                                {%- for value in member.type.values if value.value == 0 -%}
-                                    {{ member.name.camelCase() }} =
-                                        {{- member.type.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }},{{ ' ' }}
-                                {%- endfor %}
-                            {%- endif %}
-                        {%- endfor %}
-                    {%- endif %})
-            {%- elif optional -%}
-                {{ ' ' }}= null
-            {%- endif %}
-        {%- endif %}
     {%- elif type.category in ['bitmask', 'enum'] -%}
         Int
-        {%- if emit_defaults %}
-            {%- for value in type.values if value.name.name == (default_value or 'undefined') -%}
-                {{ ' ' }}= {{ type.name.CamelCase() }}.{{ as_ktName(value.name.CamelCase()) }}
-            {%- endfor %}
-        {%- endif %}
     {%- elif type.name.get() == 'bool' -%}
-        Boolean{{ '?' if optional }}{% if default_value %} = {{ default_value }}{% endif %}
+        Boolean{{ '?' if optional }}
     {%- elif type.name.get() in ['void *', 'void const *'] %}
         //* Hack: void* for a return value is a ByteBuffer.
         {% if not arg.name %}
@@ -87,42 +62,23 @@
             Long
         {% endif %}
     {%- elif type.category == 'native' -%}
-        {%- set ns = namespace(type_name='', default_value=default_value) -%}
         {%- if type.name.get() == 'float' -%}
-            {%- set ns.type_name = 'Float' -%}
-            {%- if ns.default_value -%}
-                {%- set ns.default_value = "%.1ff"|format(ns.default_value[:-1]|float) -%}
-            {%- endif -%}
+            Float
         {%- elif type.name.get() == 'double' -%}
-            {%- set ns.type_name = 'Double' -%}
+            Double
         {%- elif type.name.get() in ['int8_t', 'uint8_t'] -%}
-            {%- set ns.type_name = 'Byte' -%}
+            Byte
         {%- elif type.name.get() in ['int16_t', 'uint16_t'] -%}
-            {%- set ns.type_name = 'Short' -%}
+            Short
         {%- elif type.name.get() in ['int', 'int32_t', 'uint32_t'] -%}
-            {%- set ns.type_name = 'Int' -%}
-            {%- if ns.default_value == '0xFFFFFFFF' -%}
-                {%- set ns.default_value = '-0x7FFFFFFF' -%}
-            {%- endif -%}
+            Int
         {%- elif type.name.get() in ['int64_t', 'uint64_t', 'size_t'] -%}
-            {%- set ns.type_name = 'Long' -%}
-            {%- if ns.default_value == '0xFFFFFFFFFFFFFFFF' -%}
-                {%- set ns.default_value = '-0x7FFFFFFFFFFFFFFF' -%}
-            {%- endif -%}
+            Long
         {%- else -%}
             {{ unreachable_code('Unsupported native type: ' + type.name.get()) }}
         {%- endif -%}
         {%- if optional -%}
             {{ unreachable_code('Optional natives not supported: ' + type.name.get()) }}
-        {%- endif -%}
-        {{ ns.type_name }}
-        {%- if ns.default_value not in [None, undefined] -%} {{ ' ' }}={{ ' ' }}
-            {%- set constant = find_by_name(by_category["constant"], ns.default_value) -%}
-            {%- if constant -%}
-                Constants.{{ as_ktName(constant.name.SNAKE_CASE()) }}
-            {%- else -%}
-                {{ ns.default_value }}
-            {%- endif -%}
         {%- endif -%}
     {%- else -%}
         {{ unreachable_code('Unsupported type: ' + type.name.get()) }}
@@ -130,11 +86,8 @@
 {% endmacro %}
 
 {% macro kotlin_definition(arg) -%}
-    {{ declaration_with_defaults(arg, true) }}
-{%- endmacro %}
-
-{% macro kotlin_declaration(arg) -%}
-    {{ declaration_with_defaults(arg, false) }}
+    {{- kotlin_declaration(arg) -}}
+    {%- if kotlin_default(arg) is not none %} = {{ kotlin_default(arg) }}{% endif -%}
 {%- endmacro %}
 
 {% macro kotlin_annotation(arg) -%}

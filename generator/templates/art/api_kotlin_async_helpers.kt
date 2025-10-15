@@ -59,7 +59,7 @@ import kotlin.coroutines.suspendCoroutine
             {%- endfor %}): {{ return_name }} = suspendCoroutine {
                 //* Result is handled by the async callback; this assignment satisfies @CheckReturnValue.
                 val unused = {{ method.name.camelCase() }}(
-                    {%- for arg in method.arguments %}
+                    {%- for arg in kotlin_record_members(method.arguments) %}
                         {%- if as_varName(arg.name) == 'callbackInfo' %}
                             {{- as_varName(arg.name).removesuffix("Info")}}
                         {%- else %}
