@@ -64,7 +64,11 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
         nullptr,
         [](WGPUDevice const*, WGPUErrorType type, WGPUStringView message, void*, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
-            info->server->OnUncapturedError(info->self, type, message);
+            {
+                auto serverGuard = info->server->GetGuard();
+                info->server->OnUncapturedError(info->self, type, message);
+            }
+            info->server->Flush();
         },
         nullptr, device->info.get()};
 
