@@ -885,14 +885,14 @@ void Disassembler::EmitTerminator(const Terminator* term) {
             EmitValue(bi->Condition());
             auto next_iter_values = bi->NextIterValues();
             auto exit_values = bi->ExitValues();
-            if (!next_iter_values.IsEmpty()) {
+            if (!next_iter_values.empty()) {
                 out_ << " " << StyleLabel("next_iteration") << ": [";
-                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset, next_iter_values.Length());
+                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset, next_iter_values.size());
                 out_ << " ]";
             }
-            if (!exit_values.IsEmpty()) {
+            if (!exit_values.empty()) {
                 out_ << " " << StyleLabel("exit_loop") << ": [";
-                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset + next_iter_values.Length());
+                EmitOperandList(bi, ir::BreakIf::kArgsOperandOffset + next_iter_values.size());
                 out_ << " ]";
             }
             return std::nullopt;

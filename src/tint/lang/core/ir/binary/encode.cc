@@ -270,7 +270,7 @@ struct Encoder {
     void InstructionBitcast(pb::InstructionBitcast&, const ir::Bitcast*) {}
 
     void InstructionBreakIf(pb::InstructionBreakIf& breakif_out, const ir::BreakIf* breakif_in) {
-        auto num_next_iter_values = static_cast<uint32_t>(breakif_in->NextIterValues().Length());
+        auto num_next_iter_values = static_cast<uint32_t>(breakif_in->NextIterValues().size());
         breakif_out.set_num_next_iter_values(num_next_iter_values);
     }
 
