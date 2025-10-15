@@ -65,8 +65,6 @@ class MemoryTypeSelector {
 
     const std::vector<VkMemoryType> mMemoryTypes;
     const std::vector<VkMemoryHeap> mMemoryHeaps;
-    const bool mHostCachedForExtendedUsagesAvailable;
-    const bool mHostVisibleCachedAvailable;
 };
 
 }  // namespace dawn::native::vulkan

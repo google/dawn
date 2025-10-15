@@ -65,14 +65,7 @@ MemoryTypeSelector::MemoryTypeSelector(const VulkanDeviceInfo& info)
 
 MemoryTypeSelector::MemoryTypeSelector(std::vector<VkMemoryType> memoryTypes,
                                        std::vector<VkMemoryHeap> memoryHeaps)
-    : mMemoryTypes(std::move(memoryTypes)),
-      mMemoryHeaps(std::move(memoryHeaps)),
-      mHostCachedForExtendedUsagesAvailable(HasMemoryTypeWithFlags(
-          mMemoryTypes,
-          kMapExtendedUsageMemoryPropertyFlags | VK_MEMORY_PROPERTY_HOST_CACHED_BIT)),
-      mHostVisibleCachedAvailable(HasMemoryTypeWithFlags(
-          mMemoryTypes,
-          VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT)) {}
+    : mMemoryTypes(std::move(memoryTypes)), mMemoryHeaps(std::move(memoryHeaps)) {}
 
 int MemoryTypeSelector::FindBestTypeIndex(VkMemoryRequirements requirements, MemoryKind kind) {
     bool mappable = IsMemoryKindMappable(kind);
@@ -125,14 +118,27 @@ int MemoryTypeSelector::FindBestTypeIndex(VkMemoryRequirements requirements, Mem
             continue;
         }
 
-        // Cached memory is optimal for read-only access from CPU as host memory accesses to
-        // uncached memory are slower than to cached memory.
+        // Cached memory is optimal for read access from CPU as host memory reads to uncached memory
+        // are slower than to cached memory.
         bool currentHostCached =
             (mMemoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0u;
         bool bestHostCached =
             (mMemoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) != 0u;
         if ((kind & MemoryKind::ReadMappable) && currentHostCached != bestHostCached) {
             if (currentHostCached) {
+                bestType = static_cast<int>(i);
+            }
+            continue;
+        }
+
+        // Coherent memory is optimal for write access from CPU as host memory writes to uncoherent
+        // memory must be explicitly flushed. This is less important than HOST_CACHED above.
+        bool currentHostCoherent =
+            (mMemoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0u;
+        bool bestHostCoherent =
+            (mMemoryTypes[bestType].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0u;
+        if ((kind & MemoryKind::WriteMappable) && currentHostCoherent != bestHostCoherent) {
+            if (currentHostCoherent) {
                 bestType = static_cast<int>(i);
             }
             continue;
@@ -154,27 +160,9 @@ VkMemoryPropertyFlags MemoryTypeSelector::GetRequiredMemoryPropertyFlags(
     MemoryKind memoryKind) const {
     VkMemoryPropertyFlags vkFlags = 0;
 
-    // Mappable resource must be host visible and host coherent.
+    // HOST_VISIBLE_BIT must be set for mappable memory.
     if (IsMemoryKindMappable(memoryKind)) {
         vkFlags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-
-        if (memoryKind & MemoryKind::DeviceLocal) {
-            vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            // For device local mappable buffers prefer to use host coherent plus host cached memory
-            // when it's available for better host access performance.
-            DAWN_ASSERT(!(memoryKind & MemoryKind::HostCached));
-            if (mHostCachedForExtendedUsagesAvailable) {
-                vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-            }
-        } else {
-            // For read only buffers prefer host cached memory to improve read performance.
-            if (mHostVisibleCachedAvailable && !(memoryKind & MemoryKind::WriteMappable)) {
-                vkFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-            } else {
-                vkFlags |= VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            }
-        }
     }
 
     // DEVICE_LOCAL_BIT must be set when MemoryKind::DeviceLocal is required.
