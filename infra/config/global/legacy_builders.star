@@ -609,9 +609,11 @@ luci.console_view_entry(
 #   * dawn-cq-win-x64-rel
 # * win-clang-rel-x86
 #   * dawn-cq-win-x86-rel
+# * win-msvc-dbg-x64
+#   * dawn-cq-win-x64-msvc-dbg
+# * win-msvc-rel-x64
+#   * dawn-cq-win-x64-msvc-rel
 
-dawn_standalone_builder("win-msvc-dbg-x64", clang = False, debug = True, cpu = "x64", fuzzer = False)
-dawn_standalone_builder("win-msvc-rel-x64", clang = False, debug = False, cpu = "x64", fuzzer = False)
 dawn_standalone_builder("cron-linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", fuzzer = True)
 
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False)

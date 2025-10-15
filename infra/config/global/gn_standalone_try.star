@@ -209,6 +209,26 @@ dawn_win_functional_cq_tester(
 )
 
 dawn_win_functional_cq_tester(
+    name = "dawn-cq-win-x64-msvc-dbg",
+    description_html = "Tests debug Dawn built with MSVC on Win/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-builder-msvc-dbg",
+        "ci/dawn-win-x64-sws-msvc-dbg",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-msvc-dbg",
+)
+
+dawn_win_functional_cq_tester(
+    name = "dawn-cq-win-x64-msvc-rel",
+    description_html = "Tests release Dawn built with MSVC on Win/x64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-win-x64-builder-msvc-rel",
+        "ci/dawn-win-x64-sws-msvc-rel",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-msvc-rel",
+)
+
+dawn_win_functional_cq_tester(
     name = "dawn-cq-win-x64-rel",
     description_html = "Tests release Dawn on Win/x64 on multiple hardware configs. Blocks CL submission",
     mirrors = [
