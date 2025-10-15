@@ -2233,6 +2233,23 @@ TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_MultipleDefaultCases) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_i);
+        auto* case1 = b.DefaultCase(s);
+        b.Append(case1, [&] { b.ExitSwitch(s); });
+        auto* case2 = b.DefaultCase(s);
+        b.Append(case2, [&] { b.ExitSwitch(s); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: switch: multiple default selectors in switch"));
+}
+
 TEST_F(IR_ValidatorTest, Switch_NoCondition) {
     auto* f = b.Function("my_func", ty.void_());
 

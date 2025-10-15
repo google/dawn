@@ -4252,6 +4252,9 @@ void Validator::CheckSwitch(const Switch* s) {
 
         for (const auto& sel : cse.selectors) {
             if (sel.IsDefault()) {
+                if (found_default) {
+                    AddError(s) << "multiple default selectors in switch";
+                }
                 found_default = true;
             }
         }
