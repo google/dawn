@@ -92,7 +92,7 @@ class Device final : public DeviceBase {
                                        uint64_t destinationOffset,
                                        uint64_t size) override;
 
-    MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
+    MaybeError CopyFromStagingToTextureImpl(BufferBase* source,
                                             const TexelCopyBufferLayout& src,
                                             const TextureCopy& dst,
                                             const Extent3D& copySizePixels) override;

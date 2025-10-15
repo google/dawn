@@ -379,7 +379,7 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                         ToBackend(destination), destinationOffset);
 }
 
-MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
+MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TexelCopyBufferLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {

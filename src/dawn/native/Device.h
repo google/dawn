@@ -594,7 +594,7 @@ class DeviceBase : public ErrorSink,
     // GPU or check errors.
     virtual void DestroyImpl() = 0;
 
-    virtual MaybeError CopyFromStagingToTextureImpl(const BufferBase* source,
+    virtual MaybeError CopyFromStagingToTextureImpl(BufferBase* source,
                                                     const TexelCopyBufferLayout& src,
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;

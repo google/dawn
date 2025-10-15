@@ -346,7 +346,7 @@ MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
 // In Metal we don't write from the CPU to the texture directly which can be done using the
 // replaceRegion function, because the function requires a non-private storage mode and Dawn
 // sets the private storage mode by default for all textures except IOSurfaces on macOS.
-MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
+MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
                                                 const TexelCopyBufferLayout& dataLayout,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
