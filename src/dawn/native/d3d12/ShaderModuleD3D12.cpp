@@ -158,90 +158,22 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         }
     }
 
-    using tint::BindingPoint;
-
     tint::hlsl::writer::ArrayLengthFromUniformOptions arrayLengthFromUniform;
     arrayLengthFromUniform.ubo_binding = {layout->GetDynamicStorageBufferLengthsRegisterSpace(),
                                           layout->GetDynamicStorageBufferLengthsShaderRegister()};
 
-    tint::Bindings bindings;
-    std::vector<BindingPoint> ignored_by_robustness;
+    tint::Bindings bindings =
+        GenerateBindingRemapping(layout, stage, [&](BindGroupIndex group, BindingIndex index) {
+            const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+            return tint::BindingPoint{
+                .group = uint32_t(group),
+                .binding = bgl->GetShaderRegister(index),
+            };
+        });
 
+    std::vector<tint::BindingPoint> ignored_by_robustness;
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
-
-        for (const auto& [bindingNumber, apiBindingIndex] : bgl->GetBindingMap()) {
-            tint::BindingPoint srcBindingPoint{
-                .group = uint32_t(group),
-                .binding = uint32_t(bindingNumber),
-            };
-
-            // Remap the WGSL bindings to the register numbers computed in the
-            // d3d12::BindGroupLayout that packs them per register type. The group decoration stays
-            // the same as HLSL supports register spaces that are a similar concept of a second
-            // dimension of binding indices.
-            auto ComputeDestinationBindingPoint = [&](BindingIndex bindingIndex) {
-                return tint::BindingPoint{.group = uint32_t(group),
-                                          .binding = bgl->GetShaderRegister(bindingIndex)};
-            };
-
-            MatchVariant(
-                bgl->GetAPIBindingInfo(apiBindingIndex).bindingLayout,
-                [&](const BufferBindingInfo& bindingInfo) {
-                    tint::BindingPoint dstBindingPoint =
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
-                    switch (bindingInfo.type) {
-                        case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::Storage:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
-                        case kInternalReadOnlyStorageBufferBinding:
-                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case wgpu::BufferBindingType::BindingNotUsed:
-                        case wgpu::BufferBindingType::Undefined:
-                            DAWN_UNREACHABLE();
-                            break;
-                    }
-                },
-
-                [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const StaticSamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TextureBindingInfo& bindingInfo) {
-                    bindings.texture.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TexelBufferBindingInfo& bindingInfo) {
-                    // TODO(crbug/382544164): Prototype texel buffer feature
-                    DAWN_UNREACHABLE();
-                },
-                [&](const ExternalTextureBindingInfo& bindingInfo) {
-                    bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::ExternalTexture{
-                            .metadata = ComputeDestinationBindingPoint(bindingInfo.metadata),
-                            .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
-                            .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
-                },
-
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
 
         // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be bound
         // to root descriptor tables, where D3D12 runtime can guarantee that OOB-read will always
@@ -285,8 +217,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
              layout->GetDynamicStorageBufferLengthInfo()[group].bindingAndRegisterOffsets) {
             BindingNumber bindingNum = bindingAndRegisterOffset.binding;
             uint32_t registerOffset = bindingAndRegisterOffset.registerOffset;
-            BindingPoint bindingPoint{static_cast<uint32_t>(group),
-                                      static_cast<uint32_t>(bindingNum)};
+            tint::BindingPoint bindingPoint{static_cast<uint32_t>(group),
+                                            static_cast<uint32_t>(bindingNum)};
             arrayLengthFromUniform.bindpoint_to_size_index.emplace(bindingPoint, registerOffset);
         }
     }

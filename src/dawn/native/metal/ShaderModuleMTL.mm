@@ -122,88 +122,15 @@ ShaderModule::~ShaderModule() = default;
 
 namespace {
 
-tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
-                                   const PipelineLayout* layout,
-                                   const BindingInfoArray& moduleBindingInfo,
-                                   tint::msl::writer::ArrayLengthOptions& arrayLengthFromConstants,
-                                   bool useArgumentBuffers) {
-    tint::Bindings bindings;
+tint::msl::writer::ArrayLengthOptions GenerateArrayLengthOptions(const PipelineLayout* layout,
+                                                                 SingleShaderStage stage) {
+    tint::msl::writer::ArrayLengthOptions arrayLength;
 
+    // Use the ShaderIndex as the indices for the buffer size lookups in the array length uniform
+    // transform. This is used to compute the size of variable length arrays in storage buffers.
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        for (const auto& [bindingNumber, apiBindingIndex] : bgl->GetBindingMap()) {
-            tint::BindingPoint srcBindingPoint{
-                .group = uint32_t(group),
-                .binding = uint32_t(bindingNumber),
-            };
-
-            auto& bindingIndexInfo = layout->GetBindingIndexInfo(stage)[group];
-
-            auto ComputeDestinationBindingPoint = [&](BindingIndex bindingIndex) {
-                uint32_t shaderIndex = bindingIndexInfo[bindingIndex];
-                return tint::BindingPoint{
-                    .group = useArgumentBuffers ? uint32_t(group) : 0,
-                    .binding = shaderIndex,
-                };
-            };
-
-            MatchVariant(
-                bgl->GetAPIBindingInfo(apiBindingIndex).bindingLayout,
-                [&](const BufferBindingInfo& bindingInfo) {
-                    tint::BindingPoint dstBindingPoint =
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
-                    switch (bindingInfo.type) {
-                        case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::Storage:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
-                        case kInternalReadOnlyStorageBufferBinding:
-                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case wgpu::BufferBindingType::BindingNotUsed:
-                        case wgpu::BufferBindingType::Undefined:
-                            DAWN_UNREACHABLE();
-                            break;
-                    }
-                },
-                [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TextureBindingInfo& bindingInfo) {
-                    bindings.texture.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TexelBufferBindingInfo& bindingInfo) {
-                    // Metal does not support texel buffers.
-                    // TODO(crbug/382544164): Prototype texel buffer feature
-                    DAWN_UNREACHABLE();
-                },
-                [&](const ExternalTextureBindingInfo& bindingInfo) {
-                    bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::ExternalTexture{
-                            .metadata = ComputeDestinationBindingPoint(bindingInfo.metadata),
-                            .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
-                            .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
-                },
-                [](const StaticSamplerBindingInfo&) { DAWN_UNREACHABLE(); },
-                [](const InputAttachmentBindingInfo&) { DAWN_UNREACHABLE(); });
-        }
-
-        // Use the ShaderIndex as the indices for the buffer size lookups in the array length
-        // uniform transform. This is used to compute the size of variable length arrays in storage
-        // buffers.
         for (BindingIndex index : bgl->GetBufferIndices()) {
             const auto& bindingInfo = bgl->GetBindingInfo(index);
             if (!(bindingInfo.visibility & StageBit(stage))) {
@@ -216,7 +143,7 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
                 case wgpu::BufferBindingType::Storage:
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                 case kInternalReadOnlyStorageBufferBinding:
-                    arrayLengthFromConstants.bindpoint_to_size_index.emplace(
+                    arrayLength.bindpoint_to_size_index.emplace(
                         tint::BindingPoint{uint32_t(group), uint32_t(bindingInfo.binding)},
                         layout->GetBindingIndexInfo(stage)[group][index]);
                     break;
@@ -230,7 +157,7 @@ tint::Bindings GenerateBindingInfo(SingleShaderStage stage,
             }
         }
     }
-    return bindings;
+    return arrayLength;
 }
 
 std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> GenerateArgumentBufferInfo(
@@ -297,12 +224,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     std::ostringstream errorStream;
     errorStream << "Tint MSL failure:\n";
 
-    tint::msl::writer::ArrayLengthOptions arrayLengthFromConstants;
 
     bool useArgumentBuffers = device->IsToggleEnabled(Toggle::MetalUseArgumentBuffers);
 
-    tint::Bindings bindings = GenerateBindingInfo(stage, layout, moduleBindingInfo,
-                                                  arrayLengthFromConstants, useArgumentBuffers);
+    tint::Bindings bindings =
+        GenerateBindingRemapping(layout, stage, [&](BindGroupIndex group, BindingIndex index) {
+            return tint::BindingPoint{
+                .group = useArgumentBuffers ? uint32_t(group) : 0,
+                .binding = layout->GetBindingIndexInfo(stage)[group][index],
+            };
+        });
+
+    tint::msl::writer::ArrayLengthOptions arrayLengthFromConstants =
+        GenerateArrayLengthOptions(layout, stage);
 
     std::unordered_map<uint32_t, tint::msl::writer::ArgumentBufferInfo> argumentBufferInfo =
         GenerateArgumentBufferInfo(stage, layout, moduleBindingInfo, useArgumentBuffers);

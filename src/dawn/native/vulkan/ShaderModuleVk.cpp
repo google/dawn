@@ -134,86 +134,29 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 #if TINT_BUILD_SPV_WRITER
     // Creation of module and spirv is deferred to this point when using tint generator
 
-    tint::Bindings bindings;
-    std::unordered_set<tint::BindingPoint> statically_paired_texture_binding_points;
+    tint::Bindings bindings =
+        GenerateBindingRemapping(layout, stage, [&](BindGroupIndex group, BindingIndex index) {
+            return tint::BindingPoint{
+                .group = uint32_t(group),
+                .binding = uint32_t(index),
+            };
+        });
 
+    // Post process the binding remapping to make statically paired texture point at the sampler
+    // binding point instead.
+    std::unordered_set<tint::BindingPoint> staticallyPairedTextureBindingPoints;
     for (BindGroupIndex group : layout->GetBindGroupLayoutsMask()) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
 
-        for (const auto& [bindingNumber, apiBindingIndex] : bgl->GetBindingMap()) {
-            tint::BindingPoint srcBindingPoint{
-                .group = uint32_t(group),
-                .binding = uint32_t(bindingNumber),
-            };
+        for (BindingIndex index : bgl->GetSampledTextureIndices()) {
+            const auto& bindingInfo = bgl->GetBindingInfo(index);
 
-            auto ComputeDestinationBindingPoint = [&](BindingIndex bindingIndex) {
-                return tint::BindingPoint{.group = uint32_t(group),
-                                          .binding = uint32_t(bindingIndex)};
-            };
-
-            MatchVariant(
-                bgl->GetAPIBindingInfo(apiBindingIndex).bindingLayout,
-                [&](const BufferBindingInfo& bindingInfo) {
-                    tint::BindingPoint dstBindingPoint =
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
-                    switch (bindingInfo.type) {
-                        case wgpu::BufferBindingType::Uniform:
-                            bindings.uniform.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case kInternalStorageBufferBinding:
-                        case wgpu::BufferBindingType::Storage:
-                        case wgpu::BufferBindingType::ReadOnlyStorage:
-                        case kInternalReadOnlyStorageBufferBinding:
-                            bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
-                            break;
-                        case wgpu::BufferBindingType::BindingNotUsed:
-                        case wgpu::BufferBindingType::Undefined:
-                            DAWN_UNREACHABLE();
-                            break;
-                    }
-                },
-                [&](const SamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const StaticSamplerBindingInfo& bindingInfo) {
-                    bindings.sampler.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TextureBindingInfo& bindingInfo) {
-                    tint::BindingPoint dstBindingPoint =
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex));
-                    if (auto samplerIndex = bgl->GetStaticSamplerIndexForTexture(
-                            BindingIndex{dstBindingPoint.binding})) {
-                        dstBindingPoint.binding = uint32_t(samplerIndex.value());
-                        statically_paired_texture_binding_points.insert(srcBindingPoint);
-                    }
-                    bindings.texture.emplace(srcBindingPoint, dstBindingPoint);
-                },
-                [&](const StorageTextureBindingInfo& bindingInfo) {
-                    bindings.storage_texture.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                },
-                [&](const TexelBufferBindingInfo& bindingInfo) {
-                    // TODO(crbug/382544164): Prototype texel buffer feature
-                    DAWN_UNREACHABLE();
-                },
-                [&](const ExternalTextureBindingInfo& bindingInfo) {
-                    bindings.external_texture.emplace(
-                        srcBindingPoint,
-                        tint::ExternalTexture{
-                            .metadata = ComputeDestinationBindingPoint(bindingInfo.metadata),
-                            .plane0 = ComputeDestinationBindingPoint(bindingInfo.plane0),
-                            .plane1 = ComputeDestinationBindingPoint(bindingInfo.plane1)});
-                },
-                [&](const InputAttachmentBindingInfo& bindingInfo) {
-                    bindings.input_attachment.emplace(
-                        srcBindingPoint,
-                        ComputeDestinationBindingPoint(bgl->AsBindingIndex(apiBindingIndex)));
-                });
+            if (auto samplerIndex = bgl->GetStaticSamplerIndexForTexture(index)) {
+                tint::BindingPoint wgslBindingPoint = {.group = uint32_t(group),
+                                                       .binding = uint32_t(bindingInfo.binding)};
+                bindings.texture[wgslBindingPoint].binding = uint32_t(samplerIndex.value());
+                staticallyPairedTextureBindingPoints.insert(wgslBindingPoint);
+            }
         }
     }
 
@@ -266,7 +209,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.strip_all_names = !GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
 
     req.tintOptions.statically_paired_texture_binding_points =
-        std::move(statically_paired_texture_binding_points);
+        std::move(staticallyPairedTextureBindingPoints);
     req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
     req.tintOptions.emit_vertex_point_size = emitPointSize;
 
