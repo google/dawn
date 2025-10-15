@@ -319,7 +319,7 @@ TEST_F(IR_ValidatorTest, Structure_LargePaddingSizeAtEnd) {
         ty.Struct(mod.symbols.New("S"),
                   Vector{
                       ty.Get<type::StructMember>(mod.symbols.New("a"), ty.array<u32, 3>(), 0u, 0u,
-                                                 4u, 40'000'000u, IOAttributes{}),
+                                                 4u, 4'000'000'000u, IOAttributes{}),
                   });
     mod.root_block->Append(b.Var("my_struct", private_, str_ty));
 
@@ -329,7 +329,7 @@ TEST_F(IR_ValidatorTest, Structure_LargePaddingSizeAtEnd) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr("struct padding (39999988) is larger then the max (10485760)"))
+                testing::HasSubstr("struct padding (3999999988) is larger then the max (10485760)"))
         << res.Failure();
 }
 
