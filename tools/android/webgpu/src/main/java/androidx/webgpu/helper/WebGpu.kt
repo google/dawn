@@ -30,9 +30,13 @@ public class DeviceLostException(
     public val device: Device, @DeviceLostReason public val reason: Int, message: String
 ) : Exception(message)
 
-public class UncapturedErrorException(
-    public val device: Device, @ErrorType public val type: Int, message: String
-) : Exception(message)
+public class ValidationException(public val device: Device, message: String) : Exception(message)
+
+public class OutOfMemoryException(public val device: Device, message: String) : Exception(message)
+
+public class InternalException(public val device: Device, message: String) : Exception(message)
+
+public class UnknownException(public val device: Device, message: String) : Exception(message)
 
 private const val POLLING_DELAY_MS = 100L
 
@@ -116,8 +120,15 @@ private suspend fun requestDevice(adapter: Adapter, @FeatureName requiredFeature
                                 throw DeviceLostException(device, reason, message)
                             },
                 uncapturedErrorCallback = { device, type, message ->
-                        throw UncapturedErrorException(device, type, message)
-                    },
+                    when (type) {
+                        ErrorType.NoError -> {} // NoError
+                        ErrorType.Validation -> throw ValidationException(device, message)
+                        ErrorType.OutOfMemory -> throw OutOfMemoryException(device, message)
+                        ErrorType.Internal -> throw InternalException(device, message)
+                        ErrorType.Unknown -> throw UnknownException(device, message)
+                        else -> throw UnknownException(device, message)
+                    }
+                },
             )
         )
     val device = result.device

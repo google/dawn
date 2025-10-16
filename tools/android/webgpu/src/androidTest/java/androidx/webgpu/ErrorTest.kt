@@ -2,7 +2,7 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.UncapturedErrorException
+import androidx.webgpu.helper.ValidationException
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertThrows
@@ -21,7 +21,7 @@ class ErrorTest {
         runBlocking {
             val webGpu = createWebGpu()
             val device = webGpu.device
-            assertThrows(UncapturedErrorException::class.java) {
+            assertThrows(ValidationException::class.java) {
                 device.createTexture(
                     TextureDescriptor(
                         usage = TextureUsage.None,
