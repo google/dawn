@@ -31,7 +31,6 @@
 enum GPUFeatureName {
     "multi-draw-indirect",
     "chromium-experimental-subgroup-matrix",
-    "texture-component-swizzle",
 };
 
 enum GPUSubgroupMatrixComponentType {
@@ -91,8 +90,4 @@ interface GPUSupportedLimits {
     readonly attribute unsigned long maxStorageTexturesInFragmentStage;
     readonly attribute unsigned long maxStorageBuffersInVertexStage;
     readonly attribute unsigned long maxStorageTexturesInVertexStage;
-};
-
-dictionary GPUTextureViewDescriptor {
-    DOMString swizzle = "rgba";
 };
