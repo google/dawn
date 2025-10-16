@@ -46,6 +46,7 @@ class ContextEGL : NonMovable {
     static ResultOrError<std::unique_ptr<ContextEGL>> Create(Ref<DisplayEGL> display,
                                                              wgpu::BackendType backend,
                                                              bool useRobustness,
+                                                             bool disableEGL15Robustness,
                                                              bool useANGLETextureSharing,
                                                              bool forceES31AndMinExtensions);
 
@@ -55,6 +56,7 @@ class ContextEGL : NonMovable {
     MaybeError Initialize(wgpu::BackendType backend,
                           bool useRobustness,
                           bool useANGLETextureSharing,
+                          bool disableEGL15Robustness,
                           bool forceES31AndMinExtensions);
     void RequestRequiredExtensionsExplicitly();
 

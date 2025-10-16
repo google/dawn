@@ -55,11 +55,12 @@ namespace dawn::native::opengl {
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> display,
                                                               wgpu::BackendType backend,
                                                               bool useRobustness,
+                                                              bool disableEGL15Robustness,
                                                               bool useANGLETextureSharing,
                                                               bool forceES31AndMinExtensions) {
     auto context = std::make_unique<ContextEGL>(std::move(display));
-    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing,
-                                 forceES31AndMinExtensions));
+    DAWN_TRY(context->Initialize(backend, useRobustness, disableEGL15Robustness,
+                                 useANGLETextureSharing, forceES31AndMinExtensions));
     return std::move(context);
 }
 
@@ -78,6 +79,7 @@ ContextEGL::~ContextEGL() {
 
 MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useRobustness,
+                                  bool disableEGL15Robustness,
                                   bool useANGLETextureSharing,
                                   bool forceES31AndMinExtensions) {
     const EGLFunctions& egl = mDisplay->egl;
@@ -127,7 +129,8 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     if (useRobustness) {
         DAWN_ASSERT(egl.HasExt(EGLExt::CreateContextRobustness));
         // EGL_EXT_create_context_robustness is promoted to 1.5 but with a different enum value.
-        if (egl.GetMinorVersion() >= 5) {
+        // PowerVR advertises EGL 1.5, but only supports the old enum value.
+        if (egl.GetMinorVersion() >= 5 && !disableEGL15Robustness) {
             AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS, EGL_TRUE);
         } else {
             AddAttrib(EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT, EGL_TRUE);

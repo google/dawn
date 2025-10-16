@@ -121,6 +121,7 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context,
                     ContextEGL::Create(display, backendType, /*useRobustness*/ false,
+                                       /*disableEGL15Robustness */ false,
                                        /*useANGLETextureSharing*/ false,
                                        /*forceES31AndMinExtensions*/ forceES31AndMinExtensions));
 
@@ -526,11 +527,16 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     }
 
     bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
+
+    // Workaround: Imagination EGL 1.5 drivers do not support the new robustness enum.
+    // Use the pre-1.5 extension enum instead.
+    bool disableEGL15Robustness = mVendorId == gpu_info::kVendorID_ImgTec;
     bool forceES31AndMinExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
 
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                                useANGLETextureSharing, forceES31AndMinExtensions));
+                                                disableEGL15Robustness, useANGLETextureSharing,
+                                                forceES31AndMinExtensions));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
