@@ -32,11 +32,9 @@
 #include <limits>
 #include <memory>
 
-#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Assert.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireCmd_autogen.h"
-#include "dawn/wire/WireDeserializeAllocator.h"
 
 namespace dawn::wire {
 
@@ -45,21 +43,41 @@ class ChunkedCommandHandler : public CommandHandler {
     ChunkedCommandHandler();
     ~ChunkedCommandHandler() override;
 
-  protected:
-    WireResult HandleChunkedCommand(DeserializeBuffer* deserializeBuffer);
+    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
 
-    WireDeserializeAllocator mAllocator;
+  protected:
+    enum class ChunkedCommandsResult {
+        Passthrough,
+        Consumed,
+        Error,
+    };
+
+    // Returns |true| if the commands were entirely consumed into the chunked command vector
+    // and should be handled later once we receive all the command data.
+    // Returns |false| if commands should be handled now immediately.
+    ChunkedCommandsResult HandleChunkedCommands(const volatile char* commands, size_t size) {
+        uint64_t commandSize64 = reinterpret_cast<const volatile CmdHeader*>(commands)->commandSize;
+
+        if (commandSize64 > std::numeric_limits<size_t>::max()) {
+            return ChunkedCommandsResult::Error;
+        }
+        size_t commandSize = static_cast<size_t>(commandSize64);
+        if (size < commandSize) {
+            return BeginChunkedCommandData(commands, commandSize, size);
+        }
+        return ChunkedCommandsResult::Passthrough;
+    }
 
   private:
-    // This map keeps track of all in-flight chunked commands. Note that because |HandleCommands|
-    // must be called in a thread-safe manner, we do not need to explicitly synchronize access to
-    // this map.
-    struct ChunkedCommand {
-        size_t remainingSize = 0;
-        size_t putOffset = 0;
-        std::unique_ptr<char[]> data = nullptr;
-    };
-    absl::flat_hash_map<uint64_t, ChunkedCommand> mChunkedCommands;
+    virtual const volatile char* HandleCommandsImpl(const volatile char* commands, size_t size) = 0;
+
+    ChunkedCommandsResult BeginChunkedCommandData(const volatile char* commands,
+                                                  size_t commandSize,
+                                                  size_t initialSize);
+
+    size_t mChunkedCommandRemainingSize = 0;
+    size_t mChunkedCommandPutOffset = 0;
+    std::unique_ptr<char[]> mChunkedCommandData;
 };
 
 }  // namespace dawn::wire

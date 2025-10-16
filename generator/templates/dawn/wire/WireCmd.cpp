@@ -136,7 +136,7 @@
                       "Record must be at most one of is_cmd, extensible, and chained.");
         {% if is_cmd %}
             //* Start the transfer structure with the command ID, so that casting to WireCmd gives the ID.
-            WireCmd commandId;
+            {{Return}}WireCmd commandId;
         {% elif record.extensible %}
             WGPUBool hasNextInChain;
         {% elif record.chained %}
@@ -242,7 +242,7 @@
     ) {
         //* Handle special transfer members of methods.
         {% if is_cmd %}
-            transfer->commandId = WireCmd::{{Return}}{{name}};
+            transfer->commandId = {{Return}}WireCmd::{{name}};
         {% endif %}
 
         {% if record.extensible %}
@@ -348,7 +348,7 @@
             , const ObjectIdResolver& resolver
         {%- endif -%}) {
         {% if is_cmd %}
-            DAWN_ASSERT(transfer->commandId == WireCmd::{{Return}}{{name}});
+            DAWN_ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
         {% endif %}
         {% if record.derived_method %}
             record->selfId = transfer->self;
@@ -690,12 +690,6 @@ WireResult WGPUStringViewDeserialize(
     {% do sTypes.append(sType) %}
 {% endfor %}
 
-//* Output [de]serialization helpers for special commands
-{% for command in cmd_records["special command"] %}
-    {%- set name = command.name.CamelCase() -%}
-    {{write_record_serialization_helpers(command, name, command.members, is_cmd=True)}}
-{% endfor %}
-
 //* Output [de]serialization helpers for commands
 {% for command in cmd_records["command"] %}
     {%- set name = command.name.CamelCase() -%}
@@ -740,10 +734,6 @@ class ErrorObjectIdProvider final : public ObjectIdProvider {
 };
 
 }  // anonymous namespace
-
-{% for command in cmd_records["special command"] -%}
-    {{write_command_serialization_methods(command, False)}}
-{% endfor %}
 
 {% for command in cmd_records["command"] -%}
     {{write_command_serialization_methods(command, False)}}

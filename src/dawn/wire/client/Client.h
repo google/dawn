@@ -82,7 +82,7 @@ class Client : public ClientBase {
     }
 
     // ChunkedCommandHandler implementation
-    const volatile char* HandleCommands(const volatile char* commands, size_t size) override;
+    const volatile char* HandleCommandsImpl(const volatile char* commands, size_t size) override;
 
     MemoryTransferService* GetMemoryTransferService() const { return mMemoryTransferService; }
 
@@ -143,6 +143,7 @@ class Client : public ClientBase {
 #include "dawn/wire/client/ClientPrototypes_autogen.inc"
 
     ChunkedCommandSerializer mSerializer;
+    WireDeserializeAllocator mWireCommandAllocator;
     PerObjectType<ObjectStore> mObjects;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     raw_ptr<MemoryTransferService> mMemoryTransferService = nullptr;

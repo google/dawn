@@ -29,6 +29,7 @@
 {% for command in cmd_records["command"] %}
     {% set Suffix = command.name.CamelCase() %}
     WireResult Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer);
+
     WireResult Do{{Suffix}}(
         {%- for member in command.members -%}
             {%- if member.is_return_value -%}
@@ -45,7 +46,6 @@
             {%- if not loop.last -%}, {% endif %}
         {%- endfor -%}
     );
-
 {% endfor %}
 
 {% for CommandName in server_custom_pre_handler_commands %}

@@ -174,7 +174,7 @@ EventManager& Client::GetEventManager(const ObjectHandle& instance) {
 
 void Client::Disconnect() {
     mDisconnected = true;
-    mSerializer.SetCommandSerializerForDisconnect(NoopCommandSerializer::GetInstance());
+    mSerializer = ChunkedCommandSerializer(NoopCommandSerializer::GetInstance());
 
     // Transition all event managers to ClientDropped state.
     for (auto& [_, eventManager] : mEventManagers) {
