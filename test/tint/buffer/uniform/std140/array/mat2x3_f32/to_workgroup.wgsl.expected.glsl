@@ -50,7 +50,8 @@ void f_inner(uint tint_local_index) {
   w = v_4;
   w[1u] = mat2x3(v.inner[2u].col0, v.inner[2u].col1);
   w[1u][0u] = v.inner[0u].col1.zxy;
-  w[1u][0u].x = v.inner[0u].col1.x;
+  vec3 v_7 = v.inner[0u].col1;
+  w[1u][0u].x = v_7.x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -18,6 +18,7 @@ void main() {
   a(mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3));
   b(mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3)[1u]);
   b(mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3)[1u].yx);
-  c(mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3)[1u].x);
+  vec2 v_2 = mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3)[1u];
+  c(v_2.x);
   c(mat4x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2, v_1.inner_col3)[1u].yx.x);
 }

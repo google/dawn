@@ -21,5 +21,6 @@ void main() {
   tint_store_and_preserve_padding(f16mat3(v.inner_col0, v.inner_col1, v.inner_col2));
   v_1.inner[1u] = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   v_1.inner[1u] = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u].zxy;
-  v_1.inner[0u].y = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
+  f16vec3 v_2 = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u];
+  v_1.inner[0u].y = v_2.x;
 }

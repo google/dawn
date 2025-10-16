@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_RAISE_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_
+#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_
+#define SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_
 
 #include "src/tint/utils/result.h"
 
@@ -35,7 +35,7 @@ namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::spirv::writer::raise {
+namespace tint::core::ir::transform {
 
 /// RemoveUniformVectorComponentLoads is a transform that removes load_vector_element instructions
 /// for uniform buffers. Instead, we load the whole vector and then extract the desired component.
@@ -44,6 +44,6 @@ namespace tint::spirv::writer::raise {
 /// @returns success or failure
 Result<SuccessType> RemoveUniformVectorComponentLoads(core::ir::Module& module);
 
-}  // namespace tint::spirv::writer::raise
+}  // namespace tint::core::ir::transform
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_
+#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_REMOVE_UNIFORM_VECTOR_COMPONENT_LOADS_H_

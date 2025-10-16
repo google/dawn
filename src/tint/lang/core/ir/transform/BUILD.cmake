@@ -84,6 +84,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/remove_continue_in_switch.h
   lang/core/ir/transform/remove_terminator_args.cc
   lang/core/ir/transform/remove_terminator_args.h
+  lang/core/ir/transform/remove_uniform_vector_component_loads.cc
+  lang/core/ir/transform/remove_uniform_vector_component_loads.h
   lang/core/ir/transform/rename_conflicts.cc
   lang/core/ir/transform/rename_conflicts.h
   lang/core/ir/transform/resource_binding.cc
@@ -165,6 +167,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/prevent_infinite_loops_test.cc
   lang/core/ir/transform/remove_continue_in_switch_test.cc
   lang/core/ir/transform/remove_terminator_args_test.cc
+  lang/core/ir/transform/remove_uniform_vector_component_loads_test.cc
   lang/core/ir/transform/rename_conflicts_test.cc
   lang/core/ir/transform/robustness_test.cc
   lang/core/ir/transform/signed_integer_polyfill_test.cc

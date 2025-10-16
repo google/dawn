@@ -11,5 +11,6 @@ void main() {
   p = mat2(v.inner_col0, v.inner_col1);
   p[1u] = mat2(v.inner_col0, v.inner_col1)[0u];
   p[1u] = mat2(v.inner_col0, v.inner_col1)[0u].yx;
-  p[0u].y = mat2(v.inner_col0, v.inner_col1)[1u].x;
+  vec2 v_1 = mat2(v.inner_col0, v.inner_col1)[1u];
+  p[0u].y = v_1.x;
 }

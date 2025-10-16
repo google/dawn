@@ -16,5 +16,6 @@ void main() {
   v_1.inner = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3);
   v_1.inner[1u] = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u];
   v_1.inner[1u] = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u].yx;
-  v_1.inner[0u].y = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u].x;
+  vec2 v_2 = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u];
+  v_1.inner[0u].y = v_2.x;
 }

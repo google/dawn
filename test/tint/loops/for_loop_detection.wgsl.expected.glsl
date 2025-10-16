@@ -27,13 +27,14 @@ void main_inner(uvec3 lid, uint tint_local_index) {
   {
     int S = init;
     while(true) {
-      if ((S < v.inner.i3.x)) {
+      ivec4 v_1 = v.inner.i3;
+      if ((S < v_1.x)) {
       } else {
         break;
       }
       {
-        uint v_1 = uint(S);
-        S = int((v_1 + uint(8)));
+        uint v_2 = uint(S);
+        S = int((v_2 + uint(8)));
       }
       continue;
     }
@@ -41,19 +42,22 @@ void main_inner(uvec3 lid, uint tint_local_index) {
   {
     int s_group = 0;
     while(true) {
-      if ((s_group < v.inner.i3.z)) {
+      ivec4 v_3 = v.inner.i3;
+      if ((s_group < v_3.z)) {
       } else {
         break;
       }
-      outputs[lid.z][lid.x] = tint_v4f32_to_v4u32(texelFetch(src_image2d, ivec2(uvec2(uint(v.inner.i3.x))), 0));
+      ivec4 v_4 = v.inner.i3;
+      outputs[lid.z][lid.x] = tint_v4f32_to_v4u32(texelFetch(src_image2d, ivec2(uvec2(uint(v_4.x))), 0));
       barrier();
       uvec4 result = outputs[lid.z][lid.x];
-      uvec2 v_2 = uvec2(uint(v.inner.i3.x));
-      uvec4 v_3 = result;
-      imageStore(dst_image2d, ivec2(v_2), v_3);
+      ivec4 v_5 = v.inner.i3;
+      uvec2 v_6 = uvec2(uint(v_5.x));
+      uvec4 v_7 = result;
+      imageStore(dst_image2d, ivec2(v_6), v_7);
       {
-        uint v_4 = uint(s_group);
-        s_group = int((v_4 + uint(8)));
+        uint v_8 = uint(s_group);
+        s_group = int((v_8 + uint(8)));
       }
       continue;
     }

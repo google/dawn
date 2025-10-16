@@ -38,5 +38,7 @@ void main() {
   Inner l_a_i_a_i = v.inner[v_2].a[v_3];
   mat2x4 l_a_i_a_i_m = v.inner[v_2].a[v_3].m;
   vec4 l_a_i_a_i_m_i = v.inner[v_2].a[v_3].m[v_4];
-  float l_a_i_a_i_m_i_i = v.inner[v_2].a[v_3].m[v_4][min(uint(i()), 3u)];
+  uint v_5 = min(uint(i()), 3u);
+  vec4 v_6 = v.inner[v_2].a[v_3].m[v_4];
+  float l_a_i_a_i_m_i_i = v_6[v_5];
 }

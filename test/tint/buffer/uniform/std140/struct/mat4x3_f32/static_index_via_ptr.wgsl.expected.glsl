@@ -93,5 +93,6 @@ void main() {
   Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3u].a[2u]);
   mat4x3 l_a_3_a_2_m = v_4;
   vec3 l_a_3_a_2_m_1 = v_4[1u];
-  float l_a_3_a_2_m_1_0 = v_4[1u].x;
+  vec3 v_13 = v_4[1u];
+  float l_a_3_a_2_m_1_0 = v_13.x;
 }

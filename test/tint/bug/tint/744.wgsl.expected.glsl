@@ -25,8 +25,10 @@ uniform uniforms_block_1_ubo {
 } v;
 void main_inner(uvec3 global_id) {
   uvec2 resultCell = uvec2(global_id.y, global_id.x);
-  uint dimInner = v.inner.aShape.y;
-  uint dimOutter = v.inner.outShape.y;
+  uvec2 v_1 = v.inner.aShape;
+  uint dimInner = v_1.y;
+  uvec2 v_2 = v.inner.outShape;
+  uint dimOutter = v_2.y;
   uint result = 0u;
   {
     uint i = 0u;
@@ -37,11 +39,11 @@ void main_inner(uvec3 global_id) {
       }
       uint a = (i + (resultCell.x * dimInner));
       uint b = (resultCell.y + (i * dimOutter));
-      uint v_1 = result;
-      uint v_2 = min(a, (uint(firstMatrix.numbers.length()) - 1u));
-      uint v_3 = firstMatrix.numbers[v_2];
-      uint v_4 = min(b, (uint(secondMatrix.numbers.length()) - 1u));
-      result = (v_1 + (v_3 * secondMatrix.numbers[v_4]));
+      uint v_3 = result;
+      uint v_4 = min(a, (uint(firstMatrix.numbers.length()) - 1u));
+      uint v_5 = firstMatrix.numbers[v_4];
+      uint v_6 = min(b, (uint(secondMatrix.numbers.length()) - 1u));
+      result = (v_3 + (v_5 * secondMatrix.numbers[v_6]));
       {
         i = (i + 1u);
       }
@@ -49,8 +51,8 @@ void main_inner(uvec3 global_id) {
     }
   }
   uint index = (resultCell.y + (resultCell.x * dimOutter));
-  uint v_5 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
-  resultMatrix.numbers[v_5] = result;
+  uint v_7 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
+  resultMatrix.numbers[v_7] = result;
 }
 layout(local_size_x = 2, local_size_y = 2, local_size_z = 1) in;
 void main() {

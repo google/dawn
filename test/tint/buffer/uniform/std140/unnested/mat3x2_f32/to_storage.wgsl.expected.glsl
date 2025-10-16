@@ -15,5 +15,6 @@ void main() {
   v_1.inner = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
   v_1.inner[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   v_1.inner[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u].yx;
-  v_1.inner[0u].y = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
+  vec2 v_2 = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u];
+  v_1.inner[0u].y = v_2.x;
 }

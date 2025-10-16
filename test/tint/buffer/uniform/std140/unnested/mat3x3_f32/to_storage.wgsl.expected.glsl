@@ -22,5 +22,6 @@ void main() {
   tint_store_and_preserve_padding(mat3(v.inner_col0, v.inner_col1, v.inner_col2));
   v_1.inner[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   v_1.inner[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u].zxy;
-  v_1.inner[0u].y = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
+  vec3 v_2 = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u];
+  v_1.inner[0u].y = v_2.x;
 }

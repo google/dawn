@@ -7,5 +7,6 @@ uniform f_weights_block_ubo {
   vec2 inner;
 } v;
 void main() {
-  float a = v.inner.x;
+  vec2 v_1 = v.inner;
+  float a = v_1.x;
 }

@@ -17,7 +17,8 @@ void f_inner(uint tint_local_index) {
   w = mat3(v.inner_col0, v.inner_col1, v.inner_col2);
   w[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   w[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u].zxy;
-  w[0u].y = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
+  vec3 v_1 = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u];
+  w[0u].y = v_1.x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

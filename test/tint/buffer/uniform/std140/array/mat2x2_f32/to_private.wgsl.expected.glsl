@@ -37,6 +37,7 @@ void main() {
   p = v_3;
   p[1u] = mat2(v.inner[2u].col0, v.inner[2u].col1);
   p[1u][0u] = v.inner[0u].col1.yx;
-  p[1u][0u].x = v.inner[0u].col1.x;
+  vec2 v_6 = v.inner[0u].col1;
+  p[1u][0u].x = v_6.x;
   v_1.inner = p[1u][0u].x;
 }

@@ -111,5 +111,6 @@ void main() {
   Inner l_a_i_a_i = tint_convert_Inner(v.inner[v_5].a[v_6]);
   f16mat3x2 l_a_i_a_i_m = v_7;
   f16vec2 l_a_i_a_i_m_i = v_8;
-  float16_t l_a_i_a_i_m_i_i = v_8[min(uint(i()), 1u)];
+  f16vec2 v_17 = v_8;
+  float16_t l_a_i_a_i_m_i_i = v_17[min(uint(i()), 1u)];
 }

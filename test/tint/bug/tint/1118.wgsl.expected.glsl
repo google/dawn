@@ -73,15 +73,16 @@ void main_1() {
   baseColor = vec4(1.0f);
   vec4 x_52 = v_1.inner.vDiffuseColor;
   diffuseColor = vec3(x_52.x, x_52.y, x_52.z);
-  float x_60 = v_1.inner.vDiffuseColor.w;
+  vec4 v_3 = v_1.inner.vDiffuseColor;
+  float x_60 = v_3.w;
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
   uvOffset = vec2(0.0f);
   vec4 x_74 = vec4(0.0f);
   vec4 x_76 = baseColor;
-  vec3 v_3 = vec3(x_76.x, x_76.y, x_76.z);
-  vec3 x_78 = (v_3 * vec3(x_74.x, x_74.y, x_74.z));
+  vec3 v_4 = vec3(x_76.x, x_76.y, x_76.z);
+  vec3 x_78 = (v_4 * vec3(x_74.x, x_74.y, x_74.z));
   vec4 x_79 = baseColor;
   baseColor = vec4(x_78.x, x_78.y, x_78.z, x_79.w);
   baseAmbientColor = vec3(1.0f);
@@ -104,8 +105,8 @@ void main_1() {
   vec3 x_116 = finalSpecular;
   vec4 x_118 = reflectionColor;
   vec4 x_121 = refractionColor;
-  vec3 v_4 = (((x_113 * x_114) + x_116) + vec3(x_118.x, x_118.y, x_118.z));
-  vec3 x_123 = (v_4 + vec3(x_121.x, x_121.y, x_121.z));
+  vec3 v_5 = (((x_113 * x_114) + x_116) + vec3(x_118.x, x_118.y, x_118.z));
+  vec3 x_123 = (v_5 + vec3(x_121.x, x_121.y, x_121.z));
   float x_124 = alpha;
   color = vec4(x_123.x, x_123.y, x_123.z, x_124);
   vec4 x_129 = color;
@@ -122,11 +123,11 @@ main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  main_out v_5 = main_out(glFragColor);
+  main_out v_6 = main_out(glFragColor);
   if (!(continue_execution)) {
     discard;
   }
-  return v_5;
+  return v_6;
 }
 void main() {
   main_loc0_Output = main_inner(tint_interstage_location2, tint_interstage_location3).glFragColor_1;

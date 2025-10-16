@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/raise/remove_uniform_vector_component_loads.h"
+#include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -34,7 +34,7 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::spirv::writer::raise {
+namespace tint::core::ir::transform {
 
 namespace {
 
@@ -62,8 +62,12 @@ struct State {
         // Replace the instructions that we found.
         for (auto* lve : worklist) {
             b.InsertBefore(lve, [&] {
+                // Capture the `load` in a `let` so that it does not get inlined.
+                // This is necessary for the GLSL backend, where inlining the load expression will
+                // turn it into a reference that defers the load until the component is accessed.
                 auto* load = b.Load(lve->From());
-                auto* access = b.Access(lve->Result()->Type(), load, lve->Index());
+                auto* let = b.Let(load);
+                auto* access = b.Access(lve->Result()->Type(), let, lve->Index());
                 lve->Result()->ReplaceAllUsesWith(access->Result());
             });
             lve->Destroy();
@@ -74,7 +78,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RemoveUniformVectorComponentLoads(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "spirv.RemoveUniformVectorComponentLoads",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.RemoveUniformVectorComponentLoads",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowDuplicateBindings,
                                               core::ir::Capability::kAllowNonCoreTypes,
@@ -89,4 +93,4 @@ Result<SuccessType> RemoveUniformVectorComponentLoads(core::ir::Module& ir) {
     return Success;
 }
 
-}  // namespace tint::spirv::writer::raise
+}  // namespace tint::core::ir::transform

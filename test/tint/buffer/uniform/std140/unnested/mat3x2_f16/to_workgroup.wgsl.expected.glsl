@@ -16,7 +16,8 @@ void f_inner(uint tint_local_index) {
   w = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
   w[1u] = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   w[1u] = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u].yx;
-  w[0u].y = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
+  f16vec2 v_1 = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u];
+  w[0u].y = v_1.x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

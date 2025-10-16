@@ -25,21 +25,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/writer/raise/remove_uniform_vector_component_loads.h"
+#include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
 
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
-namespace tint::spirv::writer::raise {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_RemoveUniformVectorComponentLoadsTest = core::ir::transform::TransformTest;
+using IR_RemoveUniformVectorComponentLoadsTest = core::ir::transform::TransformTest;
 
-TEST_F(SpirvWriter_RemoveUniformVectorComponentLoadsTest, NoModify_NotUniform) {
+TEST_F(IR_RemoveUniformVectorComponentLoadsTest, NoModify_NotUniform) {
     auto* buffer = b.Var("buffer", ty.ptr(storage, ty.vec4<f32>(), read));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -71,7 +71,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_RemoveUniformVectorComponentLoadsTest, Basic) {
+TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Basic) {
     auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -104,8 +104,9 @@ $B1: {  # root
 %foo = func():f32 {
   $B2: {
     %3:vec4<f32> = load %buffer
-    %4:f32 = access %3, 2u
-    ret %4
+    %4:vec4<f32> = let %3
+    %5:f32 = access %4, 2u
+    ret %5
   }
 }
 )";
@@ -115,7 +116,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_RemoveUniformVectorComponentLoadsTest, ViaLet) {
+TEST_F(IR_RemoveUniformVectorComponentLoadsTest, ViaLet) {
     auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -151,8 +152,9 @@ $B1: {  # root
   $B2: {
     %3:ptr<uniform, vec4<f32>, read> = let %buffer
     %4:vec4<f32> = load %3
-    %5:f32 = access %4, 2u
-    ret %5
+    %5:vec4<f32> = let %4
+    %6:f32 = access %5, 2u
+    ret %6
   }
 }
 )";
@@ -162,7 +164,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_RemoveUniformVectorComponentLoadsTest, Multiple) {
+TEST_F(IR_RemoveUniformVectorComponentLoadsTest, Multiple) {
     auto* buffer = b.Var("buffer", ty.ptr(uniform, ty.vec4<f32>()));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -203,15 +205,19 @@ $B1: {  # root
 %foo = func():vec4<f32> {
   $B2: {
     %3:vec4<f32> = load %buffer
-    %4:f32 = access %3, 0u
-    %5:vec4<f32> = load %buffer
-    %6:f32 = access %5, 1u
-    %7:vec4<f32> = load %buffer
-    %8:f32 = access %7, 2u
+    %4:vec4<f32> = let %3
+    %5:f32 = access %4, 0u
+    %6:vec4<f32> = load %buffer
+    %7:vec4<f32> = let %6
+    %8:f32 = access %7, 1u
     %9:vec4<f32> = load %buffer
-    %10:f32 = access %9, 3u
-    %11:vec4<f32> = construct %4, %6, %8, %10
-    ret %11
+    %10:vec4<f32> = let %9
+    %11:f32 = access %10, 2u
+    %12:vec4<f32> = load %buffer
+    %13:vec4<f32> = let %12
+    %14:f32 = access %13, 3u
+    %15:vec4<f32> = construct %5, %8, %11, %14
+    ret %15
   }
 }
 )";
@@ -222,4 +228,4 @@ $B1: {  # root
 }
 
 }  // namespace
-}  // namespace tint::spirv::writer::raise
+}  // namespace tint::core::ir::transform

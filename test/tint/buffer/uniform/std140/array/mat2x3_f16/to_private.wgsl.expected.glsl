@@ -38,6 +38,7 @@ void main() {
   p = v_3;
   p[1u] = f16mat2x3(v.inner[2u].col0, v.inner[2u].col1);
   p[1u][0u] = v.inner[0u].col1.zxy;
-  p[1u][0u].x = v.inner[0u].col1.x;
+  f16vec3 v_6 = v.inner[0u].col1;
+  p[1u][0u].x = v_6.x;
   v_1.inner = p[1u][0u].x;
 }

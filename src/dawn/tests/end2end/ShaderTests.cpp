@@ -2738,9 +2738,6 @@ fn main(@builtin(local_invocation_id) lid : vec3<u32>) {
 // Test coverage for a uniform buffer indexing bug on Qualcomm devices.
 // See crbug.com/452350626.
 TEST_P(ShaderTests, LargeUBOVectorIndexing) {
-    // TODO(452350626): The OpenGL backend needs a workaround for Qualcomm as well.
-    DAWN_SUPPRESS_TEST_IF(IsQualcomm() && IsOpenGLES());
-
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
 struct Input {
   vector_index: u32,

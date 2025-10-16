@@ -996,10 +996,14 @@ uniform f_v_block_ubo {
 } v_1;
 void main() {
   vec4 a = v_1.inner;
-  float b = v_1.inner.x;
-  float c = v_1.inner.y;
-  float d = v_1.inner.z;
-  float e = v_1.inner.w;
+  vec4 v_2 = v_1.inner;
+  float b = v_2.x;
+  vec4 v_3 = v_1.inner;
+  float c = v_3.y;
+  vec4 v_4 = v_1.inner;
+  float d = v_4.z;
+  vec4 v_5 = v_1.inner;
+  float e = v_5.w;
 }
 )");
 }
@@ -1032,10 +1036,14 @@ uniform f_v_block_ubo {
 void main() {
   uint x = 1u;
   f16vec4 a = v_1.inner;
-  float16_t b = v_1.inner.x;
-  float16_t c = v_1.inner[min(x, 3u)];
-  float16_t d = v_1.inner.z;
-  float16_t e = v_1.inner.w;
+  f16vec4 v_2 = v_1.inner;
+  float16_t b = v_2.x;
+  f16vec4 v_3 = v_1.inner;
+  float16_t c = v_3[min(x, 3u)];
+  f16vec4 v_4 = v_1.inner;
+  float16_t d = v_4.z;
+  f16vec4 v_5 = v_1.inner;
+  float16_t e = v_5.w;
 }
 )");
 }
@@ -1065,7 +1073,8 @@ uniform f_v_block_ubo {
 void main() {
   mat4 a = v_1.inner;
   vec4 b = v_1.inner[3u];
-  float c = v_1.inner[1u].z;
+  vec4 v_2 = v_1.inner[1u];
+  float c = v_2.z;
 }
 )");
 }
@@ -1097,7 +1106,8 @@ uniform f_v_block_std140_ubo {
 void main() {
   mat2x3 a = mat2x3(v_1.inner_col0, v_1.inner_col1);
   vec3 b = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
+  vec3 v_2 = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
+  float c = v_2.z;
 }
 )");
 }
@@ -1128,7 +1138,8 @@ uniform f_v_block_std140_ubo {
 void main() {
   f16mat2x3 a = f16mat2x3(v_1.inner_col0, v_1.inner_col1);
   f16vec3 b = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
+  f16vec3 v_2 = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
+  float16_t c = v_2.z;
 }
 )");
 }
@@ -1160,7 +1171,8 @@ uniform f_v_block_std140_ubo {
 void main() {
   mat3x2 a = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2);
   vec2 b = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
-  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].y;
+  vec2 v_2 = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
+  float c = v_2.y;
 }
 )");
 }
@@ -1191,7 +1203,8 @@ uniform f_v_block_std140_ubo {
 void main() {
   mat2 a = mat2(v_1.inner_col0, v_1.inner_col1);
   vec2 b = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
+  vec2 v_2 = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
+  float c = v_2.y;
 }
 )");
 }
@@ -1223,7 +1236,8 @@ uniform f_v_block_std140_ubo {
 void main() {
   f16mat2 a = f16mat2(v_1.inner_col0, v_1.inner_col1);
   f16vec2 b = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
+  f16vec2 v_2 = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
+  float16_t c = v_2.y;
 }
 )");
 }
@@ -1477,7 +1491,8 @@ SB tint_convert_SB(SB_std140 tint_input) {
 }
 void main() {
   SB a = tint_convert_SB(v_1.inner);
-  float b = v_1.inner.b.y.t[3u].z;
+  vec3 v_2 = v_1.inner.b.y.t[3u];
+  float b = v_2.z;
 }
 )");
 }
@@ -2279,8 +2294,10 @@ uniform f_v_block_ubo {
   SB inner;
 } v_1;
 void main() {
-  float b = v_1.inner.d.y;
-  float c = v_1.inner.d.z;
+  vec3 v_2 = v_1.inner.d;
+  float b = v_2.y;
+  vec3 v_3 = v_1.inner.d;
+  float c = v_3.z;
 }
 )");
 }

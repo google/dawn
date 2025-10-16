@@ -29,5 +29,6 @@ void main() {
   Inner l_a_3_a_2 = v.inner[3u].a[2u];
   mat2x4 l_a_3_a_2_m = v.inner[3u].a[2u].m;
   vec4 l_a_3_a_2_m_1 = v.inner[3u].a[2u].m[1u];
-  float l_a_3_a_2_m_1_0 = v.inner[3u].a[2u].m[1u].x;
+  vec4 v_1 = v.inner[3u].a[2u].m[1u];
+  float l_a_3_a_2_m_1_0 = v_1.x;
 }

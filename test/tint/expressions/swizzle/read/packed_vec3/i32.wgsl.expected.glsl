@@ -12,9 +12,12 @@ uniform U_block_1_ubo {
 } v_1;
 void f() {
   ivec3 v = v_1.inner.v;
-  int x = v_1.inner.v.x;
-  int y = v_1.inner.v.y;
-  int z = v_1.inner.v.z;
+  ivec3 v_2 = v_1.inner.v;
+  int x = v_2.x;
+  ivec3 v_3 = v_1.inner.v;
+  int y = v_3.y;
+  ivec3 v_4 = v_1.inner.v;
+  int z = v_4.z;
   ivec2 xx = v_1.inner.v.xx;
   ivec2 xy = v_1.inner.v.xy;
   ivec2 xz = v_1.inner.v.xz;

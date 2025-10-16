@@ -32,103 +32,109 @@ void main_inner(uvec3 GlobalInvocationID) {
   uvec2 dstTexCoord = uvec2(GlobalInvocationID.xy);
   vec4 nonCoveredColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
-  bool v_3 = false;
-  if ((dstTexCoord.x < v_1.inner.dstCopyOrigin.x)) {
-    v_3 = true;
-  } else {
-    v_3 = (dstTexCoord.y < v_1.inner.dstCopyOrigin.y);
-  }
+  uvec2 v_3 = v_1.inner.dstCopyOrigin;
   bool v_4 = false;
-  if (v_3) {
+  if ((dstTexCoord.x < v_3.x)) {
     v_4 = true;
   } else {
-    v_4 = (dstTexCoord.x >= (v_1.inner.dstCopyOrigin.x + v_1.inner.copySize.x));
+    uvec2 v_5 = v_1.inner.dstCopyOrigin;
+    v_4 = (dstTexCoord.y < v_5.y);
   }
-  bool v_5 = false;
+  bool v_6 = false;
   if (v_4) {
-    v_5 = true;
+    v_6 = true;
   } else {
-    v_5 = (dstTexCoord.y >= (v_1.inner.dstCopyOrigin.y + v_1.inner.copySize.y));
+    uvec2 v_7 = v_1.inner.dstCopyOrigin;
+    uvec2 v_8 = v_1.inner.copySize;
+    v_6 = (dstTexCoord.x >= (v_7.x + v_8.x));
   }
-  if (v_5) {
-    bool v_6 = false;
+  bool v_9 = false;
+  if (v_6) {
+    v_9 = true;
+  } else {
+    uvec2 v_10 = v_1.inner.dstCopyOrigin;
+    uvec2 v_11 = v_1.inner.copySize;
+    v_9 = (dstTexCoord.y >= (v_10.y + v_11.y));
+  }
+  if (v_9) {
+    bool v_12 = false;
     if (success) {
-      ivec2 v_7 = ivec2(dstTexCoord);
-      uint v_8 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
-      uint v_9 = min(uint(0), v_8);
-      uvec2 v_10 = (uvec2(textureSize(dst, int(v_9))) - uvec2(1u));
-      ivec2 v_11 = ivec2(min(uvec2(v_7), v_10));
-      v_6 = all(equal(texelFetch(dst, v_11, int(v_9)), nonCoveredColor));
+      ivec2 v_13 = ivec2(dstTexCoord);
+      uint v_14 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
+      uint v_15 = min(uint(0), v_14);
+      uvec2 v_16 = (uvec2(textureSize(dst, int(v_15))) - uvec2(1u));
+      ivec2 v_17 = ivec2(min(uvec2(v_13), v_16));
+      v_12 = all(equal(texelFetch(dst, v_17, int(v_15)), nonCoveredColor));
     } else {
-      v_6 = false;
+      v_12 = false;
     }
-    success = v_6;
+    success = v_12;
   } else {
     uvec2 srcTexCoord = ((dstTexCoord - v_1.inner.dstCopyOrigin) + v_1.inner.srcCopyOrigin);
     if ((v_1.inner.dstTextureFlipY == 1u)) {
       srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
-    ivec2 v_12 = ivec2(srcTexCoord);
-    uint v_13 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
-    uint v_14 = min(uint(0), v_13);
-    uvec2 v_15 = (uvec2(textureSize(src, int(v_14))) - uvec2(1u));
-    ivec2 v_16 = ivec2(min(uvec2(v_12), v_15));
-    vec4 srcColor = texelFetch(src, v_16, int(v_14));
-    ivec2 v_17 = ivec2(dstTexCoord);
-    uint v_18 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
-    uint v_19 = min(uint(0), v_18);
-    uvec2 v_20 = (uvec2(textureSize(dst, int(v_19))) - uvec2(1u));
-    ivec2 v_21 = ivec2(min(uvec2(v_17), v_20));
-    vec4 dstColor = texelFetch(dst, v_21, int(v_19));
+    ivec2 v_18 = ivec2(srcTexCoord);
+    uint v_19 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+    uint v_20 = min(uint(0), v_19);
+    uvec2 v_21 = (uvec2(textureSize(src, int(v_20))) - uvec2(1u));
+    ivec2 v_22 = ivec2(min(uvec2(v_18), v_21));
+    vec4 srcColor = texelFetch(src, v_22, int(v_20));
+    ivec2 v_23 = ivec2(dstTexCoord);
+    uint v_24 = (v_2.metadata[(1u / 4u)][(1u % 4u)] - 1u);
+    uint v_25 = min(uint(0), v_24);
+    uvec2 v_26 = (uvec2(textureSize(dst, int(v_25))) - uvec2(1u));
+    ivec2 v_27 = ivec2(min(uvec2(v_23), v_26));
+    vec4 dstColor = texelFetch(dst, v_27, int(v_25));
     if ((v_1.inner.channelCount == 2u)) {
-      bool v_22 = false;
+      bool v_28 = false;
       if (success) {
-        v_22 = aboutEqual(dstColor.x, srcColor.x);
+        v_28 = aboutEqual(dstColor.x, srcColor.x);
       } else {
-        v_22 = false;
+        v_28 = false;
       }
-      bool v_23 = false;
-      if (v_22) {
-        v_23 = aboutEqual(dstColor.y, srcColor.y);
+      bool v_29 = false;
+      if (v_28) {
+        v_29 = aboutEqual(dstColor.y, srcColor.y);
       } else {
-        v_23 = false;
+        v_29 = false;
       }
-      success = v_23;
+      success = v_29;
     } else {
-      bool v_24 = false;
+      bool v_30 = false;
       if (success) {
-        v_24 = aboutEqual(dstColor.x, srcColor.x);
+        v_30 = aboutEqual(dstColor.x, srcColor.x);
       } else {
-        v_24 = false;
+        v_30 = false;
       }
-      bool v_25 = false;
-      if (v_24) {
-        v_25 = aboutEqual(dstColor.y, srcColor.y);
+      bool v_31 = false;
+      if (v_30) {
+        v_31 = aboutEqual(dstColor.y, srcColor.y);
       } else {
-        v_25 = false;
+        v_31 = false;
       }
-      bool v_26 = false;
-      if (v_25) {
-        v_26 = aboutEqual(dstColor.z, srcColor.z);
+      bool v_32 = false;
+      if (v_31) {
+        v_32 = aboutEqual(dstColor.z, srcColor.z);
       } else {
-        v_26 = false;
+        v_32 = false;
       }
-      bool v_27 = false;
-      if (v_26) {
-        v_27 = aboutEqual(dstColor.w, srcColor.w);
+      bool v_33 = false;
+      if (v_32) {
+        v_33 = aboutEqual(dstColor.w, srcColor.w);
       } else {
-        v_27 = false;
+        v_33 = false;
       }
-      success = v_27;
+      success = v_33;
     }
   }
   uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
-    uint v_28 = min(outputIndex, (uint(v.result.length()) - 1u));
-    v.result[v_28] = 1u;
+    uint v_34 = min(outputIndex, (uint(v.result.length()) - 1u));
+    v.result[v_34] = 1u;
   } else {
-    uint v_29 = min(outputIndex, (uint(v.result.length()) - 1u));
-    v.result[v_29] = 0u;
+    uint v_35 = min(outputIndex, (uint(v.result.length()) - 1u));
+    v.result[v_35] = 0u;
   }
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

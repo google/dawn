@@ -24,5 +24,6 @@ buffer result_block_1_ssbo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uint v_2 = min(uint(v.inner.dynamic_idx), 3u);
-  v_1.inner.member_0 = v.inner.data[v_2].x;
+  ivec4 v_3 = v.inner.data[v_2];
+  v_1.inner.member_0 = v_3.x;
 }

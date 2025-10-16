@@ -46,5 +46,6 @@ void main() {
   f16mat2x4 l_a[4] = v_7;
   f16mat2x4 l_a_i = v_4;
   f16vec4 l_a_i_i = v_5;
-  v_1.inner = (((v_5.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  f16vec4 v_10 = v_5;
+  v_1.inner = (((v_10.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

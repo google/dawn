@@ -12,9 +12,12 @@ uniform U_block_1_ubo {
 } v_1;
 void f() {
   f16vec3 v = v_1.inner.v;
-  float16_t x = v_1.inner.v.x;
-  float16_t y = v_1.inner.v.y;
-  float16_t z = v_1.inner.v.z;
+  f16vec3 v_2 = v_1.inner.v;
+  float16_t x = v_2.x;
+  f16vec3 v_3 = v_1.inner.v;
+  float16_t y = v_3.y;
+  f16vec3 v_4 = v_1.inner.v;
+  float16_t z = v_4.z;
   f16vec2 xx = v_1.inner.v.xx;
   f16vec2 xy = v_1.inner.v.xy;
   f16vec2 xz = v_1.inner.v.xz;

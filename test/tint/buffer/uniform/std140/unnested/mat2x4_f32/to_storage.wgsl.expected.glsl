@@ -13,5 +13,6 @@ void main() {
   v_1.inner = v.inner;
   v_1.inner[1u] = v.inner[0u];
   v_1.inner[1u] = v.inner[0u].ywxz;
-  v_1.inner[0u].y = v.inner[1u].x;
+  vec4 v_2 = v.inner[1u];
+  v_1.inner[0u].y = v_2.x;
 }

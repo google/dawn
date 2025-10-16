@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
+#include "src/tint/lang/core/ir/transform/remove_uniform_vector_component_loads.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
@@ -171,6 +172,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         dva_config.transform_handle = true;
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
     }
+
+    // RemoveUniformVectorComponentLoads is used to work around a Qualcomm driver bug.
+    // See crbug.com/452350626.
+    RUN_TRANSFORM(core::ir::transform::RemoveUniformVectorComponentLoads, module);
 
     // Note, this must come after remapping as it uses post-remapping indices for its options.
     // Note, this must come after DirectVariableAccess as it doesn't handle tracing through function

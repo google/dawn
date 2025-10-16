@@ -38,5 +38,6 @@ void main() {
   f16mat2x3 l_a[4] = v_4;
   f16mat2x3 l_a_i = v_2;
   f16vec3 l_a_i_i = v_2[1u];
-  v_1.inner = (((v_2[1u].x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  f16vec3 v_7 = v_2[1u];
+  v_1.inner = (((v_7.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }
