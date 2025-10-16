@@ -277,7 +277,6 @@ class Server : public ServerBase {
     //   1) It is a repeating callback, so it can't be used with ForwardToServerHelper::Callback.
     //   2) It does not require holding the server object storage lock, i.e. |GetGuard| before
     //      being called because it never interacts with the object store.
-    //   3) It is not immediately followed by a |Flush|.
     void OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView message);
 
 #include "dawn/wire/server/ServerPrototypes_autogen.inc"

@@ -189,6 +189,7 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
                          [](WGPULoggingType type, WGPUStringView message, void* userdata, void*) {
                              DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
                              info->server->OnLogging(info->self, type, message);
+                             info->server->Flush();
                          },
                          device->info.get(), nullptr});
 }
