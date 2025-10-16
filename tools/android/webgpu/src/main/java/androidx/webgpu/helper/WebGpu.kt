@@ -100,10 +100,11 @@ private suspend fun requestAdapter(
     options: RequestAdapterOptions = RequestAdapterOptions(backendType = BackendType.Vulkan),
 ): Adapter {
     val result = instance.requestAdapter(options)
-    check(result.status == RequestAdapterStatus.Success && result.adapter != null) {
+    val adapter = result.adapter
+    check(result.status == RequestAdapterStatus.Success && adapter != null) {
         result. message.ifEmpty { "Error requesting the adapter: $result.status" }
     }
-    return result.adapter
+    return adapter
 }
 
 private suspend fun requestDevice(adapter: Adapter, @FeatureName requiredFeatures: IntArray): Device {
@@ -119,10 +120,11 @@ private suspend fun requestDevice(adapter: Adapter, @FeatureName requiredFeature
                     },
             )
         )
-    check(result.status == RequestDeviceStatus.Success && result.device != null) {
+    val device = result.device
+    check(result.status == RequestDeviceStatus.Success && device != null) {
         result.message.ifEmpty { "Error requesting the device: $result.status" }
     }
-    return result.device
+    return device
 }
 
 /** Initializes the native library. This method should be called before making and WebGPU calls. */
