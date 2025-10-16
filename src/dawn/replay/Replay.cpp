@@ -45,16 +45,40 @@ MaybeError ReadContentIntoBuffer(ReadHead& readHead,
     return {};
 }
 
+MaybeError MapContentIntoBuffer(ReadHead& readHead,
+                                wgpu::Device device,
+                                wgpu::Buffer buffer,
+                                uint64_t bufferOffset,
+                                uint64_t size) {
+    const uint32_t* data;
+    DAWN_TRY_ASSIGN(data, readHead.GetData(size));
+
+    // Note: We could call MapAsync here, wait for it to map, put in the data, then unmap.
+    // To do so we'd have to change the code in Replay::CreateBuffer to leave the buffer
+    // as MapWrite|CopySrc. That would be more inline with what the user actually did
+    // though it might be slower as it would be synchronous.
+    device.GetQueue().WriteBuffer(buffer, bufferOffset, data, size);
+    return {};
+}
+
 ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
                                          ReadHead& readHead,
                                          const std::string& label) {
     schema::Buffer buf;
     DAWN_TRY(Deserialize(readHead, &buf));
 
+    wgpu::BufferUsage usage = (buf.usage & wgpu::BufferUsage::MapRead)
+                                  ? buf.usage
+                                  : (buf.usage | wgpu::BufferUsage::CopySrc);
+
+    // Remap mappable write buffers as CopySrc|CopyDst as we use WriteBuffer to set their contents.
+    if (usage == (wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc)) {
+        usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    }
+
     wgpu::BufferDescriptor desc{
         .label = wgpu::StringView(label),
-        .usage = (buf.usage & wgpu::BufferUsage::MapRead) ? buf.usage
-                                                          : buf.usage | wgpu::BufferUsage::CopySrc,
+        .usage = usage,
         .size = buf.size,
     };
     wgpu::Buffer buffer = device.CreateBuffer(&desc);
@@ -101,11 +125,19 @@ MaybeError Replay::Play() {
                 break;
             }
             case schema::RootCommand::WriteBuffer: {
-                schema::WriteBufferCmdData data;
+                schema::RootCommandWriteBufferCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::Buffer buffer = GetObjectById<wgpu::Buffer>(data.bufferId);
                 DAWN_TRY(ReadContentIntoBuffer(contentReadHead, mDevice, buffer, data.bufferOffset,
                                                data.size));
+                break;
+            }
+            case schema::RootCommand::UnmapBuffer: {
+                schema::RootCommandUnmapBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::Buffer buffer = GetObjectById<wgpu::Buffer>(data.bufferId);
+                DAWN_TRY(MapContentIntoBuffer(contentReadHead, mDevice, buffer, data.bufferOffset,
+                                              data.size));
                 break;
             }
             default: {

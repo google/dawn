@@ -52,7 +52,7 @@ enum class RootCommand : uint32_t {
     QueueSubmit,
     WriteBuffer,
     WriteTexture,
-    Unmap,
+    UnmapBuffer,
 
     End,
 };
@@ -77,9 +77,16 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CreateResource, CREATE_RESOURCE_CMD_DATA_
 #define WRITE_BUFFER_CMD_DATA_MEMBER(X) \
     X(ObjectId, bufferId)               \
     X(uint64_t, bufferOffset)           \
-    X(size_t, size)
+    X(uint64_t, size)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(WriteBuffer, WRITE_BUFFER_CMD_DATA_MEMBER){};
+
+#define UNMAP_BUFFER_CMD_DATA_MEMBER(X) \
+    X(ObjectId, bufferId)               \
+    X(uint64_t, bufferOffset)           \
+    X(uint64_t, size)
+
+DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(UnmapBuffer, UNMAP_BUFFER_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

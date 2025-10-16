@@ -147,6 +147,255 @@ TEST_P(CaptureAndReplayTests, NonMultipleOf4LabelLength) {
     }
 }
 
+// Before capture, creates a buffer and sets half of it with WriteBuffer.
+// It then starts a capture and writes the other half with WriteBuffer.
+// On replay both halves should have the correct data..
+TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationWriteBuffer) {
+    const char* label = "MyBuffer";
+    const uint8_t myData0[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData1[] = {0x55, 0x66, 0x77, 0x88};
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
+    descriptor.size = 8;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    queue.WriteBuffer(buffer, 0, &myData0, sizeof(myData0));
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.WriteBuffer(buffer, 4, &myData1, sizeof(myData1));
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+// Before capture, creates a buffer and sets half of it with mappedAtCreation.
+// It then starts a capture and writes the other half with WriteBuffer.
+// On replay both halves should have the correct data..
+TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationMappedAtCreation) {
+    const char* label = "MyBuffer";
+    const uint8_t myData0[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData1[] = {0x55, 0x66, 0x77, 0x88};
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
+    descriptor.size = 8;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    descriptor.mappedAtCreation = true;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    std::memcpy(buffer.GetMappedRange(), myData0, sizeof(myData0));
+    buffer.Unmap();
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.WriteBuffer(buffer, 4, &myData1, sizeof(myData1));
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+// Before capture, creates a buffer and sets half of it with a compute shader.
+// It then starts a capture and writes the other half with WriteBuffer.
+// On replay both halves should have the correct data..
+TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationComputeShader) {
+    const char* label = "MyBuffer";
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
+    descriptor.size = 8;
+    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn main() {
+            result = 0x44332211;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, buffer},
+                                                     });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+    queue.Submit(1, &commands);
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    const uint8_t myData[] = {0x55, 0x66, 0x77, 0x88};
+    queue.WriteBuffer(buffer, 4, &myData, sizeof(myData));
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+// Before capture, creates a buffer and sets half of it with copyBufferToBuffer.
+// It then starts a capture and writes the other half with WriteBuffer.
+// On replay both halves should have the correct data..
+TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationCopyB2B) {
+    const char* srcLabel = "SrcBuffer";
+    const char* dstLabel = "DstBuffer";
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = dstLabel;
+    descriptor.size = 8;
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+
+    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    descriptor.label = srcLabel;
+    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+    const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
+    queue.WriteBuffer(srcBuffer, 0, &myData1, sizeof(myData1));
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, 4);
+        commands = encoder.Finish();
+    }
+    queue.Submit(1, &commands);
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    const uint8_t myData2[] = {0x55, 0x66, 0x77, 0x88};
+    queue.WriteBuffer(dstBuffer, 4, &myData2, sizeof(myData2));
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(dstLabel);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+// During first capture, makes a buffer, puts data in it.
+// During 2nd capture, puts a little data in the same buffer.
+// Then, replays the 2nd capture and checks the data is correct.
+TEST_P(CaptureAndReplayTests, TwoCaptures) {
+    const char* label = "MyBuffer";
+    const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData2[] = {0x55, 0x66, 0x77, 0x88};
+
+    wgpu::Buffer buffer;
+
+    {
+        auto recorder = Recorder::CreateAndStart(device);
+
+        wgpu::BufferDescriptor descriptor;
+        descriptor.label = label;
+        descriptor.size = 8;
+        descriptor.usage = wgpu::BufferUsage::CopyDst;
+        buffer = device.CreateBuffer(&descriptor);
+
+        queue.WriteBuffer(buffer, 0, &myData1, sizeof(myData1));
+
+        recorder.Finish();
+    }
+
+    {
+        auto recorder = Recorder::CreateAndStart(device);
+
+        queue.WriteBuffer(buffer, 4, &myData2, sizeof(myData2));
+
+        auto capture = recorder.Finish();
+        auto replay = capture.Replay(device);
+
+        {
+            wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+            ASSERT_NE(buffer, nullptr);
+
+            uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+            EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+        }
+    }
+}
+
+// We make a buffer before capture. During capture write map it, put data in it.
+// Then check the data is correct on replay.
+TEST_P(CaptureAndReplayTests, MapWrite) {
+    const char* label = "myBuffer";
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    MapAsyncAndWait(buffer, wgpu::MapMode::Write, 0, 4);
+    buffer.WriteMappedRange(0, &myData, sizeof(myData));
+    buffer.Unmap();
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

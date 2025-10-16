@@ -47,6 +47,7 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
 
     bool IsCapturing() const;
     MaybeError SetCaptureContext(std::unique_ptr<CaptureContext> captureContext);
+    CaptureContext* GetCaptureContext() const;
 
   private:
     Queue(Device* device, const QueueDescriptor* descriptor);

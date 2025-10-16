@@ -750,6 +750,7 @@ source_set("sources") {
       "webgpu/PipelineLayoutWGPU.h",
       "webgpu/QueueWGPU.cpp",
       "webgpu/QueueWGPU.h",
+      "webgpu/RecordableObject.cpp",
       "webgpu/RecordableObject.h",
       "webgpu/RenderPipelineWGPU.cpp",
       "webgpu/RenderPipelineWGPU.h",

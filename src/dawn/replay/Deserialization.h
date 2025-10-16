@@ -129,22 +129,26 @@ constexpr int kInternalVisitableUnusedForComma = 0;
     };                                                     \
     qualifier Name : Name##__Contents, public ::dawn::replay::Deserializable<Name>
 
+// Makes both a CmdData and a Cmd struct for a given command name.
+#define DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(CmdType, CmdName, CMD_MEMBERS)               \
+    DAWN_REPLAY_SERIALIZABLE(struct, CmdType##CmdName##CmdData, CMD_MEMBERS){};        \
+                                                                                       \
+    struct CmdType##CmdName##Cmd##__Contents {                                         \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(CmdType, command, CmdType::CmdName) \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(CmdType##CmdName##CmdData, data)    \
+                                                                                       \
+        template <typename V>                                                          \
+        constexpr auto VisitAll(V&& visit) {                                           \
+            return [&](int, auto&... ms) { return visit(ms...); }(                     \
+                       kInternalVisitableUnusedForComma, command, data);               \
+        }                                                                              \
+    };                                                                                 \
+    struct CmdType##CmdName##Cmd : CmdType##CmdName##Cmd##__Contents,                  \
+                                   public ::dawn::replay::Deserializable<CmdType##CmdName##Cmd>
+
 // Makes both a CmdData and a Cmd struct for a given root command name.
-#define DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS)                           \
-    DAWN_REPLAY_SERIALIZABLE(struct, CmdName##CmdData, CMD_MEMBERS){};                         \
-                                                                                               \
-    struct CmdName##Cmd##__Contents {                                                          \
-        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(RootCommand, command, RootCommand::CmdName) \
-        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(CmdName##CmdData, data)                     \
-                                                                                               \
-        template <typename V>                                                                  \
-        constexpr auto VisitAll(V&& visit) {                                                   \
-            return [&](int, auto&... ms) { return visit(ms...); }(                             \
-                       kInternalVisitableUnusedForComma, command, data);                       \
-        }                                                                                      \
-    };                                                                                         \
-    struct CmdName##Cmd : CmdName##Cmd##__Contents,                                            \
-                          public ::dawn::replay::Deserializable<CmdName##Cmd>
+#define DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \
+    DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(RootCommand, CmdName, CMD_MEMBERS)
 
 #include "dawn/serialization/Schema.h"
 

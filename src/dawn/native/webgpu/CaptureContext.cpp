@@ -42,14 +42,12 @@
 
 namespace dawn::native::webgpu {
 
-constexpr uint64_t kCopyBufferSize = 1024 * 1024;
-
 void AddReferenced(CaptureContext& captureContext, const BufferBase* buffer) {}
 
-void CaptureContext::CaptureCreation(schema::ObjectId id,
-                                     const std::string& label,
-                                     const RecordableObject* object) {
-    schema::CreateResourceCmd cmd{{
+MaybeError CaptureContext::CaptureCreation(schema::ObjectId id,
+                                           const std::string& label,
+                                           RecordableObject* object) {
+    schema::RootCommandCreateResourceCmd cmd{{
         .data = {{
             .resource = {{
                 .type = object->GetObjectType(),
@@ -59,7 +57,7 @@ void CaptureContext::CaptureCreation(schema::ObjectId id,
         }},
     }};
     Serialize(*this, cmd);
-    object->CaptureCreationParameters(*this);
+    return object->CaptureCreationParameters(*this);
 }
 
 CaptureContext::CaptureContext(Device* device,
@@ -92,14 +90,15 @@ void CaptureContext::WriteCommandBytes(const void* data, size_t size) {
     mCommandBytesWritten += size;
 }
 
-void CaptureContext::CaptureQueueWriteBuffer(BufferBase* buffer,
-                                             uint64_t bufferOffset,
-                                             const void* data,
-                                             size_t size) {
-    AddResource(buffer);
-    schema::WriteBufferCmd cmd{{
+MaybeError CaptureContext::CaptureQueueWriteBuffer(BufferBase* buffer,
+                                                   uint64_t bufferOffset,
+                                                   const void* data,
+                                                   size_t size) {
+    schema::ObjectId id;
+    DAWN_TRY_ASSIGN(id, AddResourceAndGetId(buffer));
+    schema::RootCommandWriteBufferCmd cmd{{
         .data = {{
-            .bufferId = GetId(buffer),
+            .bufferId = id,
             .bufferOffset = bufferOffset,
             .size = size,
         }},
@@ -107,6 +106,26 @@ void CaptureContext::CaptureQueueWriteBuffer(BufferBase* buffer,
 
     Serialize(*this, cmd);
     WriteContentBytes(data, size);
+    return {};
+}
+
+MaybeError CaptureContext::CaptureUnmapBuffer(BufferBase* buffer,
+                                              uint64_t bufferOffset,
+                                              const void* data,
+                                              size_t size) {
+    schema::ObjectId id;
+    DAWN_TRY_ASSIGN(id, AddResourceAndGetId(buffer));
+    schema::RootCommandUnmapBufferCmd cmd{{
+        .data = {{
+            .bufferId = id,
+            .bufferOffset = bufferOffset,
+            .size = size,
+        }},
+    }};
+
+    Serialize(*this, cmd);
+    WriteContentBytes(data, size);
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

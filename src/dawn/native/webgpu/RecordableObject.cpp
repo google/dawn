@@ -25,37 +25,20 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_
-#define SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_
-
-#include "dawn/native/Error.h"
-#include "dawn/native/webgpu/Serialization.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
-class CaptureContext;
-class RecordableObject {
-  public:
-    explicit RecordableObject(schema::ObjectType objectType);
-    schema::ObjectType GetObjectType() const;
+RecordableObject::RecordableObject(schema::ObjectType objectType) : mObjectType(objectType) {}
 
-    virtual MaybeError AddReferenced(CaptureContext& captureContext) const = 0;
-    virtual MaybeError CaptureCreationParameters(CaptureContext& context) = 0;
+schema::ObjectType RecordableObject::GetObjectType() const {
+    return mObjectType;
+}
 
-    // This is called anytime a resource is used in the queue.
-    // If newResource is true this is the first time a resource has been seen
-    // during capture. The object should capture the contents unless it happens
-    // to know it's all zeros. Otherwise, it's up to that object to decide.
-    // For example a buffer will capture content if it's been mapped and written to
-    // since the last time this function was called. The default implementation does nothing.
-    virtual MaybeError CaptureContentIfNeeded(CaptureContext& context,
-                                              schema::ObjectId id,
-                                              bool newResource);
-
-  private:
-    schema::ObjectType mObjectType;
-};
+MaybeError RecordableObject::CaptureContentIfNeeded(CaptureContext& context,
+                                                    schema::ObjectId id,
+                                                    bool newResource) {
+    return {};
+}
 
 }  // namespace dawn::native::webgpu
-
-#endif  // SRC_DAWN_NATIVE_WEBGPU_RECORDABLE_OBJECT_H_

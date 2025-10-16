@@ -622,6 +622,7 @@ if (DAWN_ENABLE_WEBGPU_ON_WEBGPU)
         "webgpu/PhysicalDeviceWGPU.cpp"
         "webgpu/PipelineLayoutWGPU.cpp"
         "webgpu/QueueWGPU.cpp"
+        "webgpu/RecordableObject.cpp"
         "webgpu/RenderPipelineWGPU.cpp"
         "webgpu/SamplerWGPU.cpp"
         "webgpu/Serialization.cpp"

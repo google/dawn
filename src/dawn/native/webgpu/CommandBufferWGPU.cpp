@@ -33,6 +33,7 @@
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
@@ -55,7 +56,8 @@ namespace {
 void EncodeComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
                        CommandIterator& commands,
-                       BeginComputePassCmd* computePassCmd) {
+                       BeginComputePassCmd* computePassCmd,
+                       const ComputePassResourceUsage& resourceUsages) {
     WGPUComputePassDescriptor passDescriptor{
         .nextInChain = nullptr,
         .label = ToOutputStringView(computePassCmd->label),
@@ -397,6 +399,24 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
 
 }  // anonymous namespace
 
+MaybeError CommandBuffer::Capture(CaptureContext& captureContext) {
+    const auto& resourceUsages = GetResourceUsages();
+    for (auto buffer : resourceUsages.topLevelBuffers) {
+        DAWN_TRY(captureContext.AddResource(buffer));
+    }
+    for (const auto& pass : resourceUsages.renderPasses) {
+        for (auto buffer : pass.buffers) {
+            DAWN_TRY(captureContext.AddResource(buffer));
+        }
+    }
+    for (const auto& pass : resourceUsages.computePasses) {
+        for (auto buffer : pass.referencedBuffers) {
+            DAWN_TRY(captureContext.AddResource(buffer));
+        }
+    }
+    return {};
+}
+
 WGPUCommandBuffer CommandBuffer::Encode() {
     auto& wgpu = ToBackend(GetDevice())->wgpu;
 
@@ -404,12 +424,16 @@ WGPUCommandBuffer CommandBuffer::Encode() {
     WGPUCommandEncoder innerEncoder =
         wgpu.deviceCreateCommandEncoder(ToBackend(GetDevice())->GetInnerHandle(), nullptr);
 
+    size_t nextComputePassNumber = 0;
+
     Command type;
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::BeginComputePass: {
                 BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
-                EncodeComputePass(wgpu, innerEncoder, mCommands, cmd);
+                EncodeComputePass(wgpu, innerEncoder, mCommands, cmd,
+                                  GetResourceUsages().computePasses[nextComputePassNumber]);
+                ++nextComputePassNumber;
                 break;
             }
             case Command::BeginRenderPass: {

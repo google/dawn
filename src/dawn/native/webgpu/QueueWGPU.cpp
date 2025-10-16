@@ -72,12 +72,16 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     return {};
 }
 
+CaptureContext* Queue::GetCaptureContext() const {
+    return mCaptureContext.get();
+}
+
 MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
     if (IsCapturing()) {
-        mCaptureContext->CaptureQueueWriteBuffer(buffer, bufferOffset, data, size);
+        DAWN_TRY(mCaptureContext->CaptureQueueWriteBuffer(buffer, bufferOffset, data, size));
     }
 
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
