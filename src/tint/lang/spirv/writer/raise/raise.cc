@@ -59,6 +59,7 @@
 #include "src/tint/lang/spirv/writer/raise/keep_binding_array_as_pointer.h"
 #include "src/tint/lang/spirv/writer/raise/merge_return.h"
 #include "src/tint/lang/spirv/writer/raise/pass_matrix_by_pointer.h"
+#include "src/tint/lang/spirv/writer/raise/remove_uniform_vector_component_loads.h"
 #include "src/tint/lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h"
 #include "src/tint/lang/spirv/writer/raise/resource_binding.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
@@ -180,6 +181,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // We run this transform as some Qualcomm drivers struggle with partial access chains that
     // produce pointers to matrices.
     RUN_TRANSFORM(core::ir::transform::CombineAccessInstructions, module);
+
+    // RemoveUniformVectorComponentLoads is used to work around a Qualcomm driver bug.
+    // See crbug.com/452350626.
+    RUN_TRANSFORM(raise::RemoveUniformVectorComponentLoads, module);
 
     if (!options.use_demote_to_helper_invocation_extensions) {
         // DemoteToHelper must come before any transform that introduces non-core instructions.

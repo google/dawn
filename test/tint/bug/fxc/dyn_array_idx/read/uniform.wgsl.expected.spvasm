@@ -61,8 +61,8 @@
          %25 = OpBitcast %uint %24
          %26 = OpExtInst %uint %27 UMin %25 %uint_3
          %29 = OpAccessChain %_ptr_Uniform_v4int %1 %uint_0 %uint_0 %26
-         %31 = OpAccessChain %_ptr_Uniform_int %29 %uint_0
-         %32 = OpLoad %int %31 None
+         %31 = OpLoad %v4int %29 None
+         %32 = OpCompositeExtract %int %31 0
                OpStore %18 %32 None
                OpReturn
                OpFunctionEnd

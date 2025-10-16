@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 56
+; Bound: 55
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -47,7 +47,6 @@
      %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
-%_ptr_Uniform_half = OpTypePointer Uniform %half
           %a = OpFunction %void None %10
           %m = OpFunctionParameter %mat4v2half
          %11 = OpLabel
@@ -83,13 +82,13 @@
          %44 = OpVectorShuffle %v2half %43 %43 1 0
          %45 = OpFunctionCall %void %b %44
          %46 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
-         %47 = OpAccessChain %_ptr_Uniform_half %46 %uint_0
-         %49 = OpLoad %half %47 None
-         %50 = OpFunctionCall %void %c %49
-         %51 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
-         %52 = OpLoad %v2half %51 None
-         %53 = OpVectorShuffle %v2half %52 %52 1 0
-         %54 = OpCompositeExtract %half %53 0
-         %55 = OpFunctionCall %void %c %54
+         %47 = OpLoad %v2half %46 None
+         %48 = OpCompositeExtract %half %47 0
+         %49 = OpFunctionCall %void %c %48
+         %50 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %51 = OpLoad %v2half %50 None
+         %52 = OpVectorShuffle %v2half %51 %51 1 0
+         %53 = OpCompositeExtract %half %52 0
+         %54 = OpFunctionCall %void %c %53
                OpReturn
                OpFunctionEnd

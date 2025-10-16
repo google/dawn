@@ -156,12 +156,12 @@
      %uint_0 = OpConstant %uint 0
     %float_1 = OpConstant %float 1
          %80 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
-%_ptr_Uniform_float = OpTypePointer Uniform %float
-     %uint_3 = OpConstant %uint 3
-        %109 = OpConstantComposite %v3float %float_1 %float_1 %float_1
-        %110 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
+        %107 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+        %108 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_1
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
+     %uint_3 = OpConstant %uint 3
      %uint_1 = OpConstant %uint 1
+%_ptr_Uniform_float = OpTypePointer Uniform %float
       %false = OpConstantFalse %bool
    %main_out = OpTypeStruct %v4float
         %176 = OpTypeFunction %main_out %float %float
@@ -217,91 +217,91 @@
          %87 = OpCompositeConstruct %v3float %84 %85 %86
                OpStore %diffuseColor %87 None
          %88 = OpAccessChain %_ptr_Uniform_v4float %11 %uint_0 %uint_0
-         %89 = OpAccessChain %_ptr_Uniform_float %88 %uint_3
-       %x_60 = OpLoad %float %89 None
+         %89 = OpLoad %v4float %88 None
+       %x_60 = OpCompositeExtract %float %89 3
                OpStore %alpha %x_60 None
                OpStore %uvOffset %48 None
        %x_76 = OpLoad %v4float %baseColor None
-         %94 = OpCompositeExtract %float %x_76 0
-         %95 = OpCompositeExtract %float %x_76 1
-         %96 = OpCompositeExtract %float %x_76 2
-         %97 = OpCompositeConstruct %v3float %94 %95 %96
-         %98 = OpCompositeExtract %float %x_74 0
-         %99 = OpCompositeExtract %float %x_74 1
-        %100 = OpCompositeExtract %float %x_74 2
-        %101 = OpCompositeConstruct %v3float %98 %99 %100
-       %x_78 = OpFMul %v3float %97 %101
+         %92 = OpCompositeExtract %float %x_76 0
+         %93 = OpCompositeExtract %float %x_76 1
+         %94 = OpCompositeExtract %float %x_76 2
+         %95 = OpCompositeConstruct %v3float %92 %93 %94
+         %96 = OpCompositeExtract %float %x_74 0
+         %97 = OpCompositeExtract %float %x_74 1
+         %98 = OpCompositeExtract %float %x_74 2
+         %99 = OpCompositeConstruct %v3float %96 %97 %98
+       %x_78 = OpFMul %v3float %95 %99
        %x_79 = OpLoad %v4float %baseColor None
-        %104 = OpCompositeExtract %float %x_78 0
-        %105 = OpCompositeExtract %float %x_78 1
-        %106 = OpCompositeExtract %float %x_78 2
-        %107 = OpCompositeExtract %float %x_79 3
-        %108 = OpCompositeConstruct %v4float %104 %105 %106 %107
-               OpStore %baseColor %108 None
-               OpStore %baseAmbientColor %109 None
+        %102 = OpCompositeExtract %float %x_78 0
+        %103 = OpCompositeExtract %float %x_78 1
+        %104 = OpCompositeExtract %float %x_78 2
+        %105 = OpCompositeExtract %float %x_79 3
+        %106 = OpCompositeConstruct %v4float %102 %103 %104 %105
+               OpStore %baseColor %106 None
+               OpStore %baseAmbientColor %107 None
                OpStore %glossiness %float_0 None
                OpStore %diffuseBase %x_38 None
                OpStore %shadow %float_1 None
-               OpStore %refractionColor %110 None
-               OpStore %reflectionColor %110 None
-        %111 = OpAccessChain %_ptr_Uniform_v3float %11 %uint_0 %uint_3
-       %x_94 = OpLoad %v3float %111 None
+               OpStore %refractionColor %108 None
+               OpStore %reflectionColor %108 None
+        %109 = OpAccessChain %_ptr_Uniform_v3float %11 %uint_0 %uint_3
+       %x_94 = OpLoad %v3float %109 None
                OpStore %emissiveColor %x_94 None
        %x_96 = OpLoad %v3float %diffuseBase None
        %x_97 = OpLoad %v3float %diffuseColor None
        %x_99 = OpLoad %v3float %emissiveColor None
-        %117 = OpAccessChain %_ptr_Uniform_v3float %11 %uint_0 %uint_1
-      %x_103 = OpLoad %v3float %117 None
+        %116 = OpAccessChain %_ptr_Uniform_v3float %11 %uint_0 %uint_1
+      %x_103 = OpLoad %v3float %116 None
       %x_108 = OpLoad %v4float %baseColor None
-        %121 = OpFMul %v3float %x_96 %x_97
-        %122 = OpFAdd %v3float %121 %x_99
-        %123 = OpFAdd %v3float %122 %x_103
-        %124 = OpExtInst %v3float %79 NClamp %123 %x_38 %109
-        %125 = OpCompositeExtract %float %x_108 0
-        %126 = OpCompositeExtract %float %x_108 1
-        %127 = OpCompositeExtract %float %x_108 2
-        %128 = OpCompositeConstruct %v3float %125 %126 %127
-        %129 = OpFMul %v3float %124 %128
-               OpStore %finalDiffuse %129 None
+        %120 = OpFMul %v3float %x_96 %x_97
+        %121 = OpFAdd %v3float %120 %x_99
+        %122 = OpFAdd %v3float %121 %x_103
+        %123 = OpExtInst %v3float %79 NClamp %122 %x_38 %107
+        %124 = OpCompositeExtract %float %x_108 0
+        %125 = OpCompositeExtract %float %x_108 1
+        %126 = OpCompositeExtract %float %x_108 2
+        %127 = OpCompositeConstruct %v3float %124 %125 %126
+        %128 = OpFMul %v3float %123 %127
+               OpStore %finalDiffuse %128 None
                OpStore %finalSpecular %x_38 None
       %x_113 = OpLoad %v3float %finalDiffuse None
       %x_114 = OpLoad %v3float %baseAmbientColor None
       %x_116 = OpLoad %v3float %finalSpecular None
       %x_118 = OpLoad %v4float %reflectionColor None
       %x_121 = OpLoad %v4float %refractionColor None
-        %135 = OpFMul %v3float %x_113 %x_114
-        %136 = OpFAdd %v3float %135 %x_116
-        %137 = OpCompositeExtract %float %x_118 0
-        %138 = OpCompositeExtract %float %x_118 1
-        %139 = OpCompositeExtract %float %x_118 2
-        %140 = OpCompositeConstruct %v3float %137 %138 %139
-        %141 = OpFAdd %v3float %136 %140
-        %142 = OpCompositeExtract %float %x_121 0
-        %143 = OpCompositeExtract %float %x_121 1
-        %144 = OpCompositeExtract %float %x_121 2
-        %145 = OpCompositeConstruct %v3float %142 %143 %144
-      %x_123 = OpFAdd %v3float %141 %145
+        %134 = OpFMul %v3float %x_113 %x_114
+        %135 = OpFAdd %v3float %134 %x_116
+        %136 = OpCompositeExtract %float %x_118 0
+        %137 = OpCompositeExtract %float %x_118 1
+        %138 = OpCompositeExtract %float %x_118 2
+        %139 = OpCompositeConstruct %v3float %136 %137 %138
+        %140 = OpFAdd %v3float %135 %139
+        %141 = OpCompositeExtract %float %x_121 0
+        %142 = OpCompositeExtract %float %x_121 1
+        %143 = OpCompositeExtract %float %x_121 2
+        %144 = OpCompositeConstruct %v3float %141 %142 %143
+      %x_123 = OpFAdd %v3float %140 %144
       %x_124 = OpLoad %float %alpha None
-        %148 = OpCompositeExtract %float %x_123 0
-        %149 = OpCompositeExtract %float %x_123 1
-        %150 = OpCompositeExtract %float %x_123 2
-        %151 = OpCompositeConstruct %v4float %148 %149 %150 %x_124
-               OpStore %color %151 None
+        %147 = OpCompositeExtract %float %x_123 0
+        %148 = OpCompositeExtract %float %x_123 1
+        %149 = OpCompositeExtract %float %x_123 2
+        %150 = OpCompositeConstruct %v4float %147 %148 %149 %x_124
+               OpStore %color %150 None
       %x_129 = OpLoad %v4float %color None
-        %153 = OpCompositeExtract %float %x_129 0
-        %154 = OpCompositeExtract %float %x_129 1
-        %155 = OpCompositeExtract %float %x_129 2
-        %156 = OpCompositeConstruct %v3float %153 %154 %155
-      %x_132 = OpExtInst %v3float %79 NMax %156 %x_38
+        %152 = OpCompositeExtract %float %x_129 0
+        %153 = OpCompositeExtract %float %x_129 1
+        %154 = OpCompositeExtract %float %x_129 2
+        %155 = OpCompositeConstruct %v3float %152 %153 %154
+      %x_132 = OpExtInst %v3float %79 NMax %155 %x_38
       %x_133 = OpLoad %v4float %color None
-        %159 = OpCompositeExtract %float %x_132 0
-        %160 = OpCompositeExtract %float %x_132 1
-        %161 = OpCompositeExtract %float %x_132 2
-        %162 = OpCompositeExtract %float %x_133 3
-        %163 = OpCompositeConstruct %v4float %159 %160 %161 %162
-               OpStore %color %163 None
-        %164 = OpAccessChain %_ptr_Uniform_float %16 %uint_0 %uint_0
-      %x_140 = OpLoad %float %164 None
+        %158 = OpCompositeExtract %float %x_132 0
+        %159 = OpCompositeExtract %float %x_132 1
+        %160 = OpCompositeExtract %float %x_132 2
+        %161 = OpCompositeExtract %float %x_133 3
+        %162 = OpCompositeConstruct %v4float %158 %159 %160 %161
+               OpStore %color %162 None
+        %163 = OpAccessChain %_ptr_Uniform_float %16 %uint_0 %uint_0
+      %x_140 = OpLoad %float %163 None
         %166 = OpAccessChain %_ptr_Function_float %color %uint_3
       %x_142 = OpLoad %float %166 None
         %168 = OpFMul %float %x_142 %x_140

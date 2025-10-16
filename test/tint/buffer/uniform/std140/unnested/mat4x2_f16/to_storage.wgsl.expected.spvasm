@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 46
+; Bound: 45
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -52,7 +52,6 @@
      %uint_3 = OpConstant %uint 3
 %_ptr_StorageBuffer_mat4v2half = OpTypePointer StorageBuffer %mat4v2half
 %_ptr_StorageBuffer_v2half = OpTypePointer StorageBuffer %v2half
-%_ptr_Uniform_half = OpTypePointer Uniform %half
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
           %f = OpFunction %void None %12
          %13 = OpLabel
@@ -78,9 +77,9 @@
                OpStore %35 %38 None
          %39 = OpAccessChain %_ptr_StorageBuffer_v2half %6 %uint_0 %uint_0
          %40 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
-         %41 = OpAccessChain %_ptr_Uniform_half %40 %uint_0
-         %43 = OpLoad %half %41 None
-         %44 = OpAccessChain %_ptr_StorageBuffer_half %39 %uint_1
-               OpStore %44 %43 None
+         %41 = OpLoad %v2half %40 None
+         %42 = OpCompositeExtract %half %41 0
+         %43 = OpAccessChain %_ptr_StorageBuffer_half %39 %uint_1
+               OpStore %43 %42 None
                OpReturn
                OpFunctionEnd

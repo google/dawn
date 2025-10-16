@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 53
+; Bound: 52
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -41,7 +41,6 @@
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
-%_ptr_Uniform_float = OpTypePointer Uniform %float
           %a = OpFunction %void None %10
           %m = OpFunctionParameter %mat3v3float
          %11 = OpLabel
@@ -75,13 +74,13 @@
          %41 = OpVectorShuffle %v3float %40 %40 2 0 1
          %42 = OpFunctionCall %void %b %41
          %43 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_1
-         %44 = OpAccessChain %_ptr_Uniform_float %43 %uint_0
-         %46 = OpLoad %float %44 None
-         %47 = OpFunctionCall %void %c %46
-         %48 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_1
-         %49 = OpLoad %v3float %48 None
-         %50 = OpVectorShuffle %v3float %49 %49 2 0 1
-         %51 = OpCompositeExtract %float %50 0
-         %52 = OpFunctionCall %void %c %51
+         %44 = OpLoad %v3float %43 None
+         %45 = OpCompositeExtract %float %44 0
+         %46 = OpFunctionCall %void %c %45
+         %47 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_1
+         %48 = OpLoad %v3float %47 None
+         %49 = OpVectorShuffle %v3float %48 %48 2 0 1
+         %50 = OpCompositeExtract %float %49 0
+         %51 = OpFunctionCall %void %c %50
                OpReturn
                OpFunctionEnd
