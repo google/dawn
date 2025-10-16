@@ -64,6 +64,7 @@ class SharedBufferMemoryTests : public DawnTestWithParams<SharedBufferMemoryTest
   public:
     void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
+    bool SupportsBackend();
 };
 }  // namespace dawn
 

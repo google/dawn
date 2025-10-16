@@ -438,6 +438,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Support querying WebGPU backend info from the adapter.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "adapter_properties.md",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
+     {"Supports importing a shared memory file mapping handle as shared buffer memory.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_buffer.md",
       FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace

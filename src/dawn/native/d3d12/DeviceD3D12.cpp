@@ -442,7 +442,10 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
 
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
-        type, (unpacked.ValidateBranches<Branch<SharedBufferMemoryD3D12ResourceDescriptor>>()));
+        type,
+        (unpacked
+             .ValidateBranches<Branch<SharedBufferMemoryD3D12ResourceDescriptor>,
+                               Branch<SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor>>()));
 
     switch (type) {
         case wgpu::SType::SharedBufferMemoryD3D12ResourceDescriptor:
@@ -451,6 +454,14 @@ ResultOrError<Ref<SharedBufferMemoryBase>> Device::ImportSharedBufferMemoryImpl(
                             wgpu::FeatureName::SharedBufferMemoryD3D12Resource);
             return SharedBufferMemory::Create(
                 this, descriptor->label, unpacked.Get<SharedBufferMemoryD3D12ResourceDescriptor>());
+        case wgpu::SType::SharedBufferMemoryD3D12SharedMemoryFileMappingHandleDescriptor:
+            DAWN_INVALID_IF(
+                !HasFeature(Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle),
+                "%s is not enabled.",
+                wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle);
+            return SharedBufferMemory::Create(
+                this, descriptor->label,
+                unpacked.Get<SharedBufferMemoryD3D12SharedMemoryFileHandleDescriptor>());
         default:
             DAWN_UNREACHABLE();
     }

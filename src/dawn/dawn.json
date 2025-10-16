@@ -2452,7 +2452,8 @@
             {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
             {"value": 58, "name": "texture component swizzle", "tags": ["dawn", "emscripten"]},
             {"value": 60, "name": "chromium experimental bindless", "tags": ["dawn"]},
-            {"value": 61, "name": "adapter properties WGPU", "tags": ["dawn"]}
+            {"value": 61, "name": "adapter properties WGPU", "tags": ["dawn"]},
+            {"value": 62, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3971,7 +3972,8 @@
             {"value": 77, "name": "texel buffer binding entry", "tags": ["dawn"]},
             {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]},
             {"value": 79, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
-            {"value": 80, "name": "adapter properties WGPU", "tags": ["dawn"]}
+            {"value": 80, "name": "adapter properties WGPU", "tags": ["dawn"]},
+            {"value": 81, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {

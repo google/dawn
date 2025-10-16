@@ -218,6 +218,14 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BufferMapExtendedUsages);
     }
 
+    // Temporarily only enable SharedBufferMemoryD3D12SharedMemoryFileMappingHandle on cache
+    // coherent UMA.
+    // TODO(386255678): enable SharedBufferMemoryD3D12SharedMemoryFileMappingHandle on other
+    // architectures.
+    if (GetDeviceInfo().supportsExistingHeap && SupportsBufferMapExtendedUsages()) {
+        EnableFeature(Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle);
+    }
+
     // Only check one format here because of D3D12 "Supported as a Set" mechanism: if any format
     // in the set is supported by the device, all formats in the set are supported.
     D3D12_FEATURE_DATA_FORMAT_SUPPORT r8unormFormatSupport = {};

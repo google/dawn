@@ -38,6 +38,7 @@ namespace dawn {
 void SharedBufferMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     DawnTestWithParams<SharedBufferMemoryTestParams>::SetUp();
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsBackend());
 }
 
 std::vector<wgpu::FeatureName> SharedBufferMemoryTests::GetRequiredFeatures() {
@@ -47,6 +48,10 @@ std::vector<wgpu::FeatureName> SharedBufferMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
+}
+
+bool SharedBufferMemoryTests::SupportsBackend() {
+    return !GetRequiredFeatures().empty();
 }
 
 wgpu::Texture Create2DTexture(wgpu::Device device,

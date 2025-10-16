@@ -1751,6 +1751,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::FlexibleTextureViews:
         case wgpu::FeatureName::ChromiumExperimentalBindless:
         case wgpu::FeatureName::AdapterPropertiesWGPU:
+        case wgpu::FeatureName::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle:
             return false;
     }
     return false;
