@@ -901,6 +901,12 @@
       }
     ]
   },
+  "dawn-mac-arm64-apple-m2-rel": {},
+  "dawn-mac-arm64-builder-rel": {
+    "additional_compile_targets": [
+      "default"
+    ]
+  },
   "dawn-mac-x64-builder-dbg": {
     "additional_compile_targets": [
       "default"

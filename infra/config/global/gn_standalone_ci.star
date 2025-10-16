@@ -208,6 +208,42 @@ ci.builder(
 )
 
 ci.builder(
+    name = "dawn-mac-arm64-builder-rel",
+    description_html = "Compiles release Dawn test binaries for Mac/arm64",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_node",
+                "dawn_wasm",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "arm64",
+            "component",
+            "dawn_node_bindings",
+            "mac_clang",
+            "release",
+        ],
+    ),
+    os = os.MAC_DEFAULT,
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|build|clang|rel",
+        short_name = "a64",
+    ),
+)
+
+ci.builder(
     name = "dawn-mac-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Mac/x64",
     schedule = "triggered",
@@ -777,6 +813,30 @@ ci.thin_tester(
     console_view_entry = consoles.console_view_entry(
         category = "linux|test|clang|rel|x86",
         short_name = "sws",
+    ),
+)
+
+ci.thin_tester(
+    name = "dawn-mac-arm64-apple-m2-rel",
+    description_html = "Tests release Dawn on Mac/arm64 on Apple M2 devices",
+    parent = "dawn-mac-arm64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.ARM,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|test|clang|rel|arm64",
+        short_name = "m2",
     ),
 )
 

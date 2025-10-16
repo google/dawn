@@ -30,6 +30,13 @@
 load("@chromium-luci//gn_args.star", "gn_args")
 
 gn_args.config(
+    name = "arm64",
+    args = {
+        "target_cpu": "arm64",
+    },
+)
+
+gn_args.config(
     name = "clang",
     args = {
         "is_clang": True,

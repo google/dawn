@@ -137,6 +137,11 @@
           'gtest_tests': 'swiftshader_gtests',
         },
       },
+      'dawn-mac-arm64-builder-rel': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-mac-x64-builder-dbg': {
         'additional_compile_targets': [
           'default',
@@ -146,6 +151,13 @@
         'additional_compile_targets': [
           'default',
         ],
+      },
+      'dawn-mac-arm64-apple-m2-rel': {
+        'os_type': 'mac',
+        'mixins': [
+          'mac_arm64_apple_m2_retina_gpu_stable',
+        ],
+        'test_suites': {},
       },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
