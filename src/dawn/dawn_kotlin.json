@@ -58,5 +58,16 @@
         "uint32_t": "I",
         "uint64_t": "J",
         "void *": "J"
+    },
+    "kdocs_blocklist": [
+        "OutStructChainError",
+        "SentinelValues",
+        "See @ref CallbackStatuses"
+    ],
+    "kdocs_replacements": {
+        "See @ref SentinelValues.": "",
+        "(See also @ref SentinelValues.)": "",
+        "[defaults](@ref SentinelValues)": "defaults",
+        "WGPUCallbackMode_": "CallbackMode."
     }
 }

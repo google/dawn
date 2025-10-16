@@ -135,7 +135,8 @@ tasks.register('generateBindings', Exec) {
     '--dawn-json', 'src/dawn/dawn.json',
     '--targets', 'kotlin',
     '--kotlin-json', 'src/dawn/dawn_kotlin.json',
-    '--jinja2-path', 'third_party/jinja2'
+    '--jinja2-path', 'third_party/jinja2',
+    '--webgpu-json', 'third_party/webgpu-headers/src/webgpu.json'
 }
 
 tasks.register('createDirectory', Exec) {

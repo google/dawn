@@ -45,9 +45,25 @@ import kotlin.annotation.Target
     ]
 )
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+
+{% set file_docs = kdocs.bitflags if enum.category == 'bitmask' else kdocs.enums %}
+{% set docstring = file_docs.get(enum.name.get(), {}).doc %}
+{% if docstring %}
+    /**
+     * {{ docstring | trim | wordwrap(80, break_long_words=False, break_on_hyphens=False, wrapstring = "\n * ") }}
+     */
+{% endif %}
 public annotation class {{ enum.name.CamelCase() }} {
     public companion object {
+        {% set enum_doc = file_docs.get(enum.name.get(), {}) %}
         {% for value in enum.values %}
+            {% set value_docstring = enum_doc.get('entries', {}).get(value.name.snake_case()) %}
+            {% if value_docstring %}
+
+                /**
+                 * {{ value_docstring | trim | wordwrap(80, break_long_words=False, break_on_hyphens=False, wrapstring = "\n         * ")}}
+                 */
+            {% endif %}
             public const val {{ as_ktName(value.name.CamelCase()) }}: Int = {{ '{:#010x}'.format(value.value) }}
         {% endfor %}
         internal val names: Map<Int, String> = mapOf(

@@ -90,6 +90,9 @@ template("dawn_json_generator") {
       rebase_path("${dawn_root}/src/dawn/dawn_kotlin.json", root_build_dir),
       "--targets",
       invoker.target,
+      "--webgpu-json",
+      rebase_path("${dawn_root}/third_party/webgpu-headers/src/webgpu.json",
+                  root_build_dir),
     ]
 
     forward_variables_from(invoker, "*", [ "target" ])
