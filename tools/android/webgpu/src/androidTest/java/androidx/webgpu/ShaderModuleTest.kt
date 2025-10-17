@@ -1,7 +1,6 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.UncapturedErrorException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking

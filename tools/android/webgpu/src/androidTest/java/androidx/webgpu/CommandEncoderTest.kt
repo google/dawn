@@ -1,7 +1,7 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.UncapturedErrorException
+import androidx.webgpu.helper.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer
@@ -45,7 +45,7 @@ class CommandEncoderTest {
     )
     assertThrows(
       "Using a finished encoder should throw an error",
-      UncapturedErrorException::class.java
+      ValidationException::class.java
     ) {
       encoder.copyBufferToBuffer(dummyBuffer, 0, dummyBuffer, 0, 4)
     }
