@@ -139,10 +139,10 @@ option(DAWN_ENABLE_INSTALL "Enable install step for Dawn libraries" OFF)
 option(DAWN_ENABLE_TSAN "Enable thread sanitizer" OFF)
 option(DAWN_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(DAWN_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
-option(DAWN_ENABLE_RTTI "Enable RTTI (implicitly enabled if UBSan is enabled)" OFF)
+option(DAWN_ENABLE_RTTI "Enable RTTI (implicitly enabled if DAWN_ENABLE_UBSAN is enabled)" OFF)
 if (DAWN_ENABLE_UBSAN)
-    # -fsanitize=undefined includes -fsanitize=vptr which does not work without RTTI. Force enable
-    # it by shadowing the option with a normal variable (so we don't overwrite it in CMakeCache.txt)
+    # DAWN_ENABLE_UBSAN includes -fsanitize=vptr which does not work without RTTI. Force enable it
+    # (by shadowing the option with a normal variable so we don't overwrite it in CMakeCache.txt).
     set(DAWN_ENABLE_RTTI ON)
 endif()
 
