@@ -61,6 +61,9 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         if (ty->Is<core::type::ResourceBinding>()) {
             return Failure("resource_binding not supported by the MSL backend");
         }
+        if (ty->Is<core::type::InputAttachment>()) {
+            return Failure("input_attachment not supported by the MSL backend");
+        }
     }
 
     // Check for unsupported module-scope variable address spaces and types and ensure at most one
@@ -70,9 +73,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             return Failure("pixel_local address space is not supported by the MSL backend");
-        }
-        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return Failure("input attachments are not supported by the MSL backend");
         }
     }
 
