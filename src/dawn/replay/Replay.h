@@ -42,7 +42,7 @@
 
 namespace dawn::replay {
 
-typedef std::variant<wgpu::Buffer, wgpu::Texture> Resource;
+typedef std::variant<wgpu::Buffer, wgpu::Texture, wgpu::CommandBuffer> Resource;
 struct LabeledResource {
     std::string label;
     Resource resource;

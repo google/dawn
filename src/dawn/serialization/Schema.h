@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace schema {
 // NOTE: This file must be included after files that define
@@ -44,6 +45,24 @@ enum class ObjectType : uint32_t {
     ShaderModule,
     Texture,
     TextureView,
+};
+
+enum class EncoderCommand : uint32_t {
+    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
+    BeginComputePass,
+    BeginRenderPass,
+    CopyBufferToBuffer,
+    CopyBufferToTexture,
+    CopyTextureToBuffer,
+    CopyTextureToTexture,
+    ClearBuffer,
+    ResolveQuerySet,
+    WriteTimestamp,
+    InsertDebugMarker,
+    PopDebugGroup,
+    PushDebugGroup,
+    WriteBuffer,
+    End,
 };
 
 enum class RootCommand : uint32_t {
@@ -87,6 +106,20 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(WriteBuffer, WRITE_BUFFER_CMD_DATA_MEMBER
     X(uint64_t, size)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(UnmapBuffer, UNMAP_BUFFER_CMD_DATA_MEMBER){};
+
+#define QUEUE_SUBMIT_CMD_DATA_MEMBER(X) X(std::vector<ObjectId>, commandBuffers)
+
+DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(QueueSubmit, QUEUE_SUBMIT_CMD_DATA_MEMBER){};
+
+#define COPY_BUFFER_TO_BUFFER_CMD_DATA_MEMBER(X) \
+    X(ObjectId, srcBufferId)                     \
+    X(uint64_t, srcOffset)                       \
+    X(ObjectId, dstBufferId)                     \
+    X(uint64_t, dstOffset)                       \
+    X(uint64_t, size)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyBufferToBuffer,
+                                          COPY_BUFFER_TO_BUFFER_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

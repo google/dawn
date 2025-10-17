@@ -396,6 +396,91 @@ TEST_P(CaptureAndReplayTests, MapWrite) {
     }
 }
 
+// We make 2 buffers before capture. During capture we map one buffer
+// put some data it in via map/unmap. We then copy from that buffer to the other buffer.
+// On replay check the data is correct.
+TEST_P(CaptureAndReplayTests, CaptureWithMapWriteDuringCapture) {
+    const char* srcLabel = "srcBuffer";
+    const char* dstLabel = "dstBuffer";
+    const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
+    const uint8_t myData2[] = {0x55, 0x66, 0x77, 0x88};
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = dstLabel;
+    descriptor.size = 8;
+    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+    queue.WriteBuffer(dstBuffer, 0, &myData1, sizeof(myData1));
+
+    descriptor.label = srcLabel;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    MapAsyncAndWait(srcBuffer, wgpu::MapMode::Write, 0, 4);
+    srcBuffer.WriteMappedRange(0, &myData2, sizeof(myData2));
+    srcBuffer.Unmap();
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 4, 4);
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(dstLabel);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = "srcBuffer";
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+
+    queue.WriteBuffer(srcBuffer, 0, &myData, sizeof(myData));
+
+    descriptor.label = "dstBuffer";
+    descriptor.usage = wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(srcBuffer, 0, dstBuffer, 0, 4);
+        commands = encoder.Finish();
+    }
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("dstBuffer");
+        ASSERT_NE(buffer, nullptr);
+
+        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

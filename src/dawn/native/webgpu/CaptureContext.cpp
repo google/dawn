@@ -42,8 +42,6 @@
 
 namespace dawn::native::webgpu {
 
-void AddReferenced(CaptureContext& captureContext, const BufferBase* buffer) {}
-
 MaybeError CaptureContext::CaptureCreation(schema::ObjectId id,
                                            const std::string& label,
                                            RecordableObject* object) {
