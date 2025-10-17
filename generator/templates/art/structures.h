@@ -42,7 +42,7 @@ struct UserData {
 jobject ToKotlin(JNIEnv* env, const WGPUStringView* s);
 void ToNative(JNIContext* c, JNIEnv* env, jstring obj, WGPUStringView* s);
 
-{% for structure in by_category['structure']  + by_category['callback info'] if include_structure(structure) %}
+{% for structure in by_category['structure'] if include_structure(structure) %}
     jobject ToKotlin(JNIEnv *env, const {{ as_cType(structure.name) }}* input);
     void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted);
 {% endfor %}

@@ -94,7 +94,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
     return env->NewStringUTF(nullTerminated.c_str());
 }
 
-{%- for structure in by_category['structure'] + by_category['callback info'] if include_structure(structure) %}
+{%- for structure in by_category['structure'] if include_structure(structure) %}
 
     //* Native -> Kotlin converter.
     //* TODO(b/354411474): Filter the structures for which to add a ToKotlin conversion.
@@ -157,10 +157,8 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
     {% set Struct = as_cType(structure.name) %}
     {% set KotlinRecord = "KotlinRecord" + structure.name.CamelCase() %}
     {{ define_kotlin_record_structure(KotlinRecord, structure.members)}}
-    {# Check if the structure has a member whose type is a 'callback info' struct #}
-    {% set has_callbackInfoStruct = (structure.members | selectattr('type.category', 'equalto', 'callback info') | list) | length > 0 %}
 
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members, has_callbackInfoStruct)}}
+    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, Struct, structure.members)}}
     void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted) {
         JNIClasses* classes = JNIClasses::getInstance(env);
         jclass clz = classes->{{ structure.name.camelCase() }};

@@ -85,7 +85,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         {% endfor %}
     };
 
-    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments, has_callbackInfoStruct(method))}}
+    {{ define_kotlin_to_struct_conversion("ConvertInternal", KotlinRecord, ArgsStruct, method.arguments)}}
 
     {% set _kotlin_return = kotlin_return(method) %}
     //*  A JNI-external method is built with the JNI signature expected to match the host Kotlin.

@@ -37,7 +37,7 @@ JNIClasses::JNIClasses(JNIEnv* env) {
     {% for entity in has_kotlin_classes %}
         {{ entity.name.camelCase() }} = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}")));
         {%if entity.category == 'callback function' %}
-              {{ entity.name.camelCase() }}Runnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}Runnable")));
+            {{ entity.name.camelCase() }}Runnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}Runnable")));
         {%endif %}
     {% endfor %}
 }

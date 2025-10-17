@@ -974,9 +974,8 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
     params_kotlin['has_kotlin_classes'] = (
-        by_category['callback function'] + by_category['callback info'] +
-        by_category['enum'] + by_category['function pointer'] +
-        by_category['object'] + [
+        by_category['callback function'] + by_category['enum'] +
+        by_category['function pointer'] + by_category['object'] + [
             structure for structure in by_category['structure']
             if include_structure(structure)
         ])
@@ -1695,8 +1694,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             ]
 
             by_category = params_kotlin['by_category']
-            for structure in by_category['structure'] + by_category[
-                    'callback info']:
+            for structure in by_category['structure']:
                 if structure.name.get() != "string view":
                     renders.append(
                         FileRender('art/api_kotlin_structure.kt',
