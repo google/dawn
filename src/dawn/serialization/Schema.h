@@ -121,6 +121,12 @@ DAWN_REPLAY_SERIALIZABLE(struct, LabeledResource, LABELED_RESOURCE_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyBufferLayout, TEXEL_COPY_BUFFER_LAYOUT_MEMBER){};
 
+#define TEXEL_COPY_BUFFER_INFO_MEMBER(X) \
+    X(ObjectId, bufferId)                \
+    X(TexelCopyBufferLayout, layout)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyBufferInfo, TEXEL_COPY_BUFFER_INFO_MEMBER){};
+
 #define TEXEL_COPY_TEXTURE_INFO_MEMBER(X) \
     X(ObjectId, textureId)                \
     X(uint32_t, mipLevel)                 \
@@ -168,6 +174,30 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(QueueSubmit, QUEUE_SUBMIT_CMD_DATA_MEMBER
 
 DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyBufferToBuffer,
                                           COPY_BUFFER_TO_BUFFER_CMD_DATA_MEMBER){};
+
+#define COPY_BUFFER_TO_TEXTURE_CMD_DATA_MEMBER(X) \
+    X(TexelCopyBufferInfo, source)                \
+    X(TexelCopyTextureInfo, destination)          \
+    X(Extent3D, copySize)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyBufferToTexture,
+                                          COPY_BUFFER_TO_TEXTURE_CMD_DATA_MEMBER){};
+
+#define COPY_TEXTURE_TO_BUFFER_CMD_DATA_MEMBER(X) \
+    X(TexelCopyTextureInfo, source)               \
+    X(TexelCopyBufferInfo, destination)           \
+    X(Extent3D, copySize)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToBuffer,
+                                          COPY_TEXTURE_TO_BUFFER_CMD_DATA_MEMBER){};
+
+#define COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER(X) \
+    X(TexelCopyTextureInfo, source)                \
+    X(TexelCopyTextureInfo, destination)           \
+    X(Extent3D, copySize)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToTexture,
+                                          COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

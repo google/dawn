@@ -59,6 +59,13 @@ wgpu::TexelCopyBufferLayout ToWGPU(const schema::TexelCopyBufferLayout& info) {
     };
 }
 
+wgpu::TexelCopyBufferInfo ToWGPU(const Replay& replay, const schema::TexelCopyBufferInfo& info) {
+    return wgpu::TexelCopyBufferInfo{
+        .layout = ToWGPU(info.layout),
+        .buffer = replay.GetObjectById<wgpu::Buffer>(info.bufferId),
+    };
+}
+
 wgpu::TexelCopyTextureInfo ToWGPU(const Replay& replay, const schema::TexelCopyTextureInfo& info) {
     return wgpu::TexelCopyTextureInfo{
         .texture = replay.GetObjectById<wgpu::Texture>(info.textureId),
@@ -142,7 +149,7 @@ ResultOrError<wgpu::Texture> CreateTexture(wgpu::Device device,
 
     wgpu::TextureDescriptor desc{
         .label = wgpu::StringView(label),
-        .usage = tex.usage | wgpu::TextureUsage::CopySrc,
+        .usage = tex.usage | wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst,
         .dimension = tex.dimension,
         .size = ToWGPU(tex.size),
         .format = tex.format,
@@ -171,6 +178,33 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                                            data.srcOffset,
                                            replay.GetObjectById<wgpu::Buffer>(data.dstBufferId),
                                            data.dstOffset, data.size);
+                break;
+            }
+            case schema::EncoderCommand::CopyBufferToTexture: {
+                schema::EncoderCommandCopyBufferToTextureCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::TexelCopyBufferInfo src = ToWGPU(replay, data.source);
+                wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, data.destination);
+                wgpu::Extent3D copySize = ToWGPU(data.copySize);
+                encoder.CopyBufferToTexture(&src, &dst, &copySize);
+                break;
+            }
+            case schema::EncoderCommand::CopyTextureToBuffer: {
+                schema::EncoderCommandCopyTextureToBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::TexelCopyTextureInfo src = ToWGPU(replay, data.source);
+                wgpu::TexelCopyBufferInfo dst = ToWGPU(replay, data.destination);
+                wgpu::Extent3D copySize = ToWGPU(data.copySize);
+                encoder.CopyTextureToBuffer(&src, &dst, &copySize);
+                break;
+            }
+            case schema::EncoderCommand::CopyTextureToTexture: {
+                schema::EncoderCommandCopyTextureToTextureCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::TexelCopyTextureInfo src = ToWGPU(replay, data.source);
+                wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, data.destination);
+                wgpu::Extent3D copySize = ToWGPU(data.copySize);
+                encoder.CopyTextureToTexture(&src, &dst, &copySize);
                 break;
             }
             case schema::EncoderCommand::End: {

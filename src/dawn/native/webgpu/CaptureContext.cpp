@@ -179,6 +179,31 @@ schema::Extent3D ToSchema(const Extent3D& extent) {
     }};
 }
 
+schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy) {
+    return {{
+        .offset = bufferCopy.offset,
+        .bytesPerRow = bufferCopy.bytesPerRow,
+        .rowsPerImage = bufferCopy.rowsPerImage,
+    }};
+}
+
+schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext, const BufferCopy& bufferCopy) {
+    return {{
+        .bufferId = captureContext.GetId(bufferCopy.buffer),
+        .layout = ToSchema(bufferCopy),
+    }};
+}
+
+schema::TexelCopyTextureInfo ToSchema(CaptureContext& captureContext,
+                                      const TextureCopy& textureCopy) {
+    return {{
+        .textureId = captureContext.GetId(textureCopy.texture),
+        .mipLevel = textureCopy.mipLevel,
+        .origin = ToSchema(textureCopy.origin),
+        .aspect = ToDawn(textureCopy.aspect),
+    }};
+}
+
 schema::TexelCopyBufferLayout ToSchema(const TexelCopyBufferLayout& layout) {
     return {{
         .offset = layout.offset,

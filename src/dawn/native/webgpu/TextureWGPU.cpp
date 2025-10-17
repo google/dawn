@@ -37,15 +37,18 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
+#include "dawn/native/webgpu/Serialization.h"
 
 namespace dawn::native::webgpu {
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {
-    auto desc = ToAPI(*descriptor);
-
-    WGPUTexture innerTexture = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), desc);
+    auto desc = *ToAPI(*descriptor);
+    if (!(desc.usage & WGPUTextureUsage_TransientAttachment)) {
+        desc.usage |= WGPUTextureUsage_CopySrc;
+    }
+    WGPUTexture innerTexture = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(innerTexture);
 
     return AcquireRef(new Texture(device, descriptor, innerTexture));

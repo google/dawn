@@ -136,6 +136,7 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
     WGPUExtent3D writeSize = ToWGPU(writeSizePixel);
     ToBackend(GetDevice())
         ->wgpu.queueWriteTexture(mInnerHandle, &dest, data, dataSize, &layout, &writeSize);
+    destination.texture->SetInitialized(true);
 
     return {};
 }

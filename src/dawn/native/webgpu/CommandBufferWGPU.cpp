@@ -37,6 +37,7 @@
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
+#include "dawn/native/webgpu/Serialization.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 #include "dawn/native/webgpu/ToWGPU.h"
 
@@ -67,6 +68,10 @@ void EncodeComputePass(const DawnProcTable& wgpu,
     if (computePassCmd->timestampWrites.querySet) {
         timestampWrites = ToWGPU(computePassCmd->timestampWrites);
         passDescriptor.timestampWrites = &timestampWrites;
+    }
+
+    for (auto texture : resourceUsages.referencedTextures) {
+        texture->SetInitialized(true);
     }
 
     WGPUComputePassEncoder passEncoder =
@@ -284,7 +289,12 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
 
     size_t colorAttachmentCount = 0;
     for (auto i : renderPassCmd->attachmentState->GetColorAttachmentsMask()) {
-        colorAttachments[i] = ToWGPU(renderPassCmd->colorAttachments[i]);
+        auto& colorAttachment = renderPassCmd->colorAttachments[i];
+        colorAttachment.view->GetTexture()->SetInitialized(true);
+        if (colorAttachment.resolveTarget != nullptr) {
+            colorAttachment.resolveTarget->GetTexture()->SetInitialized(true);
+        }
+        colorAttachments[i] = ToWGPU(colorAttachment);
         colorAttachmentCount = static_cast<size_t>(i) + 1;
     }
 
@@ -301,6 +311,7 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
     };
     WGPURenderPassDepthStencilAttachment depthStencilAttachment;
     if (renderPassCmd->attachmentState->HasDepthStencilAttachment()) {
+        renderPassCmd->depthStencilAttachment.view->GetTexture()->SetInitialized(true);
         depthStencilAttachment = ToWGPU(renderPassCmd->depthStencilAttachment);
         passDescriptor.depthStencilAttachment = &depthStencilAttachment;
     }
@@ -404,6 +415,9 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) const {
     for (auto buffer : resourceUsages.topLevelBuffers) {
         DAWN_TRY(captureContext.AddResource(buffer));
     }
+    for (auto texture : resourceUsages.topLevelTextures) {
+        DAWN_TRY(captureContext.AddResource(texture));
+    }
     for (const auto& pass : resourceUsages.renderPasses) {
         for (auto buffer : pass.buffers) {
             DAWN_TRY(captureContext.AddResource(buffer));
@@ -432,6 +446,42 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                         .dstBufferId = captureContext.GetId(cmd.destination.Get()),
                         .dstOffset = cmd.destinationOffset,
                         .size = cmd.size,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::CopyBufferToTexture: {
+                const auto& cmd = *commands.NextCommand<CopyBufferToTextureCmd>();
+                schema::EncoderCommandCopyBufferToTextureCmd data{{
+                    .data = {{
+                        .source = ToSchema(captureContext, cmd.source),
+                        .destination = ToSchema(captureContext, cmd.destination),
+                        .copySize = ToSchema(cmd.copySize),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::CopyTextureToBuffer: {
+                const auto& cmd = *commands.NextCommand<CopyTextureToBufferCmd>();
+                schema::EncoderCommandCopyTextureToBufferCmd data{{
+                    .data = {{
+                        .source = ToSchema(captureContext, cmd.source),
+                        .destination = ToSchema(captureContext, cmd.destination),
+                        .copySize = ToSchema(cmd.copySize),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::CopyTextureToTexture: {
+                const auto& cmd = *commands.NextCommand<CopyTextureToTextureCmd>();
+                schema::EncoderCommandCopyTextureToTextureCmd data{{
+                    .data = {{
+                        .source = ToSchema(captureContext, cmd.source),
+                        .destination = ToSchema(captureContext, cmd.destination),
+                        .copySize = ToSchema(cmd.copySize),
                     }},
                 }};
                 Serialize(captureContext, data);
@@ -483,6 +533,7 @@ WGPUCommandBuffer CommandBuffer::Encode() {
                 WGPUTexelCopyTextureInfo destination = ToWGPU(cmd->destination);
                 WGPUExtent3D size = ToWGPU(cmd->copySize);
                 wgpu.commandEncoderCopyBufferToTexture(innerEncoder, &source, &destination, &size);
+                cmd->destination.texture.Get()->SetInitialized(true);
                 break;
             }
             case Command::CopyTextureToBuffer: {
@@ -499,6 +550,7 @@ WGPUCommandBuffer CommandBuffer::Encode() {
                 WGPUTexelCopyTextureInfo destination = ToWGPU(cmd->destination);
                 WGPUExtent3D size = ToWGPU(cmd->copySize);
                 wgpu.commandEncoderCopyTextureToTexture(innerEncoder, &source, &destination, &size);
+                cmd->destination.texture.Get()->SetInitialized(true);
                 break;
             }
             case Command::ClearBuffer: {
