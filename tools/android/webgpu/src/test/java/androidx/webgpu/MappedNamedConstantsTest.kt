@@ -50,6 +50,7 @@ class MappedNamedConstantsTest {
         CompareFunction::class,
         CompilationInfoRequestStatus::class,
         CompilationMessageType::class,
+        ComponentSwizzle::class,
         CompositeAlphaMode::class,
         CreatePipelineAsyncStatus::class,
         CullMode::class,

@@ -2390,6 +2390,7 @@
             {"value": 19, "name": "texture formats tier1"},
             {"value": 20, "name": "texture formats tier2"},
             {"value": 21, "name": "primitive index"},
+            {"value": 22, "name": "texture component swizzle"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2450,10 +2451,9 @@
             {"value": 55, "name": "chromium experimental subgroup matrix", "tags": ["dawn"]},
             {"value": 56, "name": "shared fence EGL sync", "tags": ["dawn", "native"]},
             {"value": 57, "name": "dawn device allocator control", "tags": ["dawn"]},
-            {"value": 58, "name": "texture component swizzle", "tags": ["dawn", "emscripten"]},
-            {"value": 60, "name": "chromium experimental bindless", "tags": ["dawn"]},
-            {"value": 61, "name": "adapter properties WGPU", "tags": ["dawn"]},
-            {"value": 62, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]}
+            {"value": 58, "name": "chromium experimental bindless", "tags": ["dawn"]},
+            {"value": 59, "name": "adapter properties WGPU", "tags": ["dawn"]},
+            {"value": 60, "name": "shared buffer memory D3D12 shared memory file mapping handle", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -3886,6 +3886,7 @@
             {"value": 9, "name": "surface source XCB window"},
             {"value": 10, "name": "surface color management"},
             {"value": 11, "name": "request adapter WebXR options"},
+            {"value": 12, "name": "texture component swizzle descriptor"},
 
             {"value": 0, "name": "compatibility mode limits", "tags": ["compat"]},
             {"value": 1, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
@@ -3963,17 +3964,16 @@
             {"value": 68, "name": "render pass descriptor resolve rect", "tags": ["dawn"]},
             {"value": 69, "name": "request adapter WebGPU backend options", "tags": ["dawn", "native"]},
             {"value": 70, "name": "dawn fake device initialize error for testing", "tags": ["dawn"]},
-            {"value": 71, "name": "texture component swizzle descriptor", "tags": ["dawn", "emscripten"]},
-            {"value": 72, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
-            {"value": 73, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
-            {"value": 74, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
-            {"value": 75, "name": "dynamic binding array limits", "tags": ["dawn"]},
-            {"value": 76, "name": "bind group dynamic binding array", "tags": ["dawn"]},
-            {"value": 77, "name": "texel buffer binding entry", "tags": ["dawn"]},
-            {"value": 78, "name": "texel buffer binding layout", "tags": ["dawn"]},
-            {"value": 79, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
-            {"value": 80, "name": "adapter properties WGPU", "tags": ["dawn"]},
-            {"value": 81, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]}
+            {"value": 71, "name": "shared texture memory D3D11 begin state", "tags": ["dawn", "native"]},
+            {"value": 72, "name": "dawn consume adapter descriptor", "tags": ["dawn"]},
+            {"value": 73, "name": "bind group layout dynamic binding array", "tags": ["dawn"]},
+            {"value": 74, "name": "dynamic binding array limits", "tags": ["dawn"]},
+            {"value": 75, "name": "bind group dynamic binding array", "tags": ["dawn"]},
+            {"value": 76, "name": "texel buffer binding entry", "tags": ["dawn"]},
+            {"value": 77, "name": "texel buffer binding layout", "tags": ["dawn"]},
+            {"value": 78, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
+            {"value": 79, "name": "adapter properties WGPU", "tags": ["dawn"]},
+            {"value": 80, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
@@ -4284,7 +4284,6 @@
     },
     "texture component swizzle descriptor": {
         "category": "structure",
-        "tags": ["dawn", "emscripten"],
         "chained": "in",
         "chain roots": ["texture view descriptor"],
         "members": [
@@ -4328,7 +4327,6 @@
     },
     "texture component swizzle": {
         "category": "structure",
-        "tags": ["dawn", "emscripten"],
         "extensible": false,
         "members": [
             {"name": "r", "type": "component swizzle", "default": "r"},
@@ -4339,7 +4337,6 @@
     },
     "component swizzle": {
         "category": "enum",
-        "tags": ["dawn", "emscripten"],
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
             {"value": 1, "name": "zero", "jsrepr": "'0'"},
