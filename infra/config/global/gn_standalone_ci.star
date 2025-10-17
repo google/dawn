@@ -55,7 +55,23 @@ ci.defaults.set(
 # Parent Builders                                                              #
 ################################################################################
 
-ci.builder(
+def dawn_linux_parent_builder(**kwargs):
+    kwargs.setdefault("cores", 8)
+    kwargs.setdefault("os", os.LINUX_DEFAULT)
+    ci.builder(**kwargs)
+
+def dawn_mac_parent_builder(**kwargs):
+    kwargs.setdefault("cpu", "arm64")
+    kwargs.setdefault("os", os.MAC_DEFAULT)
+    ci.builder(**kwargs)
+
+def dawn_win_parent_builder(**kwargs):
+    kwargs.setdefault("cores", 8)
+    kwargs.setdefault("os", os.WINDOWS_DEFAULT)
+    kwargs.setdefault("ssd", None)
+    ci.builder(**kwargs)
+
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-builder-dbg",
     description_html = "Compile debug Dawn test binaries for Linux/x64",
     schedule = "triggered",
@@ -85,15 +101,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|dbg",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Linux/x64",
     schedule = "triggered",
@@ -123,15 +137,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x86-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Linux/x86",
     schedule = "triggered",
@@ -161,15 +173,13 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|dbg",
         short_name = "x86",
     ),
 )
 
-ci.builder(
+dawn_linux_parent_builder(
     name = "dawn-linux-x86-builder-rel",
     description_html = "Compiles release Dawn test binaries for Linux/x86",
     schedule = "triggered",
@@ -199,15 +209,13 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.LINUX_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "linux|build|clang|rel",
         short_name = "x86",
     ),
 )
 
-ci.builder(
+dawn_mac_parent_builder(
     name = "dawn-mac-arm64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Mac/arm64",
     schedule = "triggered",
@@ -236,14 +244,13 @@ ci.builder(
             "release",
         ],
     ),
-    os = os.MAC_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|rel",
         short_name = "a64",
     ),
 )
 
-ci.builder(
+dawn_mac_parent_builder(
     name = "dawn-mac-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Mac/x64",
     schedule = "triggered",
@@ -272,14 +279,13 @@ ci.builder(
             "x64",
         ],
     ),
-    os = os.MAC_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|dbg",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_mac_parent_builder(
     name = "dawn-mac-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Mac/x64",
     schedule = "triggered",
@@ -308,14 +314,13 @@ ci.builder(
             "x64",
         ],
     ),
-    os = os.MAC_DEFAULT,
     console_view_entry = consoles.console_view_entry(
         category = "mac|build|clang|rel",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -344,16 +349,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|dbg",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x64-builder-msvc-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64 using MSVC",
     schedule = "triggered",
@@ -384,16 +386,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|msvc|dbg",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x64-builder-msvc-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x64 using MSVC",
     schedule = "triggered",
@@ -424,16 +423,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|msvc|rel",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x64-builder-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -462,16 +458,13 @@ ci.builder(
             "x64",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|rel",
         short_name = "x64",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x86-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x86",
     schedule = "triggered",
@@ -498,16 +491,13 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|dbg",
         short_name = "x86",
     ),
 )
 
-ci.builder(
+dawn_win_parent_builder(
     name = "dawn-win-x86-builder-rel",
     description_html = "Compiles release Dawn test binaries for Windows/x86",
     schedule = "triggered",
@@ -534,9 +524,6 @@ ci.builder(
             "x86",
         ],
     ),
-    cores = 8,
-    os = os.WINDOWS_DEFAULT,
-    ssd = None,
     console_view_entry = consoles.console_view_entry(
         category = "win|build|clang|rel",
         short_name = "x86",
