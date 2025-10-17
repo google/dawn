@@ -33,7 +33,10 @@ package {{ kotlin_package }}
     import java.util.concurrent.Executor
 {% endif %}
 
-public class {{ structure.name.CamelCase() }}(
+public class {{ structure.name.CamelCase() }}
+    {%- for member in kotlin_record_members(structure.members) %}
+        {% if kotlin_default(member) is not none %} @JvmOverloads constructor{% break %}{% endif %}
+    {%- endfor %}(
     {% for member in kotlin_record_members(structure.members) %}
         {% if member.type.category in ['callback function']%}
         {{'     '}}@get:JvmName("get{{member.name.CamelCase()}}Executor")
