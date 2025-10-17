@@ -87,26 +87,15 @@ namespace dawn::wire::server {
         }
     {% endfor %}
 
-    const volatile char* Server::HandleCommandsImpl(const volatile char* commands, size_t size) {
+    const volatile char* Server::HandleCommands(const volatile char* commands, size_t size) {
         DeserializeBuffer deserializeBuffer(commands, size);
 
         while (deserializeBuffer.AvailableSize() >= sizeof(CmdHeader) + sizeof(WireCmd)) {
-            // Start by chunked command handling, if it is done, then it means the whole buffer
-            // was consumed by it, so we return a pointer to the end of the commands.
-            switch (HandleChunkedCommands(deserializeBuffer.Buffer(), deserializeBuffer.AvailableSize())) {
-                case ChunkedCommandsResult::Consumed:
-                    return commands + size;
-                case ChunkedCommandsResult::Error:
-                    return nullptr;
-                case ChunkedCommandsResult::Passthrough:
-                    break;
-            }
-
             WireCmd cmdId = *static_cast<const volatile WireCmd*>(static_cast<const volatile void*>(
                 deserializeBuffer.Buffer() + sizeof(CmdHeader)));
             WireResult result;
             switch (cmdId) {
-                {% for command in cmd_records["command"] %}
+                {% for command in cmd_records["special command"] + cmd_records["command"] %}
                     case WireCmd::{{command.name.CamelCase()}}:
                         result = Handle{{command.name.CamelCase()}}(&deserializeBuffer);
                         break;

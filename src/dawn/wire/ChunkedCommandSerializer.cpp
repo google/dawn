@@ -32,10 +32,18 @@
 
 #include "dawn/wire/ChunkedCommandSerializer.h"
 
+#include "dawn/common/Assert.h"
+
 namespace dawn::wire {
 
 ChunkedCommandSerializer::ChunkedCommandSerializer(CommandSerializer* serializer)
     : mSerializer(serializer), mMaxAllocationSize(serializer->GetMaximumAllocationSize()) {
+    DAWN_ASSERT(mMaxAllocationSize > 0);
+}
+
+void ChunkedCommandSerializer::SetCommandSerializerForDisconnect(CommandSerializer* serializer) {
+    mSerializer = serializer;
+    mMaxAllocationSize = serializer->GetMaximumAllocationSize();
     DAWN_ASSERT(mMaxAllocationSize > 0);
 }
 
@@ -44,17 +52,24 @@ void ChunkedCommandSerializer::Flush() {
 }
 
 void ChunkedCommandSerializer::SerializeChunkedCommand(const char* allocatedBuffer,
-                                                       size_t remainingSize) {
-    while (remainingSize > 0) {
-        size_t chunkSize = std::min(remainingSize, mMaxAllocationSize);
-        void* dst = mSerializer->GetCmdSpace(chunkSize);
-        if (dst == nullptr) {
-            return;
-        }
-        memcpy(dst, allocatedBuffer, chunkSize);
+                                                       size_t totalSize) {
+    // Constant regarding the size of the WireChunkedCommandCmd that can be computed once.
+    static size_t kWireChunkedCmdPrefixSize = ChunkedCommandCmd{0, 0, nullptr, 0}.GetRequiredSize();
 
-        allocatedBuffer += chunkSize;
-        remainingSize -= chunkSize;
+    ChunkedCommandCmd cmd;
+    cmd.id = mNextChunkedCommandId++;
+    cmd.size = totalSize;
+
+    size_t remainingSize = totalSize;
+    while (remainingSize > 0) {
+        cmd.chunkData = allocatedBuffer;
+        cmd.chunkSize = std::min(remainingSize, mMaxAllocationSize - kWireChunkedCmdPrefixSize);
+        DAWN_ASSERT(cmd.GetRequiredSize() <= mMaxAllocationSize);
+
+        SerializeCommand(cmd);
+
+        allocatedBuffer += cmd.chunkSize;
+        remainingSize -= cmd.chunkSize;
     }
 }
 

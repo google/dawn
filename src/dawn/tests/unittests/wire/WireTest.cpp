@@ -260,6 +260,10 @@ wire::WireClient* WireTest::GetWireClient() {
     return mWireClient.get();
 }
 
+size_t WireTest::GetC2SMaxAllocationSize() {
+    return mC2sBuf->GetMaximumAllocationSize();
+}
+
 void WireTest::DeleteServer() {
     EXPECT_CALL(api, QueueRelease(apiQueue)).Times(1);
     EXPECT_CALL(api, DeviceRelease(apiDevice)).Times(1);
