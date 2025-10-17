@@ -481,6 +481,38 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
     }
 }
 
+TEST_P(CaptureAndReplayTests, WriteTexture) {
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "myTexture";
+    textureDesc.size = {4, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::R8Unorm;
+    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    {
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, 4);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::Extent3D extent = {4, 1, 1};
+        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
+                           &extent);
+    }
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
+        ASSERT_NE(texture, nullptr);
+        EXPECT_TEXTURE_EQ(&myData[0], texture, {0, 0}, {4, 1}, 0, wgpu::TextureAspect::All);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

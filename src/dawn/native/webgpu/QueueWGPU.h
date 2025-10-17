@@ -56,6 +56,11 @@ class Queue final : public QueueBase, public ObjectWGPU<WGPUQueue> {
                                uint64_t bufferOffset,
                                const void* data,
                                size_t size) override;
+    MaybeError WriteTextureImpl(const TexelCopyTextureInfo& destination,
+                                const void* data,
+                                size_t dataSize,
+                                const TexelCopyBufferLayout& dataLayout,
+                                const Extent3D& writeSizePixel) override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     bool HasPendingCommands() const override;

@@ -32,16 +32,23 @@
 #include "dawn/native/Forward.h"
 #include "dawn/native/Texture.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 #include "dawn/webgpu.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class Texture final : public TextureBase, public ObjectWGPU<WGPUTexture> {
+class Texture final : public TextureBase, public RecordableObject, public ObjectWGPU<WGPUTexture> {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const UnpackedPtr<TextureDescriptor>& descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) const override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
+    MaybeError CaptureContentIfNeeded(CaptureContext& context,
+                                      schema::ObjectId id,
+                                      bool newResource) override;
 
   private:
     Texture(Device* device,

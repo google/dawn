@@ -39,6 +39,7 @@
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/Serialization.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -124,6 +125,76 @@ MaybeError CaptureContext::CaptureUnmapBuffer(BufferBase* buffer,
     Serialize(*this, cmd);
     WriteContentBytes(data, size);
     return {};
+}
+
+MaybeError CaptureContext::CaptureQueueWriteTexture(const TexelCopyTextureInfo& destination,
+                                                    const void* data,
+                                                    size_t dataSize,
+                                                    const TexelCopyBufferLayout& dataLayout,
+                                                    const Extent3D& writeSizePixel) {
+    DAWN_TRY(AddResource(destination.texture));
+    schema::RootCommandWriteTextureCmd cmd{{
+        .data = {{
+            .destination = ToSchema(*this, destination),
+            .layout = ToSchema(dataLayout),
+            .size = ToSchema(writeSizePixel),
+            .dataSize = dataSize,
+        }},
+    }};
+    Serialize(*this, cmd);
+    WriteContentBytes(data, dataSize);
+    return {};
+}
+
+wgpu::TextureAspect ToDawn(const Aspect aspect) {
+    switch (aspect) {
+        case Aspect::Depth:
+            return wgpu::TextureAspect::DepthOnly;
+        case Aspect::Stencil:
+            return wgpu::TextureAspect::StencilOnly;
+        case Aspect::Plane0:
+            return wgpu::TextureAspect::Plane0Only;
+        case Aspect::Plane1:
+            return wgpu::TextureAspect::Plane1Only;
+        case Aspect::Plane2:
+            return wgpu::TextureAspect::Plane2Only;
+        default:
+            return wgpu::TextureAspect::All;
+    }
+}
+
+schema::Origin3D ToSchema(const Origin3D& origin) {
+    return {{
+        .x = origin.x,
+        .y = origin.y,
+        .z = origin.z,
+    }};
+}
+
+schema::Extent3D ToSchema(const Extent3D& extent) {
+    return {{
+        .width = extent.width,
+        .height = extent.height,
+        .depthOrArrayLayers = extent.depthOrArrayLayers,
+    }};
+}
+
+schema::TexelCopyBufferLayout ToSchema(const TexelCopyBufferLayout& layout) {
+    return {{
+        .offset = layout.offset,
+        .bytesPerRow = layout.bytesPerRow,
+        .rowsPerImage = layout.rowsPerImage,
+    }};
+}
+
+schema::TexelCopyTextureInfo ToSchema(CaptureContext& captureContext,
+                                      const TexelCopyTextureInfo& info) {
+    return {{
+        .textureId = captureContext.GetId(info.texture),
+        .mipLevel = info.mipLevel,
+        .origin = ToSchema(info.origin),
+        .aspect = info.aspect,
+    }};
 }
 
 }  // namespace dawn::native::webgpu

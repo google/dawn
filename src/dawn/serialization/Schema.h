@@ -76,11 +76,36 @@ enum class RootCommand : uint32_t {
     End,
 };
 
+#define ORIGIN3D_MEMBER(X) \
+    X(uint32_t, x)         \
+    X(uint32_t, y)         \
+    X(uint32_t, z)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Origin3D, ORIGIN3D_MEMBER){};
+
+#define EXTENT3D_MEMBER(X) \
+    X(uint32_t, width)     \
+    X(uint32_t, height)    \
+    X(uint32_t, depthOrArrayLayers)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Extent3D, EXTENT3D_MEMBER){};
+
 #define BUFFER_CREATION_MEMBER(X) \
     X(uint64_t, size)             \
     X(wgpu::BufferUsage, usage)
 
 DAWN_REPLAY_SERIALIZABLE(struct, Buffer, BUFFER_CREATION_MEMBER){};
+
+#define TEXTURE_CREATION_MEMBER(X)       \
+    X(wgpu::TextureUsage, usage)         \
+    X(wgpu::TextureDimension, dimension) \
+    X(Extent3D, size)                    \
+    X(wgpu::TextureFormat, format)       \
+    X(uint32_t, mipLevelCount)           \
+    X(uint32_t, sampleCount)             \
+    X(std::vector<wgpu::TextureFormat>, viewFormats)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Texture, TEXTURE_CREATION_MEMBER){};
 
 #define LABELED_RESOURCE_MEMBER(X) \
     X(ObjectType, type)            \
@@ -88,6 +113,21 @@ DAWN_REPLAY_SERIALIZABLE(struct, Buffer, BUFFER_CREATION_MEMBER){};
     X(std::string, label)
 
 DAWN_REPLAY_SERIALIZABLE(struct, LabeledResource, LABELED_RESOURCE_MEMBER){};
+
+#define TEXEL_COPY_BUFFER_LAYOUT_MEMBER(X) \
+    X(uint64_t, offset)                    \
+    X(uint32_t, bytesPerRow)               \
+    X(uint32_t, rowsPerImage)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyBufferLayout, TEXEL_COPY_BUFFER_LAYOUT_MEMBER){};
+
+#define TEXEL_COPY_TEXTURE_INFO_MEMBER(X) \
+    X(ObjectId, textureId)                \
+    X(uint32_t, mipLevel)                 \
+    X(Origin3D, origin)                   \
+    X(wgpu::TextureAspect, aspect)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyTextureInfo, TEXEL_COPY_TEXTURE_INFO_MEMBER){};
 
 #define CREATE_RESOURCE_CMD_DATA_MEMBER(X) X(LabeledResource, resource)
 
@@ -106,6 +146,14 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(WriteBuffer, WRITE_BUFFER_CMD_DATA_MEMBER
     X(uint64_t, size)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(UnmapBuffer, UNMAP_BUFFER_CMD_DATA_MEMBER){};
+
+#define WRITE_TEXTURE_CMD_DATA_MEMBER(X) \
+    X(TexelCopyTextureInfo, destination) \
+    X(TexelCopyBufferLayout, layout)     \
+    X(Extent3D, size)                    \
+    X(uint64_t, dataSize)
+
+DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(WriteTexture, WRITE_TEXTURE_CMD_DATA_MEMBER){};
 
 #define QUEUE_SUBMIT_CMD_DATA_MEMBER(X) X(std::vector<ObjectId>, commandBuffers)
 

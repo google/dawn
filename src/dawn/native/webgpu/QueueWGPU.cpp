@@ -36,6 +36,8 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/CommandBufferWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
+#include "dawn/native/webgpu/ToWGPU.h"
 #include "dawn/native/webgpu/WebGPUError.h"
 
 namespace dawn::native::webgpu {
@@ -105,6 +107,35 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
     ToBackend(GetDevice())
         ->wgpu.queueWriteBuffer(mInnerHandle, innerBuffer, bufferOffset, data, size);
     buffer->MarkUsedInPendingCommands();
+
+    return {};
+}
+
+MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
+                                   const void* data,
+                                   size_t dataSize,
+                                   const TexelCopyBufferLayout& dataLayout,
+                                   const Extent3D& writeSizePixel) {
+    if (IsCapturing()) {
+        DAWN_TRY(mCaptureContext->CaptureQueueWriteTexture(destination, data, dataSize, dataLayout,
+                                                           writeSizePixel));
+    }
+
+    auto innerTexture = ToBackend(destination.texture)->GetInnerHandle();
+    WGPUTexelCopyTextureInfo dest = {
+        .texture = innerTexture,
+        .mipLevel = destination.mipLevel,
+        .origin = ToWGPU(destination.origin),
+        .aspect = ToAPI(destination.aspect),
+    };
+    WGPUTexelCopyBufferLayout layout = {
+        .offset = dataLayout.offset,
+        .bytesPerRow = dataLayout.bytesPerRow,
+        .rowsPerImage = dataLayout.rowsPerImage,
+    };
+    WGPUExtent3D writeSize = ToWGPU(writeSizePixel);
+    ToBackend(GetDevice())
+        ->wgpu.queueWriteTexture(mInnerHandle, &dest, data, dataSize, &layout, &writeSize);
 
     return {};
 }
