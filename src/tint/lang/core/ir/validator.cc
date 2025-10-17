@@ -2263,6 +2263,15 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
+            [&](const core::type::Atomic* a) {
+                CheckType(a->Type(), diag, ignore_caps);
+
+                if (!a->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
+                    diag() << "atomic subtype must be i32 or u32";
+                    return false;
+                }
+                return true;
+            },
             [&](const core::type::SampledTexture* s) {
                 CheckType(s->Type(), diag, ignore_caps);
 
