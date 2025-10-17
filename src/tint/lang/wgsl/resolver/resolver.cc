@@ -1188,7 +1188,6 @@ sem::IfStatement* Resolver::IfStatement(const ast::IfStatement* stmt) {
             return false;
         }
         sem->SetCondition(cond);
-        sem->Behaviors() = cond->Behaviors();
         sem->Behaviors().Remove(sem::Behavior::kNext);
 
         Mark(stmt->body);
@@ -1282,7 +1281,6 @@ sem::ForLoopStatement* Resolver::ForLoopStatement(const ast::ForLoopStatement* s
                 return false;
             }
             sem->SetCondition(cond);
-            behaviors.Add(cond->Behaviors());
         }
 
         if (auto* continuing = stmt->continuing) {
@@ -1324,7 +1322,6 @@ sem::WhileStatement* Resolver::WhileStatement(const ast::WhileStatement* stmt) {
             return false;
         }
         sem->SetCondition(cond);
-        behaviors.Add(cond->Behaviors());
 
         Mark(stmt->body);
 
@@ -1698,7 +1695,6 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
     }
 
     auto* load = b.create<sem::Load>(expr, current_statement_, expr->Stage());
-    load->Behaviors() = expr->Behaviors();
     b.Sem().Replace(expr->Declaration(), load);
 
     // Register the load for the alias analysis.
@@ -1748,7 +1744,6 @@ const sem::ValueExpression* Resolver::Materialize(
     }
 
     auto* m = b.create<sem::Materialize>(expr, current_statement_, concrete_ty, materialized_val);
-    m->Behaviors() = expr->Behaviors();
     b.Sem().Replace(decl, m);
     return m;
 }
@@ -1898,7 +1893,6 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     }
     auto* sem = b.create<sem::IndexAccessorExpression>(
         expr, ty, stage, obj, idx, current_statement_, std::move(val), obj->RootIdentifier());
-    sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
 }
 
@@ -1917,7 +1911,6 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     Vector<const sem::ValueExpression*, 8> args;
     args.Reserve(expr->args.Length());
     auto args_stage = core::EvaluationStage::kConstant;
-    sem::Behaviors arg_behaviors;
     for (size_t i = 0; i < expr->args.Length(); i++) {
         auto* arg = sem_.GetVal(expr->args[i]);
         if (!arg) {
@@ -1925,9 +1918,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         }
         args.Push(arg);
         args_stage = core::EarliestStage(args_stage, arg->Stage());
-        arg_behaviors.Add(arg->Behaviors());
     }
-    arg_behaviors.Remove(sem::Behavior::kNext);
 
     // ctor_or_conv is a helper for building either a sem::ValueConstructor or
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
@@ -2193,7 +2184,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         target,  //
         [&](const sem::FunctionExpression* fn_expr) {
             return FunctionCall(expr, const_cast<sem::Function*>(fn_expr->Function()),
-                                std::move(args), arg_behaviors);
+                                std::move(args));
         },
         [&](const sem::TypeExpression* ty_expr) {
             return Switch(
@@ -3123,8 +3114,7 @@ size_t Resolver::NestDepth(const core::type::Type* ty) const {
 
 sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                   sem::Function* target,
-                                  VectorRef<const sem::ValueExpression*> args_in,
-                                  sem::Behaviors arg_behaviors) {
+                                  VectorRef<const sem::ValueExpression*> args_in) {
     Vector<const sem::ValueExpression*, 8> args = std::move(args_in);
     if (!MaybeMaterializeAndLoadArguments(args, target)) {
         return nullptr;
@@ -3137,8 +3127,6 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                      /* constant_value */ nullptr);
 
     target->AddCallSite(call);
-
-    call->Behaviors() = arg_behaviors + target->Behaviors();
 
     if (!validator_.FunctionCall(call, current_statement_)) {
         return nullptr;
@@ -3523,7 +3511,6 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                     // from the pointer expression.
                     auto* load =
                         b.create<sem::Load>(obj_expr, current_statement_, obj_expr->Stage());
-                    load->Behaviors() = obj_expr->Behaviors();
                     b.Sem().Replace(obj_expr->Declaration(), load);
 
                     // Register the load for the alias analysis.
@@ -3638,8 +3625,6 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     auto* sem = b.create<sem::ValueExpression>(expr, res_ty, stage, current_statement_, value);
-    sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
-
     return sem;
 }
 
@@ -3740,7 +3725,6 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
     auto* sem =
         b.create<sem::ValueExpression>(unary, ty, stage, current_statement_, value, root_ident);
-    sem->Behaviors() = expr->Behaviors();
     return sem;
 }
 
@@ -4457,8 +4441,6 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
                     return false;
                 }
             }
-            behaviors.Add(expr->Behaviors() - sem::Behavior::kNext);
-
             value_ty = expr->Type();
         } else {
             value_ty = b.create<core::type::Void>();
@@ -4481,7 +4463,10 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         if (!cond) {
             return false;
         }
-        behaviors = cond->Behaviors() - sem::Behavior::kNext;
+        // Each case clause will contribute behaviours. Switches must
+        // have at least a default clause, so we'll always end up with
+        // a non-empty behaviour set.
+        behaviors = behaviors - sem::Behavior::kNext;
 
         auto* cond_ty = cond->Type();
 
@@ -4567,10 +4552,6 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
 
         current_compound_statement_->AddDecl(variable->As<sem::LocalVariable>());
 
-        if (auto* ctor = variable->Initializer()) {
-            sem->Behaviors() = ctor->Behaviors();
-        }
-
         return validator_.LocalVariable(variable);
     });
 }
@@ -4602,12 +4583,6 @@ sem::Statement* Resolver::AssignmentStatement(const ast::AssignmentStatement* st
             return false;
         }
 
-        auto& behaviors = sem->Behaviors();
-        behaviors = rhs->Behaviors();
-        if (!is_phony_assignment) {
-            behaviors.Add(lhs->Behaviors());
-        }
-
         if (!is_phony_assignment) {
             RegisterStore(lhs);
         }
@@ -4634,7 +4609,6 @@ sem::Statement* Resolver::BreakIfStatement(const ast::BreakIfStatement* stmt) {
             return false;
         }
         sem->SetCondition(cond);
-        sem->Behaviors() = cond->Behaviors();
         sem->Behaviors().Add(sem::Behavior::kBreak);
 
         return validator_.BreakIfStatement(sem, current_statement_);
@@ -4644,8 +4618,7 @@ sem::Statement* Resolver::BreakIfStatement(const ast::BreakIfStatement* stmt) {
 sem::Statement* Resolver::CallStatement(const ast::CallStatement* stmt) {
     auto* sem = b.create<sem::Statement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
-        if (auto* expr = ValueExpression(stmt->expr)) {
-            sem->Behaviors() = expr->Behaviors();
+        if (ValueExpression(stmt->expr)) {
             return true;
         }
         return false;
@@ -4667,8 +4640,6 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
         }
 
         RegisterStore(lhs);
-
-        sem->Behaviors() = rhs->Behaviors() + lhs->Behaviors();
 
         auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
@@ -4722,8 +4693,6 @@ sem::Statement* Resolver::IncrementDecrementStatement(
         if (!lhs) {
             return false;
         }
-        sem->Behaviors() = lhs->Behaviors();
-
         RegisterStore(lhs);
 
         return validator_.IncrementDecrementStatement(stmt);

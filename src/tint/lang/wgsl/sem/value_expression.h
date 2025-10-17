@@ -77,12 +77,6 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     /// @return the root identifier of this expression, or nullptr
     const Variable* RootIdentifier() const { return root_identifier_; }
 
-    /// @return the behaviors of this statement
-    const sem::Behaviors& Behaviors() const { return behaviors_; }
-
-    /// @return the behaviors of this statement
-    sem::Behaviors& Behaviors() { return behaviors_; }
-
     /// @return the inner expression node if this is a Materialize, otherwise this.
     const ValueExpression* UnwrapMaterialize() const;
 
@@ -100,7 +94,6 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     const core::type::Type* const type_;
     const core::EvaluationStage stage_;
     const core::constant::Value* const constant_;
-    sem::Behaviors behaviors_{sem::Behavior::kNext};
 };
 
 }  // namespace tint::sem

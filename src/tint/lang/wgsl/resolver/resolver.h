@@ -293,8 +293,7 @@ class Resolver {
     sem::Function* Function(const ast::Function*);
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
-                            VectorRef<const sem::ValueExpression*> args,
-                            sem::Behaviors arg_behaviors);
+                            VectorRef<const sem::ValueExpression*> args);
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
