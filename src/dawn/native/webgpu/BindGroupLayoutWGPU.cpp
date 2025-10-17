@@ -27,6 +27,8 @@
 
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 
+#include <vector>
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/Forward.h"
 
@@ -44,8 +46,30 @@ BindGroupLayout::BindGroupLayout(Device* device,
     : BindGroupLayoutInternalBase(device, descriptor),
       ObjectWGPU(device->wgpu.bindGroupLayoutRelease),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
-    auto desc = ToAPI(*descriptor);
-    mInnerHandle = device->wgpu.deviceCreateBindGroupLayout(device->GetInnerHandle(), desc);
+    // Rebuild the descriptor and resolve internal bindings to regular ones.
+    std::vector<WGPUBindGroupLayoutEntry> entries(descriptor->entryCount);
+    for (size_t i = 0; i < entries.size(); i++) {
+        entries[i] = *ToAPI(&descriptor->entries[i]);
+
+        switch (descriptor->entries[i].buffer.type) {
+            case kInternalStorageBufferBinding:
+                entries[i].buffer.type = WGPUBufferBindingType_Storage;
+                break;
+            case kInternalReadOnlyStorageBufferBinding:
+                entries[i].buffer.type = WGPUBufferBindingType_ReadOnlyStorage;
+                break;
+            default:
+                break;
+        }
+    }
+
+    WGPUBindGroupLayoutDescriptor desc = {};
+    desc.nextInChain = nullptr;
+    desc.label = ToOutputStringView(descriptor->label);
+    desc.entryCount = descriptor->entryCount;
+    desc.entries = entries.data();
+
+    mInnerHandle = device->wgpu.deviceCreateBindGroupLayout(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
 }
 

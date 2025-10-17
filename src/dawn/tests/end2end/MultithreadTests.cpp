@@ -1610,9 +1610,6 @@ TEST_P(MultithreadDrawIndexedIndirectTests, IndirectOffsetInParallel) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
-    // TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     utils::RGBA8 filled(0, 255, 0, 255);
     utils::RGBA8 notFilled(0, 0, 0, 0);
 

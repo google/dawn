@@ -466,14 +466,14 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectBothOffset) {
     }
 }
 
-// TODO(crbug.com/440123094): Fix internal binding validation for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(FirstIndexOffsetTests,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

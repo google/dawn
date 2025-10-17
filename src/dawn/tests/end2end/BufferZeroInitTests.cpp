@@ -1365,17 +1365,17 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(
-    BufferZeroInitTest,
-    D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
-    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
-    D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
-                 {"d3d12_create_not_zeroed_heap"}),
-    MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-    OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-    OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
-    VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"})
-    // TODO(crbug.com/440123094): Fix internal binding validation and add WebGPUBackend.
+DAWN_INSTANTIATE_TEST(BufferZeroInitTest,
+                      D3D11Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
+                                   {"d3d12_create_not_zeroed_heap"}),
+                      MetalBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      OpenGLESBackend({"nonzero_clear_resources_on_creation_for_testing"}),
+                      VulkanBackend({"nonzero_clear_resources_on_creation_for_testing"})
+                      // TODO(crbug.com/440123094): Add implementation of
+                      // Toggle::NonzeroClearResourcesOnCreationForTesting for WebGPUBackend.
 );
 
 }  // anonymous namespace

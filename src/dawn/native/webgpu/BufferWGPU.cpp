@@ -43,11 +43,33 @@ namespace dawn::native::webgpu {
 // static
 ResultOrError<Ref<Buffer>> Buffer::Create(Device* device,
                                           const UnpackedPtr<BufferDescriptor>& descriptor) {
-    WGPUBufferDescriptor desc = *ToAPI(*descriptor);
+    auto actualUsage = ComputeInternalBufferUsages(device, descriptor->usage, descriptor->size);
+
     // Make the inner buffer copyable for readback if possible.
-    if (!(desc.usage & WGPUBufferUsage_MapRead)) {
-        desc.usage |= WGPUBufferUsage_CopySrc;
+    if (!(actualUsage & wgpu::BufferUsage::MapRead)) {
+        actualUsage |= wgpu::BufferUsage::CopySrc;
     }
+
+    // Resolve internal usages to regular ones.
+    if (actualUsage & kInternalStorageBuffer) {
+        actualUsage &= ~kInternalStorageBuffer;
+        actualUsage |= wgpu::BufferUsage::Storage;
+    }
+    if (actualUsage & kReadOnlyStorageBuffer) {
+        actualUsage &= ~kReadOnlyStorageBuffer;
+        actualUsage |= wgpu::BufferUsage::Storage;
+    }
+    if (actualUsage & kInternalCopySrcBuffer) {
+        actualUsage &= ~kInternalCopySrcBuffer;
+        actualUsage |= wgpu::BufferUsage::CopySrc;
+    }
+
+    WGPUBufferDescriptor desc = WGPU_BUFFER_DESCRIPTOR_INIT;
+    desc.label = ToOutputStringView(descriptor->label);
+    desc.usage = ToAPI(actualUsage);
+    desc.size = descriptor->size;
+    desc.mappedAtCreation = descriptor->mappedAtCreation;
+
     WGPUBuffer innerBuffer = device->wgpu.deviceCreateBuffer(device->GetInnerHandle(), &desc);
     if (innerBuffer == nullptr) {
         // innerBuffer can be nullptr when mappedAtCreation == true and fails.
