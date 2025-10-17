@@ -17,7 +17,14 @@ class FeaturesTest {
     fun featuresTest() {
         val requiredFeatures = intArrayOf(FeatureName.TextureCompressionASTC)
         runBlocking {
-            val webGpu = createWebGpu(requiredFeatures = requiredFeatures)
+            val webGpu =
+                createWebGpu(
+                    deviceDescriptor = DeviceDescriptor(
+                        requiredFeatures = requiredFeatures,
+                        deviceLostCallback = null,
+                        uncapturedErrorCallback = null
+                    )
+                )
             val device = webGpu.device
             val deviceFeatures = device.getFeatures().features
             requiredFeatures.forEach {

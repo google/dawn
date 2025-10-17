@@ -5,14 +5,11 @@ import android.os.Looper
 import android.view.Surface
 import androidx.webgpu.Adapter
 import androidx.webgpu.BackendType
-import androidx.webgpu.CallbackMode.Companion.AllowSpontaneous
 import androidx.webgpu.Device
 import androidx.webgpu.DeviceDescriptor
 import androidx.webgpu.DeviceLostCallback
-import androidx.webgpu.DeviceLostCallbackInfo
 import androidx.webgpu.DeviceLostReason
 import androidx.webgpu.ErrorType
-import androidx.webgpu.FeatureName
 import androidx.webgpu.Instance
 import androidx.webgpu.InstanceDescriptor
 import androidx.webgpu.RequestAdapterOptions
@@ -20,7 +17,7 @@ import androidx.webgpu.RequestAdapterStatus
 import androidx.webgpu.RequestDeviceStatus
 import androidx.webgpu.SurfaceDescriptor
 import androidx.webgpu.SurfaceSourceAndroidNativeWindow
-import androidx.webgpu.UncapturedErrorCallbackInfo
+import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.createInstance
 import androidx.webgpu.helper.Util.windowFromSurface
 import androidx.webgpu.requestAdapter
@@ -50,7 +47,10 @@ public suspend fun createWebGpu(
     surface: Surface? = null,
     instanceDescriptor: InstanceDescriptor = InstanceDescriptor(),
     requestAdapterOptions: RequestAdapterOptions = RequestAdapterOptions(),
-    @FeatureName requiredFeatures: IntArray = intArrayOf()
+    deviceDescriptor: DeviceDescriptor = DeviceDescriptor(
+        deviceLostCallback = defaultDeviceLostCallback,
+        uncapturedErrorCallback = defaultUncapturedErrorCallback
+    ),
 ): WebGpu {
     initLibrary()
 
@@ -66,7 +66,7 @@ public suspend fun createWebGpu(
         }
 
     val adapter = requestAdapter(instance, requestAdapterOptions)
-    val device = requestDevice(adapter, requiredFeatures)
+    val device = requestDevice(adapter, deviceDescriptor)
 
     var isClosing = false
     // Long-running event poller for async methods. Can be removed when
@@ -111,31 +111,42 @@ private suspend fun requestAdapter(
     return adapter
 }
 
-private suspend fun requestDevice(adapter: Adapter, @FeatureName requiredFeatures: IntArray): Device {
-    val result =
-        adapter.requestDevice(
-            DeviceDescriptor(
-                requiredFeatures = requiredFeatures,
-                deviceLostCallback = { device, reason, message ->
-                                throw DeviceLostException(device, reason, message)
-                            },
-                uncapturedErrorCallback = { device, type, message ->
-                    when (type) {
-                        ErrorType.NoError -> {} // NoError
-                        ErrorType.Validation -> throw ValidationException(device, message)
-                        ErrorType.OutOfMemory -> throw OutOfMemoryException(device, message)
-                        ErrorType.Internal -> throw InternalException(device, message)
-                        ErrorType.Unknown -> throw UnknownException(device, message)
-                        else -> throw UnknownException(device, message)
-                    }
-                },
-            )
-        )
+private suspend inline fun requestDevice(
+    adapter: Adapter,
+    deviceDescriptor: DeviceDescriptor,
+): Device {
+    if (deviceDescriptor.deviceLostCallback == null) {
+        deviceDescriptor.deviceLostCallback = defaultDeviceLostCallback
+    }
+
+    if (deviceDescriptor.uncapturedErrorCallback == null) {
+        deviceDescriptor.uncapturedErrorCallback = defaultUncapturedErrorCallback
+    }
+    val result = adapter.requestDevice(deviceDescriptor)
     val device = result.device
     check(result.status == RequestDeviceStatus.Success && device != null) {
         result.message.ifEmpty { "Error requesting the device: $result.status" }
     }
     return device
+}
+
+private val defaultUncapturedErrorCallback get(): UncapturedErrorCallback {
+    return UncapturedErrorCallback { device, type, message ->
+        when (type) {
+            ErrorType.NoError -> {} // NoError
+            ErrorType.Validation -> throw ValidationException(device, message)
+            ErrorType.OutOfMemory -> throw OutOfMemoryException(device, message)
+            ErrorType.Internal -> throw InternalException(device, message)
+            ErrorType.Unknown -> throw UnknownException(device, message)
+            else -> throw UnknownException(device, message)
+        }
+    }
+}
+
+private val defaultDeviceLostCallback get(): DeviceLostCallback {
+    return DeviceLostCallback { device, reason, message ->
+        throw DeviceLostException(device, reason, message)
+    }
 }
 
 /** Initializes the native library. This method should be called before making and WebGPU calls. */
