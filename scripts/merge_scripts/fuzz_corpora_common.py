@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,11 +24,7 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-"""Merge script to generate/upload fuzz corpora for use in ClusterFuzz.
-
-Note that this "merge" script does not actually merge any data - all Dawn
-results are handled by ResultDB.
-"""
+"""Common code for ClusterFuzz corpora generation/uploading."""
 
 import argparse
 import hashlib
@@ -38,67 +32,49 @@ import os
 import shutil
 import subprocess
 import sys
-import tempfile
-from typing import List
 
 DAWN_ROOT = os.path.realpath(
     os.path.join(os.path.dirname(__file__), '..', '..'))
-TESTING_MERGE_SCRIPTS = os.path.join(DAWN_ROOT, 'testing', 'merge_scripts')
-sys.path.insert(0, TESTING_MERGE_SCRIPTS)
 
-try:
-    import merge_api
-except ImportError as e:
-    raise RuntimeError(
-        'Unable to import merge_api - are you running in a Chromium checkout? '
-        'This merge script only supports standalone Dawn checkouts.') from e
-
-TRACE_SUBDIR = 'wire_traces'
-FUZZER_NAMES = (
-    'dawn_wire_server_and_frontend_fuzzer',
-    'dawn_wire_server_and_vulkan_backend_fuzzer',
-    'dawn_wire_server_and_d3d12_backend_fuzzer',
-)
 BUCKET = 'clusterfuzz-corpus'
 BUCKET_DIRECTORY = 'libfuzzer'
 
 
-def upload_files(input_directory: str) -> None:
-    """Uploads all files in a directory to the ClusterFuzz bucket.
-
-    One upload will be performed for each fuzzer in |FUZZER_NAMES|.
+def upload_directory_to_gcs(local_directory: str, fuzzer_name: str,
+                            clobber: bool) -> None:
+    """Uploads the contents of a directory to the ClusterFuzz GCS bucket.
 
     Args:
-        input_directory: A filepath to a directory whose contents will be
-            uploaded.
+        local_directory: The path to the local directory whose contents will
+            be uploaded.
+        fuzzer_name: The ClusterFuzz fuzzer name to upload the files under.
+        clobber: Whether to clobber identically named files in the GCS bucket.
     """
     gsutil_path = os.path.join(DAWN_ROOT, 'third_party', 'depot_tools',
                                'gsutil.py')
     if not os.path.exists(gsutil_path):
         raise RuntimeError(f'Unable to find gsutil.py at {gsutil_path}')
 
-    for fn in FUZZER_NAMES:
-        # This is effectively the same command line that would be run by the
-        # older dawn/gn.py recipe for uploading the corpora when using the
-        # gsutil recipe module.
-        cmd = [
-            sys.executable,
-            '-u',  # Unbuffered output.
-            gsutil_path,
-            '-m',  # Multithreaded.
-            '-o',  # Parallel upload.
-            'GSUtil:parallel_composite_upload_threshold=50M',
-            'cp',
-            '-r',  # Recursive.
-            '-n',  # No clobber.
-            os.path.join(input_directory, '*'),
-            f'gs://{BUCKET}/{BUCKET_DIRECTORY}/{fn}',
-        ]
-        p = subprocess.run(cmd)
-        p.check_returncode()
+    cmd = [
+        sys.executable,
+        '-u',  # Unbuffered output.
+        gsutil_path,
+        '-m',  # Multithreaded.
+        '-o',  # Parallel upload.
+        'GSUtil:parallel_composite_upload_threshold=50M',
+        'cp',
+        '-r',  # Recursive.
+    ]
+    if not clobber:
+        cmd.append('-n')
+    cmd.extend([
+        os.path.join(local_directory, '*'),
+        f'gs://{BUCKET}/{BUCKET_DIRECTORY}/{fuzzer_name}',
+    ])
+    p = subprocess.run(cmd, check=True)
 
 
-def hash_trace_files(trace_files: List[str], output_directory: str) -> None:
+def hash_trace_files(trace_files: list[str], output_directory: str) -> None:
     """Creates copies of trace files with hash-based names.
 
     Args:
@@ -113,12 +89,15 @@ def hash_trace_files(trace_files: List[str], output_directory: str) -> None:
         shutil.copyfile(tf, filename)
 
 
-def find_trace_files(output_jsons: List[str]) -> List[str]:
-    """Finds all wire trace files produced by the test.
+def find_raw_trace_files(output_jsons: list[str],
+                         subdirectory: str) -> list[str]:
+    """Finds all raw trace files produced by the test.
 
     Args:
         output_jsons: A list of filepaths to the output.json files produced
             by each shard.
+        subdirectory: The subdirectory of the isolated output directory that
+            is expected to contain the raw trace files.
 
     Returns:
         A list of filepaths, one for each found trace file.
@@ -126,7 +105,7 @@ def find_trace_files(output_jsons: List[str]) -> List[str]:
     trace_files = []
     for json_file in output_jsons:
         isolated_outdir = os.path.dirname(json_file)
-        dirname = os.path.join(isolated_outdir, TRACE_SUBDIR)
+        dirname = os.path.join(isolated_outdir, subdirectory)
         for f in os.listdir(dirname):
             trace_files.append(os.path.join(dirname, f))
     if not trace_files:
@@ -134,26 +113,16 @@ def find_trace_files(output_jsons: List[str]) -> List[str]:
     return trace_files
 
 
-def generate_and_upload_fuzz_corpora(output_jsons: List[str]) -> None:
-    """Generates and uploads fuzz corpora to ClusterFuzz.
-
-    One corpus will be generated for each fuzzer in |FUZZER_NAMES|.
+def add_common_arguments(parser: argparse.ArgumentParser) -> None:
+    """Adds common fuzz corpora-related arguments to a parser.
 
     Args:
-        output_jsons: A list of filepaths to the output.json files produced
-            by each shard.
+        parser: The ArgumentParser to add arguments to.
     """
-    trace_files = find_trace_files(output_jsons)
-    with tempfile.TemporaryDirectory() as tempdir:
-        hash_trace_files(trace_files, tempdir)
-        upload_files(tempdir)
-
-
-def main(cmdline_args: List[str]) -> None:
-    parser = merge_api.ArgumentParser()
-    args = parser.parse_args(cmdline_args)
-    generate_and_upload_fuzz_corpora(args.jsons_to_merge)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
+    parser.add_argument(
+        '--fuzzer-name',
+        required=True,
+        dest='fuzzer_names',
+        action='append',
+        help=('A fuzzer name to upload files to. Can be specified multiple '
+              'times'))

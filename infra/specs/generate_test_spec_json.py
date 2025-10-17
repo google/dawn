@@ -66,9 +66,41 @@ ADDITIONAL_MIXINS = {
             'result_format': 'single',
         },
     },
+    'tint_ir_merge': {
+        'merge': {
+            'script': '//scripts/merge_scripts/generate_tint_fuzz_corpora.py',
+            'args': [
+                '--fuzzer-name',
+                'tint_ir_fuzzer',
+            ],
+        },
+    },
+    'tint_wgsl_merge': {
+        'merge': {
+            'script': '//scripts/merge_scripts/generate_tint_fuzz_corpora.py',
+            'args': [
+                '--fuzzer-name',
+                'tint_wgsl_fuzzer',
+            ],
+        },
+    },
     'true_noop_merge': {
         'merge': {
             'script': '//scripts/merge_scripts/true_noop_merge.py',
+        },
+    },
+    'wire_trace_merge': {
+        'merge': {
+            'script':
+            '//scripts/merge_scripts/generate_wire_trace_fuzz_corpora.py',
+            'args': [
+                '--fuzzer-name',
+                'dawn_wire_server_and_frontend_fuzzer',
+                '--fuzzer-name',
+                'dawn_wire_server_and_vulkan_backend_fuzzer',
+                '--fuzzer-name',
+                'dawn_wire_server_and_d3d12_backend_fuzzer',
+            ],
         },
     },
 }

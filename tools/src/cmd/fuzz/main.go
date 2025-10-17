@@ -180,6 +180,11 @@ func run(c *cmdConfig) error {
 		} else {
 			return err
 		}
+	} else {
+		err := c.osWrapper.MkdirAll(c.out, os.ModePerm)
+		if err != nil {
+			return err
+		}
 	}
 
 	if !fileutils.IsDir(c.out, c.osWrapper) {

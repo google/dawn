@@ -22,11 +22,11 @@
         'args': [
           '--adapter-vendor-id=0x1AE0',
           '--use-wire',
-          '--wire-trace-dir=${ISOLATED_OUTDIR}',
+          '--wire-trace-dir=${ISOLATED_OUTDIR}/clusterfuzz',
         ],
         'mixins': [
           'result_adapter_gtest_json',
-          'true_noop_merge',
+          'wire_trace_merge',
         ],
         'test': 'dawn_end2end_tests',
       },
@@ -106,11 +106,11 @@
       'dawn_wire_trace_unittests': {
         'args': [
           '--use-wire',
-          '--wire-trace-dir=${ISOLATED_OUTDIR}',
+          '--wire-trace-dir=${ISOLATED_OUTDIR}/clusterfuzz',
         ],
         'mixins': [
           'result_adapter_gtest_json',
-          'true_noop_merge',
+          'wire_trace_merge',
         ],
         'test': 'dawn_unittests',
       },
@@ -157,12 +157,12 @@
         'args': [
           '-generate',
           '-out',
-          '${ISOLATED_OUTDIR}',
+          '${ISOLATED_OUTDIR}/clusterfuzz',
           '--append-cwd-as-build',
         ],
         'mixins': [
           'result_adapter_single',
-          'true_noop_merge',
+          'tint_wgsl_merge',
         ],
         'test': 'fuzzer_corpus_tests',
       },
@@ -170,13 +170,13 @@
         'args': [
           '-generate',
           '-out',
-          '${ISOLATED_OUTDIR}',
+          '${ISOLATED_OUTDIR}/clusterfuzz',
           '-ir',
           '--append-cwd-as-build',
         ],
         'mixins': [
           'result_adapter_single',
-          'true_noop_merge',
+          'tint_ir_merge',
         ],
         'test': 'fuzzer_corpus_tests',
       },
