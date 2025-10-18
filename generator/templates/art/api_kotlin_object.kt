@@ -38,6 +38,11 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
     {% for method in obj.methods if include_method(method) %}
         @FastNative
         @JvmName("{{ method.name.camelCase() }}")
+        {% for arg in kotlin_record_members(method.arguments) %}
+            {% if arg.type.category == 'callback function' or kotlin_default(arg) is not none %}
+                @JvmOverloads
+            {% break %}{% endif %}
+        {% endfor %}
         {{ kotlin_annotation(kotlin_return(method)) }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
