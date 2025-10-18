@@ -50,12 +50,6 @@
         JNIClasses* classes = JNIClasses::getInstance(env);
         *outStruct = {};
 
-        //* Finds callback functions that have a 'callbackMode' sibling and stores their names in a list.
-        {% set callback_ns = namespace(callbacks_with_mode = []) %}
-        {% for member in members if member.type.category == 'callback info' and find_by_name (member.type.members, 'mode') %}
-            {% do callback_ns.callbacks_with_mode.append(find_by_name (member.type.members, 'callback').type.name.camelCase()) %}
-        {% endfor %}
-
         {% for member in kotlin_record_members(members) %}
             {
                 {% if member.type.category == 'callback function' %}
@@ -63,10 +57,14 @@
                     {
                         auto& callbackInfo = outStruct->{{as_varName(member.name)}}Info;
                         callbackInfo = {};
+
                         //* Check if the member's corresponding callback info has a callbackMode.
-                        {% if member.type.name.camelCase() in callback_ns.callbacks_with_mode %}
+                        {% set callbackInfoType = find_by_name(by_category["callback info"], member.type.name.get() ~ " info") %}
+                        {% do assert(callbackInfoType, "callbackInfoType must exist but was not found") %}
+                        {% if find_by_name(callbackInfoType.members, 'mode') %}
                             callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
                         {% endif %}
+
                         //* The callback functions require each argument converting.
                         //* A custom native callback is generated to wrap the Kotlin callback.
                         callbackInfo.callback = [](
