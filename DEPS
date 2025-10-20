@@ -3,6 +3,7 @@ use_relative_paths = True
 gclient_gn_args_file = 'build/config/gclient_args.gni'
 
 gclient_gn_args = [
+  'build_with_chromium',
   'dawn_wasm',
   'generate_location_tags',
 ]
@@ -59,6 +60,9 @@ vars = {
   # to be compatible we can get rid of this allowlisting mecahnism and remove
   # this condition. Tracking bug for removing this condition: b/349365433
   'non_git_source': 'True',
+
+  # Set to True by Chromium if syncing from a Chromium checkout.
+  'build_with_chromium': False,
 }
 
 deps = {
@@ -72,7 +76,7 @@ deps = {
   },
   'buildtools/linux64': {
     'packages': [{
-      'package': 'gn/gn/linux-amd64',
+      'package': 'gn/gn/linux-${{arch}}',
       'version': Var('dawn_gn_version'),
     }],
     'dep_type': 'cipd',
@@ -357,10 +361,10 @@ deps = {
     'url': '{chromium_git}/external/github.com/KhronosGroup/EGL-Registry@7dea2ed79187cd13f76183c4b9100159b9e3e071',
   },
 
-  # WebGPU CTS - not used directly by Dawn, only transitively by Chromium.
+  # WebGPU CTS - Used both by the dawn_node tests and transitively by Chromium.
   'third_party/webgpu-cts': {
     'url': '{chromium_git}/external/github.com/gpuweb/cts@4adb750084943d08f521f18cb36d85c792ff20ba',
-    'condition': 'build_with_chromium',
+    'condition': 'build_with_chromium or dawn_standalone',
   },
 
   # Dependencies required to build / run WebAssembly bindings
@@ -566,7 +570,7 @@ deps = {
 
   # Dependencies for tintd.
   'third_party/jsoncpp': {
-    'url': '{github_git}/open-source-parsers/jsoncpp.git@69098a18b9af0c47549d9a271c054d13ca92b006',
+    'url': '{chromium_git}/external/github.com/open-source-parsers/jsoncpp.git@69098a18b9af0c47549d9a271c054d13ca92b006',
     'condition': 'dawn_tintd',
   },
 
