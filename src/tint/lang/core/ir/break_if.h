@@ -33,7 +33,6 @@
 
 #include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/lang/core/ir/value.h"
-#include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
@@ -130,7 +129,7 @@ class BreakIf final : public Castable<BreakIf, Exit> {
     }
 
   private:
-    ConstPropagatingPtr<ir::Loop> loop_;
+    ir::Loop* loop_ = nullptr;
     size_t num_next_iter_values_ = 0;
 };
 

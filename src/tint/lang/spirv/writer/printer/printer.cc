@@ -2843,9 +2843,9 @@ class Printer {
     /// @returns the label ID
     uint32_t GetTerminatorBlockLabel(core::ir::Terminator* t) {
         // Walk backwards from `t` until we find a control instruction.
-        auto* inst = t->prev.Get();
+        auto* inst = t->prev;
         while (inst) {
-            auto* prev = inst->prev.Get();
+            auto* prev = inst->prev;
             if (auto* ci = inst->As<core::ir::ControlInstruction>()) {
                 // This is the last control instruction before `t`, so use its merge block label.
                 return GetMergeLabel(ci);

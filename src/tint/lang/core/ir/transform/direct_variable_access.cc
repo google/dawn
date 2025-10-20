@@ -239,8 +239,7 @@ struct State {
     /// Process the module.
     void Process() {
         // Make a copy of all the functions in the IR module.
-        // Use transform to convert from ConstPropagatingPtr<Function> to Function*
-        auto input_fns = Transform<8>(ir.functions.Slice(), [](auto& fn) { return fn.Get(); });
+        auto input_fns = ir.functions;
 
         // Populate #need_forking
         GatherFnsThatNeedForking();

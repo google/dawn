@@ -32,7 +32,6 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/control_instruction.h"
-#include "src/tint/utils/containers/const_propagating_ptr.h"
 
 // Forward declarations
 namespace tint::core::ir {
@@ -71,7 +70,7 @@ class Switch final : public Castable<Switch, ControlInstruction> {
         bool IsDefault() const { return val == nullptr; }
 
         /// The selector value, or nullptr if this is the default selector
-        ConstPropagatingPtr<Constant> val;
+        Constant* val = nullptr;
     };
 
     /// A case label in the struct
@@ -80,7 +79,7 @@ class Switch final : public Castable<Switch, ControlInstruction> {
         Vector<CaseSelector, 4> selectors;
 
         /// The case block.
-        ConstPropagatingPtr<ir::Block> block;
+        ir::Block* block = nullptr;
     };
 
     /// Constructor (no results, no operands, no cases)
@@ -130,7 +129,7 @@ class Switch final : public Castable<Switch, ControlInstruction> {
         for (auto& c : cases_) {
             for (auto& s : c.selectors) {
                 if (s.IsDefault()) {
-                    return c.block.Get();
+                    return c.block;
                 }
             }
         }

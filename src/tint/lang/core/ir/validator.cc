@@ -1630,9 +1630,8 @@ void Validator::RunStructuralSoundnessChecks() {
     CheckRootBlock(mod_.root_block);
 
     for (auto& func : mod_.functions) {
-        if (!all_functions_.Add(func.Get())) {
-            AddError(func) << "function " << NameOf(func.Get())
-                           << " added to module multiple times";
+        if (!all_functions_.Add(func)) {
+            AddError(func) << "function " << NameOf(func) << " added to module multiple times";
         }
         scope_stack_.Add(func);
     }

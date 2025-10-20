@@ -40,7 +40,6 @@
 ################################################################################
 tint_add_target(tint_utils_containers lib
   utils/containers/bitset.h
-  utils/containers/const_propagating_ptr.h
   utils/containers/containers.cc
   utils/containers/enum_set.h
   utils/containers/filtered_iterator.h

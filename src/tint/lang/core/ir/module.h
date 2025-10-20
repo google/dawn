@@ -37,7 +37,6 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
-#include "src/tint/utils/containers/const_propagating_ptr.h"
 #include "src/tint/utils/containers/filtered_iterator.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
@@ -191,10 +190,10 @@ class Module {
     core::constant::Manager constant_values;
 
     /// List of functions in the module.
-    Vector<ConstPropagatingPtr<Function>, 8> functions;
+    Vector<Function*, 8> functions;
 
     /// The block containing module level declarations, if any exist.
-    ConstPropagatingPtr<Block> root_block;
+    Block* root_block = nullptr;
 
     /// The symbol table for the module
     SymbolTable symbols{};

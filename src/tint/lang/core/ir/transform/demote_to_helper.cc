@@ -159,7 +159,7 @@ struct State {
         for (auto* inst = *block->begin(); inst;) {
             // As we're (potentially) modifying the block that we're iterating over, grab a pointer
             // to the next instruction before we make any changes.
-            auto* next = inst->next.Get();
+            auto* next = inst->next;
             TINT_DEFER(inst = next);
 
             tint::Switch(

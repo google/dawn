@@ -165,7 +165,7 @@ struct State {
     /// them in a new `if` instruction that checks the `continue_execution` flag.
     /// @param control the control instruction that should have its merge conditionalized
     void ConditionalizeMerge(core::ir::ControlInstruction* control) {
-        auto* next = control->next.Get();
+        auto* next = control->next;
 
         // If there are no instructions after the control instruction then we must be at the
         // top-level function block (where the final return has been removed), so there's nothing to

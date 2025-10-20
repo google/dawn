@@ -400,7 +400,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             // Otherwise, use the binding 0 of the largest used group plus 1, or group 0 if no
             // resources are bound.
             uint32_t group = 0;
-            for (auto* inst : *ir.root_block.Get()) {
+            for (auto* inst : *ir.root_block) {
                 if (auto* var = inst->As<core::ir::Var>()) {
                     if (const auto& bp = var->BindingPoint()) {
                         if (bp->group >= group) {

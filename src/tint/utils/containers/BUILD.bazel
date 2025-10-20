@@ -43,7 +43,6 @@ cc_library(
   ],
   hdrs = [
     "bitset.h",
-    "const_propagating_ptr.h",
     "enum_set.h",
     "filtered_iterator.h",
     "hashmap.h",
