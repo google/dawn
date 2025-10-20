@@ -198,6 +198,8 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
 TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
     // TODO(dawn:1616): Metal too needs to clamping of @builtin(frag_depth) to the viewport.
     DAWN_SUPPRESS_TEST_IF(IsMetal());
+    // TODO(crbug.com/452680504): Same as above but for WebGPU on Metal.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal));
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {

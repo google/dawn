@@ -8,6 +8,10 @@
     'type': 'script',
     'script': '//scripts/dawn_node_cts/run_dawn_node_cts.py',
   },
+  "dawn_perf_tests": {
+    "label": "//src/dawn/tests:dawn_perf_tests",
+    "type": "windowed_test_launcher",
+  },
   'dawn_unittests': {
     'label': '//src/dawn/tests:dawn_unittests',
     'type': 'windowed_test_launcher',

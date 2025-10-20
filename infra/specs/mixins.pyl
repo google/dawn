@@ -38,6 +38,10 @@
 
 { 'chromium-tester-service-account': { 'fail_if_unused': False,
                                        'swarming': { 'service_account': 'chromium-tester@chops-service-accounts.iam.gserviceaccount.com'}},
+  'dawn_end2end_real_hardware_gtests_common_args': { 'args': [ '--use-gpu-in-tests',
+                                                               '--exclusive-device-type-preference=discrete,integrated',
+                                                               '--test-launcher-retry-limit=0',
+                                                               '--test-launcher-batch-limit=512']},
   'gpu-swarming-pool': { 'fail_if_unused': False,
                          'swarming': { 'dimensions': { 'pool': 'chromium.tests.gpu'}}},
   'linux-jammy': { 'fail_if_unused': False,
@@ -59,6 +63,7 @@
               'swarming': {'dimensions': {'gpu': 'none'}}},
   'no_swarming': {'swarming': {'can_use_on_swarming_builders': False}},
   'result_adapter_gtest_json': {'resultdb': {'result_format': 'gtest_json'}},
+  'result_adapter_json': {'resultdb': {'result_format': 'json'}},
   'result_adapter_single': {'resultdb': {'result_format': 'single'}},
   'swarming_containment_auto': { 'fail_if_unused': False,
                                  'swarming': {'containment_type': 'AUTO'}},

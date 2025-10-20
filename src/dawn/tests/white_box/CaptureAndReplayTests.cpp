@@ -43,6 +43,14 @@ namespace {
 
 class CaptureAndReplayTests : public DawnTest {
   public:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // TODO(crbug.com/452924800): Remove once these tests work properly with
+        // the WebGPU on WebGPU backend with wire.
+        DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && UsesWire());
+    }
+
     class Capture {
       public:
         Capture(const std::string& commandData, const std::string& contentData)

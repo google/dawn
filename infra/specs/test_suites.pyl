@@ -31,6 +31,59 @@
         'test': 'dawn_end2end_tests',
       },
     },
+    'dawn_end2end_real_hardware_gtests': {
+      'dawn_end2end_implicit_sync_tests': {
+        'args': [
+          '--enable-implicit-device-sync',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+      },
+      'dawn_end2end_skip_validation_tests': {
+        'args': [
+          '--enable-toggles=skip_validation',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+      },
+      'dawn_end2end_tests': {
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+      },
+      'dawn_end2end_validation_layers_tests': {
+        'args': [
+          '--enable-backend-validation',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+      },
+      'dawn_end2end_wire_tests': {
+        'args': [
+          '--use-wire',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+      },
+    },
     'dawn_end2end_sws_gtests': {
       'dawn_end2end_sws_tests': {
         'args': [
@@ -92,6 +145,24 @@
           'true_noop_merge',
         ],
         'test': 'dawn_node_cts',
+      },
+    },
+    'dawn_real_hardware_perf_tests': {
+      # This is run as a gtest instead of an isolated script since on the bots
+      # these are used more as a smoke test/to ensure that they continue to run
+      # rather than for actual perf results.
+      'dawn_perf_tests': {
+        'args': [
+          "--test-launcher-print-test-stdio=always",
+          "--test-launcher-jobs=1",
+          "--test-launcher-retry-limit=0",
+          # Tell the tests to only run one step for faster iteration.
+          "--override-steps=1",
+        ],
+        'mixins': [
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
       },
     },
     'dawn_unit_gtests': {
@@ -191,6 +262,10 @@
     },
   },
   'compound_suites': {
+    'real_hardware_gtests': [
+      'dawn_end2end_real_hardware_gtests',
+      'dawn_real_hardware_perf_tests',
+    ],
     'swiftshader_gtests': [
       'dawn_end2end_swangle_gtests',
       'dawn_end2end_sws_gtests',

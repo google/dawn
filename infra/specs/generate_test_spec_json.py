@@ -51,6 +51,14 @@ import generate_buildbot_json
 
 # Add custom mixins here.
 ADDITIONAL_MIXINS = {
+    'dawn_end2end_real_hardware_gtests_common_args': {
+        'args': [
+            '--use-gpu-in-tests',
+            '--exclusive-device-type-preference=discrete,integrated',
+            '--test-launcher-retry-limit=0',
+            '--test-launcher-batch-limit=512',
+        ],
+    },
     'no_swarming': {
         'swarming': {
             'can_use_on_swarming_builders': False,
@@ -59,6 +67,11 @@ ADDITIONAL_MIXINS = {
     'result_adapter_gtest_json': {
         'resultdb': {
             'result_format': 'gtest_json',
+        },
+    },
+    'result_adapter_json': {
+        'resultdb': {
+            'result_format': 'json',
         },
     },
     'result_adapter_single': {
