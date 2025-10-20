@@ -4255,8 +4255,11 @@ void Validator::CheckSwitch(const Switch* s) {
             AddError(s) << "case block must be a block";
         }
 
-        QueueBlock(cse.block);
+        if (cse.selectors.IsEmpty()) {
+            AddError(s) << "case does not have any selectors";
+        }
 
+        QueueBlock(cse.block);
         for (const auto& sel : cse.selectors) {
             if (sel.IsDefault()) {
                 if (found_default) {

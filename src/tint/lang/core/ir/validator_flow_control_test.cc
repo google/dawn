@@ -2306,6 +2306,33 @@ TEST_F(IR_ValidatorTest, Switch_CaseMultiBlock) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_CaseNoSelectors) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(1_i);
+        b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s); });
+
+        s->Cases().Push({});
+
+        auto* blk = b.Block();
+        blk->SetParent(s);
+        b.Append(blk, [&] { b.ExitSwitch(s); });
+
+        s->Cases().Back().block = blk;
+
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:3:5 error: switch: case does not have any selectors
+    switch 1i [c: (default, $B2), c: (, $B3)] {  # switch_1
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Loop_PtrResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
