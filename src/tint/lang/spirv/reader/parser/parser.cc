@@ -1218,6 +1218,12 @@ class Parser {
             // control as we're jumping over the control to its parent control. (This is an
             // `if` inside a `loop` where the `if` is doing a `break`).
             if (ctrl->Exits().IsEmpty()) {
+                if (ctrl->Is<core::ir::Loop>()) {
+                    TINT_UNREACHABLE()
+                        << "loop detected with no exits which means it's an infinite loop. "
+                           "Infinite loops are not supported in WGSL";
+                }
+
                 TINT_ASSERT(ctrl->Is<core::ir::If>());
                 blk = ctrl->Block();
                 continue;
