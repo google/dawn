@@ -320,6 +320,17 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
         timestampWrites = ToWGPU(renderPassCmd->timestampWrites);
         passDescriptor.timestampWrites = &timestampWrites;
     }
+    WGPURenderPassDescriptorResolveRect resolveRect;
+    if (renderPassCmd->resolveRect.HasValue()) {
+        resolveRect = WGPU_RENDER_PASS_DESCRIPTOR_RESOLVE_RECT_INIT;
+        resolveRect.colorOffsetX = renderPassCmd->resolveRect.colorOffsetX;
+        resolveRect.colorOffsetY = renderPassCmd->resolveRect.colorOffsetY;
+        resolveRect.resolveOffsetX = renderPassCmd->resolveRect.resolveOffsetX;
+        resolveRect.resolveOffsetY = renderPassCmd->resolveRect.resolveOffsetY;
+        resolveRect.width = renderPassCmd->resolveRect.updateWidth;
+        resolveRect.height = renderPassCmd->resolveRect.updateHeight;
+        passDescriptor.nextInChain = &(resolveRect.chain);
+    }
     WGPURenderPassEncoder passEncoder =
         wgpu.commandEncoderBeginRenderPass(innerEncoder, &passDescriptor);
 

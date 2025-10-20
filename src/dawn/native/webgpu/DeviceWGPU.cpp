@@ -273,6 +273,13 @@ float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
 
+bool Device::CanResolveSubRect() const {
+    // Related code in src/dawn/native/RenderPassWorkaroundsHelper.cpp
+    // WebGPU backend will pass down cmd->resolveRect to the inner layer backend to handle it
+    // anyways, so return true and do not apply any workarounds here.
+    return true;
+}
+
 void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentStream) {
     MaybeError result = ToBackend(GetQueue())
                             ->SetCaptureContext(std::unique_ptr<CaptureContext>(

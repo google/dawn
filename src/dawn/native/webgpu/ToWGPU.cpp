@@ -112,8 +112,7 @@ WGPULoadOp ToWGPU(const wgpu::LoadOp op) {
         case wgpu::LoadOp::Clear:
             return WGPULoadOp_Clear;
         case wgpu::LoadOp::ExpandResolveTexture:
-            DAWN_UNREACHABLE();  // TODO(crbug.com/440123094): Fix when test that uses this is
-                                 // enabled.
+            return WGPULoadOp_ExpandResolveTexture;
         default:
             return WGPULoadOp_Undefined;
     }

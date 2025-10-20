@@ -54,6 +54,8 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
+    bool CanResolveSubRect() const override;
+
     float GetTimestampPeriodInNS() const override;
 
     WGPUInstance GetInnerInstance() const;

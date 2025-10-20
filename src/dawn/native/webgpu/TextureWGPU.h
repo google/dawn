@@ -51,9 +51,7 @@ class Texture final : public TextureBase, public RecordableObject, public Object
                                       bool newResource) override;
 
   private:
-    Texture(Device* device,
-            const UnpackedPtr<TextureDescriptor>& descriptor,
-            WGPUTexture innerTexture);
+    Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     void DestroyImpl() override;
 };
 

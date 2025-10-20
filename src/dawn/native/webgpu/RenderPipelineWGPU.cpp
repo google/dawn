@@ -63,6 +63,8 @@ MaybeError RenderPipeline::InitializeImpl() {
     std::vector<std::string> fragmentConstantsKeys;
     PerColorAttachment<WGPUColorTargetState> colorTargets = {};
     PerColorAttachment<WGPUBlendState> blends = {};
+    PerColorAttachment<WGPUColorTargetStateExpandResolveTextureDawn>
+        colorTargetStateExpandResolveTextureDawnExtensions = {};
 
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
@@ -158,6 +160,16 @@ MaybeError RenderPipeline::InitializeImpl() {
                 wgpuTarget->blend = nullptr;
             }
             wgpuTarget->writeMask = ToAPI(dawnTarget->writeMask);
+
+            if (GetAttachmentState()->GetExpandResolveInfo().resolveTargetsMask.test(i)) {
+                auto& e = colorTargetStateExpandResolveTextureDawnExtensions[i];
+                e = WGPU_COLOR_TARGET_STATE_EXPAND_RESOLVE_TEXTURE_DAWN_INIT;
+                e.enabled =
+                    GetAttachmentState()->GetExpandResolveInfo().attachmentsToExpandResolve.test(i);
+                e.chain.next = wgpuTarget->nextInChain;
+                wgpuTarget->nextInChain = &(e.chain);
+            }
+
             targetCount = static_cast<size_t>(i) + 1;
         }
         fragmentState.targetCount = targetCount;

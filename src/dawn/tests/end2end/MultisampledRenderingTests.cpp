@@ -2906,7 +2906,6 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
                       MetalBackend({"always_resolve_into_zero_level_and_layer",
                                     "emulate_store_and_msaa_resolve"}));
 
-// TODO(crbug.com/440123094): Fix loadOp assignment for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(DawnLoadResolveTextureTest,
                       D3D11Backend(),
                       D3D12Backend(),
@@ -2915,6 +2914,7 @@ DAWN_INSTANTIATE_TEST(DawnLoadResolveTextureTest,
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
+                      WebGPUBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
                       VulkanBackend({"resolve_multiple_attachments_in_separate_passes"}),

@@ -38,29 +38,58 @@
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/Serialization.h"
+#include "dawn/native/webgpu/ToWGPU.h"
 
 namespace dawn::native::webgpu {
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const UnpackedPtr<TextureDescriptor>& descriptor) {
-    auto desc = *ToAPI(*descriptor);
-    if (!(desc.usage & WGPUTextureUsage_TransientAttachment)) {
-        desc.usage |= WGPUTextureUsage_CopySrc;
-    }
-    WGPUTexture innerTexture = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), &desc);
-    DAWN_ASSERT(innerTexture);
-
-    return AcquireRef(new Texture(device, descriptor, innerTexture));
+    return AcquireRef(new Texture(device, descriptor));
 }
 
-Texture::Texture(Device* device,
-                 const UnpackedPtr<TextureDescriptor>& descriptor,
-                 WGPUTexture innerTexture)
+Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor)
     : TextureBase(device, descriptor),
       RecordableObject(schema::ObjectType::Texture),
       ObjectWGPU(device->wgpu.textureRelease) {
-    mInnerHandle = innerTexture;
+    wgpu::TextureUsage actualUsage = GetInternalUsage();
+    // Resolve internal usages to regular ones
+    if (actualUsage | kReadOnlyStorageTexture) {
+        actualUsage &= ~kReadOnlyStorageTexture;
+    }
+    if (actualUsage | kWriteOnlyStorageTexture) {
+        actualUsage &= ~kWriteOnlyStorageTexture;
+    }
+    if (actualUsage | kReadOnlyRenderAttachment) {
+        actualUsage &= ~kReadOnlyRenderAttachment;
+    }
+    if (actualUsage | kResolveAttachmentLoadingUsage) {
+        actualUsage &= ~kResolveAttachmentLoadingUsage;
+    }
+    if (!(actualUsage | wgpu::TextureUsage::TransientAttachment)) {
+        actualUsage |= wgpu::TextureUsage::CopySrc;
+    }
+    std::vector<WGPUTextureFormat> viewFormats;
+    viewFormats.reserve(GetViewFormats().size());
+    for (FormatIndex i : GetViewFormats()) {
+        viewFormats.push_back(ToAPI(device->GetValidInternalFormat(i).format));
+    }
+
+    WGPUTextureDescriptor desc = {
+        .nextInChain = nullptr,
+        .label = ToOutputStringView(GetLabel()),
+        .usage = ToAPI(actualUsage),
+        .dimension = ToAPI(GetDimension()),
+        .size = ToWGPU(GetBaseSize()),
+        .format = ToAPI(GetFormat().format),
+        .mipLevelCount = GetNumMipLevels(),
+        .sampleCount = GetSampleCount(),
+        .viewFormatCount = viewFormats.size(),
+        .viewFormats = viewFormats.data(),
+    };
+
+    mInnerHandle = device->wgpu.deviceCreateTexture(device->GetInnerHandle(), &desc);
+    DAWN_ASSERT(mInnerHandle);
 }
 
 void Texture::DestroyImpl() {
