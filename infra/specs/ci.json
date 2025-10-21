@@ -121,6 +121,7 @@
       }
     ]
   },
+  "dawn-linux-x64-intel-uhd630-rel": {},
   "dawn-linux-x64-sws-clusterfuzz": {
     "gtest_tests": [
       {

@@ -39,6 +39,7 @@
     "dawn-cq-win-x86-rel": "try/dawn-cq-win-x86-rel/gn-args.json",
     "dawn-try-linux-x64-fuzz-dbg": "try/dawn-try-linux-x64-fuzz-dbg/gn-args.json",
     "dawn-try-linux-x64-fuzz-rel": "try/dawn-try-linux-x64-fuzz-rel/gn-args.json",
+    "dawn-try-linux-x64-intel-uhd630-rel": "try/dawn-try-linux-x64-intel-uhd630-rel/gn-args.json",
     "dawn-try-linux-x64-sws-dbg": "try/dawn-try-linux-x64-sws-dbg/gn-args.json",
     "dawn-try-linux-x64-sws-rel": "try/dawn-try-linux-x64-sws-rel/gn-args.json",
     "dawn-try-linux-x86-fuzz-dbg": "try/dawn-try-linux-x86-fuzz-dbg/gn-args.json",

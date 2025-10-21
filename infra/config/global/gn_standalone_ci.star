@@ -708,6 +708,30 @@ ci.builder(
 ################################################################################
 
 ci.thin_tester(
+    name = "dawn-linux-x64-intel-uhd630-rel",
+    description_html = "Tests release Dawn on Linux/x64 on Intel CPUs w/ UHD 630 GPUs",
+    parent = "dawn-linux-x64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.LINUX,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "linux|test|clang|rel|x64",
+        short_name = "630",
+    ),
+)
+
+ci.thin_tester(
     name = "dawn-linux-x64-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x64 with SwiftShader",
     parent = "dawn-linux-x64-builder-dbg",

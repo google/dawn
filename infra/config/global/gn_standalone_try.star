@@ -344,6 +344,16 @@ def dawn_win_manual_builder(*, name, **kwargs):
 ## Functional testers
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-intel-uhd630-rel",
+    description_html = "Tests release Dawn on Linux/x64 on Intel CPUs w/ UHD 630 GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-builder-rel",
+        "ci/dawn-linux-x64-intel-uhd630-rel",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-rel",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x64-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x64 with SwiftShader. Manual only.",
     mirrors = [

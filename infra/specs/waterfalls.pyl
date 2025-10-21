@@ -40,6 +40,13 @@
           'isolated_scripts': 'tint_fuzzer_corpus_check_tests',
         },
       },
+      'dawn-linux-x64-intel-uhd630-rel': {
+        'os_type': 'linux',
+        'mixins': [
+          'linux_intel_uhd_630_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',
         'mixins': [
