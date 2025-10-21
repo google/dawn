@@ -179,6 +179,16 @@ dawn_linux_functional_cq_tester_without_node(
 )
 
 dawn_mac_functional_cq_tester(
+    name = "dawn-cq-mac-arm64-rel",
+    description_html = "Tests release Dawn on Mac/arm64 on multiple hardware configs. Blocks CL submission",
+    mirrors = [
+        "ci/dawn-mac-arm64-builder-rel",
+        "ci/dawn-mac-arm64-apple-m2-rel",
+    ],
+    gn_args = "ci/dawn-mac-arm64-builder-rel",
+)
+
+dawn_mac_functional_cq_tester(
     name = "dawn-cq-mac-x64-dbg",
     description_html = "Tests debug Dawn on Mac/x64 on multiple hardware configs. Blocks CL submission",
     mirrors = [

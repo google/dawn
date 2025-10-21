@@ -28,6 +28,7 @@
     "dawn-cq-linux-x86-fuzz-dbg": "try/dawn-cq-linux-x86-fuzz-dbg/gn-args.json",
     "dawn-cq-linux-x86-fuzz-rel": "try/dawn-cq-linux-x86-fuzz-rel/gn-args.json",
     "dawn-cq-linux-x86-rel": "try/dawn-cq-linux-x86-rel/gn-args.json",
+    "dawn-cq-mac-arm64-rel": "try/dawn-cq-mac-arm64-rel/gn-args.json",
     "dawn-cq-mac-x64-dbg": "try/dawn-cq-mac-x64-dbg/gn-args.json",
     "dawn-cq-mac-x64-rel": "try/dawn-cq-mac-x64-rel/gn-args.json",
     "dawn-cq-win-x64-dbg": "try/dawn-cq-win-x64-dbg/gn-args.json",
