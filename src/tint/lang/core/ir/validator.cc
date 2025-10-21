@@ -2124,8 +2124,12 @@ void Validator::CheckType(const core::type::Type* root,
                     }
                     cur_offset += padding + member->MinimumRequiredSize();
                 }
+                if (str->Size() < cur_offset) {
+                    diag() << "struct size (" << str->Size()
+                           << ") is smaller than the end of the last member (" << cur_offset << ")";
+                    return false;
+                }
 
-                TINT_ASSERT(str->Size() >= cur_offset);
                 auto padding = str->Size() - cur_offset;
                 if (padding >= internal_limits::kMaxStructMemberPadding) {
                     diag() << "struct padding (" << padding << ") is larger then the max ("

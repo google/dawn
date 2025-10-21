@@ -333,6 +333,26 @@ TEST_F(IR_ValidatorTest, Structure_LargePaddingSizeAtEnd) {
         << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Structure_MemberAlignmentCausesSizeOverflow) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("S"),
+                  Vector{
+                      ty.Get<type::StructMember>(mod.symbols.New("a"), ty.u32(), 0u, 0u,
+                                                 u32::kHighestValue - 63, 128u, IOAttributes{}),
+                  });
+    mod.root_block->Append(b.Var("my_struct", private_, str_ty));
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] { b.Return(fn); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr("struct size (0) is smaller than the end of the last member (4)"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, StructureMember_LargePaddingSize) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("S"),
