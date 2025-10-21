@@ -590,8 +590,10 @@ class Printer {
                 [&](const core::type::F32*) { module_.PushType(spv::Op::OpTypeFloat, {id, 32u}); },
                 [&](const core::type::F16*) {
                     module_.PushCapability(SpvCapabilityFloat16);
-                    module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
                     module_.PushCapability(SpvCapabilityStorageBuffer16BitAccess);
+                    if (!options_.decompose_uniform_buffers) {
+                        module_.PushCapability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
+                    }
                     module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
                 },
                 [&](const core::type::Vector* vec) {

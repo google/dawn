@@ -8,7 +8,6 @@
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
          %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
@@ -66,7 +65,6 @@
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
          %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
@@ -124,7 +122,6 @@
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
                OpCapability StorageInputOutput16
          %19 = OpExtInstImport "GLSL.std.450"

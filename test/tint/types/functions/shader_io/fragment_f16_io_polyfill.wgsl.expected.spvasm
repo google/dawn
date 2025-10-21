@@ -5,7 +5,6 @@
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %frag_main "frag_main" %frag_main_loc1_Input %frag_main_loc2_Input %frag_main_loc1_Output %frag_main_loc2_Output

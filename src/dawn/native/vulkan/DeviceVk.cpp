@@ -554,13 +554,17 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderFloat16Int8) &&
                     mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                     usedKnobs.HasExt(DeviceExt::_16BitStorage) &&
-                    mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
-                    mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess ==
+                    mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE);
+        if (!IsToggleEnabled(Toggle::DecomposeUniformBuffers)) {
+            DAWN_ASSERT(mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess ==
                         VK_TRUE);
+        }
 
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
-        usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
+        if (!IsToggleEnabled(Toggle::DecomposeUniformBuffers)) {
+            usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
+        }
         if (mDeviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE) {
             usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
         }

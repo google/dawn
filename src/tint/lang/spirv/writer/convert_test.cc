@@ -430,7 +430,6 @@ TEST_F(SpirvWriterTest, Convert_F16_to_I32_Vec2) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
          %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
@@ -495,7 +494,6 @@ TEST_F(SpirvWriterTest, Convert_F16_to_U32_Vec4) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(hader
                OpCapability Float16
-               OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
          %14 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450

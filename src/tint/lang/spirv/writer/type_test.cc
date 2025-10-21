@@ -98,6 +98,19 @@ TEST_F(SpirvWriterTest, Type_F16) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpCapability Float16");
+    EXPECT_INST("OpCapability StorageBuffer16BitAccess");
+    EXPECT_INST("%half = OpTypeFloat 16");
+}
+
+TEST_F(SpirvWriterTest, Type_F16_WithoutDecomposeUniformBuffers) {
+    b.Append(b.ir.root_block, [&] {  //
+        b.Var<private_, f16, read_write>("v");
+    });
+
+    Options options;
+    options.decompose_uniform_buffers = false;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("OpCapability Float16");
     EXPECT_INST("OpCapability UniformAndStorageBuffer16BitAccess");
     EXPECT_INST("OpCapability StorageBuffer16BitAccess");
     EXPECT_INST("%half = OpTypeFloat 16");

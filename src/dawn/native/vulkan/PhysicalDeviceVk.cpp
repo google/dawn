@@ -343,8 +343,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
         mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-        mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
-        mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE) {
+        mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE) {
         // TODO(crbug.com/tint/2164): Investigate crashes in f16 CTS tests to enable on NVIDIA.
         if (!gpu_info::IsNvidia(GetVendorId())) {
             EnableFeature(Feature::ShaderF16);
@@ -1203,6 +1202,16 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                 return FeatureValidationResult(
                     absl::StrFormat("Intel Gen-9 devices require `enable_subgroups_intel_gen9`"
                                     " to enable %s.",
+                                    feature));
+            }
+            break;
+
+        case wgpu::FeatureName::ShaderF16:
+            if (!toggles.IsEnabled(Toggle::DecomposeUniformBuffers) &&
+                mDeviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_FALSE) {
+                return FeatureValidationResult(
+                    absl::StrFormat("uniformAndStorageBuffer16BitAccess is required to enable %s "
+                                    "if `decompose_uniform_buffers` is not used",
                                     feature));
             }
             break;
