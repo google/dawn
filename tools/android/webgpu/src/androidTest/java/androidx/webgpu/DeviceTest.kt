@@ -2,7 +2,7 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.UncapturedErrorException
+import androidx.webgpu.helper.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import junit.framework.TestCase.assertEquals
@@ -95,7 +95,7 @@ class DeviceTest {
       )
     )
 
-    assertThrows(UncapturedErrorException::class.java) {
+    assertThrows(ValidationException::class.java) {
       device.createComputePipeline(
         ComputePipelineDescriptor(
           compute = ComputeState(
@@ -113,7 +113,7 @@ class DeviceTest {
     val badShaderCode = "@compute @workgroup_size(1) fu main() {}"
 
     // Creating the shader module itself should fail
-    assertThrows(UncapturedErrorException::class.java) {
+    assertThrows(ValidationException::class.java) {
       device.createShaderModule(
         ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(code = badShaderCode))
       )
@@ -223,12 +223,12 @@ class DeviceTest {
   }
 
   @Test
-  fun validationError_withoutActiveErrorScope_throwsUncapturedErrorException() {
+  fun validationError_withoutActiveErrorScope_throwsValidationException() {
     val invalidDescriptor = QuerySetDescriptor(
       type = QueryType.Occlusion,
       count = -1 // Invalid parameter
     )
-    assertThrows(UncapturedErrorException::class.java) {
+    assertThrows(ValidationException::class.java) {
       device.createQuerySet(invalidDescriptor)
     }
   }
