@@ -168,6 +168,13 @@
           'gtest_tests': 'real_hardware_gtests',
         },
       },
+      'dawn-mac-x64-amd-5300m-rel': {
+        'os_type': 'mac',
+        'mixins': [
+          'mac_retina_amd_gpu_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
         'mixins': [

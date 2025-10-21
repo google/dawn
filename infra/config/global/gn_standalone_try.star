@@ -404,6 +404,16 @@ dawn_mac_manual_builder(
 )
 
 dawn_mac_manual_builder(
+    name = "dawn-try-mac-x64-amd-5300m-rel",
+    description_html = "Tests release Dawn on Mac/x64 on 16\" 2019 Macbook Pros w/ 5300M GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-rel",
+        "ci/dawn-mac-x64-amd-5300m-rel",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-rel",
+)
+
+dawn_mac_manual_builder(
     name = "dawn-try-mac-x64-sws-dbg",
     description_html = "Tests debug Dawn on Mac/x64 with SwiftShader. Manual only.",
     mirrors = [

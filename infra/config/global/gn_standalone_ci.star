@@ -852,6 +852,30 @@ ci.thin_tester(
 )
 
 ci.thin_tester(
+    name = "dawn-mac-x64-amd-5300m-rel",
+    description_html = "Tests release Dawn on Mac/x64 on 16\" 2019 Macbook Pros w/ 5300M GPUs",
+    parent = "dawn-mac-x64-builder-rel",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.MAC,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "mac|test|clang|rel|x64",
+        short_name = "5300m",
+    ),
+)
+
+ci.thin_tester(
     name = "dawn-mac-x64-sws-dbg",
     description_html = "Tests debug Dawn on Mac/x64 with SwiftShader",
     parent = "dawn-mac-x64-builder-dbg",
