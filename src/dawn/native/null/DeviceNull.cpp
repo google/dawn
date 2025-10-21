@@ -495,7 +495,7 @@ MaybeError ComputePipeline::InitializeImpl() {
 
     // this needs to run after SingleEntryPoint transform which removes unused
     // overrides for the current entry point.
-    tint::core::ir::transform::SubstituteOverridesConfig cfg;
+    tint::SubstituteOverridesConfig cfg;
     cfg.map = BuildSubstituteOverridesTransformConfig(computeStage);
 
     auto substituteOverridesResult = tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);

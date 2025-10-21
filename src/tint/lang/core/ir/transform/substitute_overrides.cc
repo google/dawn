@@ -392,8 +392,6 @@ struct State {
 
 }  // namespace
 
-SubstituteOverridesConfig::SubstituteOverridesConfig() = default;
-
 Result<SuccessType> SubstituteOverrides(Module& ir, const SubstituteOverridesConfig& cfg) {
     {
         auto result = ValidateAndDumpIfNeeded(ir, "core.SubstituteOverrides",

@@ -246,7 +246,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
                                            "ShaderModuleSubstituteOverrides");
-        tint::core::ir::transform::SubstituteOverridesConfig cfg;
+        tint::SubstituteOverridesConfig cfg;
         cfg.map = std::move(r.substituteOverrideConfig);
         auto substituteOverridesResult =
             tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);

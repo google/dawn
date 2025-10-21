@@ -767,11 +767,12 @@ Options:
 }
 TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
-[[maybe_unused]] tint::diag::Result<tint::core::ir::transform::SubstituteOverridesConfig>
-CreateOverrideMap(const Options& options, tint::inspector::Inspector& inspector) {
+[[maybe_unused]] tint::diag::Result<tint::SubstituteOverridesConfig> CreateOverrideMap(
+    const Options& options,
+    tint::inspector::Inspector& inspector) {
     auto override_names = inspector.GetNamedOverrideIds();
 
-    tint::core::ir::transform::SubstituteOverridesConfig cfg;
+    tint::SubstituteOverridesConfig cfg;
     cfg.map.reserve(options.overrides.Count());
     for (auto& override : options.overrides) {
         const auto& override_name = override.key.Value();
