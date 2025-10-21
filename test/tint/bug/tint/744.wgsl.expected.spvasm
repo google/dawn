@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 93
+; Bound: 94
 ; Schema: 0
                OpCapability Shader
-         %51 = OpExtInstImport "GLSL.std.450"
+         %52 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
                OpExecutionMode %main LocalSize 2 2 1
@@ -13,12 +13,8 @@
                OpName %firstMatrix "firstMatrix"
                OpName %secondMatrix "secondMatrix"
                OpName %resultMatrix "resultMatrix"
-               OpMemberName %Uniforms 0 "aShape"
-               OpMemberName %Uniforms 1 "bShape"
-               OpMemberName %Uniforms 2 "outShape"
-               OpName %Uniforms "Uniforms"
-               OpMemberName %uniforms_block 0 "inner"
-               OpName %uniforms_block "uniforms_block"
+               OpMemberName %uniforms_block_tint_explicit_layout 0 "inner"
+               OpName %uniforms_block_tint_explicit_layout "uniforms_block_tint_explicit_layout"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %main_inner "main_inner"
                OpName %global_id "global_id"
@@ -43,11 +39,9 @@
                OpDecorate %resultMatrix DescriptorSet 0
                OpDecorate %resultMatrix Binding 2
                OpDecorate %resultMatrix Coherent
-               OpMemberDecorate %Uniforms 0 Offset 0
-               OpMemberDecorate %Uniforms 1 Offset 8
-               OpMemberDecorate %Uniforms 2 Offset 16
-               OpMemberDecorate %uniforms_block 0 Offset 0
-               OpDecorate %uniforms_block Block
+               OpDecorate %_arr_v4uint_uint_2 ArrayStride 16
+               OpMemberDecorate %uniforms_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %uniforms_block_tint_explicit_layout Block
                OpDecorate %9 DescriptorSet 0
                OpDecorate %9 Binding 3
                OpDecorate %9 NonWritable
@@ -60,104 +54,105 @@
 %secondMatrix = OpVariable %_ptr_StorageBuffer_Matrix_tint_explicit_layout StorageBuffer
 %_ptr_StorageBuffer_Matrix_tint_explicit_layout_0 = OpTypePointer StorageBuffer %Matrix_tint_explicit_layout
 %resultMatrix = OpVariable %_ptr_StorageBuffer_Matrix_tint_explicit_layout_0 StorageBuffer
-     %v2uint = OpTypeVector %uint 2
-   %Uniforms = OpTypeStruct %v2uint %v2uint %v2uint
-%uniforms_block = OpTypeStruct %Uniforms
-%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
-          %9 = OpVariable %_ptr_Uniform_uniforms_block Uniform
+     %v4uint = OpTypeVector %uint 4
+     %uint_2 = OpConstant %uint 2
+%_arr_v4uint_uint_2 = OpTypeArray %v4uint %uint_2
+%uniforms_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_2
+%_ptr_Uniform_uniforms_block_tint_explicit_layout = OpTypePointer Uniform %uniforms_block_tint_explicit_layout
+          %9 = OpVariable %_ptr_Uniform_uniforms_block_tint_explicit_layout Uniform
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
        %void = OpTypeVoid
-         %20 = OpTypeFunction %void %v3uint
-%_ptr_Uniform_v2uint = OpTypePointer Uniform %v2uint
+         %21 = OpTypeFunction %void %v3uint
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
-     %uint_2 = OpConstant %uint 2
+     %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
-     %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
        %bool = OpTypeBool
 %_ptr_StorageBuffer__runtimearr_uint_0 = OpTypePointer StorageBuffer %_runtimearr_uint
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
-         %89 = OpTypeFunction %void
- %main_inner = OpFunction %void None %20
+         %90 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %21
   %global_id = OpFunctionParameter %v3uint
-         %21 = OpLabel
+         %22 = OpLabel
      %result = OpVariable %_ptr_Function_uint Function
           %i = OpVariable %_ptr_Function_uint Function
-         %22 = OpCompositeExtract %uint %global_id 1
-         %23 = OpCompositeExtract %uint %global_id 0
- %resultCell = OpCompositeConstruct %v2uint %22 %23
-         %25 = OpAccessChain %_ptr_Uniform_v2uint %9 %uint_0 %uint_0
-         %28 = OpLoad %v2uint %25 None
-   %dimInner = OpCompositeExtract %uint %28 1
-         %30 = OpAccessChain %_ptr_Uniform_v2uint %9 %uint_0 %uint_2
-         %32 = OpLoad %v2uint %30 None
-  %dimOutter = OpCompositeExtract %uint %32 1
+         %23 = OpCompositeExtract %uint %global_id 1
+         %24 = OpCompositeExtract %uint %global_id 0
+ %resultCell = OpCompositeConstruct %v2uint %23 %24
+         %27 = OpAccessChain %_ptr_Uniform_v4uint %9 %uint_0 %uint_0
+         %30 = OpLoad %v4uint %27 None
+   %dimInner = OpCompositeExtract %uint %30 1
+         %32 = OpAccessChain %_ptr_Uniform_v4uint %9 %uint_0 %uint_1
+         %34 = OpLoad %v4uint %32 None
+  %dimOutter = OpCompositeExtract %uint %34 1
                OpStore %result %uint_0
-               OpBranch %36
-         %36 = OpLabel
-               OpStore %i %uint_0
-               OpBranch %39
-         %39 = OpLabel
-               OpLoopMerge %40 %38 None
-               OpBranch %37
-         %37 = OpLabel
-         %56 = OpLoad %uint %i None
-         %57 = OpULessThan %bool %56 %dimInner
-               OpSelectionMerge %59 None
-               OpBranchConditional %57 %59 %60
-         %60 = OpLabel
-               OpBranch %40
-         %59 = OpLabel
-         %61 = OpLoad %uint %i None
-         %62 = OpCompositeExtract %uint %resultCell 0
-         %63 = OpIMul %uint %62 %dimInner
-          %a = OpIAdd %uint %61 %63
-         %65 = OpCompositeExtract %uint %resultCell 1
-         %66 = OpLoad %uint %i None
-         %67 = OpIMul %uint %66 %dimOutter
-          %b = OpIAdd %uint %65 %67
-         %69 = OpLoad %uint %result None
-         %70 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %firstMatrix %uint_0
-         %72 = OpArrayLength %uint %firstMatrix 0
-         %73 = OpISub %uint %72 %uint_1
-         %74 = OpExtInst %uint %51 UMin %a %73
-         %75 = OpAccessChain %_ptr_StorageBuffer_uint_0 %firstMatrix %uint_0 %74
-         %77 = OpLoad %uint %75 None
-         %78 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %secondMatrix %uint_0
-         %79 = OpArrayLength %uint %secondMatrix 0
-         %80 = OpISub %uint %79 %uint_1
-         %81 = OpExtInst %uint %51 UMin %b %80
-         %82 = OpAccessChain %_ptr_StorageBuffer_uint_0 %secondMatrix %uint_0 %81
-         %83 = OpLoad %uint %82 None
-         %84 = OpIMul %uint %77 %83
-         %85 = OpIAdd %uint %69 %84
-               OpStore %result %85 None
                OpBranch %38
          %38 = OpLabel
-         %86 = OpLoad %uint %i None
-         %87 = OpIAdd %uint %86 %uint_1
-               OpStore %i %87 None
+               OpStore %i %uint_0
+               OpBranch %41
+         %41 = OpLabel
+               OpLoopMerge %42 %40 None
                OpBranch %39
+         %39 = OpLabel
+         %57 = OpLoad %uint %i None
+         %58 = OpULessThan %bool %57 %dimInner
+               OpSelectionMerge %60 None
+               OpBranchConditional %58 %60 %61
+         %61 = OpLabel
+               OpBranch %42
+         %60 = OpLabel
+         %62 = OpLoad %uint %i None
+         %63 = OpCompositeExtract %uint %resultCell 0
+         %64 = OpIMul %uint %63 %dimInner
+          %a = OpIAdd %uint %62 %64
+         %66 = OpCompositeExtract %uint %resultCell 1
+         %67 = OpLoad %uint %i None
+         %68 = OpIMul %uint %67 %dimOutter
+          %b = OpIAdd %uint %66 %68
+         %70 = OpLoad %uint %result None
+         %71 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %firstMatrix %uint_0
+         %73 = OpArrayLength %uint %firstMatrix 0
+         %74 = OpISub %uint %73 %uint_1
+         %75 = OpExtInst %uint %52 UMin %a %74
+         %76 = OpAccessChain %_ptr_StorageBuffer_uint_0 %firstMatrix %uint_0 %75
+         %78 = OpLoad %uint %76 None
+         %79 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint_0 %secondMatrix %uint_0
+         %80 = OpArrayLength %uint %secondMatrix 0
+         %81 = OpISub %uint %80 %uint_1
+         %82 = OpExtInst %uint %52 UMin %b %81
+         %83 = OpAccessChain %_ptr_StorageBuffer_uint_0 %secondMatrix %uint_0 %82
+         %84 = OpLoad %uint %83 None
+         %85 = OpIMul %uint %78 %84
+         %86 = OpIAdd %uint %70 %85
+               OpStore %result %86 None
+               OpBranch %40
          %40 = OpLabel
-         %41 = OpCompositeExtract %uint %resultCell 1
-         %42 = OpCompositeExtract %uint %resultCell 0
-         %43 = OpIMul %uint %42 %dimOutter
-      %index = OpIAdd %uint %41 %43
-         %45 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %resultMatrix %uint_0
-         %47 = OpArrayLength %uint %resultMatrix 0
-         %48 = OpISub %uint %47 %uint_1
-         %50 = OpExtInst %uint %51 UMin %index %48
-         %52 = OpAccessChain %_ptr_StorageBuffer_uint %resultMatrix %uint_0 %50
-         %54 = OpLoad %uint %result None
-               OpStore %52 %54 None
+         %87 = OpLoad %uint %i None
+         %88 = OpIAdd %uint %87 %uint_1
+               OpStore %i %88 None
+               OpBranch %41
+         %42 = OpLabel
+         %43 = OpCompositeExtract %uint %resultCell 1
+         %44 = OpCompositeExtract %uint %resultCell 0
+         %45 = OpIMul %uint %44 %dimOutter
+      %index = OpIAdd %uint %43 %45
+         %47 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %resultMatrix %uint_0
+         %49 = OpArrayLength %uint %resultMatrix 0
+         %50 = OpISub %uint %49 %uint_1
+         %51 = OpExtInst %uint %52 UMin %index %50
+         %53 = OpAccessChain %_ptr_StorageBuffer_uint %resultMatrix %uint_0 %51
+         %55 = OpLoad %uint %result None
+               OpStore %53 %55 None
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %89
-         %90 = OpLabel
-         %91 = OpLoad %v3uint %main_global_invocation_id_Input None
-         %92 = OpFunctionCall %void %main_inner %91
+       %main = OpFunction %void None %90
+         %91 = OpLabel
+         %92 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %93 = OpFunctionCall %void %main_inner %92
                OpReturn
                OpFunctionEnd

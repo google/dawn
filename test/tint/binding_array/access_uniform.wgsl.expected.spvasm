@@ -1,63 +1,67 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
-         %29 = OpExtInstImport "GLSL.std.450"
+         %32 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fs "fs"
                OpExecutionMode %fs OriginUpperLeft
-               OpMemberName %index_block 0 "inner"
-               OpName %index_block "index_block"
+               OpMemberName %index_block_tint_explicit_layout 0 "inner"
+               OpName %index_block_tint_explicit_layout "index_block_tint_explicit_layout"
                OpName %sampled_textures "sampled_textures"
                OpName %fs "fs"
                OpName %texture_load "texture_load"
-               OpMemberDecorate %index_block 0 Offset 0
-               OpDecorate %index_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %index_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %index_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpDecorate %sampled_textures DescriptorSet 0
                OpDecorate %sampled_textures Binding 0
        %uint = OpTypeInt 32 0
-%index_block = OpTypeStruct %uint
-%_ptr_Uniform_index_block = OpTypePointer Uniform %index_block
-          %1 = OpVariable %_ptr_Uniform_index_block Uniform
-      %float = OpTypeFloat 32
-          %8 = OpTypeImage %float 2D 0 0 0 1 Unknown
-     %uint_4 = OpConstant %uint 4
-%_arr_8_uint_4 = OpTypeArray %8 %uint_4
-%_ptr_UniformConstant__arr_8_uint_4 = OpTypePointer UniformConstant %_arr_8_uint_4
-%sampled_textures = OpVariable %_ptr_UniformConstant__arr_8_uint_4 UniformConstant
-       %void = OpTypeVoid
-         %13 = OpTypeFunction %void
-%_ptr_Uniform_uint = OpTypePointer Uniform %uint
-     %uint_0 = OpConstant %uint 0
-%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+     %v4uint = OpTypeVector %uint 4
      %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%index_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_index_block_tint_explicit_layout = OpTypePointer Uniform %index_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_index_block_tint_explicit_layout Uniform
+      %float = OpTypeFloat 32
+         %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
+     %uint_4 = OpConstant %uint 4
+%_arr_11_uint_4 = OpTypeArray %11 %uint_4
+%_ptr_UniformConstant__arr_11_uint_4 = OpTypePointer UniformConstant %_arr_11_uint_4
+%sampled_textures = OpVariable %_ptr_UniformConstant__arr_11_uint_4 UniformConstant
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
         %int = OpTypeInt 32 1
       %int_0 = OpConstant %int 0
      %v2uint = OpTypeVector %uint 2
-         %33 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %36 = OpConstantComposite %v2uint %uint_1 %uint_1
       %v2int = OpTypeVector %int 2
-         %35 = OpConstantNull %v2int
+         %38 = OpConstantNull %v2int
     %v4float = OpTypeVector %float 4
-         %fs = OpFunction %void None %13
-         %14 = OpLabel
-         %15 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0
-         %18 = OpLoad %uint %15 None
-         %19 = OpAccessChain %_ptr_UniformConstant_8 %sampled_textures %18
-         %21 = OpLoad %8 %19 None
-         %22 = OpImageQueryLevels %uint %21
-         %23 = OpISub %uint %22 %uint_1
-         %25 = OpBitcast %uint %int_0
-         %28 = OpExtInst %uint %29 UMin %25 %23
-         %30 = OpImageQuerySizeLod %v2uint %21 %28
-         %32 = OpISub %v2uint %30 %33
-         %34 = OpBitcast %v2uint %35
-         %37 = OpExtInst %v2uint %29 UMin %34 %32
-%texture_load = OpImageFetch %v4float %21 %37 Lod %28
+         %fs = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %21 = OpLoad %v4uint %18 None
+         %22 = OpCompositeExtract %uint %21 0
+         %23 = OpAccessChain %_ptr_UniformConstant_11 %sampled_textures %22
+         %25 = OpLoad %11 %23 None
+         %26 = OpImageQueryLevels %uint %25
+         %27 = OpISub %uint %26 %uint_1
+         %28 = OpBitcast %uint %int_0
+         %31 = OpExtInst %uint %32 UMin %28 %27
+         %33 = OpImageQuerySizeLod %v2uint %25 %31
+         %35 = OpISub %v2uint %33 %36
+         %37 = OpBitcast %v2uint %38
+         %40 = OpExtInst %v2uint %32 UMin %37 %35
+%texture_load = OpImageFetch %v4float %25 %40 Lod %31
                OpReturn
                OpFunctionEnd

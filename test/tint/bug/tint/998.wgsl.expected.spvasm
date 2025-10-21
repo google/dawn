@@ -1,50 +1,51 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 25
+; Bound: 28
 ; Schema: 0
                OpCapability Shader
-         %21 = OpExtInstImport "GLSL.std.450"
+         %24 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %Constants 0 "zero"
-               OpName %Constants "Constants"
-               OpMemberName %constants_block 0 "inner"
-               OpName %constants_block "constants_block"
+               OpMemberName %constants_block_tint_explicit_layout 0 "inner"
+               OpName %constants_block_tint_explicit_layout "constants_block_tint_explicit_layout"
                OpMemberName %S 0 "data"
                OpName %S "S"
                OpName %s "s"
                OpName %main "main"
-               OpMemberDecorate %Constants 0 Offset 0
-               OpMemberDecorate %constants_block 0 Offset 0
-               OpDecorate %constants_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %constants_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %constants_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
        %uint = OpTypeInt 32 0
-  %Constants = OpTypeStruct %uint
-%constants_block = OpTypeStruct %Constants
-%_ptr_Uniform_constants_block = OpTypePointer Uniform %constants_block
-          %1 = OpVariable %_ptr_Uniform_constants_block Uniform
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%constants_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_constants_block_tint_explicit_layout = OpTypePointer Uniform %constants_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_constants_block_tint_explicit_layout Uniform
      %uint_3 = OpConstant %uint 3
 %_arr_uint_uint_3 = OpTypeArray %uint %uint_3
           %S = OpTypeStruct %_arr_uint_uint_3
 %_ptr_Private_S = OpTypePointer Private %S
-         %11 = OpConstantNull %S
-          %s = OpVariable %_ptr_Private_S Private %11
+         %13 = OpConstantNull %S
+          %s = OpVariable %_ptr_Private_S Private %13
        %void = OpTypeVoid
-         %14 = OpTypeFunction %void
-%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+         %16 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
 %_ptr_Private_uint = OpTypePointer Private %uint
-       %main = OpFunction %void None %14
-         %15 = OpLabel
-         %16 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %19 = OpLoad %uint %16 None
-         %20 = OpExtInst %uint %21 UMin %19 %uint_2
-         %23 = OpAccessChain %_ptr_Private_uint %s %uint_0 %20
-               OpStore %23 %uint_0 None
+       %main = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %21 = OpLoad %v4uint %18 None
+         %22 = OpCompositeExtract %uint %21 0
+         %23 = OpExtInst %uint %24 UMin %22 %uint_2
+         %26 = OpAccessChain %_ptr_Private_uint %s %uint_0 %23
+               OpStore %26 %uint_0 None
                OpReturn
                OpFunctionEnd

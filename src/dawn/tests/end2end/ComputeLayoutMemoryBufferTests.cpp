@@ -800,6 +800,7 @@ auto GenerateParams() {
             D3D12Backend({"use_dxc"}),
             MetalBackend(),
             VulkanBackend(),
+            VulkanBackend({}, {"decompose_uniform_buffers"}),
             OpenGLBackend(),
             OpenGLESBackend(),
         },

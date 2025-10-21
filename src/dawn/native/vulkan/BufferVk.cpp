@@ -251,6 +251,12 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     }
     mAllocatedSize = Align(size, kAlignment);
 
+    // Round uniform buffer sizes up to a multiple of 16 bytes since Tint will polyfill them as
+    // array<vec4u, ...>.
+    if (GetUsage() & wgpu::BufferUsage::Uniform) {
+        mAllocatedSize = Align(size, 16u);
+    }
+
     // Avoid passing ludicrously large sizes to drivers because it causes issues: drivers add
     // some constants to the size passed and align it, but for values close to the maximum
     // VkDeviceSize this can cause overflows and makes drivers crash or return bad sizes in the

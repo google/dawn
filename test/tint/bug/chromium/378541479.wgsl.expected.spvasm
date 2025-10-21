@@ -1,70 +1,74 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 39
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
-         %29 = OpExtInstImport "GLSL.std.450"
+         %32 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %level_block 0 "inner"
-               OpName %level_block "level_block"
-               OpMemberName %coords_block 0 "inner"
-               OpName %coords_block "coords_block"
+               OpMemberName %level_block_tint_explicit_layout 0 "inner"
+               OpName %level_block_tint_explicit_layout "level_block_tint_explicit_layout"
+               OpMemberName %coords_block_tint_explicit_layout 0 "inner"
+               OpName %coords_block_tint_explicit_layout "coords_block_tint_explicit_layout"
                OpName %tex "tex"
                OpName %compute_main "compute_main"
                OpName %res "res"
-               OpMemberDecorate %level_block 0 Offset 0
-               OpDecorate %level_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %level_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %level_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %coords_block 0 Offset 0
-               OpDecorate %coords_block Block
-               OpDecorate %5 DescriptorSet 0
-               OpDecorate %5 Binding 1
-               OpDecorate %5 NonWritable
+               OpMemberDecorate %coords_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %coords_block_tint_explicit_layout Block
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+               OpDecorate %8 NonWritable
                OpDecorate %tex DescriptorSet 0
                OpDecorate %tex Binding 2
        %uint = OpTypeInt 32 0
-%level_block = OpTypeStruct %uint
-%_ptr_Uniform_level_block = OpTypePointer Uniform %level_block
-          %1 = OpVariable %_ptr_Uniform_level_block Uniform
-     %v2uint = OpTypeVector %uint 2
-%coords_block = OpTypeStruct %v2uint
-%_ptr_Uniform_coords_block = OpTypePointer Uniform %coords_block
-          %5 = OpVariable %_ptr_Uniform_coords_block Uniform
-      %float = OpTypeFloat 32
-         %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
-        %tex = OpVariable %_ptr_UniformConstant_11 UniformConstant
-       %void = OpTypeVoid
-         %15 = OpTypeFunction %void
-%_ptr_Uniform_v2uint = OpTypePointer Uniform %v2uint
-     %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %v4uint = OpTypeVector %uint 4
      %uint_1 = OpConstant %uint 1
-         %32 = OpConstantComposite %v2uint %uint_1 %uint_1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%level_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_level_block_tint_explicit_layout = OpTypePointer Uniform %level_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_level_block_tint_explicit_layout Uniform
+%coords_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_coords_block_tint_explicit_layout = OpTypePointer Uniform %coords_block_tint_explicit_layout
+          %8 = OpVariable %_ptr_Uniform_coords_block_tint_explicit_layout Uniform
+      %float = OpTypeFloat 32
+         %13 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_13 = OpTypePointer UniformConstant %13
+        %tex = OpVariable %_ptr_UniformConstant_13 UniformConstant
+       %void = OpTypeVoid
+         %17 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+     %uint_0 = OpConstant %uint 0
+     %v2uint = OpTypeVector %uint 2
+         %35 = OpConstantComposite %v2uint %uint_1 %uint_1
     %v4float = OpTypeVector %float 4
 %_ptr_Function_float = OpTypePointer Function %float
-%compute_main = OpFunction %void None %15
-         %16 = OpLabel
+%compute_main = OpFunction %void None %17
+         %18 = OpLabel
         %res = OpVariable %_ptr_Function_float Function
-         %17 = OpLoad %11 %tex None
-         %18 = OpAccessChain %_ptr_Uniform_v2uint %5 %uint_0
-         %21 = OpLoad %v2uint %18 None
-         %22 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0
-         %24 = OpLoad %uint %22 None
-         %25 = OpImageQueryLevels %uint %17
-         %26 = OpISub %uint %25 %uint_1
-         %28 = OpExtInst %uint %29 UMin %24 %26
-         %30 = OpImageQuerySizeLod %v2uint %17 %28
-         %31 = OpISub %v2uint %30 %32
-         %33 = OpExtInst %v2uint %29 UMin %21 %31
-         %34 = OpImageFetch %v4float %17 %33 Lod %28
-         %36 = OpCompositeExtract %float %34 0
-               OpStore %res %36
+         %19 = OpLoad %13 %tex None
+         %20 = OpAccessChain %_ptr_Uniform_v4uint %8 %uint_0 %uint_0
+         %23 = OpLoad %v4uint %20 None
+         %24 = OpVectorShuffle %v2uint %23 %23 0 1
+         %26 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %27 = OpLoad %v4uint %26 None
+         %28 = OpCompositeExtract %uint %27 0
+         %29 = OpImageQueryLevels %uint %19
+         %30 = OpISub %uint %29 %uint_1
+         %31 = OpExtInst %uint %32 UMin %28 %30
+         %33 = OpImageQuerySizeLod %v2uint %19 %31
+         %34 = OpISub %v2uint %33 %35
+         %36 = OpExtInst %v2uint %32 UMin %24 %34
+         %37 = OpImageFetch %v4float %19 %36 Lod %31
+         %39 = OpCompositeExtract %float %37 0
+               OpStore %res %39
                OpReturn
                OpFunctionEnd

@@ -102,6 +102,7 @@ enum class Features {
     kWebGPUUseVulkanMemoryModel,
     kWebGPUEnableRangeAnalysisForRobustness,
     kWebGPUUseSpirv14,
+    kWebGPUDecomposeUniformBuffers,
 };
 
 class DAWN_PLATFORM_EXPORT Platform {

@@ -1,46 +1,48 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 24
+; Bound: 28
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %UniformBuffer 0 "d"
-               OpName %UniformBuffer "UniformBuffer"
-               OpMemberName %u_input_block 0 "inner"
-               OpName %u_input_block "u_input_block"
+               OpMemberName %u_input_block_tint_explicit_layout 0 "inner"
+               OpName %u_input_block_tint_explicit_layout "u_input_block_tint_explicit_layout"
                OpName %main "main"
                OpName %temp "temp"
-               OpMemberDecorate %UniformBuffer 0 Offset 0
-               OpMemberDecorate %u_input_block 0 Offset 0
-               OpDecorate %u_input_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %u_input_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_input_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-        %int = OpTypeInt 32 1
-      %v3int = OpTypeVector %int 3
-%UniformBuffer = OpTypeStruct %v3int
-%u_input_block = OpTypeStruct %UniformBuffer
-%_ptr_Uniform_u_input_block = OpTypePointer Uniform %u_input_block
-          %1 = OpVariable %_ptr_Uniform_u_input_block Uniform
-       %void = OpTypeVoid
-          %9 = OpTypeFunction %void
-%_ptr_Uniform_v3int = OpTypePointer Uniform %v3int
        %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%u_input_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_u_input_block_tint_explicit_layout = OpTypePointer Uniform %u_input_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_input_block_tint_explicit_layout Uniform
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
      %v3uint = OpTypeVector %uint 3
-         %17 = OpConstantNull %v3uint
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+         %22 = OpConstantNull %v3uint
     %uint_31 = OpConstant %uint 31
-         %19 = OpConstantComposite %v3uint %uint_31 %uint_31 %uint_31
-       %main = OpFunction %void None %9
-         %10 = OpLabel
-         %11 = OpAccessChain %_ptr_Uniform_v3int %1 %uint_0 %uint_0
-         %15 = OpLoad %v3int %11 None
-         %16 = OpBitwiseAnd %v3uint %17 %19
-         %21 = OpBitcast %v3uint %15
-         %22 = OpShiftLeftLogical %v3uint %21 %16
-       %temp = OpBitcast %v3int %22
+         %23 = OpConstantComposite %v3uint %uint_31 %uint_31 %uint_31
+       %main = OpFunction %void None %10
+         %11 = OpLabel
+         %12 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %15 = OpLoad %v4uint %12 None
+         %16 = OpVectorShuffle %v3uint %15 %15 0 1 2
+         %20 = OpBitcast %v3int %16
+         %21 = OpBitwiseAnd %v3uint %22 %23
+         %25 = OpBitcast %v3uint %20
+         %26 = OpShiftLeftLogical %v3uint %25 %21
+       %temp = OpBitcast %v3int %26
                OpReturn
                OpFunctionEnd

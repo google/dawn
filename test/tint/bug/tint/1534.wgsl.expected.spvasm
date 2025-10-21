@@ -1,70 +1,72 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %g 0 "a"
-               OpName %g "g"
-               OpMemberName %i_block 0 "inner"
-               OpName %i_block "i_block"
+               OpMemberName %i_block_tint_explicit_layout 0 "inner"
+               OpName %i_block_tint_explicit_layout "i_block_tint_explicit_layout"
                OpMemberName %h 0 "a"
                OpName %h "h"
                OpMemberName %j_block 0 "inner"
                OpName %j_block "j_block"
                OpName %main "main"
                OpName %l "l"
-               OpMemberDecorate %g 0 Offset 0
-               OpMemberDecorate %i_block 0 Offset 0
-               OpDecorate %i_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %i_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %i_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpMemberDecorate %h 0 Offset 0
                OpMemberDecorate %j_block 0 Offset 0
                OpDecorate %j_block Block
-               OpDecorate %7 DescriptorSet 0
-               OpDecorate %7 Binding 1
-               OpDecorate %7 Coherent
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+               OpDecorate %8 Coherent
        %uint = OpTypeInt 32 0
-     %v3uint = OpTypeVector %uint 3
-          %g = OpTypeStruct %v3uint
-    %i_block = OpTypeStruct %g
-%_ptr_Uniform_i_block = OpTypePointer Uniform %i_block
-          %1 = OpVariable %_ptr_Uniform_i_block Uniform
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%i_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_i_block_tint_explicit_layout = OpTypePointer Uniform %i_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_i_block_tint_explicit_layout Uniform
           %h = OpTypeStruct %uint
     %j_block = OpTypeStruct %h
 %_ptr_StorageBuffer_j_block = OpTypePointer StorageBuffer %j_block
-          %7 = OpVariable %_ptr_StorageBuffer_j_block StorageBuffer
+          %8 = OpVariable %_ptr_StorageBuffer_j_block StorageBuffer
        %void = OpTypeVoid
-         %13 = OpTypeFunction %void
-%_ptr_Uniform_v3uint = OpTypePointer Uniform %v3uint
+         %14 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
+     %v3uint = OpTypeVector %uint 3
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-       %main = OpFunction %void None %13
-         %14 = OpLabel
-         %15 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
-         %18 = OpLoad %v3uint %15 None
-         %19 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
-         %20 = OpLoad %v3uint %19 None
-         %21 = OpCompositeExtract %uint %18 0
-         %22 = OpCompositeExtract %uint %20 0
-         %23 = OpIMul %uint %21 %22
-         %24 = OpCompositeExtract %uint %18 1
-         %25 = OpCompositeExtract %uint %20 1
-         %26 = OpIMul %uint %24 %25
-         %27 = OpIAdd %uint %23 %26
-         %28 = OpCompositeExtract %uint %18 2
-         %29 = OpCompositeExtract %uint %20 2
+       %main = OpFunction %void None %14
+         %15 = OpLabel
+         %16 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %19 = OpLoad %v4uint %16 None
+         %20 = OpVectorShuffle %v3uint %19 %19 0 1 2
+         %22 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %23 = OpLoad %v4uint %22 None
+         %24 = OpVectorShuffle %v3uint %23 %23 0 1 2
+         %25 = OpCompositeExtract %uint %20 0
+         %26 = OpCompositeExtract %uint %24 0
+         %27 = OpIMul %uint %25 %26
+         %28 = OpCompositeExtract %uint %20 1
+         %29 = OpCompositeExtract %uint %24 1
          %30 = OpIMul %uint %28 %29
-          %l = OpIAdd %uint %27 %30
-         %32 = OpAccessChain %_ptr_StorageBuffer_uint %7 %uint_0 %uint_0
-         %34 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
-         %35 = OpLoad %v3uint %34 None
-         %36 = OpCompositeExtract %uint %35 0
-               OpStore %32 %36 None
+         %31 = OpIAdd %uint %27 %30
+         %32 = OpCompositeExtract %uint %20 2
+         %33 = OpCompositeExtract %uint %24 2
+         %34 = OpIMul %uint %32 %33
+          %l = OpIAdd %uint %31 %34
+         %36 = OpAccessChain %_ptr_StorageBuffer_uint %8 %uint_0 %uint_0
+         %38 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %39 = OpLoad %v4uint %38 None
+         %40 = OpCompositeExtract %uint %39 0
+               OpStore %36 %40 None
                OpReturn
                OpFunctionEnd

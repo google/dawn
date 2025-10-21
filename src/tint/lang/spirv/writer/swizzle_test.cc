@@ -33,6 +33,20 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TEST_F(SpirvWriterTest, Swizzle_OneElement) {
+    auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({vec});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Swizzle(ty.i32(), vec, {3_u});
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpCompositeExtract %int %vec 3");
+}
+
 TEST_F(SpirvWriterTest, Swizzle_TwoElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());

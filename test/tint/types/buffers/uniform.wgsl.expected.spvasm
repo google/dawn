@@ -1,38 +1,42 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 18
+; Bound: 21
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %weights_block 0 "inner"
-               OpName %weights_block "weights_block"
+               OpMemberName %weights_block_tint_explicit_layout 0 "inner"
+               OpName %weights_block_tint_explicit_layout "weights_block_tint_explicit_layout"
                OpName %main "main"
                OpName %a "a"
-               OpMemberDecorate %weights_block 0 Offset 0
-               OpDecorate %weights_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %weights_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %weights_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-      %float = OpTypeFloat 32
-    %v2float = OpTypeVector %float 2
-%weights_block = OpTypeStruct %v2float
-%_ptr_Uniform_weights_block = OpTypePointer Uniform %weights_block
-          %1 = OpVariable %_ptr_Uniform_weights_block Uniform
-       %void = OpTypeVoid
-          %8 = OpTypeFunction %void
-%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
        %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%weights_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_weights_block_tint_explicit_layout = OpTypePointer Uniform %weights_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_weights_block_tint_explicit_layout Uniform
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
+      %float = OpTypeFloat 32
 %_ptr_Function_float = OpTypePointer Function %float
-       %main = OpFunction %void None %8
-          %9 = OpLabel
+       %main = OpFunction %void None %10
+         %11 = OpLabel
           %a = OpVariable %_ptr_Function_float Function
-         %10 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %14 = OpLoad %v2float %10 None
-         %15 = OpCompositeExtract %float %14 0
-               OpStore %a %15
+         %12 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %15 = OpLoad %v4uint %12 None
+         %16 = OpCompositeExtract %uint %15 0
+         %18 = OpBitcast %float %16
+               OpStore %a %18
                OpReturn
                OpFunctionEnd

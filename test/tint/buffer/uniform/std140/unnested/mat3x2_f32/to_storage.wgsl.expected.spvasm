@@ -1,23 +1,21 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 42
+; Bound: 89
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %u_block_std140 0 "inner_col0"
-               OpMemberName %u_block_std140 1 "inner_col1"
-               OpMemberName %u_block_std140 2 "inner_col2"
-               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_tint_explicit_layout 0 "inner"
+               OpName %u_block_tint_explicit_layout "u_block_tint_explicit_layout"
                OpMemberName %s_block 0 "inner"
                OpName %s_block "s_block"
                OpName %f "f"
-               OpMemberDecorate %u_block_std140 0 Offset 0
-               OpMemberDecorate %u_block_std140 1 Offset 8
-               OpMemberDecorate %u_block_std140 2 Offset 16
-               OpDecorate %u_block_std140 Block
+               OpName %start_byte_offset "start_byte_offset"
+               OpDecorate %_arr_v4uint_uint_2 ArrayStride 16
+               OpMemberDecorate %u_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -25,53 +23,102 @@
                OpMemberDecorate %s_block 0 ColMajor
                OpMemberDecorate %s_block 0 MatrixStride 8
                OpDecorate %s_block Block
-               OpDecorate %6 DescriptorSet 0
-               OpDecorate %6 Binding 1
-               OpDecorate %6 Coherent
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+               OpDecorate %8 Coherent
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+     %uint_2 = OpConstant %uint 2
+%_arr_v4uint_uint_2 = OpTypeArray %v4uint %uint_2
+%u_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_2
+%_ptr_Uniform_u_block_tint_explicit_layout = OpTypePointer Uniform %u_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_tint_explicit_layout Uniform
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-%u_block_std140 = OpTypeStruct %v2float %v2float %v2float
-%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
-          %1 = OpVariable %_ptr_Uniform_u_block_std140 Uniform
 %mat3v2float = OpTypeMatrix %v2float 3
     %s_block = OpTypeStruct %mat3v2float
 %_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
-          %6 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
+          %8 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
-         %12 = OpTypeFunction %void
-%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
-       %uint = OpTypeInt 32 0
+         %16 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
-     %uint_1 = OpConstant %uint 1
-     %uint_2 = OpConstant %uint 2
 %_ptr_StorageBuffer_mat3v2float = OpTypePointer StorageBuffer %mat3v2float
 %_ptr_StorageBuffer_v2float = OpTypePointer StorageBuffer %v2float
+     %uint_1 = OpConstant %uint 1
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+     %v2uint = OpTypeVector %uint 2
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-          %f = OpFunction %void None %12
-         %13 = OpLabel
-         %14 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %18 = OpLoad %v2float %14 None
-         %19 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %21 = OpLoad %v2float %19 None
-         %22 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_2
-         %24 = OpLoad %v2float %22 None
-         %25 = OpCompositeConstruct %mat3v2float %18 %21 %24
-         %26 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %6 %uint_0
-               OpStore %26 %25 None
-         %28 = OpAccessChain %_ptr_StorageBuffer_v2float %6 %uint_0 %uint_1
-         %30 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %31 = OpLoad %v2float %30 None
-               OpStore %28 %31 None
-         %32 = OpAccessChain %_ptr_StorageBuffer_v2float %6 %uint_0 %uint_1
-         %33 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %34 = OpLoad %v2float %33 None
-         %35 = OpVectorShuffle %v2float %34 %34 1 0
-               OpStore %32 %35 None
-         %36 = OpAccessChain %_ptr_StorageBuffer_v2float %6 %uint_0 %uint_0
-         %37 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %38 = OpLoad %v2float %37 None
-         %39 = OpCompositeExtract %float %38 0
-         %40 = OpAccessChain %_ptr_StorageBuffer_float %36 %uint_1
-               OpStore %40 %39 None
+         %46 = OpTypeFunction %mat3v2float %uint
+    %uint_16 = OpConstant %uint 16
+     %uint_4 = OpConstant %uint 4
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+     %uint_8 = OpConstant %uint 8
+          %f = OpFunction %void None %16
+         %17 = OpLabel
+         %18 = OpFunctionCall %mat3v2float %19 %uint_0
+         %21 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %8 %uint_0
+               OpStore %21 %18 None
+         %23 = OpAccessChain %_ptr_StorageBuffer_v2float %8 %uint_0 %uint_1
+         %26 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %28 = OpLoad %v4uint %26 None
+         %29 = OpVectorShuffle %v2uint %28 %28 0 1
+         %31 = OpBitcast %v2float %29
+               OpStore %23 %31 None
+         %32 = OpAccessChain %_ptr_StorageBuffer_v2float %8 %uint_0 %uint_1
+         %33 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %34 = OpLoad %v4uint %33 None
+         %35 = OpVectorShuffle %v2uint %34 %34 0 1
+         %36 = OpBitcast %v2float %35
+         %37 = OpVectorShuffle %v2float %36 %36 1 0
+               OpStore %32 %37 None
+         %38 = OpAccessChain %_ptr_StorageBuffer_v2float %8 %uint_0 %uint_0
+         %39 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %40 = OpLoad %v4uint %39 None
+         %41 = OpCompositeExtract %uint %40 2
+         %42 = OpBitcast %float %41
+         %43 = OpAccessChain %_ptr_StorageBuffer_float %38 %uint_1
+               OpStore %43 %42 None
                OpReturn
+               OpFunctionEnd
+         %19 = OpFunction %mat3v2float None %46
+%start_byte_offset = OpFunctionParameter %uint
+         %47 = OpLabel
+         %48 = OpUDiv %uint %start_byte_offset %uint_16
+         %50 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %48
+         %51 = OpUMod %uint %start_byte_offset %uint_16
+         %52 = OpUDiv %uint %51 %uint_4
+         %54 = OpLoad %v4uint %50 None
+         %55 = OpVectorShuffle %v2uint %54 %54 2 3
+         %56 = OpVectorShuffle %v2uint %54 %54 0 1
+         %57 = OpIEqual %bool %52 %uint_2
+         %60 = OpCompositeConstruct %v2bool %57 %57
+         %61 = OpSelect %v2uint %60 %55 %56
+         %62 = OpBitcast %v2float %61
+         %63 = OpIAdd %uint %uint_8 %start_byte_offset
+         %65 = OpUDiv %uint %63 %uint_16
+         %66 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %65
+         %67 = OpUMod %uint %63 %uint_16
+         %68 = OpUDiv %uint %67 %uint_4
+         %69 = OpLoad %v4uint %66 None
+         %70 = OpVectorShuffle %v2uint %69 %69 2 3
+         %71 = OpVectorShuffle %v2uint %69 %69 0 1
+         %72 = OpIEqual %bool %68 %uint_2
+         %73 = OpCompositeConstruct %v2bool %72 %72
+         %74 = OpSelect %v2uint %73 %70 %71
+         %75 = OpBitcast %v2float %74
+         %76 = OpIAdd %uint %uint_16 %start_byte_offset
+         %77 = OpUDiv %uint %76 %uint_16
+         %78 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %77
+         %79 = OpUMod %uint %76 %uint_16
+         %80 = OpUDiv %uint %79 %uint_4
+         %81 = OpLoad %v4uint %78 None
+         %82 = OpVectorShuffle %v2uint %81 %81 2 3
+         %83 = OpVectorShuffle %v2uint %81 %81 0 1
+         %84 = OpIEqual %bool %80 %uint_2
+         %85 = OpCompositeConstruct %v2bool %84 %84
+         %86 = OpSelect %v2uint %85 %82 %83
+         %87 = OpBitcast %v2float %86
+         %88 = OpCompositeConstruct %mat3v2float %62 %75 %87
+               OpReturnValue %88
                OpFunctionEnd

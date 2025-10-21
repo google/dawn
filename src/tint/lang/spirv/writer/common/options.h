@@ -139,6 +139,9 @@ struct Options {
     /// Set to `true` if handles should be transformed by direct variable access.
     bool dva_transform_handle = false;
 
+    /// Set to `true` to decompose uniform buffers into array<vec4u, ...>.
+    bool decompose_uniform_buffers = true;
+
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets = std::nullopt;
 
@@ -173,6 +176,7 @@ struct Options {
                  scalarize_max_min_clamp,
                  use_vulkan_memory_model,
                  dva_transform_handle,
+                 decompose_uniform_buffers,
                  depth_range_offsets,
                  spirv_version,
                  resource_binding);

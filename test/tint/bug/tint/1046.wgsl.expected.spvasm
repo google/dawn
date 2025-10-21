@@ -1,20 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 63
+; Bound: 124
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %main_position_Input %main_loc0_Input %main_loc1_Input %main_loc2_Input %main_loc3_Input %main_loc0_Output
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %Uniforms 0 "worldView"
-               OpMemberName %Uniforms 1 "proj"
-               OpMemberName %Uniforms 2 "numPointLights"
-               OpMemberName %Uniforms 3 "color_source"
-               OpMemberName %Uniforms 4 "color"
-               OpName %Uniforms "Uniforms"
-               OpMemberName %uniforms_block 0 "inner"
-               OpName %uniforms_block "uniforms_block"
+               OpMemberName %uniforms_block_tint_explicit_layout 0 "inner"
+               OpName %uniforms_block_tint_explicit_layout "uniforms_block_tint_explicit_layout"
                OpMemberName %PointLight 0 "position"
                OpName %PointLight "PointLight"
                OpMemberName %PointLights_tint_explicit_layout 0 "values"
@@ -39,18 +33,18 @@
                OpName %FragmentInput "FragmentInput"
                OpName %fragment "fragment"
                OpName %output "output"
+               OpMemberName %Uniforms 0 "worldView"
+               OpMemberName %Uniforms 1 "proj"
+               OpMemberName %Uniforms 2 "numPointLights"
+               OpMemberName %Uniforms 3 "color_source"
+               OpMemberName %Uniforms 4 "color"
+               OpName %Uniforms "Uniforms"
+               OpName %start_byte_offset "start_byte_offset"
+               OpName %start_byte_offset_0 "start_byte_offset"
                OpName %main "main"
-               OpMemberDecorate %Uniforms 0 Offset 0
-               OpMemberDecorate %Uniforms 0 ColMajor
-               OpMemberDecorate %Uniforms 0 MatrixStride 16
-               OpMemberDecorate %Uniforms 1 Offset 64
-               OpMemberDecorate %Uniforms 1 ColMajor
-               OpMemberDecorate %Uniforms 1 MatrixStride 16
-               OpMemberDecorate %Uniforms 2 Offset 128
-               OpMemberDecorate %Uniforms 3 Offset 132
-               OpMemberDecorate %Uniforms 4 Offset 144
-               OpMemberDecorate %uniforms_block 0 Offset 0
-               OpDecorate %uniforms_block Block
+               OpDecorate %_arr_v4uint_uint_10 ArrayStride 16
+               OpMemberDecorate %uniforms_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %uniforms_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -71,25 +65,26 @@
                OpDecorate %main_loc2_Input Location 2
                OpDecorate %main_loc3_Input Location 3
                OpDecorate %main_loc0_Output Location 0
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+    %uint_10 = OpConstant %uint 10
+%_arr_v4uint_uint_10 = OpTypeArray %v4uint %uint_10
+%uniforms_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_10
+%_ptr_Uniform_uniforms_block_tint_explicit_layout = OpTypePointer Uniform %uniforms_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_uniforms_block_tint_explicit_layout Uniform
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%mat4v4float = OpTypeMatrix %v4float 4
-       %uint = OpTypeInt 32 0
-   %Uniforms = OpTypeStruct %mat4v4float %mat4v4float %uint %uint %v4float
-%uniforms_block = OpTypeStruct %Uniforms
-%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
-          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
  %PointLight = OpTypeStruct %v4float
 %_runtimearr_PointLight = OpTypeRuntimeArray %PointLight
 %PointLights_tint_explicit_layout = OpTypeStruct %_runtimearr_PointLight
 %_ptr_StorageBuffer_PointLights_tint_explicit_layout = OpTypePointer StorageBuffer %PointLights_tint_explicit_layout
 %pointLights = OpVariable %_ptr_StorageBuffer_PointLights_tint_explicit_layout StorageBuffer
-         %16 = OpTypeSampler
-%_ptr_UniformConstant_16 = OpTypePointer UniformConstant %16
-  %mySampler = OpVariable %_ptr_UniformConstant_16 UniformConstant
-         %19 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_19 = OpTypePointer UniformConstant %19
-  %myTexture = OpVariable %_ptr_UniformConstant_19 UniformConstant
+         %17 = OpTypeSampler
+%_ptr_UniformConstant_17 = OpTypePointer UniformConstant %17
+  %mySampler = OpVariable %_ptr_UniformConstant_17 UniformConstant
+         %20 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_20 = OpTypePointer UniformConstant %20
+  %myTexture = OpVariable %_ptr_UniformConstant_20 UniformConstant
 %_ptr_Input_v4float = OpTypePointer Input %v4float
 %main_position_Input = OpVariable %_ptr_Input_v4float Input
 %main_loc0_Input = OpVariable %_ptr_Input_v4float Input
@@ -102,40 +97,104 @@
 %main_loc0_Output = OpVariable %_ptr_Output_v4float Output
 %FragmentOutput = OpTypeStruct %v4float
 %FragmentInput = OpTypeStruct %v4float %v4float %v4float %v2float %v4float
-         %34 = OpTypeFunction %FragmentOutput %FragmentInput
+         %35 = OpTypeFunction %FragmentOutput %FragmentInput
 %_ptr_Function_FragmentOutput = OpTypePointer Function %FragmentOutput
-         %38 = OpConstantNull %FragmentOutput
+         %39 = OpConstantNull %FragmentOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_0 = OpConstant %uint 0
     %float_1 = OpConstant %float 1
     %float_0 = OpConstant %float 0
-         %42 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
-%_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
+         %43 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+%mat4v4float = OpTypeMatrix %v4float 4
+   %Uniforms = OpTypeStruct %mat4v4float %mat4v4float %uint %uint %v4float
+         %54 = OpTypeFunction %Uniforms %uint
+    %uint_64 = OpConstant %uint 64
+   %uint_128 = OpConstant %uint 128
+    %uint_16 = OpConstant %uint 16
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+     %uint_4 = OpConstant %uint 4
+   %uint_132 = OpConstant %uint 132
+   %uint_144 = OpConstant %uint 144
+         %88 = OpTypeFunction %mat4v4float %uint
+    %uint_32 = OpConstant %uint 32
+    %uint_48 = OpConstant %uint 48
        %void = OpTypeVoid
-         %53 = OpTypeFunction %void
- %main_inner = OpFunction %FragmentOutput None %34
+        %114 = OpTypeFunction %void
+ %main_inner = OpFunction %FragmentOutput None %35
    %fragment = OpFunctionParameter %FragmentInput
-         %35 = OpLabel
-     %output = OpVariable %_ptr_Function_FragmentOutput Function %38
-         %39 = OpAccessChain %_ptr_Function_v4float %output %uint_0
-               OpStore %39 %42 None
-         %45 = OpAccessChain %_ptr_Uniform_Uniforms %1 %uint_0
-         %47 = OpLoad %Uniforms %45 None
-         %48 = OpLoad %16 %mySampler None
-         %49 = OpLoad %19 %myTexture None
-         %50 = OpLoad %FragmentOutput %output None
-               OpReturnValue %50
+         %36 = OpLabel
+     %output = OpVariable %_ptr_Function_FragmentOutput Function %39
+         %40 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+               OpStore %40 %43 None
+         %46 = OpFunctionCall %Uniforms %49 %uint_0
+         %50 = OpLoad %17 %mySampler None
+         %51 = OpLoad %20 %myTexture None
+         %52 = OpLoad %FragmentOutput %output None
+               OpReturnValue %52
                OpFunctionEnd
-       %main = OpFunction %void None %53
-         %54 = OpLabel
-         %55 = OpLoad %v4float %main_position_Input None
-         %56 = OpLoad %v4float %main_loc0_Input None
-         %57 = OpLoad %v4float %main_loc1_Input None
-         %58 = OpLoad %v2float %main_loc2_Input None
-         %59 = OpLoad %v4float %main_loc3_Input None
-         %60 = OpCompositeConstruct %FragmentInput %55 %56 %57 %58 %59
-         %61 = OpFunctionCall %FragmentOutput %main_inner %60
-         %62 = OpCompositeExtract %v4float %61 0
-               OpStore %main_loc0_Output %62 None
+         %49 = OpFunction %Uniforms None %54
+%start_byte_offset = OpFunctionParameter %uint
+         %55 = OpLabel
+         %56 = OpFunctionCall %mat4v4float %57 %start_byte_offset
+         %58 = OpIAdd %uint %uint_64 %start_byte_offset
+         %60 = OpFunctionCall %mat4v4float %57 %58
+         %61 = OpIAdd %uint %uint_128 %start_byte_offset
+         %63 = OpUDiv %uint %61 %uint_16
+         %65 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %63
+         %67 = OpUMod %uint %61 %uint_16
+         %68 = OpUDiv %uint %67 %uint_4
+         %70 = OpLoad %v4uint %65 None
+         %71 = OpVectorExtractDynamic %uint %70 %68
+         %72 = OpIAdd %uint %uint_132 %start_byte_offset
+         %74 = OpUDiv %uint %72 %uint_16
+         %75 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %74
+         %76 = OpUMod %uint %72 %uint_16
+         %77 = OpUDiv %uint %76 %uint_4
+         %78 = OpLoad %v4uint %75 None
+         %79 = OpVectorExtractDynamic %uint %78 %77
+         %80 = OpIAdd %uint %uint_144 %start_byte_offset
+         %82 = OpUDiv %uint %80 %uint_16
+         %83 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %82
+         %84 = OpLoad %v4uint %83 None
+         %85 = OpBitcast %v4float %84
+         %86 = OpCompositeConstruct %Uniforms %56 %60 %71 %79 %85
+               OpReturnValue %86
+               OpFunctionEnd
+         %57 = OpFunction %mat4v4float None %88
+%start_byte_offset_0 = OpFunctionParameter %uint
+         %89 = OpLabel
+         %90 = OpUDiv %uint %start_byte_offset_0 %uint_16
+         %91 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %90
+         %92 = OpLoad %v4uint %91 None
+         %93 = OpBitcast %v4float %92
+         %94 = OpIAdd %uint %uint_16 %start_byte_offset_0
+         %95 = OpUDiv %uint %94 %uint_16
+         %96 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %95
+         %97 = OpLoad %v4uint %96 None
+         %98 = OpBitcast %v4float %97
+         %99 = OpIAdd %uint %uint_32 %start_byte_offset_0
+        %101 = OpUDiv %uint %99 %uint_16
+        %102 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %101
+        %103 = OpLoad %v4uint %102 None
+        %104 = OpBitcast %v4float %103
+        %105 = OpIAdd %uint %uint_48 %start_byte_offset_0
+        %107 = OpUDiv %uint %105 %uint_16
+        %108 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %107
+        %109 = OpLoad %v4uint %108 None
+        %110 = OpBitcast %v4float %109
+        %111 = OpCompositeConstruct %mat4v4float %93 %98 %104 %110
+               OpReturnValue %111
+               OpFunctionEnd
+       %main = OpFunction %void None %114
+        %115 = OpLabel
+        %116 = OpLoad %v4float %main_position_Input None
+        %117 = OpLoad %v4float %main_loc0_Input None
+        %118 = OpLoad %v4float %main_loc1_Input None
+        %119 = OpLoad %v2float %main_loc2_Input None
+        %120 = OpLoad %v4float %main_loc3_Input None
+        %121 = OpCompositeConstruct %FragmentInput %116 %117 %118 %119 %120
+        %122 = OpFunctionCall %FragmentOutput %main_inner %121
+        %123 = OpCompositeExtract %v4float %122 0
+               OpStore %main_loc0_Output %123 None
                OpReturn
                OpFunctionEnd

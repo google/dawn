@@ -2521,6 +2521,15 @@ class Printer {
     void EmitSwizzle(core::ir::Swizzle* swizzle) {
         auto id = Value(swizzle);
         auto obj = Value(swizzle->Object());
+
+        // If there is only one swizzle index use OpCompositeExtract as we are producing a scalar.
+        if (swizzle->Indices().Length() == 1) {
+            OperandList operands = {Type(swizzle->Result()->Type()), id, obj,
+                                    swizzle->Indices()[0]};
+            current_function_.PushInst(spv::Op::OpCompositeExtract, operands);
+            return;
+        }
+
         OperandList operands = {Type(swizzle->Result()->Type()), id, obj, obj};
         for (auto idx : swizzle->Indices()) {
             operands.push_back(idx);

@@ -37,6 +37,7 @@
 #include "src/tint/lang/core/ir/transform/builtin_scalarize.h"
 #include "src/tint/lang/core/ir/transform/combine_access_instructions.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
+#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -174,7 +175,16 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
+
+    if (options.decompose_uniform_buffers) {
+        // DecomposeUniformAccess must come before BlockDecoratedStructs, which will wrap the
+        // uniform variable in a structure.
+        RUN_TRANSFORM(core::ir::transform::DecomposeUniformAccess, module);
+    } else {
+        RUN_TRANSFORM(core::ir::transform::Std140, module);
+    }
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
+
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
 
     // CombineAccessInstructions must come after DirectVariableAccess and BlockDecoratedStructs.
@@ -218,10 +228,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         raise::ShaderIO, module,
         raise::ShaderIOConfig{immediate_data_layout.Get(), options.emit_vertex_point_size,
                               !options.use_storage_input_output_16, options.depth_range_offsets});
-    RUN_TRANSFORM(core::ir::transform::Std140, module);
 
-    // ForkExplicitLayoutTypes must come after Std140, since it rewrites host-shareable array types
-    // to use the explicitly laid array type defined by the SPIR-V dialect.
+    // ForkExplicitLayoutTypes must come after DecomposeUniformAccess, since it rewrites
+    // host-shareable array types to use the explicitly laid array type defined by the SPIR-V
+    // dialect.
     RUN_TRANSFORM(raise::ForkExplicitLayoutTypes, module, options.spirv_version);
 
     RUN_TRANSFORM(raise::VarForDynamicIndex, module);

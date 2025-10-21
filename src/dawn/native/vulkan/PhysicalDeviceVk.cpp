@@ -753,9 +753,17 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel 
                                maxStorageTexturesPerShaderStage);
     CHECK_AND_SET_V1_MAX_LIMIT(maxPerStageDescriptorUniformBuffers,
                                maxUniformBuffersPerShaderStage);
-    CHECK_AND_SET_V1_MAX_LIMIT(maxUniformBufferRange, maxUniformBufferBindingSize);
     CHECK_AND_SET_V1_MAX_LIMIT(maxStorageBufferRange, maxStorageBufferBindingSize);
     CHECK_AND_SET_V1_MAX_LIMIT(maxColorAttachments, maxColorAttachments);
+
+    // Round max uniform buffer size down to a multiple of 16 bytes since Tint will polyfill them as
+    // array<vec4u, ...>.
+    uint32_t maxUniformBufferSize = vkLimits.maxUniformBufferRange;
+    maxUniformBufferSize = maxUniformBufferSize - (maxUniformBufferSize % 16);
+    if (maxUniformBufferSize < baseLimits.v1.maxUniformBufferBindingSize) {
+        return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for maxUniformBufferBindingSize");
+    }
+    limits->v1.maxUniformBufferBindingSize = maxUniformBufferSize;
 
     // Validate against maxFragmentCombinedOutputResources, tightening the limits when necessary.
     const uint32_t minFragmentCombinedOutputResources =
@@ -940,6 +948,10 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     adapterToggles->Default(
         Toggle::UseVulkanMemoryModel,
         platform->IsFeatureEnabled(platform::Features::kWebGPUUseVulkanMemoryModel));
+
+    adapterToggles->Default(
+        Toggle::DecomposeUniformBuffers,
+        platform->IsFeatureEnabled(platform::Features::kWebGPUDecomposeUniformBuffers));
 }
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,

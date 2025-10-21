@@ -1,39 +1,59 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 18
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %u_block_tint_explicit_layout 0 "inner"
+               OpName %u_block_tint_explicit_layout "u_block_tint_explicit_layout"
+               OpName %main "main"
                OpMemberName %S 0 "i"
                OpName %S "S"
-               OpMemberName %u_block 0 "inner"
-               OpName %u_block "u_block"
-               OpName %main "main"
-               OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %u_block 0 Offset 0
-               OpDecorate %u_block Block
+               OpName %start_byte_offset "start_byte_offset"
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %u_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %u_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%u_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_u_block_tint_explicit_layout = OpTypePointer Uniform %u_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_u_block_tint_explicit_layout Uniform
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %int
-    %u_block = OpTypeStruct %S
-%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
-          %1 = OpVariable %_ptr_Uniform_u_block Uniform
-       %void = OpTypeVoid
-          %8 = OpTypeFunction %void
-%_ptr_Uniform_S = OpTypePointer Uniform %S
-       %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-%_ptr_Uniform_int = OpTypePointer Uniform %int
-       %main = OpFunction %void None %8
-          %9 = OpLabel
-         %10 = OpAccessChain %_ptr_Uniform_S %1 %uint_0
-         %14 = OpLoad %S %10 None
-         %15 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
-         %17 = OpLoad %int %15 None
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+         %23 = OpTypeFunction %S %uint
+    %uint_16 = OpConstant %uint 16
+     %uint_4 = OpConstant %uint 4
+       %main = OpFunction %void None %10
+         %11 = OpLabel
+         %12 = OpFunctionCall %S %15 %uint_0
+         %17 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %19 = OpLoad %v4uint %17 None
+         %20 = OpCompositeExtract %uint %19 0
+         %21 = OpBitcast %int %20
                OpReturn
+               OpFunctionEnd
+         %15 = OpFunction %S None %23
+%start_byte_offset = OpFunctionParameter %uint
+         %24 = OpLabel
+         %25 = OpUDiv %uint %start_byte_offset %uint_16
+         %27 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %25
+         %28 = OpUMod %uint %start_byte_offset %uint_16
+         %29 = OpUDiv %uint %28 %uint_4
+         %31 = OpLoad %v4uint %27 None
+         %32 = OpVectorExtractDynamic %uint %31 %29
+         %33 = OpBitcast %int %32
+         %34 = OpCompositeConstruct %S %33
+               OpReturnValue %34
                OpFunctionEnd

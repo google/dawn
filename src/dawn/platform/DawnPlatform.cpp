@@ -105,6 +105,8 @@ bool Platform::IsFeatureEnabled(Features feature) {
             return true;
         case Features::kWebGPUUseSpirv14:
             return true;
+        case Features::kWebGPUDecomposeUniformBuffers:
+            return true;
     }
     return false;
 }

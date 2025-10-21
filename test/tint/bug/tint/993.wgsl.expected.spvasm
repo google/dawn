@@ -1,17 +1,15 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 40
+; Bound: 42
 ; Schema: 0
                OpCapability Shader
-         %26 = OpExtInstImport "GLSL.std.450"
+         %29 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %Constants 0 "zero"
-               OpName %Constants "Constants"
-               OpMemberName %constants_block 0 "inner"
-               OpName %constants_block "constants_block"
+               OpMemberName %constants_block_tint_explicit_layout 0 "inner"
+               OpName %constants_block_tint_explicit_layout "constants_block_tint_explicit_layout"
                OpMemberName %Result 0 "value"
                OpName %Result "Result"
                OpMemberName %result_block 0 "inner"
@@ -22,65 +20,67 @@
                OpName %s_block_tint_explicit_layout "s_block_tint_explicit_layout"
                OpName %runTest "runTest"
                OpName %main "main"
-               OpMemberDecorate %Constants 0 Offset 0
-               OpMemberDecorate %constants_block 0 Offset 0
-               OpDecorate %constants_block Block
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %constants_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %constants_block_tint_explicit_layout Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpMemberDecorate %Result 0 Offset 0
                OpMemberDecorate %result_block 0 Offset 0
                OpDecorate %result_block Block
-               OpDecorate %6 DescriptorSet 1
-               OpDecorate %6 Binding 1
-               OpDecorate %6 Coherent
+               OpDecorate %8 DescriptorSet 1
+               OpDecorate %8 Binding 1
+               OpDecorate %8 Coherent
                OpDecorate %_arr_int_uint_3 ArrayStride 4
                OpMemberDecorate %TestData_tint_explicit_layout 0 Offset 0
                OpMemberDecorate %s_block_tint_explicit_layout 0 Offset 0
                OpDecorate %s_block_tint_explicit_layout Block
-               OpDecorate %10 DescriptorSet 0
-               OpDecorate %10 Binding 0
-               OpDecorate %10 Coherent
+               OpDecorate %12 DescriptorSet 0
+               OpDecorate %12 Binding 0
+               OpDecorate %12 Coherent
        %uint = OpTypeInt 32 0
-  %Constants = OpTypeStruct %uint
-%constants_block = OpTypeStruct %Constants
-%_ptr_Uniform_constants_block = OpTypePointer Uniform %constants_block
-          %1 = OpVariable %_ptr_Uniform_constants_block Uniform
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%constants_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_constants_block_tint_explicit_layout = OpTypePointer Uniform %constants_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_constants_block_tint_explicit_layout Uniform
      %Result = OpTypeStruct %uint
 %result_block = OpTypeStruct %Result
 %_ptr_StorageBuffer_result_block = OpTypePointer StorageBuffer %result_block
-          %6 = OpVariable %_ptr_StorageBuffer_result_block StorageBuffer
+          %8 = OpVariable %_ptr_StorageBuffer_result_block StorageBuffer
         %int = OpTypeInt 32 1
      %uint_3 = OpConstant %uint 3
 %_arr_int_uint_3 = OpTypeArray %int %uint_3
 %TestData_tint_explicit_layout = OpTypeStruct %_arr_int_uint_3
 %s_block_tint_explicit_layout = OpTypeStruct %TestData_tint_explicit_layout
 %_ptr_StorageBuffer_s_block_tint_explicit_layout = OpTypePointer StorageBuffer %s_block_tint_explicit_layout
-         %10 = OpVariable %_ptr_StorageBuffer_s_block_tint_explicit_layout StorageBuffer
-         %18 = OpTypeFunction %int
-%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+         %12 = OpVariable %_ptr_StorageBuffer_s_block_tint_explicit_layout StorageBuffer
+         %20 = OpTypeFunction %int
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
      %uint_2 = OpConstant %uint 2
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-     %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-         %34 = OpTypeFunction %void
+         %36 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-    %runTest = OpFunction %int None %18
-         %19 = OpLabel
-         %20 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %23 = OpLoad %uint %20 None
-         %24 = OpIAdd %uint %uint_0 %23
-         %25 = OpExtInst %uint %26 UMin %24 %uint_2
-         %28 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %25
-         %30 = OpAtomicLoad %int %28 %uint_1 %uint_0
-               OpReturnValue %30
+    %runTest = OpFunction %int None %20
+         %21 = OpLabel
+         %22 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %25 = OpLoad %v4uint %22 None
+         %26 = OpCompositeExtract %uint %25 0
+         %27 = OpIAdd %uint %uint_0 %26
+         %28 = OpExtInst %uint %29 UMin %27 %uint_2
+         %31 = OpAccessChain %_ptr_StorageBuffer_int %12 %uint_0 %uint_0 %28
+         %33 = OpAtomicLoad %int %31 %uint_1 %uint_0
+               OpReturnValue %33
                OpFunctionEnd
-       %main = OpFunction %void None %34
-         %35 = OpLabel
-         %36 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0 %uint_0
-         %38 = OpFunctionCall %int %runTest
-         %39 = OpBitcast %uint %38
-               OpStore %36 %39 None
+       %main = OpFunction %void None %36
+         %37 = OpLabel
+         %38 = OpAccessChain %_ptr_StorageBuffer_uint %8 %uint_0 %uint_0
+         %40 = OpFunctionCall %int %runTest
+         %41 = OpBitcast %uint %40
+               OpStore %38 %41 None
                OpReturn
                OpFunctionEnd
