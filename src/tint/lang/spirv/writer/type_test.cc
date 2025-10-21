@@ -656,10 +656,12 @@ INSTANTIATE_TEST_SUITE_P(
                                     Format::kRgba8Unorm}));
 
 TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
-    b.Append(b.ir.root_block, [&] {  //
-        b.Var("left", ty.ptr<private_>(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
-        b.Var("right", ty.ptr<private_>(ty.subgroup_matrix_right(ty.u32(), 4, 8)));
-        b.Var("result", ty.ptr<private_>(ty.subgroup_matrix_result(ty.i32(), 2, 2)));
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Var("left", ty.ptr<function>(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
+        b.Var("right", ty.ptr<function>(ty.subgroup_matrix_right(ty.u32(), 4, 8)));
+        b.Var("result", ty.ptr<function>(ty.subgroup_matrix_result(ty.i32(), 2, 2)));
+        b.Return(fn);
     });
 
     Options options;
@@ -667,9 +669,9 @@ TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability CooperativeMatrixKHR");
     EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
-    EXPECT_INST("%3 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
-    EXPECT_INST("%14 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_4 %uint_1");
-    EXPECT_INST("%19 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
+    EXPECT_INST("%18 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%23 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
 }
 
 // Test that we can emit multiple types.

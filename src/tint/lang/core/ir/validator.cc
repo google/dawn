@@ -2030,6 +2030,11 @@ void Validator::CheckType(const core::type::Type* root,
         return;
     }
 
+    AddressSpace addrspace = AddressSpace::kUndefined;
+    if (auto* mv = root->As<core::type::MemoryView>()) {
+        addrspace = mv->AddressSpace();
+    }
+
     auto visit = [&](const core::type::Type* type) {
         if (type->IsAbstract()) {
             diag() << "abstracts are not permitted";
@@ -2232,8 +2237,7 @@ void Validator::CheckType(const core::type::Type* root,
                     return false;
                 }
                 if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                    auto* mv = root->As<core::type::MemoryView>();
-                    if (mv && mv->AddressSpace() != AddressSpace::kStorage) {
+                    if (addrspace != AddressSpace::kStorage) {
                         diag() << "runtime arrays must be in the 'storage' address space";
                         return false;
                     }
@@ -2311,6 +2315,11 @@ void Validator::CheckType(const core::type::Type* root,
                          ->IsAnyOf<core::type::F16, core::type::F32, core::type::I8,
                                    core::type::I32, core::type::U8, core::type::U32>()) {
                     diag() << "invalid subgroup matrix component type: " << NameOf(m->Type());
+                    return false;
+                }
+                if (!(addrspace == AddressSpace::kUndefined ||
+                      addrspace == AddressSpace::kFunction)) {
+                    diag() << "invalid address space for subgroup matrix : " << addrspace;
                     return false;
                 }
                 return true;
