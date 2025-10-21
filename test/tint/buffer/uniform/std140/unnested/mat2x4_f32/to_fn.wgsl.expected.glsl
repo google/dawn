@@ -2,7 +2,7 @@
 
 layout(binding = 0, std140)
 uniform u_block_1_ubo {
-  mat2x4 inner;
+  uvec4 inner[2];
 } v_1;
 void a(mat2x4 m) {
 }
@@ -10,12 +10,15 @@ void b(vec4 v) {
 }
 void c(float f_1) {
 }
+mat2x4 v_2(uint start_byte_offset) {
+  return mat2x4(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)]));
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  a(v_1.inner);
-  b(v_1.inner[1u]);
-  b(v_1.inner[1u].ywxz);
-  vec4 v_2 = v_1.inner[1u];
-  c(v_2.x);
-  c(v_1.inner[1u].ywxz.x);
+  a(v_2(0u));
+  b(uintBitsToFloat(v_1.inner[1u]));
+  b(uintBitsToFloat(v_1.inner[1u]).ywxz);
+  uvec4 v_3 = v_1.inner[1u];
+  c(uintBitsToFloat(v_3.x));
+  c(uintBitsToFloat(v_1.inner[1u]).ywxz.x);
 }

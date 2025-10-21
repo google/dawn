@@ -3,74 +3,12 @@
 
 struct Inner {
   int scalar_i32;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
   float scalar_f32;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
-};
-
-struct S_std140 {
-  float scalar_f32;
-  int scalar_i32;
-  uint scalar_u32;
-  uint tint_pad_0;
-  vec2 vec2_f32;
-  ivec2 vec2_i32;
-  uvec2 vec2_u32;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  vec3 vec3_f32;
-  uint tint_pad_3;
-  ivec3 vec3_i32;
-  uint tint_pad_4;
-  uvec3 vec3_u32;
-  uint tint_pad_5;
-  vec4 vec4_f32;
-  ivec4 vec4_i32;
-  uvec4 vec4_u32;
-  vec2 mat2x2_f32_col0;
-  vec2 mat2x2_f32_col1;
-  vec3 mat2x3_f32_col0;
-  uint tint_pad_6;
-  vec3 mat2x3_f32_col1;
-  uint tint_pad_7;
-  mat2x4 mat2x4_f32;
-  vec2 mat3x2_f32_col0;
-  vec2 mat3x2_f32_col1;
-  vec2 mat3x2_f32_col2;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  vec3 mat3x3_f32_col0;
-  uint tint_pad_10;
-  vec3 mat3x3_f32_col1;
-  uint tint_pad_11;
-  vec3 mat3x3_f32_col2;
-  uint tint_pad_12;
-  mat3x4 mat3x4_f32;
-  vec2 mat4x2_f32_col0;
-  vec2 mat4x2_f32_col1;
-  vec2 mat4x2_f32_col2;
-  vec2 mat4x2_f32_col3;
-  vec3 mat4x3_f32_col0;
-  uint tint_pad_13;
-  vec3 mat4x3_f32_col1;
-  uint tint_pad_14;
-  vec3 mat4x3_f32_col2;
-  uint tint_pad_15;
-  vec3 mat4x3_f32_col3;
-  uint tint_pad_16;
-  mat4 mat4x4_f32;
-  vec3 arr2_vec3_f32[2];
-  Inner struct_inner;
-  Inner array_struct_inner[4];
 };
 
 layout(binding = 0, std140)
-uniform ub_block_std140_1_ubo {
-  S_std140 inner;
+uniform ub_block_1_ubo {
+  uvec4 inner[44];
 } v;
 layout(binding = 1, std430)
 buffer s_block_1_ssbo {
@@ -79,88 +17,177 @@ buffer s_block_1_ssbo {
 int tint_f32_to_i32(float value) {
   return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
+Inner v_2(uint start_byte_offset) {
+  uvec4 v_3 = v.inner[(start_byte_offset / 16u)];
+  int v_4 = int(v_3[((start_byte_offset % 16u) / 4u)]);
+  uvec4 v_5 = v.inner[((16u + start_byte_offset) / 16u)];
+  return Inner(v_4, uintBitsToFloat(v_5[(((16u + start_byte_offset) % 16u) / 4u)]));
+}
+Inner[4] v_6(uint start_byte_offset) {
+  Inner a[4] = Inner[4](Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f));
+  {
+    uint v_7 = 0u;
+    v_7 = 0u;
+    while(true) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4u)) {
+        break;
+      }
+      a[v_8] = v_2((start_byte_offset + (v_8 * 32u)));
+      {
+        v_7 = (v_8 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
+vec3[2] v_9(uint start_byte_offset) {
+  vec3 a[2] = vec3[2](vec3(0.0f), vec3(0.0f));
+  {
+    uint v_10 = 0u;
+    v_10 = 0u;
+    while(true) {
+      uint v_11 = v_10;
+      if ((v_11 >= 2u)) {
+        break;
+      }
+      a[v_11] = uintBitsToFloat(v.inner[((start_byte_offset + (v_11 * 16u)) / 16u)].xyz);
+      {
+        v_10 = (v_11 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
+mat4 v_12(uint start_byte_offset) {
+  return mat4(uintBitsToFloat(v.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((48u + start_byte_offset) / 16u)]));
+}
+mat4x3 v_13(uint start_byte_offset) {
+  return mat4x3(uintBitsToFloat(v.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((48u + start_byte_offset) / 16u)].xyz));
+}
+mat4x2 v_14(uint start_byte_offset) {
+  uvec4 v_15 = v.inner[(start_byte_offset / 16u)];
+  vec2 v_16 = uintBitsToFloat(mix(v_15.xy, v_15.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_17 = v.inner[((8u + start_byte_offset) / 16u)];
+  vec2 v_18 = uintBitsToFloat(mix(v_17.xy, v_17.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_19 = v.inner[((16u + start_byte_offset) / 16u)];
+  vec2 v_20 = uintBitsToFloat(mix(v_19.xy, v_19.zw, bvec2(((((16u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_21 = v.inner[((24u + start_byte_offset) / 16u)];
+  return mat4x2(v_16, v_18, v_20, uintBitsToFloat(mix(v_21.xy, v_21.zw, bvec2(((((24u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
+mat3x4 v_22(uint start_byte_offset) {
+  return mat3x4(uintBitsToFloat(v.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)]));
+}
+mat3 v_23(uint start_byte_offset) {
+  return mat3(uintBitsToFloat(v.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)].xyz));
+}
+mat3x2 v_24(uint start_byte_offset) {
+  uvec4 v_25 = v.inner[(start_byte_offset / 16u)];
+  vec2 v_26 = uintBitsToFloat(mix(v_25.xy, v_25.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_27 = v.inner[((8u + start_byte_offset) / 16u)];
+  vec2 v_28 = uintBitsToFloat(mix(v_27.xy, v_27.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_29 = v.inner[((16u + start_byte_offset) / 16u)];
+  return mat3x2(v_26, v_28, uintBitsToFloat(mix(v_29.xy, v_29.zw, bvec2(((((16u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
+mat2x4 v_30(uint start_byte_offset) {
+  return mat2x4(uintBitsToFloat(v.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)]));
+}
+mat2x3 v_31(uint start_byte_offset) {
+  return mat2x3(uintBitsToFloat(v.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz));
+}
+mat2 v_32(uint start_byte_offset) {
+  uvec4 v_33 = v.inner[(start_byte_offset / 16u)];
+  vec2 v_34 = uintBitsToFloat(mix(v_33.xy, v_33.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_35 = v.inner[((8u + start_byte_offset) / 16u)];
+  return mat2(v_34, uintBitsToFloat(mix(v_35.xy, v_35.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  float scalar_f32 = v.inner.scalar_f32;
-  int scalar_i32 = v.inner.scalar_i32;
-  uint scalar_u32 = v.inner.scalar_u32;
-  vec2 vec2_f32 = v.inner.vec2_f32;
-  ivec2 vec2_i32 = v.inner.vec2_i32;
-  uvec2 vec2_u32 = v.inner.vec2_u32;
-  vec3 vec3_f32 = v.inner.vec3_f32;
-  ivec3 vec3_i32 = v.inner.vec3_i32;
-  uvec3 vec3_u32 = v.inner.vec3_u32;
-  vec4 vec4_f32 = v.inner.vec4_f32;
-  ivec4 vec4_i32 = v.inner.vec4_i32;
-  uvec4 vec4_u32 = v.inner.vec4_u32;
-  mat2 mat2x2_f32 = mat2(v.inner.mat2x2_f32_col0, v.inner.mat2x2_f32_col1);
-  mat2x3 mat2x3_f32 = mat2x3(v.inner.mat2x3_f32_col0, v.inner.mat2x3_f32_col1);
-  mat2x4 mat2x4_f32 = v.inner.mat2x4_f32;
-  mat3x2 mat3x2_f32 = mat3x2(v.inner.mat3x2_f32_col0, v.inner.mat3x2_f32_col1, v.inner.mat3x2_f32_col2);
-  mat3 mat3x3_f32 = mat3(v.inner.mat3x3_f32_col0, v.inner.mat3x3_f32_col1, v.inner.mat3x3_f32_col2);
-  mat3x4 mat3x4_f32 = v.inner.mat3x4_f32;
-  mat4x2 mat4x2_f32 = mat4x2(v.inner.mat4x2_f32_col0, v.inner.mat4x2_f32_col1, v.inner.mat4x2_f32_col2, v.inner.mat4x2_f32_col3);
-  mat4x3 mat4x3_f32 = mat4x3(v.inner.mat4x3_f32_col0, v.inner.mat4x3_f32_col1, v.inner.mat4x3_f32_col2, v.inner.mat4x3_f32_col3);
-  mat4 mat4x4_f32 = v.inner.mat4x4_f32;
-  vec3 arr2_vec3_f32[2] = v.inner.arr2_vec3_f32;
-  Inner struct_inner = v.inner.struct_inner;
-  Inner array_struct_inner[4] = v.inner.array_struct_inner;
-  uint v_2 = uint(tint_f32_to_i32(scalar_f32));
-  int v_3 = int((v_2 + uint(scalar_i32)));
-  int v_4 = int(scalar_u32);
-  uint v_5 = uint(v_3);
-  int v_6 = int((v_5 + uint(v_4)));
-  int v_7 = tint_f32_to_i32(vec2_f32.x);
-  uint v_8 = uint(v_6);
-  uint v_9 = uint(int((v_8 + uint(v_7))));
-  int v_10 = int((v_9 + uint(vec2_i32.x)));
-  int v_11 = int(vec2_u32.x);
-  uint v_12 = uint(v_10);
-  int v_13 = int((v_12 + uint(v_11)));
-  int v_14 = tint_f32_to_i32(vec3_f32.y);
-  uint v_15 = uint(v_13);
-  uint v_16 = uint(int((v_15 + uint(v_14))));
-  int v_17 = int((v_16 + uint(vec3_i32.y)));
-  int v_18 = int(vec3_u32.y);
-  uint v_19 = uint(v_17);
-  int v_20 = int((v_19 + uint(v_18)));
-  int v_21 = tint_f32_to_i32(vec4_f32.z);
-  uint v_22 = uint(v_20);
-  uint v_23 = uint(int((v_22 + uint(v_21))));
-  int v_24 = int((v_23 + uint(vec4_i32.z)));
-  int v_25 = int(vec4_u32.z);
-  uint v_26 = uint(v_24);
-  int v_27 = int((v_26 + uint(v_25)));
-  int v_28 = tint_f32_to_i32(mat2x2_f32[0u].x);
-  uint v_29 = uint(v_27);
-  int v_30 = int((v_29 + uint(v_28)));
-  int v_31 = tint_f32_to_i32(mat2x3_f32[0u].x);
-  uint v_32 = uint(v_30);
-  int v_33 = int((v_32 + uint(v_31)));
-  int v_34 = tint_f32_to_i32(mat2x4_f32[0u].x);
-  uint v_35 = uint(v_33);
-  int v_36 = int((v_35 + uint(v_34)));
-  int v_37 = tint_f32_to_i32(mat3x2_f32[0u].x);
-  uint v_38 = uint(v_36);
-  int v_39 = int((v_38 + uint(v_37)));
-  int v_40 = tint_f32_to_i32(mat3x3_f32[0u].x);
-  uint v_41 = uint(v_39);
-  int v_42 = int((v_41 + uint(v_40)));
-  int v_43 = tint_f32_to_i32(mat3x4_f32[0u].x);
-  uint v_44 = uint(v_42);
-  int v_45 = int((v_44 + uint(v_43)));
-  int v_46 = tint_f32_to_i32(mat4x2_f32[0u].x);
-  uint v_47 = uint(v_45);
-  int v_48 = int((v_47 + uint(v_46)));
-  int v_49 = tint_f32_to_i32(mat4x3_f32[0u].x);
-  uint v_50 = uint(v_48);
-  int v_51 = int((v_50 + uint(v_49)));
-  int v_52 = tint_f32_to_i32(mat4x4_f32[0u].x);
-  uint v_53 = uint(v_51);
-  int v_54 = int((v_53 + uint(v_52)));
-  int v_55 = tint_f32_to_i32(arr2_vec3_f32[0u].x);
+  uvec4 v_36 = v.inner[0u];
+  float scalar_f32 = uintBitsToFloat(v_36.x);
+  uvec4 v_37 = v.inner[0u];
+  int scalar_i32 = int(v_37.y);
+  uvec4 v_38 = v.inner[0u];
+  uint scalar_u32 = v_38.z;
+  vec2 vec2_f32 = uintBitsToFloat(v.inner[1u].xy);
+  ivec2 vec2_i32 = ivec2(v.inner[1u].zw);
+  uvec2 vec2_u32 = v.inner[2u].xy;
+  vec3 vec3_f32 = uintBitsToFloat(v.inner[3u].xyz);
+  ivec3 vec3_i32 = ivec3(v.inner[4u].xyz);
+  uvec3 vec3_u32 = v.inner[5u].xyz;
+  vec4 vec4_f32 = uintBitsToFloat(v.inner[6u]);
+  ivec4 vec4_i32 = ivec4(v.inner[7u]);
+  uvec4 vec4_u32 = v.inner[8u];
+  mat2 mat2x2_f32 = v_32(144u);
+  mat2x3 mat2x3_f32 = v_31(160u);
+  mat2x4 mat2x4_f32 = v_30(192u);
+  mat3x2 mat3x2_f32 = v_24(224u);
+  mat3 mat3x3_f32 = v_23(256u);
+  mat3x4 mat3x4_f32 = v_22(304u);
+  mat4x2 mat4x2_f32 = v_14(352u);
+  mat4x3 mat4x3_f32 = v_13(384u);
+  mat4 mat4x4_f32 = v_12(448u);
+  vec3 arr2_vec3_f32[2] = v_9(512u);
+  Inner struct_inner = v_2(544u);
+  Inner array_struct_inner[4] = v_6(576u);
+  uint v_39 = uint(tint_f32_to_i32(scalar_f32));
+  int v_40 = int((v_39 + uint(scalar_i32)));
+  int v_41 = int(scalar_u32);
+  uint v_42 = uint(v_40);
+  int v_43 = int((v_42 + uint(v_41)));
+  int v_44 = tint_f32_to_i32(vec2_f32.x);
+  uint v_45 = uint(v_43);
+  uint v_46 = uint(int((v_45 + uint(v_44))));
+  int v_47 = int((v_46 + uint(vec2_i32.x)));
+  int v_48 = int(vec2_u32.x);
+  uint v_49 = uint(v_47);
+  int v_50 = int((v_49 + uint(v_48)));
+  int v_51 = tint_f32_to_i32(vec3_f32.y);
+  uint v_52 = uint(v_50);
+  uint v_53 = uint(int((v_52 + uint(v_51))));
+  int v_54 = int((v_53 + uint(vec3_i32.y)));
+  int v_55 = int(vec3_u32.y);
   uint v_56 = uint(v_54);
-  uint v_57 = uint(int((v_56 + uint(v_55))));
-  uint v_58 = uint(int((v_57 + uint(struct_inner.scalar_i32))));
-  v_1.inner = int((v_58 + uint(array_struct_inner[0u].scalar_i32)));
+  int v_57 = int((v_56 + uint(v_55)));
+  int v_58 = tint_f32_to_i32(vec4_f32.z);
+  uint v_59 = uint(v_57);
+  uint v_60 = uint(int((v_59 + uint(v_58))));
+  int v_61 = int((v_60 + uint(vec4_i32.z)));
+  int v_62 = int(vec4_u32.z);
+  uint v_63 = uint(v_61);
+  int v_64 = int((v_63 + uint(v_62)));
+  int v_65 = tint_f32_to_i32(mat2x2_f32[0u].x);
+  uint v_66 = uint(v_64);
+  int v_67 = int((v_66 + uint(v_65)));
+  int v_68 = tint_f32_to_i32(mat2x3_f32[0u].x);
+  uint v_69 = uint(v_67);
+  int v_70 = int((v_69 + uint(v_68)));
+  int v_71 = tint_f32_to_i32(mat2x4_f32[0u].x);
+  uint v_72 = uint(v_70);
+  int v_73 = int((v_72 + uint(v_71)));
+  int v_74 = tint_f32_to_i32(mat3x2_f32[0u].x);
+  uint v_75 = uint(v_73);
+  int v_76 = int((v_75 + uint(v_74)));
+  int v_77 = tint_f32_to_i32(mat3x3_f32[0u].x);
+  uint v_78 = uint(v_76);
+  int v_79 = int((v_78 + uint(v_77)));
+  int v_80 = tint_f32_to_i32(mat3x4_f32[0u].x);
+  uint v_81 = uint(v_79);
+  int v_82 = int((v_81 + uint(v_80)));
+  int v_83 = tint_f32_to_i32(mat4x2_f32[0u].x);
+  uint v_84 = uint(v_82);
+  int v_85 = int((v_84 + uint(v_83)));
+  int v_86 = tint_f32_to_i32(mat4x3_f32[0u].x);
+  uint v_87 = uint(v_85);
+  int v_88 = int((v_87 + uint(v_86)));
+  int v_89 = tint_f32_to_i32(mat4x4_f32[0u].x);
+  uint v_90 = uint(v_88);
+  int v_91 = int((v_90 + uint(v_89)));
+  int v_92 = tint_f32_to_i32(arr2_vec3_f32[0u].x);
+  uint v_93 = uint(v_91);
+  uint v_94 = uint(int((v_93 + uint(v_92))));
+  uint v_95 = uint(int((v_94 + uint(struct_inner.scalar_i32))));
+  v_1.inner = int((v_95 + uint(array_struct_inner[0u].scalar_i32)));
 }

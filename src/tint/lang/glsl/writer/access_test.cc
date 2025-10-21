@@ -843,26 +843,13 @@ TEST_F(GlslWriterTest, AccessUniformChainFromUnnamedAccessChain) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
-struct Inner {
-  float c;
-  uint d;
-};
-
-struct SB {
-  int a;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  Inner b;
-};
-
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  SB inner[4];
+  uvec4 inner[8];
 } v_1;
 void main() {
-  uint b = v_1.inner[2u].b.d;
+  uvec4 v_2 = v_1.inner[5u];
+  uint b = v_2.y;
 }
 )");
 }
@@ -897,25 +884,13 @@ TEST_F(GlslWriterTest, AccessUniformChainFromLetAccessChain) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
-struct Inner {
-  float c;
-};
-
-struct SB {
-  int a;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  Inner b;
-};
-
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  SB inner;
+  uvec4 inner[2];
 } v_1;
 void main() {
-  float a = v_1.inner.b.c;
+  uvec4 v_2 = v_1.inner[1u];
+  float a = uintBitsToFloat(v_2.x);
 }
 )");
 }
@@ -937,10 +912,11 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  float inner;
+  uvec4 inner[1];
 } v_1;
 void main() {
-  float a = v_1.inner;
+  uvec4 v_2 = v_1.inner[0u];
+  float a = uintBitsToFloat(v_2.x);
 }
 )");
 }
@@ -963,10 +939,14 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  float16_t inner;
+  uvec4 inner[1];
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
 void main() {
-  float16_t a = v_1.inner;
+  uvec4 v_2 = v_1.inner[0u];
+  float16_t a = tint_bitcast_to_f16(v_2.x).x;
 }
 )");
 }
@@ -992,18 +972,18 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  vec4 inner;
+  uvec4 inner[1];
 } v_1;
 void main() {
-  vec4 a = v_1.inner;
-  vec4 v_2 = v_1.inner;
-  float b = v_2.x;
-  vec4 v_3 = v_1.inner;
-  float c = v_3.y;
-  vec4 v_4 = v_1.inner;
-  float d = v_4.z;
-  vec4 v_5 = v_1.inner;
-  float e = v_5.w;
+  vec4 a = uintBitsToFloat(v_1.inner[0u]);
+  uvec4 v_2 = v_1.inner[0u];
+  float b = uintBitsToFloat(v_2.x);
+  uvec4 v_3 = v_1.inner[0u];
+  float c = uintBitsToFloat(v_3.y);
+  uvec4 v_4 = v_1.inner[0u];
+  float d = uintBitsToFloat(v_4.z);
+  uvec4 v_5 = v_1.inner[0u];
+  float e = uintBitsToFloat(v_5.w);
 }
 )");
 }
@@ -1031,19 +1011,26 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  f16vec4 inner;
+  uvec4 inner[1];
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
+f16vec4 tint_bitcast_to_f16_1(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
 void main() {
   uint x = 1u;
-  f16vec4 a = v_1.inner;
-  f16vec4 v_2 = v_1.inner;
-  float16_t b = v_2.x;
-  f16vec4 v_3 = v_1.inner;
-  float16_t c = v_3[min(x, 3u)];
-  f16vec4 v_4 = v_1.inner;
-  float16_t d = v_4.z;
-  f16vec4 v_5 = v_1.inner;
-  float16_t e = v_5.w;
+  f16vec4 a = tint_bitcast_to_f16_1(v_1.inner[0u].xy);
+  uvec4 v_2 = v_1.inner[0u];
+  float16_t b = tint_bitcast_to_f16(v_2.x).x;
+  uint v_3 = (min(x, 3u) * 2u);
+  uvec4 v_4 = v_1.inner[(v_3 / 16u)];
+  float16_t c = tint_bitcast_to_f16(v_4[((v_3 % 16u) / 4u)])[mix(1u, 0u, ((v_3 % 4u) == 0u))];
+  uvec4 v_5 = v_1.inner[0u];
+  float16_t d = tint_bitcast_to_f16(v_5.y).x;
+  uvec4 v_6 = v_1.inner[0u];
+  float16_t e = tint_bitcast_to_f16(v_6.y).y;
 }
 )");
 }
@@ -1068,13 +1055,16 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  mat4 inner;
+  uvec4 inner[4];
 } v_1;
+mat4 v_2(uint start_byte_offset) {
+  return mat4(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((48u + start_byte_offset) / 16u)]));
+}
 void main() {
-  mat4 a = v_1.inner;
-  vec4 b = v_1.inner[3u];
-  vec4 v_2 = v_1.inner[1u];
-  float c = v_2.z;
+  mat4 a = v_2(0u);
+  vec4 b = uintBitsToFloat(v_1.inner[3u]);
+  uvec4 v_3 = v_1.inner[1u];
+  float c = uintBitsToFloat(v_3.z);
 }
 )");
 }
@@ -1098,16 +1088,17 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  vec3 inner_col0;
-  uint tint_pad_0;
-  vec3 inner_col1;
+uniform f_v_block_ubo {
+  uvec4 inner[2];
 } v_1;
+mat2x3 v_2(uint start_byte_offset) {
+  return mat2x3(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)].xyz));
+}
 void main() {
-  mat2x3 a = mat2x3(v_1.inner_col0, v_1.inner_col1);
-  vec3 b = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  vec3 v_2 = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = v_2.z;
+  mat2x3 a = v_2(0u);
+  vec3 b = uintBitsToFloat(v_1.inner[1u].xyz);
+  uvec4 v_3 = v_1.inner[1u];
+  float c = uintBitsToFloat(v_3.z);
 }
 )");
 }
@@ -1131,15 +1122,26 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  f16vec3 inner_col0;
-  f16vec3 inner_col1;
+uniform f_v_block_ubo {
+  uvec4 inner[1];
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
+f16vec4 tint_bitcast_to_f16_1(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
+f16mat2x3 v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  f16vec3 v_4 = tint_bitcast_to_f16_1(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u)))).xyz;
+  uvec4 v_5 = v_1.inner[((8u + start_byte_offset) / 16u)];
+  return f16mat2x3(v_4, tint_bitcast_to_f16_1(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))).xyz);
+}
 void main() {
-  f16mat2x3 a = f16mat2x3(v_1.inner_col0, v_1.inner_col1);
-  f16vec3 b = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  f16vec3 v_2 = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = v_2.z;
+  f16mat2x3 a = v_2(0u);
+  f16vec3 b = tint_bitcast_to_f16_1(v_1.inner[0u].zw).xyz;
+  uvec4 v_6 = v_1.inner[0u];
+  float16_t c = tint_bitcast_to_f16(v_6.w).x;
 }
 )");
 }
@@ -1163,16 +1165,22 @@ TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  vec2 inner_col0;
-  vec2 inner_col1;
-  vec2 inner_col2;
+uniform f_v_block_ubo {
+  uvec4 inner[2];
 } v_1;
+mat3x2 v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  vec2 v_4 = uintBitsToFloat(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_5 = v_1.inner[((8u + start_byte_offset) / 16u)];
+  vec2 v_6 = uintBitsToFloat(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_7 = v_1.inner[((16u + start_byte_offset) / 16u)];
+  return mat3x2(v_4, v_6, uintBitsToFloat(mix(v_7.xy, v_7.zw, bvec2(((((16u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 void main() {
-  mat3x2 a = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2);
-  vec2 b = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
-  vec2 v_2 = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
-  float c = v_2.y;
+  mat3x2 a = v_2(0u);
+  vec2 b = uintBitsToFloat(v_1.inner[0u].zw);
+  uvec4 v_8 = v_1.inner[0u];
+  float c = uintBitsToFloat(v_8.w);
 }
 )");
 }
@@ -1196,15 +1204,20 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  vec2 inner_col0;
-  vec2 inner_col1;
+uniform f_v_block_ubo {
+  uvec4 inner[1];
 } v_1;
+mat2 v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  vec2 v_4 = uintBitsToFloat(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_5 = v_1.inner[((8u + start_byte_offset) / 16u)];
+  return mat2(v_4, uintBitsToFloat(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 void main() {
-  mat2 a = mat2(v_1.inner_col0, v_1.inner_col1);
-  vec2 b = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  vec2 v_2 = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = v_2.y;
+  mat2 a = v_2(0u);
+  vec2 b = uintBitsToFloat(v_1.inner[0u].zw);
+  uvec4 v_6 = v_1.inner[0u];
+  float c = uintBitsToFloat(v_6.w);
 }
 )");
 }
@@ -1229,15 +1242,21 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  f16vec2 inner_col0;
-  f16vec2 inner_col1;
+uniform f_v_block_ubo {
+  uvec4 inner[1];
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
+f16mat2 v_2(uint start_byte_offset) {
+  f16vec2 v_3 = tint_bitcast_to_f16(v_1.inner[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  return f16mat2(v_3, tint_bitcast_to_f16(v_1.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]));
+}
 void main() {
-  f16mat2 a = f16mat2(v_1.inner_col0, v_1.inner_col1);
-  f16vec2 b = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  f16vec2 v_2 = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = v_2.y;
+  f16mat2 a = v_2(0u);
+  f16vec2 b = tint_bitcast_to_f16(v_1.inner[0u].y);
+  uvec4 v_4 = v_1.inner[0u];
+  float16_t c = tint_bitcast_to_f16(v_4.y).y;
 }
 )");
 }
@@ -1260,11 +1279,30 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  vec3 inner[5];
+  uvec4 inner[5];
 } v_1;
+vec3[5] v_2(uint start_byte_offset) {
+  vec3 a[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  {
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 5u)) {
+        break;
+      }
+      a[v_4] = uintBitsToFloat(v_1.inner[((start_byte_offset + (v_4 * 16u)) / 16u)].xyz);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
 void main() {
-  vec3 a[5] = v_1.inner;
-  vec3 b = v_1.inner[3u];
+  vec3 a[5] = v_2(0u);
+  vec3 b = uintBitsToFloat(v_1.inner[3u].xyz);
 }
 )");
 }
@@ -1288,11 +1326,34 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  f16vec3 inner[5];
+  uvec4 inner[3];
 } v_1;
+f16vec4 tint_bitcast_to_f16(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
+f16vec3[5] v_2(uint start_byte_offset) {
+  f16vec3 a[5] = f16vec3[5](f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
+  {
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 5u)) {
+        break;
+      }
+      uvec4 v_5 = v_1.inner[((start_byte_offset + (v_4 * 8u)) / 16u)];
+      a[v_4] = tint_bitcast_to_f16(mix(v_5.xy, v_5.zw, bvec2(((((start_byte_offset + (v_4 * 8u)) % 16u) / 4u) == 2u)))).xyz;
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
 void main() {
-  f16vec3 a[5] = v_1.inner;
-  f16vec3 b = v_1.inner[3u];
+  f16vec3 a[5] = v_2(0u);
+  f16vec3 b = tint_bitcast_to_f16(v_1.inner[1u].zw).xyz;
 }
 )");
 }
@@ -1315,11 +1376,30 @@ precision highp int;
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  vec3 inner[42];
+  uvec4 inner[42];
 } v_1;
+vec3[42] v_2(uint start_byte_offset) {
+  vec3 a[42] = vec3[42](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  {
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 42u)) {
+        break;
+      }
+      a[v_4] = uintBitsToFloat(v_1.inner[((start_byte_offset + (v_4 * 16u)) / 16u)].xyz);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
 void main() {
-  vec3 a[42] = v_1.inner;
-  vec3 b = v_1.inner[3u];
+  vec3 a[42] = v_2(0u);
+  vec3 b = uintBitsToFloat(v_1.inner[3u].xyz);
 }
 )");
 }
@@ -1353,11 +1433,18 @@ struct SB {
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  SB inner;
+  uvec4 inner[1];
 } v_1;
+SB v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  int v_4 = int(v_3[((start_byte_offset % 16u) / 4u)]);
+  uvec4 v_5 = v_1.inner[((4u + start_byte_offset) / 16u)];
+  return SB(v_4, uintBitsToFloat(v_5[(((4u + start_byte_offset) % 16u) / 4u)]));
+}
 void main() {
-  SB a = v_1.inner;
-  float b = v_1.inner.b;
+  SB a = v_2(0u);
+  uvec4 v_6 = v_1.inner[0u];
+  float b = uintBitsToFloat(v_6.y);
 }
 )");
 }
@@ -1392,11 +1479,21 @@ struct SB {
 
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  SB inner;
+  uvec4 inner[1];
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
+SB v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  int v_4 = int(v_3[((start_byte_offset % 16u) / 4u)]);
+  uvec4 v_5 = v_1.inner[((4u + start_byte_offset) / 16u)];
+  return SB(v_4, tint_bitcast_to_f16(v_5[(((4u + start_byte_offset) % 16u) / 4u)])[mix(1u, 0u, (((4u + start_byte_offset) % 4u) == 0u))]);
+}
 void main() {
-  SB a = v_1.inner;
-  float16_t b = v_1.inner.b;
+  SB a = v_2(0u);
+  uvec4 v_6 = v_1.inner[0u];
+  float16_t b = tint_bitcast_to_f16(v_6.y).x;
 }
 )");
 }
@@ -1435,32 +1532,6 @@ TEST_F(GlslWriterTest, AccessUniformStructNested) {
 precision highp int;
 
 
-struct Inner_std140 {
-  vec3 s_col0;
-  uint tint_pad_0;
-  vec3 s_col1;
-  uint tint_pad_1;
-  vec3 s_col2;
-  uint tint_pad_2;
-  vec3 t[5];
-};
-
-struct Outer_std140 {
-  float x;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  Inner_std140 y;
-};
-
-struct SB_std140 {
-  int a;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  Outer_std140 b;
-};
-
 struct Inner {
   mat3 s;
   vec3 t[5];
@@ -1477,22 +1548,48 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform f_v_block_std140_ubo {
-  SB_std140 inner;
+uniform f_v_block_ubo {
+  uvec4 inner[10];
 } v_1;
-Inner tint_convert_Inner(Inner_std140 tint_input) {
-  return Inner(mat3(tint_input.s_col0, tint_input.s_col1, tint_input.s_col2), tint_input.t);
+vec3[5] v_2(uint start_byte_offset) {
+  vec3 a[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  {
+    uint v_3 = 0u;
+    v_3 = 0u;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 5u)) {
+        break;
+      }
+      a[v_4] = uintBitsToFloat(v_1.inner[((start_byte_offset + (v_4 * 16u)) / 16u)].xyz);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
 }
-Outer tint_convert_Outer(Outer_std140 tint_input) {
-  return Outer(tint_input.x, tint_convert_Inner(tint_input.y));
+mat3 v_5(uint start_byte_offset) {
+  return mat3(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)].xyz));
 }
-SB tint_convert_SB(SB_std140 tint_input) {
-  return SB(tint_input.a, tint_convert_Outer(tint_input.b));
+Inner v_6(uint start_byte_offset) {
+  mat3 v_7 = v_5(start_byte_offset);
+  return Inner(v_7, v_2((48u + start_byte_offset)));
+}
+Outer v_8(uint start_byte_offset) {
+  uvec4 v_9 = v_1.inner[(start_byte_offset / 16u)];
+  return Outer(uintBitsToFloat(v_9[((start_byte_offset % 16u) / 4u)]), v_6((16u + start_byte_offset)));
+}
+SB v_10(uint start_byte_offset) {
+  uvec4 v_11 = v_1.inner[(start_byte_offset / 16u)];
+  int v_12 = int(v_11[((start_byte_offset % 16u) / 4u)]);
+  return SB(v_12, v_8((16u + start_byte_offset)));
 }
 void main() {
-  SB a = tint_convert_SB(v_1.inner);
-  vec3 v_2 = v_1.inner.b.y.t[3u];
-  float b = v_2.z;
+  SB a = v_10(0u);
+  uvec4 v_13 = v_1.inner[8u];
+  float b = uintBitsToFloat(v_13.z);
 }
 )");
 }
@@ -2279,25 +2376,15 @@ TEST_F(GlslWriterTest, AccessUniformChainReused) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
-struct SB {
-  float c;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  vec3 d;
-  uint tint_pad_3;
-};
-
 layout(binding = 0, std140)
 uniform f_v_block_ubo {
-  SB inner;
+  uvec4 inner[2];
 } v_1;
 void main() {
-  vec3 v_2 = v_1.inner.d;
-  float b = v_2.y;
-  vec3 v_3 = v_1.inner.d;
-  float c = v_3.z;
+  uvec4 v_2 = v_1.inner[1u];
+  float b = uintBitsToFloat(v_2.y);
+  uvec4 v_3 = v_1.inner[1u];
+  float c = uintBitsToFloat(v_3.z);
 }
 )");
 }

@@ -1,10 +1,6 @@
 #version 310 es
 
 
-struct UBO {
-  int dynamic_idx;
-};
-
 struct Result {
   int member_0;
 };
@@ -15,7 +11,7 @@ struct SSBO {
 
 layout(binding = 0, std140)
 uniform ubo_block_1_ubo {
-  UBO inner;
+  uvec4 inner[1];
 } v;
 layout(binding = 1, std430)
 buffer result_block_1_ssbo {
@@ -27,7 +23,8 @@ buffer ssbo_block_1_ssbo {
 } v_2;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_3 = min(uint(v.inner.dynamic_idx), 3u);
-  v_2.inner.data[v_3] = 1;
+  uvec4 v_3 = v.inner[0u];
+  uint v_4 = min(uint(int(v_3.x)), 3u);
+  v_2.inner.data[v_4] = 1;
   v_1.inner.member_0 = v_2.inner.data[3u];
 }

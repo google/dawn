@@ -2,29 +2,6 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 
-struct Inner_std140 {
-  f16vec2 m_col0;
-  f16vec2 m_col1;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
-  uint tint_pad_6;
-  uint tint_pad_7;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  uint tint_pad_10;
-  uint tint_pad_11;
-  uint tint_pad_12;
-  uint tint_pad_13;
-};
-
-struct Outer_std140 {
-  Inner_std140 a[4];
-};
-
 struct Inner {
   f16mat2 m;
 };
@@ -34,74 +11,68 @@ struct Outer {
 };
 
 layout(binding = 0, std140)
-uniform a_block_std140_1_ubo {
-  Outer_std140 inner[4];
+uniform a_block_1_ubo {
+  uvec4 inner[64];
 } v;
-Inner tint_convert_Inner(Inner_std140 tint_input) {
-  return Inner(f16mat2(tint_input.m_col0, tint_input.m_col1));
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
 }
-Outer tint_convert_Outer(Outer_std140 tint_input) {
-  Inner v_1[4] = Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))));
+f16mat2 v_1(uint start_byte_offset) {
+  f16vec2 v_2 = tint_bitcast_to_f16(v.inner[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  return f16mat2(v_2, tint_bitcast_to_f16(v.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]));
+}
+Inner v_3(uint start_byte_offset) {
+  return Inner(v_1(start_byte_offset));
+}
+Inner[4] v_4(uint start_byte_offset) {
+  Inner a[4] = Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))));
   {
-    uint v_2 = 0u;
-    v_2 = 0u;
+    uint v_5 = 0u;
+    v_5 = 0u;
     while(true) {
-      uint v_3 = v_2;
-      if ((v_3 >= 4u)) {
+      uint v_6 = v_5;
+      if ((v_6 >= 4u)) {
         break;
       }
-      v_1[v_3] = tint_convert_Inner(tint_input.a[v_3]);
+      a[v_6] = v_3((start_byte_offset + (v_6 * 64u)));
       {
-        v_2 = (v_3 + 1u);
+        v_5 = (v_6 + 1u);
       }
       continue;
     }
   }
-  return Outer(v_1);
+  return a;
+}
+Outer v_7(uint start_byte_offset) {
+  return Outer(v_4(start_byte_offset));
+}
+Outer[4] v_8(uint start_byte_offset) {
+  Outer a[4] = Outer[4](Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))));
+  {
+    uint v_9 = 0u;
+    v_9 = 0u;
+    while(true) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
+        break;
+      }
+      a[v_10] = v_7((start_byte_offset + (v_10 * 256u)));
+      {
+        v_9 = (v_10 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f16mat2 v_4 = f16mat2(v.inner[3u].a[2u].m_col0, v.inner[3u].a[2u].m_col1);
-  Outer_std140 v_5[4] = v.inner;
-  Outer v_6[4] = Outer[4](Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))), Outer(Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))))));
-  {
-    uint v_7 = 0u;
-    v_7 = 0u;
-    while(true) {
-      uint v_8 = v_7;
-      if ((v_8 >= 4u)) {
-        break;
-      }
-      v_6[v_8] = tint_convert_Outer(v_5[v_8]);
-      {
-        v_7 = (v_8 + 1u);
-      }
-      continue;
-    }
-  }
-  Outer l_a[4] = v_6;
-  Outer l_a_3 = tint_convert_Outer(v.inner[3u]);
-  Inner_std140 v_9[4] = v.inner[3u].a;
-  Inner v_10[4] = Inner[4](Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))), Inner(f16mat2(f16vec2(0.0hf), f16vec2(0.0hf))));
-  {
-    uint v_11 = 0u;
-    v_11 = 0u;
-    while(true) {
-      uint v_12 = v_11;
-      if ((v_12 >= 4u)) {
-        break;
-      }
-      v_10[v_12] = tint_convert_Inner(v_9[v_12]);
-      {
-        v_11 = (v_12 + 1u);
-      }
-      continue;
-    }
-  }
-  Inner l_a_3_a[4] = v_10;
-  Inner l_a_3_a_2 = tint_convert_Inner(v.inner[3u].a[2u]);
-  f16mat2 l_a_3_a_2_m = v_4;
-  f16vec2 l_a_3_a_2_m_1 = v_4[1u];
-  f16vec2 v_13 = v_4[1u];
-  float16_t l_a_3_a_2_m_1_0 = v_13.x;
+  Outer l_a[4] = v_8(0u);
+  Outer l_a_3 = v_7(768u);
+  Inner l_a_3_a[4] = v_4(768u);
+  Inner l_a_3_a_2 = v_3(896u);
+  f16mat2 l_a_3_a_2_m = v_1(896u);
+  f16vec2 l_a_3_a_2_m_1 = tint_bitcast_to_f16(v.inner[56u].y);
+  uvec4 v_11 = v.inner[56u];
+  float16_t l_a_3_a_2_m_1_0 = tint_bitcast_to_f16(v_11.y).x;
 }

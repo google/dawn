@@ -1,10 +1,6 @@
 #version 310 es
 
 
-struct Uniforms {
-  uint i;
-};
-
 struct InnerS {
   int v;
 };
@@ -15,7 +11,7 @@ struct OuterS {
 
 layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
-  Uniforms inner;
+  uvec4 inner[1];
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -24,8 +20,8 @@ void main() {
   int i = 0;
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
-    uint v_2 = min(v_1.inner.i, 7u);
-    s1.a1[v_2] = v;
+    uvec4 v_2 = v_1.inner[0u];
+    s1.a1[min(v_2.x, 7u)] = v;
     while(true) {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;

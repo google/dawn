@@ -1,14 +1,19 @@
 #version 310 es
 
 layout(binding = 0, std140)
-uniform m_block_std140_1_ubo {
-  vec2 inner_col0;
-  vec2 inner_col1;
-  vec2 inner_col2;
+uniform m_block_1_ubo {
+  uvec4 inner[2];
 } v;
+mat3x2 v_1(uint start_byte_offset) {
+  uvec4 v_2 = v.inner[(start_byte_offset / 16u)];
+  vec2 v_3 = uintBitsToFloat(mix(v_2.xy, v_2.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_4 = v.inner[((8u + start_byte_offset) / 16u)];
+  vec2 v_5 = uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_6 = v.inner[((16u + start_byte_offset) / 16u)];
+  return mat3x2(v_3, v_5, uintBitsToFloat(mix(v_6.xy, v_6.zw, bvec2(((((16u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  mat3x2 v_1 = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
-  mat3x2 l_m = v_1;
-  vec2 l_m_1 = v_1[1u];
+  mat3x2 l_m = v_1(0u);
+  vec2 l_m_1 = uintBitsToFloat(v.inner[0u].zw);
 }

@@ -1,16 +1,21 @@
 #version 310 es
 
 layout(binding = 0, std140)
-uniform u_block_std140_1_ubo {
-  vec2 inner_col0;
-  vec2 inner_col1;
+uniform u_block_1_ubo {
+  uvec4 inner[1];
 } v;
 mat2 p = mat2(vec2(0.0f), vec2(0.0f));
+mat2 v_1(uint start_byte_offset) {
+  uvec4 v_2 = v.inner[(start_byte_offset / 16u)];
+  vec2 v_3 = uintBitsToFloat(mix(v_2.xy, v_2.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_4 = v.inner[((8u + start_byte_offset) / 16u)];
+  return mat2(v_3, uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  p = mat2(v.inner_col0, v.inner_col1);
-  p[1u] = mat2(v.inner_col0, v.inner_col1)[0u];
-  p[1u] = mat2(v.inner_col0, v.inner_col1)[0u].yx;
-  vec2 v_1 = mat2(v.inner_col0, v.inner_col1)[1u];
-  p[0u].y = v_1.x;
+  p = v_1(0u);
+  p[1u] = uintBitsToFloat(v.inner[0u].xy);
+  p[1u] = uintBitsToFloat(v.inner[0u].xy).yx;
+  uvec4 v_5 = v.inner[0u];
+  p[0u].y = uintBitsToFloat(v_5.z);
 }

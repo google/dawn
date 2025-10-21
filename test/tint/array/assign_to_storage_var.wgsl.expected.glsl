@@ -13,7 +13,7 @@ ivec4 src_private[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
 shared ivec4 src_workgroup[4];
 layout(binding = 0, std140)
 uniform src_uniform_block_1_ubo {
-  S inner;
+  uvec4 inner[4];
 } v;
 layout(binding = 1, std430)
 buffer src_storage_block_1_ssbo {
@@ -33,6 +33,25 @@ ivec4[4] ret_arr() {
 S ret_struct_arr() {
   return S(ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0)));
 }
+ivec4[4] v_4(uint start_byte_offset) {
+  ivec4 a[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
+  {
+    uint v_5 = 0u;
+    v_5 = 0u;
+    while(true) {
+      uint v_6 = v_5;
+      if ((v_6 >= 4u)) {
+        break;
+      }
+      a[v_6] = ivec4(v.inner[((start_byte_offset + (v_6 * 16u)) / 16u)]);
+      {
+        v_5 = (v_6 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
 void foo(ivec4 src_param[4]) {
   ivec4 src_function[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   v_2.inner.arr = ivec4[4](ivec4(1), ivec4(2), ivec4(3), ivec4(3));
@@ -44,23 +63,23 @@ void foo(ivec4 src_param[4]) {
   v_2.inner.arr = src_private;
   v_2.inner.arr = src_workgroup;
   v_2.inner.arr = ret_struct_arr().arr;
-  v_2.inner.arr = v.inner.arr;
+  v_2.inner.arr = v_4(0u);
   v_2.inner.arr = v_1.inner.arr;
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
   v_3.inner.arr = src_nested;
 }
 void main_inner(uint tint_local_index) {
   {
-    uint v_4 = 0u;
-    v_4 = tint_local_index;
+    uint v_7 = 0u;
+    v_7 = tint_local_index;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4u)) {
         break;
       }
-      src_workgroup[v_5] = ivec4(0);
+      src_workgroup[v_8] = ivec4(0);
       {
-        v_4 = (v_5 + 1u);
+        v_7 = (v_8 + 1u);
       }
       continue;
     }

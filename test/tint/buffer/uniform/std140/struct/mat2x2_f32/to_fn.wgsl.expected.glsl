@@ -1,39 +1,6 @@
 #version 310 es
 
 
-struct S_std140 {
-  int before;
-  uint tint_pad_0;
-  vec2 m_col0;
-  vec2 m_col1;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
-  uint tint_pad_6;
-  uint tint_pad_7;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  uint tint_pad_10;
-  int after;
-  uint tint_pad_11;
-  uint tint_pad_12;
-  uint tint_pad_13;
-  uint tint_pad_14;
-  uint tint_pad_15;
-  uint tint_pad_16;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
-  uint tint_pad_23;
-  uint tint_pad_24;
-  uint tint_pad_25;
-};
-
 struct S {
   int before;
   mat2 m;
@@ -41,8 +8,8 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform u_block_std140_1_ubo {
-  S_std140 inner[4];
+uniform u_block_1_ubo {
+  uvec4 inner[32];
 } v_1;
 void a(S a_1[4]) {
 }
@@ -54,31 +21,43 @@ void d(vec2 v) {
 }
 void e(float f_1) {
 }
-S tint_convert_S(S_std140 tint_input) {
-  return S(tint_input.before, mat2(tint_input.m_col0, tint_input.m_col1), tint_input.after);
+mat2 v_2(uint start_byte_offset) {
+  uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
+  vec2 v_4 = uintBitsToFloat(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_5 = v_1.inner[((8u + start_byte_offset) / 16u)];
+  return mat2(v_4, uintBitsToFloat(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  S_std140 v_2[4] = v_1.inner;
-  S v_3[4] = S[4](S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0));
+S v_6(uint start_byte_offset) {
+  uvec4 v_7 = v_1.inner[(start_byte_offset / 16u)];
+  int v_8 = int(v_7[((start_byte_offset % 16u) / 4u)]);
+  mat2 v_9 = v_2((8u + start_byte_offset));
+  uvec4 v_10 = v_1.inner[((64u + start_byte_offset) / 16u)];
+  return S(v_8, v_9, int(v_10[(((64u + start_byte_offset) % 16u) / 4u)]));
+}
+S[4] v_11(uint start_byte_offset) {
+  S a_2[4] = S[4](S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0), S(0, mat2(vec2(0.0f), vec2(0.0f)), 0));
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint v_12 = 0u;
+    v_12 = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_13 = v_12;
+      if ((v_13 >= 4u)) {
         break;
       }
-      v_3[v_5] = tint_convert_S(v_2[v_5]);
+      a_2[v_13] = v_6((start_byte_offset + (v_13 * 128u)));
       {
-        v_4 = (v_5 + 1u);
+        v_12 = (v_13 + 1u);
       }
       continue;
     }
   }
-  a(v_3);
-  b(tint_convert_S(v_1.inner[2u]));
-  c(mat2(v_1.inner[2u].m_col0, v_1.inner[2u].m_col1));
-  d(v_1.inner[0u].m_col1.yx);
-  e(v_1.inner[0u].m_col1.yx.x);
+  return a_2;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a(v_11(0u));
+  b(v_6(256u));
+  c(v_2(264u));
+  d(uintBitsToFloat(v_1.inner[1u].xy).yx);
+  e(uintBitsToFloat(v_1.inner[1u].xy).yx.x);
 }

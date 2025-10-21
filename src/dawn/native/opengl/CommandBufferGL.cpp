@@ -364,6 +364,10 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     switch (layout.type) {
                         case wgpu::BufferBindingType::Uniform:
                             target = GL_UNIFORM_BUFFER;
+
+                            // Round uniform buffer binding sizes up to a multiple of 16 bytes since
+                            // Tint will polyfill them as array<vec4u, ...>.
+                            binding.size = Align(binding.size, 16u);
                             break;
                         case wgpu::BufferBindingType::Storage:
                         case kInternalStorageBufferBinding:

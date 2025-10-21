@@ -2,10 +2,11 @@
 
 layout(binding = 0, std140)
 uniform i_block_1_ubo {
-  uint inner;
+  uvec4 inner[1];
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   vec3 v1 = vec3(0.0f);
-  v1[min(v.inner, 2u)] = 1.0f;
+  uvec4 v_1 = v.inner[0u];
+  v1[min(v_1.x, 2u)] = 1.0f;
 }

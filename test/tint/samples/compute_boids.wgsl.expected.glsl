@@ -36,16 +36,6 @@ void main() {
 #version 310 es
 
 
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-
 struct Particle {
   vec2 pos;
   vec2 vel;
@@ -57,7 +47,7 @@ struct Particles {
 
 layout(binding = 0, std140)
 uniform params_block_1_ubo {
-  SimParams inner;
+  uvec4 inner[2];
 } v;
 layout(binding = 1, std430)
 buffer particlesA_block_1_ssbo {
@@ -100,18 +90,21 @@ void comp_main_inner(uvec3 v_3) {
       pos = v_1.inner.particles[v_6].pos.xy;
       uint v_7 = min(i, 4u);
       vel = v_1.inner.particles[v_7].vel.xy;
-      if ((distance(pos, vPos) < v.inner.rule1Distance)) {
+      uvec4 v_8 = v.inner[0u];
+      if ((distance(pos, vPos) < uintBitsToFloat(v_8.y))) {
         cMass = (cMass + pos);
-        uint v_8 = uint(cMassCount);
-        cMassCount = int((v_8 + uint(1)));
+        uint v_9 = uint(cMassCount);
+        cMassCount = int((v_9 + uint(1)));
       }
-      if ((distance(pos, vPos) < v.inner.rule2Distance)) {
+      uvec4 v_10 = v.inner[0u];
+      if ((distance(pos, vPos) < uintBitsToFloat(v_10.z))) {
         colVel = (colVel - (pos - vPos));
       }
-      if ((distance(pos, vPos) < v.inner.rule3Distance)) {
+      uvec4 v_11 = v.inner[0u];
+      if ((distance(pos, vPos) < uintBitsToFloat(v_11.w))) {
         cVel = (cVel + vel);
-        uint v_9 = uint(cVelCount);
-        cVelCount = int((v_9 + uint(1)));
+        uint v_12 = uint(cVelCount);
+        cVelCount = int((v_12 + uint(1)));
       }
       {
         i = (i + 1u);
@@ -120,19 +113,23 @@ void comp_main_inner(uvec3 v_3) {
     }
   }
   if ((cMassCount > 0)) {
-    vec2 v_10 = cMass;
-    float v_11 = float(cMassCount);
-    vec2 v_12 = (v_10 / vec2(v_11, float(cMassCount)));
-    cMass = (v_12 - vPos);
+    vec2 v_13 = cMass;
+    float v_14 = float(cMassCount);
+    vec2 v_15 = (v_13 / vec2(v_14, float(cMassCount)));
+    cMass = (v_15 - vPos);
   }
   if ((cVelCount > 0)) {
-    vec2 v_13 = cVel;
-    float v_14 = float(cVelCount);
-    cVel = (v_13 / vec2(v_14, float(cVelCount)));
+    vec2 v_16 = cVel;
+    float v_17 = float(cVelCount);
+    cVel = (v_16 / vec2(v_17, float(cVelCount)));
   }
-  vVel = (((vVel + (cMass * v.inner.rule1Scale)) + (colVel * v.inner.rule2Scale)) + (cVel * v.inner.rule3Scale));
+  uvec4 v_18 = v.inner[1u];
+  uvec4 v_19 = v.inner[1u];
+  uvec4 v_20 = v.inner[1u];
+  vVel = (((vVel + (cMass * uintBitsToFloat(v_18.x))) + (colVel * uintBitsToFloat(v_19.y))) + (cVel * uintBitsToFloat(v_20.z)));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
-  vPos = (vPos + (vVel * v.inner.deltaT));
+  uvec4 v_21 = v.inner[0u];
+  vPos = (vPos + (vVel * uintBitsToFloat(v_21.x)));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;
   }
@@ -145,10 +142,10 @@ void comp_main_inner(uvec3 v_3) {
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  uint v_15 = min(index, 4u);
-  v_2.inner.particles[v_15].pos = vPos;
-  uint v_16 = min(index, 4u);
-  v_2.inner.particles[v_16].vel = vVel;
+  uint v_22 = min(index, 4u);
+  v_2.inner.particles[v_22].pos = vPos;
+  uint v_23 = min(index, 4u);
+  v_2.inner.particles[v_23].vel = vVel;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

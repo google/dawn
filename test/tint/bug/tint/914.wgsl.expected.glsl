@@ -1,12 +1,5 @@
 #version 310 es
 
-
-struct Uniforms {
-  uint dimAOuter;
-  uint dimInner;
-  uint dimBOuter;
-};
-
 layout(binding = 0, std430)
 buffer Matrix_1_ssbo {
   float numbers[];
@@ -21,51 +14,58 @@ buffer Matrix_3_ssbo {
 } resultMatrix;
 layout(binding = 3, std140)
 uniform uniforms_block_1_ubo {
-  Uniforms inner;
+  uvec4 inner[1];
 } v;
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
 float mm_readA(uint row, uint col) {
-  bool v_1 = false;
-  if ((row < v.inner.dimAOuter)) {
-    v_1 = (col < v.inner.dimInner);
+  uvec4 v_1 = v.inner[0u];
+  bool v_2 = false;
+  if ((row < v_1.x)) {
+    uvec4 v_3 = v.inner[0u];
+    v_2 = (col < v_3.y);
   } else {
-    v_1 = false;
+    v_2 = false;
   }
-  if (v_1) {
-    uint v_2 = ((row * v.inner.dimInner) + col);
-    uint v_3 = min(v_2, (uint(firstMatrix.numbers.length()) - 1u));
-    float result = firstMatrix.numbers[v_3];
+  if (v_2) {
+    uvec4 v_4 = v.inner[0u];
+    uint v_5 = min(((row * v_4.y) + col), (uint(firstMatrix.numbers.length()) - 1u));
+    float result = firstMatrix.numbers[v_5];
     return result;
   }
   return 0.0f;
 }
 float mm_readB(uint row, uint col) {
-  bool v_4 = false;
-  if ((row < v.inner.dimInner)) {
-    v_4 = (col < v.inner.dimBOuter);
+  uvec4 v_6 = v.inner[0u];
+  bool v_7 = false;
+  if ((row < v_6.y)) {
+    uvec4 v_8 = v.inner[0u];
+    v_7 = (col < v_8.z);
   } else {
-    v_4 = false;
+    v_7 = false;
   }
-  if (v_4) {
-    uint v_5 = ((row * v.inner.dimBOuter) + col);
-    uint v_6 = min(v_5, (uint(secondMatrix.numbers.length()) - 1u));
-    float result = secondMatrix.numbers[v_6];
+  if (v_7) {
+    uvec4 v_9 = v.inner[0u];
+    uint v_10 = min(((row * v_9.z) + col), (uint(secondMatrix.numbers.length()) - 1u));
+    float result = secondMatrix.numbers[v_10];
     return result;
   }
   return 0.0f;
 }
 void mm_write(uint row, uint col, float value) {
-  bool v_7 = false;
-  if ((row < v.inner.dimAOuter)) {
-    v_7 = (col < v.inner.dimBOuter);
+  uvec4 v_11 = v.inner[0u];
+  bool v_12 = false;
+  if ((row < v_11.x)) {
+    uvec4 v_13 = v.inner[0u];
+    v_12 = (col < v_13.z);
   } else {
-    v_7 = false;
+    v_12 = false;
   }
-  if (v_7) {
-    uint index = (col + (row * v.inner.dimBOuter));
-    uint v_8 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
-    resultMatrix.numbers[v_8] = value;
+  if (v_12) {
+    uvec4 v_14 = v.inner[0u];
+    uint index = (col + (row * v_14.z));
+    uint v_15 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
+    resultMatrix.numbers[v_15] = value;
   }
 }
 uint tint_div_u32(uint lhs, uint rhs) {
@@ -73,17 +73,17 @@ uint tint_div_u32(uint lhs, uint rhs) {
 }
 void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   {
-    uint v_9 = 0u;
-    v_9 = tint_local_index;
+    uint v_16 = 0u;
+    v_16 = tint_local_index;
     while(true) {
-      uint v_10 = v_9;
-      if ((v_10 >= 4096u)) {
+      uint v_17 = v_16;
+      if ((v_17 >= 4096u)) {
         break;
       }
-      mm_Asub[(v_10 / 64u)][(v_10 % 64u)] = 0.0f;
-      mm_Bsub[(v_10 / 64u)][(v_10 % 64u)] = 0.0f;
+      mm_Asub[(v_17 / 64u)][(v_17 % 64u)] = 0.0f;
+      mm_Bsub[(v_17 / 64u)][(v_17 % 64u)] = 0.0f;
       {
-        v_9 = (v_10 + 256u);
+        v_16 = (v_17 + 256u);
       }
       continue;
     }
@@ -93,7 +93,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);
   uint globalCol = (global_id.x * 4u);
-  uint numTiles = (tint_div_u32((v.inner.dimInner - 1u), 64u) + 1u);
+  uvec4 v_18 = v.inner[0u];
+  uint numTiles = (tint_div_u32((v_18.y - 1u), 64u) + 1u);
   float acc[16] = float[16](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
@@ -104,8 +105,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
       } else {
         break;
       }
-      uint v_11 = min(index, 15u);
-      acc[v_11] = 0.0f;
+      uint v_19 = min(index, 15u);
+      acc[v_19] = 0.0f;
       {
         index = (index + 1u);
       }
@@ -168,8 +169,8 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               }
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              uint v_12 = min(innerCol, 63u);
-              mm_Bsub[v_12][min(inputCol, 63u)] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              uint v_20 = min(innerCol, 63u);
+              mm_Bsub[v_20][min(inputCol, 63u)] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
               {
                 innerCol = (innerCol + 1u);
               }
@@ -197,10 +198,10 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              uint v_13 = min(inner, 3u);
-              uint v_14 = min(k, 63u);
-              uint v_15 = min((tileCol + inner), 63u);
-              BCached[v_13] = mm_Bsub[v_14][v_15];
+              uint v_21 = min(inner, 3u);
+              uint v_22 = min(k, 63u);
+              uint v_23 = min((tileCol + inner), 63u);
+              BCached[v_21] = mm_Bsub[v_22][v_23];
               {
                 inner = (inner + 1u);
               }
@@ -214,9 +215,9 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              uint v_16 = min((tileRow + innerRow), 63u);
-              uint v_17 = min(k, 63u);
-              ACached = mm_Asub[v_16][v_17];
+              uint v_24 = min((tileRow + innerRow), 63u);
+              uint v_25 = min(k, 63u);
+              ACached = mm_Asub[v_24][v_25];
               {
                 uint innerCol = 0u;
                 while(true) {
@@ -225,10 +226,10 @@ void main_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
                     break;
                   }
                   uint index = ((innerRow * 4u) + innerCol);
-                  float v_18 = acc[min(index, 15u)];
-                  float v_19 = ACached;
-                  uint v_20 = min(innerCol, 3u);
-                  acc[min(index, 15u)] = (v_18 + (v_19 * BCached[v_20]));
+                  float v_26 = acc[min(index, 15u)];
+                  float v_27 = ACached;
+                  uint v_28 = min(innerCol, 3u);
+                  acc[min(index, 15u)] = (v_26 + (v_27 * BCached[v_28]));
                   {
                     innerCol = (innerCol + 1u);
                   }

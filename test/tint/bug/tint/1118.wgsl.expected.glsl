@@ -3,22 +3,6 @@ precision highp float;
 precision highp int;
 
 
-struct Scene {
-  vec4 vEyePosition;
-};
-
-struct Material {
-  vec4 vDiffuseColor;
-  vec3 vAmbientColor;
-  float placeholder;
-  vec3 vEmissiveColor;
-  float placeholder2;
-};
-
-struct Mesh {
-  float visibility;
-};
-
 struct main_out {
   vec4 glFragColor_1;
 };
@@ -27,15 +11,15 @@ float fClipDistance3 = 0.0f;
 float fClipDistance4 = 0.0f;
 layout(binding = 0, std140)
 uniform f_x_29_block_ubo {
-  Scene inner;
+  uvec4 inner[1];
 } v;
 layout(binding = 1, std140)
 uniform f_x_49_block_ubo {
-  Material inner;
+  uvec4 inner[3];
 } v_1;
 layout(binding = 2, std140)
 uniform f_x_137_block_ubo {
-  Mesh inner;
+  uvec4 inner[1];
 } v_2;
 vec4 glFragColor = vec4(0.0f);
 bool continue_execution = true;
@@ -67,14 +51,14 @@ void main_1() {
   if ((x_17 > 0.0f)) {
     continue_execution = false;
   }
-  vec4 x_34 = v.inner.vEyePosition;
+  vec4 x_34 = uintBitsToFloat(v.inner[0u]);
   vec3 x_38 = vec3(0.0f);
   viewDirectionW = normalize((vec3(x_34.x, x_34.y, x_34.z) - x_38));
   baseColor = vec4(1.0f);
-  vec4 x_52 = v_1.inner.vDiffuseColor;
+  vec4 x_52 = uintBitsToFloat(v_1.inner[0u]);
   diffuseColor = vec3(x_52.x, x_52.y, x_52.z);
-  vec4 v_3 = v_1.inner.vDiffuseColor;
-  float x_60 = v_3.w;
+  uvec4 v_3 = v_1.inner[0u];
+  float x_60 = uintBitsToFloat(v_3.w);
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
@@ -91,12 +75,12 @@ void main_1() {
   shadow = 1.0f;
   refractionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
   reflectionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  vec3 x_94 = v_1.inner.vEmissiveColor;
+  vec3 x_94 = uintBitsToFloat(v_1.inner[2u].xyz);
   emissiveColor = x_94;
   vec3 x_96 = diffuseBase;
   vec3 x_97 = diffuseColor;
   vec3 x_99 = emissiveColor;
-  vec3 x_103 = v_1.inner.vAmbientColor;
+  vec3 x_103 = uintBitsToFloat(v_1.inner[1u].xyz);
   vec4 x_108 = baseColor;
   finalDiffuse = (clamp((((x_96 * x_97) + x_99) + x_103), vec3(0.0f), vec3(1.0f)) * vec3(x_108.x, x_108.y, x_108.z));
   finalSpecular = vec3(0.0f);
@@ -113,7 +97,8 @@ void main_1() {
   vec3 x_132 = max(vec3(x_129.x, x_129.y, x_129.z), vec3(0.0f));
   vec4 x_133 = color;
   color = vec4(x_132.x, x_132.y, x_132.z, x_133.w);
-  float x_140 = v_2.inner.visibility;
+  uvec4 v_6 = v_2.inner[0u];
+  float x_140 = uintBitsToFloat(v_6.x);
   float x_142 = color.w;
   color.w = (x_142 * x_140);
   vec4 x_147 = color;
@@ -123,11 +108,11 @@ main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  main_out v_6 = main_out(glFragColor);
+  main_out v_7 = main_out(glFragColor);
   if (!(continue_execution)) {
     discard;
   }
-  return v_6;
+  return v_7;
 }
 void main() {
   main_loc0_Output = main_inner(tint_interstage_location2, tint_interstage_location3).glFragColor_1;

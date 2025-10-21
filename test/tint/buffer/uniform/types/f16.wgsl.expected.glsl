@@ -3,14 +3,18 @@
 
 layout(binding = 0, std140)
 uniform u_block_1_ubo {
-  float16_t inner;
+  uvec4 inner[1];
 } v;
 layout(binding = 1, std430)
 buffer s_block_1_ssbo {
   float16_t inner;
 } v_1;
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  float16_t x = v.inner;
+  uvec4 v_2 = v.inner[0u];
+  float16_t x = tint_bitcast_to_f16(v_2.x).x;
   v_1.inner = x;
 }

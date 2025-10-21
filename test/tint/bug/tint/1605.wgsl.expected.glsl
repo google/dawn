@@ -2,7 +2,7 @@
 
 layout(binding = 0, std140)
 uniform b_block_1_ubo {
-  int inner;
+  uvec4 inner[1];
 } v;
 bool func_3() {
   {
@@ -12,7 +12,9 @@ bool func_3() {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      if ((i < v.inner)) {
+      int v_1 = i;
+      uvec4 v_2 = v.inner[0u];
+      if ((v_1 < int(v_2.x))) {
       } else {
         break;
       }
@@ -35,8 +37,8 @@ bool func_3() {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        uint v_1 = uint(i);
-        i = int((v_1 + uint(1)));
+        uint v_3 = uint(i);
+        i = int((v_3 + uint(1)));
       }
       continue;
     }

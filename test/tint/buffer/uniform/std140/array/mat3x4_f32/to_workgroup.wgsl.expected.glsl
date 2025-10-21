@@ -2,31 +2,53 @@
 
 layout(binding = 0, std140)
 uniform u_block_1_ubo {
-  mat3x4 inner[4];
+  uvec4 inner[12];
 } v;
 shared mat3x4 w[4];
-void f_inner(uint tint_local_index) {
+mat3x4 v_1(uint start_byte_offset) {
+  return mat3x4(uintBitsToFloat(v.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)]));
+}
+mat3x4[4] v_2(uint start_byte_offset) {
+  mat3x4 a[4] = mat3x4[4](mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)), mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)));
   {
-    uint v_1 = 0u;
-    v_1 = tint_local_index;
+    uint v_3 = 0u;
+    v_3 = 0u;
     while(true) {
-      uint v_2 = v_1;
-      if ((v_2 >= 4u)) {
+      uint v_4 = v_3;
+      if ((v_4 >= 4u)) {
         break;
       }
-      w[v_2] = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
+      a[v_4] = v_1((start_byte_offset + (v_4 * 48u)));
       {
-        v_1 = (v_2 + 1u);
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  return a;
+}
+void f_inner(uint tint_local_index) {
+  {
+    uint v_5 = 0u;
+    v_5 = tint_local_index;
+    while(true) {
+      uint v_6 = v_5;
+      if ((v_6 >= 4u)) {
+        break;
+      }
+      w[v_6] = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
+      {
+        v_5 = (v_6 + 1u);
       }
       continue;
     }
   }
   barrier();
-  w = v.inner;
-  w[1u] = v.inner[2u];
-  w[1u][0u] = v.inner[0u][1u].ywxz;
-  vec4 v_3 = v.inner[0u][1u];
-  w[1u][0u].x = v_3.x;
+  w = v_2(0u);
+  w[1u] = v_1(96u);
+  w[1u][0u] = uintBitsToFloat(v.inner[1u]).ywxz;
+  uvec4 v_7 = v.inner[1u];
+  w[1u][0u].x = uintBitsToFloat(v_7.x);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

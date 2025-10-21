@@ -803,6 +803,7 @@ auto GenerateParams() {
             VulkanBackend({}, {"decompose_uniform_buffers"}),
             OpenGLBackend(),
             OpenGLESBackend(),
+            OpenGLESBackend({}, {"decompose_uniform_buffers"}),
         },
         {AddressSpace::Storage, AddressSpace::Uniform},
         {

@@ -2,41 +2,6 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 
-struct S_std140 {
-  int before;
-  f16vec2 m_col0;
-  f16vec2 m_col1;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
-  uint tint_pad_6;
-  uint tint_pad_7;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  uint tint_pad_10;
-  uint tint_pad_11;
-  uint tint_pad_12;
-  int after;
-  uint tint_pad_13;
-  uint tint_pad_14;
-  uint tint_pad_15;
-  uint tint_pad_16;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
-  uint tint_pad_23;
-  uint tint_pad_24;
-  uint tint_pad_25;
-  uint tint_pad_26;
-  uint tint_pad_27;
-};
-
 struct S {
   int before;
   f16mat2 m;
@@ -44,8 +9,8 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform u_block_std140_1_ubo {
-  S_std140 inner[4];
+uniform u_block_1_ubo {
+  uvec4 inner[32];
 } v_1;
 void a(S a_1[4]) {
 }
@@ -57,31 +22,44 @@ void d(f16vec2 v) {
 }
 void e(float16_t f_1) {
 }
-S tint_convert_S(S_std140 tint_input) {
-  return S(tint_input.before, f16mat2(tint_input.m_col0, tint_input.m_col1), tint_input.after);
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(src);
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  S_std140 v_2[4] = v_1.inner;
-  S v_3[4] = S[4](S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0));
+f16mat2 v_2(uint start_byte_offset) {
+  f16vec2 v_3 = tint_bitcast_to_f16(v_1.inner[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  return f16mat2(v_3, tint_bitcast_to_f16(v_1.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]));
+}
+S v_4(uint start_byte_offset) {
+  uvec4 v_5 = v_1.inner[(start_byte_offset / 16u)];
+  int v_6 = int(v_5[((start_byte_offset % 16u) / 4u)]);
+  f16mat2 v_7 = v_2((4u + start_byte_offset));
+  uvec4 v_8 = v_1.inner[((64u + start_byte_offset) / 16u)];
+  return S(v_6, v_7, int(v_8[(((64u + start_byte_offset) % 16u) / 4u)]));
+}
+S[4] v_9(uint start_byte_offset) {
+  S a_2[4] = S[4](S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat2(f16vec2(0.0hf), f16vec2(0.0hf)), 0));
   {
-    uint v_4 = 0u;
-    v_4 = 0u;
+    uint v_10 = 0u;
+    v_10 = 0u;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4u)) {
+      uint v_11 = v_10;
+      if ((v_11 >= 4u)) {
         break;
       }
-      v_3[v_5] = tint_convert_S(v_2[v_5]);
+      a_2[v_11] = v_4((start_byte_offset + (v_11 * 128u)));
       {
-        v_4 = (v_5 + 1u);
+        v_10 = (v_11 + 1u);
       }
       continue;
     }
   }
-  a(v_3);
-  b(tint_convert_S(v_1.inner[2u]));
-  c(f16mat2(v_1.inner[2u].m_col0, v_1.inner[2u].m_col1));
-  d(v_1.inner[0u].m_col1.yx);
-  e(v_1.inner[0u].m_col1.yx.x);
+  return a_2;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a(v_9(0u));
+  b(v_4(256u));
+  c(v_2(260u));
+  d(tint_bitcast_to_f16(v_1.inner[0u].z).yx);
+  e(tint_bitcast_to_f16(v_1.inner[0u].z).yx.x);
 }

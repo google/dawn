@@ -1,21 +1,13 @@
 #version 310 es
 
 
-struct UBO {
-  ivec4 data[4];
-  int dynamic_idx;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
-};
-
 struct Result {
   int member_0;
 };
 
 layout(binding = 0, std140)
 uniform ubo_block_1_ubo {
-  UBO inner;
+  uvec4 inner[5];
 } v;
 layout(binding = 1, std430)
 buffer result_block_1_ssbo {
@@ -23,7 +15,8 @@ buffer result_block_1_ssbo {
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_2 = min(uint(v.inner.dynamic_idx), 3u);
-  ivec4 v_3 = v.inner.data[v_2];
-  v_1.inner.member_0 = v_3.x;
+  uvec4 v_2 = v.inner[4u];
+  uint v_3 = (16u * min(uint(int(v_2.x)), 3u));
+  uvec4 v_4 = v.inner[(v_3 / 16u)];
+  v_1.inner.member_0 = int(v_4[((v_3 % 16u) / 4u)]);
 }

@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/conversion_polyfill.h"
+#include "src/tint/lang/core/ir/transform/decompose_uniform_access.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
@@ -159,8 +160,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
 
-    RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
-
     // `PreservePadding` must run before `DirectVariableAccess`.
     RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
 
@@ -172,6 +171,16 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         dva_config.transform_handle = true;
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
     }
+
+    if (options.decompose_uniform_buffers) {
+        // DecomposeUniformAccess must come before BlockDecoratedStructs, which will wrap the
+        // uniform variable in a structure. It must come after DirectVariableAccess which removes
+        // uniform buffers passed as function parameters.
+        RUN_TRANSFORM(core::ir::transform::DecomposeUniformAccess, module);
+    } else {
+        RUN_TRANSFORM(core::ir::transform::Std140, module);
+    }
+    RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
     // RemoveUniformVectorComponentLoads is used to work around a Qualcomm driver bug.
     // See crbug.com/452350626.
@@ -222,8 +231,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         raise::OffsetFirstIndex, module,
         raise::OffsetFirstIndexConfig{immediate_data_layout.Get(), options.first_vertex_offset,
                                       options.first_instance_offset});
-
-    RUN_TRANSFORM(core::ir::transform::Std140, module);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.

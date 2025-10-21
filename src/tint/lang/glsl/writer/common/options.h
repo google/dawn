@@ -170,6 +170,9 @@ struct Options {
     /// Set to `true` to run ArrayLengthFromTransform workaround
     bool use_array_length_from_uniform = false;
 
+    /// Set to `true` to decompose uniform buffers into array<vec4u, ...>.
+    bool decompose_uniform_buffers = true;
+
     /// The GLSL version to emit
     Version version;
 
@@ -213,6 +216,7 @@ struct Options {
                  disable_workgroup_init,
                  disable_polyfill_integer_div_mod,
                  use_array_length_from_uniform,
+                 decompose_uniform_buffers,
                  version,
                  first_vertex_offset,
                  first_instance_offset,

@@ -3,43 +3,13 @@
 
 struct S {
   int before;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  uint tint_pad_2;
   mat4 m;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
-  uint tint_pad_6;
-  uint tint_pad_7;
-  uint tint_pad_8;
-  uint tint_pad_9;
-  uint tint_pad_10;
-  uint tint_pad_11;
-  uint tint_pad_12;
-  uint tint_pad_13;
-  uint tint_pad_14;
   int after;
-  uint tint_pad_15;
-  uint tint_pad_16;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
-  uint tint_pad_23;
-  uint tint_pad_24;
-  uint tint_pad_25;
-  uint tint_pad_26;
-  uint tint_pad_27;
-  uint tint_pad_28;
-  uint tint_pad_29;
 };
 
 layout(binding = 0, std140)
 uniform u_block_1_ubo {
-  S inner[4];
+  uvec4 inner[48];
 } v_1;
 void a(S a_1[4]) {
 }
@@ -51,11 +21,40 @@ void d(vec4 v) {
 }
 void e(float f_1) {
 }
+mat4 v_2(uint start_byte_offset) {
+  return mat4(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((48u + start_byte_offset) / 16u)]));
+}
+S v_3(uint start_byte_offset) {
+  uvec4 v_4 = v_1.inner[(start_byte_offset / 16u)];
+  int v_5 = int(v_4[((start_byte_offset % 16u) / 4u)]);
+  mat4 v_6 = v_2((16u + start_byte_offset));
+  uvec4 v_7 = v_1.inner[((128u + start_byte_offset) / 16u)];
+  return S(v_5, v_6, int(v_7[(((128u + start_byte_offset) % 16u) / 4u)]));
+}
+S[4] v_8(uint start_byte_offset) {
+  S a_2[4] = S[4](S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0), S(0, mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0));
+  {
+    uint v_9 = 0u;
+    v_9 = 0u;
+    while(true) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
+        break;
+      }
+      a_2[v_10] = v_3((start_byte_offset + (v_10 * 192u)));
+      {
+        v_9 = (v_10 + 1u);
+      }
+      continue;
+    }
+  }
+  return a_2;
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  a(v_1.inner);
-  b(v_1.inner[2u]);
-  c(v_1.inner[2u].m);
-  d(v_1.inner[0u].m[1u].ywxz);
-  e(v_1.inner[0u].m[1u].ywxz.x);
+  a(v_8(0u));
+  b(v_3(384u));
+  c(v_2(400u));
+  d(uintBitsToFloat(v_1.inner[2u]).ywxz);
+  e(uintBitsToFloat(v_1.inner[2u]).ywxz.x);
 }

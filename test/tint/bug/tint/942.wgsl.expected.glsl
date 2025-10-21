@@ -1,23 +1,13 @@
 #version 310 es
 
-
-struct Params {
-  uint filterDim;
-  uint blockDim;
-};
-
-struct Flip {
-  uint value;
-};
-
 layout(binding = 1, std140)
 uniform params_block_1_ubo {
-  Params inner;
+  uvec4 inner[1];
 } v;
 layout(binding = 3, rgba8) uniform highp writeonly image2D outputTex;
 layout(binding = 4, std140)
 uniform flip_block_1_ubo {
-  Flip inner;
+  uvec4 inner[1];
 } v_1;
 shared vec3 tile[4][256];
 layout(binding = 0, std140)
@@ -45,11 +35,13 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
     }
   }
   barrier();
-  uint filterOffset = tint_div_u32((v.inner.filterDim - 1u), 2u);
-  uint v_5 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
-  uvec2 dims = uvec2(textureSize(inputTex_samp, int(min(uint(0), v_5))));
-  uvec2 v_6 = ((WorkGroupID.xy * uvec2(v.inner.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)));
-  uvec2 baseIndex = (v_6 - uvec2(filterOffset, 0u));
+  uvec4 v_5 = v.inner[0u];
+  uint filterOffset = tint_div_u32((v_5.x - 1u), 2u);
+  uint v_6 = (v_2.metadata[(0u / 4u)][(0u % 4u)] - 1u);
+  uvec2 dims = uvec2(textureSize(inputTex_samp, int(min(uint(0), v_6))));
+  uvec4 v_7 = v.inner[0u];
+  uvec2 v_8 = ((WorkGroupID.xy * uvec2(v_7.y, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)));
+  uvec2 baseIndex = (v_8 - uvec2(filterOffset, 0u));
   {
     uint r = 0u;
     while(true) {
@@ -65,13 +57,14 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
             break;
           }
           uvec2 loadIndex = (baseIndex + uvec2(c, r));
-          if ((v_1.inner.value != 0u)) {
+          uvec4 v_9 = v_1.inner[0u];
+          if ((v_9.x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          uint v_7 = min(r, 3u);
-          uint v_8 = min(((4u * LocalInvocationID.x) + c), 255u);
-          vec2 v_9 = (vec2(loadIndex) + vec2(0.25f));
-          tile[v_7][v_8] = textureLod(inputTex_samp, (v_9 / vec2(dims)), 0.0f).xyz;
+          uint v_10 = min(r, 3u);
+          uint v_11 = min(((4u * LocalInvocationID.x) + c), 255u);
+          vec2 v_12 = (vec2(loadIndex) + vec2(0.25f));
+          tile[v_10][v_11] = textureLod(inputTex_samp, (v_12 / vec2(dims)), 0.0f).xyz;
           {
             c = (c + 1u);
           }
@@ -100,23 +93,24 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
             break;
           }
           uvec2 writeIndex = (baseIndex + uvec2(c, r));
-          if ((v_1.inner.value != 0u)) {
+          uvec4 v_13 = v_1.inner[0u];
+          if ((v_13.x != 0u)) {
             writeIndex = writeIndex.yx;
           }
           uint center = ((4u * LocalInvocationID.x) + c);
-          bool v_10 = false;
+          bool v_14 = false;
           if ((center >= filterOffset)) {
-            v_10 = (center < (256u - filterOffset));
+            v_14 = (center < (256u - filterOffset));
           } else {
-            v_10 = false;
+            v_14 = false;
           }
-          bool v_11 = false;
-          if (v_10) {
-            v_11 = all(lessThan(writeIndex, dims));
+          bool v_15 = false;
+          if (v_14) {
+            v_15 = all(lessThan(writeIndex, dims));
           } else {
-            v_11 = false;
+            v_15 = false;
           }
-          if (v_11) {
+          if (v_15) {
             vec3 acc = vec3(0.0f);
             {
               uvec2 tint_loop_idx = uvec2(4294967295u);
@@ -125,16 +119,18 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
                 if (all(equal(tint_loop_idx, uvec2(0u)))) {
                   break;
                 }
-                if ((f < v.inner.filterDim)) {
+                uvec4 v_16 = v.inner[0u];
+                if ((f < v_16.x)) {
                 } else {
                   break;
                 }
                 uint i = ((center + f) - filterOffset);
-                vec3 v_12 = acc;
-                float v_13 = (1.0f / float(v.inner.filterDim));
-                uint v_14 = min(r, 3u);
-                uint v_15 = min(i, 255u);
-                acc = (v_12 + (v_13 * tile[v_14][v_15]));
+                vec3 v_17 = acc;
+                uvec4 v_18 = v.inner[0u];
+                float v_19 = (1.0f / float(v_18.x));
+                uint v_20 = min(r, 3u);
+                uint v_21 = min(i, 255u);
+                acc = (v_17 + (v_19 * tile[v_20][v_21]));
                 {
                   uint tint_low_inc = (tint_loop_idx.x - 1u);
                   tint_loop_idx.x = tint_low_inc;
@@ -145,9 +141,9 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
                 continue;
               }
             }
-            uvec2 v_16 = writeIndex;
-            vec4 v_17 = vec4(acc, 1.0f);
-            imageStore(outputTex, ivec2(v_16), v_17);
+            uvec2 v_22 = writeIndex;
+            vec4 v_23 = vec4(acc, 1.0f);
+            imageStore(outputTex, ivec2(v_22), v_23);
           }
           {
             c = (c + 1u);

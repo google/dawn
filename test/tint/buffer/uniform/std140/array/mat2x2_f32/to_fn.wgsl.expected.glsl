@@ -1,14 +1,8 @@
 #version 310 es
 
-
-struct mat2x2_f32_std140 {
-  vec2 col0;
-  vec2 col1;
-};
-
 layout(binding = 0, std140)
-uniform u_block_std140_1_ubo {
-  mat2x2_f32_std140 inner[4];
+uniform u_block_1_ubo {
+  uvec4 inner[4];
 } v_1;
 layout(binding = 1, std430)
 buffer s_block_1_ssbo {
@@ -26,27 +20,35 @@ float c(vec2 v) {
 float d(float f_1) {
   return f_1;
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  mat2x2_f32_std140 v_3[4] = v_1.inner;
-  mat2 v_4[4] = mat2[4](mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)));
+mat2 v_3(uint start_byte_offset) {
+  uvec4 v_4 = v_1.inner[(start_byte_offset / 16u)];
+  vec2 v_5 = uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_6 = v_1.inner[((8u + start_byte_offset) / 16u)];
+  return mat2(v_5, uintBitsToFloat(mix(v_6.xy, v_6.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
+mat2[4] v_7(uint start_byte_offset) {
+  mat2 a_2[4] = mat2[4](mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)));
   {
-    uint v_5 = 0u;
-    v_5 = 0u;
+    uint v_8 = 0u;
+    v_8 = 0u;
     while(true) {
-      uint v_6 = v_5;
-      if ((v_6 >= 4u)) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
         break;
       }
-      v_4[v_6] = mat2(v_3[v_6].col0, v_3[v_6].col1);
+      a_2[v_9] = v_3((start_byte_offset + (v_9 * 16u)));
       {
-        v_5 = (v_6 + 1u);
+        v_8 = (v_9 + 1u);
       }
       continue;
     }
   }
-  float v_7 = a(v_4);
-  float v_8 = (v_7 + b(mat2(v_1.inner[1u].col0, v_1.inner[1u].col1)));
-  float v_9 = (v_8 + c(v_1.inner[1u].col0.yx));
-  v_2.inner = (v_9 + d(v_1.inner[1u].col0.yx.x));
+  return a_2;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  float v_10 = a(v_7(0u));
+  float v_11 = (v_10 + b(v_3(16u)));
+  float v_12 = (v_11 + c(uintBitsToFloat(v_1.inner[1u].xy).yx));
+  v_2.inner = (v_12 + d(uintBitsToFloat(v_1.inner[1u].xy).yx.x));
 }

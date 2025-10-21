@@ -3,32 +3,6 @@ precision highp float;
 precision highp int;
 
 
-struct LeftOver {
-  mat4 u_World;
-  mat4 u_ViewProjection;
-  float u_bumpStrength;
-  uint padding;
-  uint tint_pad_0;
-  uint tint_pad_1;
-  vec3 u_cameraPosition;
-  float u_parallaxScale;
-  float textureInfoName;
-  uint padding_1;
-  vec2 tangentSpaceParameter0;
-};
-
-struct Light0 {
-  vec4 vLightData;
-  vec4 vLightDiffuse;
-  vec4 vLightSpecular;
-  vec3 vLightGround;
-  uint padding_2;
-  vec4 shadowsInfo;
-  vec2 depthValues;
-  uint tint_pad_0;
-  uint tint_pad_1;
-};
-
 struct lightingInfo {
   vec3 diffuse;
   vec3 specular;
@@ -43,7 +17,7 @@ vec3 u_Color = vec3(0.0f);
 vec2 vMainuv = vec2(0.0f);
 layout(binding = 2, std140)
 uniform f_x_269_block_ubo {
-  LeftOver inner;
+  uvec4 inner[11];
 } v;
 vec4 v_output1 = vec4(0.0f);
 bool v_1 = false;
@@ -51,7 +25,7 @@ vec2 v_uv = vec2(0.0f);
 vec4 v_output2 = vec4(0.0f);
 layout(binding = 5, std140)
 uniform f_light0_block_ubo {
-  Light0 inner;
+  uvec4 inner[6];
 } v_2;
 vec4 glFragColor = vec4(0.0f);
 uniform highp sampler2D f_TextureSamplerTexture_TextureSamplerSampler;
@@ -251,14 +225,16 @@ void main_1() {
   vec4 x_262 = texture(f_TextureSamplerTexture_TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
-  float x_273 = v.inner.textureInfoName;
+  uvec4 v_7 = v.inner[10u];
+  float x_273 = uintBitsToFloat(v_7.x);
   rgb = (vec3(x_264.x, x_264.y, x_264.z) * x_273);
-  vec3 x_279 = v.inner.u_cameraPosition;
+  vec3 x_279 = uintBitsToFloat(v.inner[9u].xyz);
   vec4 x_282 = v_output1;
   output5 = normalize((x_279 - vec3(x_282.x, x_282.y, x_282.z)));
   output4 = vec4(0.0f);
   uvOffset = vec2(0.0f);
-  float x_292 = v.inner.u_bumpStrength;
+  uvec4 v_8 = v.inner[8u];
+  float x_292 = uintBitsToFloat(v_8.x);
   normalScale = (1.0f / x_292);
   bool x_298 = v_1;
   if (x_298) {
@@ -277,7 +253,7 @@ void main_1() {
   param_4 = vec3(x_317.x, x_317.y, x_317.z);
   vec2 x_320 = TBNUV;
   param_5 = x_320;
-  vec2 x_324 = v.inner.tangentSpaceParameter0;
+  vec2 x_324 = uintBitsToFloat(v.inner[10u].zw);
   param_6 = x_324;
   mat3 x_325 = cotangent_frame_vf3_vf3_vf2_vf2_(param_3, param_4, param_5, param_6);
   TBN = x_325;
@@ -291,7 +267,8 @@ void main_1() {
   mat3 x_337 = invTBN;
   vec3 x_338 = output5;
   parallaxLimit = (length(vec2(x_334.x, x_334.y)) / (x_337 * -(x_338)).z);
-  float x_345 = v.inner.u_parallaxScale;
+  uvec4 v_9 = v.inner[9u];
+  float x_345 = uintBitsToFloat(v_9.w);
   float x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
   mat3 x_349 = invTBN;
@@ -368,8 +345,8 @@ void main_1() {
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_441 = i;
-        uint v_7 = uint(x_441);
-        i = int((v_7 + uint(1)));
+        uint v_10 = uint(x_441);
+        i = int((v_10 + uint(1)));
       }
       continue;
     }
@@ -381,7 +358,8 @@ void main_1() {
   vec2 x_449 = v_uv;
   vec2 x_450 = uvOffset;
   vec4 x_452 = texture(f_TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
-  float x_454 = v.inner.u_bumpStrength;
+  uvec4 v_11 = v.inner[8u];
+  float x_454 = uintBitsToFloat(v_11.x);
   mat3 x_457 = TBN;
   param_8 = x_457;
   param_9 = vec3(x_452.x, x_452.y, x_452.z);
@@ -397,7 +375,7 @@ void main_1() {
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
   rgb1 = vec3(x_477.x, x_477.y, x_477.z);
-  vec3 x_481 = v.inner.u_cameraPosition;
+  vec3 x_481 = uintBitsToFloat(v.inner[9u].xyz);
   vec4 x_482 = v_output1;
   viewDirectionW_1 = normalize((x_481 - vec3(x_482.x, x_482.y, x_482.z)));
   shadow = 1.0f;
@@ -411,13 +389,13 @@ void main_1() {
   param_11 = x_501;
   vec3 x_503 = normalW;
   param_12 = x_503;
-  vec4 x_507 = v_2.inner.vLightData;
+  vec4 x_507 = uintBitsToFloat(v_2.inner[0u]);
   param_13 = x_507;
-  vec4 x_510 = v_2.inner.vLightDiffuse;
+  vec4 x_510 = uintBitsToFloat(v_2.inner[1u]);
   param_14 = vec3(x_510.x, x_510.y, x_510.z);
-  vec4 x_514 = v_2.inner.vLightSpecular;
+  vec4 x_514 = uintBitsToFloat(v_2.inner[2u]);
   param_15 = vec3(x_514.x, x_514.y, x_514.z);
-  vec3 x_518 = v_2.inner.vLightGround;
+  vec3 x_518 = uintBitsToFloat(v_2.inner[3u].xyz);
   param_16 = x_518;
   float x_520 = glossiness_1;
   param_17 = x_520;
@@ -444,10 +422,10 @@ void main_1() {
   vec3 x_548 = output3;
   glFragColor = vec4(x_548.x, x_548.y, x_548.z, 1.0f);
 }
-main_out main_inner(vec2 vMainuv_param, vec4 v_output1_param, bool v_8, vec2 v_uv_param, vec4 v_output2_param) {
+main_out main_inner(vec2 vMainuv_param, vec4 v_output1_param, bool v_12, vec2 v_uv_param, vec4 v_output2_param) {
   vMainuv = vMainuv_param;
   v_output1 = v_output1_param;
-  v_1 = v_8;
+  v_1 = v_12;
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();

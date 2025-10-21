@@ -4,11 +4,6 @@
 #version 310 es
 
 
-struct Uniforms {
-  vec2 u_scale;
-  vec2 u_offset;
-};
-
 struct VertexOutputs {
   vec2 texcoords;
   vec4 position;
@@ -16,19 +11,19 @@ struct VertexOutputs {
 
 layout(binding = 0, std140)
 uniform v_uniforms_block_ubo {
-  Uniforms inner;
+  uvec4 inner[1];
 } v;
 layout(location = 0) out vec2 tint_interstage_location0;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   vec2 texcoord[3] = vec2[3](vec2(-0.5f, 0.0f), vec2(1.5f, 0.0f), vec2(0.5f, 2.0f));
   VertexOutputs v_1 = VertexOutputs(vec2(0.0f), vec4(0.0f));
   v_1.position = vec4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - vec2(1.0f)), 0.0f, 1.0f);
-  vec2 v_2 = v.inner.u_scale;
-  bool flipY = (v_2.y < 0.0f);
+  uvec4 v_2 = v.inner[0u];
+  bool flipY = (uintBitsToFloat(v_2.y) < 0.0f);
   if (flipY) {
-    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * v.inner.u_scale) + v.inner.u_offset) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
+    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * uintBitsToFloat(v.inner[0u].xy)) + uintBitsToFloat(v.inner[0u].zw)) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
   } else {
-    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * v.inner.u_scale) + v.inner.u_offset);
+    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * uintBitsToFloat(v.inner[0u].xy)) + uintBitsToFloat(v.inner[0u].zw));
   }
   return v_1;
 }

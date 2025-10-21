@@ -2,10 +2,8 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std140)
-uniform m_block_std140_1_ubo {
-  f16vec4 inner_col0;
-  f16vec4 inner_col1;
-  f16vec4 inner_col2;
+uniform m_block_1_ubo {
+  uvec4 inner[2];
 } v;
 int counter = 0;
 int i() {
@@ -13,9 +11,21 @@ int i() {
   counter = int((v_1 + uint(1)));
   return counter;
 }
+f16vec4 tint_bitcast_to_f16(uvec2 src) {
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
+}
+f16mat3x4 v_2(uint start_byte_offset) {
+  uvec4 v_3 = v.inner[(start_byte_offset / 16u)];
+  f16vec4 v_4 = tint_bitcast_to_f16(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  uvec4 v_5 = v.inner[((8u + start_byte_offset) / 16u)];
+  f16vec4 v_6 = tint_bitcast_to_f16(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u))));
+  uvec4 v_7 = v.inner[((16u + start_byte_offset) / 16u)];
+  return f16mat3x4(v_4, v_6, tint_bitcast_to_f16(mix(v_7.xy, v_7.zw, bvec2(((((16u + start_byte_offset) % 16u) / 4u) == 2u)))));
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f16mat3x4 v_2 = f16mat3x4(v.inner_col0, v.inner_col1, v.inner_col2);
-  f16mat3x4 l_m = v_2;
-  f16vec4 l_m_i = v_2[min(uint(i()), 2u)];
+  uint v_8 = (8u * min(uint(i()), 2u));
+  f16mat3x4 l_m = v_2(0u);
+  uvec4 v_9 = v.inner[(v_8 / 16u)];
+  f16vec4 l_m_i = tint_bitcast_to_f16(mix(v_9.xy, v_9.zw, bvec2((((v_8 % 16u) / 4u) == 2u))));
 }

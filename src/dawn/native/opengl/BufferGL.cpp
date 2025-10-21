@@ -93,7 +93,13 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor, 
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     // Align with 4 byte to avoid out-of-bounds access issue in compute emulation for 2 byte
     // element.
-    mAllocatedSize = Align(std::max(GetSize(), uint64_t(4u)), uint64_t(4u));
+    uint64_t alignment = 4u;
+    // Round uniform buffer sizes up to a multiple of 16 bytes since Tint will polyfill them as
+    // array<vec4u, ...>.
+    if (GetUsage() & wgpu::BufferUsage::Uniform) {
+        alignment = 16u;
+    }
+    mAllocatedSize = Align(std::max(GetSize(), uint64_t(4u)), alignment);
 }
 
 Buffer::~Buffer() = default;

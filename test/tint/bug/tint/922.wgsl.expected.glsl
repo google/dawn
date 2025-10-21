@@ -8,28 +8,15 @@ struct Mat4x4_ {
   vec4 mw;
 };
 
-struct ub_SceneParams {
-  Mat4x4_ u_Projection;
-};
-
 struct Mat4x2_ {
   vec4 mx;
   vec4 my;
-};
-
-struct ub_MaterialParams {
-  Mat4x2_ u_TexMtx[1];
-  vec4 u_Misc0_;
 };
 
 struct Mat4x3_ {
   vec4 mx;
   vec4 my;
   vec4 mz;
-};
-
-struct ub_PacketParams {
-  Mat4x3_ u_PosMtx[32];
 };
 
 struct VertexOutput {
@@ -40,15 +27,15 @@ struct VertexOutput {
 
 layout(binding = 0, std140)
 uniform v_global_block_ubo {
-  ub_SceneParams inner;
+  uvec4 inner[4];
 } v_1;
 layout(binding = 1, std140)
 uniform v_global1_block_ubo {
-  ub_MaterialParams inner;
+  uvec4 inner[3];
 } v_2;
 layout(binding = 2, std140)
 uniform v_global2_block_ubo {
-  ub_PacketParams inner;
+  uvec4 inner[96];
 } v_3;
 vec3 a_Position1 = vec3(0.0f);
 vec2 a_UV1 = vec2(0.0f);
@@ -121,6 +108,15 @@ Mat4x4_ x_Mat4x4_1(Mat4x3_ m16) {
   Mat4x4_ x_e15 = o1;
   return x_e15;
 }
+Mat4x2_ v_5(uint start_byte_offset) {
+  return Mat4x2_(uintBitsToFloat(v_2.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_2.inner[((16u + start_byte_offset) / 16u)]));
+}
+Mat4x4_ v_6(uint start_byte_offset) {
+  return Mat4x4_(uintBitsToFloat(v_1.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_1.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((32u + start_byte_offset) / 16u)]), uintBitsToFloat(v_1.inner[((48u + start_byte_offset) / 16u)]));
+}
+Mat4x3_ v_7(uint start_byte_offset) {
+  return Mat4x3_(uintBitsToFloat(v_3.inner[(start_byte_offset / 16u)]), uintBitsToFloat(v_3.inner[((16u + start_byte_offset) / 16u)]), uintBitsToFloat(v_3.inner[((32u + start_byte_offset) / 16u)]));
+}
 int tint_f32_to_i32(float value) {
   return int(clamp(value, -2147483648.0f, 2147483520.0f));
 }
@@ -128,8 +124,7 @@ void main1() {
   Mat4x3_ t_PosMtx = Mat4x3_(vec4(0.0f), vec4(0.0f), vec4(0.0f));
   vec2 t_TexSpaceCoord = vec2(0.0f);
   float x_e15 = a_PosMtxIdx1;
-  uint v_5 = min(uint(tint_f32_to_i32(x_e15)), 31u);
-  Mat4x3_ x_e18 = v_3.inner.u_PosMtx[v_5];
+  Mat4x3_ x_e18 = v_7((48u * min(uint(tint_f32_to_i32(x_e15)), 31u)));
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
   Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);
@@ -138,7 +133,7 @@ void main1() {
   Mat4x4_ x_e30 = x_Mat4x4_1(x_e29);
   vec3 x_e31 = a_Position1;
   vec4 x_e34 = Mul(x_e30, vec4(x_e31, 1.0f));
-  Mat4x4_ x_e35 = v_1.inner.u_Projection;
+  Mat4x4_ x_e35 = v_6(0u);
   Mat4x3_ x_e37 = t_PosMtx;
   Mat4x4_ x_e38 = x_Mat4x4_1(x_e37);
   vec3 x_e39 = a_Position1;
@@ -150,17 +145,17 @@ void main1() {
   v_4 = x_e49;
   vec4 x_e50 = a_Color1;
   v_Color = x_e50;
-  vec4 x_e52 = v_2.inner.u_Misc0_;
+  vec4 x_e52 = uintBitsToFloat(v_2.inner[2u]);
   if ((x_e52.x == 2.0f)) {
     vec3 x_e59 = a_Normal1;
-    Mat4x2_ x_e64 = v_2.inner.u_TexMtx[0u];
+    Mat4x2_ x_e64 = v_5(0u);
     vec3 x_e65 = a_Normal1;
     vec2 x_e68 = Mul2(x_e64, vec4(x_e65, 1.0f));
     v_TexCoord = x_e68.xy;
     return;
   } else {
     vec2 x_e73 = a_UV1;
-    Mat4x2_ x_e79 = v_2.inner.u_TexMtx[0u];
+    Mat4x2_ x_e79 = v_5(0u);
     vec2 x_e80 = a_UV1;
     vec2 x_e84 = Mul2(x_e79, vec4(x_e80, 1.0f, 1.0f));
     v_TexCoord = x_e84.xy;
@@ -181,9 +176,9 @@ VertexOutput main_inner(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 a_Normal,
   return VertexOutput(x_e11, x_e13, x_e15);
 }
 void main() {
-  VertexOutput v_6 = main_inner(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input, main_loc4_Input);
-  tint_interstage_location0 = v_6.v_Color;
-  tint_interstage_location1 = v_6.v_TexCoord;
-  gl_Position = vec4(v_6.member.x, -(v_6.member.y), ((2.0f * v_6.member.z) - v_6.member.w), v_6.member.w);
+  VertexOutput v_8 = main_inner(main_loc0_Input, main_loc1_Input, main_loc2_Input, main_loc3_Input, main_loc4_Input);
+  tint_interstage_location0 = v_8.v_Color;
+  tint_interstage_location1 = v_8.v_TexCoord;
+  gl_Position = vec4(v_8.member.x, -(v_8.member.y), ((2.0f * v_8.member.z) - v_8.member.w), v_8.member.w);
   gl_PointSize = 1.0f;
 }

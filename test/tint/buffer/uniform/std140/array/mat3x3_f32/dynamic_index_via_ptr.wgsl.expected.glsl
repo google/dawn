@@ -1,18 +1,8 @@
 #version 310 es
 
-
-struct mat3x3_f32_std140 {
-  vec3 col0;
-  uint tint_pad_0;
-  vec3 col1;
-  uint tint_pad_1;
-  vec3 col2;
-  uint tint_pad_2;
-};
-
 layout(binding = 0, std140)
-uniform a_block_std140_1_ubo {
-  mat3x3_f32_std140 inner[4];
+uniform a_block_1_ubo {
+  uvec4 inner[12];
 } v;
 layout(binding = 1, std430)
 buffer s_block_1_ssbo {
@@ -24,31 +14,35 @@ int i() {
   counter = int((v_2 + uint(1)));
   return counter;
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  uint v_3 = min(uint(i()), 3u);
-  mat3 v_4 = mat3(v.inner[v_3].col0, v.inner[v_3].col1, v.inner[v_3].col2);
-  vec3 v_5 = v_4[min(uint(i()), 2u)];
-  mat3x3_f32_std140 v_6[4] = v.inner;
-  mat3 v_7[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
+mat3 v_3(uint start_byte_offset) {
+  return mat3(uintBitsToFloat(v.inner[(start_byte_offset / 16u)].xyz), uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz), uintBitsToFloat(v.inner[((32u + start_byte_offset) / 16u)].xyz));
+}
+mat3[4] v_4(uint start_byte_offset) {
+  mat3 a[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
   {
-    uint v_8 = 0u;
-    v_8 = 0u;
+    uint v_5 = 0u;
+    v_5 = 0u;
     while(true) {
-      uint v_9 = v_8;
-      if ((v_9 >= 4u)) {
+      uint v_6 = v_5;
+      if ((v_6 >= 4u)) {
         break;
       }
-      v_7[v_9] = mat3(v_6[v_9].col0, v_6[v_9].col1, v_6[v_9].col2);
+      a[v_6] = v_3((start_byte_offset + (v_6 * 48u)));
       {
-        v_8 = (v_9 + 1u);
+        v_5 = (v_6 + 1u);
       }
       continue;
     }
   }
-  mat3 l_a[4] = v_7;
-  mat3 l_a_i = v_4;
-  vec3 l_a_i_i = v_5;
-  vec3 v_10 = v_5;
-  v_1.inner = (((v_10.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
+  return a;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  uint v_7 = (48u * min(uint(i()), 3u));
+  uint v_8 = (16u * min(uint(i()), 2u));
+  mat3 l_a[4] = v_4(0u);
+  mat3 l_a_i = v_3(v_7);
+  vec3 l_a_i_i = uintBitsToFloat(v.inner[((v_7 + v_8) / 16u)].xyz);
+  uvec4 v_9 = v.inner[((v_7 + v_8) / 16u)];
+  v_1.inner = (((uintBitsToFloat(v_9[(((v_7 + v_8) % 16u) / 4u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

@@ -63,6 +63,8 @@ TEST_P(BufferAllocatedSizeTests, UniformUsage) {
         requiredBufferAlignment = 16u;
     } else if (IsVulkan()) {
         requiredBufferAlignment = 16u;
+    } else if (IsOpenGL() || IsOpenGLES()) {
+        requiredBufferAlignment = 16u;
     }
 
     // Test uniform usage
