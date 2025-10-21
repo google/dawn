@@ -585,6 +585,8 @@ luci.console_view_entry(
 
 # The following standalone builders have been replaced with functionally
 # equivalent ones using the gn_v2 recipe. See crbug.com/385317083.
+# * cron-linux-clang-rel-x64
+#   * dawn-linux-x64-sws-clusterfuzz
 # * linux-clang-dbg-x64
 #   * dawn-cq-linux-x64-dbg
 #   * dawn-cq-linux-x64-fuzz-dbg
@@ -613,8 +615,6 @@ luci.console_view_entry(
 #   * dawn-cq-win-x64-msvc-dbg
 # * win-msvc-rel-x64
 #   * dawn-cq-win-x64-msvc-rel
-
-dawn_standalone_builder("cron-linux-clang-rel-x64", clang = True, debug = False, cpu = "x64", fuzzer = True)
 
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64", clang = True, debug = True, cpu = "x64", asan = False, ubsan = False)
 dawn_cmake_standalone_builder("cmake-linux-clang-dbg-x64-asan", clang = True, debug = True, cpu = "x64", asan = True, ubsan = False)
