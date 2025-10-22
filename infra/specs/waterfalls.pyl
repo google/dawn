@@ -175,7 +175,9 @@
         'mixins': [
           'mac_retina_amd_gpu_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_gtests',
+        },
       },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
