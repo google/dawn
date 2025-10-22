@@ -22,6 +22,7 @@ import androidx.webgpu.createInstance
 import androidx.webgpu.helper.Util.windowFromSurface
 import androidx.webgpu.requestAdapter
 import androidx.webgpu.requestDevice
+import java.util.concurrent.Executor
 
 public class DeviceLostException(
     public val device: Device, @DeviceLostReason public val reason: Int, message: String
@@ -49,7 +50,9 @@ public suspend fun createWebGpu(
     requestAdapterOptions: RequestAdapterOptions = RequestAdapterOptions(),
     deviceDescriptor: DeviceDescriptor = DeviceDescriptor(
         deviceLostCallback = defaultDeviceLostCallback,
-        uncapturedErrorCallback = defaultUncapturedErrorCallback
+        deviceLostCallbackExecutor = Executor(Runnable::run),
+        uncapturedErrorCallback = defaultUncapturedErrorCallback,
+        uncapturedErrorCallbackExecutor = Executor(Runnable::run)
     ),
 ): WebGpu {
     initLibrary()

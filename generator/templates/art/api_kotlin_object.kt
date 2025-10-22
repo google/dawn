@@ -39,7 +39,7 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
         @FastNative
         @JvmName("{{ method.name.camelCase() }}")
         {% for arg in kotlin_record_members(method.arguments) %}
-            {% if arg.type.category == 'callback function' or kotlin_default(arg) is not none %}
+            {% if kotlin_default(arg) is not none %}
                 @JvmOverloads
             {% break %}{% endif %}
         {% endfor %}
@@ -47,7 +47,7 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
             {%- if as_varName(arg.name) == 'callback' %}
-                {{arg.name.camelCase()}}Executor: Executor = Executor(Runnable::run),{{' '}}
+                {{arg.name.camelCase()}}Executor: Executor,{{' '}}
             {%- endif %}
             {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
         {%- endfor -%}): {{ kotlin_declaration(kotlin_return(method)) }}

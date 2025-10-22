@@ -3,6 +3,7 @@ package androidx.webgpu
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.createWebGpu
+import java.util.concurrent.Executor
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,7 +23,9 @@ class FeaturesTest {
                     deviceDescriptor = DeviceDescriptor(
                         requiredFeatures = requiredFeatures,
                         deviceLostCallback = null,
-                        uncapturedErrorCallback = null
+                        deviceLostCallbackExecutor = Executor(Runnable::run),
+                        uncapturedErrorCallback = null,
+                        uncapturedErrorCallbackExecutor = Executor(Runnable::run)
                     )
                 )
             val device = webGpu.device

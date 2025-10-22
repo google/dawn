@@ -26,6 +26,7 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
 
+import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
@@ -60,6 +61,9 @@ import kotlin.coroutines.suspendCoroutine
                 //* Result is handled by the async callback; this assignment satisfies @CheckReturnValue.
                 val unused = {{ method.name.camelCase() }}(
                     {%- for arg in kotlin_record_members(method.arguments) %}
+                        {% if arg.type.category == 'callback function' %}
+                            {{- as_varName(arg.name) }}Executor = Executor(Runnable::run),
+                        {% endif %}
                         {{- as_varName(arg.name) }}
                         {%- if loop.last %}
                             //* The final parameter of a callback method is always callback info.
