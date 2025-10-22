@@ -64,7 +64,8 @@ class BufferTest {
           mappedAtCreation = false
         )
       ).apply {
-        val unused = getMappedRange(size = size)
+        val status = getMappedRange(size = size)
+        assertEquals(MapAsyncStatus.Success, status)
       }
     }
   }
@@ -229,7 +230,8 @@ class BufferTest {
 
     val readByteBuffer =
       ByteBuffer.allocateDirect(bufferSize.toInt()).order(ByteOrder.nativeOrder())
-    buffer.readMappedRange(0, readByteBuffer)
+    val status = buffer.readMappedRange(0, readByteBuffer)
+    assertEquals(MapAsyncStatus.Success, status)
 
     val readByteBufferFloat = readByteBuffer.asFloatBuffer()
     val readData = FloatArray(readByteBufferFloat.remaining())
