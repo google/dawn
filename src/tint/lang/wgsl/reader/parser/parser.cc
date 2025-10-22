@@ -1986,6 +1986,12 @@ Maybe<const ast::BlockStatement*> Parser::continuing_compound_statement() {
         StatementList stmts;
 
         while (continue_parsing()) {
+            // Need to skip empty statements otherwise we can end up in the `statement` code below,
+            // then we skip the `;` and parse a `break-if` as a `break`.
+            while (match(Token::Type::kSemicolon)) {
+                // Skip empty statements
+            }
+
             // Note, break-if has to parse before statements because statements includes `break`
             auto break_if = break_if_statement();
             if (break_if.errored) {
