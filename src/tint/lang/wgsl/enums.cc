@@ -213,6 +213,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "texel_buffers") {
         return LanguageFeature::kTexelBuffers;
     }
+    if (str == "uniform_buffer_standard_layout") {
+        return LanguageFeature::kUniformBufferStandardLayout;
+    }
     if (str == "unrestricted_pointer_parameters") {
         return LanguageFeature::kUnrestrictedPointerParameters;
     }
@@ -244,6 +247,8 @@ std::string_view ToString(LanguageFeature value) {
             return "sized_binding_array";
         case LanguageFeature::kTexelBuffers:
             return "texel_buffers";
+        case LanguageFeature::kUniformBufferStandardLayout:
+            return "uniform_buffer_standard_layout";
         case LanguageFeature::kUnrestrictedPointerParameters:
             return "unrestricted_pointer_parameters";
     }

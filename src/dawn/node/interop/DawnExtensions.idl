@@ -79,6 +79,7 @@ enum WGSLLanguageFeatureName {
     "sized_binding_array",
     "texel_buffers",
     "chromium_print",
+    "uniform_buffer_standard_layout",
 };
 
 dictionary GPUBindGroupLayoutEntry {

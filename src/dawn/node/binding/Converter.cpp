@@ -1780,6 +1780,9 @@ bool Converter::Convert(wgpu::WGSLLanguageFeatureName& out, interop::WGSLLanguag
         case interop::WGSLLanguageFeatureName::kChromiumPrint:
             out = wgpu::WGSLLanguageFeatureName::ChromiumPrint;
             return true;
+        case interop::WGSLLanguageFeatureName::kUniformBufferStandardLayout:
+            out = wgpu::WGSLLanguageFeatureName::UniformBufferStandardLayout;
+            return true;
     }
     return false;
 }
@@ -1806,6 +1809,9 @@ bool Converter::Convert(interop::WGSLLanguageFeatureName& out, wgpu::WGSLLanguag
             return true;
         case wgpu::WGSLLanguageFeatureName::ChromiumPrint:
             out = interop::WGSLLanguageFeatureName::kChromiumPrint;
+            return true;
+        case wgpu::WGSLLanguageFeatureName::UniformBufferStandardLayout:
+            out = interop::WGSLLanguageFeatureName::kUniformBufferStandardLayout;
             return true;
 
         case wgpu::WGSLLanguageFeatureName::ChromiumTestingUnimplemented:

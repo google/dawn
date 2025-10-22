@@ -323,6 +323,7 @@ static constexpr LanguageFeatureCase kValidLanguageFeatureCases[] = {
     {"readonly_and_readwrite_storage_textures", LanguageFeature::kReadonlyAndReadwriteStorageTextures},
     {"sized_binding_array", LanguageFeature::kSizedBindingArray},
     {"texel_buffers", LanguageFeature::kTexelBuffers},
+    {"uniform_buffer_standard_layout", LanguageFeature::kUniformBufferStandardLayout},
     {"unrestricted_pointer_parameters", LanguageFeature::kUnrestrictedPointerParameters},
 };
 
@@ -360,9 +361,12 @@ static constexpr LanguageFeatureCase kInvalidLanguageFeatureCases[] = {
     {"tezyel_bXXffer", LanguageFeature::kUndefined},
     {"exelPbufVVers", LanguageFeature::kUndefined},
     {"texel_Cufernn", LanguageFeature::kUndefined},
-    {"nrestrqqcHHed_oinAAer_parameters", LanguageFeature::kUndefined},
-    {"unrestricted_pointer_parametrs", LanguageFeature::kUndefined},
-    {"unfestricKKed_pointer_parameer", LanguageFeature::kUndefined},
+    {"qqniformbffer_stanAAard_layoHHt", LanguageFeature::kUndefined},
+    {"uniform_buffr_standard_layout", LanguageFeature::kUndefined},
+    {"unfKform_ffer_standard_layout", LanguageFeature::kUndefined},
+    {"ulrestrictePggointerparameters", LanguageFeature::kUndefined},
+    {"unrestricted_pointer_prameters", LanguageFeature::kUndefined},
+    {"unrectricted_poinTTer_paNamete4s", LanguageFeature::kUndefined},
 };
 
 using LanguageFeatureParseTest = testing::TestWithParam<LanguageFeatureCase>;

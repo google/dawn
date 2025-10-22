@@ -504,6 +504,7 @@
 "u32"
 "u8"
 "uniform"
+"uniform_buffer_standard_layout"
 "unpack2x16float"
 "unpack2x16snorm"
 "unpack2x16unorm"

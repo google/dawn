@@ -198,6 +198,7 @@ enum class LanguageFeature : uint8_t {
     kReadonlyAndReadwriteStorageTextures,
     kSizedBindingArray,
     kTexelBuffers,
+    kUniformBufferStandardLayout,
     kUnrestrictedPointerParameters,
 };
 
@@ -222,6 +223,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "readonly_and_readwrite_storage_textures",
     "sized_binding_array",
     "texel_buffers",
+    "uniform_buffer_standard_layout",
     "unrestricted_pointer_parameters",
 };
 
@@ -238,6 +240,7 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,
     LanguageFeature::kSizedBindingArray,
     LanguageFeature::kTexelBuffers,
+    LanguageFeature::kUniformBufferStandardLayout,
     LanguageFeature::kUnrestrictedPointerParameters,
 };
 

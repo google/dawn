@@ -4423,6 +4423,7 @@
             {"value": 5, "name": "sized binding array", "jsrepr": "'sized_binding_array'", "tags": ["dawn"]},
             {"value": 6, "name": "texel buffers", "jsrepr": "'texel_buffers'", "tags": ["dawn"]},
             {"value": 7, "name": "chromium print", "jsrepr": "'chromium_print'", "tags": ["dawn"]},
+            {"value": 8, "name": "uniform buffer standard layout", "jsrepr": "'uniform_buffer_standard_layout'", "tags": ["dawn"]},
 
             {"value": 0, "name": "chromium testing unimplemented", "jsrepr": "'chromium_testing_unimplemented'", "tags": ["dawn"]},
             {"value": 1, "name": "chromium testing unsafe experimental", "jsrepr": "'chromium_testing_unsafe_experimental'", "tags": ["dawn"]},

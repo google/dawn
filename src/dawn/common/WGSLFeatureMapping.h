@@ -37,6 +37,7 @@
     X(kSizedBindingArray, SizedBindingArray)                                       \
     X(kTexelBuffers, TexelBuffers)                                                 \
     X(kChromiumPrint, ChromiumPrint)                                               \
+    X(kUniformBufferStandardLayout, UniformBufferStandardLayout)                   \
     /* ----------------- entries below are only for testing  ------------------ */ \
     X(kChromiumTestingUnimplemented, ChromiumTestingUnimplemented)                 \
     X(kChromiumTestingUnsafeExperimental, ChromiumTestingUnsafeExperimental)       \
