@@ -58,6 +58,9 @@ ADDITIONAL_MIXINS = {
             '--test-launcher-retry-limit=0',
             '--test-launcher-batch-limit=512',
         ],
+        'linux_args': [
+            '--no-xvfb',
+        ],
     },
     'no_swarming': {
         'swarming': {

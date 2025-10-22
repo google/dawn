@@ -45,7 +45,9 @@
         'mixins': [
           'linux_intel_uhd_630_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_gtests',
+        },
       },
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',

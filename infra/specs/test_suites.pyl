@@ -159,6 +159,9 @@
           # Tell the tests to only run one step for faster iteration.
           "--override-steps=1",
         ],
+        'linux_args': [
+          '--no-xvfb',
+        ],
         'mixins': [
           'result_adapter_gtest_json',
           'true_noop_merge',

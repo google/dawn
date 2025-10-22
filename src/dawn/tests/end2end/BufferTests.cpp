@@ -1074,8 +1074,9 @@ TEST_P(BufferTests, CreateBufferOOM) {
     DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     // TODO(crbug.com/452924802): Unable to allocate buffer with validation
-    // skipped on WebGPU on WebGPU w/ Metal backend.
+    // skipped on WebGPU on WebGPU w/ Metal/Vulkan backends.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && !IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Vulkan) && !IsBackendValidationEnabled());
 
     wgpu::BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::CopyDst;
@@ -1246,8 +1247,9 @@ TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     DAWN_TEST_UNSUPPORTED_IF(IsTsan());
 
     // TODO(crbug.com/452924802): Unable to allocate buffer with validation
-    // skipped on WebGPU on WebGPU w/ Metal backend.
+    // skipped on WebGPU on WebGPU w/ Metal/Vulkan backends.
     DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && !IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Vulkan) && !IsBackendValidationEnabled());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;

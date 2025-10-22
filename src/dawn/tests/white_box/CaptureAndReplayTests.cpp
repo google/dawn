@@ -49,6 +49,7 @@ class CaptureAndReplayTests : public DawnTest {
         // TODO(crbug.com/452924800): Remove once these tests work properly with
         // the WebGPU on WebGPU backend with wire.
         DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Metal) && UsesWire());
+        DAWN_SUPPRESS_TEST_IF(IsWebGPUOn(wgpu::BackendType::Vulkan) && UsesWire());
     }
 
     class Capture {
