@@ -1804,6 +1804,7 @@
       "default"
     ]
   },
+  "dawn-win-x64-nvidia-gtx1660-rel": {},
   "dawn-win-x64-sws-dbg": {
     "gtest_tests": [
       {
