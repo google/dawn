@@ -4,7 +4,7 @@ cbuffer cbuffer_m : register(b0) {
 };
 static int counter = int(0);
 int i() {
-  counter = (counter + int(1));
+  counter = asint((asuint(counter) + asuint(int(1))));
   return counter;
 }
 

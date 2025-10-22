@@ -10,7 +10,7 @@ void main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   i = int(123);
-  int u = (i + int(1));
+  int u = asint((asuint(i) + asuint(int(1))));
 }
 
 [numthreads(1, 1, 1)]

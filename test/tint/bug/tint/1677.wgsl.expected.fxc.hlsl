@@ -5,7 +5,8 @@ struct main_inputs {
 
 ByteAddressBuffer input : register(t0);
 void main_inner(uint3 id) {
-  int3 pos = (asint(input.Load3(0u)) - (int(0)).xxx);
+  uint3 v = asuint(asint(input.Load3(0u)));
+  int3 pos = asint((v - asuint(int3((int(0)).xxx))));
 }
 
 [numthreads(1, 1, 1)]

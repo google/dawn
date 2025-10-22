@@ -21,10 +21,10 @@ void main() {
               break;
             }
             if ((i > int(5))) {
-              i = (i * int(2));
+              i = asint((asuint(i) * asuint(int(2))));
               break;
             } else {
-              i = (i * int(2));
+              i = asint((asuint(i) * asuint(int(2))));
               break;
             }
             /* unreachable */

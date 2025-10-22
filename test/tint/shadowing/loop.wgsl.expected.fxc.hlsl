@@ -16,7 +16,7 @@ void foo() {
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
         int x_1 = asint(output.Load((0u + (min(uint(x), 9u) * 4u))));
-        i = (i + x_1);
+        i = asint((asuint(i) + asuint(x_1)));
         if ((i > int(10))) { break; }
       }
       continue;

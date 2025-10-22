@@ -1,6 +1,6 @@
 
 int f(int a, int b, int c) {
-  return ((a * b) + c);
+  return asint((asuint(asint((asuint(a) * asuint(b)))) + asuint(c)));
 }
 
 [numthreads(1, 1, 1)]

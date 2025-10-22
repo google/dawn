@@ -3,6 +3,6 @@
 void f0() {
   int a = int(2147483647);
   int b = int(1);
-  int c = (a + int(1));
+  int c = asint((asuint(a) + asuint(int(1))));
 }
 

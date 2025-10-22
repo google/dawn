@@ -256,13 +256,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
 
-    // TODO(crbug.com/429211395): Resolve unsigned/signed casting issues with DXC.
-    constexpr bool kEnableSignedIntegerPolyfill = false;
-    if (kEnableSignedIntegerPolyfill) {
-        core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
-            .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
-        RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
-    }
+    // Avoid potential UB (aka signed overflow) by performing unsigned integer arithmetic.
+    core::ir::transform::SignedIntegerPolyfillConfig signed_integer_cfg{
+        .signed_negation = true, .signed_arithmetic = true, .signed_shiftleft = true};
+    RUN_TRANSFORM(core::ir::transform::SignedIntegerPolyfill, module, signed_integer_cfg);
 
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
     // builtins

@@ -35,14 +35,14 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       vel = asfloat(particlesA.Load2((8u + (min(i, 4u) * 16u)))).xy;
       if ((distance(pos, vPos) < asfloat(params[0u].y))) {
         cMass = (cMass + pos);
-        cMassCount = (cMassCount + int(1));
+        cMassCount = asint((asuint(cMassCount) + asuint(int(1))));
       }
       if ((distance(pos, vPos) < asfloat(params[0u].z))) {
         colVel = (colVel - (pos - vPos));
       }
       if ((distance(pos, vPos) < asfloat(params[0u].w))) {
         cVel = (cVel + vel);
-        cVelCount = (cVelCount + int(1));
+        cVelCount = asint((asuint(cVelCount) + asuint(int(1))));
       }
       {
         i = (i + 1u);

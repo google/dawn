@@ -24,7 +24,7 @@ void main() {
       InnerS v_3[8] = tint_array_copy;
       s1.a1 = v_3;
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

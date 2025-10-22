@@ -3,6 +3,6 @@
 void f() {
   int a = int(1);
   int b = int(2);
-  int r = (a + b);
+  int r = asint((asuint(a) + asuint(b)));
 }
 

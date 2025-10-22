@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int abs_4ad288() {
   int arg_0 = int(1);
   int v = arg_0;
-  int res = max(v, -(v));
+  int res = max(v, asint((~(asuint(v)) + 1u)));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int abs_4ad288() {
   int arg_0 = int(1);
   int v = arg_0;
-  int res = max(v, -(v));
+  int res = max(v, asint((~(asuint(v)) + 1u)));
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 int abs_4ad288() {
   int arg_0 = int(1);
   int v = arg_0;
-  int res = max(v, -(v));
+  int res = max(v, asint((~(asuint(v)) + 1u)));
   return res;
 }
 

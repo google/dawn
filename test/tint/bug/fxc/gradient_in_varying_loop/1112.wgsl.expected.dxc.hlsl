@@ -42,7 +42,7 @@ float4 main_inner(float2 vUV) {
         v_3 = (offset.y > 1.0f);
       }
       if (v_3) {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
         {
           uint tint_low_inc = (tint_loop_idx.x - 1u);
           tint_loop_idx.x = tint_low_inc;
@@ -52,7 +52,7 @@ float4 main_inner(float2 vUV) {
         continue;
       }
       float sampleDepth = 0.0f;
-      i = (i + int(1));
+      i = asint((asuint(i) + asuint(int(1))));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;

@@ -7,7 +7,7 @@ int3 tint_div_v3i32(int3 lhs, int3 rhs) {
 void f() {
   int a = int(4);
   int3 b = int3(int(0), int(2), int(0));
-  int3 v = (b + b);
+  int3 v = asint((asuint(b) + asuint(b)));
   int3 r = tint_div_v3i32(int3((a).xxx), v);
 }
 

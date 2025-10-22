@@ -5,7 +5,7 @@ cbuffer cbuffer_a : register(b0) {
 RWByteAddressBuffer s : register(u1);
 static int counter = int(0);
 int i() {
-  counter = (counter + int(1));
+  counter = asint((asuint(counter) + asuint(int(1))));
   return counter;
 }
 

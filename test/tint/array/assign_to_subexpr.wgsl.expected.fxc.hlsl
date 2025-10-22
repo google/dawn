@@ -14,7 +14,7 @@ int foo() {
   v = src;
   dst_struct.arr = src;
   dst_array[0u] = src;
-  return ((v[0u] + dst_struct.arr[0u]) + dst_array[0u][0u]);
+  return asint((asuint(asint((asuint(v[0u]) + asuint(dst_struct.arr[0u])))) + asuint(dst_array[0u][0u])));
 }
 
 [numthreads(1, 1, 1)]

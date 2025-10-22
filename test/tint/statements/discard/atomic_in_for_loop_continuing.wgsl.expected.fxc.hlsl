@@ -32,7 +32,7 @@ int foo_inner(float v, float2 coord) {
       } else {
         break;
       }
-      result = (result + i);
+      result = asint((asuint(result) + asuint(i)));
       {
         uint tint_low_inc = (tint_loop_idx.x - 1u);
         tint_loop_idx.x = tint_low_inc;

@@ -10,7 +10,7 @@ int2 extractBits_a99a8d() {
   int2 v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + arg_2)));
-  int2 v_3 = (((v_2 < 32u)) ? ((v << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint2((v_2).xx)))) : ((int(0)).xx));
   int2 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint2(((v_2 + v_1)).xx))) : (((v_3 >> (31u).xx) >> (1u).xx)));
   return res;
 }
@@ -31,7 +31,7 @@ int2 extractBits_a99a8d() {
   int2 v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + arg_2)));
-  int2 v_3 = (((v_2 < 32u)) ? ((v << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint2((v_2).xx)))) : ((int(0)).xx));
   int2 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint2(((v_2 + v_1)).xx))) : (((v_3 >> (31u).xx) >> (1u).xx)));
   return res;
 }
@@ -62,7 +62,7 @@ int2 extractBits_a99a8d() {
   int2 v = arg_0;
   uint v_1 = min(arg_1, 32u);
   uint v_2 = (32u - min(32u, (v_1 + arg_2)));
-  int2 v_3 = (((v_2 < 32u)) ? ((v << uint2((v_2).xx))) : ((int(0)).xx));
+  int2 v_3 = (((v_2 < 32u)) ? (asint((asuint(v) << uint2((v_2).xx)))) : ((int(0)).xx));
   int2 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint2(((v_2 + v_1)).xx))) : (((v_3 >> (31u).xx) >> (1u).xx)));
   return res;
 }

@@ -22,7 +22,7 @@ void main() {
       }
       foo();
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

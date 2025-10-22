@@ -8,6 +8,6 @@ void f() {
   int3 a = int3(int(1), int(2), int(3));
   int b = int(0);
   int3 v = a;
-  int3 r = tint_div_v3i32(v, int3(((b + b)).xxx));
+  int3 r = tint_div_v3i32(v, int3((asint((asuint(b) + asuint(b)))).xxx));
 }
 

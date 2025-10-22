@@ -134,24 +134,24 @@ void main_inner(uint idx) {
   uint v_34 = 0u;
   sb.GetDimensions(v_34);
   float3 arr2_vec3_f32[2] = v((512u + (min(idx, ((v_34 / 544u) - 1u)) * 544u)));
-  int v_35 = (tint_f32_to_i32(scalar_f32) + scalar_i32);
-  int v_36 = (v_35 + int(scalar_u32));
-  int v_37 = ((v_36 + tint_f32_to_i32(vec2_f32.x)) + vec2_i32.x);
-  int v_38 = (v_37 + int(vec2_u32.x));
-  int v_39 = ((v_38 + tint_f32_to_i32(vec3_f32.y)) + vec3_i32.y);
-  int v_40 = (v_39 + int(vec3_u32.y));
-  int v_41 = ((v_40 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
-  int v_42 = (v_41 + int(vec4_u32.z));
-  int v_43 = (v_42 + tint_f32_to_i32(mat2x2_f32[0u].x));
-  int v_44 = (v_43 + tint_f32_to_i32(mat2x3_f32[0u].x));
-  int v_45 = (v_44 + tint_f32_to_i32(mat2x4_f32[0u].x));
-  int v_46 = (v_45 + tint_f32_to_i32(mat3x2_f32[0u].x));
-  int v_47 = (v_46 + tint_f32_to_i32(mat3x3_f32[0u].x));
-  int v_48 = (v_47 + tint_f32_to_i32(mat3x4_f32[0u].x));
-  int v_49 = (v_48 + tint_f32_to_i32(mat4x2_f32[0u].x));
-  int v_50 = (v_49 + tint_f32_to_i32(mat4x3_f32[0u].x));
-  int v_51 = (v_50 + tint_f32_to_i32(mat4x4_f32[0u].x));
-  s.Store(0u, asuint((v_51 + tint_f32_to_i32(arr2_vec3_f32[0u].x))));
+  int v_35 = asint((asuint(tint_f32_to_i32(scalar_f32)) + asuint(scalar_i32)));
+  int v_36 = asint((asuint(v_35) + asuint(int(scalar_u32))));
+  int v_37 = asint((asuint(asint((asuint(v_36) + asuint(tint_f32_to_i32(vec2_f32.x))))) + asuint(vec2_i32.x)));
+  int v_38 = asint((asuint(v_37) + asuint(int(vec2_u32.x))));
+  int v_39 = asint((asuint(asint((asuint(v_38) + asuint(tint_f32_to_i32(vec3_f32.y))))) + asuint(vec3_i32.y)));
+  int v_40 = asint((asuint(v_39) + asuint(int(vec3_u32.y))));
+  int v_41 = asint((asuint(asint((asuint(v_40) + asuint(tint_f32_to_i32(vec4_f32.z))))) + asuint(vec4_i32.z)));
+  int v_42 = asint((asuint(v_41) + asuint(int(vec4_u32.z))));
+  int v_43 = asint((asuint(v_42) + asuint(tint_f32_to_i32(mat2x2_f32[0u].x))));
+  int v_44 = asint((asuint(v_43) + asuint(tint_f32_to_i32(mat2x3_f32[0u].x))));
+  int v_45 = asint((asuint(v_44) + asuint(tint_f32_to_i32(mat2x4_f32[0u].x))));
+  int v_46 = asint((asuint(v_45) + asuint(tint_f32_to_i32(mat3x2_f32[0u].x))));
+  int v_47 = asint((asuint(v_46) + asuint(tint_f32_to_i32(mat3x3_f32[0u].x))));
+  int v_48 = asint((asuint(v_47) + asuint(tint_f32_to_i32(mat3x4_f32[0u].x))));
+  int v_49 = asint((asuint(v_48) + asuint(tint_f32_to_i32(mat4x2_f32[0u].x))));
+  int v_50 = asint((asuint(v_49) + asuint(tint_f32_to_i32(mat4x3_f32[0u].x))));
+  int v_51 = asint((asuint(v_50) + asuint(tint_f32_to_i32(mat4x4_f32[0u].x))));
+  s.Store(0u, asuint(asint((asuint(v_51) + asuint(tint_f32_to_i32(arr2_vec3_f32[0u].x))))));
 }
 
 [numthreads(1, 1, 1)]

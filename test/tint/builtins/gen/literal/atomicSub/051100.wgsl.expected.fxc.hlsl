@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 int atomicSub_051100() {
   int v = int(0);
-  sb_rw.InterlockedAdd(int(0u), (int(0) - int(1)), v);
+  sb_rw.InterlockedAdd(int(0u), asint((asuint(int(0)) - asuint(int(1)))), v);
   int res = v;
   return res;
 }
@@ -23,7 +23,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 int atomicSub_051100() {
   int v = int(0);
-  sb_rw.InterlockedAdd(int(0u), (int(0) - int(1)), v);
+  sb_rw.InterlockedAdd(int(0u), asint((asuint(int(0)) - asuint(int(1)))), v);
   int res = v;
   return res;
 }

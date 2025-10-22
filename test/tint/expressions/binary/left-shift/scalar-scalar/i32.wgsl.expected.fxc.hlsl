@@ -3,6 +3,6 @@
 void f() {
   int a = int(1);
   uint b = 2u;
-  int r = (a << (b & 31u));
+  int r = asint((asuint(a) << (b & 31u)));
 }
 

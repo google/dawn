@@ -12,7 +12,7 @@ void a() {
     }
     default:
     {
-      a_1 = (a_1 + int(2));
+      a_1 = asint((asuint(a_1) + asuint(int(2))));
       break;
     }
   }

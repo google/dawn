@@ -6,6 +6,6 @@ static int _a = int(2);
 void f() {
   int b = a;
   int _b = _a;
-  s.Store(0u, asuint((b + _b)));
+  s.Store(0u, asuint(asint((asuint(b) + asuint(_b)))));
 }
 

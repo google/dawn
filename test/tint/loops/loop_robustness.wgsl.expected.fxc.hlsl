@@ -7,7 +7,7 @@ int f() {
       if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
-      i = (i + int(1));
+      i = asint((asuint(i) + asuint(int(1))));
       if ((i > int(4))) {
         return i;
       }

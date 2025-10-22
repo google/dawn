@@ -8,7 +8,7 @@ struct main1_inputs {
 
 groupshared int a;
 void uses_a() {
-  a = (a + int(1));
+  a = asint((asuint(a) + asuint(int(1))));
 }
 
 void main1_inner(uint tint_local_index) {
@@ -35,7 +35,7 @@ struct main2_inputs {
 
 groupshared int b;
 void uses_b() {
-  b = (b * int(2));
+  b = asint((asuint(b) * asuint(int(2))));
 }
 
 void main2_inner(uint tint_local_index) {
@@ -63,11 +63,11 @@ struct main3_inputs {
 groupshared int a;
 groupshared int b;
 void uses_a() {
-  a = (a + int(1));
+  a = asint((asuint(a) + asuint(int(1))));
 }
 
 void uses_b() {
-  b = (b * int(2));
+  b = asint((asuint(b) * asuint(int(2))));
 }
 
 void uses_a_and_b() {

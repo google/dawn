@@ -4,6 +4,6 @@ cbuffer cbuffer_v : register(b0) {
 };
 [numthreads(1, 1, 1)]
 void main() {
-  int u = (asint(v[0u].x) + int(1));
+  int u = asint((asuint(asint(v[0u].x)) + asuint(int(1))));
 }
 

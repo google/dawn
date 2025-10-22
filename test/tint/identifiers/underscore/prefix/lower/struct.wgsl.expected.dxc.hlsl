@@ -8,6 +8,6 @@ RWByteAddressBuffer s : register(u0);
 void f() {
   _a c = (_a)0;
   int d = c._b;
-  s.Store(0u, asuint((c._b + d)));
+  s.Store(0u, asuint(asint((asuint(c._b) + asuint(d)))));
 }
 

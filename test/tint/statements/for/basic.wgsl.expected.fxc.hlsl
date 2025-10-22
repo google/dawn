@@ -8,7 +8,7 @@ void f() {
     while((i < int(5))) {
       some_loop_body();
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

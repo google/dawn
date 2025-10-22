@@ -1,6 +1,6 @@
 
 int func(int value, inout int pointer) {
-  return (value + pointer);
+  return asint((asuint(value) + asuint(pointer)));
 }
 
 [numthreads(1, 1, 1)]

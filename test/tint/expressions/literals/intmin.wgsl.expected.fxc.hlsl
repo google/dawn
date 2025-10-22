@@ -1,7 +1,7 @@
 
 int add_int_min_explicit() {
   int a = int(-2147483648);
-  int b = (a + int(1));
+  int b = asint((asuint(a) + asuint(int(1))));
   int c = int(-2147483647);
   return c;
 }

@@ -77,7 +77,7 @@ void main() {
       uint4 v_47 = uint4((uint(v_44)).xxxx);
       v4b = (((v_47 == uint4(0u, 1u, 2u, 3u))) ? (v_46) : (v_45));
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

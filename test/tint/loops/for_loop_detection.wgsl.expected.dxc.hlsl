@@ -28,7 +28,7 @@ void main_inner(uint3 lid, uint tint_local_index) {
         break;
       }
       {
-        S = (S + int(8));
+        S = asint((asuint(S) + asuint(int(8))));
       }
       continue;
     }
@@ -46,7 +46,7 @@ void main_inner(uint3 lid, uint tint_local_index) {
       uint2 v = uint2((uint(asint(U[3u].x))).xx);
       dst_image2d[v] = result;
       {
-        s_group = (s_group + int(8));
+        s_group = asint((asuint(s_group) + asuint(int(8))));
       }
       continue;
     }

@@ -42,7 +42,7 @@ void main() {
     uint v_5 = min(uint(v_1), v_4);
     uint v_6 = (min(uint(v_2), 3u) * 16u);
     int v_7 = idx3();
-    int v_8 = (asint(buffer.Load((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u)))) - int(1));
+    int v_8 = asint((asuint(asint(buffer.Load((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u))))) - asuint(int(1))));
     buffer.Store((((0u + (v_5 * 64u)) + v_6) + (min(uint(v_7), 3u) * 4u)), asuint(v_8));
     while(true) {
       if (all((tint_loop_idx == (0u).xx))) {
@@ -65,7 +65,7 @@ void main() {
         uint v_13 = min(uint(v_9), v_12);
         uint v_14 = (min(uint(v_10), 3u) * 16u);
         int v_15 = idx6();
-        int v_16 = (asint(buffer.Load((((0u + (v_13 * 64u)) + v_14) + (min(uint(v_15), 3u) * 4u)))) - int(1));
+        int v_16 = asint((asuint(asint(buffer.Load((((0u + (v_13 * 64u)) + v_14) + (min(uint(v_15), 3u) * 4u))))) - asuint(int(1))));
         buffer.Store((((0u + (v_13 * 64u)) + v_14) + (min(uint(v_15), 3u) * 4u)), asuint(v_16));
       }
       continue;

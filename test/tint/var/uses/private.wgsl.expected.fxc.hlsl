@@ -4,7 +4,7 @@
 
 static int a = int(0);
 void uses_a() {
-  a = (a + int(1));
+  a = asint((asuint(a) + asuint(int(1))));
 }
 
 [numthreads(1, 1, 1)]
@@ -19,7 +19,7 @@ void main1() {
 
 static int b = int(0);
 void uses_b() {
-  b = (b * int(2));
+  b = asint((asuint(b) * asuint(int(2))));
 }
 
 [numthreads(1, 1, 1)]
@@ -35,11 +35,11 @@ void main2() {
 static int a = int(0);
 static int b = int(0);
 void uses_a() {
-  a = (a + int(1));
+  a = asint((asuint(a) + asuint(int(1))));
 }
 
 void uses_b() {
-  b = (b * int(2));
+  b = asint((asuint(b) * asuint(int(2))));
 }
 
 void uses_a_and_b() {

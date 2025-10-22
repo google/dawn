@@ -7,6 +7,6 @@ int tint_div_i32(int lhs, int rhs) {
 void f() {
   int a = int(1);
   int b = int(0);
-  int r = tint_div_i32(a, (b + b));
+  int r = tint_div_i32(a, asint((asuint(b) + asuint(b))));
 }
 

@@ -37,7 +37,7 @@ void main() {
       uint2 v_15 = uint2((uint(v_12)).xx);
       v2b = (((v_15 == uint2(0u, 1u))) ? (v_14) : (v_13));
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

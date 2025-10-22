@@ -114,7 +114,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
               tint_loop_idx_1.x = tint_low_inc_1;
               uint tint_carry_1 = uint((tint_low_inc_1 == 4294967295u));
               tint_loop_idx_1.y = (tint_loop_idx_1.y - tint_carry_1);
-              _72_h = (_72_h + int(1));
+              _72_h = asint((asuint(_72_h) + asuint(int(1))));
               if ((_72_h >= int(4))) { break; }
             }
             continue;
@@ -137,7 +137,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        _61_o = (_61_o + int(1));
+        _61_o = asint((asuint(_61_o) + asuint(int(1))));
       }
       continue;
     }

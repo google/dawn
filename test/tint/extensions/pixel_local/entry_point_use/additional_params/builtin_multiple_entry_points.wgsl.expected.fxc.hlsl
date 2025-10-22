@@ -60,7 +60,7 @@ int tint_f32_to_i32(float value) {
 
 void f2_inner(float4 pos) {
   int v = tint_f32_to_i32(pos.x);
-  P.b = (P.b + v);
+  P.b = asint((asuint(P.b) + asuint(v)));
 }
 
 void f2(f2_inputs inputs) {

@@ -1,7 +1,7 @@
 
 void c() {
   int a = int(1);
-  a = (a + int(2));
+  a = asint((asuint(a) + asuint(int(2))));
 }
 
 void b() {

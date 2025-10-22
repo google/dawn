@@ -4,6 +4,6 @@ cbuffer cbuffer_u_input : register(b0) {
 };
 [numthreads(1, 1, 1)]
 void main() {
-  int3 temp = (asint(u_input[0u].xyz) << ((0u).xxx & (31u).xxx));
+  int3 temp = asint((asuint(asint(u_input[0u].xyz)) << ((0u).xxx & (31u).xxx)));
 }
 

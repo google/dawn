@@ -33,7 +33,7 @@ void main() {
       v3b[min(uint(i), 2u)] = true;
       v4b[min(uint(i), 3u)] = true;
       {
-        i = (i + int(1));
+        i = asint((asuint(i) + asuint(int(1))));
       }
       continue;
     }

@@ -288,7 +288,7 @@ TEST_F(HlslWriterTest, BuiltinStorageAtomicSub) {
 RWByteAddressBuffer v : register(u0);
 void foo() {
   int v_1 = int(0);
-  v.InterlockedAdd(int(16u), (int(0) - int(123)), v_1);
+  v.InterlockedAdd(int(16u), asint((asuint(int(0)) - asuint(int(123)))), v_1);
   int x = v_1;
 }
 
@@ -311,7 +311,7 @@ TEST_F(HlslWriterTest, BuiltinStorageAtomicSubDirect) {
 RWByteAddressBuffer v : register(u0);
 void foo() {
   int v_1 = int(0);
-  v.InterlockedAdd(int(0u), (int(0) - int(123)), v_1);
+  v.InterlockedAdd(int(0u), asint((asuint(int(0)) - asuint(int(123)))), v_1);
   int x = v_1;
 }
 

@@ -8,7 +8,7 @@ int f() {
       if (all((tint_loop_idx == (0u).xx))) {
         break;
       }
-      i = (i + int(1));
+      i = asint((asuint(i) + asuint(int(1))));
       if ((i > int(4))) {
         return int(1);
       }
@@ -18,7 +18,7 @@ int f() {
           if (all((tint_loop_idx_1 == (0u).xx))) {
             break;
           }
-          j = (j + int(1));
+          j = asint((asuint(j) + asuint(int(1))));
           if ((j > int(4))) {
             return int(2);
           }

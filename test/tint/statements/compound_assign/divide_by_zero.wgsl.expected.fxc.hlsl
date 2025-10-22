@@ -3,7 +3,7 @@ static int a = int(0);
 static float b = 0.0f;
 int tint_mod_i32(int lhs, int rhs) {
   int v = ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs));
-  return (lhs - ((lhs / v) * v));
+  return asint((asuint(lhs) - asuint(asint((asuint((lhs / v)) * asuint(v))))));
 }
 
 int tint_div_i32(int lhs, int rhs) {

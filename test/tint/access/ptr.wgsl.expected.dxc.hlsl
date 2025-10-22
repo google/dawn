@@ -16,16 +16,16 @@ int accept_value(int val) {
 
 int accept_ptr_deref_call_func(inout int val) {
   int v = val;
-  return (v + accept_value(val));
+  return asint((asuint(v) + asuint(accept_value(val))));
 }
 
 int accept_ptr_deref_pass_through(inout int val) {
   int v_1 = val;
-  return (v_1 + accept_ptr_deref_call_func(val));
+  return asint((asuint(v_1) + asuint(accept_ptr_deref_call_func(val))));
 }
 
 int accept_ptr_to_struct_and_access(inout S val) {
-  return (val.a + val.b);
+  return asint((asuint(val.a) + asuint(val.b)));
 }
 
 int accept_ptr_to_struct_access_pass_ptr(inout S val) {
@@ -61,11 +61,11 @@ void main_inner(uint tint_local_index) {
   InterlockedOr(g1, int(0), v_4);
   int t1 = v_4;
   int v_5 = accept_ptr_deref_pass_through(v1);
-  int v_6 = (v_5 + accept_ptr_to_struct_and_access(v2));
-  int v_7 = (v_6 + accept_ptr_to_struct_and_access(v2));
-  int v_8 = (v_7 + accept_ptr_vec_access_elements(v4));
-  int v_9 = (v_8 + accept_ptr_to_struct_access_pass_ptr(v2));
-  s.Store(0u, asuint(((v_9 + call_builtin_with_mod_scope_ptr()) + t1)));
+  int v_6 = asint((asuint(v_5) + asuint(accept_ptr_to_struct_and_access(v2))));
+  int v_7 = asint((asuint(v_6) + asuint(accept_ptr_to_struct_and_access(v2))));
+  int v_8 = asint((asuint(v_7) + asuint(accept_ptr_vec_access_elements(v4))));
+  int v_9 = asint((asuint(v_8) + asuint(accept_ptr_to_struct_access_pass_ptr(v2))));
+  s.Store(0u, asuint(asint((asuint(asint((asuint(v_9) + asuint(call_builtin_with_mod_scope_ptr())))) + asuint(t1)))));
 }
 
 [numthreads(1, 1, 1)]

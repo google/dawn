@@ -2,7 +2,7 @@
 RWByteAddressBuffer v : register(u0);
 int tint_mod_i32(int lhs, int rhs) {
   int v_1 = ((((rhs == int(0)) | ((lhs == int(-2147483648)) & (rhs == int(-1))))) ? (int(1)) : (rhs));
-  return (lhs - ((lhs / v_1) * v_1));
+  return asint((asuint(lhs) - asuint(asint((asuint((lhs / v_1)) * asuint(v_1))))));
 }
 
 void foo() {

@@ -25,7 +25,7 @@ void foo() {
         GroupMemoryBarrierWithGroupSync();
         int v_2 = b;
         GroupMemoryBarrierWithGroupSync();
-        i = (i + v_2);
+        i = asint((asuint(i) + asuint(v_2)));
       }
       continue;
     }
