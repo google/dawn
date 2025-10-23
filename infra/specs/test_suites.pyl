@@ -31,7 +31,7 @@
         'test': 'dawn_end2end_tests',
       },
     },
-    'dawn_end2end_real_hardware_gtests': {
+    'dawn_end2end_real_hardware_common_gtests': {
       'dawn_end2end_implicit_sync_tests': {
         'args': [
           '--enable-implicit-device-sync',
@@ -42,6 +42,10 @@
           'true_noop_merge',
         ],
         'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 2,
+        },
       },
       'dawn_end2end_skip_validation_tests': {
         'args': [
@@ -53,6 +57,10 @@
           'true_noop_merge',
         ],
         'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 2,
+        },
       },
       'dawn_end2end_tests': {
         'mixins': [
@@ -60,6 +68,10 @@
           'result_adapter_gtest_json',
           'true_noop_merge',
         ],
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 2,
+        },
       },
       'dawn_end2end_validation_layers_tests': {
         'args': [
@@ -71,6 +83,10 @@
           'true_noop_merge',
         ],
         'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 3,
+        },
       },
       'dawn_end2end_wire_tests': {
         'args': [
@@ -82,6 +98,41 @@
           'true_noop_merge',
         ],
         'test': 'dawn_end2end_tests',
+        'swarming': {
+          # Primarily needed for Windows.
+          'shards': 2,
+        },
+      },
+    },
+    'dawn_end2end_real_hardware_win_only_gtests': {
+      'dawn_end2end_no_dxc_tests': {
+        'args': [
+          '--disable-toggles=use_dxc',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+        'swarming': {
+          'shards': 2,
+        },
+      },
+      'dawn_end2end_no_dxc_validation_layers_tests': {
+        'args': [
+          '--disable-toggles=use_dxc',
+          '--enable-backend-validation',
+        ],
+        'mixins': [
+          'dawn_end2end_real_hardware_gtests_common_args',
+          'result_adapter_gtest_json',
+          'true_noop_merge',
+        ],
+        'test': 'dawn_end2end_tests',
+        'swarming': {
+          'shards': 3,
+        },
       },
     },
     'dawn_end2end_sws_gtests': {
@@ -265,8 +316,13 @@
     },
   },
   'compound_suites': {
-    'real_hardware_gtests': [
-      'dawn_end2end_real_hardware_gtests',
+    'real_hardware_common_gtests': [
+      'dawn_end2end_real_hardware_common_gtests',
+      'dawn_real_hardware_perf_tests',
+    ],
+    'real_hardware_win_gtests': [
+      'dawn_end2end_real_hardware_common_gtests',
+      'dawn_end2end_real_hardware_win_only_gtests',
       'dawn_real_hardware_perf_tests',
     ],
     'swiftshader_gtests': [

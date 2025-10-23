@@ -46,7 +46,7 @@
           'linux_intel_uhd_630_stable',
         ],
         'test_suites': {
-          'gtest_tests': 'real_hardware_gtests',
+          'gtest_tests': 'real_hardware_common_gtests',
         },
       },
       'dawn-linux-x64-sws-clusterfuzz': {
@@ -167,7 +167,7 @@
           'mac_arm64_apple_m2_retina_gpu_stable',
         ],
         'test_suites': {
-          'gtest_tests': 'real_hardware_gtests',
+          'gtest_tests': 'real_hardware_common_gtests',
         },
       },
       'dawn-mac-x64-amd-5300m-rel': {
@@ -176,7 +176,7 @@
           'mac_retina_amd_gpu_stable',
         ],
         'test_suites': {
-          'gtest_tests': 'real_hardware_gtests',
+          'gtest_tests': 'real_hardware_common_gtests',
         },
       },
       'dawn-mac-x64-sws-dbg': {
@@ -224,7 +224,9 @@
         'mixins': [
           'win10_nvidia_gtx_1660_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_win_gtests',
+        },
       },
       'dawn-win-x64-sws-dbg': {
         'os_type': 'win',
