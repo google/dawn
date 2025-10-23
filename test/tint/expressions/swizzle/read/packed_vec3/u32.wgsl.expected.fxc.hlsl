@@ -2,6 +2,7 @@
 cbuffer cbuffer_U : register(b0) {
   uint4 U[1];
 };
+[numthreads(1, 1, 1)]
 void f() {
   uint3 v = U[0u].xyz;
   uint x = U[0u].x;
@@ -124,9 +125,5 @@ void f() {
   uint4 zzzx = U[0u].xyz.zzzx;
   uint4 zzzy = U[0u].xyz.zzzy;
   uint4 zzzz = U[0u].xyz.zzzz;
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

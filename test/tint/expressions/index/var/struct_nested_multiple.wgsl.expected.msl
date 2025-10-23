@@ -26,3 +26,7 @@ uint f() {
   S a = S{};
   return a.n[2u].k[1u];
 }
+
+kernel void v() {
+  f();
+}

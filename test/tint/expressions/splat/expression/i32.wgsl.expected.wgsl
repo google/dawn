@@ -1,3 +1,4 @@
+@compute @workgroup_size(1)
 fn f() {
   var v2 : vec2<i32> = vec2<i32>((1 + 2));
   var v3 : vec3<i32> = vec3<i32>((1 + 2));

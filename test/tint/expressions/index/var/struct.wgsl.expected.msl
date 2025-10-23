@@ -10,3 +10,7 @@ uint f() {
   S a = S{};
   return a.n;
 }
+
+kernel void v() {
+  f();
+}

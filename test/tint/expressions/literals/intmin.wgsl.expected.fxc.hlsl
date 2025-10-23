@@ -7,6 +7,7 @@ int add_int_min_explicit() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  add_int_min_explicit();
 }
 

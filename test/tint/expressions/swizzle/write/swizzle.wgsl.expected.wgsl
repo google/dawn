@@ -2,6 +2,7 @@ struct S {
   val : array<vec3f, 3>,
 }
 
+@compute @workgroup_size(1)
 fn a() {
   var a = vec4();
   a.x = 1;

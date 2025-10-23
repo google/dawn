@@ -4,6 +4,7 @@ struct S {
 
 
 static S P = (S)0;
+[numthreads(1, 1, 1)]
 void f() {
   int3 v = P.v;
   int x = P.v.x;
@@ -126,9 +127,5 @@ void f() {
   int4 zzzx = P.v.zzzx;
   int4 zzzy = P.v.zzzy;
   int4 zzzz = P.v.zzzz;
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

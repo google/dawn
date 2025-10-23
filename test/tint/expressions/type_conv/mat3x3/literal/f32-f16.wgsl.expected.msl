@@ -1,2 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
+struct tint_module_vars_struct {
+  thread half3x3* u;
+};
+
+kernel void v() {
+  thread half3x3 u = half3x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h), half3(7.0h, 8.0h, 9.0h));
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
+}

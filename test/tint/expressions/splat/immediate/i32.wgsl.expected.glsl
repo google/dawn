@@ -1,10 +1,8 @@
 #version 310 es
 
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   ivec2 v2 = ivec2(1);
   ivec3 v3 = ivec3(1);
   ivec4 v4 = ivec4(1);
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

@@ -9,7 +9,9 @@ struct tint_module_vars_struct {
   thread S* P;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread S P = {};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.P=(&P)};
   half3 v = (*tint_module_vars.P).v;
   half x = (*tint_module_vars.P).v.x;
   half y = (*tint_module_vars.P).v.y;

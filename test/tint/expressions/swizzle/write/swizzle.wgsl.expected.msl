@@ -17,7 +17,7 @@ struct S {
   tint_array<float3, 3> val;
 };
 
-void a() {
+kernel void a() {
   int4 a_1 = int4(0);
   a_1.x = 1;
   a_1.z = 2;

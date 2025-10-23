@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-void f() {
+kernel void f() {
   int v = 3;
   int2 v2 = int2(v);
   int3 v3 = int3(v);

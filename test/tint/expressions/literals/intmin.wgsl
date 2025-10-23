@@ -5,3 +5,8 @@ fn add_int_min_explicit() -> i32 {
     var c = -2147483648 + 1;
     return c;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    _ = add_int_min_explicit();
+}

@@ -4,6 +4,7 @@ struct S {
 
 var<private> P : S;
 
+@compute @workgroup_size(1)
 fn f() {
   var v = P.v;
   var x = P.v.x;

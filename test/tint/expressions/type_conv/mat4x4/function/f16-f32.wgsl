@@ -8,6 +8,8 @@ fn m() -> mat4x4<f16> {
                        9.0h, 10.0h, 11.0h, 12.0h,
                        13.0h, 14.0h, 15.0h, 16.0h);
 }
+
+@compute @workgroup_size(1)
 fn f() {
     var v : mat4x4<f32> = mat4x4<f32>(m());
 }

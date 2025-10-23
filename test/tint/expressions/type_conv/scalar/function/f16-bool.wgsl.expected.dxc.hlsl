@@ -5,11 +5,8 @@ float16_t m() {
   return float16_t(t);
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   bool v = bool(m());
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

@@ -6,9 +6,7 @@ f16mat2x4 m() {
   t = (t + 1.0hf);
   return f16mat2x4(f16vec4(1.0hf, 2.0hf, 3.0hf, 4.0hf), f16vec4(5.0hf, 6.0hf, 7.0hf, 8.0hf));
 }
-void f() {
-  mat2x4 v = mat2x4(m());
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  mat2x4 v = mat2x4(m());
 }

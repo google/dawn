@@ -10,3 +10,7 @@ float f() {
   S a = S{};
   return a.n[2u].y;
 }
+
+kernel void v() {
+  f();
+}

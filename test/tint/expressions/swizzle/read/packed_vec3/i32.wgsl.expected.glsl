@@ -4,7 +4,8 @@ layout(binding = 0, std140)
 uniform U_block_1_ubo {
   uvec4 inner[1];
 } v_1;
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   ivec3 v = ivec3(v_1.inner[0u].xyz);
   uvec4 v_2 = v_1.inner[0u];
   int x = int(v_2.x);
@@ -129,7 +130,4 @@ void f() {
   ivec4 zzzx = ivec3(v_1.inner[0u].xyz).zzzx;
   ivec4 zzzy = ivec3(v_1.inner[0u].xyz).zzzy;
   ivec4 zzzz = ivec3(v_1.inner[0u].xyz).zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

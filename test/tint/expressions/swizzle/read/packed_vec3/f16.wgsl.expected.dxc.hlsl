@@ -22,6 +22,7 @@ vector<float16_t, 2> tint_bitcast_to_f16_1(uint src) {
   return vector<float16_t, 2>(v_4, float16_t(t_high));
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   vector<float16_t, 3> v = tint_bitcast_to_f16(U[0u].xy).xyz;
   float16_t x = tint_bitcast_to_f16_1(U[0u].x).x;
@@ -144,9 +145,5 @@ void f() {
   vector<float16_t, 4> zzzx = tint_bitcast_to_f16(U[0u].xy).xyz.zzzx;
   vector<float16_t, 4> zzzy = tint_bitcast_to_f16(U[0u].xy).xyz.zzzy;
   vector<float16_t, 4> zzzz = tint_bitcast_to_f16(U[0u].xy).xyz.zzzz;
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

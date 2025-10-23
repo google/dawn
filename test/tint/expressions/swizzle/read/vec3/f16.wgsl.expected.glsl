@@ -7,7 +7,8 @@ struct S {
 };
 
 S P = S(f16vec3(0.0hf));
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   f16vec3 v = P.v;
   float16_t x = P.v.x;
   float16_t y = P.v.y;
@@ -129,7 +130,4 @@ void f() {
   f16vec4 zzzx = P.v.zzzx;
   f16vec4 zzzy = P.v.zzzy;
   f16vec4 zzzz = P.v.zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

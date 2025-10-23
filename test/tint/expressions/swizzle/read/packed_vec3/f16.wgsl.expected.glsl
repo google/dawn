@@ -11,7 +11,8 @@ f16vec4 tint_bitcast_to_f16(uvec2 src) {
 f16vec2 tint_bitcast_to_f16_1(uint src) {
   return unpackFloat2x16(src);
 }
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   f16vec3 v = tint_bitcast_to_f16(v_1.inner[0u].xy).xyz;
   uvec4 v_2 = v_1.inner[0u];
   float16_t x = tint_bitcast_to_f16_1(v_2.x).x;
@@ -136,7 +137,4 @@ void f() {
   f16vec4 zzzx = tint_bitcast_to_f16(v_1.inner[0u].xy).xyz.zzzx;
   f16vec4 zzzy = tint_bitcast_to_f16(v_1.inner[0u].xy).xyz.zzzy;
   f16vec4 zzzz = tint_bitcast_to_f16(v_1.inner[0u].xy).xyz.zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

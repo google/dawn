@@ -7,3 +7,7 @@ int add_int_min_explicit() {
   int c = -2147483647;
   return c;
 }
+
+kernel void v() {
+  add_int_min_explicit();
+}

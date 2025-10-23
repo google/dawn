@@ -4,6 +4,7 @@ struct S {
 
 var<private> P : S;
 
+@compute @workgroup_size(1)
 fn f() {
     P.v = vec3<u32>(1u, 2u, 3u);
 

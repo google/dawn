@@ -12,3 +12,8 @@ fn f() -> u32 {
   var a = S();
   return a.n.p;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f();
+}

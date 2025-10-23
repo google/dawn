@@ -6,3 +6,7 @@ float3 f(int x) {
   int const i = x;
   return m[min(uint(i), 2u)];
 }
+
+kernel void v() {
+  f(1);
+}

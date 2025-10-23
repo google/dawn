@@ -6,7 +6,8 @@ struct S {
 };
 
 S P = S(uvec3(0u));
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   uvec3 v = P.v;
   uint x = P.v.x;
   uint y = P.v.y;
@@ -128,7 +129,4 @@ void f() {
   uvec4 zzzx = P.v.zzzx;
   uvec4 zzzy = P.v.zzzy;
   uvec4 zzzz = P.v.zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

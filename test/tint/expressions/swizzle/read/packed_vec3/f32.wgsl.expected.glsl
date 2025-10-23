@@ -4,7 +4,8 @@ layout(binding = 0, std140)
 uniform U_block_1_ubo {
   uvec4 inner[1];
 } v_1;
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   vec3 v = uintBitsToFloat(v_1.inner[0u].xyz);
   uvec4 v_2 = v_1.inner[0u];
   float x = uintBitsToFloat(v_2.x);
@@ -129,7 +130,4 @@ void f() {
   vec4 zzzx = uintBitsToFloat(v_1.inner[0u].xyz).zzzx;
   vec4 zzzy = uintBitsToFloat(v_1.inner[0u].xyz).zzzy;
   vec4 zzzz = uintBitsToFloat(v_1.inner[0u].xyz).zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

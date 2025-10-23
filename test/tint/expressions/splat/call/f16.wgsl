@@ -2,6 +2,7 @@
 enable f16;
 fn get_f16() -> f16 { return 1.0h; }
 
+@compute @workgroup_size(1)
 fn f() {
     var v2 : vec2<f16> = vec2<f16>(get_f16());
     var v3 : vec3<f16> = vec3<f16>(get_f16());

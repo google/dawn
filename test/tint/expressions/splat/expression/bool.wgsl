@@ -1,3 +1,4 @@
+@compute @workgroup_size(1)
 fn f() {
     var v2 : vec2<bool> = vec2<bool>(true || false);
     var v3 : vec3<bool> = vec3<bool>(true || false);

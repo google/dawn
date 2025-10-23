@@ -10,6 +10,8 @@ half3x2 m(tint_module_vars_struct tint_module_vars) {
   return half3x2(half2(1.0h, 2.0h), half2(3.0h, 4.0h), half2(5.0h, 6.0h));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread half t = 0.0h;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   float3x2 v = float3x2(m(tint_module_vars));
 }

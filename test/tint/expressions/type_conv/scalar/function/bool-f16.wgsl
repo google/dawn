@@ -5,6 +5,8 @@ fn m() -> bool {
     t = true;
     return bool(t);
 }
+
+@compute @workgroup_size(1)
 fn f() {
     var v : f16 = f16(m());
 }

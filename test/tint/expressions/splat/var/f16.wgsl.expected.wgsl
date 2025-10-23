@@ -1,5 +1,6 @@
 enable f16;
 
+@compute @workgroup_size(1)
 fn f() {
   var v = (1.0h + 2.0h);
   var v2 : vec2<f16> = vec2<f16>(v);

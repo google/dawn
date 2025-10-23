@@ -6,7 +6,8 @@ struct S {
 };
 
 S P = S(vec3(0.0f));
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   vec3 v = P.v;
   float x = P.v.x;
   float y = P.v.y;
@@ -128,7 +129,4 @@ void f() {
   vec4 zzzx = P.v.zzzx;
   vec4 zzzy = P.v.zzzy;
   vec4 zzzz = P.v.zzzz;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }
