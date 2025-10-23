@@ -1,9 +1,7 @@
 #version 310 es
 
 float u = 1.0f;
-void f() {
-  bool v = bool(u);
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool v = bool(u);
 }

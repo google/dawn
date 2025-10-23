@@ -5,6 +5,7 @@ fn m() -> f32 {
   return f32(t);
 }
 
+@compute @workgroup_size(1)
 fn f() {
   var v : i32 = i32(m());
 }

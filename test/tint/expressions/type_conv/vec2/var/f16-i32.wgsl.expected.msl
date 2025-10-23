@@ -9,6 +9,8 @@ int2 tint_v2f16_to_v2i32(half2 value) {
   return int2(clamp(value, half2(-65504.0h), half2(65504.0h)));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread half2 u = half2(1.0h);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
   int2 const v = tint_v2f16_to_v2i32((*tint_module_vars.u));
 }

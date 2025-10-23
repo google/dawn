@@ -14,6 +14,8 @@ int2 tint_v2f32_to_v2i32(float2 value) {
   return int2(clamp(value, float2(-2147483648.0f), float2(2147483520.0f)));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread float t = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   int2 v = tint_v2f32_to_v2i32(m(tint_module_vars));
 }

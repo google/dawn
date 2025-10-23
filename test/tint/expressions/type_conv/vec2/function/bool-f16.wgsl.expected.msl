@@ -10,6 +10,8 @@ bool2 m(tint_module_vars_struct tint_module_vars) {
   return bool2((*tint_module_vars.t));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread bool t = false;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   half2 v = half2(m(tint_module_vars));
 }

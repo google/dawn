@@ -5,11 +5,8 @@ int m() {
   return int(t);
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   uint v = uint(m());
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

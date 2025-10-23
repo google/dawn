@@ -7,6 +7,7 @@ fn m() -> vec2<i32> {
   return vec2<i32>(t);
 }
 
+@compute @workgroup_size(1)
 fn f() {
   var v : vec2<f16> = vec2<f16>(m());
 }

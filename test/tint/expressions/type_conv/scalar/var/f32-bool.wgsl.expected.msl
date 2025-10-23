@@ -5,6 +5,8 @@ struct tint_module_vars_struct {
   thread float* u;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread float u = 1.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
   bool const v = bool((*tint_module_vars.u));
 }

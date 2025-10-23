@@ -10,6 +10,8 @@ uint2 m(tint_module_vars_struct tint_module_vars) {
   return uint2((*tint_module_vars.t));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread uint t = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   int2 v = int2(m(tint_module_vars));
 }

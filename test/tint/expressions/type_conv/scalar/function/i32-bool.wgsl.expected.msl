@@ -10,6 +10,8 @@ int m(tint_module_vars_struct tint_module_vars) {
   return int((*tint_module_vars.t));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread int t = 0;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   bool v = bool(m(tint_module_vars));
 }
