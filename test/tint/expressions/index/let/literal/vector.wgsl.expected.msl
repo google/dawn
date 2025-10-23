@@ -5,3 +5,7 @@ float f() {
   float3 const v = float3(1.0f, 2.0f, 3.0f);
   return v.y;
 }
+
+kernel void v_1() {
+  f();
+}

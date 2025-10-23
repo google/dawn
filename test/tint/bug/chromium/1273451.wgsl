@@ -9,3 +9,8 @@ struct B {
 fn f(a : A) -> B {
   return B();
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f(A(1));
+}

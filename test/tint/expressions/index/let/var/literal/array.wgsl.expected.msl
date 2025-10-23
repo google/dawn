@@ -18,3 +18,7 @@ int f() {
   int i = 1;
   return a[min(uint(i), 7u)];
 }
+
+kernel void v() {
+  f();
+}

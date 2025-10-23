@@ -4,3 +4,7 @@ using namespace metal;
 float f() {
   return 0.0f;
 }
+
+kernel void v() {
+  f();
+}

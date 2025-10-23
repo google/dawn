@@ -5,7 +5,8 @@ struct tint_module_vars_struct {
   texture2d<int, access::read_write> tex;
 };
 
-void foo(tint_module_vars_struct tint_module_vars) {
+kernel void foo(texture2d<int, access::read_write> tex [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tex=tex};
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     int i = 0;

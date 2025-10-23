@@ -7,6 +7,8 @@ void b(inout int x) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  int c = int(1);
+  b(c);
 }
 

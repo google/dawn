@@ -5,3 +5,8 @@ fn foo() -> f32 {
   v[oob] = b;
   return b;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo();
+}

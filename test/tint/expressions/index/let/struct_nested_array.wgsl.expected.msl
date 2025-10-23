@@ -22,3 +22,7 @@ uint f() {
   S const a = S{};
   return a.n[2u];
 }
+
+kernel void v() {
+  f();
+}

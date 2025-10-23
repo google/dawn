@@ -32,5 +32,9 @@ void bar(float x, tint_module_vars_struct tint_module_vars) {
   }
 }
 
-void v() {
+kernel void v() {
+  thread int global = 0;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.global=(&global)};
+  foo(1.0f);
+  bar(1.0f, tint_module_vars);
 }

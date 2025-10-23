@@ -3,3 +3,8 @@ fn f() -> f32 {
   let i = 1;
   return v[i];
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f();
+}

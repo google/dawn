@@ -2,3 +2,8 @@ fn f(i : i32) -> i32 {
   let a = array<i32, 8>(1, 2, 3, 4, 5, 6, 7, 8);
   return a[i];
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f(1);
+}

@@ -4,6 +4,7 @@ override wgsize : u32;
 var<workgroup> a : array<f32, wgsize>; // Accepted
 var<workgroup> b : array<f32, wgsize * 2>; // Rejected
 
+@compute @workgroup_size(1)
 fn f() {
     let x = a[0];
     let y = b[0];

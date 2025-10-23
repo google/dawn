@@ -13,3 +13,8 @@ var<workgroup> v : Outer;
 fn foo() -> Outer {
   return workgroupUniformLoad(&(v));
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo();
+}

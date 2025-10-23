@@ -5,3 +5,8 @@ fn foo() -> f32 {
   v[oob] = b;  // 99 is out of bounds
   return b;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    _ = foo();
+}

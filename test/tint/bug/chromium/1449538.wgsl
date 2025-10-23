@@ -1,3 +1,4 @@
+@compute @workgroup_size(1)
 fn f() {
     for (var i0520 = array<i32, 636109182>()[ 0]; false;) {}
     for (var i62 = array<i32,   656633 >()[0]; false;) {}

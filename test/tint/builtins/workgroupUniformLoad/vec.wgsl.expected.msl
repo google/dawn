@@ -5,9 +5,26 @@ struct tint_module_vars_struct {
   threadgroup float4* v;
 };
 
+struct tint_symbol_1 {
+  float4 tint_symbol;
+};
+
 float4 foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   float4 const v_1 = (*tint_module_vars.v);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1;
+}
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.v) = float4(0.0f);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  foo(tint_module_vars);
+}
+
+kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_3).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

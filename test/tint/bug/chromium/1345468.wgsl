@@ -1,4 +1,4 @@
-
+@compute @workgroup_size(1)
 fn f(){
     const m = mat4x2(0, 0, 0, 0, 4., 0, 0, 0); // abstract matrix
     const v = vec2(0, 1);                      // abstract vector

@@ -546,6 +546,7 @@ fn foo(
   *p254 = rhs;
 }
 
+@compute @workgroup_size(1)
 fn main() {
   var v0 : i32;
   var v1 : i32;

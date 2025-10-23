@@ -15,3 +15,7 @@ uint f() {
   S const a = S{};
   return a.n.p;
 }
+
+kernel void v() {
+  f();
+}

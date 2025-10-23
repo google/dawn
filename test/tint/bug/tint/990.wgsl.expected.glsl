@@ -1,6 +1,7 @@
 #version 310 es
 
-void f() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int i = 0;
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
@@ -21,7 +22,4 @@ void f() {
       continue;
     }
   }
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

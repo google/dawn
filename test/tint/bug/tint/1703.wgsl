@@ -35,3 +35,9 @@ fn foo_default_initialize() {
         let r : vec4<f32> = textureSampleBias(my_texture, my_sampler, vec2<f32>(), 0.0);
     }
 }
+
+@fragment
+fn main() {
+    foo_member_initialize();
+    foo_default_initialize();
+}

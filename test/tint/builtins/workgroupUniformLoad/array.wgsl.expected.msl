@@ -17,9 +17,38 @@ struct tint_module_vars_struct {
   threadgroup tint_array<int, 4>* v;
 };
 
+struct tint_symbol_1 {
+  tint_array<int, 4> tint_symbol;
+};
+
 tint_array<int, 4> foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_array<int, 4> const v_1 = (*tint_module_vars.v);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   return v_1;
+}
+
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v_2 = 0u;
+    v_2 = tint_local_index;
+    while(true) {
+      uint const v_3 = v_2;
+      if ((v_3 >= 4u)) {
+        break;
+      }
+      (*tint_module_vars.v)[v_3] = 0;
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  foo(tint_module_vars);
+}
+
+kernel void v_4(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_5 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_5).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

@@ -13,7 +13,8 @@ layout(binding = 0, std430)
 buffer FSUniforms_1_ssbo {
   FSUniformData fsUniformData[];
 } _storage;
-void v() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   ivec2 vec = ivec2(0);
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
@@ -21,10 +22,10 @@ void v() {
       if (all(equal(tint_loop_idx, uvec2(0u)))) {
         break;
       }
-      int v_1 = vec.y;
-      uint v_2 = idx;
-      uint v_3 = min(v_2, (uint(_storage.fsUniformData.length()) - 1u));
-      if ((v_1 >= _storage.fsUniformData[v_3].size.y)) {
+      int v = vec.y;
+      uint v_1 = idx;
+      uint v_2 = min(v_1, (uint(_storage.fsUniformData.length()) - 1u));
+      if ((v >= _storage.fsUniformData[v_2].size.y)) {
         break;
       }
       {
@@ -36,7 +37,4 @@ void v() {
       continue;
     }
   }
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

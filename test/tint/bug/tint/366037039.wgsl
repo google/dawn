@@ -10,6 +10,7 @@ var<uniform> ubuffer : S;
 var<storage, read_write> sbuffer : S;
 var<workgroup> wbuffer : S;
 
+@compute @workgroup_size(1)
 fn foo() {
   let u = ubuffer;
   let s = sbuffer;

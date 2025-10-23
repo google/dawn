@@ -6,3 +6,7 @@ float f() {
   int i = 1;
   return v[min(uint(i), 2u)];
 }
+
+kernel void v_1() {
+  f();
+}

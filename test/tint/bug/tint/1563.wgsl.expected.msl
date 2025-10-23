@@ -8,3 +8,7 @@ float foo() {
   v[min(uint(oob), 3u)] = b;
   return b;
 }
+
+kernel void v_1() {
+  foo();
+}

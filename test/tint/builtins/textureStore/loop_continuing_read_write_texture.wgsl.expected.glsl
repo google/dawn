@@ -1,7 +1,8 @@
 #version 310 es
 
 layout(binding = 0, r32i) uniform highp iimage2D tex;
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
     int i = 0;
@@ -23,7 +24,4 @@ void foo() {
       continue;
     }
   }
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }

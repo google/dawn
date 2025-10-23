@@ -1,6 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-void v() {
+kernel void tint_entry_point() {
   float const v_1 = 1.0f;
 }

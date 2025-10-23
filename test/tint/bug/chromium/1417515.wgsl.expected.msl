@@ -6,6 +6,6 @@ struct modf_result_f32 {
   float whole;
 };
 
-void foo() {
+kernel void foo() {
   modf_result_f32 const s1 = modf_result_f32{};
 }

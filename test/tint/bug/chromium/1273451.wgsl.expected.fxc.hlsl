@@ -13,6 +13,8 @@ B f(A a) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  A v_1 = {int(1)};
+  f(v_1);
 }
 

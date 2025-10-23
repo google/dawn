@@ -10,6 +10,8 @@ void more_tests_that_would_fail() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  original_clusterfuzz_code();
+  more_tests_that_would_fail();
 }
 

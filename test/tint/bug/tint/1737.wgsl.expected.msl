@@ -18,7 +18,48 @@ struct tint_module_vars_struct {
   threadgroup tint_array<float, 20>* b;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+struct tint_symbol_2 {
+  tint_array<float, 10> tint_symbol;
+  tint_array<float, 20> tint_symbol_1;
+};
+
+void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  {
+    uint v = 0u;
+    v = tint_local_index;
+    while(true) {
+      uint const v_1 = v;
+      if ((v_1 >= 10u)) {
+        break;
+      }
+      (*tint_module_vars.a)[v_1] = 0.0f;
+      {
+        v = (v_1 + 1u);
+      }
+      continue;
+    }
+  }
+  {
+    uint v_2 = 0u;
+    v_2 = tint_local_index;
+    while(true) {
+      uint const v_3 = v_2;
+      if ((v_3 >= 20u)) {
+        break;
+      }
+      (*tint_module_vars.b)[v_3] = 0.0f;
+      {
+        v_2 = (v_3 + 1u);
+      }
+      continue;
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   float const x = (*tint_module_vars.a)[0u];
   float const y = (*tint_module_vars.b)[0u];
+}
+
+kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_4 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_4).tint_symbol), .b=(&(*v_4).tint_symbol_1)};
+  f_inner(tint_local_index, tint_module_vars);
 }

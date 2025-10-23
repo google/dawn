@@ -1,5 +1,6 @@
 
 ByteAddressBuffer _storage : register(t2);
+[numthreads(1, 1, 1)]
 void main() {
   int2 vec = (int(0)).xx;
   {
@@ -23,9 +24,5 @@ void main() {
       continue;
     }
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

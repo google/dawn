@@ -10,3 +10,7 @@ uint f() {
   S const a = S{};
   return a.n.z;
 }
+
+kernel void v() {
+  f();
+}

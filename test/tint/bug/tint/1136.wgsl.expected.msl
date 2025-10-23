@@ -2,13 +2,14 @@
 using namespace metal;
 
 struct Buffer {
-  uint data;
+  /* 0x0000 */ uint data;
 };
 
 struct tint_module_vars_struct {
   device Buffer* tint_member;
 };
 
-void v(tint_module_vars_struct tint_module_vars) {
+kernel void v(device Buffer* v_1 [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1};
   (*tint_module_vars.tint_member).data = ((*tint_module_vars.tint_member).data + 1u);
 }

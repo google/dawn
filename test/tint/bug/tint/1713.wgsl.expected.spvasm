@@ -5,12 +5,12 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
-               OpName %unused_entry_point "unused_entry_point"
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
        %void = OpTypeVoid
           %3 = OpTypeFunction %void
-%unused_entry_point = OpFunction %void None %3
+       %main = OpFunction %void None %3
           %4 = OpLabel
                OpReturn
                OpFunctionEnd

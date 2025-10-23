@@ -6,3 +6,9 @@ fn b(x : ptr<function, i32>) {
 }
 
 //it
+
+@compute @workgroup_size(1)
+fn main() {
+    var c = 1;
+    b(&c);
+}

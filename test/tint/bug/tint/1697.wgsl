@@ -1,5 +1,6 @@
 override O = 0; // Try switching to 'const'
 
+@compute @workgroup_size(1)
 fn f() {
   const smaller_than_any_f32 = 1e-50;
   // When O is an override, the outer index value is not constant, so the

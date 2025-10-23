@@ -2,7 +2,12 @@
 
 shared int a;
 shared int b;
-void foo() {
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    a = 0;
+    b = 0;
+  }
+  barrier();
   {
     uvec2 tint_loop_idx = uvec2(4294967295u);
     int i = 0;
@@ -35,4 +40,5 @@ void foo() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  foo_inner(gl_LocalInvocationIndex);
 }

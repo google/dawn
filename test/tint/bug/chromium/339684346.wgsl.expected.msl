@@ -7,3 +7,8 @@ void a(thread int* const x) {
 void b(thread int* const x) {
   a(x);
 }
+
+kernel void v() {
+  int c = 1;
+  b((&c));
+}

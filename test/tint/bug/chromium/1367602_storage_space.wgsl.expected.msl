@@ -1,2 +1,27 @@
 #include <metal_stdlib>
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct A {
+  /* 0x0000 */ tint_array<float, 1000000> a;
+};
+
+struct tint_module_vars_struct {
+  const device tint_array<int, 1000000>* v;
+  const device A* b;
+};
+
+kernel void v_1(const device tint_array<int, 1000000>* v [[buffer(0)]], const device A* b [[buffer(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v, .b=b};
+}

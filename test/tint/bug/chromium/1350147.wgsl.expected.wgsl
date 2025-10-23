@@ -16,3 +16,9 @@ fn more_tests_that_would_fail() {
     _ = atan2(0.10000000000000000555, 1);
   }
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  original_clusterfuzz_code();
+  more_tests_that_would_fail();
+}

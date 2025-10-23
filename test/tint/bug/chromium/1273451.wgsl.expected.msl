@@ -12,3 +12,7 @@ struct A {
 B f(A a) {
   return B{};
 }
+
+kernel void v() {
+  f(A{.a=1});
+}

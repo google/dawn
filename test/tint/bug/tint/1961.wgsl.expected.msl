@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-void f() {
+kernel void f() {
   bool x = false;
   bool y = false;
   bool v = false;

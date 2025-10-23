@@ -28,3 +28,8 @@ struct Teec65538tDtint_sybom_l7ata {
 
 struct TzfVatt0x0UDatasmvec65535tDtinvec4matomicMaxbol_fVatt0atomicMin3D9t672var {
   dmat2axat1 : array<atomic<i32>, 39711>, }
+
+@compute @workgroup_size(1)
+fn main() {
+
+}

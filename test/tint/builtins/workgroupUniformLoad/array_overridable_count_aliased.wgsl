@@ -6,3 +6,8 @@ var<workgroup> v : Array;
 fn foo() -> i32 {
   return workgroupUniformLoad(&v[0]);
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    _ = foo();
+}

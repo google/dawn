@@ -10,3 +10,8 @@ void more_tests_that_would_fail() {
   float const a_1 = 2.5f;
   float const b_1 = 2.5f;
 }
+
+kernel void v() {
+  original_clusterfuzz_code();
+  more_tests_that_would_fail();
+}

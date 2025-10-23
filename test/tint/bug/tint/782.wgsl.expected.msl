@@ -13,7 +13,7 @@ struct tint_array {
   T elements[N];
 };
 
-void foo() {
+kernel void foo() {
   tint_array<int, 2> explicitStride = {};
   tint_array<int, 2> implictStride = {};
   implictStride = explicitStride;

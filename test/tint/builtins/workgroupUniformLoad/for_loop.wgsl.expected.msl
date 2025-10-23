@@ -6,7 +6,17 @@ struct tint_module_vars_struct {
   threadgroup int* b;
 };
 
-void foo(tint_module_vars_struct tint_module_vars) {
+struct tint_symbol_2 {
+  int tint_symbol;
+  int tint_symbol_1;
+};
+
+void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.a) = 0;
+    (*tint_module_vars.b) = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     int i = 0;
@@ -35,4 +45,9 @@ void foo(tint_module_vars_struct tint_module_vars) {
       continue;
     }
   }
+}
+
+kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_3).tint_symbol), .b=(&(*v_3).tint_symbol_1)};
+  foo_inner(tint_local_index, tint_module_vars);
 }

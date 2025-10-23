@@ -1,3 +1,3 @@
 fn f() {
-  discard;
+    discard;
 }

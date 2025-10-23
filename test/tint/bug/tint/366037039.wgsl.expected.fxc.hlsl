@@ -4,6 +4,10 @@ struct S {
   uint3 c[4];
 };
 
+struct foo_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
 
 cbuffer cbuffer_ubuffer : register(b0) {
   uint4 ubuffer[5];
@@ -95,16 +99,37 @@ S v_18(uint start_byte_offset) {
   return v_22;
 }
 
-void foo() {
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    wbuffer.a = (0u).xxx;
+    wbuffer.b = 0u;
+  }
+  {
+    uint v_23 = 0u;
+    v_23 = tint_local_index;
+    while(true) {
+      uint v_24 = v_23;
+      if ((v_24 >= 4u)) {
+        break;
+      }
+      wbuffer.c[v_24] = (0u).xxx;
+      {
+        v_23 = (v_24 + 1u);
+      }
+      continue;
+    }
+  }
+  GroupMemoryBarrierWithGroupSync();
   S u = v_18(0u);
   S s = v_9(0u);
   S w = v_9(0u);
-  S v_23 = (S)0;
-  v_3(0u, v_23);
-  wbuffer = v_23;
+  S v_25 = (S)0;
+  v_3(0u, v_25);
+  wbuffer = v_25;
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void foo(foo_inputs inputs) {
+  foo_inner(inputs.tint_local_index);
 }
 

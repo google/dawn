@@ -4,3 +4,7 @@ using namespace metal;
 uint f() {
   return 2147483648u;
 }
+
+kernel void v() {
+  f();
+}

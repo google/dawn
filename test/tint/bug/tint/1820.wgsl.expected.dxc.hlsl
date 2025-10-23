@@ -27,10 +27,9 @@ void bar(float x) {
   }
 }
 
-void main() {
-}
-
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  foo(1.0f);
+  bar(1.0f);
 }
 

@@ -5,3 +5,7 @@ float f(int i) {
   float3 const v = float3(1.0f, 2.0f, 3.0f);
   return v[min(uint(i), 2u)];
 }
+
+kernel void v_1() {
+  f(1);
+}

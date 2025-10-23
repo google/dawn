@@ -1,2 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
+struct tint_module_vars_struct {
+  texture1d<uint, access::read> image_dup_src;
+  texture1d<uint, access::write> image_dst;
+};
+
+kernel void v(texture1d<uint, access::read> image_dup_src [[texture(0)]], texture1d<uint, access::write> image_dst [[texture(1)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.image_dup_src=image_dup_src, .image_dst=image_dst};
+}

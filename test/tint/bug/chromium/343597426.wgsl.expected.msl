@@ -15,3 +15,7 @@ void foo(bool a, bool b, bool c, bool d, bool e) {
     }
   }
 }
+
+kernel void v() {
+  foo(true, true, false, false, false);
+}

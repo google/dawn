@@ -4,3 +4,7 @@
 
 @group(0) @binding(0) var<storage> SSBO : S;
 @group(0) @binding(0) var<uniform> UBO : S;
+
+@compute @workgroup_size(1)
+fn main() {
+}

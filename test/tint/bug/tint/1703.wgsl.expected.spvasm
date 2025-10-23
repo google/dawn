@@ -1,13 +1,13 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 91
+; Bound: 93
 ; Schema: 0
                OpCapability Shader
          %59 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
                OpName %my_global "my_global"
                OpMemberName %my_uniform_block_tint_explicit_layout 0 "inner"
                OpName %my_uniform_block_tint_explicit_layout "my_uniform_block_tint_explicit_layout"
@@ -19,7 +19,7 @@
                OpName %foo_default_initialize "foo_default_initialize"
                OpName %vb2_0 "vb2"
                OpName %r_0 "r"
-               OpName %unused_entry_point "unused_entry_point"
+               OpName %main "main"
                OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
                OpMemberDecorate %my_uniform_block_tint_explicit_layout 0 Offset 0
                OpDecorate %my_uniform_block_tint_explicit_layout Block
@@ -133,7 +133,9 @@
          %82 = OpLabel
                OpReturn
                OpFunctionEnd
-%unused_entry_point = OpFunction %void None %21
+       %main = OpFunction %void None %21
          %90 = OpLabel
+         %91 = OpFunctionCall %void %foo_member_initialize
+         %92 = OpFunctionCall %void %foo_default_initialize
                OpReturn
                OpFunctionEnd

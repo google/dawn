@@ -1,5 +1,6 @@
 
 RWTexture2D<int4> tex : register(u2);
+[numthreads(1, 1, 1)]
 void foo() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
@@ -22,9 +23,5 @@ void foo() {
       continue;
     }
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

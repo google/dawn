@@ -12,3 +12,8 @@ fn foo(a: bool, b: bool, c: bool, d: bool, e: bool) {
         }
     }
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    foo(true, true, false, false, false);
+}

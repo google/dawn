@@ -7,3 +7,8 @@ fn f() -> u32 {
   let a = S();
   return a.n;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f();
+}

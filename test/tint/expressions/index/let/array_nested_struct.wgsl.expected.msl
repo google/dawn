@@ -22,3 +22,7 @@ uint f() {
   tint_array<S, 2> const a = tint_array<S, 2>{};
   return a[1u].n[1u];
 }
+
+kernel void v() {
+  f();
+}

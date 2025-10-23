@@ -1,7 +1,16 @@
+struct foo_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
 
 groupshared int a;
 groupshared int b;
-void foo() {
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    a = int(0);
+    b = int(0);
+  }
+  GroupMemoryBarrierWithGroupSync();
   {
     uint2 tint_loop_idx = (4294967295u).xx;
     int i = int(0);
@@ -33,6 +42,7 @@ void foo() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void foo(foo_inputs inputs) {
+  foo_inner(inputs.tint_local_index);
 }
 

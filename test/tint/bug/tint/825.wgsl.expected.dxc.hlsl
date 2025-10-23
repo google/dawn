@@ -1,4 +1,5 @@
 
+[numthreads(1, 1, 1)]
 void f() {
   int i = int(0);
   int j = int(0);
@@ -6,9 +7,5 @@ void f() {
   int v = j;
   uint v_1 = min(uint(i), 1u);
   float f_1 = m[v_1][min(uint(v), 1u)];
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

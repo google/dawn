@@ -6,6 +6,7 @@ float3 f(int x) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  f(int(1));
 }
 

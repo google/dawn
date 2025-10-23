@@ -5,3 +5,8 @@ fn foo(in : u32) {
   let y = unpack4xU8(in);
   let z = atomicLoad(&(a));
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  foo(1);
+}

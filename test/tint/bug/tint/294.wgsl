@@ -6,3 +6,8 @@ struct Light {
   light : array<Light>,
 };
 @group(0) @binding(1) var<storage, read> lights : Lights;
+
+@compute @workgroup_size(1)
+fn main() {
+    _ = lights.light[0];
+}

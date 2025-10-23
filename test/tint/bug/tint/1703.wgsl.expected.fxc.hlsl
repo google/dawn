@@ -25,7 +25,8 @@ void foo_default_initialize() {
   }
 }
 
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  foo_member_initialize();
+  foo_default_initialize();
 }
 

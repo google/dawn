@@ -4,3 +4,8 @@ using namespace metal;
 void f(thread float* const p) {
   thread float* const x = p;
 }
+
+kernel void v() {
+  float a = 1.0f;
+  f((&a));
+}

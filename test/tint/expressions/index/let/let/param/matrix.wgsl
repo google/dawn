@@ -3,3 +3,8 @@ fn f(x : i32) -> vec3<f32> {
   let i = x;
   return m[i];
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    _ = f(1);
+}

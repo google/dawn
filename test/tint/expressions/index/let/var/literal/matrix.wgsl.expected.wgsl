@@ -3,3 +3,8 @@ fn f() -> vec3<f32> {
   var i = 1;
   return m[i];
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f();
+}

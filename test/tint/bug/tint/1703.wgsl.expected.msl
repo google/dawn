@@ -27,3 +27,10 @@ void foo_default_initialize(tint_module_vars_struct tint_module_vars) {
     float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
   }
 }
+
+fragment void v(const constant float* my_uniform [[buffer(0)]], texture2d<float, access::sample> my_texture [[texture(0)]], sampler my_sampler [[sampler(0)]]) {
+  thread float4 my_global = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.my_global=(&my_global), .my_uniform=my_uniform, .my_texture=my_texture, .my_sampler=my_sampler};
+  foo_member_initialize(tint_module_vars);
+  foo_default_initialize(tint_module_vars);
+}

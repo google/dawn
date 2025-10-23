@@ -1,4 +1,5 @@
 
+[numthreads(1, 1, 1)]
 void f() {
   bool x = false;
   bool y = false;
@@ -10,9 +11,5 @@ void f() {
   }
   if (v) {
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

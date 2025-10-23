@@ -1,12 +1,12 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 26
+; Bound: 51
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
+               OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Inner 0 "b"
                OpMemberName %Inner 1 "v"
                OpMemberName %Inner 2 "m"
@@ -14,8 +14,12 @@
                OpMemberName %Outer 0 "a"
                OpName %Outer "Outer"
                OpName %v "v"
+               OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %foo "foo"
-               OpName %unused_entry_point "unused_entry_point"
+               OpName %main_inner "main_inner"
+               OpName %tint_local_index "tint_local_index"
+               OpName %main "main"
+               OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %bool = OpTypeBool
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
@@ -29,19 +33,56 @@
       %Outer = OpTypeStruct %_arr_Inner_uint_4
 %_ptr_Workgroup_Outer = OpTypePointer Workgroup %Outer
           %v = OpVariable %_ptr_Workgroup_Outer Workgroup
-         %15 = OpTypeFunction %Outer
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+         %17 = OpTypeFunction %Outer
        %void = OpTypeVoid
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %24 = OpTypeFunction %void
-        %foo = OpFunction %Outer None %15
-         %16 = OpLabel
+         %27 = OpTypeFunction %void %uint
+%_ptr_Workgroup_Inner = OpTypePointer Workgroup %Inner
+     %uint_0 = OpConstant %uint 0
+         %44 = OpConstantNull %Inner
+     %uint_1 = OpConstant %uint 1
+         %47 = OpTypeFunction %void
+        %foo = OpFunction %Outer None %17
+         %18 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %21 = OpLoad %Outer %v None
+         %23 = OpLoad %Outer %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpReturnValue %21
+               OpReturnValue %23
                OpFunctionEnd
-%unused_entry_point = OpFunction %void None %24
-         %25 = OpLabel
+ %main_inner = OpFunction %void None %27
+%tint_local_index = OpFunctionParameter %uint
+         %28 = OpLabel
+               OpBranch %29
+         %29 = OpLabel
+               OpBranch %32
+         %32 = OpLabel
+         %34 = OpPhi %uint %tint_local_index %29 %35 %31
+               OpLoopMerge %33 %31 None
+               OpBranch %30
+         %30 = OpLabel
+         %38 = OpUGreaterThanEqual %bool %34 %uint_4
+               OpSelectionMerge %39 None
+               OpBranchConditional %38 %40 %39
+         %40 = OpLabel
+               OpBranch %33
+         %39 = OpLabel
+         %41 = OpAccessChain %_ptr_Workgroup_Inner %v %uint_0 %34
+               OpStore %41 %44 None
+               OpBranch %31
+         %31 = OpLabel
+         %35 = OpIAdd %uint %34 %uint_1
+               OpBranch %32
+         %33 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %37 = OpFunctionCall %Outer %foo
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %47
+         %48 = OpLabel
+         %49 = OpLoad %uint %main_local_invocation_index_Input None
+         %50 = OpFunctionCall %void %main_inner %49
                OpReturn
                OpFunctionEnd

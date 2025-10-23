@@ -62,7 +62,27 @@ S v_7(uint start_byte_offset) {
   uvec4 v_9 = v.inner[((12u + start_byte_offset) / 16u)];
   return S(v_8, v_9[(((12u + start_byte_offset) & 15u) >> 2u)], v_4((16u + start_byte_offset)));
 }
-void foo() {
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    wbuffer.a = uvec3(0u);
+    wbuffer.b = 0u;
+  }
+  {
+    uint v_10 = 0u;
+    v_10 = tint_local_index;
+    while(true) {
+      uint v_11 = v_10;
+      if ((v_11 >= 4u)) {
+        break;
+      }
+      wbuffer.c[v_11] = uvec3(0u);
+      {
+        v_10 = (v_11 + 1u);
+      }
+      continue;
+    }
+  }
+  barrier();
   S u = v_7(0u);
   S s = v_1.inner;
   S w = v_1.inner;
@@ -71,4 +91,5 @@ void foo() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  foo_inner(gl_LocalInvocationIndex);
 }
