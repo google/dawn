@@ -54,19 +54,19 @@ Texture::Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descripto
       ObjectWGPU(device->wgpu.textureRelease) {
     wgpu::TextureUsage actualUsage = GetInternalUsage();
     // Resolve internal usages to regular ones
-    if (actualUsage | kReadOnlyStorageTexture) {
+    if (actualUsage & kReadOnlyStorageTexture) {
         actualUsage &= ~kReadOnlyStorageTexture;
     }
-    if (actualUsage | kWriteOnlyStorageTexture) {
+    if (actualUsage & kWriteOnlyStorageTexture) {
         actualUsage &= ~kWriteOnlyStorageTexture;
     }
-    if (actualUsage | kReadOnlyRenderAttachment) {
+    if (actualUsage & kReadOnlyRenderAttachment) {
         actualUsage &= ~kReadOnlyRenderAttachment;
     }
-    if (actualUsage | kResolveAttachmentLoadingUsage) {
+    if (actualUsage & kResolveAttachmentLoadingUsage) {
         actualUsage &= ~kResolveAttachmentLoadingUsage;
     }
-    if (!(actualUsage | wgpu::TextureUsage::TransientAttachment)) {
+    if (!(actualUsage & wgpu::TextureUsage::TransientAttachment)) {
         actualUsage |= wgpu::TextureUsage::CopySrc;
     }
     std::vector<WGPUTextureFormat> viewFormats;
