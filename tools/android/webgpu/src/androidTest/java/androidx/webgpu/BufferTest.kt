@@ -152,11 +152,12 @@ class BufferTest {
     )
     val gpuCommand = commandEncoder.finish()
     queue.submit(arrayOf(gpuCommand))
-    runBlocking { queue.onSubmittedWorkDone() }
+    val result = runBlocking { queue.onSubmittedWorkDone() }
+    assertEquals(QueueWorkDoneStatus.Success, result.status)
 
     val mapStatus =
       runBlocking { gpuReadBuffer.mapAsync(mode = MapMode.Read, size = bufferSize, offset = 0) }
-    assertEquals(mapStatus.status, MapAsyncStatus.Success)
+    assertEquals(MapAsyncStatus.Success, mapStatus.status)
 
     val arrayBuffer = gpuReadBuffer.getConstMappedRange(size = bufferSize).asFloatBuffer()
     gpuReadBuffer.unmap()
