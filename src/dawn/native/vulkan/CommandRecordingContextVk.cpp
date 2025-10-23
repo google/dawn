@@ -61,34 +61,24 @@ void CommandRecordingContext::AddBufferBarrier(VkAccessFlags srcAccessMask,
 }
 
 void CommandRecordingContext::EmitBufferBarriers(Device* device) {
-    std::array<VkMemoryBarrier, 2> barriers;
-    size_t idx = 0;
-
-    VkPipelineStageFlags srcStages = 0;
-    VkPipelineStageFlags dstStages = 0;
-
-    auto CreateBarrierIfNeeded = [&](const BufferBarrier& barrier) {
+    auto EmitBarrierIfNeeded = [&](const BufferBarrier& barrier) {
         if (barrier.bufferSrcStages == 0 || barrier.bufferDstStages == 0) {
             return;
         }
 
-        barriers[idx].sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-        barriers[idx].pNext = nullptr;
-        barriers[idx].srcAccessMask = barrier.bufferSrcAccessMask;
-        barriers[idx].dstAccessMask = barrier.bufferDstAccessMask;
+        VkMemoryBarrier vkBarrier;
+        vkBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+        vkBarrier.pNext = nullptr;
+        vkBarrier.srcAccessMask = barrier.bufferSrcAccessMask;
+        vkBarrier.dstAccessMask = barrier.bufferDstAccessMask;
 
-        srcStages |= barrier.bufferSrcStages;
-        dstStages |= barrier.bufferDstStages;
-
-        idx++;
+        device->fn.CmdPipelineBarrier(commandBuffer, barrier.bufferSrcStages,
+                                      barrier.bufferDstStages, 0, 1, &vkBarrier, 0, nullptr, 0,
+                                      nullptr);
     };
-    CreateBarrierIfNeeded(mVertexBufferBarrier);
-    CreateBarrierIfNeeded(mNonVertexBufferBarrier);
-
-    if (idx > 0) {
-        device->fn.CmdPipelineBarrier(commandBuffer, srcStages, dstStages, 0, idx, barriers.data(),
-                                      0, nullptr, 0, nullptr);
-    }
+    // Emit vertex and non-vertex barriers separately to keep src and dst stage masks separate.
+    EmitBarrierIfNeeded(mVertexBufferBarrier);
+    EmitBarrierIfNeeded(mNonVertexBufferBarrier);
 
     mVertexBufferBarrier = {};
     mNonVertexBufferBarrier = {};
