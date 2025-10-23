@@ -77,8 +77,9 @@ void DoTask(ConcurrentTaskResultQueue* resultQueue, uint32_t id) {
 
 class AsyncTaskTest : public testing::Test {};
 
+// TODO(crbug.com/454672586): Causing flaky fatal errors on multiple platforms.
 // Emulate the basic usage of worker thread pool in Create*PipelineAsync().
-TEST_F(AsyncTaskTest, Basic) {
+TEST_F(AsyncTaskTest, DISABLED_Basic) {
     platform::Platform platform;
     std::unique_ptr<platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
