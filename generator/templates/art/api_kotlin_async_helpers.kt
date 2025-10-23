@@ -33,7 +33,7 @@ import kotlin.coroutines.suspendCoroutine
 
 //* Provide an async wrapper for the 'callback info' type of async methods.
 {% for obj in by_category['object'] %}
-    {% for method in obj.methods if has_callbackInfoStruct(method) %}
+    {% for method in obj.methods if has_callbackInfoStruct(method) and include_method(obj, method) %}
         {% set callback_info = method.arguments[-1].type %}
         {% set callback_function = callback_info.members[-1].type %}
         {% set return_name = callback_function.name.chunks[:-1] | map('title') | join + 'Return' %}

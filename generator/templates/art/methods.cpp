@@ -189,7 +189,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 } {% endmacro %}
 
 {% for obj in by_category['object'] %}
-    {% for method in obj.methods if include_method(method) %}
+    {% for method in obj.methods if include_method(obj, method) %}
         {{ render_method(method, obj) }}
     {% endfor %}
 
@@ -207,7 +207,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 {% endfor %}
 
 //* Global functions don't have an associated class.
-{% for function in by_category['function'] if include_method(function) %}
+{% for function in by_category['function'] if include_method(None, function) %}
     {{ render_method(function, None) }}
 {% endfor %}
 

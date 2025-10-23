@@ -798,6 +798,10 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     params_kotlin['jni_primitives'] = kotlin_json['jni_primitives']
     params_kotlin['jni_signatures'] = kotlin_json['jni_signatures']
     kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
+    customize_api = kotlin_json["customize_api"]
+    customize_objects = customize_api["objects"]
+    customize_structures = customize_api["structures"]
+    customize_enums = customize_api["enums"]
 
     def kotlin_record_members(members):
         # Members are sorted so that those with default parameters appear after those without.
@@ -926,6 +930,11 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
                         and argument.type.category == 'structure'):
                     return argument
 
+        # If the function should return an omitted structure, we return nothing instead.
+        if method.returns and method.returns.type.category == 'structure' and not include_structure(
+                method.returns.type):
+            return None
+
         # Return values are not treated as optional to keep the Kotlin API simple.
         # Methods are expected to return an object if declared. If they can't, dawn may raise an
         # error (converted to a Kotlin exception); otherwise JNI will throw NullPointerException.
@@ -934,18 +943,30 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
             method.returns.type, method.returns.annotation, False,
             method.json_data) if method.returns else None
 
-    # TODO(b/352047733): Replace methods that require special handling with an exceptions list.
-    def include_method(method):
+    def include_method(obj, method):
         if method.returns and method.returns.type.category == 'function pointer':
             # Kotlin doesn't support returning functions.
             return False
-        return True
 
-    # Whether to create structure converters (or use handwritten converters).
+        if obj is None:
+            return True
+
+        # Is the method marked omitted in dawn_kotlin.json?
+        return customize_objects.get(obj.name.get(),
+                                     {}).get("methods", {}).get(
+                                         method.name.get(),
+                                         {}).get('omitted') is not True
+
     def include_structure(structure):
         if structure.name.canonical_case() == "string view":
             return False
-        return True
+        # Is the structure marked omitted in dawn_kotlin.json?
+        return customize_structures.get(structure.name.get(),
+                                        {}).get('omitted') is not True
+
+    def include_enum(enum):
+        return customize_enums.get(enum.name.get(),
+                                   {}).get('omitted') is not True
 
     def jni_name(type):
         return kt_file_path + '/' + type.name.CamelCase()
@@ -971,14 +992,15 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     params_kotlin['kotlin_return'] = kotlin_return
     params_kotlin['include_method'] = include_method
     params_kotlin['include_structure'] = include_structure
+    params_kotlin['include_enum'] = include_enum
     params_kotlin['kotlin_record_members'] = kotlin_record_members
     params_kotlin['jni_name'] = jni_name
-    params_kotlin['has_kotlin_classes'] = (
-        by_category['callback function'] + by_category['enum'] +
-        by_category['function pointer'] + by_category['object'] + [
-            structure for structure in by_category['structure']
-            if include_structure(structure)
-        ])
+    params_kotlin['has_kotlin_classes'] = by_category['callback function'] + [
+        enum for enum in by_category['enum'] if include_enum(enum)
+    ] + by_category['function pointer'] + by_category['object'] + [
+        structure for structure in by_category['structure']
+        if include_structure(structure)
+    ]
 
     return params_kotlin
 
@@ -1695,7 +1717,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             by_category = params_kotlin['by_category']
             for structure in by_category['structure']:
-                if structure.name.get() != "string view":
+                if params_kotlin['include_structure'](structure):
                     renders.append(
                         FileRender('art/api_kotlin_structure.kt',
                                    'java/' + jni_name(structure) + '.kt', [
@@ -1731,13 +1753,14 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             for enum in (params_kotlin['by_category']['bitmask'] +
                          params_kotlin['by_category']['enum']):
-                renders.append(
-                    FileRender(
-                        'art/api_kotlin_enum.kt',
-                        'java/' + jni_name(enum) + '.kt',
-                        [RENDER_PARAMS_BASE, params_kotlin, {
-                            'enum': enum
-                        }]))
+                if params_kotlin['include_enum'](enum):
+                    renders.append(
+                        FileRender('art/api_kotlin_enum.kt',
+                                   'java/' + jni_name(enum) + '.kt', [
+                                       RENDER_PARAMS_BASE, params_kotlin, {
+                                           'enum': enum
+                                       }
+                                   ]))
 
             renders.append(
                 FileRender('art/api_kotlin_constants.kt',

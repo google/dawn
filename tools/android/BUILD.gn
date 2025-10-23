@@ -107,8 +107,6 @@ dawn_json_generator("kotlin_gen") {
     "java/androidx/webgpu/FragmentState.kt",
     "java/androidx/webgpu/FrontFace.kt",
     "java/androidx/webgpu/Functions.kt",
-    "java/androidx/webgpu/Future.kt",
-    "java/androidx/webgpu/FutureWaitInfo.kt",
     "java/androidx/webgpu/IndexFormat.kt",
     "java/androidx/webgpu/Instance.kt",
     "java/androidx/webgpu/InstanceDescriptor.kt",
@@ -208,7 +206,6 @@ dawn_json_generator("kotlin_gen") {
     "java/androidx/webgpu/VertexState.kt",
     "java/androidx/webgpu/VertexStepMode.kt",
     "java/androidx/webgpu/WGSLLanguageFeatureName.kt",
-    "java/androidx/webgpu/WaitStatus.kt",
   ]
 }
 

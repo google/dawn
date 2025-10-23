@@ -69,5 +69,36 @@
         "(See also @ref SentinelValues.)": "",
         "[defaults](@ref SentinelValues)": "defaults",
         "WGPUCallbackMode_": "CallbackMode."
+    },
+    "customize_api": {
+        "objects": {
+            "device": {
+                "methods": {
+                    "get lost future": {
+                        "omitted": true
+                    }
+                }
+            },
+            "instance": {
+                "methods": {
+                    "wait any": {
+                        "omitted": true
+                    }
+                }
+            }
+        },
+        "structures": {
+            "future": {
+                "omitted": true
+            },
+            "future wait info": {
+                "omitted": true
+            }
+        },
+        "enums": {
+            "wait status": {
+                "omitted": true
+            }
+        }
     }
 }
