@@ -179,6 +179,12 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% if _kotlin_return %}
         {% if _kotlin_return.type.name.get() in ['void const *', 'void *'] %}
             size_t size = args.size;
+            {% if object and as_cType(object.name) == 'WGPUBuffer' %}
+                if (args.size == WGPU_WHOLE_MAP_SIZE) {
+                  uint64_t totalBufferSize = wgpuBufferGetSize(handle);
+                  size = static_cast<size_t>(totalBufferSize) - args.offset;
+                }
+            {% endif %}
         {% endif %}
         {{ convert_to_kotlin("args." + as_varName(_kotlin_return.name) if _kotlin_return.annotation == '*' else 'result',
                              'result_kt',

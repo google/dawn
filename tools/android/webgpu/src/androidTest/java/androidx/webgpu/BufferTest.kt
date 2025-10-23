@@ -263,4 +263,103 @@ class BufferTest {
       buffer.writeMappedRange(0, byteBuffer)
     }
   }
+
+  @SmallTest
+  @Test
+  fun getMappedRangeWithDefaultValuesReturnsFullBuffer() {
+    val bufferSize = 1024L
+    device.createBuffer(
+      BufferDescriptor(
+        usage = BufferUsage.MapWrite,
+        size = bufferSize,
+        mappedAtCreation = true
+      )
+    ).use { buffer ->
+      // Call with defaults: offset = 0, size = -1L (WGPU_WHOLE_MAP_SIZE).
+      val byteBuffer = buffer.getMappedRange()
+      buffer.unmap()
+
+      assertEquals(bufferSize, byteBuffer.capacity().toLong())
+    }
+  }
+
+  @SmallTest
+  @Test
+  fun getMappedRangeWithOffsetAndDefaultSizeReturnsPartialBuffer() {
+    val bufferSize = 1024L
+    val offset = 256L
+    device.createBuffer(
+      BufferDescriptor(
+        usage = BufferUsage.MapWrite,
+        size = bufferSize,
+        mappedAtCreation = true
+      )
+    ).use { buffer ->
+      // Call with offset and default size: size = -1L (WGPU_WHOLE_MAP_SIZE).
+      val byteBuffer = buffer.getMappedRange(offset = offset)
+      buffer.unmap()
+
+      val expectedSize = bufferSize - offset
+      assertEquals(expectedSize, byteBuffer.capacity().toLong())
+    }
+  }
+
+  @SmallTest
+  @Test
+  fun getMappedRangeWithOffsetAndExplicitSizeReturnsPartialBuffer() {
+    val bufferSize = 1024L
+    val offset = 256L
+    val size = 512L
+    device.createBuffer(
+      BufferDescriptor(
+        usage = BufferUsage.MapWrite,
+        size = bufferSize,
+        mappedAtCreation = true
+      )
+    ).use { buffer ->
+      val byteBuffer = buffer.getMappedRange(offset = offset, size = size)
+      buffer.unmap()
+
+      assertEquals(size, byteBuffer.capacity().toLong())
+    }
+  }
+
+  @SmallTest
+  @Test
+  fun getConstMappedRangeWithDefaultValuesReturnsFullBuffer() {
+    val bufferSize = 1024L
+    device.createBuffer(
+      BufferDescriptor(
+        usage = BufferUsage.MapRead,
+        size = bufferSize,
+        mappedAtCreation = true
+      )
+    ).use { buffer ->
+      val byteBuffer = buffer.getConstMappedRange()
+      buffer.unmap()
+
+      assertEquals(bufferSize, byteBuffer.capacity().toLong())
+    }
+  }
+
+  @SmallTest
+  @Test
+  fun getConstMappedRangeWithOffsetAndDefaultSizeReturnsPartialBuffer() {
+    val bufferSize = 1024L
+    val offset = 128L
+    device.createBuffer(
+      BufferDescriptor(
+        usage = BufferUsage.MapRead,
+        size = bufferSize,
+        mappedAtCreation = true
+      )
+    ).use { buffer ->
+      // Call with offset and default size.
+      val byteBuffer = buffer.getConstMappedRange(offset = offset)
+      buffer.unmap()
+
+      val expectedSize = bufferSize - offset
+      assertEquals(expectedSize, byteBuffer.capacity().toLong())
+    }
+  }
 }
