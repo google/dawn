@@ -555,14 +555,10 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_UniformBuffer_Struct_Run
     Alias("t", ty.ptr<uniform>(Source{{90, 12}}, ty("S")));
 
     ASSERT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: 'uniform' storage requires that array elements are aligned to 16 bytes, but array element of type 'i32' has a stride of 4 bytes. Consider using a vector or struct as the element type instead.
-note: see layout of struct:
-/*           align(4) size(4) */ struct S {
-/* offset(0) align(4) size(4) */   m : array<i32>,
-/*                            */ };
-90:12 note: 'S' used in address space 'uniform' here)");
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
+56:78 note: while analyzing structure member S.m
+90:12 note: while instantiating ptr<uniform, S, read>)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_UniformBufferBool) {

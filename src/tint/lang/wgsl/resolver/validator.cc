@@ -583,7 +583,9 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
     auto required_alignment_of = [&](const core::type::Type* ty) {
         uint32_t actual_align = ty->Align();
         uint32_t required_align = actual_align;
-        if (is_uniform_struct_or_array(ty)) {
+        if (is_uniform_struct_or_array(ty) &&
+            !allowed_features_.features.contains(
+                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
             required_align = tint::RoundUp(16u, actual_align);
         }
         return required_align;
@@ -649,7 +651,9 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
             // For uniform buffers, validate that the number of bytes between the previous member of
             // type struct and the current is a multiple of 16 bytes.
             auto* const prev_member = (i == 0) ? nullptr : str->Members()[i - 1];
-            if (prev_member && is_uniform_struct(prev_member->Type())) {
+            if (prev_member && is_uniform_struct(prev_member->Type()) &&
+                !allowed_features_.features.contains(
+                    wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
                 const uint32_t prev_to_curr_offset = m->Offset() - prev_member->Offset();
                 if (prev_to_curr_offset % 16 != 0) {
                     AddError(m->Declaration()->source)
@@ -700,7 +704,9 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
             return false;
         }
 
-        if (address_space == core::AddressSpace::kUniform) {
+        if (address_space == core::AddressSpace::kUniform &&
+            !allowed_features_.features.contains(
+                wgsl::LanguageFeature::kUniformBufferStandardLayout)) {
             // We already validated that this array member is itself aligned to 16 bytes above, so
             // we only need to validate that stride is a multiple of 16 bytes.
             if (arr->ImplicitStride() % 16 != 0) {

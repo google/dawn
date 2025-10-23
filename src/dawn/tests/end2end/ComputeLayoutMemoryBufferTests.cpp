@@ -1157,7 +1157,14 @@ auto GenerateParams() {
 
     std::vector<ComputeLayoutMemoryBufferTestParams> filtered;
     for (auto param : params) {
-        if (param.mAddressSpace != AddressSpace::Storage && param.mField.IsStorageBufferOnly()) {
+        // If the decompose_uniform_buffers toggle is disabled then Tint will not support the
+        // relaxed constraints on uniform buffers. We can remove this (and all of the
+        // StorageBufferOnly logic) when the killswitch for decompose_uniform_buffers is removed.
+        bool supportsUniformBufferStandardLayout =
+            std::find(param.forceDisabledWorkarounds.begin(), param.forceDisabledWorkarounds.end(),
+                      "decompose_uniform_buffers") == param.forceDisabledWorkarounds.end();
+        if (param.mAddressSpace != AddressSpace::Storage && param.mField.IsStorageBufferOnly() &&
+            !supportsUniformBufferStandardLayout) {
             continue;
         }
         filtered.emplace_back(param);
