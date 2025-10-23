@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 121
+; Bound: 123
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -73,6 +73,8 @@
          %97 = OpTypeFunction %Inner %uint
         %102 = OpTypeFunction %mat2v2half %uint
     %uint_16 = OpConstant %uint 16
+    %uint_15 = OpConstant %uint 15
+     %uint_2 = OpConstant %uint 2
           %f = OpFunction %void None %10
          %11 = OpLabel
         %l_a = OpFunctionCall %_arr_Outer_uint_4 %21 %uint_0
@@ -174,19 +176,19 @@
         %103 = OpLabel
         %104 = OpUDiv %uint %start_byte_offset_3 %uint_16
         %106 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %104
-        %107 = OpUMod %uint %start_byte_offset_3 %uint_16
-        %108 = OpUDiv %uint %107 %uint_4
-        %109 = OpLoad %v4uint %106 None
-        %110 = OpVectorExtractDynamic %uint %109 %108
-        %111 = OpBitcast %v2half %110
-        %112 = OpIAdd %uint %uint_4 %start_byte_offset_3
-        %113 = OpUDiv %uint %112 %uint_16
-        %114 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %113
-        %115 = OpUMod %uint %112 %uint_16
-        %116 = OpUDiv %uint %115 %uint_4
-        %117 = OpLoad %v4uint %114 None
-        %118 = OpVectorExtractDynamic %uint %117 %116
-        %119 = OpBitcast %v2half %118
-        %120 = OpCompositeConstruct %mat2v2half %111 %119
-               OpReturnValue %120
+        %107 = OpBitwiseAnd %uint %start_byte_offset_3 %uint_15
+        %109 = OpShiftRightLogical %uint %107 %uint_2
+        %111 = OpLoad %v4uint %106 None
+        %112 = OpVectorExtractDynamic %uint %111 %109
+        %113 = OpBitcast %v2half %112
+        %114 = OpIAdd %uint %uint_4 %start_byte_offset_3
+        %115 = OpUDiv %uint %114 %uint_16
+        %116 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %115
+        %117 = OpBitwiseAnd %uint %114 %uint_15
+        %118 = OpShiftRightLogical %uint %117 %uint_2
+        %119 = OpLoad %v4uint %116 None
+        %120 = OpVectorExtractDynamic %uint %119 %118
+        %121 = OpBitcast %v2half %120
+        %122 = OpCompositeConstruct %mat2v2half %113 %121
+               OpReturnValue %122
                OpFunctionEnd

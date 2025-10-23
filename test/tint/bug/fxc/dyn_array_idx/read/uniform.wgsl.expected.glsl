@@ -18,5 +18,5 @@ void main() {
   uvec4 v_2 = v.inner[4u];
   uint v_3 = (16u * min(uint(int(v_2.x)), 3u));
   uvec4 v_4 = v.inner[(v_3 / 16u)];
-  v_1.inner.member_0 = int(v_4[((v_3 % 16u) / 4u)]);
+  v_1.inner.member_0 = int(v_4[((v_3 & 15u) >> 2u)]);
 }

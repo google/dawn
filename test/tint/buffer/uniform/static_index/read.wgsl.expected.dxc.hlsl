@@ -13,7 +13,7 @@ int tint_f32_to_i32(float value) {
 }
 
 Inner v(uint start_byte_offset) {
-  Inner v_1 = {asint(ub[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]), asfloat(ub[((16u + start_byte_offset) / 16u)][(((16u + start_byte_offset) % 16u) / 4u)])};
+  Inner v_1 = {asint(ub[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]), asfloat(ub[((16u + start_byte_offset) / 16u)][(((16u + start_byte_offset) & 15u) >> 2u)])};
   return v_1;
 }
 
@@ -72,13 +72,13 @@ float4x3 v_12(uint start_byte_offset) {
 
 float4x2 v_13(uint start_byte_offset) {
   uint4 v_14 = ub[(start_byte_offset / 16u)];
-  float2 v_15 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_14.zw) : (v_14.xy)));
+  float2 v_15 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_14.zw) : (v_14.xy)));
   uint4 v_16 = ub[((8u + start_byte_offset) / 16u)];
-  float2 v_17 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_16.zw) : (v_16.xy)));
+  float2 v_17 = asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_16.zw) : (v_16.xy)));
   uint4 v_18 = ub[((16u + start_byte_offset) / 16u)];
-  float2 v_19 = asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_18.zw) : (v_18.xy)));
+  float2 v_19 = asfloat(((((((16u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_18.zw) : (v_18.xy)));
   uint4 v_20 = ub[((24u + start_byte_offset) / 16u)];
-  return float4x2(v_15, v_17, v_19, asfloat(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_20.zw) : (v_20.xy))));
+  return float4x2(v_15, v_17, v_19, asfloat(((((((24u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_20.zw) : (v_20.xy))));
 }
 
 float3x4 v_21(uint start_byte_offset) {
@@ -91,11 +91,11 @@ float3x3 v_22(uint start_byte_offset) {
 
 float3x2 v_23(uint start_byte_offset) {
   uint4 v_24 = ub[(start_byte_offset / 16u)];
-  float2 v_25 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_24.zw) : (v_24.xy)));
+  float2 v_25 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_24.zw) : (v_24.xy)));
   uint4 v_26 = ub[((8u + start_byte_offset) / 16u)];
-  float2 v_27 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_26.zw) : (v_26.xy)));
+  float2 v_27 = asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_26.zw) : (v_26.xy)));
   uint4 v_28 = ub[((16u + start_byte_offset) / 16u)];
-  return float3x2(v_25, v_27, asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_28.zw) : (v_28.xy))));
+  return float3x2(v_25, v_27, asfloat(((((((16u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_28.zw) : (v_28.xy))));
 }
 
 float2x4 v_29(uint start_byte_offset) {
@@ -108,9 +108,9 @@ float2x3 v_30(uint start_byte_offset) {
 
 float2x2 v_31(uint start_byte_offset) {
   uint4 v_32 = ub[(start_byte_offset / 16u)];
-  float2 v_33 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_32.zw) : (v_32.xy)));
+  float2 v_33 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_32.zw) : (v_32.xy)));
   uint4 v_34 = ub[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_33, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_34.zw) : (v_34.xy))));
+  return float2x2(v_33, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_34.zw) : (v_34.xy))));
 }
 
 [numthreads(1, 1, 1)]

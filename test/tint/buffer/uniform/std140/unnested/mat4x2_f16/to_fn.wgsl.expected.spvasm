@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 95
+; Bound: 97
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -44,6 +44,8 @@
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
          %57 = OpTypeFunction %mat4v2half %uint
     %uint_16 = OpConstant %uint 16
+    %uint_15 = OpConstant %uint 15
+     %uint_2 = OpConstant %uint 2
      %uint_4 = OpConstant %uint 4
      %uint_8 = OpConstant %uint 8
     %uint_12 = OpConstant %uint 12
@@ -97,35 +99,35 @@
          %58 = OpLabel
          %59 = OpUDiv %uint %start_byte_offset %uint_16
          %61 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %59
-         %62 = OpUMod %uint %start_byte_offset %uint_16
-         %63 = OpUDiv %uint %62 %uint_4
-         %65 = OpLoad %v4uint %61 None
-         %66 = OpVectorExtractDynamic %uint %65 %63
-         %67 = OpBitcast %v2half %66
-         %68 = OpIAdd %uint %uint_4 %start_byte_offset
-         %69 = OpUDiv %uint %68 %uint_16
-         %70 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %69
-         %71 = OpUMod %uint %68 %uint_16
-         %72 = OpUDiv %uint %71 %uint_4
-         %73 = OpLoad %v4uint %70 None
-         %74 = OpVectorExtractDynamic %uint %73 %72
-         %75 = OpBitcast %v2half %74
-         %76 = OpIAdd %uint %uint_8 %start_byte_offset
-         %78 = OpUDiv %uint %76 %uint_16
-         %79 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %78
-         %80 = OpUMod %uint %76 %uint_16
-         %81 = OpUDiv %uint %80 %uint_4
-         %82 = OpLoad %v4uint %79 None
-         %83 = OpVectorExtractDynamic %uint %82 %81
-         %84 = OpBitcast %v2half %83
-         %85 = OpIAdd %uint %uint_12 %start_byte_offset
-         %87 = OpUDiv %uint %85 %uint_16
-         %88 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %87
-         %89 = OpUMod %uint %85 %uint_16
-         %90 = OpUDiv %uint %89 %uint_4
-         %91 = OpLoad %v4uint %88 None
-         %92 = OpVectorExtractDynamic %uint %91 %90
-         %93 = OpBitcast %v2half %92
-         %94 = OpCompositeConstruct %mat4v2half %67 %75 %84 %93
-               OpReturnValue %94
+         %62 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %64 = OpShiftRightLogical %uint %62 %uint_2
+         %66 = OpLoad %v4uint %61 None
+         %67 = OpVectorExtractDynamic %uint %66 %64
+         %68 = OpBitcast %v2half %67
+         %69 = OpIAdd %uint %uint_4 %start_byte_offset
+         %71 = OpUDiv %uint %69 %uint_16
+         %72 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %71
+         %73 = OpBitwiseAnd %uint %69 %uint_15
+         %74 = OpShiftRightLogical %uint %73 %uint_2
+         %75 = OpLoad %v4uint %72 None
+         %76 = OpVectorExtractDynamic %uint %75 %74
+         %77 = OpBitcast %v2half %76
+         %78 = OpIAdd %uint %uint_8 %start_byte_offset
+         %80 = OpUDiv %uint %78 %uint_16
+         %81 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %80
+         %82 = OpBitwiseAnd %uint %78 %uint_15
+         %83 = OpShiftRightLogical %uint %82 %uint_2
+         %84 = OpLoad %v4uint %81 None
+         %85 = OpVectorExtractDynamic %uint %84 %83
+         %86 = OpBitcast %v2half %85
+         %87 = OpIAdd %uint %uint_12 %start_byte_offset
+         %89 = OpUDiv %uint %87 %uint_16
+         %90 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %89
+         %91 = OpBitwiseAnd %uint %87 %uint_15
+         %92 = OpShiftRightLogical %uint %91 %uint_2
+         %93 = OpLoad %v4uint %90 None
+         %94 = OpVectorExtractDynamic %uint %93 %92
+         %95 = OpBitcast %v2half %94
+         %96 = OpCompositeConstruct %mat4v2half %68 %77 %86 %95
+               OpReturnValue %96
                OpFunctionEnd

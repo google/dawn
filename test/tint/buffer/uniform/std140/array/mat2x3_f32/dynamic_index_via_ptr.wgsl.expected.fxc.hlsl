@@ -42,6 +42,6 @@ void f() {
   float2x3 l_a[4] = v_1(0u);
   float2x3 l_a_i = v(v_5);
   float3 l_a_i_i = asfloat(a[((v_5 + v_6) / 16u)].xyz);
-  s.Store(0u, asuint((((asfloat(a[((v_5 + v_6) / 16u)][(((v_5 + v_6) % 16u) / 4u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
+  s.Store(0u, asuint((((asfloat(a[((v_5 + v_6) / 16u)][(((v_5 + v_6) & 15u) >> 2u)]) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
 }
 

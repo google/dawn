@@ -5,9 +5,9 @@ cbuffer cbuffer_a : register(b0) {
 RWByteAddressBuffer s : register(u1);
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = a[(start_byte_offset / 16u)];
-  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  float2 v_2 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_1.zw) : (v_1.xy)));
   uint4 v_3 = a[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy))));
+  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_3.zw) : (v_3.xy))));
 }
 
 typedef float2x2 ary_ret[4];

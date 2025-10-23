@@ -39,7 +39,7 @@
      %v4half = OpTypeVector %half 4
          %29 = OpTypeFunction %mat3v3half %uint
     %uint_16 = OpConstant %uint 16
-     %uint_4 = OpConstant %uint 4
+    %uint_15 = OpConstant %uint 15
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
      %uint_8 = OpConstant %uint 8
@@ -59,12 +59,12 @@
          %30 = OpLabel
          %31 = OpUDiv %uint %start_byte_offset %uint_16
          %33 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %31
-         %34 = OpUMod %uint %start_byte_offset %uint_16
-         %35 = OpUDiv %uint %34 %uint_4
+         %34 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %36 = OpShiftRightLogical %uint %34 %uint_2
          %37 = OpLoad %v4uint %33 None
          %38 = OpVectorShuffle %v2uint %37 %37 2 3
          %39 = OpVectorShuffle %v2uint %37 %37 0 1
-         %40 = OpIEqual %bool %35 %uint_2
+         %40 = OpIEqual %bool %36 %uint_2
          %43 = OpCompositeConstruct %v2bool %40 %40
          %44 = OpSelect %v2uint %43 %38 %39
          %45 = OpBitcast %v4half %44
@@ -72,8 +72,8 @@
          %47 = OpIAdd %uint %uint_8 %start_byte_offset
          %49 = OpUDiv %uint %47 %uint_16
          %50 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %49
-         %51 = OpUMod %uint %47 %uint_16
-         %52 = OpUDiv %uint %51 %uint_4
+         %51 = OpBitwiseAnd %uint %47 %uint_15
+         %52 = OpShiftRightLogical %uint %51 %uint_2
          %53 = OpLoad %v4uint %50 None
          %54 = OpVectorShuffle %v2uint %53 %53 2 3
          %55 = OpVectorShuffle %v2uint %53 %53 0 1
@@ -85,8 +85,8 @@
          %61 = OpIAdd %uint %uint_16 %start_byte_offset
          %62 = OpUDiv %uint %61 %uint_16
          %63 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %62
-         %64 = OpUMod %uint %61 %uint_16
-         %65 = OpUDiv %uint %64 %uint_4
+         %64 = OpBitwiseAnd %uint %61 %uint_15
+         %65 = OpShiftRightLogical %uint %64 %uint_2
          %66 = OpLoad %v4uint %63 None
          %67 = OpVectorShuffle %v2uint %66 %66 2 3
          %68 = OpVectorShuffle %v2uint %66 %66 0 1

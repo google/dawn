@@ -17,10 +17,10 @@ mat4x3 v_1(uint start_byte_offset) {
 }
 S v_2(uint start_byte_offset) {
   uvec4 v_3 = v.inner[(start_byte_offset / 16u)];
-  int v_4 = int(v_3[((start_byte_offset % 16u) / 4u)]);
+  int v_4 = int(v_3[((start_byte_offset & 15u) >> 2u)]);
   mat4x3 v_5 = v_1((16u + start_byte_offset));
   uvec4 v_6 = v.inner[((128u + start_byte_offset) / 16u)];
-  return S(v_4, v_5, int(v_6[(((128u + start_byte_offset) % 16u) / 4u)]));
+  return S(v_4, v_5, int(v_6[(((128u + start_byte_offset) & 15u) >> 2u)]));
 }
 S[4] v_7(uint start_byte_offset) {
   S a[4] = S[4](S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0));

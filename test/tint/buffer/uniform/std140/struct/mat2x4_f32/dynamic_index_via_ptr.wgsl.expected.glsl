@@ -79,5 +79,5 @@ void main() {
   vec4 l_a_i_a_i_m_i = uintBitsToFloat(v.inner[(((v_11 + v_12) + v_13) / 16u)]);
   uint v_14 = (((v_11 + v_12) + v_13) + (min(uint(i()), 3u) * 4u));
   uvec4 v_15 = v.inner[(v_14 / 16u)];
-  float l_a_i_a_i_m_i_i = uintBitsToFloat(v_15[((v_14 % 16u) / 4u)]);
+  float l_a_i_a_i_m_i_i = uintBitsToFloat(v_15[((v_14 & 15u) >> 2u)]);
 }

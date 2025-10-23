@@ -15,15 +15,15 @@ cbuffer cbuffer_u : register(b0) {
 groupshared S w[4];
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = u[(start_byte_offset / 16u)];
-  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  float2 v_2 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_1.zw) : (v_1.xy)));
   uint4 v_3 = u[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy))));
+  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_3.zw) : (v_3.xy))));
 }
 
 S v_4(uint start_byte_offset) {
-  int v_5 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  int v_5 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
   float2x2 v_6 = v((8u + start_byte_offset));
-  S v_7 = {v_5, v_6, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  S v_7 = {v_5, v_6, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
   return v_7;
 }
 

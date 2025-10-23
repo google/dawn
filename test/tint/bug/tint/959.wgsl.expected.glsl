@@ -89,35 +89,35 @@ uniform highp sampler2DShadow f_t14;
 uniform highp sampler2DShadow f_t15;
 S v_16(uint start_byte_offset) {
   uvec4 v_17 = v_15.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_17[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_17[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_18(uint start_byte_offset) {
   uvec4 v_19 = v_14.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_19[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_19[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_20(uint start_byte_offset) {
   uvec4 v_21 = v_13.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_21[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_21[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_22(uint start_byte_offset) {
   uvec4 v_23 = v_12.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_23[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_23[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_24(uint start_byte_offset) {
   uvec4 v_25 = v_11.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_25[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_25[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_26(uint start_byte_offset) {
   uvec4 v_27 = v_10.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_27[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_27[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_28(uint start_byte_offset) {
   uvec4 v_29 = v_9.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_29[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_29[((start_byte_offset & 15u) >> 2u)]));
 }
 S v_30(uint start_byte_offset) {
   uvec4 v_31 = v_8.inner[(start_byte_offset / 16u)];
-  return S(uintBitsToFloat(v_31[((start_byte_offset % 16u) / 4u)]));
+  return S(uintBitsToFloat(v_31[((start_byte_offset & 15u) >> 2u)]));
 }
 void main() {
   v_30(0u);

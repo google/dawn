@@ -43,10 +43,10 @@ void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
 }
 S v_3(uint start_byte_offset) {
   uvec4 v_4 = v.inner[(start_byte_offset / 16u)];
-  int v_5 = int(v_4[((start_byte_offset % 16u) / 4u)]);
+  int v_5 = int(v_4[((start_byte_offset & 15u) >> 2u)]);
   mat3x4 v_6 = v_2((16u + start_byte_offset));
   uvec4 v_7 = v.inner[((64u + start_byte_offset) / 16u)];
-  return S(v_5, 0u, 0u, 0u, v_6, int(v_7[(((64u + start_byte_offset) % 16u) / 4u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+  return S(v_5, 0u, 0u, 0u, v_6, int(v_7[(((64u + start_byte_offset) & 15u) >> 2u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
 void tint_store_and_preserve_padding(S value_param[4]) {
   {

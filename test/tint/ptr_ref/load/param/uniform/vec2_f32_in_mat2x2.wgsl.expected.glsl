@@ -6,7 +6,7 @@ uniform S_block_1_ubo {
 } v;
 vec2 func(uint pointer_indices[1]) {
   uvec4 v_1 = v.inner[((8u * pointer_indices[0u]) / 16u)];
-  return uintBitsToFloat(mix(v_1.xy, v_1.zw, bvec2(((((8u * pointer_indices[0u]) % 16u) / 4u) == 2u))));
+  return uintBitsToFloat(mix(v_1.xy, v_1.zw, bvec2(((((8u * pointer_indices[0u]) & 15u) >> 2u) == 2u))));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

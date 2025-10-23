@@ -68,42 +68,42 @@ SamplerComparisonState s13 : register(s300, space13);
 SamplerComparisonState s14 : register(s300, space14);
 SamplerComparisonState s15 : register(s300, space15);
 S v(uint start_byte_offset) {
-  S v_1 = {asfloat(b15[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_1 = {asfloat(b15[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_1;
 }
 
 S v_2(uint start_byte_offset) {
-  S v_3 = {asfloat(b14[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_3 = {asfloat(b14[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_3;
 }
 
 S v_4(uint start_byte_offset) {
-  S v_5 = {asfloat(b13[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_5 = {asfloat(b13[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_5;
 }
 
 S v_6(uint start_byte_offset) {
-  S v_7 = {asfloat(b12[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_7 = {asfloat(b12[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_7;
 }
 
 S v_8(uint start_byte_offset) {
-  S v_9 = {asfloat(b11[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_9 = {asfloat(b11[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_9;
 }
 
 S v_10(uint start_byte_offset) {
-  S v_11 = {asfloat(b10[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_11 = {asfloat(b10[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_11;
 }
 
 S v_12(uint start_byte_offset) {
-  S v_13 = {asfloat(b9[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_13 = {asfloat(b9[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_13;
 }
 
 S v_14(uint start_byte_offset) {
-  S v_15 = {asfloat(b8[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_15 = {asfloat(b8[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_15;
 }
 

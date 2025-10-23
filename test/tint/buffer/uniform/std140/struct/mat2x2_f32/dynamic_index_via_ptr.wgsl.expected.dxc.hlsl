@@ -18,9 +18,9 @@ int i() {
 
 float2x2 v(uint start_byte_offset) {
   uint4 v_1 = a[(start_byte_offset / 16u)];
-  float2 v_2 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_1.zw) : (v_1.xy)));
+  float2 v_2 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_1.zw) : (v_1.xy)));
   uint4 v_3 = a[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_3.zw) : (v_3.xy))));
+  return float2x2(v_2, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_3.zw) : (v_3.xy))));
 }
 
 Inner v_4(uint start_byte_offset) {
@@ -91,8 +91,8 @@ void f() {
   Inner l_a_i_a_i = v_4((v_19 + v_20));
   float2x2 l_a_i_a_i_m = v((v_19 + v_20));
   uint4 v_22 = a[(((v_19 + v_20) + v_21) / 16u)];
-  float2 l_a_i_a_i_m_i = asfloat((((((((v_19 + v_20) + v_21) % 16u) / 4u) == 2u)) ? (v_22.zw) : (v_22.xy)));
+  float2 l_a_i_a_i_m_i = asfloat((((((((v_19 + v_20) + v_21) & 15u) >> 2u) == 2u)) ? (v_22.zw) : (v_22.xy)));
   uint v_23 = (((v_19 + v_20) + v_21) + (min(uint(i()), 1u) * 4u));
-  float l_a_i_a_i_m_i_i = asfloat(a[(v_23 / 16u)][((v_23 % 16u) / 4u)]);
+  float l_a_i_a_i_m_i_i = asfloat(a[(v_23 / 16u)][((v_23 & 15u) >> 2u)]);
 }
 

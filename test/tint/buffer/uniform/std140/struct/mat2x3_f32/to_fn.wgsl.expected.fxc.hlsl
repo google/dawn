@@ -28,9 +28,9 @@ float2x3 v_1(uint start_byte_offset) {
 }
 
 S v_2(uint start_byte_offset) {
-  int v_3 = asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  int v_3 = asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
   float2x3 v_4 = v_1((16u + start_byte_offset));
-  S v_5 = {v_3, v_4, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) % 16u) / 4u)])};
+  S v_5 = {v_3, v_4, asint(u[((64u + start_byte_offset) / 16u)][(((64u + start_byte_offset) & 15u) >> 2u)])};
   return v_5;
 }
 

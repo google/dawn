@@ -89,7 +89,7 @@ ary_ret_1 v_14(uint start_byte_offset) {
 
 S v_18(uint start_byte_offset) {
   uint3 v_19 = ubuffer[(start_byte_offset / 16u)].xyz;
-  uint v_20 = ubuffer[((12u + start_byte_offset) / 16u)][(((12u + start_byte_offset) % 16u) / 4u)];
+  uint v_20 = ubuffer[((12u + start_byte_offset) / 16u)][(((12u + start_byte_offset) & 15u) >> 2u)];
   uint3 v_21[4] = v_14((16u + start_byte_offset));
   S v_22 = {v_19, v_20, v_21};
   return v_22;

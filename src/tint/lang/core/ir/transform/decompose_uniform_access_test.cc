@@ -410,8 +410,8 @@ $B1: {  # root
     %14:u32 = mul %x, 2u
     %15:u32 = div %14, 16u
     %16:ptr<uniform, vec4<u32>, read> = access %v, %15
-    %17:u32 = mod %14, 16u
-    %18:u32 = div %17, 4u
+    %17:u32 = and %14, 15u
+    %18:u32 = shr %17, 2u
     %19:u32 = load_vector_element %16, %18
     %20:u32 = mod %14, 4u
     %21:bool = eq %20, 0u
@@ -498,8 +498,8 @@ $B1: {  # root
   $B3: {
     %18:u32 = div %start_byte_offset, 16u
     %19:ptr<uniform, vec4<u32>, read> = access %v, %18
-    %20:u32 = mod %start_byte_offset, 16u
-    %21:u32 = div %20, 4u
+    %20:u32 = and %start_byte_offset, 15u
+    %21:u32 = shr %20, 2u
     %22:vec4<u32> = load %19
     %23:vec2<u32> = swizzle %22, zw
     %24:vec2<u32> = swizzle %22, xy
@@ -510,8 +510,8 @@ $B1: {  # root
     %29:u32 = add 8u, %start_byte_offset
     %30:u32 = div %29, 16u
     %31:ptr<uniform, vec4<u32>, read> = access %v, %30
-    %32:u32 = mod %29, 16u
-    %33:u32 = div %32, 4u
+    %32:u32 = and %29, 15u
+    %33:u32 = shr %32, 2u
     %34:vec4<u32> = load %31
     %35:vec2<u32> = swizzle %34, zw
     %36:vec2<u32> = swizzle %34, xy
@@ -850,15 +850,15 @@ $B1: {  # root
   $B3: {
     %11:u32 = div %start_byte_offset, 16u
     %12:ptr<uniform, vec4<u32>, read> = access %v, %11
-    %13:u32 = mod %start_byte_offset, 16u
-    %14:u32 = div %13, 4u
+    %13:u32 = and %start_byte_offset, 15u
+    %14:u32 = shr %13, 2u
     %15:u32 = load_vector_element %12, %14
     %16:i32 = bitcast %15
     %17:u32 = add 4u, %start_byte_offset
     %18:u32 = div %17, 16u
     %19:ptr<uniform, vec4<u32>, read> = access %v, %18
-    %20:u32 = mod %17, 16u
-    %21:u32 = div %20, 4u
+    %20:u32 = and %17, 15u
+    %21:u32 = shr %20, 2u
     %22:u32 = load_vector_element %19, %21
     %23:f32 = bitcast %22
     %24:SB = construct %16, %23
@@ -967,8 +967,8 @@ $B1: {  # root
   $B3: {
     %11:u32 = div %start_byte_offset, 16u
     %12:ptr<uniform, vec4<u32>, read> = access %v, %11
-    %13:u32 = mod %start_byte_offset, 16u
-    %14:u32 = div %13, 4u
+    %13:u32 = and %start_byte_offset, 15u
+    %14:u32 = shr %13, 2u
     %15:u32 = load_vector_element %12, %14
     %16:i32 = bitcast %15
     %17:u32 = add 16u, %start_byte_offset
@@ -981,8 +981,8 @@ $B1: {  # root
   $B4: {
     %22:u32 = div %start_byte_offset_1, 16u
     %23:ptr<uniform, vec4<u32>, read> = access %v, %22
-    %24:u32 = mod %start_byte_offset_1, 16u
-    %25:u32 = div %24, 4u
+    %24:u32 = and %start_byte_offset_1, 15u
+    %25:u32 = shr %24, 2u
     %26:u32 = load_vector_element %23, %25
     %27:f32 = bitcast %26
     %28:u32 = add 16u, %start_byte_offset_1

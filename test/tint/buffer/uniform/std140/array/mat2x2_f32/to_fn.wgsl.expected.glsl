@@ -22,9 +22,9 @@ float d(float f_1) {
 }
 mat2 v_3(uint start_byte_offset) {
   uvec4 v_4 = v_1.inner[(start_byte_offset / 16u)];
-  vec2 v_5 = uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  vec2 v_5 = uintBitsToFloat(mix(v_4.xy, v_4.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
   uvec4 v_6 = v_1.inner[((8u + start_byte_offset) / 16u)];
-  return mat2(v_5, uintBitsToFloat(mix(v_6.xy, v_6.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+  return mat2(v_5, uintBitsToFloat(mix(v_6.xy, v_6.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))));
 }
 mat2[4] v_7(uint start_byte_offset) {
   mat2 a_2[4] = mat2[4](mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)));

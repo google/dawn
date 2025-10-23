@@ -14,9 +14,9 @@ f16vec2 tint_bitcast_to_f16_1(uint src) {
   return unpackFloat2x16(src);
 }
 f16mat3x2 v_1(uint start_byte_offset) {
-  f16vec2 v_2 = tint_bitcast_to_f16_1(v.inner[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
-  f16vec2 v_3 = tint_bitcast_to_f16_1(v.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)]);
-  return f16mat3x2(v_2, v_3, tint_bitcast_to_f16_1(v.inner[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) % 16u) / 4u)]));
+  f16vec2 v_2 = tint_bitcast_to_f16_1(v.inner[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
+  f16vec2 v_3 = tint_bitcast_to_f16_1(v.inner[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) & 15u) >> 2u)]);
+  return f16mat3x2(v_2, v_3, tint_bitcast_to_f16_1(v.inner[((8u + start_byte_offset) / 16u)][(((8u + start_byte_offset) & 15u) >> 2u)]));
 }
 void main() {
   f16mat3x2 v_4 = v_1(0u);

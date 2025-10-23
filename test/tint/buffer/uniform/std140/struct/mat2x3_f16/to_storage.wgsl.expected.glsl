@@ -51,9 +51,9 @@ void tint_store_and_preserve_padding_2(uint target_indices[1], f16mat2x3 value_p
 }
 f16mat2x3 v_2(uint start_byte_offset) {
   uvec4 v_3 = v.inner[(start_byte_offset / 16u)];
-  f16vec3 v_4 = tint_bitcast_to_f16(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u)))).xyz;
+  f16vec3 v_4 = tint_bitcast_to_f16(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u)))).xyz;
   uvec4 v_5 = v.inner[((8u + start_byte_offset) / 16u)];
-  return f16mat2x3(v_4, tint_bitcast_to_f16(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))).xyz);
+  return f16mat2x3(v_4, tint_bitcast_to_f16(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))).xyz);
 }
 void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
   v_1.inner[target_indices[0u]].before = value_param.before;
@@ -62,10 +62,10 @@ void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
 }
 S v_6(uint start_byte_offset) {
   uvec4 v_7 = v.inner[(start_byte_offset / 16u)];
-  int v_8 = int(v_7[((start_byte_offset % 16u) / 4u)]);
+  int v_8 = int(v_7[((start_byte_offset & 15u) >> 2u)]);
   f16mat2x3 v_9 = v_2((8u + start_byte_offset));
   uvec4 v_10 = v.inner[((64u + start_byte_offset) / 16u)];
-  return S(v_8, 0u, v_9, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, int(v_10[(((64u + start_byte_offset) % 16u) / 4u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+  return S(v_8, 0u, v_9, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, int(v_10[(((64u + start_byte_offset) & 15u) >> 2u)]), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
 void tint_store_and_preserve_padding(S value_param[4]) {
   {

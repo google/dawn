@@ -49,7 +49,7 @@ Uniforms v_2(uint start_byte_offset) {
   mat4 v_4 = v_1((64u + start_byte_offset));
   uvec4 v_5 = v.inner[((128u + start_byte_offset) / 16u)];
   uvec4 v_6 = v.inner[((132u + start_byte_offset) / 16u)];
-  return Uniforms(v_3, v_4, v_5[(((128u + start_byte_offset) % 16u) / 4u)], v_6[(((132u + start_byte_offset) % 16u) / 4u)], uintBitsToFloat(v.inner[((144u + start_byte_offset) / 16u)]));
+  return Uniforms(v_3, v_4, v_5[(((128u + start_byte_offset) & 15u) >> 2u)], v_6[(((132u + start_byte_offset) & 15u) >> 2u)], uintBitsToFloat(v.inner[((144u + start_byte_offset) / 16u)]));
 }
 FragmentOutput main_inner(FragmentInput fragment) {
   FragmentOutput v_7 = FragmentOutput(vec4(0.0f));

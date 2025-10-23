@@ -2840,6 +2840,61 @@ TEST_P(ShaderTests, CopyStructCompute) {
     EXPECT_BUFFER_U32_RANGE_EQ(inputData.data(), outputBuffer, 0, inputData.size());
 }
 
+// Test coverage for a uniform buffer indexing bug with FXC.
+// See crbug.com/454366353.
+TEST_P(ShaderTests, UBOIndexFXC) {
+    // TODO(crbug.com/454396190): WebGPU-on-WebGPU is not enabling the WGSL language feature.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+@group(0) @binding(0) var<uniform> inputs : array<vec2u, 4>;
+@group(0) @binding(1) var<storage, read_write> outputs : array<u32, 4>;
+
+@compute @workgroup_size(1)
+fn main() {
+  for (var i = 0; i < 2; i++) {
+    // Get the second component of each vec2.
+    outputs[i] = inputs[i].y;
+  }
+}
+)");
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.compute.module = csModule;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    // The shader will extract the value at each odd-numbered index.
+    std::vector<uint32_t> bufferData(256, 0u);
+    bufferData[0] = 1u;
+    bufferData[1] = 2u;
+    bufferData[2] = 3u;
+    bufferData[3] = 4u;
+    wgpu::Buffer inputBuffer =
+        utils::CreateBufferFromData(device, bufferData.data(), bufferData.size() * sizeof(uint32_t),
+                                    wgpu::BufferUsage::Uniform);
+    wgpu::Buffer outputBuffer = CreateBuffer(22 * sizeof(uint32_t));
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, inputBuffer},
+                                                         {1, outputBuffer},
+                                                     });
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bindGroup);
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // The values are the odd-numbered indices of the input buffer.
+    EXPECT_BUFFER_U32_EQ(2u, outputBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(4u, outputBuffer, 4);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),

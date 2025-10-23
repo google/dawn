@@ -22,9 +22,9 @@ f16vec4 tint_bitcast_to_f16(uvec2 src) {
 }
 f16mat2x4 v_1(uint start_byte_offset) {
   uvec4 v_2 = v.inner[(start_byte_offset / 16u)];
-  f16vec4 v_3 = tint_bitcast_to_f16(mix(v_2.xy, v_2.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  f16vec4 v_3 = tint_bitcast_to_f16(mix(v_2.xy, v_2.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
   uvec4 v_4 = v.inner[((8u + start_byte_offset) / 16u)];
-  return f16mat2x4(v_3, tint_bitcast_to_f16(mix(v_4.xy, v_4.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+  return f16mat2x4(v_3, tint_bitcast_to_f16(mix(v_4.xy, v_4.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))));
 }
 Inner v_5(uint start_byte_offset) {
   return Inner(v_1(start_byte_offset));

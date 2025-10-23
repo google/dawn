@@ -89,6 +89,6 @@ void f() {
   float4x3 l_a_i_a_i_m = v((v_16 + v_17));
   float3 l_a_i_a_i_m_i = asfloat(a[(((v_16 + v_17) + v_18) / 16u)].xyz);
   uint v_19 = (((v_16 + v_17) + v_18) + (min(uint(i()), 2u) * 4u));
-  float l_a_i_a_i_m_i_i = asfloat(a[(v_19 / 16u)][((v_19 % 16u) / 4u)]);
+  float l_a_i_a_i_m_i_i = asfloat(a[(v_19 / 16u)][((v_19 & 15u) >> 2u)]);
 }
 

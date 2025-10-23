@@ -37,7 +37,7 @@ mat2x4 v_2(uint start_byte_offset) {
 Inner v_3(uint start_byte_offset) {
   uvec4 v_4 = v.inner[(start_byte_offset / 16u)];
   vec3 v_5 = uintBitsToFloat(v.inner[((16u + start_byte_offset) / 16u)].xyz);
-  return Inner(uintBitsToFloat(v_4[((start_byte_offset % 16u) / 4u)]), 0u, 0u, 0u, v_5, 0u, v_2((32u + start_byte_offset)));
+  return Inner(uintBitsToFloat(v_4[((start_byte_offset & 15u) >> 2u)]), 0u, 0u, 0u, v_5, 0u, v_2((32u + start_byte_offset)));
 }
 S v_6(uint start_byte_offset) {
   return S(v_3(start_byte_offset));

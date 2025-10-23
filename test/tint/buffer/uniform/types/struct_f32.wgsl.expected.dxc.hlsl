@@ -34,7 +34,7 @@ float2x4 v_4(uint start_byte_offset) {
 }
 
 Inner v_5(uint start_byte_offset) {
-  float v_6 = asfloat(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  float v_6 = asfloat(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)]);
   float3 v_7 = asfloat(u[((16u + start_byte_offset) / 16u)].xyz);
   Inner v_8 = {v_6, v_7, v_4((32u + start_byte_offset))};
   return v_8;

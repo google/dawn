@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 120
+; Bound: 121
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -63,13 +63,14 @@
      %v2uint = OpTypeVector %uint 2
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
          %68 = OpTypeFunction %mat2v4half %uint
+    %uint_15 = OpConstant %uint 15
      %uint_2 = OpConstant %uint 2
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
      %uint_8 = OpConstant %uint 8
-         %99 = OpTypeFunction %_arr_mat2v4half_uint_4 %uint
+        %100 = OpTypeFunction %_arr_mat2v4half_uint_4 %uint
 %_ptr_Function__arr_mat2v4half_uint_4 = OpTypePointer Function %_arr_mat2v4half_uint_4
-        %103 = OpConstantNull %_arr_mat2v4half_uint_4
+        %104 = OpConstantNull %_arr_mat2v4half_uint_4
 %_ptr_Function_mat2v4half = OpTypePointer Function %mat2v4half
           %a = OpFunction %half None %17
         %a_0 = OpFunctionParameter %_arr_mat2v4half_uint_4
@@ -125,59 +126,59 @@
          %69 = OpLabel
          %70 = OpUDiv %uint %start_byte_offset %uint_16
          %71 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %70
-         %72 = OpUMod %uint %start_byte_offset %uint_16
-         %73 = OpUDiv %uint %72 %uint_4
-         %74 = OpLoad %v4uint %71 None
-         %75 = OpVectorShuffle %v2uint %74 %74 2 3
-         %76 = OpVectorShuffle %v2uint %74 %74 0 1
-         %77 = OpIEqual %bool %73 %uint_2
-         %81 = OpCompositeConstruct %v2bool %77 %77
-         %82 = OpSelect %v2uint %81 %75 %76
-         %83 = OpBitcast %v4half %82
-         %84 = OpIAdd %uint %uint_8 %start_byte_offset
-         %86 = OpUDiv %uint %84 %uint_16
-         %87 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %86
-         %88 = OpUMod %uint %84 %uint_16
-         %89 = OpUDiv %uint %88 %uint_4
-         %90 = OpLoad %v4uint %87 None
-         %91 = OpVectorShuffle %v2uint %90 %90 2 3
-         %92 = OpVectorShuffle %v2uint %90 %90 0 1
-         %93 = OpIEqual %bool %89 %uint_2
-         %94 = OpCompositeConstruct %v2bool %93 %93
-         %95 = OpSelect %v2uint %94 %91 %92
-         %96 = OpBitcast %v4half %95
-         %97 = OpCompositeConstruct %mat2v4half %83 %96
-               OpReturnValue %97
+         %72 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %74 = OpShiftRightLogical %uint %72 %uint_2
+         %76 = OpLoad %v4uint %71 None
+         %77 = OpVectorShuffle %v2uint %76 %76 2 3
+         %78 = OpVectorShuffle %v2uint %76 %76 0 1
+         %79 = OpIEqual %bool %74 %uint_2
+         %82 = OpCompositeConstruct %v2bool %79 %79
+         %83 = OpSelect %v2uint %82 %77 %78
+         %84 = OpBitcast %v4half %83
+         %85 = OpIAdd %uint %uint_8 %start_byte_offset
+         %87 = OpUDiv %uint %85 %uint_16
+         %88 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %87
+         %89 = OpBitwiseAnd %uint %85 %uint_15
+         %90 = OpShiftRightLogical %uint %89 %uint_2
+         %91 = OpLoad %v4uint %88 None
+         %92 = OpVectorShuffle %v2uint %91 %91 2 3
+         %93 = OpVectorShuffle %v2uint %91 %91 0 1
+         %94 = OpIEqual %bool %90 %uint_2
+         %95 = OpCompositeConstruct %v2bool %94 %94
+         %96 = OpSelect %v2uint %95 %92 %93
+         %97 = OpBitcast %v4half %96
+         %98 = OpCompositeConstruct %mat2v4half %84 %97
+               OpReturnValue %98
                OpFunctionEnd
-         %39 = OpFunction %_arr_mat2v4half_uint_4 None %99
+         %39 = OpFunction %_arr_mat2v4half_uint_4 None %100
 %start_byte_offset_0 = OpFunctionParameter %uint
-        %100 = OpLabel
+        %101 = OpLabel
         %a_1 = OpVariable %_ptr_Function__arr_mat2v4half_uint_4 Function
-               OpStore %a_1 %103
-               OpBranch %104
-        %104 = OpLabel
-               OpBranch %107
-        %107 = OpLabel
-        %109 = OpPhi %uint %uint_0 %104 %110 %106
-               OpLoopMerge %108 %106 None
+               OpStore %a_1 %104
                OpBranch %105
         %105 = OpLabel
-        %112 = OpUGreaterThanEqual %bool %109 %uint_4
-               OpSelectionMerge %113 None
-               OpBranchConditional %112 %114 %113
-        %114 = OpLabel
                OpBranch %108
-        %113 = OpLabel
-        %115 = OpIMul %uint %109 %uint_16
-        %116 = OpIAdd %uint %start_byte_offset_0 %115
-        %117 = OpAccessChain %_ptr_Function_mat2v4half %a_1 %109
-        %119 = OpFunctionCall %mat2v4half %43 %116
-               OpStore %117 %119 None
+        %108 = OpLabel
+        %110 = OpPhi %uint %uint_0 %105 %111 %107
+               OpLoopMerge %109 %107 None
                OpBranch %106
         %106 = OpLabel
-        %110 = OpIAdd %uint %109 %uint_1
+        %113 = OpUGreaterThanEqual %bool %110 %uint_4
+               OpSelectionMerge %114 None
+               OpBranchConditional %113 %115 %114
+        %115 = OpLabel
+               OpBranch %109
+        %114 = OpLabel
+        %116 = OpIMul %uint %110 %uint_16
+        %117 = OpIAdd %uint %start_byte_offset_0 %116
+        %118 = OpAccessChain %_ptr_Function_mat2v4half %a_1 %110
+        %120 = OpFunctionCall %mat2v4half %43 %117
+               OpStore %118 %120 None
                OpBranch %107
-        %108 = OpLabel
-        %111 = OpLoad %_arr_mat2v4half_uint_4 %a_1 None
-               OpReturnValue %111
+        %107 = OpLabel
+        %111 = OpIAdd %uint %110 %uint_1
+               OpBranch %108
+        %109 = OpLabel
+        %112 = OpLoad %_arr_mat2v4half_uint_4 %a_1 None
+               OpReturnValue %112
                OpFunctionEnd

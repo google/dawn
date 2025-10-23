@@ -34,9 +34,9 @@
     %uint_16 = OpConstant %uint 16
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
      %uint_0 = OpConstant %uint 0
-     %uint_4 = OpConstant %uint 4
-     %v2uint = OpTypeVector %uint 2
+    %uint_15 = OpConstant %uint 15
      %uint_2 = OpConstant %uint 2
+     %v2uint = OpTypeVector %uint 2
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
        %void = OpTypeVoid
@@ -48,14 +48,14 @@
          %16 = OpIMul %uint %uint_8 %15
          %18 = OpUDiv %uint %16 %uint_16
          %20 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %18
-         %23 = OpUMod %uint %16 %uint_16
-         %24 = OpUDiv %uint %23 %uint_4
-         %26 = OpLoad %v4uint %20 None
-         %27 = OpVectorShuffle %v2uint %26 %26 2 3
-         %29 = OpVectorShuffle %v2uint %26 %26 0 1
-         %30 = OpIEqual %bool %24 %uint_2
-         %34 = OpCompositeConstruct %v2bool %30 %30
-         %35 = OpSelect %v2uint %34 %27 %29
+         %23 = OpBitwiseAnd %uint %16 %uint_15
+         %25 = OpShiftRightLogical %uint %23 %uint_2
+         %27 = OpLoad %v4uint %20 None
+         %28 = OpVectorShuffle %v2uint %27 %27 2 3
+         %30 = OpVectorShuffle %v2uint %27 %27 0 1
+         %31 = OpIEqual %bool %25 %uint_2
+         %34 = OpCompositeConstruct %v2bool %31 %31
+         %35 = OpSelect %v2uint %34 %28 %30
          %36 = OpBitcast %v2float %35
                OpReturnValue %36
                OpFunctionEnd

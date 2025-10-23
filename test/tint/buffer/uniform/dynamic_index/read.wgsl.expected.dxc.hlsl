@@ -43,13 +43,13 @@ float4x3 v_5(uint start_byte_offset) {
 
 float4x2 v_6(uint start_byte_offset) {
   uint4 v_7 = ub[(start_byte_offset / 16u)];
-  float2 v_8 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_7.zw) : (v_7.xy)));
+  float2 v_8 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_7.zw) : (v_7.xy)));
   uint4 v_9 = ub[((8u + start_byte_offset) / 16u)];
-  float2 v_10 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_9.zw) : (v_9.xy)));
+  float2 v_10 = asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_9.zw) : (v_9.xy)));
   uint4 v_11 = ub[((16u + start_byte_offset) / 16u)];
-  float2 v_12 = asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_11.zw) : (v_11.xy)));
+  float2 v_12 = asfloat(((((((16u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_11.zw) : (v_11.xy)));
   uint4 v_13 = ub[((24u + start_byte_offset) / 16u)];
-  return float4x2(v_8, v_10, v_12, asfloat(((((((24u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_13.zw) : (v_13.xy))));
+  return float4x2(v_8, v_10, v_12, asfloat(((((((24u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_13.zw) : (v_13.xy))));
 }
 
 float3x4 v_14(uint start_byte_offset) {
@@ -62,11 +62,11 @@ float3x3 v_15(uint start_byte_offset) {
 
 float3x2 v_16(uint start_byte_offset) {
   uint4 v_17 = ub[(start_byte_offset / 16u)];
-  float2 v_18 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_17.zw) : (v_17.xy)));
+  float2 v_18 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_17.zw) : (v_17.xy)));
   uint4 v_19 = ub[((8u + start_byte_offset) / 16u)];
-  float2 v_20 = asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_19.zw) : (v_19.xy)));
+  float2 v_20 = asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_19.zw) : (v_19.xy)));
   uint4 v_21 = ub[((16u + start_byte_offset) / 16u)];
-  return float3x2(v_18, v_20, asfloat(((((((16u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_21.zw) : (v_21.xy))));
+  return float3x2(v_18, v_20, asfloat(((((((16u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_21.zw) : (v_21.xy))));
 }
 
 float2x4 v_22(uint start_byte_offset) {
@@ -79,21 +79,21 @@ float2x3 v_23(uint start_byte_offset) {
 
 float2x2 v_24(uint start_byte_offset) {
   uint4 v_25 = ub[(start_byte_offset / 16u)];
-  float2 v_26 = asfloat((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_25.zw) : (v_25.xy)));
+  float2 v_26 = asfloat((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_25.zw) : (v_25.xy)));
   uint4 v_27 = ub[((8u + start_byte_offset) / 16u)];
-  return float2x2(v_26, asfloat(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_27.zw) : (v_27.xy))));
+  return float2x2(v_26, asfloat(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_27.zw) : (v_27.xy))));
 }
 
 void main_inner(uint idx) {
-  float scalar_f32 = asfloat(ub[((544u * min(idx, 7u)) / 16u)][(((544u * min(idx, 7u)) % 16u) / 4u)]);
-  int scalar_i32 = asint(ub[((4u + (544u * min(idx, 7u))) / 16u)][(((4u + (544u * min(idx, 7u))) % 16u) / 4u)]);
-  uint scalar_u32 = ub[((8u + (544u * min(idx, 7u))) / 16u)][(((8u + (544u * min(idx, 7u))) % 16u) / 4u)];
+  float scalar_f32 = asfloat(ub[((544u * min(idx, 7u)) / 16u)][(((544u * min(idx, 7u)) & 15u) >> 2u)]);
+  int scalar_i32 = asint(ub[((4u + (544u * min(idx, 7u))) / 16u)][(((4u + (544u * min(idx, 7u))) & 15u) >> 2u)]);
+  uint scalar_u32 = ub[((8u + (544u * min(idx, 7u))) / 16u)][(((8u + (544u * min(idx, 7u))) & 15u) >> 2u)];
   uint4 v_28 = ub[((16u + (544u * min(idx, 7u))) / 16u)];
-  float2 vec2_f32 = asfloat(((((((16u + (544u * min(idx, 7u))) % 16u) / 4u) == 2u)) ? (v_28.zw) : (v_28.xy)));
+  float2 vec2_f32 = asfloat(((((((16u + (544u * min(idx, 7u))) & 15u) >> 2u) == 2u)) ? (v_28.zw) : (v_28.xy)));
   uint4 v_29 = ub[((24u + (544u * min(idx, 7u))) / 16u)];
-  int2 vec2_i32 = asint(((((((24u + (544u * min(idx, 7u))) % 16u) / 4u) == 2u)) ? (v_29.zw) : (v_29.xy)));
+  int2 vec2_i32 = asint(((((((24u + (544u * min(idx, 7u))) & 15u) >> 2u) == 2u)) ? (v_29.zw) : (v_29.xy)));
   uint4 v_30 = ub[((32u + (544u * min(idx, 7u))) / 16u)];
-  uint2 vec2_u32 = ((((((32u + (544u * min(idx, 7u))) % 16u) / 4u) == 2u)) ? (v_30.zw) : (v_30.xy));
+  uint2 vec2_u32 = ((((((32u + (544u * min(idx, 7u))) & 15u) >> 2u) == 2u)) ? (v_30.zw) : (v_30.xy));
   float3 vec3_f32 = asfloat(ub[((48u + (544u * min(idx, 7u))) / 16u)].xyz);
   int3 vec3_i32 = asint(ub[((64u + (544u * min(idx, 7u))) / 16u)].xyz);
   uint3 vec3_u32 = ub[((80u + (544u * min(idx, 7u))) / 16u)].xyz;

@@ -60,7 +60,7 @@ uvec3[4] v_4(uint start_byte_offset) {
 S v_7(uint start_byte_offset) {
   uvec3 v_8 = v.inner[(start_byte_offset / 16u)].xyz;
   uvec4 v_9 = v.inner[((12u + start_byte_offset) / 16u)];
-  return S(v_8, v_9[(((12u + start_byte_offset) % 16u) / 4u)], v_4((16u + start_byte_offset)));
+  return S(v_8, v_9[(((12u + start_byte_offset) & 15u) >> 2u)], v_4((16u + start_byte_offset)));
 }
 void foo() {
   S u = v_7(0u);

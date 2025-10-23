@@ -7,7 +7,7 @@ cbuffer cbuffer_u : register(b0) {
   uint4 u[1];
 };
 S v(uint start_byte_offset) {
-  S v_1 = {asint(u[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)])};
+  S v_1 = {asint(u[(start_byte_offset / 16u)][((start_byte_offset & 15u) >> 2u)])};
   return v_1;
 }
 

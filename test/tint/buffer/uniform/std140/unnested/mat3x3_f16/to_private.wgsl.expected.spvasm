@@ -45,7 +45,7 @@
 %_ptr_Private_half = OpTypePointer Private %half
          %49 = OpTypeFunction %mat3v3half %uint
     %uint_16 = OpConstant %uint 16
-     %uint_4 = OpConstant %uint 4
+    %uint_15 = OpConstant %uint 15
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
      %uint_8 = OpConstant %uint 8
@@ -83,12 +83,12 @@
          %50 = OpLabel
          %51 = OpUDiv %uint %start_byte_offset %uint_16
          %53 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %51
-         %54 = OpUMod %uint %start_byte_offset %uint_16
-         %55 = OpUDiv %uint %54 %uint_4
+         %54 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %56 = OpShiftRightLogical %uint %54 %uint_2
          %57 = OpLoad %v4uint %53 None
          %58 = OpVectorShuffle %v2uint %57 %57 2 3
          %59 = OpVectorShuffle %v2uint %57 %57 0 1
-         %60 = OpIEqual %bool %55 %uint_2
+         %60 = OpIEqual %bool %56 %uint_2
          %63 = OpCompositeConstruct %v2bool %60 %60
          %64 = OpSelect %v2uint %63 %58 %59
          %65 = OpBitcast %v4half %64
@@ -96,8 +96,8 @@
          %67 = OpIAdd %uint %uint_8 %start_byte_offset
          %69 = OpUDiv %uint %67 %uint_16
          %70 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %69
-         %71 = OpUMod %uint %67 %uint_16
-         %72 = OpUDiv %uint %71 %uint_4
+         %71 = OpBitwiseAnd %uint %67 %uint_15
+         %72 = OpShiftRightLogical %uint %71 %uint_2
          %73 = OpLoad %v4uint %70 None
          %74 = OpVectorShuffle %v2uint %73 %73 2 3
          %75 = OpVectorShuffle %v2uint %73 %73 0 1
@@ -109,8 +109,8 @@
          %81 = OpIAdd %uint %uint_16 %start_byte_offset
          %82 = OpUDiv %uint %81 %uint_16
          %83 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %82
-         %84 = OpUMod %uint %81 %uint_16
-         %85 = OpUDiv %uint %84 %uint_4
+         %84 = OpBitwiseAnd %uint %81 %uint_15
+         %85 = OpShiftRightLogical %uint %84 %uint_2
          %86 = OpLoad %v4uint %83 None
          %87 = OpVectorShuffle %v2uint %86 %86 2 3
          %88 = OpVectorShuffle %v2uint %86 %86 0 1

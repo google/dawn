@@ -44,7 +44,7 @@ float4x4 v(uint start_byte_offset) {
 Uniforms v_1(uint start_byte_offset) {
   float4x4 v_2 = v(start_byte_offset);
   float4x4 v_3 = v((64u + start_byte_offset));
-  Uniforms v_4 = {v_2, v_3, uniforms[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) % 16u) / 4u)], uniforms[((132u + start_byte_offset) / 16u)][(((132u + start_byte_offset) % 16u) / 4u)], asfloat(uniforms[((144u + start_byte_offset) / 16u)])};
+  Uniforms v_4 = {v_2, v_3, uniforms[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) & 15u) >> 2u)], uniforms[((132u + start_byte_offset) / 16u)][(((132u + start_byte_offset) & 15u) >> 2u)], asfloat(uniforms[((144u + start_byte_offset) / 16u)])};
   return v_4;
 }
 

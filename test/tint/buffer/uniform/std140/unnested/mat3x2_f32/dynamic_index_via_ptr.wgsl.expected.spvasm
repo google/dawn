@@ -44,7 +44,7 @@
      %uint_0 = OpConstant %uint 0
     %uint_16 = OpConstant %uint 16
 %_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
-     %uint_4 = OpConstant %uint 4
+    %uint_15 = OpConstant %uint 15
      %v2uint = OpTypeVector %uint 2
        %bool = OpTypeBool
      %v2bool = OpTypeVector %bool 2
@@ -69,12 +69,12 @@
         %l_m = OpFunctionCall %mat3v2float %36 %uint_0
          %38 = OpUDiv %uint %30 %uint_16
          %40 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %38
-         %42 = OpUMod %uint %30 %uint_16
-         %43 = OpUDiv %uint %42 %uint_4
+         %42 = OpBitwiseAnd %uint %30 %uint_15
+         %44 = OpShiftRightLogical %uint %42 %uint_2
          %45 = OpLoad %v4uint %40 None
          %46 = OpVectorShuffle %v2uint %45 %45 2 3
          %48 = OpVectorShuffle %v2uint %45 %45 0 1
-         %49 = OpIEqual %bool %43 %uint_2
+         %49 = OpIEqual %bool %44 %uint_2
          %52 = OpCompositeConstruct %v2bool %49 %49
          %53 = OpSelect %v2uint %52 %46 %48
       %l_m_i = OpBitcast %v2float %53
@@ -85,8 +85,8 @@
          %57 = OpLabel
          %58 = OpUDiv %uint %start_byte_offset %uint_16
          %59 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %58
-         %60 = OpUMod %uint %start_byte_offset %uint_16
-         %61 = OpUDiv %uint %60 %uint_4
+         %60 = OpBitwiseAnd %uint %start_byte_offset %uint_15
+         %61 = OpShiftRightLogical %uint %60 %uint_2
          %62 = OpLoad %v4uint %59 None
          %63 = OpVectorShuffle %v2uint %62 %62 2 3
          %64 = OpVectorShuffle %v2uint %62 %62 0 1
@@ -97,8 +97,8 @@
          %69 = OpIAdd %uint %uint_8 %start_byte_offset
          %70 = OpUDiv %uint %69 %uint_16
          %71 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %70
-         %72 = OpUMod %uint %69 %uint_16
-         %73 = OpUDiv %uint %72 %uint_4
+         %72 = OpBitwiseAnd %uint %69 %uint_15
+         %73 = OpShiftRightLogical %uint %72 %uint_2
          %74 = OpLoad %v4uint %71 None
          %75 = OpVectorShuffle %v2uint %74 %74 2 3
          %76 = OpVectorShuffle %v2uint %74 %74 0 1
@@ -109,8 +109,8 @@
          %81 = OpIAdd %uint %uint_16 %start_byte_offset
          %82 = OpUDiv %uint %81 %uint_16
          %83 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %82
-         %84 = OpUMod %uint %81 %uint_16
-         %85 = OpUDiv %uint %84 %uint_4
+         %84 = OpBitwiseAnd %uint %81 %uint_15
+         %85 = OpShiftRightLogical %uint %84 %uint_2
          %86 = OpLoad %v4uint %83 None
          %87 = OpVectorShuffle %v2uint %86 %86 2 3
          %88 = OpVectorShuffle %v2uint %86 %86 0 1

@@ -10,15 +10,15 @@ uniform v_x_26_block_ubo {
 } v_1;
 mat2 v_2(uint start_byte_offset) {
   uvec4 v_3 = v_1.inner[(start_byte_offset / 16u)];
-  vec2 v_4 = uintBitsToFloat(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  vec2 v_4 = uintBitsToFloat(mix(v_3.xy, v_3.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
   uvec4 v_5 = v_1.inner[((8u + start_byte_offset) / 16u)];
-  return mat2(v_4, uintBitsToFloat(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+  return mat2(v_4, uintBitsToFloat(mix(v_5.xy, v_5.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))));
 }
 mat2 v_6(uint start_byte_offset) {
   uvec4 v_7 = v.inner[(start_byte_offset / 16u)];
-  vec2 v_8 = uintBitsToFloat(mix(v_7.xy, v_7.zw, bvec2((((start_byte_offset % 16u) / 4u) == 2u))));
+  vec2 v_8 = uintBitsToFloat(mix(v_7.xy, v_7.zw, bvec2((((start_byte_offset & 15u) >> 2u) == 2u))));
   uvec4 v_9 = v.inner[((8u + start_byte_offset) / 16u)];
-  return mat2(v_8, uintBitsToFloat(mix(v_9.xy, v_9.zw, bvec2(((((8u + start_byte_offset) % 16u) / 4u) == 2u)))));
+  return mat2(v_8, uintBitsToFloat(mix(v_9.xy, v_9.zw, bvec2(((((8u + start_byte_offset) & 15u) >> 2u) == 2u)))));
 }
 vec4 main_inner(uint v_10) {
   vec2 indexable[3] = vec2[3](vec2(0.0f), vec2(0.0f), vec2(0.0f));

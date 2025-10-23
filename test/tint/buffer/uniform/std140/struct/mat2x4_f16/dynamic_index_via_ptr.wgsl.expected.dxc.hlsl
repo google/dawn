@@ -38,9 +38,9 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
 
 matrix<float16_t, 2, 4> v_5(uint start_byte_offset) {
   uint4 v_6 = a[(start_byte_offset / 16u)];
-  vector<float16_t, 4> v_7 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_6.zw) : (v_6.xy)));
+  vector<float16_t, 4> v_7 = tint_bitcast_to_f16((((((start_byte_offset & 15u) >> 2u) == 2u)) ? (v_6.zw) : (v_6.xy)));
   uint4 v_8 = a[((8u + start_byte_offset) / 16u)];
-  return matrix<float16_t, 2, 4>(v_7, tint_bitcast_to_f16(((((((8u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_8.zw) : (v_8.xy))));
+  return matrix<float16_t, 2, 4>(v_7, tint_bitcast_to_f16(((((((8u + start_byte_offset) & 15u) >> 2u) == 2u)) ? (v_8.zw) : (v_8.xy))));
 }
 
 Inner v_9(uint start_byte_offset) {
@@ -111,9 +111,9 @@ void f() {
   Inner l_a_i_a_i = v_9((v_24 + v_25));
   matrix<float16_t, 2, 4> l_a_i_a_i_m = v_5((v_24 + v_25));
   uint4 v_27 = a[(((v_24 + v_25) + v_26) / 16u)];
-  vector<float16_t, 4> l_a_i_a_i_m_i = tint_bitcast_to_f16((((((((v_24 + v_25) + v_26) % 16u) / 4u) == 2u)) ? (v_27.zw) : (v_27.xy)));
+  vector<float16_t, 4> l_a_i_a_i_m_i = tint_bitcast_to_f16((((((((v_24 + v_25) + v_26) & 15u) >> 2u) == 2u)) ? (v_27.zw) : (v_27.xy)));
   uint v_28 = (((v_24 + v_25) + v_26) + (min(uint(i()), 3u) * 2u));
-  uint v_29 = a[(v_28 / 16u)][((v_28 % 16u) / 4u)];
+  uint v_29 = a[(v_28 / 16u)][((v_28 & 15u) >> 2u)];
   uint v_30 = ((((v_28 % 4u) == 0u)) ? (0u) : (1u));
   float16_t l_a_i_a_i_m_i_i = tint_bitcast_to_f16_1(v_29)[v_30];
 }
