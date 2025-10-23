@@ -151,18 +151,74 @@ the `dawn::webgpu_dawn` target. Please see [Quickstart with CMake](./quickstart-
 for step-by-step instructions.
 
 ### Fuzzers on MacOS
-If you are attempting fuzz, using `TINT_BUILD_FUZZERS=ON`, the version of llvm
-in the XCode SDK does not have the needed libfuzzer functionality included.
+As of Late Oct 2025, fuzzing on a dev Mac is not in a good state.
 
-The build error that you will see from using the XCode SDK will look something
-like this:
-```
+The old workaround for fuzzing with XCode 16.X should still work, but that is
+not the Chromium supported version of XCode so there may be other issues. That
+workaround does not work for XCode 26.X, which is supported by Chromium.
+
+If you attempt to build and run the fuzzers without a workaround, you will
+either get build failures like this:
+```sh
 ld: file not found:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.0/lib/darwin/libclang_rt.fuzzer_osx.a
 ```
 
-The solution to this problem is to use a full version llvm, like what you would
-get via homebrew, `brew install llvm`, and use something like `CC=<path to full
-clang> cmake ..` to setup a build using that toolchain.
+or if using a component build, you will get a similar runtime issue for a
+missing `.dylib`.
+
+The root cause for this is that the build of llvm shipped as part of the XCode
+SDK does not include the standard support libraries for fuzzing.
+
+The workaround for this depends on which version of XCode you are trying to use.
+
+#### Using XCode 16.X
+The workaround for 16.X has been to install a fully featured version llvm onto
+your system, for example via Homebrew, `brew install llvm`, (you might have to
+use `llvm@XX` where `XX` is the major version of llvm in the XCode SDK). And
+then using environment variables, i.e. `CC=<path to Homebrew clang> cmake
+-GNinja ../..`, to set up the build including the full llvm toolchain to get the
+missing libraries onto the search path. This will actually create a hybrid
+toolchain using some elements of the XCode SDK and the llvm SDK, because there
+is some Apple specific framework stuff that isn't in mainstream llvm.
+
+#### Using XCode 26.X
+As mentioned above, the 16.X workaround appears to no longer work due to drift
+between Apple's llvm and the mainline version. Trying to create a hybrid
+toolchain will lead to compiling issues from the XCode standard headers using
+deprecated functions according to mainstream llvm, even when using the same
+major version.
+
+For 26.X there is workaround done by installing `llvm@17` (since AppleClang is
+version 17) from Homebrew, and then copying over the missing library files
+(i.e. `libclang_rt.fuzzer_osx.a`) from the Homebrew directory to the
+CommandLineTools toolchain directory. (Cannot be the XCode toolchain directory,
+because that is write protected).
+
+You will then need to be using the CLT toolchain as your active toolchain
+```sh
+sudo xcode-select -s /Library/Developer/CommandLineTools
+```
+
+This allows for building and debugging the fuzzers, but the impact of this on
+other builds and/or system stability is unknown. It shouldn't have a significant
+impact, since the standard SDK doesn't ship with these libraries, so nothing
+else should be using them, but the Homebrew version of llvm will not have all of
+Apple's patches, so may be incompatible in subtle ways if these libraries do get
+used somehow.
+
+#### Using hermetic builds
+It should be possible to use the same hermetic toolchain that the bots
+use for dev builds of the fuzzers, since the bots build and run the fuzzer fine.
+
+Unfortunately the standard setup on a dev machine is 'mostly' hermetic. It does
+use the hermetic version clang and other tools, but it also does use some of the
+system framework stuff that comes from XCode, and that is where the build issues
+come in from, when trying to build/run the fuzzers.
+
+There is some support for getting a truly hermetic build on a dev machine,
+https://source.chromium.org/chromium/chromium/src/+/main:third_party/dawn/src/cmake/HermeticXcode/,
+but that has not been tested with building the fuzzers, and probably needs work
+to be a drop-in solution here.
 
 ### Reproducing bot specific environments on Windows + CMake
 When investigating build issues being seen by CI/CQ it is sometimes necessary
