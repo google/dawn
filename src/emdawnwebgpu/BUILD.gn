@@ -204,11 +204,23 @@ if (is_wasm) {
 
   config("emdawnwebgpu_base_test_config") {
     cflags = []
-    ldflags = [
-      "-Wno-limited-postlink-optimizations",
-      # TODO(crbug.com/450959456): We should enable Closure, but it is missing
-      # from the CQ builders. Fix this.
-    ]
+    ldflags = [ "-Wno-limited-postlink-optimizations" ]
+
+    # If possible, always build with Closure, even in debug, for its static
+    # analysis checks and to test the externs. On Mac, first check whether
+    # Closure Compiler works, as it requires either Rosetta 2 or Java to be
+    # installed. Dawn bots don't have either of those.
+    use_closure = true
+    if (host_os == "mac") {
+      use_closure = exec_script("../../third_party/gn/emsdk/can-use-closure.py",
+                                [],
+                                "value")
+    }
+    if (use_closure) {
+      ldflags += [ "--closure=1" ]
+    } else {
+      print("WARNING: building without Closure Compiler")
+    }
 
     # is_asan and is_ubsan are never true when using the Emscripten toolchain,
     # so force enable them for all builds. (If this is fixed in sanitizers.gni,

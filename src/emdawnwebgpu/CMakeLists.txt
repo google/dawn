@@ -294,9 +294,9 @@ if (EMSCRIPTEN)
         target_link_options(emdawnwebgpu_test_linkopts
             INTERFACE
                 "-sALLOW_MEMORY_GROWTH"
-                # Build with Closure so we can look at code size, and to test that Closure
-                # minification works, and to let Closure statically analyze our JS.
-                "$<$<CONFIG:Release,MinSizeRel>:--closure=1>"
+                # Always build with Closure, even in debug, for its static analysis checks
+                # and to test the externs. Also needed for testing code size in release.
+                "--closure=1"
         )
         if (NOT DAWN_ENABLE_ASAN)
             target_link_options(emdawnwebgpu_test_linkopts
