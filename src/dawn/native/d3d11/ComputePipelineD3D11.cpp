@@ -37,6 +37,7 @@
 #include "dawn/native/d3d11/ShaderModuleD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::d3d11 {
 
@@ -85,6 +86,7 @@ MaybeError ComputePipeline::InitializeImpl() {
                         ->Compile(programmableStage, SingleShaderStage::Compute,
                                   ToBackend(GetLayout()), compileFlags, GetImmediateMask()));
     {
+        TRACE_EVENT0(device->GetPlatform(), General, "ComputePipelineD3D11::CreateComputeShader");
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateComputeShaderUs");
         DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateComputeShader(
                                   compiledShader.shaderBlob.Data(),
