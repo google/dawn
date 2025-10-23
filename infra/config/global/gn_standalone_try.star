@@ -203,6 +203,7 @@ dawn_mac_functional_cq_tester(
     description_html = "Tests release Dawn on Mac/x64 on multiple hardware configs. Blocks CL submission",
     mirrors = [
         "ci/dawn-mac-x64-builder-rel",
+        "ci/dawn-mac-x64-amd-5300m-rel",
         "ci/dawn-mac-x64-sws-rel",
     ],
     gn_args = "ci/dawn-mac-x64-builder-rel",
