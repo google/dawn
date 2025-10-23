@@ -1699,6 +1699,35 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.invariant = true;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* v = b.Var("v", AddressSpace::kOut, str_ty);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(str_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:9:1 error: invariant can only decorate members if they are also position builtins
+%my_func = @fragment func():void {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV) {
     IOAttributes attr;
     attr.invariant = true;
 
@@ -1717,6 +1746,29 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
         testing::HasSubstr(
             R"(:5:1 error: invariant can only decorate output members if they are also position builtins
 %my_func = func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition_ViaMSV) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4<f32>());
+    v->SetInvariant(true);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(ty.vec4<f32>()));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:1 error: invariant can only decorate vars if they are also position builtins
+%my_func = @fragment func():void {
 ^^^^^^^^
 )")) << res.Failure();
 }

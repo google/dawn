@@ -2678,6 +2678,13 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
+            CheckIOAttributes(
+                func, attr, ty,
+                CheckInvariantFunc<Function>(
+                    "invariant can only decorate vars if they are also position builtins"),
+                CheckInvariantFunc<Function>(
+                    "invariant can only decorate members if they are also position builtins"));
+
             if (mv->AddressSpace() != AddressSpace::kIn &&
                 mv->AddressSpace() != AddressSpace::kOut) {
                 continue;
