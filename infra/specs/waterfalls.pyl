@@ -179,6 +179,13 @@
           'gtest_tests': 'real_hardware_common_gtests',
         },
       },
+      'dawn-mac-x64-intel-uhd630-rel': {
+        'os_type': 'mac',
+        'mixins': [
+          'mac_mini_intel_gpu_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
         'mixins': [

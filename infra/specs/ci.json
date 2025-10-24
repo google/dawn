@@ -1495,6 +1495,7 @@
       "default"
     ]
   },
+  "dawn-mac-x64-intel-uhd630-rel": {},
   "dawn-mac-x64-sws-dbg": {
     "gtest_tests": [
       {

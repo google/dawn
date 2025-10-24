@@ -416,6 +416,16 @@ dawn_mac_manual_builder(
 )
 
 dawn_mac_manual_builder(
+    name = "dawn-try-mac-x64-intel-uhd630-rel",
+    description_html = "Tests release Dawn on Mac/x64 on 2018 Mac Minis w/ Intel UHD 630 GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-mac-x64-builder-rel",
+        "ci/dawn-mac-x64-intel-uhd630-rel",
+    ],
+    gn_args = "ci/dawn-mac-x64-builder-rel",
+)
+
+dawn_mac_manual_builder(
     name = "dawn-try-mac-x64-sws-dbg",
     description_html = "Tests debug Dawn on Mac/x64 with SwiftShader. Manual only.",
     mirrors = [
