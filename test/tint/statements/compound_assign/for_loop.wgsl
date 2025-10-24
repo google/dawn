@@ -23,6 +23,7 @@ fn idx3() -> i32 {
   return 1;
 }
 
+@compute @workgroup_size(1)
 fn foo() {
   var a  = array<f32, 4>();
   // Make sure that the functions are only evaluated once each.

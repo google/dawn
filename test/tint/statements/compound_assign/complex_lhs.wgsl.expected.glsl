@@ -16,14 +16,12 @@ int bar() {
   counter = int((v_1 + uint(2)));
   return counter;
 }
-void v_2() {
-  S x = S(ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0)));
-  uint v_3 = min(uint(foo()), 3u);
-  int v_4 = bar();
-  uint v_5 = uint(x.a[v_3][min(uint(v_4), 3u)]);
-  int v_6 = int((v_5 + uint(5)));
-  x.a[v_3][min(uint(v_4), 3u)] = v_6;
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  S x = S(ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0)));
+  uint v_2 = min(uint(foo()), 3u);
+  int v_3 = bar();
+  uint v_4 = uint(x.a[v_2][min(uint(v_3), 3u)]);
+  int v_5 = int((v_4 + uint(5)));
+  x.a[v_2][min(uint(v_3), 3u)] = v_5;
 }

@@ -1,14 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct S {
-  int a;
-  float4 b;
-  float2x2 c;
-};
-
 struct tint_module_vars_struct {
-  device S* v;
   thread uint* i;
 };
 
@@ -39,7 +32,9 @@ int idx3(tint_module_vars_struct tint_module_vars) {
   return 1;
 }
 
-void foo(tint_module_vars_struct tint_module_vars) {
+kernel void foo() {
+  thread uint i = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.i=(&i)};
   tint_array<float, 4> a = tint_array<float, 4>{};
   {
     uint2 tint_loop_idx = uint2(4294967295u);

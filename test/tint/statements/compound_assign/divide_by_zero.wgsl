@@ -10,3 +10,8 @@ fn foo(maybe_zero : i32) {
   b /= f32(maybe_zero);
   b %= f32(maybe_zero);
 }
+
+@compute @workgroup_size(1)
+fn main() {
+    foo(0);
+}

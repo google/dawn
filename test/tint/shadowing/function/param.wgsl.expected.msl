@@ -4,3 +4,7 @@ using namespace metal;
 void a(int a_1) {
   int const b = a_1;
 }
+
+kernel void v() {
+  a(1);
+}

@@ -3,3 +3,7 @@ using namespace metal;
 
 void f() {
 }
+
+kernel void v() {
+  f();
+}

@@ -8,3 +8,7 @@ struct a {
 void f(a a_1) {
   a const b = a_1;
 }
+
+kernel void v() {
+  f(a{});
+}

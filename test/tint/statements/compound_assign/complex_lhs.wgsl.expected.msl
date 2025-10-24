@@ -31,7 +31,9 @@ int bar(tint_module_vars_struct tint_module_vars) {
   return (*tint_module_vars.counter);
 }
 
-void v(tint_module_vars_struct tint_module_vars) {
+kernel void v() {
+  thread int counter = 0;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.counter=(&counter)};
   S x = S{};
   thread S* const p = (&x);
   thread int4* const v_1 = (&(*p).a[min(uint(foo(tint_module_vars)), 3u)]);

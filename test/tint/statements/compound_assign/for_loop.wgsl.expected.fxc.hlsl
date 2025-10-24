@@ -1,5 +1,4 @@
 
-RWByteAddressBuffer v : register(u0);
 static uint i = 0u;
 int idx1() {
   i = (i + 1u);
@@ -16,6 +15,7 @@ int idx3() {
   return int(1);
 }
 
+[numthreads(1, 1, 1)]
 void foo() {
   float a[4] = (float[4])0;
   {
@@ -42,9 +42,5 @@ void foo() {
       continue;
     }
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

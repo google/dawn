@@ -31,3 +31,10 @@ void foo(int maybe_zero, tint_module_vars_struct tint_module_vars) {
   float const v_8 = float(maybe_zero);
   (*tint_module_vars.b) = fmod((*tint_module_vars.b), v_8);
 }
+
+kernel void v_9() {
+  thread int a = 0;
+  thread float b = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a), .b=(&b)};
+  foo(0, tint_module_vars);
+}

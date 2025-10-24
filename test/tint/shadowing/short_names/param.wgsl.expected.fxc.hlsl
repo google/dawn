@@ -4,6 +4,7 @@ void f(float3 vec3f) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  f((0.0f).xxx);
 }
 

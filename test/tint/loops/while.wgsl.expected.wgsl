@@ -5,3 +5,8 @@ fn f() -> i32 {
   }
   return i;
 }
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = f();
+}

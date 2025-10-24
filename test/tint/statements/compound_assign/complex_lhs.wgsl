@@ -12,6 +12,7 @@ fn bar() -> i32 {
   return counter;
 }
 
+@compute @workgroup_size(1)
 fn main() {
   var x = S();
   let p = &x;

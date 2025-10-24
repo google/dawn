@@ -1,5 +1,6 @@
 alias a = vec3f;
 
+@compute @workgroup_size(1)
 fn f() {
   {
     let vec3f = 1;

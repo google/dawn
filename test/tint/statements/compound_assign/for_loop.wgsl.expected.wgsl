@@ -23,6 +23,7 @@ fn idx3() -> i32 {
   return 1;
 }
 
+@compute @workgroup_size(1)
 fn foo() {
   var a = array<f32, 4>();
   for(a[idx1()] *= 2.0; (a[idx2()] < 10.0); a[idx3()] += 1.0) {

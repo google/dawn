@@ -14,7 +14,11 @@ int tint_div_i32(int lhs, int rhs) {
   return (lhs / select(rhs, 1, bool((v_2 | uint(v_1)))));
 }
 
-void foo(tint_module_vars_struct tint_module_vars) {
+kernel void foo() {
+  thread int a = 0;
+  thread float4 b = 0.0f;
+  thread float2x2 c = float2x2(0.0f);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a), .b=(&b), .c=(&c)};
   (*tint_module_vars.a) = tint_div_i32((*tint_module_vars.a), 2);
   (*tint_module_vars.b) = ((*tint_module_vars.b) * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
   (*tint_module_vars.c) = ((*tint_module_vars.c) * 2.0f);

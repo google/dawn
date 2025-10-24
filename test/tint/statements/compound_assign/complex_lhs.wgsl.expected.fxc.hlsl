@@ -14,6 +14,7 @@ int bar() {
   return counter;
 }
 
+[numthreads(1, 1, 1)]
 void main() {
   S x = (S)0;
   uint v = min(uint(foo()), 3u);
@@ -23,9 +24,5 @@ void main() {
   int4 v_4 = int4((v_2).xxxx);
   uint4 v_5 = uint4((uint(v_1)).xxxx);
   x.a[v] = (((v_5 == uint4(0u, 1u, 2u, 3u))) ? (v_4) : (v_3));
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

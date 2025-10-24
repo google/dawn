@@ -17,6 +17,6 @@ struct S {
   tint_array<float, 4> a;
 };
 
-void f() {
+kernel void f() {
   S v = S{};
 }

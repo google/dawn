@@ -15,9 +15,7 @@ ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
   uvec4 v_4 = uvec4(equal(rhs, ivec4(0)));
   return (lhs / mix(rhs, ivec4(1), bvec4((v_4 | uvec4(v_3)))));
 }
-void foo() {
-  v_1.inner.a = tint_div_v4i32(v_1.inner.a, ivec4(2));
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  v_1.inner.a = tint_div_v4i32(v_1.inner.a, ivec4(2));
 }

@@ -5,7 +5,7 @@ struct a {
   int a;
 };
 
-void f() {
+kernel void f() {
   a const a_1 = a{};
   a const b = a_1;
   a const a_2 = a{};

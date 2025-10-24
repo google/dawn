@@ -8,6 +8,6 @@ struct S {
   bool b;
 };
 
-void f() {
+kernel void f() {
   S v = S{};
 }

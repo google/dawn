@@ -19,10 +19,8 @@ ivec4 tint_mod_v4i32(ivec4 lhs, ivec4 rhs) {
   uvec4 v_8 = uvec4(lhs);
   return ivec4((v_8 - uvec4(v_7)));
 }
-void foo() {
-  ivec4 v_9 = v_1.inner.a;
-  v_1.inner.a = tint_mod_v4i32(v_9, ivec4(2));
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  ivec4 v_9 = v_1.inner.a;
+  v_1.inner.a = tint_mod_v4i32(v_9, ivec4(2));
 }

@@ -11,11 +11,8 @@ float4x4 v_2(uint offset) {
   return float4x4(asfloat(v.Load4((offset + 0u))), asfloat(v.Load4((offset + 16u))), asfloat(v.Load4((offset + 32u))), asfloat(v.Load4((offset + 48u))));
 }
 
+[numthreads(1, 1, 1)]
 void foo() {
   v_1(0u, (v_2(0u) * 2.0f));
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

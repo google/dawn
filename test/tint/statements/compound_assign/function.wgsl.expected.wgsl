@@ -1,3 +1,4 @@
+@compute @workgroup_size(1)
 fn foo() {
   var<function> a : i32;
   var<function> b : vec4<f32>;

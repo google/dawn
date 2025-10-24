@@ -25,3 +25,7 @@ int f() {
   }
   return i;
 }
+
+kernel void v() {
+  f();
+}

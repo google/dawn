@@ -40,3 +40,7 @@ int f() {
   /* unreachable */
   return 0;
 }
+
+kernel void v() {
+  f();
+}
