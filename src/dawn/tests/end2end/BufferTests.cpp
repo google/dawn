@@ -435,6 +435,9 @@ TEST_P(BufferMappingTests, MapWrite_Large) {
 
 // Stress test mapping many buffers.
 TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
+    // TODO(crbug.com/454861473): Flakily hangs indefinitely on Mac/AMD 5300M.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     constexpr uint32_t kDataSize = 1000;
     std::vector<uint32_t> myData;
     for (uint32_t i = 0; i < kDataSize; ++i) {
