@@ -209,14 +209,14 @@ TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     EXPECT_PIXEL_RGBA8_EQ(kColors[1], renderPass.color, 3, 1);
 }
 
-// TODO(crbug.com/440123094): Implement render bundle for WebGPUBackend.
 DAWN_INSTANTIATE_TEST(RenderBundleTest,
                       D3D11Backend(),
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

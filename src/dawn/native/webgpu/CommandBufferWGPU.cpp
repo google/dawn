@@ -31,6 +31,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/RenderBundle.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/CaptureContext.h"
@@ -169,35 +170,36 @@ void EncodeComputePass(const DawnProcTable& wgpu,
 }
 
 void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
-                               WGPURenderPassEncoder passEncoder,
+                               WGPURenderBundleEncoder encoder,
                                CommandIterator& commands,
                                Command type) {
     switch (type) {
         case Command::Draw: {
             auto cmd = commands.NextCommand<DrawCmd>();
-            wgpu.renderPassEncoderDraw(passEncoder, cmd->vertexCount, cmd->instanceCount,
-                                       cmd->firstVertex, cmd->firstInstance);
+            wgpu.renderBundleEncoderDraw(encoder, cmd->vertexCount, cmd->instanceCount,
+                                         cmd->firstVertex, cmd->firstInstance);
             break;
         }
 
         case Command::DrawIndexed: {
             auto cmd = commands.NextCommand<DrawIndexedCmd>();
-            wgpu.renderPassEncoderDrawIndexed(passEncoder, cmd->indexCount, cmd->instanceCount,
-                                              cmd->firstIndex, cmd->baseVertex, cmd->firstInstance);
+            wgpu.renderBundleEncoderDrawIndexed(encoder, cmd->indexCount, cmd->instanceCount,
+                                                cmd->firstIndex, cmd->baseVertex,
+                                                cmd->firstInstance);
             break;
         }
 
         case Command::DrawIndirect: {
             auto cmd = commands.NextCommand<DrawIndirectCmd>();
-            wgpu.renderPassEncoderDrawIndirect(
-                passEncoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(), cmd->indirectOffset);
+            wgpu.renderBundleEncoderDrawIndirect(
+                encoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(), cmd->indirectOffset);
             break;
         }
 
         case Command::DrawIndexedIndirect: {
             auto cmd = commands.NextCommand<DrawIndexedIndirectCmd>();
-            wgpu.renderPassEncoderDrawIndexedIndirect(
-                passEncoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(), cmd->indirectOffset);
+            wgpu.renderBundleEncoderDrawIndexedIndirect(
+                encoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(), cmd->indirectOffset);
             break;
         }
 
@@ -214,20 +216,20 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
         case Command::InsertDebugMarker: {
             auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
             char* label = commands.NextData<char>(cmd->length + 1);
-            wgpu.renderPassEncoderInsertDebugMarker(passEncoder, {label, cmd->length});
+            wgpu.renderBundleEncoderInsertDebugMarker(encoder, {label, cmd->length});
             break;
         }
 
         case Command::PopDebugGroup: {
             commands.NextCommand<PopDebugGroupCmd>();
-            wgpu.renderPassEncoderPopDebugGroup(passEncoder);
+            wgpu.renderBundleEncoderPopDebugGroup(encoder);
             break;
         }
 
         case Command::PushDebugGroup: {
             auto cmd = commands.NextCommand<PushDebugGroupCmd>();
             char* label = commands.NextData<char>(cmd->length + 1);
-            wgpu.renderPassEncoderPushDebugGroup(passEncoder, {label, cmd->length});
+            wgpu.renderBundleEncoderPushDebugGroup(encoder, {label, cmd->length});
             break;
         }
 
@@ -237,32 +239,32 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
             if (cmd->dynamicOffsetCount > 0) {
                 dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
             }
-            wgpu.renderPassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
-                                               ToBackend(cmd->group)->GetInnerHandle(),
-                                               cmd->dynamicOffsetCount, dynamicOffsets);
+            wgpu.renderBundleEncoderSetBindGroup(encoder, static_cast<uint32_t>(cmd->index),
+                                                 ToBackend(cmd->group)->GetInnerHandle(),
+                                                 cmd->dynamicOffsetCount, dynamicOffsets);
             break;
         }
 
         case Command::SetIndexBuffer: {
             auto cmd = commands.NextCommand<SetIndexBufferCmd>();
-            wgpu.renderPassEncoderSetIndexBuffer(passEncoder,
-                                                 ToBackend(cmd->buffer)->GetInnerHandle(),
-                                                 ToWGPU(cmd->format), cmd->offset, cmd->size);
+            wgpu.renderBundleEncoderSetIndexBuffer(encoder,
+                                                   ToBackend(cmd->buffer)->GetInnerHandle(),
+                                                   ToWGPU(cmd->format), cmd->offset, cmd->size);
             break;
         }
 
         case Command::SetRenderPipeline: {
             auto cmd = commands.NextCommand<SetRenderPipelineCmd>();
-            wgpu.renderPassEncoderSetPipeline(passEncoder,
-                                              ToBackend(cmd->pipeline)->GetInnerHandle());
+            wgpu.renderBundleEncoderSetPipeline(encoder,
+                                                ToBackend(cmd->pipeline)->GetInnerHandle());
             break;
         }
 
         case Command::SetVertexBuffer: {
             auto cmd = commands.NextCommand<SetVertexBufferCmd>();
-            wgpu.renderPassEncoderSetVertexBuffer(passEncoder, static_cast<uint8_t>(cmd->slot),
-                                                  ToBackend(cmd->buffer)->GetInnerHandle(),
-                                                  cmd->offset, cmd->size);
+            wgpu.renderBundleEncoderSetVertexBuffer(encoder, static_cast<uint8_t>(cmd->slot),
+                                                    ToBackend(cmd->buffer)->GetInnerHandle(),
+                                                    cmd->offset, cmd->size);
             break;
         }
 
@@ -271,7 +273,7 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
             DAWN_ASSERT(cmd->size > 0);
             uint8_t* value = nullptr;
             value = commands.NextData<uint8_t>(cmd->size);
-            wgpu.renderPassEncoderSetImmediateData(passEncoder, cmd->offset, value, cmd->size);
+            wgpu.renderBundleEncoderSetImmediateData(encoder, cmd->offset, value, cmd->size);
             break;
         }
 
@@ -281,10 +283,12 @@ void EncodeRenderBundleCommand(const DawnProcTable& wgpu,
     }
 }
 
-void EncodeRenderPass(const DawnProcTable& wgpu,
+void EncodeRenderPass(const Device* device,
                       WGPUCommandEncoder innerEncoder,
                       CommandIterator& commands,
                       BeginRenderPassCmd* renderPassCmd) {
+    const DawnProcTable& wgpu = device->wgpu;
+
     PerColorAttachment<WGPURenderPassColorAttachment> colorAttachments = {};
 
     size_t colorAttachmentCount = 0;
@@ -372,14 +376,47 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
 
             case Command::ExecuteBundles: {
                 auto* cmd = commands.NextCommand<ExecuteBundlesCmd>();
-                /*auto bundles = */ commands.NextData<Ref<RenderBundleBase>>(cmd->count);
+                auto bundles = commands.NextData<Ref<RenderBundleBase>>(cmd->count);
                 std::vector<WGPURenderBundle> wgpuBundles;
                 wgpuBundles.reserve(cmd->count);
+
+                // Frontend validation guarantees that the render pass layout of all the render
+                // bundles here match that of the current render pass. So we get the render pass
+                // layout information from the current render pass.
+                PerColorAttachment<WGPUTextureFormat> colorFormats = {};
+                for (auto i : renderPassCmd->attachmentState->GetColorAttachmentsMask()) {
+                    colorFormats[i] = ToAPI(
+                        renderPassCmd->colorAttachments[i].view->GetTexture()->GetFormat().format);
+                }
+
+                WGPURenderBundleEncoderDescriptor bundleEncoderDescriptorBase =
+                    WGPU_RENDER_BUNDLE_ENCODER_DESCRIPTOR_INIT;
+                bundleEncoderDescriptorBase.colorFormatCount = colorAttachmentCount;
+                bundleEncoderDescriptorBase.colorFormats = colorFormats.data();
+                if (renderPassCmd->attachmentState->HasDepthStencilAttachment()) {
+                    bundleEncoderDescriptorBase.depthStencilFormat =
+                        ToAPI(renderPassCmd->depthStencilAttachment.view->GetTexture()
+                                  ->GetFormat()
+                                  .format);
+                }
+
                 for (uint32_t i = 0; i < cmd->count; ++i) {
-                    // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented
-                    // for RenderBundleWGPU
+                    WGPURenderBundleEncoderDescriptor bundleEncoderDescriptor =
+                        bundleEncoderDescriptorBase;
+                    bundleEncoderDescriptor.depthReadOnly = bundles[i]->IsDepthReadOnly();
+                    bundleEncoderDescriptor.stencilReadOnly = bundles[i]->IsStencilReadOnly();
+
+                    WGPURenderBundleEncoder bundleEncoder = wgpu.deviceCreateRenderBundleEncoder(
+                        device->GetInnerHandle(), &bundleEncoderDescriptor);
+
+                    CommandIterator* iter = bundles[i]->GetCommands();
+                    Command bundleCommandType;
+                    while (iter->NextCommandId(&bundleCommandType)) {
+                        EncodeRenderBundleCommand(wgpu, bundleEncoder, *iter, bundleCommandType);
+                    }
+
                     wgpuBundles.emplace_back(
-                        nullptr /*ToBackend(cmd->bundles[i])->GetInnerHandle()*/);
+                        wgpu.renderBundleEncoderFinish(bundleEncoder, nullptr));
                 }
                 wgpu.renderPassEncoderExecuteBundles(passEncoder, wgpuBundles.size(),
                                                      wgpuBundles.data());
@@ -408,8 +445,115 @@ void EncodeRenderPass(const DawnProcTable& wgpu,
                 break;
             }
 
+            // The followings are commands shared with RenderBundleEncoder, but it's a bit hard to
+            // share code with EncodeRenderBundleCommand since we are using webgpu C header.
+            case Command::Draw: {
+                auto cmd = commands.NextCommand<DrawCmd>();
+                wgpu.renderPassEncoderDraw(passEncoder, cmd->vertexCount, cmd->instanceCount,
+                                           cmd->firstVertex, cmd->firstInstance);
+                break;
+            }
+
+            case Command::DrawIndexed: {
+                auto cmd = commands.NextCommand<DrawIndexedCmd>();
+                wgpu.renderPassEncoderDrawIndexed(passEncoder, cmd->indexCount, cmd->instanceCount,
+                                                  cmd->firstIndex, cmd->baseVertex,
+                                                  cmd->firstInstance);
+                break;
+            }
+
+            case Command::DrawIndirect: {
+                auto cmd = commands.NextCommand<DrawIndirectCmd>();
+                wgpu.renderPassEncoderDrawIndirect(passEncoder,
+                                                   ToBackend(cmd->indirectBuffer)->GetInnerHandle(),
+                                                   cmd->indirectOffset);
+                break;
+            }
+
+            case Command::DrawIndexedIndirect: {
+                auto cmd = commands.NextCommand<DrawIndexedIndirectCmd>();
+                wgpu.renderPassEncoderDrawIndexedIndirect(
+                    passEncoder, ToBackend(cmd->indirectBuffer)->GetInnerHandle(),
+                    cmd->indirectOffset);
+                break;
+            }
+
+            case Command::MultiDrawIndirect: {
+                DAWN_UNREACHABLE();
+                break;
+            }
+
+            case Command::MultiDrawIndexedIndirect: {
+                DAWN_UNREACHABLE();
+                break;
+            }
+
+            case Command::InsertDebugMarker: {
+                auto cmd = commands.NextCommand<InsertDebugMarkerCmd>();
+                char* label = commands.NextData<char>(cmd->length + 1);
+                wgpu.renderPassEncoderInsertDebugMarker(passEncoder, {label, cmd->length});
+                break;
+            }
+
+            case Command::PopDebugGroup: {
+                commands.NextCommand<PopDebugGroupCmd>();
+                wgpu.renderPassEncoderPopDebugGroup(passEncoder);
+                break;
+            }
+
+            case Command::PushDebugGroup: {
+                auto cmd = commands.NextCommand<PushDebugGroupCmd>();
+                char* label = commands.NextData<char>(cmd->length + 1);
+                wgpu.renderPassEncoderPushDebugGroup(passEncoder, {label, cmd->length});
+                break;
+            }
+
+            case Command::SetBindGroup: {
+                auto cmd = commands.NextCommand<SetBindGroupCmd>();
+                uint32_t* dynamicOffsets = nullptr;
+                if (cmd->dynamicOffsetCount > 0) {
+                    dynamicOffsets = commands.NextData<uint32_t>(cmd->dynamicOffsetCount);
+                }
+                wgpu.renderPassEncoderSetBindGroup(passEncoder, static_cast<uint32_t>(cmd->index),
+                                                   ToBackend(cmd->group)->GetInnerHandle(),
+                                                   cmd->dynamicOffsetCount, dynamicOffsets);
+                break;
+            }
+
+            case Command::SetIndexBuffer: {
+                auto cmd = commands.NextCommand<SetIndexBufferCmd>();
+                wgpu.renderPassEncoderSetIndexBuffer(passEncoder,
+                                                     ToBackend(cmd->buffer)->GetInnerHandle(),
+                                                     ToWGPU(cmd->format), cmd->offset, cmd->size);
+                break;
+            }
+
+            case Command::SetRenderPipeline: {
+                auto cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                wgpu.renderPassEncoderSetPipeline(passEncoder,
+                                                  ToBackend(cmd->pipeline)->GetInnerHandle());
+                break;
+            }
+
+            case Command::SetVertexBuffer: {
+                auto cmd = commands.NextCommand<SetVertexBufferCmd>();
+                wgpu.renderPassEncoderSetVertexBuffer(passEncoder, static_cast<uint8_t>(cmd->slot),
+                                                      ToBackend(cmd->buffer)->GetInnerHandle(),
+                                                      cmd->offset, cmd->size);
+                break;
+            }
+
+            case Command::SetImmediateData: {
+                auto cmd = commands.NextCommand<SetImmediateDataCmd>();
+                DAWN_ASSERT(cmd->size > 0);
+                uint8_t* value = nullptr;
+                value = commands.NextData<uint8_t>(cmd->size);
+                wgpu.renderPassEncoderSetImmediateData(passEncoder, cmd->offset, value, cmd->size);
+                break;
+            }
+
             default: {
-                EncodeRenderBundleCommand(wgpu, passEncoder, commands, type);
+                DAWN_UNREACHABLE();
                 break;
             }
         }
@@ -527,7 +671,7 @@ WGPUCommandBuffer CommandBuffer::Encode() {
             }
             case Command::BeginRenderPass: {
                 auto cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                EncodeRenderPass(wgpu, innerEncoder, mCommands, cmd);
+                EncodeRenderPass(ToBackend(GetDevice()), innerEncoder, mCommands, cmd);
                 break;
             }
             case Command::CopyBufferToBuffer: {
