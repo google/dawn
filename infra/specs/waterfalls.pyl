@@ -49,6 +49,13 @@
           'gtest_tests': 'real_hardware_common_gtests',
         },
       },
+      'dawn-linux-x64-intel-uhd770-rel': {
+        'os_type': 'linux',
+        'mixins': [
+          'linux_intel_uhd_770_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',
         'mixins': [
