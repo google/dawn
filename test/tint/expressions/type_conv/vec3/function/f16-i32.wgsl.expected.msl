@@ -14,6 +14,8 @@ int3 tint_v3f16_to_v3i32(half3 value) {
   return int3(clamp(value, half3(-65504.0h), half3(65504.0h)));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread half t = 0.0h;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   int3 v = tint_v3f16_to_v3i32(m(tint_module_vars));
 }

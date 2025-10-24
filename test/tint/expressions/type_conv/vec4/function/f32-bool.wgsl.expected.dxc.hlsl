@@ -5,11 +5,8 @@ float4 m() {
   return float4((t).xxxx);
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   bool4 v = bool4(m());
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

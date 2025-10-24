@@ -5,6 +5,7 @@ fn m() -> vec4<i32> {
   return vec4<i32>(t);
 }
 
+@compute @workgroup_size(1)
 fn f() {
   var v : vec4<bool> = vec4<bool>(m());
 }

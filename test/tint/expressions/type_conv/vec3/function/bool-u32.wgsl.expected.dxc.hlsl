@@ -5,11 +5,8 @@ bool3 m() {
   return bool3((t).xxx);
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   uint3 v = uint3(m());
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

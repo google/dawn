@@ -10,6 +10,8 @@ float3 m(tint_module_vars_struct tint_module_vars) {
   return float3((*tint_module_vars.t));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread float t = 0.0f;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};
   half3 v = half3(m(tint_module_vars));
 }

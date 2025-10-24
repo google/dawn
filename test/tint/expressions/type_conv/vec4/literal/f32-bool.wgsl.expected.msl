@@ -1,2 +1,11 @@
 #include <metal_stdlib>
 using namespace metal;
+
+struct tint_module_vars_struct {
+  thread bool4* u;
+};
+
+kernel void v() {
+  thread bool4 u = bool4(true);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
+}

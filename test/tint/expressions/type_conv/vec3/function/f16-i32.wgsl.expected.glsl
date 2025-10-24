@@ -9,9 +9,7 @@ f16vec3 m() {
 ivec3 tint_v3f16_to_v3i32(f16vec3 value) {
   return ivec3(clamp(value, f16vec3(-65504.0hf), f16vec3(65504.0hf)));
 }
-void f() {
-  ivec3 v = tint_v3f16_to_v3i32(m());
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  ivec3 v = tint_v3f16_to_v3i32(m());
 }

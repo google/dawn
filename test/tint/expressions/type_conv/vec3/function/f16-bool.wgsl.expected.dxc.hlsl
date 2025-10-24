@@ -5,11 +5,8 @@ vector<float16_t, 3> m() {
   return vector<float16_t, 3>((t).xxx);
 }
 
+[numthreads(1, 1, 1)]
 void f() {
   bool3 v = bool3(m());
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 
