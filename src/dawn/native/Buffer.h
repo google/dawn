@@ -181,9 +181,11 @@ class BufferBase : public SharedResource {
 
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
-    virtual void FinalizeMapImpl() = 0;
+    // `newState` is the state the buffer will be in after this returns.
+    virtual void FinalizeMapImpl(BufferState newState) = 0;
     virtual void* GetMappedPointerImpl() = 0;
-    virtual void UnmapImpl() = 0;
+    // `oldState` is the state of the buffer before unmap operation started.
+    virtual void UnmapImpl(BufferState oldState) = 0;
 
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();
@@ -194,7 +196,7 @@ class BufferBase : public SharedResource {
                                 WGPUMapAsyncStatus* status) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-    MaybeError UnmapInternal(WGPUMapAsyncStatus status, std::string_view message);
+    MaybeError UnmapInternal(std::string_view earlyUnmapMessage);
 
     // Updates internal state to reflect that the buffer is now mapped.
     void FinalizeMap(BufferState newState);

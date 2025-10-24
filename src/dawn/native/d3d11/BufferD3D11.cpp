@@ -520,7 +520,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl() {
+void Buffer::FinalizeMapImpl(BufferState newState) {
     // TODO(crbug.com/440536255): See if FinalizeMap() below can be replaced with this generic
     // implementation.
 }
@@ -544,7 +544,7 @@ MaybeError Buffer::FinalizeMap(ScopedCommandRecordingContext* commandContext,
     return {};
 }
 
-void Buffer::UnmapImpl() {
+void Buffer::UnmapImpl(BufferState oldState) {
     DAWN_ASSERT(IsMappable(GetInternalUsage()));
     mMapReadySerial = kMaxExecutionSerial;
     if (mMappedData) {
@@ -570,7 +570,7 @@ void Buffer::DestroyImpl() {
     //   other threads using the buffer since there are no other live refs.
     BufferBase::DestroyImpl();
     if (mMappedData) {
-        UnmapImpl();
+        UnmapImpl(GetState());
     }
 }
 

@@ -147,15 +147,15 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl() {}
+void Buffer::FinalizeMapImpl(BufferState newState) {}
 
 void* Buffer::GetMappedPointerImpl() {
     // The mapping offset has already been removed.
     return mMappedData;
 }
 
-void Buffer::UnmapImpl() {
-    if (IsMappedState(GetState()) && MapMode() == wgpu::MapMode::Write) {
+void Buffer::UnmapImpl(BufferState oldState) {
+    if (IsMappedState(oldState) && MapMode() == wgpu::MapMode::Write) {
         CaptureContext* captureContext = ToBackend(GetDevice()->GetQueue())->GetCaptureContext();
         if (captureContext != nullptr) {
             [[maybe_unused]] auto result =

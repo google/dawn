@@ -570,13 +570,13 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl() {
+void Buffer::FinalizeMapImpl(BufferState newState) {
     if (!mHostCoherent) {
         // Map reads always require invalidation. Map writes only require invalidation if the buffer
         // contents could have been modified by the GPU previously, eg. it's not being mapped on
         // creation and the buffer is GPU writable.
         if (MapMode() == wgpu::MapMode::Read ||
-            (GetState() != BufferState::MappedAtCreation &&
+            (newState != BufferState::MappedAtCreation &&
              !IsSubset(GetInternalUsage(), kReadOnlyBufferUsages | wgpu::BufferUsage::MapWrite))) {
             Device* device = ToBackend(GetDevice());
             VkDeviceSize nonCoherentAtomSize =
@@ -590,9 +590,9 @@ void Buffer::FinalizeMapImpl() {
     }
 }
 
-void Buffer::UnmapImpl() {
+void Buffer::UnmapImpl(BufferState oldState) {
     // We keep CPU-visible memory mapped at all times but need to flush writes to GPU memory here.
-    if (!mHostCoherent && IsMappedState(GetState()) && MapMode() == wgpu::MapMode::Write) {
+    if (!mHostCoherent && IsMappedState(oldState) && MapMode() == wgpu::MapMode::Write) {
         Device* device = ToBackend(GetDevice());
         VkDeviceSize nonCoherentAtomSize =
             device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
