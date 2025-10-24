@@ -1467,7 +1467,8 @@ int Run(tint::VectorRef<std::string_view> arguments, ExeMode exe_mode) {
     }
 
     if (inspector.GetEntryPoints().empty()) {
-        return Generate(options, inspector, info.program) ? 0 : 1;
+        std::cerr << "no entry point found, entry point required\n";
+        return 1;
     }
 
     bool success = true;
