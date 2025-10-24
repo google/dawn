@@ -24,4 +24,5 @@ kernel void v() {
       /* unreachable */
     }
   }
+  /* unreachable */
 }

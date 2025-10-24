@@ -24,4 +24,5 @@ void main() {
       /* unreachable */
     }
   }
+  /* unreachable */
 }

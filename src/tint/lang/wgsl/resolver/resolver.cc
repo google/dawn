@@ -79,6 +79,7 @@
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
 #include "src/tint/lang/wgsl/resolver/unresolved_identifier.h"
 #include "src/tint/lang/wgsl/sem/array.h"
+#include "src/tint/lang/wgsl/sem/behavior.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin_fn.h"
@@ -1236,6 +1237,11 @@ sem::LoopStatement* Resolver::LoopStatement(const ast::LoopStatement* stmt) {
             auto& behaviors = sem->Behaviors();
             behaviors = body->Behaviors();
 
+            // If the body only returns, then the entire loop only returns.
+            // Control never reaches the continuing block, and never reaches
+            // code that follows the loop.
+            const bool only_return = behaviors == sem::Behaviors(sem::Behavior::kReturn);
+
             if (stmt->continuing) {
                 Mark(stmt->continuing);
                 auto* continuing = StatementScope(
@@ -1246,9 +1252,12 @@ sem::LoopStatement* Resolver::LoopStatement(const ast::LoopStatement* stmt) {
                 if (!continuing) {
                     return false;
                 }
-                behaviors.Add(continuing->Behaviors());
+                if (!only_return) {
+                    behaviors.Add(continuing->Behaviors());
+                }
             }
 
+            // If the body behaviour is just Return, then this has no effect.
             if (behaviors.Contains(sem::Behavior::kBreak)) {  // Does the loop exit?
                 behaviors.Add(sem::Behavior::kNext);
             } else {
@@ -1332,11 +1341,11 @@ sem::WhileStatement* Resolver::WhileStatement(const ast::WhileStatement* stmt) {
         }
 
         behaviors.Add(body->Behaviors());
-        // Always consider the while as having a 'next' behaviour because it has
-        // a condition. We don't check if the condition will terminate but it isn't
-        // valid to have an infinite loop in a WGSL program, so a non-terminating
-        // condition is already an invalid program.
-        behaviors.Add(sem::Behavior::kNext);
+        if (stmt->condition || behaviors.Contains(sem::Behavior::kBreak)) {  // Does the loop exit?
+            behaviors.Add(sem::Behavior::kNext);
+        } else {
+            behaviors.Remove(sem::Behavior::kNext);
+        }
         behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kContinue);
 
         return validator_.WhileStatement(sem);
@@ -4463,7 +4472,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         if (!cond) {
             return false;
         }
-        // Each case clause will contribute behaviours. Switches must
+        // Each case clause will contribute behaviors. Switches must
         // have at least a default clause, so we'll always end up with
         // a non-empty behaviour set.
         behaviors = behaviors - sem::Behavior::kNext;

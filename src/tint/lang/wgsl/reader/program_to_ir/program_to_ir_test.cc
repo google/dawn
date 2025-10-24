@@ -504,12 +504,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
         ret
       }
     }
-    if true [t: $B3] {  # if_1
-      $B3: {  # true
-        ret
-      }
-    }
-    ret
+    unreachable
   }
 }
 )");

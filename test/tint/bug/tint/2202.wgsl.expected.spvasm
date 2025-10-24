@@ -99,5 +99,5 @@
                OpStore %41 %40 None
                OpBranch %8
           %9 = OpLabel
-               OpReturn
+               OpUnreachable
                OpFunctionEnd

@@ -1355,7 +1355,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                              return ToStr(static_cast<ControlFlowInterrupt>(p.param));
                          });
 
-TEST_P(LoopDeadCodeTest, AfterInterrupt) {
+TEST_P(LoopDeadCodeTest, Loop_AfterInterrupt) {
     // Dead code after a control-flow interrupt in a loop shouldn't cause uniformity errors.
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> n : i32;
@@ -1377,6 +1377,267 @@ fn foo() {
 )";
 
     RunTest(src, true);
+}
+
+TEST_P(LoopDeadCodeTest, ForWithCond_AfterInterrupt) {
+    // Dead code after a control-flow interrupt in a loop shouldn't cause uniformity errors.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  for ( ; true ; ) {
+    )" + ToStr(static_cast<ControlFlowInterrupt>(GetParam())) +
+                      R"(;
+    if (n == 42) {
+      workgroupBarrier();
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_P(LoopDeadCodeTest, ForWithoutCond_AfterInterrupt) {
+    // Dead code after a control-flow interrupt in a loop shouldn't cause uniformity errors.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  for ( ; ; ) {
+    )" + ToStr(interrupt) +
+                      R"(;
+    if (n == 42) {
+      workgroupBarrier();
+    }
+  }
+}
+)";
+
+    // The loop is infinite if the interrupt is kContinue, and rejected early.
+    if (interrupt != kContinue) {
+        RunTest(src, true);
+    }
+}
+
+TEST_P(LoopDeadCodeTest, While_AfterInterrupt) {
+    // Dead code after a control-flow interrupt in a loop shouldn't cause uniformity errors.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  while (true) {
+    )" + ToStr(static_cast<ControlFlowInterrupt>(GetParam())) +
+                      R"(;
+    if (n == 42) {
+      workgroupBarrier();
+    }
+  }
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_P(LoopDeadCodeTest, Loop_AfterLoop_WithBreakIf) {
+    // Code after a return-only loop body should not cause uniformity errors.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  loop {
+    )" + ToStr(interrupt) +
+                      R"(;
+    continuing {
+      // Pretend that this isn't an infinite loop, in case the interrupt is a
+      // continue statement.
+      break if (false);
+    }
+  }
+  if (n == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    const bool should_pass = interrupt == kReturn;
+    RunTest(src, should_pass);
+    if (!should_pass) {
+        EXPECT_EQ(
+            error_,
+            R"(test:14:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:13:3 note: control flow depends on possibly non-uniform value
+  if (n == 42) {
+  ^^
+
+test:13:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
+)");
+    }
+}
+
+TEST_P(LoopDeadCodeTest, Loop_AfterLoop_WithoutBreakIf) {
+    // Code after a return-only loop body should not cause uniformity errors.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  loop {
+    )" + ToStr(interrupt) +
+                      R"(;
+    continuing { }
+  }
+  if (n == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+    // The loop is infinite if the interrupt is kContinue, and rejected early.
+    if (interrupt != kContinue) {
+        const bool should_pass = interrupt == kReturn;
+        RunTest(src, should_pass);
+        if (!should_pass) {
+            EXPECT_EQ(
+                error_,
+                R"(test:10:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:9:3 note: control flow depends on possibly non-uniform value
+  if (n == 42) {
+  ^^
+
+test:9:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
+)");
+        }
+    }
+}
+
+TEST_P(LoopDeadCodeTest, ForWithCond_AfterLoop) {
+    // The for loop with a condition is desguared as:
+    //    loop { if ! cond { break; } ... }
+    // So the for loop behaviour always includes kNext, and code
+    // after the for loop is always considered reachable by uniformity
+    // analysis.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  for ( ; true ; ) {
+    )" + ToStr(interrupt) +
+                      R"(;
+  }
+  if (n == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    // The loop is infinite if the interrupt is kContinue, and rejected early.
+    if (interrupt != kContinue) {
+        RunTest(src, false);
+        EXPECT_EQ(
+            error_,
+            R"(test:9:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (n == 42) {
+  ^^
+
+test:8:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
+)");
+    }
+}
+
+TEST_P(LoopDeadCodeTest, ForWithoutCond_AfterLoop) {
+    // Code after a return-only loop body should not cause uniformity errors.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  for ( ; ; ) {
+    )" + ToStr(interrupt) +
+                      R"(;
+  }
+  if (n == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    // The loop is infinite if the interrupt is kContinue, and rejected early.
+    if (interrupt != kContinue) {
+        const bool should_pass = interrupt == kReturn;
+        RunTest(src, should_pass);
+        if (!should_pass) {
+            EXPECT_EQ(
+                error_,
+                R"(test:9:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (n == 42) {
+  ^^
+
+test:8:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
+)");
+        }
+    }
+}
+
+TEST_P(LoopDeadCodeTest, While_AfterLoop) {
+    // The while loop is desguared as:
+    //    loop { if ! cond { break; } ... }
+    // So the while loop behaviour always includes kNext, and code
+    // after the while loop is always considered reachable by uniformity
+    // analysis.
+    const auto interrupt = static_cast<ControlFlowInterrupt>(GetParam());
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> n : i32;
+
+fn foo() {
+  while ( true ) {
+    )" + ToStr(interrupt) +
+                      R"(;
+  }
+  if (n == 42) {
+    workgroupBarrier();
+  }
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:9:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();
+    ^^^^^^^^^^^^^^^^
+
+test:8:3 note: control flow depends on possibly non-uniform value
+  if (n == 42) {
+  ^^
+
+test:8:7 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+  if (n == 42) {
+      ^
+)");
 }
 
 TEST_F(UniformityAnalysisTest, Loop_VarBecomesNonUniformInLoopAfterBarrier) {
