@@ -118,11 +118,12 @@ TextureView::TextureView(TextureBase* texture,
                          const UnpackedPtr<TextureViewDescriptor>& descriptor,
                          WGPUTextureView innerView)
     : TextureViewBase(texture, descriptor),
+      RecordableObject(schema::ObjectType::TextureView),
       ObjectWGPU(ToBackend(texture->GetDevice())->wgpu.textureViewRelease) {
     mInnerHandle = innerView;
 }
 
-MaybeError Texture::AddReferenced(CaptureContext& captureContext) const {
+MaybeError Texture::AddReferenced(CaptureContext& captureContext) {
     // Textures do not reference other objects.
     return {};
 }
@@ -279,6 +280,26 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
             }
         }
     }
+    return {};
+}
+
+MaybeError TextureView::AddReferenced(CaptureContext& captureContext) {
+    return captureContext.AddResource(GetTexture());
+}
+
+MaybeError TextureView::CaptureCreationParameters(CaptureContext& captureContext) {
+    schema::TextureView tex{{
+        .textureId = captureContext.GetId(GetTexture()),
+        .format = GetFormat().baseFormat,
+        .dimension = GetDimension(),
+        .baseMipLevel = GetBaseMipLevel(),
+        .mipLevelCount = GetLevelCount(),
+        .baseArrayLayer = GetBaseArrayLayer(),
+        .arrayLayerCount = GetLayerCount(),
+        .aspect = ToDawn(GetAspects()),
+        .usage = GetUsage(),
+    }};
+    Serialize(captureContext, tex);
     return {};
 }
 

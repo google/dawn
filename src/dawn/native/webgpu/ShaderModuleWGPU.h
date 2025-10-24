@@ -28,22 +28,29 @@
 #ifndef SRC_DAWN_NATIVE_WEBGPU_SHADERMODULEWGPU_H_
 #define SRC_DAWN_NATIVE_WEBGPU_SHADERMODULEWGPU_H_
 
+#include <string>
 #include <vector>
 
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class ShaderModule final : public ShaderModuleBase, public ObjectWGPU<WGPUShaderModule> {
+class ShaderModule final : public ShaderModuleBase,
+                           public RecordableObject,
+                           public ObjectWGPU<WGPUShaderModule> {
   public:
     static ResultOrError<Ref<ShaderModule>> Create(
         Device* device,
         const UnpackedPtr<ShaderModuleDescriptor>& descriptor,
         const std::vector<tint::wgsl::Extension>& internalExtensions);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:
     ShaderModule(Device* device,
@@ -51,6 +58,10 @@ class ShaderModule final : public ShaderModuleBase, public ObjectWGPU<WGPUShader
                  std::vector<tint::wgsl::Extension> internalExtensions,
                  WGPUShaderModule innerShaderModule);
     ~ShaderModule() override = default;
+
+    // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
+    // chained structs.
+    std::string mCode;
 };
 
 }  // namespace dawn::native::webgpu

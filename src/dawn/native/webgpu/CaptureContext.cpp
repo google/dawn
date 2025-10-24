@@ -222,4 +222,29 @@ schema::TexelCopyTextureInfo ToSchema(CaptureContext& captureContext,
     }};
 }
 
+schema::TimestampWrites ToSchema(CaptureContext& captureContext,
+                                 const TimestampWrites& timestampWrites) {
+    return {{
+        .querySetId = 0,  // TODO(451389800): Need QuerySetWGPU then,
+                          // captureContext.GetId(timestampWrites.querySet),
+        .beginningOfPassWriteIndex = timestampWrites.beginningOfPassWriteIndex,
+        .endOfPassWriteIndex = timestampWrites.endOfPassWriteIndex,
+    }};
+}
+
+schema::ProgrammableStage ToSchema(CaptureContext& captureContext, const ProgrammableStage& stage) {
+    std::vector<schema::PipelineConstant> constants;
+    for (const auto& [name, value] : stage.constants) {
+        constants.push_back({{
+            .name = name,
+            .value = value,
+        }});
+    }
+    return {{
+        .moduleId = captureContext.GetId(stage.module.Get()),
+        .entryPoint = stage.entryPoint,
+        .constants = constants,
+    }};
+}
+
 }  // namespace dawn::native::webgpu

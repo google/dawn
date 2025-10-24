@@ -51,6 +51,28 @@ wgpu::Extent3D ToWGPU(const schema::Extent3D& extent) {
     };
 }
 
+wgpu::PassTimestampWrites ToWGPU(const Replay& replay, const schema::TimestampWrites& writes) {
+    return wgpu::PassTimestampWrites{
+        .nextInChain = nullptr,
+        .querySet = replay.GetObjectById<wgpu::QuerySet>(writes.querySetId),
+        .beginningOfPassWriteIndex = writes.beginningOfPassWriteIndex,
+        .endOfPassWriteIndex = writes.endOfPassWriteIndex,
+    };
+}
+
+std::vector<wgpu::ConstantEntry> ToWGPU(const std::vector<schema::PipelineConstant>& constants) {
+    std::vector<wgpu::ConstantEntry> entries;
+    entries.reserve(constants.size());
+    std::transform(constants.begin(), constants.end(), std::back_inserter(entries),
+                   [](const auto& constant) {
+                       return wgpu::ConstantEntry{
+                           .key = wgpu::StringView(constant.name),
+                           .value = constant.value,
+                       };
+                   });
+    return entries;
+}
+
 wgpu::TexelCopyBufferLayout ToWGPU(const schema::TexelCopyBufferLayout& info) {
     return wgpu::TexelCopyBufferLayout{
         .offset = info.offset,
@@ -72,6 +94,17 @@ wgpu::TexelCopyTextureInfo ToWGPU(const Replay& replay, const schema::TexelCopyT
         .mipLevel = info.mipLevel,
         .origin = ToWGPU(info.origin),
         .aspect = static_cast<wgpu::TextureAspect>(info.aspect),
+    };
+}
+
+wgpu::BindGroupEntry ToWGPU(const Replay& replay, const schema::BindGroupEntry& entry) {
+    return wgpu::BindGroupEntry{
+        .binding = entry.binding,
+        .buffer = replay.GetObjectById<wgpu::Buffer>(entry.bufferId),
+        .offset = entry.offset,
+        .size = entry.size,
+        .sampler = replay.GetObjectById<wgpu::Sampler>(entry.samplerId),
+        .textureView = replay.GetObjectById<wgpu::TextureView>(entry.textureViewId),
     };
 }
 
@@ -117,6 +150,26 @@ MaybeError ReadContentIntoTexture(const Replay& replay,
     return {};
 }
 
+ResultOrError<wgpu::BindGroup> CreateBindGroup(const Replay& replay,
+                                               wgpu::Device device,
+                                               ReadHead& readHead,
+                                               const std::string& label) {
+    schema::BindGroup bg;
+    DAWN_TRY(Deserialize(readHead, &bg));
+    std::vector<wgpu::BindGroupEntry> entries;
+    std::transform(bg.entries.begin(), bg.entries.end(), std::back_inserter(entries),
+                   [&](const auto& entry) { return ToWGPU(replay, entry); });
+
+    wgpu::BindGroupDescriptor desc{
+        .label = wgpu::StringView(label),
+        .layout = replay.GetObjectById<wgpu::BindGroupLayout>(bg.layoutId),
+        .entryCount = entries.size(),
+        .entries = entries.data(),
+    };
+    wgpu::BindGroup bindGroup = device.CreateBindGroup(&desc);
+    return {bindGroup};
+}
+
 ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
                                          ReadHead& readHead,
                                          const std::string& label) {
@@ -141,6 +194,53 @@ ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
     return {buffer};
 }
 
+template <typename F>
+ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const Replay& replay,
+                                                           wgpu::Device device,
+                                                           ReadHead& readHead,
+                                                           const std::string& label,
+                                                           F func) {
+    schema::ComputePipeline pipeline;
+    DAWN_TRY(Deserialize(readHead, &pipeline));
+
+    std::vector<wgpu::ConstantEntry> constants = ToWGPU(pipeline.compute.constants);
+
+    wgpu::ComputePipelineDescriptor desc{
+        .label = wgpu::StringView(label),
+        .layout = replay.GetObjectById<wgpu::PipelineLayout>(pipeline.layoutId),
+        .compute =
+            {
+                .module = replay.GetObjectById<wgpu::ShaderModule>(pipeline.compute.moduleId),
+                .entryPoint = wgpu::StringView(pipeline.compute.entryPoint),
+                .constantCount = constants.size(),
+                .constants = constants.data(),
+            },
+    };
+    wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&desc);
+    func(computePipeline, pipeline.groupIndexIds);
+    return {computePipeline};
+}
+
+ResultOrError<wgpu::ShaderModule> CreateShaderModule(wgpu::Device device,
+                                                     ReadHead& readHead,
+                                                     const std::string& label) {
+    schema::ShaderModule mod;
+    DAWN_TRY(Deserialize(readHead, &mod));
+
+    // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
+    // chained structs.
+    wgpu::ShaderSourceWGSL source({
+        .nextInChain = nullptr,
+        .code = wgpu::StringView(mod.code),
+    });
+    wgpu::ShaderModuleDescriptor desc{
+        .nextInChain = &source,
+        .label = wgpu::StringView(label),
+    };
+    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&desc);
+    return {shaderModule};
+}
+
 ResultOrError<wgpu::Texture> CreateTexture(wgpu::Device device,
                                            ReadHead& readHead,
                                            const std::string& label) {
@@ -162,6 +262,68 @@ ResultOrError<wgpu::Texture> CreateTexture(wgpu::Device device,
     return {texture};
 }
 
+ResultOrError<wgpu::TextureView> CreateTextureView(const Replay& replay,
+                                                   ReadHead& readHead,
+                                                   const std::string& label) {
+    schema::TextureView view;
+    DAWN_TRY(Deserialize(readHead, &view));
+
+    wgpu::TextureViewDescriptor desc{
+        .label = wgpu::StringView(label),
+        .format = view.format,
+        .dimension = view.dimension,
+        .baseMipLevel = view.baseMipLevel,
+        .mipLevelCount = view.mipLevelCount,
+        .baseArrayLayer = view.baseArrayLayer,
+        .arrayLayerCount = view.arrayLayerCount,
+        .aspect = view.aspect,
+        .usage = view.usage,
+    };
+    wgpu::Texture texture = replay.GetObjectById<wgpu::Texture>(view.textureId);
+    wgpu::TextureView textureView = texture.CreateView(&desc);
+    return {textureView};
+}
+
+MaybeError ProcessComputePassCommands(const Replay& replay,
+                                      ReadHead& readHead,
+                                      wgpu::Device device,
+                                      wgpu::ComputePassEncoder pass) {
+    schema::ComputePassCommand cmd;
+
+    while (!readHead.IsDone()) {
+        DAWN_TRY(Deserialize(readHead, &cmd));
+        switch (cmd) {
+            case schema::ComputePassCommand::End: {
+                pass.End();
+                return {};
+            }
+            case schema::ComputePassCommand::SetComputePipeline: {
+                schema::ComputePassCommandSetComputePipelineCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetPipeline(replay.GetObjectById<wgpu::ComputePipeline>(data.pipelineId));
+                break;
+            }
+            case schema::ComputePassCommand::SetBindGroup: {
+                schema::ComputePassCommandSetBindGroupCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetBindGroup(data.index,
+                                  replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
+                                  data.dynamicOffsets.size(), data.dynamicOffsets.data());
+                break;
+            }
+            case schema::ComputePassCommand::Dispatch: {
+                schema::ComputePassCommandDispatchCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.DispatchWorkgroups(data.x, data.y, data.z);
+                break;
+            }
+            default:
+                return DAWN_INTERNAL_ERROR("Compute Pass Command not implemented");
+        }
+    }
+    return DAWN_INTERNAL_ERROR("Missing ComputePass End command");
+}
+
 MaybeError ProcessEncoderCommands(const Replay& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
@@ -171,6 +333,18 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
     while (!readHead.IsDone()) {
         DAWN_TRY(Deserialize(readHead, &cmd));
         switch (cmd) {
+            case schema::EncoderCommand::BeginComputePass: {
+                schema::EncoderCommandBeginComputePassCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::PassTimestampWrites timestampWrites = ToWGPU(replay, data.timestampWrites);
+                wgpu::ComputePassDescriptor desc{
+                    .label = wgpu::StringView(data.label),
+                    .timestampWrites = timestampWrites.querySet ? &timestampWrites : nullptr,
+                };
+                wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&desc);
+                DAWN_TRY(ProcessComputePassCommands(replay, readHead, device, pass));
+                break;
+            }
             case schema::EncoderCommand::CopyBufferToBuffer: {
                 schema::EncoderCommandCopyBufferToBufferCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
@@ -211,8 +385,7 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 return {};
             }
             default:
-                // UNIMPLEMENTED();
-                break;
+                return DAWN_INTERNAL_ERROR("Encoder Command not implemented");
         }
     }
     return DAWN_INTERNAL_ERROR("Missing End command");
@@ -243,6 +416,12 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
     DAWN_TRY(Deserialize(readHead, &resource));
 
     switch (resource.type) {
+        case schema::ObjectType::BindGroup: {
+            wgpu::BindGroup bindGroup;
+            DAWN_TRY_ASSIGN(bindGroup, CreateBindGroup(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, bindGroup}});
+            return {};
+        }
         case schema::ObjectType::Buffer: {
             wgpu::Buffer buffer;
             DAWN_TRY_ASSIGN(buffer, CreateBuffer(device, readHead, resource.label));
@@ -260,6 +439,32 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             return {};
         }
 
+        case schema::ObjectType::ComputePipeline: {
+            wgpu::ComputePipeline computePipeline;
+            DAWN_TRY_ASSIGN(
+                computePipeline,
+                CreateComputePipeline(
+                    *this, device, readHead, resource.label,
+                    [this](wgpu::ComputePipeline& computePipeline,
+                           const std::vector<schema::BindGroupLayoutIndexIdPair>& groupIndexIds) {
+                        // Register any implicit bindgroups.
+                        for (const auto& groupIndexId : groupIndexIds) {
+                            wgpu::BindGroupLayout bgl =
+                                computePipeline.GetBindGroupLayout(groupIndexId.groupIndex);
+                            mResources.insert({groupIndexId.bindGroupLayoutId, {"", bgl}});
+                        }
+                    }));
+            mResources.insert({resource.id, {resource.label, computePipeline}});
+            return {};
+        }
+
+        case schema::ObjectType::ShaderModule: {
+            wgpu::ShaderModule shaderModule;
+            DAWN_TRY_ASSIGN(shaderModule, CreateShaderModule(device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, shaderModule}});
+            return {};
+        }
+
         case schema::ObjectType::Texture: {
             wgpu::Texture texture;
             DAWN_TRY_ASSIGN(texture, CreateTexture(device, readHead, resource.label));
@@ -267,11 +472,16 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             return {};
         }
 
+        case schema::ObjectType::TextureView: {
+            wgpu::TextureView textureView;
+            DAWN_TRY_ASSIGN(textureView, CreateTextureView(*this, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, textureView}});
+            return {};
+        }
+
         default:
-            // UNIMPLEMENTED();
-            break;
+            return DAWN_INTERNAL_ERROR("unhandled resource type");
     }
-    return {};
 }
 
 MaybeError Replay::Play() {

@@ -44,7 +44,7 @@ class Texture final : public TextureBase, public RecordableObject, public Object
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const UnpackedPtr<TextureDescriptor>& descriptor);
 
-    MaybeError AddReferenced(CaptureContext& captureContext) const override;
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
     MaybeError CaptureCreationParameters(CaptureContext& context) override;
     MaybeError CaptureContentIfNeeded(CaptureContext& context,
                                       schema::ObjectId id,
@@ -55,11 +55,16 @@ class Texture final : public TextureBase, public RecordableObject, public Object
     void DestroyImpl() override;
 };
 
-class TextureView final : public TextureViewBase, public ObjectWGPU<WGPUTextureView> {
+class TextureView final : public TextureViewBase,
+                          public RecordableObject,
+                          public ObjectWGPU<WGPUTextureView> {
   public:
     static ResultOrError<Ref<TextureView>> Create(
         TextureBase* texture,
         const UnpackedPtr<TextureViewDescriptor>& descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:
     TextureView(TextureBase* texture,

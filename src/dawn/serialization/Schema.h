@@ -47,6 +47,20 @@ enum class ObjectType : uint32_t {
     TextureView,
 };
 
+enum class ComputePassCommand : uint32_t {
+    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
+    Dispatch,
+    DispatchIndirect,
+    SetComputePipeline,
+    SetBindGroup,
+    WriteTimestamp,
+    InsertDebugMarker,
+    PopDebugGroup,
+    PushDebugGroup,
+    SetImmediateData,
+    End,
+};
+
 enum class EncoderCommand : uint32_t {
     Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
     BeginComputePass,
@@ -90,6 +104,19 @@ DAWN_REPLAY_SERIALIZABLE(struct, Origin3D, ORIGIN3D_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, Extent3D, EXTENT3D_MEMBER){};
 
+#define PIPELINE_CONSTANT_MEMBER(X) \
+    X(std::string, name)            \
+    X(double, value)
+
+DAWN_REPLAY_SERIALIZABLE(struct, PipelineConstant, PIPELINE_CONSTANT_MEMBER){};
+
+#define PROGRAMMABLE_STAGE_MEMBER(X) \
+    X(ObjectId, moduleId)            \
+    X(std::string, entryPoint)       \
+    X(std::vector<PipelineConstant>, constants)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ProgrammableStage, PROGRAMMABLE_STAGE_MEMBER){};
+
 #define BUFFER_CREATION_MEMBER(X) \
     X(uint64_t, size)             \
     X(wgpu::BufferUsage, usage)
@@ -106,6 +133,60 @@ DAWN_REPLAY_SERIALIZABLE(struct, Buffer, BUFFER_CREATION_MEMBER){};
     X(std::vector<wgpu::TextureFormat>, viewFormats)
 
 DAWN_REPLAY_SERIALIZABLE(struct, Texture, TEXTURE_CREATION_MEMBER){};
+
+#define TEXTURE_VIEW_CREATION_MEMBER(X)      \
+    X(ObjectId, textureId)                   \
+    X(wgpu::TextureFormat, format)           \
+    X(wgpu::TextureViewDimension, dimension) \
+    X(uint32_t, baseMipLevel)                \
+    X(uint32_t, mipLevelCount)               \
+    X(uint32_t, baseArrayLayer)              \
+    X(uint32_t, arrayLayerCount)             \
+    X(wgpu::TextureAspect, aspect)           \
+    X(wgpu::TextureUsage, usage)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TextureView, TEXTURE_VIEW_CREATION_MEMBER){};
+
+#define QUERYSET_CREATION_MEMBER(X) \
+    X(wgpu::QueryType, type)        \
+    X(uint32_t, count)
+
+DAWN_REPLAY_SERIALIZABLE(struct, QuerySet, QUERYSET_CREATION_MEMBER){};
+
+// TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
+// chained structs.
+#define SHADER_MODULE_CREATION_MEMBER(X) X(std::string, code)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ShaderModule, SHADER_MODULE_CREATION_MEMBER){};
+
+#define BIND_GROUP_LAYOUT_INDEX_ID_PAIR(X) \
+    X(uint32_t, groupIndex)                \
+    X(ObjectId, bindGroupLayoutId)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutIndexIdPair, BIND_GROUP_LAYOUT_INDEX_ID_PAIR){};
+
+#define COMPUTE_PIPELINE_CREATION_MEMBER(X) \
+    X(ObjectId, layoutId)                   \
+    X(ProgrammableStage, compute)           \
+    X(std::vector<BindGroupLayoutIndexIdPair>, groupIndexIds)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ComputePipeline, COMPUTE_PIPELINE_CREATION_MEMBER){};
+
+#define BIND_GROUP_ENTRY_MEMBER(X) \
+    X(uint32_t, binding)           \
+    X(ObjectId, bufferId)          \
+    X(uint64_t, offset)            \
+    X(uint64_t, size)              \
+    X(ObjectId, samplerId)         \
+    X(ObjectId, textureViewId)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BindGroupEntry, BIND_GROUP_ENTRY_MEMBER){};
+
+#define BIND_GROUP_CREATION_MEMBER(X) \
+    X(ObjectId, layoutId)             \
+    X(std::vector<BindGroupEntry>, entries)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BindGroup, BIND_GROUP_CREATION_MEMBER){};
 
 #define LABELED_RESOURCE_MEMBER(X) \
     X(ObjectType, type)            \
@@ -134,6 +215,13 @@ DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyBufferInfo, TEXEL_COPY_BUFFER_INFO_MEM
     X(wgpu::TextureAspect, aspect)
 
 DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyTextureInfo, TEXEL_COPY_TEXTURE_INFO_MEMBER){};
+
+#define TIMESTAMP_WRITES_MEMBER(X)         \
+    X(ObjectId, querySetId)                \
+    X(uint32_t, beginningOfPassWriteIndex) \
+    X(uint32_t, endOfPassWriteIndex)
+
+DAWN_REPLAY_SERIALIZABLE(struct, TimestampWrites, TIMESTAMP_WRITES_MEMBER){};
 
 #define CREATE_RESOURCE_CMD_DATA_MEMBER(X) X(LabeledResource, resource)
 
@@ -198,6 +286,31 @@ DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToBuffer,
 
 DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToTexture,
                                           COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER){};
+
+#define BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER(X) \
+    X(std::string, label)                     \
+    X(TimestampWrites, timestampWrites)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginComputePass, BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER){};
+
+#define SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
+
+DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetComputePipeline,
+                                               SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER){};
+
+#define SET_BIND_GROUP_CMD_DATA_MEMBER(X) \
+    X(uint32_t, index)                    \
+    X(ObjectId, bindGroupId)              \
+    X(std::vector<uint32_t>, dynamicOffsets)
+
+DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+
+#define DISPATCH_CMD_DATA_MEMBER(X) \
+    X(uint32_t, x)                  \
+    X(uint32_t, y)                  \
+    X(uint32_t, z)
+
+DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

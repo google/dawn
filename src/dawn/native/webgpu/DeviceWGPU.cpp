@@ -67,6 +67,22 @@
 
 namespace dawn::native::webgpu {
 
+namespace {
+
+void AssociateAutoLayoutBindGroupLayoutsWithPipeline(PipelineBase* pipeline) {
+    // Go through pipeline layout, for each bindGroup that has a non-explicit
+    // PipelineCompatibilityToken associate it with this pipeline.
+    PipelineLayoutBase* pipelineLayout = pipeline->GetLayout();
+    for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
+        BindGroupLayoutBase* bgl = pipelineLayout->GetFrontendBindGroupLayout(groupIndex);
+        if (bgl->GetPipelineCompatibilityToken() != kExplicitPCT) {
+            ToBackend(bgl->GetInternalBindGroupLayout())->AssociateWithPipeline(pipeline);
+        }
+    }
+}
+
+}  // anonymous namespace
+
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           WGPUAdapter innerAdapter,
@@ -164,7 +180,9 @@ ResultOrError<Ref<CommandBufferBase>> Device::CreateCommandBuffer(
 }
 Ref<ComputePipelineBase> Device::CreateUninitializedComputePipelineImpl(
     const UnpackedPtr<ComputePipelineDescriptor>& descriptor) {
-    return ComputePipeline::CreateUninitialized(this, descriptor);
+    Ref<ComputePipelineBase> pipeline = ComputePipeline::CreateUninitialized(this, descriptor);
+    AssociateAutoLayoutBindGroupLayoutsWithPipeline(pipeline.Get());
+    return pipeline;
 }
 
 ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
@@ -178,7 +196,9 @@ ResultOrError<Ref<QuerySetBase>> Device::CreateQuerySetImpl(const QuerySetDescri
 
 Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
     const UnpackedPtr<RenderPipelineDescriptor>& descriptor) {
-    return RenderPipeline::CreateUninitialized(this, descriptor);
+    Ref<RenderPipelineBase> pipeline = RenderPipeline::CreateUninitialized(this, descriptor);
+    AssociateAutoLayoutBindGroupLayoutsWithPipeline(pipeline.Get());
+    return pipeline;
 }
 ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {
     return Sampler::Create(this, descriptor);

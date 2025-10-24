@@ -33,6 +33,7 @@ void WriteBytes(CaptureContext& context, const void* data, size_t size);
 void Serialize(CaptureContext& context, int32_t v);
 void Serialize(CaptureContext& context, uint32_t v);
 void Serialize(CaptureContext& context, uint64_t v);
+void Serialize(CaptureContext& context, double v);
 void Serialize(CaptureContext& context, const std::string& v);
 
 template <typename T>
@@ -148,6 +149,10 @@ constexpr int kInternalVisitableUnusedForComma = 0;
     };                                                                                 \
     struct CmdType##CmdName##Cmd : CmdType##CmdName##Cmd##__Contents,                  \
                                    public Serializable<CmdType##CmdName##Cmd>
+
+// Makes both a CmdData and a Cmd struct for a given compute pass command name.
+#define DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \
+    DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(ComputePassCommand, CmdName, CMD_MEMBERS)
 
 // Makes both a CmdData and a Cmd struct for a given encoder command name.
 #define DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \

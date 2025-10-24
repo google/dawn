@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_COMMANDBUFFER_H_
 
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "dawn/native/dawn_platform.h"
@@ -67,6 +68,13 @@ class CommandBufferBase : public ApiObjectBase {
     const std::vector<IndirectDrawMetadata>& GetIndirectDrawMetadata();
 
     CommandIterator* GetCommandIteratorForTesting();
+
+    template <typename F>
+    auto UseCommands(F func) -> auto {
+        auto result = func(mCommands);
+        mCommands.Reset();
+        return result;
+    }
 
   protected:
     void DestroyImpl() override;

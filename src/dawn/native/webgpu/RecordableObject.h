@@ -39,7 +39,7 @@ class RecordableObject {
     explicit RecordableObject(schema::ObjectType objectType);
     schema::ObjectType GetObjectType() const;
 
-    virtual MaybeError AddReferenced(CaptureContext& captureContext) const = 0;
+    virtual MaybeError AddReferenced(CaptureContext& captureContext) = 0;
     virtual MaybeError CaptureCreationParameters(CaptureContext& context) = 0;
 
     // This is called anytime a resource is used in the queue.

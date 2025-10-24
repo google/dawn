@@ -49,6 +49,10 @@ void Serialize(CaptureContext& context, uint64_t v) {
     WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
 }
 
+void Serialize(CaptureContext& context, double v) {
+    WriteBytes(context, reinterpret_cast<const char*>(&v), sizeof(v));
+}
+
 void Serialize(CaptureContext& context, const std::string& v) {
     Serialize(context, v.size());
     WriteBytes(context, v.data(), v.size());

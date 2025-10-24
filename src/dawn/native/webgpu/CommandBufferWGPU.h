@@ -44,7 +44,7 @@ class CommandBuffer final : public CommandBufferBase, public RecordableObject {
     WGPUCommandBuffer Encode();
     MaybeError Capture(CaptureContext& captureContext);
 
-    MaybeError AddReferenced(CaptureContext& captureContext) const override;
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
     MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:

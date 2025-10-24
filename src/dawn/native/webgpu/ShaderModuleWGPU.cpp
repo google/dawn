@@ -55,8 +55,27 @@ ShaderModule::ShaderModule(Device* device,
                            std::vector<tint::wgsl::Extension> internalExtensions,
                            WGPUShaderModule innerShaderModule)
     : ShaderModuleBase(device, descriptor, std::move(internalExtensions)),
+      RecordableObject(schema::ObjectType::ShaderModule),
       ObjectWGPU(device->wgpu.shaderModuleRelease) {
     mInnerHandle = innerShaderModule;
+
+    // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
+    // chained structs. We need to save the entire chain here for serialization later.
+    if (auto* wgslDesc = descriptor.Get<ShaderSourceWGSL>()) {
+        mCode = wgslDesc->code;
+    }
+}
+
+MaybeError ShaderModule::AddReferenced(CaptureContext& captureContext) {
+    return {};
+}
+
+MaybeError ShaderModule::CaptureCreationParameters(CaptureContext& captureContext) {
+    schema::ShaderModule shaderModule{{
+        .code = mCode,
+    }};
+    Serialize(captureContext, shaderModule);
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

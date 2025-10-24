@@ -117,6 +117,8 @@ class PipelineLayoutBase : public ApiObjectBase,
 
     uint32_t GetImmediateDataRangeByteSize() const;
 
+    bool IsImplicit() const;
+
   protected:
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
     void DestroyImpl() override;

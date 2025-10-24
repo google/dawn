@@ -29,6 +29,7 @@
 
 #include "dawn/common/Math.h"
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/Commands.h"
 #include "dawn/native/dawn_platform_autogen.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/Forward.h"

@@ -563,9 +563,122 @@ void EncodeRenderPass(const Device* device,
     DAWN_UNREACHABLE();
 }
 
+// Commands are encoded with a command id followed by command-specific data.
+// so we're required to read each command to skip over them.
+#define DAWN_SKIP_COMMAND(cmdName)            \
+    case Command::cmdName: {                  \
+        commands.NextCommand<cmdName##Cmd>(); \
+        break;                                \
+    }
+
+MaybeError AddReferencedFromComputePass(CaptureContext& captureContext, CommandIterator& commands) {
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndComputePass: {
+                commands.NextCommand<EndComputePassCmd>();
+                return {};
+            }
+            case Command::SetComputePipeline: {
+                auto cmd = commands.NextCommand<SetComputePipelineCmd>();
+                DAWN_TRY(captureContext.AddResource(cmd->pipeline.Get()));
+                break;
+            }
+            case Command::SetBindGroup: {
+                auto cmd = commands.NextCommand<SetBindGroupCmd>();
+                DAWN_TRY(captureContext.AddResource(cmd->group.Get()));
+                break;
+            }
+                DAWN_SKIP_COMMAND(Dispatch)
+                DAWN_SKIP_COMMAND(DispatchIndirect)
+                DAWN_SKIP_COMMAND(InsertDebugMarker)
+                DAWN_SKIP_COMMAND(PopDebugGroup)
+                DAWN_SKIP_COMMAND(PushDebugGroup)
+                DAWN_SKIP_COMMAND(WriteTimestamp)
+                DAWN_SKIP_COMMAND(SetImmediateData)
+            default: {
+                DAWN_CHECK(false);
+                break;
+            }
+        }
+    }
+
+    // EndComputePass should have been called
+    DAWN_UNREACHABLE();
+    return {};
+}
+
+MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& commands) {
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndComputePass: {
+                commands.NextCommand<EndComputePassCmd>();
+                Serialize(captureContext, schema::ComputePassCommand::End);
+                return {};
+            }
+            case Command::SetComputePipeline: {
+                const auto& cmd = *commands.NextCommand<SetComputePipelineCmd>();
+                schema::ComputePassCommandSetComputePipelineCmd data{{
+                    .data = {{
+                        .pipelineId = captureContext.GetId(cmd.pipeline.Get()),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::SetBindGroup: {
+                const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
+                const uint32_t* dynamicOffsetsData =
+                    cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
+                                               : nullptr;
+                schema::ComputePassCommandSetBindGroupCmd data{{
+                    .data = {{
+                        .index = uint32_t(cmd.index),
+                        .bindGroupId = captureContext.GetId(cmd.group),
+                        .dynamicOffsets = std::vector<uint32_t>(
+                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::Dispatch: {
+                const auto& cmd = *commands.NextCommand<DispatchCmd>();
+                schema::ComputePassCommandDispatchCmd data{{
+                    .data = {{
+                        .x = cmd.x,
+                        .y = cmd.y,
+                        .z = cmd.z,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            default:
+                DAWN_CHECK(false);
+        }
+    }
+    return {};
+}
+
+template <typename T>
+MaybeError AddReferencedPassResourceUsages(CaptureContext& captureContext,
+                                           const std::vector<T>& syncScopeResourceUsages) {
+    for (const auto& usages : syncScopeResourceUsages) {
+        for (auto buffer : usages.buffers) {
+            DAWN_TRY(captureContext.AddResource(buffer));
+        }
+        for (auto texture : usages.textures) {
+            DAWN_TRY(captureContext.AddResource(texture));
+        }
+    }
+    return {};
+}
+
 }  // anonymous namespace
 
-MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) const {
+MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     const auto& resourceUsages = GetResourceUsages();
     for (auto buffer : resourceUsages.topLevelBuffers) {
         DAWN_TRY(captureContext.AddResource(buffer));
@@ -573,81 +686,109 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) const {
     for (auto texture : resourceUsages.topLevelTextures) {
         DAWN_TRY(captureContext.AddResource(texture));
     }
-    for (const auto& pass : resourceUsages.renderPasses) {
-        for (auto buffer : pass.buffers) {
-            DAWN_TRY(captureContext.AddResource(buffer));
-        }
-    }
+    DAWN_TRY(AddReferencedPassResourceUsages(captureContext, resourceUsages.renderPasses));
     for (const auto& pass : resourceUsages.computePasses) {
-        for (auto buffer : pass.referencedBuffers) {
-            DAWN_TRY(captureContext.AddResource(buffer));
-        }
+        DAWN_TRY(AddReferencedPassResourceUsages(captureContext, pass.dispatchUsages));
     }
+
+    DAWN_TRY(UseCommands([&](CommandIterator& commands) -> MaybeError {
+        Command type;
+        while (commands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::BeginComputePass: {
+                    commands.NextCommand<BeginComputePassCmd>();
+                    DAWN_TRY(AddReferencedFromComputePass(captureContext, commands));
+                    break;
+                }
+                    DAWN_SKIP_COMMAND(CopyBufferToBuffer)
+                    DAWN_SKIP_COMMAND(CopyBufferToTexture)
+                    DAWN_SKIP_COMMAND(CopyTextureToBuffer)
+                    DAWN_SKIP_COMMAND(CopyTextureToTexture)
+                default:
+                    DAWN_CHECK(false);
+            }
+        }
+        return {};
+    }));
+
     return {};
 }
 
 MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureContext) {
-    CommandIterator& commands = *GetCommandIteratorForTesting();
-
-    Command type;
-    while (commands.NextCommandId(&type)) {
-        switch (type) {
-            case Command::CopyBufferToBuffer: {
-                const auto& cmd = *commands.NextCommand<CopyBufferToBufferCmd>();
-                schema::EncoderCommandCopyBufferToBufferCmd data{{
-                    .data = {{
-                        .srcBufferId = captureContext.GetId(cmd.source.Get()),
-                        .srcOffset = cmd.sourceOffset,
-                        .dstBufferId = captureContext.GetId(cmd.destination.Get()),
-                        .dstOffset = cmd.destinationOffset,
-                        .size = cmd.size,
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
+    return UseCommands([&](CommandIterator& commands) -> MaybeError {
+        Command type;
+        while (commands.NextCommandId(&type)) {
+            switch (type) {
+                case Command::CopyBufferToBuffer: {
+                    const auto& cmd = *commands.NextCommand<CopyBufferToBufferCmd>();
+                    schema::EncoderCommandCopyBufferToBufferCmd data{{
+                        .data = {{
+                            .srcBufferId = captureContext.GetId(cmd.source.Get()),
+                            .srcOffset = cmd.sourceOffset,
+                            .dstBufferId = captureContext.GetId(cmd.destination.Get()),
+                            .dstOffset = cmd.destinationOffset,
+                            .size = cmd.size,
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    break;
+                }
+                case Command::CopyBufferToTexture: {
+                    const auto& cmd = *commands.NextCommand<CopyBufferToTextureCmd>();
+                    schema::EncoderCommandCopyBufferToTextureCmd data{{
+                        .data = {{
+                            .source = ToSchema(captureContext, cmd.source),
+                            .destination = ToSchema(captureContext, cmd.destination),
+                            .copySize = ToSchema(cmd.copySize),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    break;
+                }
+                case Command::CopyTextureToBuffer: {
+                    const auto& cmd = *commands.NextCommand<CopyTextureToBufferCmd>();
+                    schema::EncoderCommandCopyTextureToBufferCmd data{{
+                        .data = {{
+                            .source = ToSchema(captureContext, cmd.source),
+                            .destination = ToSchema(captureContext, cmd.destination),
+                            .copySize = ToSchema(cmd.copySize),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    break;
+                }
+                case Command::CopyTextureToTexture: {
+                    const auto& cmd = *commands.NextCommand<CopyTextureToTextureCmd>();
+                    schema::EncoderCommandCopyTextureToTextureCmd data{{
+                        .data = {{
+                            .source = ToSchema(captureContext, cmd.source),
+                            .destination = ToSchema(captureContext, cmd.destination),
+                            .copySize = ToSchema(cmd.copySize),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    break;
+                }
+                case Command::BeginComputePass: {
+                    const auto& cmd = *commands.NextCommand<BeginComputePassCmd>();
+                    schema::EncoderCommandBeginComputePassCmd data{{
+                        .data = {{
+                            .label = cmd.label,
+                            .timestampWrites = ToSchema(captureContext, cmd.timestampWrites),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    // Capture commands inside the compute pass
+                    DAWN_TRY(CaptureComputePass(captureContext, commands));
+                    break;
+                }
+                default:
+                    DAWN_CHECK(false);
             }
-            case Command::CopyBufferToTexture: {
-                const auto& cmd = *commands.NextCommand<CopyBufferToTextureCmd>();
-                schema::EncoderCommandCopyBufferToTextureCmd data{{
-                    .data = {{
-                        .source = ToSchema(captureContext, cmd.source),
-                        .destination = ToSchema(captureContext, cmd.destination),
-                        .copySize = ToSchema(cmd.copySize),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            case Command::CopyTextureToBuffer: {
-                const auto& cmd = *commands.NextCommand<CopyTextureToBufferCmd>();
-                schema::EncoderCommandCopyTextureToBufferCmd data{{
-                    .data = {{
-                        .source = ToSchema(captureContext, cmd.source),
-                        .destination = ToSchema(captureContext, cmd.destination),
-                        .copySize = ToSchema(cmd.copySize),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            case Command::CopyTextureToTexture: {
-                const auto& cmd = *commands.NextCommand<CopyTextureToTextureCmd>();
-                schema::EncoderCommandCopyTextureToTextureCmd data{{
-                    .data = {{
-                        .source = ToSchema(captureContext, cmd.source),
-                        .destination = ToSchema(captureContext, cmd.destination),
-                        .copySize = ToSchema(cmd.copySize),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            default:
-                DAWN_UNREACHABLE();
         }
-    }
-    Serialize(captureContext, schema::EncoderCommand::End);
-    return {};
+        Serialize(captureContext, schema::EncoderCommand::End);
+        return {};
+    });
 }
 
 WGPUCommandBuffer CommandBuffer::Encode() {

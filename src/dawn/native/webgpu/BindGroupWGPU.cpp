@@ -27,10 +27,15 @@
 
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 
+#include <vector>
+
 #include "absl/container/inlined_vector.h"
+#include "dawn/common/MatchVariant.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
+#include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/SamplerWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
@@ -87,7 +92,9 @@ ResultOrError<Ref<BindGroup>> BindGroup::Create(
 }
 
 BindGroup::BindGroup(Device* device, const UnpackedPtr<BindGroupDescriptor>& descriptor)
-    : BindGroupBase(this, device, descriptor), ObjectWGPU(device->wgpu.bindGroupRelease) {
+    : BindGroupBase(this, device, descriptor),
+      RecordableObject(schema::ObjectType::BindGroup),
+      ObjectWGPU(device->wgpu.bindGroupRelease) {
     ComboBindGroupDescriptor desc(*descriptor);
     mInnerHandle =
         ToBackend(GetDevice())
@@ -106,6 +113,66 @@ void BindGroup::DeleteThis() {
     Ref<BindGroupLayout> layout = ToBackend(GetLayout());
     BindGroupBase::DeleteThis();
     layout->DeallocateBindGroup(this);
+}
+
+MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
+    // We shouldn't need to include any referenced bound objects as we only serialize from
+    // setBindGroup in a command buffer and the command buffer itself should already reference all.
+    // We do need to reference the layout though.
+    //
+    // Unfortunately we can't just call `AddResource(layout)` because that would add a call to
+    // createBindGroupLayout which we only want if the bindGroupLayout was not implicit
+    //
+    // We need to figure out if this is bindgroup uses an explicit layout or an auto layout.
+    // If it's an auto layout then we need to find the pipeline then generated it and reference that
+    // first so that on replay, we create the pipeline before the bind group. Otherwise, just we
+    // reference the layout directly which will cause an explicit bindgroup layout to be created on
+    // replay.
+    BindGroupLayoutBase* layout = GetFrontendLayout();
+    if (layout->GetPipelineCompatibilityToken() == kExplicitPCT) {
+        // TODO(452983510): Handle explicit bind group layouts.
+        // DAWN_TRY(captureContext.AddResource(layout));
+        DAWN_CHECK(false);
+    } else {
+        DAWN_TRY(ToBackend(layout->GetInternalBindGroupLayout())
+                     ->CapturePipelineForImplicitLayout(captureContext));
+    }
+
+    return {};
+}
+
+MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) {
+    std::vector<schema::BindGroupEntry> entries;
+
+    BindGroupLayoutInternalBase* layout = GetLayout();
+    const auto& bindingMap = layout->GetBindingMap();
+
+    for (const auto& [bindingNumbers, apiBindingIndex] : bindingMap) {
+        BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
+        const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
+
+        MatchVariant(
+            bindingInfo.bindingLayout,
+            [&](const BufferBindingInfo& info) {
+                const auto& entry = GetBindingAsBufferBinding(bindingIndex);
+                entries.push_back(schema::BindGroupEntry{{
+                    .binding = uint32_t(apiBindingIndex),
+                    .bufferId = captureContext.GetId(entry.buffer),
+                    .offset = entry.offset,
+                    .size = entry.size,
+                    .samplerId = 0,
+                    .textureViewId = 0,
+                }});
+            },
+            [&](const auto& info) { DAWN_CHECK(false); });
+    }
+
+    schema::BindGroup bg{{
+        .layoutId = captureContext.GetId(GetLayout()),
+        .entries = entries,
+    }};
+    Serialize(captureContext, bg);
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

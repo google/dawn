@@ -34,6 +34,7 @@ MaybeError ReadBytes(ReadHead& s, void* data, size_t size);
 MaybeError Deserialize(ReadHead& s, int32_t* v);
 MaybeError Deserialize(ReadHead& s, uint32_t* v);
 MaybeError Deserialize(ReadHead& s, uint64_t* v);
+MaybeError Deserialize(ReadHead& s, double* v);
 MaybeError Deserialize(ReadHead& s, std::string* v);
 
 template <typename T>
@@ -157,6 +158,10 @@ constexpr int kInternalVisitableUnusedForComma = 0;
     };                                                                                 \
     struct CmdType##CmdName##Cmd : CmdType##CmdName##Cmd##__Contents,                  \
                                    public ::dawn::replay::Deserializable<CmdType##CmdName##Cmd>
+
+// Makes both a CmdData and a Cmd struct for a given compute pass command name.
+#define DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \
+    DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(ComputePassCommand, CmdName, CMD_MEMBERS)
 
 // Makes both a CmdData and a Cmd struct for a given encoder command name.
 #define DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CmdName, CMD_MEMBERS) \

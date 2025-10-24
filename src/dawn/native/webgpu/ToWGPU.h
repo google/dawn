@@ -31,51 +31,44 @@
 #include <webgpu/webgpu.h>
 #include <string>
 #include <vector>
-#include "dawn/native/Commands.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/wgpu_structs_autogen.h"
 
 // A bunch of ToWGPU helper functions to convert dawn::native descriptors to WGPU C descriptors.
 
+namespace dawn::native {
+
+class BufferBase;
+struct BufferCopy;
+struct RenderPassColorAttachmentInfo;
+struct RenderPassDepthStencilAttachmentInfo;
+struct TextureCopy;
+struct TimestampWrites;
+
+}  // namespace dawn::native
+
 namespace dawn::native::webgpu {
 
-WGPUExtent3D ToWGPU(const Extent3D& extent);
-
-WGPUOrigin3D ToWGPU(const Origin3D& origin);
-
-WGPUColor ToWGPU(const dawn::native::Color& color);
-
-WGPUTexelCopyBufferLayout ToWGPU(const TexelCopyBufferLayout& copy);
-
-WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy);
-
-WGPUTexelCopyBufferInfo ToWGPU(const TexelCopyBufferLayout& copy, const BufferBase* buffer);
-
-WGPUTextureAspect ToWGPU(const Aspect aspect);
-
-WGPULoadOp ToWGPU(const wgpu::LoadOp op);
-
-WGPUStoreOp ToWGPU(const wgpu::StoreOp op);
-
-WGPUIndexFormat ToWGPU(const wgpu::IndexFormat format);
-
-WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes);
-
-WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy);
-
-WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info);
-
-WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachmentInfo& info);
-
-WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
-
-WGPUDepthStencilState ToWGPU(const DepthStencilState* desc);
-
-WGPUPrimitiveState ToWGPU(const PrimitiveState* desc);
-
-WGPUMultisampleState ToWGPU(const MultisampleState* desc);
-
 WGPUBlendState ToWGPU(const BlendState* desc);
+WGPUColor ToWGPU(const dawn::native::Color& color);
+WGPUDepthStencilState ToWGPU(const DepthStencilState* desc);
+WGPUExtent3D ToWGPU(const Extent3D& extent);
+WGPUIndexFormat ToWGPU(const wgpu::IndexFormat format);
+WGPULoadOp ToWGPU(const wgpu::LoadOp op);
+WGPUMultisampleState ToWGPU(const MultisampleState* desc);
+WGPUOrigin3D ToWGPU(const Origin3D& origin);
+WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes);
+WGPUPrimitiveState ToWGPU(const PrimitiveState* desc);
+WGPURenderPassColorAttachment ToWGPU(const RenderPassColorAttachmentInfo& info);
+WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachmentInfo& info);
+WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
+WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
+WGPUStoreOp ToWGPU(const wgpu::StoreOp op);
+WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy);
+WGPUTexelCopyBufferInfo ToWGPU(const TexelCopyBufferLayout& copy, const BufferBase* buffer);
+WGPUTexelCopyBufferLayout ToWGPU(const TexelCopyBufferLayout& copy);
+WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy);
+WGPUTextureAspect ToWGPU(const Aspect aspect);
 
 // A vector of keys need to pass alongside constants to preserve the memory of WGPUStringView data
 // pointer.

@@ -33,10 +33,12 @@
 #include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class BindGroupLayout final : public BindGroupLayoutInternalBase,
+                              public RecordableObject,
                               public ObjectWGPU<WGPUBindGroupLayout> {
   public:
     static ResultOrError<Ref<BindGroupLayout>> Create(
@@ -47,11 +49,18 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase,
     void DeallocateBindGroup(BindGroup* bindGroup);
     void ReduceMemoryUsage() override;
 
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
+    void AssociateWithPipeline(PipelineBase* pipeline);
+    MaybeError CapturePipelineForImplicitLayout(CaptureContext& context);
+
   private:
     BindGroupLayout(Device* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayout() override = default;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
+
+    Ref<PipelineBase> mPipelineForImplicitLayout;
 };
 
 }  // namespace dawn::native::webgpu

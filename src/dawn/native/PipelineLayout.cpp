@@ -612,6 +612,16 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
     return true;
 }
 
+bool PipelineLayoutBase::IsImplicit() const {
+    for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
+        const BindGroupLayoutBase* bgl = GetFrontendBindGroupLayout(groupIndex);
+        if (bgl->GetPipelineCompatibilityToken() != kExplicitPCT) {
+            return true;
+        }
+    }
+    return false;
+}
+
 uint32_t PipelineLayoutBase::GetImmediateDataRangeByteSize() const {
     return mImmediateDataRangeByteSize;
 }

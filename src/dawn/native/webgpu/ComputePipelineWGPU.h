@@ -31,17 +31,23 @@
 #include "absl/container/inlined_vector.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
-class ComputePipeline final : public ComputePipelineBase, public ObjectWGPU<WGPUComputePipeline> {
+class ComputePipeline final : public ComputePipelineBase,
+                              public RecordableObject,
+                              public ObjectWGPU<WGPUComputePipeline> {
   public:
     static Ref<ComputePipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
 
     MaybeError InitializeImpl() override;
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   protected:
     ComputePipeline(Device* device, const UnpackedPtr<ComputePipelineDescriptor>& descriptor);

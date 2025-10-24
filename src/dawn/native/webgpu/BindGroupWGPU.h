@@ -33,16 +33,21 @@
 #include "dawn/common/PlacementAllocated.h"
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class BindGroup final : public BindGroupBase,
                         public PlacementAllocated,
+                        public RecordableObject,
                         public ObjectWGPU<WGPUBindGroup> {
   public:
     static ResultOrError<Ref<BindGroup>> Create(Device* device,
                                                 const UnpackedPtr<BindGroupDescriptor>& descriptor);
     BindGroup(Device* device, const UnpackedPtr<BindGroupDescriptor>& descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:
     ~BindGroup() override = default;

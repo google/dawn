@@ -28,9 +28,13 @@
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
 
 #include <vector>
+
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/webgpu/CaptureContext.h"
+#include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/RenderPipelineWGPU.h"
 
 namespace dawn::native::webgpu {
 
@@ -44,6 +48,7 @@ ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
 BindGroupLayout::BindGroupLayout(Device* device,
                                  const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor)
     : BindGroupLayoutInternalBase(device, descriptor),
+      RecordableObject(schema::ObjectType::BindGroupLayout),
       ObjectWGPU(device->wgpu.bindGroupLayoutRelease),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     // Rebuild the descriptor and resolve internal bindings to regular ones.
@@ -85,6 +90,34 @@ void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
 
 void BindGroupLayout::ReduceMemoryUsage() {
     mBindGroupAllocator->DeleteEmptySlabs();
+}
+
+void BindGroupLayout::AssociateWithPipeline(PipelineBase* pipeline) {
+    mPipelineForImplicitLayout = pipeline;
+}
+
+MaybeError BindGroupLayout::AddReferenced(CaptureContext& captureContext) {
+    // BindGroupLayouts don't reference anything.
+    return {};
+}
+
+MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& context) {
+    // TODO(451338754): Implement explicit BindGroupLayout capture
+    return {};
+}
+
+MaybeError BindGroupLayout::CapturePipelineForImplicitLayout(CaptureContext& context) {
+    DAWN_ASSERT(mPipelineForImplicitLayout != nullptr);
+    PipelineBase* pipeline = mPipelineForImplicitLayout.Get();
+    ComputePipelineBase* computePipeline = pipeline->AsComputePipeline();
+    if (computePipeline) {
+        return context.AddResource(computePipeline);
+    }
+    // TODO(451389801): Capture render pass pipelines.
+    // RenderPipelineBase* renderPipeline = pipeline->AsRenderPipeline();
+    // DAWN_ASSERT(renderPipeline);
+    // return context.AddResource(renderPipeline);
+    DAWN_CHECK(false);
 }
 
 }  // namespace dawn::native::webgpu

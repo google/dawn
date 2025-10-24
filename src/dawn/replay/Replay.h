@@ -42,7 +42,19 @@
 
 namespace dawn::replay {
 
-typedef std::variant<wgpu::Buffer, wgpu::Texture, wgpu::CommandBuffer> Resource;
+typedef std::variant<wgpu::BindGroup,
+                     wgpu::BindGroupLayout,
+                     wgpu::Buffer,
+                     wgpu::CommandBuffer,
+                     wgpu::ComputePipeline,
+                     wgpu::PipelineLayout,
+                     wgpu::QuerySet,
+                     wgpu::Sampler,
+                     wgpu::ShaderModule,
+                     wgpu::Texture,
+                     wgpu::TextureView>
+    Resource;
+
 struct LabeledResource {
     std::string label;
     Resource resource;
@@ -75,6 +87,9 @@ class Replay {
 
     template <typename T>
     T GetObjectById(schema::ObjectId id) const {
+        if (id == 0) {
+            return nullptr;
+        }
         auto iter = mResources.find(id);
         const T* p = std::get_if<T>(&iter->second.resource);
         return *p;
@@ -84,6 +99,8 @@ class Replay {
     Replay(wgpu::Device device, const Capture* capture);
 
     MaybeError CreateResource(wgpu::Device device, ReadHead& readHead);
+    void RegisterImplicitBindGroupLayouts(wgpu::ComputePipeline pipeline,
+                                          const std::vector<uint32_t> groupIndicies);
 
     wgpu::Device mDevice;
     const Capture* mCapture;
