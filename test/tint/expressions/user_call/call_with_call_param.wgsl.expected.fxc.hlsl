@@ -7,11 +7,8 @@ int c(uint u) {
   return int(1);
 }
 
+[numthreads(1, 1, 1)]
 void a() {
   float a_1 = b(c(2u));
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

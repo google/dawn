@@ -3,6 +3,7 @@ fn c(x: i32, y: i32, z: i32) {
     a = a + 2;
 }
 
+@compute @workgroup_size(1)
 fn b() {
     c(1, 2, 3);
     c(4, 5, 6);

@@ -1,2 +1,15 @@
 #include <metal_stdlib>
 using namespace metal;
+
+struct tint_module_vars_struct {
+  thread float3* f;
+  thread int3* i;
+  thread uint3* u;
+};
+
+kernel void v() {
+  thread float3 f = float3(0.0f);
+  thread int3 i = int3(0);
+  thread uint3 u = uint3(0u);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.f=(&f), .i=(&i), .u=(&u)};
+}

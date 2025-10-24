@@ -10,11 +10,8 @@ void b() {
   c();
 }
 
+[numthreads(1, 1, 1)]
 void a() {
   b();
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

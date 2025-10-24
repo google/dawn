@@ -5,7 +5,7 @@ float2 v() {
   return float2(0.0f);
 }
 
-void f() {
+kernel void f() {
   float2 const a = float2(1.0f);
   float2 const b = float2(a);
   float2 const c = float2(v());

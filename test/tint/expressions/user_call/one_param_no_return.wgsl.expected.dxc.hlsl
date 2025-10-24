@@ -4,12 +4,9 @@ void c(int z) {
   a = asint((asuint(a) + asuint(int(2))));
 }
 
+[numthreads(1, 1, 1)]
 void b() {
   c(int(2));
   c(int(3));
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

@@ -4,6 +4,7 @@ fn c() -> i32 {
   return a;
 }
 
+@compute @workgroup_size(1)
 fn b() {
   var b = c();
   b += c();

@@ -6,6 +6,7 @@ fn c(u : u32) -> i32 {
   return 1;
 }
 
+@compute @workgroup_size(1)
 fn a() {
   var a = b(c(2));
 }

@@ -12,6 +12,6 @@ void b() {
   c();
 }
 
-void a() {
+kernel void a() {
   b();
 }

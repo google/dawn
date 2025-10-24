@@ -17,6 +17,8 @@ struct tint_module_vars_struct {
   thread tint_array<int2, 2>* arr;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread tint_array<int2, 2> arr = tint_array<int2, 2>{int2(1), int2(2)};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arr=(&arr)};
   tint_array<int2, 2> v = (*tint_module_vars.arr);
 }

@@ -9,6 +9,8 @@ int4 tint_v4f32_to_v4i32(float4 value) {
   return int4(clamp(value, float4(-2147483648.0f), float4(2147483520.0f)));
 }
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread float4 u = float4(1.0f);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
   int4 const v = tint_v4f32_to_v4i32((*tint_module_vars.u));
 }

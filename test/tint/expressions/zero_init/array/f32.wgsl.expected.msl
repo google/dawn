@@ -13,6 +13,6 @@ struct tint_array {
   T elements[N];
 };
 
-void f() {
+kernel void f() {
   tint_array<float, 4> v = tint_array<float, 4>{};
 }

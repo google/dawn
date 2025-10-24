@@ -6,9 +6,7 @@ float b(int i) {
 int c(uint u) {
   return 1;
 }
-void a() {
-  float a_1 = b(c(2u));
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float a_1 = b(c(2u));
 }

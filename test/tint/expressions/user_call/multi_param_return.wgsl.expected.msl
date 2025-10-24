@@ -7,7 +7,7 @@ int c(int x, int y, int z) {
   return a;
 }
 
-void b() {
+kernel void b() {
   int b_1 = c(2, 3, 4);
   int const v = c(3, 4, 5);
   b_1 = as_type<int>((as_type<uint>(b_1) + as_type<uint>(v)));

@@ -9,6 +9,6 @@ int c(uint u) {
   return 1;
 }
 
-void a() {
+kernel void a() {
   float a_1 = b(c(2u));
 }

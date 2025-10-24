@@ -8,6 +8,8 @@ int4 vi(int4 x) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  i(int(1));
+  vi((int(0)).xxxx);
 }
 

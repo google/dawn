@@ -14,4 +14,8 @@ uvec4 vu(uvec4 x) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  i(1);
+  u(1u);
+  vi(ivec4(0));
+  vu(uvec4(0u));
 }

@@ -20,6 +20,6 @@ struct S {
   bool b;
 };
 
-void f() {
+kernel void f() {
   tint_array<S, 4> v = tint_array<S, 4>{};
 }

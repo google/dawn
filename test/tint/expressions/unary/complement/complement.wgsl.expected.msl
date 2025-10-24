@@ -16,3 +16,10 @@ int4 vi(int4 x) {
 uint4 vu(uint4 x) {
   return ~(x);
 }
+
+kernel void v() {
+  i(1);
+  u(1u);
+  vi(int4(0));
+  vu(uint4(0u));
+}

@@ -5,6 +5,8 @@ struct tint_module_vars_struct {
   thread bool4* u;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+kernel void f() {
+  thread bool4 u = bool4(true);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};
   uint4 const v = uint4((*tint_module_vars.u));
 }

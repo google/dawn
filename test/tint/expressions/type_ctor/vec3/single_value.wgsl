@@ -2,6 +2,7 @@ fn v() -> vec3<f32> {
     return vec3(0.0);
 }
 
+@compute @workgroup_size(1)
 fn f() {
     let a = vec3(1.0);
     let b = vec3(a);
