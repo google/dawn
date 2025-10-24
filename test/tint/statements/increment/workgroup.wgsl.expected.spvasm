@@ -1,33 +1,55 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 17
+; Bound: 32
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
+               OpExecutionMode %main LocalSize 1 1 1
                OpName %i "i"
+               OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
+               OpName %main_inner "main_inner"
+               OpName %tint_local_index "tint_local_index"
                OpName %main "main"
-               OpName %unused_entry_point "unused_entry_point"
+               OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
         %int = OpTypeInt 32 1
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
           %i = OpVariable %_ptr_Workgroup_int Workgroup
-       %void = OpTypeVoid
-          %6 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
+       %bool = OpTypeBool
+     %uint_2 = OpConstant %uint 2
+   %uint_264 = OpConstant %uint 264
       %int_1 = OpConstant %int 1
-       %main = OpFunction %void None %6
-          %7 = OpLabel
-          %8 = OpLoad %int %i None
-         %10 = OpBitcast %uint %8
-         %11 = OpBitcast %uint %int_1
-         %13 = OpIAdd %uint %10 %11
-         %14 = OpBitcast %int %13
-               OpStore %i %14 None
+      %int_0 = OpConstant %int 0
+         %28 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %10
+%tint_local_index = OpFunctionParameter %uint
+         %11 = OpLabel
+         %12 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %15 None
+               OpBranchConditional %12 %16 %15
+         %16 = OpLabel
+               OpStore %i %int_0 None
+               OpBranch %15
+         %15 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+         %20 = OpLoad %int %i None
+         %21 = OpBitcast %uint %20
+         %22 = OpBitcast %uint %int_1
+         %24 = OpIAdd %uint %21 %22
+         %25 = OpBitcast %int %24
+               OpStore %i %25 None
                OpReturn
                OpFunctionEnd
-%unused_entry_point = OpFunction %void None %6
-         %16 = OpLabel
+       %main = OpFunction %void None %28
+         %29 = OpLabel
+         %30 = OpLoad %uint %main_local_invocation_index_Input None
+         %31 = OpFunctionCall %void %main_inner %30
                OpReturn
                OpFunctionEnd

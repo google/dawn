@@ -14,12 +14,13 @@ struct tint_array {
 };
 
 struct S {
-  tint_array<int4, 4> a;
+  /* 0x0000 */ tint_array<int4, 4> a;
 };
 
 struct tint_module_vars_struct {
   device tint_array<S, 1>* tint_member;
   thread uint* v;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 struct tint_array_lengths_struct {
@@ -56,16 +57,19 @@ int idx6(tint_module_vars_struct tint_module_vars) {
   return 2;
 }
 
-void v_1(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
+kernel void v_1(device tint_array<S, 1>* v_2 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  thread uint v = 0u;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_2, .v=(&v), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_array_lengths_struct const v_3 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u)};
   {
     uint2 tint_loop_idx = uint2(4294967295u);
-    int const v_2 = idx1(tint_module_vars);
-    int const v_3 = idx2(tint_module_vars);
-    uint const v_4 = min(uint(v_2), (tint_array_lengths.tint_array_length_0_0 - 1u));
-    device int4* const v_5 = (&(*tint_module_vars.tint_member)[v_4].a[min(uint(v_3), 3u)]);
-    int const v_6 = idx3(tint_module_vars);
-    int const v_7 = as_type<int>((as_type<uint>((*v_5)[min(uint(v_6), 3u)]) + as_type<uint>(1)));
-    (*v_5)[min(uint(v_6), 3u)] = v_7;
+    int const v_4 = idx1(tint_module_vars);
+    int const v_5 = idx2(tint_module_vars);
+    uint const v_6 = min(uint(v_4), (v_3.tint_array_length_0_0 - 1u));
+    device int4* const v_7 = (&(*tint_module_vars.tint_member)[v_6].a[min(uint(v_5), 3u)]);
+    int const v_8 = idx3(tint_module_vars);
+    int const v_9 = as_type<int>((as_type<uint>((*v_7)[min(uint(v_8), 3u)]) + as_type<uint>(1)));
+    (*v_7)[min(uint(v_8), 3u)] = v_9;
     while(true) {
       if (all((tint_loop_idx == uint2(0u)))) {
         break;
@@ -79,13 +83,13 @@ void v_1(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct t
         tint_loop_idx.x = tint_low_inc;
         uint const tint_carry = uint((tint_low_inc == 4294967295u));
         tint_loop_idx.y = (tint_loop_idx.y - tint_carry);
-        int const v_8 = idx4(tint_module_vars);
-        int const v_9 = idx5(tint_module_vars);
-        uint const v_10 = min(uint(v_8), (tint_array_lengths.tint_array_length_0_0 - 1u));
-        device int4* const v_11 = (&(*tint_module_vars.tint_member)[v_10].a[min(uint(v_9), 3u)]);
-        int const v_12 = idx6(tint_module_vars);
-        int const v_13 = as_type<int>((as_type<uint>((*v_11)[min(uint(v_12), 3u)]) + as_type<uint>(1)));
-        (*v_11)[min(uint(v_12), 3u)] = v_13;
+        int const v_10 = idx4(tint_module_vars);
+        int const v_11 = idx5(tint_module_vars);
+        uint const v_12 = min(uint(v_10), (v_3.tint_array_length_0_0 - 1u));
+        device int4* const v_13 = (&(*tint_module_vars.tint_member)[v_12].a[min(uint(v_11), 3u)]);
+        int const v_14 = idx6(tint_module_vars);
+        int const v_15 = as_type<int>((as_type<uint>((*v_13)[min(uint(v_14), 3u)]) + as_type<uint>(1)));
+        (*v_13)[min(uint(v_14), 3u)] = v_15;
       }
       continue;
     }

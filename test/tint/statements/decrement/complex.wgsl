@@ -36,6 +36,7 @@ fn idx6() -> i32 {
   return 2;
 }
 
+@compute @workgroup_size(1)
 fn main() {
   for (buffer[idx1()].a[idx2()][idx3()]--;
        v < 10u;

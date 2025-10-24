@@ -31,6 +31,7 @@ int idx6() {
   return int(2);
 }
 
+[numthreads(1, 1, 1)]
 void main() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
@@ -71,9 +72,5 @@ void main() {
       continue;
     }
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

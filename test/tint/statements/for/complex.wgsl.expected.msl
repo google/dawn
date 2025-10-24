@@ -4,7 +4,7 @@ using namespace metal;
 void some_loop_body() {
 }
 
-void f() {
+kernel void f() {
   int j = 0;
   {
     uint2 tint_loop_idx = uint2(4294967295u);

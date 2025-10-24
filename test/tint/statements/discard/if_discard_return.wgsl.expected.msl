@@ -11,3 +11,12 @@ void f(bool cond, tint_module_vars_struct tint_module_vars) {
     return;
   }
 }
+
+fragment void v() {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
+  f(false, tint_module_vars);
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
+  }
+}

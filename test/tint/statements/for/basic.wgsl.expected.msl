@@ -4,7 +4,7 @@ using namespace metal;
 void some_loop_body() {
 }
 
-void f() {
+kernel void f() {
   {
     int i = 0;
     while(true) {

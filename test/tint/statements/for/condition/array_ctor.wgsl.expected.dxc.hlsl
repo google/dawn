@@ -1,4 +1,5 @@
 
+[numthreads(1, 1, 1)]
 void f() {
   int i = int(0);
   {
@@ -20,9 +21,5 @@ void f() {
       continue;
     }
   }
-}
-
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
 }
 

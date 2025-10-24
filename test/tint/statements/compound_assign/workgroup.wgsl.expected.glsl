@@ -9,11 +9,18 @@ int tint_div_i32(int lhs, int rhs) {
   uint v_2 = uint((rhs == 0));
   return (lhs / mix(rhs, 1, bool((v_2 | uint(v_1)))));
 }
-void foo() {
+void foo_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    a = 0;
+    b = vec4(0.0f);
+    c = mat2(vec2(0.0f), vec2(0.0f));
+  }
+  barrier();
   a = tint_div_i32(a, 2);
   b = (b * mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f)));
   c = (c * 2.0f);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  foo_inner(gl_LocalInvocationIndex);
 }

@@ -5,6 +5,11 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
-void f(tint_module_vars_struct tint_module_vars) {
+fragment void f() {
+  thread bool continue_execution = true;
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
   (*tint_module_vars.continue_execution) = false;
+  if (!((*tint_module_vars.continue_execution))) {
+    discard_fragment();
+  }
 }

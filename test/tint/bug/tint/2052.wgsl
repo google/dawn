@@ -1,3 +1,4 @@
+@fragment
 fn f() {
     discard;
 }

@@ -7,6 +7,12 @@ struct tint_module_vars_struct {
   threadgroup float2x2* c;
 };
 
+struct tint_symbol_3 {
+  int tint_symbol;
+  float4 tint_symbol_1;
+  float2x2 tint_symbol_2;
+};
+
 int tint_div_i32(int lhs, int rhs) {
   uint const v = uint((lhs == (-2147483647 - 1)));
   bool const v_1 = bool((v & uint((rhs == -1))));
@@ -14,8 +20,19 @@ int tint_div_i32(int lhs, int rhs) {
   return (lhs / select(rhs, 1, bool((v_2 | uint(v_1)))));
 }
 
-void foo(tint_module_vars_struct tint_module_vars) {
+void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.a) = 0;
+    (*tint_module_vars.b) = float4(0.0f);
+    (*tint_module_vars.c) = float2x2(float2(0.0f), float2(0.0f));
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   (*tint_module_vars.a) = tint_div_i32((*tint_module_vars.a), 2);
   (*tint_module_vars.b) = ((*tint_module_vars.b) * float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f)));
   (*tint_module_vars.c) = ((*tint_module_vars.c) * 2.0f);
+}
+
+kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_3* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v_3).tint_symbol), .b=(&(*v_3).tint_symbol_1), .c=(&(*v_3).tint_symbol_2)};
+  foo_inner(tint_local_index, tint_module_vars);
 }

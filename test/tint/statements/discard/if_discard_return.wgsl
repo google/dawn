@@ -4,3 +4,8 @@ fn f(cond : bool) {
     return;
   }
 }
+
+@fragment
+fn main() {
+    f(false);
+}
