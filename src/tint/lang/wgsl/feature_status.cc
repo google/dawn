@@ -36,6 +36,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             ////////////////////////////////////////////////////////////////////
             // Experimental features
             ///////////////////////////////////////////////////////////////////
+        case LanguageFeature::kSubgroupId:
         case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSizedBindingArray:
         case LanguageFeature::kTexelBuffers:

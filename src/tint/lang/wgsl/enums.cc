@@ -210,6 +210,9 @@ LanguageFeature ParseLanguageFeature(std::string_view str) {
     if (str == "sized_binding_array") {
         return LanguageFeature::kSizedBindingArray;
     }
+    if (str == "subgroup_id") {
+        return LanguageFeature::kSubgroupId;
+    }
     if (str == "texel_buffers") {
         return LanguageFeature::kTexelBuffers;
     }
@@ -245,6 +248,8 @@ std::string_view ToString(LanguageFeature value) {
             return "readonly_and_readwrite_storage_textures";
         case LanguageFeature::kSizedBindingArray:
             return "sized_binding_array";
+        case LanguageFeature::kSubgroupId:
+            return "subgroup_id";
         case LanguageFeature::kTexelBuffers:
             return "texel_buffers";
         case LanguageFeature::kUniformBufferStandardLayout:
