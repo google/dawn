@@ -37,9 +37,6 @@
             {% else %}
                 {{ arg_to_jni_type(member) }} {{ as_varName(member.name) }};
             {% endif %}
-            {% if member.type.category == 'callback function' %}
-                jobject {{as_varName(member.name)}}Executor;
-            {% endif %}
         {% endfor%}
     };
 {% endmacro %}
@@ -116,7 +113,12 @@
                                                 methodId,
                                                 userData1->callback
                                                 {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
-                                                    {{- ', ' }}_{{ callbackArg.name.camelCase() }}
+                                                    {{- ', ' }}
+                                                    {%- if member.type.category == 'kotlin type' -%}
+                                                        nullptr  {#- We can't make these. TODO(b/451995459): Don't even create the converter. #}
+                                                    {%- else -%}
+                                                        _{{ callbackArg.name.camelCase() }}
+                                                    {%- endif -%}
                                                 {%- endfor %});
 
                             env->CallVoidMethod(userData1->executor, executeMethodID, runnable);
@@ -128,7 +130,7 @@
                           .jvm = c->jvm
                         })).release();
                     }
-                {% else %}
+                {% elif member.type.category != 'kotlin type' %}
                     auto& in = inStruct.{{member.name.camelCase()}};
                     auto& out = outStruct->{{member.name.camelCase()}};
                 {% endif %}
@@ -200,7 +202,7 @@
                     out = reinterpret_cast<{{as_cType(member.type.name)}}>(static_cast<uintptr_t>(in));
                 {% elif member.type.category in ["native", "enum", "bitmask"] %}
                     out = static_cast<{{as_cType(member.type.name)}}>(in);
-                {% else %}
+                {% elif member.type.category != 'kotlin type' %}
                     {{ unreachable_code() }}
                 {% endif %}
             }

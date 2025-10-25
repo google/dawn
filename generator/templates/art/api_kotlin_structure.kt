@@ -27,20 +27,11 @@
 package {{ kotlin_package }}
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_definition with context %}
 
-{# Add executor related imports if structure contains a callback function #}
-{% if 'callback function' in (kotlin_record_members(structure.members) | map(attribute='type.category')) %}
-    import java.util.concurrent.Executor
-{% endif %}
-
 public class {{ structure.name.CamelCase() }}
     {%- for member in kotlin_record_members(structure.members) %}
         {% if kotlin_default(member) is not none %} @JvmOverloads constructor{% break %}{% endif %}
     {%- endfor %}(
     {% for member in kotlin_record_members(structure.members) %}
-        {% if member.type.category in ['callback function']%}
-        {{'     '}}@get:JvmName("get{{member.name.CamelCase()}}Executor")
-        {{'     '}}public var {{member.name.camelCase()}}Executor: Executor,
-        {% endif %}
         {{ kotlin_annotation(member) }} public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
     {% for structure in chain_children[structure.name.get()] %}

@@ -29,7 +29,7 @@
     {%- if arg == None -%}
         void
     {%- elif arg.length and arg.length != 'constant' -%}
-        {%- if arg.type.category in ['callback function', 'function pointer', 'object', 'callback info', 'structure'] -%}
+        {%- if arg.type.category in ['callback function', 'function pointer', 'kotlin type', 'object', 'structure'] -%}
             jobjectArray
         {%- elif arg.type.name.get() == 'void' -%}
             jobject
@@ -46,7 +46,7 @@
 {% macro to_jni_type(type) %}
     {%- if type.name.get() == "string view" -%}
         jstring
-    {%- elif type.category in ['callback function', 'function pointer', 'object', 'callback info', 'structure'] -%}
+    {%- elif type.category in ['callback function', 'function pointer', 'kotlin type', 'object', 'structure'] -%}
         jobject
     {%- elif type.category in ['bitmask', 'enum'] -%}
         jint
@@ -66,7 +66,7 @@
 {% endmacro %}
 
 {% macro jni_signature_single_value(type) %}
-    {%- if type.category in ['function pointer', 'object', 'callback function', 'callback info', 'structure'] -%}
+    {%- if type.category in ['callback function', 'function pointer', 'kotlin type', 'object', 'structure'] -%}
         L{{ jni_name(type) }};
     {%- elif type.category in ['bitmask', 'enum'] -%}
         {{ jni_signatures['int32_t'] }}
@@ -93,7 +93,7 @@
     {% if size is string %}
         {% if member.type.name.get() in ['void const *', 'void *'] %}
             jobject {{ output }} = toByteBuffer(env, {{ input }}, {{ size }});
-        {% elif member.type.category in ['object', 'callback info', 'structure'] %}
+        {% elif member.type.category in ['object', 'structure'] %}
             //* Native container converted to a Kotlin container.
             jobjectArray {{ output }} = env->NewObjectArray(
                     {{ size }}, classes->{{ member.type.name.camelCase() }}, 0);
@@ -114,7 +114,7 @@
             jmethodID init = env->GetMethodID(clz, "<init>", "(J)V");
             {{ output }} = env->NewObject(clz, init, reinterpret_cast<jlong>({{ input }}));
         }
-    {% elif member.type.category in ['callback info', 'structure'] %}
+    {% elif member.type.category == 'structure' %}
         jobject {{ output }} = ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
     {% elif member.type.name.get() == 'void *' %}
         jlong {{ output }} = reinterpret_cast<jlong>({{ input }});
@@ -124,7 +124,7 @@
     {% elif member.type.category in ['callback function', 'function pointer'] %}
         jobject {{ output }} = nullptr;
         dawn::WarningLog() << "while converting {{ as_cType(member.type.name) }}: Native callbacks cannot be converted to Kotlin";
-    {% else %}
+    {% elif member.type.category != 'kotlin type' %}
         {{ unreachable_code() }}
     {% endif %}
 {% endmacro %}

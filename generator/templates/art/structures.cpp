@@ -145,7 +145,11 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
             clz,
             ctor
         {%- for member in kotlin_record_members(structure.members) %},
-                {{ member.name.camelCase() -}}
+            {%- if member.type.category == 'kotlin type' -%}
+                nullptr  {#- We can't make these. TODO(b/451995459): Don't even create the converter. #}
+            {%- else -%}
+                {{ member.name.camelCase() }}
+            {%- endif -%}
         {%- endfor -%}
         {%- for structure in chain_children[structure.name.get()] -%},
                 {{ structure.name.camelCase() -}}
@@ -170,13 +174,6 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
                 jmethodID getter = env->GetMethodID(clz, "get{{member.name.CamelCase()}}", "(){{jni_signature(member)}}");
                 CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}});
             }
-
-            {% if "callback" in as_varName(member.name) | lower %}
-                {
-                    jmethodID getter = env->GetMethodID(clz, "get{{member.name.CamelCase()}}Executor", "()Ljava/util/concurrent/Executor;");
-                    CallGetter(env, getter, obj, &kotlinRecord.{{as_varName(member.name)}}Executor);
-                }
-            {% endif %}
         {% endfor %}
 
         //* Fill all struct members from the Kotlin record.

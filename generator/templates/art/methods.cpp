@@ -73,9 +73,6 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     //* Define the helper structs to perform most of the conversion.
     struct {{KotlinRecord}} {
         {% for arg in kotlin_record_members(method.arguments) %}
-            {% if "callback" in as_varName(arg.name) | lower %}
-                jobject {{as_varName(arg.name)}}Executor;
-            {% endif %}
             {{ arg_to_jni_type(arg) }} {{ as_varName(arg.name) }};
         {% endfor %}
     };
@@ -96,10 +93,6 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 
     //* Make the signature for each argument in turn.
     {% for arg in kotlin_record_members(method.arguments) %},
-        {% if "callback" in as_varName(arg.name) | lower %}
-            jobject _{{as_varName(arg.name)}}Executor
-            ,
-        {% endif %}
         {{ arg_to_jni_type(arg) }} _{{ as_varName(arg.name) }}
     {% endfor %}) {
 
@@ -110,9 +103,6 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     //* Perform the conversion of arguments.
     {{KotlinRecord}} kotlinRecord;
     {% for arg in kotlin_record_members(method.arguments) %}
-        {% if "callback" in as_varName(arg.name) | lower %}
-            kotlinRecord.{{as_varName(arg.name)}}Executor = _{{as_varName(arg.name)}}Executor;
-        {% endif %}
         kotlinRecord.{{ as_varName(arg.name) }} = _{{ as_varName(arg.name) }};
     {% endfor %}
     {{ArgsStruct}} args;

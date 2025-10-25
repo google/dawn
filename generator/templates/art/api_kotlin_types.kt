@@ -31,6 +31,8 @@
     {%- set default_value = arg.default_value %}
     {%- if arg == None -%}
         Unit
+    {%- elif type.category == 'kotlin type' -%}
+        {{ type.name.get() }}  {#- The name *is* the type #}
     {%- elif arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional }}
     {%- elif type.name.get() == 'void' %}

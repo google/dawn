@@ -28,10 +28,6 @@ package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
-{% for method in obj.methods if has_callbackInfoStruct(method) %}
-    import java.util.concurrent.Executor
-    {% break %}
-{% endfor %}
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
 
 public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable {
@@ -46,9 +42,6 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
         {{ kotlin_annotation(kotlin_return(method)) }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
-            {%- if as_varName(arg.name) == 'callback' %}
-                {{arg.name.camelCase()}}Executor: Executor,{{' '}}
-            {%- endif %}
             {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
         {%- endfor -%}): {{ kotlin_declaration(kotlin_return(method)) }}
 

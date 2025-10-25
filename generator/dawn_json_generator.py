@@ -829,11 +829,18 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         for member in members:
             # Partially inline away 'callback info'.
             if member.type.category == 'callback info':
+                # We replace the callback info with 1. an executor...
+                name = member.name.get().removesuffix(' info')
+                yield RecordMember(
+                    Name(name + ' executor'),
+                    Type('java.util.concurrent.Executor',
+                         {'category': 'kotlin type'}), None, {})
                 for callback_info_member in member.type.members:
                     if callback_info_member.type.category == 'callback function':
+                        # ... and 2. the callback function, with a new name based on the callback
+                        # info.
                         function_member = deepcopy(callback_info_member)
-                        function_member.name = Name(
-                            member.name.get().removesuffix(' info'))
+                        function_member.name = Name(name)
                         yield function_member
 
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
@@ -969,6 +976,9 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
                                    {}).get('omitted') is not True
 
     def jni_name(type):
+        if type.category == 'kotlin type':
+            # Standard library Kotlin class (with namespace) just needs converting.
+            return type.name.get().replace('.', '/')
         return kt_file_path + '/' + type.name.CamelCase()
 
     # A structure may need to know which other structures listed it as a chain root, e.g.
