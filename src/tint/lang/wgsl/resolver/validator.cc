@@ -1098,13 +1098,19 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             }
             break;
         case core::BuiltinValue::kSubgroupId:
-            // TODO(crbug.com/416555787): Move this to the `subgroups` extension.
-            if (!enabled_extensions_.Contains(
-                    wgsl::Extension::kChromiumExperimentalSubgroupMatrix)) {
-                AddError(attr->source) << "use of " << style::Attribute("@builtin")
-                                       << style::Code("(", style::Enum(builtin), ")")
-                                       << " attribute requires enabling extension "
-                                       << style::Code("chromium_experimental_subgroup_matrix");
+            if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " attribute requires enabling extension " << style::Code("subgroups");
+                return false;
+            }
+            // TODO(crbug.com/454654105): Remove this check.
+            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kSubgroupId)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")") << " attribute requires the "
+                    << style::Code("subgroup_id") << " language feature";
                 return false;
             }
             if (!type->Is<core::type::U32>()) {

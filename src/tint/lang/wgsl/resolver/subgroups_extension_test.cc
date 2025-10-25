@@ -209,11 +209,26 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupIdAttribWithoutExtensionError)
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: use of '@builtin(subgroup_id)' attribute requires enabling extension 'chromium_experimental_subgroup_matrix')");
+        R"(error: use of '@builtin(subgroup_id)' attribute requires enabling extension 'subgroups')");
+}
+
+TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupIdAttribWithoutLanguageExtension) {
+    Enable(wgsl::Extension::kSubgroups);
+    Structure("Inputs", Vector{
+                            Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupId)}),
+                        });
+
+    wgsl::AllowedFeatures allowed_features{};
+    allowed_features.extensions.insert(wgsl::Extension::kSubgroups);
+    Resolver resolver{this, allowed_features};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(
+        resolver.error(),
+        R"(error: use of '@builtin(subgroup_id)' attribute requires the 'subgroup_id' language feature)");
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupIdAttribWithExtension) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Enable(wgsl::Extension::kSubgroups);
     Structure("Inputs", Vector{
                             Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupId)}),
                         });
@@ -222,7 +237,7 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupIdAttribWithExtension) {
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupIdI32Error) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Enable(wgsl::Extension::kSubgroups);
     Structure("Inputs", Vector{
                             Member("a", ty.i32(), Vector{Builtin(core::BuiltinValue::kSubgroupId)}),
                         });
@@ -232,7 +247,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupIdI32Error) {
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupIdFragmentShader) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Enable(wgsl::Extension::kSubgroups);
     Func("main", Vector{Param("size", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupId)})},
          ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});
 
@@ -242,7 +257,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupIdFragmentShader) {
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupIdComputeShaderOutput) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroupMatrix);
+    Enable(wgsl::Extension::kSubgroups);
 
     Func("main", tint::Empty, ty.u32(),
          Vector{
