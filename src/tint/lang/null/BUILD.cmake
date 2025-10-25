@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,10 +34,4 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/core/BUILD.cmake)
-include(lang/glsl/BUILD.cmake)
-include(lang/hlsl/BUILD.cmake)
-include(lang/msl/BUILD.cmake)
-include(lang/null/BUILD.cmake)
-include(lang/spirv/BUILD.cmake)
-include(lang/wgsl/BUILD.cmake)
+include(lang/null/writer/BUILD.cmake)

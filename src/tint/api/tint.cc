@@ -64,6 +64,10 @@
 #include "src/tint/lang/wgsl/writer/writer.h"  // nogncheck
 #endif
 
+#if TINT_BUILD_NULL_WRITER
+#include "src/tint/lang/null/writer/writer.h"  // nogncheck
+#endif
+
 // IWYU pragma: end_keep
 
 #if TINT_BUILD_SPV_READER && TINT_BUILD_WGSL_WRITER

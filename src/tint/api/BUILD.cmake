@@ -53,6 +53,7 @@ tint_target_add_dependencies(tint_api lib
   tint_lang_core_ir
   tint_lang_core_type
   tint_lang_hlsl_writer_common
+  tint_lang_null_writer_common
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_inspector
@@ -94,6 +95,12 @@ if(TINT_BUILD_MSL_WRITER)
     tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
+
+if(TINT_BUILD_NULL_WRITER)
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_null_writer
+  )
+endif(TINT_BUILD_NULL_WRITER)
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_api lib

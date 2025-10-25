@@ -25,29 +25,27 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#ifndef SRC_TINT_LANG_NULL_WRITER_WRITER_H_
+#define SRC_TINT_LANG_NULL_WRITER_WRITER_H_
 
-#include <unordered_map>
+#include "src/tint/lang/null/writer/common/options.h"
+#include "src/tint/lang/null/writer/common/output.h"
+#include "src/tint/utils/result.h"
 
-#include "src/tint/api/common/override_id.h"
-#include "src/tint/utils/reflection.h"
+// Forward declarations
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
-namespace tint {
+namespace tint::null::writer {
 
-/// Configuration options for the transform
-struct SubstituteOverridesConfig {
-    /// The map of override identifier to the override value.
-    /// The value is always a double coming into the transform and will be
-    /// converted to the correct type through and initializer.
-    std::unordered_map<OverrideId, double> map;
+/// Run generator for the Null backend, according to a set of configuration options.
+/// The result will contain the supplementary information, or failure.
+/// @param ir the IR module
+/// @param options the configuration options to use
+/// @returns the supplementary information, or failure
+Result<Output> Generate(core::ir::Module& ir, const Options& options);
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(SubstituteOverridesConfig, map);
-    TINT_REFLECT_EQUALS(SubstituteOverridesConfig);
-    TINT_REFLECT_HASH_CODE(SubstituteOverridesConfig);
-};
+}  // namespace tint::null::writer
 
-}  // namespace tint
-
-#endif  // SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#endif  // SRC_TINT_LANG_NULL_WRITER_WRITER_H_

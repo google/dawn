@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2025 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,10 +34,28 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/core/BUILD.cmake)
-include(lang/glsl/BUILD.cmake)
-include(lang/hlsl/BUILD.cmake)
-include(lang/msl/BUILD.cmake)
-include(lang/null/BUILD.cmake)
-include(lang/spirv/BUILD.cmake)
-include(lang/wgsl/BUILD.cmake)
+################################################################################
+# Target:    tint_lang_null_writer_common
+# Kind:      lib
+################################################################################
+tint_add_target(tint_lang_null_writer_common lib
+  lang/null/writer/common/options.cc
+  lang/null/writer/common/options.h
+  lang/null/writer/common/output.cc
+  lang/null/writer/common/output.h
+)
+
+tint_target_add_dependencies(tint_lang_null_writer_common lib
+  tint_api_common
+  tint_utils
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+)
+
+tint_target_add_external_dependencies(tint_lang_null_writer_common lib
+  "src_utils"
+)

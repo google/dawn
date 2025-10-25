@@ -25,29 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#include "src/tint/lang/null/writer/common/output.h"
 
-#include <unordered_map>
+namespace tint::null::writer {
 
-#include "src/tint/api/common/override_id.h"
-#include "src/tint/utils/reflection.h"
+Output::Output() = default;
 
-namespace tint {
+Output::~Output() = default;
 
-/// Configuration options for the transform
-struct SubstituteOverridesConfig {
-    /// The map of override identifier to the override value.
-    /// The value is always a double coming into the transform and will be
-    /// converted to the correct type through and initializer.
-    std::unordered_map<OverrideId, double> map;
+Output::Output(const Output&) = default;
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(SubstituteOverridesConfig, map);
-    TINT_REFLECT_EQUALS(SubstituteOverridesConfig);
-    TINT_REFLECT_HASH_CODE(SubstituteOverridesConfig);
-};
+Output& Output::operator=(const Output&) = default;
 
-}  // namespace tint
-
-#endif  // SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+}  // namespace tint::null::writer

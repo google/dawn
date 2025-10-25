@@ -25,29 +25,40 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#ifndef SRC_TINT_LANG_NULL_WRITER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_NULL_WRITER_COMMON_OPTIONS_H_
 
-#include <unordered_map>
+#include <string>
 
-#include "src/tint/api/common/override_id.h"
+#include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/utils/reflection.h"
 
-namespace tint {
+namespace tint::null::writer {
 
-/// Configuration options for the transform
-struct SubstituteOverridesConfig {
-    /// The map of override identifier to the override value.
-    /// The value is always a double coming into the transform and will be
-    /// converted to the correct type through and initializer.
-    std::unordered_map<OverrideId, double> map;
+/// Configuration options used for Null generator.
+struct Options {
+    /// Constructor
+    Options();
+    /// Destructor
+    ~Options();
+    /// Copy constructor
+    Options(const Options&);
+    /// Copy assignment
+    /// @returns this Options
+    Options& operator=(const Options&);
+
+    /// The entry point name to emit
+    std::string entry_point_name = {};
+
+    // Substitute Overrides
+    SubstituteOverridesConfig substitute_overrides_config = {};
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(SubstituteOverridesConfig, map);
-    TINT_REFLECT_EQUALS(SubstituteOverridesConfig);
-    TINT_REFLECT_HASH_CODE(SubstituteOverridesConfig);
+    TINT_REFLECT(Options, entry_point_name, substitute_overrides_config);
+    TINT_REFLECT_EQUALS(Options);
+    TINT_REFLECT_HASH_CODE(Options);
 };
 
-}  // namespace tint
+}  // namespace tint::null::writer
 
-#endif  // SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#endif  // SRC_TINT_LANG_NULL_WRITER_COMMON_OPTIONS_H_

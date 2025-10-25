@@ -25,29 +25,29 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#include "src/tint/lang/null/writer/raise/raise.h"
 
-#include <unordered_map>
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
+#include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 
-#include "src/tint/api/common/override_id.h"
-#include "src/tint/utils/reflection.h"
+namespace tint::null::writer {
 
-namespace tint {
+Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
+#define RUN_TRANSFORM(name, ...)         \
+    do {                                 \
+        auto result = name(__VA_ARGS__); \
+        if (result != Success) {         \
+            return result.Failure();     \
+        }                                \
+    } while (false)
 
-/// Configuration options for the transform
-struct SubstituteOverridesConfig {
-    /// The map of override identifier to the override value.
-    /// The value is always a double coming into the transform and will be
-    /// converted to the correct type through and initializer.
-    std::unordered_map<OverrideId, double> map;
+    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(SubstituteOverridesConfig, map);
-    TINT_REFLECT_EQUALS(SubstituteOverridesConfig);
-    TINT_REFLECT_HASH_CODE(SubstituteOverridesConfig);
-};
+    RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
+                  options.substitute_overrides_config);
 
-}  // namespace tint
+    return Success;
+}
 
-#endif  // SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+}  // namespace tint::null::writer

@@ -25,29 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
-#define SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+#include "src/tint/lang/null/writer/writer.h"
 
-#include <unordered_map>
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/reflection.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/null/writer/raise/raise.h"
 
-#include "src/tint/api/common/override_id.h"
-#include "src/tint/utils/reflection.h"
+namespace tint::null::writer {
 
-namespace tint {
+Result<Output> Generate(core::ir::Module& ir, const Options& options) {
+    Output output;
 
-/// Configuration options for the transform
-struct SubstituteOverridesConfig {
-    /// The map of override identifier to the override value.
-    /// The value is always a double coming into the transform and will be
-    /// converted to the correct type through and initializer.
-    std::unordered_map<OverrideId, double> map;
+    // Raise from core-dialect
+    auto raise_result = Raise(ir, options);
+    if (raise_result != Success) {
+        return raise_result.Failure();
+    }
 
-    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(SubstituteOverridesConfig, map);
-    TINT_REFLECT_EQUALS(SubstituteOverridesConfig);
-    TINT_REFLECT_HASH_CODE(SubstituteOverridesConfig);
-};
+    auto wg_info = GetWorkgroupInfo(ir);
+    if (wg_info != Success) {
+        return wg_info.Failure();
+    }
 
-}  // namespace tint
+    output.workgroup_info = {
+        .x = wg_info.Get().x,
+        .y = wg_info.Get().y,
+        .z = wg_info.Get().z,
+        .storage_size = wg_info.Get().storage_size,
+    };
 
-#endif  // SRC_TINT_API_COMMON_SUBSTITUTE_OVERRIDES_CONFIG_H_
+    return output;
+}
+
+}  // namespace tint::null::writer

@@ -98,6 +98,12 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_HLSL_WRITER=0" ]
   }
 
+  if (tint_build_null_writer) {
+    defines += [ "TINT_BUILD_NULL_WRITER=1" ]
+  } else {
+    defines += [ "TINT_BUILD_NULL_WRITER=0" ]
+  }
+
   if (tint_build_glsl_writer) {
     defines += [ "TINT_BUILD_GLSL_WRITER=1" ]
   } else {
