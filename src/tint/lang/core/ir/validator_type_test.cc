@@ -959,6 +959,22 @@ TEST_F(IR_ValidatorTest, BindingArrayNonSampledTexture) {
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
 }
 
+TEST_F(IR_ValidatorTest, BindingArrayInvalidAddressSpace) {
+    b.Append(mod.root_block, [&] {
+        b.Var("m", AddressSpace::kWorkgroup,
+              ty.binding_array(ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), 4));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:3 error: var: handle types can only be declared in the 'handle' address space
+  %m:ptr<workgroup, binding_array<texture_2d<f32>, 4>, read_write> = var undef
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^)"));
+}
+
 TEST_F(IR_ValidatorTest, ResourceBinding_WithoutCapabilityFails) {
     b.Append(mod.root_block, [&] {
         auto* var = b.Var("m", AddressSpace::kHandle, ty.Get<core::type::ResourceBinding>());

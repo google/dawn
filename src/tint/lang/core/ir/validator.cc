@@ -2329,6 +2329,12 @@ void Validator::CheckType(const core::type::Type* root,
                     diag() << "binding_array count must be a constant expression";
                     return false;
                 }
+                if (!(addrspace == AddressSpace::kUndefined ||
+                      addrspace == AddressSpace::kHandle) &&
+                    !capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
+                    diag() << "invalid address space for binding_array : " << addrspace;
+                    return false;
+                }
 
                 if (!capabilities_.Contains(Capability::kAllowNonCoreTypes)) {
                     if (!t->ElemType()->Is<core::type::SampledTexture>()) {
