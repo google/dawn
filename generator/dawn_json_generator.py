@@ -804,12 +804,28 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     customize_enums = customize_api["enums"]
 
     def kotlin_record_members(members):
-        # Members are sorted so that those with default parameters appear after those without.
-        for member in sorted(members,
+        # Members are sorted in the following order.
+        # 1. members with no default value (except callbacks).
+        # 2. members with default values.
+        # 3. callbacks.
+        for member in sorted(kotlin_record_members_unsorted(members),
                              key=lambda arg: kotlin_default(arg) is not None):
-            if member.type.category == 'callback info':
-                continue
+            yield member
 
+        # Callbacks always go at the end.
+        for member in members:
+            if member.type.category == 'callback info':
+                for callback_info_member in member.type.members:
+                    if callback_info_member.type.category == 'callback function':
+                        # We give the callback function a new name based on the callback info.
+                        name = member.name.get().removesuffix(' info')
+                        function_member = deepcopy(callback_info_member)
+                        function_member.name = Name(name)
+                        yield function_member
+                    continue
+
+    def kotlin_record_members_unsorted(members):
+        for member in members:
             # length parameters are omitted because Kotlin containers have 'length'.
             if member in [m.length for m in members]:
                 continue
@@ -823,25 +839,17 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
             if member.annotation == '*' and member.length == 'constant':
                 continue
 
-            yield member
-
-        # Callbacks appear at the end of the list.
-        for member in members:
-            # Partially inline away 'callback info'.
+            # We replace the callback info with an executor here.
             if member.type.category == 'callback info':
-                # We replace the callback info with 1. an executor...
                 name = member.name.get().removesuffix(' info')
                 yield RecordMember(
                     Name(name + ' executor'),
                     Type('java.util.concurrent.Executor',
                          {'category': 'kotlin type'}), None, {})
-                for callback_info_member in member.type.members:
-                    if callback_info_member.type.category == 'callback function':
-                        # ... and 2. the callback function, with a new name based on the callback
-                        # info.
-                        function_member = deepcopy(callback_info_member)
-                        function_member.name = Name(name)
-                        yield function_member
+                continue
+
+            yield member
+
 
     # Calculate if we should, and can, provide a Kotlin default value for a given argument.
     # This will affect its order in the method parameter and structure field lists.
