@@ -31,63 +31,62 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition with context %}
 
-//* Provide an async wrapper for the 'callback info' type of async methods.
-{% for obj in by_category['object'] %}
-    {% for method in obj.methods if has_callbackInfoStruct(method) and include_method(obj, method) %}
-        {% set callback_info = method.arguments[-1].type %}
-        {% set callback_function = callback_info.members[-1].type %}
-        {% set return_name = callback_function.name.chunks[:-1] | map('title') | join + 'Return' %}
+{% macro async_wrapper(obj, method, callback_arg) %}
+    {% set return_name = callback_arg.type.name.chunks[:-1] | map('title') | join + 'Return' %}
+    {% set result_args = kotlin_record_members(callback_arg.type.arguments) | list %}
 
-        //* We make a return class for every callback method so that it can be used inline
-        //* (without callbacks) in a suspend (async) function.
-        public class {{ return_name }}(
-            {% for arg in kotlin_record_members(callback_function.arguments) %}
-                {{ kotlin_annotation(arg) }} public val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
-            {% endfor %}) {
-            //* Required for destructuring declarations. These come for free in a 'data' class but
-            //* we don't make it a data class because that can cause binary compatibility issues.
-            {% for arg in kotlin_record_members(callback_function.arguments) %}
-                public operator fun component{{ loop.index }}() : {{ kotlin_declaration(arg) }} =
-                    {{- as_varName(arg.name) }}
-            {% endfor %}
-        }
+    //* We make a return class to receive the callback's (possibly multiple) return values.
+    public class {{ return_name }}(
+        {% for arg in result_args %}
+            {{ kotlin_annotation(arg) }} public val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }}{{ ',' if not loop.last }}
+        {% endfor %}) {
+        //* Required for destructuring declarations. These come for free in a 'data' class but
+        //* we don't make it a data class because that can cause binary compatibility issues.
+        {% for arg in result_args %}
+            public operator fun component{{ loop.index }}() : {{ kotlin_declaration(arg) }} =
+                {{- as_varName(arg.name) }}
+        {% endfor %}
+    }
 
-        //* Every method that is identified as using callbacks is given a helper method that wraps
-        //* call with a suspend function.
-        public suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
-            {%- for arg in method.arguments[:-1] %}
-                {{ kotlin_annotation(arg) }}  {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
-            {%- endfor %}): {{ return_name }} = suspendCoroutine {
-                //* Result is handled by the async callback; this assignment satisfies @CheckReturnValue.
-                val unused = {{ method.name.camelCase() }}(
-                    {%- for arg in kotlin_record_members(method.arguments) %}
-                        {{- as_varName(arg.name) }}
-                        {%- if arg.type.category == 'kotlin type' -%}
-                            {%- if arg.type.name.get() == 'java.util.concurrent.Executor' -%}
-                                = Executor(Runnable::run)
-                            {%- else -%}
-                                {{ unreachable_code() }}
-                            {%- endif -%}
-                        {%- endif %}
-                        {%- if loop.last %}
-                            //* The final parameter of a callback method is always callback info.
-                            //* We make this and include our generated callback.
-                            {{- ' = ' }}
-                        {%- else %}
-                            //* Non-final parameters are whatever the client supplied.
-                            {{- ', ' }}
-                        {%- endif %}
-                    {%- endfor %}{
-                    {%- for arg in kotlin_record_members(callback_function.arguments) %}
+    //* The wrapped method has executor and callback function stripped out (the wrapper supplies
+    //* those so the client doesn't have to).
+    public suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
+        {%- for arg in kotlin_record_members(method.arguments) if not (
+            arg.type.category == 'callback function' or
+            (arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor')
+        ) %}
+            {{ kotlin_annotation(arg) }}  {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
+        {%- endfor %}): {{ return_name }} = suspendCoroutine {
+        {{ method.name.camelCase() }}(
+            {%- for arg in kotlin_record_members(method.arguments) %}
+                {%- if arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor' -%}
+                    Executor(Runnable::run),
+                {%- elif arg.name.get() == callback_arg.name.get() %}{
+                    {%- for arg in kotlin_record_members(callback_arg.type.arguments) %}
                         {{- as_varName(arg.name) }},
                     {%- endfor %} -> it.resume({{ return_name }}(
                         //* We make an instance of the callback parameters -> return type wrapper.
-                        {%- for arg in kotlin_record_members(callback_function.arguments) %}
-                            {{- as_varName(arg.name) }} {{ ', ' }}
-                        {%- endfor %})
-                    )
-                })
-            }
+                        {%- for arg in result_args %}
+                            {{- as_varName(arg.name) }},
+                        {%- endfor %}
+                    ))},
+                {%- else -%}
+                    {{- as_varName(arg.name) }},
+                {%- endif %}
+            {%- endfor %})
+    }
+{% endmacro %}
+
+//* Every method that is identified as using callbacks is given a helper method that wraps the
+//* call with a suspend function.
+{% for obj in by_category['object'] %}
+    {%- for method in obj.methods if include_method(obj, method) %}
+        {%- for arg in kotlin_record_members(method.arguments) %}
+            {% if arg.type.category == 'callback function' %}
+                {{ async_wrapper(obj, method, arg) }}
+                {{ continue }}
+            {% endif %}
+        {% endfor %}
     {% endfor %}
 {% endfor %}
 
