@@ -356,6 +356,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(
         Toggle::EnableIntegerRangeAnalysisInRobustness,
         platform->IsFeatureEnabled(platform::Features::kWebGPUEnableRangeAnalysisForRobustness));
+
+    // TODO(crbug.com/454782021): hang on Qualcomm Adreno X1.
+    if (gpu_info::IsQualcommACPI(vendorId)) {
+        deviceToggles->ForceSet(Toggle::D3D11DelayFlushToGPU, false);
+    }
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
