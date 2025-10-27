@@ -37,13 +37,13 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/api/helpers/generate_bindings.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
-#include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -1405,25 +1405,6 @@ bool Generate([[maybe_unused]] const Options& options,
             return GenerateMsl(options, inspector, ir.Get());
         case Format::kGlsl:
             return GenerateGlsl(options, inspector, ir.Get());
-        default:
-            break;
-    }
-
-    // Run SubstituteOverrides to replace override instructions with constants.
-    // This needs to run after SingleEntryPoint which removes unused overrides.
-    auto substitute_override_cfg = CreateOverrideMap(options, inspector);
-    if (substitute_override_cfg != tint::Success) {
-        std::cerr << "Failed to create override map: " << substitute_override_cfg.Failure() << "\n";
-        return false;
-    }
-    auto substituteOverridesResult =
-        tint::core::ir::transform::SubstituteOverrides(ir.Get(), substitute_override_cfg.Get());
-    if (substituteOverridesResult != tint::Success) {
-        std::cerr << "SubstituteOverrides failed:\n" << substituteOverridesResult.Failure() << "\n";
-        return false;
-    }
-
-    switch (options.format) {
         case Format::kWgsl:
             TINT_UNREACHABLE();
         case Format::kNone:
@@ -1432,6 +1413,7 @@ bool Generate([[maybe_unused]] const Options& options,
             std::cerr << "Unknown output format specified\n";
             break;
     }
+
 #else
     std::cerr << "Cannot convert WGSL programs to Tint IR without the WGSL reader\n";
 #endif  // TINT_BUILD_WGSL_READER
