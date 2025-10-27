@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise lib
+  lang/hlsl/writer/raise/array_offset_from_uniform.cc
+  lang/hlsl/writer/raise/array_offset_from_uniform.h
   lang/hlsl/writer/raise/binary_polyfill.cc
   lang/hlsl/writer/raise/binary_polyfill.h
   lang/hlsl/writer/raise/builtin_polyfill.cc
@@ -95,6 +97,7 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_test test
+  lang/hlsl/writer/raise/array_offset_from_uniform_test.cc
   lang/hlsl/writer/raise/binary_polyfill_test.cc
   lang/hlsl/writer/raise/builtin_polyfill_test.cc
   lang/hlsl/writer/raise/decompose_storage_access_test.cc
@@ -115,6 +118,10 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
   tint_lang_core_ir_transform
   tint_lang_core_ir_transform_test
   tint_lang_core_type
+  tint_lang_hlsl
+  tint_lang_hlsl_intrinsic
+  tint_lang_hlsl_ir
+  tint_lang_hlsl_type
   tint_lang_hlsl_writer_common
   tint_lang_hlsl_writer_raise
   tint_utils

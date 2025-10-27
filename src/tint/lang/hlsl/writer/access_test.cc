@@ -2229,5 +2229,60 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, AccessStorage_OffsetFromUniform) {
+    auto* arr = b.Var<storage, array<vec3<f32>, 10>, core::Access::kReadWrite>("array");
+    arr->SetBindingPoint(1, 2);
+
+    auto* vec2_u32 = b.Var<storage, vec2<u32>, core::Access::kReadWrite>("vec2_u32");
+    vec2_u32->SetBindingPoint(1, 3);
+
+    auto* vec4_f16 = b.Var<storage, vec4<f16>, core::Access::kReadWrite>("vec4_f16");
+    vec4_f16->SetBindingPoint(1, 4);
+
+    b.ir.root_block->Append(arr);
+    b.ir.root_block->Append(vec2_u32);
+    b.ir.root_block->Append(vec4_f16);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a",
+              b.Load(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), arr, 3_u)));
+        b.Store(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), arr, 5_u),
+                b.Zero<vec3<f32>>());
+
+        b.Let("b", b.LoadVectorElement(vec2_u32, 1_u));
+        b.StoreVectorElement(vec2_u32, 1_u, 42_u);
+
+        b.Let("c", b.LoadVectorElement(vec4_f16, 3_u));
+        b.StoreVectorElement(vec4_f16, 3_u, 43_h);
+
+        b.Return(func);
+    });
+
+    Options options;
+    options.array_offset_from_uniform.ubo_binding = {11, 12};
+    options.array_offset_from_uniform.bindpoint_to_offset_index[{1, 2}] = 3;
+    options.array_offset_from_uniform.bindpoint_to_offset_index[{1, 3}] = 4;
+    options.array_offset_from_uniform.bindpoint_to_offset_index[{1, 4}] = 5;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+RWByteAddressBuffer array_1 : register(u2, space1);
+RWByteAddressBuffer vec2_u32 : register(u3, space1);
+RWByteAddressBuffer vec4_f16 : register(u4, space1);
+cbuffer cbuffer_tint_storage_buffer_dynamic_offsets : register(b12, space11) {
+  uint4 tint_storage_buffer_dynamic_offsets[2];
+};
+void foo() {
+  float3 a = asfloat(array_1.Load3((48u + tint_storage_buffer_dynamic_offsets[0u].w)));
+  array_1.Store3((80u + tint_storage_buffer_dynamic_offsets[0u].w), asuint((0.0f).xxx));
+  uint b = vec2_u32.Load((4u + tint_storage_buffer_dynamic_offsets[1u].x));
+  vec2_u32.Store((4u + tint_storage_buffer_dynamic_offsets[1u].x), 42u);
+  float16_t c = vec4_f16.Load<float16_t>((6u + tint_storage_buffer_dynamic_offsets[1u].y));
+  vec4_f16.Store<float16_t>((6u + tint_storage_buffer_dynamic_offsets[1u].y), float16_t(43.0h));
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

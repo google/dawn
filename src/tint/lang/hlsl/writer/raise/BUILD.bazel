@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "raise",
   srcs = [
+    "array_offset_from_uniform.cc",
     "binary_polyfill.cc",
     "builtin_polyfill.cc",
     "decompose_storage_access.cc",
@@ -51,6 +52,7 @@ cc_library(
     "shader_io.cc",
   ],
   hdrs = [
+    "array_offset_from_uniform.h",
     "binary_polyfill.h",
     "builtin_polyfill.h",
     "decompose_storage_access.h",
@@ -94,6 +96,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "array_offset_from_uniform_test.cc",
     "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",
     "decompose_storage_access_test.cc",
@@ -113,6 +116,10 @@ cc_library(
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/ir/transform:test",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/hlsl",
+    "//src/tint/lang/hlsl/intrinsic",
+    "//src/tint/lang/hlsl/ir",
+    "//src/tint/lang/hlsl/type",
     "//src/tint/lang/hlsl/writer/common",
     "//src/tint/lang/hlsl/writer/raise",
     "//src/tint/utils",

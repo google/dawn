@@ -53,7 +53,8 @@ void PopulateBindingRelatedOptions(
     const Options& options,
     RemapperData& remapper_data,
     tint::transform::multiplanar::BindingsMap& multiplanar_map,
-    ArrayLengthFromUniformOptions& array_length_from_uniform_options);
+    ArrayLengthFromUniformOptions& array_length_from_uniform_options,
+    ArrayOffsetFromUniformOptions& array_offset_from_uniform_options);
 
 }  // namespace tint::hlsl::writer
 
