@@ -77,7 +77,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         }
     }
 
-    auto check = CanGenerate(module, options);
+    auto check = CanGenerate(module, options, ep_name);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }

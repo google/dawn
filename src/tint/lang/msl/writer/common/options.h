@@ -34,6 +34,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
+#include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/utils/reflection.h"
 
@@ -157,6 +158,9 @@ struct Options {
     /// The bindings.
     Bindings bindings;
 
+    // Substitute Overrides
+    SubstituteOverridesConfig substitute_overrides_config = {};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  remapped_entry_point_name,
@@ -180,7 +184,8 @@ struct Options {
                  vertex_pulling_config,
                  immediate_binding_point,
                  group_to_argument_buffer_info,
-                 bindings);
+                 bindings,
+                 substitute_overrides_config);
     TINT_REFLECT_EQUALS(Options);
     TINT_REFLECT_HASH_CODE(Options);
 };

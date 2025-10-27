@@ -1011,6 +1011,15 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
 
+    // Run SubstituteOverrides to replace override instructions with constants.
+    // This needs to run after SingleEntryPoint which removes unused overrides.
+    auto substitute_override_cfg = CreateOverrideMap(options, inspector);
+    if (substitute_override_cfg != tint::Success) {
+        std::cerr << "Failed to create override map: " << substitute_override_cfg.Failure() << "\n";
+        return false;
+    }
+    gen_options.substitute_overrides_config = substitute_override_cfg.Get();
+
     // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
     for (auto* inst : *ir.root_block) {
@@ -1035,7 +1044,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     }
 
     // Check that the module and options are supported by the backend.
-    auto check = tint::msl::writer::CanGenerate(ir, gen_options);
+    auto check = tint::msl::writer::CanGenerate(ir, gen_options, options.ep_name);
     if (check != tint::Success) {
         std::cerr << check.Failure() << "\n";
         return false;
@@ -1380,6 +1389,8 @@ bool Generate([[maybe_unused]] const Options& options,
         case Format::kSpirv:
         case Format::kSpvAsm:
             return GenerateSpirv(options, inspector, ir.Get());
+        case Format::kMsl:
+            return GenerateMsl(options, inspector, ir.Get());
         case Format::kGlsl:
             return GenerateGlsl(options, inspector, ir.Get());
         default:
@@ -1401,8 +1412,6 @@ bool Generate([[maybe_unused]] const Options& options,
     }
 
     switch (options.format) {
-        case Format::kMsl:
-            return GenerateMsl(options, inspector, ir.Get());
         case Format::kHlsl:
         case Format::kHlslFxc:
             return GenerateHlsl(options, inspector, ir.Get());

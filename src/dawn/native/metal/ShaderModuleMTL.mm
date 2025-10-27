@@ -55,13 +55,11 @@ namespace dawn::native::metal {
 namespace {
 
 using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingConfig>;
-using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                           \
     X(SingleShaderStage, stage)                                                      \
     X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
     X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
     X(uint32_t, maxSubgroupSize)                                                     \
@@ -293,13 +291,15 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.stage = stage;
     req.shaderModuleHash = programmableStage.module->GetHash();
     req.inputProgram = UnsafeUnserializedValue(programmableStage.module->UseTintProgram());
-    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
     req.platform = UnsafeUnserializedValue(device->GetPlatform());
     req.useStrictMath = useStrictMath;
 
+    req.tintOptions.substitute_overrides_config = {
+        .map = BuildSubstituteOverridesTransformConfig(programmableStage),
+    };
     req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
     req.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
     req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
@@ -365,20 +365,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
                                 "Pipeline single entry point (IR) failed:\n%s",
                                 singleEntryPointResult.Failure().reason);
-            }
-
-            // this needs to run after SingleEntryPoint transform which removes unused
-            // overrides for the current entry point.
-            {
-                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
-                                                   "ShaderModuleSubstituteOverrides");
-                tint::SubstituteOverridesConfig cfg;
-                cfg.map = std::move(r.substituteOverrideConfig);
-                auto substituteOverridesResult =
-                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                                "Pipeline override substitution (IR) failed:\n%s",
-                                substituteOverridesResult.Failure().reason);
             }
 
             // Generate MSL.
