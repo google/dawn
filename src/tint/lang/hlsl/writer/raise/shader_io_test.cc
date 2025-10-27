@@ -4139,5 +4139,500 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_NonLinearWorkgroupSize) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
+    ep->SetParams({subgroup_id});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, subgroup_id));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(8u, 8u, 1u) func(%id:u32 [@subgroup_id]):void {
+  $B1: {
+    %3:u32 = mul %id, %id
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%foo_inner = func(%id:u32):void {
+  $B2: {
+    %4:u32 = mul %id, %id
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(8u, 8u, 1u) func():void {
+  $B3: {
+    %7:void = atomicStore %tint_subgroup_id_counter, 0u
+    %8:void = workgroupBarrier
+    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %10:bool = subgroupElect
+    if %10 [t: $B4] {  # if_1
+      $B4: {  # true
+        %11:u32 = atomicAdd %tint_subgroup_id_counter, 1u
+        store %tint_subgroup_id, %11
+        exit_if  # if_1
+      }
+    }
+    %12:u32 = load %tint_subgroup_id
+    %13:u32 = subgroupBroadcastFirst %12
+    %14:void = call %foo_inner, %13
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_NonLinearWorkgroupSize) {
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
+    ep->SetParams({num_subgroups});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), num_subgroups, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(8u, 8u, 1u) func(%num:u32 [@num_subgroups]):void {
+  $B1: {
+    %3:u32 = mul %num, %num
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%foo_inner = func(%num:u32):void {
+  $B2: {
+    %4:u32 = mul %num, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(8u, 8u, 1u) func():void {
+  $B3: {
+    %7:void = atomicStore %tint_subgroup_id_counter, 0u
+    %8:void = workgroupBarrier
+    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %10:bool = subgroupElect
+    if %10 [t: $B4] {  # if_1
+      $B4: {  # true
+        %11:u32 = atomicAdd %tint_subgroup_id_counter, 1u
+        store %tint_subgroup_id, %11
+        exit_if  # if_1
+      }
+    }
+    %12:void = workgroupBarrier
+    %13:u32 = atomicLoad %tint_subgroup_id_counter
+    %14:void = call %foo_inner, %13
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupId_Then_NumSubgroups_NonLinear) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
+    ep->SetParams({subgroup_id, num_subgroups});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(8u, 8u, 1u) func(%id:u32 [@subgroup_id], %num:u32 [@num_subgroups]):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%foo_inner = func(%id:u32, %num:u32):void {
+  $B2: {
+    %5:u32 = mul %id, %num
+    %x:u32 = let %5
+    ret
+  }
+}
+%foo = @compute @workgroup_size(8u, 8u, 1u) func():void {
+  $B3: {
+    %8:void = atomicStore %tint_subgroup_id_counter, 0u
+    %9:void = workgroupBarrier
+    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %11:bool = subgroupElect
+    if %11 [t: $B4] {  # if_1
+      $B4: {  # true
+        %12:u32 = atomicAdd %tint_subgroup_id_counter, 1u
+        store %tint_subgroup_id, %12
+        exit_if  # if_1
+      }
+    }
+    %13:u32 = load %tint_subgroup_id
+    %14:u32 = subgroupBroadcastFirst %13
+    %15:void = workgroupBarrier
+    %16:u32 = atomicLoad %tint_subgroup_id_counter
+    %17:void = call %foo_inner, %14, %16
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumSubgroups_Then_SubgroupId_NonLinear) {
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* ep = b.ComputeFunction("foo", 8_u, 8_u, 1_u);
+    ep->SetParams({num_subgroups, subgroup_id});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(8u, 8u, 1u) func(%num:u32 [@num_subgroups], %id:u32 [@subgroup_id]):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_subgroup_id_counter:ptr<workgroup, atomic<u32>, read_write> = var undef
+}
+
+%foo_inner = func(%num:u32, %id:u32):void {
+  $B2: {
+    %5:u32 = mul %id, %num
+    %x:u32 = let %5
+    ret
+  }
+}
+%foo = @compute @workgroup_size(8u, 8u, 1u) func():void {
+  $B3: {
+    %8:void = atomicStore %tint_subgroup_id_counter, 0u
+    %9:void = workgroupBarrier
+    %tint_subgroup_id:ptr<function, u32, read_write> = var undef
+    %11:bool = subgroupElect
+    if %11 [t: $B4] {  # if_1
+      $B4: {  # true
+        %12:u32 = atomicAdd %tint_subgroup_id_counter, 1u
+        store %tint_subgroup_id, %12
+        exit_if  # if_1
+      }
+    }
+    %13:void = workgroupBarrier
+    %14:u32 = atomicLoad %tint_subgroup_id_counter
+    %15:u32 = load %tint_subgroup_id
+    %16:u32 = subgroupBroadcastFirst %15
+    %17:void = call %foo_inner, %14, %16
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_LinearX) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* ep = b.ComputeFunction("foo", 64_u, 1_u, 1_u);
+    ep->SetParams({subgroup_id, num_subgroups});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(64u, 1u, 1u) func(%id:u32 [@subgroup_id], %num:u32 [@num_subgroups]):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  local_invocation_index:u32 @offset(0), @builtin(local_invocation_index)
+}
+
+%foo_inner = func(%id:u32, %num:u32):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(64u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %8:u32 = access %inputs, 0u
+    %9:u32 = hlsl.WaveGetLaneCount
+    %10:u32 = div %8, %9
+    %11:u32 = hlsl.WaveGetLaneCount
+    %12:u32 = add 63u, %11
+    %13:u32 = div %12, %11
+    %14:void = call %foo_inner, %10, %13
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_LinearY) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* ep = b.ComputeFunction("foo", 1_u, 64_u, 1_u);
+    ep->SetParams({subgroup_id, num_subgroups});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 64u, 1u) func(%id:u32 [@subgroup_id], %num:u32 [@num_subgroups]):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  local_invocation_index:u32 @offset(0), @builtin(local_invocation_index)
+}
+
+%foo_inner = func(%id:u32, %num:u32):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 64u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %8:u32 = access %inputs, 0u
+    %9:u32 = hlsl.WaveGetLaneCount
+    %10:u32 = div %8, %9
+    %11:u32 = hlsl.WaveGetLaneCount
+    %12:u32 = add 63u, %11
+    %13:u32 = div %12, %11
+    %14:void = call %foo_inner, %10, %13
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_SubgroupIdAndNumSubgroups_LinearZ) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* ep = b.ComputeFunction("foo", 1_u, 1_u, 64_u);
+    ep->SetParams({subgroup_id, num_subgroups});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, num_subgroups));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 64u) func(%id:u32 [@subgroup_id], %num:u32 [@num_subgroups]):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  local_invocation_index:u32 @offset(0), @builtin(local_invocation_index)
+}
+
+%foo_inner = func(%id:u32, %num:u32):void {
+  $B1: {
+    %4:u32 = mul %id, %num
+    %x:u32 = let %4
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 64u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %8:u32 = access %inputs, 0u
+    %9:u32 = hlsl.WaveGetLaneCount
+    %10:u32 = div %8, %9
+    %11:u32 = hlsl.WaveGetLaneCount
+    %12:u32 = add 63u, %11
+    %13:u32 = div %12, %11
+    %14:void = call %foo_inner, %10, %13
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest,
+       ShaderIOParameters_SubgroupIdAndNumSubgroups_Linear_UserDeclaredLocalInvocationIndex) {
+    auto* subgroup_id = b.FunctionParam("id", ty.u32());
+    subgroup_id->SetBuiltin(core::BuiltinValue::kSubgroupId);
+
+    auto* num_subgroups = b.FunctionParam("num", ty.u32());
+    num_subgroups->SetBuiltin(core::BuiltinValue::kNumSubgroups);
+
+    auto* local_invocation_index = b.FunctionParam("lid", ty.u32());
+    local_invocation_index->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
+
+    auto* ep = b.ComputeFunction("foo", 64_u, 1_u, 1_u);
+    ep->SetParams({subgroup_id, num_subgroups, local_invocation_index});
+    b.Append(ep->Block(), [&] {
+        b.Let("x", b.Multiply(ty.u32(), subgroup_id, local_invocation_index));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(64u, 1u, 1u) func(%id:u32 [@subgroup_id], %num:u32 [@num_subgroups], %lid:u32 [@local_invocation_index]):void {
+  $B1: {
+    %5:u32 = mul %id, %lid
+    %x:u32 = let %5
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(4) {
+  lid:u32 @offset(0), @builtin(local_invocation_index)
+}
+
+%foo_inner = func(%id:u32, %num:u32, %lid:u32):void {
+  $B1: {
+    %5:u32 = mul %id, %lid
+    %x:u32 = let %5
+    ret
+  }
+}
+%foo = @compute @workgroup_size(64u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %9:u32 = access %inputs, 0u
+    %10:u32 = hlsl.WaveGetLaneCount
+    %11:u32 = div %9, %10
+    %12:u32 = hlsl.WaveGetLaneCount
+    %13:u32 = add 63u, %12
+    %14:u32 = div %13, %12
+    %15:u32 = access %inputs, 0u
+    %16:void = call %foo_inner, %11, %14, %15
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
