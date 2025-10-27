@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_WRITER_H_
 #define SRC_TINT_LANG_HLSL_WRITER_WRITER_H_
 
+#include <string>
+
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/common/output.h"
 #include "src/tint/utils/result.h"
@@ -42,8 +44,11 @@ namespace tint::hlsl::writer {
 /// Check if the module @p ir is supported by the HLSL backend with @p options.
 /// @param ir the module
 /// @param options the writer options
+/// @param ep_name the entry point
 /// @returns Success or a failure message indicating why HLSL generation would fail
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+Result<SuccessType> CanGenerate(const core::ir::Module& ir,
+                                const Options& options,
+                                const std::string& ep_name);
 
 /// Generate HLSL for a program, according to a set of configuration options.
 /// The result will contain the HLSL and supplementary information, or failure.

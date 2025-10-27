@@ -227,7 +227,9 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.inputProgram = UnsafeUnserializedValue(UseTintProgram());
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
-    req.hlsl.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    req.hlsl.tintOptions.substitute_overrides_config = {
+        .map = BuildSubstituteOverridesTransformConfig(programmableStage),
+    };
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.hlsl.tintOptions.disable_workgroup_init =
         device->IsToggleEnabled(Toggle::DisableWorkgroupInit);

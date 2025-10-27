@@ -1124,8 +1124,17 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
                                    : tint::hlsl::writer::Options::Compiler::kDXC;
     gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
 
+    // Run SubstituteOverrides to replace override instructions with constants.
+    // This needs to run after SingleEntryPoint which removes unused overrides.
+    auto substitute_override_cfg = CreateOverrideMap(options, inspector);
+    if (substitute_override_cfg != tint::Success) {
+        std::cerr << "Failed to create override map: " << substitute_override_cfg.Failure() << "\n";
+        return false;
+    }
+    gen_options.substitute_overrides_config = substitute_override_cfg.Get();
+
     // Check that the module and options are supported by the backend.
-    auto check = tint::hlsl::writer::CanGenerate(ir, gen_options);
+    auto check = tint::hlsl::writer::CanGenerate(ir, gen_options, options.ep_name);
     if (check != tint::Success) {
         std::cerr << check.Failure() << "\n";
         return false;
@@ -1386,6 +1395,9 @@ bool Generate([[maybe_unused]] const Options& options,
     }
 
     switch (options.format) {
+        case Format::kHlsl:
+        case Format::kHlslFxc:
+            return GenerateHlsl(options, inspector, ir.Get());
         case Format::kSpirv:
         case Format::kSpvAsm:
             return GenerateSpirv(options, inspector, ir.Get());
@@ -1412,9 +1424,6 @@ bool Generate([[maybe_unused]] const Options& options,
     }
 
     switch (options.format) {
-        case Format::kHlsl:
-        case Format::kHlslFxc:
-            return GenerateHlsl(options, inspector, ir.Get());
         case Format::kWgsl:
             TINT_UNREACHABLE();
         case Format::kNone:

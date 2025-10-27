@@ -36,6 +36,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
+#include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/lang/core/enums.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/reflection.h"
@@ -203,6 +204,9 @@ struct Options {
     /// Pixel local configuration
     PixelLocalOptions pixel_local;
 
+    // Configuration for substitute overrides
+    SubstituteOverridesConfig substitute_overrides_config = {};
+
     bool operator==(const Options& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
@@ -230,7 +234,8 @@ struct Options {
                  num_workgroups_start_offset,
                  bindings,
                  ignored_by_robustness_transform,
-                 pixel_local);
+                 pixel_local,
+                 substitute_overrides_config);
 };
 
 }  // namespace tint::hlsl::writer

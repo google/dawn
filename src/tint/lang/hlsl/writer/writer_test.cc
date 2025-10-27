@@ -99,8 +99,14 @@ TEST_F(HlslWriterTest, CanGenerate_TexelBufferUnsupported) {
     auto* var = b.Var("buf", ty.ptr<handle>(buffer_ty));
     mod.root_block->Append(var);
 
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Let("x", var);
+        b.Return(ep);
+    });
+
     Options options;
-    auto result = CanGenerate(mod, options);
+    auto result = CanGenerate(mod, options, "main");
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("texel buffers are not supported by the HLSL backend"));

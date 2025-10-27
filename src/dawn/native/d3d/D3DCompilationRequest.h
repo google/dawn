@@ -58,7 +58,6 @@ namespace dawn::native::d3d {
 enum class Compiler { FXC, DXC };
 
 using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterStageLocations>;
-using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
 #define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
     X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
@@ -73,7 +72,6 @@ using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
     X(uint32_t, firstIndexOffsetShaderRegister)                                      \
     X(uint32_t, firstIndexOffsetRegisterSpace)                                       \
     X(tint::hlsl::writer::Options, tintOptions)                                      \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
     X(uint32_t, maxSubgroupSize)                                                     \

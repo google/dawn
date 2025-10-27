@@ -33,6 +33,7 @@
 
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
@@ -45,7 +46,9 @@
 
 namespace tint::hlsl::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+Result<SuccessType> CanGenerate(const core::ir::Module& ir,
+                                const Options& options,
+                                const std::string& ep_name) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
@@ -67,25 +70,40 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    core::ir::Function* ep_func = nullptr;
+    for (auto* f : ir.functions) {
+        if (!f->IsEntryPoint()) {
+            continue;
+        }
+        if (ir.NameOf(f).NameView() == ep_name) {
+            ep_func = f;
+            break;
+        }
+    }
+    // No entrypoint, so no bindings needed
+    if (!ep_func) {
+        return Failure("entry point not found");
+    }
+
+    core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{ir};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
+
     // Check for unsupported module-scope variable address spaces and types.
-    {
-        for (auto* inst : *ir.root_block) {
-            auto* var = inst->As<core::ir::Var>();
-            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-                // Check the pixel_local variables have corresponding entries in the PLS attachment
-                // map.
-                auto* str = ptr->StoreType()->As<core::type::Struct>();
-                for (uint32_t i = 0; i < str->Members().Length(); i++) {
-                    if (options.pixel_local.attachments.count(i) == 0) {
-                        return Failure("missing pixel local attachment for member index " +
-                                       std::to_string(i));
-                    }
+    for (auto* var : refs) {
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            // Check the pixel_local variables have corresponding entries in the PLS attachment
+            // map.
+            auto* str = ptr->StoreType()->As<core::type::Struct>();
+            for (uint32_t i = 0; i < str->Members().Length(); i++) {
+                if (options.pixel_local.attachments.count(i) == 0) {
+                    return Failure("missing pixel local attachment for member index " +
+                                   std::to_string(i));
                 }
             }
-            if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-                return Failure("input attachments are not supported by the HLSL backend");
-            }
+        }
+        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+            return Failure("input attachments are not supported by the HLSL backend");
         }
     }
 

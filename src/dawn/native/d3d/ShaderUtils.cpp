@@ -241,21 +241,6 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         singleEntryPointResult.Failure().reason);
     }
 
-    // this needs to run after SingleEntryPoint transform which removes unused
-    // overrides for the current entry point.
-    {
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                           "ShaderModuleSubstituteOverrides");
-        tint::SubstituteOverridesConfig cfg;
-        cfg.map = std::move(r.substituteOverrideConfig);
-        auto substituteOverridesResult =
-            tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-
-        DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                        "Pipeline override substitution (IR) failed:\n%s",
-                        substituteOverridesResult.Failure().reason);
-    }
-
     tint::Result<tint::hlsl::writer::Output> result;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
