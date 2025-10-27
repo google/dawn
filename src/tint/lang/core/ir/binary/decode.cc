@@ -179,6 +179,22 @@ struct Decoder {
         return number;
     }
 
+    /// Checks that the given @p name is valid.
+    /// @returns true if the name is valid.
+    bool CheckName(const std::string& name, const char* kind) {
+        if (DAWN_UNLIKELY(name.find('\0') != std::string::npos)) {
+            err_ << kind << " '" << name << "' contains '\\0' before end of the string\n";
+            return false;
+        }
+
+        // Reject excessively long names as they cause problems in some backends.
+        if (DAWN_UNLIKELY(name.length() > 16384)) {
+            err_ << kind << " '" << name << "' is longer than 16384 characters\n";
+            return false;
+        }
+        return true;
+    }
+
     /// @returns true if all blocks are reachable, acyclic nesting depth is less than or equal to
     /// kMaxBlockDepth.
     bool CheckBlocks() {
@@ -246,10 +262,7 @@ struct Decoder {
 
     void PopulateFunction(ir::Function* fn_out, const pb::Function& fn_in) {
         if (!fn_in.name().empty()) {
-            if (DAWN_UNLIKELY(fn_in.name().find('\0') != std::string::npos)) {
-                err_ << "function name '" << fn_in.name()
-                     << "' contains '\\0' before end of the string\n";
-            } else {
+            if (CheckName(fn_in.name(), "function name")) {
                 mod_out_.SetName(fn_out, fn_in.name());
             }
         }
@@ -812,9 +825,7 @@ struct Decoder {
             return mod_out_.Types().invalid();
         }
 
-        if (DAWN_UNLIKELY(struct_name.find('\0') != std::string::npos)) {
-            err_ << "structure name '" << struct_name
-                 << "' contains '\\0' before end of the string\n";
+        if (!CheckName(struct_name, "struct name")) {
             return mod_out_.Types().invalid();
         }
 
@@ -832,9 +843,7 @@ struct Decoder {
                 return mod_out_.Types().invalid();
             }
 
-            if (DAWN_UNLIKELY(member_name.find('\0') != std::string::npos)) {
-                err_ << "member name '" << member_name
-                     << "' contains '\\0' before end of the string\n";
+            if (!CheckName(member_name, "member name")) {
                 return mod_out_.Types().invalid();
             }
 
@@ -1159,9 +1168,7 @@ struct Decoder {
         }
         auto* res_out = b.InstructionResult(type);
         if (!res_in.name().empty()) {
-            if (DAWN_UNLIKELY(res_in.name().find('\0') != std::string::npos)) {
-                err_ << "result name '" << res_in.name()
-                     << "' contains '\\0' before end of the string\n";
+            if (!CheckName(res_in.name(), "result name")) {
                 return nullptr;
             }
             mod_out_.SetName(res_out, res_in.name());
@@ -1177,9 +1184,7 @@ struct Decoder {
         }
         auto* param_out = b.FunctionParam(type);
         if (!param_in.name().empty()) {
-            if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
-                err_ << "param name '" << param_in.name()
-                     << "' contains '\\0' before end of the string\n";
+            if (!CheckName(param_in.name(), "param name")) {
                 return nullptr;
             }
             mod_out_.SetName(param_out, param_in.name());
@@ -1219,9 +1224,7 @@ struct Decoder {
         }
         auto* param_out = b.BlockParam(type);
         if (!param_in.name().empty()) {
-            if (DAWN_UNLIKELY(param_in.name().find('\0') != std::string::npos)) {
-                err_ << "param name '" << param_in.name()
-                     << "' contains '\\0' before end of the string\n";
+            if (!CheckName(param_in.name(), "param name")) {
                 return nullptr;
             }
             mod_out_.SetName(param_out, param_in.name());
