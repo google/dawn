@@ -37,6 +37,12 @@ TEST_F(GlslWriterTest, ConstantBoolFalse) {
     auto* f = b.Function("a", ty.bool_());
     f->Block()->Append(b.Return(f, false));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
@@ -44,6 +50,7 @@ bool a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool x = a();
 }
 )");
 }
@@ -52,6 +59,12 @@ TEST_F(GlslWriterTest, ConstantBoolTrue) {
     auto* f = b.Function("a", ty.bool_());
     f->Block()->Append(b.Return(f, true));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
@@ -59,6 +72,7 @@ bool a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool x = a();
 }
 )");
 }
@@ -67,6 +81,12 @@ TEST_F(GlslWriterTest, ConstantInt) {
     auto* f = b.Function("a", ty.i32());
     f->Block()->Append(b.Return(f, -12345_i));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 int a() {
@@ -74,6 +94,7 @@ int a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  int x = a();
 }
 )");
 }
@@ -82,6 +103,12 @@ TEST_F(GlslWriterTest, ConstantIntMin) {
     auto* f = b.Function("a", ty.i32());
     b.Append(f->Block(), [&] { b.Return(f, i32(std::numeric_limits<int32_t>::min())); });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 int a() {
@@ -89,6 +116,7 @@ int a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  int x = a();
 }
 )");
 }
@@ -97,6 +125,12 @@ TEST_F(GlslWriterTest, ConstantUInt) {
     auto* f = b.Function("a", ty.u32());
     f->Block()->Append(b.Return(f, 56779_u));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uint a() {
@@ -104,6 +138,7 @@ uint a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  uint x = a();
 }
 )");
 }
@@ -113,6 +148,12 @@ TEST_F(GlslWriterTest, ConstantFloat) {
     // Use a number close to 1<<30 but whose decimal representation ends in 0.
     f->Block()->Append(b.Return(f, f32((1 << 30) - 4)));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 float a() {
@@ -120,6 +161,7 @@ float a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float x = a();
 }
 )");
 }
@@ -129,6 +171,12 @@ TEST_F(GlslWriterTest, ConstantF16) {
     // Use a number close to 1<<16 but whose decimal representation ends in 0.
     f->Block()->Append(b.Return(f, f16((1 << 15) - 8)));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -137,6 +185,7 @@ float16_t a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float16_t x = a();
 }
 )");
 }

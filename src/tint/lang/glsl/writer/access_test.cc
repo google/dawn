@@ -36,7 +36,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, AccessArray) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<array<f32, 3>>());
@@ -63,7 +63,7 @@ TEST_F(GlslWriterTest, AccessStruct) {
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
-    auto* f = b.ComputeFunction("a");
+    auto* f = b.ComputeFunction("main");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero(strct));
@@ -88,7 +88,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, AccessVector) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
@@ -107,7 +107,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, AccessMatrix) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<mat4x4<f32>>());
@@ -127,7 +127,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, AccessStoreVectorElementConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
         b.StoreVectorElement(vec_var, 1_u, b.Constant(42_i));
@@ -136,12 +136,10 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementConstantIndex) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
-  ivec4 vec = ivec4(0);
-  vec.y = 42;
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  ivec4 vec = ivec4(0);
+  vec.y = 42;
 }
 )");
 }
@@ -156,6 +154,12 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementDynamicIndex) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 void foo(int idx) {
@@ -164,6 +168,7 @@ void foo(int idx) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  foo(0);
 }
 )");
 }
@@ -187,7 +192,7 @@ TEST_F(GlslWriterTest, AccessNested) {
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
-    auto* f = b.ComputeFunction("a");
+    auto* f = b.ComputeFunction("main");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero(s_strct));
@@ -218,7 +223,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, AccessSwizzle) {
-    auto* f = b.ComputeFunction("a");
+    auto* f = b.ComputeFunction("main");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
@@ -237,7 +242,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, AccessSwizzleMulti) {
-    auto* f = b.ComputeFunction("a");
+    auto* f = b.ComputeFunction("main");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec4<f32>>());
@@ -260,7 +265,7 @@ TEST_F(GlslWriterTest, AccessStorageVector) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.LoadVectorElement(var, 0_u));
@@ -293,7 +298,7 @@ TEST_F(GlslWriterTest, AccessStorageVectorF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.LoadVectorElement(var, 0_u));
@@ -327,7 +332,7 @@ TEST_F(GlslWriterTest, AccessStorageMatrix) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<storage, vec4<f32>, core::Access::kRead>(), var, 3_u)));
@@ -357,7 +362,7 @@ TEST_F(GlslWriterTest, AccessStorageArray) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kRead>(), var, 3_u)));
@@ -389,7 +394,7 @@ TEST_F(GlslWriterTest, AccessStorageStruct) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<storage, f32, core::Access::kRead>(), var, 1_u)));
@@ -437,7 +442,7 @@ TEST_F(GlslWriterTest, AccessStorageNested) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kRead>(),
@@ -488,7 +493,7 @@ TEST_F(GlslWriterTest, AccessStorageStoreVector) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(var, 0_u, 2_f);
         b.StoreVectorElement(var, 1_u, 4_f);
@@ -531,7 +536,7 @@ TEST_F(GlslWriterTest, AccessDirectVariable) {
         b.Return(bar);
     });
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Call(bar, var1);
         b.Call(bar, var2);
@@ -577,7 +582,7 @@ TEST_F(GlslWriterTest, AccessChainFromUnnamedAccessChain) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(storage, sb, core::Access::kReadWrite), var, 2_u);
         auto* y = b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(), 1_u);
@@ -624,7 +629,7 @@ TEST_F(GlslWriterTest, AccessChainFromLetAccessChain) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Let("x", var);
         auto* y = b.Let(
@@ -680,7 +685,7 @@ TEST_F(GlslWriterTest, AccessComplexDynamicAccessChain) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* i = b.Load(b.Var("i", 4_i));
         auto* j = b.Load(b.Var("j", 1_u));
@@ -761,7 +766,7 @@ TEST_F(GlslWriterTest, AccessComplexDynamicAccessChainSplit) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* j = b.Load(b.Var("j", 1_u));
         b.Let("x", b.LoadVectorElement(b.Access(ty.ptr<storage, vec3<f32>, read_write>(), var, 1_u,
@@ -830,7 +835,7 @@ TEST_F(GlslWriterTest, AccessUniformChainFromUnnamedAccessChain) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(uniform, sb, core::Access::kRead), var, 2_u);
         auto* y = b.Access(ty.ptr(uniform, Inner, core::Access::kRead), x->Result(), 1_u);
@@ -869,7 +874,7 @@ TEST_F(GlslWriterTest, AccessUniformChainFromLetAccessChain) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Let("x", var);
         auto* y =
@@ -900,7 +905,7 @@ TEST_F(GlslWriterTest, AccessUniformScalar) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Return(func);
@@ -926,7 +931,7 @@ TEST_F(GlslWriterTest, AccessUniformScalarF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Return(func);
@@ -956,7 +961,7 @@ TEST_F(GlslWriterTest, AccessUniformVector) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.LoadVectorElement(var, 0_u));
@@ -993,7 +998,7 @@ TEST_F(GlslWriterTest, AccessUniformVectorF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", 1_u);
         b.Let("a", b.Load(var));
@@ -1040,7 +1045,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec4<f32>, core::Access::kRead>(), var, 3_u)));
@@ -1074,7 +1079,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 1_u)));
@@ -1108,7 +1113,7 @@ TEST_F(GlslWriterTest, AccessUniformMat2x3F16) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr(uniform, ty.vec3<f16>()), var, 1_u)));
@@ -1151,7 +1156,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u)));
@@ -1190,7 +1195,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec2<f32>, core::Access::kRead>(), var, 1_u)));
@@ -1227,7 +1232,7 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2F16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec2<f16>, core::Access::kRead>(), var, 1_u)));
@@ -1266,7 +1271,7 @@ TEST_F(GlslWriterTest, AccessUniformArray) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 3_u)));
@@ -1312,7 +1317,7 @@ TEST_F(GlslWriterTest, AccessUniformArrayF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f16>, core::Access::kRead>(), var, 3_u)));
@@ -1363,7 +1368,7 @@ TEST_F(GlslWriterTest, AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(), var, 3_u)));
@@ -1414,7 +1419,7 @@ TEST_F(GlslWriterTest, AccessUniformStruct) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, f32, core::Access::kRead>(), var, 1_u)));
@@ -1459,7 +1464,7 @@ TEST_F(GlslWriterTest, AccessUniformStructF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.Load(b.Access(ty.ptr<uniform, f16, core::Access::kRead>(), var, 1_u)));
@@ -1518,7 +1523,7 @@ TEST_F(GlslWriterTest, AccessUniformStructNested) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("a", b.Load(var));
         b.Let("b", b.LoadVectorElement(b.Access(ty.ptr<uniform, vec3<f32>, core::Access::kRead>(),
@@ -1599,7 +1604,7 @@ TEST_F(GlslWriterTest, AccessStoreScalar) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, 2_f);
         b.Return(func);
@@ -1624,7 +1629,7 @@ TEST_F(GlslWriterTest, AccessStoreScalarF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, 2_h);
         b.Return(func);
@@ -1650,7 +1655,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(var, 1_u, 2_f);
         b.Return(func);
@@ -1675,7 +1680,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(var, 1_u, 2_h);
         b.Return(func);
@@ -1701,7 +1706,7 @@ TEST_F(GlslWriterTest, AccessStoreVector) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, b.Composite(ty.vec3<f32>(), 2_f, 3_f, 4_f));
         b.Return(func);
@@ -1726,7 +1731,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, b.Composite(ty.vec3<f16>(), 2_h, 3_h, 4_h));
         b.Return(func);
@@ -1752,7 +1757,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(
             b.Access(ty.ptr<storage, vec4<f32>, core::Access::kReadWrite>(), var, 1_u), 2_u, 5_f);
@@ -1778,7 +1783,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElementF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.StoreVectorElement(
             b.Access(ty.ptr<storage, vec2<f16>, core::Access::kReadWrite>(), var, 2_u), 1_u, 5_h);
@@ -1805,7 +1810,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumn) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, vec4<f32>, core::Access::kReadWrite>(), var, 1_u),
                 b.Splat<vec4<f32>>(5_f));
@@ -1831,7 +1836,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumnF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var, 1_u),
                 b.Splat<vec3<f16>>(5_h));
@@ -1858,7 +1863,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrix) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, b.Zero<mat4x4<f32>>());
         b.Return(func);
@@ -1883,7 +1888,7 @@ TEST_F(GlslWriterTest, AccessStoreMatrixF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(var, b.Zero<mat4x4<f16>>());
         b.Return(func);
@@ -1909,7 +1914,7 @@ TEST_F(GlslWriterTest, AccessStoreArrayElement) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 3_u), 1_f);
         b.Return(func);
@@ -1934,7 +1939,7 @@ TEST_F(GlslWriterTest, AccessStoreArrayElementF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var, 3_u), 1_h);
         b.Return(func);
@@ -1960,7 +1965,7 @@ TEST_F(GlslWriterTest, AccessStoreArray) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* ary = b.Let("ary", b.Zero<array<vec3<f32>, 5>>());
         b.Store(var, ary);
@@ -2009,7 +2014,7 @@ TEST_F(GlslWriterTest, AccessStoreStructMember) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u), 3_f);
         b.Return(func);
@@ -2045,7 +2050,7 @@ TEST_F(GlslWriterTest, AccessStoreStructMemberF16) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var, 1_u), 3_h);
         b.Return(func);
@@ -2092,7 +2097,7 @@ TEST_F(GlslWriterTest, AccessStoreStructNested) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var, 1_u, 0_u), 2_f);
         b.Return(func);
@@ -2153,7 +2158,7 @@ TEST_F(GlslWriterTest, AccessStoreStruct) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* s = b.Let("s", b.Zero(SB));
         b.Store(var, s);
@@ -2233,7 +2238,7 @@ TEST_F(GlslWriterTest, AccessStoreStructComplex) {
     var->SetBindingPoint(0, 0);
 
     b.ir.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* s = b.Let("s", b.Zero(SB));
         b.Store(var, s);
@@ -2321,7 +2326,7 @@ TEST_F(GlslWriterTest, AccessChainReused) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(storage, ty.vec3<f32>(), core::Access::kReadWrite), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
@@ -2364,7 +2369,7 @@ TEST_F(GlslWriterTest, AccessUniformChainReused) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         auto* x = b.Access(ty.ptr(uniform, ty.vec3<f32>(), core::Access::kRead), var, 1_u);
         b.Let("b", b.LoadVectorElement(x, 1_u));
@@ -2396,7 +2401,7 @@ TEST_F(GlslWriterTest, AccessToLetWithFunctionParams) {
     auto* g = b.Function("g", ty.i32());
     b.Append(g->Block(), [&] { b.Return(g, 0_i); });
 
-    auto* foo = b.Function("foo", ty.void_());
+    auto* foo = b.ComputeFunction("main");
     b.Append(foo->Block(), [&] {
         auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
         auto* c = b.Call(ty.i32(), f);
@@ -2416,14 +2421,12 @@ int f() {
 int g() {
   return 0;
 }
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int arr[4] = int[4](0, 0, 0, 0);
   uint v = min(uint(f()), 3u);
   int y = g();
   int x = arr[v];
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }
 )");
 }
@@ -2435,7 +2438,7 @@ TEST_F(GlslWriterTest, AccessToLetWithNestedFunctionParams) {
     auto* g = b.Function("g", ty.i32());
     b.Append(g->Block(), [&] { b.Return(g, 0_i); });
 
-    auto* foo = b.Function("foo", ty.void_());
+    auto* foo = b.ComputeFunction("main");
     b.Append(foo->Block(), [&] {
         auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
         auto* c = b.Call(ty.i32(), f);
@@ -2456,15 +2459,13 @@ int f() {
 int g() {
   return 0;
 }
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int arr[4] = int[4](0, 0, 0, 0);
   uint v = uint(f());
   uint v_1 = min(uint(int((v + uint(1)))), 3u);
   int y = g();
   int x = arr[v_1];
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }
 )");
 }

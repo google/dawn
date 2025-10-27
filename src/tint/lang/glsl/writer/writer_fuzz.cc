@@ -43,6 +43,7 @@ namespace {
 Options GenerateOptions(core::ir::Module& module, const std::string& ep_name) {
     Options options;
     options.version = Version(Version::Standard::kES, 3, 1);
+    options.entry_point_name = ep_name;
     options.disable_robustness = false;
     options.disable_workgroup_init = false;
     options.disable_polyfill_integer_div_mod = false;
@@ -131,7 +132,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
     // TODO(377391551): Enable fuzzing of options.
     auto options = GenerateOptions(module, ep_name);
 
-    auto check = CanGenerate(module, options, ep_name);
+    auto check = CanGenerate(module, options);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }

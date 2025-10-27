@@ -41,6 +41,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Float_Large) {
         b.Return(func, b.Construct(ty.f32(), f32((1 << 30) - 4)));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 float a() {
@@ -48,6 +54,7 @@ float a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float x = a();
 }
 )");
 }
@@ -58,6 +65,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Float) {
         b.Return(func, b.Construct(ty.f32(), -1.2e-5_f));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 float a() {
@@ -65,6 +78,7 @@ float a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float x = a();
 }
 )");
 }
@@ -76,6 +90,12 @@ TEST_F(GlslWriterTest, Constructor_Type_F16_Large) {
         b.Return(func, b.Construct(ty.f16(), f16((1 << 15) - 8)));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -84,6 +104,7 @@ float16_t a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float16_t x = a();
 }
 )");
 }
@@ -94,6 +115,12 @@ TEST_F(GlslWriterTest, Constructor_Type_F16) {
         b.Return(func, b.Construct(ty.f16(), -1.2e-3_h));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -102,6 +129,7 @@ float16_t a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  float16_t x = a();
 }
 )");
 }
@@ -112,6 +140,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Bool_False) {
         b.Return(func, b.Construct(ty.bool_(), false));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
@@ -119,6 +153,7 @@ bool a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool x = a();
 }
 )");
 }
@@ -129,6 +164,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Bool_True) {
         b.Return(func, b.Construct(ty.bool_(), true));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool a() {
@@ -136,6 +177,7 @@ bool a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool x = a();
 }
 )");
 }
@@ -146,6 +188,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Int) {
         b.Return(func, b.Construct(ty.i32(), -12345_i));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 int a() {
@@ -153,6 +201,7 @@ int a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  int x = a();
 }
 )");
 }
@@ -163,6 +212,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Uint) {
         b.Return(func, b.Construct(ty.u32(), 12345_u));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uint a() {
@@ -170,6 +225,7 @@ uint a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  uint x = a();
 }
 )");
 }
@@ -180,6 +236,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_F32) {
         b.Return(func, b.Construct(ty.vec3<f32>(), 1.0_f, 2.0_f, 3.0_f));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3 a() {
@@ -187,6 +249,7 @@ vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x = a();
 }
 )");
 }
@@ -197,6 +260,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_F16) {
         b.Return(func, b.Construct(ty.vec3<f16>(), 1_h, 2_h, 3_h));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -205,6 +274,7 @@ f16vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16vec3 x = a();
 }
 )");
 }
@@ -215,6 +285,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_Empty_F32) {
         b.Return(func, b.Construct(ty.vec3<f32>()));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3 a() {
@@ -222,6 +298,7 @@ vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x = a();
 }
 )");
 }
@@ -232,6 +309,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_Empty_F16) {
         b.Return(func, b.Construct(ty.vec3<f16>()));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -240,6 +323,7 @@ f16vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16vec3 x = a();
 }
 )");
 }
@@ -250,6 +334,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F32_Literal) {
         b.Return(func, b.Splat(ty.vec3<f32>(), 2_f));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3 a() {
@@ -257,6 +347,7 @@ vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x = a();
 }
 )");
 }
@@ -267,6 +358,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F16_Literal) {
         b.Return(func, b.Splat(ty.vec3<f16>(), 2_h));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -275,6 +372,7 @@ f16vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16vec3 x = a();
 }
 )");
 }
@@ -286,6 +384,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F32_Var) {
         b.Return(func, b.Construct(ty.vec3<f32>(), b.Load(v)));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3 a() {
@@ -294,6 +398,7 @@ vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x = a();
 }
 )");
 }
@@ -305,6 +410,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_F16_Var) {
         b.Return(func, b.Construct(ty.vec3<f16>(), b.Load(v)));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -314,6 +425,7 @@ f16vec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16vec3 x = a();
 }
 )");
 }
@@ -324,6 +436,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_Bool) {
         b.Return(func, b.Splat(ty.vec3<bool>(), true));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bvec3 a() {
@@ -331,6 +449,7 @@ bvec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bvec3 x = a();
 }
 )");
 }
@@ -341,6 +460,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_Int) {
         b.Return(func, b.Splat(ty.vec3<i32>(), 2_i));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 ivec3 a() {
@@ -348,6 +473,7 @@ ivec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  ivec3 x = a();
 }
 )");
 }
@@ -358,6 +484,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Vec_SingleScalar_UInt) {
         b.Return(func, b.Construct(ty.vec3<u32>(), 2_u));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uvec3 a() {
@@ -365,6 +497,7 @@ uvec3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  uvec3 x = a();
 }
 )");
 }
@@ -377,6 +510,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_F32) {
         b.Return(func, b.Construct(ty.mat2x3<f32>(), v1, v2));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat2x3 a() {
@@ -386,6 +525,7 @@ mat2x3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  mat2x3 x = a();
 }
 )");
 }
@@ -398,6 +538,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_F16) {
         b.Return(func, b.Construct(ty.mat2x3<f16>(), v1, v2));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -408,6 +554,7 @@ f16mat2x3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16mat2x3 x = a();
 }
 )");
 }
@@ -429,6 +576,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F32) {
         b.Return(func, b.Construct(ty.mat4x4<f32>(), v1, v2, v3, v4));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat4 a() {
@@ -438,6 +591,7 @@ mat4 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  mat4 x = a();
 }
 )");
 }
@@ -459,6 +613,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Complex_F16) {
         b.Return(func, b.Construct(ty.mat4x4<f16>(), v1, v2, v3, v4));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -469,6 +629,7 @@ f16mat4 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16mat4 x = a();
 }
 )");
 }
@@ -479,6 +640,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Empty_F32) {
         b.Return(func, b.Construct(ty.mat2x3<f32>()));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat2x3 a() {
@@ -486,6 +653,7 @@ mat2x3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  mat2x3 x = a();
 }
 )");
 }
@@ -496,6 +664,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Empty_F16) {
         b.Return(func, b.Construct(ty.mat2x3<f16>()));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -504,6 +678,7 @@ f16mat2x3 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16mat2x3 x = a();
 }
 )");
 }
@@ -519,6 +694,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Identity_F32) {
         b.Return(func, b.Construct(ty.mat4x4<f32>(), b.Construct(ty.mat4x4<f32>())));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 mat4 a() {
@@ -526,6 +707,7 @@ mat4 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  mat4 x = a();
 }
 )");
 }
@@ -541,6 +723,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Mat_Identity_F16) {
         b.Return(func, b.Construct(ty.mat4x4<f16>(), b.Construct(ty.mat4x4<f16>())));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
@@ -549,6 +737,7 @@ f16mat4 a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  f16mat4 x = a();
 }
 )");
 }
@@ -562,6 +751,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Array) {
         b.Return(func, b.Construct(ty.array<vec3<f32>, 3>(), v1, v2, v3));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3[3] a() {
@@ -572,6 +767,7 @@ vec3[3] a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x[3] = a();
 }
 )");
 }
@@ -582,6 +778,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Array_Empty) {
         b.Return(func, b.Construct(ty.array<vec3<f32>, 3>()));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 vec3[3] a() {
@@ -589,6 +791,7 @@ vec3[3] a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  vec3 x[3] = a();
 }
 )");
 }
@@ -605,6 +808,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct) {
         b.Return(func, b.Construct(str, 1_i, 2_f, b.Construct(ty.vec3<i32>(), 3_i, 4_i, 5_i)));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 
@@ -619,6 +828,7 @@ S a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  S x = a();
 }
 )");
 }
@@ -635,6 +845,12 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct_Empty) {
         b.Return(func, b.Construct(str));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 
@@ -649,6 +865,7 @@ S a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  S x = a();
 }
 )");
 }

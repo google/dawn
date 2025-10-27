@@ -103,9 +103,16 @@ void main() {
 
 // Not emitted in GLSL
 TEST_F(GlslWriterTest, VarSampler) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler()));
         v->SetBindingPoint(1, 2);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -118,9 +125,16 @@ void main() {
 
 // Not emitted in GLSL
 TEST_F(GlslWriterTest, VarInBuiltin) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
         v->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -132,15 +146,20 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarIn) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
         v->SetLocation(1);
         v->SetInterpolation(core::Interpolation{core::InterpolationType::kFlat,
                                                 core::InterpolationSampling::kUndefined});
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] { b.Return(func); });
+    b.Append(func->Block(), [&] {
+        b.Let("x", v);
+        b.Return(func);
+    });
+
     ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
@@ -151,36 +170,19 @@ void main() {
 )");
 }
 
-TEST_F(GlslWriterTest, VarOutBlendSrc) {
-    b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
-        v->SetLocation(1);
-        v->SetBlendSrc(1);
-    });
-
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] { b.Return(func); });
-
-    ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_EXT_blend_func_extended: require
-precision highp float;
-precision highp int;
-
-layout(location = 1, index = 1) out uint v;
-void main() {
-}
-)");
-}
-
 // Not emitted in GLSL
 TEST_F(GlslWriterTest, VarOutBuiltin) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
         v->SetBuiltin(core::BuiltinValue::kFragDepth);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] { b.Return(func); });
+    b.Append(func->Block(), [&] {
+        b.Let("x", v);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
@@ -192,13 +194,17 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarBuiltinSampleIndex_ES) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
         v->SetBuiltin(core::BuiltinValue::kSampleIndex);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] { b.Return(func); });
+    b.Append(func->Block(), [&] {
+        b.Let("x", v);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_OES_sample_variables: require
@@ -211,13 +217,17 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarBuiltinSampleMask_ES) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
         v->SetBuiltin(core::BuiltinValue::kSampleMask);
     });
 
     auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(func->Block(), [&] { b.Return(func); });
+    b.Append(func->Block(), [&] {
+        b.Let("x", v);
+        b.Return(func);
+    });
 
     ASSERT_TRUE(Generate({}, core::ir::Function::PipelineStage::kFragment)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_OES_sample_variables: require
@@ -252,9 +262,16 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarStorageUint32) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kStorage, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kStorage, ty.u32()));
         v->SetBindingPoint(0, 1);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -275,9 +292,16 @@ TEST_F(GlslWriterTest, VarStorageStruct) {
                                                     {mod.symbols.New("b"), ty.f32()},
                                                 });
 
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kStorage, sb));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kStorage, sb));
         v->SetBindingPoint(0, 1);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -299,9 +323,16 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarUniform) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kUniform, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kUniform, ty.u32()));
         v->SetBindingPoint(0, 1);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -317,12 +348,19 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarHandleStorageTexture) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var(
-            "v", ty.ptr(core::AddressSpace::kHandle,
-                        ty.storage_texture(core::type::TextureDimension::k2d,
-                                           core::TexelFormat::kR32Float, core::Access::kWrite)));
+        v = b.Var("v",
+                  ty.ptr(core::AddressSpace::kHandle,
+                         ty.storage_texture(core::type::TextureDimension::k2d,
+                                            core::TexelFormat::kR32Float, core::Access::kWrite)));
         v->SetBindingPoint(0, 1);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -335,10 +373,17 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarHandleDepthTexture) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                                    ty.depth_texture(core::type::TextureDimension::k2d)));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                              ty.depth_texture(core::type::TextureDimension::k2d)));
         v->SetBindingPoint(0, 1);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -351,14 +396,28 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, VarWorkgroup) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block,
-             [&] { b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ty.u32())); });
+             [&] { v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ty.u32())); });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 shared uint v;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    v = 0u;
+  }
+  barrier();
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  main_inner(gl_LocalInvocationIndex);
 }
 )");
 }

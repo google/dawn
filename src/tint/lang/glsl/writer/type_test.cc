@@ -45,7 +45,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(GlslWriterTest, EmitType_Array) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array<bool, 4>()));
         b.Return(func);
@@ -61,7 +61,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_ArrayOfArray) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array<bool, 4>(), 5)));
         b.Return(func);
@@ -77,7 +77,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_ArrayOfArrayOfArray) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a",
               ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array(ty.array<bool, 4>(), 5), 6)));
@@ -98,7 +98,7 @@ TEST_F(GlslWriterTest, EmitType_StructArrayVec) {
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("t"), ty.array<vec3<f32>, 5>()},
                                             });
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, Inner));
         b.Return(func);
@@ -119,7 +119,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Bool) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
         b.Return(func);
@@ -135,7 +135,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_F32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f32()));
         b.Return(func);
@@ -151,7 +151,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_F16) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f16()));
         b.Return(func);
@@ -168,7 +168,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_I32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.i32()));
         b.Return(func);
@@ -184,7 +184,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Matrix_F32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f32>()));
         b.Return(func);
@@ -200,7 +200,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_MatrixSquare_F32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x2<f32>()));
         b.Return(func);
@@ -216,7 +216,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Matrix_F16) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f16>()));
         b.Return(func);
@@ -233,7 +233,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_U32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.u32()));
         b.Return(func);
@@ -249,33 +249,61 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Atomic_U32) {
-    b.Append(b.ir.root_block, [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>()))->Result();
+    core::ir::Var* v = nullptr;
+    b.Append(b.ir.root_block,
+             [&] { v = b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<u32>())); });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 shared uint a;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    atomicExchange(a, 0u);
+  }
+  barrier();
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  main_inner(gl_LocalInvocationIndex);
 }
 )");
 }
 
 TEST_F(GlslWriterTest, EmitType_Atomic_I32) {
-    b.Append(b.ir.root_block, [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<i32>()))->Result();
+    core::ir::Var* v = nullptr;
+    b.Append(b.ir.root_block,
+             [&] { v = b.Var("a", ty.ptr(core::AddressSpace::kWorkgroup, ty.atomic<i32>())); });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 shared int a;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    atomicExchange(a, 0);
+  }
+  barrier();
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  main_inner(gl_LocalInvocationIndex);
 }
 )");
 }
 
 TEST_F(GlslWriterTest, EmitType_Vector_F32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
         b.Return(func);
@@ -291,7 +319,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Vector_F16) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
         b.Return(func);
@@ -308,7 +336,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Vector_I32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec2<i32>()));
         b.Return(func);
@@ -324,7 +352,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Vector_U32) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec4<u32>()));
         b.Return(func);
@@ -340,7 +368,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, EmitType_Vector_bool) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<bool>()));
         b.Return(func);
@@ -357,7 +385,7 @@ void main() {
 
 TEST_F(GlslWriterTest, EmitType_Void) {
     // Tested via the function return type.
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -373,7 +401,7 @@ TEST_F(GlslWriterTest, EmitType_Struct) {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
@@ -399,7 +427,7 @@ TEST_F(GlslWriterTest, EmitType_Struct_Dedup) {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Var("b", ty.ptr(core::AddressSpace::kFunction, s));
@@ -433,7 +461,7 @@ TEST_F(GlslWriterTest, EmitType_Struct_Nested) {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), inner},
                                               });
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
@@ -478,6 +506,12 @@ TEST_P(GlslWriterDepthTextureESTest, Emit) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uniform highp )" + params.result +
@@ -504,8 +538,15 @@ TEST_P(GlslWriterDepthTextureNonESTest, Emit) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
+
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    opts.entry_point_name = "main";
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
@@ -530,6 +571,12 @@ TEST_F(GlslWriterTest, EmitType_DepthMultisampledTexture) {
     auto* var = b.Var("v", handle, t, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
@@ -578,6 +625,12 @@ TEST_P(GlslWriterSampledTextureESTest, Emit) {
     auto* var = b.Var("v", handle, t, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
@@ -633,8 +686,15 @@ TEST_P(GlslWriterSampledTextureNonESTest, Emit) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
+
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    opts.entry_point_name = "main";
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
@@ -695,6 +755,12 @@ TEST_P(GlslWriterMultisampledTextureESTest, Emit) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 uniform highp )" + params.result +
@@ -733,6 +799,12 @@ TEST_P(GlslWriterMultisampledTextureNonESTest, Emit) {
     auto* var = b.Var("v", handle, ms, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
@@ -792,6 +864,12 @@ TEST_P(GlslWriterStorageTextureESTest, Emit) {
     auto* var = b.Var("v", handle, s, core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
@@ -894,8 +972,15 @@ TEST_P(GlslWriterStorageTextureNonESTest, Emit) {
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
+
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    opts.entry_point_name = "main";
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
@@ -986,6 +1071,12 @@ TEST_F(GlslWriterTest, EmitType_PadInlineStruct) {
     auto* var = b.Var("v", storage, S, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", var);
+        b.Return(eb);
+    });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(

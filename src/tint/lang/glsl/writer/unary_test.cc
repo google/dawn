@@ -36,7 +36,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, Complement) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* op = b.Complement(ty.u32(), l);
@@ -55,7 +55,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Not_Scalar) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(false));
         auto* op = b.Not(ty.bool_(), l);
@@ -74,7 +74,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Not_Vector) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec3<bool>(), false));
         auto* op = b.Not(ty.vec3<bool>(), l);
@@ -93,7 +93,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Negation) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_i));
         auto* op = b.Negation(ty.i32(), l);

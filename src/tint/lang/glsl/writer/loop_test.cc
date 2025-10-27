@@ -34,7 +34,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, Loop) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -61,7 +61,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopContinueAndBreakIf) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -95,7 +95,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopBodyVarInContinue) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -134,7 +134,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopInitializer) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();

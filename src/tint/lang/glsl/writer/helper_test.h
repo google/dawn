@@ -67,6 +67,7 @@ class GlslWriterTestHelperBase : public BASE {
     bool Generate(
         Options options = {},
         core::ir::Function::PipelineStage stage = core::ir::Function::PipelineStage::kCompute) {
+        options.entry_point_name = "main";
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason;

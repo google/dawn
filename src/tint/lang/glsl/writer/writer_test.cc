@@ -134,7 +134,8 @@ TEST_F(GlslWriterTest, CanGenerate_TexelBufferUnsupported) {
     });
 
     Options options;
-    auto result = CanGenerate(mod, options, "main");
+    options.entry_point_name = "main";
+    auto result = CanGenerate(mod, options);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("texel buffers are not supported by the GLSL backend"));

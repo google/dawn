@@ -55,7 +55,6 @@ using InterstageLocationAndName = std::pair<uint32_t, std::string>;
 #define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
     X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
     X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(std::string, entryPointName)                                                   \
     X(SingleShaderStage, stage)                                                      \
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
@@ -403,7 +402,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                           &(req.tintOptions.texture_builtins_from_uniform));
 
     req.stage = stage;
-    req.entryPointName = programmableStage.entryPoint;
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
@@ -428,6 +426,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     req.platform = UnsafeUnserializedValue(GetDevice()->GetPlatform());
 
+    req.tintOptions.entry_point_name = programmableStage.entryPoint;
     req.tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(version.GetStandard()),
                                                           version.GetMajor(), version.GetMinor());
 
@@ -495,16 +494,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason);
-            }
-
-            {
-                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
-                                                   "ShaderModuleSingleEntryPoint");
-                auto singleEntryPointResult =
-                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                                "Pipeline single entry point (IR) failed:\n%s",
-                                singleEntryPointResult.Failure().reason);
             }
 
             tint::Result<tint::glsl::writer::Output> result;

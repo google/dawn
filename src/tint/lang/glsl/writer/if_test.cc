@@ -33,7 +33,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, If) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -42,18 +42,16 @@ TEST_F(GlslWriterTest, If) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
-  if (true) {
-  }
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  if (true) {
+  }
 }
 )");
 }
 
 TEST_F(GlslWriterTest, IfWithElseIf) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -67,21 +65,19 @@ TEST_F(GlslWriterTest, IfWithElseIf) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   if (true) {
   } else {
     if (false) {
     }
   }
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
 )");
 }
 
 TEST_F(GlslWriterTest, IfWithElse) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -91,20 +87,18 @@ TEST_F(GlslWriterTest, IfWithElse) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   if (true) {
   } else {
     return;
   }
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
 )");
 }
 
 TEST_F(GlslWriterTest, IfBothBranchesReturn) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.Return(func); });
@@ -114,16 +108,14 @@ TEST_F(GlslWriterTest, IfBothBranchesReturn) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   if (true) {
     return;
   } else {
     return;
   }
   /* unreachable */
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }
 )");
 }
@@ -135,6 +127,12 @@ TEST_F(GlslWriterTest, IfBothBranchesReturn_NonVoidFunction) {
         b.Append(if_->True(), [&] { b.Return(func, 0_u); });
         b.Append(if_->False(), [&] { b.Return(func, 1_u); });
         b.Unreachable();
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
@@ -150,12 +148,13 @@ uint foo() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  uint x = foo();
 }
 )");
 }
 
 TEST_F(GlslWriterTest, IfWithSinglePhi) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResult(b.InstructionResult(ty.i32()));
@@ -170,7 +169,8 @@ TEST_F(GlslWriterTest, IfWithSinglePhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int v = 0;
   if (true) {
     v = 10;
@@ -178,14 +178,11 @@ void foo() {
     v = 20;
   }
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
 )");
 }
 
 TEST_F(GlslWriterTest, IfWithMultiPhi) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
@@ -200,7 +197,8 @@ TEST_F(GlslWriterTest, IfWithMultiPhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo() {
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
   int v = 0;
   bool v_1 = false;
   if (true) {
@@ -210,9 +208,6 @@ void foo() {
     v = 20;
     v_1 = false;
   }
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
 }
 )");
 }
@@ -231,6 +226,12 @@ TEST_F(GlslWriterTest, IfWithMultiPhiReturn1) {
         b.Return(func, i->Result(0));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 int foo() {
@@ -247,6 +248,7 @@ int foo() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  int x = foo();
 }
 )");
 }
@@ -265,6 +267,12 @@ TEST_F(GlslWriterTest, IfWithMultiPhiReturn2) {
         b.Return(func, i->Result(1));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 bool foo() {
@@ -281,6 +289,7 @@ bool foo() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
+  bool x = foo();
 }
 )");
 }

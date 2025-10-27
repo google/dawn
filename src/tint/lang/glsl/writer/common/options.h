@@ -174,6 +174,9 @@ struct Options {
     /// Set to `true` to decompose uniform buffers into array<vec4u, ...>.
     bool decompose_uniform_buffers = true;
 
+    /// The entry point name to emit
+    std::string entry_point_name;
+
     /// The GLSL version to emit
     Version version;
 
@@ -221,6 +224,7 @@ struct Options {
                  disable_polyfill_integer_div_mod,
                  use_array_length_from_uniform,
                  decompose_uniform_buffers,
+                 entry_point_name,
                  version,
                  first_vertex_offset,
                  first_instance_offset,
