@@ -1,11 +1,11 @@
 #version 310 es
 
-layout(binding = 1, std140)
+layout(binding = 0, std140)
 uniform params_block_1_ubo {
   uvec4 inner[1];
 } v;
-layout(binding = 3, rgba8) uniform highp writeonly image2D outputTex;
-layout(binding = 4, std140)
+layout(binding = 4, rgba8) uniform highp writeonly image2D outputTex;
+layout(binding = 3, std140)
 uniform flip_block_1_ubo {
   uvec4 inner[1];
 } v_1;

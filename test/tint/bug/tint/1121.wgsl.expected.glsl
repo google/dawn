@@ -20,15 +20,15 @@ layout(binding = 0, std430)
 buffer LightsBuffer_1_ssbo {
   LightData lights[];
 } lightsBuffer;
-layout(binding = 1, std430)
+layout(binding = 3, std430)
 buffer tileLightId_block_1_ssbo {
   Tiles inner;
 } v;
-layout(binding = 2, std140)
+layout(binding = 1, std140)
 uniform config_block_1_ubo {
   uvec4 inner[2];
 } v_1;
-layout(binding = 3, std140)
+layout(binding = 2, std140)
 uniform uniforms_block_1_ubo {
   uvec4 inner[11];
 } v_2;

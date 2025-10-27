@@ -55,7 +55,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     (*tint_module_vars.w) = 0.0f;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  foo(1.0f, tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)}, tint_module_vars);
+  foo(1.0f, tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 4u)}, tint_module_vars);
 }
 
 kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]], const device float2* uniforms [[buffer(0)]], device tint_array<float, 1>* storages [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {

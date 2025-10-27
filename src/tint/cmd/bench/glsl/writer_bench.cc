@@ -29,6 +29,8 @@
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
+#include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::glsl::writer {
@@ -42,28 +44,15 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     }
 
     std::vector<std::string> names;
-    tint::glsl::writer::Options gen_options = {};
-    {
-        // Convert the AST program to an IR module, so that we can generating bindings data.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
-        if (ir != Success) {
-            state.SkipWithError(ir.Failure().reason);
-            return;
-        }
-        auto data = tint::glsl::writer::GenerateBindings(ir.Get());
-        gen_options.bindings = std::move(data.bindings);
-        gen_options.texture_builtins_from_uniform = std::move(data.texture_builtins_from_uniform);
-
-        // Get the list of entry point names.
-        for (auto func : ir->functions) {
-            if (func->IsEntryPoint()) {
-                names.push_back(ir->NameOf(func).Name());
-            }
+    // Get the list of entry point names.
+    for (auto* func : res->program.AST().Functions()) {
+        if (func->IsEntryPoint()) {
+            names.push_back(func->name->symbol.Name());
         }
     }
 
     for (auto _ : state) {
-        for (uint32_t i = 0; i < names.size(); i++) {
+        for (auto& name : names) {
             // Convert the AST program to an IR module.
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
             if (ir != Success) {
@@ -71,8 +60,16 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
                 return;
             }
 
+            tint::glsl::writer::Options gen_options = {};
+            {
+                auto data = tint::glsl::writer::GenerateBindings(ir.Get(), name);
+                gen_options.bindings = std::move(data.bindings);
+                gen_options.texture_builtins_from_uniform =
+                    std::move(data.texture_builtins_from_uniform);
+            }
+
             // Run single entry point to strip the program down to a single entry point.
-            auto single_result = core::ir::transform::SingleEntryPoint(ir.Get(), names[i]);
+            auto single_result = core::ir::transform::SingleEntryPoint(ir.Get(), name);
             if (single_result != Success) {
                 state.SkipWithError(ir.Failure().reason);
                 return;

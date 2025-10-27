@@ -52,7 +52,6 @@ cc_binary(
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
     "//src/tint/lang/hlsl/writer/common",
-    "//src/tint/lang/msl/ir/transform",
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/inspector",

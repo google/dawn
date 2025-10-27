@@ -9,11 +9,11 @@ struct TestData {
   int data[3];
 };
 
-layout(binding = 0, std140)
+layout(binding = 1, std140)
 uniform constants_block_1_ubo {
   uvec4 inner[1];
 } v;
-layout(binding = 1, std430)
+layout(binding = 0, std430)
 buffer result_block_1_ssbo {
   Result inner;
 } v_1;

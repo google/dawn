@@ -55,7 +55,6 @@ if (tint_build_benchmarks) {
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/ir",
         "${tint_src_dir}/lang/core/type",
-        "${tint_src_dir}/lang/msl/ir/transform",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
         "${tint_src_dir}/lang/wgsl/program",

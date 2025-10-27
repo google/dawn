@@ -33,9 +33,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/tint/utils/command/args.h"
-#include "src/tint/utils/text/color_mode.h"
-
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
@@ -49,12 +46,15 @@
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/f16.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/utils/command/args.h"
 #include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/text/color_mode.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
@@ -73,7 +73,6 @@
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
-#include "src/tint/lang/msl/ir/transform/flatten_bindings.h"
 #include "src/tint/lang/msl/validate/validate.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #endif  // TINT_BUILD_MSL_WRITER
@@ -868,7 +867,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
         offset += 8;
     }
 
-    gen_options.bindings = tint::GenerateBindings(ir, false);
+    gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
     gen_options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(ir);
 
     // Enable the Vulkan Memory Model if needed.
@@ -986,15 +985,6 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
                                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                                   [[maybe_unused]] tint::core::ir::Module& ir) {
 #if TINT_BUILD_MSL_WRITER
-    if (!options.use_argument_buffers) {
-        // Remap resource numbers to a flat namespace.
-        auto res = tint::msl::ir::transform::FlattenBindings(ir);
-        if (res != tint::Success) {
-            std::cerr << "Failed to flatten bindings: " << res.Failure().reason << "\n";
-            return false;
-        }
-    }
-
     // Set up the backend options.
     tint::msl::writer::Options gen_options;
     if (options.rename_all) {
@@ -1004,7 +994,8 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
-    gen_options.bindings = tint::GenerateBindings(ir, !options.use_argument_buffers);
+    gen_options.bindings = tint::GenerateBindings(
+        ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
     gen_options.array_length_from_constants.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
@@ -1024,11 +1015,12 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
             continue;
         }
 
-        auto* ty = var->Result()->Type()->UnwrapPtr();
-        if (!ty->HasFixedFootprint()) {
-            if (storage_bindings.insert(bp.value()).second) {
+        auto* ty = var->Result()->Type()->As<tint::core::type::Pointer>();
+        if (ty && ty->AddressSpace() == tint::core::AddressSpace::kStorage &&
+            !ty->HasFixedFootprint()) {
+            if (storage_bindings.insert(*bp).second) {
                 gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
-                    bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
+                    *bp, static_cast<uint32_t>(storage_bindings.size() - 1));
             }
         }
     }
@@ -1112,7 +1104,7 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
         options.hlsl_shader_model < kMinShaderModelForPackUnpack4x8InHLSL;
     gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
                                    : tint::hlsl::writer::Options::Compiler::kDXC;
-    gen_options.bindings = tint::GenerateBindings(ir, false);
+    gen_options.bindings = tint::GenerateBindings(ir, options.ep_name, false, false);
 
     // Check that the module and options are supported by the backend.
     auto check = tint::hlsl::writer::CanGenerate(ir, gen_options);
@@ -1254,12 +1246,12 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     }
 
     // Generate binding options.
-    auto data = tint::glsl::writer::GenerateBindings(ir);
+    auto data = tint::glsl::writer::GenerateBindings(ir, options.ep_name);
     gen_options.bindings = std::move(data.bindings);
     gen_options.texture_builtins_from_uniform = std::move(data.texture_builtins_from_uniform);
 
     // Check that the module and options are supported by the backend.
-    auto check = tint::glsl::writer::CanGenerate(ir, gen_options);
+    auto check = tint::glsl::writer::CanGenerate(ir, gen_options, options.ep_name);
     if (check != tint::Success) {
         std::cerr << check.Failure() << "\n";
         return false;

@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
 #define SRC_TINT_LANG_GLSL_WRITER_HELPERS_GENERATE_BINDINGS_H_
 
+#include <string>
+
 #include "src/tint/lang/glsl/writer/common/options.h"
 
 // Forward declarations
@@ -45,7 +47,7 @@ struct BindingData {
 /// Generate the resource bindings
 /// @param module the module to generate from
 /// @returns the bindings
-BindingData GenerateBindings(const core::ir::Module& module);
+BindingData GenerateBindings(const core::ir::Module& module, const std::string& ep);
 
 }  // namespace tint::glsl::writer
 

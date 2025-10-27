@@ -30,6 +30,7 @@
 #include <vector>
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
@@ -42,7 +43,9 @@
 
 namespace tint::glsl::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+Result<SuccessType> CanGenerate(const core::ir::Module& ir,
+                                const Options& options,
+                                const std::string& ep_name) {
     // Check for unsupported types.
     for (auto* ty : ir.Types()) {
         if (ty->Is<core::type::SubgroupMatrix>()) {
@@ -62,17 +65,31 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    core::ir::Function* ep_func = nullptr;
+    for (auto* f : ir.functions) {
+        if (!f->IsEntryPoint()) {
+            continue;
+        }
+        if (ir.NameOf(f).NameView() == ep_name) {
+            ep_func = f;
+            break;
+        }
+    }
+    // No entrypoint, so no bindings needed
+    if (!ep_func) {
+        return Failure("entry point not found");
+    }
+
     // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
     // otherwise TextureBuiltinsFromUniform will fail.
     // TODO(https://issues.chromium.org/427172887) Be more precise for the
     // texture_builtins_from_uniform checks. Also ensure there is at most one user-declared
     // immediate.
-    for (auto* inst : *ir.root_block) {
-        auto* var = inst->As<core::ir::Var>();
+    core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{ir};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
 
-        if (!var) {
-            continue;
-        }
+    Vector<tint::BindingPoint, 4> ext_tex_bps;
+    for (auto* var : refs) {
         auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
 
         // The pixel_local extension is not supported by the GLSL backend.

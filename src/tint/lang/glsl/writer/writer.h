@@ -47,8 +47,11 @@ namespace tint::glsl::writer {
 /// Check if the module @p ir is supported by the GLSL backend with @p options.
 /// @param ir the module
 /// @param options the writer options
+/// @param ep_name the entry point
 /// @returns Success or a failure message indicating why GLSL generation would fail
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
+Result<SuccessType> CanGenerate(const core::ir::Module& ir,
+                                const Options& options,
+                                const std::string& ep_name);
 
 /// Generate GLSL for a program, according to a set of configuration options.
 /// The result will contain the GLSL and supplementary information, or failure.

@@ -111,7 +111,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
-kernel void v_17(texture2d<float, access::sample> t_plane0 [[texture(0)]], texture2d<float, access::sample> t_plane1 [[texture(2)]], const constant tint_ExternalTextureParams_packed_vec3* t_params [[buffer(3)]], texture2d<float, access::write> outImage [[texture(1)]]) {
+kernel void v_17(texture2d<float, access::sample> t_plane0 [[texture(1)]], texture2d<float, access::sample> t_plane1 [[texture(2)]], const constant tint_ExternalTextureParams_packed_vec3* t_params [[buffer(0)]], texture2d<float, access::write> outImage [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t_plane0=t_plane0, .t_plane1=t_plane1, .t_params=t_params, .outImage=outImage};
   tint_ExternalTextureParams const v_18 = tint_load_struct_packed_vec3(tint_module_vars.t_params);
   float4 red = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_18, min(uint2(int2(10)), ((v_18.apparentSize + uint2(1u)) - uint2(1u))));

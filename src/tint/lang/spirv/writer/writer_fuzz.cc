@@ -38,12 +38,32 @@ namespace tint::spirv::writer {
 namespace {
 
 Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
+    // TODO(375388101): We cannot run the backend for every entry point in the module unless we
+    // clone the whole module each time, so for now we just generate the first entry point.
+
+    // Strip the module down to a single entry point.
+    core::ir::Function* entry_point = nullptr;
+    for (auto& func : module.functions) {
+        if (func->IsEntryPoint()) {
+            entry_point = func;
+            break;
+        }
+    }
+    std::string ep_name;
+    if (entry_point) {
+        ep_name = module.NameOf(entry_point).NameView();
+    }
+    if (ep_name.empty()) {
+        // No entry point, just return success
+        return Success;
+    }
+
     auto check = CanGenerate(module, options);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }
 
-    options.bindings = GenerateBindings(module, false);
+    options.bindings = GenerateBindings(module, ep_name, false, false);
     options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto output = Generate(module, options);

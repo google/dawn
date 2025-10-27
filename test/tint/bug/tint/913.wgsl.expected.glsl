@@ -1,10 +1,10 @@
 #version 310 es
 
-layout(binding = 2, std430)
+layout(binding = 3, std430)
 buffer OutputBuf_1_ssbo {
   uint result[];
 } v;
-layout(binding = 3, std140)
+layout(binding = 2, std140)
 uniform uniforms_block_1_ubo {
   uvec4 inner[2];
 } v_1;

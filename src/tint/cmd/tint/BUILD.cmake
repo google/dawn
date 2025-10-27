@@ -53,7 +53,6 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_lang_core_ir_transform
   tint_lang_core_type
   tint_lang_hlsl_writer_common
-  tint_lang_msl_ir_transform
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_inspector

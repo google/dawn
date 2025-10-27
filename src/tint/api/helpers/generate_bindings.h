@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_API_HELPERS_GENERATE_BINDINGS_H_
 #define SRC_TINT_API_HELPERS_GENERATE_BINDINGS_H_
 
+#include <string>
+
 #include "src/tint/api/common/bindings.h"
 
 // Forward declarations
@@ -40,8 +42,12 @@ namespace tint {
 /// Generate the resource bindings
 /// @param module the module to generate from
 /// @param set_group_to_zero if true, the group used for bindings will always be zero
+/// @param flatten_bindings if true, the bindings will remap to count from 0
 /// @returns the bindings
-Bindings GenerateBindings(const core::ir::Module& module, bool set_group_to_zero);
+Bindings GenerateBindings(const core::ir::Module& module,
+                          const std::string& ep,
+                          bool set_group_to_zero,
+                          bool flatten_bindings);
 
 }  // namespace tint
 

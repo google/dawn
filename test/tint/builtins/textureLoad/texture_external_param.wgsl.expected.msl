@@ -130,7 +130,7 @@ float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
   return float4(0.0f);
 }
 
-vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
+vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
   vertex_main_outputs tint_wrapper_result = {};
   tint_wrapper_result.tint_symbol = vertex_main_inner(tint_module_vars);
@@ -259,7 +259,7 @@ void doTextureLoad(tint_module_vars_struct tint_module_vars) {
   float4 res = textureLoad2d(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, tint_load_struct_packed_vec3(tint_module_vars.arg_0_params), int2(0));
 }
 
-fragment void fragment_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
+fragment void fragment_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
   doTextureLoad(tint_module_vars);
 }
@@ -386,7 +386,7 @@ void doTextureLoad(tint_module_vars_struct tint_module_vars) {
   float4 res = textureLoad2d(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, tint_load_struct_packed_vec3(tint_module_vars.arg_0_params), int2(0));
 }
 
-kernel void compute_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
+kernel void compute_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
   doTextureLoad(tint_module_vars);
 }

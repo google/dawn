@@ -27,11 +27,11 @@ layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 2, std430)
+layout(binding = 3, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 3, std430)
+layout(binding = 2, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
@@ -160,19 +160,19 @@ layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   uvec4 inner[3];
 } v;
-layout(binding = 1, std430)
+layout(binding = 3, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 2, std430)
+layout(binding = 4, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 3, std430)
+layout(binding = 1, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 4, std430)
+layout(binding = 2, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;
@@ -251,15 +251,15 @@ layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 2, std430)
+layout(binding = 3, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 3, std430)
+layout(binding = 4, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 4, std430)
+layout(binding = 2, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;

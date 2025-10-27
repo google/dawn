@@ -24,15 +24,15 @@ layout(binding = 1, std430)
 buffer U32s_1_ssbo {
   uint values[];
 } indices;
-layout(binding = 2, std430)
+layout(binding = 3, std430)
 buffer F32s_1_ssbo {
   float values[];
 } positions;
-layout(binding = 3, std430)
+layout(binding = 4, std430)
 buffer AU32s_1_ssbo {
   uint values[];
 } counters;
-layout(binding = 4, std430)
+layout(binding = 2, std430)
 buffer AI32s_1_ssbo {
   int values[];
 } LUT;

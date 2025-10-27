@@ -62,14 +62,14 @@ struct tint_module_vars_struct {
   device AU32s* counters;
   device AI32s* LUT;
   device Dbg* dbg;
-  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+  const constant tint_array<uint4, 2>* tint_storage_buffer_sizes;
 };
 
 struct tint_array_lengths_struct {
-  uint tint_array_length_0_2;
   uint tint_array_length_0_3;
-  uint tint_array_length_0_1;
   uint tint_array_length_0_4;
+  uint tint_array_length_0_1;
+  uint tint_array_length_0_2;
 };
 
 float3 toVoxelPos(float3 position, tint_module_vars_struct tint_module_vars) {
@@ -94,21 +94,21 @@ uint toIndex1D(uint gridSize, float3 voxelPos) {
 }
 
 float3 loadPosition(uint vertexIndex, tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
-  float3 position = float3((*tint_module_vars.positions).values[min(((3u * vertexIndex) + 0u), (tint_array_lengths.tint_array_length_0_2 - 1u))], (*tint_module_vars.positions).values[min(((3u * vertexIndex) + 1u), (tint_array_lengths.tint_array_length_0_2 - 1u))], (*tint_module_vars.positions).values[min(((3u * vertexIndex) + 2u), (tint_array_lengths.tint_array_length_0_2 - 1u))]);
+  float3 position = float3((*tint_module_vars.positions).values[min(((3u * vertexIndex) + 0u), (tint_array_lengths.tint_array_length_0_3 - 1u))], (*tint_module_vars.positions).values[min(((3u * vertexIndex) + 1u), (tint_array_lengths.tint_array_length_0_3 - 1u))], (*tint_module_vars.positions).values[min(((3u * vertexIndex) + 2u), (tint_array_lengths.tint_array_length_0_3 - 1u))]);
   return position;
 }
 
 void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint g43 = (*tint_module_vars.uniforms).numTriangles;
   uint kj6 = (*tint_module_vars.dbg).value1;
-  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(uint(0), (tint_array_lengths.tint_array_length_0_3 - 1u))]), memory_order_relaxed);
+  uint b53 = atomic_load_explicit((&(*tint_module_vars.counters).values[min(uint(0), (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
   uint rwg = (*tint_module_vars.indices).values[min(uint(0), (tint_array_lengths.tint_array_length_0_1 - 1u))];
-  float rb5 = (*tint_module_vars.positions).values[min(uint(0), (tint_array_lengths.tint_array_length_0_2 - 1u))];
-  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(uint(0), (tint_array_lengths.tint_array_length_0_4 - 1u))]), memory_order_relaxed);
+  float rb5 = (*tint_module_vars.positions).values[min(uint(0), (tint_array_lengths.tint_array_length_0_3 - 1u))];
+  int g55 = atomic_load_explicit((&(*tint_module_vars.LUT).values[min(uint(0), (tint_array_lengths.tint_array_length_0_2 - 1u))]), memory_order_relaxed);
 }
 
 void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
   uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= (*tint_module_vars.uniforms).numTriangles)) {
     return;
@@ -123,10 +123,10 @@ void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mod
   float3 center = (((p0 + p2) + p1) / 3.0f);
   float3 voxelPos = toVoxelPos(p1, tint_module_vars);
   uint lIndex = toIndex1D((*tint_module_vars.uniforms).gridSize, p0);
-  int triangleOffset = atomic_fetch_add_explicit((&(*tint_module_vars.LUT).values[min(i1, (v.tint_array_length_0_4 - 1u))]), 1, memory_order_relaxed);
+  int triangleOffset = atomic_fetch_add_explicit((&(*tint_module_vars.LUT).values[min(i1, (v.tint_array_length_0_2 - 1u))]), 1, memory_order_relaxed);
 }
 
-kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(1)]], device F32s* positions [[buffer(2)]], device AU32s* counters [[buffer(3)]], device AI32s* LUT [[buffer(4)]], device Dbg* dbg [[buffer(5)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(1)]], device F32s* positions [[buffer(3)]], device AU32s* counters [[buffer(4)]], device AI32s* LUT [[buffer(2)]], device Dbg* dbg [[buffer(5)]], const constant tint_array<uint4, 2>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_count_inner(GlobalInvocationID, tint_module_vars);
 }

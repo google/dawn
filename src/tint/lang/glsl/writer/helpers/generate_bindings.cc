@@ -29,6 +29,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/binding_array.h"
 #include "src/tint/lang/core/type/external_texture.h"
@@ -39,7 +40,7 @@
 
 namespace tint::glsl::writer {
 
-BindingData GenerateBindings(const core::ir::Module& module) {
+BindingData GenerateBindings(const core::ir::Module& module, const std::string& ep) {
     BindingData data{
         .bindings = {},
         .texture_builtins_from_uniform = {.ubo_binding = {.group = 0, .binding = 0u}},
@@ -63,13 +64,26 @@ BindingData GenerateBindings(const core::ir::Module& module) {
         return binding;
     };
 
-    Vector<tint::BindingPoint, 4> ext_tex_bps;
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        if (!var) {
+    core::ir::Function* ep_func = nullptr;
+    for (auto* f : module.functions) {
+        if (!f->IsEntryPoint()) {
             continue;
         }
+        if (module.NameOf(f).NameView() == ep) {
+            ep_func = f;
+            break;
+        }
+    }
+    // No entrypoint, so no bindings needed
+    if (!ep_func) {
+        return data;
+    }
 
+    core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{module};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
+
+    Vector<tint::BindingPoint, 4> ext_tex_bps;
+    for (auto* var : refs) {
         if (auto bp = var->BindingPoint()) {
             auto* ptr_type = var->Result()->Type()->As<core::type::Pointer>();
 

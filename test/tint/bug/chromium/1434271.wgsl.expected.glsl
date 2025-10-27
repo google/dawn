@@ -143,19 +143,19 @@ void main() {
 //
 #version 310 es
 
-layout(binding = 0, std140)
+layout(binding = 1, std140)
 uniform ubo_block_1_ubo {
   uvec4 inner[1];
 } v;
-layout(binding = 1, std430)
+layout(binding = 2, std430)
 buffer Buffer_1_ssbo {
   float weights[];
 } buf_in;
-layout(binding = 2, std430)
+layout(binding = 3, std430)
 buffer Buffer_2_ssbo {
   float weights[];
 } buf_out;
-layout(binding = 3, rgba8) uniform highp writeonly image2D tex_out;
+layout(binding = 0, rgba8) uniform highp writeonly image2D tex_out;
 float tint_float_modulo(float x, float y) {
   return (x - (y * trunc((x / y))));
 }

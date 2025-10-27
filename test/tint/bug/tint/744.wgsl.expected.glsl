@@ -1,18 +1,18 @@
 #version 310 es
 
-layout(binding = 0, std430)
+layout(binding = 2, std430)
 buffer Matrix_1_ssbo {
   uint numbers[];
 } firstMatrix;
-layout(binding = 1, std430)
+layout(binding = 3, std430)
 buffer Matrix_2_ssbo {
   uint numbers[];
 } secondMatrix;
-layout(binding = 2, std430)
+layout(binding = 0, std430)
 buffer Matrix_3_ssbo {
   uint numbers[];
 } resultMatrix;
-layout(binding = 3, std140)
+layout(binding = 1, std140)
 uniform uniforms_block_1_ubo {
   uvec4 inner[2];
 } v;

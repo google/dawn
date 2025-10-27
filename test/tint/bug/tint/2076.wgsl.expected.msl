@@ -85,7 +85,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   return tint_ExternalTextureParams{.numPlanes=v, .doYuvToRgbConversionOnly=v_1, .yuvToRgbConversionMatrix=v_2, .gammaDecodeParams=v_3, .gammaEncodeParams=v_4, .gamutConversionMatrix=v_6, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
-kernel void v_7(texture2d<float, access::sample> randomTexture_plane0 [[texture(0)]], texture2d<float, access::sample> randomTexture_plane1 [[texture(2)]], const constant tint_ExternalTextureParams_packed_vec3* randomTexture_params [[buffer(3)]], texture2d<float, access::sample> depthTexture [[texture(1)]]) {
+kernel void v_7(texture2d<float, access::sample> randomTexture_plane0 [[texture(1)]], texture2d<float, access::sample> randomTexture_plane1 [[texture(2)]], const constant tint_ExternalTextureParams_packed_vec3* randomTexture_params [[buffer(0)]], texture2d<float, access::sample> depthTexture [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.randomTexture_plane0=randomTexture_plane0, .randomTexture_plane1=randomTexture_plane1, .randomTexture_params=randomTexture_params, .depthTexture=depthTexture};
   tint_load_struct_packed_vec3(tint_module_vars.randomTexture_params);
 }

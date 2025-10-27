@@ -259,10 +259,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 .binding = metalIndex,
             };
             if (srcBindingPoint != dstBindingPoint) {
-                bindings.storage.emplace(srcBindingPoint, tint::BindingPoint{
-                                                              .group = 0,
-                                                              .binding = dstBindingPoint.binding,
-                                                          });
+                bindings.storage.emplace(srcBindingPoint, dstBindingPoint);
             }
 
             // Use the ShaderIndex as the indices for the buffer size lookups in the array

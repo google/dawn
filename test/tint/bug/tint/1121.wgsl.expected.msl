@@ -186,7 +186,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
   }
 }
 
-kernel void v_10(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer_packed_vec3* lightsBuffer [[buffer(0)]], device Tiles* tileLightId [[buffer(1)]], const constant Config* config [[buffer(2)]], const constant Uniforms* uniforms [[buffer(3)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_10(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer_packed_vec3* lightsBuffer [[buffer(0)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(1)]], const constant Uniforms* uniforms [[buffer(2)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(GlobalInvocationID, tint_module_vars);
 }

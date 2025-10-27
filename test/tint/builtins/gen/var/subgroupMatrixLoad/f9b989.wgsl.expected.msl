@@ -44,5 +44,5 @@ simdgroup_float8x8 subgroupMatrixLoad_f9b989(tint_array_lengths_struct tint_arra
 
 kernel void compute_main(device tint_array<float, 1024>* prevent_dce [[buffer(0)]], device SB_RW* sb_rw [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  simdgroup_store(subgroupMatrixLoad_f9b989(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)}, tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_store(subgroupMatrixLoad_f9b989(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u)}, tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
 }

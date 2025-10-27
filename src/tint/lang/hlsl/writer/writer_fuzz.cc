@@ -67,6 +67,26 @@ struct FuzzedOptions {
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              FuzzedOptions fuzzed_options) {
+    // TODO(375388101): We cannot run the backend for every entry point in the module unless we
+    // clone the whole module each time, so for now we just generate the first entry point.
+
+    // Strip the module down to a single entry point.
+    core::ir::Function* entry_point = nullptr;
+    for (auto& func : module.functions) {
+        if (func->IsEntryPoint()) {
+            entry_point = func;
+            break;
+        }
+    }
+    std::string ep_name;
+    if (entry_point) {
+        ep_name = module.NameOf(entry_point).NameView();
+    }
+    if (ep_name.empty()) {
+        // No entry point, just return success
+        return Success;
+    }
+
     Options options;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
@@ -79,7 +99,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     options.compiler =
         fuzzed_options.compiler_is_dxc ? Options::Compiler::kDXC : Options::Compiler::kFXC;
 
-    options.bindings = GenerateBindings(module, false);
+    options.bindings = GenerateBindings(module, ep_name, false, false);
     options.array_length_from_uniform.ubo_binding = {30, 0};
     // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
