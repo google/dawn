@@ -51,14 +51,12 @@
 namespace dawn::native::opengl {
 namespace {
 using InterstageLocationAndName = std::pair<uint32_t, std::string>;
-using SubstituteOverrideConfig = std::unordered_map<tint::OverrideId, double>;
 
 #define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
     X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
     X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
     X(std::string, entryPointName)                                                   \
     X(SingleShaderStage, stage)                                                      \
-    X(SubstituteOverrideConfig, substituteOverrideConfig)                            \
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
     X(bool, disableSymbolRenaming)                                                   \
@@ -406,7 +404,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
-    req.substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
     req.limits = LimitsForCompilationRequest::Create(GetDevice()->GetLimits().v1);
     req.adapterSupportedLimits = UnsafeUnserializedValue(
         LimitsForCompilationRequest::Create(GetDevice()->GetAdapter()->GetLimits().v1));
@@ -433,6 +430,10 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
 
     req.tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(version.GetStandard()),
                                                           version.GetMajor(), version.GetMinor());
+
+    req.tintOptions.substitute_overrides_config = {
+        .map = BuildSubstituteOverridesTransformConfig(programmableStage),
+    };
 
     req.tintOptions.disable_robustness = !GetDevice()->IsRobustnessEnabled();
     req.tintOptions.disable_workgroup_init =
@@ -504,21 +505,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
                                 "Pipeline single entry point (IR) failed:\n%s",
                                 singleEntryPointResult.Failure().reason);
-            }
-
-            // this needs to run after SingleEntryPoint transform which removes unused
-            // overrides for the current entry point.
-
-            {
-                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
-                                                   "ShaderModuleSubstituteOverrides");
-                tint::SubstituteOverridesConfig cfg;
-                cfg.map = std::move(r.substituteOverrideConfig);
-                auto substituteOverridesResult =
-                    tint::core::ir::transform::SubstituteOverrides(ir.Get(), cfg);
-                DAWN_INVALID_IF(substituteOverridesResult != tint::Success,
-                                "Pipeline override substitution (IR) failed:\n%s",
-                                substituteOverridesResult.Failure().reason);
             }
 
             tint::Result<tint::glsl::writer::Output> result;

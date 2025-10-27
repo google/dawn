@@ -36,6 +36,7 @@
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/common/bindings.h"
+#include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 
 namespace tint::glsl::writer {
@@ -208,6 +209,9 @@ struct Options {
     /// The bindings
     Bindings bindings{};
 
+    /// Override substitutions
+    SubstituteOverridesConfig substitute_overrides_config{};
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  strip_all_names,
@@ -226,7 +230,8 @@ struct Options {
                  array_length_from_uniform,
                  sampler_texture_to_name,
                  placeholder_sampler_bind_point,
-                 bindings);
+                 bindings,
+                 substitute_overrides_config);
 };
 
 }  // namespace tint::glsl::writer
