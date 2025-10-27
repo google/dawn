@@ -1,22 +1,14 @@
 --- webgpu_header
 +++ dawn_header
 @@
- struct WGPUSurfaceTexture;
  struct WGPUTexelCopyBufferLayout;
  struct WGPUTextureBindingLayout;
+ struct WGPUTextureComponentSwizzle;
 -struct WGPUTextureViewDescriptor;
-+struct WGPUTextureComponentSwizzle;
  struct WGPUVertexAttribute;
  struct WGPUBindGroupDescriptor;
  struct WGPUBindGroupLayoutEntry;
 @@
- struct WGPUSurfaceDescriptor;
- struct WGPUTexelCopyBufferInfo;
- struct WGPUTexelCopyTextureInfo;
-+struct WGPUTextureComponentSwizzleDescriptor;
- struct WGPUTextureDescriptor;
- struct WGPUVertexBufferLayout;
- struct WGPUBindGroupLayoutDescriptor;
  struct WGPUColorTargetState;
  struct WGPUComputePipelineDescriptor;
  struct WGPURenderPassDescriptor;
@@ -24,32 +16,6 @@
  struct WGPUVertexState;
  struct WGPUFragmentState;
  struct WGPURenderPipelineDescriptor;
-@@
-     WGPUCompilationMessageType_Info = 0x00000003,
-     WGPUCompilationMessageType_Force32 = 0x7FFFFFFF
- } WGPUCompilationMessageType WGPU_ENUM_ATTRIBUTE;
-+
-+typedef enum WGPUComponentSwizzle {
-+    WGPUComponentSwizzle_Undefined = 0x00000000,
-+    WGPUComponentSwizzle_Zero = 0x00000001,
-+    WGPUComponentSwizzle_One = 0x00000002,
-+    WGPUComponentSwizzle_R = 0x00000003,
-+    WGPUComponentSwizzle_G = 0x00000004,
-+    WGPUComponentSwizzle_B = 0x00000005,
-+    WGPUComponentSwizzle_A = 0x00000006,
-+    WGPUComponentSwizzle_Force32 = 0x7FFFFFFF
-+} WGPUComponentSwizzle WGPU_ENUM_ATTRIBUTE;
- 
- typedef enum WGPUCompositeAlphaMode {
-     WGPUCompositeAlphaMode_Auto = 0x00000000,
-@@
-     WGPUFeatureName_TextureFormatsTier1 = 0x00000013,
-     WGPUFeatureName_TextureFormatsTier2 = 0x00000014,
-     WGPUFeatureName_PrimitiveIndex = 0x00000015,
-+    WGPUFeatureName_TextureComponentSwizzle = 0x00000016,
-     WGPUFeatureName_Force32 = 0x7FFFFFFF
- } WGPUFeatureName WGPU_ENUM_ATTRIBUTE;
- 
 @@
      WGPUSType_SurfaceSourceXCBWindow = 0x00000009,
      WGPUSType_SurfaceColorManagement = 0x0000000A,
@@ -59,9 +25,15 @@
  } WGPUSType WGPU_ENUM_ATTRIBUTE;
  
 @@
-     /*.multisampled=*/WGPU_FALSE _wgpu_COMMA \
- })
+ } WGPUTextureComponentSwizzle WGPU_STRUCTURE_ATTRIBUTE;
  
+ #define WGPU_TEXTURE_COMPONENT_SWIZZLE_INIT _wgpu_MAKE_INIT_STRUCT(WGPUTextureComponentSwizzle, { \
+-    /*.r=*/WGPUComponentSwizzle_R _wgpu_COMMA \
+-    /*.g=*/WGPUComponentSwizzle_G _wgpu_COMMA \
+-    /*.b=*/WGPUComponentSwizzle_B _wgpu_COMMA \
+-    /*.a=*/WGPUComponentSwizzle_A _wgpu_COMMA \
+-})
+-
 -typedef struct WGPUTextureViewDescriptor {
 -    WGPUChainedStruct * nextInChain;
 -    WGPUStringView label;
@@ -86,14 +58,6 @@
 -    /*.arrayLayerCount=*/WGPU_ARRAY_LAYER_COUNT_UNDEFINED _wgpu_COMMA \
 -    /*.aspect=*/WGPUTextureAspect_Undefined _wgpu_COMMA \
 -    /*.usage=*/WGPUTextureUsage_None _wgpu_COMMA \
-+typedef struct WGPUTextureComponentSwizzle {
-+    WGPUComponentSwizzle r;
-+    WGPUComponentSwizzle g;
-+    WGPUComponentSwizzle b;
-+    WGPUComponentSwizzle a;
-+} WGPUTextureComponentSwizzle WGPU_STRUCTURE_ATTRIBUTE;
-+
-+#define WGPU_TEXTURE_COMPONENT_SWIZZLE_INIT _wgpu_MAKE_INIT_STRUCT(WGPUTextureComponentSwizzle, { \
 +    /*.r=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
 +    /*.g=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
 +    /*.b=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
@@ -101,26 +65,6 @@
  })
  
  typedef struct WGPUVertexAttribute {
-@@
-     /*.aspect=*/WGPUTextureAspect_Undefined _wgpu_COMMA \
- })
- 
-+typedef struct WGPUTextureComponentSwizzleDescriptor {
-+    WGPUChainedStruct chain;
-+    WGPUTextureComponentSwizzle swizzle;
-+} WGPUTextureComponentSwizzleDescriptor WGPU_STRUCTURE_ATTRIBUTE;
-+
-+#define WGPU_TEXTURE_COMPONENT_SWIZZLE_DESCRIPTOR_INIT _wgpu_MAKE_INIT_STRUCT(WGPUTextureComponentSwizzleDescriptor, { \
-+    /*.chain=*/_wgpu_MAKE_INIT_STRUCT(WGPUChainedStruct, { \
-+        /*.next=*/NULL _wgpu_COMMA \
-+        /*.sType=*/WGPUSType_TextureComponentSwizzleDescriptor _wgpu_COMMA \
-+    }) _wgpu_COMMA \
-+    /*.swizzle=*/WGPU_TEXTURE_COMPONENT_SWIZZLE_INIT _wgpu_COMMA \
-+})
-+
- typedef struct WGPUTextureDescriptor {
-     WGPUChainedStruct * nextInChain;
-     WGPUStringView label;
 @@
      /*.depthStencilAttachment=*/NULL _wgpu_COMMA \
      /*.occlusionQuerySet=*/NULL _wgpu_COMMA \
