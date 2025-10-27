@@ -53,11 +53,19 @@ TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
 }
 
 TEST_F(SpirvWriterTest, CanGenerate_SubgroupMatrixRequiresVulkanMemoryModel) {
-    mod.root_block->Append(b.Var(ty.ptr<private_>(ty.subgroup_matrix_result(ty.f32(), 8, 8))));
+    core::ir::Var* v = nullptr;
+    b.Append(mod.root_block,
+             [&] { v = b.Var(ty.ptr<private_>(ty.subgroup_matrix_result(ty.f32(), 8, 8))); });
+
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Let("x", v);
+        b.Return(ep);
+    });
 
     Options options;
     options.use_vulkan_memory_model = false;
-    auto result = CanGenerate(mod, options);
+    auto result = CanGenerate(mod, options, "main");
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("using subgroup matrices requires the Vulkan Memory Model"));

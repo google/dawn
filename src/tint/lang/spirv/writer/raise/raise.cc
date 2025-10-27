@@ -49,6 +49,7 @@
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
+#include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -76,6 +77,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result;               \
         }                                \
     } while (false)
+
+    RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
+                  options.substitute_overrides_config);
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};

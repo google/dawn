@@ -219,7 +219,7 @@ class SpirvWriterTestHelperBase : public BASE {
             case kI32:
                 return b.Composite(MakeVectorType(type), 42_i, -10_i);
             case kU32:
-                return b.Composite(MakeVectorType(type), 42_u, 10_u);
+                return b.Composite(MakeVectorType(type), 31_u, 10_u);
             case kF32:
                 return b.Composite(MakeVectorType(type), 42_f, -0.5_f);
             case kF16:
