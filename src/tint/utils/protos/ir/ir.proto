@@ -584,6 +584,7 @@ enum BuiltinValue {
     subgroup_id = 17;
     primitive_index = 18;
     barycentric_coord = 19;
+    num_subgroups = 20;
 }
 
 enum BuiltinFn {

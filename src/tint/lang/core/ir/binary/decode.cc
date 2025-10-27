@@ -1714,6 +1714,8 @@ struct Decoder {
                 return core::BuiltinValue::kSubgroupInvocationId;
             case pb::BuiltinValue::subgroup_size:
                 return core::BuiltinValue::kSubgroupSize;
+            case pb::BuiltinValue::num_subgroups:
+                return core::BuiltinValue::kNumSubgroups;
             case pb::BuiltinValue::vertex_index:
                 return core::BuiltinValue::kVertexIndex;
             case pb::BuiltinValue::workgroup_id:

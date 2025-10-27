@@ -997,6 +997,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "local_invocation_index") {
         return BuiltinValue::kLocalInvocationIndex;
     }
+    if (str == "num_subgroups") {
+        return BuiltinValue::kNumSubgroups;
+    }
     if (str == "num_workgroups") {
         return BuiltinValue::kNumWorkgroups;
     }
@@ -1053,6 +1056,8 @@ std::string_view ToString(BuiltinValue value) {
             return "local_invocation_id";
         case BuiltinValue::kLocalInvocationIndex:
             return "local_invocation_index";
+        case BuiltinValue::kNumSubgroups:
+            return "num_subgroups";
         case BuiltinValue::kNumWorkgroups:
             return "num_workgroups";
         case BuiltinValue::kPosition:

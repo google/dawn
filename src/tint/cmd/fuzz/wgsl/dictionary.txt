@@ -320,6 +320,7 @@
 "must_use"
 "normalize"
 "num_levels"
+"num_subgroups"
 "num_workgroups"
 "off"
 "original_value"

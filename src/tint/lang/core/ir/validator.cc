@@ -413,6 +413,14 @@ constexpr BuiltinChecker kLocalInvocationIndexChecker{
     /* type_error */ "local_invocation_index must be an u32",
 };
 
+constexpr BuiltinChecker kNumSubgroupsChecker{
+    /* name */ "num_subgroups",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "num_subgroups must be an u32",
+};
+
 constexpr BuiltinChecker kNumWorkgroupsChecker{
     /* name */ "num_workgroups",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
@@ -519,6 +527,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kLocalInvocationIdChecker;
         case BuiltinValue::kLocalInvocationIndex:
             return kLocalInvocationIndexChecker;
+        case BuiltinValue::kNumSubgroups:
+            return kNumSubgroupsChecker;
         case BuiltinValue::kNumWorkgroups:
             return kNumWorkgroupsChecker;
         case BuiltinValue::kSampleIndex:

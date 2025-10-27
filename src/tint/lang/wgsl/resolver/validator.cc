@@ -1125,6 +1125,34 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
+        case core::BuiltinValue::kNumSubgroups:
+            if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " attribute requires enabling extension " << style::Code("subgroups");
+                return false;
+            }
+            // TODO(crbug.com/454654105): Remove this check.
+            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kSubgroupId)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")") << " attribute requires the "
+                    << style::Code("subgroup_id") << " language feature";
+                return false;
+            }
+            if (!type->Is<core::type::U32>()) {
+                err_builtin_type("u32");
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone &&
+                !(stage == ast::PipelineStage::kCompute && is_input)) {
+                AddError(attr->source)
+                    << style::Attribute("@builtin") << style::Code("(", style::Enum(builtin), ")")
+                    << " is only valid as a compute shader input";
+                return false;
+            }
+            break;
         case core::BuiltinValue::kSubgroupInvocationId:
         case core::BuiltinValue::kSubgroupSize:
             if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {

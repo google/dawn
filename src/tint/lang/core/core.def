@@ -65,6 +65,7 @@ enum builtin_value {
   subgroup_id
   subgroup_invocation_id
   subgroup_size
+  num_subgroups
   barycentric_coord
   primitive_index
   @internal __point_size

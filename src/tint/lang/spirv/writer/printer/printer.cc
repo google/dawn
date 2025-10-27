@@ -393,6 +393,8 @@ class Printer {
             case core::BuiltinValue::kSubgroupSize:
                 module_.PushCapability(SpvCapabilityGroupNonUniform);
                 return SpvBuiltInSubgroupSize;
+            case core::BuiltinValue::kNumSubgroups:
+                TINT_UNIMPLEMENTED();
             case core::BuiltinValue::kVertexIndex:
                 return SpvBuiltInVertexIndex;
             case core::BuiltinValue::kWorkgroupId:

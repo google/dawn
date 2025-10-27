@@ -1080,6 +1080,8 @@ struct Encoder {
                 return pb::BuiltinValue::subgroup_invocation_id;
             case core::BuiltinValue::kSubgroupSize:
                 return pb::BuiltinValue::subgroup_size;
+            case core::BuiltinValue::kNumSubgroups:
+                return pb::BuiltinValue::num_subgroups;
             case core::BuiltinValue::kVertexIndex:
                 return pb::BuiltinValue::vertex_index;
             case core::BuiltinValue::kWorkgroupId:

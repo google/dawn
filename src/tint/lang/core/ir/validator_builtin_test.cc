@@ -972,6 +972,53 @@ TEST_F(IR_ValidatorTest, Builtin_SubgroupInvocationId_WrongType) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Builtin_NumSubgroups_WrongStage) {
+    auto* f = VertexEntryPoint();
+    AddBuiltinParam(f, "num", BuiltinValue::kNumSubgroups, ty.u32());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(
+                    R"(:1:19 error: num_subgroups must be used in a compute shader entry point
+%f = @vertex func(%num:u32 [@num_subgroups]):vec4<f32> [@position] {
+                  ^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_NumSubgroups_WrongIODirection) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinReturn(f, "num", BuiltinValue::kNumSubgroups, ty.u32());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:1:1 error: num_subgroups must be an input of a shader entry point
+%f = @compute @workgroup_size(1u, 1u, 1u) func():u32 [@num_subgroups] {
+^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Builtin_NumSubgroups_WrongType) {
+    auto* f = ComputeEntryPoint();
+    AddBuiltinParam(f, "num", BuiltinValue::kNumSubgroups, ty.i32());
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr(R"(:1:48 error: num_subgroups must be an u32
+%f = @compute @workgroup_size(1u, 1u, 1u) func(%num:i32 [@num_subgroups]):void {
+                                               ^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Bitcast_MissingArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
