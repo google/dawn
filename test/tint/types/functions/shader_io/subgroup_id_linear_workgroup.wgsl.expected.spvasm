@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniform
+         %20 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_subgroup_id_Input
+               OpExecutionMode %main LocalSize 64 1 1
+               OpMemberName %output_block_tint_explicit_layout 0 "inner"
+               OpName %output_block_tint_explicit_layout "output_block_tint_explicit_layout"
+               OpName %main_subgroup_id_Input "main_subgroup_id_Input"
+               OpName %main_inner "main_inner"
+               OpName %subgroup_id "subgroup_id"
+               OpName %main "main"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %output_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %output_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %main_subgroup_id_Input BuiltIn SubgroupId
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%output_block_tint_explicit_layout = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_output_block_tint_explicit_layout = OpTypePointer StorageBuffer %output_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_StorageBuffer_output_block_tint_explicit_layout StorageBuffer
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_subgroup_id_Input = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %11 = OpTypeFunction %void %uint
+%_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %24 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %11
+%subgroup_id = OpFunctionParameter %uint
+         %12 = OpLabel
+         %13 = OpAccessChain %_ptr_StorageBuffer__runtimearr_uint %1 %uint_0
+         %16 = OpArrayLength %uint %1 0
+         %17 = OpISub %uint %16 %uint_1
+         %19 = OpExtInst %uint %20 UMin %subgroup_id %17
+         %21 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %19
+               OpStore %21 %subgroup_id None
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %24
+         %25 = OpLabel
+         %26 = OpLoad %uint %main_subgroup_id_Input None
+         %27 = OpFunctionCall %void %main_inner %26
+               OpReturn
+               OpFunctionEnd

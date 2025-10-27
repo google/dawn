@@ -146,8 +146,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir,
                     if (member->Attributes().color.has_value()) {
                         return Failure("@color attribute is not supported by the HLSL backend");
                     }
-                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId) {
-                        return Failure("subgroup_id is not yet supported by the HLSL backend");
+                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId ||
+                        member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
+                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize ||
+                        member->Attributes().builtin == core::BuiltinValue::kNumSubgroups) {
+                        if (options.compiler == Options::Compiler::kFXC) {
+                            return Failure("subgroups are not supported by FXC");
+                        }
                     }
 
                     if (member->Attributes().builtin == core::BuiltinValue::kBarycentricCoord &&
@@ -160,8 +165,13 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir,
                 if (param->Color().has_value()) {
                     return Failure("@color attribute is not supported by the HLSL backend");
                 }
-                if (param->Builtin() == core::BuiltinValue::kSubgroupId) {
-                    return Failure("subgroup_id is not yet supported by the HLSL backend");
+                if (param->Builtin() == core::BuiltinValue::kSubgroupId ||
+                    param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
+                    param->Builtin() == core::BuiltinValue::kSubgroupSize ||
+                    param->Builtin() == core::BuiltinValue::kNumSubgroups) {
+                    if (options.compiler == Options::Compiler::kFXC) {
+                        return Failure("subgroups are not supported by FXC");
+                    }
                 }
 
                 if (param->Builtin() == core::BuiltinValue::kBarycentricCoord &&

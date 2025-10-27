@@ -178,14 +178,16 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kSubgroupId ||
                         member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
-                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
+                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize ||
+                        member->Attributes().builtin == core::BuiltinValue::kNumSubgroups) {
                         return Failure("subgroups are not supported by the GLSL backend");
                     }
                 }
             } else {
                 if (param->Builtin() == core::BuiltinValue::kSubgroupId ||
                     param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
-                    param->Builtin() == core::BuiltinValue::kSubgroupSize) {
+                    param->Builtin() == core::BuiltinValue::kSubgroupSize ||
+                    param->Builtin() == core::BuiltinValue::kNumSubgroups) {
                     return Failure("subgroups are not supported by the GLSL backend");
                 }
             }
