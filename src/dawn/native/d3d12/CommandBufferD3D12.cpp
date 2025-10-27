@@ -1356,7 +1356,8 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
                 ComPtr<ID3D12CommandSignature> signature =
                     lastPipeline->GetDispatchIndirectCommandSignature();
                 commandList->ExecuteIndirect(
-                    signature.Get(), 1, ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
+                    signature.Get(), 1,
+                    ToBackend(dispatch->indirectBuffer.Get())->GetD3D12Resource(),
                     dispatch->indirectOffset, nullptr, 0);
                 currentDispatch++;
                 break;
