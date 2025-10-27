@@ -168,6 +168,7 @@ enum class Toggle {
     EnableShaderPrint,
     BlobCacheHashValidation,
     DecomposeUniformBuffers,
+    VulkanEnableF16OnNvidia,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,

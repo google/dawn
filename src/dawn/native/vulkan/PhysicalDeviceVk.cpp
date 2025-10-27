@@ -344,11 +344,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
         mDeviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE) {
-        // TODO(crbug.com/tint/2164): Investigate crashes in f16 CTS tests to enable on NVIDIA.
-        if (!gpu_info::IsNvidia(GetVendorId())) {
-            EnableFeature(Feature::ShaderF16);
-            shaderF16Enabled = true;
-        }
+        EnableFeature(Feature::ShaderF16);
+        shaderF16Enabled = true;
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::DrawIndirectCount) &&
@@ -1213,6 +1210,12 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
                     absl::StrFormat("uniformAndStorageBuffer16BitAccess is required to enable %s "
                                     "if `decompose_uniform_buffers` is not used",
                                     feature));
+            }
+            // TODO(crbug.com/42251215): Investigate f16 CTS test failures to enable on Nvidia.
+            if (gpu_info::IsNvidia(mVendorId) &&
+                !toggles.IsEnabled(Toggle::VulkanEnableF16OnNvidia)) {
+                return FeatureValidationResult(
+                    absl::StrFormat("Feature %s is not yet supported on Nvidia GPUs", feature));
             }
             break;
 

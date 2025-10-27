@@ -703,6 +703,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"decompose_uniform_buffers",
       "Decompose uniform buffers into arrays of vec4<u32> on backends for Vulkan and OpenGL.",
       "https://crbug.com/448452698", ToggleStage::Adapter}},
+    {Toggle::VulkanEnableF16OnNvidia,
+     {"vulkan_enable_f16_on_nvidia", "Enables F16 on Nvidia GPUs with Vulkan",
+      "https://crbug.com/42251215", ToggleStage::Adapter}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "
