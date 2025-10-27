@@ -28,8 +28,6 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_WRITER_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_WRITER_H_
 
-#include <string>
-
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/lang/spirv/writer/common/output.h"
@@ -40,11 +38,8 @@ namespace tint::spirv::writer {
 /// Check if the module @p ir is supported by the SPIR-V backend with @p options.
 /// @param ir the module
 /// @param options the writer options
-/// @param ep_name the entry point name
 /// @returns Success or a failure message indicating why SPIR-V generation would fail
-Result<SuccessType> CanGenerate(const core::ir::Module& ir,
-                                const Options& options,
-                                const std::string& ep_name);
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options);
 
 /// Generate SPIR-V for a program, according to a set of configuration options.
 /// The result will contain the SPIR-V or failure.

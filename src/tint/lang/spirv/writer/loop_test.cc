@@ -46,6 +46,12 @@ TEST_F(SpirvWriterTest, Loop_BreakIf) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     Options options;
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -77,6 +83,12 @@ TEST_F(SpirvWriterTest, Loop_BreakIf_WithRobustness) {
             });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -133,6 +145,12 @@ TEST_F(SpirvWriterTest, Loop_UnconditionalBreakInBody) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     Options options;
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -171,6 +189,12 @@ TEST_F(SpirvWriterTest, Loop_ConditionalBreakInBody) {
             });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -218,6 +242,12 @@ TEST_F(SpirvWriterTest, Loop_ConditionalContinueInBody) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     Options options;
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -254,6 +284,12 @@ TEST_F(SpirvWriterTest, Loop_UnconditionalReturnInBody) {
         b.Unreachable();
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     Options options;
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -286,6 +322,12 @@ TEST_F(SpirvWriterTest, Loop_UseResultFromBodyInContinuing) {
             });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -329,6 +371,12 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInBody) {
                      });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -379,6 +427,12 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing) {
             });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -440,6 +494,12 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody) {
             });
         });
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -510,6 +570,12 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_With
         b.Return(func, outer_result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     Options options;
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -547,9 +613,10 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_With
                OpReturnValue %10
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %26
+               ; Function main
+       %main = OpFunction %void None %26
          %27 = OpLabel
+          %x = OpFunctionCall %int %foo
                OpReturn
                OpFunctionEnd
 )");
@@ -557,7 +624,6 @@ TEST_F(SpirvWriterTest, Loop_NestedLoopInContinuing_UnreachableInNestedBody_With
 
 TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.void_());
-
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
 
@@ -581,6 +647,12 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         });
 
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -611,7 +683,6 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
 
 TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
     auto* func = b.Function("foo", ty.void_());
-
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
 
@@ -638,6 +709,12 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
         });
 
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -671,7 +748,6 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
 
 TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
     auto* func = b.Function("foo", ty.void_());
-
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Initializer(), [&] {  //
@@ -700,6 +776,12 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
         });
 
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -736,7 +818,6 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
 
 TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
     auto* func = b.Function("foo", ty.void_());
-
     b.Append(func->Block(), [&] {
         auto* outer = b.Loop();
         b.Append(outer->Initializer(), [&] {  //
@@ -768,6 +849,12 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
         });
 
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -807,7 +894,6 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
 
 TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing) {
     auto* func = b.Function("foo", ty.void_());
-
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
 
@@ -826,6 +912,12 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIfWithResultAndImplicitFalse_InContinuing
         });
 
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
     });
 
     Options options;
@@ -868,6 +960,12 @@ TEST_F(SpirvWriterTest, Loop_ExitValue) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     EXPECT_EQ(IR(), R"(
 %foo = func():i32 {
   $B1: {
@@ -877,6 +975,13 @@ TEST_F(SpirvWriterTest, Loop_ExitValue) {
       }
     }
     ret %2
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B3: {
+    %4:i32 = call %foo
+    %x:i32 = let %4
+    ret
   }
 }
 )");
@@ -921,6 +1026,12 @@ TEST_F(SpirvWriterTest, Loop_ExitValue_BreakIf) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     EXPECT_EQ(IR(), R"(
 %foo = func():i32 {
   $B1: {
@@ -938,6 +1049,13 @@ TEST_F(SpirvWriterTest, Loop_ExitValue_BreakIf) {
       }
     }
     ret %2
+  }
+}
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B5: {
+    %4:i32 = call %foo
+    %x:i32 = let %4
+    ret
   }
 }
 )");

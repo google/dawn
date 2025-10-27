@@ -39,6 +39,10 @@ namespace tint::core::ir::transform {
 namespace {
 
 Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
+    if (entry_point_name.empty()) {
+        return Failure{"no entry point provided"};
+    }
+
     // Find the entry point.
     ir::Function* entry_point = nullptr;
     for (auto& func : ir.functions) {

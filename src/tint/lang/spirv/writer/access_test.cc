@@ -43,6 +43,12 @@ TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.array(ty.i32(), 4))));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpCompositeExtract %int %arr 1");
 }
@@ -54,6 +60,12 @@ TEST_F(SpirvWriterTest, Access_Array_Pointer_ConstantIndex) {
         auto* result = b.Access(ty.ptr<function, i32>(), arr_var, 1_u);
         b.Return(func, b.Load(result));
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -69,6 +81,12 @@ TEST_F(SpirvWriterTest, Access_Array_Pointer_DynamicIndex) {
         auto* result = b.Access(ty.ptr<function, i32>(), arr_var, idx);
         b.Return(func, b.Load(result));
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -91,13 +109,19 @@ TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
         mod.SetName(result_scalar, "result_scalar");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat2x2<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_vector = OpCompositeExtract %v2float %mat 1");
     EXPECT_INST("%result_scalar = OpCompositeExtract %float %mat 1 0");
 }
 
 TEST_F(SpirvWriterTest, Access_Matrix_Pointer_ConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* mat_var = b.Var("mat", ty.ptr<function, mat2x2<f32>>());
         auto* result_vector = b.Access(ty.ptr<function, vec2<f32>>(), mat_var, 1_u);
@@ -126,6 +150,12 @@ TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
         mod.SetName(result_scalar, "result_scalar");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %14 = OpBitcast %uint %idx
@@ -148,6 +178,12 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpCompositeExtract %int %vec 1");
 }
@@ -163,6 +199,12 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %9 = OpBitcast %uint %idx
@@ -172,7 +214,9 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
-    auto* val = b.FunctionParam("arr", ty.array(ty.array(ty.vec4(ty.i32()), 4), 4));
+    auto* arr_ty = ty.array(ty.array(ty.vec4(ty.i32()), 4), 4);
+
+    auto* val = b.FunctionParam("arr", arr_ty);
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({val, idx});
@@ -180,6 +224,12 @@ TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
         auto* result = b.Access(ty.i32(), val, 1_u, 2_u, idx);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(arr_ty), b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -208,6 +258,12 @@ TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
         mod.SetName(result_b, "result_b");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(str)));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_a = OpCompositeExtract %int %str 0");
     EXPECT_INST("%result_b = OpCompositeExtract %int %str 1 2");
@@ -231,13 +287,19 @@ TEST_F(SpirvWriterTest, Access_Struct_Pointer_ConstantIndex) {
         mod.SetName(result_b, "result_b");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result_a = OpAccessChain %_ptr_Function_int %str %uint_0");
     EXPECT_INST("%result_b = OpAccessChain %_ptr_Function_v4int %str %uint_1");
 }
 
 TEST_F(SpirvWriterTest, LoadVectorElement_ConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
         auto* result = b.LoadVectorElement(vec_var, 1_u);
@@ -261,6 +323,12 @@ TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %12 = OpBitcast %uint %idx
@@ -271,7 +339,7 @@ TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
 }
 
 TEST_F(SpirvWriterTest, StoreVectorElement_ConstantIndex) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
         b.StoreVectorElement(vec_var, 1_u, b.Constant(42_i));
@@ -291,6 +359,12 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
         b.StoreVectorElement(vec_var, idx, b.Constant(42_i));
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

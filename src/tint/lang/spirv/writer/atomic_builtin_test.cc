@@ -52,6 +52,12 @@ TEST_F(SpirvWriterTest, AtomicAdd_Storage) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicIAdd %int %ptr %uint_1 %uint_0 %arg1");
 }
@@ -69,6 +75,12 @@ TEST_F(SpirvWriterTest, AtomicAdd_Workgroup) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicIAdd %int %var %uint_2 %uint_0 %arg1");
 }
@@ -84,6 +96,12 @@ TEST_F(SpirvWriterTest, AtomicAnd) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kAtomicAnd, var, arg1);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -108,10 +126,16 @@ TEST_F(SpirvWriterTest, AtomicCompareExchangeWeak) {
         mod.SetName(original, "original");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%9 = OpAtomicCompareExchange %int %var %uint_2 %uint_0 %uint_0 %val %cmp");
-    EXPECT_INST("%13 = OpIEqual %bool %9 %cmp");
-    EXPECT_INST("%result = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %9 %13");
+    EXPECT_INST("%12 = OpAtomicCompareExchange %int %var %uint_2 %uint_0 %uint_0 %val %cmp");
+    EXPECT_INST("%15 = OpIEqual %bool %12 %cmp");
+    EXPECT_INST("%result = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %12 %15");
     EXPECT_INST("%original = OpCompositeExtract %int %result 0");
 }
 
@@ -128,6 +152,12 @@ TEST_F(SpirvWriterTest, AtomicExchange) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicExchange %int %var %uint_2 %uint_0 %arg1");
 }
@@ -141,6 +171,12 @@ TEST_F(SpirvWriterTest, AtomicLoad) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, var);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -160,6 +196,12 @@ TEST_F(SpirvWriterTest, AtomicMax_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicSMax %int %var %uint_2 %uint_0 %arg1");
 }
@@ -175,6 +217,12 @@ TEST_F(SpirvWriterTest, AtomicMax_U32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kAtomicMax, var, arg1);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -194,6 +242,12 @@ TEST_F(SpirvWriterTest, AtomicMin_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicSMin %int %var %uint_2 %uint_0 %arg1");
 }
@@ -209,6 +263,12 @@ TEST_F(SpirvWriterTest, AtomicMin_U32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kAtomicMin, var, arg1);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -228,6 +288,12 @@ TEST_F(SpirvWriterTest, AtomicOr) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicOr %int %var %uint_2 %uint_0 %arg1");
 }
@@ -242,6 +308,12 @@ TEST_F(SpirvWriterTest, AtomicStore) {
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, var, arg1);
         b.Return(func);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -261,6 +333,12 @@ TEST_F(SpirvWriterTest, AtomicSub) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpAtomicISub %int %var %uint_2 %uint_0 %arg1");
 }
@@ -276,6 +354,12 @@ TEST_F(SpirvWriterTest, AtomicXor) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kAtomicXor, var, arg1);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

@@ -80,7 +80,7 @@ using Arithmetic_Bitwise = SpirvWriterTestWithParam<BinaryTestCase>;
 TEST_P(Arithmetic_Bitwise, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* lhs = MakeScalarValue(params.lhs_type);
         auto* rhs = MakeScalarValue(params.rhs_type);
@@ -95,7 +95,7 @@ TEST_P(Arithmetic_Bitwise, Scalar) {
 TEST_P(Arithmetic_Bitwise, Vector) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* lhs = MakeVectorValue(params.lhs_type);
         auto* rhs = MakeVectorValue(params.rhs_type);
@@ -160,6 +160,12 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesVector_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.f32()), b.Zero(ty.vec4<f32>()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpVectorTimesScalar %v4float %vector %scalar");
 }
@@ -173,6 +179,12 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesScalar_F32) {
         auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
         b.Return(func);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.f32()), b.Zero(ty.vec4<f32>()));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -190,6 +202,12 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesMatrix_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.f32()), b.Zero(ty.mat3x4<f32>()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpMatrixTimesScalar %mat3v4float %matrix %scalar");
 }
@@ -203,6 +221,12 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesScalar_F32) {
         auto* result = b.Multiply(ty.mat3x4<f32>(), matrix, scalar);
         b.Return(func);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.f32()), b.Zero(ty.mat3x4<f32>()));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -220,6 +244,12 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesMatrix_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.mat3x4<f32>()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpVectorTimesMatrix %v3float %vector %matrix");
 }
@@ -233,6 +263,12 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesVector_F32) {
         auto* result = b.Multiply(ty.vec4<f32>(), matrix, vector);
         b.Return(func);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.vec3<f32>()), b.Zero(ty.mat3x4<f32>()));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -250,6 +286,12 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesMatrix_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.mat4x3<f32>()), b.Zero(ty.mat3x4<f32>()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpMatrixTimesMatrix %mat3v3float %mat1 %mat2");
 }
@@ -258,7 +300,7 @@ using Comparison = SpirvWriterTestWithParam<BinaryTestCase>;
 TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* lhs = MakeScalarValue(params.lhs_type);
         auto* rhs = MakeScalarValue(params.rhs_type);
@@ -274,7 +316,7 @@ TEST_P(Comparison, Scalar) {
 TEST_P(Comparison, Vector) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* lhs = MakeVectorValue(params.lhs_type);
         auto* rhs = MakeVectorValue(params.rhs_type);
@@ -333,8 +375,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryTestCase{kBool, core::BinaryOp::kNotEqual, "OpLogicalNotEqual", "bool"}));
 
 TEST_F(SpirvWriterTest, Binary_Chain) {
-    auto* func = b.Function("foo", ty.void_());
-
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* sub = b.Subtract(ty.i32(), 1_i, 2_i);
         auto* add = b.Add(ty.i32(), sub, sub);
@@ -362,6 +403,12 @@ TEST_F(SpirvWriterTest, Divide_u32_u32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                ; Function foo
@@ -373,15 +420,22 @@ TEST_F(SpirvWriterTest, Divide_u32_u32) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %11
+         %12 = OpLabel
+          %x = OpFunctionCall %uint %foo %uint_0 %uint_0
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_div_u32
 %tint_div_u32 = OpFunction %uint None %5
       %lhs_0 = OpFunctionParameter %uint
       %rhs_0 = OpFunctionParameter %uint
-         %11 = OpLabel
-         %12 = OpIEqual %bool %rhs_0 %uint_0
-         %15 = OpSelect %uint %12 %uint_1 %rhs_0
-         %17 = OpUDiv %uint %lhs_0 %15
-               OpReturnValue %17
+         %17 = OpLabel
+         %18 = OpIEqual %bool %rhs_0 %uint_0
+         %20 = OpSelect %uint %18 %uint_1 %rhs_0
+         %22 = OpUDiv %uint %lhs_0 %20
+               OpReturnValue %22
                OpFunctionEnd
 )");
 }
@@ -398,6 +452,12 @@ TEST_F(SpirvWriterTest, Divide_i32_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                ; Function foo
@@ -409,19 +469,26 @@ TEST_F(SpirvWriterTest, Divide_i32_i32) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %11
+         %12 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %int_0
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_div_i32
 %tint_div_i32 = OpFunction %int None %5
       %lhs_0 = OpFunctionParameter %int
       %rhs_0 = OpFunctionParameter %int
-         %11 = OpLabel
-         %12 = OpIEqual %bool %rhs_0 %int_0
-         %15 = OpIEqual %bool %lhs_0 %int_n2147483648
-         %17 = OpIEqual %bool %rhs_0 %int_n1
-         %19 = OpLogicalAnd %bool %15 %17
-         %20 = OpLogicalOr %bool %12 %19
-         %21 = OpSelect %int %20 %int_1 %rhs_0
-         %23 = OpSDiv %int %lhs_0 %21
-               OpReturnValue %23
+         %17 = OpLabel
+         %18 = OpIEqual %bool %rhs_0 %int_0
+         %20 = OpIEqual %bool %lhs_0 %int_n2147483648
+         %22 = OpIEqual %bool %rhs_0 %int_n1
+         %24 = OpLogicalAnd %bool %20 %22
+         %25 = OpLogicalOr %bool %18 %24
+         %26 = OpSelect %int %25 %int_1 %rhs_0
+         %28 = OpSDiv %int %lhs_0 %26
+               OpReturnValue %28
                OpFunctionEnd
 )");
 }
@@ -438,8 +505,14 @@ TEST_F(SpirvWriterTest, Divide_i32_vec4i) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.vec4<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%16 = OpConstantNull %v4int");
+    EXPECT_INST("%17 = OpConstantNull %v4int");
     EXPECT_INST(R"(
                ; Function foo
         %foo = OpFunction %v4int None %6
@@ -451,19 +524,26 @@ TEST_F(SpirvWriterTest, Divide_i32_vec4i) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %13
+         %14 = OpLabel
+          %x = OpFunctionCall %v4int %foo %int_0 %17
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_div_v4i32
-%tint_div_v4i32 = OpFunction %v4int None %13
+%tint_div_v4i32 = OpFunction %v4int None %20
       %lhs_0 = OpFunctionParameter %v4int
       %rhs_0 = OpFunctionParameter %v4int
-         %14 = OpLabel
-         %15 = OpIEqual %v4bool %rhs_0 %16
-         %19 = OpIEqual %v4bool %lhs_0 %20
-         %22 = OpIEqual %v4bool %rhs_0 %23
-         %25 = OpLogicalAnd %v4bool %19 %22
-         %26 = OpLogicalOr %v4bool %15 %25
-         %27 = OpSelect %v4int %26 %28 %rhs_0
-         %30 = OpSDiv %v4int %lhs_0 %27
-               OpReturnValue %30
+         %21 = OpLabel
+         %22 = OpIEqual %v4bool %rhs_0 %17
+         %25 = OpIEqual %v4bool %lhs_0 %26
+         %28 = OpIEqual %v4bool %rhs_0 %29
+         %31 = OpLogicalAnd %v4bool %25 %28
+         %32 = OpLogicalOr %v4bool %22 %31
+         %33 = OpSelect %v4int %32 %34 %rhs_0
+         %36 = OpSDiv %v4int %lhs_0 %33
+               OpReturnValue %36
                OpFunctionEnd
 )");
 }
@@ -480,6 +560,12 @@ TEST_F(SpirvWriterTest, Divide_vec4i_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%16 = OpConstantNull %v4int");
     EXPECT_INST(R"(
@@ -493,19 +579,26 @@ TEST_F(SpirvWriterTest, Divide_vec4i_i32) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %13
+         %14 = OpLabel
+          %x = OpFunctionCall %v4int %foo %16 %int_0
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_div_v4i32
-%tint_div_v4i32 = OpFunction %v4int None %13
+%tint_div_v4i32 = OpFunction %v4int None %20
       %lhs_0 = OpFunctionParameter %v4int
       %rhs_0 = OpFunctionParameter %v4int
-         %14 = OpLabel
-         %15 = OpIEqual %v4bool %rhs_0 %16
-         %19 = OpIEqual %v4bool %lhs_0 %20
-         %22 = OpIEqual %v4bool %rhs_0 %23
-         %25 = OpLogicalAnd %v4bool %19 %22
-         %26 = OpLogicalOr %v4bool %15 %25
-         %27 = OpSelect %v4int %26 %28 %rhs_0
-         %30 = OpSDiv %v4int %lhs_0 %27
-               OpReturnValue %30
+         %21 = OpLabel
+         %22 = OpIEqual %v4bool %rhs_0 %16
+         %25 = OpIEqual %v4bool %lhs_0 %26
+         %28 = OpIEqual %v4bool %rhs_0 %29
+         %31 = OpLogicalAnd %v4bool %25 %28
+         %32 = OpLogicalOr %v4bool %22 %31
+         %33 = OpSelect %v4int %32 %34 %rhs_0
+         %36 = OpSDiv %v4int %lhs_0 %33
+               OpReturnValue %36
                OpFunctionEnd
 )");
 }
@@ -522,6 +615,12 @@ TEST_F(SpirvWriterTest, Modulo_u32_u32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                ; Function foo
@@ -533,17 +632,24 @@ TEST_F(SpirvWriterTest, Modulo_u32_u32) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %11
+         %12 = OpLabel
+          %x = OpFunctionCall %uint %foo %uint_0 %uint_0
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_mod_u32
 %tint_mod_u32 = OpFunction %uint None %5
       %lhs_0 = OpFunctionParameter %uint
       %rhs_0 = OpFunctionParameter %uint
-         %11 = OpLabel
-         %12 = OpIEqual %bool %rhs_0 %uint_0
-         %15 = OpSelect %uint %12 %uint_1 %rhs_0
-         %17 = OpUDiv %uint %lhs_0 %15
-         %18 = OpIMul %uint %17 %15
-         %19 = OpISub %uint %lhs_0 %18
-               OpReturnValue %19
+         %17 = OpLabel
+         %18 = OpIEqual %bool %rhs_0 %uint_0
+         %20 = OpSelect %uint %18 %uint_1 %rhs_0
+         %22 = OpUDiv %uint %lhs_0 %20
+         %23 = OpIMul %uint %22 %20
+         %24 = OpISub %uint %lhs_0 %23
+               OpReturnValue %24
                OpFunctionEnd
 )");
 }
@@ -559,6 +665,12 @@ TEST_F(SpirvWriterTest, Modulo_i32_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                ; Function foo
@@ -570,33 +682,34 @@ TEST_F(SpirvWriterTest, Modulo_i32_i32) {
                OpReturnValue %result
                OpFunctionEnd
 
+               ; Function main
+       %main = OpFunction %void None %11
+         %12 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %int_0
+               OpReturn
+               OpFunctionEnd
+
                ; Function tint_mod_i32
 %tint_mod_i32 = OpFunction %int None %5
       %lhs_0 = OpFunctionParameter %int
       %rhs_0 = OpFunctionParameter %int
-         %11 = OpLabel
-         %12 = OpIEqual %bool %rhs_0 %int_0
-         %15 = OpIEqual %bool %lhs_0 %int_n2147483648
-         %17 = OpIEqual %bool %rhs_0 %int_n1
-         %19 = OpLogicalAnd %bool %15 %17
-         %20 = OpLogicalOr %bool %12 %19
-         %21 = OpSelect %int %20 %int_1 %rhs_0
-         %23 = OpSDiv %int %lhs_0 %21
-         %25 = OpBitcast %uint %23
-         %26 = OpBitcast %uint %21
-         %27 = OpIMul %uint %25 %26
-         %28 = OpBitcast %int %27
-         %29 = OpBitcast %uint %lhs_0
+         %17 = OpLabel
+         %18 = OpIEqual %bool %rhs_0 %int_0
+         %20 = OpIEqual %bool %lhs_0 %int_n2147483648
+         %22 = OpIEqual %bool %rhs_0 %int_n1
+         %24 = OpLogicalAnd %bool %20 %22
+         %25 = OpLogicalOr %bool %18 %24
+         %26 = OpSelect %int %25 %int_1 %rhs_0
+         %28 = OpSDiv %int %lhs_0 %26
          %30 = OpBitcast %uint %28
-         %31 = OpISub %uint %29 %30
-         %32 = OpBitcast %int %31
-               OpReturnValue %32
-               OpFunctionEnd
-
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %35
-         %36 = OpLabel
-               OpReturn
+         %31 = OpBitcast %uint %26
+         %32 = OpIMul %uint %30 %31
+         %33 = OpBitcast %int %32
+         %34 = OpBitcast %uint %lhs_0
+         %35 = OpBitcast %uint %33
+         %36 = OpISub %uint %34 %35
+         %37 = OpBitcast %int %36
+               OpReturnValue %37
                OpFunctionEnd
 )");
 }
@@ -613,17 +726,24 @@ TEST_F(SpirvWriterTest, Add_i32_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %lhs "lhs"                    ; id %3
                OpName %rhs "rhs"                    ; id %4
-               OpName %unused_entry_point "unused_entry_point"  ; id %12
+               OpName %main "main"                  ; id %12
+               OpName %x "x"                        ; id %16
 
                ; Types, variables and constants
         %int = OpTypeInt 32 1
@@ -631,6 +751,7 @@ TEST_F(SpirvWriterTest, Add_i32_i32) {
        %uint = OpTypeInt 32 0
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
+      %int_0 = OpConstant %int 0
 
                ; Function foo
         %foo = OpFunction %int None %5
@@ -644,9 +765,12 @@ TEST_F(SpirvWriterTest, Add_i32_i32) {
                OpReturnValue %11
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %14
+               ; Function main
+       %main = OpFunction %void None %14
          %15 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %int_0
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -662,17 +786,24 @@ TEST_F(SpirvWriterTest, Sub_i32_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %lhs "lhs"                    ; id %3
                OpName %rhs "rhs"                    ; id %4
-               OpName %unused_entry_point "unused_entry_point"  ; id %12
+               OpName %main "main"                  ; id %12
+               OpName %x "x"                        ; id %16
 
                ; Types, variables and constants
         %int = OpTypeInt 32 1
@@ -680,6 +811,7 @@ TEST_F(SpirvWriterTest, Sub_i32_i32) {
        %uint = OpTypeInt 32 0
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
+      %int_0 = OpConstant %int 0
 
                ; Function foo
         %foo = OpFunction %int None %5
@@ -693,9 +825,12 @@ TEST_F(SpirvWriterTest, Sub_i32_i32) {
                OpReturnValue %11
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %14
+               ; Function main
+       %main = OpFunction %void None %14
          %15 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %int_0
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -711,17 +846,24 @@ TEST_F(SpirvWriterTest, Mul_i32_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %lhs "lhs"                    ; id %3
                OpName %rhs "rhs"                    ; id %4
-               OpName %unused_entry_point "unused_entry_point"  ; id %12
+               OpName %main "main"                  ; id %12
+               OpName %x "x"                        ; id %16
 
                ; Types, variables and constants
         %int = OpTypeInt 32 1
@@ -729,6 +871,7 @@ TEST_F(SpirvWriterTest, Mul_i32_i32) {
        %uint = OpTypeInt 32 0
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
+      %int_0 = OpConstant %int 0
 
                ; Function foo
         %foo = OpFunction %int None %5
@@ -742,9 +885,12 @@ TEST_F(SpirvWriterTest, Mul_i32_i32) {
                OpReturnValue %11
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %14
+               ; Function main
+       %main = OpFunction %void None %14
          %15 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %int_0
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -760,17 +906,24 @@ TEST_F(SpirvWriterTest, ShiftLeft_i32_u32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %lhs "lhs"                    ; id %3
                OpName %rhs "rhs"                    ; id %5
-               OpName %unused_entry_point "unused_entry_point"  ; id %13
+               OpName %main "main"                  ; id %13
+               OpName %x "x"                        ; id %17
 
                ; Types, variables and constants
         %int = OpTypeInt 32 1
@@ -779,6 +932,8 @@ TEST_F(SpirvWriterTest, ShiftLeft_i32_u32) {
     %uint_31 = OpConstant %uint 31
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
+      %int_0 = OpConstant %int 0
+     %uint_0 = OpConstant %uint 0
 
                ; Function foo
         %foo = OpFunction %int None %6
@@ -792,9 +947,12 @@ TEST_F(SpirvWriterTest, ShiftLeft_i32_u32) {
                OpReturnValue %12
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %15
+               ; Function main
+       %main = OpFunction %void None %15
          %16 = OpLabel
+          %x = OpFunctionCall %int %foo %int_0 %uint_0
+               OpReturn
+               OpFunctionEnd
 )");
 }
 
@@ -810,8 +968,14 @@ TEST_F(SpirvWriterTest, Modulo_i32_vec4i) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.vec4<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%16 = OpConstantNull %v4int");
+    EXPECT_INST("%17 = OpConstantNull %v4int");
     EXPECT_INST(R"(
                ; Function foo
         %foo = OpFunction %v4int None %6
@@ -823,33 +987,34 @@ TEST_F(SpirvWriterTest, Modulo_i32_vec4i) {
                OpReturnValue %result
                OpFunctionEnd
 
-               ; Function tint_mod_v4i32
-%tint_mod_v4i32 = OpFunction %v4int None %13
-      %lhs_0 = OpFunctionParameter %v4int
-      %rhs_0 = OpFunctionParameter %v4int
+               ; Function main
+       %main = OpFunction %void None %13
          %14 = OpLabel
-         %15 = OpIEqual %v4bool %rhs_0 %16
-         %19 = OpIEqual %v4bool %lhs_0 %20
-         %22 = OpIEqual %v4bool %rhs_0 %23
-         %25 = OpLogicalAnd %v4bool %19 %22
-         %26 = OpLogicalOr %v4bool %15 %25
-         %27 = OpSelect %v4int %26 %28 %rhs_0
-         %30 = OpSDiv %v4int %lhs_0 %27
-         %33 = OpBitcast %v4uint %30
-         %34 = OpBitcast %v4uint %27
-         %35 = OpIMul %v4uint %33 %34
-         %36 = OpBitcast %v4int %35
-         %37 = OpBitcast %v4uint %lhs_0
-         %38 = OpBitcast %v4uint %36
-         %39 = OpISub %v4uint %37 %38
-         %40 = OpBitcast %v4int %39
-               OpReturnValue %40
+          %x = OpFunctionCall %v4int %foo %int_0 %17
+               OpReturn
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %43
-         %44 = OpLabel
-               OpReturn
+               ; Function tint_mod_v4i32
+%tint_mod_v4i32 = OpFunction %v4int None %20
+      %lhs_0 = OpFunctionParameter %v4int
+      %rhs_0 = OpFunctionParameter %v4int
+         %21 = OpLabel
+         %22 = OpIEqual %v4bool %rhs_0 %17
+         %25 = OpIEqual %v4bool %lhs_0 %26
+         %28 = OpIEqual %v4bool %rhs_0 %29
+         %31 = OpLogicalAnd %v4bool %25 %28
+         %32 = OpLogicalOr %v4bool %22 %31
+         %33 = OpSelect %v4int %32 %34 %rhs_0
+         %36 = OpSDiv %v4int %lhs_0 %33
+         %39 = OpBitcast %v4uint %36
+         %40 = OpBitcast %v4uint %33
+         %41 = OpIMul %v4uint %39 %40
+         %42 = OpBitcast %v4int %41
+         %43 = OpBitcast %v4uint %lhs_0
+         %44 = OpBitcast %v4uint %42
+         %45 = OpISub %v4uint %43 %44
+         %46 = OpBitcast %v4int %45
+               OpReturnValue %46
                OpFunctionEnd
 )");
 }
@@ -866,6 +1031,12 @@ TEST_F(SpirvWriterTest, Modulo_vec4i_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%16 = OpConstantNull %v4int");
     EXPECT_INST(R"(
@@ -879,33 +1050,34 @@ TEST_F(SpirvWriterTest, Modulo_vec4i_i32) {
                OpReturnValue %result
                OpFunctionEnd
 
-               ; Function tint_mod_v4i32
-%tint_mod_v4i32 = OpFunction %v4int None %13
-      %lhs_0 = OpFunctionParameter %v4int
-      %rhs_0 = OpFunctionParameter %v4int
+               ; Function main
+       %main = OpFunction %void None %13
          %14 = OpLabel
-         %15 = OpIEqual %v4bool %rhs_0 %16
-         %19 = OpIEqual %v4bool %lhs_0 %20
-         %22 = OpIEqual %v4bool %rhs_0 %23
-         %25 = OpLogicalAnd %v4bool %19 %22
-         %26 = OpLogicalOr %v4bool %15 %25
-         %27 = OpSelect %v4int %26 %28 %rhs_0
-         %30 = OpSDiv %v4int %lhs_0 %27
-         %33 = OpBitcast %v4uint %30
-         %34 = OpBitcast %v4uint %27
-         %35 = OpIMul %v4uint %33 %34
-         %36 = OpBitcast %v4int %35
-         %37 = OpBitcast %v4uint %lhs_0
-         %38 = OpBitcast %v4uint %36
-         %39 = OpISub %v4uint %37 %38
-         %40 = OpBitcast %v4int %39
-               OpReturnValue %40
+          %x = OpFunctionCall %v4int %foo %16 %int_0
+               OpReturn
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %43
-         %44 = OpLabel
-               OpReturn
+               ; Function tint_mod_v4i32
+%tint_mod_v4i32 = OpFunction %v4int None %20
+      %lhs_0 = OpFunctionParameter %v4int
+      %rhs_0 = OpFunctionParameter %v4int
+         %21 = OpLabel
+         %22 = OpIEqual %v4bool %rhs_0 %16
+         %25 = OpIEqual %v4bool %lhs_0 %26
+         %28 = OpIEqual %v4bool %rhs_0 %29
+         %31 = OpLogicalAnd %v4bool %25 %28
+         %32 = OpLogicalOr %v4bool %22 %31
+         %33 = OpSelect %v4int %32 %34 %rhs_0
+         %36 = OpSDiv %v4int %lhs_0 %33
+         %39 = OpBitcast %v4uint %36
+         %40 = OpBitcast %v4uint %33
+         %41 = OpIMul %v4uint %39 %40
+         %42 = OpBitcast %v4int %41
+         %43 = OpBitcast %v4uint %lhs_0
+         %44 = OpBitcast %v4uint %42
+         %45 = OpISub %v4uint %43 %44
+         %46 = OpBitcast %v4int %45
+               OpReturnValue %46
                OpFunctionEnd
 )");
 }

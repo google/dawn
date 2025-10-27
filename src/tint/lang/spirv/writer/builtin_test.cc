@@ -51,7 +51,7 @@ using Builtin_1arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_1arg, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type));
         b.Return(func);
@@ -63,7 +63,7 @@ TEST_P(Builtin_1arg, Scalar) {
 TEST_P(Builtin_1arg, Vector) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type));
         b.Return(func);
@@ -155,6 +155,12 @@ TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
         mod.SetName(arg, "arg");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
         %foo = OpFunction %uint None %3
@@ -172,6 +178,12 @@ TEST_F(SpirvWriterTest, Builtin_Abs_i32) {
         auto* result = b.Call(MakeScalarType(kI32), core::BuiltinFn::kAbs, arg);
         b.Return(func, result);
         mod.SetName(arg, "arg");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -193,6 +205,12 @@ TEST_F(SpirvWriterTest, Builtin_Abs_vec2u) {
         mod.SetName(arg, "arg");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
         %foo = OpFunction %v2uint None %4
@@ -212,6 +230,12 @@ TEST_F(SpirvWriterTest, Builtin_All_Scalar) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.bool_())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpReturnValue %arg");
 }
@@ -224,6 +248,12 @@ TEST_F(SpirvWriterTest, Builtin_All_Vector) {
         auto* result = b.Call(ty.bool_(), core::BuiltinFn::kAll, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<bool>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -240,6 +270,12 @@ TEST_F(SpirvWriterTest, Builtin_Any_Scalar) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.bool_())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpReturnValue %arg");
 }
@@ -252,6 +288,12 @@ TEST_F(SpirvWriterTest, Builtin_Any_Vector) {
         auto* result = b.Call(ty.bool_(), core::BuiltinFn::kAny, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<bool>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -268,6 +310,12 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat4x4f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat4x4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %float %9 Determinant %arg");
 }
@@ -280,6 +328,12 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat3x3h) {
         auto* result = b.Call(ty.f16(), core::BuiltinFn::kDeterminant, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat3x3<f16>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -297,6 +351,12 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %__frexp_result_f32 %9 FrexpStruct %arg");
 }
@@ -310,6 +370,12 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
         auto* result = b.Call(str, core::BuiltinFn::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f16())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -327,6 +393,12 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %__frexp_result_vec2_f32 %11 FrexpStruct %arg");
 }
@@ -342,6 +414,12 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec3h) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec3<f16>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %__frexp_result_vec3_f16 %11 FrexpStruct %arg");
 }
@@ -354,6 +432,12 @@ TEST_F(SpirvWriterTest, Builtin_Length_vec4f) {
         auto* result = b.Call(ty.f32(), core::BuiltinFn::kLength, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -371,6 +455,12 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %__modf_result_f32 %8 ModfStruct %arg");
 }
@@ -384,6 +474,12 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
         auto* result = b.Call(str, core::BuiltinFn::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f16())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -401,6 +497,12 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %__modf_result_vec2_f32 %9 ModfStruct %arg");
 }
@@ -414,6 +516,12 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec3h) {
         auto* result = b.Call(str, core::BuiltinFn::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec3<f16>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -430,6 +538,12 @@ TEST_F(SpirvWriterTest, Builtin_Normalize_vec4f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v4float %8 Normalize %arg");
 }
@@ -442,6 +556,12 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x3f) {
         auto* result = b.Call(ty.mat3x2<f32>(), core::BuiltinFn::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat2x3<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -458,6 +578,12 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x4f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat4x4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpTranspose %mat4v4float %arg");
 }
@@ -470,6 +596,12 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x3h) {
         auto* result = b.Call(ty.mat3x4<f16>(), core::BuiltinFn::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat4x3<f16>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -486,6 +618,12 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x2h) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.mat2x2<f16>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpTranspose %mat2v2half %arg");
 }
@@ -498,6 +636,12 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Float) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -514,6 +658,12 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Snorm) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm2x16 %arg");
 }
@@ -526,6 +676,12 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Unorm) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -542,6 +698,12 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Snorm) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %uint %9 PackSnorm4x8 %arg");
 }
@@ -554,6 +716,12 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Unorm) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kPack4X8Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -570,6 +738,12 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Float) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v2float %9 UnpackHalf2x16 %arg");
 }
@@ -582,6 +756,12 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Snorm) {
         auto* result = b.Call(ty.vec2<f32>(), core::BuiltinFn::kUnpack2X16Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -598,6 +778,12 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Unorm) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v2float %9 UnpackUnorm2x16 %arg");
 }
@@ -610,6 +796,12 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Snorm) {
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kUnpack4X8Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -626,6 +818,12 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v4float %9 UnpackUnorm4x8 %arg");
 }
@@ -638,6 +836,12 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_U32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kCountLeadingZeros, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -677,6 +881,12 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %7 = OpBitcast %uint %arg
@@ -714,6 +924,12 @@ TEST_F(SpirvWriterTest, Builtin_CountLeadingZeros_Vec2U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kCountLeadingZeros, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -764,6 +980,12 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_U32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %6 = OpBitwiseAnd %uint %arg %uint_65535
@@ -803,6 +1025,12 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_I32) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kCountTrailingZeros, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -846,6 +1074,12 @@ TEST_F(SpirvWriterTest, Builtin_CountTrailingZeros_Vec2U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kCountTrailingZeros, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -899,6 +1133,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_U32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %6 = OpBitwiseAnd %uint %arg %uint_4294901760
@@ -937,6 +1177,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_I32) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kFirstLeadingBit, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -982,6 +1228,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_Vec2U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kFirstLeadingBit, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1035,6 +1287,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_U32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %6 = OpBitwiseAnd %uint %arg %uint_65535
@@ -1073,6 +1331,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_I32) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kFirstTrailingBit, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1115,6 +1379,12 @@ TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_Vec2U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kFirstTrailingBit, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1168,6 +1438,12 @@ TEST_F(SpirvWriterTest, Builtin_Saturate_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %float %7 NClamp %arg %float_0 %float_1");
 }
@@ -1182,6 +1458,12 @@ TEST_F(SpirvWriterTest, Builtin_Saturate_Vec4h) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f16>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%9 = OpConstantNull %v4half");
     EXPECT_INST(
@@ -1194,7 +1476,7 @@ using Builtin_2arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
                MakeScalarValue(params.type));
@@ -1207,7 +1489,7 @@ TEST_P(Builtin_2arg, Scalar) {
 TEST_P(Builtin_2arg, Vector) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
                MakeVectorValue(params.type));
@@ -1242,6 +1524,12 @@ TEST_F(SpirvWriterTest, Builtin_Cross_vec3f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec3<f32>()), b.Zero(ty.vec3<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v3float %9 Cross %arg1 %arg2");
 }
@@ -1255,6 +1543,12 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec2f) {
         auto* result = b.Call(MakeScalarType(kF32), core::BuiltinFn::kDistance, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(MakeVectorType(kF32)), b.Zero(MakeVectorType(kF32))));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1272,6 +1566,12 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec3h) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(MakeVectorType(kF16)), b.Zero(MakeVectorType(kF16))));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %half %9 Distance %arg1 %arg2");
 }
@@ -1287,6 +1587,12 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4f) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpDot %float %arg1 %arg2");
 }
@@ -1300,6 +1606,12 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<i32>()), b.Zero(ty.vec2<i32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1334,6 +1646,12 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4u) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<u32>()), b.Zero(ty.vec4<u32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpCompositeExtract %uint %arg1 0
@@ -1365,6 +1683,12 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %float %9 Ldexp %arg1 %arg2");
 }
@@ -1378,6 +1702,12 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F16) {
         auto* result = b.Call(ty.f16(), core::BuiltinFn::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f16()), b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1395,6 +1725,12 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec2_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f32>()), b.Zero(ty.vec2<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v2float %11 Ldexp %arg1 %arg2");
 }
@@ -1408,6 +1744,12 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec3_F16) {
         auto* result = b.Call(ty.vec3<f16>(), core::BuiltinFn::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec3<f16>()), b.Zero(ty.vec3<i32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1425,6 +1767,12 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec3<f32>()), b.Zero(ty.vec3<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v3float %9 Reflect %arg1 %arg2");
 }
@@ -1440,6 +1788,12 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F16) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f16>()), b.Zero(ty.vec4<f16>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v4half %9 Reflect %arg1 %arg2");
 }
@@ -1449,7 +1803,7 @@ using Builtin_3arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_3arg, Scalar) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
                MakeScalarValue(params.type), MakeScalarValue(params.type));
@@ -1462,7 +1816,7 @@ TEST_P(Builtin_3arg, Scalar) {
 TEST_P(Builtin_3arg, Vector) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
                MakeVectorValue(params.type), MakeVectorValue(params.type));
@@ -1493,6 +1847,12 @@ TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpExtInst %int %9 SMax %value %low
@@ -1511,6 +1871,12 @@ TEST_F(SpirvWriterTest, Builtin_Clamp_Scalar_U32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kClamp, value, low, high);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1533,6 +1899,13 @@ TEST_F(SpirvWriterTest, Builtin_Clamp_Vector_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.vec4<i32>()), b.Zero(ty.vec4<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %9 = OpExtInst %v4int %10 SMax %value %low
@@ -1551,6 +1924,13 @@ TEST_F(SpirvWriterTest, Builtin_Clamp_Vector_U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kClamp, value, low, high);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec2<u32>()), b.Zero(ty.vec2<u32>()), b.Zero(ty.vec2<u32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1573,6 +1953,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %9 = OpExtInst %uint %10 UMin %offset %uint_32
@@ -1593,6 +1979,12 @@ TEST_F(SpirvWriterTest, Builtin_Smoothstep_F32) {
         auto* result = b.Call(ty.f32(), core::BuiltinFn::kSmoothstep, value, low, high);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f32()), b.Zero(ty.f32()), b.Zero(ty.f32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1621,6 +2013,12 @@ TEST_F(SpirvWriterTest, Builtin_Smoothstep_F16) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.f16()), b.Zero(ty.f16()), b.Zero(ty.f16())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpFSub %half %high %value
@@ -1646,6 +2044,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpExtInst %uint %9 UMin %offset %uint_32
@@ -1668,6 +2072,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %10 = OpExtInst %uint %11 UMin %offset %uint_32
@@ -1688,6 +2098,12 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
         auto* result = b.Call(ty.vec2<u32>(), core::BuiltinFn::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1713,6 +2129,13 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %10 = OpExtInst %uint %11 UMin %offset %uint_32
@@ -1734,6 +2157,13 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32()), b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1760,6 +2190,13 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.vec4<i32>()), b.Zero(ty.u32()),
+                          b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %11 = OpExtInst %uint %12 UMin %offset %uint_32
@@ -1784,6 +2221,13 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<u32>()), b.Zero(ty.vec2<u32>()), b.Zero(ty.u32()),
+                          b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
          %10 = OpExtInst %uint %11 UMin %offset %uint_32
@@ -1805,6 +2249,13 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec3<f32>()), b.Zero(ty.vec3<f32>()), b.Zero(ty.vec3<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v3float %10 FaceForward %arg1 %arg2 %arg3");
 }
@@ -1819,6 +2270,13 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F16) {
         auto* result = b.Call(ty.vec4<f16>(), core::BuiltinFn::kFaceForward, arg1, arg2, arg3);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec4<f16>()), b.Zero(ty.vec4<f16>()), b.Zero(ty.vec4<f16>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1836,6 +2294,12 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_ScalarFactor) {
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kMix, arg1, arg2, factor);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>()), b.Zero(ty.f32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1856,6 +2320,13 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_VectorFactor) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v4float %10 FMix %arg1 %arg2 %factor");
 }
@@ -1871,6 +2342,12 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F32) {
         auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kRefract, arg1, arg2, i);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>()), b.Zero(ty.f32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1890,6 +2367,12 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F16) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f16>()), b.Zero(ty.vec4<f16>()), b.Zero(ty.f16())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpExtInst %v4half %10 Refract %arg1 %arg2 %i");
 }
@@ -1905,6 +2388,12 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_ScalarOperands) {
         auto* result = b.Call(ty.i32(), core::BuiltinFn::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32()), b.Zero(ty.bool_())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -1924,6 +2413,13 @@ TEST_F(SpirvWriterTest, Builtin_Select_VectorCondition_VectorOperands) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.vec4<i32>()),
+                          b.Zero(ty.vec4<bool>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpSelect %v4int %cond %argt %argf");
 }
@@ -1941,13 +2437,20 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec4<i32>()), b.Zero(ty.vec4<i32>()), b.Zero(ty.bool_())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%11 = OpCompositeConstruct %v4bool %cond %cond %cond %cond");
     EXPECT_INST("%result = OpSelect %v4int %11 %argt %argf");
 }
 
 TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
         b.Return(func);
@@ -1958,7 +2461,7 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_StorageBarrier_VulkanMemoryModel) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
         b.Return(func);
@@ -1971,7 +2474,7 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier_VulkanMemoryModel) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
         b.Return(func);
@@ -1982,7 +2485,7 @@ TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_TextureBarrier_Vulkan) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
         b.Return(func);
@@ -1995,7 +2498,7 @@ TEST_F(SpirvWriterTest, Builtin_TextureBarrier_Vulkan) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
         b.Return(func);
@@ -2006,7 +2509,7 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier_VulkanMemoryModel) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
         b.Return(func);
@@ -2026,6 +2529,12 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpCapability GroupNonUniformBallot");
     EXPECT_INST("%result = OpGroupNonUniformBallot %v4uint %uint_3 %true");
@@ -2037,6 +2546,12 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueF32) {
         auto* result = b.Call(ty.f32(), core::BuiltinFn::kSubgroupBroadcast, 1_f, 0_u);
         mod.SetName(result, "result");
         b.Return(func, result);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -2052,6 +2567,12 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueI32) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpCapability GroupNonUniformBallot");
     EXPECT_INST("%result = OpGroupNonUniformBroadcast %int %uint_3 %int_1 %uint_0");
@@ -2063,6 +2584,12 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueU32) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kSubgroupBroadcast, 1_u, 0_u);
         mod.SetName(result, "result");
         b.Return(func, result);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -2081,6 +2608,12 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
         auto* result = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, ptr);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -2107,6 +2640,12 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%var = OpVariable %_ptr_StorageBuffer_Buffer_tint_explicit_layout StorageBuffer");
     EXPECT_INST("%result = OpArrayLength %uint %var 2");
@@ -2127,21 +2666,28 @@ TEST_F(SpirvWriterTest, Builtin_Dot4I8Packed) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpCapability DotProduct
                OpCapability DotProductInput4x8BitPacked
                OpExtension "SPV_KHR_integer_dot_product"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %arg1 "arg1"                  ; id %4
                OpName %arg2 "arg2"                  ; id %5
                OpName %result "result"              ; id %8
-               OpName %unused_entry_point "unused_entry_point"  ; id %9
+               OpName %main "main"                  ; id %9
+               OpName %x "x"                        ; id %13
 
                ; Types, variables and constants
         %int = OpTypeInt 32 1
@@ -2149,6 +2695,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot4I8Packed) {
           %6 = OpTypeFunction %int %uint %uint
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
 
                ; Function foo
         %foo = OpFunction %int None %6
@@ -2157,6 +2704,13 @@ TEST_F(SpirvWriterTest, Builtin_Dot4I8Packed) {
           %7 = OpLabel
      %result = OpSDot %int %arg1 %arg2 PackedVectorFormat4x8Bit
                OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function main
+       %main = OpFunction %void None %11
+         %12 = OpLabel
+          %x = OpFunctionCall %int %foo %uint_0 %uint_0
+               OpReturn
                OpFunctionEnd
 )");
 }
@@ -2172,27 +2726,35 @@ TEST_F(SpirvWriterTest, Builtin_Dot4U8Packed) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32()), b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
                OpCapability DotProduct
                OpCapability DotProductInput4x8BitPacked
                OpExtension "SPV_KHR_integer_dot_product"
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
-               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
 
                ; Debug Information
                OpName %foo "foo"                    ; id %1
                OpName %arg1 "arg1"                  ; id %3
                OpName %arg2 "arg2"                  ; id %4
                OpName %result "result"              ; id %7
-               OpName %unused_entry_point "unused_entry_point"  ; id %8
+               OpName %main "main"                  ; id %8
+               OpName %x "x"                        ; id %12
 
                ; Types, variables and constants
        %uint = OpTypeInt 32 0
           %5 = OpTypeFunction %uint %uint %uint
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
 
                ; Function foo
         %foo = OpFunction %uint None %5
@@ -2201,6 +2763,13 @@ TEST_F(SpirvWriterTest, Builtin_Dot4U8Packed) {
           %6 = OpLabel
      %result = OpUDot %uint %arg1 %arg2 PackedVectorFormat4x8Bit
                OpReturnValue %result
+               OpFunctionEnd
+
+               ; Function main
+       %main = OpFunction %void None %10
+         %11 = OpLabel
+          %x = OpFunctionCall %uint %foo %uint_0 %uint_0
+               OpReturn
                OpFunctionEnd
 )");
 }

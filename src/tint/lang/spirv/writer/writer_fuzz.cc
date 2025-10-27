@@ -57,8 +57,9 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
         // No entry point, just return success
         return Success;
     }
+    options.entry_point_name = ep_name;
 
-    auto check = CanGenerate(module, options, ep_name);
+    auto check = CanGenerate(module, options);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }

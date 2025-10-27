@@ -4845,6 +4845,26 @@ Result<uint32_t> ValidateSingleUserImmediate(const Module& ir) {
     return user_immediate_size;  // 0 if none found
 }
 
+Result<uint32_t> ValidateSingleUserImmediate(const Module& ir, core::ir::Function* ep) {
+    uint32_t user_immediate_size = 0;
+
+    core::ir::ReferencedModuleVars<const core::ir::Module> referenced_module_vars{ir};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep);
+    for (auto* var : refs) {
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+        if (!ptr) {
+            continue;
+        }
+        if (ptr->AddressSpace() == core::AddressSpace::kImmediate) {
+            if (user_immediate_size > 0) {
+                return Failure("module contains multiple user-declared immediate data");
+            }
+            user_immediate_size = tint::RoundUp(4u, ptr->StoreType()->Size());
+        }
+    }
+    return user_immediate_size;  // 0 if none found
+}
+
 Result<SuccessType> ValidateInternalImmediateOffset(uint32_t max_immediate_block_size,
                                                     uint32_t user_immediate_data_size,
                                                     const std::vector<ImmediateInfo>& immediates) {

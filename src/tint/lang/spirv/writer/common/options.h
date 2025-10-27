@@ -65,6 +65,9 @@ struct Options {
         TINT_REFLECT(RangeOffsets, min, max);
     };
 
+    /// The entry point name to generate
+    std::string entry_point_name;
+
     /// An optional remapped name to use when emitting the entry point.
     std::string remapped_entry_point_name = {};
 
@@ -157,6 +160,7 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 entry_point_name,
                  remapped_entry_point_name,
                  bindings,
                  statically_paired_texture_binding_points,

@@ -50,13 +50,20 @@ using Arithmetic = SpirvWriterTestWithParam<UnaryTestCase>;
 TEST_P(Arithmetic, Scalar) {
     auto params = GetParam();
 
-    auto* arg = b.FunctionParam("arg", MakeScalarType(params.type));
+    auto* arg_ty = MakeScalarType(params.type);
+    auto* arg = b.FunctionParam("arg", arg_ty);
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
         auto* result = b.Unary(params.op, MakeScalarType(params.type), arg);
-        b.Return(func);
         mod.SetName(result, "result");
+        b.Return(func);
+    });
+
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Call(func, b.Zero(arg_ty));
+        b.Return(ep);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -65,13 +72,20 @@ TEST_P(Arithmetic, Scalar) {
 TEST_P(Arithmetic, Vector) {
     auto params = GetParam();
 
-    auto* arg = b.FunctionParam("arg", MakeVectorType(params.type));
+    auto* arg_ty = MakeVectorType(params.type);
+    auto* arg = b.FunctionParam("arg", arg_ty);
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
         auto* result = b.Unary(params.op, MakeVectorType(params.type), arg);
-        b.Return(func);
         mod.SetName(result, "result");
+        b.Return(func);
+    });
+
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Call(func, b.Zero(arg_ty));
+        b.Return(ep);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -95,6 +109,12 @@ TEST_F(SpirvWriterTest, Unary_Negate_i32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(MakeVectorType(kI32)));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
        %void = OpTypeVoid
@@ -106,6 +126,7 @@ TEST_F(SpirvWriterTest, Unary_Negate_i32) {
      %uint_1 = OpConstant %uint 1
          %13 = OpConstantComposite %v2uint %uint_1 %uint_1
          %17 = OpTypeFunction %void
+         %20 = OpConstantNull %v2int
 
                ; Function foo
         %foo = OpFunction %void None %6
@@ -118,9 +139,10 @@ TEST_F(SpirvWriterTest, Unary_Negate_i32) {
                OpReturn
                OpFunctionEnd
 
-               ; Function unused_entry_point
-%unused_entry_point = OpFunction %void None %17
+               ; Function main
+       %main = OpFunction %void None %17
          %18 = OpLabel
+         %19 = OpFunctionCall %void %foo %20
                OpReturn
                OpFunctionEnd
 )");
@@ -134,6 +156,12 @@ TEST_F(SpirvWriterTest, Unary_Negate_Vector_i32) {
         auto* result = b.Unary(core::UnaryOp::kNegation, MakeScalarType(kI32), arg);
         b.Return(func);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(MakeScalarType(kI32)));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

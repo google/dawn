@@ -33,7 +33,7 @@ namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, Switch_Basic) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
@@ -59,7 +59,7 @@ TEST_F(SpirvWriterTest, Switch_Basic) {
 }
 
 TEST_F(SpirvWriterTest, Switch_MultipleCases) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
@@ -99,7 +99,7 @@ TEST_F(SpirvWriterTest, Switch_MultipleCases) {
 }
 
 TEST_F(SpirvWriterTest, Switch_MultipleSelectorsPerCase) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
@@ -161,6 +161,12 @@ TEST_F(SpirvWriterTest, Switch_AllCasesReturn) {
         b.Unreachable();
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
@@ -204,6 +210,12 @@ TEST_F(SpirvWriterTest, Switch_ConditionalBreak) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
@@ -242,6 +254,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue) {
         b.Return(func, s);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
@@ -274,6 +292,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue_CaseReturn) {
         });
 
         b.Return(func, s);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -323,6 +347,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_0) {
         b.Return(func, s->Result(0));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
@@ -356,6 +386,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_1) {
         });
 
         b.Return(func, s->Result(1));
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -400,6 +436,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_NestedIf) {
         });
 
         b.Return(func, s);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -448,6 +490,12 @@ TEST_F(SpirvWriterTest, Switch_Phi_NestedSwitch) {
         });
 
         b.Return(func, outer);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

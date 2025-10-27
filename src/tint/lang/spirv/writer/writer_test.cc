@@ -36,6 +36,9 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, ModuleHeader) {
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] { b.Return(eb); });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpCapability Shader");
     EXPECT_INST("OpMemoryModel Logical GLSL450");
@@ -44,6 +47,9 @@ TEST_F(SpirvWriterTest, ModuleHeader) {
 TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
     Options opts;
     opts.use_vulkan_memory_model = true;
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] { b.Return(eb); });
 
     ASSERT_TRUE(Generate(opts)) << Error() << output_;
     EXPECT_INST("OpExtension \"SPV_KHR_vulkan_memory_model\"");
@@ -65,14 +71,15 @@ TEST_F(SpirvWriterTest, CanGenerate_SubgroupMatrixRequiresVulkanMemoryModel) {
 
     Options options;
     options.use_vulkan_memory_model = false;
-    auto result = CanGenerate(mod, options, "main");
+    options.entry_point_name = "main";
+    auto result = CanGenerate(mod, options);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("using subgroup matrices requires the Vulkan Memory Model"));
 }
 
 TEST_F(SpirvWriterTest, Unreachable) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] {
@@ -96,7 +103,7 @@ TEST_F(SpirvWriterTest, Unreachable) {
     options.disable_robustness = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
-        %foo = OpFunction %void None %3
+       %main = OpFunction %void None %3
           %4 = OpLabel
                OpBranch %7
           %7 = OpLabel
@@ -123,13 +130,21 @@ TEST_F(SpirvWriterTest, Unreachable) {
 // See crbug.com/354748060.
 TEST_F(SpirvWriterTest, TooManyFunctionParameters) {
     Vector<core::ir::FunctionParam*, 256> params;
+    Vector<core::ir::Value*, 256> args;
     for (uint32_t i = 0; i < 256; i++) {
         params.Push(b.FunctionParam(ty.i32()));
+        args.Push(b.Zero(ty.i32()));
     }
     auto* func = b.Function("foo", ty.void_());
     func->SetParams(std::move(params));
     b.Append(func->Block(), [&] {  //
         b.Return(func);
+    });
+
+    auto* ep = b.ComputeFunction("main");
+    b.Append(ep->Block(), [&] {
+        b.Call(func, args);
+        b.Return(ep);
     });
 
     EXPECT_FALSE(Generate());

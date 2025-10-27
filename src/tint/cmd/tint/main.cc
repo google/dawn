@@ -850,6 +850,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
         gen_options.remapped_entry_point_name = "tint_entry_point";
         gen_options.strip_all_names = true;
     }
+    gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
@@ -887,7 +888,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
     }
 
     // Check that the module and options are supported by the backend.
-    auto check = tint::spirv::writer::CanGenerate(ir, gen_options, options.ep_name);
+    auto check = tint::spirv::writer::CanGenerate(ir, gen_options);
     if (check != tint::Success) {
         std::cerr << check.Failure() << "\n";
         return false;
@@ -1384,6 +1385,14 @@ bool Generate([[maybe_unused]] const Options& options,
         return false;
     }
 
+    switch (options.format) {
+        case Format::kSpirv:
+        case Format::kSpvAsm:
+            return GenerateSpirv(options, inspector, ir.Get());
+        default:
+            break;
+    }
+
     // Strip the module down to a single entry point.
     if (options.ep_name != "") {
         auto singleEntryPointResult =
@@ -1398,9 +1407,6 @@ bool Generate([[maybe_unused]] const Options& options,
         case Format::kHlsl:
         case Format::kHlslFxc:
             return GenerateHlsl(options, inspector, ir.Get());
-        case Format::kSpirv:
-        case Format::kSpvAsm:
-            return GenerateSpirv(options, inspector, ir.Get());
         case Format::kMsl:
             return GenerateMsl(options, inspector, ir.Get());
         case Format::kGlsl:

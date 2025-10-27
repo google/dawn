@@ -47,6 +47,13 @@ TEST_F(SpirvWriterTest, Construct_Vector) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.i32()), b.Zero(ty.i32()), b.Zero(ty.i32()), b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpCompositeConstruct %v4int %a %b %c %d");
 }
@@ -62,6 +69,13 @@ TEST_F(SpirvWriterTest, Construct_Matrix) {
         auto* result = b.Construct(ty.mat3x4<f32>(), func->Params());
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>()), b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -80,6 +94,13 @@ TEST_F(SpirvWriterTest, Construct_Array) {
         auto* result = b.Construct(ty.array<f32, 4>(), func->Params());
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x",
+              b.Call(func, b.Zero(ty.f32()), b.Zero(ty.f32()), b.Zero(ty.f32()), b.Zero(ty.f32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -105,6 +126,12 @@ TEST_F(SpirvWriterTest, Construct_Struct) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32()), b.Zero(ty.u32()), b.Zero(ty.vec4<f32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpCompositeConstruct %MyStruct %a %b %c");
 }
@@ -115,6 +142,12 @@ TEST_F(SpirvWriterTest, Construct_Scalar_Identity) {
     b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.i32(), func->Params()[0]);
         b.Return(func, result);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -129,12 +162,18 @@ TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
         b.Return(func, result);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<i32>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpReturnValue %arg");
 }
 
 TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_ZeroValue) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Let("left", b.Construct(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
         b.Let("right", b.Construct(ty.subgroup_matrix_right(ty.i32(), 4, 8)));
@@ -164,6 +203,12 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
         b.Return(func);
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     Options options;
     options.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -176,7 +221,7 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
 }
 
 TEST_F(SpirvWriterTest, Construct_ArrayOfSubgroupMatrix_ZeroValue) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Let("left", b.Construct(ty.array(ty.subgroup_matrix_left(ty.f32(), 8, 4), 4u)));
         b.Let("right", b.Construct(ty.array(ty.subgroup_matrix_right(ty.i32(), 4, 8), 4u)));
@@ -185,6 +230,7 @@ TEST_F(SpirvWriterTest, Construct_ArrayOfSubgroupMatrix_ZeroValue) {
     });
 
     Options options{
+        .entry_point_name = "main",
         .use_vulkan_memory_model = true,
     };
     ASSERT_TRUE(Generate(options)) << Error() << output_;
@@ -218,13 +264,14 @@ TEST_F(SpirvWriterTest, Construct_StructOfSubgroupMatrix_ZeroValue) {
             {mod.symbols.Register("res"), ty.array(ty.subgroup_matrix_result(ty.u32(), 2, 2), 4u)},
         });
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Let("s", b.Construct(str));
         b.Return(func);
     });
 
     Options options{
+        .entry_point_name = "main",
         .use_vulkan_memory_model = true,
     };
     ASSERT_TRUE(Generate(options)) << Error() << output_;

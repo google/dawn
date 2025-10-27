@@ -59,6 +59,12 @@ TEST_P(Bitcast, Scalar) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(MakeScalarType(params.in))));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     if (params.in == params.out) {
         EXPECT_INST("OpReturnValue %arg");
@@ -74,6 +80,12 @@ TEST_P(Bitcast, Vector) {
         auto* result = b.Bitcast(MakeVectorType(params.out), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(MakeVectorType(params.in))));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -114,6 +126,12 @@ TEST_F(SpirvWriterTest, Bitcast_u32_to_vec2h) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.u32())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpBitcast %v2half %arg");
 }
@@ -125,6 +143,12 @@ TEST_F(SpirvWriterTest, Bitcast_vec2i_to_vec4h) {
         auto* result = b.Bitcast(ty.vec4<f16>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<i32>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -140,6 +164,12 @@ TEST_F(SpirvWriterTest, Bitcast_vec2h_to_u32) {
         mod.SetName(result, "result");
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec2<f16>())));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%result = OpBitcast %uint %arg");
 }
@@ -151,6 +181,12 @@ TEST_F(SpirvWriterTest, Bitcast_vec4h_to_vec2i) {
         auto* result = b.Bitcast(ty.vec2<i32>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.vec4<f16>())));
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

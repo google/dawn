@@ -48,7 +48,7 @@ namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, Type_Void) {
-    auto* fn = b.Function("f", ty.void_());
+    auto* fn = b.ComputeFunction("main");
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -56,8 +56,15 @@ TEST_F(SpirvWriterTest, Type_Void) {
 }
 
 TEST_F(SpirvWriterTest, Type_Bool) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, bool, read_write>("v");
+        v = b.Var<private_, bool, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -65,8 +72,15 @@ TEST_F(SpirvWriterTest, Type_Bool) {
 }
 
 TEST_F(SpirvWriterTest, Type_I32) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, i32, read_write>("v");
+        v = b.Var<private_, i32, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -74,8 +88,15 @@ TEST_F(SpirvWriterTest, Type_I32) {
 }
 
 TEST_F(SpirvWriterTest, Type_U32) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, u32, read_write>("v");
+        v = b.Var<private_, u32, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -83,8 +104,15 @@ TEST_F(SpirvWriterTest, Type_U32) {
 }
 
 TEST_F(SpirvWriterTest, Type_F32) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, f32, read_write>("v");
+        v = b.Var<private_, f32, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -92,8 +120,15 @@ TEST_F(SpirvWriterTest, Type_F32) {
 }
 
 TEST_F(SpirvWriterTest, Type_F16) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, f16, read_write>("v");
+        v = b.Var<private_, f16, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -103,12 +138,20 @@ TEST_F(SpirvWriterTest, Type_F16) {
 }
 
 TEST_F(SpirvWriterTest, Type_F16_WithoutDecomposeUniformBuffers) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, f16, read_write>("v");
+        v = b.Var<private_, f16, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     Options options;
     options.decompose_uniform_buffers = false;
+
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpCapability Float16");
     EXPECT_INST("OpCapability UniformAndStorageBuffer16BitAccess");
@@ -117,8 +160,15 @@ TEST_F(SpirvWriterTest, Type_F16_WithoutDecomposeUniformBuffers) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec2i) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, vec2<i32>, read_write>("v");
+        v = b.Var<private_, vec2<i32>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -126,8 +176,15 @@ TEST_F(SpirvWriterTest, Type_Vec2i) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec3u) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, vec3<u32>, read_write>("v");
+        v = b.Var<private_, vec3<u32>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -135,8 +192,15 @@ TEST_F(SpirvWriterTest, Type_Vec3u) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec4f) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, vec4<f32>, read_write>("v");
+        v = b.Var<private_, vec4<f32>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -144,8 +208,15 @@ TEST_F(SpirvWriterTest, Type_Vec4f) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec2h) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, vec2<f16>, read_write>("v");
+        v = b.Var<private_, vec2<f16>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -153,8 +224,15 @@ TEST_F(SpirvWriterTest, Type_Vec2h) {
 }
 
 TEST_F(SpirvWriterTest, Type_Vec4Bool) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, vec4<bool>, read_write>("v");
+        v = b.Var<private_, vec4<bool>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -162,8 +240,15 @@ TEST_F(SpirvWriterTest, Type_Vec4Bool) {
 }
 
 TEST_F(SpirvWriterTest, Type_Mat2x3f) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, mat2x3<f32>, read_write>("v");
+        v = b.Var<private_, mat2x3<f32>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -171,8 +256,15 @@ TEST_F(SpirvWriterTest, Type_Mat2x3f) {
 }
 
 TEST_F(SpirvWriterTest, Type_Mat4x2h) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, mat4x2<f16>, read_write>("v");
+        v = b.Var<private_, mat4x2<f16>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -180,8 +272,15 @@ TEST_F(SpirvWriterTest, Type_Mat4x2h) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_NoExplicitLayout) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, array<f32, 4>>("v");
+        v = b.Var<private_, array<f32, 4>>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -190,9 +289,16 @@ TEST_F(SpirvWriterTest, Type_Array_NoExplicitLayout) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_DefaultStride) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var<storage, array<f32, 4>>("v");
+        v = b.Var<storage, array<f32, 4>>("v");
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -206,10 +312,17 @@ TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         auto* ex = ty.array(str, 4_u);
-        auto* v = b.Var("v", ty.ptr<storage>(ex));
+        v = b.Var("v", ty.ptr<storage>(ex));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -218,9 +331,16 @@ TEST_F(SpirvWriterTest, Type_Array_ExplicitStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_Array_NestedArray) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var<storage, array<array<f32, 64>, 4>>("v");
+        v = b.Var<storage, array<array<f32, 64>, 4>>("v");
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -231,9 +351,16 @@ TEST_F(SpirvWriterTest, Type_Array_NestedArray) {
 }
 
 TEST_F(SpirvWriterTest, Type_RuntimeArray_DefaultStride) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var<storage, array<f32>, read_write>("v");
+        v = b.Var<storage, array<f32>, read_write>("v");
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -247,10 +374,17 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         auto* ex = ty.runtime_array(str);
-        auto* v = b.Var("v", ty.ptr<storage, read_write>(ex));
+        v = b.Var("v", ty.ptr<storage, read_write>(ex));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -259,10 +393,17 @@ TEST_F(SpirvWriterTest, Type_RuntimeArray_ExplicitStride) {
 }
 
 TEST_F(SpirvWriterTest, Type_BindingArray_SampledTexture) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
         auto* sampled_texture = ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32());
-        auto* v = b.Var("v", ty.ptr<handle>(ty.binding_array(sampled_texture, 4_u)));
+        v = b.Var("v", ty.ptr<handle>(ty.binding_array(sampled_texture, 4_u)));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -279,8 +420,15 @@ TEST_F(SpirvWriterTest, Type_Struct_NoExplicitLayout) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var("v", ty.ptr<private_, read_write>(str));
+        v = b.Var("v", ty.ptr<private_, read_write>(str));
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -297,9 +445,16 @@ TEST_F(SpirvWriterTest, Type_Struct) {
                                                    {mod.symbols.Register("a"), ty.f32()},
                                                    {mod.symbols.Register("b"), ty.vec4<i32>()},
                                                });
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<storage>(str));
+        v = b.Var("v", ty.ptr<storage>(str));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -319,9 +474,16 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
             // Matrices nested inside arrays need layout decorations on the struct member too.
             {mod.symbols.Register("arr"), ty.array(ty.array(ty.mat2x4<f16>(), 4), 4)},
         });
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<storage>(str));
+        v = b.Var("v", ty.ptr<storage>(str));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -334,8 +496,15 @@ TEST_F(SpirvWriterTest, Type_Struct_MatrixLayout) {
 }
 
 TEST_F(SpirvWriterTest, Type_Atomic) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        b.Var<private_, atomic<i32>, read_write>("v");
+        v = b.Var<private_, atomic<i32>, read_write>("v");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -343,9 +512,16 @@ TEST_F(SpirvWriterTest, Type_Atomic) {
 }
 
 TEST_F(SpirvWriterTest, Type_Sampler) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.sampler()));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.sampler()));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -353,9 +529,16 @@ TEST_F(SpirvWriterTest, Type_Sampler) {
 }
 
 TEST_F(SpirvWriterTest, Type_SamplerComparison) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.comparison_sampler()));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.comparison_sampler()));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -363,11 +546,20 @@ TEST_F(SpirvWriterTest, Type_SamplerComparison) {
 }
 
 TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var("v1", ty.ptr<handle, core::Access::kRead>(ty.sampler()));
-        auto* v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.comparison_sampler()));
+        v1 = b.Var("v1", ty.ptr<handle, core::Access::kRead>(ty.sampler()));
+        v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.comparison_sampler()));
         v1->SetBindingPoint(0, 1);
         v2->SetBindingPoint(0, 2);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v1);
+        b.Let("y", v2);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -379,15 +571,24 @@ TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
 }
 
 TEST_F(SpirvWriterTest, Type_StorageTexture_Dedup) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var("v1", ty.ptr<handle, core::Access::kRead>(ty.storage_texture(
-                                   core::type::TextureDimension::k2dArray,
-                                   core::TexelFormat::kR32Uint, core::Access::kRead)));
-        auto* v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.storage_texture(
-                                   core::type::TextureDimension::k2dArray,
-                                   core::TexelFormat::kR32Uint, core::Access::kWrite)));
+        v1 = b.Var("v1", ty.ptr<handle, core::Access::kRead>(
+                             ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                                core::TexelFormat::kR32Uint, core::Access::kRead)));
+        v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.storage_texture(
+                             core::type::TextureDimension::k2dArray, core::TexelFormat::kR32Uint,
+                             core::Access::kWrite)));
         v1->SetBindingPoint(0, 1);
         v2->SetBindingPoint(0, 2);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v1);
+        b.Let("y", v2);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -408,10 +609,17 @@ struct TextureCase {
 using Type_SampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_SampledTexture, Emit) {
     auto params = GetParam();
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
-                                 ty.sampled_texture(params.dim, MakeScalarType(params.format))));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
+                           ty.sampled_texture(params.dim, MakeScalarType(params.format))));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -443,10 +651,17 @@ INSTANTIATE_TEST_SUITE_P(
 using Type_MultisampledTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_MultisampledTexture, Emit) {
     auto params = GetParam();
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.multisampled_texture(
-                                 params.dim, MakeScalarType(params.format))));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
+                           ty.multisampled_texture(params.dim, MakeScalarType(params.format))));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -462,9 +677,16 @@ INSTANTIATE_TEST_SUITE_P(
 using Type_DepthTexture = SpirvWriterTestWithParam<TextureCase>;
 TEST_P(Type_DepthTexture, Emit) {
     auto params = GetParam();
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {  //
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.depth_texture(params.dim)));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.depth_texture(params.dim)));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -479,12 +701,21 @@ INSTANTIATE_TEST_SUITE_P(
                     TextureCase{" = OpTypeImage %float Cube 0 1 0 1 Unknown", Dim::kCubeArray}));
 
 TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var(
-            "v1", ty.ptr<handle, core::Access::kRead>(ty.sampled_texture(Dim::k2d, ty.f32())));
-        auto* v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.depth_texture(Dim::k2d)));
+        v1 = b.Var("v1",
+                   ty.ptr<handle, core::Access::kRead>(ty.sampled_texture(Dim::k2d, ty.f32())));
+        v2 = b.Var("v2", ty.ptr<handle, core::Access::kRead>(ty.depth_texture(Dim::k2d)));
         v1->SetBindingPoint(0, 1);
         v2->SetBindingPoint(0, 2);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v1);
+        b.Let("y", v2);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -500,10 +731,17 @@ TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
 }
 
 TEST_F(SpirvWriterTest, Type_DepthMultiSampledTexture) {
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var(
-            "v", ty.ptr<handle, core::Access::kRead>(ty.depth_multisampled_texture(Dim::k2d)));
+        v = b.Var("v",
+                  ty.ptr<handle, core::Access::kRead>(ty.depth_multisampled_texture(Dim::k2d)));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -511,13 +749,22 @@ TEST_F(SpirvWriterTest, Type_DepthMultiSampledTexture) {
 }
 
 TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTexture) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v1 = b.Var(
+        v1 = b.Var(
             "v1", ty.ptr<handle, core::Access::kRead>(ty.multisampled_texture(Dim::k2d, ty.f32())));
-        auto* v2 = b.Var(
-            "v2", ty.ptr<handle, core::Access::kRead>(ty.depth_multisampled_texture(Dim::k2d)));
+        v2 = b.Var("v2",
+                   ty.ptr<handle, core::Access::kRead>(ty.depth_multisampled_texture(Dim::k2d)));
         v1->SetBindingPoint(0, 1);
         v2->SetBindingPoint(0, 2);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v1);
+        b.Let("y", v2);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -541,10 +788,17 @@ struct StorageTextureCase {
 using Type_StorageTexture = SpirvWriterTestWithParam<StorageTextureCase>;
 TEST_P(Type_StorageTexture, Emit) {
     auto params = GetParam();
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(ty.storage_texture(
-                                 params.dim, params.format, core::Access::kWrite)));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
+                           ty.storage_texture(params.dim, params.format, core::Access::kWrite)));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -608,10 +862,18 @@ struct TexelBufferCase {
 using Type_TexelBuffer = SpirvWriterTestWithParam<TexelBufferCase>;
 TEST_P(Type_TexelBuffer, Emit) {
     auto params = GetParam();
+
+    core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        auto* v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
-                                 ty.texel_buffer(params.format, core::Access::kReadWrite)));
+        v = b.Var("v", ty.ptr<handle, core::Access::kRead>(
+                           ty.texel_buffer(params.format, core::Access::kReadWrite)));
         v->SetBindingPoint(0, 0);
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -656,7 +918,7 @@ INSTANTIATE_TEST_SUITE_P(
                                     Format::kRgba8Unorm}));
 
 TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
-    auto* fn = b.Function("f", ty.void_());
+    auto* fn = b.ComputeFunction("main");
     b.Append(fn->Block(), [&] {
         b.Var("left", ty.ptr<function>(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
         b.Var("right", ty.ptr<function>(ty.subgroup_matrix_right(ty.u32(), 4, 8)));
@@ -677,11 +939,24 @@ TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpirvWriterTest, Type_Multiple) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
+    core::ir::Var* v3 = nullptr;
+    core::ir::Var* v4 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        b.Var<private_, i32, read_write>("v1");
-        b.Var<private_, u32, read_write>("v2");
-        b.Var<private_, f32, read_write>("v3");
-        b.Var<private_, f16, read_write>("v4");
+        v1 = b.Var<private_, i32, read_write>("v1");
+        v2 = b.Var<private_, u32, read_write>("v2");
+        v3 = b.Var<private_, f32, read_write>("v3");
+        v4 = b.Var<private_, f16, read_write>("v4");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("w", v1);
+        b.Let("x", v2);
+        b.Let("y", v3);
+        b.Let("z", v4);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -693,10 +968,21 @@ TEST_F(SpirvWriterTest, Type_Multiple) {
 
 // Test that we do not emit the same type more than once.
 TEST_F(SpirvWriterTest, Type_Deduplicate) {
+    core::ir::Var* v1 = nullptr;
+    core::ir::Var* v2 = nullptr;
+    core::ir::Var* v3 = nullptr;
     b.Append(b.ir.root_block, [&] {
-        b.Var<private_, i32, read_write>("v1");
-        b.Var<private_, i32, read_write>("v2");
-        b.Var<private_, i32, read_write>("v3");
+        v1 = b.Var<private_, i32, read_write>("v1");
+        v2 = b.Var<private_, i32, read_write>("v2");
+        v3 = b.Var<private_, i32, read_write>("v3");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v1);
+        b.Let("y", v2);
+        b.Let("z", v3);
+        b.Return(eb);
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;

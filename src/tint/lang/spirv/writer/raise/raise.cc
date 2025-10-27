@@ -28,7 +28,6 @@
 #include "src/tint/lang/spirv/writer/raise/raise.h"
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -48,6 +47,7 @@
 #include "src/tint/lang/core/ir/transform/resource_binding.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -77,6 +77,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result;               \
         }                                \
     } while (false)
+
+    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
 
     RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
                   options.substitute_overrides_config);
@@ -177,7 +179,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(raise::PassMatrixByPointer, module);
     }
 
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
 
     if (options.decompose_uniform_buffers) {
