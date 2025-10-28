@@ -2180,6 +2180,24 @@ TEST_F(IR_ValidatorTest, Unreachable_MissingResult) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Switch_ExternalTextureResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* s = b.Switch(true);
+        s->AddResult(b.InstructionResult(ty.external_texture()));
+
+        b.Append(b.DefaultCase(s), [&] { b.ExitSwitch(s, nullptr); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason,
+                testing::HasSubstr("error: switch: result type must be constructable"))
+        << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
     auto* f = b.Function("my_func", ty.void_());
 
