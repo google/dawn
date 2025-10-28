@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/cmd/bench/bench.h"
-#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
@@ -61,18 +60,12 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
             }
 
             tint::glsl::writer::Options gen_options = {};
+            gen_options.entry_point_name = name;
             {
                 auto data = tint::glsl::writer::GenerateBindings(ir.Get(), name);
                 gen_options.bindings = std::move(data.bindings);
                 gen_options.texture_builtins_from_uniform =
                     std::move(data.texture_builtins_from_uniform);
-            }
-
-            // Run single entry point to strip the program down to a single entry point.
-            auto single_result = core::ir::transform::SingleEntryPoint(ir.Get(), name);
-            if (single_result != Success) {
-                state.SkipWithError(ir.Failure().reason);
-                return;
             }
 
             // Generate GLSL.

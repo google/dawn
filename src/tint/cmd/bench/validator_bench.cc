@@ -57,7 +57,9 @@ void ValidateIR(benchmark::State& state, std::string input_name) {
     }
 
     for (auto _ : state) {
-        auto val_res = Validate(ir.Get(), {});
+        auto val_res = Validate(ir.Get(), Capabilities{
+                                              Capability::kAllowMultipleEntryPoints,
+                                          });
         if (val_res != Success) {
             state.SkipWithError(val_res.Failure().reason);
         }

@@ -81,6 +81,7 @@ void GenerateMSL(benchmark::State& state, std::string input_name) {
                 return;
             }
             gen_options.bindings = tint::GenerateBindings(ir.Get(), name, true, true);
+            gen_options.entry_point_name = name;
 
             auto gen_res = Generate(ir.Get(), gen_options);
             if (gen_res != Success) {
