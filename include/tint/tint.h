@@ -37,7 +37,6 @@
 #include "src/tint/api/common/substitute_overrides_config.h"
 #include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/api/tint.h"
-#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/utils/diagnostic/formatter.h"
