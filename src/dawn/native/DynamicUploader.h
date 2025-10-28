@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_NATIVE_DYNAMICUPLOADER_H_
 #define SRC_DAWN_NATIVE_DYNAMICUPLOADER_H_
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -72,12 +73,16 @@ class DynamicUploader : NonMovable {
     MaybeError OnStagingMemoryFreePendingOnSubmit(uint64_t size);
 
     // May submit pending commands on the queue if enough memory was freed since the last submit.
+    // This will lock the device mutex if a queue submit is necessary (and mutex exists).
     MaybeError MaybeSubmitPendingCommands();
 
     void Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll = false);
 
   private:
     ResultOrError<UploadReservation> Reserve(uint64_t size, uint64_t offsetAlignment);
+
+    // Checks if a submit happened and resets memory to be freed pending submit if so.
+    void UpdateMemoryPendingSubmit();
 
     struct RingBuffer {
         Ref<BufferBase> mStagingBuffer;
@@ -88,7 +93,7 @@ class DynamicUploader : NonMovable {
     // Serial used to track when a serial has been scheduled and the corresponding pending memory
     // will be freed in finite time.
     ExecutionSerial mLastPendingSerialSeen = kBeginningOfGPUTime;
-    uint64_t mMemoryPendingSubmit = 0;
+    std::atomic<uint64_t> mMemoryPendingSubmit = 0;
     raw_ptr<DeviceBase> mDevice;
 };
 }  // namespace dawn::native
