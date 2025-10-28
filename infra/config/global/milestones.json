@@ -48,5 +48,15 @@
             "mac",
             "win"
         ]
+    },
+    "143": {
+        "name": "m143",
+        "chromium_project": "chromium-m143",
+        "ref": "refs/heads/chromium/7499",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
