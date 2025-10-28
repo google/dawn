@@ -28,7 +28,6 @@
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
@@ -226,8 +225,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
-
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{immediate_data_layout.Get(), options.depth_range_offsets,

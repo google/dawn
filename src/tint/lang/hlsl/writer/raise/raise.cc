@@ -31,7 +31,6 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -189,8 +188,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         conversion_polyfills.ftoi = true;
         RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
     }
-
-    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
     if (options.compiler == Options::Compiler::kFXC) {
         RUN_TRANSFORM(raise::ReplaceDefaultOnlySwitch, module);

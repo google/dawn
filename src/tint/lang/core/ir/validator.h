@@ -117,12 +117,6 @@ Result<SuccessType> ValidateAndDumpIfNeeded(const Module& ir,
                                             Capabilities capabilities = {},
                                             std::string_view timing = "before");
 
-// Scans the module root block for user-declared immediate data (module-scope
-// `var<immediate>` declarations). Returns Success if there is at most one.
-// On success, the returned uint32_t is the 4-byte rounded-up size of the
-// user-declared immediate data (or 0 if none present). Fails if multiple
-// immediates are declared.
-Result<uint32_t> ValidateSingleUserImmediate(const Module& ir);
 // Scans the given entry point referenced variables for user-declared immediate data (module-scope
 // `var<immediate>` declarations). Returns Success if there is at most one.
 // On success, the returned uint32_t is the 4-byte rounded-up size of the

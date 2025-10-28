@@ -45,8 +45,6 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("transform") {
   sources = [
-    "add_empty_entry_point.cc",
-    "add_empty_entry_point.h",
     "array_length_from_immediate.cc",
     "array_length_from_immediate.h",
     "array_length_from_uniform.cc",
@@ -144,7 +142,6 @@ libtint_source_set("transform") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
-      "add_empty_entry_point_test.cc",
       "array_length_from_immediate_test.cc",
       "array_length_from_uniform_test.cc",
       "bgra8unorm_polyfill_test.cc",
@@ -206,7 +203,6 @@ if (tint_build_unittests) {
 
 tint_fuzz_source_set("fuzz") {
   sources = [
-    "add_empty_entry_point_fuzz.cc",
     "array_length_from_uniform_fuzz.cc",
     "bgra8unorm_polyfill_fuzz.cc",
     "binary_polyfill_fuzz.cc",

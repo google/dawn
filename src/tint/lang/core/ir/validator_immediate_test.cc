@@ -36,7 +36,8 @@
 
 namespace tint::core::ir {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 // Helper to make a module-scope immediate variable with given store type.
 static Var* MakeImmediate(Builder& b,
@@ -50,18 +51,18 @@ static Var* MakeImmediate(Builder& b,
 
 class IR_ValidatorImmediateTest : public IR_ValidatorTest {};
 
-TEST_F(IR_ValidatorImmediateTest, ValidateSingleUserImmediate_None) {
-    // Empty module (no immediates)
-    auto res = ValidateSingleUserImmediate(mod);
-    ASSERT_EQ(res, Success) << res.Failure();
-    EXPECT_EQ(res.Get(), 0u);
-}
-
 TEST_F(IR_ValidatorImmediateTest, ValidateSingleUserImmediate_One) {
     // Single immediate variable with size 12 -> rounded to 12 (already multiple of 4)
     auto* s = ty.Struct(mod.symbols.New("S"), {{mod.symbols.New("a"), ty.array<i32, 3>()}});
-    MakeImmediate(b, mod, "immediate_data", s);
-    auto res = ValidateSingleUserImmediate(mod);
+    auto* v = MakeImmediate(b, mod, "immediate_data", s);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Access(ty.ptr(immediate, ty.i32()), v, 0_u, 0_u));
+        b.Return(eb);
+    });
+
+    auto res = ValidateSingleUserImmediate(mod, eb);
     ASSERT_EQ(res, Success) << res.Failure();
     EXPECT_EQ(res.Get(), 12u);  // 3 * 4 bytes
 }
@@ -70,9 +71,17 @@ TEST_F(IR_ValidatorImmediateTest, ValidateSingleUserImmediate_One) {
 
 TEST_F(IR_ValidatorImmediateTest, ValidateSingleUserImmediate_Multiple) {
     auto* s = ty.Struct(mod.symbols.New("S"), {{mod.symbols.New("a"), ty.i32()}});
-    MakeImmediate(b, mod, "immediate0", s);
-    MakeImmediate(b, mod, "immediate1", s);
-    auto res = ValidateSingleUserImmediate(mod);
+    auto* v1 = MakeImmediate(b, mod, "immediate0", s);
+    auto* v2 = MakeImmediate(b, mod, "immediate1", s);
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Access(ty.ptr(immediate, ty.i32()), v1, 0_u, 0_u));
+        b.Let("y", b.Access(ty.ptr(immediate, ty.i32()), v2, 0_u, 0_u));
+        b.Return(eb);
+    });
+
+    auto res = ValidateSingleUserImmediate(mod, eb);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
                 ::testing::HasSubstr("multiple user-declared immediate data"));

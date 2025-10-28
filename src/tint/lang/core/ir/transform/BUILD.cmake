@@ -39,8 +39,6 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform lib
-  lang/core/ir/transform/add_empty_entry_point.cc
-  lang/core/ir/transform/add_empty_entry_point.h
   lang/core/ir/transform/array_length_from_immediate.cc
   lang/core/ir/transform/array_length_from_immediate.h
   lang/core/ir/transform/array_length_from_uniform.cc
@@ -144,7 +142,6 @@ tint_target_add_external_dependencies(tint_lang_core_ir_transform lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_test test
-  lang/core/ir/transform/add_empty_entry_point_test.cc
   lang/core/ir/transform/array_length_from_immediate_test.cc
   lang/core/ir/transform/array_length_from_uniform_test.cc
   lang/core/ir/transform/bgra8unorm_polyfill_test.cc
@@ -211,7 +208,6 @@ tint_target_add_external_dependencies(tint_lang_core_ir_transform_test test
 # Kind:      fuzz
 ################################################################################
 tint_add_target(tint_lang_core_ir_transform_fuzz fuzz
-  lang/core/ir/transform/add_empty_entry_point_fuzz.cc
   lang/core/ir/transform/array_length_from_uniform_fuzz.cc
   lang/core/ir/transform/bgra8unorm_polyfill_fuzz.cc
   lang/core/ir/transform/binary_polyfill_fuzz.cc
