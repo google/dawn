@@ -193,7 +193,9 @@
         'mixins': [
           'mac_mini_intel_gpu_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_common_gtests',
+        },
       },
       'dawn-mac-x64-sws-dbg': {
         'os_type': 'mac',
