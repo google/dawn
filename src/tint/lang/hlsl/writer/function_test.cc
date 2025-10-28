@@ -42,16 +42,13 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, FunctionEmpty) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("main");
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-void foo() {
-}
-
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -65,13 +62,20 @@ TEST_F(HlslWriterTest, FunctionWithParams) {
     func->SetParams({b.FunctionParam("a", ty.f32()), b.FunctionParam("b", ty.i32())});
     func->Block()->Append(b.Return(func));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.f32()), b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void my_func(float a, int b) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  my_func(0.0f, int(0));
 }
 
 )");
@@ -140,6 +144,13 @@ TEST_F(HlslWriterTest, FunctionPtrParameter) {
     func->SetParams({foo});
     b.Append(func->Block(), [&] { b.Return(func, b.Load(foo)); });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, ty.f32()));
+        b.Let("x", b.Call(func, v));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 float f(inout float foo) {
@@ -147,41 +158,43 @@ float f(inout float foo) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  float v = 0.0f;
+  float x = f(v);
 }
 
 )");
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPointWithInAndOutLocations) {
-    // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
+    // fn main(@location(0) foo : f32) -> @location(1) f32 {
     //   return foo;
     // }
 
     auto* foo = b.FunctionParam("foo", ty.f32());
     foo->SetLocation(0);
 
-    auto* func = b.Function("frag_main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     func->SetParams({foo});
     func->SetReturnLocation(1);
     func->Block()->Append(b.Return(func, foo));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct frag_main_outputs {
+    EXPECT_EQ(output_.hlsl, R"(struct main_outputs {
   float tint_symbol : SV_Target1;
 };
 
-struct frag_main_inputs {
+struct main_inputs {
   float foo : TEXCOORD0;
 };
 
 
-float frag_main_inner(float foo) {
+float main_inner(float foo) {
   return foo;
 }
 
-frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v = {frag_main_inner(inputs.foo)};
+main_outputs main(main_inputs inputs) {
+  main_outputs v = {main_inner(inputs.foo)};
   return v;
 }
 
@@ -189,14 +202,14 @@ frag_main_outputs frag_main(frag_main_inputs inputs) {
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPointWithInOutBuiltins) {
-    // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
+    // fn main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
     //   return coord.x;
     // }
 
     auto* coord = b.FunctionParam("coord", ty.vec4<f32>());
     coord->SetBuiltin(core::BuiltinValue::kPosition);
 
-    auto* func = b.Function("frag_main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     func->SetReturnBuiltin(core::BuiltinValue::kFragDepth);
     func->SetParams({coord});
     b.Append(func->Block(), [&] {
@@ -205,21 +218,21 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithInOutBuiltins) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(struct frag_main_outputs {
+    EXPECT_EQ(output_.hlsl, R"(struct main_outputs {
   float tint_symbol : SV_Depth;
 };
 
-struct frag_main_inputs {
+struct main_inputs {
   float4 coord : SV_Position;
 };
 
 
-float frag_main_inner(float4 coord) {
+float main_inner(float4 coord) {
   return coord.x;
 }
 
-frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)))};
+main_outputs main(main_inputs inputs) {
+  main_outputs v = {main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)))};
   return v;
 }
 
@@ -235,7 +248,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithUniform) {
     // fn sub_func(param: f32) -> f32 {
     //   return ubo.coord.x;
     // }
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = sub_func(1f);
     // }
 
@@ -260,8 +273,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithUniform) {
         b.Return(sub_func, b.Load(a));
     });
 
-    auto* frag_func =
-        b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* frag_func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(frag_func->Block(), [&] {
         b.Var("v", b.Call(sub_func, 1_f));
         b.Return(frag_func);
@@ -276,7 +288,7 @@ float sub_func(float param) {
   return asfloat(ubo[0u].x);
 }
 
-void frag_main() {
+void main() {
   float v = sub_func(1.0f);
 }
 
@@ -290,7 +302,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithUniformStruct) {
     //
     // @group(1) @binding(0) var<uniform> ubo: Uniforms;
     //
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = ubo.coord.x;
     // }
 
@@ -306,7 +318,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithUniformStruct) {
     ubo->SetBindingPoint(1, 0);
     b.ir.root_block->Append(ubo);
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         auto* a = b.Access(ty.ptr<uniform, f32>(), ubo, 0_u, 0_u);
         b.Var("v", b.Load(a));
@@ -318,7 +330,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithUniformStruct) {
 cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
-void frag_main() {
+void main() {
   float v = asfloat(ubo[0u].x);
 }
 
@@ -332,7 +344,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithRWStorageBufferRead) {
     // }
     // @group(1) @binding(0) var<storage, read_write> coord: Data;
     //
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = coord.b;
     // }
 
@@ -346,7 +358,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithRWStorageBufferRead) {
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         auto* a = b.Access(ty.ptr(storage, ty.i32()), coord, 0_u);
         b.Var("v", b.Load(a));
@@ -358,7 +370,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithRWStorageBufferRead) {
     EXPECT_EQ(output_.hlsl,
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
-void frag_main() {
+void main() {
   int v = asint(coord.Load(0u));
 }
 
@@ -372,7 +384,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithROStorageBufferRead) {
     // }
     // @group(1) @binding(0) var<storage, read> coord: Data;
     //
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = coord.b;
     // }
 
@@ -386,7 +398,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithROStorageBufferRead) {
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         auto* a = b.Access(ty.ptr<storage, f32, core::Access::kRead>(), coord, 1_u);
         b.Var("v", b.Load(a));
@@ -397,7 +409,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithROStorageBufferRead) {
     EXPECT_EQ(output_.hlsl,
               R"(
 ByteAddressBuffer coord : register(t0, space1);
-void frag_main() {
+void main() {
   float v = asfloat(coord.Load(4u));
 }
 
@@ -411,7 +423,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithWOStorageBufferStore) {
     // }
     // @group(1) @binding(0) var<storage, write> coord: Data;
     //
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   coord.b = 2f;
     // }
 
@@ -425,7 +437,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithWOStorageBufferStore) {
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Store(b.Access(ty.ptr(storage, ty.f32()), coord, 1_u), 2_f);
         b.Return(func);
@@ -435,7 +447,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithWOStorageBufferStore) {
     EXPECT_EQ(output_.hlsl,
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
-void frag_main() {
+void main() {
   coord.Store(4u, asuint(2.0f));
 }
 
@@ -449,7 +461,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithStorageBufferStore) {
     // }
     // @group(1) @binding(0) var<storage, write> coord: Data;
     //
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   coord.b = 2f;
     // }
 
@@ -463,7 +475,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithStorageBufferStore) {
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Store(b.Access(ty.ptr(storage, ty.f32()), coord, 1_u), 2_f);
         b.Return(func);
@@ -473,7 +485,7 @@ TEST_F(HlslWriterTest, FunctionEntryPointWithStorageBufferStore) {
     EXPECT_EQ(output_.hlsl,
               R"(
 RWByteAddressBuffer coord : register(u0, space1);
-void frag_main() {
+void main() {
   coord.Store(4u, asuint(2.0f));
 }
 
@@ -489,7 +501,7 @@ TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithUniform) {
     // fn sub_func() -> f32 {
     //   return coord.x;
     // }
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = sub_func(1f);
     // }
 
@@ -510,7 +522,7 @@ TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithUniform) {
         b.Return(sub_func, b.Load(a));
     });
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Var("v", b.Call(sub_func, 1_f));
         b.Return(func);
@@ -525,7 +537,7 @@ float sub_func(float param) {
   return asfloat(coord[0u].x);
 }
 
-void frag_main() {
+void main() {
   float v = sub_func(1.0f);
 }
 
@@ -541,7 +553,7 @@ TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithStorageBuffer) {
     // fn sub_func() -> f32 {
     //   return coord.x;
     // }
-    // @fragment fn frag_main() {
+    // @fragment fn main() {
     //   var v = sub_func();
     // }
 
@@ -559,7 +571,7 @@ TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithStorageBuffer) {
         b.Return(sub_func, b.Load(a));
     });
 
-    auto* func = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {  //
         b.Var("v", b.Call(sub_func));
         b.Return(func);
@@ -573,7 +585,7 @@ float sub_func() {
   return asfloat(coord.Load(0u));
 }
 
-void frag_main() {
+void main() {
   float v = sub_func();
 }
 
@@ -622,13 +634,21 @@ TEST_F(HlslWriterTest, FunctionWithArrayParams) {
     func->SetParams({p});
     func->Block()->Append(b.Return(func));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.array<f32, 5>()));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void my_func(float a[5]) {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  float v[5] = (float[5])0;
+  my_func(v);
 }
 
 )");
@@ -642,6 +662,12 @@ TEST_F(HlslWriterTest, FunctionWithArrayReturn) {
     auto* func = b.Function("my_func", ty.array<f32, 5>());
     func->Block()->Append(b.Return(func, b.Zero(ty.array<f32, 5>())));
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 typedef float ary_ret[5];
@@ -651,7 +677,8 @@ ary_ret my_func() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  float x[5] = my_func();
 }
 
 )");
@@ -676,7 +703,16 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithContinueExecution) {
         });
         b.Return(func);
     });
+
+    auto* eb = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     tint::hlsl::writer::Options options;
+    options.entry_point_name = "main";
+
     // FXC must use demote to helper transform.
     options.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
@@ -688,8 +724,11 @@ void my_func(int a) {
   }
 }
 
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  my_func(int(0));
+  if (!(continue_execution)) {
+    discard;
+  }
 }
 
 )");
@@ -714,7 +753,16 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithPlatformDiscard) {
         });
         b.Return(func);
     });
+
+    auto* eb = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     tint::hlsl::writer::Options options;
+    options.entry_point_name = "main";
+
     options.compiler = tint::hlsl::writer::Options::Compiler::kDXC;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
@@ -724,8 +772,8 @@ void my_func(int a) {
   }
 }
 
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  my_func(int(0));
 }
 
 )");
@@ -752,7 +800,15 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithContinueExecution)
         b.Return(func, 42_i);
     });
 
+    auto* eb = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(eb->Block(), [&] {
+        b.Call(func, b.Zero(ty.i32()));
+        b.Return(eb);
+    });
+
     tint::hlsl::writer::Options options;
+    options.entry_point_name = "main";
+
     // FXC must use demote to helper transform.
     options.compiler = tint::hlsl::writer::Options::Compiler::kFXC;
 
@@ -766,8 +822,11 @@ int my_func(int a) {
   return int(42);
 }
 
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  my_func(int(0));
+  if (!(continue_execution)) {
+    discard;
+  }
 }
 
 )");
@@ -794,6 +853,12 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithPlatformDiscard) {
         b.Return(func, 42_i);
     });
 
+    auto* eb = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.i32())));
+        b.Return(eb);
+    });
+
     tint::hlsl::writer::Options options;
     options.compiler = tint::hlsl::writer::Options::Compiler::kDXC;
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
@@ -805,8 +870,8 @@ int my_func(int a) {
   return int(42);
 }
 
-[numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  int x = my_func(int(0));
 }
 
 )");
@@ -816,9 +881,10 @@ TEST_F(HlslWriterTest, DuplicateConstant) {
     auto* ret_arr = b.Function("ret_arr", ty.array<vec4<i32>, 4>());
     b.Append(ret_arr->Block(), [&] { b.Return(ret_arr, b.Zero<array<vec4<i32>, 4>>()); });
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
         b.Let("src_let", b.Zero<array<vec4<i32>, 4>>());
+        b.Let("x", b.Call(ret_arr));
         b.Return(func);
     });
 
@@ -830,8 +896,9 @@ ary_ret ret_arr() {
   return v;
 }
 
-void foo() {
+void main() {
   int4 src_let[4] = (int4[4])0;
+  int4 x[4] = ret_arr();
 }
 
 )");

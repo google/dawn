@@ -131,6 +131,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
     req.hlsl.dumpShadersOnFailure = device->IsToggleEnabled(Toggle::DumpShadersOnFailure);
+    req.hlsl.tintOptions.entry_point_name = programmableStage.entryPoint;
     req.hlsl.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
 
     req.bytecode.hasShaderF16Feature = device->HasFeature(Feature::ShaderF16);
@@ -225,7 +226,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     req.hlsl.shaderModuleHash = GetHash();
     req.hlsl.inputProgram = UnsafeUnserializedValue(UseTintProgram());
-    req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
     req.hlsl.tintOptions.substitute_overrides_config = {
         .map = BuildSubstituteOverridesTransformConfig(programmableStage),

@@ -62,7 +62,6 @@ using InterStageShaderVariablesMask = std::bitset<tint::hlsl::writer::kMaxInterS
 #define HLSL_COMPILATION_REQUEST_MEMBERS(X)                                          \
     X(ShaderModuleBase::ShaderModuleHash, shaderModuleHash)                          \
     X(UnsafeUnserializedValue<ShaderModuleBase::ScopedUseTintProgram>, inputProgram) \
-    X(std::string_view, entryPointName)                                              \
     X(SingleShaderStage, stage)                                                      \
     X(uint32_t, shaderModel)                                                         \
     X(uint32_t, compileFlags)                                                        \

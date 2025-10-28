@@ -101,11 +101,17 @@ TEST_F(HlslWriterTest, VarSampler) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 SamplerState s : register(s0, space1);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -117,11 +123,17 @@ TEST_F(HlslWriterTest, VarSamplerComparison) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 SamplerComparisonState s : register(s0);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -134,11 +146,17 @@ TEST_F(HlslWriterTest, VarBindingArraySampledTexture) {
 
     b.ir.root_block->Append(v);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", v);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 Texture2D<float4> v[4] : register(t0);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -164,10 +182,16 @@ TEST_P(VarDepthTextureTest, Emit) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, "\n" + params.result + R"(
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -191,11 +215,17 @@ TEST_F(HlslWriterTest, VarDepthMultiSampled) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<float4> tex : register(t1, space2);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -237,10 +267,16 @@ TEST_P(VarSampledTextureTest, Emit) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, "\n" + params.result + R"(
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -348,11 +384,17 @@ TEST_F(HlslWriterTest, VarMultisampledTexture) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<float4> tex : register(t1, space2);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -382,10 +424,16 @@ TEST_P(VarStorageTextureTest, Emit) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, "\n" + params.result + R"(
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -476,13 +524,19 @@ TEST_F(HlslWriterTest, VarUniform) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 cbuffer cbuffer_u : register(b1, space2) {
   uint4 u[1];
 };
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -494,11 +548,17 @@ TEST_F(HlslWriterTest, VarStorageRead) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 ByteAddressBuffer u : register(t1, space2);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -510,11 +570,17 @@ TEST_F(HlslWriterTest, VarStorageReadWrite) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer u : register(u1, space2);
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -525,11 +591,17 @@ TEST_F(HlslWriterTest, VarPrivate) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 static float4 u = (0.0f).xxxx;
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
 }
 
 )");
@@ -540,11 +612,29 @@ TEST_F(HlslWriterTest, VarWorkgroup) {
 
     b.ir.root_block->Append(s);
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", s);
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(
+    EXPECT_EQ(output_.hlsl, R"(struct main_inputs {
+  uint tint_local_index : SV_GroupIndex;
+};
+
+
 groupshared float4 u;
+void main_inner(uint tint_local_index) {
+  if ((tint_local_index < 1u)) {
+    u = (0.0f).xxxx;
+  }
+  GroupMemoryBarrierWithGroupSync();
+}
+
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main(main_inputs inputs) {
+  main_inner(inputs.tint_local_index);
 }
 
 )");

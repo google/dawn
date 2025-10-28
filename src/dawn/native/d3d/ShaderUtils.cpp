@@ -231,16 +231,6 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         ir.Failure().reason);
     }
 
-    {
-        SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),
-                                           "ShaderModuleSingleEntryPoint");
-        auto singleEntryPointResult =
-            tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-        DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                        "Pipeline single entry point (IR) failed:\n%s",
-                        singleEntryPointResult.Failure().reason);
-    }
-
     tint::Result<tint::hlsl::writer::Output> result;
     {
         SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(tracePlatform.UnsafeGetValue(),

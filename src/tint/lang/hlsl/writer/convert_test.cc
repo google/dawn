@@ -40,6 +40,12 @@ TEST_F(HlslWriterTest, ConvertU32) {
         b.Return(f, b.Convert(ty.u32(), v));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(f));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint a() {
@@ -48,7 +54,8 @@ uint a() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  uint x = a();
 }
 
 )");

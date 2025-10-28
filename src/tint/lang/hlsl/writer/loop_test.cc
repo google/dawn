@@ -34,7 +34,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Loop) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -46,7 +46,7 @@ TEST_F(HlslWriterTest, Loop) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void a() {
+void main() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
@@ -62,7 +62,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopContinueAndBreakIf) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -74,7 +74,7 @@ TEST_F(HlslWriterTest, LoopContinueAndBreakIf) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void a() {
+void main() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
@@ -97,7 +97,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopBodyVarInContinue) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -113,7 +113,7 @@ TEST_F(HlslWriterTest, LoopBodyVarInContinue) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void a() {
+void main() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
     while(true) {
@@ -137,7 +137,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopInitializer) {
-    auto* func = b.ComputeFunction("a");
+    auto* func = b.ComputeFunction("main");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -154,7 +154,7 @@ TEST_F(HlslWriterTest, LoopInitializer) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void a() {
+void main() {
   {
     uint2 tint_loop_idx = (4294967295u).xx;
     bool v = true;
@@ -186,6 +186,12 @@ TEST_F(HlslWriterTest, Loop_UnconditionalReturn_NonVoid) {
         b.Unreachable();
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int a() {
@@ -203,7 +209,8 @@ int a() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  int x = a();
 }
 
 )");

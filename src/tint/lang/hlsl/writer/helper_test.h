@@ -61,6 +61,10 @@ class HlslWriterTestHelperBase : public BASE {
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
     bool Generate(Options options = {}) {
+        if (options.entry_point_name.empty()) {
+            options.entry_point_name = "main";
+        }
+
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason;

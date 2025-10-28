@@ -88,6 +88,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     }
 
     Options options;
+    options.entry_point_name = ep_name;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
     options.enable_integer_range_analysis = fuzzed_options.enable_integer_range_analysis;
@@ -115,7 +116,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         }
     }
 
-    auto check = CanGenerate(module, options, ep_name);
+    auto check = CanGenerate(module, options);
     if (check != Success) {
         return check.Failure();
     }

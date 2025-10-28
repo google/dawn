@@ -33,7 +33,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, If) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -43,7 +43,7 @@ TEST_F(HlslWriterTest, If) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   if (true) {
   }
 }
@@ -52,7 +52,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithElseIf) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -67,7 +67,7 @@ TEST_F(HlslWriterTest, IfWithElseIf) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   if (true) {
   } else {
     if (false) {
@@ -79,7 +79,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithElse) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -90,7 +90,7 @@ TEST_F(HlslWriterTest, IfWithElse) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   if (true) {
   } else {
     return;
@@ -101,7 +101,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfBothBranchesReturn) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.Return(func); });
@@ -112,7 +112,7 @@ TEST_F(HlslWriterTest, IfBothBranchesReturn) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   if (true) {
     return;
   } else {
@@ -133,6 +133,12 @@ TEST_F(HlslWriterTest, IfBothBranchesReturn_NonVoidFunction) {
         b.Unreachable();
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint foo() {
@@ -146,14 +152,15 @@ uint foo() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  uint x = foo();
 }
 
 )");
 }
 
 TEST_F(HlslWriterTest, IfWithSinglePhi) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResult(b.InstructionResult(ty.i32()));
@@ -169,7 +176,7 @@ TEST_F(HlslWriterTest, IfWithSinglePhi) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   int v = int(0);
   if (true) {
     v = int(10);
@@ -182,7 +189,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithMultiPhi) {
-    auto* func = b.ComputeFunction("foo");
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
@@ -198,7 +205,7 @@ TEST_F(HlslWriterTest, IfWithMultiPhi) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
-void foo() {
+void main() {
   int v = int(0);
   bool v_1 = false;
   if (true) {
@@ -227,6 +234,12 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn1) {
         b.Return(func, i->Result(0));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int foo() {
@@ -243,7 +256,8 @@ int foo() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  int x = foo();
 }
 
 )");
@@ -263,6 +277,12 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn2) {
         b.Return(func, i->Result(1));
     });
 
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 bool foo() {
@@ -279,7 +299,8 @@ bool foo() {
 }
 
 [numthreads(1, 1, 1)]
-void unused_entry_point() {
+void main() {
+  bool x = foo();
 }
 
 )");
