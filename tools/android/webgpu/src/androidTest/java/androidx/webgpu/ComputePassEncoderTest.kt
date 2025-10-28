@@ -10,6 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("UNUSED_VARIABLE")
 class ComputePassEncoderTest {
   private var webGpu: WebGpu? = null
   private lateinit var device: Device
@@ -73,7 +74,7 @@ class ComputePassEncoderTest {
     passEncoder.insertDebugMarker("My Marker")
 
     passEncoder.end()
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
     assertEquals(ErrorType.NoError, errorScope.type)
   }
@@ -90,7 +91,7 @@ class ComputePassEncoderTest {
     passEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -109,7 +110,7 @@ class ComputePassEncoderTest {
     passEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -130,7 +131,7 @@ class ComputePassEncoderTest {
     passEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -156,7 +157,7 @@ class ComputePassEncoderTest {
     passEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -185,7 +186,7 @@ class ComputePassEncoderTest {
     passEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -206,7 +207,7 @@ class ComputePassEncoderTest {
     passEncoder.dispatchWorkgroups(1)  // Invalid call after end.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -225,7 +226,7 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     passEncoder.end()  // Second call (invalid).
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)

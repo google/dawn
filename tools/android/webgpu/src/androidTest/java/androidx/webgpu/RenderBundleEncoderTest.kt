@@ -14,6 +14,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("UNUSED_VARIABLE")
 @SmallTest
 class RenderBundleEncoderTest {
   private lateinit var webGpu: WebGpu
@@ -124,7 +125,7 @@ class RenderBundleEncoderTest {
     val bundleEncoder = createDefaultBundleEncoder()
     bundleEncoder.insertDebugMarker("Marker Inside Bundle")
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
     assertEquals(ErrorType.NoError, errorScope.type)
   }
@@ -135,7 +136,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.popDebugGroup()  // Invalid call.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()  // Deferred error caught here.
+    val unusedRenderBundle = bundleEncoder.finish()  // Deferred error caught here.
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -148,7 +149,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.popDebugGroup()  // Valid pair.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()  // Should succeed.
+    val unusedRenderBundle = bundleEncoder.finish()  // Should succeed.
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -160,7 +161,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.draw(3)  // Invalid: pipeline not set.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -173,7 +174,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.draw(3)  // Valid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -188,7 +189,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.setVertexBuffer(0, invalidBuffer)  // Invalid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -204,7 +205,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.setVertexBuffer(0, validBuffer)  // Valid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -218,7 +219,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.drawIndexed(3)  // Invalid: index buffer not set.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -251,7 +252,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.drawIndirect(invalidBuffer, 0)  // Invalid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -282,7 +283,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.drawIndexedIndirect(indirectBuffer, 0)  // Invalid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -300,7 +301,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.drawIndexedIndirect(indirectBuffer, 0)  // Valid.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -343,7 +344,7 @@ class RenderBundleEncoderTest {
     bundleEncoder.draw(3)  // Invalid: Bind group 0 not set.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -405,7 +406,7 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     // Finish recording. Validation occurs here.
-    bundleEncoder.finish()
+    val unusedRenderBundle = bundleEncoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)

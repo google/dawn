@@ -12,6 +12,7 @@ import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("UNUSED_VARIABLE")
 @SmallTest
 class QuerySetTest {
   private lateinit var webGpu: WebGpu
@@ -84,7 +85,8 @@ class QuerySetTest {
   fun testCreateQuerySetWithNegativeCountFails() {
     // Attempting to create a QuerySet with count -1 should fail validation.
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createQuerySet(QuerySetDescriptor(type = QueryType.Occlusion, count = -1))
+    val unusedQuerySet =
+      device.createQuerySet(QuerySetDescriptor(type = QueryType.Occlusion, count = -1))
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -130,7 +132,7 @@ class QuerySetTest {
     encoder.resolveQuerySet(querySet, 0, QUERY_COUNT, destinationBuffer, 0)
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.NoError, errorScope.type)
@@ -153,7 +155,7 @@ class QuerySetTest {
     encoder.resolveQuerySet(querySet, 0, QUERY_COUNT, invalidBuffer, 0)  // Invalid usage.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -171,7 +173,7 @@ class QuerySetTest {
     encoder.resolveQuerySet(querySet, 0, QUERY_COUNT, smallBuffer, 0)  // Invalid size.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -190,7 +192,7 @@ class QuerySetTest {
     encoder.resolveQuerySet(querySet, 1, QUERY_COUNT, destinationBuffer, 0)  // Invalid range.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)
@@ -210,7 +212,7 @@ class QuerySetTest {
     encoder.resolveQuerySet(querySet, 0, QUERY_COUNT, destinationBuffer, 4)  // Invalid offset.
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val errorScope = runBlocking { device.popErrorScope() }
 
     assertEquals(ErrorType.Validation, errorScope.type)

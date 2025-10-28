@@ -13,6 +13,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("UNUSED_VARIABLE")
 @SmallTest
 class CommandEncoderTest {
 
@@ -38,7 +39,7 @@ class CommandEncoderTest {
   @Test
   fun testFinish() {
     val encoder = device.createCommandEncoder()
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
 
     val dummyBuffer = device.createBuffer(
       BufferDescriptor(size = 4, usage = BufferUsage.CopySrc)
@@ -72,7 +73,7 @@ class CommandEncoderTest {
       error.status == PopErrorScopeStatus.Success &&
         error.type == ErrorType.NoError
     )
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
   }
 
   /**
@@ -86,12 +87,12 @@ class CommandEncoderTest {
     val encoder = device.createCommandEncoder()
     val activePassEncoder = encoder.beginComputePass()
 
-    encoder.beginComputePass()
+    val unusedComputePassEncoder = encoder.beginComputePass()
 
     activePassEncoder.end()
 
     device.pushErrorScope(ErrorFilter.Validation)
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
     val error = runBlocking { device.popErrorScope() }
 
     TestCase.assertTrue(
@@ -132,7 +133,7 @@ class CommandEncoderTest {
     )
     TestCase.assertNotNull(passEncoder)
     passEncoder.end()
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
   }
 
   /**
@@ -248,7 +249,7 @@ class CommandEncoderTest {
       error.status == PopErrorScopeStatus.Success &&
         error.type == ErrorType.NoError
     )
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
   }
 
   /**
@@ -284,7 +285,7 @@ class CommandEncoderTest {
       error.status == PopErrorScopeStatus.Success &&
         error.type == ErrorType.NoError
     )
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
   }
 
   /**
@@ -307,6 +308,6 @@ class CommandEncoderTest {
       error.status == PopErrorScopeStatus.Success &&
         error.type == ErrorType.NoError
     )
-    encoder.finish()
+    val unusedCommandBuffer = encoder.finish()
   }
 }

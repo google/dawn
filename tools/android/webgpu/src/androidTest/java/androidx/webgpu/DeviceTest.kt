@@ -11,8 +11,10 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.assertThrows
+import org.junit.Assume
 import org.junit.Before
 
+@Suppress("UNUSED_VARIABLE")
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class DeviceTest {
@@ -36,7 +38,7 @@ class DeviceTest {
   fun testHasFeature() {
     runBlocking {
       // This test ensures the API is callable.
-      device.hasFeature(FeatureName.TimestampQuery)
+      Assume.assumeTrue(device.hasFeature(FeatureName.TimestampQuery))
     }
   }
 
@@ -47,7 +49,7 @@ class DeviceTest {
 
     // Intentionally create an invalid buffer to trigger a validation error.
     // A buffer size must be a multiple of 4.
-    device.createBuffer(
+    val unusedBuffer = device.createBuffer(
       BufferDescriptor(
         size = 1, usage = BufferUsage.Vertex, mappedAtCreation = true
       )
@@ -135,7 +137,7 @@ class DeviceTest {
     )
 
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createRenderPipeline(
+    val unusedRenderPipeline = device.createRenderPipeline(
       RenderPipelineDescriptor(
         vertex = VertexState(
           module = shaderModule, entryPoint = "non_existent_entry_point" // Invalid
@@ -151,7 +153,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateBindGroupLayout_withDuplicateBindings_failsValidation() {
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createBindGroupLayout(
+    val unusedBindGroupLayout = device.createBindGroupLayout(
       BindGroupLayoutDescriptor(
         entries = arrayOf(
           BindGroupLayoutEntry(
@@ -196,7 +198,7 @@ class DeviceTest {
     )
 
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createBindGroup(
+    val unusedBindGroup = device.createBindGroup(
       BindGroupDescriptor(
         layout = layout, entries = arrayOf(
           BindGroupEntry(binding = 0, buffer = buffer)
@@ -212,7 +214,7 @@ class DeviceTest {
   @SmallTest
   fun testCreateQuerySet_withInvalidCount_failsValidation() {
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createQuerySet(
+    val unusedQuerySet = device.createQuerySet(
       QuerySetDescriptor(
         type = QueryType.Occlusion, count = -1 // Invalid: count must be > 0.
       )
@@ -244,7 +246,7 @@ class DeviceTest {
     )
 
     device.pushErrorScope(ErrorFilter.Validation)
-    device.createSampler(invalidDescriptor)
+    val unusedSampler = device.createSampler(invalidDescriptor)
     val error = device.popErrorScope()
 
     assertEquals(error.type, ErrorType.Validation)

@@ -10,6 +10,7 @@ import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Before
 
+@Suppress("UNUSED_VARIABLE")
 @SmallTest
 class ShaderModuleTest {
   private lateinit var webGpu: WebGpu
@@ -87,7 +88,7 @@ class ShaderModuleTest {
       expectedErrorLine,
       errorMessage.lineNum
     )
-    runBlocking { device.popErrorScope() }
+    val unusedErrorScope = runBlocking { device.popErrorScope() }
   }
 
   /**
@@ -113,6 +114,6 @@ class ShaderModuleTest {
       errorMessage.offset,
       calculatedOffset
     )
-    runBlocking { device.popErrorScope() }
+    val unusedErrorScope = runBlocking { device.popErrorScope() }
   }
 }
