@@ -319,6 +319,7 @@ struct State {
                     [&](core::ir::Access* a) {
                         CheckForStructForking(a);
                         values_to_convert_.Push(a->Object());
+                        values_to_fix_usages_.Push(a->Result());
                     },
                     [&](core::ir::Let* l) {
                         values_to_convert_.Push(l->Value());

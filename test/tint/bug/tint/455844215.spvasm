@@ -1,0 +1,53 @@
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 64 1 1
+
+               OpName %buffer_type "buffer_type"
+               OpName %buffer "buffer"
+               OpName %main "main"
+               OpDecorate %buffer DescriptorSet 0
+               OpDecorate %buffer Binding 0
+               OpDecorate %runtime_arr ArrayStride 4
+               OpMemberDecorate %buffer_type 0 Offset 0
+               OpDecorate %buffer_type BufferBlock
+
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%runtime_arr = OpTypeRuntimeArray %uint
+       %void = OpTypeVoid
+         %15 = OpTypeFunction %void
+       %bool = OpTypeBool
+%buffer_type = OpTypeStruct %runtime_arr
+
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+       %true = OpConstantTrue %bool
+
+%ptr_buffer_type = OpTypePointer Uniform %buffer_type
+   %ptr_uint = OpTypePointer Uniform %uint
+     %buffer = OpVariable %ptr_buffer_type Uniform
+
+       %main = OpFunction %void None %15
+         %19 = OpLabel
+               ; Access chain into atomic
+         %22 = OpAccessChain %ptr_uint %buffer %int_0 %int_0
+               ; Load of the buffer value as a u32
+         %23 = OpLoad %uint %22
+
+               ; If
+               OpSelectionMerge %25 None
+               OpBranchConditional %true %26 %25
+
+               ; True block
+         %26 = OpLabel
+               ; Access atomic, attempts to makes %22 an atomic value
+         %27 = OpAtomicCompareExchange %uint %22 %uint_1 %uint_0 %uint_0 %uint_0 %uint_0
+               OpBranch %25
+
+               ; If merge/False block
+         %25 = OpLabel
+               OpReturn
+               OpFunctionEnd
