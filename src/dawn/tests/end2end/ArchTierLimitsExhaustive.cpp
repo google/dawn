@@ -180,6 +180,7 @@ device_map["OpenGLES_ANGLE__Intel__Intel_R__UHD_Graphics_770__0x00004680__Direct
                                                             = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 16, 2048, 16, 8,  32, 32768, 1024, 1024, 1024, 64, 65535, 0, 10, 8, 10, 8,};
 device_map["Vulkan_Intel_R__UHD_Graphics_770"]              = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  536870912, 256, 256, 8, 4294967296, 30, 2048, 28, 8,  32, 32768,  256,  256,  256, 64, 65535, 32, 10, 8, 10, 8,};
 device_map["Vulkan_Intel_R__UHD_Graphics_770__ADL_S_GT1"]   = {  16384, 16384, 2048, 2048, 4, 24, 1000,  8, 4, 16, 16, 10, 4, 12, 65536, 4294967292, 256, 256, 8, 4294967296, 16, 2048, 28, 8,  32, 65536, 1024, 1024, 1024, 64, 65535, 32, 10, 4, 10, 4,};
+device_map["Vulkan_Intel_R__Iris_R__Xe_Graphics__TGL_GT2"]  = {  16384, 16384, 2048, 2048, 4, 24, 1000, 8, 4, 16, 16, 10, 4, 12, 65536, 4294967292, 256, 256, 8, 4294967296, 16, 2048, 28, 8, 32, 65536, 1024, 1024, 1024, 64, 65535, 32, 10, 4, 10, 4,};
 
 // llvmpipe
 device_map["Vulkan_llvmpipe__LLVM_19_1_7__256_bits"]        = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536,  134217728, 256, 256, 8, 2147483648, 30, 2048, 28, 8,  32, 32768, 1024, 1024, 1024, 64, 65535, 32, 10, 8, 10, 8,};
@@ -479,14 +480,14 @@ auto supported_features = this->GetSupportedFeatures();
                 curr_features_typed.insert(static_cast<wgpu::FeatureName>(each));
             }
             std::set<wgpu::FeatureName> missing_features;
-            std::set_difference(supported_features.begin(), supported_features.end(),
-                                curr_features_typed.begin(), curr_features_typed.end(),
+            std::set_difference(curr_features_typed.begin(), curr_features_typed.end(),
+                                supported_features.begin(), supported_features.end(),
                                 std::inserter(missing_features, missing_features.begin()));
 
             std::set<wgpu::FeatureName> unexpected_features;
 
-            std::set_difference(curr_features_typed.begin(), curr_features_typed.end(),
-                                supported_features.begin(), supported_features.end(),
+            std::set_difference(supported_features.begin(), supported_features.end(),
+                                curr_features_typed.begin(), curr_features_typed.end(),
                                 std::inserter(unexpected_features, unexpected_features.begin()));
 
             error_str = "\nMissing features= ";
