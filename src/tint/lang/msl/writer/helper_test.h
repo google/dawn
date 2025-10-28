@@ -81,9 +81,12 @@ class MslWriterTestHelperBase : public BASE {
     /// Run the writer on the IR module and validate the result.
     /// @param options the writer options
     /// @returns true if generation and validation succeeded
-    bool Generate(
-        Options options = {},
-        [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
+    bool Generate(Options options = {},
+                  validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
+        if (options.entry_point_name.empty()) {
+            options.entry_point_name = "entry";
+        }
+
         auto result = writer::Generate(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason;
@@ -98,7 +101,7 @@ class MslWriterTestHelperBase : public BASE {
     /// @param options the writer options
     /// @returns true if generation and validation succeeded
     bool Print(Options options = {},
-               [[maybe_unused]] validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
+               validate::MslVersion msl_version = validate::MslVersion::kMsl_2_3) {
         auto result = writer::Print(mod, options);
         if (result != Success) {
             err_ = result.Failure().reason;

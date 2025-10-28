@@ -111,7 +111,7 @@ void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_str
 }
 
 void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
   uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= (*tint_module_vars.uniforms).numTriangles)) {
     return;
@@ -226,7 +226,7 @@ void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_str
 }
 
 void main_create_lut_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u)};
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore(v, tint_module_vars);
   uint maxVoxels = (((*tint_module_vars.uniforms).gridSize * (*tint_module_vars.uniforms).gridSize) * (*tint_module_vars.uniforms).gridSize);
@@ -358,7 +358,7 @@ void doIgnore(tint_array_lengths_struct tint_array_lengths, tint_module_vars_str
 }
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_4=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].w - 0u) / 4u), .tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u)};
   uint triangleIndex = GlobalInvocationID.x;
   doIgnore(v, tint_module_vars);
   if ((triangleIndex >= (*tint_module_vars.uniforms).numTriangles)) {

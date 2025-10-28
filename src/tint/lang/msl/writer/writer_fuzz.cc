@@ -60,6 +60,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         return Success;
     }
 
+    options.entry_point_name = ep_name;
     options.bindings = GenerateBindings(module, ep_name, true, true);
     options.array_length_from_constants.ubo_binding = 30;
 
@@ -77,7 +78,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
         }
     }
 
-    auto check = CanGenerate(module, options, ep_name);
+    auto check = CanGenerate(module, options);
     if (check != Success) {
         return Failure{check.Failure().reason};
     }

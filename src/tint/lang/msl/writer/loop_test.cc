@@ -40,7 +40,7 @@ Options NoRobustness() {
 }
 
 TEST_F(MslWriterTest, Loop) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
@@ -52,7 +52,7 @@ TEST_F(MslWriterTest, Loop) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
@@ -67,7 +67,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, Loop_WithoutRobustness) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
@@ -79,7 +79,7 @@ TEST_F(MslWriterTest, Loop_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     while(true) {
       break;
@@ -90,7 +90,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.Continue(l); });
@@ -102,7 +102,7 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
@@ -124,7 +124,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopContinueAndBreakIf_WithoutRobustness) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.Continue(l); });
@@ -136,7 +136,7 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     while(true) {
       {
@@ -150,7 +150,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopBodyVarInContinue) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] {
@@ -166,7 +166,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     while(true) {
@@ -189,7 +189,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Body(), [&] {
@@ -205,7 +205,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     while(true) {
       bool v = true;
@@ -220,7 +220,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopInitializer) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Initializer(), [&] {
@@ -237,7 +237,7 @@ TEST_F(MslWriterTest, LoopInitializer) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
     bool v = true;
@@ -260,7 +260,7 @@ void a() {
 }
 
 TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Initializer(), [&] {
@@ -277,7 +277,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     bool v = true;
     while(true) {
@@ -293,7 +293,7 @@ void a() {
 
 // Test that we elide the mechanism used to avoid infinite loop UB when we detect a loop as finite.
 TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
-    auto* func = b.Function("a", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
         b.Append(l->Initializer(), [&] {
@@ -322,7 +322,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-void a() {
+kernel void entry() {
   {
     uint v = 0u;
     while(true) {

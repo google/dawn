@@ -42,14 +42,14 @@ TEST_F(MslWriterTest, WorkgroupAllocations_NoAllocations) {
     mod.root_block->Append(var_b);
 
     // No allocations, but still needs an entry in the map.
-    auto* bar = b.ComputeFunction("bar");
+    auto* bar = b.ComputeFunction("entry");
     b.Append(bar->Block(), [&] { b.Return(bar); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
-kernel void bar() {
+kernel void entry() {
 }
 )");
 
@@ -62,7 +62,7 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     mod.root_block->Append(var_a);
     mod.root_block->Append(var_b);
 
-    auto* foo = b.ComputeFunction("foo");
+    auto* foo = b.ComputeFunction("entry");
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
@@ -84,7 +84,7 @@ struct tint_symbol_2 {
   int tint_symbol_1;
 };
 
-void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index < 1u)) {
     (*tint_module_vars.a) = 0;
     (*tint_module_vars.b) = 0;
@@ -93,9 +93,9 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
   (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>((*tint_module_vars.b))));
 }
 
-kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
-  foo_inner(tint_local_index, tint_module_vars);
+  entry_inner(tint_local_index, tint_module_vars);
 }
 )");
 
@@ -107,7 +107,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* foo = b.ComputeFunction("foo");
+    auto* foo = b.ComputeFunction("entry");
     b.Append(foo->Block(), [&] {
         b.Store(b.Access<ptr<storage, u32>>(var, 0_u), 42_u);
         b.Return(foo);
@@ -143,7 +143,7 @@ struct tint_module_vars_struct {
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
-kernel void foo(device tint_array<uint, 1>* a [[buffer(0)]]) {
+kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   (*tint_module_vars.a)[0u] = 42u;
 }
@@ -156,7 +156,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* foo = b.ComputeFunction("foo");
+    auto* foo = b.ComputeFunction("entry");
     b.Append(foo->Block(), [&] {
         auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, var);
         b.Store(b.Access<ptr<storage, u32>>(var, 0_u), length);
@@ -198,7 +198,7 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
-kernel void foo(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
   (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u].x / 4u)}.tint_array_length_0_0;
 }
@@ -219,7 +219,7 @@ TEST_F(MslWriterTest, StripAllNames) {
         b.Return(foo, param);
     });
 
-    auto* func = b.ComputeFunction("main");
+    auto* func = b.ComputeFunction("entry");
     auto* idx = b.FunctionParam("idx", ty.u32());
     idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
     func->AppendParam(idx);
@@ -259,7 +259,7 @@ kernel void tint_entry_point(uint v_7 [[thread_index_in_threadgroup]]) {
 }
 
 TEST_F(MslWriterTest, VertexPulling) {
-    auto* ep = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* ep = b.Function("entry", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
     ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
     auto* attr = b.FunctionParam<vec4<f32>>("attr");
     attr->SetLocation(1);
@@ -311,18 +311,18 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_1;
 };
 
-struct main_outputs {
+struct entry_outputs {
   float4 tint_symbol [[position]];
 };
 
-float4 main_inner(uint tint_vertex_index, tint_module_vars_struct tint_module_vars) {
+float4 entry_inner(uint tint_vertex_index, tint_module_vars_struct tint_module_vars) {
   return float4(as_type<float>((*tint_module_vars.tint_vertex_buffer_0)[min(tint_vertex_index, (tint_array_lengths_struct{.tint_array_length_0_1=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u].x / 4u)}.tint_array_length_0_1 - 1u))]), 0.0f, 0.0f, 1.0f);
 }
 
-vertex main_outputs v(uint tint_vertex_index [[vertex_id]], const device tint_array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
+vertex entry_outputs entry(uint tint_vertex_index [[vertex_id]], const device tint_array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_vertex_buffer_0=tint_vertex_buffer_0, .tint_immediate_data=tint_immediate_data};
-  main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol = main_inner(tint_vertex_index, tint_module_vars);
+  entry_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = entry_inner(tint_vertex_index, tint_module_vars);
   return tint_wrapper_result;
 }
 )");
@@ -333,14 +333,15 @@ TEST_F(MslWriterTest, CanGenerate_TexelBufferUnsupported) {
     auto* var = b.Var("buf", ty.ptr<handle>(buffer_ty));
     mod.root_block->Append(var);
 
-    auto* ep = b.ComputeFunction("main");
+    auto* ep = b.ComputeFunction("entry");
     b.Append(ep->Block(), [&] {
         b.Let("x", var);
         b.Return(ep);
     });
 
     Options options;
-    auto result = CanGenerate(mod, options, "main");
+    options.entry_point_name = "main";
+    auto result = CanGenerate(mod, options);
     ASSERT_NE(result, Success);
     EXPECT_THAT(result.Failure().reason,
                 testing::HasSubstr("texel buffers are not supported by the MSL backend"));

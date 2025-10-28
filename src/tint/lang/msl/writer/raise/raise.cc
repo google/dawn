@@ -50,6 +50,7 @@
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/signed_integer_polyfill.h"
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/transform/substitute_overrides.h"
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
@@ -79,6 +80,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
             return result.Failure();     \
         }                                \
     } while (false)
+
+    RUN_TRANSFORM(core::ir::transform::SingleEntryPoint, module, options.entry_point_name);
 
     RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
                   options.substitute_overrides_config);

@@ -38,7 +38,7 @@ struct tint_array_lengths_struct {
 };
 
 void main_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u)};
+  tint_array_lengths_struct const v = tint_array_lengths_struct{.tint_array_length_0_2=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u), .tint_array_length_0_3=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u), .tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)};
   uint2 const resultCell = uint2(global_id.y, global_id.x);
   uint const dimInner = (*tint_module_vars.uniforms).aShape.y;
   uint const dimOutter = (*tint_module_vars.uniforms).outShape.y;

@@ -63,7 +63,6 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
     X(LimitsForCompilationRequest, limits)                                           \
     X(UnsafeUnserializedValue<LimitsForCompilationRequest>, adapterSupportedLimits)  \
     X(uint32_t, maxSubgroupSize)                                                     \
-    X(std::string, entryPointName)                                                   \
     X(bool, usesSubgroupMatrix)                                                      \
     X(bool, useStrictMath)                                                           \
     X(bool, disableSymbolRenaming)                                                   \
@@ -291,7 +290,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.stage = stage;
     req.shaderModuleHash = programmableStage.module->GetHash();
     req.inputProgram = UnsafeUnserializedValue(programmableStage.module->UseTintProgram());
-    req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.usesSubgroupMatrix = programmableStage.metadata->usesSubgroupMatrix;
     req.platform = UnsafeUnserializedValue(device->GetPlatform());
@@ -301,6 +299,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
         .map = BuildSubstituteOverridesTransformConfig(programmableStage),
     };
     req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
+    req.tintOptions.entry_point_name = programmableStage.entryPoint;
     req.tintOptions.remapped_entry_point_name = device->GetIsolatedEntryPointName();
     req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.tintOptions.fixed_sample_mask = sampleMask;
@@ -355,16 +354,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason);
-            }
-
-            {
-                SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(r.platform.UnsafeGetValue(),
-                                                   "ShaderModuleSingleEntryPoint");
-                auto singleEntryPointResult =
-                    tint::core::ir::transform::SingleEntryPoint(ir.Get(), r.entryPointName);
-                DAWN_INVALID_IF(singleEntryPointResult != tint::Success,
-                                "Pipeline single entry point (IR) failed:\n%s",
-                                singleEntryPointResult.Failure().reason);
             }
 
             // Generate MSL.

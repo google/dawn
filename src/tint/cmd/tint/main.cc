@@ -42,6 +42,7 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/transform/resource_binding_helper.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -986,6 +987,51 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
 #endif  // TINT_BUILD_WGSL_WRITER
 }
 
+#if TINT_BUILD_MSL_WRITER
+tint::msl::writer::ArrayLengthOptions GenerateArrayLengthFromConstants(tint::core::ir::Module& ir,
+                                                                       const std::string& ep_name) {
+    tint::msl::writer::ArrayLengthOptions options{
+        .ubo_binding = 30,
+    };
+
+    tint::core::ir::Function* ep_func = nullptr;
+    for (auto* f : ir.functions) {
+        if (!f->IsEntryPoint()) {
+            continue;
+        }
+        if (ir.NameOf(f).NameView() == ep_name) {
+            ep_func = f;
+            break;
+        }
+    }
+    TINT_ASSERT(ep_func);
+
+    tint::core::ir::ReferencedModuleVars<const tint::core::ir::Module> referenced_module_vars{ir};
+    auto& refs = referenced_module_vars.TransitiveReferences(ep_func);
+
+    // Add array_length_from_constants entries for all storage buffers with runtime sized
+    // arrays used by the given entry point.
+    std::unordered_set<tint::BindingPoint> storage_bindings;
+    for (auto* var : refs) {
+        auto bp = var->BindingPoint();
+        if (!bp.has_value()) {
+            continue;
+        }
+
+        auto* ty = var->Result()->Type()->As<tint::core::type::Pointer>();
+        if (ty && ty->AddressSpace() == tint::core::AddressSpace::kStorage &&
+            !ty->HasFixedFootprint()) {
+            if (storage_bindings.insert(*bp).second) {
+                options.bindpoint_to_size_index.emplace(
+                    *bp, static_cast<uint32_t>(storage_bindings.size() - 1));
+            }
+        }
+    }
+
+    return options;
+}
+#endif  // TINT_BUILD_MSL_WRITER
+
 /// Generate MSL code for a program.
 /// @param options the options that Tint was invoked with
 /// @param inspector the inspector
@@ -1001,16 +1047,17 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
         gen_options.remapped_entry_point_name = "tint_entry_point";
         gen_options.strip_all_names = true;
     }
+    gen_options.entry_point_name = options.ep_name;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
     gen_options.bindings = tint::GenerateBindings(
         ir, options.ep_name, !options.use_argument_buffers, !options.use_argument_buffers);
     // TODO(crbug.com/366291600): Replace ubo with immediate block for end2end tests
-    gen_options.array_length_from_constants.ubo_binding = 30;
     gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
     gen_options.use_argument_buffers = options.use_argument_buffers;
     gen_options.group_to_argument_buffer_info = options.group_to_argument_buffer_info;
+    gen_options.array_length_from_constants = GenerateArrayLengthFromConstants(ir, options.ep_name);
 
     // Run SubstituteOverrides to replace override instructions with constants.
     // This needs to run after SingleEntryPoint which removes unused overrides.
@@ -1021,31 +1068,8 @@ bool GenerateWgsl([[maybe_unused]] Options& options,
     }
     gen_options.substitute_overrides_config = substitute_override_cfg.Get();
 
-    // Add array_length_from_constants entries for all storage buffers with runtime sized arrays.
-    std::unordered_set<tint::BindingPoint> storage_bindings;
-    for (auto* inst : *ir.root_block) {
-        auto* var = inst->As<tint::core::ir::Var>();
-        if (!var) {
-            continue;
-        }
-
-        auto bp = var->BindingPoint();
-        if (!bp.has_value()) {
-            continue;
-        }
-
-        auto* ty = var->Result()->Type()->As<tint::core::type::Pointer>();
-        if (ty && ty->AddressSpace() == tint::core::AddressSpace::kStorage &&
-            !ty->HasFixedFootprint()) {
-            if (storage_bindings.insert(*bp).second) {
-                gen_options.array_length_from_constants.bindpoint_to_size_index.emplace(
-                    *bp, static_cast<uint32_t>(storage_bindings.size() - 1));
-            }
-        }
-    }
-
     // Check that the module and options are supported by the backend.
-    auto check = tint::msl::writer::CanGenerate(ir, gen_options, options.ep_name);
+    auto check = tint::msl::writer::CanGenerate(ir, gen_options);
     if (check != tint::Success) {
         std::cerr << check.Failure() << "\n";
         return false;
@@ -1387,6 +1411,8 @@ bool Generate([[maybe_unused]] const Options& options,
     }
 
     switch (options.format) {
+        case Format::kMsl:
+            return GenerateMsl(options, inspector, ir.Get());
         case Format::kSpirv:
         case Format::kSpvAsm:
             return GenerateSpirv(options, inspector, ir.Get());
@@ -1410,8 +1436,6 @@ bool Generate([[maybe_unused]] const Options& options,
         case Format::kHlsl:
         case Format::kHlslFxc:
             return GenerateHlsl(options, inspector, ir.Get());
-        case Format::kMsl:
-            return GenerateMsl(options, inspector, ir.Get());
         case Format::kWgsl:
             TINT_UNREACHABLE();
         case Format::kNone:

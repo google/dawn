@@ -88,6 +88,9 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// The entry point name to emit.
+    std::string entry_point_name = {};
+
     /// An optional remapped name to use when emitting the entry point.
     std::string remapped_entry_point_name = {};
 
@@ -163,6 +166,7 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 entry_point_name,
                  remapped_entry_point_name,
                  strip_all_names,
                  disable_robustness,

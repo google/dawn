@@ -34,7 +34,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(MslWriterTest, VarF32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
         b.Return(func);
@@ -42,14 +42,14 @@ TEST_F(MslWriterTest, VarF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   float a = 0.0f;
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarI32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, i32>());
         v->SetInitializer(b.Constant(1_i));
@@ -58,14 +58,14 @@ TEST_F(MslWriterTest, VarI32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   int a = 1;
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarU32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, u32>());
         v->SetInitializer(b.Constant(1_u));
@@ -74,14 +74,14 @@ TEST_F(MslWriterTest, VarU32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   uint a = 1u;
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarArrayF32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, array<f32, 5>>());
         b.Return(func);
@@ -89,7 +89,7 @@ TEST_F(MslWriterTest, VarArrayF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
-void foo() {
+kernel void entry() {
   tint_array<float, 5> a = {};
 }
 )");
@@ -99,7 +99,7 @@ TEST_F(MslWriterTest, VarStruct) {
     auto* s = ty.Struct(mod.symbols.New("MyStruct"), {{mod.symbols.Register("a"), ty.f32()},  //
                                                       {mod.symbols.Register("b"), ty.vec4<i32>()}});
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
@@ -112,14 +112,14 @@ struct MyStruct {
   int4 b;
 };
 
-void foo() {
+kernel void entry() {
   MyStruct a = {};
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarVecF32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec2<f32>>());
         b.Return(func);
@@ -127,7 +127,7 @@ TEST_F(MslWriterTest, VarVecF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   float2 a = 0.0f;
 }
 )");
@@ -135,7 +135,7 @@ void foo() {
 
 TEST_F(MslWriterTest, VarVecF16) {
     // Enable f16?
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec2<f16>>());
         b.Return(func);
@@ -143,14 +143,14 @@ TEST_F(MslWriterTest, VarVecF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   half2 a = 0.0h;
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarMatF32) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat3x2<f32>>());
         b.Return(func);
@@ -158,7 +158,7 @@ TEST_F(MslWriterTest, VarMatF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   float3x2 a = float3x2(0.0f);
 }
 )");
@@ -166,7 +166,7 @@ void foo() {
 
 TEST_F(MslWriterTest, VarMatF16) {
     // Enable f16?
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat3x2<f16>>());
         b.Return(func);
@@ -174,14 +174,14 @@ TEST_F(MslWriterTest, VarMatF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   half3x2 a = half3x2(0.0h);
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarVecF32SplatZero) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f32>>());
         v->SetInitializer(b.Splat<vec3<f32>>(0_f));
@@ -190,7 +190,7 @@ TEST_F(MslWriterTest, VarVecF32SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   float3 a = float3(0.0f);
 }
 )");
@@ -198,7 +198,7 @@ void foo() {
 
 TEST_F(MslWriterTest, VarVecF16SplatZero) {
     // Enable f16
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f16>>());
         v->SetInitializer(b.Splat<vec3<f16>>(0_h));
@@ -207,14 +207,14 @@ TEST_F(MslWriterTest, VarVecF16SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   half3 a = half3(0.0h);
 }
 )");
 }
 
 TEST_F(MslWriterTest, VarMatF32SplatZero) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f32>>());
         v->SetInitializer(
@@ -224,7 +224,7 @@ TEST_F(MslWriterTest, VarMatF32SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   float2x3 a = float2x3(float3(0.0f), float3(0.0f));
 }
 )");
@@ -232,7 +232,7 @@ void foo() {
 
 TEST_F(MslWriterTest, VarMatF16SplatZero) {
     // Enable f16?
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f16>>());
         v->SetInitializer(
@@ -242,7 +242,7 @@ TEST_F(MslWriterTest, VarMatF16SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   half2x3 a = half2x3(half3(0.0h), half3(0.0h));
 }
 )");
@@ -261,7 +261,7 @@ TEST_F(MslWriterTest, VarGlobalPrivate) {
         b.Return(foo);
     });
 
-    auto* frag = b.Function("frag", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    auto* frag = b.Function("entry", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(frag->Block(), [&] {
         b.Call(foo);
         b.Return(frag);
@@ -277,7 +277,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
   float const a = (*tint_module_vars.v);
 }
 
-fragment void frag() {
+fragment void entry() {
   thread float v = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};
   foo(tint_module_vars);
@@ -290,7 +290,7 @@ TEST_F(MslWriterTest, VarGlobalWorkgroup) {
     b.Append(mod.root_block,
              [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* ld = b.Load(v->Result());
         auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
@@ -304,8 +304,21 @@ struct tint_module_vars_struct {
   threadgroup float* v;
 };
 
-void foo(tint_module_vars_struct tint_module_vars) {
+struct tint_symbol_1 {
+  float tint_symbol;
+};
+
+void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+  if ((tint_local_index < 1u)) {
+    (*tint_module_vars.v) = 0.0f;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
   float a = (*tint_module_vars.v);
+}
+
+kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol)};
+  entry_inner(tint_local_index, tint_module_vars);
 }
 )");
 }

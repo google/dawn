@@ -33,7 +33,7 @@ namespace tint::msl::writer {
 namespace {
 
 TEST_F(MslWriterTest, If) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -42,7 +42,7 @@ TEST_F(MslWriterTest, If) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   if (true) {
   }
 }
@@ -50,7 +50,7 @@ void foo() {
 }
 
 TEST_F(MslWriterTest, IfWithElseIf) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -64,7 +64,7 @@ TEST_F(MslWriterTest, IfWithElseIf) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   if (true) {
   } else {
     if (false) {
@@ -75,7 +75,7 @@ void foo() {
 }
 
 TEST_F(MslWriterTest, IfWithElse) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -85,7 +85,7 @@ TEST_F(MslWriterTest, IfWithElse) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   if (true) {
   } else {
     return;
@@ -95,7 +95,7 @@ void foo() {
 }
 
 TEST_F(MslWriterTest, IfBothBranchesReturn) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.Return(func); });
@@ -105,7 +105,7 @@ TEST_F(MslWriterTest, IfBothBranchesReturn) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   if (true) {
     return;
   } else {
@@ -125,6 +125,12 @@ TEST_F(MslWriterTest, IfBothBranchesReturn_NonVoidFunction) {
         b.Unreachable();
     });
 
+    auto* eb = b.ComputeFunction("entry");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 uint foo() {
@@ -136,11 +142,15 @@ uint foo() {
   /* unreachable */
   return 0u;
 }
+
+kernel void entry() {
+  uint const x = foo();
+}
 )");
 }
 
 TEST_F(MslWriterTest, IfWithSinglePhi) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResult(b.InstructionResult(ty.i32()));
@@ -155,7 +165,7 @@ TEST_F(MslWriterTest, IfWithSinglePhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   int v = 0;
   if (true) {
     v = 10;
@@ -167,7 +177,7 @@ void foo() {
 }
 
 TEST_F(MslWriterTest, IfWithMultiPhi) {
-    auto* func = b.Function("foo", ty.void_());
+    auto* func = b.ComputeFunction("entry");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
@@ -182,7 +192,7 @@ TEST_F(MslWriterTest, IfWithMultiPhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
+kernel void entry() {
   int v = 0;
   bool v_1 = false;
   if (true) {
@@ -210,6 +220,12 @@ TEST_F(MslWriterTest, IfWithMultiPhiReturn1) {
         b.Return(func, i->Result(0));
     });
 
+    auto* eb = b.ComputeFunction("entry");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 int foo() {
@@ -223,6 +239,10 @@ int foo() {
     v_1 = false;
   }
   return v;
+}
+
+kernel void entry() {
+  int const x = foo();
 }
 )");
 }
@@ -241,6 +261,12 @@ TEST_F(MslWriterTest, IfWithMultiPhiReturn2) {
         b.Return(func, i->Result(1));
     });
 
+    auto* eb = b.ComputeFunction("entry");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 bool foo() {
@@ -254,6 +280,10 @@ bool foo() {
     v_1 = false;
   }
   return v_1;
+}
+
+kernel void entry() {
+  bool const x = foo();
 }
 )");
 }
