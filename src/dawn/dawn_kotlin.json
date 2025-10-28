@@ -60,14 +60,22 @@
         "void *": "J"
     },
     "kdocs_blocklist": [
+        "ReturnedWithOwnership",
+        "SurfaceGetCurrentTexture",
+        "CallbackReentrancy",
+        "Chained in @ref WGPUSurfaceDescriptor",
         "OutStructChainError",
+        "ImplementationAllocatedStructChain",
+        "NonFiniteFloatValueError",
         "SentinelValues",
+        "LocalizableHumanReadableMessageString",
         "See @ref CallbackStatuses"
     ],
     "kdocs_replacements": {
         "See @ref SentinelValues.": "",
         "(See also @ref SentinelValues.)": "",
         "[defaults](@ref SentinelValues)": "defaults",
+        "color using @ref DoubleAsSupertype": "color using @ref Color",
         "WGPUCallbackMode_": "CallbackMode."
     },
     "customize_api": {

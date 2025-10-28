@@ -31,7 +31,7 @@ from collections import namedtuple, defaultdict
 from copy import deepcopy
 
 from generator_lib import Generator, run_generator, FileRender, GeneratorOutput
-from dawn_json_utility import build_doc_map, load_json_data
+from webgpu_json_utility import build_doc_map, load_json_data
 
 ############################################################
 # OBJECT MODEL

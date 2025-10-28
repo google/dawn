@@ -25,10 +25,21 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
-{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration with context %}
+{% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc with context %}
 
 {% set callbackName = 'on' + function_pointer.name.chunks[:-1] | map('title') | join %}
 
+//* Generating KDocs
+{% set all_callback_info = kdocs.callbacks %}
+{% set funtion_pointer_info = all_callback_info.get(function_pointer.name.get()) %}
+{% set main_doc = funtion_pointer_info.doc if funtion_pointer_info else "" %}
+{% set arg_docs_map =  funtion_pointer_info.args if funtion_pointer_info else {} %}
+
+{% set function_pointer_args = function_pointer.arguments[:-1] | list %}
+{% if check_if_doc_present(main_doc, "", arg_docs_map, function_pointer_args) == 'True' %}
+    {{ generate_kdoc(main_doc, return_str, arg_docs_map, function_pointer_args , line_wrap_prefix = "\n * ") }}
+
+{%- endif %}
 public fun interface {{ function_pointer.name.CamelCase() }} {
     @Suppress("INAPPLICABLE_JVM_NAME")  //* Required for @JvmName on global function.
     @JvmName("{{ callbackName }}")  //* Required to access Inline Value Class parameters via JNI.

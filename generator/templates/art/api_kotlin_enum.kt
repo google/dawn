@@ -31,6 +31,7 @@ import androidx.annotation.RestrictTo
 import kotlin.annotation.AnnotationRetention
 import kotlin.annotation.Retention
 import kotlin.annotation.Target
+{% from 'art/api_kotlin_types.kt' import generate_simple_kdoc with context %}
 
 @Retention(AnnotationRetention.SOURCE)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -46,23 +47,21 @@ import kotlin.annotation.Target
 )
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
 
+//* Generating KDocs
 {% set file_docs = kdocs.bitflags if enum.category == 'bitmask' else kdocs.enums %}
 {% set docstring = file_docs.get(enum.name.get(), {}).doc %}
 {% if docstring %}
-    /**
-     * {{ docstring | trim | wordwrap(80, break_long_words=False, break_on_hyphens=False, wrapstring = "\n * ") }}
-     */
+    {{ generate_simple_kdoc(docstring) }}
 {% endif %}
 public annotation class {{ enum.name.CamelCase() }} {
     public companion object {
+        //* Generating KDocs
         {% set enum_doc = file_docs.get(enum.name.get(), {}) %}
         {% for value in enum.values %}
             {% set value_docstring = enum_doc.get('entries', {}).get(value.name.snake_case()) %}
             {% if value_docstring %}
 
-                /**
-                 * {{ value_docstring | trim | wordwrap(80, break_long_words=False, break_on_hyphens=False, wrapstring = "\n         * ")}}
-                 */
+                {{ generate_simple_kdoc(value_docstring, indent_prefix = "        ", line_wrap_prefix = "\n         * ") }}
             {% endif %}
             public const val {{ as_ktName(value.name.CamelCase()) }}: Int = {{ '{:#010x}'.format(value.value) }}
         {% endfor %}

@@ -100,3 +100,74 @@
         {% endif -%}
     {% endif -%}
 {% endmacro %}
+
+{% macro has_any_arg_doc(all_arg_docs, code_args) %}
+    //* Ensure inputs are not None
+    {% set all_arg_docs = all_arg_docs if all_arg_docs else {} %}
+    {% set code_args = code_args if code_args else {} %}
+    {% set found = namespace(value=false) %}
+    {% for arg in code_args %}
+        //* Check for docs under both camelCase and snake_case versions of the arg name
+        {% set camel_name = as_varName(arg.name) %}
+        {% set snake_name = arg.name.snake_case() %}
+        {% set arg_name = camel_name if camel_name in all_arg_docs else (snake_name if snake_name in all_arg_docs else None) %}
+        {% set arg_doc = all_arg_docs.get(arg_name) | trim if arg_name else "" %}
+        {% if arg_doc %}
+            //* If docs are found for any arg, set found to true and exit early
+            {% set found.value = true %}
+            {% break %}
+        {% endif %}
+    {% endfor %}
+    {{- found.value -}}
+{% endmacro %}
+
+{% macro check_if_doc_present(doc_str, return_str, all_arg_docs, code_args) %}
+    {% set all_arg_docs = all_arg_docs if all_arg_docs else {} %}
+    {% set code_args = code_args if code_args else {} %}
+    {% if (doc_str | trim) or (return_str | trim) %}
+        {{- true -}}
+    {% else %}
+        //* Call the generalized helper for arg docs
+        {{- has_any_arg_doc(all_arg_docs, code_args) -}}
+    {% endif %}
+{% endmacro %}
+
+{%- macro generate_kdoc(main_doc, return_doc, arg_docs_map, function_args, line_wrap_prefix, indent_prefix = "") -%}
+    {%- set main_doc = main_doc -%}
+    {%- set return_doc = return_doc -%}
+    {%- set line_wrap_prefix = line_wrap_prefix -%}
+    {%- set arg_docs_map = arg_docs_map if arg_docs_map else {} -%}
+    {%- set indent_prefix = indent_prefix %}
+    //* Check if any of the class's arguments have doc available in the map.
+    {%- set any_arg_has_doc = has_any_arg_doc(arg_docs_map, function_args) -%}
+    {{indent_prefix}}/**
+    {%- if main_doc %}
+
+        {{indent_prefix}} * {{ main_doc | trim | wordwrap(90, break_long_words=False, break_on_hyphens=False, wrapstring = line_wrap_prefix) }}
+    {%- endif %}
+    //* Iterate over each argument in the function's signature to generate its @param tag.
+    {%- for arg in function_args %}
+        //* To find the doc, we need to check for the argument's name in the docs map. The name in the map might be camelCase or snake_case, so we try both.
+        {%- set arg_name_camel_case = as_varName(arg.name) -%}
+        {%- set arg_name_snake_case = arg.name.snake_case() -%}
+        {%- set arg_doc_lookup_key = arg_name_camel_case if arg_name_camel_case in arg_docs_map else (arg_name_snake_case if arg_name_snake_case in arg_docs_map else None) -%}
+        {%- set current_arg_doc = arg_docs_map.get(arg_doc_lookup_key) | trim if arg_doc_lookup_key else "" -%}
+        //* Only add the @param tag if doc was found for this specific argument, and if at least one argument has doc overall (to keep the block clean).
+        {%- if any_arg_has_doc == 'True' and current_arg_doc %}
+
+            {{indent_prefix}} * @param {{ as_varName(arg.name) + " " +  current_arg_doc | wordwrap(90, break_long_words=False, break_on_hyphens=False, wrapstring = line_wrap_prefix) }}
+        {%- endif %}
+    {%- endfor %}
+    {%- if return_doc %}
+
+        {{indent_prefix}} * @return {{ return_doc | trim | wordwrap(90, break_long_words=False, break_on_hyphens=False, wrapstring = line_wrap_prefix) }}
+    {%- endif %}
+
+    {{indent_prefix}} */
+{% endmacro -%}
+
+{% macro generate_simple_kdoc(doc_str, indent_prefix = "", line_wrap_prefix = "\n * ") %}
+    /**
+    {{indent_prefix}} * {{ doc_str | wordwrap(80, break_long_words=False, break_on_hyphens=False, wrapstring = line_wrap_prefix) }}
+    {{indent_prefix}} */
+{%- endmacro -%}
