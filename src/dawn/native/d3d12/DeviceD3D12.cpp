@@ -195,6 +195,9 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mDxcShaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
     }
 
+    // The device guard isn't needed for thread safety exactly, since device creation should happen
+    // on a single thread, but it's required to satisfy assertions.
+    auto deviceGuard = GetGuard();
     DAWN_TRY(CreateZeroBuffer());
 
     SetLabelImpl();

@@ -174,8 +174,7 @@ void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial, bool freeA
 }
 
 void DynamicUploader::UpdateMemoryPendingSubmit() {
-    // TODO(crbug.com/454667734): Add assert that device mutex is locked here. This currently fails
-    // during D3D12 Device::Initialize() but lock isn't needed there.
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
 
     // Take into account that submits make the pending memory freed in finite time so we no longer
     // need to track that memory.
