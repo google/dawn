@@ -1268,6 +1268,19 @@ class UniformityGraph {
             TINT_ICE_ON_NO_MATCH);
     }
 
+    /// @returns true if @p builtin is workgroup-uniform
+    bool IsWorkgroupUniform(core::BuiltinValue builtin) {
+        switch (builtin) {
+            case core::BuiltinValue::kNumSubgroups:
+            case core::BuiltinValue::kNumWorkgroups:
+            case core::BuiltinValue::kSubgroupSize:
+            case core::BuiltinValue::kWorkgroupId:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /// Process an identifier expression.
     /// @param cf the input control flow node
     /// @param ident the identifier expression to process
@@ -1278,24 +1291,14 @@ class UniformityGraph {
                                                    bool load_rule = false) {
         // Helper to check if the entry point attribute of `obj` indicates non-uniformity.
         auto has_nonuniform_entry_point_attribute = [&](auto* obj, auto* entry_point) {
-            // Only the num_workgroups and workgroup_id builtins, and subgroup_size builtin used in
-            // compute stage are uniform.
+            // Only the num_subgroups, num_workgroups and workgroup_id builtins, and subgroup_size
+            // builtin used in compute stage are uniform.
             if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(obj->attributes)) {
-                auto builtin = builtin_attr->builtin;
-                if (builtin == core::BuiltinValue::kNumWorkgroups ||
-                    builtin == core::BuiltinValue::kWorkgroupId) {
-                    return false;
-                }
-                if (builtin == core::BuiltinValue::kSubgroupSize) {
-                    if (entry_point->PipelineStage() == ast::PipelineStage::kCompute) {
-                        // Subgroup size is uniform in compute.
-                        return false;
-                    } else {
-                        // Currently the only other allowed usage for subgroup_size is in fragment.
-                        TINT_ASSERT(entry_point->PipelineStage() == ast::PipelineStage::kFragment);
-                        // Subgroup size is considered to be varying for fragment.
-                        return true;
-                    }
+                // Some builtins are workgroup-uniform in compute stages.
+                // All builtins are non-uniform in non-compute stages.
+                // Notably, we consider `subgroup_size` to be non-uniform in fragment shaders.
+                if (entry_point->PipelineStage() == ast::PipelineStage::kCompute) {
+                    return !IsWorkgroupUniform(builtin_attr->builtin);
                 }
             }
             return true;

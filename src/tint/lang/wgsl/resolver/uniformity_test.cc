@@ -649,10 +649,9 @@ struct BuiltinEntry {
 class ComputeBuiltin : public UniformityAnalysisTestBase,
                        public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(ComputeBuiltin, AsParam) {
-    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
-)"
-                                                                       : "") +
-                      R"(
+    std::string src = R"(
+enable subgroups;
+
 @compute @workgroup_size(64)
 fn main(@builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"() {
@@ -667,15 +666,15 @@ fn main(@builtin()" + GetParam().name +
     if (!should_pass) {
         EXPECT_EQ(
             error_,
-            R"(test:5:5 error: 'workgroupBarrier' must only be called from uniform control flow
+            R"(test:7:5 error: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:4:3 note: control flow depends on possibly non-uniform value
+test:6:3 note: control flow depends on possibly non-uniform value
   if (all(vec3(b) == vec3(0u))) {
   ^^
 
-test:4:16 note: builtin 'b' of 'main' may be non-uniform
+test:6:16 note: builtin 'b' of 'main' may be non-uniform
   if (all(vec3(b) == vec3(0u))) {
                ^
 )");
@@ -683,10 +682,9 @@ test:4:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(ComputeBuiltin, InStruct) {
-    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
-)"
-                                                                       : "") +
-                      R"(
+    std::string src = R"(
+enable subgroups;
+
 struct S {
   @builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"(
@@ -705,15 +703,15 @@ fn main(s : S) {
     if (!should_pass) {
         EXPECT_EQ(
             error_,
-            R"(test:9:5 error: 'workgroupBarrier' must only be called from uniform control flow
+            R"(test:11:5 error: 'workgroupBarrier' must only be called from uniform control flow
     workgroupBarrier();
     ^^^^^^^^^^^^^^^^
 
-test:8:3 note: control flow depends on possibly non-uniform value
+test:10:3 note: control flow depends on possibly non-uniform value
   if (all(vec3(s.b) == vec3(0u))) {
   ^^
 
-test:8:16 note: parameter 's' of 'main' may be non-uniform
+test:10:16 note: parameter 's' of 'main' may be non-uniform
   if (all(vec3(s.b) == vec3(0u))) {
                ^
 )");
@@ -726,6 +724,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                                            BuiltinEntry{"local_invocation_index", "u32", false},
                                            BuiltinEntry{"global_invocation_id", "vec3<u32>", false},
                                            BuiltinEntry{"workgroup_id", "vec3<u32>", true},
+                                           BuiltinEntry{"num_subgroups", "u32", true},
                                            BuiltinEntry{"num_workgroups", "vec3<u32>", true},
                                            BuiltinEntry{"subgroup_size", "u32", true}),
                          [](const ::testing::TestParamInfo<ComputeBuiltin::ParamType>& p) {
