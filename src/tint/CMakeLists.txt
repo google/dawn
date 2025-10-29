@@ -524,7 +524,7 @@ function(tint_target_add_external_dependencies TARGET KIND)
     elseif(${DEPENDENCY} STREQUAL "dxc-include")
       target_include_directories(${TARGET} PRIVATE "${DAWN_THIRD_PARTY_DIR}/dxc/include")
     elseif(${DEPENDENCY} STREQUAL "dxcompiler-for-fuzzer")
-      if(TINT_BUILD_FUZZERS) # TODO: and target arch is not x86
+      if(TINT_BUILD_FUZZERS AND DAWN_USE_BUILT_DXC) # TODO: and target arch is not x86
         target_link_libraries(${TARGET} PRIVATE dxcompiler)
       endif()
     elseif(${DEPENDENCY} STREQUAL "jsoncpp")
