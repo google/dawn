@@ -557,9 +557,6 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     CommandRecordingContext* recordingContext =
         ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext();
 
-    // TODO(crbug.com/dawn/852): initialize mapped buffer in CPU side.
-    EnsureDataInitialized(recordingContext);
-
     if (mode & wgpu::MapMode::Read) {
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
     } else {
@@ -571,6 +568,29 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
 }
 
 void Buffer::FinalizeMapImpl(BufferState newState) {
+    Device* device = ToBackend(GetDevice());
+
+    if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
+        // Clear full allocated size, including padding bytes, except for zero sized buffers. For
+        // zero sized buffers GetMappedPointerImpl() points to const data which we can't clear.
+        std::memset(GetMappedPointerImpl(), 0, GetAllocatedSize());
+        GetDevice()->IncrementLazyClearCountForTesting();
+        SetInitialized(true);
+
+        // If the buffer is non-coherent then make sure either the whole buffer will be flushed
+        // later or flush it now.
+        if (!mHostCoherent &&
+            (MapMode() == wgpu::MapMode::Read || MapOffset() != 0 || MapSize() != GetSize())) {
+            VkDeviceSize nonCoherentAtomSize =
+                device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
+
+            VkMappedMemoryRange range =
+                GetMappedMemoryRange(mMemoryAllocation, 0, GetAllocatedSize(), nonCoherentAtomSize);
+
+            device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &range);
+        }
+    }
+
     if (!mHostCoherent) {
         // Map reads always require invalidation. Map writes only require invalidation if the buffer
         // contents could have been modified by the GPU previously, eg. it's not being mapped on
@@ -578,7 +598,6 @@ void Buffer::FinalizeMapImpl(BufferState newState) {
         if (MapMode() == wgpu::MapMode::Read ||
             (newState != BufferState::MappedAtCreation &&
              !IsSubset(GetInternalUsage(), kReadOnlyBufferUsages | wgpu::BufferUsage::MapWrite))) {
-            Device* device = ToBackend(GetDevice());
             VkDeviceSize nonCoherentAtomSize =
                 device->GetDeviceInfo().properties.limits.nonCoherentAtomSize;
 

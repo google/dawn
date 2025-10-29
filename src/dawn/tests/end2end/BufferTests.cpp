@@ -766,6 +766,10 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
 
     std::vector<bool> done = {false, false};
 
+    // With Vulkan Queue::WriteBuffers() doesn't encode any commands which need to be waited on so
+    // MapAsync() can happen immediately. On other platforms that isn't the case.
+    bool mapCompletesFirst = IsVulkan();
+
     // 1. submission without using buffer.
     SubmitCommandBuffer({});
     wgpu::Future f1 = queue.OnSubmittedWorkDone(
@@ -773,8 +777,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
             ASSERT_EQ(status, wgpu::QueueWorkDoneStatus::Success);
             done[0] = true;
 
-            // Step 2 callback should be called first, this is the second.
-            const std::vector<bool> kExpected = {true, false};
+            const std::vector<bool> kExpected = {true, mapCompletesFirst};
             EXPECT_EQ(done, kExpected);
         });
 
@@ -788,8 +791,7 @@ TEST_P(BufferMappingCallbackTests, EmptySubmissionWriteAndThenMap) {
                             ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                             done[1] = true;
 
-                            // The buffer is not used by step 1, so this callback is called first.
-                            const std::vector<bool> kExpected = {true, true};
+                            const std::vector<bool> kExpected = {!mapCompletesFirst, true};
                             EXPECT_EQ(done, kExpected);
                         });
 
