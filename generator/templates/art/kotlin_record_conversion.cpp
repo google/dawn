@@ -103,7 +103,7 @@
                                                                          "(Ljava/lang/Runnable;)V");
                             jmethodID methodId = env->GetMethodID(
                                 classes->{{ member.type.name.camelCase() }}Runnable,
-                                "<init>", "(L{{ jni_name(member.type) }};
+                                "<init>", "(L{{ jni_name(member.type, member.category) }};
                               {%- for callbackArg in kotlin_record_members(member.type.arguments) -%}
                                   {{- jni_signature(callbackArg) -}}
                               {%- endfor %})V");

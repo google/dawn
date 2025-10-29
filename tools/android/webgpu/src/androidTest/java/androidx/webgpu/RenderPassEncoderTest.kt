@@ -13,14 +13,14 @@ import org.junit.Test
 @Suppress("UNUSED_VARIABLE")
 class RenderPassEncoderTest {
   private var webGpu: WebGpu? = null
-  private lateinit var device: Device
-  private lateinit var defaultColorPipeline: RenderPipeline
-  private lateinit var renderTarget: Texture
-  private lateinit var renderTargetDepth: Texture
-  private lateinit var renderTargetView: TextureView
-  private lateinit var renderTargetDepthView: TextureView
-  private lateinit var shaderModule: ShaderModule
-  private lateinit var layout: PipelineLayout
+  private lateinit var device: GPUDevice
+  private lateinit var defaultColorPipeline: GPURenderPipeline
+  private lateinit var renderTarget: GPUTexture
+  private lateinit var renderTargetDepth: GPUTexture
+  private lateinit var renderTargetView: GPUTextureView
+  private lateinit var renderTargetDepthView: GPUTextureView
+  private lateinit var shaderModule: GPUShaderModule
+  private lateinit var layout: GPUPipelineLayout
   private val kDepthFormat = TextureFormat.Depth24Plus
 
   @Before
@@ -100,7 +100,7 @@ class RenderPassEncoderTest {
   /**
    * Helper function to begin a standard (color-only) render pass.
    */
-  private fun beginDefaultRenderPass(encoder: CommandEncoder): RenderPassEncoder {
+  private fun beginDefaultRenderPass(encoder: GPUCommandEncoder): GPURenderPassEncoder {
     return encoder.beginRenderPass(
       RenderPassDescriptor(
         colorAttachments = arrayOf(
@@ -118,7 +118,7 @@ class RenderPassEncoderTest {
   /**
    * Helper to create a buffer for index data with 4-byte padding.
    */
-  private fun createIndexBuffer(indices: ShortArray): Buffer {
+  private fun createIndexBuffer(indices: ShortArray): GPUBuffer {
     val dataSize = (indices.size * Short.SIZE_BYTES).toLong()
     val paddedSize = (dataSize + 3) and -4L  // Aligns to 4 bytes.
 
@@ -138,7 +138,7 @@ class RenderPassEncoderTest {
   /**
    * Helper to create a buffer for indirect draw calls.
    */
-  private fun createIndirectBuffer(data: IntArray): Buffer {
+  private fun createIndirectBuffer(data: IntArray): GPUBuffer {
     val byteBuffer = ByteBuffer.allocateDirect(data.size * Int.SIZE_BYTES)
       .order(ByteOrder.nativeOrder())
     byteBuffer.asIntBuffer().put(data)

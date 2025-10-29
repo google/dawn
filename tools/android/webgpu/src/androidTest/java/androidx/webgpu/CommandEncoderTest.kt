@@ -17,7 +17,7 @@ import org.junit.Test
 @SmallTest
 class CommandEncoderTest {
 
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
 
   @Before

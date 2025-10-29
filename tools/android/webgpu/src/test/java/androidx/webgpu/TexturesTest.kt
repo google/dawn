@@ -15,8 +15,8 @@ class TexturesTest {
     @Test
     @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun testBadWidthIsCaught() = runTest {
-        val mockDevice = mock<Device>()
-        val partialMockTexture = spy(Texture(0))
+        val mockDevice = mock<GPUDevice>()
+        val partialMockTexture = spy(GPUTexture(0))
 
         doReturn(65).whenever(partialMockTexture).width
         assertFailsWith<DawnException>{

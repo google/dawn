@@ -16,7 +16,7 @@ import org.junit.Test
 @SmallTest
 class QuerySetTest {
   private lateinit var webGpu: WebGpu
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
 
   @Before
   fun setup() = runBlocking {
@@ -45,7 +45,7 @@ class QuerySetTest {
 
 
   /** Helper to create a destination buffer for resolveQuerySet */
-  private fun createResolveBuffer(size: Long): Buffer {
+  private fun createResolveBuffer(size: Long): GPUBuffer {
     return device.createBuffer(
       BufferDescriptor(
         size = size,
@@ -166,7 +166,7 @@ class QuerySetTest {
     val querySet = device.createQuerySet(
       QuerySetDescriptor(type = QueryType.Occlusion, count = QUERY_COUNT)
     )
-    // Buffer only has space for 1 result (8 bytes), but we try to resolve 2.
+    // GPUBuffer only has space for 1 result (8 bytes), but we try to resolve 2.
     val smallBuffer = createResolveBuffer((1 * Long.SIZE_BYTES).toLong())
 
     val encoder = device.createCommandEncoder()

@@ -16,7 +16,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 
 class BufferTest {
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
 
   @Before

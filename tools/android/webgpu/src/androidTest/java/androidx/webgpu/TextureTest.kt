@@ -14,7 +14,7 @@ import org.junit.Test
 @SmallTest
 class TextureTest {
   private lateinit var webGpu: WebGpu
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
 
   @Before
   fun setup() = runBlocking {

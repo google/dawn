@@ -13,8 +13,8 @@ import org.junit.Test
 @Suppress("UNUSED_VARIABLE")
 class ComputePassEncoderTest {
   private var webGpu: WebGpu? = null
-  private lateinit var device: Device
-  private lateinit var pipeline: ComputePipeline
+  private lateinit var device: GPUDevice
+  private lateinit var pipeline: GPUComputePipeline
 
   @Before
   fun setup() = runBlocking {

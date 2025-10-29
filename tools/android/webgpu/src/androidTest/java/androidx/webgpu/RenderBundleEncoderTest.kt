@@ -18,10 +18,10 @@ import org.junit.Test
 @SmallTest
 class RenderBundleEncoderTest {
   private lateinit var webGpu: WebGpu
-  private lateinit var device: Device
-  private lateinit var defaultColorPipeline: RenderPipeline
-  private lateinit var shaderModule: ShaderModule
-  private lateinit var layout: PipelineLayout
+  private lateinit var device: GPUDevice
+  private lateinit var defaultColorPipeline: GPURenderPipeline
+  private lateinit var shaderModule: GPUShaderModule
+  private lateinit var layout: GPUPipelineLayout
   private val kColorFormat = TextureFormat.RGBA8Unorm
 
   @Before
@@ -80,8 +80,8 @@ class RenderBundleEncoderTest {
         """
   }
 
-  /** Helper to create a RenderBundleEncoder with default color format. */
-  private fun createDefaultBundleEncoder(): RenderBundleEncoder {
+  /** Helper to create a GPURenderBundleEncoder with default color format. */
+  private fun createDefaultBundleEncoder(): GPURenderBundleEncoder {
     return device.createRenderBundleEncoder(
       RenderBundleEncoderDescriptor(
         colorFormats = intArrayOf(kColorFormat)
@@ -90,7 +90,7 @@ class RenderBundleEncoderTest {
   }
 
   /** Helper to create an index buffer with padding. */
-  private fun createIndexBuffer(indices: ShortArray): Buffer {
+  private fun createIndexBuffer(indices: ShortArray): GPUBuffer {
     val dataSize = (indices.size * Short.SIZE_BYTES).toLong()
     val paddedSize = (dataSize + 3) and -4L
     val buffer = device.createBuffer(
@@ -106,7 +106,7 @@ class RenderBundleEncoderTest {
   }
 
   /** Helper to create an indirect buffer. */
-  private fun createIndirectBuffer(data: IntArray): Buffer {
+  private fun createIndirectBuffer(data: IntArray): GPUBuffer {
     val byteBuffer = ByteBuffer.allocateDirect(data.size * Int.SIZE_BYTES)
       .order(ByteOrder.nativeOrder())
     byteBuffer.asIntBuffer().put(data)

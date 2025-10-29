@@ -35,7 +35,7 @@ JNIClasses* JNIClasses::getInstance(JNIEnv* env) {
 JNIClasses::JNIClasses(JNIEnv* env) {
     //* Time of lookups measured on Pixel 6 at 1.7ms.
     {% for entity in has_kotlin_classes %}
-        {{ entity.name.camelCase() }} = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}")));
+        {{ entity.name.camelCase() }} = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity, entity.category) }}")));
         {%if entity.category == 'callback function' %}
             {{ entity.name.camelCase() }}Runnable = reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("{{ jni_name(entity) }}Runnable")));
         {%endif %}

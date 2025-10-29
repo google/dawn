@@ -18,7 +18,7 @@ import org.junit.Before
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class DeviceTest {
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
 
   @Before

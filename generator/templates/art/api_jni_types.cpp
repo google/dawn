@@ -67,7 +67,7 @@
 
 {% macro jni_signature_single_value(type) %}
     {%- if type.category in ['callback function', 'function pointer', 'kotlin type', 'object', 'structure'] -%}
-        L{{ jni_name(type) }};
+        L{{ jni_name(type, type.category) }};
     {%- elif type.category in ['bitmask', 'enum'] -%}
         {{ jni_signatures['int32_t'] }}
     {%- elif type.category == 'native' -%}

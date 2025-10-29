@@ -14,7 +14,7 @@ import org.junit.Before
 @SmallTest
 class ShaderModuleTest {
   private lateinit var webGpu: WebGpu
-  private lateinit var device: Device
+  private lateinit var device: GPUDevice
 
   private val invalidShader = """
             @vertex fn main() -> @builtin(position) vec4<f32> {

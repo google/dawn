@@ -70,7 +70,7 @@ import kotlin.coroutines.suspendCoroutine
     {%- endif %}
     //* The wrapped method has executor and callback function stripped out (the wrapper supplies
     //* those so the client doesn't have to).
-    public suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
+    public suspend fun {{ kotlin_prefixed_name(obj.name.CamelCase(), 'object') }}.{{ method.name.camelCase() }}(
         {%- for arg in kotlin_record_members(method.arguments) if not (
             arg.type.category == 'callback function' or
             (arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor')
