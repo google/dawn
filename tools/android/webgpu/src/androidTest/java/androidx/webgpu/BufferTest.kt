@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 
+@Suppress("UNUSED_VARIABLE")
 class BufferTest {
   private lateinit var device: GPUDevice
   private lateinit var webGpu: WebGpu
@@ -226,7 +227,7 @@ class BufferTest {
     device.getQueue().writeBuffer(buffer, 0, byteBuffer)
 
     runBlocking {
-      buffer.mapAsync(MapMode.Read, offset = 0, size = bufferSize)
+      val unusedBufferMapReturn = buffer.mapAsync(MapMode.Read, offset = 0, size = bufferSize)
     }
 
     val readByteBuffer =

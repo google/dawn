@@ -11,6 +11,7 @@ import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("UNUSED_VARIABLE")
 @SmallTest
 class TextureTest {
   private lateinit var webGpu: WebGpu
@@ -69,7 +70,7 @@ class TextureTest {
     )
 
     assertThrows(ValidationException::class.java) {
-      device.createTexture(invalidDescriptor)
+      val unusedGPUTexture = device.createTexture(invalidDescriptor)
     }
   }
 
@@ -111,7 +112,7 @@ class TextureTest {
       assertThrows(ValidationException::class.java) {
         queue.submit(arrayOf(commandBuffer))
         runBlocking {
-          queue.onSubmittedWorkDone()
+          val unusedQueueWorkDoneReturn = queue.onSubmittedWorkDone()
         }
       }
     } finally {
