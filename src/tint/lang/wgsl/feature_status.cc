@@ -37,7 +37,6 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
             // Experimental features
             ///////////////////////////////////////////////////////////////////
         case LanguageFeature::kSubgroupId:
-        case LanguageFeature::kUniformBufferStandardLayout:
         case LanguageFeature::kSizedBindingArray:
         case LanguageFeature::kTexelBuffers:
             return FeatureStatus::kUnsafeExperimental;
@@ -55,6 +54,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kPointerCompositeAccess:
         case LanguageFeature::kUnrestrictedPointerParameters:
         case LanguageFeature::kReadonlyAndReadwriteStorageTextures:
+        case LanguageFeature::kUniformBufferStandardLayout:
             return FeatureStatus::kShippedWithKillswitch;
 
             ////////////////////////////////////////////////////////////////////
