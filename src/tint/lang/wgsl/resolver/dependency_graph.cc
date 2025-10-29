@@ -696,10 +696,9 @@ struct DependencyAnalysis {
 
             sorted_.Add(global->node);
 
-            if (DAWN_UNLIKELY(!stack.IsEmpty())) {
-                // Each stack.push() must have a corresponding stack.pop_back().
-                TINT_ICE() << "stack not empty after returning from TraverseDependencies()";
-            }
+            // Each stack.push() must have a corresponding stack.pop_back().
+            TINT_ASSERT(stack.IsEmpty())
+                << "stack not empty after returning from TraverseDependencies()";
         }
     }
 

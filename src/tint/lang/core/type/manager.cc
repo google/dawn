@@ -338,10 +338,8 @@ const core::type::Reference* Manager::ref(core::AddressSpace address_space,
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {
-    if (auto* existing = Find<type::Struct>(name, /* is_wgsl_internal */ false);
-        DAWN_UNLIKELY(existing)) {
-        TINT_ICE() << "attempting to construct two structs named " << name.NameView();
-    }
+    auto* existing = Find<type::Struct>(name, /* is_wgsl_internal */ false);
+    TINT_ASSERT(!existing) << "attempting to construct two structs named " << name.NameView();
 
     uint32_t max_align = 0u;
     for (const auto& m : members) {
@@ -357,9 +355,8 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
 core::type::Struct* Manager::Struct(Symbol name,
                                     bool is_wgsl_internal,
                                     VectorRef<StructMemberDesc> md) {
-    if (auto* existing = Find<type::Struct>(name, is_wgsl_internal); DAWN_UNLIKELY(existing)) {
-        TINT_ICE() << "attempting to construct two structs named " << name.NameView();
-    }
+    auto* existing = Find<type::Struct>(name, is_wgsl_internal);
+    TINT_ASSERT(!existing) << "attempting to construct two structs named " << name.NameView();
 
     tint::Vector<const StructMember*, 4> members;
     uint32_t current_size = 0u;

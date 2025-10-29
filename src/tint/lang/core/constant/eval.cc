@@ -420,10 +420,8 @@ const Value* ConvertInternal(const Value* root_value,
                     // declare the target structure type, so each member type must be the same
                     // default materialization type.
                     for (size_t i = 1; i < members.Length(); i++) {
-                        if (members[i]->Type() != target_el_ty) {
-                            TINT_ICE()
-                                << "inconsistent target struct member types for SplatConvert";
-                        }
+                        TINT_ASSERT(members[i]->Type() == target_el_ty)
+                            << "inconsistent target struct member types for SplatConvert";
                     }
                 } else {
                     target_el_ty = convert->target_ty->Elements(convert->target_ty).type;
@@ -441,10 +439,9 @@ const Value* ConvertInternal(const Value* root_value,
                 pending.Push(ActionBuildComposite{el_count, convert->target_ty});
 
                 if (auto* str = convert->target_ty->As<core::type::Struct>()) {
-                    if (DAWN_UNLIKELY(str->Members().Length() != el_count)) {
-                        TINT_ICE()
-                            << "const-eval conversion of structure has mismatched element counts";
-                    }
+                    TINT_ASSERT(str->Members().Length() == el_count)
+                        << "const-eval conversion of structure has mismatched element counts";
+
                     // Struct composites can have different types for each member.
                     auto members = str->Members();
                     for (size_t i = 0; i < el_count; i++) {
@@ -2068,9 +2065,8 @@ Eval::Result Eval::ShiftLeft(const core::type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (DAWN_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
-        TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
-    }
+    TINT_ASSERT(args[1]->Type()->DeepestElement()->Is<core::type::U32>())
+        << "Element type of rhs of ShiftLeft must be a u32";
 
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
 }
@@ -2133,9 +2129,8 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (DAWN_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
-        TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
-    }
+    TINT_ASSERT(args[1]->Type()->DeepestElement()->Is<core::type::U32>())
+        << "Element type of rhs of ShiftLeft must be a u32";
 
     return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
 }

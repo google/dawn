@@ -68,11 +68,11 @@ void TextGenerator::TextBuffer::Append(const std::string& line) {
 }
 
 void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, uint32_t indent) {
-    if (DAWN_UNLIKELY(before > lines.size())) {
-        TINT_ICE() << "TextBuffer::Insert() called with before > lines.size()\n"
-                   << "  before:" << before << "\n"
-                   << "  lines.size(): " << lines.size();
-    }
+    TINT_ASSERT(before <= lines.size())
+        << "TextBuffer::Insert() called with before > lines.size()\n"
+        << "  before:" << before << "\n"
+        << "  lines.size(): " << lines.size();
+
     using DT = decltype(lines)::difference_type;
     lines.insert(lines.begin() + static_cast<DT>(before), LineInfo{indent, line});
 }
@@ -85,11 +85,11 @@ void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
 }
 
 void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint32_t indent) {
-    if (DAWN_UNLIKELY(before > lines.size())) {
-        TINT_ICE() << "TextBuffer::Insert() called with before > lines.size()\n"
-                   << "  before:" << before << "\n"
-                   << "  lines.size(): " << lines.size();
-    }
+    TINT_ASSERT(before <= lines.size())
+        << "TextBuffer::Insert() called with before > lines.size()\n"
+        << "  before:" << before << "\n"
+        << "  lines.size(): " << lines.size();
+
     size_t idx = 0;
     for (auto& line : tb.lines) {
         // TODO(crbug.com/tint/2222): inefficient, consider optimizing

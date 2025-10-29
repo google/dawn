@@ -1348,16 +1348,14 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
             return false;
         }
 
-        if (decl->body) {
-            auto behaviors = sem_.Get(decl->body)->Behaviors();
-            if (behaviors.Contains(sem::Behavior::kNext)) {
-                auto end_source = decl->body->source.End();
-                end_source.range.begin.column--;
-                AddError(end_source) << "missing return at end of function";
-                return false;
-            }
-        } else {
-            TINT_ICE() << "function " << decl->name->symbol.NameView() << " has no body";
+        TINT_ASSERT(decl->body) << "function " << decl->name->symbol.NameView() << " has no body";
+
+        auto behaviors = sem_.Get(decl->body)->Behaviors();
+        if (behaviors.Contains(sem::Behavior::kNext)) {
+            auto end_source = decl->body->source.End();
+            end_source.range.begin.column--;
+            AddError(end_source) << "missing return at end of function";
+            return false;
         }
     }
 
@@ -1453,18 +1451,14 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     }
                     pipeline_io_attribute = attr;
 
-                    if (DAWN_UNLIKELY(!location.has_value())) {
-                        TINT_ICE() << "@location has no value";
-                    }
+                    TINT_ASSERT(location.has_value()) << "@location has no value";
 
                     return LocationAttribute(loc_attr, ty, stage, source);
                 },
                 [&](const ast::BlendSrcAttribute* blend_src_attr) {
                     blend_src_attribute = blend_src_attr;
 
-                    if (DAWN_UNLIKELY(!blend_src.has_value())) {
-                        TINT_ICE() << "@blend_src has no value";
-                    }
+                    TINT_ASSERT(blend_src.has_value()) << "@blend_src has no value";
 
                     bool is_input = param_or_ret == ParamOrRetType::kParameter;
                     return BlendSrcAttribute(blend_src_attr, stage, is_input);
@@ -1482,9 +1476,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
                     bool is_input = param_or_ret == ParamOrRetType::kParameter;
 
-                    if (DAWN_UNLIKELY(!color.has_value())) {
-                        TINT_ICE() << "@color has no value";
-                    }
+                    TINT_ASSERT(color.has_value()) << "@color has no value";
 
                     return ColorAttribute(col_attr, ty, stage, source, is_input);
                 },
@@ -2384,9 +2376,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
         return false;
     }
 
-    if (DAWN_UNLIKELY(!c->Is<core::type::ConstantArrayCount>())) {
-        TINT_ICE() << "Invalid ArrayCount found";
-    }
+    TINT_ASSERT(c->Is<core::type::ConstantArrayCount>()) << "Invalid ArrayCount found";
 
     const auto count = c->As<core::type::ConstantArrayCount>()->value;
     if (!values.IsEmpty() && (values.Length() != count)) {

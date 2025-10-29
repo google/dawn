@@ -78,9 +78,8 @@ void IR_ValidatorTest::AddReturn(Function* func,
                                  const std::string& name,
                                  const core::type::Type* type,
                                  const IOAttributes& attr) {
-    if (func->ReturnType()->Is<core::type::Struct>()) {
-        TINT_ICE() << "AddReturn does not support adding to structured returns";
-    }
+    TINT_ASSERT(!func->ReturnType()->Is<core::type::Struct>())
+        << "AddReturn does not support adding to structured returns";
 
     if (func->ReturnType() == ty.void_()) {
         func->SetReturnAttributes(attr);

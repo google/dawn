@@ -793,9 +793,7 @@ std::optional<uint32_t> Inspector::GetClipDistancesBuiltinSize(const core::type:
             if (ContainsBuiltin(core::BuiltinValue::kClipDistances, member->Type(),
                                 member->Declaration()->attributes)) {
                 auto* array_type = member->Type()->As<core::type::Array>();
-                if (DAWN_UNLIKELY(array_type == nullptr)) {
-                    TINT_ICE() << "clip_distances is not an array";
-                }
+                TINT_ASSERT(array_type != nullptr) << "clip_distances is not an array";
                 return array_type->ConstantCount();
             }
         }

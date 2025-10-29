@@ -163,9 +163,8 @@ bool Resolver::Resolve() {
 
     bool result = ResolveInternal();
 
-    if (DAWN_UNLIKELY(!result && !diagnostics_.ContainsErrors())) {
-        TINT_ICE() << "resolving failed, but no error was raised";
-    }
+    TINT_ASSERT(result || diagnostics_.ContainsErrors())
+        << "resolving failed, but no error was raised";
 
     if (!validator_.Enables(b.AST().Enables())) {
         return false;
@@ -4856,9 +4855,8 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
 }
 
 bool Resolver::Mark(const ast::Node* node) {
-    if (DAWN_UNLIKELY(node == nullptr)) {
-        TINT_ICE() << "Resolver::Mark() called with nullptr";
-    }
+    TINT_ASSERT(node != nullptr) << "Resolver::Mark() called with nullptr";
+
     auto marked_bit_ref = marked_[node->node_id.value];
     if (DAWN_LIKELY(!marked_bit_ref)) {
         marked_bit_ref = true;

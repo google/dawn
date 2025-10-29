@@ -287,22 +287,19 @@ class Impl {
                     ir_func->SetStage(core::ir::Function::PipelineStage::kCompute);
 
                     auto attr = ast::GetAttribute<ast::WorkgroupAttribute>(ast_func->attributes);
-                    if (attr) {
-                        TINT_SCOPED_ASSIGNMENT(current_block_, mod.root_block);
+                    TINT_ASSERT(attr) << "Missing workgroup attribute for compute entry point.";
 
-                        // The x size is always required (y, z are optional).
-                        auto value_x = EmitValueExpression(attr->x);
-                        bool is_unsigned = value_x->Type()->IsUnsignedIntegerScalar();
+                    TINT_SCOPED_ASSIGNMENT(current_block_, mod.root_block);
 
-                        auto* one_const =
-                            is_unsigned ? builder_.Constant(1_u) : builder_.Constant(1_i);
+                    // The x size is always required (y, z are optional).
+                    auto value_x = EmitValueExpression(attr->x);
+                    bool is_unsigned = value_x->Type()->IsUnsignedIntegerScalar();
 
-                        ir_func->SetWorkgroupSize(
-                            value_x, attr->y ? EmitValueExpression(attr->y) : one_const,
-                            attr->z ? EmitValueExpression(attr->z) : one_const);
-                    } else {
-                        TINT_ICE() << "Missing workgroup attribute for compute entry point.";
-                    }
+                    auto* one_const = is_unsigned ? builder_.Constant(1_u) : builder_.Constant(1_i);
+
+                    ir_func->SetWorkgroupSize(value_x,
+                                              attr->y ? EmitValueExpression(attr->y) : one_const,
+                                              attr->z ? EmitValueExpression(attr->z) : one_const);
                     break;
                 }
                 default: {

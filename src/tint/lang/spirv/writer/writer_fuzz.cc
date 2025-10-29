@@ -68,10 +68,8 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
     options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
     auto output = Generate(module, options);
-    if (output != Success) {
-        TINT_ICE() << "Generate() failed after CanGenerate() succeeded: "
-                   << output.Failure().reason;
-    }
+    TINT_ASSERT(output == Success)
+        << "Generate() failed after CanGenerate() succeeded: " << output.Failure().reason;
 
     spv_target_env target_env = SPV_ENV_VULKAN_1_1;
     switch (options.spirv_version) {
@@ -89,13 +87,11 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
     }
 
     auto& spirv = output->spirv;
-    if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), target_env);
-        res != Success) {
-        TINT_ICE() << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
-                   << res.Failure() << "\n\n"
-                   << "IR:\n"
-                   << core::ir::Disassembler(module).Plain();
-    }
+    auto res = validate::Validate(Slice(spirv.data(), spirv.size()), target_env);
+    TINT_ASSERT(res == Success) << "output of SPIR-V writer failed to validate with SPIR-V Tools\n"
+                                << res.Failure() << "\n\n"
+                                << "IR:\n"
+                                << core::ir::Disassembler(module).Plain();
 
     return Success;
 }
