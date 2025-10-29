@@ -66,12 +66,18 @@ MaybeError BindGroup::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
     ID3D12Device* d3d12Device = device->GetD3D12Device();
 
-    // It's not necessary to create descriptors in the descriptor heap for dynamic resources.
-    // This is because they are created as root descriptors which are never heap allocated.
-    // Since dynamic buffers are packed in the front, we can skip over these bindings by
-    // starting from the dynamic buffer count.
-    for (BindingIndex bindingIndex : Range(bgl->GetDynamicBufferCount(), bgl->GetBindingCount())) {
+    // It's not necessary to create descriptors in the descriptor heap for dynamic uniform buffers
+    // because they are created as root descriptors which are never heap allocated. However, we do
+    // create descriptors for dynamic storage buffers.
+    for (BindingIndex bindingIndex : Range(bgl->GetBindingCount())) {
         const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
+
+        // Skip dynamic uniform buffers. Since dynamic buffers are packed at the front, we know the
+        // binding is dynamic if the index is less than the number of dynamic buffers.
+        const bool isDynamic = bindingIndex < bgl->GetDynamicBufferCount();
+        if (isDynamic && !bgl->IsStorageBufferBinding(bindingIndex)) {
+            continue;
+        }
 
         // Increment size does not need to be stored and is only used to get a handle
         // local to the allocation with OffsetFrom().
@@ -87,6 +93,19 @@ MaybeError BindGroup::InitializeImpl() {
                     // command buffer that references destroyed resources.
                     return;
                 }
+
+                auto storageBufferNumElements = [](const BufferBinding& binding,
+                                                   bool isDynamic) -> uint64_t {
+                    if (isDynamic) {
+                        // For dynamic storage buffers, we bind the buffer from binding.offset to
+                        // the end of the buffer. The dynamic offset is stored as a root constant
+                        // and applied in the shaders. The binding.size is also stored as a root
+                        // constant, and OOB access behaviour is managed via robustness.
+                        return (ToBackend(binding.buffer)->GetSize() - binding.offset) / 4;
+                    } else {
+                        return binding.size / 4;
+                    }
+                };
 
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
@@ -110,7 +129,8 @@ MaybeError BindGroup::InitializeImpl() {
                         // byte aligned. Since binding.size and binding.offset are in bytes,
                         // we need to divide by 4 to obtain the element size.
                         D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-                        desc.Buffer.NumElements = static_cast<uint32_t>(binding.size / 4);
+                        desc.Buffer.NumElements =
+                            static_cast<UINT>(storageBufferNumElements(binding, isDynamic));
                         desc.Format = DXGI_FORMAT_R32_TYPELESS;
                         desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
                         desc.Buffer.FirstElement = binding.offset / 4;
@@ -135,7 +155,8 @@ MaybeError BindGroup::InitializeImpl() {
                         desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
                         desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
                         desc.Buffer.FirstElement = binding.offset / 4;
-                        desc.Buffer.NumElements = static_cast<uint32_t>(binding.size / 4);
+                        desc.Buffer.NumElements =
+                            static_cast<UINT>(storageBufferNumElements(binding, isDynamic));
                         desc.Buffer.StructureByteStride = 0;
                         desc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_RAW;
                         d3d12Device->CreateShaderResourceView(

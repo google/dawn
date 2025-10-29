@@ -143,13 +143,11 @@ BindGroupLayout::BindGroupLayout(Device* device,
             continue;
         }
 
-        // For dynamic resources, Dawn uses root descriptor in D3D12 backend. So there is no
-        // need to allocate the descriptor from descriptor heap or create descriptor ranges.
-        if (bindingIndex < GetDynamicBufferCount()) {
+        // For dynamic uniform buffers, Dawn uses root descriptors in the D3D12 backend. So there is
+        // no need to allocate the descriptor from the descriptor heap or create descriptor ranges.
+        if (bindingIndex < GetDynamicBufferCount() && !IsStorageBufferBinding(bindingIndex)) {
             continue;
         }
-        DAWN_ASSERT(!std::holds_alternative<BufferBindingInfo>(bindingInfo.bindingLayout) ||
-                    !std::get<BufferBindingInfo>(bindingInfo.bindingLayout).hasDynamicOffset);
 
         mDescriptorHeapOffsets[bindingIndex] =
             descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER

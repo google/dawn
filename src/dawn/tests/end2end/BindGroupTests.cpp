@@ -717,6 +717,103 @@ TEST_P(BindGroupTests, SetDynamicBindGroupBeforePipeline) {
     EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, max, max);
 }
 
+// Test atomic operations against a storage buffer with dynamic offsets.
+// This is to ensure dynamic offsets are applied in the generated HLSL for D3D12.
+TEST_P(BindGroupTests, DynamicOffsetsWithAtomicOperations) {
+    constexpr uint32_t kBufferSize = 256;
+    constexpr uint32_t kBufferSizeBytes = kBufferSize * sizeof(uint32_t);
+
+    constexpr uint32_t kBaseOffset = 64;
+    constexpr uint32_t kBaseOffsetBytes = kBaseOffset * sizeof(uint32_t);
+
+    constexpr uint32_t kDynamicOffset = 64;
+    constexpr uint32_t kDynamicOffsetBytes = kDynamicOffset * sizeof(uint32_t);
+
+    constexpr uint32_t kStorageArraySize = 10;
+    constexpr uint32_t kStorageArraySizeBytes = kStorageArraySize * sizeof(uint32_t);
+
+    std::vector<uint32_t> data(kBufferSize);
+    for (uint32_t i = 0; i < kStorageArraySize; ++i) {
+        // Seed all values. These will be overwritten by the compute shader using atomic operations.
+        data[kBaseOffset + kDynamicOffset + i] = 6;
+    }
+
+    wgpu::Buffer storageBuffer = utils::CreateBufferFromData(
+        device, data.data(), kBufferSizeBytes,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
+
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage, true}});
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bindGroupLayout,
+                             {{0, storageBuffer, /*offset bytes*/ kBaseOffsetBytes,
+                               /*size bytes*/ kStorageArraySizeBytes}});
+
+    const char* cs = R"(
+        @group(0) @binding(0) var<storage, read_write> buffer : array<atomic<u32>>;
+
+        @compute @workgroup_size(1) fn main() {
+            let v = atomicLoad(&buffer[0]);
+            atomicStore(&buffer[0], v); // 6
+
+            atomicAdd(&buffer[1], 1); // 7
+            atomicSub(&buffer[2], 1); // 5
+            atomicMax(&buffer[3], 8); // 8
+            atomicMin(&buffer[4], 4); // 4
+
+            // 6 = 0b0110, 3 = 0b0011
+            atomicAnd(&buffer[5], 2); // 0b0010 = 2
+
+            // 6 = 0b0110, 8 = 0b1000
+            atomicOr(&buffer[6], 8); // 0b1110 = 14
+
+            // 6 = 0b0110, 15 = 0b1111
+            atomicXor(&buffer[7], 15); // 0b1001 = 9
+
+            atomicExchange(&buffer[8], 13); // 13
+            atomicCompareExchangeWeak(&buffer[9], 6, 42); // 42
+        }
+    )";
+
+    std::vector<uint32_t> expectedData(kBufferSize);
+    expectedData[kBaseOffset + kDynamicOffset + 0] = 6;
+    expectedData[kBaseOffset + kDynamicOffset + 1] = 7;
+    expectedData[kBaseOffset + kDynamicOffset + 2] = 5;
+    expectedData[kBaseOffset + kDynamicOffset + 3] = 8;
+    expectedData[kBaseOffset + kDynamicOffset + 4] = 4;
+    expectedData[kBaseOffset + kDynamicOffset + 5] = 2;
+    expectedData[kBaseOffset + kDynamicOffset + 6] = 14;
+    expectedData[kBaseOffset + kDynamicOffset + 7] = 9;
+    expectedData[kBaseOffset + kDynamicOffset + 8] = 13;
+    expectedData[kBaseOffset + kDynamicOffset + 9] = 42;
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, cs);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = csModule;
+
+    wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
+    pipelineLayoutDescriptor.bindGroupLayoutCount = 1;
+    pipelineLayoutDescriptor.bindGroupLayouts = &bindGroupLayout;
+    csDesc.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
+
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    std::array<uint32_t, 1> offsets = {kDynamicOffsetBytes};
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.SetBindGroup(0, bindGroup, offsets.size(), offsets.data());
+    computePassEncoder.DispatchWorkgroups(1);
+    computePassEncoder.End();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expectedData.data(), storageBuffer, 0, expectedData.size());
+}
+
 // Test that the same renderpass can use 3 more pipelines
 TEST_P(BindGroupTests, ThreePipelinesInSameRenderpass) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

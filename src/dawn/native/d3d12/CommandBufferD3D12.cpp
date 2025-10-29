@@ -632,21 +632,30 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
         DAWN_ASSERT(dynamicOffsets.size() == group->GetLayout()->GetDynamicBufferCount());
 
         // Usually, the application won't set the same offsets many times,
-        // so always try to apply dynamic offsets even if the offsets stay the same
-        if (dynamicOffsets.size() != BindingIndex(0)) {
-            // Update dynamic offsets.
-            // Dynamic buffer bindings are packed at the beginning of the layout.
-            for (BindingIndex bindingIndex{0}; bindingIndex < dynamicOffsets.size();
-                 ++bindingIndex) {
-                const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
-                if (bindingInfo.visibility == wgpu::ShaderStage::None) {
-                    // Skip dynamic buffers that are not visible. D3D12 does not have None
-                    // visibility.
-                    continue;
-                }
+        // so always try to apply dynamic offsets even if the offsets stay the same.
+        BindGroupLayout* bgl = ToBackend(group->GetLayout());
+        std::vector<uint32_t> storageBufferDynamicOffsets;
+        for (BindingIndex bindingIndex{0}; bindingIndex < dynamicOffsets.size(); ++bindingIndex) {
+            // Note that the order of indices in dynamicOffsets corresponds to the order of
+            // dynamic resource bindings in the BGL by binding number. Because the BGL packs
+            // (uniform and storage) dynamic buffers at the front, and are sorted by binding
+            // number, we can retrieve them in the right order via the dynamicOffsets index.
+            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
+            if (bindingInfo.visibility == wgpu::ShaderStage::None) {
+                // Skip dynamic buffers that are not visible. D3D12 does not have None
+                // visibility.
+                continue;
+            }
 
+            if (bgl->IsStorageBufferBinding(bindingIndex)) {
+                // Dynamic storage buffers are already bound to the root descriptor table, and
+                // only need the dynamic offsets updated in root constants.
+                // Collect the offsets so we can set the root constants after the loop.
+                storageBufferDynamicOffsets.push_back(dynamicOffsets[bindingIndex]);
+            } else {
+                // Set dynamic uniform buffer root descriptor
                 uint32_t parameterIndex =
-                    pipelineLayout->GetDynamicRootParameterIndex(index, bindingIndex);
+                    pipelineLayout->GetDynamicUniformRootParameterIndex(index, bindingIndex);
                 BufferBinding binding = group->GetBindingAsBufferBinding(bindingIndex);
 
                 // Calculate buffer locations that root descriptors links to. The location
@@ -659,6 +668,16 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                 SetRootBufferView(commandList,
                                   std::get<BufferBindingInfo>(bindingInfo.bindingLayout).type,
                                   parameterIndex, bufferLocation);
+            }
+
+            if (!storageBufferDynamicOffsets.empty()) {
+                uint32_t firstRegisterOffset =
+                    pipelineLayout->GetDynamicStorageBufferInfo()[index].firstRegisterOffset;
+                uint32_t offsetsParameterIndex =
+                    pipelineLayout->GetDynamicStorageBufferOffsetsParameterIndex();
+                SetRootConstant(commandList, offsetsParameterIndex,
+                                storageBufferDynamicOffsets.size(),
+                                storageBufferDynamicOffsets.data(), firstRegisterOffset);
             }
         }
 
@@ -688,14 +707,16 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             }
         }
 
+        // Update dynamic storage buffer root constants: lengths and offsets
         const auto& dynamicStorageBufferLengths = group->GetDynamicStorageBufferLengths();
-        if (dynamicStorageBufferLengths.size() != 0) {
-            uint32_t parameterIndex =
-                pipelineLayout->GetDynamicStorageBufferLengthsParameterIndex();
+        if (!dynamicStorageBufferLengths.empty()) {
+            // Both lengths and offsets use the same register offsets
             uint32_t firstRegisterOffset =
-                pipelineLayout->GetDynamicStorageBufferLengthInfo()[index].firstRegisterOffset;
+                pipelineLayout->GetDynamicStorageBufferInfo()[index].firstRegisterOffset;
 
-            SetRootConstant(commandList, parameterIndex, dynamicStorageBufferLengths.size(),
+            uint32_t lengthsParameterIndex =
+                pipelineLayout->GetDynamicStorageBufferLengthsParameterIndex();
+            SetRootConstant(commandList, lengthsParameterIndex, dynamicStorageBufferLengths.size(),
                             dynamicStorageBufferLengths.data(), firstRegisterOffset);
         }
     }

@@ -399,15 +399,15 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         static constexpr uint32_t kShaderBuiltinSlots = 3;
 
         // Slots not used at all. (This is just for the assert. We could use these slots later.)
-        static constexpr uint32_t kUnusedSlots = 1;
+        static constexpr uint32_t kUnusedSlots = 9;
 
         DAWN_ASSERT(
             // bind groups: 1 for CBV+UAV+SRV table + 1 for sampler table
             2 * limits->v1.maxBindGroups +
                 // dynamic uniform buffers: 2 for root descriptor
                 2 * limits->v1.maxDynamicUniformBuffersPerPipelineLayout +
-                // dynamic storage buffers: 2 for root descriptor plus 1 for the size constant
-                3 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
+                // dynamic storage buffers: 1 for the size constant, 1 for the offset constant
+                2 * limits->v1.maxDynamicStorageBuffersPerPipelineLayout +
                 // immediates: 1 slot per 4 bytes
                 limits->v1.maxImmediateSize / kImmediateConstantElementByteSize +
                 // builtins and unused slots

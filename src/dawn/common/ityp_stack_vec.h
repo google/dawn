@@ -70,6 +70,8 @@ class stack_vec : private absl::InlinedVector<Value, StaticCapacity> {
     const Value* data() const { return Base::data(); }
 
     Index size() const { return Index(static_cast<I>(Base::size())); }
+
+    bool empty() const { return Base::empty(); }
 };
 
 }  // namespace dawn::ityp

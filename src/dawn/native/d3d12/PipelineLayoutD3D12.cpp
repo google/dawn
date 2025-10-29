@@ -29,6 +29,7 @@
 
 #include <limits>
 #include <sstream>
+#include <utility>
 
 #include "dawn/common/Assert.h"
 #include "dawn/native/d3d/D3DError.h"
@@ -53,10 +54,17 @@ static constexpr uint32_t kRenderOrComputeInternalBaseRegister = 0;
 static constexpr uint32_t kDynamicStorageBufferLengthsRegisterSpace = kMaxBindGroups + 2;
 static constexpr uint32_t kDynamicStorageBufferLengthsBaseRegister = 0;
 
-static constexpr uint32_t kImmediatesRegisterSpace = kMaxBindGroups + 3;
+static constexpr uint32_t kDynamicStorageBufferOffsetsRegisterSpace = kMaxBindGroups + 3;
+static constexpr uint32_t kDynamicStorageBufferOffsetsBaseRegister = 0;
+
+static constexpr uint32_t kImmediatesRegisterSpace = kMaxBindGroups + 4;
 static constexpr uint32_t kImmediatesBaseRegister = 0;
 
 static constexpr uint32_t kInvalidDynamicStorageBufferLengthsParameterIndex =
+    std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t kInvalidDynamicStorageBufferOffsetsParameterIndex =
+    std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t kInvalidDynamicUniformBufferParameterIndex =
     std::numeric_limits<uint32_t>::max();
 static constexpr uint32_t kInvalidImmediatesParameterIndex = std::numeric_limits<uint32_t>::max();
 
@@ -208,6 +216,7 @@ MaybeError PipelineLayout::Initialize() {
             return true;
         };
 
+        // Note that CbvUavSrvDescriptorRanges includes dynamic storage buffers
         if (SetRootDescriptorTable(bindGroupLayout->GetCbvUavSrvDescriptorRanges())) {
             mCbvUavSrvRootParameterInfo[group] = static_cast<uint32_t>(rootParameters.size() - 1u);
         }
@@ -221,10 +230,18 @@ MaybeError PipelineLayout::Initialize() {
             newSampler.RegisterSpace = static_cast<uint32_t>(group);
         }
 
-        // Init root descriptors in root signatures for dynamic buffer bindings.
-        // These are packed at the beginning of the layout binding info.
-        mDynamicRootParameterIndices[group].resize(bindGroupLayout->GetDynamicBufferCount());
+        // Init root descriptors in root signatures for dynamic uniform buffer bindings.
+        // Dynamic buffer bindings are packed at the beginning of the layout binding info.
+        // Resize the vector to include entries for both dynamic uniform and storage buffers, even
+        // though we only write to the uniform entries, so that we can index them correctly.
+        mDynamicUniformRootParameterIndices[group].resize(
+            bindGroupLayout->GetDynamicBufferCount(), kInvalidDynamicUniformBufferParameterIndex);
         for (BindingIndex dynamicBindingIndex : bindGroupLayout->GetDynamicBufferIndices()) {
+            if (GetBindGroupLayout(group)->IsStorageBufferBinding(dynamicBindingIndex)) {
+                // Dynamic storage buffers are stored in the root descriptor table
+                continue;
+            }
+
             const BindingInfo& bindingInfo = bindGroupLayout->GetBindingInfo(dynamicBindingIndex);
 
             if (bindingInfo.visibility == wgpu::ShaderStage::None) {
@@ -247,7 +264,7 @@ MaybeError PipelineLayout::Initialize() {
 
             // Set root descriptors in root signatures.
             rootParameter.Descriptor = rootDescriptor;
-            mDynamicRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
+            mDynamicUniformRootParameterIndices[group][dynamicBindingIndex] = rootParameters.size();
 
             // Set parameter types according to bind group layout descriptor.
             rootParameter.ParameterType =
@@ -283,52 +300,61 @@ MaybeError PipelineLayout::Initialize() {
     // would need to be updated often
     rootParameters.emplace_back(renderOrComputeInternalConstants);
 
-    // Loops over all of the dynamic storage buffer bindings in the layout and build
-    // a mapping from the binding to the next offset into the root constant array where
-    // that dynamic storage buffer's binding size will be stored. The next register offset
-    // to use is tracked with |dynamicStorageBufferLengthsShaderRegisterOffset|.
-    // This data will be used by shader translation to emit a load from the root constant
-    // array to use as the binding's size in runtime array calculations.
-    // Each bind group's length data is stored contiguously in the root constant array,
-    // so the loop also computes the first register offset for each group where the
+    // For dynamic storage buffers, we store the length and offset of each binding as root
+    // constants. Lengths and offsets are bound to separate groups, but share the same binding value
+    // (aka register offset). Here we populate mDynamicStorageBufferInfo with this mapping of
+    // dynamic storage buffer bind group to register offset, which will be used to update the root
+    // constant values, as well as to tell Tint to emit loads from these root constant values for
+    // lengths and offsets. Each bind group's length/offset data is stored contiguously in the root
+    // constant, so we also compute and store the first register offset for each group where the
     // data should start.
-    uint32_t dynamicStorageBufferLengthsShaderRegisterOffset = 0;
+    uint32_t dynamicStorageBufferInfoShaderRegisterOffset = 0;
     for (BindGroupIndex group : GetBindGroupLayoutsMask()) {
         const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
+        const size_t dynamicStorageBufferCount =
+            static_cast<size_t>(bgl->GetDynamicStorageBufferCount());
 
-        mDynamicStorageBufferLengthInfo[group].firstRegisterOffset =
-            dynamicStorageBufferLengthsShaderRegisterOffset;
-        mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.reserve(
-            bgl->GetDynamicStorageBufferCount());
+        BindGroupDynamicStorageBufferInfo info;
+        info.firstRegisterOffset = dynamicStorageBufferInfoShaderRegisterOffset;
+        info.bindingAndRegisterOffsets.reserve(dynamicStorageBufferCount);
 
         for (BindingIndex bindingIndex : bgl->GetDynamicBufferIndices()) {
             if (bgl->IsStorageBufferBinding(bindingIndex)) {
-                mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.push_back(
+                info.bindingAndRegisterOffsets.push_back(
                     {bgl->GetBindingInfo(bindingIndex).binding,
-                     dynamicStorageBufferLengthsShaderRegisterOffset++});
+                     dynamicStorageBufferInfoShaderRegisterOffset++});
             }
         }
-
-        DAWN_ASSERT(mDynamicStorageBufferLengthInfo[group].bindingAndRegisterOffsets.size() ==
-                    bgl->GetDynamicStorageBufferCount());
+        DAWN_ASSERT(info.bindingAndRegisterOffsets.size() == dynamicStorageBufferCount);
+        mDynamicStorageBufferInfo[group] = std::move(info);
     }
 
-    if (dynamicStorageBufferLengthsShaderRegisterOffset > 0) {
-        D3D12_ROOT_PARAMETER1 dynamicStorageBufferLengthConstants{};
-        dynamicStorageBufferLengthConstants.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        dynamicStorageBufferLengthConstants.ParameterType =
-            D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-        dynamicStorageBufferLengthConstants.Constants.Num32BitValues =
-            dynamicStorageBufferLengthsShaderRegisterOffset;
-        dynamicStorageBufferLengthConstants.Constants.RegisterSpace =
-            kDynamicStorageBufferLengthsRegisterSpace;
-        dynamicStorageBufferLengthConstants.Constants.ShaderRegister =
-            kDynamicStorageBufferLengthsBaseRegister;
-        mDynamicStorageBufferLengthsParameterIndex = static_cast<uint32_t>(rootParameters.size());
-        rootParameters.emplace_back(dynamicStorageBufferLengthConstants);
+    if (dynamicStorageBufferInfoShaderRegisterOffset > 0) {
+        auto createRootConstants = [&](uint32_t num32BitValues, uint32_t registerSpace,
+                                       uint32_t shaderRegister) -> uint32_t {
+            D3D12_ROOT_PARAMETER1 rootParam{};
+            rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+            rootParam.Constants.Num32BitValues = num32BitValues;
+            rootParam.Constants.RegisterSpace = registerSpace;
+            rootParam.Constants.ShaderRegister = shaderRegister;
+            rootParameters.emplace_back(rootParam);
+            return static_cast<uint32_t>(rootParameters.size() - 1);
+        };
+
+        // Create the same number of root constants for both the lengths and the offsets of each
+        // dynamic storage buffer
+        mDynamicStorageBufferLengthsParameterIndex = createRootConstants(
+            dynamicStorageBufferInfoShaderRegisterOffset, kDynamicStorageBufferLengthsRegisterSpace,
+            kDynamicStorageBufferLengthsBaseRegister);
+        mDynamicStorageBufferOffsetsParameterIndex = createRootConstants(
+            dynamicStorageBufferInfoShaderRegisterOffset, kDynamicStorageBufferOffsetsRegisterSpace,
+            kDynamicStorageBufferOffsetsBaseRegister);
     } else {
         mDynamicStorageBufferLengthsParameterIndex =
             kInvalidDynamicStorageBufferLengthsParameterIndex;
+        mDynamicStorageBufferOffsetsParameterIndex =
+            kInvalidDynamicStorageBufferOffsetsParameterIndex;
     }
 
     if (GetImmediateDataRangeByteSize() > 0) {
@@ -433,20 +459,24 @@ ID3DBlob* PipelineLayout::GetRootSignatureBlob() const {
     return mRootSignatureBlob.Get();
 }
 
-const PipelineLayout::DynamicStorageBufferLengthInfo&
-PipelineLayout::GetDynamicStorageBufferLengthInfo() const {
-    return mDynamicStorageBufferLengthInfo;
+const PipelineLayout::DynamicStorageBufferInfo& PipelineLayout::GetDynamicStorageBufferInfo()
+    const {
+    return mDynamicStorageBufferInfo;
 }
 
-uint32_t PipelineLayout::GetDynamicRootParameterIndex(BindGroupIndex group,
-                                                      BindingIndex bindingIndex) const {
+uint32_t PipelineLayout::GetDynamicUniformRootParameterIndex(BindGroupIndex group,
+                                                             BindingIndex bindingIndex) const {
     DAWN_ASSERT(group < kMaxBindGroupsTyped);
     DAWN_ASSERT(std::get<BufferBindingInfo>(
                     GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).bindingLayout)
                     .hasDynamicOffset);
     DAWN_ASSERT(GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).visibility !=
                 wgpu::ShaderStage::None);
-    return mDynamicRootParameterIndices[group][bindingIndex];
+    DAWN_ASSERT(std::get<BufferBindingInfo>(
+                    GetBindGroupLayout(group)->GetBindingInfo(bindingIndex).bindingLayout)
+                    .type == wgpu::BufferBindingType::Uniform);
+
+    return mDynamicUniformRootParameterIndices[group][bindingIndex];
 }
 
 uint32_t PipelineLayout::GetFirstIndexOffsetRegisterSpace() const {
@@ -485,6 +515,20 @@ uint32_t PipelineLayout::GetDynamicStorageBufferLengthsParameterIndex() const {
     DAWN_ASSERT(mDynamicStorageBufferLengthsParameterIndex !=
                 kInvalidDynamicStorageBufferLengthsParameterIndex);
     return mDynamicStorageBufferLengthsParameterIndex;
+}
+
+uint32_t PipelineLayout::GetDynamicStorageBufferOffsetsRegisterSpace() const {
+    return kDynamicStorageBufferOffsetsRegisterSpace;
+}
+
+uint32_t PipelineLayout::GetDynamicStorageBufferOffsetsShaderRegister() const {
+    return kDynamicStorageBufferOffsetsBaseRegister;
+}
+
+uint32_t PipelineLayout::GetDynamicStorageBufferOffsetsParameterIndex() const {
+    DAWN_ASSERT(mDynamicStorageBufferOffsetsParameterIndex !=
+                kInvalidDynamicStorageBufferOffsetsParameterIndex);
+    return mDynamicStorageBufferOffsetsParameterIndex;
 }
 
 uint32_t PipelineLayout::GetImmediatesRegisterSpace() const {

@@ -83,6 +83,8 @@ class vector : public std::vector<Value> {
 
     void resize(Index size) { Base::resize(static_cast<I>(size)); }
 
+    void resize(Index size, const Value& value) { Base::resize(static_cast<I>(size), value); }
+
     void reserve(Index size) { Base::reserve(static_cast<I>(size)); }
 };
 
