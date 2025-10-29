@@ -1240,6 +1240,7 @@ dxc_module("dxclib") {
     "$dawn_dxc_dir/lib/DxcSupport/WinAdapter.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/WinFunctions.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/WinIncludes.cpp",
+    "$dawn_dxc_dir/lib/DxcSupport/dxcapi.extval.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/dxcapi.use.cpp",
     "$dawn_dxc_dir/lib/DxcSupport/dxcmem.cpp",
     "$dawn_dxc_dir/lib/DxilContainer/DxcContainerBuilder.cpp",
