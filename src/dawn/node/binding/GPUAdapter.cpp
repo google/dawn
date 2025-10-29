@@ -167,9 +167,19 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT
 
+    // Must throw a OperationError if the required limit is not supported by the adapter
     for (auto [key, limit] : descriptor.requiredLimits) {
         if (!std::holds_alternative<interop::UndefinedType>(limit)) {
             promise.Reject(binding::Errors::OperationError(env, "Unknown limit \"" + key + "\""));
+            return promise;
+        }
+    }
+
+    // Must throw a TypeError if the required feature is not supported by the adapter
+    for (auto& f : requiredFeatures) {
+        if (!adapter_.HasFeature(f)) {
+            promise.Reject(Napi::TypeError::New(
+                ctx->env, "Unsupported feature: " + std::to_string(static_cast<uint32_t>(f))));
             return promise;
         }
     }
