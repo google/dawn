@@ -154,7 +154,6 @@ dawn_linux_functional_cq_tester(
     mirrors = [
         "ci/dawn-linux-x64-builder-rel",
         "ci/dawn-linux-x64-intel-uhd630-rel",
-        "ci/dawn-linux-x64-intel-uhd770-rel",
         "ci/dawn-linux-x64-sws-rel",
     ],
     gn_args = "ci/dawn-linux-x64-builder-rel",
