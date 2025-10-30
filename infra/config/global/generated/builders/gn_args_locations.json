@@ -58,6 +58,7 @@
     "dawn-try-win-x64-sws-msvc-dbg": "try/dawn-try-win-x64-sws-msvc-dbg/gn-args.json",
     "dawn-try-win-x64-sws-msvc-rel": "try/dawn-try-win-x64-sws-msvc-rel/gn-args.json",
     "dawn-try-win-x64-sws-rel": "try/dawn-try-win-x64-sws-rel/gn-args.json",
+    "dawn-try-win-x86-nvidia-gtx1660-rel": "try/dawn-try-win-x86-nvidia-gtx1660-rel/gn-args.json",
     "dawn-try-win-x86-sws-dbg": "try/dawn-try-win-x86-sws-dbg/gn-args.json",
     "dawn-try-win-x86-sws-rel": "try/dawn-try-win-x86-sws-rel/gn-args.json"
   }

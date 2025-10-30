@@ -317,6 +317,13 @@
           'default',
         ],
       },
+      'dawn-win-x86-nvidia-gtx1660-rel': {
+        'os_type': 'win',
+        'mixins': [
+          'win10_nvidia_gtx_1660_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-win-x86-sws-dbg': {
         'os_type': 'win',
         'mixins': [
