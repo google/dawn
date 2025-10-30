@@ -81,7 +81,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
-          'isolated_scripts': 'dawn_node_cts_sws_tests',
+          'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
       'dawn-linux-x64-sws-rel': {
@@ -94,7 +94,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
-          'isolated_scripts': 'dawn_node_cts_sws_tests',
+          'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
       'dawn-linux-x86-builder-dbg': {
@@ -204,7 +204,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
-          'isolated_scripts': 'dawn_node_cts_sws_tests',
+          'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
       'dawn-mac-x64-sws-rel': {
@@ -214,7 +214,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'swiftshader_gtests',
-          'isolated_scripts': 'dawn_node_cts_sws_tests',
+          'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
       'dawn-win-x64-builder-dbg': {
@@ -265,7 +265,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'dawn_node_cts_win_software_tests',
+          'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
       'dawn-win-x64-sws-msvc-dbg': {
@@ -278,7 +278,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'dawn_node_cts_win_software_tests',
+          'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
       'dawn-win-x64-sws-msvc-rel': {
@@ -291,7 +291,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'dawn_node_cts_win_software_tests',
+          'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
       'dawn-win-x64-sws-rel': {
@@ -304,7 +304,7 @@
         ],
         'test_suites': {
           'gtest_tests': 'win_software_renderer_gtests',
-          'isolated_scripts': 'dawn_node_cts_win_software_tests',
+          'isolated_scripts': 'win_software_renderer_isolated_scripts',
         },
       },
       'dawn-win-x86-builder-dbg': {

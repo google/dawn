@@ -25,6 +25,11 @@
     'type': 'script',
     'script': '//scripts/run_tint_fuzzer_corpus_tests.py',
   },
+  'benchmarks': {
+    'label': '//src/tint:benchmarks',
+    'type': 'script',
+    'script': '//scripts/run_tint_benchmark_test.py',
+  },
   'tint_unittests': {
     'label': '//src/tint/cmd/test:tint_unittests',
     'type': 'windowed_test_launcher',

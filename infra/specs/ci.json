@@ -763,6 +763,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -915,6 +936,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Ubuntu-22.04",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -2001,6 +2043,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "display_attached": "1",
+            "gpu": "8086:3e9b",
+            "os": "Mac-14.5"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -2153,6 +2216,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "display_attached": "1",
+            "gpu": "8086:3e9b",
+            "os": "Mac-14.5"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -2832,6 +2916,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -3009,6 +3114,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -3186,6 +3312,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
@@ -3363,6 +3510,27 @@
         },
         "test": "dawn_node_cts",
         "test_id_prefix": "ninja://scripts/dawn_node_cts:dawn_node_cts/"
+      },
+      {
+        "merge": {
+          "script": "//scripts/merge_scripts/true_noop_merge.py"
+        },
+        "name": "tint_benchmark",
+        "resultdb": {
+          "result_format": "single"
+        },
+        "swarming": {
+          "containment_type": "AUTO",
+          "dimensions": {
+            "cpu": "x86-64",
+            "gpu": "none",
+            "os": "Windows-10-19045",
+            "pool": "chromium.tests.gpu"
+          },
+          "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
+        },
+        "test": "benchmarks",
+        "test_id_prefix": "ninja://src/tint:benchmarks/"
       }
     ]
   },
