@@ -104,7 +104,7 @@ MaybeError SwapChainEGL::PresentImpl() {
 
     // Do the reverse-Y blit from the fake surface texture to the default framebuffer.
     {
-        auto surfaceCurrent = device->GetContext()->MakeSurfaceCurrentScope(mEGLSurface);
+        auto surfaceCurrent = device->GetContext()->SetCurrentSurfaceScope(mEGLSurface);
         EGLint surfaceWidth;
         EGLint surfaceHeight;
         DAWN_TRY(CheckEGL(egl, egl.QuerySurface(display, mEGLSurface, EGL_WIDTH, &surfaceWidth),

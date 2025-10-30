@@ -30,7 +30,9 @@
 #include <string>
 #include <vector>
 
+#include "dawn/native/opengl/DeviceGL.h"
 #include "dawn/native/opengl/EGLFunctions.h"
+#include "dawn/native/opengl/PhysicalDeviceGL.h"
 
 namespace dawn::native::opengl {
 
@@ -99,21 +101,27 @@ MaybeError CheckEGL(const EGLFunctions& egl, EGLBoolean result, const char* cont
     }
 }
 
-ResultOrError<Ref<WrappedEGLSync>> WrappedEGLSync::Create(DisplayEGL* display,
+ResultOrError<Ref<WrappedEGLSync>> WrappedEGLSync::Create(Device* device,
                                                           EGLenum type,
                                                           const EGLint* attribs) {
+    DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
     const EGLFunctions& egl = display->egl;
 
     EGLSyncKHR sync = EGL_NO_SYNC;
-    if (egl.HasExt(EGLExt::FenceSync)) {
-        sync = egl.CreateSyncKHR(display->GetDisplay(), type, attribs);
-    } else {
-        DAWN_ASSERT(egl.IsAtLeastVersion(1, 5));
-        std::vector<EGLAttrib> convertedAttribs = ConvertEGLIntParameterListToEGLAttrib(attribs);
-        sync = egl.CreateSync(display->GetDisplay(), type, convertedAttribs.data());
-    }
+    // eglCreateSync requires a current context.
+    DAWN_TRY(device->ExecuteGLWork([&](const OpenGLFunctions&) -> MaybeError {
+        if (egl.HasExt(EGLExt::FenceSync)) {
+            sync = egl.CreateSyncKHR(display->GetDisplay(), type, attribs);
+        } else {
+            DAWN_ASSERT(egl.IsAtLeastVersion(1, 5));
+            std::vector<EGLAttrib> convertedAttribs =
+                ConvertEGLIntParameterListToEGLAttrib(attribs);
+            sync = egl.CreateSync(display->GetDisplay(), type, convertedAttribs.data());
+        }
 
-    DAWN_TRY(CheckEGL(egl, sync != EGL_NO_SYNC, "eglCreateSync"));
+        DAWN_TRY(CheckEGL(egl, sync != EGL_NO_SYNC, "eglCreateSync"));
+        return {};
+    }));
     return AcquireRef(new WrappedEGLSync(display, sync, true));
 }
 

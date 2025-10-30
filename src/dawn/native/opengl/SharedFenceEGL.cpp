@@ -53,10 +53,8 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
         EGL_NONE,
     };
 
-    DisplayEGL* display = ToBackend(device->GetPhysicalDevice())->GetDisplay();
-
     Ref<WrappedEGLSync> sync;
-    DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(display, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs));
+    DAWN_TRY_ASSIGN(sync, WrappedEGLSync::Create(device, EGL_SYNC_NATIVE_FENCE_ANDROID, attribs));
 
     // If EGLSync creation succeeded, the sync now owns the handle.
     handleForSyncCreation.Detach();

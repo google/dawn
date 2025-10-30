@@ -28,9 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_DEVICEGL_H_
 
+#include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/native/dawn_platform.h"
 
 #include "dawn/common/Platform.h"
@@ -51,6 +54,8 @@ class ContextEGL;
 
 class Device final : public DeviceBase {
   public:
+    using GLWorkFunc = std::function<MaybeError(const OpenGLFunctions&)>;
+
     class Context;
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -62,8 +67,31 @@ class Device final : public DeviceBase {
 
     MaybeError Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor);
 
+    // Queues up GL work to be executed later in ExecutePendingGLWork().
+    // If the device is already executing GL works, the work will be executed immediately.
+    // This can happen when a pending task indirectly creates temporary resources.
+    template <typename Fn>
+    MaybeError AddGLWork(Fn&& work) {
+        MarkGLUsed();
+        if (CanExecuteGLWorkImmediately()) {
+            return work(GetGL(/*makeCurrent=*/false));
+        }
+        mPendingGLWorkList.Use([&](auto workList) { workList->push_back(std::forward<Fn>(work)); });
+        return {};
+    }
+    MaybeError ExecutePendingGLWork();
+
+    // Shortcut for AddGLWork + ExecutePendingGLWork.
+    template <typename Fn>
+    MaybeError ExecuteGLWork(Fn&& work) {
+        DAWN_TRY(AddGLWork(std::forward<Fn>(work)));
+        return ExecutePendingGLWork();
+    }
+
+    // TODO(451928481): remove this from public access once all places are updated to use
+    // AddGLWork().
     // Returns all the OpenGL entry points and ensures that the associated GL context is current.
-    const OpenGLFunctions& GetGL() const;
+    const OpenGLFunctions& GetGL(bool makeCurrent = true) const;
 
     // Helper functions to get access to relevant EGL objects.
     const EGLFunctions& GetEGL(bool makeCurrent) const;
@@ -158,7 +186,12 @@ class Device final : public DeviceBase {
 
     void DestroyImpl() override;
 
+    void MarkGLUsed();
+    bool CanExecuteGLWorkImmediately() const;
+
     const OpenGLFunctions mGL;
+
+    MutexProtected<std::vector<GLWorkFunc>> mPendingGLWorkList;
 
     GLFormatTable mFormatTable;
     std::unique_ptr<ContextEGL> mContext;

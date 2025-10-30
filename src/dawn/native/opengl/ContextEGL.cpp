@@ -51,6 +51,22 @@
 
 namespace dawn::native::opengl {
 
+namespace {
+
+thread_local ContextEGL* gCurrentContextInScope = nullptr;
+
+void MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& state) {
+    EGLBoolean success = display->egl.MakeCurrent(display->GetDisplay(), state.drawSurface,
+
+                                                  state.readSurface, state.context);
+
+    IgnoreErrors(
+
+        CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
+}
+
+}  // namespace
+
 // static
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> display,
                                                               wgpu::BackendType backend,
@@ -64,16 +80,17 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> di
     return std::move(context);
 }
 
-ContextEGL::ContextEGL(Ref<DisplayEGL> display) : mDisplay(std::move(display)) {}
+ContextEGL::ContextEGL(Ref<DisplayEGL> display)
+    : mExclusiveMakeCurrentMutex(AcquireRef(new Mutex())), mDisplay(std::move(display)) {}
 
 ContextEGL::~ContextEGL() {
     if (mOffscreenSurface != EGL_NO_SURFACE) {
         mDisplay->egl.DestroySurface(mDisplay->GetDisplay(), mOffscreenSurface);
         mOffscreenSurface = EGL_NO_SURFACE;
     }
-    if (mContext != EGL_NO_CONTEXT) {
-        mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mContext);
-        mContext = EGL_NO_CONTEXT;
+    if (mState.context != EGL_NO_CONTEXT) {
+        mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mState.context);
+        mState.context = EGL_NO_CONTEXT;
     }
 }
 
@@ -155,9 +172,9 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     // The attrib list is finished with an EGL_NONE tag.
     attribs.push_back(EGL_NONE);
 
-    mContext =
+    mState.context =
         egl.CreateContext(mDisplay->GetDisplay(), contextConfig, EGL_NO_CONTEXT, attribs.data());
-    DAWN_TRY(CheckEGL(egl, mContext != EGL_NO_CONTEXT, "eglCreateContext"));
+    DAWN_TRY(CheckEGL(egl, mState.context != EGL_NO_CONTEXT, "eglCreateContext"));
 
     // When EGL_KHR_surfaceless_context is not supported, we need to create a pbuffer to act
     // as an offscreen surface.
@@ -215,28 +232,71 @@ void ContextEGL::RequestRequiredExtensionsExplicitly() {
     glRequestExtension("GL_EXT_color_buffer_half_float");
 }
 
-void ContextEGL::MakeCurrent() {
-    EGLBoolean success = mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), mCurrentSurface,
-                                                   mCurrentSurface, mContext);
-    IgnoreErrors(
-        CheckEGL(mDisplay->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
+bool ContextEGL::IsInScopedMakeCurrent() const {
+    // TODO(451928481): This should ideally check `eglGetCurrentContext() == mState.context`,
+    // but that is not possible until all legacy call sites are updated to use
+    // `ScopedMakeCurrent` instead of `DeprecatedMakeCurrent`. This thread-local tracks if the
+    // context was made current via a scope and can be removed after the refactor.
+    return gCurrentContextInScope == this;
 }
 
-// ScopedMakeSurfaceCurrent
+void ContextEGL::DeprecatedMakeCurrent() {
+    MakeContextCurrent(mDisplay.Get(), mState);
+}
 
-[[nodiscard]] ContextEGL::ScopedMakeSurfaceCurrent ContextEGL::MakeSurfaceCurrentScope(
+// ScopedSetCurrentSurface
+
+[[nodiscard]] ContextEGL::ScopedSetCurrentSurface ContextEGL::SetCurrentSurfaceScope(
     EGLSurface surface) {
     return {this, surface};
 }
 
-ContextEGL::ScopedMakeSurfaceCurrent::ScopedMakeSurfaceCurrent(ContextEGL* context,
-                                                               EGLSurface surface)
+ContextEGL::ScopedSetCurrentSurface::ScopedSetCurrentSurface(ContextEGL* context,
+                                                             EGLSurface surface)
     : mContext(context) {
-    mContext->mCurrentSurface = surface;
+    mContext->mState.drawSurface = surface;
+    mContext->mState.readSurface = surface;
 }
 
-ContextEGL::ScopedMakeSurfaceCurrent::~ScopedMakeSurfaceCurrent() {
-    mContext->mCurrentSurface = mContext->mOffscreenSurface;
+ContextEGL::ScopedSetCurrentSurface::~ScopedSetCurrentSurface() {
+    mContext->mState.drawSurface = mContext->mOffscreenSurface;
+    mContext->mState.readSurface = mContext->mOffscreenSurface;
+}
+
+// ContextState
+
+bool ContextEGL::ContextState::operator==(const ContextState& other) const {
+    return context == other.context && drawSurface == other.drawSurface &&
+           readSurface == other.readSurface;
+}
+
+bool ContextEGL::ContextState::operator!=(const ContextState& other) const {
+    return !(*this == other);
+}
+
+// ScopedMakeCurrent
+
+ContextEGL::ScopedMakeCurrent::ScopedMakeCurrent(ContextEGL* context)
+    : mContext(context), mLock(mContext->mExclusiveMakeCurrentMutex.Get()) {
+    mPrevState.context = mContext->mDisplay->egl.GetCurrentContext();
+    mPrevState.drawSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_DRAW);
+    mPrevState.readSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_READ);
+
+    if (mPrevState != mContext->mState) {
+        MakeContextCurrent(mContext->mDisplay.Get(), mContext->mState);
+    }
+    gCurrentContextInScope = mContext;
+}
+
+ContextEGL::ScopedMakeCurrent::~ScopedMakeCurrent() {
+    if (mPrevState != mContext->mState) {
+        MakeContextCurrent(mContext->mDisplay.Get(), mPrevState);
+    }
+    gCurrentContextInScope = nullptr;
+}
+
+[[nodiscard]] ContextEGL::ScopedMakeCurrent ContextEGL::MakeCurrent() {
+    return ScopedMakeCurrent(this);
 }
 
 }  // namespace dawn::native::opengl

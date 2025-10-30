@@ -31,6 +31,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/common/Mutex.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/egl_platform.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -59,24 +60,49 @@ class ContextEGL : NonMovable {
                           bool disableEGL15Robustness,
                           bool forceES31AndMinExtensions);
     void RequestRequiredExtensionsExplicitly();
+    bool IsInScopedMakeCurrent() const;
 
     // Make the surface used by all MakeCurrent until the scoper gets out of scope.
-    class ScopedMakeSurfaceCurrent : NonMovable {
+    class ScopedSetCurrentSurface : NonMovable {
       public:
-        ScopedMakeSurfaceCurrent(ContextEGL* context, EGLSurface surface);
-        ~ScopedMakeSurfaceCurrent();
+        ScopedSetCurrentSurface(ContextEGL* context, EGLSurface surface);
+        ~ScopedSetCurrentSurface();
 
       private:
         raw_ptr<ContextEGL> mContext;
     };
-    [[nodiscard]] ScopedMakeSurfaceCurrent MakeSurfaceCurrentScope(EGLSurface surface);
+    [[nodiscard]] ScopedSetCurrentSurface SetCurrentSurfaceScope(EGLSurface surface);
 
-    void MakeCurrent();
+    // TODO(451928481): remove this once all call sites use MakeCurrent
+    void DeprecatedMakeCurrent();
+
+    struct ContextState {
+        EGLContext context = EGL_NO_CONTEXT;
+        EGLSurface drawSurface = EGL_NO_SURFACE;
+        EGLSurface readSurface = EGL_NO_SURFACE;
+
+        bool operator==(const ContextState& other) const;
+        bool operator!=(const ContextState& other) const;
+    };
+
+    class ScopedMakeCurrent : NonMovable {
+      public:
+        explicit ScopedMakeCurrent(ContextEGL* context);
+        ~ScopedMakeCurrent();
+
+      private:
+        raw_ptr<ContextEGL> mContext;
+        ContextState mPrevState;
+        Mutex::AutoLock mLock;
+    };
+    [[nodiscard]] ScopedMakeCurrent MakeCurrent();
 
   private:
+    // This mutex is used to make sure only one thread can enter ScopedMakeCurrent at a time.
+    Ref<Mutex> mExclusiveMakeCurrentMutex;
+
     Ref<DisplayEGL> mDisplay;
-    EGLContext mContext = EGL_NO_CONTEXT;
-    EGLSurface mCurrentSurface = EGL_NO_SURFACE;
+    ContextState mState;
     EGLSurface mOffscreenSurface = EGL_NO_SURFACE;
     bool mForceES31AndMinExtensions = false;
 };

@@ -157,7 +157,7 @@ Device::~Device() {
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // Directly set the context current and use mGL instead of calling GetGL as GetGL will notify
     // the (yet inexistent) queue that GL was used.
-    mContext->MakeCurrent();
+    auto scopedCurrentContext = mContext->MakeCurrent();
     mContext->RequestRequiredExtensionsExplicitly();
 
     const OpenGLFunctions& gl = mGL;
@@ -380,7 +380,11 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
 ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     const ExternalImageDescriptor* descriptor,
     ::EGLImage image) {
-    const OpenGLFunctions& gl = GetGL();
+    // TODO(451928481): We cannot defer the GL work here because the external texture may be
+    // deleted after this method returns. In the future, we should deprecate this method and
+    // require clients to use SharedTextureMemory for better lifetime management.
+    auto scopedCurrentContext = mContext->MakeCurrent();
+    const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
         FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
@@ -434,7 +438,11 @@ Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescr
 ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     const ExternalImageDescriptor* descriptor,
     GLuint texture) {
-    const OpenGLFunctions& gl = GetGL();
+    // TODO(451928481): We cannot defer the GL work here because the external texture may be
+    // deleted after this method returns. In the future, we should deprecate this method and
+    // require clients to use SharedTextureMemory for better lifetime management.
+    auto scopedCurrentContext = mContext->MakeCurrent();
+    const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
         FromAPI(descriptor->cTextureDescriptor)->WithTrivialFrontendDefaults();
@@ -471,6 +479,22 @@ MaybeError Device::TickImpl() {
     return {};
 }
 
+MaybeError Device::ExecutePendingGLWork() {
+    std::vector<GLWorkFunc> workList;
+    mPendingGLWorkList.Use([&](auto pendingList) { std::swap(workList, *pendingList); });
+
+    if (workList.empty()) {
+        return {};
+    }
+
+    auto scopedCurrentContext = mContext->MakeCurrent();
+    const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
+    for (auto& work : workList) {
+        DAWN_TRY(work(gl));
+    }
+    return {};
+}
+
 MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,
@@ -492,6 +516,14 @@ void Device::DestroyImpl() {
 
     mTextureBuiltinsBuffer = nullptr;
     mArrayLengthBuffer = nullptr;
+}
+
+void Device::MarkGLUsed() {
+    ToBackend(GetQueue())->OnGLUsed();
+}
+
+bool Device::CanExecuteGLWorkImmediately() const {
+    return mContext->IsInScopedMakeCurrent();
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -525,8 +557,10 @@ const AHBFunctions* Device::GetOrLoadAHBFunctions() {
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
-const OpenGLFunctions& Device::GetGL() const {
-    mContext->MakeCurrent();
+const OpenGLFunctions& Device::GetGL(bool makeCurrent) const {
+    if (makeCurrent) {
+        mContext->DeprecatedMakeCurrent();
+    }
     ToBackend(GetQueue())->OnGLUsed();
     return mGL;
 }
@@ -537,7 +571,7 @@ int Device::GetMaxTextureMaxAnisotropy() const {
 
 const EGLFunctions& Device::GetEGL(bool makeCurrent) const {
     if (makeCurrent) {
-        mContext->MakeCurrent();
+        mContext->DeprecatedMakeCurrent();
         ToBackend(GetQueue())->OnGLUsed();
     }
     return ToBackend(GetPhysicalDevice())->GetDisplay()->egl;
