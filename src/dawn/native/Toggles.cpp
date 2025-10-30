@@ -381,8 +381,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "https://crbug.com/dawn/838", ToggleStage::Device}},
     {Toggle::MetalPolyfillUnpack2x16snorm,
      {"metal_polyfill_unpack_2x16_snorm",
-      "Polyfill unpack2x16snorm for MSL due to CTS failures on Mac AMD devices.",
+      "Polyfill unpack2x16snorm for MSL due to CTS failures on Mac AMD and M3+ devices.",
       "https://crbug.com/407109055", ToggleStage::Device}},
+    {Toggle::MetalPolyfillUnpack2x16unorm,
+     {"metal_polyfill_unpack_2x16_unorm",
+      "Polyfill unpack2x16unorm for MSL due to CTS failures on Mac M3+ devices.",
+      "https://crbug.com/449576833", ToggleStage::Device}},
     {Toggle::MetalFillEmptyOcclusionQueriesWithZero,
      {"metal_fill_empty_occlusion_queries_with_zero",
       "Apple GPUs leave stale results in the visibility result buffer instead of writing zero if "

@@ -3520,6 +3520,79 @@ TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Snorm_disabled) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Unorm_enabled) {
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* input = b.FunctionParam("input", ty.u32());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<f32>>(core::BuiltinFn::kUnpack2X16Unorm, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16unorm %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:u32 = shl %input, 16u
+    %4:vec2<u32> = construct %3, %input
+    %5:vec2<u32> = shr %4, vec2<u32>(16u)
+    %6:vec2<f32> = convert %5
+    %7:vec2<f32> = div %6, 65535.0f
+    %8:vec2<f32> = clamp %7, vec2<f32>(0.0f), vec2<f32>(1.0f)
+    ret %8
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config{.polyfill_unpack_2x16_unorm = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_BuiltinPolyfillTest, Unpack2x16Unorm_disabled) {
+    auto* func = b.Function("foo", ty.vec2<f32>());
+    auto* input = b.FunctionParam("input", ty.u32());
+    func->SetParams(Vector{input});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<f32>>(core::BuiltinFn::kUnpack2X16Unorm, input);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16unorm %input
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%input:u32):vec2<f32> {
+  $B1: {
+    %3:vec2<f32> = unpack2x16unorm %input
+    ret %3
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixLoad_Storage_F32) {
     auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
     auto* p = b.FunctionParam<ptr<storage, array<f32, 256>>>("p");

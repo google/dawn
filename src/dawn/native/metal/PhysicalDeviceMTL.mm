@@ -228,6 +228,7 @@ bool IsGPUCounterSupported(id<MTLDevice> device,
     return true;
 }
 
+// https://developer.apple.com/documentation/metal/mtlgpufamily/apple9?language=objc
 enum class MTLGPUFamily {
     Apple1,
     Apple2,
@@ -235,7 +236,9 @@ enum class MTLGPUFamily {
     Apple4,
     Apple5,
     Apple6,
-    Apple7,
+    Apple7,  // A14 and M1
+    Apple8,  // A15, A16 and M2
+    Apple9,  // A17, M3 and M4
     Mac1,
     Mac2,
 };
@@ -248,6 +251,12 @@ ResultOrError<MTLGPUFamily> GetMTLGPUFamily(id<MTLDevice> device) {
         return MTLGPUFamily::Mac2;
     }
 #endif
+    if ([device supportsFamily:MTLGPUFamilyApple9]) {
+        return MTLGPUFamily::Apple9;
+    }
+    if ([device supportsFamily:MTLGPUFamilyApple8]) {
+        return MTLGPUFamily::Apple8;
+    }
     if ([device supportsFamily:MTLGPUFamilyApple7]) {
         return MTLGPUFamily::Apple7;
     }
@@ -450,9 +459,15 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalDisableModuleConstantF16, true);
     }
 
-    // chromium:407109055: Signed unpacking is inaccurate on AMD only.
+    // chromium:407109055: Signed unpacking is inaccurate on AMD.
     if (gpu_info::IsAMD(vendorId)) {
         deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16snorm, true);
+    }
+    // chromium:449576833: Signed and unsigned packing is incorrect on M3+ for non-4-byte aligned
+    // offsets.
+    if ([*mDevice supportsFamily:MTLGPUFamilyApple9]) {
+        deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16snorm, true);
+        deviceToggles->Default(Toggle::MetalPolyfillUnpack2x16unorm, true);
     }
 
     // chromium:407109056: Floating point clamp is slightly inaccurate for subnormal values.
@@ -793,31 +808,31 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     struct LimitsForFamily {
         uint32_t MTLDeviceLimits::* limit;
-        ityp::array<MTLGPUFamily, uint32_t, 9> values;
+        ityp::array<MTLGPUFamily, uint32_t, 11> values;
     };
 
     // clang-format off
             // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
-            //                                                               Apple                                                      Mac
-            //                                                                   1,      2,      3,      4,      5,      6,      7,       1,      2
+            //                                                               Apple                                                                     Mac
+            //                                                                   1,      2,      3,      4,      5,      6,      7,      8,      9,      1,      2
             constexpr LimitsForFamily kMTLLimits[15] = {
-                {&MTLDeviceLimits::maxVertexAttribsPerDescriptor,         {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
-                {&MTLDeviceLimits::maxBufferArgumentEntriesPerFunc,       {    31u,    31u,    31u,    31u,    31u,    31u,    31u,     31u,    31u }},
-                {&MTLDeviceLimits::maxTextureArgumentEntriesPerFunc,      {    31u,    31u,    31u,    96u,    96u,   128u,   128u,    128u,   128u }},
-                {&MTLDeviceLimits::maxSamplerStateArgumentEntriesPerFunc, {    16u,    16u,    16u,    16u,    16u,    16u,    16u,     16u,    16u }},
-                {&MTLDeviceLimits::maxThreadsPerThreadgroup,              {   512u,   512u,   512u,  1024u,  1024u,  1024u,  1024u,   1024u,  1024u }},
-                {&MTLDeviceLimits::maxTotalThreadgroupMemory,             { 16352u, 16352u, 16384u, 32768u, 32768u, 32768u, 32768u,  32768u, 32768u }},
-                {&MTLDeviceLimits::maxFragmentInputs,                     {    60u,    60u,    60u,   124u,   124u,   124u,   124u,     32u,    32u }},
-                {&MTLDeviceLimits::maxFragmentInputComponents,            {    60u,    60u,    60u,   124u,   124u,   124u,   124u,    124u,   124u }},
-                {&MTLDeviceLimits::max1DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u,  16384u, 16384u }},
-                {&MTLDeviceLimits::max2DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u,  16384u, 16384u }},
-                {&MTLDeviceLimits::max3DTextureSize,                      {  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,   2048u,  2048u }},
-                {&MTLDeviceLimits::maxTextureArrayLayers,                 {  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,   2048u,  2048u }},
-                {&MTLDeviceLimits::minBufferOffsetAlignment,              {     4u,     4u,     4u,     4u,     4u,     4u,     4u,    256u,   256u }},
-                {&MTLDeviceLimits::maxColorRenderTargets,                 {     4u,     8u,     8u,     8u,     8u,     8u,     8u,      8u,     8u }},
+                {&MTLDeviceLimits::maxVertexAttribsPerDescriptor,         {    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u }},
+                {&MTLDeviceLimits::maxBufferArgumentEntriesPerFunc,       {    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u,    31u }},
+                {&MTLDeviceLimits::maxTextureArgumentEntriesPerFunc,      {    31u,    31u,    31u,    96u,    96u,   128u,   128u,   128u,   128u,   128u,   128u }},
+                {&MTLDeviceLimits::maxSamplerStateArgumentEntriesPerFunc, {    16u,    16u,    16u,    16u,    16u,    16u,    16u,    16u,    16u,    16u,    16u }},
+                {&MTLDeviceLimits::maxThreadsPerThreadgroup,              {   512u,   512u,   512u,  1024u,  1024u,  1024u,  1024u,  1024u,  1024u,  1024u,  1024u }},
+                {&MTLDeviceLimits::maxTotalThreadgroupMemory,             { 16352u, 16352u, 16384u, 32768u, 32768u, 32768u, 32768u, 32768u, 32768u, 32768u, 32768u }},
+                {&MTLDeviceLimits::maxFragmentInputs,                     {    60u,    60u,    60u,   124u,   124u,   124u,   124u,   124u,   124u,    32u,    32u }},
+                {&MTLDeviceLimits::maxFragmentInputComponents,            {    60u,    60u,    60u,   124u,   124u,   124u,   124u,   124u,   124u,   124u,   124u }},
+                {&MTLDeviceLimits::max1DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u }},
+                {&MTLDeviceLimits::max2DTextureSize,                      {  8192u,  8192u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u, 16384u }},
+                {&MTLDeviceLimits::max3DTextureSize,                      {  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u }},
+                {&MTLDeviceLimits::maxTextureArrayLayers,                 {  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u,  2048u }},
+                {&MTLDeviceLimits::minBufferOffsetAlignment,              {     4u,     4u,     4u,     4u,     4u,     4u,     4u,     4u,     4u,   256u,   256u }},
+                {&MTLDeviceLimits::maxColorRenderTargets,                 {     4u,     8u,     8u,     8u,     8u,     8u,     8u,     8u,     8u,     8u,     8u }},
                 // Note: the feature set tables list No Limit for Mac 1 and Mac 2.
                 // For these, we use maxColorRenderTargets * 16. 16 is the largest cost of any color format.
-                {&MTLDeviceLimits::maxTotalRenderTargetSize,              {    16u,    32u,    32u,    64u,    64u,    64u,    64u,    128u,   128u }},
+                {&MTLDeviceLimits::maxTotalRenderTargetSize,              {    16u,    32u,    32u,    64u,    64u,    64u,    64u,    64u,    64u,   128u,   128u }},
             };
     // clang-format on
 

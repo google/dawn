@@ -239,8 +239,12 @@ struct State {
 
             // Register the format, buffer, and offset for each location slot.
             for (auto& attr : buffer.attributes) {
-                locations_.Add(attr.shader_location,
-                               LocationInfo{attr.format, var->Result(), index, attr.offset});
+                locations_.Add(attr.shader_location, LocationInfo{
+                                                         .format = attr.format,
+                                                         .buffer = var->Result(),
+                                                         .base_offset = index,
+                                                         .attr_byte_offset = attr.offset,
+                                                     });
             }
         }
     }

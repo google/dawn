@@ -142,6 +142,11 @@ struct State {
                             builtin_worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kUnpack2X16Unorm:
+                        if ((config.polyfill_unpack_2x16_unorm)) {
+                            builtin_worklist.Push(builtin);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -284,6 +289,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kUnpack2X16Snorm:
                     Unpack2x16Snorm(builtin);
+                    break;
+                case core::BuiltinFn::kUnpack2X16Unorm:
+                    Unpack2x16Unorm(builtin);
                     break;
 
                 // Subgroup matrix builtins.
@@ -986,6 +994,26 @@ struct State {
             auto* scale = b.Divide(ty.vec2<f32>(), flt, 32767_f);
 
             auto* lower = b.Splat(ty.vec2<f32>(), -1_f);
+            auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
+            b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
+        });
+        builtin->Destroy();
+    }
+
+    /// Polyfill a `unpack2x16unorm` builtin call
+    /// @param builtin the builtin call instruction
+    void Unpack2x16Unorm(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        b.InsertBefore(builtin, [&] {
+            auto* x = b.ShiftLeft(ty.u32(), arg, 16_u);
+
+            auto* vec = b.Construct(ty.vec2<u32>(), x, arg);
+            auto* v = b.ShiftRight(ty.vec2<u32>(), vec, b.Splat(ty.vec2<u32>(), 16_u));
+
+            auto* flt = b.Convert(ty.vec2<f32>(), v);
+            auto* scale = b.Divide(ty.vec2<f32>(), flt, 65535_f);
+
+            auto* lower = b.Splat(ty.vec2<f32>(), 0_f);
             auto* upper = b.Splat(ty.vec2<f32>(), 1_f);
             b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kClamp, scale, lower, upper);
         });

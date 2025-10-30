@@ -119,6 +119,9 @@ struct Options {
     /// Set to `true` to polyfill `unpack2x16snorm()`.
     bool polyfill_unpack_2x16_snorm = false;
 
+    /// Set to `true` to polyfill `unpack2x16unorm()`.
+    bool polyfill_unpack_2x16_unorm = false;
+
     /// Set to `true` to scalarize max min and clamp builtins.
     bool scalarize_max_min_clamp = false;
 
@@ -176,6 +179,7 @@ struct Options {
                  emit_vertex_point_size,
                  disable_polyfill_integer_div_mod,
                  polyfill_unpack_2x16_snorm,
+                 polyfill_unpack_2x16_unorm,
                  scalarize_max_min_clamp,
                  disable_module_constant_f16,
                  polyfill_subgroup_broadcast_f16,

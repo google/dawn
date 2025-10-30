@@ -42,6 +42,8 @@ namespace tint::msl::writer::raise {
 struct BuiltinPolyfillConfig {
     /// Set to `true` to polyfill `unpack2x16snorm()`.
     bool polyfill_unpack_2x16_snorm = false;
+    /// Set to `true` to polyfill `unpack2x16unorm()`.
+    bool polyfill_unpack_2x16_unorm = false;
 };
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
