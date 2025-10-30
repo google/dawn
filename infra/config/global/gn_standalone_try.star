@@ -206,6 +206,7 @@ dawn_mac_functional_cq_tester(
     mirrors = [
         "ci/dawn-mac-x64-builder-rel",
         "ci/dawn-mac-x64-amd-5300m-rel",
+        "ci/dawn-mac-x64-intel-uhd630-rel",
         "ci/dawn-mac-x64-sws-rel",
     ],
     gn_args = "ci/dawn-mac-x64-builder-rel",
