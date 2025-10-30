@@ -2898,7 +2898,7 @@ fn main() {
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D11Backend(),
                       D3D12Backend(),
-                      D3D12Backend({"use_dxc"}),
+                      D3D12Backend({}, {"use_dxc"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),

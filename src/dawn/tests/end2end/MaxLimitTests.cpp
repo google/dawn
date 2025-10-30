@@ -1188,8 +1188,8 @@ TEST_P(MaxInterStageShaderVariablesLimitTests, MaxLocation_ClipDistances) {
 
 DAWN_INSTANTIATE_TEST(MaxInterStageShaderVariablesLimitTests,
                       D3D11Backend(),
+                      D3D12Backend(),
                       D3D12Backend({}, {"use_dxc"}),
-                      D3D12Backend({"use_dxc"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
@@ -1337,8 +1337,8 @@ TEST_P(MaxVertexAttributesPipelineCreationTests, VertexIndex_InstanceIndex) {
 
 DAWN_INSTANTIATE_TEST(MaxVertexAttributesPipelineCreationTests,
                       D3D11Backend(),
+                      D3D12Backend(),
                       D3D12Backend({}, {"use_dxc"}),
-                      D3D12Backend({"use_dxc"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
