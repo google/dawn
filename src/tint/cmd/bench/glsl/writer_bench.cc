@@ -37,10 +37,7 @@ namespace {
 
 void GenerateGLSL(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
-    if (res != Success) {
-        state.SkipWithError(res.Failure().reason);
-        return;
-    }
+    TINT_ASSERT(res == Success) << res.Failure().reason;
 
     std::vector<std::string> names;
     // Get the list of entry point names.
@@ -54,10 +51,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
         for (auto& name : names) {
             // Convert the AST program to an IR module.
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
-            if (ir != Success) {
-                state.SkipWithError(ir.Failure().reason);
-                return;
-            }
+            TINT_ASSERT(ir == Success) << ir.Failure().reason;
 
             tint::glsl::writer::Options gen_options = {};
             gen_options.entry_point_name = name;
@@ -70,9 +64,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
 
             // Generate GLSL.
             auto gen_res = Generate(ir.Get(), gen_options);
-            if (gen_res != Success) {
-                state.SkipWithError(gen_res.Failure().reason);
-            }
+            TINT_ASSERT(gen_res == Success) << gen_res.Failure().reason;
         }
     }
 }
