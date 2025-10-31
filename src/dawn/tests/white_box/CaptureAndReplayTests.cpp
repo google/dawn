@@ -1182,6 +1182,47 @@ TEST_P(CaptureAndReplayTests, CaptureTwoAutoLayoutComputePipelinesOneIsBoundButU
     }
 }
 
+// Capture and replay the simplest render pass.
+// It just starts and ends a render pass and uses the clearValue to set
+// a texture.
+TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "myTexture";
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({texture.CreateView()});
+        passDescriptor.cColorAttachments[0].clearValue = {0x11, 0x22, 0x33, 0x44};
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
+        ASSERT_NE(texture, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

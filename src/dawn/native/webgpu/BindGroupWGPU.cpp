@@ -37,6 +37,7 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/SamplerWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 
@@ -116,9 +117,8 @@ void BindGroup::DeleteThis() {
 }
 
 MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
-    // We shouldn't need to include any referenced bound objects as we only serialize from
-    // setBindGroup in a command buffer and the command buffer itself should already reference all.
-    // We do need to reference the layout though.
+    // We have to include any referenced bound textures views as the front end does
+    // not track texture views.
     //
     // Unfortunately we can't just call `AddResource(layout)` because that would add a call to
     // createBindGroupLayout which we only want if the bindGroupLayout was not implicit. If
@@ -130,6 +130,22 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
         // TODO(452983510): Handle explicit bind group layouts.
         // DAWN_TRY(captureContext.AddResource(layout));
         DAWN_CHECK(false);
+    }
+
+    {
+        BindGroupLayoutInternalBase* layout = GetLayout();
+        const auto& bindingMap = layout->GetBindingMap();
+        for (const auto& [bindingNumbers, apiBindingIndex] : bindingMap) {
+            BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
+            const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
+
+            DAWN_TRY(MatchVariant(
+                bindingInfo.bindingLayout,
+                [&](const TextureBindingInfo& info) -> MaybeError {
+                    return captureContext.AddResource(GetBindingAsTextureView(bindingIndex));
+                },
+                [&](const auto& info) -> MaybeError { return {}; }));
+        }
     }
 
     return {};

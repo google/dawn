@@ -51,6 +51,15 @@ wgpu::Extent3D ToWGPU(const schema::Extent3D& extent) {
     };
 }
 
+wgpu::Color ToWGPU(const schema::Color& color) {
+    return wgpu::Color{
+        .r = color.r,
+        .g = color.g,
+        .b = color.b,
+        .a = color.a,
+    };
+}
+
 wgpu::PassTimestampWrites ToWGPU(const Replay& replay, const schema::TimestampWrites& writes) {
     return wgpu::PassTimestampWrites{
         .nextInChain = nullptr,
@@ -324,6 +333,47 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
     return DAWN_INTERNAL_ERROR("Missing ComputePass End command");
 }
 
+MaybeError ProcessRenderPassCommands(const Replay& replay,
+                                     ReadHead& readHead,
+                                     wgpu::Device device,
+                                     wgpu::RenderPassEncoder pass) {
+    schema::RenderPassCommand cmd;
+
+    while (!readHead.IsDone()) {
+        DAWN_TRY(Deserialize(readHead, &cmd));
+        switch (cmd) {
+            case schema::RenderPassCommand::End: {
+                pass.End();
+                return {};
+            }
+            case schema::RenderPassCommand::SetPipeline: {
+                schema::RenderPassCommandSetPipelineCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetPipeline(replay.GetObjectById<wgpu::RenderPipeline>(data.pipelineId));
+                break;
+            }
+            case schema::RenderPassCommand::SetBindGroup: {
+                schema::RenderPassCommandSetBindGroupCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetBindGroup(data.index,
+                                  replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
+                                  data.dynamicOffsets.size(), data.dynamicOffsets.data());
+                break;
+            }
+            case schema::RenderPassCommand::Draw: {
+                schema::RenderPassCommandDrawCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex,
+                          data.firstInstance);
+                break;
+            }
+            default:
+                return DAWN_INTERNAL_ERROR("Render Pass Command not implemented");
+        }
+    }
+    return DAWN_INTERNAL_ERROR("Missing RenderPass End command");
+}
+
 MaybeError ProcessEncoderCommands(const Replay& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
@@ -343,6 +393,52 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 };
                 wgpu::ComputePassEncoder pass = encoder.BeginComputePass(&desc);
                 DAWN_TRY(ProcessComputePassCommands(replay, readHead, device, pass));
+                break;
+            }
+            case schema::EncoderCommand::BeginRenderPass: {
+                schema::EncoderCommandBeginRenderPassCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                wgpu::PassTimestampWrites timestampWrites = ToWGPU(replay, data.timestampWrites);
+                std::vector<wgpu::RenderPassColorAttachment> colorAttachments;
+
+                for (const auto& attachment : data.colorAttachments) {
+                    colorAttachments.push_back(wgpu::RenderPassColorAttachment{
+                        .nextInChain = nullptr,
+                        .view = replay.GetObjectById<wgpu::TextureView>(attachment.viewId),
+                        .depthSlice = attachment.depthSlice,
+                        .resolveTarget =
+                            replay.GetObjectById<wgpu::TextureView>(attachment.resolveTargetId),
+                        .loadOp = attachment.loadOp,
+                        .storeOp = attachment.storeOp,
+                        .clearValue = ToWGPU(attachment.clearValue),
+                    });
+                }
+
+                wgpu::RenderPassDepthStencilAttachment depthStencilAttachment{
+                    .view =
+                        replay.GetObjectById<wgpu::TextureView>(data.depthStencilAttachment.viewId),
+                    .depthLoadOp = data.depthStencilAttachment.depthLoadOp,
+                    .depthStoreOp = data.depthStencilAttachment.depthStoreOp,
+                    .depthClearValue = data.depthStencilAttachment.depthClearValue,
+                    .depthReadOnly = data.depthStencilAttachment.depthReadOnly,
+                    .stencilLoadOp = data.depthStencilAttachment.stencilLoadOp,
+                    .stencilStoreOp = data.depthStencilAttachment.stencilStoreOp,
+                    .stencilClearValue = data.depthStencilAttachment.stencilClearValue,
+                    .stencilReadOnly = data.depthStencilAttachment.stencilReadOnly,
+                };
+
+                wgpu::RenderPassDescriptor desc{
+                    .label = wgpu::StringView(data.label),
+                    .colorAttachmentCount = colorAttachments.size(),
+                    .colorAttachments = colorAttachments.data(),
+                    .depthStencilAttachment =
+                        depthStencilAttachment.view != nullptr ? &depthStencilAttachment : nullptr,
+                    .occlusionQuerySet =
+                        replay.GetObjectById<wgpu::QuerySet>(data.occlusionQuerySetId),
+                    .timestampWrites = timestampWrites.querySet ? &timestampWrites : nullptr,
+                };
+                wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&desc);
+                DAWN_TRY(ProcessRenderPassCommands(replay, readHead, device, pass));
                 break;
             }
             case schema::EncoderCommand::CopyBufferToBuffer: {

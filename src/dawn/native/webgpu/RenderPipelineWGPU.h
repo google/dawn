@@ -32,17 +32,23 @@
 #include "dawn/common/Constants.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class RenderPipeline final : public RenderPipelineBase, public ObjectWGPU<WGPURenderPipeline> {
+class RenderPipeline final : public RenderPipelineBase,
+                             public RecordableObject,
+                             public ObjectWGPU<WGPURenderPipeline> {
   public:
     static Ref<RenderPipeline> CreateUninitialized(
         Device* device,
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
     MaybeError InitializeImpl() override;
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   protected:
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);

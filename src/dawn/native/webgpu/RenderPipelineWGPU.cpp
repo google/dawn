@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 #include "dawn/native/webgpu/ShaderModuleWGPU.h"
@@ -46,7 +48,9 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
 
 RenderPipeline::RenderPipeline(Device* device,
                                const UnpackedPtr<RenderPipelineDescriptor>& descriptor)
-    : RenderPipelineBase(device, descriptor), ObjectWGPU(device->wgpu.renderPipelineRelease) {}
+    : RenderPipelineBase(device, descriptor),
+      RecordableObject(schema::ObjectType::RenderPipeline),
+      ObjectWGPU(device->wgpu.renderPipelineRelease) {}
 
 MaybeError RenderPipeline::InitializeImpl() {
     auto device = ToBackend(GetDevice());
@@ -182,6 +186,135 @@ MaybeError RenderPipeline::InitializeImpl() {
 
     mInnerHandle = device->wgpu.deviceCreateRenderPipeline(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
+    return {};
+}
+
+MaybeError RenderPipeline::AddReferenced(CaptureContext& captureContext) {
+    DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Vertex).module.Get()));
+    if (HasStage(SingleShaderStage::Fragment)) {
+        DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Fragment).module.Get()));
+    }
+    PipelineLayoutBase* pipelineLayout = GetLayout();
+    if (!pipelineLayout->IsImplicit()) {
+        // TODO(452983510): add support for explicit pipeline layout
+        // DAWN_TRY(captureContext.AddResource(pipelineLayout));
+        return DAWN_INTERNAL_ERROR("explicit pipeline layout unsupported");
+    }
+    return {};
+}
+
+schema::BlendComponent ToSchema(const BlendComponent* component) {
+    const BlendComponent& c = component ? *component : BlendComponent();
+    return {{
+        .operation = c.operation,
+        .srcFactor = c.srcFactor,
+        .dstFactor = c.dstFactor,
+    }};
+}
+
+schema::StencilFaceState ToSchema(const StencilFaceState& state) {
+    return {{
+        .compare = state.compare,
+        .failOp = state.failOp,
+        .depthFailOp = state.depthFailOp,
+        .passOp = state.passOp,
+    }};
+}
+
+MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureContext) {
+    schema::ObjectId layoutId = 0;
+    std::vector<schema::BindGroupLayoutIndexIdPair> groupIndexIds;
+
+    PipelineLayoutBase* pipelineLayout = GetLayout();
+    if (pipelineLayout->IsImplicit()) {
+        // If it's an implicit layout then, on playback, we need to add the bind group layouts
+        // to the id to resource map as there is no other connection.
+        for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
+            BindGroupLayoutBase* bgl = pipelineLayout->GetFrontendBindGroupLayout(groupIndex);
+
+            groupIndexIds.push_back(schema::BindGroupLayoutIndexIdPair{{
+                .groupIndex = uint32_t(groupIndex),
+                .bindGroupLayoutId = captureContext.AddAndGetIdForImplicitResource(bgl),
+            }});
+        }
+    } else {
+        layoutId = captureContext.GetId(pipelineLayout);
+    }
+
+    std::vector<schema::VertexBufferLayout> buffers;
+    for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
+        const auto& info = GetVertexBuffer(slot);
+
+        std::vector<schema::VertexAttribute> attributes;
+        // TODO(454365240): handle attributes
+
+        buffers.push_back({{
+            .arrayStride = info.arrayStride,
+            .stepMode = info.stepMode,
+            .attributes = attributes,
+        }});
+    }
+
+    const DepthStencilState defaultDepthStencilState;
+    const DepthStencilState* depthStencilState = GetDepthStencilState();
+    if (!depthStencilState) {
+        depthStencilState = &defaultDepthStencilState;
+    }
+    ProgrammableStage empty;
+    const ProgrammableStage& fragment =
+        HasStage(SingleShaderStage::Fragment) ? GetStage(SingleShaderStage::Fragment) : empty;
+    std::vector<schema::ColorTargetState> targets;
+    if (fragment.module != nullptr) {
+        for (auto slot : GetColorAttachmentsMask()) {
+            const auto& target = *GetColorTargetState(slot);
+            targets.push_back({{
+                .format = target.format,
+                .blend{{
+                    .color = ToSchema(target.blend ? &target.blend->color : nullptr),
+                    .alpha = ToSchema(target.blend ? &target.blend->alpha : nullptr),
+                }},
+                .writeMask = target.writeMask,
+            }});
+        }
+    }
+
+    schema::RenderPipeline data{{
+        .layoutId = layoutId,
+        .vertex{{
+            .program = ToSchema(captureContext, GetStage(SingleShaderStage::Vertex)),
+            .buffers = buffers,
+        }},
+        .primitive{{
+            .topology = GetPrimitiveTopology(),
+            .stripIndexFormat = GetStripIndexFormat(),
+            .frontFace = GetFrontFace(),
+            .cullMode = GetCullMode(),
+            .unclippedDepth = HasUnclippedDepth(),
+        }},
+        .depthStencil{{
+            .format = depthStencilState->format,
+            .depthWriteEnabled = depthStencilState->depthWriteEnabled == wgpu::OptionalBool(true),
+            .depthCompare = depthStencilState->depthCompare,
+            .stencilFront = ToSchema(depthStencilState->stencilFront),
+            .stencilBack = ToSchema(depthStencilState->stencilBack),
+            .stencilReadMask = depthStencilState->stencilReadMask,
+            .stencilWriteMask = depthStencilState->stencilWriteMask,
+            .depthBias = depthStencilState->depthBias,
+            .depthBiasSlopeScale = depthStencilState->depthBiasSlopeScale,
+            .depthBiasClamp = depthStencilState->depthBiasClamp,
+        }},
+        .multisample{{
+            .count = GetSampleCount(),
+            .mask = GetSampleMask(),
+            .alphaToCoverageEnabled = IsAlphaToCoverageEnabled(),
+        }},
+        .fragment{{
+            .program = ToSchema(captureContext, fragment),
+            .targets = targets,
+        }},
+        .groupIndexIds = groupIndexIds,
+    }};
+    Serialize(captureContext, data);
     return {};
 }
 

@@ -42,6 +42,7 @@
 namespace dawn::native {
 
 class BufferBase;
+struct Color;
 struct Origin3D;
 struct Extent3D;
 struct BufferCopy;
@@ -186,6 +187,7 @@ class CaptureContext {
 wgpu::TextureAspect ToDawn(const Aspect aspect);
 schema::Origin3D ToSchema(const Origin3D& origin);
 schema::Extent3D ToSchema(const Extent3D& extent);
+schema::Color ToSchema(const Color& color);
 schema::ProgrammableStage ToSchema(CaptureContext& captureContext, const ProgrammableStage& stage);
 schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy);
 schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext, const BufferCopy& bufferCopy);

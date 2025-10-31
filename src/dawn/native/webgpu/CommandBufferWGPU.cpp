@@ -67,6 +67,7 @@ bool ShouldCaptureBindGroup(CaptureContext& captureContext, BindGroupBase* bindG
 // does not outlast a CommandBuffer which itself uses Refs.
 struct CommandBufferResourceUsages {
     std::vector<ComputePipelineBase*> computePipelines;
+    std::vector<RenderPipelineBase*> renderPipelines;
     std::vector<BindGroupBase*> bindGroups;
 };
 
@@ -625,6 +626,47 @@ MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureConte
     return {};
 }
 
+MaybeError GatherReferencedResourcesFromRenderPass(CaptureContext& captureContext,
+                                                   CommandIterator& commands,
+                                                   CommandBufferResourceUsages& usedResources) {
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndRenderPass: {
+                commands.NextCommand<EndRenderPassCmd>();
+                return {};
+            }
+            case Command::SetRenderPipeline: {
+                auto cmd = commands.NextCommand<SetRenderPipelineCmd>();
+                usedResources.renderPipelines.push_back(cmd->pipeline.Get());
+                break;
+            }
+            case Command::SetBindGroup: {
+                auto cmd = commands.NextCommand<SetBindGroupCmd>();
+                usedResources.bindGroups.push_back(cmd->group.Get());
+                break;
+            }
+                DAWN_SKIP_COMMAND(Draw)
+                DAWN_SKIP_COMMAND(DrawIndexed)
+                DAWN_SKIP_COMMAND(DrawIndirect)
+                DAWN_SKIP_COMMAND(DrawIndexedIndirect)
+                DAWN_SKIP_COMMAND(InsertDebugMarker)
+                DAWN_SKIP_COMMAND(PopDebugGroup)
+                DAWN_SKIP_COMMAND(PushDebugGroup)
+                DAWN_SKIP_COMMAND(WriteTimestamp)
+                DAWN_SKIP_COMMAND(SetImmediateData)
+            default: {
+                DAWN_CHECK(false);
+                break;
+            }
+        }
+    }
+
+    // EndComputePass should have been called
+    DAWN_UNREACHABLE();
+    return {};
+}
+
 MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& commands) {
     Command type;
     while (commands.NextCommandId(&type)) {
@@ -670,6 +712,63 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                         .x = cmd.x,
                         .y = cmd.y,
                         .z = cmd.z,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            default:
+                DAWN_CHECK(false);
+        }
+    }
+    return {};
+}
+
+MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& commands) {
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        switch (type) {
+            case Command::EndRenderPass: {
+                commands.NextCommand<EndRenderPassCmd>();
+                Serialize(captureContext, schema::RenderPassCommand::End);
+                return {};
+            }
+            case Command::SetRenderPipeline: {
+                const auto& cmd = *commands.NextCommand<SetRenderPipelineCmd>();
+                schema::RenderPassCommandSetPipelineCmd data{{
+                    .data = {{
+                        .pipelineId = captureContext.GetId(cmd.pipeline.Get()),
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::SetBindGroup: {
+                const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
+                const uint32_t* dynamicOffsetsData =
+                    cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
+                                               : nullptr;
+                if (ShouldCaptureBindGroup(captureContext, cmd.group.Get())) {
+                    schema::RenderPassCommandSetBindGroupCmd data{{
+                        .data = {{
+                            .index = uint32_t(cmd.index),
+                            .bindGroupId = captureContext.GetId(cmd.group),
+                            .dynamicOffsets = std::vector<uint32_t>(
+                                dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                }
+                break;
+            }
+            case Command::Draw: {
+                const auto& cmd = *commands.NextCommand<DrawCmd>();
+                schema::RenderPassCommandDrawCmd data{{
+                    .data = {{
+                        .vertexCount = cmd.vertexCount,
+                        .instanceCount = cmd.instanceCount,
+                        .firstVertex = cmd.firstVertex,
+                        .firstInstance = cmd.firstInstance,
                     }},
                 }};
                 Serialize(captureContext, data);
@@ -748,8 +847,33 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
             switch (type) {
                 case Command::BeginComputePass: {
                     commands.NextCommand<BeginComputePassCmd>();
+                    // TODO(451389800): Handle QuerySet
+                    // if (cmd.timestampWrites.querySet != nullptr) {
+                    //     DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                    // }
                     DAWN_TRY(GatherReferencedResourcesFromComputePass(captureContext, commands,
                                                                       usedResources));
+                    break;
+                }
+                case Command::BeginRenderPass: {
+                    const auto& cmd = *commands.NextCommand<BeginRenderPassCmd>();
+                    for (const auto& attachment : cmd.colorAttachments) {
+                        if (attachment.view != nullptr) {
+                            DAWN_TRY(captureContext.AddResource(attachment.view.Get()));
+                        }
+                        if (attachment.resolveTarget != nullptr) {
+                            DAWN_TRY(captureContext.AddResource(attachment.resolveTarget.Get()));
+                        }
+                    }
+                    if (cmd.depthStencilAttachment.view != nullptr) {
+                        DAWN_TRY(captureContext.AddResource(cmd.depthStencilAttachment.view.Get()));
+                    }
+                    // TODO(451389800): Handle QuerySet
+                    // if (cmd.timestampWrites.querySet != nullptr) {
+                    //     DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                    // }
+                    DAWN_TRY(GatherReferencedResourcesFromRenderPass(captureContext, commands,
+                                                                     usedResources));
                     break;
                 }
                     DAWN_SKIP_COMMAND(CopyBufferToBuffer)
@@ -768,6 +892,9 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     for (auto pipeline : usedResources.computePipelines) {
         DAWN_TRY(captureContext.AddResource(pipeline));
     }
+    for (auto pipeline : usedResources.renderPipelines) {
+        DAWN_TRY(captureContext.AddResource(pipeline));
+    }
     for (auto bindGroup : usedResources.bindGroups) {
         if (ShouldCaptureBindGroup(captureContext, bindGroup)) {
             DAWN_TRY(captureContext.AddResource(bindGroup));
@@ -775,6 +902,36 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     }
 
     return {};
+}
+
+schema::ColorAttachment ToSchema(CaptureContext& captureContext,
+                                 const RenderPassColorAttachmentInfo& info) {
+    return {{
+        .viewId = captureContext.GetId(info.view),
+        .depthSlice = info.view->GetDimension() == wgpu::TextureViewDimension::e3D
+                          ? info.depthSlice
+                          : wgpu::kDepthSliceUndefined,
+        .resolveTargetId = captureContext.GetId(info.resolveTarget),
+        .loadOp = info.loadOp,
+        .storeOp = info.storeOp,
+        .clearValue = ToSchema(info.clearColor),
+    }};
+}
+
+schema::RenderPassDepthStencilAttachment ToSchema(
+    CaptureContext& captureContext,
+    const RenderPassDepthStencilAttachmentInfo& info) {
+    return {{
+        .viewId = captureContext.GetId(info.view),
+        .depthLoadOp = info.depthLoadOp,
+        .depthStoreOp = info.depthStoreOp,
+        .depthClearValue = info.clearDepth,
+        .depthReadOnly = info.depthReadOnly,
+        .stencilLoadOp = info.stencilLoadOp,
+        .stencilStoreOp = info.stencilStoreOp,
+        .stencilClearValue = info.clearStencil,
+        .stencilReadOnly = info.stencilReadOnly,
+    }};
 }
 
 MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureContext) {
@@ -843,6 +1000,31 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                     Serialize(captureContext, data);
                     // Capture commands inside the compute pass
                     DAWN_TRY(CaptureComputePass(captureContext, commands));
+                    break;
+                }
+                case Command::BeginRenderPass: {
+                    const auto& cmd = *commands.NextCommand<BeginRenderPassCmd>();
+                    std::vector<schema::ColorAttachment> colorAttachments;
+                    for (ColorAttachmentIndex i : cmd.attachmentState->GetColorAttachmentsMask()) {
+                        colorAttachments.push_back(
+                            ToSchema(captureContext, cmd.colorAttachments[i]));
+                    }
+                    schema::EncoderCommandBeginRenderPassCmd data{{
+                        .data = {{
+                            .label = cmd.label,
+                            .colorAttachments = colorAttachments,
+                            .depthStencilAttachment =
+                                ToSchema(captureContext, cmd.depthStencilAttachment),
+                            // TODO(451389800): Handle QuerySet
+                            // .occlusionQuerySetId =
+                            // captureContext.GetId(cmd.occlusionQuerySet.Get()),
+                            .occlusionQuerySetId = 0,
+                            .timestampWrites = ToSchema(captureContext, cmd.timestampWrites),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                    // Capture commands inside the compute pass
+                    DAWN_TRY(CaptureRenderPass(captureContext, commands));
                     break;
                 }
                 default:

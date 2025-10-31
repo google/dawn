@@ -179,6 +179,15 @@ schema::Extent3D ToSchema(const Extent3D& extent) {
     }};
 }
 
+schema::Color ToSchema(const Color& color) {
+    return {{
+        .r = color.r,
+        .g = color.g,
+        .b = color.b,
+        .a = color.a,
+    }};
+}
+
 schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy) {
     return {{
         .offset = bufferCopy.offset,

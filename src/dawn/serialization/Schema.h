@@ -61,6 +61,30 @@ enum class ComputePassCommand : uint32_t {
     End,
 };
 
+enum class RenderPassCommand : uint32_t {
+    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
+    Draw,
+    DrawIndexed,
+    DrawIndirect,
+    DrawIndexedIndirect,
+    SetPipeline,
+    SetBindGroup,
+    SetIndexBuffer,
+    SetVertexBuffer,
+    SetViewport,
+    SetScissorRect,
+    SetBlendConstant,
+    SetStencilReference,
+    EndRenderPass,
+    ExecuteBundles,
+    WriteTimestamp,
+    InsertDebugMarker,
+    PopDebugGroup,
+    PushDebugGroup,
+    SetImmediateData,
+    End,
+};
+
 enum class EncoderCommand : uint32_t {
     Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
     BeginComputePass,
@@ -104,6 +128,14 @@ DAWN_REPLAY_SERIALIZABLE(struct, Origin3D, ORIGIN3D_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, Extent3D, EXTENT3D_MEMBER){};
 
+#define COLOR_MEMBER(X) \
+    X(double, r)        \
+    X(double, g)        \
+    X(double, b)        \
+    X(double, a)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Color, COLOR_MEMBER){};
+
 #define PIPELINE_CONSTANT_MEMBER(X) \
     X(std::string, name)            \
     X(double, value)
@@ -116,6 +148,90 @@ DAWN_REPLAY_SERIALIZABLE(struct, PipelineConstant, PIPELINE_CONSTANT_MEMBER){};
     X(std::vector<PipelineConstant>, constants)
 
 DAWN_REPLAY_SERIALIZABLE(struct, ProgrammableStage, PROGRAMMABLE_STAGE_MEMBER){};
+
+#define VERTEX_ATTRIBUTE_MEMBER(X) \
+    X(wgpu::VertexFormat, format)  \
+    X(uint64_t, offset)            \
+    X(uint32_t, shaderLocation)
+
+DAWN_REPLAY_SERIALIZABLE(struct, VertexAttribute, VERTEX_ATTRIBUTE_MEMBER){};
+
+#define VERTEX_BUFFER_LAYOUT_MEMBER(X) \
+    X(uint64_t, arrayStride)           \
+    X(wgpu::VertexStepMode, stepMode)  \
+    X(std::vector<VertexAttribute>, attributes)
+
+DAWN_REPLAY_SERIALIZABLE(struct, VertexBufferLayout, VERTEX_BUFFER_LAYOUT_MEMBER){};
+
+#define VERTEX_STATE_MEMBER(X)    \
+    X(ProgrammableStage, program) \
+    X(std::vector<VertexBufferLayout>, buffers)
+
+DAWN_REPLAY_SERIALIZABLE(struct, VertexState, VERTEX_STATE_MEMBER){};
+
+#define PRIMITIVE_STATE_MEMBER(X)          \
+    X(wgpu::PrimitiveTopology, topology)   \
+    X(wgpu::IndexFormat, stripIndexFormat) \
+    X(wgpu::FrontFace, frontFace)          \
+    X(wgpu::CullMode, cullMode)            \
+    X(bool, unclippedDepth)
+
+DAWN_REPLAY_SERIALIZABLE(struct, PrimitiveState, PRIMITIVE_STATE_MEMBER){};
+
+#define STENCIL_FACE_STATE_MEMBER(X)       \
+    X(wgpu::CompareFunction, compare)      \
+    X(wgpu::StencilOperation, failOp)      \
+    X(wgpu::StencilOperation, depthFailOp) \
+    X(wgpu::StencilOperation, passOp)
+
+DAWN_REPLAY_SERIALIZABLE(struct, StencilFaceState, STENCIL_FACE_STATE_MEMBER){};
+
+#define DEPTH_STENCIL_STATE_MEMBER(X)      \
+    X(wgpu::TextureFormat, format)         \
+    X(bool, depthWriteEnabled)             \
+    X(wgpu::CompareFunction, depthCompare) \
+    X(StencilFaceState, stencilFront)      \
+    X(StencilFaceState, stencilBack)       \
+    X(uint32_t, stencilReadMask)           \
+    X(uint32_t, stencilWriteMask)          \
+    X(int32_t, depthBias)                  \
+    X(float, depthBiasSlopeScale)          \
+    X(float, depthBiasClamp)
+
+DAWN_REPLAY_SERIALIZABLE(struct, DepthStencilState, DEPTH_STENCIL_STATE_MEMBER){};
+
+#define MULTISAMPLE_STATE_MEMBER(X) \
+    X(uint32_t, count)              \
+    X(uint32_t, mask)               \
+    X(bool, alphaToCoverageEnabled)
+
+DAWN_REPLAY_SERIALIZABLE(struct, MultisampleState, MULTISAMPLE_STATE_MEMBER){};
+
+#define BLEND_COMPONENT_MEMBER(X)      \
+    X(wgpu::BlendOperation, operation) \
+    X(wgpu::BlendFactor, srcFactor)    \
+    X(wgpu::BlendFactor, dstFactor)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BlendComponent, BLEND_COMPONENT_MEMBER){};
+
+#define BLEND_STATE_MEMBER(X) \
+    X(BlendComponent, color)  \
+    X(BlendComponent, alpha)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BlendState, BLEND_STATE_MEMBER){};
+
+#define COLOR_TARGET_STATE_MEMBER(X) \
+    X(wgpu::TextureFormat, format)   \
+    X(BlendState, blend)             \
+    X(wgpu::ColorWriteMask, writeMask)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ColorTargetState, COLOR_TARGET_STATE_MEMBER){};
+
+#define FRAGMENT_STATE_MEMBER(X)  \
+    X(ProgrammableStage, program) \
+    X(std::vector<ColorTargetState>, targets)
+
+DAWN_REPLAY_SERIALIZABLE(struct, FragmentState, FRAGMENT_STATE_MEMBER){};
 
 #define BUFFER_CREATION_MEMBER(X) \
     X(uint64_t, size)             \
@@ -172,6 +288,17 @@ DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutIndexIdPair, BIND_GROUP_LAYOUT_I
 
 DAWN_REPLAY_SERIALIZABLE(struct, ComputePipeline, COMPUTE_PIPELINE_CREATION_MEMBER){};
 
+#define RENDER_PIPELINE_CREATION_MEMBER(X) \
+    X(ObjectId, layoutId)                  \
+    X(VertexState, vertex)                 \
+    X(PrimitiveState, primitive)           \
+    X(DepthStencilState, depthStencil)     \
+    X(MultisampleState, multisample)       \
+    X(FragmentState, fragment)             \
+    X(std::vector<BindGroupLayoutIndexIdPair>, groupIndexIds)
+
+DAWN_REPLAY_SERIALIZABLE(struct, RenderPipeline, RENDER_PIPELINE_CREATION_MEMBER){};
+
 #define BIND_GROUP_ENTRY_MEMBER(X) \
     X(uint32_t, binding)           \
     X(ObjectId, bufferId)          \
@@ -222,6 +349,31 @@ DAWN_REPLAY_SERIALIZABLE(struct, TexelCopyTextureInfo, TEXEL_COPY_TEXTURE_INFO_M
     X(uint32_t, endOfPassWriteIndex)
 
 DAWN_REPLAY_SERIALIZABLE(struct, TimestampWrites, TIMESTAMP_WRITES_MEMBER){};
+
+#define COLOR_ATTACHMENT_MEMBER(X) \
+    X(ObjectId, viewId)            \
+    X(uint32_t, depthSlice)        \
+    X(ObjectId, resolveTargetId)   \
+    X(wgpu::LoadOp, loadOp)        \
+    X(wgpu::StoreOp, storeOp)      \
+    X(Color, clearValue)
+
+DAWN_REPLAY_SERIALIZABLE(struct, ColorAttachment, COLOR_ATTACHMENT_MEMBER){};
+
+#define RENDER_PASS_DEPTH_STENCIL_ATTACHMENT_MEMBER(X) \
+    X(ObjectId, viewId)                                \
+    X(wgpu::LoadOp, depthLoadOp)                       \
+    X(wgpu::StoreOp, depthStoreOp)                     \
+    X(float, depthClearValue)                          \
+    X(bool, depthReadOnly)                             \
+    X(wgpu::LoadOp, stencilLoadOp)                     \
+    X(wgpu::StoreOp, stencilStoreOp)                   \
+    X(uint32_t, stencilClearValue)                     \
+    X(bool, stencilReadOnly)
+
+DAWN_REPLAY_SERIALIZABLE(struct,
+                         RenderPassDepthStencilAttachment,
+                         RENDER_PASS_DEPTH_STENCIL_ATTACHMENT_MEMBER){};
 
 #define CREATE_RESOURCE_CMD_DATA_MEMBER(X) X(LabeledResource, resource)
 
@@ -293,6 +445,16 @@ DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToTexture,
 
 DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginComputePass, BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER){};
 
+#define BEGIN_RENDER_PASS_CMD_DATA_MEMBER(X)                    \
+    X(std::string, label)                                       \
+    X(std::vector<ColorAttachment>, colorAttachments)           \
+    X(RenderPassDepthStencilAttachment, depthStencilAttachment) \
+    X(ObjectId, occlusionQuerySetId)                            \
+    X(TimestampWrites, timestampWrites)                         \
+    X(uint64_t, maxDrawCount)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginRenderPass, BEGIN_RENDER_PASS_CMD_DATA_MEMBER){};
+
 #define SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
 
 DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetComputePipeline,
@@ -311,6 +473,20 @@ DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_
     X(uint32_t, z)
 
 DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEMBER){};
+
+#define SET_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
+
+DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetPipeline, SET_PIPELINE_CMD_DATA_MEMBER){};
+
+DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+
+#define DRAW_CMD_DATA_MEMBER(X) \
+    X(uint32_t, vertexCount)    \
+    X(uint32_t, instanceCount)  \
+    X(uint32_t, firstVertex)    \
+    X(uint32_t, firstInstance)
+
+DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(Draw, DRAW_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 
