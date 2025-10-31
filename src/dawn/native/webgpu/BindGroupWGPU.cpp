@@ -135,7 +135,7 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     {
         BindGroupLayoutInternalBase* layout = GetLayout();
         const auto& bindingMap = layout->GetBindingMap();
-        for (const auto& [bindingNumbers, apiBindingIndex] : bindingMap) {
+        for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
             BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
             const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
 
@@ -160,18 +160,30 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
     for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
         BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
+        uint32_t binding = uint32_t(bindingNumber);
 
         MatchVariant(
             bindingInfo.bindingLayout,
             [&](const BufferBindingInfo& info) {
                 const auto& entry = GetBindingAsBufferBinding(bindingIndex);
                 entries.push_back(schema::BindGroupEntry{{
-                    .binding = uint32_t(bindingNumber),
+                    .binding = binding,
                     .bufferId = captureContext.GetId(entry.buffer),
                     .offset = entry.offset,
                     .size = entry.size,
                     .samplerId = 0,
                     .textureViewId = 0,
+                }});
+            },
+            [&](const TextureBindingInfo& info) {
+                const auto& entry = GetBindingAsTextureView(bindingIndex);
+                entries.push_back(schema::BindGroupEntry{{
+                    .binding = binding,
+                    .bufferId = 0,
+                    .offset = 0,
+                    .size = 0,
+                    .samplerId = 0,
+                    .textureViewId = captureContext.GetId(entry),
                 }});
             },
             [&](const auto& info) { DAWN_CHECK(false); });

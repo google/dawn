@@ -35,6 +35,7 @@
 #include "dawn/replay/Replay.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/tests/MockCallback.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
 
@@ -1216,6 +1217,88 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
 
     {
         wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
+        ASSERT_NE(texture, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
+    }
+}
+
+// Capture and replay the a render pass where a texture is rendered into another.
+TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithBindGroup) {
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "srcTexture";
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+
+    {
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, 4);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::Extent3D extent = {1, 1, 1};
+        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
+                           &extent);
+    }
+
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    textureDesc.label = "dstTexture";
+    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var tex: texture_2d<u32>;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0.0, 0.0, 0.0, 1.0);
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return textureLoad(tex, vec2u(0), 0);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+    desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, srcTexture.CreateView()},
+                                                     });
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
         ASSERT_NE(texture, nullptr);
 
         uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};

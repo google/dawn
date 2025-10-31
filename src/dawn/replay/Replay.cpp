@@ -117,6 +117,40 @@ wgpu::BindGroupEntry ToWGPU(const Replay& replay, const schema::BindGroupEntry& 
     };
 }
 
+wgpu::StencilFaceState ToWGPU(const schema::StencilFaceState& state) {
+    return wgpu::StencilFaceState{
+        .compare = state.compare,
+        .failOp = state.failOp,
+        .depthFailOp = state.depthFailOp,
+        .passOp = state.passOp,
+    };
+}
+
+wgpu::BlendComponent ToWGPU(const schema::BlendComponent& component) {
+    return wgpu::BlendComponent{
+        .operation = component.operation,
+        .srcFactor = component.srcFactor,
+        .dstFactor = component.dstFactor,
+    };
+}
+
+wgpu::BlendState ToWGPU(const schema::BlendState& state) {
+    return wgpu::BlendState{
+        .color = ToWGPU(state.color),
+        .alpha = ToWGPU(state.alpha),
+    };
+}
+
+bool IsBlendComponentEnabled(const wgpu::BlendComponent& component) {
+    return component.operation != wgpu::BlendOperation::Add ||
+           component.srcFactor != wgpu::BlendFactor::One ||
+           component.dstFactor != wgpu::BlendFactor::Zero;
+}
+
+bool IsBlendEnabled(const wgpu::BlendState& blend) {
+    return IsBlendComponentEnabled(blend.color) || IsBlendComponentEnabled(blend.alpha);
+}
+
 MaybeError ReadContentIntoBuffer(ReadHead& readHead,
                                  wgpu::Device device,
                                  wgpu::Buffer buffer,
@@ -228,6 +262,92 @@ ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const Replay& replay,
     wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&desc);
     func(computePipeline, pipeline.groupIndexIds);
     return {computePipeline};
+}
+
+template <typename F>
+ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
+                                                         wgpu::Device device,
+                                                         ReadHead& readHead,
+                                                         const std::string& label,
+                                                         F func) {
+    schema::RenderPipeline pipeline;
+    DAWN_TRY(Deserialize(readHead, &pipeline));
+
+    std::vector<wgpu::ConstantEntry> vertexConstants = ToWGPU(pipeline.vertex.program.constants);
+    std::vector<wgpu::ConstantEntry> fragmentConstants =
+        ToWGPU(pipeline.fragment.program.constants);
+    std::vector<wgpu::ColorTargetState> colorTargets;
+    std::vector<wgpu::BlendState> blendStates(pipeline.fragment.targets.size());
+
+    wgpu::FragmentState* fragment = nullptr;
+    wgpu::FragmentState fragmentState;
+    if (pipeline.fragment.program.moduleId) {
+        fragment = &fragmentState;
+        fragmentState.module =
+            replay.GetObjectById<wgpu::ShaderModule>(pipeline.fragment.program.moduleId);
+        fragmentState.entryPoint = wgpu::StringView(pipeline.fragment.program.entryPoint);
+        fragmentState.constantCount = fragmentConstants.size();
+        fragmentState.constants = fragmentConstants.data();
+        for (const auto& target : pipeline.fragment.targets) {
+            wgpu::BlendState& blend = blendStates[colorTargets.size()];
+            blend = ToWGPU(target.blend);
+            colorTargets.push_back({
+                .format = target.format,
+                .blend = IsBlendEnabled(blend) ? &blend : nullptr,
+                .writeMask = target.writeMask,
+            });
+        }
+        fragmentState.targetCount = colorTargets.size();
+        fragmentState.targets = colorTargets.data();
+    }
+
+    wgpu::DepthStencilState* depthStencil = nullptr;
+    wgpu::DepthStencilState depthStencilState;
+    if (pipeline.depthStencil.format != wgpu::TextureFormat::Undefined) {
+        depthStencil = &depthStencilState;
+        depthStencilState.format = pipeline.depthStencil.format;
+        depthStencilState.depthWriteEnabled = pipeline.depthStencil.depthWriteEnabled;
+        depthStencilState.depthCompare = pipeline.depthStencil.depthCompare;
+        depthStencilState.stencilFront = ToWGPU(pipeline.depthStencil.stencilFront);
+        depthStencilState.stencilBack = ToWGPU(pipeline.depthStencil.stencilBack);
+        depthStencilState.stencilReadMask = pipeline.depthStencil.stencilReadMask;
+        depthStencilState.stencilWriteMask = pipeline.depthStencil.stencilWriteMask;
+        depthStencilState.depthBias = pipeline.depthStencil.depthBias;
+        depthStencilState.depthBiasSlopeScale = pipeline.depthStencil.depthBiasSlopeScale;
+        depthStencilState.depthBiasClamp = pipeline.depthStencil.depthBiasClamp;
+    }
+
+    wgpu::RenderPipelineDescriptor desc{
+        .label = wgpu::StringView(label),
+        .layout = replay.GetObjectById<wgpu::PipelineLayout>(pipeline.layoutId),
+        .vertex =
+            {
+                .module =
+                    replay.GetObjectById<wgpu::ShaderModule>(pipeline.vertex.program.moduleId),
+                .entryPoint = wgpu::StringView(pipeline.vertex.program.entryPoint),
+                .constantCount = vertexConstants.size(),
+                .constants = vertexConstants.data(),
+            },
+        .primitive =
+            {
+                .topology = pipeline.primitive.topology,
+                .stripIndexFormat = pipeline.primitive.stripIndexFormat,
+                .frontFace = pipeline.primitive.frontFace,
+                .cullMode = pipeline.primitive.cullMode,
+                .unclippedDepth = pipeline.primitive.unclippedDepth,
+            },
+        .depthStencil = depthStencil,
+        .multisample =
+            {
+                .count = pipeline.multisample.count,
+                .mask = pipeline.multisample.mask,
+                .alphaToCoverageEnabled = pipeline.multisample.alphaToCoverageEnabled,
+            },
+        .fragment = fragment,
+    };
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&desc);
+    func(renderPipeline, pipeline.groupIndexIds);
+    return {renderPipeline};
 }
 
 ResultOrError<wgpu::ShaderModule> CreateShaderModule(wgpu::Device device,
@@ -554,6 +674,25 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             return {};
         }
 
+        case schema::ObjectType::RenderPipeline: {
+            wgpu::RenderPipeline renderPipeline;
+            DAWN_TRY_ASSIGN(
+                renderPipeline,
+                CreateRenderPipeline(
+                    *this, device, readHead, resource.label,
+                    [this](wgpu::RenderPipeline& renderPipeline,
+                           const std::vector<schema::BindGroupLayoutIndexIdPair>& groupIndexIds) {
+                        // Register any implicit bindgroups.
+                        for (const auto& groupIndexId : groupIndexIds) {
+                            wgpu::BindGroupLayout bgl =
+                                renderPipeline.GetBindGroupLayout(groupIndexId.groupIndex);
+                            mResources.insert({groupIndexId.bindGroupLayoutId, {"", bgl}});
+                        }
+                    }));
+            mResources.insert({resource.id, {resource.label, renderPipeline}});
+            return {};
+        }
+
         case schema::ObjectType::ShaderModule: {
             wgpu::ShaderModule shaderModule;
             DAWN_TRY_ASSIGN(shaderModule, CreateShaderModule(device, readHead, resource.label));
@@ -629,8 +768,7 @@ MaybeError Replay::Play() {
                 break;
             }
             default: {
-                // UNIMPLEMENTED();
-                break;
+                return DAWN_INTERNAL_ERROR("unimplemented root command");
             }
         }
     }
