@@ -793,6 +793,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         wgpu::RequestAdapterWebGPUBackendOptions webgpuBackendOptions = {};
         if (gCurrentTest->mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU) {
             adapterOptions.backendType = wgpu::BackendType::Undefined;
+            webgpuBackendOptions.nextInChain = adapterOptions.nextInChain;
             adapterOptions.nextInChain = &webgpuBackendOptions;
         } else {
             adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;

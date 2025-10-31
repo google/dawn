@@ -318,6 +318,8 @@ class StaticSamplerTest : public SamplerTest {
 // modes.
 TEST_P(StaticSamplerTest, AddressMode) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+    // TODO(crbug.com/413053623): Fix static sampler feature.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     for (auto u : addressModes) {
         for (auto v : addressModes) {
@@ -337,6 +339,8 @@ TEST_P(StaticSamplerTest, AddressMode) {
 // correctly.
 TEST_P(StaticSamplerTest, PassThroughUserFunctionParameters) {
     DAWN_SUPPRESS_TEST_IF(IsWARP());
+    // TODO(crbug.com/413053623): Fix static sampler feature.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     for (auto u : addressModes) {
         for (auto v : addressModes) {

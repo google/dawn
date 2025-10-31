@@ -92,6 +92,20 @@ Device::Device(AdapterBase* adapter,
     WGPUDeviceDescriptor apiDesc = *(ToAPI(*descriptor));
     std::string label = "Inner Device on " + adapter->GetPhysicalDevice()->GetName();
     apiDesc.label = ToOutputStringView(label);
+
+    WGPUDawnTogglesDescriptor apiToggleDescriptor = WGPU_DAWN_TOGGLES_DESCRIPTOR_INIT;
+
+    apiDesc.nextInChain = nullptr;
+    auto enabledTogglesName = deviceToggles.GetEnabledToggleNames();
+    apiToggleDescriptor.enabledToggleCount = enabledTogglesName.size();
+    apiToggleDescriptor.enabledToggles = enabledTogglesName.data();
+
+    auto disabledTogglesName = deviceToggles.GetDisabledToggleNames();
+    apiToggleDescriptor.disabledToggleCount = disabledTogglesName.size();
+    apiToggleDescriptor.disabledToggles = disabledTogglesName.data();
+
+    apiDesc.nextInChain = &apiToggleDescriptor.chain;
+
     // Acquire a Ref to the outer webgpu::Device to avoid possible dangling pointer in the callback.
     Ref<Device>* outerDeviceRef = new Ref<Device>(this);
     apiDesc.deviceLostCallbackInfo = {

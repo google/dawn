@@ -167,9 +167,9 @@ TEST_P(MultiDrawIndirectTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, kDrawIndirectSize, 1, notFilled, filled);
 }
 
+// TODO(crbug.com/413053623): Implement MultiDraw*Indirect for WebGPU backend.
 DAWN_INSTANTIATE_TEST(MultiDrawIndirectTest,
                       VulkanBackend(),
-                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 
@@ -284,9 +284,9 @@ TEST_P(MultiDrawIndirectUsingFirstVertexTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, 2, notFilled, filled);
 }
 
+// TODO(crbug.com/413053623): Implement MultiDraw*Indirect for WebGPU backend.
 DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingFirstVertexTest,
                       VulkanBackend(),
-                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 
@@ -338,9 +338,9 @@ TEST_P(MultiDrawIndirectUsingInstanceIndexTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 1}, 2, notFilled, filled);
 }
 
+// TODO(crbug.com/413053623): Implement MultiDraw*Indirect for WebGPU backend.
 DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingInstanceIndexTest,
                       VulkanBackend(),
-                      WebGPUBackend(),
                       D3D12Backend(),
                       MetalBackend());
 

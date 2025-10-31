@@ -2140,14 +2140,14 @@ TEST_P(Tier1StorageValidationTests, ReadOnlyStorageTextureInFragmentShader) {
     }
 }
 
-// TODO(crbug.com/440123094): Fix device toggles passing in WebGPUBackend.
 DAWN_INSTANTIATE_TEST(Tier1StorageValidationTests,
                       D3D11Backend(),
                       D3D12Backend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
                       MetalBackend(),
-                      VulkanBackend());
+                      VulkanBackend(),
+                      WebGPUBackend());
 
 class Tier2StorageValidationTests : public ReadWriteStorageTextureTests {
   public:
