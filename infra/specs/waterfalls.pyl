@@ -322,7 +322,9 @@
         'mixins': [
           'win10_nvidia_gtx_1660_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_win_gtests',
+        },
       },
       'dawn-win-x86-sws-dbg': {
         'os_type': 'win',
