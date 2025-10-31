@@ -121,21 +121,15 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     // We do need to reference the layout though.
     //
     // Unfortunately we can't just call `AddResource(layout)` because that would add a call to
-    // createBindGroupLayout which we only want if the bindGroupLayout was not implicit
-    //
-    // We need to figure out if this is bindgroup uses an explicit layout or an auto layout.
-    // If it's an auto layout then we need to find the pipeline then generated it and reference that
-    // first so that on replay, we create the pipeline before the bind group. Otherwise, just we
-    // reference the layout directly which will cause an explicit bindgroup layout to be created on
-    // replay.
+    // createBindGroupLayout which we only want if the bindGroupLayout was not implicit. If
+    // the bindGroupLayout was implicit then the code that serializes the command buffer makes sure
+    // the pipeline is serialized first so its implicit bindGroupLayouts will already be
+    // referenced.
     BindGroupLayoutBase* layout = GetFrontendLayout();
-    if (layout->GetPipelineCompatibilityToken() == kExplicitPCT) {
+    if (layout->IsExplicit()) {
         // TODO(452983510): Handle explicit bind group layouts.
         // DAWN_TRY(captureContext.AddResource(layout));
         DAWN_CHECK(false);
-    } else {
-        DAWN_TRY(ToBackend(layout->GetInternalBindGroupLayout())
-                     ->CapturePipelineForImplicitLayout(captureContext));
     }
 
     return {};
@@ -147,7 +141,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
     BindGroupLayoutInternalBase* layout = GetLayout();
     const auto& bindingMap = layout->GetBindingMap();
 
-    for (const auto& [bindingNumbers, apiBindingIndex] : bindingMap) {
+    for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
         BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
         const auto& bindingInfo = layout->GetAPIBindingInfo(apiBindingIndex);
 
@@ -156,7 +150,7 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
             [&](const BufferBindingInfo& info) {
                 const auto& entry = GetBindingAsBufferBinding(bindingIndex);
                 entries.push_back(schema::BindGroupEntry{{
-                    .binding = uint32_t(apiBindingIndex),
+                    .binding = uint32_t(bindingNumber),
                     .bufferId = captureContext.GetId(entry.buffer),
                     .offset = entry.offset,
                     .size = entry.size,
@@ -167,8 +161,9 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
             [&](const auto& info) { DAWN_CHECK(false); });
     }
 
+    // This must use the front end layout as it is not deduplicated.
     schema::BindGroup bg{{
-        .layoutId = captureContext.GetId(GetLayout()),
+        .layoutId = captureContext.GetId(GetFrontendLayout()),
         .entries = entries,
     }};
     Serialize(captureContext, bg);

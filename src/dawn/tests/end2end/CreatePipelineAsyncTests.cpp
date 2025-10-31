@@ -175,11 +175,6 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     for (size_t i = 0; i < 100; i++) {
         wgpu::ComputePipelineDescriptor csDesc;
         std::string shader = R"(
@@ -214,11 +209,6 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
 
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
-
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     auto f = [&](size_t t) {
         wgpu::ComputePipelineDescriptor csDesc;
@@ -354,11 +344,6 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main() -> @location(0) vec4f {
             return vec4f(0.0, 1.0, 0.0, 1.0);
@@ -395,11 +380,6 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
 
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
-
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main() -> @location(0) vec4f {

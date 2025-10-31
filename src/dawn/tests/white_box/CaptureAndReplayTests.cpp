@@ -1015,6 +1015,173 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicSetBindGroupFirst) {
     }
 }
 
+// Capture and replay 2 auto-layout compute pipelines with the same layout
+// This is to verify a bug fix. In Dawn, there is BindGroupLayout and
+// BindGroupLayoutInternal. In this test, given 2 pipelines with the same
+// layout, there will be 2 BindGroupLayout objects pointing to one
+// BindGroupLayoutInternal. That means that when serializing, one of them
+// will get the wrong Pipeline if the pipeline is incorrectly associated
+// with the one BindGroupLayoutInternal instead of each of the 2 pipelines
+// being separately associated with one of the 2 BindGroupLayout objects.
+// This is a regression test for crbug.com/455605671
+TEST_P(CaptureAndReplayTests, CaptureTwoMatchingAutoLayoutComputePipelines) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+    descriptor.label = "buffer1";
+    wgpu::Buffer buffer1 = device.CreateBuffer(&descriptor);
+    descriptor.label = "buffer2";
+    wgpu::Buffer buffer2 = device.CreateBuffer(&descriptor);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn cs1() {
+            result = 0x44332211;
+        }
+
+        @compute @workgroup_size(1) fn cs2() {
+            result = 0x88776655;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.label = "pipeline1";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "cs1";
+    wgpu::ComputePipeline pipeline1 = device.CreateComputePipeline(&csDesc);
+    csDesc.label = "pipeline2";
+    csDesc.compute.entryPoint = "cs2";
+    wgpu::ComputePipeline pipeline2 = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, buffer1},
+                                                      });
+    wgpu::BindGroup bindGroup2 = utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, buffer2},
+                                                      });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline1);
+        pass.SetBindGroup(0, bindGroup1);
+        pass.DispatchWorkgroups(1);
+        pass.SetPipeline(pipeline2);
+        pass.SetBindGroup(0, bindGroup2);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer1");
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer2");
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
+// Capture and replay 2 bindGroups that use implicit bindGroupLayouts from
+// different pipelines but for 1, never set the pipeline nor dispatch. This effectively
+// makes it a no-op. The issue is, we can't easily serialize a bindGroup that uses an
+// implicit bindGroupLayout unless the pipeline that created that bindGroupLayout is
+// used in the command buffer. So, we just don't serialize those calls to setBindGroup
+// since they are effectively no-ops. This test checks things don't crash as if the
+// call was actually serialized it would reference a bindGroupLayout that does not
+// exist.
+TEST_P(CaptureAndReplayTests, CaptureTwoAutoLayoutComputePipelinesOneIsBoundButUnused) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+    descriptor.label = "buffer";
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn cs1() {
+            result = 0x44332211;
+        }
+
+        @compute @workgroup_size(1) fn cs2() {
+            result = 0x88776655;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.label = "pipeline1";
+    csDesc.compute.module = module;
+    csDesc.compute.entryPoint = "cs1";
+    wgpu::ComputePipeline pipeline1 = device.CreateComputePipeline(&csDesc);
+    csDesc.label = "pipeline2";
+    csDesc.compute.entryPoint = "cs2";
+    wgpu::ComputePipeline pipeline2 = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, buffer},
+                                                      });
+    wgpu::BindGroup bindGroup2 = utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0),
+                                                      {
+                                                          {0, buffer},
+                                                      });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bindGroup1);
+        pass.SetPipeline(pipeline2);
+        pass.SetBindGroup(0, bindGroup2);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer");
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x55, 0x66, 0x77, 0x88};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

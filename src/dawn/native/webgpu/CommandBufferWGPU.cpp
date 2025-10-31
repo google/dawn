@@ -55,6 +55,21 @@ CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescrip
 
 namespace {
 
+// Only serialize bindGroups that are explicit OR who's bindGroupLayout has an schema::ObjectId.
+// If it's not explicit and has no id then its pipeline was not in the command buffer and so
+// it was not actually used.
+bool ShouldCaptureBindGroup(CaptureContext& captureContext, BindGroupBase* bindGroup) {
+    BindGroupLayoutBase* layout = bindGroup->GetFrontendLayout();
+    return layout->IsExplicit() || captureContext.HasId(layout);
+}
+
+// Note: These are fine to be pointers and not Refs as this object
+// does not outlast a CommandBuffer which itself uses Refs.
+struct CommandBufferResourceUsages {
+    std::vector<ComputePipelineBase*> computePipelines;
+    std::vector<BindGroupBase*> bindGroups;
+};
+
 void EncodeComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
                        CommandIterator& commands,
@@ -571,7 +586,9 @@ void EncodeRenderPass(const Device* device,
         break;                                \
     }
 
-MaybeError AddReferencedFromComputePass(CaptureContext& captureContext, CommandIterator& commands) {
+MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureContext,
+                                                    CommandIterator& commands,
+                                                    CommandBufferResourceUsages& usedResources) {
     Command type;
     while (commands.NextCommandId(&type)) {
         switch (type) {
@@ -581,12 +598,12 @@ MaybeError AddReferencedFromComputePass(CaptureContext& captureContext, CommandI
             }
             case Command::SetComputePipeline: {
                 auto cmd = commands.NextCommand<SetComputePipelineCmd>();
-                DAWN_TRY(captureContext.AddResource(cmd->pipeline.Get()));
+                usedResources.computePipelines.push_back(cmd->pipeline.Get());
                 break;
             }
             case Command::SetBindGroup: {
                 auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                DAWN_TRY(captureContext.AddResource(cmd->group.Get()));
+                usedResources.bindGroups.push_back(cmd->group.Get());
                 break;
             }
                 DAWN_SKIP_COMMAND(Dispatch)
@@ -632,15 +649,18 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 const uint32_t* dynamicOffsetsData =
                     cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
                                                : nullptr;
-                schema::ComputePassCommandSetBindGroupCmd data{{
-                    .data = {{
-                        .index = uint32_t(cmd.index),
-                        .bindGroupId = captureContext.GetId(cmd.group),
-                        .dynamicOffsets = std::vector<uint32_t>(
-                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
-                    }},
-                }};
-                Serialize(captureContext, data);
+
+                if (ShouldCaptureBindGroup(captureContext, cmd.group.Get())) {
+                    schema::ComputePassCommandSetBindGroupCmd data{{
+                        .data = {{
+                            .index = uint32_t(cmd.index),
+                            .bindGroupId = captureContext.GetId(cmd.group),
+                            .dynamicOffsets = std::vector<uint32_t>(
+                                dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                        }},
+                    }};
+                    Serialize(captureContext, data);
+                }
                 break;
             }
             case Command::Dispatch: {
@@ -691,13 +711,45 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
         DAWN_TRY(AddReferencedPassResourceUsages(captureContext, pass.dispatchUsages));
     }
 
+    // We need to process all pipelines (setPipeline calls) before we deal with
+    // any bindGroups (setBindGroup calls). The reason is, bindGroups reference
+    // a bindGroupLayout but that bindGroupLayout might have been implicitly
+    // created from a `layout: 'auto'` pipeline. That means, in order to create
+    // the bindGroup we need to have first created the correct pipeline.
+    // Unfortunately there is no association from an implicitly created
+    // bindGroupLayout to the pipeline that created it.
+    //
+    // So, we gather all the pipelines and all the bindGroups referenced in the
+    // command buffer. We then serialize all the pipelines. Pipelines that
+    // create implicit bindGroupLayouts will make schema::ObjectIds for those
+    // implicit bindGroupLayouts which means we can then serialize bindGroups
+    // from the calls to `setBindGroup`.
+    //
+    // This has one issue though, the user can call `setBindGroup` that
+    // references an implicit bindGroupLayout that is never used. Example:
+    //
+    //     setBindGroup(0, bindGroupWithImplicitBGLForPipelineThatIsNotInCommandBuffer);
+    //     setBindGroup(0, otherBindGroup);
+    //
+    // That first call is effectively a no-op as it's replaced. Even if it
+    // wasn't replaced it's a no-op because it could not have been used,
+    // otherwise an error would have been generated during encoding.
+    //
+    // So, our solution is to not serialize both the bindGroup and the call to
+    // setBindGroup. To skip serializing the unused bindGroup and unused call,
+    // we check if the implicit bindGroupLayout been assigned an id because we
+    // previously serialized the pipeline that created it. If there is no id
+    // then don't serialize either as they weren't used.
+    CommandBufferResourceUsages usedResources;
+
     DAWN_TRY(UseCommands([&](CommandIterator& commands) -> MaybeError {
         Command type;
         while (commands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     commands.NextCommand<BeginComputePassCmd>();
-                    DAWN_TRY(AddReferencedFromComputePass(captureContext, commands));
+                    DAWN_TRY(GatherReferencedResourcesFromComputePass(captureContext, commands,
+                                                                      usedResources));
                     break;
                 }
                     DAWN_SKIP_COMMAND(CopyBufferToBuffer)
@@ -710,6 +762,17 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
         }
         return {};
     }));
+
+    // We must serialize pipelines before bindGroups since some bindGroups use implicitly created
+    // bindGroupLayout.
+    for (auto pipeline : usedResources.computePipelines) {
+        DAWN_TRY(captureContext.AddResource(pipeline));
+    }
+    for (auto bindGroup : usedResources.bindGroups) {
+        if (ShouldCaptureBindGroup(captureContext, bindGroup)) {
+            DAWN_TRY(captureContext.AddResource(bindGroup));
+        }
+    }
 
     return {};
 }

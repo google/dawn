@@ -51,16 +51,12 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase,
 
     MaybeError AddReferenced(CaptureContext& captureContext) override;
     MaybeError CaptureCreationParameters(CaptureContext& context) override;
-    void AssociateWithPipeline(PipelineBase* pipeline);
-    MaybeError CapturePipelineForImplicitLayout(CaptureContext& context);
 
   private:
     BindGroupLayout(Device* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayout() override = default;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
-
-    Ref<PipelineBase> mPipelineForImplicitLayout;
 };
 
 }  // namespace dawn::native::webgpu

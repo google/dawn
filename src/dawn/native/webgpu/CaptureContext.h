@@ -138,6 +138,11 @@ class CaptureContext {
         return it->second;
     }
 
+    template <typename T>
+    bool HasId(T* object) {
+        return mObjectIds.find(Ref<ApiObjectBase>(object)) != mObjectIds.end();
+    }
+
     void WriteCommandBytes(const void* data, size_t size);
     void WriteContentBytes(const void* data, size_t size);
 

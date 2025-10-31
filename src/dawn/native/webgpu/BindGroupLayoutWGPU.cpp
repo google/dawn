@@ -92,10 +92,6 @@ void BindGroupLayout::ReduceMemoryUsage() {
     mBindGroupAllocator->DeleteEmptySlabs();
 }
 
-void BindGroupLayout::AssociateWithPipeline(PipelineBase* pipeline) {
-    mPipelineForImplicitLayout = pipeline;
-}
-
 MaybeError BindGroupLayout::AddReferenced(CaptureContext& captureContext) {
     // BindGroupLayouts don't reference anything.
     return {};
@@ -104,20 +100,6 @@ MaybeError BindGroupLayout::AddReferenced(CaptureContext& captureContext) {
 MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& context) {
     // TODO(451338754): Implement explicit BindGroupLayout capture
     return {};
-}
-
-MaybeError BindGroupLayout::CapturePipelineForImplicitLayout(CaptureContext& context) {
-    DAWN_ASSERT(mPipelineForImplicitLayout != nullptr);
-    PipelineBase* pipeline = mPipelineForImplicitLayout.Get();
-    ComputePipelineBase* computePipeline = pipeline->AsComputePipeline();
-    if (computePipeline) {
-        return context.AddResource(computePipeline);
-    }
-    // TODO(451389801): Capture render pass pipelines.
-    // RenderPipelineBase* renderPipeline = pipeline->AsRenderPipeline();
-    // DAWN_ASSERT(renderPipeline);
-    // return context.AddResource(renderPipeline);
-    DAWN_CHECK(false);
 }
 
 }  // namespace dawn::native::webgpu

@@ -456,11 +456,6 @@ TEST_P(MultithreadTests, CreateComputePipelineInParallel) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     std::vector<wgpu::ComputePipeline> pipelines(10);
     std::vector<std::string> shaderSources(pipelines.size());
     std::vector<uint32_t> expectedValues(shaderSources.size());
@@ -526,11 +521,6 @@ TEST_P(MultithreadTests, CreateComputePipelineInParallel) {
 TEST_P(MultithreadTests, CreateRenderPipelineAsyncInParallel) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
-
-    // TODO(crbug.com/455605671): Flakily kills test process on multiple
-    // platforms. There is evidence that this may apply to non-WebGPU on WebGPU,
-    // but start with a more limited scope for now.
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     constexpr uint32_t kNumThreads = 10;
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
