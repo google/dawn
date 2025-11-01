@@ -929,7 +929,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         )
         return None
 
-    def kotlin_prefixed_name(name, category=None):
+    def kotlin_name(name, category=None):
         return ('GPU' if category == 'object' else '') + name
 
     def kotlin_return(method):
@@ -990,7 +990,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         if type.category == 'kotlin type':
             # Standard library Kotlin class (with namespace) just needs converting.
             return type.name.get().replace('.', '/')
-        return f"{kt_file_path}/{kotlin_prefixed_name(type.name.CamelCase(), category)}"
+        return f"{kt_file_path}/{kotlin_name(type.name.CamelCase(), category)}"
 
     # A structure may need to know which other structures listed it as a chain root, e.g.
     # to know whether to mark the generated class 'open'.
@@ -1011,7 +1011,7 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     params_kotlin['chain_children'] = chain_children
     params_kotlin['kotlin_default'] = kotlin_default
     params_kotlin['kotlin_return'] = kotlin_return
-    params_kotlin['kotlin_prefixed_name'] = kotlin_prefixed_name
+    params_kotlin['kotlin_name'] = kotlin_name
     params_kotlin['include_method'] = include_method
     params_kotlin['include_structure'] = include_structure
     params_kotlin['include_enum'] = include_enum
