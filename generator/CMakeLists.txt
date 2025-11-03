@@ -185,7 +185,7 @@ function(DawnJSONGenerator)
              ${arg_TARGET}
              ${arg_UNPARSED_ARGUMENTS}
              --webgpu-json
-             "${Dawn_SOURCE_DIR}/third_party/webgpu-headers/src/webgpu.json"
+             "${DAWN_WEBGPU_HEADERS_DIR}/webgpu.json"
     )
 
     if (SOURCES AND NOT arg_OUTPUT_SOURCES)

@@ -192,12 +192,15 @@ set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directo
 set_if_not_defined(DAWN_LPM_DIR "${DAWN_THIRD_PARTY_DIR}/libprotobuf-mutator/src" "Directory in which to find libprotobuf")
 set_if_not_defined(DAWN_EMDAWNWEBGPU_DIR "${DAWN_THIRD_PARTY_DIR}/emdawnwebgpu" "Directory in which to find Dawn specific Emscripten bindings")
 set_if_not_defined(DAWN_GOOGLETEST_DIR "${DAWN_THIRD_PARTY_DIR}/googletest" "Directory in which to find googletest")
-
+set_if_not_defined(DAWN_EGL_REGISTRY_DIR "${DAWN_THIRD_PARTY_DIR}/khronos/EGL-Registry" "Directory in which to find EGL-Registry")
+set_if_not_defined(DAWN_OPENGL_REGISTRY_DIR "${DAWN_THIRD_PARTY_DIR}/khronos/OpenGL-Registry" "Directory in which to find OpenGL-Registry")
 set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src" "Directory in which to find SPIRV-Tools")
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")
 set_if_not_defined(DAWN_GLSLANG_DIR "${DAWN_THIRD_PARTY_DIR}/glslang/src" "Directory in which to find GLSLang")
 set_if_not_defined(DAWN_VULKAN_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-headers/src" "Directory in which to find Vulkan-Headers")
 set_if_not_defined(DAWN_VULKAN_UTILITY_LIBRARIES_DIR "${DAWN_THIRD_PARTY_DIR}/vulkan-utility-libraries/src" "Directory in which to find Vulkan-Utility-Libraries")
+set_if_not_defined(DAWN_WEBGPU_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/webgpu-headers/src" "Directory in which to find webgpu headers")
+
 
 # Handling of the type of monolithic library to build, if any.
 set(DAWN_BUILD_MONOLITHIC_LIBRARY "STATIC" CACHE STRING "Build monolithic library: SHARED, STATIC, or OFF.")

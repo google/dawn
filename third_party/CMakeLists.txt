@@ -177,8 +177,8 @@ endif()
 if (DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES)
     # Header-only library for khrplatform.h
     add_library(dawn_khronos_platform INTERFACE)
-    target_sources(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api/KHR/khrplatform.h")
-    target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api")
+    target_sources(dawn_khronos_platform INTERFACE "${DAWN_EGL_REGISTRY_DIR}/api/KHR/khrplatform.h")
+    target_include_directories(dawn_khronos_platform INTERFACE "${DAWN_EGL_REGISTRY_DIR}/api")
 endif()
 
 if (NOT TARGET Vulkan::Headers AND DAWN_ENABLE_VULKAN)
