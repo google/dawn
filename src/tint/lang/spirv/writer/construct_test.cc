@@ -172,6 +172,24 @@ TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
     EXPECT_INST("OpReturnValue %arg");
 }
 
+TEST_F(SpirvWriterTest, Construct_Array_ZeroValue) {
+    auto* func = b.Function("foo", ty.array<f32, 4>());
+    b.Append(func->Block(), [&] {
+        auto* result = b.Construct(ty.array<f32, 4>());
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func));
+        b.Return(eb);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpConstantNull %_arr_float_uint_4");
+}
+
 TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_ZeroValue) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {

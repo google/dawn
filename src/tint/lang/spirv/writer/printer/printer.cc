@@ -2294,9 +2294,9 @@ class Printer {
             return;
         }
 
-        // Zero-value constructors for subgroup matrices are not folded into constants, so
-        // special-case them into OpConstantNull here.
-        if (ContainsSubgroupMatrix(result_ty) && construct->Operands().IsEmpty()) {
+        // A zero-value constructor may be used for subgroup matrices or when IR is created from a
+        // flow that is not the WGSL frontend, so special-case them into OpConstantNull here.
+        if (construct->Operands().IsEmpty()) {
             values_.Add(construct->Result(), ConstantNull(result_ty));
             return;
         }
