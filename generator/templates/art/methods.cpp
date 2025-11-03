@@ -65,7 +65,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
 }
 
 {% macro render_method(method, object) %}
-    {% set ObjectName = kotlin_name(object.name.CamelCase(), 'object') if object else "FunctionsKt" %}
+    {% set ObjectName = kotlin_name(object) if object else "FunctionsKt" %}
     {% set FunctionSuffix = ObjectName + "_" +  method.name.camelCase() %}
     {% set KotlinRecord = FunctionSuffix + "KotlinRecord" %}
     {% set ArgsStruct = FunctionSuffix + "ArgsStruct" %}
@@ -192,7 +192,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     //* Every object gets a Release method, to supply a Kotlin AutoCloseable.
     extern "C"
     JNIEXPORT void JNICALL
-    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj.name.CamelCase(), 'object') }}_close(
+    Java_{{ kotlin_package.replace('.', '_') }}_{{ kotlin_name(obj) }}_close(
             JNIEnv *env, jobject obj) {
         JNIClasses* classes = JNIClasses::getInstance(env);
         jclass clz = classes->{{ obj.name.camelCase() }};
