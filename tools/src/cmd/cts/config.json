@@ -89,11 +89,6 @@
       "Project": "chromium",
       "Bucket": "try",
       "Builder": "dawn-try-linux-x64-intel-uhd770-rel"
-    },
-    "Linux-NVIDIA-GTX1660-Experimental": {
-      "Project": "chromium",
-      "Bucket": "try",
-      "Builder": "linux-dawn-nvidia-1660-exp-rel"
     }
   },
   "Tag": {
