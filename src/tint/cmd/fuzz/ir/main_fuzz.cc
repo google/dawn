@@ -83,7 +83,10 @@ DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
     tint::fuzz::ir::Run(acquire_module, options, data);
 }
 
-extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
+// Explicitly specify the visibility to prevent the linker from stripping the function on macOS, as
+// the LibFuzzer runtime uses dlsym() instead of calling the function directly.
+extern "C" __attribute__((visibility("default"))) int LLVMFuzzerInitialize(int* argc,
+                                                                           char*** argv) {
     tint::cli::OptionSet opts;
 
     tint::Vector<std::string_view, 8> arguments;

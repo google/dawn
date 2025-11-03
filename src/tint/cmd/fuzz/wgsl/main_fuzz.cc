@@ -95,7 +95,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* input, size_t size) {
     return 0;
 }
 
-extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
+// Explicitly specify the visibility to prevent the linker from stripping the function on macOS, as
+// the LibFuzzer runtime uses dlsym() instead of calling the function directly.
+extern "C" __attribute__((visibility("default"))) int LLVMFuzzerInitialize(int* argc,
+                                                                           char*** argv) {
     tint::cli::OptionSet opts;
 
     tint::Vector<std::string_view, 8> arguments;
