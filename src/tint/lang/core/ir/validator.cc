@@ -321,9 +321,6 @@ std::string_view ToString(IODirection value) {
 /// It does not test more sophisticated rules like location and builtins being mutually exclusive or
 /// the correct capabilities are enabled.
 struct BuiltinChecker {
-    /// User friendly name to print in logging messages
-    const char* name;
-
     /// What type of entry point is this builtin legal for
     EnumSet<Function::PipelineStage> stages;
 
@@ -341,7 +338,6 @@ struct BuiltinChecker {
 };
 
 constexpr BuiltinChecker kPointSizeChecker{
-    /* name */ "__point_size",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
     /* direction */ IODirection::kOutput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
@@ -349,7 +345,6 @@ constexpr BuiltinChecker kPointSizeChecker{
 };
 
 constexpr BuiltinChecker kCullDistanceChecker{
-    /* name */ "__cull_distance",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
     /* direction */ IODirection::kOutput,
     /* type_check */
@@ -360,7 +355,6 @@ constexpr BuiltinChecker kCullDistanceChecker{
 };
 
 constexpr BuiltinChecker kFragDepthChecker{
-    /* name */ "frag_depth",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ IODirection::kOutput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
@@ -368,7 +362,6 @@ constexpr BuiltinChecker kFragDepthChecker{
 };
 
 constexpr BuiltinChecker kFrontFacingChecker{
-    /* name */ "front_facing",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::Bool>(); },
@@ -376,7 +369,6 @@ constexpr BuiltinChecker kFrontFacingChecker{
 };
 
 constexpr BuiltinChecker kGlobalInvocationIdChecker{
-    /* name */ "global_invocation_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -387,7 +379,6 @@ constexpr BuiltinChecker kGlobalInvocationIdChecker{
 };
 
 constexpr BuiltinChecker kInstanceIndexChecker{
-    /* name */ "instance_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
@@ -395,7 +386,6 @@ constexpr BuiltinChecker kInstanceIndexChecker{
 };
 
 constexpr BuiltinChecker kLocalInvocationIdChecker{
-    /* name */ "local_invocation_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -406,7 +396,6 @@ constexpr BuiltinChecker kLocalInvocationIdChecker{
 };
 
 constexpr BuiltinChecker kLocalInvocationIndexChecker{
-    /* name */ "local_invocation_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
@@ -414,7 +403,6 @@ constexpr BuiltinChecker kLocalInvocationIndexChecker{
 };
 
 constexpr BuiltinChecker kNumSubgroupsChecker{
-    /* name */ "num_subgroups",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
@@ -422,7 +410,6 @@ constexpr BuiltinChecker kNumSubgroupsChecker{
 };
 
 constexpr BuiltinChecker kNumWorkgroupsChecker{
-    /* name */ "num_workgroups",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -433,7 +420,6 @@ constexpr BuiltinChecker kNumWorkgroupsChecker{
 };
 
 constexpr BuiltinChecker kSampleIndexChecker{
-    /* name */ "sample_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
@@ -441,7 +427,6 @@ constexpr BuiltinChecker kSampleIndexChecker{
 };
 
 constexpr BuiltinChecker kSubgroupIdChecker{
-    /* name */ "subgroup_id",
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
@@ -450,7 +435,6 @@ constexpr BuiltinChecker kSubgroupIdChecker{
 };
 
 constexpr BuiltinChecker kSubgroupInvocationIdChecker{
-    /* name */ "subgroup_invocation_id",
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
                                      Function::PipelineStage::kCompute),
@@ -460,7 +444,6 @@ constexpr BuiltinChecker kSubgroupInvocationIdChecker{
 };
 
 constexpr BuiltinChecker kSubgroupSizeChecker{
-    /* name */ "subgroup_size",
     /* stages */
     EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
                                      Function::PipelineStage::kCompute),
@@ -470,7 +453,6 @@ constexpr BuiltinChecker kSubgroupSizeChecker{
 };
 
 constexpr BuiltinChecker kVertexIndexChecker{
-    /* name */ "vertex_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
     /* direction */ IODirection::kInput,
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
@@ -478,7 +460,6 @@ constexpr BuiltinChecker kVertexIndexChecker{
 };
 
 constexpr BuiltinChecker kWorkgroupIdChecker{
-    /* name */ "workgroup_id",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -489,7 +470,6 @@ constexpr BuiltinChecker kWorkgroupIdChecker{
 };
 
 constexpr BuiltinChecker kPrimitiveIndexChecker{
-    /* name */ "primitive_index",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -498,7 +478,6 @@ constexpr BuiltinChecker kPrimitiveIndexChecker{
 };
 
 constexpr BuiltinChecker kBarycentricCoordChecker{
-    /* name */ "barycentric_coord",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
     /* direction */ IODirection::kInput,
     /* type_check */
@@ -673,12 +652,13 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
         auto stages_size = checker.stages.Size();
         switch (stages_size) {
             case 1:
-                msg << checker.name << " must be used in a " << ToString(*checker.stages.begin())
-                    << " shader entry point";
+                msg << ToString(builtin) << " must be used in a "
+                    << ToString(*checker.stages.begin()) << " shader entry point";
                 break;
             case 2:
-                msg << checker.name << " must be used in a " << ToString(*checker.stages.begin())
-                    << " or " << ToString(*(++checker.stages.begin())) << " shader entry point";
+                msg << ToString(builtin) << " must be used in a "
+                    << ToString(*checker.stages.begin()) << " or "
+                    << ToString(*(++checker.stages.begin())) << " shader entry point";
                 break;
             default:
                 TINT_ICE() << "Unexpected number of stages set, " << stages_size;
@@ -688,7 +668,7 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
 
     auto io_direction = is_input ? IODirection::kInput : IODirection::kOutput;
     if (io_direction != checker.direction) {
-        msg << checker.name << " must be an " << ToString(checker.direction)
+        msg << ToString(builtin) << " must be an " << ToString(checker.direction)
             << " of a shader entry point";
         return msg.str();
     }
@@ -1087,22 +1067,8 @@ class Validator {
     void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
         if (func->ReturnType()->Is<core::type::Struct>() &&
             func->ReturnAttributes().builtin.has_value()) {
-            const char* name;
-            switch (func->ReturnAttributes().builtin.value()) {
-                case BuiltinValue::kPosition:
-                    name = "position";
-                    break;
-                case BuiltinValue::kSampleMask:
-                    name = "sample_mask";
-                    break;
-                case BuiltinValue::kClipDistances:
-                    name = "clip_distances";
-                    break;
-                default:
-                    name = BuiltinCheckerFor(func->ReturnAttributes().builtin.value()).name;
-                    break;
-            }
-            AddError(func) << name << " cannot be attached to a structure";
+            AddError(func) << ToString(func->ReturnAttributes().builtin.value())
+                           << " cannot be attached to a structure";
         }
 
         CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
