@@ -149,7 +149,7 @@
 [submodule "third_party/webgpu-cts"]
 	path = third_party/webgpu-cts
 	url = https://chromium.googlesource.com/external/github.com/gpuweb/cts
-	gclient-condition = build_with_chromium
+	gclient-condition = build_with_chromium or dawn_standalone
 [submodule "third_party/emsdk"]
 	path = third_party/emsdk
 	url = https://chromium.googlesource.com/external/github.com/emscripten-core/emsdk.git
@@ -183,7 +183,7 @@
 	gclient-condition = dawn_standalone
 [submodule "third_party/jsoncpp"]
 	path = third_party/jsoncpp
-	url = https://github.com/open-source-parsers/jsoncpp.git
+	url = https://chromium.googlesource.com/external/github.com/open-source-parsers/jsoncpp.git
 	gclient-condition = dawn_tintd
 [submodule "third_party/langsvr"]
 	path = third_party/langsvr

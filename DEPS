@@ -237,7 +237,7 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@2b39694741d609b78948e2330a47d684e723f229',
+    'url': '{chromium_git}/chromium/src/testing@fec671f0c0fcb50654e60a118bb24051c516bb01',
     'condition': 'dawn_standalone',
   },
   'third_party/libFuzzer/src': {
