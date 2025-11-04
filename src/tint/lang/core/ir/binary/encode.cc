@@ -1400,6 +1400,8 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_matrix_multiply_accumulate;
             case core::BuiltinFn::kSubgroupMatrixScalarAdd:
                 return pb::BuiltinFn::subgroup_matrix_scalar_add;
+            case core::BuiltinFn::kSubgroupMatrixScalarMultiply:
+                return pb::BuiltinFn::subgroup_matrix_scalar_multiply;
             case core::BuiltinFn::kPrint:
                 return pb::BuiltinFn::print;
             case core::BuiltinFn::kHasBinding:

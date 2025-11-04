@@ -177,6 +177,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kSubgroupMatrixMultiply,
         kSubgroupMatrixMultiplyAccumulate,
         kSubgroupMatrixScalarAdd,
+        kSubgroupMatrixScalarMultiply,
         // End of range marker:
         kEndOfFunctionRange,
     };
@@ -327,6 +328,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                        "subgroup_matrix_right_zero, subgroup_matrix_result_zero)";
             case kSubgroupMatrixScalarAdd:
                 return "_ = subgroupMatrixScalarAdd(subgroup_matrix_left_zero, 4.2f)";
+            case kSubgroupMatrixScalarMultiply:
+                return "_ = subgroupMatrixScalarMultiply(subgroup_matrix_left_zero, 4.2f)";
             case kEndOfFunctionRange:
                 return "<invalid>";
         }
@@ -421,6 +424,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kSubgroupMatrixMultiply);
             CASE(kSubgroupMatrixMultiplyAccumulate);
             CASE(kSubgroupMatrixScalarAdd);
+            CASE(kSubgroupMatrixScalarMultiply);
             case kEndOfFunctionRange:
                 break;
         }
