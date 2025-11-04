@@ -1770,6 +1770,9 @@ implicit(T: iu32, N: num) fn convert_s_to_f<R: f32_f16>(vec<N, T>) -> vec<N, R>
 implicit(T: iu32) fn convert_u_to_f<R: f32_f16>(T) -> R
 implicit(T: iu32, N: num) fn convert_u_to_f<R: f32_f16>(vec<N, T>) -> vec<N, R>
 
+implicit(T: i32) fn s_convert<K: i8>(T) -> K
+implicit(T: u32) fn u_convert<K: u8>(T) -> K
+
 implicit(A: iu32, B: iu32) fn bitwise_and<R: iu32>(A, B) -> R
 implicit(A: iu32, B: iu32, N: num) fn bitwise_and<R: iu32>(vec<N, A>, vec<N, B>) -> vec<N, R>
 implicit(A: iu32, B: iu32) fn bitwise_or<R: iu32>(A, B) -> R
@@ -1855,6 +1858,13 @@ fn u_dot(u32, u32, u32) -> u32
     subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>,
     u32)
     -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
+  op + (subgroup_matrix<K, T, C, R>, subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, T, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  op + (subgroup_matrix<K, i8, C, R>, subgroup_matrix<K, i8, C, R>) -> subgroup_matrix<K, i8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  op + (subgroup_matrix<K, u8, C, R>, subgroup_matrix<K, u8, C, R>) -> subgroup_matrix<K, u8, C, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Subgroups

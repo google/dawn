@@ -39,11 +39,14 @@
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/core/type/u8.h"
+#include "src/tint/lang/spirv/ir/binary.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
 #include "src/tint/lang/spirv/type/resource_binding.h"
@@ -242,6 +245,7 @@ struct State {
                     case core::BuiltinFn::kSubgroupMatrixStore:
                     case core::BuiltinFn::kSubgroupMatrixMultiply:
                     case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
+                    case core::BuiltinFn::kSubgroupMatrixScalarAdd:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -343,6 +347,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
                     SubgroupMatrixMultiplyAccumulate(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixScalarAdd:
+                    SubgroupMatrixScalarAdd(builtin);
                     break;
                 default:
                     break;
@@ -1307,6 +1314,33 @@ struct State {
             b.CallWithResult<spirv::ir::BuiltinCall>(builtin->DetachResult(),
                                                      spirv::BuiltinFn::kCooperativeMatrixMulAdd,
                                                      left, right, acc, operands);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixScalarAdd builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixScalarAdd(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* mat = builtin->Args()[0];
+            auto* scalar = builtin->Args()[1];
+
+            auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
+            if (sm_ty->Type()->Is<core::type::I8>()) {
+                scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
+                              ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
+                              b.Call(ty.i32(), core::BuiltinFn::kClamp, scalar, -128_i, 127_i))
+                             ->Result();
+            } else if (sm_ty->Type()->Is<core::type::U8>()) {
+                scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
+                              ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
+                              b.Call(ty.u32(), core::BuiltinFn::kClamp, scalar, 0_u, 255_u))
+                             ->Result();
+            }
+
+            auto* scalar_mat = b.Construct(sm_ty, scalar);
+            b.BinaryWithResult<spirv::ir::Binary>(builtin->DetachResult(), core::BinaryOp::kAdd,
+                                                  mat, scalar_mat);
         });
         builtin->Destroy();
     }

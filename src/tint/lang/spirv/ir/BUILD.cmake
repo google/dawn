@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_spirv_ir lib
+  lang/spirv/ir/binary.cc
+  lang/spirv/ir/binary.h
   lang/spirv/ir/builtin_call.cc
   lang/spirv/ir/builtin_call.h
   lang/spirv/ir/copy_logical.cc
@@ -77,6 +79,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_ir lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_spirv_ir_test test
+  lang/spirv/ir/binary_test.cc
   lang/spirv/ir/builtin_call_test.cc
 )
 

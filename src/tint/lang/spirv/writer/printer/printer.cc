@@ -87,6 +87,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/spirv/ir/binary.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/copy_logical.h"
 #include "src/tint/lang/spirv/ir/literal_operand.h"
@@ -1022,6 +1023,7 @@ class Printer {
                 [&](core::ir::Access* a) { EmitAccess(a); },                          //
                 [&](core::ir::Bitcast* b) { EmitBitcast(b); },                        //
                 [&](core::ir::CoreBinary* b) { EmitBinary(b); },                      //
+                [&](spirv::ir::Binary* b) { EmitSpirvBinary(b); },                    //
                 [&](core::ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
                 [&](spirv::ir::BuiltinCall* b) { EmitSpirvBuiltinCall(b); },          //
                 [&](core::ir::Construct* c) { EmitConstruct(c); },                    //
@@ -1358,6 +1360,33 @@ class Printer {
                 } else if (lhs_ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpULessThanEqual;
                 }
+                break;
+            }
+            default: {
+                TINT_IR_UNIMPLEMENTED(ir_)
+                    << "\"" << binary->Op() << "\"  (enum value=" << static_cast<int>(binary->Op())
+                    << ")";
+            }
+        }
+
+        // Emit the instruction.
+        current_function_.PushInst(op, {Type(ty), id, lhs, rhs});
+    }
+
+    /// Emit a binary instruction.
+    /// @param binary the binary instruction to emit
+    void EmitSpirvBinary(spirv::ir::Binary* binary) {
+        auto id = Value(binary);
+        auto lhs = Value(binary->LHS());
+        auto rhs = Value(binary->RHS());
+        auto* ty = binary->Result()->Type();
+
+        // Determine the opcode.
+        spv::Op op = spv::Op::Max;
+        switch (binary->Op()) {
+            case core::BinaryOp::kAdd: {
+                op = ty->DeepestElement()->IsIntegerScalarOrVector() ? spv::Op::OpIAdd
+                                                                     : spv::Op::OpFAdd;
                 break;
             }
             default: {
@@ -1735,6 +1764,12 @@ class Printer {
                 break;
             case BuiltinFn::kGroupNonUniformSMax:
                 op = spv::Op::OpGroupNonUniformSMax;
+                break;
+            case BuiltinFn::kUConvert:
+                op = spv::Op::OpUConvert;
+                break;
+            case BuiltinFn::kSConvert:
+                op = spv::Op::OpSConvert;
                 break;
             case spirv::BuiltinFn::kNone:
                 TINT_IR_ICE(ir_) << "undefined spirv ir function";

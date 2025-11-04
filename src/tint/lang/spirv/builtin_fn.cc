@@ -206,6 +206,10 @@ const char* str(BuiltinFn i) {
             return "convert_s_to_f";
         case BuiltinFn::kConvertUToF:
             return "convert_u_to_f";
+        case BuiltinFn::kSConvert:
+            return "s_convert";
+        case BuiltinFn::kUConvert:
+            return "u_convert";
         case BuiltinFn::kBitwiseAnd:
             return "bitwise_and";
         case BuiltinFn::kBitwiseOr:
@@ -381,6 +385,8 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kGroupNonUniformQuadSwap:
         case BuiltinFn::kGroupNonUniformSMin:
         case BuiltinFn::kGroupNonUniformSMax:
+        case BuiltinFn::kSConvert:
+        case BuiltinFn::kUConvert:
             break;
     }
     return core::ir::Instruction::Accesses{};

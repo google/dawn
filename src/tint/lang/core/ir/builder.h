@@ -633,6 +633,21 @@ class Builder {
         return Append(ir.CreateInstruction<KLASS>(InstructionResult(type), op, lhs_val, rhs_val));
     }
 
+    /// Creates an op for `lhs kind rhs`
+    /// @param op the binary operator
+    /// @param result the result of the binary expression
+    /// @param lhs the left-hand-side of the operation
+    /// @param rhs the right-hand-side of the operation
+    /// @returns the operation
+    template <typename KLASS, typename LHS, typename RHS>
+        requires(tint::traits::IsTypeOrDerived<KLASS, ir::Binary>)
+    KLASS* BinaryWithResult(ir::InstructionResult* result, BinaryOp op, LHS&& lhs, RHS&& rhs) {
+        CheckForNonDeterministicEvaluation<LHS, RHS>();
+        auto* lhs_val = Value(std::forward<LHS>(lhs));
+        auto* rhs_val = Value(std::forward<RHS>(rhs));
+        return Append(ir.CreateInstruction<KLASS>(result, op, lhs_val, rhs_val));
+    }
+
     /// Creates an And operation
     /// @param type the result type of the expression
     /// @param lhs the lhs of the add

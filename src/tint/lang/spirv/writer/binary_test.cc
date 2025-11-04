@@ -29,6 +29,7 @@
 
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
+#include "src/tint/lang/spirv/ir/binary.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -1079,6 +1080,40 @@ TEST_F(SpirvWriterTest, Modulo_vec4i_i32) {
          %46 = OpBitcast %v4int %45
                OpReturnValue %46
                OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Add_SubgroupMatrix) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+
+        auto* scalar_mat = b.Construct(mat, 2_f);
+        b.Binary<spirv::ir::Binary>(core::BinaryOp::kAdd, mat, b.Load(v), scalar_mat);
+        b.Return(func);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .use_vulkan_memory_model = true,
+    };
+
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("OpCapability CooperativeMatrixKHR");
+    EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
+    EXPECT_INST(R"(
+          %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_2
+%_ptr_Function_7 = OpTypePointer Function %7
+    %float_0 = OpConstant %float 0
+         %13 = OpConstantComposite %7 %float_0
+)");
+    EXPECT_INST(R"(
+          %v = OpVariable %_ptr_Function_7 Function %13
+         %15 = OpCompositeConstruct %7 %float_2
+         %17 = OpLoad %7 %v None
+         %18 = OpFAdd %7 %17 %15
 )");
 }
 

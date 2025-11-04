@@ -131,6 +131,8 @@ enum class BuiltinFn : uint8_t {
     kConvertFToS,
     kConvertSToF,
     kConvertUToF,
+    kSConvert,
+    kUConvert,
     kBitwiseAnd,
     kBitwiseOr,
     kBitwiseXor,
