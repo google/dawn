@@ -618,6 +618,7 @@ struct State {
             // DVA needs to be updated if handles start to be passed by pointer.
             TINT_IR_ASSERT(ir, ptr->AddressSpace() != core::AddressSpace::kHandle);
             switch (ptr->AddressSpace()) {
+                case core::AddressSpace::kImmediate:
                 case core::AddressSpace::kStorage:
                 case core::AddressSpace::kUniform:
                 case core::AddressSpace::kWorkgroup:
