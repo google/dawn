@@ -1252,6 +1252,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "location";
         case ParameterUsage::kLod:
             return "lod";
+        case ParameterUsage::kM:
+            return "m";
         case ParameterUsage::kMask:
             return "mask";
         case ParameterUsage::kNumLevels:
@@ -1264,6 +1266,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "refz";
         case ParameterUsage::kResult:
             return "result";
+        case ParameterUsage::kS:
+            return "s";
         case ParameterUsage::kSample:
             return "sample";
         case ParameterUsage::kSampleIndex:
@@ -1754,6 +1758,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupMatrixMultiplyAccumulate") {
         return BuiltinFn::kSubgroupMatrixMultiplyAccumulate;
     }
+    if (name == "subgroupMatrixScalarAdd") {
+        return BuiltinFn::kSubgroupMatrixScalarAdd;
+    }
     if (name == "print") {
         return BuiltinFn::kPrint;
     }
@@ -2068,6 +2075,8 @@ const char* str(BuiltinFn i) {
             return "subgroupMatrixMultiply";
         case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
             return "subgroupMatrixMultiplyAccumulate";
+        case BuiltinFn::kSubgroupMatrixScalarAdd:
+            return "subgroupMatrixScalarAdd";
         case BuiltinFn::kPrint:
             return "print";
         case BuiltinFn::kHasBinding:

@@ -731,54 +731,81 @@ match workgroup
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn quadSwapDiagonal(e: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn quadSwapDiagonal(e: vec<N, T>) -> vec<N, T>
 
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<S>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<S, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<i32>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<u32>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AC: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<i32, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AC: num) fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<u32, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num) fn subgroupMatrixStore(ptr<storage, runtime_array<S>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num) fn subgroupMatrixStore(ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num) fn subgroupMatrixStore(ptr<storage, runtime_array<i32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num) fn subgroupMatrixStore(ptr<storage, runtime_array<u32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AC: num) fn subgroupMatrixStore(ptr<workgroup_or_storage, array<i32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AC: num) fn subgroupMatrixStore(ptr<workgroup_or_storage, array<u32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
-@must_use @stage("compute") implicit(T: f16, C: num, R: num, K: num) fn subgroupMatrixMultiply<TR: f32_f16>(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: f32, C: num, R: num, K: num) fn subgroupMatrixMultiply<TR: f32>(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: iu8, C: num, R: num, K: num) fn subgroupMatrixMultiply<TR: iu32_iu8>(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: iu32, C: num, R: num, K: num) fn subgroupMatrixMultiply<TR: iu32>(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num) fn subgroupMatrixMultiplyAccumulate(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: f32, TR: f32, C: num, R: num, K: num) fn subgroupMatrixMultiplyAccumulate(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: iu8, TR: iu32_iu8, C: num, R: num, K: num) fn subgroupMatrixMultiplyAccumulate(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
-@must_use @stage("compute") implicit(T: iu32, TR: iu32, C: num, R: num, K: num) fn subgroupMatrixMultiplyAccumulate(
-  subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
-  -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+//////////////////////////////////////////
+// subgroup matrix
+//////////////////////////////////////////
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<S>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<S, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<i32>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<storage, runtime_array<u32>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AC: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<i32, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AC: num)
+  fn subgroupMatrixLoad<T: subgroup_matrix<K, S, C, R> >(ptr<workgroup_or_storage, array<u32, AC>, readable>, u32, @const bool, @test_value(8) u32) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num)
+  fn subgroupMatrixStore(ptr<storage, runtime_array<S>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: fiu32_f16, C: num, R: num, AC: num)
+  fn subgroupMatrixStore(ptr<workgroup_or_storage, array<S, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num)
+  fn subgroupMatrixStore(ptr<storage, runtime_array<i32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num)
+  fn subgroupMatrixStore(ptr<storage, runtime_array<u32>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: i8, C: num, R: num, AC: num)
+  fn subgroupMatrixStore(ptr<workgroup_or_storage, array<i32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: u8, C: num, R: num, AC: num)
+  fn subgroupMatrixStore(ptr<workgroup_or_storage, array<u32, AC>, writable>, u32, subgroup_matrix<K, S, C, R>, @const bool, @test_value(8) u32)
+
+@must_use @stage("compute") implicit(T: f16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: f32_f16>(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>, subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: f32, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: f32>(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>, subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: iu8, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: iu32_iu8>(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>, subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: iu32, C: num, R: num, K: num)
+  fn subgroupMatrixMultiply<TR: iu32>(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>, subgroup_matrix<subgroup_matrix_kind_right, T, C, K>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: f16, TR: f32_f16, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+    subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: f32, TR: f32, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+    subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: iu8, TR: iu32_iu8, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+    subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+@must_use @stage("compute") implicit(T: iu32, TR: iu32, C: num, R: num, K: num)
+  fn subgroupMatrixMultiplyAccumulate(
+    subgroup_matrix<subgroup_matrix_kind_left, T, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, T, C, K>,
+    subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>)
+    -> subgroup_matrix<subgroup_matrix_kind_result, TR, C, R>
+
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, T: fiu32_f16, C: num, R: num)
+  fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, T, C, R>, @test_value(8) s: T) -> subgroup_matrix<K, T, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, i8, C, R>, @test_value(8) s: i32) -> subgroup_matrix<K, i8, C, R>
+@must_use @stage("compute") implicit(K: subgroup_matrix_kind, C: num, R: num)
+  fn subgroupMatrixScalarAdd(m: subgroup_matrix<K, u8, C, R>, @test_value(8) s: u32) -> subgroup_matrix<K, u8, C, R>
 
 // chromium_experimental_print
 implicit(T: concrete_scalar) fn print(T)

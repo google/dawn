@@ -440,6 +440,7 @@
 "subgroupMatrixLoad"
 "subgroupMatrixMultiply"
 "subgroupMatrixMultiplyAccumulate"
+"subgroupMatrixScalarAdd"
 "subgroupMatrixStore"
 "subgroupMax"
 "subgroupMin"

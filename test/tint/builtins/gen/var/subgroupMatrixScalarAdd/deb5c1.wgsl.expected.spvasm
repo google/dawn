@@ -1,0 +1,12 @@
+SKIP: FAILED
+
+<dawn>/src/tint/lang/spirv/writer/printer/printer.cc:2270 internal compiler error: unimplemented builtin function: subgroupMatrixScalarAdd
+
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
+tint executable returned error: signal: trace/BPT trap
