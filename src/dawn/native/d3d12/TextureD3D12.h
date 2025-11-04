@@ -86,9 +86,9 @@ class Texture final : public TextureBase {
 
     MaybeError SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext);
 
-    void NotifySwapChainPresentToPIX();
+    void NotifySwapChainPresent();
 
-    void SetIsSwapchainTexture(bool isSwapChainTexture);
+    void SetIsExternalSwapchainTexture(bool isSwapChainTexture);
 
     void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                 std::vector<D3D12_RESOURCE_BARRIER>* barrier,
@@ -164,7 +164,7 @@ class Texture final : public TextureBase {
     // SharedTextureMemory.
     std::vector<FenceAndSignalValue> mWaitFences;
 
-    bool mSwapChainTexture = false;
+    bool mIsExternalSwapChainTexture = false;
 
     SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;
 };

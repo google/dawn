@@ -69,3 +69,23 @@ Note that tracing is not currently implemented on all backends.
 
 * Vulkan - not yet implemented
 
+## Capturing with RenderDoc in Chrome
+
+Currently only supported on Windows using the D3D12 backend.
+
+Launch Chrome with the following flags:
+```bash
+set RENDERDOC_HOOK_EGL=0 && path\to\chrome.exe --no-sandbox --disable-gpu-sandbox --disable-direct-composition --gpu-startup-dialog --enable-dawn-features=enable_renderdoc_process_injection <path\to\chrome.exe>
+```
+
+This will start Chrome with a dialog that says "Gpu starting with pid: <pid>".
+
+In RenderDoc, in Tools -> Settings, check "Enable process injection" and restart RenderDoc.
+
+Go to File -> Inject into Process, search for "gpu" in the list of processes and double-click the chrome.exe one with the title "Google Chrome GPU". This is the GPU process.
+
+Go back to the Chrome GPU dialog and click OK to close it. The GPU process will resume.
+
+Now open a WebGPU application in a tab, and as soon as it starts rendering, each frame will be automatically captured and sent to RenderDoc. To stop the captures, switch tabs, close the tab, or exit Chrome.
+
+Note that you can use the "Refresh" button in RenderDoc's "Inject into Process" tab the next time Chrome is launched to select the GPU process again.

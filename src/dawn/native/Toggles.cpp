@@ -710,6 +710,10 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::VulkanEnableF16OnNvidia,
      {"vulkan_enable_f16_on_nvidia", "Enables F16 on Nvidia GPUs with Vulkan",
       "https://crbug.com/42251215", ToggleStage::Adapter}},
+    {Toggle::EnableRenderDocProcessInjection,
+     {"enable_renderdoc_process_injection", "Enables RenderDoc process injection",
+      "If RenderDoc is used to inject into the GPU process, send RenderDoc frame capture info.",
+      ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

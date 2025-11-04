@@ -174,6 +174,12 @@ if (DAWN_BUILD_PROTOBUF AND NOT TARGET libprotobuf-mutator)
     include("libprotobuf-mutator/BUILD.cmake")
 endif()
 
+if (NOT TARGET renderdoc-api)
+    add_library(RenderDocApi INTERFACE)
+    target_include_directories(RenderDocApi INTERFACE "renderdoc")
+    target_compile_definitions(RenderDocApi INTERFACE "DAWN_ENABLE_RENDERDOC")
+endif()
+
 if (DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES)
     # Header-only library for khrplatform.h
     add_library(dawn_khronos_platform INTERFACE)

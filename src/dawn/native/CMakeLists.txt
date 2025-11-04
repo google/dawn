@@ -419,6 +419,9 @@ if (DAWN_ENABLE_D3D11)
 endif()
 
 if (DAWN_ENABLE_D3D12)
+    list(APPEND conditional_private_depends
+        RenderDocApi
+    )
     list(APPEND headers
         "${DAWN_INCLUDE_DIR}/dawn/native/D3D12Backend.h"
     )

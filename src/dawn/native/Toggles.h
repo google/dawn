@@ -170,6 +170,7 @@ enum class Toggle {
     BlobCacheHashValidation,
     DecomposeUniformBuffers,
     VulkanEnableF16OnNvidia,
+    EnableRenderDocProcessInjection,
 
     // Once all backends have been updated to be thread safe for waiting, we can remove this toggle.
     WaitIsThreadSafe,
