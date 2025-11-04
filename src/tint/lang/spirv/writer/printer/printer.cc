@@ -1389,6 +1389,11 @@ class Printer {
                                                                      : spv::Op::OpFAdd;
                 break;
             }
+            case core::BinaryOp::kSubtract: {
+                op = ty->DeepestElement()->IsIntegerScalarOrVector() ? spv::Op::OpISub
+                                                                     : spv::Op::OpFSub;
+                break;
+            }
             default: {
                 TINT_IR_UNIMPLEMENTED(ir_)
                     << "\"" << binary->Op() << "\"  (enum value=" << static_cast<int>(binary->Op())

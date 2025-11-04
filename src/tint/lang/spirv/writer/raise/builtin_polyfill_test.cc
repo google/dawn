@@ -5370,5 +5370,93 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd_i8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract) {
+    auto* mat = ty.subgroup_matrix_result(ty.i32(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, b.Load(v), 3_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<i32, 8, 8> = load %v
+    %4:subgroup_matrix_result<i32, 8, 8> = subgroupMatrixScalarSubtract %3, 3i
+    %r:subgroup_matrix_result<i32, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<i32, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<i32, 8, 8> = load %v
+    %4:subgroup_matrix_result<i32, 8, 8> = construct 3i
+    %5:subgroup_matrix_result<i32, 8, 8> = sub %3, %4
+    %r:subgroup_matrix_result<i32, 8, 8> = let %5
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarSubtract_u8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
+    auto* mat = ty.subgroup_matrix_result(ty.u8(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarSubtract, b.Load(v), 3_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<u8, 8, 8> = load %v
+    %4:subgroup_matrix_result<u8, 8, 8> = subgroupMatrixScalarSubtract %3, 3u
+    %r:subgroup_matrix_result<u8, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<u8, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<u8, 8, 8> = load %v
+    %4:u32 = clamp 3u, 0u, 255u
+    %5:u8 = spirv.u_convert<u8> %4
+    %6:subgroup_matrix_result<u8, 8, 8> = construct %5
+    %7:subgroup_matrix_result<u8, 8, 8> = sub %3, %6
+    %r:subgroup_matrix_result<u8, 8, 8> = let %7
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise
