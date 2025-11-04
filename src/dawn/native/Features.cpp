@@ -442,6 +442,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
      {"Supports importing a shared memory file mapping handle as shared buffer memory.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_buffer.md",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::SharedTextureMemoryD3D12Resource,
+     {"Support importing ID3D12Resource as shared texture memory.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shared_texture.md",
       FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace

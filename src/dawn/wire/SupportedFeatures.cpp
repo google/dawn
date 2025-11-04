@@ -56,6 +56,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_SharedTextureMemoryZirconHandle:
         case WGPUFeatureName_SharedTextureMemoryDXGISharedHandle:
         case WGPUFeatureName_SharedTextureMemoryD3D11Texture2D:
+        case WGPUFeatureName_SharedTextureMemoryD3D12Resource:
         case WGPUFeatureName_SharedTextureMemoryIOSurface:
         case WGPUFeatureName_SharedTextureMemoryEGLImage:
         case WGPUFeatureName_SharedFenceVkSemaphoreOpaqueFD:

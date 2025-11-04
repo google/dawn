@@ -39,6 +39,7 @@ class KeyedMutex;
 
 namespace d3d12 {
 class Device;
+struct SharedTextureMemoryD3D12ResourceDescriptor;
 
 class SharedTextureMemory final : public d3d::SharedTextureMemory {
   public:
@@ -46,6 +47,11 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
         Device* device,
         StringView label,
         const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
+
+    static ResultOrError<Ref<SharedTextureMemory>> Create(
+        Device* device,
+        StringView label,
+        const SharedTextureMemoryD3D12ResourceDescriptor* descriptor);
 
     ID3D12Resource* GetD3DResource() const;
 
@@ -57,6 +63,12 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
                         SharedTextureMemoryProperties properties,
                         ComPtr<ID3D12Resource> resource,
                         Ref<d3d::KeyedMutex> keyedMutex);
+
+    static ResultOrError<Ref<SharedTextureMemory>> CreateSharedTextureMemoryFromD3D12Resource(
+        Device* device,
+        StringView label,
+        ComPtr<ID3D12Resource> d3d12Resource,
+        Ref<d3d::KeyedMutex> keyedMutex);
 
     void DestroyImpl() override;
 

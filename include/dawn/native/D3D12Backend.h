@@ -86,6 +86,17 @@ struct DAWN_NATIVE_EXPORT SharedBufferMemoryD3D12SharedMemoryFileHandleDescripto
     constexpr static uint32_t kRequiredAlignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 };
 
+// May be chained on SharedTextureMemoryDescriptor.
+struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D12ResourceDescriptor : wgpu::ChainedStruct {
+    SharedTextureMemoryD3D12ResourceDescriptor() {
+        sType = static_cast<wgpu::SType>(WGPUSType_SharedTextureMemoryD3D12ResourceDescriptor);
+    }
+
+    // This ID3D12Resource object must be created from the same ID3D12Device used in the
+    // WGPUDevice.
+    Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+};
+
 }  // namespace dawn::native::d3d12
 
 #endif  // INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_

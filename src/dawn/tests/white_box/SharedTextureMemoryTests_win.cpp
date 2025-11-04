@@ -389,6 +389,8 @@ class Backend : public SharedTextureMemoryTestBackend {
 
 // Test that it is an error to import a shared fence without enabling the feature.
 TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
+
     auto backend = static_cast<Backend*>(GetParam().mBackend);
     DAWN_TEST_UNSUPPORTED_IF(!backend->HasFenceSupport(device));
 
@@ -418,6 +420,8 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
 
 // Test that a shared handle can be imported, and then exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExport) {
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
+
     auto backend = static_cast<Backend*>(GetParam().mBackend);
     DAWN_TEST_UNSUPPORTED_IF(!backend->HasFenceSupport(device));
 
@@ -507,6 +511,8 @@ TEST_P(SharedTextureMemoryTests, SharedFenceImportDXGISharedHandleMissing) {
 // Test exporting info from a shared fence with no chained struct.
 // It should be valid and the fence type is exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoNoChainedStruct) {
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
+
     auto backend = static_cast<Backend*>(GetParam().mBackend);
     DAWN_TEST_UNSUPPORTED_IF(!backend->HasFenceSupport(device));
 
@@ -543,6 +549,8 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoNoChainedStruct) {
 // Test exporting info from a shared fence with an invalid chained struct.
 // It should not be valid, but the fence type should still be exported.
 TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStruct) {
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
+
     auto backend = static_cast<Backend*>(GetParam().mBackend);
     DAWN_TEST_UNSUPPORTED_IF(!backend->HasFenceSupport(device));
 

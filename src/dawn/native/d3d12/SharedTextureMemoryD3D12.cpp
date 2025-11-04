@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/D3D12Backend.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/KeyedMutex.h"
 #include "dawn/native/d3d/UtilsD3D.h"
@@ -49,7 +50,35 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Ref<d3d::KeyedMutex> keyedMutex;
     DAWN_TRY(device->ImportSharedHandleResource(descriptor->handle, descriptor->useKeyedMutex,
                                                 d3d12Resource, keyedMutex));
+    return CreateSharedTextureMemoryFromD3D12Resource(device, label, d3d12Resource, keyedMutex);
+}
 
+// static
+ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
+    Device* device,
+    StringView label,
+    const SharedTextureMemoryD3D12ResourceDescriptor* descriptor) {
+    DAWN_INVALID_IF(descriptor->resource == nullptr, "D3D12Resource is missing.");
+    ComPtr<ID3D12Resource> d3d12Resource = descriptor->resource;
+    return CreateSharedTextureMemoryFromD3D12Resource(device, label, d3d12Resource, nullptr);
+}
+
+SharedTextureMemory::SharedTextureMemory(Device* device,
+                                         StringView label,
+                                         SharedTextureMemoryProperties properties,
+                                         ComPtr<ID3D12Resource> resource,
+                                         Ref<d3d::KeyedMutex> keyedMutex)
+    : d3d::SharedTextureMemory(device, label, properties),
+      mResource(std::move(resource)),
+      mKeyedMutex(std::move(keyedMutex)) {}
+
+// static
+ResultOrError<Ref<SharedTextureMemory>>
+SharedTextureMemory::CreateSharedTextureMemoryFromD3D12Resource(
+    Device* device,
+    StringView label,
+    ComPtr<ID3D12Resource> d3d12Resource,
+    Ref<d3d::KeyedMutex> keyedMutex) {
     D3D12_RESOURCE_DESC desc = d3d12Resource->GetDesc();
     DAWN_INVALID_IF(desc.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE2D,
                     "Resource dimension (%d) was not Texture2D", desc.Dimension);
@@ -97,15 +126,6 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     result->Initialize();
     return result;
 }
-
-SharedTextureMemory::SharedTextureMemory(Device* device,
-                                         StringView label,
-                                         SharedTextureMemoryProperties properties,
-                                         ComPtr<ID3D12Resource> resource,
-                                         Ref<d3d::KeyedMutex> keyedMutex)
-    : d3d::SharedTextureMemory(device, label, properties),
-      mResource(std::move(resource)),
-      mKeyedMutex(std::move(keyedMutex)) {}
 
 void SharedTextureMemory::DestroyImpl() {
     ToBackend(GetDevice())->ReferenceUntilUnused(std::move(mResource));
