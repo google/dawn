@@ -3544,6 +3544,7 @@
       "default"
     ]
   },
+  "dawn-win-x86-intel-uhd630-rel": {},
   "dawn-win-x86-nvidia-gtx1660-rel": {
     "gtest_tests": [
       {

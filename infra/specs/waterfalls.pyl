@@ -317,6 +317,13 @@
           'default',
         ],
       },
+      'dawn-win-x86-intel-uhd630-rel': {
+        'os_type': 'win',
+        'mixins': [
+          'win10_intel_uhd_630_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-win-x86-nvidia-gtx1660-rel': {
         'os_type': 'win',
         'mixins': [
