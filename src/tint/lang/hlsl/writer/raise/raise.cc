@@ -236,9 +236,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
     RUN_TRANSFORM(raise::DecomposeStorageAccess, module);
 
-    // ChangeImmediateToUniformConfig must come before DecomposeUniformAccess(to write correct
-    // uniform access instructions) and after DirectVariableAccess(to handle immediate pointers
-    // being passed as function parameters).
+    // ChangeImmediateToUniformConfig must come before DecomposeUniformAccess (to write correct
+    // uniform access instructions).
     {
         core::ir::transform::ChangeImmediateToUniformConfig config = {
             .immediate_binding_point = options.immediate_binding_point,
