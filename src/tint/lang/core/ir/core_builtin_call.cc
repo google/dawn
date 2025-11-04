@@ -215,6 +215,7 @@ tint::core::ir::Instruction::Accesses CoreBuiltinCall::GetSideEffects() const {
         case BuiltinFn::kSubgroupMatrixMultiply:
         case BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
         case BuiltinFn::kSubgroupMatrixScalarAdd:
+        case BuiltinFn::kSubgroupMatrixScalarSubtract:
         case BuiltinFn::kSubgroupMatrixScalarMultiply:
         case BuiltinFn::kHasBinding:
         case BuiltinFn::kNone:

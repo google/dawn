@@ -13087,6 +13087,14 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [150] */
+    /* fn subgroupMatrixScalarSubtract[K : subgroup_matrix_kind, T : fiu32_f16, C : num, R : num](m: subgroup_matrix<K, T, C, R>, s: T) -> subgroup_matrix<K, T, C, R> */
+    /* fn subgroupMatrixScalarSubtract[K : subgroup_matrix_kind, C : num, R : num](m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R> */
+    /* fn subgroupMatrixScalarSubtract[K : subgroup_matrix_kind, C : num, R : num](m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R> */
+    /* num overloads */ 3,
+    /* overloads */ OverloadIndex(332),
+  },
+  {
+    /* [151] */
     /* fn subgroupMatrixScalarMultiply[K : subgroup_matrix_kind, T : fiu32_f16, C : num, R : num](m: subgroup_matrix<K, T, C, R>, s: T) -> subgroup_matrix<K, T, C, R> */
     /* fn subgroupMatrixScalarMultiply[K : subgroup_matrix_kind, C : num, R : num](m: subgroup_matrix<K, i8, C, R>, s: i32) -> subgroup_matrix<K, i8, C, R> */
     /* fn subgroupMatrixScalarMultiply[K : subgroup_matrix_kind, C : num, R : num](m: subgroup_matrix<K, u8, C, R>, s: u32) -> subgroup_matrix<K, u8, C, R> */
@@ -13094,14 +13102,14 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(332),
   },
   {
-    /* [151] */
+    /* [152] */
     /* fn print[T : scalar](T) */
     /* fn print[N : num, T : scalar](vec<N, T>) */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(476),
   },
   {
-    /* [152] */
+    /* [153] */
     /* fn hasBinding<T : texture_1d<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> bool */
     /* fn hasBinding<T : texture_2d<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> bool */
     /* fn hasBinding<T : texture_2d_array<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> bool */
@@ -13118,7 +13126,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* overloads */ OverloadIndex(124),
   },
   {
-    /* [153] */
+    /* [154] */
     /* fn getBinding<T : texture_1d<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> T */
     /* fn getBinding<T : texture_2d<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> T */
     /* fn getBinding<T : texture_2d_array<K>>[K : fiu32, I : iu32](resource_binding, index: I) -> T */

@@ -2045,6 +2045,8 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupMatrixScalarAdd;
             case pb::BuiltinFn::subgroup_matrix_scalar_multiply:
                 return core::BuiltinFn::kSubgroupMatrixScalarMultiply;
+            case pb::BuiltinFn::subgroup_matrix_scalar_subtract:
+                return core::BuiltinFn::kSubgroupMatrixScalarSubtract;
             case pb::BuiltinFn::print:
                 return core::BuiltinFn::kPrint;
             case pb::BuiltinFn::has_binding:

@@ -742,4 +742,5 @@ enum BuiltinFn {
     get_binding = 151;
     subgroup_matrix_scalar_add = 152;
     subgroup_matrix_scalar_multiply = 153;
+    subgroup_matrix_scalar_subtract = 154;
 }
