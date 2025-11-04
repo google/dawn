@@ -72,6 +72,8 @@ class Device final : public d3d::Device {
     MaybeError TickImpl() override;
 
     ID3D12Device* GetD3D12Device() const;
+    ComPtr<ID3D11On12Device> GetOrCreateD3D11On12Device();
+    ComPtr<ID3D12CommandQueue> GetD3D12CommandQueue() const;
 
     ComPtr<ID3D12CommandSignature> GetDispatchIndirectSignature() const;
     ComPtr<ID3D12CommandSignature> GetDrawIndirectSignature() const;
@@ -221,7 +223,7 @@ class Device final : public d3d::Device {
     void AppendDebugLayerMessages(ErrorData* error) override;
     void AppendDeviceLostMessage(ErrorData* error) override;
 
-    ResultOrError<ComPtr<ID3D11On12Device>> GetOrCreateD3D11on12Device();
+    ResultOrError<ComPtr<ID3D11On12Device>> GetOrCreateD3D11On12DeviceInternal();
     void Flush11On12DeviceToAvoidLeaks();
 
     MaybeError EnsureCompilerLibraries();

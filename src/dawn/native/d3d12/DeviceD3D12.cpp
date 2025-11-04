@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <utility>
 
@@ -217,7 +218,20 @@ ID3D12Device* Device::GetD3D12Device() const {
     return mD3d12Device.Get();
 }
 
-ResultOrError<ComPtr<ID3D11On12Device>> Device::GetOrCreateD3D11on12Device() {
+ComPtr<ID3D11On12Device> Device::GetOrCreateD3D11On12Device() {
+    ComPtr<ID3D11On12Device> d3d11On12Device;
+    // Use std::addressof to avoid ComPtr's overloaded operator& returning ComPtrRef type.
+    if (ConsumedError(GetOrCreateD3D11On12DeviceInternal(), std::addressof(d3d11On12Device))) {
+        return nullptr;
+    }
+    return d3d11On12Device;
+}
+
+ComPtr<ID3D12CommandQueue> Device::GetD3D12CommandQueue() const {
+    return ToBackend(GetQueue())->GetCommandQueue();
+}
+
+ResultOrError<ComPtr<ID3D11On12Device>> Device::GetOrCreateD3D11On12DeviceInternal() {
     if (mD3d11On12Device == nullptr) {
         ComPtr<ID3D11Device> d3d11Device;
         D3D_FEATURE_LEVEL d3dFeatureLevel;
@@ -604,7 +618,7 @@ MaybeError Device::ImportSharedHandleResource(HANDLE handle,
 
     if (useKeyedMutex) {
         ComPtr<ID3D11On12Device> d3d11on12Device;
-        DAWN_TRY_ASSIGN(d3d11on12Device, GetOrCreateD3D11on12Device());
+        DAWN_TRY_ASSIGN(d3d11on12Device, GetOrCreateD3D11On12DeviceInternal());
 
         // Since D3D12 does not directly support keyed mutexes, we need to wrap the D3D12 resource
         // using 11on12 and QueryInterface the D3D11 representation for the keyed mutex.

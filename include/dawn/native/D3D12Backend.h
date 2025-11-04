@@ -28,6 +28,7 @@
 #ifndef INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
 #define INCLUDE_DAWN_NATIVE_D3D12BACKEND_H_
 
+#include <d3d11on12.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <wrl/client.h>
@@ -47,6 +48,12 @@ enum MemorySegment {
 };
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
+
+DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D11On12Device> GetOrCreateD3D11On12Device(
+    WGPUDevice device);
+
+DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12CommandQueue> GetD3D12CommandQueue(
+    WGPUDevice device);
 
 DAWN_NATIVE_EXPORT uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                                          uint64_t requestedReservationSize,
