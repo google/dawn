@@ -217,6 +217,11 @@
           'isolated_scripts': 'swiftshader_isolated_scripts',
         },
       },
+      'dawn-win-x64-builder-asan': {
+        'additional_compile_targets': [
+          'default',
+        ],
+      },
       'dawn-win-x64-builder-dbg': {
         'additional_compile_targets': [
           'default',
@@ -237,6 +242,13 @@
           'default',
         ],
       },
+      'dawn-win-x64-intel-uhd630-asan': {
+        'os_type': 'win',
+        'mixins': [
+          'win10_intel_uhd_630_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-win-x64-intel-uhd630-rel': {
         'os_type': 'win',
         'mixins': [
@@ -245,6 +257,13 @@
         'test_suites': {
           'gtest_tests': 'real_hardware_win_gtests',
         },
+      },
+      'dawn-win-x64-nvidia-gtx1660-asan': {
+        'os_type': 'win',
+        'mixins': [
+          'win10_nvidia_gtx_1660_stable',
+        ],
+        'test_suites': {},
       },
       'dawn-win-x64-nvidia-gtx1660-rel': {
         'os_type': 'win',

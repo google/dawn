@@ -461,6 +461,16 @@ dawn_mac_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-x64-intel-uhd630-asan",
+    description_html = "Tests release Dawn on Windows/x64/ASAN on Intel CPUs w/ UHD 630. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-asan",
+        "ci/dawn-win-x64-intel-uhd630-asan",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-asan",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-intel-uhd630-rel",
     description_html = "Tests release Dawn on Windows/x64 on Intel CPUs w/ UHD 630. Manual only.",
     mirrors = [
@@ -468,6 +478,16 @@ dawn_win_manual_builder(
         "ci/dawn-win-x64-intel-uhd630-rel",
     ],
     gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_manual_builder(
+    name = "dawn-try-win-x64-nvidia-gtx1660-asan",
+    description_html = "Tests release Dawn on Windows/x64/ASAN on NVIDIA GTX 1660 GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-asan",
+        "ci/dawn-win-x64-nvidia-gtx1660-asan",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-asan",
 )
 
 dawn_win_manual_builder(

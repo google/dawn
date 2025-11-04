@@ -321,6 +321,42 @@ dawn_mac_parent_builder(
 )
 
 dawn_win_parent_builder(
+    name = "dawn-win-x64-builder-asan",
+    description_html = "Compiles release Dawn test binaries for Windows/x64 with ASAN enabled",
+    schedule = "triggered",
+    builder_spec = builder_config.builder_spec(
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+            apply_configs = [
+                "dawn_node",
+            ],
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.WIN,
+        ),
+    ),
+    gn_args = gn_args.config(
+        configs = [
+            "asan",
+            "component",
+            "dawn_node_bindings",
+            "dawn_swiftshader",
+            "release",
+            "win_clang",
+            "x64",
+        ],
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "win|build|clang|asan",
+        short_name = "x64",
+    ),
+)
+
+dawn_win_parent_builder(
     name = "dawn-win-x64-builder-dbg",
     description_html = "Compiles debug Dawn test binaries for Windows/x64",
     schedule = "triggered",
@@ -972,6 +1008,30 @@ ci.thin_tester(
 )
 
 ci.thin_tester(
+    name = "dawn-win-x64-intel-uhd630-asan",
+    description_html = "Tests release Dawn on Windows/x64/ASAN on Intel CPUs w/ UHD 630 GPUs",
+    parent = "dawn-win-x64-builder-asan",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.WIN,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "win|test|clang|asan|x64",
+        short_name = "630",
+    ),
+)
+
+ci.thin_tester(
     name = "dawn-win-x64-intel-uhd630-rel",
     description_html = "Tests release Dawn on Windows/x64 on Intel CPUs w/ UHD 630 GPUs",
     parent = "dawn-win-x64-builder-rel",
@@ -992,6 +1052,30 @@ ci.thin_tester(
     console_view_entry = consoles.console_view_entry(
         category = "win|test|clang|rel|x64",
         short_name = "630",
+    ),
+)
+
+ci.thin_tester(
+    name = "dawn-win-x64-nvidia-gtx1660-asan",
+    description_html = "Tests release Dawn on Windows/x64/ASAN on NVIDIA GTX 1660 GPUs",
+    parent = "dawn-win-x64-builder-asan",
+    builder_spec = builder_config.builder_spec(
+        execution_mode = builder_config.execution_mode.TEST,
+        gclient_config = builder_config.gclient_config(
+            config = "dawn",
+        ),
+        chromium_config = builder_config.chromium_config(
+            config = "dawn_base",
+            build_config = builder_config.build_config.RELEASE,
+            target_arch = builder_config.target_arch.INTEL,
+            target_bits = 64,
+            target_platform = builder_config.target_platform.WIN,
+        ),
+        run_tests_serially = True,
+    ),
+    console_view_entry = consoles.console_view_entry(
+        category = "win|test|clang|asan|x64",
+        short_name = "1660",
     ),
 )
 

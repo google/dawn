@@ -37,6 +37,13 @@ gn_args.config(
 )
 
 gn_args.config(
+    name = "asan",
+    args = {
+        "is_asan": True,
+    },
+)
+
+gn_args.config(
     name = "clang",
     args = {
         "is_clang": True,

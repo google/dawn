@@ -2240,6 +2240,11 @@
       }
     ]
   },
+  "dawn-win-x64-builder-asan": {
+    "additional_compile_targets": [
+      "default"
+    ]
+  },
   "dawn-win-x64-builder-dbg": {
     "additional_compile_targets": [
       "default"
@@ -2260,6 +2265,7 @@
       "default"
     ]
   },
+  "dawn-win-x64-intel-uhd630-asan": {},
   "dawn-win-x64-intel-uhd630-rel": {
     "gtest_tests": [
       {
@@ -2501,6 +2507,7 @@
       }
     ]
   },
+  "dawn-win-x64-nvidia-gtx1660-asan": {},
   "dawn-win-x64-nvidia-gtx1660-rel": {
     "gtest_tests": [
       {
