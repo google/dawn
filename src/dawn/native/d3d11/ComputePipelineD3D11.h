@@ -46,6 +46,8 @@ class ComputePipeline final : public ComputePipelineBase {
 
     void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
 
+    ID3D11ComputeShader* GetD3D11ComputeShaderForTesting();
+
     MaybeError InitializeImpl() override;
 
     bool UsesNumWorkgroups() const;

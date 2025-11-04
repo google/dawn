@@ -358,6 +358,10 @@ ResultOrError<CompiledShader> CompileShader(d3d::D3DCompilationRequest r) {
         }
     }
 
+    // Compute SHA3 of the shader blob.
+    compiledShader.sha3 =
+        Sha3_256::Hash(compiledShader.shaderBlob.Data(), compiledShader.shaderBlob.Size());
+
     // If dumpShaders is false, we don't need the HLSL for logging. Clear the contents so it
     // isn't stored into the cache.
     if (!r.hlsl.dumpShaders) {

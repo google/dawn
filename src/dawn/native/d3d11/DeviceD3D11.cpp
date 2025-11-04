@@ -39,6 +39,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/KeyedMutex.h"
+#include "dawn/native/d3d/ShaderUtils.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d11/BackendD3D11.h"
 #include "dawn/native/d3d11/BindGroupD3D11.h"
@@ -64,6 +65,19 @@
 #include "dawn/platform/tracing/TraceEvent.h"
 
 namespace dawn::native::d3d11 {
+
+size_t Sha3CacheFuncs::operator()(const Sha3_256::Output& key) const {
+    // This combines the hash of the first 8 bytes and the last 8 bytes of the SHA3-256 output.
+    // Given that the randomness of SHA3 is very good across all bits (avalanche effect),
+    // sampling from two distant parts of the hash and combining them results in a good hash value
+    // suitable for hash table distribution, while being more performant than hashing all 32 bytes.
+    return absl::HashOf(absl::MakeSpan(key.data(), 8),
+                        absl::MakeSpan(key.data() + Sha3_256::kByteOutputLength - 8, 8));
+}
+bool Sha3CacheFuncs::operator()(const Sha3_256::Output& a, const Sha3_256::Output& b) const {
+    return std::memcmp(a.data(), b.data(), sizeof(Sha3_256::Output)) == 0;
+}
+
 namespace {
 
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
@@ -171,6 +185,15 @@ uint64_t AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
 }
 
 }  // namespace
+
+Device::Device(AdapterBase* adapter,
+               const UnpackedPtr<DeviceDescriptor>& descriptor,
+               const TogglesState& deviceToggles,
+               Ref<DeviceBase::DeviceLostEvent>&& lostEvent)
+    : Base(adapter, descriptor, deviceToggles, std::move(lostEvent)),
+      mVertexShaderCache(1024),
+      mPixelShaderCache(1024),
+      mComputeShaderCache(1024) {}
 
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
@@ -479,6 +502,10 @@ void Device::DisposeKeyedMutex(ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex) {
 }
 
 bool Device::ReduceMemoryUsageImpl() {
+    mVertexShaderCache.Clear();
+    mPixelShaderCache.Clear();
+    mComputeShaderCache.Clear();
+
     // D3D11 defers the deletion of resources until we call Flush().
     // So trigger a Flush() here to force deleting any pending resources.
     auto commandContext =
@@ -606,6 +633,42 @@ void Device::ReturnStagingBuffer(Ref<BufferBase>&& buffer) {
     if (buffer->GetSize() <= kMaxStagingBufferSize) {
         mStagingBuffers.push_back(std::move(buffer));
     }
+}
+
+ResultOrError<ComPtr<ID3D11VertexShader>> Device::GetOrCreateVertexShader(
+    const d3d::CompiledShader& args) {
+    return mVertexShaderCache.GetOrCreate(
+        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11VertexShader>> {
+            ComPtr<ID3D11VertexShader> vs;
+            DAWN_TRY(CheckHRESULT(mD3d11Device->CreateVertexShader(
+                                      args.shaderBlob.Data(), args.shaderBlob.Size(), nullptr, &vs),
+                                  "D3D11 create vertex shader"));
+            return vs;
+        });
+}
+
+ResultOrError<ComPtr<ID3D11PixelShader>> Device::GetOrCreatePixelShader(
+    const d3d::CompiledShader& args) {
+    return mPixelShaderCache.GetOrCreate(
+        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11PixelShader>> {
+            ComPtr<ID3D11PixelShader> ps;
+            DAWN_TRY(CheckHRESULT(mD3d11Device->CreatePixelShader(
+                                      args.shaderBlob.Data(), args.shaderBlob.Size(), nullptr, &ps),
+                                  "D3D11 create pixel shader"));
+            return ps;
+        });
+}
+
+ResultOrError<ComPtr<ID3D11ComputeShader>> Device::GetOrCreateComputeShader(
+    const d3d::CompiledShader& args) {
+    return mComputeShaderCache.GetOrCreate(
+        args.sha3, [&](const Sha3_256::Output&) -> ResultOrError<ComPtr<ID3D11ComputeShader>> {
+            ComPtr<ID3D11ComputeShader> cs;
+            DAWN_TRY(CheckHRESULT(mD3d11Device->CreateComputeShader(
+                                      args.shaderBlob.Data(), args.shaderBlob.Size(), nullptr, &cs),
+                                  "D3D11 create compute shader"));
+            return cs;
+        });
 }
 
 }  // namespace dawn::native::d3d11

@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/common/Sha3.h"
 #include "dawn/native/Blob.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/d3d/D3DCompilationRequest.h"
@@ -45,6 +46,7 @@ class Device;
 #define COMPILED_SHADER_MEMBERS(X) \
     X(Blob, shaderBlob)            \
     X(std::string, hlslSource)     \
+    X(Sha3_256::Output, sha3)      \
     X(bool, usesVertexIndex)       \
     X(bool, usesInstanceIndex)
 
