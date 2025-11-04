@@ -291,8 +291,8 @@
         ],
         'swarming': {
           # These tests normally take ~15 minutes, but can flakily hit the
-          # default 20 minute timeout and cannot currently be sharded.
-          'hard_timeout': 1800,
+          # default 20 minute I/O timeout and cannot currently be sharded.
+          'io_timeout': 1800,
         },
         'test': 'fuzzer_corpus_tests',
       },
