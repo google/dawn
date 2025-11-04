@@ -47,7 +47,6 @@ dawn_json_generator("kotlin_gen") {
     "java/androidx/webgpu/AdapterInfo.kt",
     "java/androidx/webgpu/AdapterType.kt",
     "java/androidx/webgpu/AddressMode.kt",
-    "java/androidx/webgpu/AsyncHelpers.kt",
     "java/androidx/webgpu/BackendType.kt",
     "java/androidx/webgpu/GPUBindGroup.kt",
     "java/androidx/webgpu/BindGroupDescriptor.kt",

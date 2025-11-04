@@ -21,8 +21,6 @@ import androidx.webgpu.SurfaceSourceAndroidNativeWindow
 import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.createInstance
 import androidx.webgpu.helper.Util.windowFromSurface
-import androidx.webgpu.requestAdapter
-import androidx.webgpu.requestDevice
 import java.util.concurrent.Executor
 
 public class DeviceLostException(

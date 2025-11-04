@@ -1734,6 +1734,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             jni_name = params_kotlin['jni_name']
 
             imported_templates += [
+                "art/api_kotlin_async_helpers.kt",
                 "art/api_kotlin_types.kt",
             ]
 
@@ -1771,10 +1772,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('art/api_kotlin_functions.kt',
                            'java/' + kt_file_path + '/Functions.kt',
-                           [RENDER_PARAMS_BASE, params_kotlin]))
-            renders.append(
-                FileRender('art/api_kotlin_async_helpers.kt',
-                           'java/' + kt_file_path + '/AsyncHelpers.kt',
                            [RENDER_PARAMS_BASE, params_kotlin]))
 
             for enum in (params_kotlin['by_category']['bitmask'] +

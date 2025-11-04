@@ -28,7 +28,12 @@ package {{ kotlin_package }}
 
 import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
+import java.util.concurrent.Executor
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc with context %}
+{% from 'art/api_kotlin_async_helpers.kt' import async_wrapper with context %}
 
 //* Generating KDocs
 {% set all_objects_info = kdocs.objects%}
@@ -71,6 +76,16 @@ public class {{ kotlin_name(obj) }}(public val handle: Long): AutoCloseable {
             public val {{ name }}: {{ kotlin_declaration(kotlin_return(method)) }} get() = {{ method.name.camelCase() }}()
 
         {% endif %}
+
+        //* Every method that is identified as using callbacks is given a helper method that wraps the
+        //* call with a suspend function.
+        {%- for arg in kotlin_record_members(method.arguments) %}
+            {% if arg.type.category == 'callback function' %}
+                {{- async_wrapper(obj, method, arg) -}}
+                {{ continue }}
+            {% endif %}
+        {%- endfor -%}
+
     {% endfor %}
     external override fun close()
 
