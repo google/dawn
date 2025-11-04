@@ -12654,9 +12654,18 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
     /* num overloads */ 3,
     /* overloads */ OverloadIndex(250),
   },
+  {
+    /* [2] */
+    /* op *[K : subgroup_matrix_kind, T : fiu32_f16, C : num, R : num](subgroup_matrix<K, T, C, R>, subgroup_matrix<K, T, C, R>) -> subgroup_matrix<K, T, C, R> */
+    /* op *[K : subgroup_matrix_kind, C : num, R : num](subgroup_matrix<K, i8, C, R>, subgroup_matrix<K, i8, C, R>) -> subgroup_matrix<K, i8, C, R> */
+    /* op *[K : subgroup_matrix_kind, C : num, R : num](subgroup_matrix<K, u8, C, R>, subgroup_matrix<K, u8, C, R>) -> subgroup_matrix<K, u8, C, R> */
+    /* num overloads */ 3,
+    /* overloads */ OverloadIndex(250),
+  },
 };
 constexpr uint8_t kBinaryOperatorPlus = 0;
 constexpr uint8_t kBinaryOperatorMinus = 1;
+constexpr uint8_t kBinaryOperatorStar = 2;
 
 }  // anonymous namespace
 
@@ -12672,7 +12681,7 @@ const core::intrinsic::TableData Dialect::kData{
   /* builtins */ kBuiltins,
   /* binary '+' */ kBinaryOperators[kBinaryOperatorPlus],
   /* binary '-' */ kBinaryOperators[kBinaryOperatorMinus],
-  /* binary '*' */ tint::core::intrinsic::kNoOverloads,
+  /* binary '*' */ kBinaryOperators[kBinaryOperatorStar],
   /* binary '/' */ tint::core::intrinsic::kNoOverloads,
   /* binary '%' */ tint::core::intrinsic::kNoOverloads,
   /* binary '^' */ tint::core::intrinsic::kNoOverloads,

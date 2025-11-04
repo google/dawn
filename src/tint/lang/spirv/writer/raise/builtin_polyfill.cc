@@ -247,6 +247,7 @@ struct State {
                     case core::BuiltinFn::kSubgroupMatrixMultiplyAccumulate:
                     case core::BuiltinFn::kSubgroupMatrixScalarAdd:
                     case core::BuiltinFn::kSubgroupMatrixScalarSubtract:
+                    case core::BuiltinFn::kSubgroupMatrixScalarMultiply:
                         worklist.Push(builtin);
                         break;
                     case core::BuiltinFn::kQuantizeToF16:
@@ -354,6 +355,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSubgroupMatrixScalarSubtract:
                     SubgroupMatrixScalarSubtract(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupMatrixScalarMultiply:
+                    SubgroupMatrixScalarMultiply(builtin);
                     break;
                 default:
                     break;
@@ -1372,6 +1376,33 @@ struct State {
             auto* scalar_mat = b.Construct(sm_ty, scalar);
             b.BinaryWithResult<spirv::ir::Binary>(builtin->DetachResult(),
                                                   core::BinaryOp::kSubtract, mat, scalar_mat);
+        });
+        builtin->Destroy();
+    }
+
+    /// Replace a subgroupMatrixScalarMultiply builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupMatrixScalarMultiply(core::ir::CoreBuiltinCall* builtin) {
+        b.InsertBefore(builtin, [&] {
+            auto* mat = builtin->Args()[0];
+            auto* scalar = builtin->Args()[1];
+
+            auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
+            if (sm_ty->Type()->Is<core::type::I8>()) {
+                scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
+                              ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
+                              b.Call(ty.i32(), core::BuiltinFn::kClamp, scalar, -128_i, 127_i))
+                             ->Result();
+            } else if (sm_ty->Type()->Is<core::type::U8>()) {
+                scalar = b.CallExplicit<spirv::ir::BuiltinCall>(
+                              ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
+                              b.Call(ty.u32(), core::BuiltinFn::kClamp, scalar, 0_u, 255_u))
+                             ->Result();
+            }
+
+            auto* scalar_mat = b.Construct(sm_ty, scalar);
+            b.BinaryWithResult<spirv::ir::Binary>(builtin->DetachResult(),
+                                                  core::BinaryOp::kMultiply, mat, scalar_mat);
         });
         builtin->Destroy();
     }

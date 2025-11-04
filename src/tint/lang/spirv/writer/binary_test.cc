@@ -1151,5 +1151,39 @@ TEST_F(SpirvWriterTest, Subtract_SubgroupMatrix) {
 )");
 }
 
+TEST_F(SpirvWriterTest, Multiply_SubgroupMatrix) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+
+        auto* scalar_mat = b.Construct(mat, 2_f);
+        b.Binary<spirv::ir::Binary>(core::BinaryOp::kMultiply, mat, b.Load(v), scalar_mat);
+        b.Return(func);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .use_vulkan_memory_model = true,
+    };
+
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST("OpCapability CooperativeMatrixKHR");
+    EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
+    EXPECT_INST(R"(
+          %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_2
+%_ptr_Function_7 = OpTypePointer Function %7
+    %float_0 = OpConstant %float 0
+         %13 = OpConstantComposite %7 %float_0
+)");
+    EXPECT_INST(R"(
+          %v = OpVariable %_ptr_Function_7 Function %13
+         %15 = OpCompositeConstruct %7 %float_2
+         %17 = OpLoad %7 %v None
+         %18 = OpFMul %7 %17 %15
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer
