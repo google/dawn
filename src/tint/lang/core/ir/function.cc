@@ -36,13 +36,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Function);
 
 namespace tint::core::ir {
 
-Function::Function() = default;
+Function::Function() : Base(nullptr) {}
 
 Function::Function(const core::type::Type* type,
                    const core::type::Type* rt,
                    PipelineStage stage,
                    std::optional<std::array<Value*, 3>> wg_size)
-    : pipeline_stage_(stage), workgroup_size_(wg_size), type_(type) {
+    : Base(type), pipeline_stage_(stage), workgroup_size_(wg_size) {
     TINT_ASSERT(rt != nullptr);
 
     return_.type = rt;
@@ -52,7 +52,7 @@ Function::~Function() = default;
 
 Function* Function::Clone(CloneContext& ctx) {
     auto* new_func =
-        ctx.ir.CreateValue<Function>(type_, return_.type, pipeline_stage_, workgroup_size_);
+        ctx.ir.CreateValue<Function>(Type(), return_.type, pipeline_stage_, workgroup_size_);
     new_func->block_ = ctx.ir.blocks.Create<ir::Block>();
     new_func->SetParams(ctx.Clone<1>(params_.Slice()));
     new_func->return_.attributes = return_.attributes;

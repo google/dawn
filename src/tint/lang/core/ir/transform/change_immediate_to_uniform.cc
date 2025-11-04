@@ -121,16 +121,7 @@ struct State {
                 // when the function is called multiple times.
                 continue;
             }
-
-            // Change the type of the value.
-            auto* new_ptr_type = ty.ptr(core::AddressSpace::kUniform, ptr_type->StoreType());
-            if (auto* result = value->As<InstructionResult>()) {
-                result->SetType(new_ptr_type);
-            } else if (auto* param = value->As<FunctionParam>()) {
-                param->SetType(new_ptr_type);
-            } else {
-                TINT_IR_UNREACHABLE(ir);
-            }
+            value->SetType(ty.ptr(core::AddressSpace::kUniform, ptr_type->StoreType()));
 
             // Add all usages of the value to the queue.
             for (auto usage : value->UsagesUnsorted()) {
