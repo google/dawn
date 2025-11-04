@@ -56,7 +56,9 @@
 #include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 
+#if defined(DAWN_ENABLE_RENDERDOC)
 #include "renderdoc/api/app/renderdoc_app.h"
+#endif
 
 namespace dawn::native::d3d12 {
 
