@@ -960,6 +960,7 @@ bool Validator::Parameter(const sem::Variable* var) const {
             case core::AddressSpace::kPrivate:
                 ok = true;
                 break;
+            case core::AddressSpace::kImmediate:
             case core::AddressSpace::kStorage:
             case core::AddressSpace::kUniform:
             case core::AddressSpace::kWorkgroup:

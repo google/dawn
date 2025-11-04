@@ -1,0 +1,47 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 21
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %value_block 0 "inner"
+               OpName %value_block "value_block"
+               OpMemberName %output_block 0 "inner"
+               OpName %output_block "output_block"
+               OpName %foo "foo"
+               OpName %main "main"
+               OpMemberDecorate %value_block 0 Offset 0
+               OpDecorate %value_block Block
+               OpMemberDecorate %output_block 0 Offset 0
+               OpDecorate %output_block Block
+               OpDecorate %5 DescriptorSet 0
+               OpDecorate %5 Binding 1
+               OpDecorate %5 Coherent
+       %uint = OpTypeInt 32 0
+%value_block = OpTypeStruct %uint
+%_ptr_PushConstant_value_block = OpTypePointer PushConstant %value_block
+          %1 = OpVariable %_ptr_PushConstant_value_block PushConstant
+%output_block = OpTypeStruct %uint
+%_ptr_StorageBuffer_output_block = OpTypePointer StorageBuffer %output_block
+          %5 = OpVariable %_ptr_StorageBuffer_output_block StorageBuffer
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%_ptr_PushConstant_uint = OpTypePointer PushConstant %uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+        %foo = OpFunction %void None %10
+         %11 = OpLabel
+         %12 = OpAccessChain %_ptr_PushConstant_uint %1 %uint_0
+         %15 = OpLoad %uint %12 None
+         %16 = OpAccessChain %_ptr_StorageBuffer_uint %5 %uint_0
+               OpStore %16 %15 None
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %10
+         %19 = OpLabel
+         %20 = OpFunctionCall %void %foo
+               OpReturn
+               OpFunctionEnd

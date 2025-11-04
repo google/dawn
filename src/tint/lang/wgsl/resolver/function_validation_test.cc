@@ -1088,6 +1088,9 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedP
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
+    if (param.address_space == core::AddressSpace::kImmediate) {
+        Enable(wgsl::Extension::kChromiumExperimentalImmediate);
+    }
     if (param.address_space == core::AddressSpace::kPixelLocal) {
         Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
@@ -1116,6 +1119,9 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithUnrestrictedPoin
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
+    if (param.address_space == core::AddressSpace::kImmediate) {
+        Enable(wgsl::Extension::kChromiumExperimentalImmediate);
+    }
     if (param.address_space == core::AddressSpace::kPixelLocal) {
         Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
@@ -1149,6 +1155,8 @@ INSTANTIATE_TEST_SUITE_P(
                                Expectation::kPassWithUnrestrictedPointerParameters},
                     TestParams{core::AddressSpace::kHandle, Expectation::kInvalid},
                     TestParams{core::AddressSpace::kStorage,
+                               Expectation::kPassWithUnrestrictedPointerParameters},
+                    TestParams{core::AddressSpace::kImmediate,
                                Expectation::kPassWithUnrestrictedPointerParameters},
                     TestParams{core::AddressSpace::kPixelLocal, Expectation::kAlwaysFail},
                     TestParams{core::AddressSpace::kPrivate, Expectation::kAlwaysPass},
