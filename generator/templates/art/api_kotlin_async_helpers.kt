@@ -82,7 +82,7 @@ package {{ kotlin_package }}
             (arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor')
         ) %}
             {{ kotlin_annotation(arg) }}  {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
-        {%- endfor %}): {{ return_name }} = suspendCoroutine {
+        {%- endfor %}): {{ return_name }} = suspendCancellableCoroutine {
         {{ method.name.camelCase() }}(
             {%- for arg in kotlin_record_members(method.arguments) %}
                 {%- if arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor' -%}
@@ -90,12 +90,13 @@ package {{ kotlin_package }}
                 {%- elif arg.name.get() == callback_arg.name.get() %}{
                     {%- for arg in kotlin_record_members(callback_arg.type.arguments) %}
                         {{- as_varName(arg.name) }},
-                    {%- endfor %} -> it.resume({{ return_name }}(
-                        //* We make an instance of the callback parameters -> return type wrapper.
-                        {%- for arg in result_args %}
-                            {{- as_varName(arg.name) }},
-                        {%- endfor %}
-                    ))},
+                    {%- endfor %} -> if (it.isActive) {
+                        it.resume({{ return_name }}(
+                            //* We make an instance of the callback parameters -> return type wrapper.
+                            {%- for arg in result_args %}
+                                {{- as_varName(arg.name) }},
+                            {%- endfor %}))
+                    }}
                 {%- else -%}
                     {{- as_varName(arg.name) }},
                 {%- endif %}
