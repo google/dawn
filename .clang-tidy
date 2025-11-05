@@ -112,6 +112,7 @@ Checks: "-*,\
           -google-readability-function-size,\
           -google-readability-namespace-comments,\
           -google-readability-todo,\
+          -google-runtime-float,\
           -google-runtime-int,\
           -google-upgrade-googletest-case,\
           misc-*,\
