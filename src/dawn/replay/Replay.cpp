@@ -107,17 +107,6 @@ wgpu::TexelCopyTextureInfo ToWGPU(const Replay& replay, const schema::TexelCopyT
     };
 }
 
-wgpu::BindGroupEntry ToWGPU(const Replay& replay, const schema::BindGroupEntry& entry) {
-    return wgpu::BindGroupEntry{
-        .binding = entry.binding,
-        .buffer = replay.GetObjectById<wgpu::Buffer>(entry.bufferId),
-        .offset = entry.offset,
-        .size = entry.size,
-        .sampler = replay.GetObjectById<wgpu::Sampler>(entry.samplerId),
-        .textureView = replay.GetObjectById<wgpu::TextureView>(entry.textureViewId),
-    };
-}
-
 wgpu::StencilFaceState ToWGPU(const schema::StencilFaceState& state) {
     return wgpu::StencilFaceState{
         .compare = state.compare,
@@ -200,9 +189,39 @@ ResultOrError<wgpu::BindGroup> CreateBindGroup(const Replay& replay,
                                                const std::string& label) {
     schema::BindGroup bg;
     DAWN_TRY(Deserialize(readHead, &bg));
+
     std::vector<wgpu::BindGroupEntry> entries;
-    std::transform(bg.entries.begin(), bg.entries.end(), std::back_inserter(entries),
-                   [&](const auto& entry) { return ToWGPU(replay, entry); });
+    for (uint32_t i = 0; i < bg.numEntries; ++i) {
+        schema::BindGroupLayoutEntryType entryType;
+        uint32_t binding;
+        DAWN_TRY(Deserialize(readHead, &entryType));
+        DAWN_TRY(Deserialize(readHead, &binding));
+
+        switch (entryType) {
+            case schema::BindGroupLayoutEntryType::BufferBinding: {
+                schema::BindGroupEntryTypeBufferBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                entries.push_back(wgpu::BindGroupEntry{
+                    .binding = binding,
+                    .buffer = replay.GetObjectById<wgpu::Buffer>(data.bufferId),
+                    .offset = data.offset,
+                    .size = data.size,
+                });
+                break;
+            }
+            case schema::BindGroupLayoutEntryType::TextureBinding: {
+                schema::BindGroupEntryTypeTextureBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                entries.push_back(wgpu::BindGroupEntry{
+                    .binding = binding,
+                    .textureView = replay.GetObjectById<wgpu::TextureView>(data.textureViewId),
+                });
+                break;
+            }
+            default:
+                return DAWN_INTERNAL_ERROR("unsupported bind group entry type");
+        }
+    }
 
     wgpu::BindGroupDescriptor desc{
         .label = wgpu::StringView(label),
@@ -212,6 +231,52 @@ ResultOrError<wgpu::BindGroup> CreateBindGroup(const Replay& replay,
     };
     wgpu::BindGroup bindGroup = device.CreateBindGroup(&desc);
     return {bindGroup};
+}
+
+ResultOrError<wgpu::BindGroupLayout> CreateBindGroupLayout(const Replay& replay,
+                                                           wgpu::Device device,
+                                                           ReadHead& readHead,
+                                                           const std::string& label) {
+    schema::BindGroupLayout bgl;
+    DAWN_TRY(Deserialize(readHead, &bgl));
+
+    std::vector<wgpu::BindGroupLayoutEntry> entries;
+    for (uint32_t i = 0; i < bgl.numEntries; ++i) {
+        schema::BindGroupLayoutEntryType entryType;
+        schema::BindGroupLayoutBinding binding;
+        DAWN_TRY(Deserialize(readHead, &entryType));
+        DAWN_TRY(Deserialize(readHead, &binding));
+
+        switch (entryType) {
+            case schema::BindGroupLayoutEntryType::BufferBinding: {
+                schema::BindGroupLayoutEntryTypeBufferBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+
+                entries.push_back({
+                    .binding = binding.binding,
+                    .visibility = binding.visibility,
+                    .bindingArraySize = binding.bindingArraySize,
+                    .buffer =
+                        {
+                            .type = data.type,
+                            .hasDynamicOffset = data.hasDynamicOffset,
+                            .minBindingSize = data.minBindingSize,
+                        },
+                });
+                break;
+            }
+            default:
+                return DAWN_INTERNAL_ERROR("unhandled bind group layout entry type");
+        }
+    }
+
+    wgpu::BindGroupLayoutDescriptor desc{
+        .label = wgpu::StringView(label),
+        .entryCount = entries.size(),
+        .entries = entries.data(),
+    };
+    wgpu::BindGroupLayout bindGroupLayout = device.CreateBindGroupLayout(&desc);
+    return {bindGroupLayout};
 }
 
 ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
@@ -263,6 +328,27 @@ ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const Replay& replay,
     wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&desc);
     func(computePipeline, pipeline.groupIndexIds);
     return {computePipeline};
+}
+
+ResultOrError<wgpu::PipelineLayout> CreatePipelineLayout(const Replay& replay,
+                                                         wgpu::Device device,
+                                                         ReadHead& readHead,
+                                                         const std::string& label) {
+    schema::PipelineLayout layout;
+    DAWN_TRY(Deserialize(readHead, &layout));
+
+    std::vector<wgpu::BindGroupLayout> bindGroupLayouts;
+    for (const auto bindGroupLayoutId : layout.bindGroupLayoutIds) {
+        bindGroupLayouts.push_back(replay.GetObjectById<wgpu::BindGroupLayout>(bindGroupLayoutId));
+    }
+
+    wgpu::PipelineLayoutDescriptor desc{
+        .label = wgpu::StringView(label),
+        .bindGroupLayoutCount = bindGroupLayouts.size(),
+        .bindGroupLayouts = bindGroupLayouts.data(),
+    };
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&desc);
+    return {pipelineLayout};
 }
 
 template <typename F>
@@ -668,6 +754,15 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             mResources.insert({resource.id, {resource.label, bindGroup}});
             return {};
         }
+
+        case schema::ObjectType::BindGroupLayout: {
+            wgpu::BindGroupLayout bindGroupLayout;
+            DAWN_TRY_ASSIGN(bindGroupLayout,
+                            CreateBindGroupLayout(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, bindGroupLayout}});
+            return {};
+        }
+
         case schema::ObjectType::Buffer: {
             wgpu::Buffer buffer;
             DAWN_TRY_ASSIGN(buffer, CreateBuffer(device, readHead, resource.label));
@@ -701,6 +796,14 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
                         }
                     }));
             mResources.insert({resource.id, {resource.label, computePipeline}});
+            return {};
+        }
+
+        case schema::ObjectType::PipelineLayout: {
+            wgpu::PipelineLayout pipelineLayout;
+            DAWN_TRY_ASSIGN(pipelineLayout,
+                            CreatePipelineLayout(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, pipelineLayout}});
             return {};
         }
 

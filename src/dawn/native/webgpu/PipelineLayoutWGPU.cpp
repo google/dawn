@@ -28,10 +28,12 @@
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
 
 #include <array>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/native/webgpu/BindGroupLayoutWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 
 namespace dawn::native::webgpu {
@@ -45,7 +47,9 @@ Ref<PipelineLayout> PipelineLayout::Create(
 
 PipelineLayout::PipelineLayout(Device* device,
                                const UnpackedPtr<PipelineLayoutDescriptor>& descriptor)
-    : PipelineLayoutBase(device, descriptor), ObjectWGPU(device->wgpu.pipelineLayoutRelease) {
+    : PipelineLayoutBase(device, descriptor),
+      RecordableObject(schema::ObjectType::PipelineLayout),
+      ObjectWGPU(device->wgpu.pipelineLayoutRelease) {
     WGPUPipelineLayoutDescriptor desc;
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
@@ -66,6 +70,30 @@ PipelineLayout::PipelineLayout(Device* device,
 
     mInnerHandle = device->wgpu.deviceCreatePipelineLayout(device->GetInnerHandle(), &desc);
     DAWN_ASSERT(mInnerHandle);
+}
+
+MaybeError PipelineLayout::AddReferenced(CaptureContext& captureContext) {
+    for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
+        auto frontendLayout = GetFrontendBindGroupLayout(groupIndex);
+        DAWN_TRY(captureContext.AddResource(frontendLayout->GetInternalBindGroupLayout()));
+    }
+    return {};
+}
+
+MaybeError PipelineLayout::CaptureCreationParameters(CaptureContext& captureContext) {
+    std::vector<schema::ObjectId> bindGroupLayoutIds;
+
+    for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
+        auto frontendLayout = GetFrontendBindGroupLayout(groupIndex);
+        bindGroupLayoutIds.push_back(
+            captureContext.GetId(frontendLayout->GetInternalBindGroupLayout()));
+    }
+
+    schema::PipelineLayout data{{
+        .bindGroupLayoutIds = bindGroupLayoutIds,
+    }};
+    Serialize(captureContext, data);
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

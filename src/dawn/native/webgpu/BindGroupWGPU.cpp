@@ -125,15 +125,14 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     // the bindGroupLayout was implicit then the code that serializes the command buffer makes sure
     // the pipeline is serialized first so its implicit bindGroupLayouts will already be
     // referenced.
-    BindGroupLayoutBase* layout = GetFrontendLayout();
-    if (layout->IsExplicit()) {
-        // TODO(452983510): Handle explicit bind group layouts.
-        // DAWN_TRY(captureContext.AddResource(layout));
-        DAWN_CHECK(false);
+    BindGroupLayoutInternalBase* layout = GetLayout();
+    BindGroupLayoutBase* frontendLayout = GetFrontendLayout();
+    if (frontendLayout->IsExplicit()) {
+        // If it's an explicit layout we can add the deduplicated layout
+        DAWN_TRY(captureContext.AddResource(layout));
     }
 
     {
-        BindGroupLayoutInternalBase* layout = GetLayout();
         const auto& bindingMap = layout->GetBindingMap();
         for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
             BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
@@ -152,10 +151,19 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
 }
 
 MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) {
-    std::vector<schema::BindGroupEntry> entries;
-
     BindGroupLayoutInternalBase* layout = GetLayout();
     const auto& bindingMap = layout->GetBindingMap();
+
+    // Note: If it's an implicit layout we must use the FrontEnd layout here since we
+    // need the id to have come from the pipeline's implicit creation of the layout.
+    // If it's explicit then we can use the deduplicated `BindGroupLayoutInternal`
+    BindGroupLayoutBase* frontendLayout = GetFrontendLayout();
+    schema::BindGroup bg{{
+        .layoutId = frontendLayout->IsExplicit() ? captureContext.GetId(layout)
+                                                 : captureContext.GetId(frontendLayout),
+        .numEntries = uint32_t(bindingMap.size()),
+    }};
+    Serialize(captureContext, bg);
 
     for (const auto& [bindingNumber, apiBindingIndex] : bindingMap) {
         BindingIndex bindingIndex = layout->AsBindingIndex(apiBindingIndex);
@@ -166,35 +174,29 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
             bindingInfo.bindingLayout,
             [&](const BufferBindingInfo& info) {
                 const auto& entry = GetBindingAsBufferBinding(bindingIndex);
-                entries.push_back(schema::BindGroupEntry{{
+                schema::BindGroupEntryTypeBufferBinding data{{
                     .binding = binding,
-                    .bufferId = captureContext.GetId(entry.buffer),
-                    .offset = entry.offset,
-                    .size = entry.size,
-                    .samplerId = 0,
-                    .textureViewId = 0,
-                }});
+                    .data{{
+                        .bufferId = captureContext.GetId(entry.buffer),
+                        .offset = entry.offset,
+                        .size = entry.size,
+                    }},
+                }};
+                Serialize(captureContext, data);
             },
             [&](const TextureBindingInfo& info) {
                 const auto& entry = GetBindingAsTextureView(bindingIndex);
-                entries.push_back(schema::BindGroupEntry{{
+                schema::BindGroupEntryTypeTextureBinding data{{
                     .binding = binding,
-                    .bufferId = 0,
-                    .offset = 0,
-                    .size = 0,
-                    .samplerId = 0,
-                    .textureViewId = captureContext.GetId(entry),
-                }});
+                    .data{{
+                        .textureViewId = captureContext.GetId(entry),
+                    }},
+                }};
+                Serialize(captureContext, data);
             },
             [&](const auto& info) { DAWN_CHECK(false); });
     }
 
-    // This must use the front end layout as it is not deduplicated.
-    schema::BindGroup bg{{
-        .layoutId = captureContext.GetId(GetFrontendLayout()),
-        .entries = entries,
-    }};
-    Serialize(captureContext, bg);
     return {};
 }
 

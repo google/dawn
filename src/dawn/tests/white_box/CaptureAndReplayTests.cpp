@@ -1383,6 +1383,80 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
     }
 }
 
+// Capture and replay a compute shader with an explicit bindGroupLayout
+TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicExplicitBindGroup) {
+    wgpu::BindGroupLayoutEntry entries[1];
+    entries[0].binding = 0;
+    entries[0].visibility = wgpu::ShaderStage::Compute;
+    entries[0].buffer.type = wgpu::BufferBindingType::Storage;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &layout;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    const char* label = "MyBuffer";
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = label;
+    descriptor.size = 4;
+    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+
+        @compute @workgroup_size(1) fn main() {
+            result = 0x44332211;
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = pipelineLayout;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, buffer},
+                                                     });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

@@ -30,15 +30,21 @@
 
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 namespace dawn::native::webgpu {
 
 class Device;
 
-class PipelineLayout : public PipelineLayoutBase, public ObjectWGPU<WGPUPipelineLayout> {
+class PipelineLayout : public PipelineLayoutBase,
+                       public RecordableObject,
+                       public ObjectWGPU<WGPUPipelineLayout> {
   public:
     static Ref<PipelineLayout> Create(Device* device,
                                       const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   protected:
     PipelineLayout(Device* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);

@@ -47,6 +47,18 @@ enum class ObjectType : uint32_t {
     TextureView,
 };
 
+enum class BindGroupLayoutEntryType : uint32_t {
+    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
+    BufferBinding,
+    SamplerBinding,
+    TextureBinding,
+    TexelBufferBinding,
+    StorageTextureBinding,
+    ExternalTextureBinding,
+    StaticSamplerBindingInfo,
+    InputAttachmentBindingInfo,
+};
+
 enum class ComputePassCommand : uint32_t {
     Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
     Dispatch,
@@ -233,6 +245,28 @@ DAWN_REPLAY_SERIALIZABLE(struct, ColorTargetState, COLOR_TARGET_STATE_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, FragmentState, FRAGMENT_STATE_MEMBER){};
 
+#define BIND_GROUP_LAYOUT_BINDING_MEMBER(X) \
+    X(uint32_t, binding)                    \
+    X(wgpu::ShaderStage, visibility)        \
+    X(uint32_t, bindingArraySize)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutBinding, BIND_GROUP_LAYOUT_BINDING_MEMBER){};
+
+#define BUFFER_BIND_GROUP_LAYOUT_MEMBER(X) \
+    X(wgpu::BufferBindingType, type)       \
+    X(uint64_t, minBindingSize)            \
+    X(bool, hasDynamicOffset)
+
+DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(BufferBinding, BUFFER_BIND_GROUP_LAYOUT_MEMBER){};
+
+#define BIND_GROUP_LAYOUT_MEMBER(X) X(uint32_t, numEntries)
+
+DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayout, BIND_GROUP_LAYOUT_MEMBER){};
+
+#define PIPELINE_LAYOUT_MEMBER(X) X(std::vector<ObjectId>, bindGroupLayoutIds)
+
+DAWN_REPLAY_SERIALIZABLE(struct, PipelineLayout, PIPELINE_LAYOUT_MEMBER){};
+
 #define BUFFER_CREATION_MEMBER(X) \
     X(uint64_t, size)             \
     X(wgpu::BufferUsage, usage)
@@ -299,19 +333,20 @@ DAWN_REPLAY_SERIALIZABLE(struct, ComputePipeline, COMPUTE_PIPELINE_CREATION_MEMB
 
 DAWN_REPLAY_SERIALIZABLE(struct, RenderPipeline, RENDER_PIPELINE_CREATION_MEMBER){};
 
-#define BIND_GROUP_ENTRY_MEMBER(X) \
-    X(uint32_t, binding)           \
-    X(ObjectId, bufferId)          \
-    X(uint64_t, offset)            \
-    X(uint64_t, size)              \
-    X(ObjectId, samplerId)         \
-    X(ObjectId, textureViewId)
+#define BUFFER_BIND_GROUP_ENTRY_MEMBER(X) \
+    X(ObjectId, bufferId)                 \
+    X(uint64_t, offset)                   \
+    X(uint64_t, size)
 
-DAWN_REPLAY_SERIALIZABLE(struct, BindGroupEntry, BIND_GROUP_ENTRY_MEMBER){};
+DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(BufferBinding, BUFFER_BIND_GROUP_ENTRY_MEMBER){};
+
+#define TEXTURE_BIND_GROUP_ENTRY_MEMBER(X) X(ObjectId, textureViewId)
+
+DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(TextureBinding, TEXTURE_BIND_GROUP_ENTRY_MEMBER){};
 
 #define BIND_GROUP_CREATION_MEMBER(X) \
     X(ObjectId, layoutId)             \
-    X(std::vector<BindGroupEntry>, entries)
+    X(uint32_t, numEntries)
 
 DAWN_REPLAY_SERIALIZABLE(struct, BindGroup, BIND_GROUP_CREATION_MEMBER){};
 

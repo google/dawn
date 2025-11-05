@@ -84,9 +84,7 @@ MaybeError ComputePipeline::AddReferenced(CaptureContext& captureContext) {
     DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Compute).module.Get()));
     PipelineLayoutBase* pipelineLayout = GetLayout();
     if (!pipelineLayout->IsImplicit()) {
-        // TODO(452983510): add support for explicit pipeline layout
-        // DAWN_TRY(captureContext.AddResource(pipelineLayout));
-        return DAWN_INTERNAL_ERROR("explicit pipeline layout unsupported");
+        DAWN_TRY(captureContext.AddResource(pipelineLayout));
     }
     return {};
 }

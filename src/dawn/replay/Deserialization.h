@@ -144,6 +144,50 @@ constexpr int kInternalVisitableUnusedForComma = 0;
     };                                                     \
     qualifier Name : Name##__Contents, public ::dawn::replay::Deserializable<Name>
 
+// Makes a struct for a given bindgrouplayout entry type.
+#define DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(VariantName, VARIANT_MEMBERS)                 \
+    DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutEntryType##VariantName##Data,               \
+                             VARIANT_MEMBERS){};                                                \
+                                                                                                \
+    struct BindGroupLayoutEntryType##VariantName##__Contents {                                  \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(BindGroupLayoutEntryType,                    \
+                                                   variantType,                                 \
+                                                   BindGroupLayoutEntryType::VariantName)       \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(BindGroupLayoutBinding, binding)             \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(BindGroupLayoutEntryType##VariantName##Data, \
+                                                   data)                                        \
+                                                                                                \
+        template <typename V>                                                                   \
+        constexpr auto VisitAll(V&& visit) {                                                    \
+            return [&](int, auto&... ms) { return visit(ms...); }(                              \
+                       kInternalVisitableUnusedForComma, variantType, binding, data);           \
+        }                                                                                       \
+    };                                                                                          \
+    struct BindGroupLayoutEntryType##VariantName                                                \
+        : BindGroupLayoutEntryType##VariantName##__Contents,                                    \
+          public ::dawn::replay::Deserializable<BindGroupLayoutEntryType##VariantName>
+
+// Makes a struct for a given bindgroup entry type.
+#define DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(VariantName, VARIANT_MEMBERS)                        \
+    DAWN_REPLAY_SERIALIZABLE(struct, BindGroupEntryType##VariantName##Data, VARIANT_MEMBERS){}; \
+                                                                                                \
+    struct BindGroupEntryType##VariantName##__Contents {                                        \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(BindGroupLayoutEntryType,                    \
+                                                   variantType,                                 \
+                                                   BindGroupLayoutEntryType::VariantName)       \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(uint32_t, binding)                           \
+        DAWN_REPLAY_INTERNAL_VISITABLE_MEMBER_DECL(BindGroupEntryType##VariantName##Data, data) \
+                                                                                                \
+        template <typename V>                                                                   \
+        constexpr auto VisitAll(V&& visit) {                                                    \
+            return [&](int, auto&... ms) { return visit(ms...); }(                              \
+                       kInternalVisitableUnusedForComma, variantType, binding, data);           \
+        }                                                                                       \
+    };                                                                                          \
+    struct BindGroupEntryType##VariantName                                                      \
+        : BindGroupEntryType##VariantName##__Contents,                                          \
+          public ::dawn::replay::Deserializable<BindGroupEntryType##VariantName>
+
 // Makes both a CmdData and a Cmd struct for a given command name.
 #define DAWN_REPLAY_MAKE_CMD_AND_CMD_DATA(CmdType, CmdName, CMD_MEMBERS)               \
     DAWN_REPLAY_SERIALIZABLE(struct, CmdType##CmdName##CmdData, CMD_MEMBERS){};        \
