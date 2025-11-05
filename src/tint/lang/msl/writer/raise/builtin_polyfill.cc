@@ -1140,6 +1140,38 @@ struct State {
         builtin->Destroy();
     }
 
+    core::ir::Value* MakeSubgroupRightMatrix(const core::type::SubgroupMatrix* sm_ty,
+                                             core::ir::Value* scalar) {
+        auto* right_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, sm_ty->Type(),
+                                            sm_ty->Columns(), sm_ty->Rows());
+        return b
+            .CallExplicit<msl::ir::BuiltinCall>(
+                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix, Vector{right_ty}, scalar)
+            ->Result();
+    }
+
+    core::ir::Value* MakeSubgroupAccumulatorMatrix(const core::type::SubgroupMatrix* result_ty,
+                                                   core::ir::Value* scalar) {
+        return b
+            .CallExplicit<msl::ir::BuiltinCall>(
+                result_ty, msl::BuiltinFn::kMakeFilledSimdgroupMatrix, Vector{result_ty}, scalar)
+            ->Result();
+    }
+
+    core::ir::Value* ConvertSubgroupMatrixToLeft(const core::type::SubgroupMatrix* sm_ty,
+                                                 core::ir::Value* mat) {
+        auto* left_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, sm_ty->Type(),
+                                           sm_ty->Columns(), sm_ty->Rows());
+        return b
+            .CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert, Vector{left_ty},
+                                                mat)
+            ->Result();
+    }
+
+    core::ir::Value* One(const core::type::SubgroupMatrix* sm_ty) {
+        return sm_ty->DeepestElement()->Is<core::type::F32>() ? b.Constant(1_f) : b.Constant(1_h);
+    }
+
     /// Replace a subgroupMatrixScalarAdd builtin.
     /// @param builtin the builtin call instruction
     void SubgroupMatrixScalarAdd(core::ir::CoreBuiltinCall* builtin) {
@@ -1150,27 +1182,14 @@ struct State {
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
 
-            auto* left_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, sm_ty->Type(),
-                                               sm_ty->Columns(), sm_ty->Rows());
-            auto* right_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, sm_ty->Type(),
-                                                sm_ty->Columns(), sm_ty->Rows());
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
 
             // Declare a local variable to receive the result.
             auto* tmp = b.Var(ty.ptr<function>(result_ty));
-
-            auto* one =
-                sm_ty->DeepestElement()->Is<core::type::F32>() ? b.Constant(1_f) : b.Constant(1_h);
-
-            auto* val = b.CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert,
-                                                             Vector{left_ty}, mat);
-
-            auto* identity = b.CallExplicit<msl::ir::BuiltinCall>(
-                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix, Vector{right_ty}, one);
-
-            auto* acc = b.CallExplicit<msl::ir::BuiltinCall>(
-                result_ty, msl::BuiltinFn::kMakeFilledSimdgroupMatrix, Vector{result_ty}, scalar);
+            auto* val = ConvertSubgroupMatrixToLeft(sm_ty, mat);
+            auto* identity = MakeSubgroupRightMatrix(sm_ty, One(sm_ty));
+            auto* acc = MakeSubgroupAccumulatorMatrix(result_ty, scalar);
 
             // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
             // definition expects a value type (as we do not have reference types in the IR). The
@@ -1196,28 +1215,15 @@ struct State {
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
 
-            auto* left_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, sm_ty->Type(),
-                                               sm_ty->Columns(), sm_ty->Rows());
-            auto* right_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, sm_ty->Type(),
-                                                sm_ty->Columns(), sm_ty->Rows());
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
 
             // Declare a local variable to receive the result.
             auto* tmp = b.Var(ty.ptr<function>(result_ty));
-
-            auto* one =
-                sm_ty->DeepestElement()->Is<core::type::F32>() ? b.Constant(1_f) : b.Constant(1_h);
-
-            auto* val = b.CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert,
-                                                             Vector{left_ty}, mat);
-
-            auto* identity = b.CallExplicit<msl::ir::BuiltinCall>(
-                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix, Vector{right_ty}, one);
-
-            auto* acc = b.CallExplicit<msl::ir::BuiltinCall>(
-                result_ty, msl::BuiltinFn::kMakeFilledSimdgroupMatrix, Vector{result_ty},
-                b.Negation(sm_ty->DeepestElement(), scalar));
+            auto* val = ConvertSubgroupMatrixToLeft(sm_ty, mat);
+            auto* identity = MakeSubgroupRightMatrix(sm_ty, One(sm_ty));
+            auto* acc = MakeSubgroupAccumulatorMatrix(
+                result_ty, b.Negation(sm_ty->DeepestElement(), scalar)->Result());
 
             // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
             // definition expects a value type (as we do not have reference types in the IR). The
@@ -1243,21 +1249,13 @@ struct State {
             auto* sm_ty = mat->Type()->As<core::type::SubgroupMatrix>();
             TINT_ASSERT(sm_ty);
 
-            auto* left_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kLeft, sm_ty->Type(),
-                                               sm_ty->Columns(), sm_ty->Rows());
-            auto* right_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kRight, sm_ty->Type(),
-                                                sm_ty->Columns(), sm_ty->Rows());
             auto* result_ty = ty.subgroup_matrix(core::SubgroupMatrixKind::kResult, sm_ty->Type(),
                                                  sm_ty->Columns(), sm_ty->Rows());
 
             // Declare a local variable to receive the result.
             auto* tmp = b.Var(ty.ptr<function>(result_ty));
-
-            auto* val = b.CallExplicit<msl::ir::BuiltinCall>(left_ty, msl::BuiltinFn::kConvert,
-                                                             Vector{left_ty}, mat);
-
-            auto* mul = b.CallExplicit<msl::ir::BuiltinCall>(
-                right_ty, msl::BuiltinFn::kMakeDiagonalSimdgroupMatrix, Vector{right_ty}, scalar);
+            auto* val = ConvertSubgroupMatrixToLeft(sm_ty, mat);
+            auto* mul = MakeSubgroupRightMatrix(sm_ty, scalar);
 
             // Note: We need to use a `load` instruction to pass the variable, as the intrinsic
             // definition expects a value type (as we do not have reference types in the IR). The
