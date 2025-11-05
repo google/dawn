@@ -95,7 +95,7 @@ class AsyncHelperTest {
 
             /* Launch the function in a new coroutine, giving us a job handle we can cancel. */
             val job = launch {
-                device.createRenderPipelineAsync(
+                val unused = device.createRenderPipelineAsync(
                     RenderPipelineDescriptor(vertex = VertexState(module = shaderModule))
                 )
                 hasReturned.set(true)
