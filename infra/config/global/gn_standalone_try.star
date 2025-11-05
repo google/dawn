@@ -371,6 +371,16 @@ dawn_linux_manual_builder(
 )
 
 dawn_linux_manual_builder(
+    name = "dawn-try-linux-x64-nvidia-gtx1660-rel",
+    description_html = "Tests release Dawn on Linux/x64 on NVIDIA GTX 1660 GPUs. Manual only.",
+    mirrors = [
+        "ci/dawn-linux-x64-builder-rel",
+        "ci/dawn-linux-x64-nvidia-gtx1660-rel",
+    ],
+    gn_args = "ci/dawn-linux-x64-builder-rel",
+)
+
+dawn_linux_manual_builder(
     name = "dawn-try-linux-x64-sws-dbg",
     description_html = "Tests debug Dawn on Linux/x64 with SwiftShader. Manual only.",
     mirrors = [

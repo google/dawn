@@ -477,6 +477,7 @@
       }
     ]
   },
+  "dawn-linux-x64-nvidia-gtx1660-rel": {},
   "dawn-linux-x64-sws-clusterfuzz": {
     "gtest_tests": [
       {
