@@ -1,1 +1,8 @@
-{}
+{
+  'dawn_end2end_no_dxc_validation_layers_tests': {
+    'remove_from': [
+      # Removed from ASAN testers for capacity reasons.
+      'dawn-win-x64-nvidia-gtx1660-asan',
+    ],
+  },
+}
