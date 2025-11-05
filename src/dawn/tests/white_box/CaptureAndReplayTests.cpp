@@ -142,6 +142,17 @@ class CaptureAndReplayTests : public DawnTest {
 
         EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
     }
+
+    template <typename T>
+    void ExpectTextureEQ(replay::Replay* replay,
+                         const char* label,
+                         const wgpu::Extent3D& size,
+                         const T& expected) {
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>(label);
+        ASSERT_NE(texture, nullptr);
+        ASSERT_TRUE(size.width > 0 && size.height > 0 && size.depthOrArrayLayers > 0);
+        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, size, 0, wgpu::TextureAspect::All);
+    }
 };
 
 // During capture, makes a buffer, puts data in it.
@@ -449,11 +460,7 @@ TEST_P(CaptureAndReplayTests, WriteTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
-        ASSERT_NE(texture, nullptr);
-        EXPECT_TEXTURE_EQ(&myData[0], texture, {0, 0}, {4, 1}, 0, wgpu::TextureAspect::All);
-    }
+    ExpectTextureEQ(replay.get(), "myTexture", {4}, myData);
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToTexture) {
@@ -487,11 +494,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-        EXPECT_TEXTURE_EQ(&myData[0], texture, {0, 0}, {4, 1}, 0, wgpu::TextureAspect::All);
-    }
+    ExpectTextureEQ(replay.get(), "dstTexture", {4}, myData);
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToBuffer) {
@@ -564,11 +567,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-        EXPECT_TEXTURE_EQ(&myData[0], texture, {0, 0}, {4, 1}, 0, wgpu::TextureAspect::All);
-    }
+    ExpectTextureEQ(replay.get(), "dstTexture", {4}, myData);
 }
 
 // We make 3 textures. Put data in the first one. Copy to the 2nd one.
@@ -633,11 +632,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromCopyT2TTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-        EXPECT_TEXTURE_EQ(&myData[0], texture, {0, 0}, {4, 1}, 0, wgpu::TextureAspect::All);
-    }
+    ExpectTextureEQ(replay.get(), "dstTexture", {4}, myData);
 }
 
 // Before capture, creates a texture and sets it in a compute pass as a storage texture.
@@ -708,13 +703,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromComputeTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
 // Before capture, creates a texture and sets in a render pass as a render attachment
@@ -767,13 +757,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromRenderTexture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
 // Capture and replay the simplest compute shader.
@@ -1051,13 +1036,8 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "myTexture", {1}, expected);
 }
 
 // Capture and replay the a render pass where a texture is rendered into another.
@@ -1120,13 +1100,8 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithBindGroup) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
 TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
@@ -1189,13 +1164,8 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
 // Capture and replay a compute shader with an explicit bindGroupLayout
@@ -1325,13 +1295,8 @@ TEST_P(CaptureAndReplayTests, CaptureStorageTextureUsageWithExplicitBindGroupLay
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("myTexture");
-        ASSERT_NE(texture, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "myTexture", {1}, expected);
 }
 
 // Capture and replay a pass that uses a texture binding with explicit bind group layout.
