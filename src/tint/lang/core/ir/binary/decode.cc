@@ -1315,8 +1315,13 @@ struct Decoder {
             uint32_t i = static_cast<uint32_t>(elements_out.Length());
             auto* value = ConstantValue(element_id);
             if (auto* el_type = type->Element(i); DAWN_UNLIKELY(value->Type() != el_type)) {
-                err_ << "constant composite element value type " << value->Type()->FriendlyName()
-                     << " does not match element type " << el_type->FriendlyName() << "\n";
+                if (!el_type) {
+                    err_ << "constant composite has a null element type\n";
+                } else {
+                    err_ << "constant composite element value type "
+                         << value->Type()->FriendlyName() << " does not match element type "
+                         << el_type->FriendlyName() << "\n";
+                }
                 return b.InvalidConstant()->Value();
             }
             elements_out.Push(value);
