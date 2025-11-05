@@ -655,6 +655,7 @@ MaybeError GatherReferencedResourcesFromRenderPass(CaptureContext& captureContex
                 DAWN_SKIP_COMMAND(PushDebugGroup)
                 DAWN_SKIP_COMMAND(WriteTimestamp)
                 DAWN_SKIP_COMMAND(SetImmediateData)
+                DAWN_SKIP_COMMAND(SetVertexBuffer)
             default: {
                 DAWN_CHECK(false);
                 break;
@@ -759,6 +760,19 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                     }};
                     Serialize(captureContext, data);
                 }
+                break;
+            }
+            case Command::SetVertexBuffer: {
+                const auto& cmd = *commands.NextCommand<SetVertexBufferCmd>();
+                schema::RenderPassCommandSetVertexBufferCmd data{{
+                    .data = {{
+                        .slot = uint32_t(cmd.slot),
+                        .bufferId = captureContext.GetId(cmd.buffer),
+                        .offset = cmd.offset,
+                        .size = cmd.size,
+                    }},
+                }};
+                Serialize(captureContext, data);
                 break;
             }
             case Command::Draw: {

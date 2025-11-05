@@ -246,7 +246,19 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
         const auto& info = GetVertexBuffer(slot);
 
         std::vector<schema::VertexAttribute> attributes;
-        // TODO(454365240): handle attributes
+
+        for (VertexAttributeLocation loc : GetAttributeLocationsUsed()) {
+            const VertexAttributeInfo& attrib = GetAttribute(loc);
+            // Only use the attributes that use the current input
+            if (attrib.vertexBufferSlot != slot) {
+                continue;
+            }
+            attributes.push_back({{
+                .format = attrib.format,
+                .offset = attrib.offset,
+                .shaderLocation = uint32_t(attrib.shaderLocation),
+            }});
+        }
 
         buffers.push_back({{
             .arrayStride = info.arrayStride,

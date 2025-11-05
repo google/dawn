@@ -480,6 +480,14 @@ DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetPipeline, SET_PIPELINE_CMD_DATA
 
 DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
 
+#define SET_VERTEX_BUFFER_CMD_DATA_MEMBER(X) \
+    X(uint32_t, slot)                        \
+    X(ObjectId, bufferId)                    \
+    X(uint64_t, offset)                      \
+    X(uint64_t, size)
+
+DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetVertexBuffer, SET_VERTEX_BUFFER_CMD_DATA_MEMBER){};
+
 #define DRAW_CMD_DATA_MEMBER(X) \
     X(uint32_t, vertexCount)    \
     X(uint32_t, instanceCount)  \

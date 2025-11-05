@@ -29,6 +29,7 @@
 
 #include <algorithm>
 
+#include "dawn/common/Constants.h"
 #include "dawn/replay/Deserialization.h"
 
 namespace dawn::replay {
@@ -278,6 +279,26 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
         ToWGPU(pipeline.fragment.program.constants);
     std::vector<wgpu::ColorTargetState> colorTargets;
     std::vector<wgpu::BlendState> blendStates(pipeline.fragment.targets.size());
+    std::vector<wgpu::VertexBufferLayout> buffers;
+
+    std::vector<wgpu::VertexAttribute> attributes(kMaxVertexAttributes);
+    uint32_t attributeCount = 0;
+
+    for (const auto& buffer : pipeline.vertex.buffers) {
+        const auto attributesForBuffer = &attributes[attributeCount];
+        for (const auto& attrib : buffer.attributes) {
+            auto& attr = attributes[attributeCount++];
+            attr.format = attrib.format;
+            attr.offset = attrib.offset;
+            attr.shaderLocation = attrib.shaderLocation;
+        }
+        buffers.push_back({
+            .stepMode = buffer.stepMode,
+            .arrayStride = buffer.arrayStride,
+            .attributeCount = buffer.attributes.size(),
+            .attributes = attributesForBuffer,
+        });
+    }
 
     wgpu::FragmentState* fragment = nullptr;
     wgpu::FragmentState fragmentState;
@@ -327,6 +348,8 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
                 .entryPoint = wgpu::StringView(pipeline.vertex.program.entryPoint),
                 .constantCount = vertexConstants.size(),
                 .constants = vertexConstants.data(),
+                .bufferCount = buffers.size(),
+                .buffers = buffers.data(),
             },
         .primitive =
             {
@@ -478,6 +501,13 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.SetBindGroup(data.index,
                                   replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
                                   data.dynamicOffsets.size(), data.dynamicOffsets.data());
+                break;
+            }
+            case schema::RenderPassCommand::SetVertexBuffer: {
+                schema::RenderPassCommandSetVertexBufferCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.SetVertexBuffer(data.slot, replay.GetObjectById<wgpu::Buffer>(data.bufferId),
+                                     data.offset, data.size);
                 break;
             }
             case schema::RenderPassCommand::Draw: {

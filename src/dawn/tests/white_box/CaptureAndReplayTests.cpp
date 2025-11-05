@@ -1306,6 +1306,83 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithBindGroup) {
     }
 }
 
+TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
+    const float myVertices[] = {
+        -1, -1, 3, -1, -1, 3,
+    };
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = "vertexBuffer";
+    descriptor.size = sizeof(myVertices);
+    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
+    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
+
+    queue.WriteBuffer(vertexBuffer, 0, &myVertices, sizeof(myVertices));
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "dstTexture";
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+
+    const char* shader = R"(
+        @vertex fn vs(@location(0) pos: vec4f) -> @builtin(position) vec4f {
+            return pos;
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return vec4u(0x11, 0x22, 0x33, 0x44);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+    desc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    desc.cBuffers[0].arrayStride = 2 * sizeof(float);
+    desc.cBuffers[0].attributeCount = 1;
+    desc.cBuffers[0].attributes = &desc.cAttributes[0];
+    desc.cAttributes[0].shaderLocation = 0;
+    desc.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+    desc.vertex.bufferCount = 1;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetPipeline(pipeline);
+        pass.SetVertexBuffer(0, vertexBuffer);
+        pass.Draw(3);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Texture texture = replay->GetObjectByLabel<wgpu::Texture>("dstTexture");
+        ASSERT_NE(texture, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_TEXTURE_EQ(&expected[0], texture, {0, 0}, {1, 1}, 0, wgpu::TextureAspect::All);
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace
