@@ -265,6 +265,23 @@ ResultOrError<wgpu::BindGroupLayout> CreateBindGroupLayout(const Replay& replay,
                 });
                 break;
             }
+            case schema::BindGroupLayoutEntryType::StorageTextureBinding: {
+                schema::BindGroupLayoutEntryTypeStorageTextureBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+
+                entries.push_back({
+                    .binding = binding.binding,
+                    .visibility = binding.visibility,
+                    .bindingArraySize = binding.bindingArraySize,
+                    .storageTexture =
+                        {
+                            .access = data.access,
+                            .format = data.format,
+                            .viewDimension = data.viewDimension,
+                        },
+                });
+                break;
+            }
             default:
                 return DAWN_INTERNAL_ERROR("unhandled bind group layout entry type");
         }

@@ -259,6 +259,14 @@ DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutBinding, BIND_GROUP_LAYOUT_BINDI
 
 DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(BufferBinding, BUFFER_BIND_GROUP_LAYOUT_MEMBER){};
 
+#define STORAGE_TEXTURE_BIND_GROUP_LAYOUT_MEMBER(X) \
+    X(wgpu::TextureFormat, format)                  \
+    X(wgpu::TextureViewDimension, viewDimension)    \
+    X(wgpu::StorageTextureAccess, access)
+
+DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(StorageTextureBinding,
+                                          STORAGE_TEXTURE_BIND_GROUP_LAYOUT_MEMBER){};
+
 #define BIND_GROUP_LAYOUT_MEMBER(X) X(uint32_t, numEntries)
 
 DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayout, BIND_GROUP_LAYOUT_MEMBER){};

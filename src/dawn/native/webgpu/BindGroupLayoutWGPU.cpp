@@ -129,6 +129,18 @@ MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& captureCon
                 Serialize(captureContext, entry);
                 return {};
             },
+            [&](const StorageTextureBindingInfo& info) -> MaybeError {
+                schema::BindGroupLayoutEntryTypeStorageTextureBinding entry{{
+                    .binding = binding,
+                    .data{{
+                        .format = info.format,
+                        .viewDimension = info.viewDimension,
+                        .access = info.access,
+                    }},
+                }};
+                Serialize(captureContext, entry);
+                return {};
+            },
             [&](const auto& info) -> MaybeError {
                 return DAWN_INTERNAL_ERROR("Unsupported bind layout entry type");
             }));

@@ -140,6 +140,9 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
 
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
+                [&](const StorageTextureBindingInfo& info) -> MaybeError {
+                    return captureContext.AddResource(GetBindingAsTextureView(bindingIndex));
+                },
                 [&](const TextureBindingInfo& info) -> MaybeError {
                     return captureContext.AddResource(GetBindingAsTextureView(bindingIndex));
                 },
@@ -180,6 +183,16 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
                         .bufferId = captureContext.GetId(entry.buffer),
                         .offset = entry.offset,
                         .size = entry.size,
+                    }},
+                }};
+                Serialize(captureContext, data);
+            },
+            [&](const StorageTextureBindingInfo& info) {
+                const auto& entry = GetBindingAsTextureView(bindingIndex);
+                schema::BindGroupEntryTypeTextureBinding data{{
+                    .binding = binding,
+                    .data{{
+                        .textureViewId = captureContext.GetId(entry),
                     }},
                 }};
                 Serialize(captureContext, data);
