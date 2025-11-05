@@ -288,16 +288,6 @@ TEST_P(DeviceLifetimeTests, DroppedWhileWriteBufferAndSubmit) {
 
 // Test that the device can be dropped while createPipelineAsync is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
-    // TODO(crbug.com/447823475) This test is flaky on several platforms
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
-    DAWN_SUPPRESS_TEST_IF(IsNull());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -350,16 +340,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
 // Test that the device can be dropped while createPipelineAsync which will hit the frontend cache
 // is in flight
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
-    // TODO(crbug.com/448426209) This test is flaky on many platforms
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
-    DAWN_SUPPRESS_TEST_IF(IsNull());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {
@@ -424,16 +404,6 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
 // Test that the device can be dropped while createPipelineAsync which will race with a compilation
 // to add the same pipeline to the frontend cache
 TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
-    // TODO(crbug.com/448426209) This test is flaky on many platforms
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-    DAWN_SUPPRESS_TEST_IF(IsMetal());
-    DAWN_SUPPRESS_TEST_IF(IsNull());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
-    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
-
     wgpu::ComputePipelineDescriptor desc;
     desc.compute.module = utils::CreateShaderModule(device, R"(
     @compute @workgroup_size(1) fn main() {

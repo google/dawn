@@ -191,14 +191,14 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
         return;
     }
 
-    DeviceBase* device = mPipeline->GetDevice();
+    Ref<DeviceBase> device = mPipeline->GetDevice();
     // TODO(dawn:2353): Device losts later than this check could potentially lead to racing
     // condition when not using implicit synchronization.
     auto deviceGuard = device->GetGuard();
     if (device->IsLost()) {
         // Invalid async creation should "succeed" if the device is already lost.
         if (!mPipeline->IsError()) {
-            mPipeline = PipelineType::MakeError(device, mPipeline->GetLabel().c_str());
+            mPipeline = PipelineType::MakeError(device.Get(), mPipeline->GetLabel().c_str());
         }
         if (mCallback) {
             mCallback(WGPUCreatePipelineAsyncStatus_Success,
