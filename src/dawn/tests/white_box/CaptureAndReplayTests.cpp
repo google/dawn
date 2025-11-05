@@ -95,6 +95,18 @@ class CaptureAndReplayTests : public DawnTest {
         std::ostringstream mContentStream;
     };
 
+    wgpu::Buffer CreateBuffer(const char* label,
+                              uint64_t size,
+                              wgpu::BufferUsage usage,
+                              bool mappedAtCreation = false) {
+        wgpu::BufferDescriptor descriptor;
+        descriptor.label = label;
+        descriptor.size = size;
+        descriptor.usage = usage;
+        descriptor.mappedAtCreation = mappedAtCreation;
+        return device.CreateBuffer(&descriptor);
+    }
+
     template <typename T>
     void ExpectBufferEQ(replay::Replay* replay, const char* label, const T& expected) {
         ASSERT_TRUE(sizeof(expected) > 0);
@@ -113,15 +125,8 @@ TEST_P(CaptureAndReplayTests, Basic) {
 
     auto recorder = Recorder::CreateAndStart(device);
 
-    {
-        wgpu::BufferDescriptor descriptor;
-        descriptor.label = label;
-        descriptor.size = 4;
-        descriptor.usage = wgpu::BufferUsage::CopyDst;
-        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-        queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
-    }
+    wgpu::Buffer buffer = CreateBuffer(label, 4, wgpu::BufferUsage::CopyDst);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
@@ -139,15 +144,8 @@ TEST_P(CaptureAndReplayTests, NonMultipleOf4LabelLength) {
     // --- capture ---
     auto recorder = Recorder::CreateAndStart(device);
 
-    {
-        wgpu::BufferDescriptor descriptor;
-        descriptor.label = label;
-        descriptor.size = 4;
-        descriptor.usage = wgpu::BufferUsage::CopyDst;
-        wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
-        queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
-    }
+    wgpu::Buffer buffer = CreateBuffer(label, 4, wgpu::BufferUsage::CopyDst);
+    queue.WriteBuffer(buffer, 0, &myData, sizeof(myData));
 
     // --- replay ---
     auto capture = recorder.Finish();
@@ -164,12 +162,7 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationWriteBuffer) {
     const uint8_t myData0[] = {0x11, 0x22, 0x33, 0x44};
     const uint8_t myData1[] = {0x55, 0x66, 0x77, 0x88};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 8;
-    descriptor.usage = wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
+    wgpu::Buffer buffer = CreateBuffer(label, 8, wgpu::BufferUsage::CopyDst);
     queue.WriteBuffer(buffer, 0, &myData0, sizeof(myData0));
 
     // --- capture ---
@@ -193,13 +186,7 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationMappedAtCreation) {
     const uint8_t myData0[] = {0x11, 0x22, 0x33, 0x44};
     const uint8_t myData1[] = {0x55, 0x66, 0x77, 0x88};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 8;
-    descriptor.usage = wgpu::BufferUsage::CopyDst;
-    descriptor.mappedAtCreation = true;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
-
+    wgpu::Buffer buffer = CreateBuffer(label, 8, wgpu::BufferUsage::CopyDst, true);
     std::memcpy(buffer.GetMappedRange(), myData0, sizeof(myData0));
     buffer.Unmap();
 
@@ -222,11 +209,8 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationMappedAtCreation) {
 TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationComputeShader) {
     const char* label = "MyBuffer";
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 8;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer(label, 8, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -280,15 +264,9 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationCopyB2B) {
     const char* srcLabel = "SrcBuffer";
     const char* dstLabel = "DstBuffer";
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = dstLabel;
-    descriptor.size = 8;
-    descriptor.usage = wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
-
-    descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    descriptor.label = srcLabel;
-    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer dstBuffer = CreateBuffer(dstLabel, 8, wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer srcBuffer =
+        CreateBuffer(srcLabel, 8, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
     const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
     queue.WriteBuffer(srcBuffer, 0, &myData1, sizeof(myData1));
 
@@ -327,12 +305,7 @@ TEST_P(CaptureAndReplayTests, TwoCaptures) {
     {
         auto recorder = Recorder::CreateAndStart(device);
 
-        wgpu::BufferDescriptor descriptor;
-        descriptor.label = label;
-        descriptor.size = 8;
-        descriptor.usage = wgpu::BufferUsage::CopyDst;
-        buffer = device.CreateBuffer(&descriptor);
-
+        buffer = CreateBuffer(label, 8, wgpu::BufferUsage::CopyDst);
         queue.WriteBuffer(buffer, 0, &myData1, sizeof(myData1));
 
         recorder.Finish();
@@ -357,11 +330,8 @@ TEST_P(CaptureAndReplayTests, MapWrite) {
     const char* label = "myBuffer";
     const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer(label, 4, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
     auto recorder = Recorder::CreateAndStart(device);
 
@@ -384,17 +354,12 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapWriteDuringCapture) {
     const uint8_t myData1[] = {0x11, 0x22, 0x33, 0x44};
     const uint8_t myData2[] = {0x55, 0x66, 0x77, 0x88};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = dstLabel;
-    descriptor.size = 8;
-    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer dstBuffer =
+        CreateBuffer(dstLabel, 8, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
     queue.WriteBuffer(dstBuffer, 0, &myData1, sizeof(myData1));
 
-    descriptor.label = srcLabel;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer srcBuffer =
+        CreateBuffer(srcLabel, 4, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
     auto recorder = Recorder::CreateAndStart(device);
 
@@ -421,17 +386,11 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapWriteDuringCapture) {
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
     const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = "srcBuffer";
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
-
+    wgpu::Buffer srcBuffer =
+        CreateBuffer("srcBuffer", 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
     queue.WriteBuffer(srcBuffer, 0, &myData, sizeof(myData));
 
-    descriptor.label = "dstBuffer";
-    descriptor.usage = wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer dstBuffer = CreateBuffer("dstBuffer", 4, wgpu::BufferUsage::CopyDst);
 
     wgpu::CommandBuffer commands;
     {
@@ -485,12 +444,8 @@ TEST_P(CaptureAndReplayTests, WriteTexture) {
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToTexture) {
     const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = "srcBuffer";
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer srcBuffer = device.CreateBuffer(&descriptor);
-
+    wgpu::Buffer srcBuffer =
+        CreateBuffer("srcBuffer", 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
     queue.WriteBuffer(srcBuffer, 0, &myData, sizeof(myData));
 
     wgpu::TextureDescriptor textureDesc;
@@ -548,11 +503,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToBuffer) {
                            &extent);
     }
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = "dstBuffer";
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer dstBuffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer dstBuffer =
+        CreateBuffer("dstBuffer", 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
 
     wgpu::CommandBuffer commands;
     {
@@ -857,11 +809,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromRenderTexture) {
 TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasic) {
     const char* label = "MyBuffer";
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer(label, 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -911,11 +860,8 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasic) {
 TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicSetBindGroupFirst) {
     const char* label = "MyBuffer";
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer(label, 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -970,13 +916,10 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicSetBindGroupFirst) {
 // being separately associated with one of the 2 BindGroupLayout objects.
 // This is a regression test for crbug.com/455605671
 TEST_P(CaptureAndReplayTests, CaptureTwoMatchingAutoLayoutComputePipelines) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    descriptor.label = "buffer1";
-    wgpu::Buffer buffer1 = device.CreateBuffer(&descriptor);
-    descriptor.label = "buffer2";
-    wgpu::Buffer buffer2 = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer1 =
+        CreateBuffer("buffer1", 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
+    wgpu::Buffer buffer2 =
+        CreateBuffer("buffer2", 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -1049,11 +992,8 @@ TEST_P(CaptureAndReplayTests, CaptureTwoMatchingAutoLayoutComputePipelines) {
 // call was actually serialized it would reference a bindGroupLayout that does not
 // exist.
 TEST_P(CaptureAndReplayTests, CaptureTwoAutoLayoutComputePipelinesOneIsBoundButUnused) {
-    wgpu::BufferDescriptor descriptor;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    descriptor.label = "buffer";
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer("buffer", 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -1240,12 +1180,8 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
         -1, -1, 3, -1, -1, 3,
     };
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = "vertexBuffer";
-    descriptor.size = sizeof(myVertices);
-    descriptor.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
-    wgpu::Buffer vertexBuffer = device.CreateBuffer(&descriptor);
-
+    wgpu::Buffer vertexBuffer = CreateBuffer(
+        "vertexBuffer", sizeof(myVertices), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
     queue.WriteBuffer(vertexBuffer, 0, &myVertices, sizeof(myVertices));
 
     wgpu::TextureDescriptor textureDesc;
@@ -1330,12 +1266,8 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicExplicitBindGroup) {
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
 
     const char* label = "MyBuffer";
-
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = label;
-    descriptor.size = 4;
-    descriptor.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer =
+        CreateBuffer(label, 4, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst);
 
     const char* shader = R"(
         @group(0) @binding(0) var<storage, read_write> result : u32;
@@ -1494,12 +1426,9 @@ TEST_P(CaptureAndReplayTests, CaptureTextureUsageWithExplicitBindGroupLayout) {
                            &extent);
     }
 
-    wgpu::BufferDescriptor descriptor;
-    descriptor.label = "myBuffer";
-    descriptor.size = 4;
-    descriptor.usage =
-        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
-    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+    wgpu::Buffer buffer = CreateBuffer(
+        "myBuffer", 4,
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
 
     const char* shader = R"(
         @group(0) @binding(2) var tex: texture_2d<u32>;
