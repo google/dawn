@@ -57,6 +57,7 @@ type BigQueryClient struct {
 // BigQuery query.
 type QueryResult struct {
 	TestId   string
+	Name     string
 	Status   string
 	Tags     []TagPair
 	Duration float64
@@ -116,6 +117,7 @@ func (bq BigQueryClient) QueryTestResults(
 	baseQuery := `
 		SELECT
 			test_id AS testid,
+			test_metadata.name AS testname,
 			status,
 			tags,
 			duration
@@ -146,6 +148,7 @@ func (bq BigQueryClient) QueryUnsuppressedFailingTestResults(
 			failing_results AS (
 				SELECT
 					test_id AS testid,
+					test_metadata.name AS testname,
 					status,
 					tags,
 					duration,
@@ -194,6 +197,7 @@ func (bq BigQueryClient) QueryRecentUniqueSuppressedTestResults(
 			recent_results AS (
 				SELECT
 					test_id AS testid,
+					test_metadata.name AS testname,
           ARRAY(
             SELECT t
             FROM tr.tags t
@@ -223,10 +227,13 @@ func (bq BigQueryClient) QueryRecentUniqueSuppressedTestResults(
 		  (
 		  	ARRAY_LENGTH(typ_expectations) > 1
 		  )
-    GROUP BY testid, tags
+    GROUP BY testid, testname, tags
 `
 
-	query := fmt.Sprintf(baseQuery, testPrefix)
+	// We need to escape backslashes since they are special characters in
+	// BigQuery strings.
+	escapedTestPrefix := strings.ReplaceAll(testPrefix, `\`, `\\`)
+	query := fmt.Sprintf(baseQuery, escapedTestPrefix)
 
 	return bq.runQuery(ctx, query, f)
 }
@@ -239,7 +246,10 @@ func (bq BigQueryClient) runQueryForBuilds(
 	for _, id := range builds {
 		buildIds = append(buildIds, fmt.Sprintf(`"build-%v"`, id))
 	}
-	query := fmt.Sprintf(baseQuery, strings.Join(buildIds, ","), testPrefix)
+	// We need to escape backslashes since they are special characters in
+	// BigQuery strings.
+	escapedTestPrefix := strings.ReplaceAll(testPrefix, `\`, `\\`)
+	query := fmt.Sprintf(baseQuery, strings.Join(buildIds, ","), escapedTestPrefix)
 
 	return bq.runQuery(ctx, query, f)
 }

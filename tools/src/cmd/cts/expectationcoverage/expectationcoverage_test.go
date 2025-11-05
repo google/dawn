@@ -135,31 +135,6 @@ crbug.com/0000 [ android ] foo
 	require.ErrorContains(t, err, "/webgpu-cts/expectations.txt:6:31 error: expected status")
 }
 
-func TestRun_GetResultsFailure(t *testing.T) {
-	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
-	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)
-	client := resultsdb.MockBigQueryClient{}
-
-	expectationFileContent := getExpectationContentForTrimmedContentTest()
-	wrapper.WriteFile(common.DefaultExpectationsPath(wrapper), []byte(expectationFileContent), 0o700)
-
-	client.RecentUniqueSuppressedReturnValues = resultsdb.PrefixGroupedQueryResults{
-		"core_prefix": []resultsdb.QueryResult{
-			{
-				TestId: "invalid_prefix_test",
-				Status: "FAIL",
-			},
-		},
-	}
-
-	ctx := context.Background()
-	cfg := createConfig(wrapper, client)
-	c := cmd{}
-	err = c.Run(ctx, cfg)
-	require.ErrorContains(t, err,
-		"Test ID invalid_prefix_test did not start with core_prefix even though query should have filtered.")
-}
-
 func TestRun_SuccessCore(t *testing.T) {
 	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
 	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)

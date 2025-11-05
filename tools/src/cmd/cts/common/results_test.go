@@ -109,6 +109,7 @@ func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
 		"prefix": []resultsdb.QueryResult{
 			{
 				TestId:   "bad_test",
+				Name:     "bad_test",
 				Status:   "FAIL",
 				Tags:     []resultsdb.TagPair{},
 				Duration: 1.0,
@@ -137,45 +138,6 @@ func testCacheResults_CacheHit_Impl(t *testing.T, unsuppressedOnly bool) {
 	require.Equal(t, cachedResults, resultsByExecutionMode)
 }
 
-func TestCacheResults_GetRawResultsError(t *testing.T) {
-	testCacheResults_GetRawResultsError_Impl(t, false)
-}
-
-func TestCacheUnsuppressedFailingResults_GetRawResultsError(t *testing.T) {
-	testCacheResults_GetRawResultsError_Impl(t, true)
-}
-
-func testCacheResults_GetRawResultsError_Impl(t *testing.T, unsuppressedOnly bool) {
-	client := resultsdb.MockBigQueryClient{}
-	var testedFunc cacheResultsFunc
-	var clientDataField *resultsdb.PrefixGroupedQueryResults
-	if unsuppressedOnly {
-		testedFunc = CacheUnsuppressedFailingResults
-		clientDataField = &client.UnsuppressedFailureReturnValues
-	} else {
-		testedFunc = CacheResults
-		clientDataField = &client.ReturnValues
-	}
-
-	ctx, cfg, _, patchset, cacheDir := getCacheResultsSharedSetupData()
-
-	*clientDataField = resultsdb.PrefixGroupedQueryResults{
-		"prefix": []resultsdb.QueryResult{
-			{
-				TestId:   "bad_test",
-				Status:   "FAIL",
-				Tags:     []resultsdb.TagPair{},
-				Duration: 1.0,
-			},
-		},
-	}
-
-	resultsByExecutionMode, err := testedFunc(ctx, cfg, patchset, cacheDir, client, BuildsByName{})
-	require.Nil(t, resultsByExecutionMode)
-	require.ErrorContains(t, err,
-		"Test ID bad_test did not start with prefix even though query should have filtered.")
-}
-
 func TestCacheResults_Success(t *testing.T) {
 	testCacheResults_Success_Impl(t, false)
 }
@@ -202,6 +164,7 @@ func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
 		"prefix": []resultsdb.QueryResult{
 			{
 				TestId: "prefix_test_2",
+				Name:   "_test_2",
 				Status: "CRASH",
 				Tags: []resultsdb.TagPair{
 					{
@@ -213,6 +176,7 @@ func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
 			},
 			{
 				TestId: "prefix_test_1",
+				Name:   "_test_1",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					{
@@ -230,6 +194,7 @@ func testCacheResults_Success_Impl(t *testing.T, unsuppressedOnly bool) {
 			// Should be merged into the above result by CleanResults()
 			{
 				TestId: "prefix_test_1",
+				Name:   "_test_1",
 				Status: "PASS",
 				Tags: []resultsdb.TagPair{
 					{
@@ -304,6 +269,7 @@ func generateGoodGetResultsInputs() (
 			"prefix": []resultsdb.QueryResult{
 				resultsdb.QueryResult{
 					TestId:   "prefix_test",
+					Name:     "_test",
 					Status:   "PASS",
 					Tags:     []resultsdb.TagPair{},
 					Duration: 1.0,
@@ -329,6 +295,7 @@ func TestGetResultsHappyPath(t *testing.T) {
 		"prefix": []resultsdb.QueryResult{
 			resultsdb.QueryResult{
 				TestId: "prefix_test_2",
+				Name:   "_test_2",
 				Status: "PASS",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -344,6 +311,7 @@ func TestGetResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_1",
+				Name:   "_test_1",
 				Status: "PASS",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -379,16 +347,6 @@ func TestGetResultsHappyPath(t *testing.T) {
 	results, err := GetResults(ctx, cfg, client, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
-}
-
-// Tests that errors from GetRawResults are properly surfaced.
-func TestGetResultsGetRawResultsErrorSurfaced(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetResultsInputs()
-	client.ReturnValues["prefix"][0].TestId = "bad_test"
-
-	results, err := GetResults(ctx, cfg, client, builds)
-	require.Nil(t, results)
-	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
 
 /*******************************************************************************
@@ -414,6 +372,7 @@ func generateGoodGetUnsuppressedFailingResultsInputs() (
 			"prefix": []resultsdb.QueryResult{
 				resultsdb.QueryResult{
 					TestId:   "prefix_test",
+					Name:     "_test",
 					Status:   "FAIL",
 					Tags:     []resultsdb.TagPair{},
 					Duration: 1.0,
@@ -439,6 +398,7 @@ func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
 		"prefix": []resultsdb.QueryResult{
 			resultsdb.QueryResult{
 				TestId: "prefix_test_2",
+				Name:   "_test_2",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -454,6 +414,7 @@ func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_1",
+				Name:   "_test_1",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -491,16 +452,6 @@ func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	require.Equal(t, expectedResults, results)
 }
 
-// Tests that errors from GetRawResults are properly surfaced.
-func TestGetUnsuppressedFailingResultsGetRawResultsErrorSurfaced(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
-	client.UnsuppressedFailureReturnValues["prefix"][0].TestId = "bad_test"
-
-	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
-	require.Nil(t, results)
-	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
-}
-
 /*******************************************************************************
  * GetRawResults tests
  ******************************************************************************/
@@ -512,12 +463,14 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 		"prefix": []resultsdb.QueryResult{
 			resultsdb.QueryResult{
 				TestId:   "prefix_test_1",
+				Name:     "_test_1",
 				Status:   "PASS",
 				Tags:     []resultsdb.TagPair{},
 				Duration: 1.0,
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_2",
+				Name:   "_test_2",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -529,6 +482,7 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_3",
+				Name:   "_test_3",
 				Status: "SKIP",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -540,6 +494,7 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_4",
+				Name:   "_test_4",
 				Status: "SomeStatus",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -593,16 +548,6 @@ func TestGetRawResultsHappyPath(t *testing.T) {
 	results, err := GetRawResults(ctx, cfg, client, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
-}
-
-// Tests that a mismatched prefix results in an error.
-func TestGetRawResultsPrefixMismatch(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetResultsInputs()
-	client.ReturnValues["prefix"][0].TestId = "bad_test"
-
-	results, err := GetRawResults(ctx, cfg, client, builds)
-	require.Nil(t, results)
-	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
 
 // Tests that a JavaScript duration that cannot be parsed results in an error.
@@ -696,12 +641,14 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 		"prefix": []resultsdb.QueryResult{
 			resultsdb.QueryResult{
 				TestId:   "prefix_test_1",
+				Name:     "_test_1",
 				Status:   "FAIL",
 				Tags:     []resultsdb.TagPair{},
 				Duration: 1.0,
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_2",
+				Name:   "_test_2",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -713,6 +660,7 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_3",
+				Name:   "_test_3",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -724,6 +672,7 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 			},
 			resultsdb.QueryResult{
 				TestId: "prefix_test_4",
+				Name:   "_test_4",
 				Status: "SomeStatus",
 				Tags: []resultsdb.TagPair{
 					resultsdb.TagPair{
@@ -777,16 +726,6 @@ func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
 	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
 	require.NoError(t, err)
 	require.Equal(t, expectedResults, results)
-}
-
-// Tests that a mismatched prefix results in an error.
-func TestGetRawUnsuppressedFailingResultsPrefixMismatch(t *testing.T) {
-	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
-	client.UnsuppressedFailureReturnValues["prefix"][0].TestId = "bad_test"
-
-	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
-	require.Nil(t, results)
-	require.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
 
 // Tests that a JavaScript duration that cannot be parsed results in an error.
@@ -1034,6 +973,7 @@ func getMultiPrefixQueryResults() resultsdb.PrefixGroupedQueryResults {
 		"core_prefix": []resultsdb.QueryResult{
 			{
 				TestId: "core_prefix_test_1",
+				Name:   "_test_1",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					{
@@ -1045,6 +985,7 @@ func getMultiPrefixQueryResults() resultsdb.PrefixGroupedQueryResults {
 			},
 			{
 				TestId: "core_prefix_test_2",
+				Name:   "_test_2",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					{
@@ -1058,6 +999,7 @@ func getMultiPrefixQueryResults() resultsdb.PrefixGroupedQueryResults {
 		"compat_prefix": []resultsdb.QueryResult{
 			{
 				TestId: "compat_prefix_test_3",
+				Name:   "_test_3",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					{
@@ -1069,6 +1011,7 @@ func getMultiPrefixQueryResults() resultsdb.PrefixGroupedQueryResults {
 			},
 			{
 				TestId: "compat_prefix_test_4",
+				Name:   "_test_4",
 				Status: "FAIL",
 				Tags: []resultsdb.TagPair{
 					{
@@ -1119,24 +1062,6 @@ func getExpectedMultiPrefixResults() result.ResultsByExecutionMode {
 	}
 }
 
-func TestCacheRecentUniqueSuppressedCoreResults_ErrorSurfaced(t *testing.T) {
-	ctx := context.Background()
-	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
-
-	results := getMultiPrefixQueryResults()
-	results["core_prefix"][0].TestId = "bad_test"
-	client := resultsdb.MockBigQueryClient{
-		RecentUniqueSuppressedReturnValues: results,
-	}
-
-	resultsList, err := CacheRecentUniqueSuppressedCoreResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
-	require.Nil(t, resultsList)
-	require.ErrorContains(t, err,
-		"Test ID bad_test did not start with core_prefix even though query should have filtered.")
-}
-
 func TestCacheRecentUniqueSuppressedCoreResults_Success(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
@@ -1150,24 +1075,6 @@ func TestCacheRecentUniqueSuppressedCoreResults_Success(t *testing.T) {
 		ctx, cfg, fileutils.ThisDir(), client, wrapper)
 	require.NoErrorf(t, err, "Error getting results: %v", err)
 	require.Equal(t, resultsList, getExpectedMultiPrefixResults()["core"])
-}
-
-func TestCAcheRecentUniqueSuppressedCompatResults_ErrorSurfaced(t *testing.T) {
-	ctx := context.Background()
-	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
-
-	results := getMultiPrefixQueryResults()
-	results["compat_prefix"][0].TestId = "bad_test"
-	client := resultsdb.MockBigQueryClient{
-		RecentUniqueSuppressedReturnValues: results,
-	}
-
-	resultsList, err := CacheRecentUniqueSuppressedCoreResults(
-		ctx, cfg, fileutils.ThisDir(), client, wrapper)
-	require.Nil(t, resultsList)
-	require.ErrorContains(t, err,
-		"Test ID bad_test did not start with compat_prefix even though query should have filtered.")
 }
 
 func TestCacheRecentUniqueSuppressedCompatResults_Success(t *testing.T) {
@@ -1257,7 +1164,7 @@ func TestCacheRecentUniqueSuppressedResults_GetResultsError(t *testing.T) {
 		ctx, cfg, fileutils.ThisDir(), client, wrapper)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
-		"Got tag key non_typ_tag when only typ_tag should be present")
+		"Got tag key non_typ_tag when only typ_tag and gpu_test_class should be present")
 }
 
 func TestCacheRecentUniqueSuppressedResults_Success(t *testing.T) {
@@ -1277,37 +1184,6 @@ func TestCacheRecentUniqueSuppressedResults_Success(t *testing.T) {
 /*******************************************************************************
  * getRecentUniqueSuppressedResults tests
  ******************************************************************************/
-
-func TestGetRecentUniqueSuppressedResults_PrefixMismatch(t *testing.T) {
-	ctx := context.Background()
-
-	cfg := Config{
-		Tests: []TestConfig{
-			TestConfig{
-				ExecutionMode: result.ExecutionMode("execution_mode"),
-				Prefixes:      []string{"prefix"},
-			},
-		},
-	}
-
-	client := resultsdb.MockBigQueryClient{
-		RecentUniqueSuppressedReturnValues: resultsdb.PrefixGroupedQueryResults{
-			"prefix": []resultsdb.QueryResult{
-				{
-					TestId:   "bad_test",
-					Status:   "FAIL",
-					Tags:     []resultsdb.TagPair{},
-					Duration: 1.0,
-				},
-			},
-		},
-	}
-
-	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
-	require.Nil(t, resultsByExecutionMode)
-	require.ErrorContains(t, err,
-		"Test ID bad_test did not start with prefix even though query should have filtered.")
-}
 
 func TestGetRecentUniqueSuppressedResults_NonTypTag(t *testing.T) {
 	ctx := context.Background()
@@ -1342,7 +1218,7 @@ func TestGetRecentUniqueSuppressedResults_NonTypTag(t *testing.T) {
 	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
 	require.Nil(t, resultsByExecutionMode)
 	require.ErrorContains(t, err,
-		"Got tag key non_typ_tag when only typ_tag should be present")
+		"Got tag key non_typ_tag when only typ_tag and gpu_test_class should be present")
 }
 
 func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
@@ -1362,6 +1238,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 			"prefix": []resultsdb.QueryResult{
 				{
 					TestId: "prefix_test_1",
+					Name:   "_test_1",
 					Status: "FAIL",
 					Tags: []resultsdb.TagPair{
 						{
@@ -1373,6 +1250,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 				},
 				{
 					TestId: "prefix_test_2",
+					Name:   "_test_2",
 					Status: "FAIL",
 					Tags: []resultsdb.TagPair{
 						{
@@ -1384,6 +1262,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 				},
 				{
 					TestId: "prefix_test_1",
+					Name:   "_test_1",
 					Status: "FAIL",
 					Tags: []resultsdb.TagPair{
 						{
@@ -1395,6 +1274,7 @@ func TestGetRecentUniqueSuppressedResults_Success(t *testing.T) {
 				},
 				{
 					TestId: "prefix_test_2",
+					Name:   "_test_2",
 					Status: "FAIL",
 					Tags: []resultsdb.TagPair{
 						{

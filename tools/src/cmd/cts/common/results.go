@@ -35,7 +35,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
@@ -349,11 +348,7 @@ func getRawResultsImpl(
 					fmt.Printf(".")
 				}
 
-				if !strings.HasPrefix(r.TestId, prefix) {
-					return fmt.Errorf("Test ID %s did not start with %s even though query should have filtered.", r.TestId, prefix)
-				}
-
-				testName := r.TestId[len(prefix):]
+				testName := r.Name
 				status := convertRdbStatus(r.Status)
 				tags := result.NewTags()
 				duration := time.Duration(r.Duration * float64(time.Second))
@@ -653,18 +648,14 @@ func getRecentUniqueSuppressedResults(
 		for _, prefix := range test.Prefixes {
 
 			rowHandler := func(r *resultsdb.QueryResult) error {
-				if !strings.HasPrefix(r.TestId, prefix) {
-					return fmt.Errorf(
-						"Test ID %s did not start with %s even though query should have filtered.",
-						r.TestId, prefix)
-				}
-
-				testName := r.TestId[len(prefix):]
+				testName := r.Name
 				tags := result.NewTags()
 
 				for _, tagPair := range r.Tags {
-					if tagPair.Key != "typ_tag" {
-						return fmt.Errorf("Got tag key %v when only typ_tag should be present", tagPair.Key)
+					// We only care about typ_tag, but the new test id format adds a
+					// gpu_test_class tag that we need to ignore.
+					if tagPair.Key != "typ_tag" && tagPair.Key != "gpu_test_class" {
+						return fmt.Errorf("Got tag key %v when only typ_tag and gpu_test_class should be present", tagPair.Key)
 					}
 					tags.Add(tagPair.Value)
 				}
