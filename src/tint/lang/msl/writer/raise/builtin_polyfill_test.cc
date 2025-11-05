@@ -3915,5 +3915,53 @@ TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixMultiplyAccumulate_F16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_BuiltinPolyfillTest, SubgroupMatrixScalarAdd) {
+    auto* mat = ty.subgroup_matrix_result(ty.f32(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("v", ty.ptr(function, mat, read_write));
+        b.Let("r", b.Call(mat, core::BuiltinFn::kSubgroupMatrixScalarAdd, b.Load(v), 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<f32, 8, 8> = load %v
+    %4:subgroup_matrix_result<f32, 8, 8> = subgroupMatrixScalarAdd %3, 3.0f
+    %r:subgroup_matrix_result<f32, 8, 8> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %v:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %3:subgroup_matrix_result<f32, 8, 8> = load %v
+    %4:ptr<function, subgroup_matrix_result<f32, 8, 8>, read_write> = var undef
+    %5:subgroup_matrix_left<f32, 8, 8> = msl.convert<subgroup_matrix_left<f32, 8, 8>> %3
+    %6:subgroup_matrix_right<f32, 8, 8> = msl.make_diagonal_simdgroup_matrix<subgroup_matrix_right<f32, 8, 8>> 1.0f
+    %7:subgroup_matrix_result<f32, 8, 8> = msl.make_filled_simdgroup_matrix<subgroup_matrix_result<f32, 8, 8>> 3.0f
+    %8:subgroup_matrix_result<f32, 8, 8> = load %4
+    %9:void = msl.simdgroup_multiply_accumulate %8, %5, %6, %7
+    %10:subgroup_matrix_result<f32, 8, 8> = load %4
+    %11:subgroup_matrix_result<f32, 8, 8> = msl.convert<subgroup_matrix_result<f32, 8, 8>> %10
+    %r:subgroup_matrix_result<f32, 8, 8> = let %11
+    ret
+  }
+}
+)";
+
+    BuiltinPolyfillConfig config;
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

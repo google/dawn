@@ -390,17 +390,43 @@ fn convert(vec3<f16>) -> __packed_vec3<f16>
 
 fn convert(u32) -> u64
 
-@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_load(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, readable>, u64, vec2<u64>, bool)
-@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num) fn simdgroup_store(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, writable>, u64, vec2<u64>, bool)
-@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply(
-  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
-  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
-@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num) fn simdgroup_multiply_accumulate(
-  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
-  subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
-  subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
-  subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
+@stage("compute") implicit(S: f32_f16, C: num, R: num)
+  fn convert<T: subgroup_matrix<subgroup_matrix_kind_left, S, C, R> >(
+    subgroup_matrix<subgroup_matrix_kind_left, S, C, R>) -> T
+@stage("compute") implicit(S: f32_f16, C: num, R: num)
+  fn convert<T: subgroup_matrix<subgroup_matrix_kind_result, S, C, R> >(
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>) -> T
+
+@stage("compute") implicit(S: f32_f16, C: num, R: num)
+  fn convert<T: subgroup_matrix<subgroup_matrix_kind_left, S, C, R> >(
+    subgroup_matrix<subgroup_matrix_kind_right, S, C, R>) -> T
+@stage("compute") implicit(S: f32_f16, C: num, R: num)
+  fn convert<T: subgroup_matrix<subgroup_matrix_kind_left, S, C, R> >(
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>) -> T
+@stage("compute") implicit(S: f32_f16, C: num, R: num)
+  fn convert<T: subgroup_matrix<subgroup_matrix_kind_right, S, C, R> >(
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>) -> T
+
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num)
+  fn make_filled_simdgroup_matrix<T: subgroup_matrix<K, S, C, R> >(S) -> T
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num)
+  fn make_diagonal_simdgroup_matrix<T: subgroup_matrix<K, S, C, R> >(S) ->  T
+
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num)
+  fn simdgroup_load(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, readable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(K: subgroup_matrix_kind, S: f32_f16, C: num, R: num)
+  fn simdgroup_store(subgroup_matrix<K, S, C, R>, ptr<workgroup_or_storage, S, writable>, u64, vec2<u64>, bool)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num)
+  fn simdgroup_multiply(
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+    subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, S, C, K>)
+@stage("compute") implicit(S: f32_f16, C: num, R: num, K: num)
+  fn simdgroup_multiply_accumulate(
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>,
+    subgroup_matrix<subgroup_matrix_kind_left, S, K, R>,
+    subgroup_matrix<subgroup_matrix_kind_right, S, C, K>,
+    subgroup_matrix<subgroup_matrix_kind_result, S, C, R>)
 
 // Compute
 implicit(T: scalar) fn os_log(string, u32, u32, u32, T)

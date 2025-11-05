@@ -85,6 +85,8 @@ enum class BuiltinFn : uint8_t {
     kSimdBallot,
     kQuadShuffleXor,
     kConvert,
+    kMakeFilledSimdgroupMatrix,
+    kMakeDiagonalSimdgroupMatrix,
     kSimdgroupLoad,
     kSimdgroupStore,
     kSimdgroupMultiply,
