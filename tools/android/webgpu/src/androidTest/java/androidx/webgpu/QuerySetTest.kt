@@ -87,9 +87,9 @@ class QuerySetTest {
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedQuerySet =
       device.createQuerySet(QuerySetDescriptor(type = QueryType.Occlusion, count = -1))
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -133,9 +133,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
 
     querySet.destroy()
     destinationBuffer.destroy()
@@ -156,9 +156,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -174,9 +174,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -193,9 +193,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -213,8 +213,8 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 }

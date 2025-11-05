@@ -1,3 +1,10 @@
 package androidx.webgpu.helper
 
-public class DawnException(message:String): Exception(message)
+import androidx.webgpu.Status
+
+public class DawnException(public val reason: String = "", public val status: Int? = null) :
+    Exception(
+        (if (status != null) "${Status.toString(status)}:" else "") + reason
+    ) {
+
+}

@@ -126,8 +126,8 @@ class RenderBundleEncoderTest {
     bundleEncoder.insertDebugMarker("Marker Inside Bundle")
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.NoError, errorScope.type)
+    val error = runBlocking { device.popErrorScope() }
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test
@@ -137,9 +137,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()  // Deferred error caught here.
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -150,9 +150,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()  // Should succeed.
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test
@@ -162,9 +162,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -175,9 +175,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test
@@ -190,9 +190,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     invalidBuffer.destroy()
   }
 
@@ -206,9 +206,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     validBuffer.destroy()
   }
 
@@ -220,9 +220,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -235,9 +235,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val bundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     indexBuffer.destroy()
     bundle.close()
   }
@@ -253,9 +253,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     invalidBuffer.destroy()
   }
 
@@ -268,9 +268,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val bundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     indirectBuffer.destroy()
     bundle.close()
   }
@@ -284,9 +284,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     indirectBuffer.destroy()
   }
 
@@ -302,9 +302,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     indirectBuffer.destroy()
     indexBuffer.destroy()
   }
@@ -345,9 +345,9 @@ class RenderBundleEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   /**
@@ -407,9 +407,9 @@ class RenderBundleEncoderTest {
     device.pushErrorScope(ErrorFilter.Validation)
     // Finish recording. Validation occurs here.
     val unusedRenderBundle = bundleEncoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test

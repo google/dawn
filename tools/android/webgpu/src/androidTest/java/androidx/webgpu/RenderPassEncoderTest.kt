@@ -164,9 +164,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test
@@ -178,9 +178,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -192,9 +192,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -209,9 +209,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     invalidBuffer.destroy()
   }
 
@@ -225,9 +225,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -242,9 +242,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val errorType = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, errorType)
     indexBuffer.destroy()
   }
 
@@ -261,9 +261,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     invalidBuffer.destroy()
   }
 
@@ -278,9 +278,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
     indirectBuffer.destroy()
   }
 
@@ -297,9 +297,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     indirectBuffer.destroy()
     indexBuffer.destroy()
   }
@@ -361,9 +361,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
 
     querySet.destroy()
     depthPipeline.close()
@@ -381,9 +381,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   @Test
@@ -394,9 +394,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     passEncoder.end()  // Second call (invalid).
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertEquals(ErrorType.Validation, error)
   }
 
   @Test
@@ -417,9 +417,9 @@ class RenderPassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
 
     bundle.close()
   }
