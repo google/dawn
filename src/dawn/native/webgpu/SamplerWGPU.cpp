@@ -51,6 +51,21 @@ WGPUSamplerDescriptor ToWGPU(const SamplerDescriptor* desc) {
     };
 }
 
+schema::Sampler ToSchema(const SamplerDescriptor* desc) {
+    return {{
+        .addressModeU = desc->addressModeU,
+        .addressModeV = desc->addressModeV,
+        .addressModeW = desc->addressModeW,
+        .magFilter = desc->magFilter,
+        .minFilter = desc->minFilter,
+        .mipmapFilter = desc->mipmapFilter,
+        .lodMinClamp = desc->lodMinClamp,
+        .lodMaxClamp = desc->lodMaxClamp,
+        .compare = desc->compare,
+        .maxAnisotropy = desc->maxAnisotropy,
+    }};
+}
+
 }  // namespace
 
 // static
@@ -61,7 +76,10 @@ ResultOrError<Ref<Sampler>> Sampler::Create(Device* device, const SamplerDescrip
 }
 
 Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
-    : SamplerBase(device, descriptor), ObjectWGPU(device->wgpu.samplerRelease) {
+    : SamplerBase(device, descriptor),
+      RecordableObject(schema::ObjectType::Sampler),
+      ObjectWGPU(device->wgpu.samplerRelease),
+      mSamplerParams(ToSchema(descriptor)) {
     WGPUSamplerDescriptor desc = ToWGPU(descriptor);
     mInnerHandle = ToBackend(GetDevice())
                        ->wgpu.deviceCreateSampler(ToBackend(GetDevice())->GetInnerHandle(), &desc);
@@ -69,6 +87,16 @@ Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
 }
 
 MaybeError Sampler::Initialize() {
+    return {};
+}
+
+MaybeError Sampler::AddReferenced(CaptureContext& captureContext) {
+    // Samplers don't reference anything
+    return {};
+}
+
+MaybeError Sampler::CaptureCreationParameters(CaptureContext& captureContext) {
+    Serialize(captureContext, mSamplerParams);
     return {};
 }
 

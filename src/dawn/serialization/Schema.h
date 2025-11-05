@@ -259,6 +259,10 @@ DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutBinding, BIND_GROUP_LAYOUT_BINDI
 
 DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(BufferBinding, BUFFER_BIND_GROUP_LAYOUT_MEMBER){};
 
+#define SAMPLER_BIND_GROUP_LAYOUT_MEMBER(X) X(wgpu::SamplerBindingType, type)
+
+DAWN_REPLAY_MAKE_BINDGROUP_LAYOUT_VARIANT(SamplerBinding, SAMPLER_BIND_GROUP_LAYOUT_MEMBER){};
+
 #define STORAGE_TEXTURE_BIND_GROUP_LAYOUT_MEMBER(X) \
     X(wgpu::TextureFormat, format)                  \
     X(wgpu::TextureViewDimension, viewDimension)    \
@@ -287,6 +291,20 @@ DAWN_REPLAY_SERIALIZABLE(struct, PipelineLayout, PIPELINE_LAYOUT_MEMBER){};
     X(wgpu::BufferUsage, usage)
 
 DAWN_REPLAY_SERIALIZABLE(struct, Buffer, BUFFER_CREATION_MEMBER){};
+
+#define SAMPLER_CREATION_MEMBER(X)          \
+    X(wgpu::AddressMode, addressModeU)      \
+    X(wgpu::AddressMode, addressModeV)      \
+    X(wgpu::AddressMode, addressModeW)      \
+    X(wgpu::FilterMode, magFilter)          \
+    X(wgpu::FilterMode, minFilter)          \
+    X(wgpu::MipmapFilterMode, mipmapFilter) \
+    X(float, lodMinClamp)                   \
+    X(float, lodMaxClamp)                   \
+    X(wgpu::CompareFunction, compare)       \
+    X(uint16_t, maxAnisotropy)
+
+DAWN_REPLAY_SERIALIZABLE(struct, Sampler, SAMPLER_CREATION_MEMBER){};
 
 #define TEXTURE_CREATION_MEMBER(X)       \
     X(wgpu::TextureUsage, usage)         \
@@ -354,6 +372,10 @@ DAWN_REPLAY_SERIALIZABLE(struct, RenderPipeline, RENDER_PIPELINE_CREATION_MEMBER
     X(uint64_t, size)
 
 DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(BufferBinding, BUFFER_BIND_GROUP_ENTRY_MEMBER){};
+
+#define SAMPLER_BIND_GROUP_ENTRY_MEMBER(X) X(ObjectId, samplerId)
+
+DAWN_REPLAY_MAKE_BINDGROUP_VARIANT(SamplerBinding, SAMPLER_BIND_GROUP_ENTRY_MEMBER){};
 
 #define TEXTURE_BIND_GROUP_ENTRY_MEMBER(X) X(ObjectId, textureViewId)
 

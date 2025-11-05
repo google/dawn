@@ -209,6 +209,15 @@ ResultOrError<wgpu::BindGroup> CreateBindGroup(const Replay& replay,
                 });
                 break;
             }
+            case schema::BindGroupLayoutEntryType::SamplerBinding: {
+                schema::BindGroupEntryTypeSamplerBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                entries.push_back(wgpu::BindGroupEntry{
+                    .binding = binding,
+                    .sampler = replay.GetObjectById<wgpu::Sampler>(data.samplerId),
+                });
+                break;
+            }
             case schema::BindGroupLayoutEntryType::TextureBinding: {
                 schema::BindGroupEntryTypeTextureBindingData data;
                 DAWN_TRY(Deserialize(readHead, &data));
@@ -261,6 +270,21 @@ ResultOrError<wgpu::BindGroupLayout> CreateBindGroupLayout(const Replay& replay,
                             .type = data.type,
                             .hasDynamicOffset = data.hasDynamicOffset,
                             .minBindingSize = data.minBindingSize,
+                        },
+                });
+                break;
+            }
+            case schema::BindGroupLayoutEntryType::SamplerBinding: {
+                schema::BindGroupLayoutEntryTypeSamplerBindingData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+
+                entries.push_back({
+                    .binding = binding.binding,
+                    .visibility = binding.visibility,
+                    .bindingArraySize = binding.bindingArraySize,
+                    .sampler =
+                        {
+                            .type = data.type,
                         },
                 });
                 break;
@@ -491,6 +515,28 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&desc);
     func(renderPipeline, pipeline.groupIndexIds);
     return {renderPipeline};
+}
+
+ResultOrError<wgpu::Sampler> CreateSampler(wgpu::Device device,
+                                           ReadHead& readHead,
+                                           const std::string& label) {
+    schema::Sampler sampler;
+    DAWN_TRY(Deserialize(readHead, &sampler));
+
+    wgpu::SamplerDescriptor desc{
+        .label = wgpu::StringView(label),
+        .addressModeU = sampler.addressModeU,
+        .addressModeV = sampler.addressModeV,
+        .addressModeW = sampler.addressModeW,
+        .magFilter = sampler.magFilter,
+        .minFilter = sampler.minFilter,
+        .mipmapFilter = sampler.mipmapFilter,
+        .lodMinClamp = sampler.lodMinClamp,
+        .lodMaxClamp = sampler.lodMaxClamp,
+        .compare = sampler.compare,
+        .maxAnisotropy = sampler.maxAnisotropy,
+    };
+    return {device.CreateSampler(&desc)};
 }
 
 ResultOrError<wgpu::ShaderModule> CreateShaderModule(wgpu::Device device,
@@ -857,6 +903,13 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
                         }
                     }));
             mResources.insert({resource.id, {resource.label, renderPipeline}});
+            return {};
+        }
+
+        case schema::ObjectType::Sampler: {
+            wgpu::Sampler sampler;
+            DAWN_TRY_ASSIGN(sampler, CreateSampler(device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, sampler}});
             return {};
         }
 

@@ -1378,6 +1378,95 @@ TEST_P(CaptureAndReplayTests, CaptureTextureUsageWithExplicitBindGroupLayout) {
     ExpectBufferEQ(replay.get(), "myBuffer", expected);
 }
 
+// Capture and replay a pass that uses a sampler binding with explicit bind group layout.
+TEST_P(CaptureAndReplayTests, CaptureSamplerUsageWithExplicitBindGroupLayout) {
+    wgpu::BindGroupLayoutEntry entries[2];
+    entries[0].binding = 2;
+    entries[0].visibility = wgpu::ShaderStage::Fragment;
+    entries[0].texture.sampleType = wgpu::TextureSampleType::Float;
+    entries[0].texture.viewDimension = wgpu::TextureViewDimension::e2D;
+    entries[1].binding = 4;
+    entries[1].visibility = wgpu::ShaderStage::Fragment;
+    entries[1].sampler.type = wgpu::SamplerBindingType::Filtering;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 2;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &layout;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {1}, wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst);
+
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(srcTexture, wgpu::TextureFormat::RGBA8Unorm, {1}, myData);
+
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    const char* shader = R"(
+        @group(0) @binding(2) var tex: texture_2d<f32>;
+        @group(0) @binding(4) var smp: sampler;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 1);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            return textureSample(tex, smp, vec2f(0));
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {2, srcTexture.CreateView()},
+                                                         {4, sampler},
+                                                     });
+
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        pass.Draw(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

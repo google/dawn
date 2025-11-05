@@ -129,6 +129,16 @@ MaybeError BindGroupLayout::CaptureCreationParameters(CaptureContext& captureCon
                 Serialize(captureContext, entry);
                 return {};
             },
+            [&](const SamplerBindingInfo& info) -> MaybeError {
+                schema::BindGroupLayoutEntryTypeSamplerBinding entry{{
+                    .binding = binding,
+                    .data{{
+                        .type = info.type,
+                    }},
+                }};
+                Serialize(captureContext, entry);
+                return {};
+            },
             [&](const StorageTextureBindingInfo& info) -> MaybeError {
                 schema::BindGroupLayoutEntryTypeStorageTextureBinding entry{{
                     .binding = binding,

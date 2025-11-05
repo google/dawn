@@ -30,6 +30,7 @@
 
 #include "dawn/native/Sampler.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/RecordableObject.h"
 
 #include "dawn/webgpu.h"
 
@@ -37,13 +38,19 @@ namespace dawn::native::webgpu {
 
 class Device;
 
-class Sampler final : public SamplerBase, public ObjectWGPU<WGPUSampler> {
+class Sampler final : public SamplerBase, public RecordableObject, public ObjectWGPU<WGPUSampler> {
   public:
     static ResultOrError<Ref<Sampler>> Create(Device* device, const SamplerDescriptor* descriptor);
+
+    MaybeError AddReferenced(CaptureContext& captureContext) override;
+    MaybeError CaptureCreationParameters(CaptureContext& context) override;
 
   private:
     Sampler(Device* device, const SamplerDescriptor* descriptor);
     ~Sampler() override = default;
+
+    // Sampler params are not available after creation so we save them in serializable format.
+    schema::Sampler mSamplerParams;
 
     MaybeError Initialize();
 };
