@@ -107,6 +107,33 @@ class CaptureAndReplayTests : public DawnTest {
         return device.CreateBuffer(&descriptor);
     }
 
+    wgpu::Texture CreateTexture(const char* label,
+                                const wgpu::Extent3D& size,
+                                wgpu::TextureFormat format,
+                                wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor textureDesc;
+        textureDesc.label = label;
+        textureDesc.size = size;
+        textureDesc.format = format;
+        textureDesc.usage = usage;
+        return device.CreateTexture(&textureDesc);
+    }
+
+    template <typename T>
+    void WriteFullTexture(wgpu::Texture texture,
+                          wgpu::TextureFormat format,
+                          const wgpu::Extent3D& size,
+                          const T& data) {
+        ASSERT_TRUE(sizeof(data) > 0);
+        uint32_t bytesPerBlock = utils::GetTexelBlockSizeInBytes(format);
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, bytesPerBlock * size.width);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        queue.WriteTexture(&texelCopyTextureInfo, data, sizeof(data), &texelCopyBufferLayout,
+                           &size);
+    }
+
     template <typename T>
     void ExpectBufferEQ(replay::Replay* replay, const char* label, const T& expected) {
         ASSERT_TRUE(sizeof(expected) > 0);
@@ -410,26 +437,14 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
 }
 
 TEST_P(CaptureAndReplayTests, WriteTexture) {
-    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
-
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "myTexture";
-    textureDesc.size = {4, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::R8Unorm;
-    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::Texture texture =
+        CreateTexture("myTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     auto recorder = Recorder::CreateAndStart(device);
 
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {4, 1, 1};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(texture, wgpu::TextureFormat::R8Unorm, {4}, myData);
 
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
@@ -448,12 +463,9 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToTexture) {
         CreateBuffer("srcBuffer", 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
     queue.WriteBuffer(srcBuffer, 0, &myData, sizeof(myData));
 
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "dstTexture";
-    textureDesc.size = {4, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::R8Unorm;
-    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     wgpu::CommandBuffer commands;
     {
@@ -483,25 +495,13 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToTexture) {
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToBuffer) {
-    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
-
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "srcTexture";
-    textureDesc.size = {4, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::R8Unorm;
-    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     // Put data in source texture
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {4, 1, 1};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(srcTexture, wgpu::TextureFormat::R8Unorm, {4}, myData);
 
     wgpu::Buffer dstBuffer =
         CreateBuffer("dstBuffer", 4, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc);
@@ -531,28 +531,17 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToBuffer) {
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTexture) {
-    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
-
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "srcTexture";
-    textureDesc.size = {4, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::R8Unorm;
-    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     // Put data in source texture
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {4, 1, 1};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(srcTexture, wgpu::TextureFormat::R8Unorm, {4}, myData);
 
-    textureDesc.label = "dstTexture";
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     wgpu::CommandBuffer commands;
     {
@@ -588,28 +577,17 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTexture) {
 // not. So, if the texture is not marked as initialized by CopyT2T then
 // capture will fail as it will not copy the contents of the 2nd texture.
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromCopyT2TTexture) {
-    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
-
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "dataTexture";
-    textureDesc.size = {4, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::R8Unorm;
-    textureDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture dataTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dataTexture =
+        CreateTexture("dataTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     // Put data in data texture
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(dataTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {4, 1, 1};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(dataTexture, wgpu::TextureFormat::R8Unorm, {4}, myData);
 
-    textureDesc.label = "srcTexture";
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     // Copy the data texture ot the src texture
     {
@@ -630,8 +608,9 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromCopyT2TTexture) {
         queue.Submit(1, &commands);
     }
 
-    textureDesc.label = "dstTexture";
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {4}, wgpu::TextureFormat::R8Unorm,
+                      wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc);
 
     wgpu::CommandBuffer commands;
     {
@@ -664,12 +643,9 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromCopyT2TTexture) {
 // Before capture, creates a texture and sets it in a compute pass as a storage texture.
 // Then, captures a copyT2T to a 2nd texture. Checks the 2nd texture has the correct data on replay.
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromComputeTexture) {
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "srcTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::StorageBinding;
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::StorageBinding);
 
     const char* shader = R"(
         @group(0) @binding(0) var tex: texture_storage_2d<rgba8uint, write>;
@@ -704,9 +680,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromComputeTexture) {
         queue.Submit(1, &commands);
     }
 
-    textureDesc.label = "dstTexture";
-    textureDesc.usage = wgpu::TextureUsage::CopyDst;
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture = CreateTexture(
+        "dstTexture", {1, 1, 1}, wgpu::TextureFormat::RGBA8Uint, wgpu::TextureUsage::CopyDst);
 
     // --- capture ---
     auto recorder = Recorder::CreateAndStart(device);
@@ -745,12 +720,9 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromComputeTexture) {
 // Before capture, creates a texture and sets in a render pass as a render attachment
 // Then, captures a copyT2T to a 2nd texture. Checks the 2nd texture has the correct data on replay.
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromRenderTexture) {
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "srcTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     {
         wgpu::CommandBuffer commands;
@@ -767,9 +739,8 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTextureFromRenderTexture) {
         queue.Submit(1, &commands);
     }
 
-    textureDesc.label = "dstTexture";
-    textureDesc.usage = wgpu::TextureUsage::CopyDst;
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture = CreateTexture(
+        "dstTexture", {1, 1, 1}, wgpu::TextureFormat::RGBA8Uint, wgpu::TextureUsage::CopyDst);
 
     // --- capture ---
     auto recorder = Recorder::CreateAndStart(device);
@@ -1056,12 +1027,8 @@ TEST_P(CaptureAndReplayTests, CaptureTwoAutoLayoutComputePipelinesOneIsBoundButU
 // It just starts and ends a render pass and uses the clearValue to set
 // a texture.
 TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "myTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
-    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::Texture texture = CreateTexture("myTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                                          wgpu::TextureUsage::RenderAttachment);
 
     wgpu::CommandBuffer commands;
     {
@@ -1095,28 +1062,15 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasic) {
 
 // Capture and replay the a render pass where a texture is rendered into another.
 TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithBindGroup) {
+    wgpu::Texture srcTexture =
+        CreateTexture("srcTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst);
+
     const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(srcTexture, wgpu::TextureFormat::RGBA8Uint, {1}, myData);
 
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "srcTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
-    wgpu::Texture srcTexture = device.CreateTexture(&textureDesc);
-
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {1, 1, 1};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
-
-    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
-    textureDesc.label = "dstTexture";
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                                             wgpu::TextureUsage::RenderAttachment);
 
     const char* shader = R"(
         @group(0) @binding(0) var tex: texture_2d<u32>;
@@ -1184,12 +1138,8 @@ TEST_P(CaptureAndReplayTests, CaptureRenderPassBasicWithAttributes) {
         "vertexBuffer", sizeof(myVertices), wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex);
     queue.WriteBuffer(vertexBuffer, 0, &myVertices, sizeof(myVertices));
 
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "dstTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::RenderAttachment;
-    wgpu::Texture dstTexture = device.CreateTexture(&textureDesc);
+    wgpu::Texture dstTexture = CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                                             wgpu::TextureUsage::RenderAttachment);
 
     const char* shader = R"(
         @vertex fn vs(@location(0) pos: vec4f) -> @builtin(position) vec4f {
@@ -1331,12 +1281,9 @@ TEST_P(CaptureAndReplayTests, CaptureStorageTextureUsageWithExplicitBindGroupLay
     plDesc.bindGroupLayouts = &layout;
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
 
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "myTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc;
-    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::Texture texture =
+        CreateTexture("myTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
 
     const char* shader = R"(
         @group(0) @binding(0) var tex: texture_storage_2d<rgba8uint, write>;
@@ -1408,23 +1355,12 @@ TEST_P(CaptureAndReplayTests, CaptureTextureUsageWithExplicitBindGroupLayout) {
     plDesc.bindGroupLayouts = &layout;
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
 
-    wgpu::TextureDescriptor textureDesc;
-    textureDesc.label = "myTexture";
-    textureDesc.size = {1, 1, 1};
-    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
-    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
-    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+    wgpu::Texture texture =
+        CreateTexture("myTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst);
 
-    {
-        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
-            utils::CreateTexelCopyBufferLayout(0, 4);
-        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
-            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
-        wgpu::Extent3D extent = {1, 1, 1};
-        const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
-        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
-                           &extent);
-    }
+    const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+    WriteFullTexture(texture, wgpu::TextureFormat::RGBA8Uint, {1}, myData);
 
     wgpu::Buffer buffer = CreateBuffer(
         "myBuffer", 4,
