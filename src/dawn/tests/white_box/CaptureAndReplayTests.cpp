@@ -94,6 +94,15 @@ class CaptureAndReplayTests : public DawnTest {
         std::ostringstream mCommandStream;
         std::ostringstream mContentStream;
     };
+
+    template <typename T>
+    void ExpectBufferEQ(replay::Replay* replay, const char* label, const T& expected) {
+        ASSERT_TRUE(sizeof(expected) > 0);
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
+        ASSERT_NE(buffer, nullptr);
+
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
 };
 
 // During capture, makes a buffer, puts data in it.
@@ -117,12 +126,7 @@ TEST_P(CaptureAndReplayTests, Basic) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
-    }
+    ExpectBufferEQ(replay.get(), label, myData);
 }
 
 // During capture, makes a buffer, puts data in it.
@@ -149,12 +153,7 @@ TEST_P(CaptureAndReplayTests, NonMultipleOf4LabelLength) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
-    }
+    ExpectBufferEQ(replay.get(), label, myData);
 }
 
 // Before capture, creates a buffer and sets half of it with WriteBuffer.
@@ -182,13 +181,8 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationWriteBuffer) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Before capture, creates a buffer and sets half of it with mappedAtCreation.
@@ -218,13 +212,8 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationMappedAtCreation) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Before capture, creates a buffer and sets half of it with a compute shader.
@@ -280,13 +269,8 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationComputeShader) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Before capture, creates a buffer and sets half of it with copyBufferToBuffer.
@@ -326,13 +310,8 @@ TEST_P(CaptureAndReplayTests, StartCaptureAfterBufferCreationCopyB2B) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(dstLabel);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), dstLabel, expected);
 }
 
 // During first capture, makes a buffer, puts data in it.
@@ -367,13 +346,8 @@ TEST_P(CaptureAndReplayTests, TwoCaptures) {
         auto capture = recorder.Finish();
         auto replay = capture.Replay(device);
 
-        {
-            wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-            ASSERT_NE(buffer, nullptr);
-
-            uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-            EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-        }
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+        ExpectBufferEQ(replay.get(), label, expected);
     }
 }
 
@@ -398,12 +372,7 @@ TEST_P(CaptureAndReplayTests, MapWrite) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
-    }
+    ExpectBufferEQ(replay.get(), label, myData);
 }
 
 // We make 2 buffers before capture. During capture we map one buffer
@@ -445,13 +414,8 @@ TEST_P(CaptureAndReplayTests, CaptureWithMapWriteDuringCapture) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(dstLabel);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), dstLabel, expected);
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
@@ -483,12 +447,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyBufferToBuffer) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("dstBuffer");
-        ASSERT_NE(buffer, nullptr);
-
-        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
-    }
+    ExpectBufferEQ(replay.get(), "dstBuffer", myData);
 }
 
 TEST_P(CaptureAndReplayTests, WriteTexture) {
@@ -616,12 +575,7 @@ TEST_P(CaptureAndReplayTests, CaptureCopyTextureToBuffer) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("dstBuffer");
-        ASSERT_NE(buffer, nullptr);
-
-        EXPECT_BUFFER_U8_RANGE_EQ(myData, buffer, 0, sizeof(myData));
-    }
+    ExpectBufferEQ(replay.get(), "dstBuffer", myData);
 }
 
 TEST_P(CaptureAndReplayTests, CaptureCopyTextureToTexture) {
@@ -948,13 +902,8 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasic) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Capture and replay the simplest compute shader but set the bindGroup
@@ -1007,13 +956,8 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicSetBindGroupFirst) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Capture and replay 2 auto-layout compute pipelines with the same layout
@@ -1089,21 +1033,11 @@ TEST_P(CaptureAndReplayTests, CaptureTwoMatchingAutoLayoutComputePipelines) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer1");
-        ASSERT_NE(buffer, nullptr);
+    uint8_t expected1[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), "buffer1", expected1);
 
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
-
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer2");
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected2[] = {0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), "buffer2", expected2);
 }
 
 // Capture and replay 2 bindGroups that use implicit bindGroupLayouts from
@@ -1174,13 +1108,8 @@ TEST_P(CaptureAndReplayTests, CaptureTwoAutoLayoutComputePipelinesOneIsBoundButU
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("buffer");
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x55, 0x66, 0x77, 0x88};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x55, 0x66, 0x77, 0x88};
+    ExpectBufferEQ(replay.get(), "buffer", expected);
 }
 
 // Capture and replay the simplest render pass.
@@ -1448,13 +1377,8 @@ TEST_P(CaptureAndReplayTests, CaptureComputeShaderBasicExplicitBindGroup) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>(label);
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), label, expected);
 }
 
 // Capture and replay a pass that uses a storage texture
@@ -1620,13 +1544,8 @@ TEST_P(CaptureAndReplayTests, CaptureTextureUsageWithExplicitBindGroupLayout) {
     auto capture = recorder.Finish();
     auto replay = capture.Replay(device);
 
-    {
-        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("myBuffer");
-        ASSERT_NE(buffer, nullptr);
-
-        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
-        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
-    }
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectBufferEQ(replay.get(), "myBuffer", expected);
 }
 
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
