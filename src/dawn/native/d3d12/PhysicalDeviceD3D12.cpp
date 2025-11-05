@@ -400,7 +400,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
         static constexpr uint32_t kShaderBuiltinSlots = 3;
 
         // Slots not used at all. (This is just for the assert. We could use these slots later.)
-        static constexpr uint32_t kUnusedSlots = 9;
+        static constexpr uint32_t kUnusedSlots = 1;
 
         DAWN_ASSERT(
             // bind groups: 1 for CBV+UAV+SRV table + 1 for sampler table

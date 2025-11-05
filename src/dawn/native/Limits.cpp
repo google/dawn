@@ -111,10 +111,10 @@
     X(v1, Maximum,                       maxTextureDimension3D,      1024,      2048,       2048) \
     X(v1, Maximum,                       maxTextureArrayLayers,       256,       256,       2048)
 
-// Tired limits for immediate data sizes.
-//                                 compat  tier0  tier1
+// Tiered limits for immediate data sizes.
+//                                 compat  tier0
 #define LIMITS_IMMEDIATE_SIZE(X) \
-  X(v1, Maximum, maxImmediateSize,       0,    0,    16,  32)
+  X(v1, Maximum, maxImmediateSize,      0,     0,   64)
 
 // Limits for the dynamic binding array.
 //                                                                   compat  tier0
