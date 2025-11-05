@@ -307,7 +307,7 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainkExtractBits) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.i32()));
+    auto* func = b.Function("foo", ty.vec4i());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", b.Splat(ty.vec4<i32>(), -3_i));
         auto* call_func = b.Call(ty.vec4<i32>(), core::BuiltinFn::kExtractBits, e, 13_u, 23_u);
@@ -334,7 +334,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkExtractBits_Vec) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainkInsertBits_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.u32()));
+    auto* func = b.Function("foo", ty.vec4u());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("a", b.Splat(ty.vec4<u32>(), 3_u));
         auto* newBits = b.Let("b", b.Splat(ty.vec4<u32>(), 4_u));
@@ -472,12 +472,12 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainClamp) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainClamp_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.f16()));
+    auto* func = b.Function("foo", ty.vec4h());
     b.Append(func->Block(), [&] {
         auto* e = b.Let("b", b.Splat(ty.vec4<f16>(), 4_h));
         auto* low = b.Splat(ty.vec4<f16>(), 4_h);
         auto* high = b.Splat(ty.vec4<f16>(), 2_h);
-        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kClamp, e, low, high);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kClamp, e, low, high);
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -526,12 +526,12 @@ TEST_F(IR_ConstParamValidatorTest, CorrectDomainSmoothstep) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.f16()));
+    auto* func = b.Function("foo", ty.vec4h());
     b.Append(func->Block(), [&] {
-        auto* e = b.Let("b", b.Splat(ty.vec4<f16>(), 4_h));
+        auto* e = b.Let("b", b.Splat(ty.vec4h(), 4_h));
         auto* edge0 = b.Splat(ty.vec4<f16>(), 3_h);
         auto* edge1 = b.Splat(ty.vec4<f16>(), 3_h);
-        auto* call_func = b.Call(ty.vec4(ty.f16()), core::BuiltinFn::kSmoothstep, edge0, edge1, e);
+        auto* call_func = b.Call(ty.vec4h(), core::BuiltinFn::kSmoothstep, edge0, edge1, e);
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -555,7 +555,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainSmoothstep_Vec) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.f32()));
+    auto* func = b.Function("foo", ty.vec4f());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4<f32>(), 4_f));
         auto* e2 = b.Splat(ty.vec4<i32>(), 267_i);
@@ -582,7 +582,7 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainLdexp_Vec) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, CorrectDomainLdexp_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.f16()));
+    auto* func = b.Function("foo", ty.vec4h());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4<f16>(), 4_h));
         auto* e2 = b.Splat(ty.vec4<i32>(), 10_i);
@@ -761,11 +761,11 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftLeft) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainShiftRight_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.i32()));
+    auto* func = b.Function("foo", ty.vec4i());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4<i32>(), 4_i));
         auto* e2 = b.Splat(ty.vec4<u32>(), 33_u);
-        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4(ty.i32()), e1, e2);
+        auto* call_func = b.Binary(core::BinaryOp::kShiftLeft, ty.vec4i(), e1, e2);
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });
@@ -841,11 +841,11 @@ TEST_F(IR_ConstParamValidatorTest, IncorrectDomainDiv) {
 }
 
 TEST_F(IR_ConstParamValidatorTest, IncorrectDomainModulo_Vec) {
-    auto* func = b.Function("foo", ty.vec4(ty.i32()));
+    auto* func = b.Function("foo", ty.vec4i());
     b.Append(func->Block(), [&] {
         auto* e1 = b.Let("b", b.Splat(ty.vec4<i32>(), 4_i));
         auto* e2 = b.Splat(ty.vec4<i32>(), 0_i);
-        auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4(ty.i32()), e1, e2);
+        auto* call_func = b.Binary(core::BinaryOp::kModulo, ty.vec4i(), e1, e2);
         b.ir.SetSource(call_func, Source{{5, 7}});
         b.Return(func, call_func->Result());
     });

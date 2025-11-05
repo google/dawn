@@ -304,7 +304,7 @@ struct State {
         auto* arg = call->Args()[0];
 
         b.InsertBefore(call, [&] {
-            auto* vec4f = ty.vec4<f32>();
+            auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4<u32>();
 
             auto* neg_one = b.Splat(vec4f, -1_f);
@@ -337,7 +337,7 @@ struct State {
         auto* arg = call->Args()[0];
 
         b.InsertBefore(call, [&] {
-            auto* vec4f = ty.vec4<f32>();
+            auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4<u32>();
 
             auto* zero = b.Zero(vec4f);
@@ -368,7 +368,7 @@ struct State {
         auto* arg = call->Args()[0];
 
         b.InsertBefore(call, [&] {
-            auto* vec4f = ty.vec4<f32>();
+            auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4<u32>();
             auto* vec4i = ty.vec4<i32>();
 
@@ -393,7 +393,7 @@ struct State {
         auto* arg = call->Args()[0];
 
         b.InsertBefore(call, [&] {
-            auto* vec4f = ty.vec4<f32>();
+            auto* vec4f = ty.vec4f();
             auto* vec4u = ty.vec4<u32>();
 
             auto* v = b.Construct(vec4u, arg)->Result();

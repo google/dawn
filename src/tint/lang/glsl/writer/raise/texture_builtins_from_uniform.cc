@@ -108,7 +108,7 @@ struct State {
 
         // Wrap the array<vec4> in a struct as GLSL cannot have uniforms that are arrays directly.
         Vector<core::type::Manager::StructMemberDesc, 1> members;
-        members.Push({ir.symbols.New("metadata"), ty.array(ty.vec4(ty.u32()), vec4_count)});
+        members.Push({ir.symbols.New("metadata"), ty.array(ty.vec4u(), vec4_count)});
         auto* strct =
             ir.Types().Struct(ir.symbols.New("TintTextureUniformData"), std::move(members));
 
@@ -169,8 +169,8 @@ struct State {
         auto* index_in_array = b.Divide(ty.u32(), offset, u32(4));
         auto* index_in_vector = b.Modulo(ty.u32(), offset, u32(4));
 
-        auto* vec4_ptr = b.Access(ty.ptr<uniform>(ty.vec4(ty.u32())), texture_uniform_data_, u32(0),
-                                  index_in_array);
+        auto* vec4_ptr =
+            b.Access(ty.ptr<uniform>(ty.vec4u()), texture_uniform_data_, u32(0), index_in_array);
         auto* vec4_value = b.Load(vec4_ptr);
         auto* u32_value = b.Access(ty.u32(), vec4_value, index_in_vector);
         return u32_value->Result();

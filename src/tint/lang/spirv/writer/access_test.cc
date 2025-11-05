@@ -102,7 +102,7 @@ TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({mat_val});
     b.Append(func->Block(), [&] {
-        auto* result_vector = b.Access(ty.vec2(ty.f32()), mat_val, 1_u);
+        auto* result_vector = b.Access(ty.vec2f(), mat_val, 1_u);
         auto* result_scalar = b.Access(ty.f32(), mat_val, 1_u, 0_u);
         b.Return(func, b.Multiply(ty.vec2<f32>(), result_vector, result_scalar));
         mod.SetName(result_vector, "result_vector");
@@ -169,7 +169,7 @@ TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
-    auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
+    auto* vec_val = b.FunctionParam("vec", ty.vec4i());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({vec_val});
     b.Append(func->Block(), [&] {
@@ -189,7 +189,7 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
-    auto* vec_val = b.FunctionParam("vec", ty.vec4(ty.i32()));
+    auto* vec_val = b.FunctionParam("vec", ty.vec4i());
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({vec_val, idx});
@@ -214,7 +214,7 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
 }
 
 TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
-    auto* arr_ty = ty.array(ty.array(ty.vec4(ty.i32()), 4), 4);
+    auto* arr_ty = ty.array(ty.array(ty.vec4i(), 4), 4);
 
     auto* val = b.FunctionParam("arr", arr_ty);
     auto* idx = b.FunctionParam("idx", ty.i32());

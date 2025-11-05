@@ -85,9 +85,8 @@ TEST_F(CoreIntrinsicTableTest, MismatchF32) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchU32) {
-    auto* f32 = ty.f32();
     auto* u32 = ty.u32();
-    auto* vec2f = ty.vec2(f32);
+    auto* vec2f = ty.vec2f();
     auto result =
         table.Lookup(BuiltinFn::kUnpack2X16Float, Empty, Vector{u32}, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -107,7 +106,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchU32) {
 TEST_F(CoreIntrinsicTableTest, MatchI32) {
     auto* f32 = ty.f32();
     auto* i32 = ty.i32();
-    auto* vec4f = ty.vec4(ty.f32());
+    auto* vec4f = ty.vec4f();
     auto* tex = ty.sampled_texture(type::TextureDimension::k1d, f32);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, i32, i32},
                                EvaluationStage::kConstant);
@@ -268,8 +267,8 @@ TEST_F(CoreIntrinsicTableTest, MismatchArray) {
 
 TEST_F(CoreIntrinsicTableTest, MatchSampler) {
     auto* f32 = ty.f32();
-    auto* vec2f = ty.vec2(f32);
-    auto* vec4f = ty.vec4(f32);
+    auto* vec2f = ty.vec2f();
+    auto* vec4f = ty.vec4f();
     auto* tex = ty.sampled_texture(type::TextureDimension::k2d, f32);
     auto* sampler = ty.sampler();
     auto result = table.Lookup(BuiltinFn::kTextureSample, Empty, Vector{tex, sampler, vec2f},
@@ -287,7 +286,7 @@ TEST_F(CoreIntrinsicTableTest, MatchSampler) {
 
 TEST_F(CoreIntrinsicTableTest, MismatchSampler) {
     auto* f32 = ty.f32();
-    auto* vec2f = ty.vec2(f32);
+    auto* vec2f = ty.vec2f();
     auto* tex = ty.sampled_texture(type::TextureDimension::k2d, f32);
     auto result = table.Lookup(BuiltinFn::kTextureSample, Empty, Vector{tex, f32, vec2f},
                                EvaluationStage::kConstant);
@@ -298,8 +297,8 @@ TEST_F(CoreIntrinsicTableTest, MismatchSampler) {
 TEST_F(CoreIntrinsicTableTest, MatchSampledTexture) {
     auto* i32 = ty.i32();
     auto* f32 = ty.f32();
-    auto* vec2i = ty.vec2(i32);
-    auto* vec4f = ty.vec4(f32);
+    auto* vec2i = ty.vec2i();
+    auto* vec4f = ty.vec4f();
     auto* tex = ty.sampled_texture(type::TextureDimension::k2d, f32);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, vec2i, i32},
                                EvaluationStage::kConstant);
@@ -317,8 +316,8 @@ TEST_F(CoreIntrinsicTableTest, MatchSampledTexture) {
 TEST_F(CoreIntrinsicTableTest, MatchMultisampledTexture) {
     auto* i32 = ty.i32();
     auto* f32 = ty.f32();
-    auto* vec2i = ty.vec2(i32);
-    auto* vec4f = ty.vec4(f32);
+    auto* vec2i = ty.vec2i();
+    auto* vec4f = ty.vec4f();
     auto* tex = ty.multisampled_texture(type::TextureDimension::k2d, f32);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, vec2i, i32},
                                EvaluationStage::kConstant);
@@ -336,7 +335,7 @@ TEST_F(CoreIntrinsicTableTest, MatchMultisampledTexture) {
 TEST_F(CoreIntrinsicTableTest, MatchDepthTexture) {
     auto* f32 = ty.f32();
     auto* i32 = ty.i32();
-    auto* vec2i = ty.vec2(i32);
+    auto* vec2i = ty.vec2i();
     auto* tex = ty.depth_texture(type::TextureDimension::k2d);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, vec2i, i32},
                                EvaluationStage::kConstant);
@@ -354,7 +353,7 @@ TEST_F(CoreIntrinsicTableTest, MatchDepthTexture) {
 TEST_F(CoreIntrinsicTableTest, MatchDepthMultisampledTexture) {
     auto* f32 = ty.f32();
     auto* i32 = ty.i32();
-    auto* vec2i = ty.vec2(i32);
+    auto* vec2i = ty.vec2i();
     auto* tex = ty.depth_multisampled_texture(type::TextureDimension::k2d);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, vec2i, i32},
                                EvaluationStage::kConstant);
@@ -370,10 +369,8 @@ TEST_F(CoreIntrinsicTableTest, MatchDepthMultisampledTexture) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchExternalTexture) {
-    auto* f32 = ty.f32();
-    auto* i32 = ty.i32();
-    auto* vec2i = ty.vec2(i32);
-    auto* vec4f = ty.vec4(f32);
+    auto* vec2i = ty.vec2i();
+    auto* vec4f = ty.vec4f();
     auto* tex = ty.external_texture();
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{tex, vec2i},
                                EvaluationStage::kConstant);
@@ -387,10 +384,8 @@ TEST_F(CoreIntrinsicTableTest, MatchExternalTexture) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchWOStorageTexture) {
-    auto* f32 = ty.f32();
-    auto* i32 = ty.i32();
-    auto* vec2i = ty.vec2(i32);
-    auto* vec4f = ty.vec4(f32);
+    auto* vec2i = ty.vec2i();
+    auto* vec4f = ty.vec4f();
     auto* tex =
         ty.storage_texture(type::TextureDimension::k2d, TexelFormat::kR32Float, Access::kWrite);
 
@@ -408,9 +403,8 @@ TEST_F(CoreIntrinsicTableTest, MatchWOStorageTexture) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MismatchTexture) {
+    auto* vec2i = ty.vec2i();
     auto* f32 = ty.f32();
-    auto* i32 = ty.i32();
-    auto* vec2i = ty.vec2(i32);
     auto result = table.Lookup(BuiltinFn::kTextureLoad, Empty, Vector{f32, vec2i},
                                EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
@@ -438,8 +432,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchTemplateType) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchOpenSizeVector) {
-    auto* f32 = ty.f32();
-    auto* vec2f = ty.vec2(f32);
+    auto* vec2f = ty.vec2f();
     auto result = table.Lookup(BuiltinFn::kClamp, Empty, Vector{vec2f, vec2f, vec2f},
                                EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -451,9 +444,8 @@ TEST_F(CoreIntrinsicTableTest, MatchOpenSizeVector) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MismatchOpenSizeVector) {
-    auto* f32 = ty.f32();
     auto* u32 = ty.u32();
-    auto* vec2f = ty.vec2(f32);
+    auto* vec2f = ty.vec2f();
     auto result = table.Lookup(BuiltinFn::kClamp, Empty, Vector{vec2f, u32, vec2f},
                                EvaluationStage::kConstant);
     ASSERT_NE(result, Success);
@@ -660,8 +652,7 @@ TEST_F(CoreIntrinsicTableTest, OverloadOrderByMatchingParameter) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchUnaryOp) {
-    auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     auto result = table.Lookup(UnaryOp::kNegation, vec3i, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result->return_type, vec3i);
@@ -697,7 +688,7 @@ TEST_F(CoreIntrinsicTableTest, MatchUnaryOp_Runtime) {
 
 TEST_F(CoreIntrinsicTableTest, MatchBinaryOp) {
     auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     auto result = table.Lookup(BinaryOp::kMultiply, i32, vec3i, EvaluationStage::kConstant,
                                /* is_compound */ false);
     ASSERT_EQ(result, Success);
@@ -738,7 +729,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchBinaryOp) {
 
 TEST_F(CoreIntrinsicTableTest, MatchCompoundOp) {
     auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     auto result = table.Lookup(BinaryOp::kMultiply, i32, vec3i, EvaluationStage::kConstant,
                                /* is_compound */ true);
     ASSERT_EQ(result, Success);
@@ -779,7 +770,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchCompoundOp) {
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer) {
     auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
                                EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -838,7 +829,7 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeInitializer) {
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
                                EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -856,7 +847,7 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* i32 = ty.i32();
     auto result = table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{i32, i32, i32},
                                EvaluationStage::kRuntime);
-    auto* vec3i = ty.vec3(i32);
+    auto* vec3i = ty.vec3i();
     ASSERT_EQ(result, Success);
     EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3i);
@@ -870,9 +861,8 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeConversion) {
     auto* i32 = ty.i32();
-    auto* vec3i = ty.vec3(i32);
-    auto* f32 = ty.f32();
-    auto* vec3f = ty.vec3(f32);
+    auto* vec3i = ty.vec3i();
+    auto* vec3f = ty.vec3f();
     auto result =
         table.Lookup(CtorConv::kVec3, Vector{i32}, Vector{vec3f}, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -926,10 +916,9 @@ TEST_F(CoreIntrinsicTableTest, MismatchTypeConversion) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeConversion_ConstantEval) {
-    auto* i32 = ty.i32();
     auto* f32 = ty.f32();
-    auto* vec3i = ty.vec3(i32);
-    auto* vec3f = ty.vec3(f32);
+    auto* vec3i = ty.vec3i();
+    auto* vec3f = ty.vec3f();
     auto result =
         table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{vec3i}, EvaluationStage::kConstant);
     ASSERT_EQ(result, Success);
@@ -942,10 +931,9 @@ TEST_F(CoreIntrinsicTableTest, MatchTypeConversion_ConstantEval) {
 }
 
 TEST_F(CoreIntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
-    auto* i32 = ty.i32();
     auto* f32 = ty.f32();
-    auto* vec3i = ty.vec3(i32);
-    auto* vec3f = ty.vec3(ty.f32());
+    auto* vec3i = ty.vec3i();
+    auto* vec3f = ty.vec3f();
     auto result =
         table.Lookup(CtorConv::kVec3, Vector{f32}, Vector{vec3i}, EvaluationStage::kRuntime);
     ASSERT_EQ(result, Success);

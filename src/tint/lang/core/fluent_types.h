@@ -154,6 +154,42 @@ using vec3 = vec<3, T>;
 template <typename T>
 using vec4 = vec<4, T>;
 
+using mat2x2f = mat<2, 2, f32>;
+using mat2x3f = mat<2, 3, f32>;
+using mat2x4f = mat<2, 4, f32>;
+using mat3x2f = mat<3, 2, f32>;
+using mat3x3f = mat<3, 3, f32>;
+using mat3x4f = mat<3, 4, f32>;
+using mat4x2f = mat<4, 2, f32>;
+using mat4x3f = mat<4, 3, f32>;
+using mat4x4f = mat<4, 4, f32>;
+
+using mat2x2h = mat<2, 2, f16>;
+using mat2x3h = mat<2, 3, f16>;
+using mat2x4h = mat<2, 4, f16>;
+using mat3x2h = mat<3, 2, f16>;
+using mat3x3h = mat<3, 3, f16>;
+using mat3x4h = mat<3, 4, f16>;
+using mat4x2h = mat<4, 2, f16>;
+using mat4x3h = mat<4, 3, f16>;
+using mat4x4h = mat<4, 4, f16>;
+
+using vec2f = vec<2, f32>;
+using vec3f = vec<3, f32>;
+using vec4f = vec<4, f32>;
+
+using vec2h = vec<2, f16>;
+using vec3h = vec<3, f16>;
+using vec4h = vec<4, f16>;
+
+using vec2i = vec<2, i32>;
+using vec3i = vec<3, i32>;
+using vec4i = vec<4, i32>;
+
+using vec2u = vec<2, u32>;
+using vec3u = vec<3, u32>;
+using vec4u = vec<4, u32>;
+
 //! @endcond
 
 ////////////////////////////////////////////////////////////////////////////////

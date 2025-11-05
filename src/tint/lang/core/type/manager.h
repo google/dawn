@@ -272,6 +272,42 @@ class Manager final {
     /// @returns a vec4 type with the element type @p inner
     const core::type::Vector* vec4(const core::type::Type* inner);
 
+    /// @returns a vec2 type with the element type f32
+    const core::type::Vector* vec2f();
+
+    /// @returns a vec3 type with the element type f32
+    const core::type::Vector* vec3f();
+
+    /// @returns a vec4 type with the element type f32
+    const core::type::Vector* vec4f();
+
+    /// @returns a vec2 type with the element type f16
+    const core::type::Vector* vec2h();
+
+    /// @returns a vec3 type with the element type f16
+    const core::type::Vector* vec3h();
+
+    /// @returns a vec4 type with the element type f16
+    const core::type::Vector* vec4h();
+
+    /// @returns a vec2 type with the element type i32
+    const core::type::Vector* vec2i();
+
+    /// @returns a vec3 type with the element type i32
+    const core::type::Vector* vec3i();
+
+    /// @returns a vec4 type with the element type i32
+    const core::type::Vector* vec4i();
+
+    /// @returns a vec2 type with the element type u32
+    const core::type::Vector* vec2u();
+
+    /// @returns a vec3 type with the element type u32
+    const core::type::Vector* vec3u();
+
+    /// @returns a vec4 type with the element type u32
+    const core::type::Vector* vec4u();
+
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
     /// @returns a sampled texture type with the provided params

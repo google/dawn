@@ -101,8 +101,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     if (options.num_workgroups_start_offset) {
         immediate_data_config.AddInternalImmediateData(
             options.num_workgroups_start_offset.value(),
-            module.symbols.New("tint_num_workgroups_start_offset"),
-            module.Types().vec3(module.Types().u32()));
+            module.symbols.New("tint_num_workgroups_start_offset"), module.Types().vec3u());
     }
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);

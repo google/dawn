@@ -211,10 +211,10 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure) {
     Var* U = nullptr;
     auto* str_ty =
         ty.Struct(mod.symbols.New("UniformStruct"), {
-                                                        {mod.symbols.New("a"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("b"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("c"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("d"), ty.vec4(ty.u32())},
+                                                        {mod.symbols.New("a"), ty.vec4u()},
+                                                        {mod.symbols.New("b"), ty.vec4u()},
+                                                        {mod.symbols.New("c"), ty.vec4u()},
+                                                        {mod.symbols.New("d"), ty.vec4u()},
                                                     });
     b.Append(b.ir.root_block,
              [&] {  //
@@ -314,10 +314,10 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure_WithInfiniteLoopPrevent
     Var* U = nullptr;
     auto* str_ty =
         ty.Struct(mod.symbols.New("UniformStruct"), {
-                                                        {mod.symbols.New("a"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("b"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("c"), ty.vec4(ty.u32())},
-                                                        {mod.symbols.New("d"), ty.vec4(ty.u32())},
+                                                        {mod.symbols.New("a"), ty.vec4u()},
+                                                        {mod.symbols.New("b"), ty.vec4u()},
+                                                        {mod.symbols.New("c"), ty.vec4u()},
+                                                        {mod.symbols.New("d"), ty.vec4u()},
                                                     });
     b.Append(b.ir.root_block,
              [&] {  //

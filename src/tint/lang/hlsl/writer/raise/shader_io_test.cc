@@ -1304,8 +1304,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
-        ty.vec3(ty.u32()));
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1466,8 +1465,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
-        ty.vec3(ty.u32()));
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1729,8 +1727,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
-        ty.vec3(ty.u32()));
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -1863,8 +1860,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
-        ty.vec3(ty.u32()));
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 
@@ -2076,8 +2072,7 @@ $B1: {  # root
 
     core::ir::transform::PrepareImmediateDataConfig prepare_immediate_data_layout_config;
     prepare_immediate_data_layout_config.AddInternalImmediateData(
-        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"),
-        ty.vec3(ty.u32()));
+        num_workgroups_offset, mod.symbols.New("tint_num_workgroups_start_offset"), ty.vec3u());
     auto layout =
         core::ir::transform::PrepareImmediateData(mod, prepare_immediate_data_layout_config);
 

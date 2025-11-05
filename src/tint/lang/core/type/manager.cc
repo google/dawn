@@ -212,6 +212,46 @@ const core::type::Vector* Manager::vec4(const core::type::Type* inner) {
     return vec(inner, 4);
 }
 
+const core::type::Vector* Manager::vec2f() {
+    return vec(f32(), 2);
+}
+const core::type::Vector* Manager::vec3f() {
+    return vec(f32(), 3);
+}
+const core::type::Vector* Manager::vec4f() {
+    return vec(f32(), 4);
+}
+
+const core::type::Vector* Manager::vec2h() {
+    return vec(f16(), 2);
+}
+const core::type::Vector* Manager::vec3h() {
+    return vec(f16(), 3);
+}
+const core::type::Vector* Manager::vec4h() {
+    return vec(f16(), 4);
+}
+
+const core::type::Vector* Manager::vec2i() {
+    return vec(i32(), 2);
+}
+const core::type::Vector* Manager::vec3i() {
+    return vec(i32(), 3);
+}
+const core::type::Vector* Manager::vec4i() {
+    return vec(i32(), 4);
+}
+
+const core::type::Vector* Manager::vec2u() {
+    return vec(u32(), 2);
+}
+const core::type::Vector* Manager::vec3u() {
+    return vec(u32(), 3);
+}
+const core::type::Vector* Manager::vec4u() {
+    return vec(u32(), 4);
+}
+
 const core::type::SampledTexture* Manager::sampled_texture(TextureDimension dim,
                                                            const core::type::Type* type) {
     return Get<core::type::SampledTexture>(dim, type);
