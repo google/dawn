@@ -278,17 +278,6 @@ if (tint_build_benchmarks) {
   }
 }
 
-group("abseil") {
-  # When building within Chromium or ANGLE we need to include "//third_party/abseil-cpp:absl" while
-  # it's beneficial to be more specific with standalone Dawn, especially when it comes to
-  # including it as a dependency in other projects (such as Skia).
-  if (build_with_chromium || build_with_angle) {
-    public_deps = [ "$dawn_abseil_dir:absl" ]
-  } else {
-    public_deps = [ "${dawn_root}/third_party/gn/abseil-cpp:strings" ]
-  }
-}
-
 source_set("winsock") {
   libs = [ "ws2_32.lib" ]
 }

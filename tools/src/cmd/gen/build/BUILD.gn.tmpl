@@ -165,7 +165,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "ExternalDependencyTargets"}}
-{{-        if eq $.Name "abseil"                         -}}"${tint_src_dir}:abseil",
+{{-        if eq $.Name "abseil"                         -}}"${dawn_root}:abseil",
 {{-   else if eq $.Name "dl"                             -}}"${tint_src_dir}:dl",
 {{-   else if eq $.Name "dxc-include"                    -}}"${tint_src_dir}:dxc-include",
 {{-   else if eq $.Name "dxcompiler-for-fuzzer"          -}}"${tint_src_dir}:dxcompiler-for-fuzzer",

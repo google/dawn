@@ -67,7 +67,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@0e7d35148beeb23122a72c2a0cba21e77b83f36f',
+    'url': '{chromium_git}/chromium/src/buildtools@628cf12465dae2a157524a23608a58b525d30623',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -105,18 +105,18 @@ deps = {
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@dc1441a0c244cb94e5d1b992911c7b8895d88e2c',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@ddfdbbc1ab109b4fc6171f3d8c38faf4586701d2',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@f7f5a32b3e9582092d8a4511acec036a09ae8524',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@bb789ae647a626f62dd28806334314fd72071f6f',
     'condition': 'dawn_standalone',
   },
 
   # Required by libc++
   'third_party/llvm-libc/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@c909c9e439a6ac2c15eae2cc43c5b4c9f6ee0f3a',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@1f7cf83fb28c5bd777f4cdceed29bd52c69552b0',
     'condition': 'dawn_standalone',
   },
 
@@ -128,14 +128,14 @@ deps = {
 
   # Dependencies required to use GN, and Clang in standalone.
 
-  # The //build, //tools/clang, //tools/memory, and '//tools/valgrind' deps
-  # should all be updated in unison, as there are dependencies between them.
+  # The //build and //tools/* deps should all be updated in unison, as
+  #  there are dependencies between them.
   'build': {
-  'url': '{chromium_git}/chromium/src/build@99f8d0f4dbccc2724258ab280f0e000b94681e8d',
+  'url': '{chromium_git}/chromium/src/build@5ab9444db5e5037291c7dbeaa9b0424ff78103c8',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-  'url': '{chromium_git}/chromium/src/tools/clang@e45d2e250fb126f4dc42a017977deced3e78fe18',
+  'url': '{chromium_git}/chromium/src/tools/clang@c32a3112f46745b6b0ec81b933bb3bd6303c7af0',
     'condition': 'dawn_standalone',
   },
   'tools/memory': {
@@ -145,6 +145,10 @@ deps = {
   'tools/valgrind': {
     'url': '{chromium_git}/chromium/src/tools/valgrind@da34b95fdbf2032df6cda5f3828c2ba421592644',
     'condition': 'dawn_standalone',
+  },
+  'tools/win': {
+    'url': Var('chromium_git') + '/chromium/src/tools/win@24494b071e019a2baea4355d9870ffc5fc0bbafe',
+    'condition': 'checkout_win and not build_with_chromium',
   },
 
   # Linux sysroots for hermetic builds instead of relying on whatever is
@@ -339,7 +343,7 @@ deps = {
   },
 
   'third_party/abseil-cpp': {
-    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@9d692d669253232c024b20ae19d2ff0b581ee1cd',
+    'url': '{chromium_git}/chromium/src/third_party/abseil-cpp@e1655ca1acab4bf3f4f293ac0e14a8ddec440332',
     'condition': 'dawn_standalone',
   },
 
