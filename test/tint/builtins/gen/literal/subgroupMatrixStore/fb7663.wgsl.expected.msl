@@ -22,7 +22,7 @@ struct tint_module_vars_struct {
 };
 
 void subgroupMatrixStore_fb7663(tint_module_vars_struct tint_module_vars) {
-  simdgroup_store(simdgroup_half8x8(), (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(8u), ulong2(0ul), true);
+  simdgroup_store(make_filled_simdgroup_matrix<half, 8, 8>(0.0h), (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(8u), ulong2(0ul), true);
 }
 
 kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]]) {

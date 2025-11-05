@@ -88,6 +88,8 @@ struct State {
     void Process() {
         // Find the builtins that need replacing.
         Vector<core::ir::CoreBuiltinCall*, 4> builtin_worklist;
+        // Find the construct calls to replace with make_filled_subgroup_matrix
+        Vector<core::ir::Construct*, 4> construct_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* builtin = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
@@ -152,6 +154,11 @@ struct State {
                         break;
                     default:
                         break;
+                }
+            }
+            if (auto* construct = inst->As<core::ir::Construct>()) {
+                if (construct->Result()->Type()->Is<core::type::SubgroupMatrix>()) {
+                    construct_worklist.Push(construct);
                 }
             }
         }
@@ -324,6 +331,34 @@ struct State {
                     break;
             }
         }
+
+        // Replace the construct calls
+        for (auto* construct : construct_worklist) {
+            Construct(construct);
+        }
+    }
+
+    /// Replace construct calls with the intrinsic to make a filled matrix
+    /// @param construct the construct call instruction
+    void Construct(core::ir::Construct* construct) {
+        core::ir::Value* value = nullptr;
+
+        auto* sm_ty = construct->Result()->Type()->As<core::type::SubgroupMatrix>();
+        TINT_ASSERT(sm_ty);
+
+        auto args = construct->Args();
+        if (args.Length() > 0) {
+            value = args[0];
+        } else {
+            value = b.Zero(sm_ty->DeepestElement());
+        }
+
+        b.InsertBefore(construct, [&] {
+            b.CallExplicitWithResult<msl::ir::BuiltinCall>(
+                construct->DetachResult(), msl::BuiltinFn::kMakeFilledSimdgroupMatrix,
+                Vector{sm_ty}, value);
+        });
+        construct->Destroy();
     }
 
     /// Replace an atomic builtin call with an equivalent MSL intrinsic.

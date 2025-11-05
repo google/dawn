@@ -18,7 +18,7 @@ struct tint_module_vars_struct {
 };
 
 simdgroup_half8x8 subgroupMatrixScalarMultiply_3ec99d() {
-  simdgroup_half8x8 arg_0 = simdgroup_half8x8();
+  simdgroup_half8x8 arg_0 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
   half arg_1 = 8.0h;
   simdgroup_half8x8 v = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
   simdgroup_multiply(v, arg_0, simdgroup_half8x8(arg_1));

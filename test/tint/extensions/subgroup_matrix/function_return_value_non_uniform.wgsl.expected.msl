@@ -34,9 +34,9 @@ struct tint_array_lengths_struct {
 
 simdgroup_float8x8 make_matrix(tint_module_vars_struct tint_module_vars) {
   if ((*tint_module_vars.non_uniform_condition)) {
-    return simdgroup_float8x8(1.0f);
+    return make_filled_simdgroup_matrix<float, 8, 8>(1.0f);
   } else {
-    return simdgroup_float8x8(2.0f);
+    return make_filled_simdgroup_matrix<float, 8, 8>(2.0f);
   }
   /* unreachable */
   return make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
@@ -44,11 +44,9 @@ simdgroup_float8x8 make_matrix(tint_module_vars_struct tint_module_vars) {
 
 tint_array<simdgroup_float8x8, 2> make_array(tint_module_vars_struct tint_module_vars) {
   if ((*tint_module_vars.non_uniform_condition)) {
-    simdgroup_float8x8 const v = simdgroup_float8x8(42.0f);
-    return tint_array<simdgroup_float8x8, 2>{v, simdgroup_float8x8(100.0f)};
+    return tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(42.0f), make_filled_simdgroup_matrix<float, 8, 8>(100.0f)};
   } else {
-    simdgroup_float8x8 const v_1 = simdgroup_float8x8(-7.0f);
-    return tint_array<simdgroup_float8x8, 2>{v_1, simdgroup_float8x8(-42.0f)};
+    return tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)};
   }
   /* unreachable */
   return {};
@@ -58,15 +56,11 @@ tint_array<tint_array<simdgroup_float8x8, 2>, 2> make_nested_array(tint_module_v
   tint_array<tint_array<simdgroup_float8x8, 2>, 2> a = {};
   tint_array<tint_array<simdgroup_float8x8, 2>, 2> b = {};
   if ((*tint_module_vars.non_uniform_condition)) {
-    simdgroup_float8x8 const v_2 = simdgroup_float8x8(42.0f);
-    tint_array<simdgroup_float8x8, 2> const v_3 = tint_array<simdgroup_float8x8, 2>{v_2, simdgroup_float8x8(100.0f)};
-    simdgroup_float8x8 const v_4 = simdgroup_float8x8(-7.0f);
-    return tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v_3, tint_array<simdgroup_float8x8, 2>{v_4, simdgroup_float8x8(-42.0f)}};
+    tint_array<simdgroup_float8x8, 2> const v = tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(42.0f), make_filled_simdgroup_matrix<float, 8, 8>(100.0f)};
+    return tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v, tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)}};
   } else {
-    simdgroup_float8x8 const v_5 = simdgroup_float8x8(7.0f);
-    tint_array<simdgroup_float8x8, 2> const v_6 = tint_array<simdgroup_float8x8, 2>{v_5, simdgroup_float8x8(42.0f)};
-    simdgroup_float8x8 const v_7 = simdgroup_float8x8(-100.0f);
-    return tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v_6, tint_array<simdgroup_float8x8, 2>{v_7, simdgroup_float8x8(-1.0f)}};
+    tint_array<simdgroup_float8x8, 2> const v_1 = tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(7.0f), make_filled_simdgroup_matrix<float, 8, 8>(42.0f)};
+    return tint_array<tint_array<simdgroup_float8x8, 2>, 2>{v_1, tint_array<simdgroup_float8x8, 2>{make_filled_simdgroup_matrix<float, 8, 8>(-100.0f), make_filled_simdgroup_matrix<float, 8, 8>(-1.0f)}};
   }
   /* unreachable */
   return {};
@@ -74,11 +68,9 @@ tint_array<tint_array<simdgroup_float8x8, 2>, 2> make_nested_array(tint_module_v
 
 S make_struct(tint_module_vars_struct tint_module_vars) {
   if ((*tint_module_vars.non_uniform_condition)) {
-    simdgroup_float8x8 const v_8 = simdgroup_float8x8(42.0f);
-    return S{.l=v_8, .r=simdgroup_float8x8(100.0f)};
+    return S{.l=make_filled_simdgroup_matrix<float, 8, 8>(42.0f), .r=make_filled_simdgroup_matrix<float, 8, 8>(100.0f)};
   } else {
-    simdgroup_float8x8 const v_9 = simdgroup_float8x8(-7.0f);
-    return S{.l=v_9, .r=simdgroup_float8x8(-42.0f)};
+    return S{.l=make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), .r=make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)};
   }
   /* unreachable */
   return {};
@@ -86,43 +78,41 @@ S make_struct(tint_module_vars_struct tint_module_vars) {
 
 S_Nested make_nested_struct(tint_module_vars_struct tint_module_vars) {
   if ((*tint_module_vars.non_uniform_condition)) {
-    simdgroup_float8x8 const v_10 = simdgroup_float8x8(42.0f);
-    return S_Nested{.s=S{.l=v_10, .r=simdgroup_float8x8(100.0f)}};
+    return S_Nested{.s=S{.l=make_filled_simdgroup_matrix<float, 8, 8>(42.0f), .r=make_filled_simdgroup_matrix<float, 8, 8>(100.0f)}};
   } else {
-    simdgroup_float8x8 const v_11 = simdgroup_float8x8(-7.0f);
-    return S_Nested{.s=S{.l=v_11, .r=simdgroup_float8x8(-42.0f)}};
+    return S_Nested{.s=S{.l=make_filled_simdgroup_matrix<float, 8, 8>(-7.0f), .r=make_filled_simdgroup_matrix<float, 8, 8>(-42.0f)}};
   }
   /* unreachable */
   return {};
 }
 
 void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
-  tint_array_lengths_struct const v_12 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
-  (*tint_module_vars.non_uniform_condition) = ((*tint_module_vars.tint_member)[min(idx, (v_12.tint_array_length_0_0 - 1u))] == 0.0f);
-  simdgroup_float8x8 const v_13 = make_matrix(tint_module_vars);
-  if ((((0u + (64u * 7u)) + 8u) <= v_12.tint_array_length_0_0)) {
-    simdgroup_store(v_13, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};
+  (*tint_module_vars.non_uniform_condition) = ((*tint_module_vars.tint_member)[min(idx, (v_2.tint_array_length_0_0 - 1u))] == 0.0f);
+  simdgroup_float8x8 const v_3 = make_matrix(tint_module_vars);
+  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    simdgroup_store(v_3, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
   }
-  simdgroup_float8x8 const v_14 = make_array(tint_module_vars)[0u];
-  if ((((0u + (64u * 7u)) + 8u) <= v_12.tint_array_length_0_0)) {
-    simdgroup_store(v_14, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_float8x8 const v_4 = make_array(tint_module_vars)[0u];
+  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    simdgroup_store(v_4, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
   }
-  simdgroup_float8x8 const v_15 = make_nested_array(tint_module_vars)[1u][0u];
-  if ((((0u + (64u * 7u)) + 8u) <= v_12.tint_array_length_0_0)) {
-    simdgroup_store(v_15, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_float8x8 const v_5 = make_nested_array(tint_module_vars)[1u][0u];
+  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    simdgroup_store(v_5, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
   }
-  simdgroup_float8x8 const v_16 = make_struct(tint_module_vars).l;
-  if ((((0u + (64u * 7u)) + 8u) <= v_12.tint_array_length_0_0)) {
-    simdgroup_store(v_16, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_float8x8 const v_6 = make_struct(tint_module_vars).l;
+  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    simdgroup_store(v_6, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
   }
-  simdgroup_float8x8 const v_17 = make_nested_struct(tint_module_vars).s.r;
-  if ((((0u + (64u * 7u)) + 8u) <= v_12.tint_array_length_0_0)) {
-    simdgroup_store(v_17, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
+  simdgroup_float8x8 const v_7 = make_nested_struct(tint_module_vars).s.r;
+  if ((((0u + (64u * 7u)) + 8u) <= v_2.tint_array_length_0_0)) {
+    simdgroup_store(v_7, (&(*tint_module_vars.tint_member)[0u]), ulong(64u), ulong2(0ul), false);
   }
 }
 
-kernel void v_18(uint idx [[thread_index_in_threadgroup]], device tint_array<float, 1>* v_19 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_8(uint idx [[thread_index_in_threadgroup]], device tint_array<float, 1>* v_9 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread bool non_uniform_condition = false;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_19, .non_uniform_condition=(&non_uniform_condition), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_9, .non_uniform_condition=(&non_uniform_condition), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(idx, tint_module_vars);
 }

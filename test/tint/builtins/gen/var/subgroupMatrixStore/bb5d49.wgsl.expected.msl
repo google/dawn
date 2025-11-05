@@ -28,7 +28,7 @@ struct tint_module_vars_struct {
 
 void subgroupMatrixStore_bb5d49(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
   uint arg_1 = 1u;
-  simdgroup_float8x8 arg_2 = simdgroup_float8x8();
+  simdgroup_float8x8 arg_2 = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
   uint arg_4 = 8u;
   uint const v = arg_1;
   simdgroup_float8x8 const v_1 = arg_2;

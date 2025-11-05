@@ -27,9 +27,8 @@ struct tint_module_vars_struct {
 };
 
 void subgroupMatrixStore_adbc3e(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct tint_module_vars) {
-  simdgroup_half8x8 const v = simdgroup_half8x8();
   if ((((1u + (8u * 7u)) + 8u) <= tint_array_lengths.tint_array_length_0_0)) {
-    simdgroup_store(v, (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(8u), ulong2(0ul), true);
+    simdgroup_store(make_filled_simdgroup_matrix<half, 8, 8>(0.0h), (&(*tint_module_vars.sb_rw).arg_0[1u]), ulong(8u), ulong2(0ul), true);
   }
 }
 

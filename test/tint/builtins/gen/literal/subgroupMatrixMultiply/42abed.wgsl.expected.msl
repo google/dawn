@@ -18,11 +18,9 @@ struct tint_module_vars_struct {
 };
 
 simdgroup_half8x8 subgroupMatrixMultiply_42abed() {
-  simdgroup_half8x8 const v = simdgroup_half8x8();
-  simdgroup_half8x8 const v_1 = simdgroup_half8x8();
-  simdgroup_half8x8 v_2 = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
-  simdgroup_multiply(v_2, v, v_1);
-  simdgroup_half8x8 res = v_2;
+  simdgroup_half8x8 v = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+  simdgroup_multiply(v, make_filled_simdgroup_matrix<half, 8, 8>(0.0h), make_filled_simdgroup_matrix<half, 8, 8>(0.0h));
+  simdgroup_half8x8 res = v;
   return res;
 }
 
