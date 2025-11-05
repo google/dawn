@@ -1531,6 +1531,104 @@ TEST_P(CaptureAndReplayTests, CaptureStorageTextureUsageWithExplicitBindGroupLay
     }
 }
 
+// Capture and replay a pass that uses a texture binding with explicit bind group layout.
+TEST_P(CaptureAndReplayTests, CaptureTextureUsageWithExplicitBindGroupLayout) {
+    wgpu::BindGroupLayoutEntry entries[2];
+    entries[0].binding = 2;
+    entries[0].visibility = wgpu::ShaderStage::Compute;
+    entries[0].texture.sampleType = wgpu::TextureSampleType::Uint;
+    entries[0].texture.viewDimension = wgpu::TextureViewDimension::e2D;
+    entries[1].binding = 4;
+    entries[1].visibility = wgpu::ShaderStage::Compute;
+    entries[1].buffer.type = wgpu::BufferBindingType::Storage;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 2;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &layout;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.label = "myTexture";
+    textureDesc.size = {1, 1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Uint;
+    textureDesc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+    wgpu::Texture texture = device.CreateTexture(&textureDesc);
+
+    {
+        wgpu::TexelCopyBufferLayout texelCopyBufferLayout =
+            utils::CreateTexelCopyBufferLayout(0, 4);
+        wgpu::TexelCopyTextureInfo texelCopyTextureInfo =
+            utils::CreateTexelCopyTextureInfo(texture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::Extent3D extent = {1, 1, 1};
+        const uint8_t myData[] = {0x11, 0x22, 0x33, 0x44};
+        queue.WriteTexture(&texelCopyTextureInfo, myData, sizeof(myData), &texelCopyBufferLayout,
+                           &extent);
+    }
+
+    wgpu::BufferDescriptor descriptor;
+    descriptor.label = "myBuffer";
+    descriptor.size = 4;
+    descriptor.usage =
+        wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    const char* shader = R"(
+        @group(0) @binding(2) var tex: texture_2d<u32>;
+        @group(0) @binding(4) var<storage, read_write> result: u32;
+
+        @compute @workgroup_size(1) fn main() {
+            let c = textureLoad(tex, vec2u(0), 0);
+            result = pack4xU8Clamp(c);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.layout = pipelineLayout;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {2, texture.CreateView()},
+                                                         {4, buffer},
+                                                     });
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetBindGroup(0, bindGroup);
+        pass.SetPipeline(pipeline);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        wgpu::Buffer buffer = replay->GetObjectByLabel<wgpu::Buffer>("myBuffer");
+        ASSERT_NE(buffer, nullptr);
+
+        uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+        EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, 0, sizeof(expected));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace
