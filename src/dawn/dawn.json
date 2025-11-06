@@ -3975,7 +3975,8 @@
             {"value": 78, "name": "shared texture memory metal end access state", "tags": ["dawn", "native"]},
             {"value": 79, "name": "adapter properties WGPU", "tags": ["dawn"]},
             {"value": 80, "name": "shared buffer memory D3D12 shared memory file mapping handle descriptor", "tags": ["dawn", "native"]},
-            {"value": 81, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]}
+            {"value": 81, "name": "shared texture memory D3D12 resource descriptor", "tags": ["dawn", "native"]},
+            {"value": 82, "name": "request adapter options angle virtualization group", "tags": ["dawn", "native"]}
 
         ]
     },

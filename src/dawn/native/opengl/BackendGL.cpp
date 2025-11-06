@@ -76,7 +76,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
 
     // A helper function performing checks on the display we're trying to use, and adding the
     // physical device from it to the list returned by the discovery.
-    auto AppendNewDeviceFrom = [&](ResultOrError<Ref<DisplayEGL>> maybeDisplay) -> MaybeError {
+    auto AppendNewDeviceFrom = [&](ResultOrError<Ref<DisplayEGL>> maybeDisplay,
+                                   EGLint angleVirtualizationGroup) -> MaybeError {
         Ref<DisplayEGL> display;
         DAWN_TRY_ASSIGN(display, std::move(maybeDisplay));
 
@@ -89,8 +90,9 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         }
 
         Ref<PhysicalDevice> device;
-        DAWN_TRY_ASSIGN(device, PhysicalDevice::Create(GetType(), std::move(display),
-                                                       forceES31AndMinExtensions));
+        DAWN_TRY_ASSIGN(
+            device, PhysicalDevice::Create(GetType(), std::move(display), forceES31AndMinExtensions,
+                                           angleVirtualizationGroup));
         devices.push_back(device);
 
         return {};
@@ -105,12 +107,23 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         }
     };
 
+    int angleVirtualizationGroup = EGL_DONT_CARE;
+
+    if (auto* angleVirtualizationGroupOptions =
+            options.Get<RequestAdapterOptionsAngleVirtualizationGroup>()) {
+        angleVirtualizationGroup = angleVirtualizationGroupOptions->angleVirtualizationGroup;
+    }
+
     if (auto* glGetProcOptions = options.Get<RequestAdapterOptionsGetGLProc>()) {
-        SwallowDiscoveryError(AppendNewDeviceFrom(DisplayEGL::CreateFromProcAndDisplay(
-            GetType(), glGetProcOptions->getProc, glGetProcOptions->display)));
+        SwallowDiscoveryError(AppendNewDeviceFrom(
+            DisplayEGL::CreateFromProcAndDisplay(GetType(), glGetProcOptions->getProc,
+                                                 glGetProcOptions->display),
+            angleVirtualizationGroup));
     } else {
-        SwallowDiscoveryError(AppendNewDeviceFrom(DisplayEGL::CreateFromDynamicLoading(
-            GetType(), kEGLLib, GetInstance()->GetRuntimeSearchPaths())));
+        SwallowDiscoveryError(
+            AppendNewDeviceFrom(DisplayEGL::CreateFromDynamicLoading(
+                                    GetType(), kEGLLib, GetInstance()->GetRuntimeSearchPaths()),
+                                angleVirtualizationGroup));
     }
 
     return devices;

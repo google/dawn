@@ -25,6 +25,11 @@ If no options are passed to EnumerateAdapters, then it is as if the default `Req
 
 When discovering adapters on the GLES backend, Dawn uses the provided `RequestAdapterOptionsGetGLProc::getProc` method to load GL procs. `RequestAdapterOptionsGetGLProc::display` indicates the EGLDisplay on which to create an adapter. If `display` is `EGL_NO_DISPLAY`, the current display will be used. This extension struct does nothing on other backends.
 
+### `RequestAdapterOptionsAngleVirtualizationGroup`
+
+When dawn runs on top of angle, you can set angleVirtualizationGroup to a virtualization group number to be used with EGL_ANGLE_context_virtualization extensions. If this struct isn't provided,
+the EGL_DONT_CARE value is used.
+
 ### `RequestAdapterOptionsLUID`
 
 When discovering adapters on D3D11 and D3D12, Dawn only discovers adapters matching the provided `RequestAdapterOptionsLUID::adapterLUID`. This extension struct does nothing on other backends.

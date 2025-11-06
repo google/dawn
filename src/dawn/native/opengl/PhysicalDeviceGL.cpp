@@ -111,7 +111,8 @@ bool IsSwiftShader(std::string_view renderer) {
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
                                                           Ref<DisplayEGL> display,
-                                                          bool forceES31AndMinExtensions) {
+                                                          bool forceES31AndMinExtensions,
+                                                          EGLint angleVirtualizationGroup) {
     // Create a temporary context and make it current during the creation of the PhysicalDevice so
     // that we can query the limits and other properties. Assumes that the limit are the same
     // irrespective of the context creation options.
@@ -120,21 +121,26 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
                     ContextEGL::Create(display, backendType, /*useRobustness*/ false,
                                        /*disableEGL15Robustness */ false,
                                        /*useANGLETextureSharing*/ false,
-                                       /*forceES31AndMinExtensions*/ forceES31AndMinExtensions));
+                                       /*forceES31AndMinExtensions*/ forceES31AndMinExtensions,
+                                       angleVirtualizationGroup));
 
     auto scopedMakeCurrent = context->MakeCurrent();
     // Needed to request extensions here to initialize supported gl extensions set
     context->RequestRequiredExtensionsExplicitly();
 
     Ref<PhysicalDevice> physicalDevice =
-        AcquireRef(new PhysicalDevice(backendType, std::move(display)));
+        AcquireRef(new PhysicalDevice(backendType, std::move(display), angleVirtualizationGroup));
     DAWN_TRY(physicalDevice->Initialize());
 
     return physicalDevice;
 }
 
-PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType, Ref<DisplayEGL> display)
-    : PhysicalDeviceBase(backendType), mDisplay(std::move(display)) {}
+PhysicalDevice::PhysicalDevice(wgpu::BackendType backendType,
+                               Ref<DisplayEGL> display,
+                               EGLint angleVirtualizationGroup)
+    : PhysicalDeviceBase(backendType),
+      mDisplay(std::move(display)),
+      mAngleVirtualizationGroup(angleVirtualizationGroup) {}
 
 DisplayEGL* PhysicalDevice::GetDisplay() const {
     return mDisplay.Get();
@@ -527,9 +533,10 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     bool forceES31AndMinExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
 
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                                disableEGL15Robustness, useANGLETextureSharing,
-                                                forceES31AndMinExtensions));
+    DAWN_TRY_ASSIGN(context,
+                    ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
+                                       disableEGL15Robustness, useANGLETextureSharing,
+                                       forceES31AndMinExtensions, mAngleVirtualizationGroup));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
