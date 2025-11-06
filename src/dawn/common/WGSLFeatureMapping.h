@@ -36,6 +36,7 @@
     X(kUnrestrictedPointerParameters, UnrestrictedPointerParameters)               \
     X(kSizedBindingArray, SizedBindingArray)                                       \
     X(kTexelBuffers, TexelBuffers)                                                 \
+    X(kFragmentDepth, FragmentDepth)                                               \
     X(kChromiumPrint, ChromiumPrint)                                               \
     X(kUniformBufferStandardLayout, UniformBufferStandardLayout)                   \
     X(kSubgroupId, SubgroupId)                                                     \

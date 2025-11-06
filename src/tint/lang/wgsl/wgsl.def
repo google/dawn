@@ -115,6 +115,7 @@ enum language_feature {
   texel_buffers
   uniform_buffer_standard_layout
   subgroup_id
+  fragment_depth
 
   // Non-standard language features for Chromium developers.
   chromium_print

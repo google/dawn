@@ -78,6 +78,7 @@ enum WGSLLanguageFeatureName {
     "pointer_composite_access",
     "sized_binding_array",
     "texel_buffers",
+    "fragment_depth",
     "chromium_print",
     "uniform_buffer_standard_layout",
     "subgroup_id",

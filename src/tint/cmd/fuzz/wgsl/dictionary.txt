@@ -239,6 +239,7 @@
 "fract"
 "frag_depth"
 "fragment"
+"fragment_depth"
 "frexp"
 "front_facing"
 "function"
