@@ -25,15 +25,9 @@
  } WGPUSType WGPU_ENUM_ATTRIBUTE;
  
 @@
- } WGPUTextureComponentSwizzle WGPU_STRUCTURE_ATTRIBUTE;
+     /*.a=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
+ })
  
- #define WGPU_TEXTURE_COMPONENT_SWIZZLE_INIT _wgpu_MAKE_INIT_STRUCT(WGPUTextureComponentSwizzle, { \
--    /*.r=*/WGPUComponentSwizzle_R _wgpu_COMMA \
--    /*.g=*/WGPUComponentSwizzle_G _wgpu_COMMA \
--    /*.b=*/WGPUComponentSwizzle_B _wgpu_COMMA \
--    /*.a=*/WGPUComponentSwizzle_A _wgpu_COMMA \
--})
--
 -typedef struct WGPUTextureViewDescriptor {
 -    WGPUChainedStruct * nextInChain;
 -    WGPUStringView label;
@@ -58,13 +52,11 @@
 -    /*.arrayLayerCount=*/WGPU_ARRAY_LAYER_COUNT_UNDEFINED _wgpu_COMMA \
 -    /*.aspect=*/WGPUTextureAspect_Undefined _wgpu_COMMA \
 -    /*.usage=*/WGPUTextureUsage_None _wgpu_COMMA \
-+    /*.r=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
-+    /*.g=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
-+    /*.b=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
-+    /*.a=*/WGPUComponentSwizzle_Undefined _wgpu_COMMA \
- })
- 
+-})
+-
  typedef struct WGPUVertexAttribute {
+     WGPUChainedStruct * nextInChain;
+     WGPUVertexFormat format;
 @@
      /*.depthStencilAttachment=*/NULL _wgpu_COMMA \
      /*.occlusionQuerySet=*/NULL _wgpu_COMMA \
