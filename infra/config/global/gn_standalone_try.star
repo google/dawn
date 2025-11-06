@@ -269,6 +269,7 @@ dawn_win_functional_cq_tester_without_node(
     description_html = "Tests release Dawn on Win/x86 on multiple hardware configs. Blocks CL submission",
     mirrors = [
         "ci/dawn-win-x86-builder-rel",
+        "ci/dawn-win-x86-intel-uhd630-rel",
         "ci/dawn-win-x86-nvidia-gtx1660-rel",
         "ci/dawn-win-x86-sws-rel",
     ],
