@@ -80,7 +80,7 @@ ResultOrError<UnpackedPtr<TexelBufferViewDescriptor>> ValidateTexelBufferViewDes
     const BufferBase* buffer,
     const TexelBufferViewDescriptor* descriptor);
 
-class BufferBase : public SharedResource {
+class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
   public:
     enum class BufferState {
         Unmapped,
@@ -177,7 +177,7 @@ class BufferBase : public SharedResource {
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
   private:
-    struct MapAsyncEvent;
+    class MapAsyncEvent;
 
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
@@ -230,15 +230,25 @@ class BufferBase : public SharedResource {
     // staging buffer recursively.
     Ref<BufferBase> mStagingBuffer = nullptr;
 
-    // Track texel buffer views created from this buffer so they can be destroyed
-    // when the buffer is destroyed.
+    // Track texel buffer views created from this buffer so they can be destroyed when the buffer is
+    // destroyed.
     ApiObjectList mTexelBufferViews;
+
+    // Once MapAsync() returns a future there is a possible race between MapAsyncEvent completing
+    // and the buffer being unmapped as they can happen on different threads. `mPendingMapMutex`
+    // must be locked when resetting `mPendingMapEvent` to guard against concurrent access.
+    // `mPendingMapMutex` must also be locked for any access to MapAsyncEvent::mStatus/mErrorMessage
+    // until after `mPendingMapEvent` is reset and potential race is averted.
+    // Note: MutexProtected isn't used here due to Use() providing MapAsyncEvent* instead of
+    // Ref<MapAsyncEvent> which doesn't allow resetting the Ref.
+    Mutex mPendingMapMutex;
+    Ref<MapAsyncEvent> mPendingMapEvent;
 
     // Mapping specific states.
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
-    std::variant<void*, Ref<MapAsyncEvent>> mMapData;
+    void* mMappedPointer = nullptr;
 };
 
 }  // namespace dawn::native
