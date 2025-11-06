@@ -262,6 +262,11 @@
           'result_adapter_single',
           'true_noop_merge',
         ],
+        'swarming': {
+          # These tests normally take ~15 minutes, but can flakily hit the
+          # default 20 minute I/O timeout and cannot currently be sharded.
+          'io_timeout': 1800,
+        },
         'test': 'fuzzer_corpus_tests',
       },
       'tint_ir_fuzzer_corpus_check_tests': {
@@ -289,11 +294,6 @@
           'result_adapter_single',
           'tint_wgsl_merge',
         ],
-        'swarming': {
-          # These tests normally take ~15 minutes, but can flakily hit the
-          # default 20 minute I/O timeout and cannot currently be sharded.
-          'io_timeout': 1800,
-        },
         'test': 'fuzzer_corpus_tests',
       },
       'tint_ir_fuzzer_corpus_generate_tests': {

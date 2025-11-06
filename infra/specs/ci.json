@@ -59,6 +59,7 @@
             "os": "Ubuntu-22.04",
             "pool": "chromium.tests.gpu"
           },
+          "io_timeout": 1800,
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
         },
         "test": "fuzzer_corpus_tests",
@@ -114,6 +115,7 @@
             "os": "Ubuntu-22.04",
             "pool": "chromium.tests.gpu"
           },
+          "io_timeout": 1800,
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
         },
         "test": "fuzzer_corpus_tests",
@@ -781,7 +783,6 @@
             "os": "Ubuntu-22.04",
             "pool": "chromium.tests.gpu"
           },
-          "io_timeout": 1800,
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
         },
         "test": "fuzzer_corpus_tests",
@@ -1193,6 +1194,7 @@
             "os": "Ubuntu-22.04",
             "pool": "chromium.tests.gpu"
           },
+          "io_timeout": 1800,
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
         },
         "test": "fuzzer_corpus_tests",
@@ -1248,6 +1250,7 @@
             "os": "Ubuntu-22.04",
             "pool": "chromium.tests.gpu"
           },
+          "io_timeout": 1800,
           "service_account": "chromium-tester@chops-service-accounts.iam.gserviceaccount.com"
         },
         "test": "fuzzer_corpus_tests",
