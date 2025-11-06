@@ -63,7 +63,9 @@
         'mixins': [
           'linux_nvidia_gtx_1660_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_common_gtests',
+        },
       },
       'dawn-linux-x64-sws-clusterfuzz': {
         'os_type': 'linux',
