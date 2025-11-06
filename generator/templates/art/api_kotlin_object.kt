@@ -43,7 +43,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 {% if doc_str | trim %}
     {{ generate_simple_kdoc(doc_str) }}
 {% endif %}
-public class {{ kotlin_name(obj) }}(public val handle: Long): AutoCloseable {
+public class {{ kotlin_name(obj) }} private constructor(public val handle: Long): AutoCloseable {
     {% set all_method_info = object_info.methods if object_info else {} %}
     {% for method in obj.methods if include_method(obj, method) %}
         //* Generating KDocs

@@ -1,8 +1,10 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
+import androidx.webgpu.helper.DawnException
 import androidx.webgpu.helper.ValidationException
 import androidx.webgpu.helper.WebGpu
+import androidx.webgpu.helper.createBitmap
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -117,6 +119,24 @@ class TextureTest {
       }
     } finally {
       encoder.close()
+    }
+  }
+
+  /**
+   * Verifies that creating a bitmap from a texture with an invalid width fails.
+   */
+  @Test
+  fun createBitmap_withInvalidWidth_fails() {
+    val descriptor = TextureDescriptor(
+      size = Extent3D(width = 65, height = 16, depthOrArrayLayers = 1),
+      format = TextureFormat.RGBA8Unorm,
+      usage = TextureUsage.CopySrc
+    )
+    val texture = device.createTexture(descriptor)
+    assertThrows(DawnException::class.java) {
+      runBlocking {
+        texture.createBitmap(device)
+      }
     }
   }
 }
