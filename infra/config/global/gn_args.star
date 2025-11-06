@@ -186,13 +186,6 @@ gn_args.config(
 )
 
 gn_args.config(
-    name = "tint_has_fuzzers",
-    args = {
-        "tint_has_fuzzers": True,
-    },
-)
-
-gn_args.config(
     name = "tint_hlsl_writer",
     args = {
         "tint_build_hlsl_writer": True,
