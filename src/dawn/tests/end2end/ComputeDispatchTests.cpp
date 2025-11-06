@@ -288,6 +288,9 @@ TEST_P(ComputeDispatchTests, MaxWorkgroups) {
 TEST_P(ComputeDispatchTests, ExceedsMaxWorkgroupsNoop) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
+    // TODO(crbug.com/458102532): Flaky with WARP.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
     uint32_t max = GetSupportedLimits().maxComputeWorkgroupsPerDimension;
 
     // All dimensions are above the max
