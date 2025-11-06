@@ -37,6 +37,7 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/QuerySetWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/Serialization.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
@@ -234,8 +235,7 @@ schema::TexelCopyTextureInfo ToSchema(CaptureContext& captureContext,
 schema::TimestampWrites ToSchema(CaptureContext& captureContext,
                                  const TimestampWrites& timestampWrites) {
     return {{
-        .querySetId = 0,  // TODO(451389800): Need QuerySetWGPU then,
-                          // captureContext.GetId(timestampWrites.querySet),
+        .querySetId = captureContext.GetId(timestampWrites.querySet),
         .beginningOfPassWriteIndex = timestampWrites.beginningOfPassWriteIndex,
         .endOfPassWriteIndex = timestampWrites.endOfPassWriteIndex,
     }};

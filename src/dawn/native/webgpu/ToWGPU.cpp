@@ -33,6 +33,7 @@
 #include "dawn/native/dawn_platform_autogen.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/QuerySetWGPU.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
 
 namespace dawn::native::webgpu {
@@ -144,8 +145,7 @@ WGPUIndexFormat ToWGPU(const wgpu::IndexFormat format) {
 WGPUPassTimestampWrites ToWGPU(const TimestampWrites& writes) {
     return {
         .nextInChain = nullptr,
-        // TODO(crbug.com/440123094): Do this when GetInnerHandle is implemented for QuerySetWGPU
-        .querySet = nullptr /*ToBackend(writes.querySet)->GetInnerHandle()*/,
+        .querySet = ToBackend(writes.querySet)->GetInnerHandle(),
         .beginningOfPassWriteIndex = writes.beginningOfPassWriteIndex,
         .endOfPassWriteIndex = writes.endOfPassWriteIndex,
     };

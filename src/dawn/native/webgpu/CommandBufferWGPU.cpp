@@ -37,6 +37,7 @@
 #include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/QuerySetWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/Serialization.h"
 #include "dawn/native/webgpu/TextureWGPU.h"
@@ -157,11 +158,8 @@ void EncodeComputePass(const DawnProcTable& wgpu,
 
             case Command::WriteTimestamp: {
                 auto cmd = commands.NextCommand<WriteTimestampCmd>();
-                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-                // QuerySetWGPU
                 wgpu.computePassEncoderWriteTimestamp(
-                    passEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
-                    cmd->queryIndex);
+                    passEncoder, ToBackend(cmd->querySet)->GetInnerHandle(), cmd->queryIndex);
                 break;
             }
 
@@ -324,9 +322,9 @@ void EncodeRenderPass(const Device* device,
         .colorAttachmentCount = colorAttachmentCount,
         .colorAttachments = colorAttachments.data(),
         .depthStencilAttachment = nullptr,
-        // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-        // QuerySetWGPU
-        .occlusionQuerySet = nullptr /*ToBackend(cmd->occlusionQuerySet)->GetInnerHandle()*/,
+        .occlusionQuerySet = renderPassCmd->occlusionQuerySet
+                                 ? ToBackend(renderPassCmd->occlusionQuerySet)->GetInnerHandle()
+                                 : nullptr,
         .timestampWrites = nullptr,
     };
     WGPURenderPassDepthStencilAttachment depthStencilAttachment;
@@ -453,11 +451,8 @@ void EncodeRenderPass(const Device* device,
 
             case Command::WriteTimestamp: {
                 auto cmd = commands.NextCommand<WriteTimestampCmd>();
-                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-                // QuerySetWGPU
                 wgpu.renderPassEncoderWriteTimestamp(
-                    passEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
-                    cmd->queryIndex);
+                    passEncoder, ToBackend(cmd->querySet)->GetInnerHandle(), cmd->queryIndex);
                 break;
             }
 
@@ -1116,21 +1111,16 @@ WGPUCommandBuffer CommandBuffer::Encode() {
             }
             case Command::ResolveQuerySet: {
                 auto cmd = mCommands.NextCommand<ResolveQuerySetCmd>();
-                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-                // QuerySetWGPU
                 wgpu.commandEncoderResolveQuerySet(
-                    innerEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
-                    cmd->firstQuery, cmd->queryCount, ToBackend(cmd->destination)->GetInnerHandle(),
+                    innerEncoder, ToBackend(cmd->querySet)->GetInnerHandle(), cmd->firstQuery,
+                    cmd->queryCount, ToBackend(cmd->destination)->GetInnerHandle(),
                     cmd->destinationOffset);
                 break;
             }
             case Command::WriteTimestamp: {
                 auto cmd = mCommands.NextCommand<WriteTimestampCmd>();
-                // TODO(crbug.com/440123094): remove nullptr when GetInnerHandle is implemented for
-                // QuerySetWGPU
                 wgpu.commandEncoderWriteTimestamp(
-                    innerEncoder, nullptr /*ToBackend(cmd->querySet)->GetInnerHandle()*/,
-                    cmd->queryIndex);
+                    innerEncoder, ToBackend(cmd->querySet)->GetInnerHandle(), cmd->queryIndex);
                 break;
             }
             case Command::InsertDebugMarker: {

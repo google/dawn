@@ -56,6 +56,7 @@
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/PhysicalDeviceWGPU.h"
 #include "dawn/native/webgpu/PipelineLayoutWGPU.h"
+#include "dawn/native/webgpu/QuerySetWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
 #include "dawn/native/webgpu/SamplerWGPU.h"
@@ -187,7 +188,7 @@ ResultOrError<Ref<PipelineLayoutBase>> Device::CreatePipelineLayoutImpl(
 }
 
 ResultOrError<Ref<QuerySetBase>> Device::CreateQuerySetImpl(const QuerySetDescriptor* descriptor) {
-    return Ref<QuerySetBase>{nullptr};
+    return QuerySet::Create(this, descriptor);
 }
 
 Ref<RenderPipelineBase> Device::CreateUninitializedRenderPipelineImpl(
