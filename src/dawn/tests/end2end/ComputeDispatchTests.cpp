@@ -254,10 +254,6 @@ TEST_P(ComputeDispatchTests, IndirectNoop) {
 
 // Test indirect with buffer offset
 TEST_P(ComputeDispatchTests, IndirectOffset) {
-#if DAWN_PLATFORM_IS(32_BIT)
-    // TODO(crbug.com/dawn/1196): Fails on Chromium's Quadro P400 bots
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
-#endif
     IndirectTest({0, 0, 0, 2, 3, 4}, 3 * sizeof(uint32_t));
 }
 
