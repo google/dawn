@@ -56,7 +56,8 @@ class DeviceTest {
     )
 
     val error = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.Validation, error)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 
 
@@ -144,7 +145,8 @@ class DeviceTest {
       )
     )
     val error = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.Validation, error)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 
   @Test
@@ -168,7 +170,8 @@ class DeviceTest {
     )
     val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.Validation, error)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 
   /**
@@ -203,7 +206,8 @@ class DeviceTest {
       )
     )
     val error = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.Validation, error)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 
   @Test
@@ -216,7 +220,8 @@ class DeviceTest {
       )
     )
     val error = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.Validation, error)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 
   @Test
@@ -244,6 +249,7 @@ class DeviceTest {
     val unusedSampler = device.createSampler(invalidDescriptor)
     val error = device.popErrorScope()
 
-    assertEquals(error, ErrorType.Validation)
+    assertEquals(error.type, ErrorType.Validation)
+    assertEquals(error.status, PopErrorScopeStatus.Success)
   }
 }

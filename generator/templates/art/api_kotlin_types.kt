@@ -25,9 +25,9 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-{%- macro kotlin_declaration(arg, strip_optional = False) -%}
+{%- macro kotlin_declaration(arg) -%}
     {%- set type = arg.type %}
-    {%- set optional = arg.optional and not strip_optional %}
+    {%- set optional = arg.optional %}
     {%- set default_value = arg.default_value %}
     {%- if arg == None -%}
         Unit

@@ -38,7 +38,8 @@ class ShaderModuleTest {
   private suspend fun getCompilationInfo(code: String): CompilationInfo {
     val shaderModule =
       device.createShaderModule(ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(code)))
-    return shaderModule.getCompilationInfo()
+    val (_, info) = shaderModule.getCompilationInfo()
+    return info
   }
 
 
@@ -62,11 +63,10 @@ class ShaderModuleTest {
   fun invalidShader_producesACompilationError() {
     device.pushErrorScope(ErrorFilter.Validation)
     val info = runBlocking { getCompilationInfo(invalidShader) }
-    val error = runBlocking { device.popErrorScope() }
+    val errorScope = runBlocking { device.popErrorScope() }
 
-    assertEquals("The operation should result in a validation error",
-      ErrorType.Validation, error
-    )
+    // Assert that the operation resulted in a validation error
+    assertEquals(ErrorType.Validation, errorScope.type)
 
     val errorCount = info.messages.count { it.type == CompilationMessageType.Error }
     assertEquals(1, errorCount)

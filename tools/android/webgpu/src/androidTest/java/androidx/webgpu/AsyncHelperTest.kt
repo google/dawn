@@ -2,13 +2,11 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.DawnException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
 import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
@@ -21,15 +19,6 @@ class AsyncHelperTest {
 
     private lateinit var webGpu: WebGpu
     private lateinit var device: GPUDevice
-
-    private val BASIC_SHADER = """
-        @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
-        @builtin(position) vec4f {
-            return vec4f();
-        }
-        @fragment fn fragmentMain() -> @location(0) vec4f {
-            return vec4f();
-        } """
 
     @Before
     fun setup() {
@@ -47,36 +36,43 @@ class AsyncHelperTest {
                 ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(""))
             )
 
-            val exception = assertThrows(DawnException::class.java) {
-                runBlocking {
-                    /* Call an asynchronous method, converted from a callback pattern by a helper. */
-                    device.createRenderPipelineAsync(
-                        RenderPipelineDescriptor(vertex = VertexState(module = shaderModule))
-                    )
-                }
-            }
-
-            assertEquals(
-                """Create render pipeline (async) should fail when no shader entry point exists.
-                   The result was: ${exception.status}""",
-                CreatePipelineAsyncStatus.ValidationError,
-                exception.status
+            /* Call an asynchronous method, converted from a callback pattern by a helper. */
+            val result = device.createRenderPipelineAsync(
+                RenderPipelineDescriptor(vertex = VertexState(module = shaderModule))
             )
+
+            assert(result.status == CreatePipelineAsyncStatus.ValidationError) {
+                """Create render pipeline (async) should fail when no shader entry point exists.
+                   The result was: ${result.status}"""
+            }
         }
     }
 
     @Test
     fun asyncMethodTestValidationPasses() {
         runBlocking {
-            /* Set up a valid shader module and descriptor */
+            /* Set up a shader module to support the async call. */
             val shaderModule = device.createShaderModule(
-                ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(BASIC_SHADER))
+                ShaderModuleDescriptor(
+                    shaderSourceWGSL = ShaderSourceWGSL(
+                        """
+@vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
+@builtin(position) vec4f {
+    return vec4f();
+}
+@fragment fn fragmentMain() -> @location(0) vec4f {
+    return vec4f();
+}
+                        """
+                    )
+                )
             )
 
             /* Call an asynchronous method, converted from a callback pattern by a helper. */
-            device.createRenderPipelineAsync(
+            val result = device.createRenderPipelineAsync(
                 RenderPipelineDescriptor(
-                    vertex = VertexState(module = shaderModule), fragment = FragmentState(
+                    vertex = VertexState(module = shaderModule),
+                    fragment = FragmentState(
                         module = shaderModule,
                         targets = arrayOf(ColorTargetState(format = TextureFormat.RGBA8Unorm))
                     )
@@ -84,6 +80,8 @@ class AsyncHelperTest {
             )
 
           /* Create render pipeline (async) should pass with a simple shader.. */
+          assertEquals(result.status, CreatePipelineAsyncStatus.Success)
+
         }
     }
 
@@ -92,18 +90,13 @@ class AsyncHelperTest {
 
         runBlocking {
             val shaderModule = device.createShaderModule(
-                ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(BASIC_SHADER))
+                ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(""))
             )
 
             /* Launch the function in a new coroutine, giving us a job handle we can cancel. */
             val job = launch {
-                var unused = device.createRenderPipelineAsync(
-                    RenderPipelineDescriptor(vertex = VertexState(module = shaderModule),
-                        fragment = FragmentState(
-                            module = shaderModule,
-                            targets = arrayOf(ColorTargetState(format = TextureFormat.RGBA8Unorm))
-                        )
-                    )
+                val unused = device.createRenderPipelineAsync(
+                    RenderPipelineDescriptor(vertex = VertexState(module = shaderModule))
                 )
                 hasReturned.set(true)
             }

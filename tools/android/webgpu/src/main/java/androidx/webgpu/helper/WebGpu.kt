@@ -105,7 +105,12 @@ private suspend fun requestAdapter(
     instance: GPUInstance,
     options: RequestAdapterOptions = RequestAdapterOptions(backendType = BackendType.Vulkan),
 ): GPUAdapter {
-    return instance.requestAdapter(options)
+    val result = instance.requestAdapter(options)
+    val adapter = result.adapter
+    check(result.status == RequestAdapterStatus.Success && adapter != null) {
+        result. message.ifEmpty { "Error requesting the adapter: $result.status" }
+    }
+    return adapter
 }
 
 private suspend inline fun requestDevice(
@@ -119,7 +124,12 @@ private suspend inline fun requestDevice(
     if (deviceDescriptor.uncapturedErrorCallback == null) {
         deviceDescriptor.uncapturedErrorCallback = defaultUncapturedErrorCallback
     }
-    return adapter.requestDevice(deviceDescriptor)
+    val result = adapter.requestDevice(deviceDescriptor)
+    val device = result.device
+    check(result.status == RequestDeviceStatus.Success && device != null) {
+        result.message.ifEmpty { "Error requesting the device: $result.status" }
+    }
+    return device
 }
 
 private val defaultUncapturedErrorCallback get(): UncapturedErrorCallback {

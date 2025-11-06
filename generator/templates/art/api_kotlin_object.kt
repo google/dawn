@@ -26,7 +26,6 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package {{ kotlin_package }}
 
-import {{ kotlin_package }}.helper.DawnException
 import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor

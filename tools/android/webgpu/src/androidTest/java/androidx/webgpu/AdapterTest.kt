@@ -17,8 +17,11 @@ class AdapterTest {
 
         val instance = createInstance()
         runBlocking {
-            val adapter = instance.requestAdapter()
-
+            val result = instance.requestAdapter()
+            val adapter = result.adapter
+            check(result.status == RequestAdapterStatus.Success && adapter != null) {
+                result.message ?: "Error requesting the adapter"
+            }
             val adapterInfo = adapter.getInfo()
 
             assertEquals("The backend type should be Vulkan",
