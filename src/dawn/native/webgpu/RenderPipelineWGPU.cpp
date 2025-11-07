@@ -73,11 +73,8 @@ MaybeError RenderPipeline::InitializeImpl() {
     desc.nextInChain = nullptr;
     desc.label = ToOutputStringView(GetLabel());
     auto layout = GetLayout();
-    if (layout != nullptr) {
-        desc.layout = ToBackend(layout)->GetInnerHandle();
-    } else {
-        desc.layout = nullptr;
-    }
+    DAWN_ASSERT(layout != nullptr);
+    desc.layout = ToBackend(layout)->GetInnerHandle();
 
     // Vertex State
     const ProgrammableStage& vertex = GetStage(SingleShaderStage::Vertex);
