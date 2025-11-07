@@ -920,6 +920,10 @@ TEST_P(TimestampQueryTests, TimestampWritesQueryIndexOnComputePass) {
 
 // Test timestampWrites with timestamp location in compute pass descriptor
 TEST_P(TimestampQueryTests, TimestampWritesLocationOnComputePass) {
+    // TODO(crbug.com/458607667): Flaky on WARP, but seemingly only on Debug
+    // builds built with MSVC.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP());
+
     constexpr uint32_t kQueryCount = 2;
 
     // Set timestampWrites with only one value of ComputePassTimestampLocation
