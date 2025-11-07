@@ -1,3 +1,5 @@
+@file:JvmName("WebGpuUtils")
+
 package androidx.webgpu.helper
 
 import android.os.Handler

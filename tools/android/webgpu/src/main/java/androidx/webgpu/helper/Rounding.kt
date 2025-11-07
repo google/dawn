@@ -1,3 +1,5 @@
+@file:JvmName("RoundingUtils")
+
 package androidx.webgpu.helper
 
 /**
