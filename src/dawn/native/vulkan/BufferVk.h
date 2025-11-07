@@ -42,6 +42,18 @@ struct CommandRecordingContext;
 class Device;
 struct VulkanFunctions;
 
+// Holds the parameters for a buffer related pipeline memory barrier. Must be
+// submitted via CommandRecordingContext.
+struct BufferBarrier {
+    bool IsEmpty() const;
+    void Merge(const BufferBarrier& other);
+
+    VkAccessFlags srcAccessMask = 0;
+    VkAccessFlags dstAccessMask = 0;
+    VkPipelineStageFlags srcStages = 0;
+    VkPipelineStageFlags dstStages = 0;
+};
+
 class Buffer final : public BufferBase {
   public:
     static ResultOrError<Ref<Buffer>> Create(Device* device,
@@ -55,9 +67,8 @@ class Buffer final : public BufferBase {
     void TransitionUsageNow(CommandRecordingContext* recordingContext,
                             wgpu::BufferUsage usage,
                             wgpu::ShaderStage shaderStage = wgpu::ShaderStage::None);
-    void TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingContext,
-                                         wgpu::BufferUsage usage,
-                                         wgpu::ShaderStage shaderStage);
+    BufferBarrier TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
+                                                  wgpu::ShaderStage shaderStage);
 
     // All the Ensure methods return true if the buffer was initialized to zero.
     bool EnsureDataInitialized(CommandRecordingContext* recordingContext);
