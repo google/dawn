@@ -67,9 +67,8 @@ class SurfaceTest {
     assertEquals(currentTexture.format, TextureFormat.RGBA8Unorm)
     assertEquals(currentTexture.height, HEIGHT)
     assertEquals(currentTexture.width, WIDTH)
-
-    val status = surface.present()
-    assertEquals("Present should be successful", Status.Success, status)
+    // The testcase will fail in case present() throws DawnException
+    surface.present()
   }
 
   /**

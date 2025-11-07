@@ -45,6 +45,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 public class {{ kotlin_name(obj) }} private constructor(public val handle: Long): AutoCloseable {
     {% set all_method_info = object_info.methods if object_info else {} %}
     {% for method in obj.methods if include_method(obj, method) %}
+        {% set _kotlin_return = kotlin_return(method) %}
         //* Generating KDocs
         {% set method_info = all_method_info.get(method.name.snake_case()) %}
         {% set main_doc = method_info.doc if method_info else "" %}
@@ -62,18 +63,18 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
                 @JvmOverloads
             {% break %}{% endif %}
         {% endfor %}
-        {{ kotlin_annotation(kotlin_return(method)) }} public external fun {{ method.name.camelCase() }}(
+        {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
             {{- kotlin_annotation(arg) }} {{ as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
-        {%- endfor -%}): {{ kotlin_declaration(kotlin_return(method)) }}
+        {%- endfor -%}): {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }}
 
         {% if method.name.chunks[0] == 'get' and not method.arguments %}
             //* For the Kotlin getter, strip word 'get' from name and convert the remainder to
             //* camelCase() (lower case first word). E.g. "get foo bar" translated to fooBar.
             {% set name = method.name.chunks[1] + method.name.chunks[2:] | map('title') | join %}
             @get:JvmName("{{ name }}")
-            public val {{ name }}: {{ kotlin_declaration(kotlin_return(method)) }} get() = {{ method.name.camelCase() }}()
+            public val {{ name }}: {{ kotlin_declaration(_kotlin_return) if _kotlin_return else 'Unit' }} get() = {{ method.name.camelCase() }}()
 
         {% endif %}
 

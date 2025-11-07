@@ -160,9 +160,10 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         }
         {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
             if (result != WGPUStatus_Success) {
-                //* TODO(b/344805524): custom exception for Dawn.
-                env->ThrowNew(env->FindClass("java/lang/Error"), "Method failed");
-                return{{ ' 0' if method.returns }};
+                jclass exClass = env->FindClass("androidx/webgpu/helper/DawnException");
+                std::string message = "Dawn method failed with status: " + std::to_string(result);
+                env->ThrowNew(exClass, message.c_str());
+                return{{ ' 0' if _kotlin_return }};
             }
         {% endif %}
     {% endif %}

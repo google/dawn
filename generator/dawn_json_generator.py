@@ -948,6 +948,14 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
                         and argument.type.category == 'structure'):
                     return argument
 
+        # Check for "status-only" return.
+        if (method.returns
+                and method.returns.type.name.canonical_case() == 'status'):
+            # This is a function like GPUBuffer.readMappedRange(). Its C return is a status,
+            # but it has no "out" parameters. The idiomatic Kotlin function
+            # should return Unit and throw an exception on failure.
+            return None
+
         # If the function should return an omitted structure, we return nothing instead.
         if method.returns and method.returns.type.category == 'structure' and not include_structure(
                 method.returns.type):
