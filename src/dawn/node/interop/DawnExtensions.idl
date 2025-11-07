@@ -28,10 +28,28 @@
 // An IDL file that adds support for Dawn extensions that are not part of the
 // upstream webgpu.idl.
 
-enum GPUFeatureName {
-    "multi-draw-indirect",
-    "chromium-experimental-subgroup-matrix",
+// ============================================================================
+// Language features, they are not defined in WebGPU's IDL.
+// ============================================================================
+enum WGSLLanguageFeatureName {
+    "readonly_and_readwrite_storage_textures",
+    "packed_4x8_integer_dot_product",
+    "unrestricted_pointer_parameters",
+    "pointer_composite_access",
+    "sized_binding_array",
+    "texel_buffers",
+    "fragment_depth",
+    "chromium_print",
+    "uniform_buffer_standard_layout",
+    "subgroup_id",
 };
+
+// ============================================================================
+// Subgroup matrices
+// ============================================================================
+enum GPUFeatureName {
+    "chromium-experimental-subgroup-matrix",
+}
 
 enum GPUSubgroupMatrixComponentType {
   "f32",
@@ -54,8 +72,11 @@ interface GPUAdapterInfo {
     [SameObject] readonly attribute FrozenArray<GPUSubgroupMatrixConfig> subgroupMatrixConfigs;
 };
 
-interface GPUCommandEncoder {
-    undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
+// ============================================================================
+// MultiDrawIndirect
+// ============================================================================
+enum GPUFeatureName {
+    "multi-draw-indirect",
 };
 
 // Not in webgpu.idl yet.
@@ -67,30 +88,30 @@ interface GPURenderPassEncoder {
                                 optional GPUSize64 drawCountBufferOffset = 0);
 };
 
+// ============================================================================
+// WebGPU compat
+// ============================================================================
 dictionary GPUTextureDescriptor {
     GPUTextureViewDimension textureBindingViewDimension;
 };
-
-enum WGSLLanguageFeatureName {
-    "readonly_and_readwrite_storage_textures",
-    "packed_4x8_integer_dot_product",
-    "unrestricted_pointer_parameters",
-    "pointer_composite_access",
-    "sized_binding_array",
-    "texel_buffers",
-    "fragment_depth",
-    "chromium_print",
-    "uniform_buffer_standard_layout",
-    "subgroup_id",
-};
-
-dictionary GPUBindGroupLayoutEntry {
-    GPUSize32 bindingArraySize = 1;
-};
-
 interface GPUSupportedLimits {
     readonly attribute unsigned long maxStorageBuffersInFragmentStage;
     readonly attribute unsigned long maxStorageTexturesInFragmentStage;
     readonly attribute unsigned long maxStorageBuffersInVertexStage;
     readonly attribute unsigned long maxStorageTexturesInVertexStage;
 };
+
+// ============================================================================
+// Write timestamp
+// ============================================================================
+interface GPUCommandEncoder {
+    undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
+};
+
+// ============================================================================
+// Fixed-size binding arrays
+// ============================================================================
+dictionary GPUBindGroupLayoutEntry {
+    GPUSize32 bindingArraySize = 1;
+};
+
