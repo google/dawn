@@ -1465,7 +1465,13 @@ bool Converter::Convert(wgpu::BindGroupEntry& out, const interop::GPUBindGroupEn
 
 bool Converter::Convert(wgpu::BindGroupLayoutEntry& out,
                         const interop::GPUBindGroupLayoutEntry& in) {
-    // TODO(crbug.com/dawn/1129): External textures
+    // Chain the external texture binding layout if present in the dictionary.
+    if (in.externalTexture) {
+        auto etLayout = Allocate<wgpu::ExternalTextureBindingLayout>();
+        etLayout->nextInChain = out.nextInChain;
+        out.nextInChain = etLayout;
+    }
+
     return Convert(out.binding, in.binding) && Convert(out.visibility, in.visibility) &&
            Convert(out.bindingArraySize, in.bindingArraySize) && Convert(out.buffer, in.buffer) &&
            Convert(out.sampler, in.sampler) && Convert(out.texture, in.texture) &&
