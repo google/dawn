@@ -63,6 +63,10 @@ vars = {
 
   # Set to True by Chromium if syncing from a Chromium checkout.
   'build_with_chromium': False,
+
+  # NOTE: This is not currently accurate since no Chromium -> Dawn roll has
+  # been performed yet.
+  'chromium_revision': 'c2d941cd12644d6b893c305b1904e358727d597d',
 }
 
 deps = {
