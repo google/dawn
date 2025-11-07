@@ -494,6 +494,11 @@ void Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
             return;
         }
 
+        if (IsSubset(usage | mLastWriteUsage, kMappableBufferUsages)) {
+            // No barrier is needed for map write followed by map read.
+            return;
+        }
+
         // Write -> read barrier.
         srcAccess = VulkanAccessFlags(mLastWriteUsage);
         srcStage = VulkanPipelineStage(mLastWriteUsage, mLastWriteShaderStage);
