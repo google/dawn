@@ -59,10 +59,7 @@ static constexpr uint32_t kMaxExternalImmediateConstantsPerPipeline = 16u;
 static constexpr uint32_t kMaxImmediateConstantsPerPipeline = 32u;
 
 // Adapter Max limitation for user immediate constants is 64 bytes.
-static constexpr uint32_t kMaxSupportedImmediateDataBytes = 64u;
-
-// Device Default limitation for user immediate constants is 16 bytes.
-static constexpr uint32_t kDefaultMaxImmediateDataBytes = 16u;
+static constexpr uint32_t kMaxImmediateDataBytes = 64u;
 
 // Default subgroup sizes.
 static constexpr uint32_t kDefaultSubgroupMinSize = 4u;

@@ -927,7 +927,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
 
     // Metal doesn't have limits for SetBytes, only suggested less than 4096 bytes.
     // The size is large enough to support 64 bytes customer immediate data.
-    limits->v1.maxImmediateSize = kMaxSupportedImmediateDataBytes;
+    limits->v1.maxImmediateSize = kMaxImmediateDataBytes;
 
     // Using base limits for:
     // TODO(crbug.com/dawn/685):

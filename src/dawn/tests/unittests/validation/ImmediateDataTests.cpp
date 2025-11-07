@@ -38,7 +38,9 @@
 namespace dawn {
 namespace {
 
-class ImmediateDataDisableTest : public ValidationTest {};
+class ImmediateDataDisableTest : public ValidationTest {
+    std::vector<const char*> GetDisabledToggles() override { return {"enable_immediate_data"}; }
+};
 
 // Check that creating a PipelineLayout with non-zero immediateSize is disallowed
 // without the feature enabled.
@@ -50,7 +52,7 @@ TEST_F(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
     ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
 }
 
-// Check that SetImmediateData doesn't work (even with size=0) without maxImmediateSize>0.
+// Check that SetImmediateData doesn't work (even with size=0) without the feature enabled.
 TEST_F(ImmediateDataDisableTest, SetImmediateData) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -72,9 +74,10 @@ TEST_F(ImmediateDataDisableTest, SetImmediateData) {
 
 class ImmediateDataTest : public ValidationTest {
   protected:
-    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
-                           dawn::utils::ComboLimits& required) override {
-        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
+    std::vector<const char*> GetEnabledToggles() override {
+        // Not actually necessary as AllowUnsafeAPIs is enabled, which already enables
+        // EnableImmediateData
+        return {"enable_immediate_data"};
     }
 
     wgpu::BindGroupLayout CreateBindGroupLayout() {
@@ -111,13 +114,13 @@ TEST_F(ImmediateDataTest, ValidateImmediateSize) {
 
     // Success case with valid immediateSize.
     {
-        desc.immediateSize = kDefaultMaxImmediateDataBytes;
+        desc.immediateSize = kMaxImmediateDataBytes;
         device.CreatePipelineLayout(&desc);
     }
 
     // Failed case with invalid immediateSize that exceed limits.
     {
-        desc.immediateSize = kDefaultMaxImmediateDataBytes + 1;
+        desc.immediateSize = kMaxImmediateDataBytes + 1;
         ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
     }
 }
@@ -167,9 +170,9 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     // Success cases
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        std::vector<uint32_t> data(kDefaultMaxImmediateDataBytes / 4, 0);
+        std::vector<uint32_t> data(kMaxImmediateDataBytes / 4, 0);
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(0, data.data(), kDefaultMaxImmediateDataBytes);
+        computePass.SetImmediateData(0, data.data(), kMaxImmediateDataBytes);
         computePass.End();
         encoder.Finish();
     }
@@ -177,7 +180,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(kDefaultMaxImmediateDataBytes, nullptr, 0);
+        computePass.SetImmediateData(kMaxImmediateDataBytes, nullptr, 0);
         computePass.End();
         encoder.Finish();
     }
@@ -186,7 +189,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         uint32_t data = 0;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(kDefaultMaxImmediateDataBytes - 4, &data, 4);
+        computePass.SetImmediateData(kMaxImmediateDataBytes - 4, &data, 4);
         computePass.End();
         encoder.Finish();
     }
@@ -194,7 +197,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     // Failed case with offset oob
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        uint32_t offset = kDefaultMaxImmediateDataBytes + 4;
+        uint32_t offset = kMaxImmediateDataBytes + 4;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
         computePass.SetImmediateData(offset, nullptr, 0);
         computePass.End();
@@ -204,7 +207,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     // Failed cases with size oob
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        uint32_t size = kDefaultMaxImmediateDataBytes + 4;
+        uint32_t size = kMaxImmediateDataBytes + 4;
         std::vector<uint32_t> data(size / 4, 0);
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
         computePass.SetImmediateData(0, data.data(), size);
@@ -215,7 +218,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     // Failed cases with offset + size oob
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        uint32_t offset = kDefaultMaxImmediateDataBytes;
+        uint32_t offset = kMaxImmediateDataBytes;
         uint32_t data[] = {0};
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
         computePass.SetImmediateData(offset, data, 4);
@@ -321,39 +324,39 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
 // Check that default pipelineLayout has too many immediate data bytes .
 TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-        enable chromium_experimental_immediate;
-        var<immediate> fragmentConstants: vec4f;
-        var<immediate> computeConstants: vec4u;
-        @vertex fn vsMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
-            const pos = array(
-                vec2( 1.0, -1.0),
-                vec2(-1.0, -1.0),
-                vec2( 0.0,  1.0),
-            );
-            return vec4(pos[VertexIndex], 0.0, 1.0);
-        }
+            enable chromium_experimental_immediate;
+            var<immediate> fragmentConstants: array<vec4f, 4>;
+            var<immediate> computeConstants: array<vec4u, 4>;
+            @vertex fn vsMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                const pos = array(
+                    vec2( 1.0, -1.0),
+                    vec2(-1.0, -1.0),
+                    vec2( 0.0,  1.0),
+                );
+                return vec4(pos[VertexIndex], 0.0, 1.0);
+            }
 
-        // to reuse the same pipeline layout
-        @fragment fn fsMain() -> @location(0) vec4f {
-            return fragmentConstants;
-        }
+            // to reuse the same pipeline layout
+            @fragment fn fsMain() -> @location(0) vec4f {
+                return vec4f(fragmentConstants[0].x, fragmentConstants[0].yzw);
+            }
 
-        @group(0) @binding(0) var<storage, read_write> output : vec4u;
+            @group(0) @binding(0) var<storage, read_write> output : vec4u;
 
-        @compute @workgroup_size(1, 1, 1)
-        fn csMain() {
-            output = computeConstants;
-        })");
+            @compute @workgroup_size(1, 1, 1)
+            fn csMain() {
+                output = vec4u(computeConstants[0].x, computeConstants[0].yzw);
+            })");
 
     wgpu::ShaderModule oobShaderModule = utils::CreateShaderModule(device, R"(
             enable chromium_experimental_immediate;
             struct FragmentConstants {
-                constants: vec4f,
+                constants: array<vec4f, 4>,
                 constantsOOB: f32,
             };
 
             struct ComputeConstants {
-                constants: vec4u,
+                constants: array<vec4u, 4>,
                 constantsOOB: u32,
             };
             var<immediate> fragmentConstants: FragmentConstants;
@@ -369,16 +372,16 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
 
             // to reuse the same pipeline layout
             @fragment fn fsMain() -> @location(0) vec4f {
-                return vec4f(fragmentConstants.constants.x + fragmentConstants.constantsOOB,
-                             fragmentConstants.constants.yzw);
+                return vec4f(fragmentConstants.constants[0].x + fragmentConstants.constantsOOB,
+                             fragmentConstants.constants[0].yzw);
             }
 
             @group(0) @binding(0) var<storage, read_write> output : vec4u;
 
             @compute @workgroup_size(1, 1, 1)
             fn csMain() {
-                output = vec4u(computeConstants.constants.x + computeConstants.constantsOOB,
-                               computeConstants.constants.yzw);
+                output = vec4u(computeConstants.constants[0].x + computeConstants.constantsOOB,
+                               computeConstants.constants[0].yzw);
             })");
 
     // Success cases

@@ -98,11 +98,6 @@ InstanceBase* AdapterBase::APIGetInstance() const {
 void AdapterBase::UpdateLimits() {
     mLimits = mPhysicalDevice->GetLimits();
 
-    // Disable unsafe limits if needed.
-    if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
-        mLimits.v1.maxImmediateSize = 0;
-    }
-
     // Apply the tiered limits if needed.
     if (mUseTieredLimits) {
         ApplyLimitTiers(&mLimits);
@@ -269,6 +264,13 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // TODO(crbug.com/429938352): Disable default hash validation to prevent performance cost when
     // no longer necessary.
     deviceToggles.Default(Toggle::BlobCacheHashValidation, true);
+
+    // EnableImmediateData is safe, but not yet stable and not enabled by
+    // default yet. Enable it by default with AllowUnsafeAPIs for convenience
+    // of tests and other users of unsafe APIs.
+    if (mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
+        deviceToggles.Default(Toggle::EnableImmediateData, true);
+    }
 
     // Backend-specific forced and default device toggles
     mPhysicalDevice->SetupBackendDeviceToggles(mInstance->GetPlatform(), &deviceToggles);

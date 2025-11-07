@@ -102,6 +102,8 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     // Validate immediateSize.
     if (descriptor->immediateSize) {
+        DAWN_INVALID_IF(!device->IsToggleEnabled(Toggle::EnableImmediateData),
+                        "ImmediateData is not enabled");
         uint32_t maxImmediateSize = device->GetLimits().v1.maxImmediateSize;
         DAWN_INVALID_IF(descriptor->immediateSize > maxImmediateSize,
                         "immediateSize (%i) is larger than the maximum allowed (%i).",
