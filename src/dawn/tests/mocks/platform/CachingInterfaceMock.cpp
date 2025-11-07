@@ -37,18 +37,22 @@ CachingInterfaceMock::CachingInterfaceMock() {
 }
 
 void CachingInterfaceMock::Enable() {
+    std::scoped_lock lock(mMutex);
     mEnabled = true;
 }
 
 void CachingInterfaceMock::Disable() {
+    std::scoped_lock lock(mMutex);
     mEnabled = false;
 }
 
 size_t CachingInterfaceMock::GetHitCount() const {
+    std::scoped_lock lock(mMutex);
     return mHitCount;
 }
 
 size_t CachingInterfaceMock::GetNumEntries() const {
+    std::scoped_lock lock(mMutex);
     return mCache.size();
 }
 
@@ -56,6 +60,7 @@ size_t CachingInterfaceMock::LoadDataDefault(const void* key,
                                              size_t keySize,
                                              void* value,
                                              size_t valueSize) {
+    std::scoped_lock lock(mMutex);
     if (!mEnabled) {
         return 0;
     }
@@ -77,6 +82,7 @@ void CachingInterfaceMock::StoreDataDefault(const void* key,
                                             size_t keySize,
                                             const void* value,
                                             size_t valueSize) {
+    std::scoped_lock lock(mMutex);
     if (!mEnabled) {
         return;
     }

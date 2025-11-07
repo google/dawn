@@ -98,12 +98,10 @@ BlobCache::BlobCache(const dawn::native::DawnCacheDeviceDescriptor& desc, bool e
       mFunctionUserdata(desc.functionUserdata) {}
 
 ResultOrError<Blob> BlobCache::Load(const CacheKey& key) {
-    std::lock_guard<std::mutex> lock(mMutex);
     return LoadInternal(key);
 }
 
 void BlobCache::Store(const CacheKey& key, size_t valueSize, const void* value) {
-    std::lock_guard<std::mutex> lock(mMutex);
     StoreInternal(key, valueSize, value);
 }
 
