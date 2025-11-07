@@ -99,6 +99,7 @@ dawn_json_generator("kotlin_gen") {
     "java/androidx/webgpu/DeviceLostReason.kt",
     "java/androidx/webgpu/ErrorFilter.kt",
     "java/androidx/webgpu/ErrorType.kt",
+    "java/androidx/webgpu/Exceptions.kt",
     "java/androidx/webgpu/Extent3D.kt",
     "java/androidx/webgpu/FeatureLevel.kt",
     "java/androidx/webgpu/FeatureName.kt",

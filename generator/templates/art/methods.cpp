@@ -160,7 +160,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         }
         {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
             if (result != WGPUStatus_Success) {
-                jclass exClass = env->FindClass("androidx/webgpu/helper/DawnException");
+                jclass exClass = env->FindClass("androidx/webgpu/DawnException");
                 std::string message = "Dawn method failed with status: " + std::to_string(result);
                 env->ThrowNew(exClass, message.c_str());
                 return{{ ' 0' if _kotlin_return }};

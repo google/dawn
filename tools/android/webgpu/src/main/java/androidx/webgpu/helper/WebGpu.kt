@@ -10,10 +10,13 @@ import androidx.webgpu.BackendType
 import androidx.webgpu.GPUDevice
 import androidx.webgpu.DeviceDescriptor
 import androidx.webgpu.DeviceLostCallback
+import androidx.webgpu.DeviceLostException
 import androidx.webgpu.DeviceLostReason
 import androidx.webgpu.ErrorType
 import androidx.webgpu.GPUInstance
 import androidx.webgpu.InstanceDescriptor
+import androidx.webgpu.InternalException
+import androidx.webgpu.OutOfMemoryException
 import androidx.webgpu.RequestAdapterOptions
 import androidx.webgpu.RequestAdapterStatus
 import androidx.webgpu.GPUSurface
@@ -21,21 +24,11 @@ import androidx.webgpu.RequestDeviceStatus
 import androidx.webgpu.SurfaceDescriptor
 import androidx.webgpu.SurfaceSourceAndroidNativeWindow
 import androidx.webgpu.UncapturedErrorCallback
+import androidx.webgpu.UnknownException
+import androidx.webgpu.ValidationException
 import androidx.webgpu.createInstance
 import androidx.webgpu.helper.Util.windowFromSurface
 import java.util.concurrent.Executor
-
-public class DeviceLostException(
-    public val device: GPUDevice, @DeviceLostReason public val reason: Int, message: String
-) : Exception(message)
-
-public class ValidationException(public val device: GPUDevice, message: String) : Exception(message)
-
-public class OutOfMemoryException(public val device: GPUDevice, message: String) : Exception(message)
-
-public class InternalException(public val device: GPUDevice, message: String) : Exception(message)
-
-public class UnknownException(public val device: GPUDevice, message: String) : Exception(message)
 
 private const val POLLING_DELAY_MS = 100L
 

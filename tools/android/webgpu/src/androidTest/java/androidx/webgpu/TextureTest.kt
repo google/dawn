@@ -1,8 +1,8 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.DawnException
-import androidx.webgpu.helper.ValidationException
+import androidx.webgpu.DawnException
+import androidx.webgpu.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createBitmap
 import androidx.webgpu.helper.createWebGpu

@@ -1,7 +1,7 @@
 package androidx.webgpu
 
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.ValidationException
+import androidx.webgpu.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer

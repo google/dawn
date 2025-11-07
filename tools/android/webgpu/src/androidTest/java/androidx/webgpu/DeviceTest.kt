@@ -2,10 +2,10 @@ package androidx.webgpu
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import androidx.webgpu.helper.ValidationException
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import junit.framework.TestCase.assertEquals
+import androidx.webgpu.ValidationException
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Test
