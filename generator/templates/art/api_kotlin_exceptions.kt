@@ -43,9 +43,9 @@ package {{ kotlin_package }}
 public class DawnException(message: String) : Exception(message)
 
 /**
- * Exception thrown when a [GPUDevice] is lost and can no longer be used.
+ * Exception thrown when a [{{kotlin_name(ns.device)}}] is lost and can no longer be used.
  *
- * @property device The [GPUDevice] that was lost.
+ * @property device The [{{kotlin_name(ns.device)}}] that was lost.
  * @property reason The reason code indicating why the device was lost.
  * @param message A human-readable message describing the device loss.
  */
@@ -55,12 +55,25 @@ public class DeviceLostException(
   message: String
 ) : Exception(message)
 
-{% for value in ns.error.values %}
+{% for value in ns.error.values if value.name.get() != "no error" %}
     /**
      * Exception for {{value.name.CamelCase()}} type errors.
      *
-     * @property device The device that encountered the condition.
+     * @param message A message explaining the error.
      */
-    public class {{value.name.CamelCase()}}Exception(public val device: {{kotlin_name(ns.device)}}, message: String) : Exception(message);
+    public class {{value.name.CamelCase()}}Exception(message: String) : Exception(message);
 
 {% endfor %}
+
+/**
+ * Create the execption for the appropriate error type.
+ * @param type The [{{ kotlin_name(ns.error) }}].
+ * @param message A human-readable message describing the device loss.
+ */
+public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String): Exception =
+    when (type) {
+        {% for value in ns.error.values if value.name.get() != "no error" %}
+            {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)
+        {% endfor %}
+        else -> UnknownException(message)
+    }

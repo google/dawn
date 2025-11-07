@@ -27,6 +27,7 @@ import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.UnknownException
 import androidx.webgpu.ValidationException
 import androidx.webgpu.createInstance
+import androidx.webgpu.getException
 import androidx.webgpu.helper.Util.windowFromSurface
 import java.util.concurrent.Executor
 
@@ -127,18 +128,12 @@ private suspend inline fun requestDevice(
     return device
 }
 
-private val defaultUncapturedErrorCallback get(): UncapturedErrorCallback {
-    return UncapturedErrorCallback { device, type, message ->
-        when (type) {
-            ErrorType.NoError -> {} // NoError
-            ErrorType.Validation -> throw ValidationException(device, message)
-            ErrorType.OutOfMemory -> throw OutOfMemoryException(device, message)
-            ErrorType.Internal -> throw InternalException(device, message)
-            ErrorType.Unknown -> throw UnknownException(device, message)
-            else -> throw UnknownException(device, message)
+private val defaultUncapturedErrorCallback
+    get(): UncapturedErrorCallback {
+        return UncapturedErrorCallback { _, type, message ->
+            throw getException(type, message)
         }
     }
-}
 
 private val defaultDeviceLostCallback get(): DeviceLostCallback {
     return DeviceLostCallback { device, reason, message ->
