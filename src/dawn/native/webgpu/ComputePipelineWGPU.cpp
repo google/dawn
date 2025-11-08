@@ -79,38 +79,15 @@ MaybeError ComputePipeline::InitializeImpl() {
 
 MaybeError ComputePipeline::AddReferenced(CaptureContext& captureContext) {
     DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Compute).module.Get()));
-    PipelineLayoutBase* pipelineLayout = GetLayout();
-    if (!pipelineLayout->IsImplicit()) {
-        DAWN_TRY(captureContext.AddResource(pipelineLayout));
-    }
+    DAWN_TRY(captureContext.AddResource(GetLayout()));
     return {};
 }
 
 MaybeError ComputePipeline::CaptureCreationParameters(CaptureContext& captureContext) {
-    schema::ObjectId layoutId = 0;
-    std::vector<schema::BindGroupLayoutIndexIdPair> groupIndexIds;
-
-    PipelineLayoutBase* pipelineLayout = GetLayout();
-    if (pipelineLayout->IsImplicit()) {
-        // If it's an implicit layout then, on playback, we need to add the bind group layouts
-        // to the id to resource map as there is no other connection.
-        for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
-            BindGroupLayoutBase* bgl = pipelineLayout->GetFrontendBindGroupLayout(groupIndex);
-
-            groupIndexIds.push_back(schema::BindGroupLayoutIndexIdPair{{
-                .groupIndex = uint32_t(groupIndex),
-                .bindGroupLayoutId = captureContext.AddAndGetIdForImplicitResource(bgl),
-            }});
-        }
-    } else {
-        layoutId = captureContext.GetId(pipelineLayout);
-    }
-
     auto& stage = GetStage(SingleShaderStage::Compute);
     schema::ComputePipeline data{{
-        .layoutId = layoutId,
+        .layoutId = captureContext.GetId(GetLayout()),
         .compute = ToSchema(captureContext, stage),
-        .groupIndexIds = groupIndexIds,
     }};
     Serialize(captureContext, data);
     return {};

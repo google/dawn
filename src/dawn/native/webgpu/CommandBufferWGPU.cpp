@@ -56,14 +56,6 @@ CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescrip
 
 namespace {
 
-// Only serialize bindGroups that are explicit OR who's bindGroupLayout has an schema::ObjectId.
-// If it's not explicit and has no id then its pipeline was not in the command buffer and so
-// it was not actually used.
-bool ShouldCaptureBindGroup(CaptureContext& captureContext, BindGroupBase* bindGroup) {
-    BindGroupLayoutBase* layout = bindGroup->GetFrontendLayout();
-    return layout->IsExplicit() || captureContext.HasId(layout);
-}
-
 // Note: These are fine to be pointers and not Refs as this object
 // does not outlast a CommandBuffer which itself uses Refs.
 struct CommandBufferResourceUsages {
@@ -687,18 +679,15 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 const uint32_t* dynamicOffsetsData =
                     cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
                                                : nullptr;
-
-                if (ShouldCaptureBindGroup(captureContext, cmd.group.Get())) {
-                    schema::ComputePassCommandSetBindGroupCmd data{{
-                        .data = {{
-                            .index = uint32_t(cmd.index),
-                            .bindGroupId = captureContext.GetId(cmd.group),
-                            .dynamicOffsets = std::vector<uint32_t>(
-                                dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
-                        }},
-                    }};
-                    Serialize(captureContext, data);
-                }
+                schema::ComputePassCommandSetBindGroupCmd data{{
+                    .data = {{
+                        .index = uint32_t(cmd.index),
+                        .bindGroupId = captureContext.GetId(cmd.group),
+                        .dynamicOffsets = std::vector<uint32_t>(
+                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                    }},
+                }};
+                Serialize(captureContext, data);
                 break;
             }
             case Command::Dispatch: {
@@ -744,17 +733,15 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 const uint32_t* dynamicOffsetsData =
                     cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
                                                : nullptr;
-                if (ShouldCaptureBindGroup(captureContext, cmd.group.Get())) {
-                    schema::RenderPassCommandSetBindGroupCmd data{{
-                        .data = {{
-                            .index = uint32_t(cmd.index),
-                            .bindGroupId = captureContext.GetId(cmd.group),
-                            .dynamicOffsets = std::vector<uint32_t>(
-                                dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
-                        }},
-                    }};
-                    Serialize(captureContext, data);
-                }
+                schema::RenderPassCommandSetBindGroupCmd data{{
+                    .data = {{
+                        .index = uint32_t(cmd.index),
+                        .bindGroupId = captureContext.GetId(cmd.group),
+                        .dynamicOffsets = std::vector<uint32_t>(
+                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
+                    }},
+                }};
+                Serialize(captureContext, data);
                 break;
             }
             case Command::SetVertexBuffer: {
@@ -903,9 +890,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
         DAWN_TRY(captureContext.AddResource(pipeline));
     }
     for (auto bindGroup : usedResources.bindGroups) {
-        if (ShouldCaptureBindGroup(captureContext, bindGroup)) {
-            DAWN_TRY(captureContext.AddResource(bindGroup));
-        }
+        DAWN_TRY(captureContext.AddResource(bindGroup));
     }
 
     return {};

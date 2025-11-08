@@ -191,12 +191,7 @@ MaybeError RenderPipeline::AddReferenced(CaptureContext& captureContext) {
     if (HasStage(SingleShaderStage::Fragment)) {
         DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Fragment).module.Get()));
     }
-    PipelineLayoutBase* pipelineLayout = GetLayout();
-    if (!pipelineLayout->IsImplicit()) {
-        // TODO(452983510): add support for explicit pipeline layout
-        // DAWN_TRY(captureContext.AddResource(pipelineLayout));
-        return DAWN_INTERNAL_ERROR("explicit pipeline layout unsupported");
-    }
+    DAWN_TRY(captureContext.AddResource(GetLayout()));
     return {};
 }
 
@@ -219,25 +214,6 @@ schema::StencilFaceState ToSchema(const StencilFaceState& state) {
 }
 
 MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureContext) {
-    schema::ObjectId layoutId = 0;
-    std::vector<schema::BindGroupLayoutIndexIdPair> groupIndexIds;
-
-    PipelineLayoutBase* pipelineLayout = GetLayout();
-    if (pipelineLayout->IsImplicit()) {
-        // If it's an implicit layout then, on playback, we need to add the bind group layouts
-        // to the id to resource map as there is no other connection.
-        for (BindGroupIndex groupIndex : pipelineLayout->GetBindGroupLayoutsMask()) {
-            BindGroupLayoutBase* bgl = pipelineLayout->GetFrontendBindGroupLayout(groupIndex);
-
-            groupIndexIds.push_back(schema::BindGroupLayoutIndexIdPair{{
-                .groupIndex = uint32_t(groupIndex),
-                .bindGroupLayoutId = captureContext.AddAndGetIdForImplicitResource(bgl),
-            }});
-        }
-    } else {
-        layoutId = captureContext.GetId(pipelineLayout);
-    }
-
     std::vector<schema::VertexBufferLayout> buffers;
     for (VertexBufferSlot slot : GetVertexBuffersUsed()) {
         const auto& info = GetVertexBuffer(slot);
@@ -288,7 +264,7 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
     }
 
     schema::RenderPipeline data{{
-        .layoutId = layoutId,
+        .layoutId = captureContext.GetId(GetLayout()),
         .vertex{{
             .program = ToSchema(captureContext, GetStage(SingleShaderStage::Vertex)),
             .buffers = buffers,
@@ -321,7 +297,6 @@ MaybeError RenderPipeline::CaptureCreationParameters(CaptureContext& captureCont
             .program = ToSchema(captureContext, fragment),
             .targets = targets,
         }},
-        .groupIndexIds = groupIndexIds,
     }};
     Serialize(captureContext, data);
     return {};

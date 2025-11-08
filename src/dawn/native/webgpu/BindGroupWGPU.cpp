@@ -119,18 +119,8 @@ void BindGroup::DeleteThis() {
 MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     // We have to include any referenced bound textures views as the front end does
     // not track texture views.
-    //
-    // Unfortunately we can't just call `AddResource(layout)` because that would add a call to
-    // createBindGroupLayout which we only want if the bindGroupLayout was not implicit. If
-    // the bindGroupLayout was implicit then the code that serializes the command buffer makes sure
-    // the pipeline is serialized first so its implicit bindGroupLayouts will already be
-    // referenced.
     BindGroupLayoutInternalBase* layout = GetLayout();
-    BindGroupLayoutBase* frontendLayout = GetFrontendLayout();
-    if (frontendLayout->IsExplicit()) {
-        // If it's an explicit layout we can add the deduplicated layout
-        DAWN_TRY(captureContext.AddResource(layout));
-    }
+    DAWN_TRY(captureContext.AddResource(layout));
 
     {
         const auto& bindingMap = layout->GetBindingMap();
@@ -160,13 +150,8 @@ MaybeError BindGroup::CaptureCreationParameters(CaptureContext& captureContext) 
     BindGroupLayoutInternalBase* layout = GetLayout();
     const auto& bindingMap = layout->GetBindingMap();
 
-    // Note: If it's an implicit layout we must use the FrontEnd layout here since we
-    // need the id to have come from the pipeline's implicit creation of the layout.
-    // If it's explicit then we can use the deduplicated `BindGroupLayoutInternal`
-    BindGroupLayoutBase* frontendLayout = GetFrontendLayout();
     schema::BindGroup bg{{
-        .layoutId = frontendLayout->IsExplicit() ? captureContext.GetId(layout)
-                                                 : captureContext.GetId(frontendLayout),
+        .layoutId = captureContext.GetId(layout),
         .numEntries = uint32_t(bindingMap.size()),
     }};
     Serialize(captureContext, bg);

@@ -342,16 +342,9 @@ DAWN_REPLAY_SERIALIZABLE(struct, QuerySet, QUERYSET_CREATION_MEMBER){};
 
 DAWN_REPLAY_SERIALIZABLE(struct, ShaderModule, SHADER_MODULE_CREATION_MEMBER){};
 
-#define BIND_GROUP_LAYOUT_INDEX_ID_PAIR(X) \
-    X(uint32_t, groupIndex)                \
-    X(ObjectId, bindGroupLayoutId)
-
-DAWN_REPLAY_SERIALIZABLE(struct, BindGroupLayoutIndexIdPair, BIND_GROUP_LAYOUT_INDEX_ID_PAIR){};
-
 #define COMPUTE_PIPELINE_CREATION_MEMBER(X) \
     X(ObjectId, layoutId)                   \
-    X(ProgrammableStage, compute)           \
-    X(std::vector<BindGroupLayoutIndexIdPair>, groupIndexIds)
+    X(ProgrammableStage, compute)
 
 DAWN_REPLAY_SERIALIZABLE(struct, ComputePipeline, COMPUTE_PIPELINE_CREATION_MEMBER){};
 
@@ -361,8 +354,7 @@ DAWN_REPLAY_SERIALIZABLE(struct, ComputePipeline, COMPUTE_PIPELINE_CREATION_MEMB
     X(PrimitiveState, primitive)           \
     X(DepthStencilState, depthStencil)     \
     X(MultisampleState, multisample)       \
-    X(FragmentState, fragment)             \
-    X(std::vector<BindGroupLayoutIndexIdPair>, groupIndexIds)
+    X(FragmentState, fragment)
 
 DAWN_REPLAY_SERIALIZABLE(struct, RenderPipeline, RENDER_PIPELINE_CREATION_MEMBER){};
 

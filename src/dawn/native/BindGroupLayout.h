@@ -56,7 +56,6 @@ class BindGroupLayoutBase final : public ApiObjectBase {
     PipelineCompatibilityToken GetPipelineCompatibilityToken() const {
         return mPipelineCompatibilityToken;
     }
-    bool IsExplicit() const { return mPipelineCompatibilityToken == kExplicitPCT; }
 
     bool IsEmpty() const;
 

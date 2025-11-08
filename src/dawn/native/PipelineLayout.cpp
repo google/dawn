@@ -614,19 +614,6 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
     return true;
 }
 
-bool PipelineLayoutBase::IsImplicit() const {
-    uint32_t numBindGroups = 0;
-    for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
-        const BindGroupLayoutBase* bgl = GetFrontendBindGroupLayout(groupIndex);
-        if (bgl->GetPipelineCompatibilityToken() != kExplicitPCT) {
-            return true;
-        }
-        ++numBindGroups;
-    }
-    // A pipeline layout with no bindgroups can be considered implicit.
-    return numBindGroups == 0;
-}
-
 uint32_t PipelineLayoutBase::GetImmediateDataRangeByteSize() const {
     return mImmediateDataRangeByteSize;
 }

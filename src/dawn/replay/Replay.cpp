@@ -361,12 +361,10 @@ ResultOrError<wgpu::Buffer> CreateBuffer(wgpu::Device device,
     return {buffer};
 }
 
-template <typename F>
 ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const Replay& replay,
                                                            wgpu::Device device,
                                                            ReadHead& readHead,
-                                                           const std::string& label,
-                                                           F func) {
+                                                           const std::string& label) {
     schema::ComputePipeline pipeline;
     DAWN_TRY(Deserialize(readHead, &pipeline));
 
@@ -384,7 +382,6 @@ ResultOrError<wgpu::ComputePipeline> CreateComputePipeline(const Replay& replay,
             },
     };
     wgpu::ComputePipeline computePipeline = device.CreateComputePipeline(&desc);
-    func(computePipeline, pipeline.groupIndexIds);
     return {computePipeline};
 }
 
@@ -409,12 +406,10 @@ ResultOrError<wgpu::PipelineLayout> CreatePipelineLayout(const Replay& replay,
     return {pipelineLayout};
 }
 
-template <typename F>
 ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
                                                          wgpu::Device device,
                                                          ReadHead& readHead,
-                                                         const std::string& label,
-                                                         F func) {
+                                                         const std::string& label) {
     schema::RenderPipeline pipeline;
     DAWN_TRY(Deserialize(readHead, &pipeline));
 
@@ -513,7 +508,6 @@ ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
         .fragment = fragment,
     };
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&desc);
-    func(renderPipeline, pipeline.groupIndexIds);
     return {renderPipeline};
 }
 
@@ -862,19 +856,8 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
 
         case schema::ObjectType::ComputePipeline: {
             wgpu::ComputePipeline computePipeline;
-            DAWN_TRY_ASSIGN(
-                computePipeline,
-                CreateComputePipeline(
-                    *this, device, readHead, resource.label,
-                    [this](wgpu::ComputePipeline& computePipeline,
-                           const std::vector<schema::BindGroupLayoutIndexIdPair>& groupIndexIds) {
-                        // Register any implicit bindgroups.
-                        for (const auto& groupIndexId : groupIndexIds) {
-                            wgpu::BindGroupLayout bgl =
-                                computePipeline.GetBindGroupLayout(groupIndexId.groupIndex);
-                            mResources.insert({groupIndexId.bindGroupLayoutId, {"", bgl}});
-                        }
-                    }));
+            DAWN_TRY_ASSIGN(computePipeline,
+                            CreateComputePipeline(*this, device, readHead, resource.label));
             mResources.insert({resource.id, {resource.label, computePipeline}});
             return {};
         }
@@ -889,19 +872,8 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
 
         case schema::ObjectType::RenderPipeline: {
             wgpu::RenderPipeline renderPipeline;
-            DAWN_TRY_ASSIGN(
-                renderPipeline,
-                CreateRenderPipeline(
-                    *this, device, readHead, resource.label,
-                    [this](wgpu::RenderPipeline& renderPipeline,
-                           const std::vector<schema::BindGroupLayoutIndexIdPair>& groupIndexIds) {
-                        // Register any implicit bindgroups.
-                        for (const auto& groupIndexId : groupIndexIds) {
-                            wgpu::BindGroupLayout bgl =
-                                renderPipeline.GetBindGroupLayout(groupIndexId.groupIndex);
-                            mResources.insert({groupIndexId.bindGroupLayoutId, {"", bgl}});
-                        }
-                    }));
+            DAWN_TRY_ASSIGN(renderPipeline,
+                            CreateRenderPipeline(*this, device, readHead, resource.label));
             mResources.insert({resource.id, {resource.label, renderPipeline}});
             return {};
         }
