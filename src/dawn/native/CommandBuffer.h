@@ -69,13 +69,6 @@ class CommandBufferBase : public ApiObjectBase {
 
     CommandIterator* GetCommandIteratorForTesting();
 
-    template <typename F>
-    auto UseCommands(F func) -> auto {
-        auto result = func(mCommands);
-        mCommands.Reset();
-        return result;
-    }
-
   protected:
     void DestroyImpl() override;
 
