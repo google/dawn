@@ -71,8 +71,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, const constant SimParams* cons
         }
         continue;
       }
-      pos = (*particlesA).particles[min(i, 4u)].pos.xy;
-      vel = (*particlesA).particles[min(i, 4u)].vel.xy;
+      pos = (*particlesA).particles[i].pos.xy;
+      vel = (*particlesA).particles[i].vel.xy;
       if ((distance(pos, vPos) < (*params).rule1Distance)) {
         cMass = (cMass + pos);
         cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));

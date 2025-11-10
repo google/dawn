@@ -123,7 +123,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
       } else {
         break;
       }
-      acc[min(index, 15u)] = 0.0f;
+      acc[index] = 0.0f;
       {
         index = (index + 1u);
       }
@@ -157,7 +157,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
               }
               uint const inputRow = (tileRow + innerRow);
               uint const inputCol = (tileColA + innerCol);
-              (*tint_module_vars.mm_Asub)[min(inputRow, 63u)][min(inputCol, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), v_5, tint_module_vars);
+              (*tint_module_vars.mm_Asub)[inputRow][min(inputCol, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol), v_5, tint_module_vars);
               {
                 innerCol = (innerCol + 1u);
               }
@@ -186,7 +186,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
               }
               uint const inputRow = (tileRowB + innerRow);
               uint const inputCol = (tileCol + innerCol);
-              threadgroup float* const v_6 = (&(*tint_module_vars.mm_Bsub)[min(innerCol, 63u)][min(inputCol, 63u)]);
+              threadgroup float* const v_6 = (&(*tint_module_vars.mm_Bsub)[innerCol][inputCol]);
               (*v_6) = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol), v_5, tint_module_vars);
               {
                 innerCol = (innerCol + 1u);
@@ -215,7 +215,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
               } else {
                 break;
               }
-              BCached[min(inner, 3u)] = (*tint_module_vars.mm_Bsub)[min(k, 63u)][min((tileCol + inner), 63u)];
+              BCached[inner] = (*tint_module_vars.mm_Bsub)[k][(tileCol + inner)];
               {
                 inner = (inner + 1u);
               }
@@ -229,7 +229,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
               } else {
                 break;
               }
-              ACached = (*tint_module_vars.mm_Asub)[min((tileRow + innerRow), 63u)][min(k, 63u)];
+              ACached = (*tint_module_vars.mm_Asub)[(tileRow + innerRow)][k];
               {
                 uint innerCol = 0u;
                 while(true) {
@@ -238,7 +238,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
                     break;
                   }
                   uint const index = ((innerRow * 4u) + innerCol);
-                  acc[min(index, 15u)] = (acc[min(index, 15u)] + (ACached * BCached[min(innerCol, 3u)]));
+                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
                   {
                     innerCol = (innerCol + 1u);
                   }
@@ -279,7 +279,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
             break;
           }
           uint const index = ((innerRow * 4u) + innerCol);
-          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[min(index, 15u)], v_5, tint_module_vars);
+          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index], v_5, tint_module_vars);
           {
             innerCol = (innerCol + 1u);
           }

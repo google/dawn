@@ -147,7 +147,7 @@ kernel void v_6(device tint_array<tint_packed_vec3_f32_array_element, 3>* buffer
       } else {
         break;
       }
-      thread float3* const v_7 = (&m[min(c, 2u)]);
+      thread float3* const v_7 = (&m[c]);
       float const v_8 = float(((c * 3u) + 1u));
       float const v_9 = float(((c * 3u) + 2u));
       (*v_7) = float3(v_8, v_9, float(((c * 3u) + 3u)));

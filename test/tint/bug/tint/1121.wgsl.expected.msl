@@ -126,23 +126,23 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
                 break;
               }
               float4 p = 0.0f;
-              if ((frustumPlanes[min(i, 5u)].x > 0.0f)) {
+              if ((frustumPlanes[i].x > 0.0f)) {
                 p.x = boxMax.x;
               } else {
                 p.x = boxMin.x;
               }
-              if ((frustumPlanes[min(i, 5u)].y > 0.0f)) {
+              if ((frustumPlanes[i].y > 0.0f)) {
                 p.y = boxMax.y;
               } else {
                 p.y = boxMin.y;
               }
-              if ((frustumPlanes[min(i, 5u)].z > 0.0f)) {
+              if ((frustumPlanes[i].z > 0.0f)) {
                 p.z = boxMax.z;
               } else {
                 p.z = boxMin.z;
               }
               p.w = 1.0f;
-              dp = (dp + min(0.0f, dot(p, frustumPlanes[min(i, 5u)])));
+              dp = (dp + min(0.0f, dot(p, frustumPlanes[i])));
               {
                 i = (i + 1u);
               }

@@ -114,8 +114,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
         }
         continue;
       }
-      pos = (*tint_module_vars.particlesA).particles[min(i, 4u)].pos.xy;
-      vel = (*tint_module_vars.particlesA).particles[min(i, 4u)].vel.xy;
+      pos = (*tint_module_vars.particlesA).particles[i].pos.xy;
+      vel = (*tint_module_vars.particlesA).particles[i].vel.xy;
       if ((distance(pos, vPos) < (*tint_module_vars.params).rule1Distance)) {
         cMass = (cMass + pos);
         cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));

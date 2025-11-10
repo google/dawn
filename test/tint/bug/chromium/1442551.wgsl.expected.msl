@@ -3,5 +3,5 @@ using namespace metal;
 
 kernel void f() {
   int const i = 1;
-  int b = int2(1, 2)[min(uint(i), 1u)];
+  int b = int2(1, 2)[i];
 }

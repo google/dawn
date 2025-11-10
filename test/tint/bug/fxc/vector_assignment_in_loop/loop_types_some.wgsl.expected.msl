@@ -21,10 +21,10 @@ kernel void v() {
       } else {
         break;
       }
-      v2f[min(uint(i), 1u)] = 1.0f;
-      v2i[min(uint(i), 1u)] = 1;
-      v2u[min(uint(i), 1u)] = 1u;
-      v2b[min(uint(i), 1u)] = true;
+      v2f[i] = 1.0f;
+      v2i[i] = 1;
+      v2u[i] = 1u;
+      v2b[i] = true;
       {
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       }

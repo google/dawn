@@ -19,7 +19,7 @@ void deref_let() {
   int3 a = 0;
   thread int3* const p = (&a);
   int const i = 0;
-  int b = (*p)[min(uint(i), 2u)];
+  int b = (*p)[i];
   (*p).x = 42;
 }
 
@@ -27,7 +27,7 @@ void no_deref_let() {
   int3 a = 0;
   thread int3* const p = (&a);
   int const i = 0;
-  int b = (*p)[min(uint(i), 2u)];
+  int b = (*p)[i];
   (*p).x = 42;
 }
 
@@ -43,7 +43,7 @@ void no_deref_var() {
   int3 a = 0;
   thread int3* const p = (&a);
   int const i = 0;
-  int b = (*p)[min(uint(i), 2u)];
+  int b = (*p)[i];
   (*p).x = 42;
 }
 
