@@ -536,9 +536,11 @@ class Validator {
     /// Validates a subgroup matrix constructor
     /// @param ctor the call expression to validate
     /// @param subgroup_matrix_type the type of the subgroup matrix
+    /// @param signature the construct signature to validate against
     /// @returns true on success, false otherwise
     bool SubgroupMatrixConstructor(const ast::CallExpression* ctor,
-                                   const core::type::SubgroupMatrix* subgroup_matrix_type) const;
+                                   const core::type::SubgroupMatrix* subgroup_matrix_type,
+                                   const sem::CallTarget* signature) const;
 
     /// Validates a subgroupShuffle builtin functions including Up,Down, and Xor.
     /// @param fn the builtin call type

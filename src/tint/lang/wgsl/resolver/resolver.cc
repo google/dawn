@@ -2097,10 +2097,17 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 auto* call_target = subgroup_matrix_ctors_.GetOrAdd(
                     SubgroupMatrixConstructorSig{{m, args.Length()}},
                     [&]() -> sem::ValueConstructor* {
+                        // 8-bit integer matrices use 32-bit shader scalar types.
+                        auto* scalar_ty = m->Type();
+                        if (m->Type()->Is<core::type::I8>()) {
+                            scalar_ty = b.create<core::type::I32>();
+                        } else if (m->Type()->Is<core::type::U8>()) {
+                            scalar_ty = b.create<core::type::U32>();
+                        }
                         auto params = tint::Transform(args, [&](auto, size_t i) {
                             return b.create<sem::Parameter>(nullptr,  // declaration
                                                             static_cast<uint32_t>(i),  // index
-                                                            m->Type());
+                                                            scalar_ty);
                         });
                         return b.create<sem::ValueConstructor>(m, std::move(params),
                                                                core::EvaluationStage::kRuntime);
@@ -2110,7 +2117,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     return nullptr;
                 }
 
-                if (DAWN_UNLIKELY(!validator_.SubgroupMatrixConstructor(expr, m))) {
+                if (DAWN_UNLIKELY(!validator_.SubgroupMatrixConstructor(expr, m, call_target))) {
                     return nullptr;
                 }
 
