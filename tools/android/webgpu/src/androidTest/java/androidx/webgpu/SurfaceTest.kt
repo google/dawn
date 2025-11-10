@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,16 +56,26 @@ class SurfaceTest {
   @Test
   fun surfaceLifecycle_configureAndPresent_succeeds() {
     val surface = webGpu.webgpuSurface
-    val config = SurfaceConfiguration(
-      device = webGpu.device,
-      format = TextureFormat.RGBA8Unorm,
-      height = HEIGHT,
-      width = WIDTH
-    )
+    val adapter = runBlocking { webGpu.instance.requestAdapter() }.adapter!!
+
+    val capabilities = surface.getCapabilities(adapter)
+    val desiredFormat = TextureFormat.RGBA8Unorm
+
+    if (desiredFormat !in capabilities.formats) {
+      // If not, skip this test. It's not a failure, just not applicable.
+      Assume.assumeTrue("Adapter does not support $desiredFormat for this surface", false)
+    }
+    val config =
+      SurfaceConfiguration(
+        device = webGpu.device,
+        format = desiredFormat,
+        height = HEIGHT,
+        width = WIDTH,
+      )
     surface.configure(config)
     // ensure no errors are thrown
     val currentTexture = surface.getCurrentTexture().texture
-    assertEquals(currentTexture.format, TextureFormat.RGBA8Unorm)
+    assertEquals(currentTexture.format, desiredFormat)
     assertEquals(currentTexture.height, HEIGHT)
     assertEquals(currentTexture.width, WIDTH)
     // The testcase will fail in case present() throws DawnException
@@ -78,16 +89,15 @@ class SurfaceTest {
   @Test
   fun configure_withInvalidParameters_fails() {
     val surface = webGpu.webgpuSurface
-    val invalidConfig = SurfaceConfiguration(
-      device = webGpu.device,
-      format = TextureFormat.RGBA8Unorm,
-      height = HEIGHT,
-      width = -1 // Invalid parameter
-    )
+    val invalidConfig =
+      SurfaceConfiguration(
+        device = webGpu.device,
+        format = TextureFormat.RGBA8Unorm,
+        height = HEIGHT,
+        width = -1, // Invalid parameter
+      )
 
     // Assert that calling configure with this invalid descriptor throws an error.
-    assertThrows(ValidationException::class.java) {
-      surface.configure(invalidConfig)
-    }
+    assertThrows(ValidationException::class.java) { surface.configure(invalidConfig) }
   }
 }
