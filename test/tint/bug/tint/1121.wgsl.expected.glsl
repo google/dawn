@@ -119,19 +119,19 @@ void main_inner(uvec3 GlobalInvocationID) {
                 break;
               }
               vec4 p = vec4(0.0f);
-              uint v_32 = min(i, 5u);
+              uint v_32 = i;
               if ((frustumPlanes[v_32].x > 0.0f)) {
                 p.x = boxMax.x;
               } else {
                 p.x = boxMin.x;
               }
-              uint v_33 = min(i, 5u);
+              uint v_33 = i;
               if ((frustumPlanes[v_33].y > 0.0f)) {
                 p.y = boxMax.y;
               } else {
                 p.y = boxMin.y;
               }
-              uint v_34 = min(i, 5u);
+              uint v_34 = i;
               if ((frustumPlanes[v_34].z > 0.0f)) {
                 p.z = boxMax.z;
               } else {
@@ -140,7 +140,7 @@ void main_inner(uvec3 GlobalInvocationID) {
               p.w = 1.0f;
               float v_35 = dp;
               vec4 v_36 = p;
-              uint v_37 = min(i, 5u);
+              uint v_37 = i;
               dp = (v_35 + min(0.0f, dot(v_36, frustumPlanes[v_37])));
               {
                 i = (i + 1u);

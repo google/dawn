@@ -13,13 +13,13 @@ void no_deref_const() {
 void deref_let() {
   ivec3 a = ivec3(0);
   int i = 0;
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = 42;
 }
 void no_deref_let() {
   ivec3 a = ivec3(0);
   int i = 0;
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = 42;
 }
 void deref_var() {
@@ -31,7 +31,7 @@ void deref_var() {
 void no_deref_var() {
   ivec3 a = ivec3(0);
   int i = 0;
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = 42;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

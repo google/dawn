@@ -225,7 +225,7 @@ void main() {
       } else {
         break;
       }
-      uint v_20 = min(c, 2u);
+      uint v_20 = c;
       float v_21 = float(((c * 3u) + 1u));
       float v_22 = float(((c * 3u) + 2u));
       m[v_20] = vec3(v_21, v_22, float(((c * 3u) + 3u)));

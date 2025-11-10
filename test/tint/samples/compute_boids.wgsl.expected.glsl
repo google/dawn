@@ -86,9 +86,9 @@ void comp_main_inner(uvec3 v_3) {
         }
         continue;
       }
-      uint v_6 = min(i, 4u);
+      uint v_6 = i;
       pos = v_1.inner.particles[v_6].pos.xy;
-      uint v_7 = min(i, 4u);
+      uint v_7 = i;
       vel = v_1.inner.particles[v_7].vel.xy;
       uvec4 v_8 = v.inner[0u];
       if ((distance(pos, vPos) < uintBitsToFloat(v_8.y))) {

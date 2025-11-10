@@ -21,10 +21,10 @@ void main() {
       } else {
         break;
       }
-      v2f[min(uint(i), 1u)] = 1.0f;
-      v2i[min(uint(i), 1u)] = 1;
-      v2u[min(uint(i), 1u)] = 1u;
-      v2b[min(uint(i), 1u)] = true;
+      v2f[i] = 1.0f;
+      v2i[i] = 1;
+      v2u[i] = 1u;
+      v2b[i] = true;
       {
         uint v = uint(i);
         i = int((v + uint(1)));

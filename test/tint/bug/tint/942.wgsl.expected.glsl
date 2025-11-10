@@ -61,8 +61,8 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
           if ((v_9.x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          uint v_10 = min(r, 3u);
-          uint v_11 = min(((4u * LocalInvocationID.x) + c), 255u);
+          uint v_10 = r;
+          uint v_11 = ((4u * LocalInvocationID.x) + c);
           vec2 v_12 = (vec2(loadIndex) + vec2(0.25f));
           tile[v_10][v_11] = textureLod(inputTex_samp, (v_12 / vec2(dims)), 0.0f).xyz;
           {
@@ -128,7 +128,7 @@ void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_inde
                 vec3 v_17 = acc;
                 uvec4 v_18 = v.inner[0u];
                 float v_19 = (1.0f / float(v_18.x));
-                uint v_20 = min(r, 3u);
+                uint v_20 = r;
                 uint v_21 = min(i, 255u);
                 acc = (v_17 + (v_19 * tile[v_20][v_21]));
                 {

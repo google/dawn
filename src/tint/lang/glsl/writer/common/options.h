@@ -160,7 +160,7 @@ struct Options {
     bool disable_robustness = false;
 
     /// Set to `true` to enable integer range analysis in robustness transform.
-    bool enable_integer_range_analysis = false;
+    bool enable_integer_range_analysis = true;
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;

@@ -7,7 +7,7 @@ struct Normals {
 
 vec4 main_inner() {
   int zero = 0;
-  return vec4(Normals[1](Normals(vec3(0.0f, 0.0f, 1.0f)))[min(uint(zero), 0u)].f, 1.0f);
+  return vec4(Normals[1](Normals(vec3(0.0f, 0.0f, 1.0f)))[zero].f, 1.0f);
 }
 void main() {
   vec4 v = main_inner();
