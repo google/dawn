@@ -37,6 +37,12 @@ if (!defined(tint_standalone)) {
   }
 }
 
+if (!defined(tint_has_build)) {
+  tint_has_build = true
+}
+
+tint_has_fuzzers = tint_has_build
+
 declare_args() {
   # Is protobuf support present
   if (!defined(tint_has_protobuf)) {

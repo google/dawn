@@ -727,6 +727,7 @@ ci.builder(
             "linux_clang",
             "release",
             "tint_build_ir_binary",
+            "tint_has_fuzzers",
             "x64",
         ],
     ),

@@ -592,11 +592,12 @@ template("dxc_module") {
     }
 
     public_configs = [ ":common_config" ]
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
+    if (dawn_has_build) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
 
-    use_libcxx_modules = use_libcxx_modules
-
+      use_libcxx_modules = use_libcxx_modules
+    }
     if (is_win) {
       # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
       configs -= [ "//build/config/win:unicode" ]
@@ -743,7 +744,9 @@ dxc_module("Support") {
 source_set("TableGen") {
   public_deps = [ ":Support" ]
 
-  use_libcxx_modules = use_libcxx_modules
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   sources = [
     "$dawn_dxc_dir/lib/TableGen/Error.cpp",
@@ -760,7 +763,9 @@ source_set("TableGen") {
 executable("llvm-tblgen") {
   deps = [ ":TableGen" ]
 
-  use_libcxx_modules = use_libcxx_modules
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   sources = [
     "$dawn_dxc_dir/utils/TableGen/AsmMatcherEmitter.cpp",
@@ -797,7 +802,9 @@ executable("llvm-tblgen") {
 executable("clang-tblgen") {
   deps = [ ":TableGen" ]
 
-  use_libcxx_modules = use_libcxx_modules
+  if (dawn_has_build) {
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   sources = [
     "$dawn_dxc_dir/tools/clang/utils/TableGen/ClangASTNodesEmitter.cpp",
@@ -2345,8 +2352,10 @@ source_set("windows_version_resource") {
 }
 
 shared_library("dxcompiler") {
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  if (dawn_has_build) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 
   deps = [
     ":DxcDisassembler-inc",
@@ -2398,10 +2407,12 @@ shared_library("dxcompiler") {
 }
 
 executable("dxc") {
-  configs -= [ "//build/config/compiler:chromium_code" ]
-  configs += [ "//build/config/compiler:no_chromium_code" ]
+  if (dawn_has_build) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
 
-  use_libcxx_modules = use_libcxx_modules
+    use_libcxx_modules = use_libcxx_modules
+  }
 
   if (is_win) {
     # DXC is built with multibyte character set, so it expects Win32 functions to map the ANSI ones, not the UNICODE ones.
