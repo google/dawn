@@ -60,8 +60,8 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if ((flip[0u].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          uint v_4 = min(r, 3u);
-          uint v_5 = min(((4u * LocalInvocationID.x) + c), 255u);
+          uint v_4 = r;
+          uint v_5 = ((4u * LocalInvocationID.x) + c);
           float2 v_6 = (float2(loadIndex) + (0.25f).xx);
           tile[v_4][v_5] = inputTex.SampleLevel(samp, (v_6 / float2(dims)), 0.0f).xyz;
           {
@@ -124,7 +124,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
                 uint i = ((center + f) - filterOffset);
                 float3 v_9 = acc;
                 float v_10 = (1.0f / float(params[0u].x));
-                uint v_11 = min(r, 3u);
+                uint v_11 = r;
                 uint v_12 = min(i, 255u);
                 acc = (v_9 + (v_10 * tile[v_11][v_12]));
                 {

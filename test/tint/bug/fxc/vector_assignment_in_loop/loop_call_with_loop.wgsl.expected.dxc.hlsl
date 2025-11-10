@@ -11,10 +11,10 @@ void foo() {
       } else {
         break;
       }
-      v2f[min(uint(i), 1u)] = 1.0f;
-      v3i[min(uint(i), 2u)] = int(1);
-      v4u[min(uint(i), 3u)] = 1u;
-      v2b[min(uint(i), 1u)] = true;
+      v2f[i] = 1.0f;
+      v3i[i] = int(1);
+      v4u[i] = 1u;
+      v2b[i] = true;
       {
         i = asint((asuint(i) + asuint(int(1))));
       }

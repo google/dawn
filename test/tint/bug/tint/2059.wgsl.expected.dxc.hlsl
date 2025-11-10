@@ -228,7 +228,7 @@ void main() {
       } else {
         break;
       }
-      uint v_41 = min(c, 2u);
+      uint v_41 = c;
       float v_42 = float(((c * 3u) + 1u));
       float v_43 = float(((c * 3u) + 2u));
       m[v_41] = float3(v_42, v_43, float(((c * 3u) + 3u)));

@@ -80,19 +80,19 @@ void main_inner(uint3 GlobalInvocationID) {
             uint i = 0u;
             while((i < 6u)) {
               float4 p = (0.0f).xxxx;
-              uint v_16 = min(i, 5u);
+              uint v_16 = i;
               if ((frustumPlanes[v_16].x > 0.0f)) {
                 p.x = boxMax.x;
               } else {
                 p.x = boxMin.x;
               }
-              uint v_17 = min(i, 5u);
+              uint v_17 = i;
               if ((frustumPlanes[v_17].y > 0.0f)) {
                 p.y = boxMax.y;
               } else {
                 p.y = boxMin.y;
               }
-              uint v_18 = min(i, 5u);
+              uint v_18 = i;
               if ((frustumPlanes[v_18].z > 0.0f)) {
                 p.z = boxMax.z;
               } else {
@@ -101,7 +101,7 @@ void main_inner(uint3 GlobalInvocationID) {
               p.w = 1.0f;
               float v_19 = dp;
               float4 v_20 = p;
-              uint v_21 = min(i, 5u);
+              uint v_21 = i;
               dp = (v_19 + min(0.0f, dot(v_20, frustumPlanes[v_21])));
               {
                 i = (i + 1u);

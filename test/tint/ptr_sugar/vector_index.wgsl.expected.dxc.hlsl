@@ -14,14 +14,14 @@ void no_deref_const() {
 void deref_let() {
   int3 a = (int(0)).xxx;
   int i = int(0);
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = int(42);
 }
 
 void no_deref_let() {
   int3 a = (int(0)).xxx;
   int i = int(0);
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = int(42);
 }
 
@@ -35,7 +35,7 @@ void deref_var() {
 void no_deref_var() {
   int3 a = (int(0)).xxx;
   int i = int(0);
-  int b = a[min(uint(i), 2u)];
+  int b = a[i];
   a.x = int(42);
 }
 

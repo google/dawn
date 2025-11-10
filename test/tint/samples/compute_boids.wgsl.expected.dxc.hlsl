@@ -80,8 +80,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
         }
         continue;
       }
-      pos = asfloat(particlesA.Load2((0u + (min(i, 4u) * 16u)))).xy;
-      vel = asfloat(particlesA.Load2((8u + (min(i, 4u) * 16u)))).xy;
+      pos = asfloat(particlesA.Load2((0u + (i * 16u)))).xy;
+      vel = asfloat(particlesA.Load2((8u + (i * 16u)))).xy;
       if ((distance(pos, vPos) < asfloat(params[0u].y))) {
         cMass = (cMass + pos);
         cMassCount = asint((asuint(cMassCount) + asuint(int(1))));
