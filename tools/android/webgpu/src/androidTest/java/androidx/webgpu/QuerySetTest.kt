@@ -8,6 +8,7 @@ import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Test
@@ -87,9 +88,9 @@ class QuerySetTest {
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedQuerySet =
       device.createQuerySet(QuerySetDescriptor(type = QueryType.Occlusion, count = -1))
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -133,9 +134,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
 
     querySet.destroy()
     destinationBuffer.destroy()
@@ -156,9 +157,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -174,9 +175,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -193,9 +194,9 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -213,8 +214,8 @@ class QuerySetTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 }

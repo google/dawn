@@ -9,6 +9,7 @@ import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
@@ -68,10 +69,9 @@ class CommandEncoderTest {
     encoder.popDebugGroup()
     val error = runBlocking { device.popErrorScope() }
 
-    TestCase.assertTrue(
+    TestCase.assertEquals(
       "Expected no error for balanced push/pop debug group",
-      error.status == PopErrorScopeStatus.Success &&
-        error.type == ErrorType.NoError
+       ErrorType.NoError, error
     )
     val unusedCommandBuffer = encoder.finish()
   }
@@ -93,12 +93,10 @@ class CommandEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val error = runBlocking { device.popErrorScope() }
-
-    TestCase.assertTrue(
-      "Expected a validation error on .finish() due to an earlier nested pass attempt",
-      error.type == ErrorType.Validation,
-    )
+    assertThrows("Expected a validation error on .finish() due to an earlier nested pass attempt",
+      ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   /**
@@ -109,6 +107,7 @@ class CommandEncoderTest {
    */
   @Test
   fun testBeginRenderPass() {
+    device.pushErrorScope(ErrorFilter.Validation)
     val texture = device.createTexture(
       TextureDescriptor(
         size = Extent3D(1, 1, 1),
@@ -134,6 +133,7 @@ class CommandEncoderTest {
     TestCase.assertNotNull(passEncoder)
     passEncoder.end()
     val unusedCommandBuffer = encoder.finish()
+    assertEquals(ErrorType.NoError, runBlocking { device.popErrorScope() })
   }
 
   /**
@@ -198,8 +198,7 @@ class CommandEncoderTest {
 
     queue.submit(arrayOf(commandBuffer))
 
-    val mapResult = runBlocking { readbackBuffer.mapAsync(MapMode.Read, 0, bufferSize) }
-    TestCase.assertEquals(MapAsyncStatus.Success, mapResult.status)
+    runBlocking { readbackBuffer.mapAsync(MapMode.Read, 0, bufferSize) }
 
     val mappedData: ByteBuffer = readbackBuffer.getConstMappedRange(0, bufferSize)
 
@@ -244,10 +243,9 @@ class CommandEncoderTest {
     encoder.clearBuffer(buffer, 0, 16)
     val error = runBlocking { device.popErrorScope() }
 
-    TestCase.assertTrue(
+    assertEquals(
       "Expected clearBuffer to succeed",
-      error.status == PopErrorScopeStatus.Success &&
-        error.type == ErrorType.NoError
+      ErrorType.NoError, error
     )
     val unusedCommandBuffer = encoder.finish()
   }
@@ -280,10 +278,9 @@ class CommandEncoderTest {
     encoder.resolveQuerySet(querySet, 0, 1, destination, 0)
     val error = runBlocking { device.popErrorScope() }
 
-    TestCase.assertTrue(
+    assertEquals(
       "Expected resolveQuerySet to succeed",
-      error.status == PopErrorScopeStatus.Success &&
-        error.type == ErrorType.NoError
+      ErrorType.NoError, error
     )
     val unusedCommandBuffer = encoder.finish()
   }
@@ -303,10 +300,9 @@ class CommandEncoderTest {
     encoder.insertDebugMarker("MyDebugMarker")
     val error = runBlocking { device.popErrorScope() }
 
-    TestCase.assertTrue(
+    assertEquals(
       "Expected insertDebugMarker to succeed",
-      error.status == PopErrorScopeStatus.Success &&
-        error.type == ErrorType.NoError
+      ErrorType.NoError, error
     )
     val unusedCommandBuffer = encoder.finish()
   }

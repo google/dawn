@@ -30,6 +30,7 @@ import dalvik.annotation.optimization.FastNative
 import java.nio.ByteBuffer
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 {% from 'art/api_kotlin_types.kt' import kotlin_annotation, kotlin_declaration, kotlin_definition, check_if_doc_present, generate_kdoc, generate_simple_kdoc with context %}

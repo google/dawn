@@ -45,7 +45,7 @@ import kotlin.annotation.Target
         {% endfor %}
     ]
 )
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
 
 //* Generating KDocs
 {% set file_docs = kdocs.bitflags if enum.category == 'bitmask' else kdocs.enums %}

@@ -58,11 +58,7 @@ public suspend fun GPUTexture.createBitmap(device: GPUDevice): Bitmap {
         it.finish()
     }))
 
-    val bufferMapReturn = readbackBuffer.mapAsync(MapMode.Read, 0, size.toLong())
-
-    if (bufferMapReturn.status != MapAsyncStatus.Success) {
-        throw DawnException("Failed to map buffer: ${bufferMapReturn.message}")
-    }
+    readbackBuffer.mapAsync(MapMode.Read, 0, size.toLong())
 
     return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).apply {
         copyPixelsFromBuffer(readbackBuffer.getConstMappedRange(size = readbackBuffer.size))

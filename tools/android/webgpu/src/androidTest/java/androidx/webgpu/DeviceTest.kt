@@ -55,9 +55,9 @@ class DeviceTest {
       )
     )
 
-    val error = runBlocking { device.popErrorScope() }
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
 
@@ -144,9 +144,9 @@ class DeviceTest {
         )
       )
     )
-    val error = runBlocking { device.popErrorScope() }
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -168,10 +168,9 @@ class DeviceTest {
         )
       )
     )
-    val error = runBlocking { device.popErrorScope() }
-
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   /**
@@ -205,9 +204,9 @@ class DeviceTest {
         )
       )
     )
-    val error = runBlocking { device.popErrorScope() }
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -219,9 +218,9 @@ class DeviceTest {
         type = QueryType.Occlusion, count = -1 // Invalid: count must be > 0.
       )
     )
-    val error = runBlocking { device.popErrorScope() }
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   @Test
@@ -235,21 +234,22 @@ class DeviceTest {
     }
   }
 
-  /**
-   * Verifies that createSampler fails validation with an invalid descriptor.
-   */
   @Test
   @SmallTest
-  fun testCreateSampler_withInvalidLodClamp_failsValidation() = runBlocking {
-    val invalidDescriptor = SamplerDescriptor(
-      lodMinClamp = 10.0f, lodMaxClamp = 1.0f // Invalid: min cannot be greater than max.
-    )
+  fun testCreateSampler_withInvalidLodClamp_failsValidation() {
+    runBlocking {
+      val invalidDescriptor = SamplerDescriptor(
+        lodMinClamp = 10.0f, lodMaxClamp = 1.0f
+      )
 
-    device.pushErrorScope(ErrorFilter.Validation)
-    val unusedSampler = device.createSampler(invalidDescriptor)
-    val error = device.popErrorScope()
+      device.pushErrorScope(ErrorFilter.Validation)
+      val unusedSampler = device.createSampler(invalidDescriptor)
 
-    assertEquals(error.type, ErrorType.Validation)
-    assertEquals(error.status, PopErrorScopeStatus.Success)
+      assertThrows(ValidationException::class.java) {
+        runBlocking {
+          device.popErrorScope()
+        }
+      }
+    }
   }
 }

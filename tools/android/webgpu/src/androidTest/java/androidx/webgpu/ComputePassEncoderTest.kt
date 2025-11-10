@@ -7,6 +7,7 @@ import java.nio.ByteOrder
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 
@@ -75,8 +76,8 @@ class ComputePassEncoderTest {
 
     passEncoder.end()
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-    assertEquals(ErrorType.NoError, errorScope.type)
+    val error = runBlocking { device.popErrorScope() }
+    assertEquals(ErrorType.NoError, error)
   }
 
   /**
@@ -92,9 +93,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   /**
@@ -111,9 +112,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   /**
@@ -132,9 +133,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
   }
 
   /**
@@ -158,9 +159,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
     invalidBuffer.destroy()
   }
 
@@ -187,9 +188,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
+    val error = runBlocking { device.popErrorScope() }
 
-    assertEquals(ErrorType.NoError, errorScope.type)
+    assertEquals(ErrorType.NoError, error)
     validBuffer.destroy()
   }
 
@@ -208,9 +209,9 @@ class ComputePassEncoderTest {
 
     device.pushErrorScope(ErrorFilter.Validation)
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 
   /**
@@ -227,8 +228,8 @@ class ComputePassEncoderTest {
     device.pushErrorScope(ErrorFilter.Validation)
     passEncoder.end()  // Second call (invalid).
     val unusedCommandBuffer = encoder.finish()
-    val errorScope = runBlocking { device.popErrorScope() }
-
-    assertEquals(ErrorType.Validation, errorScope.type)
+    assertThrows(ValidationException::class.java) {
+      runBlocking { device.popErrorScope() }
+    }
   }
 }
