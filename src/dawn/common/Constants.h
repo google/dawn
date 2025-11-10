@@ -50,16 +50,18 @@ static constexpr uint64_t kAssumedMaxBufferSize =
 // All Immediate constants are 32 bit
 static constexpr uint32_t kImmediateConstantElementByteSize = sizeof(uint32_t);
 
-// Known as 'Immediate Data'. User could update them through APIs.
-static constexpr uint32_t kMaxExternalImmediateConstantsPerPipeline = 16u;
-
-// Vulkan requires min-max push constant bytes is 128 byte, which is
-// equals to 32 32bit constants. D3D12 requires 64 32bit constants limits.
-// Pick 32 here.
+// Total number of "internal" 32-bit immediates, which includes both external (user) immediates
+// and any other immediates used by Dawn internally (e.g. workgroup sizes).
+// Vulkan's min-max push constant limit is 128 bytes / 4 = 32 values,
+// while D3D12's limit is 256 bytes / 4 = 64 values, so we pick 32 here.
 static constexpr uint32_t kMaxImmediateConstantsPerPipeline = 32u;
 
 // Adapter Max limitation for user immediate constants is 64 bytes.
 static constexpr uint32_t kMaxImmediateDataBytes = 64u;
+
+// Known as 'Immediate Data' that users can update via the API
+static constexpr uint32_t kMaxExternalImmediateConstantsPerPipeline =
+    kMaxImmediateDataBytes / kImmediateConstantElementByteSize;
 
 // Default subgroup sizes.
 static constexpr uint32_t kDefaultSubgroupMinSize = 4u;
