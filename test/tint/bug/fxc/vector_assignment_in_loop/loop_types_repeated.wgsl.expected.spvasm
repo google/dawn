@@ -1,10 +1,9 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 89
+; Bound: 70
 ; Schema: 0
                OpCapability Shader
-         %45 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -39,13 +38,11 @@
 %_ptr_Function_int = OpTypePointer Function %int
       %int_0 = OpConstant %int 0
       %int_2 = OpConstant %int 2
-     %uint_1 = OpConstant %uint 1
 %_ptr_Function_float = OpTypePointer Function %float
     %float_1 = OpConstant %float 1
-     %uint_2 = OpConstant %uint 2
       %int_1 = OpConstant %int 1
-     %uint_3 = OpConstant %uint 3
 %_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
 %_ptr_Function_bool = OpTypePointer Function %bool
        %true = OpConstantTrue %bool
        %main = OpFunction %void None %3
@@ -75,53 +72,37 @@
                OpBranch %33
          %40 = OpLabel
          %42 = OpLoad %int %i None
-         %43 = OpBitcast %uint %42
-         %44 = OpExtInst %uint %45 UMin %43 %uint_1
-         %47 = OpAccessChain %_ptr_Function_float %v2f %44
-               OpStore %47 %float_1 None
-         %50 = OpLoad %int %i None
-         %51 = OpBitcast %uint %50
-         %52 = OpExtInst %uint %45 UMin %51 %uint_2
-         %54 = OpAccessChain %_ptr_Function_int %v3i %52
-               OpStore %54 %int_1 None
-         %56 = OpLoad %int %i None
-         %57 = OpBitcast %uint %56
-         %58 = OpExtInst %uint %45 UMin %57 %uint_3
-         %60 = OpAccessChain %_ptr_Function_uint %v4u %58
-               OpStore %60 %uint_1 None
-         %62 = OpLoad %int %i None
-         %63 = OpBitcast %uint %62
-         %64 = OpExtInst %uint %45 UMin %63 %uint_1
-         %65 = OpAccessChain %_ptr_Function_bool %v2b %64
-               OpStore %65 %true None
-         %68 = OpLoad %int %i None
-         %69 = OpBitcast %uint %68
-         %70 = OpExtInst %uint %45 UMin %69 %uint_1
-         %71 = OpAccessChain %_ptr_Function_float %v2f_2 %70
-               OpStore %71 %float_1 None
-         %72 = OpLoad %int %i None
-         %73 = OpBitcast %uint %72
-         %74 = OpExtInst %uint %45 UMin %73 %uint_2
-         %75 = OpAccessChain %_ptr_Function_int %v3i_2 %74
-               OpStore %75 %int_1 None
-         %76 = OpLoad %int %i None
-         %77 = OpBitcast %uint %76
-         %78 = OpExtInst %uint %45 UMin %77 %uint_3
-         %79 = OpAccessChain %_ptr_Function_uint %v4u_2 %78
-               OpStore %79 %uint_1 None
-         %80 = OpLoad %int %i None
-         %81 = OpBitcast %uint %80
-         %82 = OpExtInst %uint %45 UMin %81 %uint_1
-         %83 = OpAccessChain %_ptr_Function_bool %v2b_2 %82
-               OpStore %83 %true None
+         %43 = OpAccessChain %_ptr_Function_float %v2f %42
+               OpStore %43 %float_1 None
+         %46 = OpLoad %int %i None
+         %47 = OpAccessChain %_ptr_Function_int %v3i %46
+               OpStore %47 %int_1 None
+         %49 = OpLoad %int %i None
+         %50 = OpAccessChain %_ptr_Function_uint %v4u %49
+               OpStore %50 %uint_1 None
+         %53 = OpLoad %int %i None
+         %54 = OpAccessChain %_ptr_Function_bool %v2b %53
+               OpStore %54 %true None
+         %57 = OpLoad %int %i None
+         %58 = OpAccessChain %_ptr_Function_float %v2f_2 %57
+               OpStore %58 %float_1 None
+         %59 = OpLoad %int %i None
+         %60 = OpAccessChain %_ptr_Function_int %v3i_2 %59
+               OpStore %60 %int_1 None
+         %61 = OpLoad %int %i None
+         %62 = OpAccessChain %_ptr_Function_uint %v4u_2 %61
+               OpStore %62 %uint_1 None
+         %63 = OpLoad %int %i None
+         %64 = OpAccessChain %_ptr_Function_bool %v2b_2 %63
+               OpStore %64 %true None
                OpBranch %31
          %31 = OpLabel
-         %84 = OpLoad %int %i None
-         %85 = OpBitcast %uint %84
-         %86 = OpBitcast %uint %int_1
-         %87 = OpIAdd %uint %85 %86
-         %88 = OpBitcast %int %87
-               OpStore %i %88 None
+         %65 = OpLoad %int %i None
+         %66 = OpBitcast %uint %65
+         %67 = OpBitcast %uint %int_1
+         %68 = OpIAdd %uint %66 %67
+         %69 = OpBitcast %int %68
+               OpStore %i %69 None
                OpBranch %32
          %33 = OpLabel
                OpReturn
