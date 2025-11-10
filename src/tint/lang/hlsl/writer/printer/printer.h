@@ -44,7 +44,7 @@ namespace tint::hlsl::writer {
 const core::ir::Capabilities kPrinterCapabilities{
     core::ir::Capability::kAllowModuleScopeLets,
     core::ir::Capability::kAllowVectorElementPointer,
-    core::ir::Capability::kAllowClipDistancesOnF32,
+    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
     core::ir::Capability::kAllowDuplicateBindings,
     core::ir::Capability::kAllowNonCoreTypes,
 };

@@ -900,11 +900,12 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeStorageAccess",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowClipDistancesOnF32,
-                                              core::ir::Capability::kAllowDuplicateBindings,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "hlsl.DecomposeStorageAccess",
+                                core::ir::Capabilities{
+                                    core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
+                                    core::ir::Capability::kAllowDuplicateBindings,
+                                });
     if (result != Success) {
         return result.Failure();
     }

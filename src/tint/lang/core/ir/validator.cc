@@ -303,9 +303,27 @@ void CheckFunctionParamAttributesAndType(const FunctionParam* param, IMPL&& impl
     CheckIOAttributesAndType(param, param->Attributes(), param->Type(), std::forward<IMPL>(impl));
 }
 
-/// The IO direction of a operation.
+/// @returns a human-readable string of all the entries in a EnumSet
+template <typename T>
+std::string ToString(const EnumSet<T>& values) {
+    std::stringstream result;
+    result << "[ ";
+    bool first = true;
+    for (auto v : values) {
+        if (!first) {
+            result << ", ";
+        }
+        first = false;
+        result << ToString(v);
+    }
+    result << " ]";
+    return result.str();
+}
+
+/// The IO direction of an operation.
 enum class IODirection : uint8_t { kInput, kOutput };
 
+/// @returns a human-reabable string for an IODirection
 std::string_view ToString(IODirection value) {
     switch (value) {
         case IODirection::kInput:
@@ -316,37 +334,153 @@ std::string_view ToString(IODirection value) {
     TINT_ICE() << "Unknown enum passed to ToString(IODirection)";
 }
 
-/// A BuiltinChecker is the interface used to check that a usage of a builtin attribute meets the
+/// How an attribute is being used, a tuple of the shader stage and IO direction
+enum class IOAttributeUsage : uint8_t {
+    kComputeInputUsage,
+    kComputeOutputUsage,
+    kFragmentInputUsage,
+    kFragmentOutputUsage,
+    kVertexInputUsage,
+    kVertexOutputUsage
+};
+
+/// @returns a human-readable string for an IOAttributeUsage
+std::string ToString(IOAttributeUsage value) {
+    switch (value) {
+        case IOAttributeUsage::kComputeInputUsage:
+            return "compute shader input";
+        case IOAttributeUsage::kComputeOutputUsage:
+            return "compute shader output";
+        case IOAttributeUsage::kFragmentInputUsage:
+            return "fragment shader input";
+        case IOAttributeUsage::kFragmentOutputUsage:
+            return "fragment shader output";
+        case IOAttributeUsage::kVertexInputUsage:
+            return "vertex shader input";
+        case IOAttributeUsage::kVertexOutputUsage:
+            return "vertex shader output";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(IOAttribute)";
+}
+
+/// @returns the IOAttributeUsage for a given Function::PipelineStage + IODirection tuple
+IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection direction) {
+    switch (stage) {
+        case Function::PipelineStage::kCompute:
+            switch (direction) {
+                case IODirection::kInput:
+                    return IOAttributeUsage::kComputeInputUsage;
+                case IODirection::kOutput:
+                    return IOAttributeUsage::kComputeOutputUsage;
+            }
+        case Function::PipelineStage::kFragment:
+            switch (direction) {
+                case IODirection::kInput:
+                    return IOAttributeUsage::kFragmentInputUsage;
+                case IODirection::kOutput:
+                    return IOAttributeUsage::kFragmentOutputUsage;
+            }
+        case Function::PipelineStage::kVertex:
+            switch (direction) {
+                case IODirection::kInput:
+                    return IOAttributeUsage::kVertexInputUsage;
+                case IODirection::kOutput:
+                    return IOAttributeUsage::kVertexOutputUsage;
+            }
+        case Function::PipelineStage::kUndefined:
+            TINT_ICE() << "IOAttributeUsageFor(kUndefined, ...) is intentionally not implemented";
+    }
+    TINT_ICE() << "Unknown IOAttribute usage " << ToString(direction) << " for a "
+               << ToString(stage) << " entry point";
+}
+
+/// @returns the Function::PipelineStage for an IOAttributeUsage
+[[maybe_unused]] Function::PipelineStage PipelineStageFor(IOAttributeUsage usage) {
+    switch (usage) {
+        case IOAttributeUsage::kComputeInputUsage:
+        case IOAttributeUsage::kComputeOutputUsage:
+            return Function::PipelineStage::kCompute;
+        case IOAttributeUsage::kFragmentInputUsage:
+        case IOAttributeUsage::kFragmentOutputUsage:
+            return Function::PipelineStage::kFragment;
+        case IOAttributeUsage::kVertexInputUsage:
+        case IOAttributeUsage::kVertexOutputUsage:
+            return Function::PipelineStage::kVertex;
+    }
+    TINT_ICE() << "Unknown IOAttribute usage " << ToString(usage);
+}
+
+/// @returns the IODirection for an IOAttributeUsage
+[[maybe_unused]] IODirection IODirectionFor(IOAttributeUsage usage) {
+    switch (usage) {
+        case IOAttributeUsage::kComputeInputUsage:
+        case IOAttributeUsage::kFragmentInputUsage:
+        case IOAttributeUsage::kVertexInputUsage:
+            return IODirection::kInput;
+        case IOAttributeUsage::kComputeOutputUsage:
+        case IOAttributeUsage::kFragmentOutputUsage:
+        case IOAttributeUsage::kVertexOutputUsage:
+            return IODirection::kOutput;
+    }
+    TINT_ICE() << "Unknown IOAttribute usage " << ToString(usage);
+}
+
+/// A BuiltInChecker is the interface used to check that a usage of a builtin attribute meets the
 /// basic spec rules, i.e. correct shader stage, data type, and IO direction.
 /// It does not test more sophisticated rules like location and builtins being mutually exclusive or
-/// the correct capabilities are enabled.
-struct BuiltinChecker {
-    /// What type of entry point is this builtin legal for
-    EnumSet<Function::PipelineStage> stages;
+/// that the correct capabilities are enabled.
+struct BuiltInChecker {
+    /// What combination of stage and IO direction is this builtin legal for
+    EnumSet<IOAttributeUsage> valid_usages;
 
-    /// Is this expected to be a param going into the entry point or a result coming out
-    IODirection direction;
-
-    /// Implements logic for checking if the given type is valid or not
+    /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
+    /// type or set of types), because types are part of the IR module and created at runtime.
     using TypeCheckFn = bool(const core::type::Type* type);
 
     /// @see #TypeCheckFn
     TypeCheckFn* const type_check;
 
-    /// Message that should logged if the type check fails
+    /// Message for logging if the type check fails. Cannot be easily generated at runtime, because
+    /// the type check is a function, not just a data entry.
     const char* type_error;
 };
 
-constexpr BuiltinChecker kPointSizeChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ IODirection::kOutput,
+constexpr BuiltInChecker kPointSizeChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
     /* type_error */ "__point_size must be a f32",
 };
 
-constexpr BuiltinChecker kCullDistanceChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ IODirection::kOutput,
+/// returns true if the number of elements in @p ty is valid for use in clip_distances without
+/// Capability::kAllowClipDistancesOnF32.
+constexpr auto ClipDistancesElementsCheck = [](const core::type::Type* ty) -> bool {
+    const auto elems = ty->Elements();
+    return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;
+};
+
+constexpr BuiltInChecker kClipDistancesChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->Is<core::type::Array>() && ClipDistancesElementsCheck(ty);
+    },
+    /* type_error */ "clip_distances must be an array<f32, N>, where N <= 8",
+};
+
+constexpr BuiltInChecker kClipDistancesAllowF32ScalarAndVectorChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ((ty->Is<core::type::Array>() || ty->Is<core::type::Vector>()) &&
+                ClipDistancesElementsCheck(ty)) ||
+               ty->Is<core::type::F32>();
+    },
+    /* type_error */
+    "clip_distances must be a f32 or either a vecN<f32> or an array<f32, N>, where N <= 8",
+};
+
+constexpr BuiltInChecker kCullDistanceChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
@@ -354,23 +488,20 @@ constexpr BuiltinChecker kCullDistanceChecker{
     /* type_error */ "__cull_distance must be an array of f32",
 };
 
-constexpr BuiltinChecker kFragDepthChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ IODirection::kOutput,
+constexpr BuiltInChecker kFragDepthChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentOutputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
     /* type_error */ "frag_depth must be a f32",
 };
 
-constexpr BuiltinChecker kFrontFacingChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kFrontFacingChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::Bool>(); },
     /* type_error */ "front_facing must be a bool",
 };
 
-constexpr BuiltinChecker kGlobalInvocationIdChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kGlobalInvocationIdChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -378,16 +509,14 @@ constexpr BuiltinChecker kGlobalInvocationIdChecker{
     /* type_error */ "global_invocation_id must be an vec3<u32>",
 };
 
-constexpr BuiltinChecker kInstanceIndexChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kInstanceIndexChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "instance_index must be an u32",
 };
 
-constexpr BuiltinChecker kLocalInvocationIdChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kLocalInvocationIdChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -395,23 +524,20 @@ constexpr BuiltinChecker kLocalInvocationIdChecker{
     /* type_error */ "local_invocation_id must be an vec3<u32>",
 };
 
-constexpr BuiltinChecker kLocalInvocationIndexChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kLocalInvocationIndexChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "local_invocation_index must be an u32",
 };
 
-constexpr BuiltinChecker kNumSubgroupsChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kNumSubgroupsChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "num_subgroups must be an u32",
 };
 
-constexpr BuiltinChecker kNumWorkgroupsChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kNumWorkgroupsChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -419,49 +545,57 @@ constexpr BuiltinChecker kNumWorkgroupsChecker{
     /* type_error */ "num_workgroups must be an vec3<u32>",
 };
 
-constexpr BuiltinChecker kSampleIndexChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kPositionChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
+                                                 IOAttributeUsage::kFragmentInputUsage},
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsFloatVector() && ty->Elements().count == 4;
+    },
+    /* type_error */ "position must be an vec4<f32>",
+};
+
+constexpr BuiltInChecker kSampleIndexChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "sample_index must be an u32",
 };
 
-constexpr BuiltinChecker kSubgroupIdChecker{
-    /* stages */
-    EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kSampleMaskChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
+                                                 IOAttributeUsage::kFragmentOutputUsage},
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "sample_mask must be an u32",
+};
+
+constexpr BuiltInChecker kSubgroupIdChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_id must be an u32",
 };
 
-constexpr BuiltinChecker kSubgroupInvocationIdChecker{
-    /* stages */
-    EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
-                                     Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kSubgroupInvocationIdChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
+                                                 IOAttributeUsage::kComputeInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_invocation_id must be an u32",
 };
 
-constexpr BuiltinChecker kSubgroupSizeChecker{
-    /* stages */
-    EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
-                                     Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kSubgroupSizeChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage,
+                                                 IOAttributeUsage::kComputeInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "subgroup_size must be an u32",
 };
 
-constexpr BuiltinChecker kVertexIndexChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kVertexIndexChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexInputUsage},
     /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "vertex_index must be an u32",
 };
 
-constexpr BuiltinChecker kWorkgroupIdChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kWorkgroupIdChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kComputeInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
@@ -469,17 +603,15 @@ constexpr BuiltinChecker kWorkgroupIdChecker{
     /* type_error */ "workgroup_id must be an vec3<u32>",
 };
 
-constexpr BuiltinChecker kPrimitiveIndexChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kPrimitiveIndexChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
     /* type_error */ "primitive_index must be an u32",
 };
 
-constexpr BuiltinChecker kBarycentricCoordChecker{
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
-    /* direction */ IODirection::kInput,
+constexpr BuiltInChecker kBarycentricCoordChecker{
+    /* valid_usages */ EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
     /* type_check */
     [](const core::type::Type* ty) -> bool {
         return ty->IsFloatVector() && ty->Elements().count == 3;
@@ -488,10 +620,15 @@ constexpr BuiltinChecker kBarycentricCoordChecker{
 };
 
 /// @returns an appropriate BuiltInCheck for @p builtin, ICEs when one isn't defined
-const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
+const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Capabilities& capabilities) {
     switch (builtin) {
         case BuiltinValue::kPointSize:
             return kPointSizeChecker;
+        case BuiltinValue::kClipDistances:
+            if (capabilities.Contains(Capability::kAllowClipDistancesOnF32ScalarAndVector)) {
+                return kClipDistancesAllowF32ScalarAndVectorChecker;
+            }
+            return kClipDistancesChecker;
         case BuiltinValue::kCullDistance:
             return kCullDistanceChecker;
         case BuiltinValue::kFragDepth:
@@ -510,8 +647,12 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kNumSubgroupsChecker;
         case BuiltinValue::kNumWorkgroups:
             return kNumWorkgroupsChecker;
+        case BuiltinValue::kPosition:
+            return kPositionChecker;
         case BuiltinValue::kSampleIndex:
             return kSampleIndexChecker;
+        case BuiltinValue::kSampleMask:
+            return kSampleMaskChecker;
         case BuiltinValue::kSubgroupId:
             return kSubgroupIdChecker;
         case BuiltinValue::kSubgroupInvocationId:
@@ -526,105 +667,21 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
             return kPrimitiveIndexChecker;
         case BuiltinValue::kBarycentricCoord:
             return kBarycentricCoordChecker;
-        case BuiltinValue::kPosition:
-            TINT_ICE() << "BuiltinValue::kPosition requires special handling, so does not have a "
-                          "checker defined";
-        case BuiltinValue::kSampleMask:
-            TINT_ICE() << "BuiltinValue::kSampleMask requires special handling, so does not have a "
-                          "checker defined";
         default:
             TINT_ICE() << builtin << " is does not have a checker defined for it";
     }
-}
-
-/// Validates the basic spec rules for @builtin(position) usage
-/// @param stage the shader stage the builtin is being used
-/// @param is_input the IO direction of usage, true if input, false if output
-/// @param ty the data type being decorated by the builtin
-/// @returns Success if a valid usage, or reason for invalidity in Failure
-Result<SuccessType, std::string> ValidatePositionBuiltIn(Function::PipelineStage stage,
-                                                         bool is_input,
-                                                         const core::type::Type* ty) {
-    if (stage != Function::PipelineStage::kVertex && stage != Function::PipelineStage::kFragment) {
-        return std::string("position must be used in a fragment or vertex shader entry point");
-    }
-
-    if (stage == Function::PipelineStage::kVertex && is_input) {
-        return std::string("position must be an output for a vertex entry point");
-    }
-
-    if (stage == Function::PipelineStage::kFragment && !is_input) {
-        return std::string("position must be an input for a fragment entry point");
-    }
-
-    if (!ty->IsFloatVector() || ty->Elements().count != 4 ||
-        !ty->Element(0)->Is<core::type::F32>()) {
-        return std::string("position must be an vec4<f32>");
-    }
-
-    return Success;
-}
-
-/// Validates the basic spec rules for @builtin(sample_mask) usage
-/// @param stage the shader stage the builtin is being used
-/// @param ty the data type being decorated by the builtin
-/// @returns Success if a valid usage, or reason for invalidity in Failure
-Result<SuccessType, std::string> ValidateSampleMaskBuiltIn(Function::PipelineStage stage,
-                                                           const core::type::Type* ty) {
-    if (stage != Function::PipelineStage::kFragment) {
-        return std::string("sample_mask must be used in a fragment entry point");
-    }
-
-    if (!ty->Is<core::type::U32>()) {
-        return std::string("sample_mask must be an u32");
-    }
-
-    return Success;
-}
-
-/// Validates the basic spec rules for @builtin(clip_distance) usage
-/// @param stage the shader stage the builtin is being used
-/// @param is_input the IO direction of usage, true if input, false if output
-/// @param capabilities the optional capabilities that are allowed
-/// @param ty the data type being decorated by the builtin
-/// @returns Success if a valid usage, or reason for invalidity in Failure
-Result<SuccessType, std::string> ValidateBuiltinClipDistances(Function::PipelineStage stage,
-                                                              bool is_input,
-                                                              const Capabilities& capabilities,
-                                                              const core::type::Type* ty) {
-    if (stage != Function::PipelineStage::kVertex) {
-        return std::string("clip_distances must be used in a vertex shader entry point");
-    }
-
-    if (is_input) {
-        return std::string("clip_distances must be an output of a shader entry point");
-    }
-
-    auto is_valid_array = [&] {
-        const auto elems = ty->Elements();
-        return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;
-    };
-
-    if (capabilities.Contains(Capability::kAllowClipDistancesOnF32)) {
-        if (!ty->Is<core::type::F32>() && !is_valid_array()) {
-            return std::string("clip_distances must be an f32 or an array<f32, N>, where N <= 8");
-        }
-    } else if (!ty->Is<core::type::Array>() || !is_valid_array()) {
-        return std::string("clip_distances must be an array<f32, N>, where N <= 8");
-    }
-
-    return Success;
 }
 
 /// Validates the basic spec rules for builtin usage
 /// @param builtin the builtin to test
 /// @param stage the shader stage the builtin is being used
 /// @param is_input the IO direction of usage, true if input, false if output
+/// @param capabilities enabled optional IR capabilities
 /// @param ty the data type being decorated by the builtin
 /// @returns Success if a valid usage, or reason for invalidity in Failure
-Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
-                                                 Function::PipelineStage stage,
-                                                 bool is_input,
+Result<SuccessType, std::string> ValidateBuiltIn(const BuiltinValue builtin,
+                                                 const Function::PipelineStage stage,
+                                                 const bool is_input,
                                                  const Capabilities& capabilities,
                                                  const core::type::Type* ty) {
     // This is not an entry point function, either it is dead code and thus never called, or any
@@ -633,43 +690,18 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
         return Success;
     }
 
-    // Some builtins have multiple contexts that they are valid in, so have special handling
-    // instead of making the checker/lookup table more complex.
-    switch (builtin) {
-        case BuiltinValue::kPosition:
-            return ValidatePositionBuiltIn(stage, is_input, ty);
-        case BuiltinValue::kSampleMask:
-            return ValidateSampleMaskBuiltIn(stage, ty);
-        case BuiltinValue::kClipDistances:
-            return ValidateBuiltinClipDistances(stage, is_input, capabilities, ty);
-        default:
-            break;
-    }
-
-    const auto& checker = BuiltinCheckerFor(builtin);
-    std::stringstream msg;
-    if (!checker.stages.Contains(stage)) {
-        auto stages_size = checker.stages.Size();
-        switch (stages_size) {
-            case 1:
-                msg << ToString(builtin) << " must be used in a "
-                    << ToString(*checker.stages.begin()) << " shader entry point";
-                break;
-            case 2:
-                msg << ToString(builtin) << " must be used in a "
-                    << ToString(*checker.stages.begin()) << " or "
-                    << ToString(*(++checker.stages.begin())) << " shader entry point";
-                break;
-            default:
-                TINT_ICE() << "Unexpected number of stages set, " << stages_size;
+    const auto io_direction = is_input ? IODirection::kInput : IODirection::kOutput;
+    const IOAttributeUsage usage = IOAttributeUsageFor(stage, io_direction);
+    const auto& checker = BuiltinCheckerFor(builtin, capabilities);
+    if (!checker.valid_usages.Contains(usage)) {
+        std::stringstream msg;
+        msg << ToString(builtin) << " cannot be used on a " << ToString(usage) << ". ";
+        if (checker.valid_usages.Size() == 1) {
+            const auto v = *checker.valid_usages.begin();
+            msg << "It can only be used on a " << ToString(v) << ".";
+        } else {
+            msg << "It can only be used on one of " << ToString(checker.valid_usages);
         }
-        return msg.str();
-    }
-
-    auto io_direction = is_input ? IODirection::kInput : IODirection::kOutput;
-    if (io_direction != checker.direction) {
-        msg << ToString(builtin) << " must be an " << ToString(checker.direction)
-            << " of a shader entry point";
         return msg.str();
     }
 
@@ -680,8 +712,8 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
     return Success;
 }
 
-// Annotations that can be associated with a value that are used for shader IO, e.g. binding_points,
-// @location, being in workgroup address space, etc.
+/// Annotations that can be associated with a value that are used for shader IO,
+/// e.g. binding_points, @location, being in workgroup address space, etc.
 enum class IOAnnotation : uint8_t {
     /// @group + @binding
     kBindingPoint,
@@ -710,22 +742,6 @@ std::string ToString(IOAnnotation value) {
             return "@color";
     }
     TINT_ICE() << "Unknown enum passed to ToString(IOAnnotation)";
-}
-
-/// @returns a human-readable string of all the entries in a set of IOAnnotations
-std::string ToString(const EnumSet<IOAnnotation>& values) {
-    std::stringstream result;
-    result << "[ ";
-    bool first = true;
-    for (auto v : values) {
-        if (!first) {
-            result << ", ";
-        }
-        first = false;
-        result << ToString(v);
-    }
-    result << " ]";
-    return result.str();
 }
 
 /// Adds appropriate entries to annotations, based on what values are present in attributes

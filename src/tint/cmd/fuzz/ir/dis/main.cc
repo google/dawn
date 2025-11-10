@@ -371,20 +371,21 @@ bool Run(const Options& options) {
 
         if (options.validate) {
             auto res = tint::core::ir::Validate(
-                module.Get(), tint::core::ir::Capabilities{
-                                  tint::core::ir::Capability::kAllow8BitIntegers,
-                                  tint::core::ir::Capability::kAllow64BitIntegers,
-                                  tint::core::ir::Capability::kAllowClipDistancesOnF32,
-                                  tint::core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                  tint::core::ir::Capability::kAllowModuleScopeLets,
-                                  tint::core::ir::Capability::kAllowOverrides,
-                                  tint::core::ir::Capability::kAllowPointersAndHandlesInStructures,
-                                  tint::core::ir::Capability::kAllowRefTypes,
-                                  tint::core::ir::Capability::kAllowVectorElementPointer,
-                                  tint::core::ir::Capability::kAllowPrivateVarsInFunctions,
-                                  tint::core::ir::Capability::kAllowPhonyInstructions,
-                                  tint::core::ir::Capability::kAllowAnyLetType,
-                              });
+                module.Get(),
+                tint::core::ir::Capabilities{
+                    tint::core::ir::Capability::kAllow8BitIntegers,
+                    tint::core::ir::Capability::kAllow64BitIntegers,
+                    tint::core::ir::Capability::kAllowClipDistancesOnF32ScalarAndVector,
+                    tint::core::ir::Capability::kAllowHandleVarsWithoutBindings,
+                    tint::core::ir::Capability::kAllowModuleScopeLets,
+                    tint::core::ir::Capability::kAllowOverrides,
+                    tint::core::ir::Capability::kAllowPointersAndHandlesInStructures,
+                    tint::core::ir::Capability::kAllowRefTypes,
+                    tint::core::ir::Capability::kAllowVectorElementPointer,
+                    tint::core::ir::Capability::kAllowPrivateVarsInFunctions,
+                    tint::core::ir::Capability::kAllowPhonyInstructions,
+                    tint::core::ir::Capability::kAllowAnyLetType,
+                });
             if (res == tint::Success) {
                 std::cout << "IR module is valid.\n";
             } else {
