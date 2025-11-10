@@ -611,7 +611,15 @@ WireResult WGPUStringViewSerialize(
     transfer->has_data = has_data;
 
     if (!has_data) {
-        transfer->length = length;
+        // The StringView is either empty or nil. Wire needs to be bitness-independent, so we use
+        // UINT64_MAX as the sentinel (instead of WGPU_STRLEN, which is SIZE_MAX).
+        if (length == 0) {
+            transfer->length = 0;
+        } else if (length == WGPU_STRLEN) {
+            transfer->length = UINT64_MAX;
+        } else {
+            DAWN_ASSERT(false);
+        }
         return WireResult::Success;
     }
     if (length == WGPU_STRLEN) {
@@ -635,17 +643,20 @@ WireResult WGPUStringViewDeserialize(
     bool has_data = transfer->has_data;
     uint64_t length = transfer->length;
 
-    if (length > WGPU_STRLEN) {
-        return WireResult::FatalError;
-    }
     if (!has_data) {
         record->data = nullptr;
-        if (length != 0 && length != WGPU_STRLEN) {
-            // Invalid string.
+        // The StringView is either empty or nil. Wire needs to be bitness-independent, so we use
+        // UINT64_MAX as the sentinel (instead of WGPU_STRLEN, which is SIZE_MAX).
+        if (length == 0) {
+            record->length = 0;
+            return WireResult::Success;
+        } else if (length == UINT64_MAX) {
+            record->length = WGPU_STRLEN;
+            return WireResult::Success;
+        } else {
+            // Invalid - string with size but no data.
             return WireResult::FatalError;
         }
-        record->length = static_cast<size_t>(length);
-        return WireResult::Success;
     }
     if (length == 0) {
         record->data = "";
@@ -653,6 +664,9 @@ WireResult WGPUStringViewDeserialize(
         return WireResult::Success;
     }
 
+    if (length > WGPU_STRLEN) {
+        return WireResult::FatalError;
+    }
     size_t stringLength = static_cast<size_t>(length);
     const volatile char* stringInBuffer;
     WIRE_TRY(deserializeBuffer->ReadN(stringLength, &stringInBuffer));
