@@ -21,6 +21,7 @@ See:
 {{- $texel_format_enum := ($I.Sem.Enum "texel_format") -}}
 {{- $builtin_type_enum := ($I.Sem.Enum "builtin_type") -}}
 {{- $builtin_value_enum := ($I.Sem.Enum "builtin_value") -}}
+{{- $builtin_depth_mode_enum := ($I.Sem.Enum "builtin_depth_mode") -}}
 {{- $attribute_enum := ($I.Sem.Enum "attribute") -}}
 
 {{- Eval "OverrideEnumName" "Enum" $builtin_type_enum "Name" "BuiltinType" -}}
@@ -69,6 +70,9 @@ inline bool IsHostShareable(AddressSpace address_space) {
 
 /// Builtin value defined with `@builtin(<name>)`.
 {{ Eval "DeclareEnum" $builtin_value_enum}}
+
+/// Builtin depth mode defined with `@builtin(<name>, <depth_mode>)`.
+{{ Eval "DeclareEnum" $builtin_depth_mode_enum }}
 
 /// Address space of a given pointer.
 {{ Eval "DeclareEnum" $attribute_enum}}

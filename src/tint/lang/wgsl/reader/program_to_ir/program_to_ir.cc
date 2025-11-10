@@ -335,7 +335,10 @@ class Impl {
                         param->SetInterpolation(interp->interpolation);
                     },
                     [&](const ast::InvariantAttribute*) { param->SetInvariant(true); },
-                    [&](const ast::BuiltinAttribute* b) { param->SetBuiltin(b->builtin); });
+                    [&](const ast::BuiltinAttribute* b) {
+                        param->SetBuiltin(b->builtin);
+                        param->SetDepthMode(b->depth_mode);
+                    });
 
                 param->SetLocation(param_sem->Attributes().location);
                 param->SetColor(param_sem->Attributes().color);

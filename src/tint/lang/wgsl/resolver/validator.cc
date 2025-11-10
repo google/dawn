@@ -1003,6 +1003,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
     auto builtin = attr->builtin;
+    auto depth_mode = attr->depth_mode;
 
     auto err_builtin_type = [&](std::string_view required) {
         AddError(attr->source) << "store type of " << style::Attribute("@builtin")
@@ -1042,6 +1043,15 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && !is_input)) {
                 is_stage_mismatch = true;
+            }
+            if (!allowed_features_.features.contains(wgsl::LanguageFeature::kFragmentDepth) &&
+                depth_mode != core::BuiltinDepthMode::kUndefined) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ", ", style::Enum(depth_mode), ")")
+                    << " attribute requires the " << style::Code("fragment_depth")
+                    << " language feature";
+                return false;
             }
             if (!type->Is<core::type::F32>()) {
                 err_builtin_type("f32");
@@ -1246,6 +1256,15 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                                << style::Code("(", style::Enum(builtin), ")")
                                << " cannot be used for " << stage << " shader "
                                << (is_input ? "input" : "output");
+        return false;
+    }
+
+    if (allowed_features_.features.contains(wgsl::LanguageFeature::kFragmentDepth) &&
+        depth_mode != core::BuiltinDepthMode::kUndefined &&
+        builtin != core::BuiltinValue::kFragDepth) {
+        AddError(attr->source) << "Builtin depth mode " << style::Code(style::Enum(depth_mode))
+                               << " cannot be used for " << style::Attribute("@builtin")
+                               << style::Code("(", style::Enum(builtin), ")");
         return false;
     }
 

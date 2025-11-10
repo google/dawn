@@ -47,6 +47,8 @@ struct IOAttributes {
     std::optional<uint32_t> color = std::nullopt;
     /// The value of a `@builtin` attribute.
     std::optional<core::BuiltinValue> builtin = std::nullopt;
+    /// The depth mode of a `@builtin` attribute.
+    std::optional<core::BuiltinDepthMode> depth_mode = std::nullopt;
     /// The values of a `@interpolate` attribute.
     std::optional<core::Interpolation> interpolation = std::nullopt;
     /// The value of an `@input_attachment_index` attribute

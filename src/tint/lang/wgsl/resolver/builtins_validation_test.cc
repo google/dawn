@@ -220,6 +220,73 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
 note: while analyzing entry point 'fragShader')");
 }
 
+TEST_F(ResolverBuiltinsValidationTest, UseFragDepthModeWithoutExtension) {
+    // @fragment
+    // fn fs_main() -> @builtin(frag_depth, any) f32 { return 1.0; }
+    Func(
+        "fs_main", tint::Empty, ty.f32(),
+        Vector{
+            Return(1_f),
+        },
+        Vector{
+            Stage(ast::PipelineStage::kFragment),
+        },
+        Vector{
+            Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth, core::BuiltinDepthMode::kAny),
+        });
+
+    Resolver resolver{this, wgsl::AllowedFeatures{}};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: use of '@builtin(frag_depth, any)' attribute requires the 'fragment_depth' "
+        "language feature");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, UseFragDepthModeIsInvalidForPosition) {
+    // @vertex
+    // fn main() -> @builtin(position, any) vec4f { return vec4f(); }
+    Func("main", tint::Empty, ty.vec4<f32>(),
+         Vector{
+             Return(Call(ty.vec4<f32>())),
+         },
+         Vector{Stage(ast::PipelineStage::kVertex)},
+         Vector{
+             Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition, core::BuiltinDepthMode::kAny),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: Builtin depth mode 'any' cannot be used for '@builtin(position)'");
+}
+
+TEST_F(ResolverBuiltinsValidationTest, UseFragDepthModeIsInvalidForPositionInStruct) {
+    // struct Output {
+    //   @builtin(position, any) pos : vec4f;
+    // };
+    // @vertex
+    // fn main() -> Output {
+    //   return Output();
+    // }
+    auto* output = Structure(
+        "Output", Vector{
+                      Member("pos", ty.vec4<f32>(),
+                             Vector{Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition,
+                                            core::BuiltinDepthMode::kAny)}),
+                  });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
+             Return(Call(ty.Of(output))),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: Builtin depth mode 'any' cannot be used for '@builtin(position)'");
+}
+
 TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
     // struct S {
     //   @builtin(vertex_index) idx: u32;

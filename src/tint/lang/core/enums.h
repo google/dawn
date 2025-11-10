@@ -636,6 +636,38 @@ constexpr std::string_view kBuiltinValueStrings[] = {
     "workgroup_id",
 };
 
+/// Builtin depth mode defined with `@builtin(<name>, <depth_mode>)`.
+enum class BuiltinDepthMode : uint8_t {
+    kUndefined,
+    kAny,
+    kGreater,
+    kLess,
+};
+
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(BuiltinDepthMode value);
+
+/// @param out the stream to write to
+/// @param value the BuiltinDepthMode
+/// @returns @p out so calls can be chained
+template <typename STREAM>
+    requires(traits::IsOStream<STREAM>)
+auto& operator<<(STREAM& out, BuiltinDepthMode value) {
+    return out << ToString(value);
+}
+
+/// ParseBuiltinDepthMode parses a BuiltinDepthMode from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or BuiltinDepthMode::kUndefined if the string could not be parsed.
+BuiltinDepthMode ParseBuiltinDepthMode(std::string_view str);
+
+constexpr std::string_view kBuiltinDepthModeStrings[] = {
+    "any",
+    "greater",
+    "less",
+};
+
 /// Address space of a given pointer.
 enum class Attribute : uint8_t {
     kUndefined,

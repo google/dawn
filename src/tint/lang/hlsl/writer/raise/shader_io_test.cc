@@ -1393,12 +1393,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Immediate_NumWorkgroups_Struc
                                      mod.symbols.New("num_wgs"),
                                      ty.vec3<u32>(),
                                      core::IOAttributes{
-                                         /* location */ std::nullopt,
-                                         /* blend_src */ std::nullopt,
-                                         /* color */ std::nullopt,
-                                         /* builtin */ core::BuiltinValue::kNumWorkgroups,
-                                         /* interpolation */ std::nullopt,
-                                         /* invariant */ false,
+                                         .builtin = core::BuiltinValue::kNumWorkgroups,
                                      },
                                  },
                              });

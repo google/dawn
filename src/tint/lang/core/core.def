@@ -72,6 +72,13 @@ enum builtin_value {
   @internal __cull_distance
 }
 
+// https://github.com/gpuweb/gpuweb/blob/main/proposals/fragment-depth.md
+enum builtin_depth_mode {
+  any
+  greater
+  less
+}
+
 // https://www.w3.org/TR/WGSL/#interpolation
 enum interpolation_type {
   perspective

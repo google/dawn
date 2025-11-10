@@ -3030,18 +3030,29 @@ class Builder {
     const ast::CaseSelector* DefaultCaseSelector() { return create<ast::CaseSelector>(nullptr); }
 
     /// Creates an ast::BuiltinAttribute
-    /// @param source the source information
-    /// @param builtin the builtin value
-    /// @returns the builtin attribute pointer
-    const ast::BuiltinAttribute* Builtin(const Source& source, core::BuiltinValue builtin) {
-        return create<ast::BuiltinAttribute>(source, builtin);
-    }
-
-    /// Creates an ast::BuiltinAttribute
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
     const ast::BuiltinAttribute* Builtin(core::BuiltinValue builtin) {
         return Builtin(source_, builtin);
+    }
+
+    /// Creates an ast::BuiltinAttribute
+    /// @param source the source information
+    /// @param builtin the builtin value
+    /// @returns the builtin attribute pointer
+    const ast::BuiltinAttribute* Builtin(const Source& source, core::BuiltinValue builtin) {
+        return Builtin(source, builtin, core::BuiltinDepthMode::kUndefined);
+    }
+
+    /// Creates an ast::BuiltinAttribute
+    /// @param source the source information
+    /// @param builtin the builtin value
+    /// @param depth_mode the depth mode
+    /// @returns the builtin attribute pointer
+    const ast::BuiltinAttribute* Builtin(const Source& source,
+                                         core::BuiltinValue builtin,
+                                         core::BuiltinDepthMode depth_mode) {
+        return create<ast::BuiltinAttribute>(source, builtin, depth_mode);
     }
 
     /// Creates an ast::InterpolateAttribute

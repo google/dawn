@@ -3024,6 +3024,7 @@ Maybe<const ast::Attribute*> Parser::attribute() {
 
     // builtin_attr :
     //   '@' 'builtin' '(' builtin_value_name ',' ? ')'
+    // | '@' 'builtin' '(' builtin_value_name ',' builtin_depth_mode_name ',' ? ')'
     if (attr.value == core::Attribute::kBuiltin) {
         return expect_paren_block(
             "builtin attribute", [&]() -> Expect<const ast::BuiltinAttribute*> {
@@ -3032,9 +3033,19 @@ Maybe<const ast::Attribute*> Parser::attribute() {
                 if (name.errored) {
                     return Failure::kErrored;
                 }
+                if (!match(Token::Type::kComma) || peek().Is(Token::Type::kParenRight)) {
+                    return builder_.Builtin(t.source(), name.value);
+                }
+
+                auto depth_mode_name =
+                    expect_enum("builtin depth mode name", core::ParseBuiltinDepthMode,
+                                core::kBuiltinDepthModeStrings);
+                if (depth_mode_name.errored) {
+                    return Failure::kErrored;
+                }
                 match(Token::Type::kComma);
 
-                return builder_.Builtin(t.source(), name.value);
+                return builder_.Builtin(t.source(), name.value, depth_mode_name.value);
             });
     }
 

@@ -42,7 +42,10 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param builtin the builtin value
-    BuiltinAttribute(NodeID nid, const Source& src, const core::BuiltinValue builtin);
+    BuiltinAttribute(NodeID nid,
+                     const Source& src,
+                     const core::BuiltinValue builtin,
+                     const core::BuiltinDepthMode depth_mode);
     ~BuiltinAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -50,6 +53,9 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
 
     /// The builtin value
     const core::BuiltinValue builtin;
+
+    /// The builtin depth mode
+    const core::BuiltinDepthMode depth_mode;
 };
 
 }  // namespace tint::ast

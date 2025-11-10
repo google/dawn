@@ -92,6 +92,15 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// @returns the builtin set for the parameter
     std::optional<core::BuiltinValue> Builtin() const { return attributes_.builtin; }
 
+    /// Sets the builtin depth mode.
+    /// @param val the value to set for depth mode
+    void SetDepthMode(core::BuiltinDepthMode val) {
+        TINT_ASSERT(!attributes_.depth_mode.has_value());
+        attributes_.depth_mode = val;
+    }
+    /// Returns the depth mode information, if available
+    std::optional<core::BuiltinDepthMode> DepthMode() const { return attributes_.depth_mode; }
+
     /// Sets the parameter as invariant
     /// @param val the value to set for invariant
     void SetInvariant(bool val) { attributes_.invariant = val; }

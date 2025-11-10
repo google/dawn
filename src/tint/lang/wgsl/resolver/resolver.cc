@@ -4346,6 +4346,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 },
                 [&](const ast::BuiltinAttribute* attr) {
                     attributes.builtin = attr->builtin;
+                    attributes.depth_mode = attr->depth_mode;
                     return true;
                 },
                 [&](const ast::InterpolateAttribute* attr) {

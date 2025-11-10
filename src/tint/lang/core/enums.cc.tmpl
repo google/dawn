@@ -21,6 +21,7 @@ See:
 {{- $texel_format_enum := ($I.Sem.Enum "texel_format") -}}
 {{- $builtin_type_enum := ($I.Sem.Enum "builtin_type") -}}
 {{- $builtin_value_enum := ($I.Sem.Enum "builtin_value") -}}
+{{- $builtin_depth_mode_enum := ($I.Sem.Enum "builtin_depth_mode") -}}
 {{- $attribute_enum := ($I.Sem.Enum "attribute") -}}
 
 {{- Eval "OverrideEnumName" "Enum" $builtin_type_enum "Name" "BuiltinType" -}}
@@ -54,6 +55,9 @@ namespace tint::core {
 
 {{ Eval "ParseEnum" $builtin_value_enum}}
 {{ Eval "EnumOStream" $builtin_value_enum}}
+
+{{ Eval "ParseEnum" $builtin_depth_mode_enum}}
+{{ Eval "EnumOStream" $builtin_depth_mode_enum}}
 
 {{ Eval "ParseEnum" $attribute_enum}}
 {{ Eval "EnumOStream" $attribute_enum}}
