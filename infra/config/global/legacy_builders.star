@@ -79,16 +79,6 @@ luci.notifier(
 
 # Recipes
 
-def get_builder_executable(use_gn):
-    """Get standard executable for builders
-
-    Returns:
-      The name of a recipe from //recipes.star to use.
-    """
-    if use_gn:
-        return "recipe:dawn/gn"
-    return "recipe:dawn/cmake"
-
 def get_os_from_arg(arg):
     """Get OS enum for a builder name string
 
@@ -178,8 +168,8 @@ def get_common_properties(os, clang, rbe_project, remote_jobs):
 
     return properties
 
-def add_ci_builder(name, os, properties):
-    """Add a CI builder
+def add_ci_cmake_builder(name, os, properties):
+    """Add a CI CMake builder
 
     Args:
       name: builder's name in string form
@@ -220,7 +210,7 @@ def add_ci_builder(name, os, properties):
         bucket = "ci",
         schedule = schedule_ci,
         triggered_by = triggered_by_ci,
-        executable = get_builder_executable(use_gn = "cmake" not in name),
+        executable = "recipe:dawn/cmake",
         properties = properties_ci,
         dimensions = dimensions_ci,
         caches = get_default_caches(os),
@@ -230,8 +220,8 @@ def add_ci_builder(name, os, properties):
         shadow_properties = shadow_properties_ci,
     )
 
-def add_try_builder(name, os, properties):
-    """Add a Try builder
+def add_try_cmake_builder(name, os, properties):
+    """Add a Try CMake builder
 
     Args:
       name: builder's name in string form
@@ -252,94 +242,12 @@ def add_try_builder(name, os, properties):
     luci.builder(
         name = name,
         bucket = "try",
-        executable = get_builder_executable(use_gn = "cmake" not in name),
+        executable = "recipe:dawn/cmake",
         properties = properties_try,
         dimensions = dimensions_try,
         caches = get_default_caches(os),
         service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
-
-def dawn_standalone_builder(name, clang, debug, cpu, fuzzer):
-    """Adds both the CI and Try standalone builders as appropriate
-
-    Args:
-      name: builder's name in string form
-      clang: is this builder running clang
-      debug: is this builder generating debug builds
-      cpu: string representing the target CPU architecture
-      fuzzer: enable building fuzzer corpus
-
-    """
-    os = get_os_from_arg(name)
-
-    properties = {
-        "clang": clang,
-        "debug": debug,
-        "gen_fuzz_corpus": fuzzer,
-        "target_cpu": cpu,
-    }
-
-    add_ci_builder(name, os, properties)
-    if not fuzzer:
-        add_try_builder(name, os, properties)
-
-    config = ""
-    if clang:
-        config = "clang"
-    elif os.category == os_category.WINDOWS:
-        config = "msvc"
-
-    category = ""
-    if fuzzer:
-        category += "cron|"
-    category += os.console_name
-
-    if os.category != os_category.MAC:
-        category += "|" + config
-        if config != "msvc":
-            category += "|dbg" if debug else "|rel"
-
-    short_name = "dbg" if debug else "rel"
-    if os.category != os_category.MAC:
-        if config != "msvc":
-            short_name = cpu
-
-    luci.console_view_entry(
-        console_view = "ci",
-        builder = "ci/" + name,
-        category = category,
-        short_name = short_name,
-    )
-
-    if not fuzzer:
-        luci.list_view_entry(
-            list_view = "try",
-            builder = "try/" + name,
-        )
-
-        additional_filters = []
-        if config == "msvc":
-            additional_filters = exclusion_filters.gn_msvc_cq_file_exclusions
-
-        luci.cq_tryjob_verifier(
-            cq_group = "Dawn-CQ",
-            builder = "dawn:try/" + name,
-            location_filters = [
-                cq.location_filter(path_regexp = ".*"),
-                cq.location_filter(
-                    path_regexp = "\\.github/.+",
-                    exclude = True,
-                ),
-            ] + additional_filters,
-        )
-
-        # These builders run fine unbranched on branch CLs, so add them to the
-        # branch groups as well.
-        for milestone in ACTIVE_MILESTONES.keys():
-            luci.cq_tryjob_verifier(
-                cq_group = "Dawn-CQ-" + milestone,
-                builder = "dawn:try/" + name,
-            )
 
 def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experimental = False):
     """Adds both the CI and Try standalone builders as appropriate for the CMake build
@@ -363,8 +271,8 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
         "ubsan": ubsan,
     }
 
-    add_ci_builder(name, os, properties)
-    add_try_builder(name, os, properties)
+    add_ci_cmake_builder(name, os, properties)
+    add_try_cmake_builder(name, os, properties)
 
     config = ""
     if clang:

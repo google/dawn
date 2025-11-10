@@ -107,10 +107,6 @@ build_recipe(
 )
 
 build_recipe(
-    name = "recipe:dawn/gn",
-)
-
-build_recipe(
     name = "recipe:dawn/gn_v2",
 )
 
