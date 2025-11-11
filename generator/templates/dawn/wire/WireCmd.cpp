@@ -199,6 +199,7 @@
             {%- set memberName = as_varName(member.name) -%}
             //* Skip size computation if we are skipping serialization.
             {% if member.skip_serialize %}
+                // [Skipped serialization for {{ memberName }}, it needs to be filled with a CommandExtension by the caller.]
                 {% continue %}
             {% endif %}
             //* Normal handling for pointer members and structs.
@@ -291,6 +292,7 @@
             {% set memberName = as_varName(member.name) %}
             //* Skip serialization for custom serialized members and callback infos.
             {% if member.skip_serialize or member.type.category == 'callback info' %}
+                // [Skipped serialization for {{ memberName }}, it needs to be filled with a CommandExtension by the caller.]
                 {% continue %}
             {% endif %}
             //* Value types are directly in the transfer record, objects being replaced with their IDs.

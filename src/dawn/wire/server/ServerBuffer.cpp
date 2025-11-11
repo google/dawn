@@ -263,8 +263,10 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
     cmd.future = data->future;
     cmd.status = status;
     cmd.message = message;
+    // Set the pointer length, but the pointed-to data itself won't be serialized as usual (due
+    // to skip_serialize). Instead, the custom CommandExtension below fills that memory.
     cmd.readDataUpdateInfoLength = 0;
-    cmd.readDataUpdateInfo = nullptr;
+    cmd.readDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
 
     const void* readData = nullptr;
     size_t readDataUpdateInfoLength = 0;
@@ -291,15 +293,17 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data,
         }
     }
 
-    SerializeCommand(cmd, CommandExtension{readDataUpdateInfoLength, [&](char* readHandleBuffer) {
-                                               if (isSuccess && isRead) {
-                                                   // The in-flight map request returned
-                                                   // successfully.
-                                                   buffer->readHandle->SerializeDataUpdate(
-                                                       readData, data->offset, data->size,
-                                                       readHandleBuffer);
-                                               }
-                                           }});
+    SerializeCommand(cmd,
+                     // Extensions to replace fields skipped by skip_serialize.
+                     CommandExtension{readDataUpdateInfoLength, [&](char* readHandleBuffer) {
+                                          if (isSuccess && isRead) {
+                                              // The in-flight map request returned
+                                              // successfully.
+                                              buffer->readHandle->SerializeDataUpdate(
+                                                  readData, data->offset, data->size,
+                                                  readHandleBuffer);
+                                          }
+                                      }});
 }
 
 }  // namespace dawn::wire::server

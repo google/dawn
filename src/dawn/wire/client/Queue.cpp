@@ -151,13 +151,16 @@ void Queue::APIWriteBuffer(WGPUBuffer cBuffer,
     cmd.bufferId = buffer->GetWireHandle(client).id;
     cmd.bufferOffset = bufferOffset;
     cmd.size = size;
+    // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
+    // to skip_serialize). Instead, the custom CommandExtensions below fill that memory. [*]
     cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
-    cmd.writeHandleCreateInfo = nullptr;
+    cmd.writeHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
     cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
-    cmd.writeDataUpdateInfo = nullptr;
+    cmd.writeDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
 
     client->SerializeCommand(
         cmd,
+        // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{
             writeHandleCreateInfoLength,
             [&](char* writeHandleBuffer) { writeHandle->SerializeCreate(writeHandleBuffer); }},

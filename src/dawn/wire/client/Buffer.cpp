@@ -221,10 +221,12 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     DeviceCreateBufferCmd cmd;
     cmd.deviceId = device->GetWireHandle(wireClient).id;
     cmd.descriptor = descriptor;
+    // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
+    // to skip_serialize). Instead, the custom CommandExtensions below fill that memory.
     cmd.readHandleCreateInfoLength = 0;
-    cmd.readHandleCreateInfo = nullptr;
+    cmd.readHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
     cmd.writeHandleCreateInfoLength = 0;
-    cmd.writeHandleCreateInfo = nullptr;
+    cmd.writeHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
 
     size_t readHandleCreateInfoLength = 0;
     size_t writeHandleCreateInfoLength = 0;
@@ -276,6 +278,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // CommandExtensions consistently, making it harder to read.
     wireClient->SerializeCommand(
         cmd,
+        // Extensions to replace fields skipped by skip_serialize.
         CommandExtension{readHandleCreateInfoLength,
                          [&](char* readHandleBuffer) {
                              if (readHandle != nullptr) {
@@ -470,18 +473,22 @@ void Buffer::APIUnmap() {
 
         BufferUpdateMappedDataCmd cmd;
         cmd.bufferId = GetWireHandle(client).id;
+        // Set the pointer length, but the pointed-to data itself won't be serialized as usual (due
+        // to skip_serialize). Instead, the custom CommandExtension below fills that memory.
         cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
-        cmd.writeDataUpdateInfo = nullptr;
+        cmd.writeDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
         cmd.offset = mMappedOffset;
         cmd.size = mMappedSize;
 
         client->SerializeCommand(
-            cmd, CommandExtension{writeDataUpdateInfoLength, [&](char* writeHandleBuffer) {
-                                      // Serialize flush metadata into the space after the command.
-                                      // This closes the handle for writing.
-                                      mWriteHandle->SerializeDataUpdate(writeHandleBuffer,
-                                                                        cmd.offset, cmd.size);
-                                  }});
+            cmd,
+            // Extensions to replace fields skipped by skip_serialize.
+            CommandExtension{writeDataUpdateInfoLength, [&](char* writeHandleBuffer) {
+                                 // Serialize flush metadata into the space after the command.
+                                 // This closes the handle for writing.
+                                 mWriteHandle->SerializeDataUpdate(writeHandleBuffer, cmd.offset,
+                                                                   cmd.size);
+                             }});
 
         // If mDestructWriteHandleOnUnmap is true, that means the write handle is merely
         // for mappedAtCreation usage. It is destroyed on unmap after flush to server
