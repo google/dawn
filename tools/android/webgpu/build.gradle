@@ -35,7 +35,7 @@ plugins {
 android {
     namespace 'net.android.webgpu'
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 24
         compileSdk 34
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         externalNativeBuild {
