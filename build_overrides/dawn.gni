@@ -29,14 +29,11 @@ import("//build/config/gclient_args.gni")
 
 # These are variables that are overridable by projects that include Dawn.
 # The values in this file are the defaults for when we are building from
-# Dawn's repository.
+# the Dawn repository.
 
-# Whether we are building from Dawn's repository.
+# Whether we are building from the Dawn repository.
 # MUST be unset in other projects (will default to false).
 dawn_standalone = true
-
-# True if Dawn can access build/, testing/ and other Chrome folders.
-dawn_has_build = true
 
 # True if building within an ANGLE checkout
 build_with_angle = false

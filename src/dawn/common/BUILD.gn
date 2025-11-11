@@ -250,23 +250,6 @@ dawn_generator("dawn_gpu_info_gen") {
   ]
 }
 
-group("abseil") {
-  # When building within Chromium or ANGLE we need to include "//third_party/abseil-cpp:absl" while
-  # it's beneficial to be more specific with standalone Dawn, especially when it comes to
-  # including it as a dependency in other projects (such as Skia).
-  if (build_with_chromium || build_with_angle) {
-    public_deps = [ "$dawn_abseil_dir:absl" ]
-  } else {
-    public_deps = [
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_map",
-      "${dawn_root}/third_party/gn/abseil-cpp:flat_hash_set",
-      "${dawn_root}/third_party/gn/abseil-cpp:inlined_vector",
-      "${dawn_root}/third_party/gn/abseil-cpp:no_destructor",
-      "${dawn_root}/third_party/gn/abseil-cpp:overload",
-    ]
-  }
-}
-
 # This GN file is discovered by all Chromium builds, but common doesn't support
 # all of Chromium's OSes so we explicitly make the target visible only on
 # systems we know Dawn is able to compile on.
@@ -355,9 +338,9 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android ||
     sources += get_target_outputs(":dawn_gpu_info_gen")
 
     public_deps = [
-      ":abseil",
       ":dawn_gpu_info_gen",
       ":dawn_version_gen",
+      "${dawn_root}:abseil",
       "${dawn_root}/src/dawn/partition_alloc:raw_ptr",
       "${dawn_root}/src/utils",
     ]
