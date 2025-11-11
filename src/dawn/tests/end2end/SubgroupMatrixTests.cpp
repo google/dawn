@@ -587,8 +587,8 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
         shader << "\n";
         shader << "alias ComponentType = " << ComponentTypeToWgslType(config.componentType)
                << ";\n";
-        shader << "alias InputArrayType = " << ComponentTypeToScalarShaderType(config.componentType)
-               << ";\n";
+        shader << "alias ScalarShaderType = "
+               << ComponentTypeToScalarShaderType(config.componentType) << ";\n";
         shader << "\n";
         shader << "const M = " << config.M << ";\n";
         shader << "const K = " << config.K << ";\n";
@@ -603,8 +603,8 @@ class SubgroupMatrix_MatrixScalarArithmeticTest : public SubgroupMatrixArithmeti
 
         shader << "const SubgroupMaxSize = " << subgroupMaxSize << ";\n";
         shader << R"(
-@group(0) @binding(0) var<storage, read>       inputs : array<InputArrayType, kMatrixDataSize>;
-@group(0) @binding(1) var<storage, read_write> output : array<ComponentType, kMatrixDataSize>;
+@group(0) @binding(0) var<storage, read>       inputs : array<ScalarShaderType, kMatrixDataSize>;
+@group(0) @binding(1) var<storage, read_write> output : array<ScalarShaderType, kMatrixDataSize>;
 
 @compute @workgroup_size(SubgroupMaxSize)
 fn main() {
@@ -680,7 +680,7 @@ fn main() {
                                   MatrixOp op,
                                   uint32_t subgroupMaxSize,
                                   bool columnMajor) {
-        uint32_t resultComponentByteSize = ComponentTypeToByteSize(config.resultComponentType);
+        uint32_t componentByteSize = ComponentTypeToByteSize(config.componentType);
 
         // Generate a compute pipeline that performs a matrix scalar operation that matches the
         // config.
@@ -704,7 +704,7 @@ fn main() {
         // Create the output buffer
         wgpu::BufferDescriptor outputDescriptor{
             .usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage,
-            .size = config.K * config.M * resultComponentByteSize,
+            .size = config.K * config.M * componentByteSize,
             .mappedAtCreation = false,
         };
         wgpu::Buffer output = device.CreateBuffer(&outputDescriptor);
@@ -722,7 +722,7 @@ fn main() {
         queue.Submit(1, &commands);
 
         // Verify the result against a reference implementation.
-        Matrix expected(config.K, config.M, config.resultComponentType, columnMajor);
+        Matrix expected(config.K, config.M, config.componentType, columnMajor);
         GenerateReferenceResult(expected, inputLHS, op);
         EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
     }
@@ -1027,7 +1027,7 @@ fn main() {
         queue.Submit(1, &commands);
 
         // Verify the result in the output buffer.
-        Matrix expected(config.N, config.M, config.resultComponentType, false);
+        Matrix expected(config.N, config.M, config.componentType, false);
         GenerateReferenceResult(expected, noArgConstructor);
         EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
     }
