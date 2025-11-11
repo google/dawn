@@ -831,10 +831,13 @@ source_set("white_box_tests_sources") {
     sources += [ "white_box/SharedTextureMemoryTests_apple.mm" ]
   }
 
-  if (is_win) {
+  if (dawn_enable_d3d11) {
+    sources += [ "white_box/SharedTextureMemoryTests_win.cpp" ]
+  }
+
+  if (dawn_enable_d3d12) {
     sources += [
       "white_box/SharedBufferMemoryTests_win.cpp",
-      "white_box/SharedTextureMemoryTests_win.cpp",
       "white_box/SharedTextureMemoryTests_win_d3d12.cpp",
     ]
   }
