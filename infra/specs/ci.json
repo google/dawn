@@ -2418,6 +2418,12 @@
       }
     ]
   },
+  "dawn-win-arm64-builder-rel": {
+    "additional_compile_targets": [
+      "default"
+    ]
+  },
+  "dawn-win-arm64-qualcomm-snapdragonxelite-rel": {},
   "dawn-win-x64-builder-asan": {
     "additional_compile_targets": [
       "default"

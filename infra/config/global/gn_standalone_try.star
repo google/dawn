@@ -475,6 +475,16 @@ dawn_mac_manual_builder(
 )
 
 dawn_win_manual_builder(
+    name = "dawn-try-win-arm64-qualcomm-snapdragonxelite-rel",
+    description_html = "Tests release Dawn on Windows/arm64 on devices with Snapdragon X Elite SoCs. Manual only.",
+    mirrors = [
+        "ci/dawn-win-arm64-builder-rel",
+        "ci/dawn-win-arm64-qualcomm-snapdragonxelite-rel",
+    ],
+    gn_args = "ci/dawn-win-arm64-builder-rel",
+)
+
+dawn_win_manual_builder(
     name = "dawn-try-win-x64-intel-uhd630-asan",
     description_html = "Tests release Dawn on Windows/x64/ASAN on Intel CPUs w/ UHD 630. Manual only.",
     mirrors = [
