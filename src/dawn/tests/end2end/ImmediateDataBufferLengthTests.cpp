@@ -48,9 +48,8 @@ class ImmediateDataBufferLengthTest : public DawnTest {
   protected:
     void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
                            dawn::utils::ComboLimits& required) override {
-        // Skip compat backends
-        // TODO(crbug.com/458102548): Remove when implemented for GLES.
-        DAWN_TEST_UNSUPPORTED_IF(supported.maxImmediateSize == 0);
+        DAWN_TEST_UNSUPPORTED_IF(supported.maxImmediateSize < kDefaultMaxImmediateDataBytes);
+        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
     }
 
     void SetUp() override {

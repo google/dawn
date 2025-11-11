@@ -714,10 +714,6 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"enable_renderdoc_process_injection", "Enables RenderDoc process injection",
       "If RenderDoc is used to inject into the GPU process, send RenderDoc frame capture info.",
       ToggleStage::Device}},
-    // TODO(crbug.com/366291600): Remove this toggle after the feature has safely landed.
-    {Toggle::EnableImmediateData,
-     {"enable_immediate_data", "Enables ImmediateData feature", "http://crbug.com/366291600",
-      ToggleStage::Device}},
     {Toggle::WaitIsThreadSafe,
      {"wait_is_thread_safe",
       "WaitFor* functions are thread-safe and can be called without the device-lock if implicit "

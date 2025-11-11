@@ -40,6 +40,11 @@ constexpr uint32_t kRTSize = 1;
 
 class ImmediateDataTests : public DawnTest {
   protected:
+    void GetRequiredLimits(const dawn::utils::ComboLimits& supported,
+                           dawn::utils::ComboLimits& required) override {
+        required.maxImmediateSize = kDefaultMaxImmediateDataBytes;
+    }
+
     void SetUp() override {
         DawnTest::SetUp();
 
@@ -105,7 +110,7 @@ class ImmediateDataTests : public DawnTest {
         wgpu::PipelineLayoutDescriptor pipelineLayoutDesc;
         pipelineLayoutDesc.bindGroupLayoutCount = 1;
         pipelineLayoutDesc.bindGroupLayouts = &bindGroupLayout;
-        pipelineLayoutDesc.immediateSize = 16;
+        pipelineLayoutDesc.immediateSize = kDefaultMaxImmediateDataBytes;
         return device.CreatePipelineLayout(&pipelineLayoutDesc);
     }
 

@@ -114,7 +114,7 @@
 // Tiered limits for immediate data sizes.
 //                                 compat  tier0
 #define LIMITS_IMMEDIATE_SIZE(X) \
-  X(v1, Maximum, maxImmediateSize,      0,    kMaxImmediateDataBytes)
+  X(v1, Maximum, maxImmediateSize,      0,     0,   64)
 
 // Limits for the dynamic binding array.
 //                                                                   compat  tier0
@@ -434,7 +434,8 @@ void NormalizeLimits(CombinedLimits* limits) {
         std::min(limits->v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
     limits->v1.maxUniformBuffersPerShaderStage =
         std::min(limits->v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
-    limits->v1.maxImmediateSize = std::min(limits->v1.maxImmediateSize, kMaxImmediateDataBytes);
+    limits->v1.maxImmediateSize =
+        std::min(limits->v1.maxImmediateSize, kMaxSupportedImmediateDataBytes);
 
     if (limits->v1.maxDynamicUniformBuffersPerPipelineLayout >
         kMaxDynamicUniformBuffersPerPipelineLayout) {
