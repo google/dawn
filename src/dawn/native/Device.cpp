@@ -39,6 +39,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/Sha3.h"
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/common/Version_autogen.h"
@@ -419,8 +420,13 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     // Record the cache key from the adapter info. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
-    StreamIn(&mDeviceCacheKey, kDawnVersion, adapterInfo, mEnabledFeatures.featuresBitSet, mToggles,
-             cacheDesc);
+    CacheKey cacheKey;
+    StreamIn(&cacheKey, adapterInfo, mEnabledFeatures.featuresBitSet, mToggles, cacheDesc);
+
+    // Hash the key to make it smaller.
+    Sha3_224::Output hash = Sha3_224::Hash(cacheKey.data(), cacheKey.size());
+    // Dawn Version needs to be in plain because it's used for ValidateCacheKey()
+    StreamIn(&mDeviceCacheKey, kDawnVersion, hash);
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
