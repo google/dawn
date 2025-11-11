@@ -87,8 +87,11 @@
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
             {"name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
             {"name": "buffer offset", "type": "uint64_t"},
-            {"name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
-            {"name": "size", "type": "uint64_t"}
+            { "name": "size", "type": "uint64_t"},
+            { "name": "write handle create info length", "type": "uint64_t" },
+            { "name": "write handle create info", "type": "uint8_t", "annotation": "const*", "length": "write handle create info length", "skip_serialize": true},
+            { "name": "write data update info length", "type": "uint64_t" },
+            { "name": "write data update info", "type": "uint8_t", "annotation": "const*", "length": "write data update info length", "skip_serialize": true}
         ],
         "queue write texture": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
