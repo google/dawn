@@ -1,5 +1,7 @@
 package androidx.webgpu
 
+import androidx.test.filters.MediumTest
+import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
 import java.nio.ByteBuffer
@@ -12,6 +14,7 @@ import org.junit.Before
 import org.junit.Test
 
 @Suppress("UNUSED_VARIABLE")
+@SmallTest
 class RenderPassEncoderTest {
   private var webGpu: WebGpu? = null
   private lateinit var device: GPUDevice
@@ -286,6 +289,7 @@ class RenderPassEncoderTest {
   }
 
   @Test
+  @MediumTest
   fun testDrawIndexedIndirectValidSucceeds() {
     val indirectBuffer = createIndirectBuffer(intArrayOf(3, 1, 0, 0, 0))
     val indexBuffer = createIndexBuffer(shortArrayOf(0, 1, 2))
