@@ -27,6 +27,8 @@
 
 import("../../../scripts/dawn_overrides_with_defaults.gni")
 
+import("${dawn_root}/scripts/dawn_features.gni")
+
 group("samples") {
   deps = [
     ":Animometer",
@@ -34,7 +36,7 @@ group("samples") {
     ":HelloTriangle",
   ]
 
-  if (!is_wasm) {
+  if (dawn_supports_glfw_for_windowing) {
     deps += [
       ":DawnInfo",
       ":ManualSurfaceTest",
@@ -57,7 +59,7 @@ static_library("utils") {
     "${dawn_root}/src/dawn/utils:wgpu_utils",
   ]
 
-  if (!is_wasm) {
+  if (dawn_supports_glfw_for_windowing) {
     public_deps += [
       "${dawn_root}/src/dawn/glfw",
       "${dawn_root}/src/dawn/native",
@@ -97,10 +99,12 @@ sample("Animometer") {
   sources = [ "Animometer.cpp" ]
 }
 
-sample("ManualSurfaceTest") {
-  sources = [ "ManualSurfaceTest.cpp" ]
-}
+if (dawn_supports_glfw_for_windowing) {
+  sample("ManualSurfaceTest") {
+    sources = [ "ManualSurfaceTest.cpp" ]
+  }
 
-sample("DawnInfo") {
-  sources = [ "DawnInfo.cpp" ]
+  sample("DawnInfo") {
+    sources = [ "DawnInfo.cpp" ]
+  }
 }
