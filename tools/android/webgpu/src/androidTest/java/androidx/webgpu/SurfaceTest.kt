@@ -56,7 +56,7 @@ class SurfaceTest {
   @Test
   fun surfaceLifecycle_configureAndPresent_succeeds() {
     val surface = webGpu.webgpuSurface
-    val adapter = runBlocking { webGpu.instance.requestAdapter() }.adapter!!
+    val adapter = runBlocking { webGpu.instance.requestAdapter() }
 
     val capabilities = surface.getCapabilities(adapter)
     val desiredFormat = TextureFormat.RGBA8Unorm
