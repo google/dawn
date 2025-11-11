@@ -269,6 +269,13 @@
           'gtest_tests': 'real_hardware_win_gtests',
         },
       },
+      'dawn-win-x64-intel-uhd770-rel': {
+        'os_type': 'win',
+        'mixins': [
+          'win10_intel_uhd_770_stable',
+        ],
+        'test_suites': {},
+      },
       'dawn-win-x64-nvidia-gtx1660-asan': {
         'os_type': 'win',
         'mixins': [

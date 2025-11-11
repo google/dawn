@@ -249,6 +249,8 @@ dawn_win_functional_cq_tester(
     mirrors = [
         "ci/dawn-win-x64-builder-rel",
         "ci/dawn-win-x64-intel-uhd630-rel",
+        # TODO(crbug.com/458768121): Add the UHD 770 config when capacity has
+        # recovered.
         "ci/dawn-win-x64-nvidia-gtx1660-rel",
         "ci/dawn-win-x64-sws-rel",
     ],
@@ -488,6 +490,16 @@ dawn_win_manual_builder(
     mirrors = [
         "ci/dawn-win-x64-builder-rel",
         "ci/dawn-win-x64-intel-uhd630-rel",
+    ],
+    gn_args = "ci/dawn-win-x64-builder-rel",
+)
+
+dawn_win_manual_builder(
+    name = "dawn-try-win-x64-intel-uhd770-rel",
+    description_html = "Tests release Dawn on Windows/x64 on Intel CPUs w/ UHD 770. Manual only.",
+    mirrors = [
+        "ci/dawn-win-x64-builder-rel",
+        "ci/dawn-win-x64-intel-uhd770-rel",
     ],
     gn_args = "ci/dawn-win-x64-builder-rel",
 )
