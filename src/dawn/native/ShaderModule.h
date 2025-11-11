@@ -403,7 +403,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
 
     std::optional<bool> GetStrictMath() const;
 
-    using ShaderModuleHasher = Sha3_512;
+    using ShaderModuleHasher = Sha3_256;
     using ShaderModuleHash = ShaderModuleHasher::Output;
     const ShaderModuleHash& GetHash() const;
 
