@@ -144,13 +144,14 @@ static_assert(
     kNumElements == utils::ComboLimits::kMemberCount,
     "Combo limits structure has a different number of limits than the above ENUM_LIST_LIMITS");
 
-// clang-format off
 TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFields) {
     // SwiftShader will return a lower limit than any modern device on CQ.
     DAWN_TEST_UNSUPPORTED_IF(IsSwiftshader());
 
     std::map<std::string, std::array<uint64_t, kNumElements>> device_map;
 
+    // clang-format off
+    {
 // AMD
 device_map["Metal_AMD_Radeon_Pro_5300M"]                    = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535, 64, 10, 8, 10, 8,};
 device_map["Metal_AMD_Radeon_Pro_555X"]                     = {  16384, 16384, 2048, 2048, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 65536, 2147483644, 256, 256, 8, 2147483648, 30, 2048, 28, 8, 128, 32768, 1024, 1024, 1024, 64, 65535,  0, 10, 8, 10, 8,};
@@ -211,12 +212,14 @@ device_map["Vulkan_Qualcomm_R__Adreno_TM__X1_85_GPU"]       = {  16384, 16384, 2
 // SwiftShader
 device_map["OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___0x0000C0DE____SwiftShader_driver_5_0_0__compat"]
                                                             = {   8192,  8192, 2048,  256, 4, 24, 1000, 10, 8, 16, 16, 10, 8, 12, 16384, 1073741824, 256, 256, 8, 2147483648, 16, 2048, 16, 4,  32, 32768,  256,  256,  256, 64, 65535,  0, 10, 8, 10, 8,};
+    }
+    // clang-format on
 
     auto& supported_limits = GetSupportedLimits();
 
     // We need alternates mostly due to differences in driver versions.
-    // Some devices might be on one driver that supports limit X while others might be on a driver that
-    // supports limit Y.
+    // Some devices might be on one driver that supports limit X while others might be on a driver
+    // that supports limit Y.
     // In the case of alternates we append a "_alt{n}" where n starts at 1 (first alternate).
     bool encountered_error = false;
     int alternate_index = 0;
@@ -227,11 +230,11 @@ device_map["OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___
         full_param = GetFullParamString(alternate_index);
         auto iter_curr_limits = device_map.find(full_param);
         alternate_index++;
-        has_next_alternate =  device_map.contains(GetFullParamString(alternate_index));
+        has_next_alternate = device_map.contains(GetFullParamString(alternate_index));
         if (iter_curr_limits == device_map.end()) {
             // CQ bots will pass in '--test-launcher-bot-mode' as a command line parameter.
-            // In this case, we didn't find any results, so we want to make sure we report an error as
-            // this is a new CQ bot and we need to update the  test results.
+            // In this case, we didn't find any results, so we want to make sure we report an error
+            // as this is a new CQ bot and we need to update the  test results.
             if (IsTestLauncherBotMode()) {
                 encountered_error = true;
             } else {
@@ -242,39 +245,38 @@ device_map["OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___
         }
 
         int curr_idx = 0;
-        #define ENUM_LIMIT_PROPERTY(fieldName)                                                             \
-        if (!encountered_error &&                                                                          \
-            supported_limits.fieldName !=                                                                  \
-                static_cast<decltype(supported_limits.fieldName)>((iter_curr_limits->second)[curr_idx])) { \
-            /* maybe the alternate will pass. Do not surface error.*/                                      \
-            if(!has_next_alternate){                                                                       \
-            EXPECT_EQ(supported_limits.fieldName, static_cast<decltype(supported_limits.fieldName)>(       \
-                                                    (iter_curr_limits->second)[curr_idx]));                \
-            }                                                                                              \
-            /*Report first error only*/                                                                    \
-            encountered_error = true;                                                                      \
-        }                                                                                                  \
-        curr_idx++;
+#define ENUM_LIMIT_PROPERTY(fieldName)                                                   \
+    if (!encountered_error &&                                                            \
+        supported_limits.fieldName != static_cast<decltype(supported_limits.fieldName)>( \
+                                          (iter_curr_limits->second)[curr_idx])) {       \
+        /* maybe the alternate will pass. Do not surface error.*/                        \
+        if (!has_next_alternate) {                                                       \
+            EXPECT_EQ(supported_limits.fieldName,                                        \
+                      static_cast<decltype(supported_limits.fieldName)>(                 \
+                          (iter_curr_limits->second)[curr_idx]));                        \
+        }                                                                                \
+        /*Report first error only*/                                                      \
+        encountered_error = true;                                                        \
+    }                                                                                    \
+    curr_idx++;
 
         ENUM_LIST_LIMITS
-        #undef ENUM_LIMIT_PROPERTY
-    } while(has_next_alternate && encountered_error);
-
+#undef ENUM_LIMIT_PROPERTY
+    } while (has_next_alternate && encountered_error);
 
     if (encountered_error) {
         std::string expected_str =
             "\n Mismatch found! The full set of correct limits for device are:\n "
             "device_map[\"" +
             full_param + "\"] = { " +
-    #define ENUM_LIMIT_PROPERTY(fieldName) " " + std::to_string(supported_limits.fieldName) + "," +
+#define ENUM_LIMIT_PROPERTY(fieldName) " " + std::to_string(supported_limits.fieldName) + "," +
             ENUM_LIST_LIMITS
-    #undef ENUM_LIMIT_PROPERTY
+#undef ENUM_LIMIT_PROPERTY
             "};";
         SCOPED_TRACE(expected_str);
         EXPECT_FALSE(encountered_error);
     }
 }
-// clang-format on
 
 TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
     // SwiftShader will return a lower limit than any modern device on CQ.
@@ -282,116 +284,119 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
 
     std::multimap<std::string, std::set<uint32_t>> device_map;
 
-    // clang-format off
     using enum wgpu::FeatureName;
 
-    std::set all_feature_enum =  {
-    CoreFeaturesAndLimits,
-    DepthClipControl,
-    Depth32FloatStencil8,
-    TextureCompressionBC,
-    TextureCompressionBCSliced3D,
-    TextureCompressionETC2,
-    TextureCompressionASTC,
-    TextureCompressionASTCSliced3D,
-    TimestampQuery,
-    IndirectFirstInstance,
-    ShaderF16,
-    RG11B10UfloatRenderable,
-    BGRA8UnormStorage,
-    Float32Filterable,
-    Float32Blendable,
-    ClipDistances,
-    DualSourceBlending,
-    Subgroups,
-    TextureFormatsTier1,
-    TextureFormatsTier2,
-    PrimitiveIndex,
-    TextureComponentSwizzle,
-    DawnInternalUsages,
-    DawnMultiPlanarFormats,
-    DawnNative,
-    ChromiumExperimentalTimestampQueryInsidePasses,
-    ImplicitDeviceSynchronization,
-    TransientAttachments,
-    MSAARenderToSingleSampled,
-    D3D11MultithreadProtected,
-    ANGLETextureSharing,
-    PixelLocalStorageCoherent,
-    PixelLocalStorageNonCoherent,
-    Unorm16TextureFormats,
-    Snorm16TextureFormats,
-    MultiPlanarFormatExtendedUsages,
-    MultiPlanarFormatP010,
-    HostMappedPointer,
-    MultiPlanarRenderTargets,
-    MultiPlanarFormatNv12a,
-    FramebufferFetch,
-    BufferMapExtendedUsages,
-    AdapterPropertiesMemoryHeaps,
-    AdapterPropertiesD3D,
-    AdapterPropertiesVk,
-    R8UnormStorage,
-    DawnFormatCapabilities,
-    DawnDrmFormatCapabilities,
-    Norm16TextureFormats,
-    MultiPlanarFormatNv16,
-    MultiPlanarFormatNv24,
-    MultiPlanarFormatP210,
-    MultiPlanarFormatP410,
-    SharedTextureMemoryVkDedicatedAllocation,
-    SharedTextureMemoryAHardwareBuffer,
-    SharedTextureMemoryDmaBuf,
-    SharedTextureMemoryOpaqueFD,
-    SharedTextureMemoryZirconHandle,
-    SharedTextureMemoryDXGISharedHandle,
-    SharedTextureMemoryD3D11Texture2D,
-    SharedTextureMemoryIOSurface,
-    SharedTextureMemoryEGLImage,
-    SharedFenceVkSemaphoreOpaqueFD,
-    SharedFenceSyncFD,
-    SharedFenceVkSemaphoreZirconHandle,
-    SharedFenceDXGISharedHandle,
-    SharedFenceMTLSharedEvent,
-    SharedBufferMemoryD3D12Resource,
-    StaticSamplers,
-    YCbCrVulkanSamplers,
-    ShaderModuleCompilationOptions,
-    DawnLoadResolveTexture,
-    DawnPartialLoadResolveTexture,
-    MultiDrawIndirect,
-    DawnTexelCopyBufferRowAlignment,
-    FlexibleTextureViews,
-    ChromiumExperimentalSubgroupMatrix,
-    SharedFenceEGLSync,
-    DawnDeviceAllocatorControl,
-    ChromiumExperimentalBindless,
-    AdapterPropertiesWGPU,
-    SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
-    SharedTextureMemoryD3D12Resource,
+    std::set all_feature_enum = {
+        CoreFeaturesAndLimits,
+        DepthClipControl,
+        Depth32FloatStencil8,
+        TextureCompressionBC,
+        TextureCompressionBCSliced3D,
+        TextureCompressionETC2,
+        TextureCompressionASTC,
+        TextureCompressionASTCSliced3D,
+        TimestampQuery,
+        IndirectFirstInstance,
+        ShaderF16,
+        RG11B10UfloatRenderable,
+        BGRA8UnormStorage,
+        Float32Filterable,
+        Float32Blendable,
+        ClipDistances,
+        DualSourceBlending,
+        Subgroups,
+        TextureFormatsTier1,
+        TextureFormatsTier2,
+        PrimitiveIndex,
+        TextureComponentSwizzle,
+        DawnInternalUsages,
+        DawnMultiPlanarFormats,
+        DawnNative,
+        ChromiumExperimentalTimestampQueryInsidePasses,
+        ImplicitDeviceSynchronization,
+        TransientAttachments,
+        MSAARenderToSingleSampled,
+        D3D11MultithreadProtected,
+        ANGLETextureSharing,
+        PixelLocalStorageCoherent,
+        PixelLocalStorageNonCoherent,
+        Unorm16TextureFormats,
+        Snorm16TextureFormats,
+        MultiPlanarFormatExtendedUsages,
+        MultiPlanarFormatP010,
+        HostMappedPointer,
+        MultiPlanarRenderTargets,
+        MultiPlanarFormatNv12a,
+        FramebufferFetch,
+        BufferMapExtendedUsages,
+        AdapterPropertiesMemoryHeaps,
+        AdapterPropertiesD3D,
+        AdapterPropertiesVk,
+        R8UnormStorage,
+        DawnFormatCapabilities,
+        DawnDrmFormatCapabilities,
+        Norm16TextureFormats,
+        MultiPlanarFormatNv16,
+        MultiPlanarFormatNv24,
+        MultiPlanarFormatP210,
+        MultiPlanarFormatP410,
+        SharedTextureMemoryVkDedicatedAllocation,
+        SharedTextureMemoryAHardwareBuffer,
+        SharedTextureMemoryDmaBuf,
+        SharedTextureMemoryOpaqueFD,
+        SharedTextureMemoryZirconHandle,
+        SharedTextureMemoryDXGISharedHandle,
+        SharedTextureMemoryD3D11Texture2D,
+        SharedTextureMemoryIOSurface,
+        SharedTextureMemoryEGLImage,
+        SharedFenceVkSemaphoreOpaqueFD,
+        SharedFenceSyncFD,
+        SharedFenceVkSemaphoreZirconHandle,
+        SharedFenceDXGISharedHandle,
+        SharedFenceMTLSharedEvent,
+        SharedBufferMemoryD3D12Resource,
+        StaticSamplers,
+        YCbCrVulkanSamplers,
+        ShaderModuleCompilationOptions,
+        DawnLoadResolveTexture,
+        DawnPartialLoadResolveTexture,
+        MultiDrawIndirect,
+        DawnTexelCopyBufferRowAlignment,
+        FlexibleTextureViews,
+        ChromiumExperimentalSubgroupMatrix,
+        SharedFenceEGLSync,
+        DawnDeviceAllocatorControl,
+        ChromiumExperimentalBindless,
+        AdapterPropertiesWGPU,
+        SharedBufferMemoryD3D12SharedMemoryFileMappingHandle,
+        SharedTextureMemoryD3D12Resource,
     };
 
-
-    auto AddDevice = [&](const std::vector<int>& vec, std::string device_str){
+    auto AddDevice = [&](const std::vector<int>& vec, std::string device_str) {
         std::set<uint32_t> device_set;
         size_t vec_idx = 0;
-        if(all_feature_enum.size()!= vec.size()){
-            std::string msg = "All feature set (all_feature_enum) does not have the same size at input vector for " + device_str;
+        if (all_feature_enum.size() != vec.size()) {
+            std::string msg =
+                "All feature set (all_feature_enum) does not have the same size at input vector "
+                "for " +
+                device_str;
             SCOPED_TRACE(msg);
             EXPECT_FALSE(true);
             return;
         }
 
-        for(auto& each: all_feature_enum){
-            if(vec[vec_idx] == 1){
+        for (auto& each : all_feature_enum) {
+            if (vec[vec_idx] == 1) {
                 // Internal storage is feature id enum
                 device_set.insert(static_cast<uint32_t>(each));
             }
             vec_idx++;
         }
-        device_map.insert({device_str,device_set});
+        device_map.insert({device_str, device_set});
     };
 
+    // clang-format off
+    {
 // AMD
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }, "Metal_AMD_Radeon_Pro_5300M");
 AddDevice({1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }, "Metal_AMD_Radeon_Pro_555X");
@@ -448,13 +453,15 @@ AddDevice({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 // SwiftShader
 AddDevice({0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }, "OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___0x0000C0DE____SwiftShader_driver_5_0_0__compat");
 AddDevice({0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 }, "OpenGLES_ANGLE__Google__Vulkan_1_3_0__SwiftShader_Device__Subzero___0x0000C0DE____SwiftShader_driver_5_0_0__compat");
+    }
+    // clang-format on
 
-auto supported_features = this->GetSupportedFeatures();
+    auto supported_features = this->GetSupportedFeatures();
 
     // We need alternates mostly due to differences in driver versions.
     // Some devices might be on one driver that supports limit X while others might be on a driver
-    // that supports limit Y. In the case of alternates we append a "_alt{n}" where n starts at 1
-    // (first alternate).
+    // that supports limit Y.
+    // In the case of alternates we append a "_alt{n}" where n starts at 1 (first alternate).
     bool encountered_error = false;
     std::string full_param = GetFullParamString();
     auto iter = device_map.equal_range(full_param);
@@ -474,7 +481,7 @@ auto supported_features = this->GetSupportedFeatures();
         }
     } else {
         std::string error_str;
-        for (;iter_match!= iter_end; iter_match++) {
+        for (; iter_match != iter_end; iter_match++) {
             encountered_error = false;
             std::set<wgpu::FeatureName> curr_features_typed;
             for (auto& each : iter_match->second) {
@@ -494,17 +501,17 @@ auto supported_features = this->GetSupportedFeatures();
             error_str = "\nMissing features= ";
             for (auto& each : missing_features) {
                 encountered_error = true;
-                error_str +=
-                    FeatureNameToString(each) + "(" + std::to_string(static_cast<int>(each)) + "), ";
+                error_str += FeatureNameToString(each) + "(" +
+                             std::to_string(static_cast<int>(each)) + "), ";
             }
             error_str += "\nUnexpected features= ";
             for (auto& each : unexpected_features) {
                 encountered_error = true;
-                error_str +=
-                    FeatureNameToString(each) + "(" + std::to_string(static_cast<int>(each)) + "), ";
+                error_str += FeatureNameToString(each) + "(" +
+                             std::to_string(static_cast<int>(each)) + "), ";
             }
 
-            if(!encountered_error){
+            if (!encountered_error) {
                 // Found a successful device feature set.
                 break;
             }
@@ -529,8 +536,6 @@ auto supported_features = this->GetSupportedFeatures();
         EXPECT_FALSE(encountered_error);
     }
 }
-
-// clang-format on
 
 DAWN_INSTANTIATE_TEST(TierArchInfoTest_TieredMaxLimits,
                       D3D11Backend(),
