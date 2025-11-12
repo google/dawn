@@ -259,12 +259,21 @@ if (is_win) {
     outputs = [ "$dawn_node_gen_dir/NapiSymbols.lib" ]
     script = run_built_binary_script
     linker = rebase_path("$clang_base_path/bin/lld-link${_exe}", root_build_dir)
+
     args = [
       "",
       linker,
       "/DEF:" + rebase_path(inputs[0], root_build_dir),
       "/OUT:" + rebase_path(outputs[0], root_build_dir),
     ]
+    if (current_cpu == "x64") {
+      args += [ "/machine:x64" ]
+    } else if (current_cpu == "x86") {
+      args += [ "/machine:x86" ]
+    } else if (current_cpu == "arm64") {
+      args += [ "/machine:arm64" ]
+    }
+
     deps = [ ":gen_napi_symbols" ]
   }
 }
@@ -301,6 +310,13 @@ shared_library("dawn_node") {
     deps += [ ":napi_symbols_lib" ]
     ldflags =
         [ rebase_path("$dawn_node_gen_dir/NapiSymbols.lib", root_build_dir) ]
+    if (current_cpu == "x64") {
+      ldflags += [ "/machine:x64" ]
+    } else if (current_cpu == "x86") {
+      ldflags += [ "/machine:x86" ]
+    } else if (current_cpu == "arm64") {
+      ldflags += [ "/machine:arm64" ]
+    }
   } else {
     # Don't pass '-z,defs' linker arg when compiling weak symbols
     configs -= [ "//build/config/compiler:no_unresolved_symbols" ]
