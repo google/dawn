@@ -184,6 +184,7 @@ struct State {
     void Process() {
         // Find the builtins that need replacing.
         Vector<core::ir::CoreBuiltinCall*, 4> worklist;
+        Vector<core::ir::Construct*, 4> subgroup_matrix_constructors;
 
         // Replace types for function parameters if necessary
         for (auto fn : ir.functions) {
@@ -257,6 +258,14 @@ struct State {
                         break;
                     default:
                         break;
+                }
+            }
+            if (auto* construct = inst->As<core::ir::Construct>()) {
+                if (auto* sm = construct->Result()->Type()->As<core::type::SubgroupMatrix>()) {
+                    if (sm->Type()->IsAnyOf<core::type::I8, core::type::U8>() &&
+                        construct->Args().Length() > 0) {
+                        subgroup_matrix_constructors.Push(construct);
+                    }
                 }
             }
         }
@@ -362,6 +371,29 @@ struct State {
                 default:
                     break;
             }
+        }
+
+        // Replace non-zero subgroup matrix constructors that use 8-bit component types.
+        // SPIR-V requires that the value passed to OpCompositeConstruct is an 8-bit value.
+        for (auto* construct : subgroup_matrix_constructors) {
+            auto* sm_ty = construct->Result()->Type()->As<core::type::SubgroupMatrix>();
+            TINT_IR_ASSERT(ir, construct->Args().Length() == 1u);
+            TINT_IR_ASSERT(ir, sm_ty);
+            auto* value = construct->Args()[0];
+            b.InsertBefore(construct, [&] {
+                if (sm_ty->Type()->Is<core::type::I8>()) {
+                    value = b.CallExplicit<spirv::ir::BuiltinCall>(
+                                 ty.i8(), spirv::BuiltinFn::kSConvert, Vector{ty.i8()},
+                                 b.Call(ty.i32(), core::BuiltinFn::kClamp, value, -128_i, 127_i))
+                                ->Result();
+                } else if (sm_ty->Type()->Is<core::type::U8>()) {
+                    value = b.CallExplicit<spirv::ir::BuiltinCall>(
+                                 ty.u8(), spirv::BuiltinFn::kUConvert, Vector{ty.u8()},
+                                 b.Call(ty.u32(), core::BuiltinFn::kClamp, value, 0_u, 255_u))
+                                ->Result();
+                }
+            });
+            construct->SetArg(0, value);
         }
     }
 

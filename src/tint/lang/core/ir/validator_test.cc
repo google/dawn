@@ -238,7 +238,7 @@ TEST_F(IR_ValidatorTest, Construct_SubgroupMatrix_WrongArgType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:3:42 error: construct: subgroup matrix construct argument type '<function>' does not match matrix type 'f32'
+            R"(:3:42 error: construct: subgroup matrix construct argument type '<function>' does not match matrix shader scalar type 'f32'
     %2:subgroup_matrix_left<f32, 2, 3> = construct %f
                                          ^^^^^^^^^
 )")) << res.Failure();

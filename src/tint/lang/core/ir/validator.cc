@@ -3826,10 +3826,19 @@ void Validator::CheckConstruct(const Construct* construct) {
         if (args.Length() > 1) {
             AddError(construct) << "subgroup matrix construct must not have more than 1 argument";
         } else {
-            if (args[0]->Type() != sg_mat->Type()) {
+            // 8-bit integer matrices use 32-bit shader scalar types in WGSL.
+            // Some backends may support 8-bit integers, in which case they would pass an 8-bit
+            // type for the constructor value instead.
+            auto* scalar_ty = sg_mat->Type();
+            if (scalar_ty->Is<core::type::I8>()) {
+                scalar_ty = type_mgr_.i32();
+            } else if (scalar_ty->Is<core::type::U8>()) {
+                scalar_ty = type_mgr_.u32();
+            }
+            if (args[0]->Type() != scalar_ty && args[0]->Type() != sg_mat->Type()) {
                 AddError(construct)
                     << "subgroup matrix construct argument type " << NameOf(args[0]->Type())
-                    << " does not match matrix type " << NameOf(sg_mat->Type());
+                    << " does not match matrix shader scalar type " << NameOf(scalar_ty);
             }
         }
     } else if (auto* vec = result_type->As<core::type::Vector>()) {

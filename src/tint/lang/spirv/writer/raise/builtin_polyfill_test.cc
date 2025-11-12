@@ -5546,5 +5546,85 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixScalarMultiply_u8) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_i8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
+    auto* mat = ty.subgroup_matrix_result(ty.i8(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Let("r", b.Construct(mat, 3_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<i8, 8, 8> = construct 3i
+    %r:subgroup_matrix_result<i8, 8, 8> = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = clamp 3i, -128i, 127i
+    %3:i8 = spirv.s_convert<i8> %2
+    %4:subgroup_matrix_result<i8, 8, 8> = construct %3
+    %r:subgroup_matrix_result<i8, 8, 8> = let %4
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupMatrixConstruct_u8) {
+    capabilities = core::ir::Capability::kAllow8BitIntegers;
+
+    auto* mat = ty.subgroup_matrix_result(ty.u8(), 8, 8);
+
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        b.Let("r", b.Construct(mat, 3_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:subgroup_matrix_result<u8, 8, 8> = construct 3u
+    %r:subgroup_matrix_result<u8, 8, 8> = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = clamp 3u, 0u, 255u
+    %3:u8 = spirv.u_convert<u8> %2
+    %4:subgroup_matrix_result<u8, 8, 8> = construct %3
+    %r:subgroup_matrix_result<u8, 8, 8> = let %4
+    ret
+  }
+}
+)";
+
+    PolyfillConfig config{.use_vulkan_memory_model = true};
+    Run(BuiltinPolyfill, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise
