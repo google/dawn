@@ -79,7 +79,8 @@
     X(maxComputeWorkgroupSizeX)                  \
     X(maxComputeWorkgroupSizeY)                  \
     X(maxComputeWorkgroupSizeZ)                  \
-    X(maxComputeWorkgroupsPerDimension)
+    X(maxComputeWorkgroupsPerDimension)          \
+    X(maxImmediateSize)
 
 namespace wgpu::binding {
 

@@ -417,7 +417,8 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
 
     wgpu::PipelineLayoutDescriptor desc{};
     if (!conv(desc.label, descriptor.label) ||
-        !conv(desc.bindGroupLayouts, desc.bindGroupLayoutCount, descriptor.bindGroupLayouts)) {
+        !conv(desc.bindGroupLayouts, desc.bindGroupLayoutCount, descriptor.bindGroupLayouts) ||
+        !conv(desc.immediateSize, descriptor.immediateSize)) {
         return {};
     }
 

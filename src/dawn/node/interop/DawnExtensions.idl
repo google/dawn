@@ -89,6 +89,25 @@ interface GPURenderPassEncoder {
 };
 
 // ============================================================================
+// Immediates
+// ============================================================================
+dictionary GPUPipelineLayoutDescriptor {
+    GPUSize32 immediateSize = 0;
+};
+interface GPUComputePassEncoder {
+    undefined setImmediates(GPUSize32 rangeOffset, AllowSharedBufferSource data, optional GPUSize64 dataOffset = 0, optional GPUSize64 size);
+};
+interface GPURenderBundleEncoder {
+    undefined setImmediates(GPUSize32 rangeOffset, AllowSharedBufferSource data, optional GPUSize64 dataOffset = 0, optional GPUSize64 size);
+};
+interface GPURenderPassEncoder {
+    undefined setImmediates(GPUSize32 rangeOffset, AllowSharedBufferSource data, optional GPUSize64 dataOffset = 0, optional GPUSize64 size);
+};
+interface GPUSupportedLimits {
+    readonly attribute unsigned long maxImmediateSize;
+}
+
+// ============================================================================
 // WebGPU compat
 // ============================================================================
 dictionary GPUTextureDescriptor {

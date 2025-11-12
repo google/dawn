@@ -32,6 +32,7 @@
 
 #include <concepts>
 #include <functional>
+#include <span>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
@@ -485,6 +486,13 @@ class Converter {
 };
 
 std::string CopyLabel(StringView label);
+
+// Does the conversion from [AllowShared] BufferSource and offset, size? in elements to a span.
+bool ConvertDataElementsToSpan(Napi::Env env,
+                               std::span<const uint8_t>* out,
+                               interop::AllowSharedBufferSource data,
+                               interop::GPUSize64 data_offset_elements,
+                               std::optional<interop::GPUSize64> size_elements);
 
 }  // namespace wgpu::binding
 
