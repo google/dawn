@@ -87,7 +87,8 @@ class PhysicalDevice : public d3d::PhysicalDevice {
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();
 
-    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
+                                   const TogglesState& adapterToggles) const override;
 
     ComPtr<ID3D12Device> mD3d12Device;
 

@@ -72,7 +72,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
     FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
-    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const override;
+    void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
+                                   const TogglesState& adapterToggles) const override;
 
     NSPRef<id<MTLDevice>> mDevice;
     const bool mMetalValidationEnabled;

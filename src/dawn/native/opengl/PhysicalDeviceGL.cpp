@@ -581,7 +581,8 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
     return {};
 }
 
-void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {}
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
+                                               const TogglesState&) const {}
 
 bool PhysicalDevice::SupportTextureComponentSwizzle() const {
     // Texture component swizzle requires GLES 3.0 / GL 3.3+ and is known to be incomplete or

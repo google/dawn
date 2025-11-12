@@ -525,10 +525,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
         (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
     if (hasCooperativeMatrix && hasVulkanMemoryModel && hasComputeFullSubgroups) {
-        PopulateSubgroupMatrixConfigs();
-        if (!mSubgroupMatrixConfigs.empty()) {
-            EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
-        }
+        EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
@@ -1455,7 +1452,8 @@ const AHBFunctions* PhysicalDevice::GetOrLoadAHBFunctions() {
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
-void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
+                                               const TogglesState& toggles) const {
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
         size_t count = mDeviceInfo.memoryHeaps.size();
         auto* heapInfo = new MemoryHeapInfo[count];
@@ -1487,11 +1485,13 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) c
         vkProperties->driverVersion = mDeviceInfo.properties.driverVersion;
     }
     if (auto* subgroupMatrixConfigs = info.Get<AdapterPropertiesSubgroupMatrixConfigs>()) {
-        size_t count = mSubgroupMatrixConfigs.size();
+        std::vector<SubgroupMatrixConfig> supportedConfigs =
+            EnumerateSubgroupMatrixConfigs(toggles);
+        size_t count = supportedConfigs.size();
         SubgroupMatrixConfig* configs = new SubgroupMatrixConfig[count];
         subgroupMatrixConfigs->configs = configs;
-        subgroupMatrixConfigs->configCount = count;
-        memcpy(configs, mSubgroupMatrixConfigs.data(), count * sizeof(SubgroupMatrixConfig));
+        subgroupMatrixConfigs->configCount = supportedConfigs.size();
+        memcpy(configs, supportedConfigs.data(), count * sizeof(SubgroupMatrixConfig));
     }
 }
 
@@ -1521,14 +1521,15 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
     }
 }
 
-void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
+std::vector<SubgroupMatrixConfig> PhysicalDevice::EnumerateSubgroupMatrixConfigs(
+    const TogglesState& toggles) const {
     size_t configCount = mDeviceInfo.cooperativeMatrixConfigs.size();
-    mSubgroupMatrixConfigs.reserve(configCount);
+    std::vector<SubgroupMatrixConfig> subgroupMatrixConfigs;
+    subgroupMatrixConfigs.reserve(configCount);
 
     auto SupportComponentType = [&](wgpu::SubgroupMatrixComponentType componentType) {
         if (componentType == wgpu::SubgroupMatrixComponentType::F16) {
-            TogglesState togglesState(ToggleStage::Adapter);
-            return IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, togglesState);
+            return IsFeatureSupportedWithToggles(wgpu::FeatureName::ShaderF16, toggles);
         }
         return true;
     };
@@ -1562,8 +1563,10 @@ void PhysicalDevice::PopulateSubgroupMatrixConfigs() {
             continue;
         }
 
-        mSubgroupMatrixConfigs.push_back(config);
+        subgroupMatrixConfigs.push_back(config);
     }
+
+    return subgroupMatrixConfigs;
 }
 
 void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<ErrorData> error) {

@@ -164,7 +164,7 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
         powerPreferenceDesc->powerPreference = mPowerPreference;
     }
 
-    mPhysicalDevice->PopulateBackendProperties(unpacked);
+    mPhysicalDevice->PopulateBackendProperties(unpacked, mTogglesState);
 
     // Allocate space for all strings.
     size_t allocSize = mPhysicalDevice->GetVendorName().length() +

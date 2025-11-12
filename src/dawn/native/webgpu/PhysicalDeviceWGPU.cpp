@@ -143,7 +143,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     return Device::Create(adapter, mInnerAdapter, descriptor, deviceToggles, std::move(lostEvent));
 }
 
-void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {
+void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
+                                               const TogglesState&) const {
     // TODO(crbug.com/413053623): Populate other AdapterInfo Chained extensions when necessary.
     if (auto* wgpuProperties = info.Get<AdapterPropertiesWGPU>()) {
         wgpuProperties->backendType = FromAPI(mInnerBackendType);
