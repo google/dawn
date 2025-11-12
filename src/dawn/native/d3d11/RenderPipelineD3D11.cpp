@@ -271,33 +271,20 @@ MaybeError RenderPipeline::InitializeImpl() {
 
 RenderPipeline::~RenderPipeline() = default;
 
-MaybeError RenderPipeline::ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext,
-                                    const std::array<float, 4>& blendColor,
-                                    uint32_t stencilReference) {
+void RenderPipeline::ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext,
+                              const std::array<float, 4>& blendColor,
+                              uint32_t stencilReference) {
     auto* d3d11DeviceContext = commandContext->GetD3D11DeviceContext3();
     d3d11DeviceContext->IASetPrimitiveTopology(mD3DPrimitiveTopology);
     // TODO(dawn:1753): deduplicate these objects in the backend eventually, and to avoid redundant
     // state setting.
     d3d11DeviceContext->IASetInputLayout(mInputLayout.Get());
     d3d11DeviceContext->RSSetState(mRasterizerState.Get());
-
-    if (DAWN_UNLIKELY(!mVertexShader)) {
-        DAWN_TRY_ASSIGN(mVertexShader, mVertexShaderFuture->TryGet());
-
-        if (mPixelShaderFuture) {
-            DAWN_TRY_ASSIGN(mPixelShader, mPixelShaderFuture->TryGet());
-        }
-
-        SetLabelImpl();
-    }
-
     d3d11DeviceContext->VSSetShader(mVertexShader.Get(), nullptr, 0);
     d3d11DeviceContext->PSSetShader(mPixelShader.Get(), nullptr, 0);
 
     ApplyBlendState(commandContext, blendColor);
     ApplyDepthStencilState(commandContext, stencilReference);
-
-    return {};
 }
 
 void RenderPipeline::ApplyBlendState(const ScopedSwapStateCommandRecordingContext* commandContext,
@@ -497,11 +484,14 @@ MaybeError RenderPipeline::InitializeShaders() {
                                       ToBackend(GetLayout()), compileFlags | additionalCompileFlags,
                                       GetImmediateMask(), usedInterstageVariables));
         const Blob& shaderBlob = compiledShader[SingleShaderStage::Vertex].shaderBlob;
+        {
+            TRACE_EVENT0(device->GetPlatform(), General, "RenderPipelineD3D11::CreateVertexShader");
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreateVertexShaderUs");
 
+            DAWN_TRY_ASSIGN(mVertexShader, device->GetOrCreateVertexShader(
+                                               compiledShader[SingleShaderStage::Vertex]));
+        }
         DAWN_TRY(InitializeInputLayout(shaderBlob));
-
-        mVertexShaderFuture = device->GetOrCreateVertexShader(
-            std::move(compiledShader[SingleShaderStage::Vertex]), GetLabel());
     }
 
     std::optional<tint::hlsl::writer::PixelLocalOptions> pixelLocalOptions;
@@ -564,23 +554,23 @@ MaybeError RenderPipeline::InitializeShaders() {
                 ->Compile(programmableStage, SingleShaderStage::Fragment, ToBackend(GetLayout()),
                           compileFlags | additionalCompileFlags, GetImmediateMask(),
                           usedInterstageVariables, pixelLocalOptions));
-        mPixelShaderFuture = device->GetOrCreatePixelShader(
-            std::move(compiledShader[SingleShaderStage::Fragment]), GetLabel());
+        {
+            TRACE_EVENT0(device->GetPlatform(), General, "RenderPipelineD3D11::CreatePixelShader");
+            SCOPED_DAWN_HISTOGRAM_TIMER_MICROS(device->GetPlatform(), "D3D11.CreatePixelShaderUs");
+            DAWN_TRY_ASSIGN(mPixelShader, device->GetOrCreatePixelShader(
+                                              compiledShader[SingleShaderStage::Fragment]));
+        }
     }
 
     return {};
 }
 
-ComPtr<ID3D11VertexShader> RenderPipeline::GetD3D11VertexShaderForTesting() {
-    ResultOrError<ComPtr<ID3D11VertexShader>> result = mVertexShaderFuture->TryGet();
-    DAWN_ASSERT(result.IsSuccess());
-    return result.AcquireSuccess();
+ID3D11VertexShader* RenderPipeline::GetD3D11VertexShaderForTesting() {
+    return mVertexShader.Get();
 }
 
-ComPtr<ID3D11PixelShader> RenderPipeline::GetD3D11PixelShaderForTesting() {
-    ResultOrError<ComPtr<ID3D11PixelShader>> result = mPixelShaderFuture->TryGet();
-    DAWN_ASSERT(result.IsSuccess());
-    return result.AcquireSuccess();
+ID3D11PixelShader* RenderPipeline::GetD3D11PixelShaderForTesting() {
+    return mPixelShader.Get();
 }
 
 }  // namespace dawn::native::d3d11

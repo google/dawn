@@ -335,7 +335,6 @@ dawn_test("dawn_unittests") {
     "unittests/EnumeratorTests.cpp",
     "unittests/ErrorTests.cpp",
     "unittests/FeatureTests.cpp",
-    "unittests/FutureResultTests.cpp",
     "unittests/GPUInfoTests.cpp",
     "unittests/GetProcAddressTests.cpp",
     "unittests/ITypArrayTests.cpp",

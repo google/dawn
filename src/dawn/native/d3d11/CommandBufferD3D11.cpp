@@ -583,7 +583,7 @@ MaybeError CommandBuffer::ExecuteComputePass(
             case Command::SetComputePipeline: {
                 SetComputePipelineCmd* cmd = mCommands.NextCommand<SetComputePipelineCmd>();
                 lastPipeline = ToBackend(cmd->pipeline).Get();
-                DAWN_TRY(lastPipeline->ApplyNow(commandContext));
+                lastPipeline->ApplyNow(commandContext);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
                 immediates.OnSetPipeline(lastPipeline);
                 break;
@@ -822,7 +822,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
                 SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
 
                 lastPipeline = ToBackend(cmd->pipeline.Get());
-                DAWN_TRY(lastPipeline->ApplyNow(commandContext, blendColor, stencilReference));
+                lastPipeline->ApplyNow(commandContext, blendColor, stencilReference);
                 bindGroupTracker.OnSetPipeline(lastPipeline);
                 immediates.OnSetPipeline(lastPipeline);
 

@@ -32,7 +32,6 @@
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 
 #include "dawn/native/d3d/d3d_platform.h"
-#include "dawn/native/d3d11/CreateShaderTaskD3D11.h"
 
 namespace dawn::native::d3d11 {
 
@@ -45,9 +44,9 @@ class ComputePipeline final : public ComputePipelineBase {
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
 
-    MaybeError ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
+    void ApplyNow(const ScopedSwapStateCommandRecordingContext* commandContext);
 
-    ComPtr<ID3D11ComputeShader> GetD3D11ComputeShaderForTesting();
+    ID3D11ComputeShader* GetD3D11ComputeShaderForTesting();
 
     MaybeError InitializeImpl() override;
 
@@ -58,7 +57,6 @@ class ComputePipeline final : public ComputePipelineBase {
     ~ComputePipeline() override;
     void SetLabelImpl() override;
 
-    Ref<FutureComPtr<ID3D11ComputeShader>> mComputeShaderFuture;
     ComPtr<ID3D11ComputeShader> mComputeShader;
 };
 
