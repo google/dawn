@@ -94,7 +94,7 @@ struct State {
         auto* unsigned_type = ty.MatchWidth(ty.u32(), signed_type);
         b.InsertBefore(unary, [&] {
             auto* unsigned_value = b.Bitcast(unsigned_type, unary->Val());
-            auto* complement = b.Complement(unsigned_type, unsigned_value);
+            auto* complement = b.Complement(unsigned_value);
             auto* plus_one = b.Add(unsigned_type, complement, b.MatchWidth(u32(1), unsigned_type));
             auto* result = b.Bitcast(signed_type, plus_one);
             unary->Result()->ReplaceAllUsesWith(result->Result());

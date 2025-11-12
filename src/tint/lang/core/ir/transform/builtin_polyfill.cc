@@ -702,7 +702,7 @@ struct State {
             auto* x = input;
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 x = b.Bitcast(uint_ty, x)->Result();
-                auto* inverted = b.Complement(uint_ty, x);
+                auto* inverted = b.Complement(x);
                 x = b.Call(uint_ty, core::BuiltinFn::kSelect, inverted, x,
                            b.LessThan(bool_ty, x, V(0x80000000)))
                         ->Result();
@@ -870,8 +870,7 @@ struct State {
                     auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
                                       b.LessThan<bool>(offset, 32_u));
                     auto* result_lhs = b.And(result_ty, s3, mask_as_result_type(mask));
-                    auto* result_rhs =
-                        b.And(result_ty, e, mask_as_result_type(b.Complement<u32>(mask)));
+                    auto* result_rhs = b.And(result_ty, e, mask_as_result_type(b.Complement(mask)));
                     auto* result = b.Or(result_ty, result_lhs, result_rhs);
                     result->SetResult(call->DetachResult());
                 });

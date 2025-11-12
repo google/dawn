@@ -39,7 +39,7 @@ TEST_F(HlslWriterTest, UnaryComplement) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
-        b.Var("b", b.Complement<i32>(b.Load(a)));
+        b.Var("b", b.Complement(b.Load(a)));
         b.Return(func);
     });
 

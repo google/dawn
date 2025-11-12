@@ -946,8 +946,7 @@ class Impl {
                         Bind(expr, val);
                         return;
                     case core::UnaryOp::kComplement: {
-                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
-                        inst = impl.builder_.Complement(ty, val);
+                        inst = impl.builder_.Complement(val);
                         break;
                     }
                     case core::UnaryOp::kNegation: {

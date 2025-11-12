@@ -1416,7 +1416,8 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
 }
 
 TEST_F(IR_ValidatorTest, Unary_ResultTypeNotMatchValueType) {
-    auto* bin = b.Complement(ty.f32(), 2_i);
+    auto* bin = b.Append(b.ir.CreateInstruction<ir::CoreUnary>(b.InstructionResult(ty.f32()),
+                                                               UnaryOp::kComplement, b.Value(2_i)));
 
     auto* f = b.Function("my_func", ty.void_());
 

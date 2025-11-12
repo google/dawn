@@ -39,7 +39,7 @@ TEST_F(GlslWriterTest, Complement) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
-        auto* op = b.Complement(ty.u32(), l);
+        auto* op = b.Complement(l);
         b.Let("val", op);
         b.Return(func);
     });

@@ -72,7 +72,7 @@ TEST_F(IR_EvaluatorTest, Bitcast) {
 }
 
 TEST_F(IR_EvaluatorTest, Unary) {
-    auto* inst = b.Complement(mod.Types().i32(), 4_i);
+    auto* inst = b.Complement(4_i);
     auto res = Eval(b, inst);
     ASSERT_EQ(res, Success);
 

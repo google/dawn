@@ -1010,32 +1010,21 @@ class Builder {
 
     /// Creates an op for `op val`
     /// @param op the unary operator
-    /// @tparam TYPE the result type of the binary expression
     /// @param val the value of the operation
     /// @returns the operation
-    template <typename TYPE, typename VAL>
+    template <typename VAL>
     ir::CoreUnary* Unary(UnaryOp op, VAL&& val) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Unary(op, type, std::forward<VAL>(val));
+        auto* value = Value(std::forward<VAL>(val));
+        return Append(
+            ir.CreateInstruction<ir::CoreUnary>(InstructionResult(value->Type()), op, value));
     }
 
     /// Creates a Complement operation
-    /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Complement(const core::type::Type* type, VAL&& val) {
-        return Unary(UnaryOp::kComplement, type, std::forward<VAL>(val));
-    }
-
-    /// Creates a Complement operation
-    /// @tparam TYPE the result type of the expression
-    /// @param val the value
-    /// @returns the operation
-    template <typename TYPE, typename VAL>
     ir::CoreUnary* Complement(VAL&& val) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Complement(type, std::forward<VAL>(val));
+        return Unary(UnaryOp::kComplement, std::forward<VAL>(val));
     }
 
     /// Creates a Negation operation

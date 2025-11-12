@@ -1037,7 +1037,7 @@ TEST_F(IRToProgramTest, UnaryOp_Complement) {
     auto* i = b.FunctionParam("i", ty.u32());
     fn->SetParams({i});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Complement(ty.u32(), i)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Complement(i)); });
 
     EXPECT_WGSL(R"(
 fn f(i : u32) -> u32 {
@@ -2025,7 +2025,7 @@ TEST_F(IRToProgramTest, LetUsedOnce) {
     fn->SetParams({i});
 
     b.Append(fn->Block(), [&] {
-        auto* v = b.Let("v", b.Complement(ty.u32(), i));
+        auto* v = b.Let("v", b.Complement(i));
         b.Return(fn, v);
     });
 

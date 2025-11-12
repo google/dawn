@@ -481,7 +481,7 @@ struct State {
         auto* val = call->Args()[0];
         auto* result_ty = call->Result()->Type();
         b.InsertBefore(call, [&] {
-            auto* complement = b.Complement(val->Type(), val)->Result();
+            auto* complement = b.Complement(val)->Result();
             if (val->Type() != result_ty) {
                 complement = b.Bitcast(result_ty, complement)->Result();
             }

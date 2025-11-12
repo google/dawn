@@ -41,7 +41,7 @@ using IR_UnaryTest = IRTestHelper;
 using IR_UnaryDeathTest = IR_UnaryTest;
 
 TEST_F(IR_UnaryTest, CreateComplement) {
-    auto* inst = b.Complement(mod.Types().i32(), 4_i);
+    auto* inst = b.Complement(4_i);
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Op(), UnaryOp::kComplement);
@@ -103,7 +103,7 @@ TEST_F(IR_UnaryDeathTest, Fail_NullType) {
 }
 
 TEST_F(IR_UnaryTest, Clone) {
-    auto* inst = b.Complement(mod.Types().i32(), 4_i);
+    auto* inst = b.Complement(4_i);
     auto* new_inst = clone_ctx.Clone(inst);
 
     EXPECT_NE(inst, new_inst);
