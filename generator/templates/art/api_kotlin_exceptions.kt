@@ -83,11 +83,12 @@ public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String)
 //* Generate a custom exception for every enum ending 'status'.
 //* 'status' is renamed 'web gpu status'.
 {% for enum in by_category['enum'] if include_enum(enum) and enum.name.chunks[-1] == 'status' %}
+    {% set success = enum.values[0] %}  //* 'Success' is conventionally the first enum.
     {% set exception_name = (enum.name.chunks[:-1] if len(enum.name.chunks) > 1 else ['web', 'gpu']) | map('title') | join + 'Exception' %}
     public class {{ exception_name }} (
         public val reason: String = "",
-        @{{ enum.name.CamelCase() }} public val status: Int? = null) : Exception(
-            (if (status != null && status != Status.Success) "${Status.toString(status)}: " else "") + reason) {
+        @{{ enum.name.CamelCase() }} public val status: Int = {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) : Exception(
+            (if (status != {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) "${Status.toString(status)}: " else "") + reason) {
     }
 
 {% endfor %}
