@@ -388,7 +388,7 @@ TEST(Limits, NormalizeLimits) {
         limits.v1.maxStorageBuffersPerShaderStage = kMaxStorageBuffersPerShaderStage + 1;
         limits.v1.maxStorageTexturesPerShaderStage = kMaxStorageTexturesPerShaderStage + 1;
         limits.v1.maxUniformBuffersPerShaderStage = kMaxUniformBuffersPerShaderStage + 1;
-        limits.v1.maxImmediateSize = kMaxSupportedImmediateDataBytes + 1;
+        limits.v1.maxImmediateSize = kMaxImmediateDataBytes + 1;
 
         NormalizeLimits(&limits);
 
@@ -403,7 +403,7 @@ TEST(Limits, NormalizeLimits) {
         EXPECT_EQ(limits.v1.maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
         EXPECT_EQ(limits.v1.maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
         EXPECT_EQ(limits.v1.maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
-        EXPECT_EQ(limits.v1.maxImmediateSize, kMaxSupportedImmediateDataBytes);
+        EXPECT_EQ(limits.v1.maxImmediateSize, kMaxImmediateDataBytes);
     }
 
     // Test maxStorageBufferBindingSize is clamped to maxBufferSize.

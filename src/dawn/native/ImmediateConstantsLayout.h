@@ -80,9 +80,10 @@ DAWN_DISABLE_STRUCT_PADDING_WARNINGS
 // Convert byte sizes and offsets into immediate constant indices and offsets
 // (dividing everything by kImmediateConstantElementByteSize)
 constexpr ImmediateConstantMask GetImmediateConstantBlockBits(size_t byteOffset, size_t byteSize) {
-    size_t firstIndex = byteOffset / kImmediateConstantElementByteSize;
-    size_t constantCount = byteSize / kImmediateConstantElementByteSize;
-
+    // This bit math can be done in uint64_t because there are <= 64 bits in the mask.
+    static_assert(ImmediateConstantMask{}.size() <= 64);
+    uint64_t firstIndex = byteOffset / kImmediateConstantElementByteSize;
+    uint64_t constantCount = byteSize / kImmediateConstantElementByteSize;
     return ((1u << constantCount) - 1u) << firstIndex;
 }
 

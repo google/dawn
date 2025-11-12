@@ -121,16 +121,15 @@ void ProgrammableEncoder::APISetImmediates(uint32_t offset, const void* data, si
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                uint32_t maxImmediateSize = GetDevice()->GetLimits().v1.maxImmediateSize;
-                DAWN_INVALID_IF(maxImmediateSize == 0,
-                                "immediates are not enabled (the device's maxImmediateSize is 0; "
-                                "AllowUnsafeAPIs may be needed to raise the adapter limit)");
+                DAWN_INVALID_IF(!GetDevice()->IsToggleEnabled(Toggle::EnableImmediateData),
+                                "ImmediateData is not enabled");
 
                 // Validate offset and size are aligned to 4 bytes.
                 DAWN_INVALID_IF(offset % 4 != 0, "offset (%u) is not a multiple of 4", offset);
                 DAWN_INVALID_IF(size % 4 != 0, "size (%u) is not a multiple of 4", size);
 
                 // Validate OOB
+                uint32_t maxImmediateSize = GetDevice()->GetLimits().v1.maxImmediateSize;
                 DAWN_INVALID_IF(offset > maxImmediateSize,
                                 "offset (%u) is larger than maxImmediateSize (%u).", offset,
                                 maxImmediateSize);

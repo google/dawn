@@ -64,6 +64,12 @@ AdapterBase::AdapterBase(InstanceBase* instance,
     // Cache the supported features of this adapter. Note that with device toggles overriding, a
     // device created by this adapter may support features not in this set and vice versa.
     mSupportedFeatures = mPhysicalDevice->GetSupportedFeatures(mTogglesState);
+    // EnableImmediateData is safe, but not yet stable and not enabled by
+    // default yet. Enable it by default with AllowUnsafeAPIs for convenience
+    // of tests and other users of unsafe APIs.
+    if (mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
+        mTogglesState.Default(Toggle::EnableImmediateData, true);
+    }
     // Cache the limits of this adapter. UpdateLimits should be called when the adapter's
     // limits-related status changes, e.g. SetUseTieredLimits.
     UpdateLimits();
@@ -98,14 +104,15 @@ InstanceBase* AdapterBase::APIGetInstance() const {
 void AdapterBase::UpdateLimits() {
     mLimits = mPhysicalDevice->GetLimits();
 
-    // Disable unsafe limits if needed.
-    if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
-        mLimits.v1.maxImmediateSize = 0;
-    }
-
     // Apply the tiered limits if needed.
     if (mUseTieredLimits) {
         ApplyLimitTiers(&mLimits);
+    }
+
+    // If immediate data is not enabled, report a maxImmediateSize of 0
+    // TODO(crbug.com/366291600): Remove when immediates are implemented on all backends
+    if (!mTogglesState.IsEnabled(Toggle::EnableImmediateData)) {
+        mLimits.v1.maxImmediateSize = 0;
     }
 }
 

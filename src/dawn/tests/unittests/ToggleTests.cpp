@@ -291,6 +291,7 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         };
 
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
+    const char* enableImmediateData = "enable_immediate_data";
     const char* useDXCToggle = "use_dxc";
 
     // Create adapter with no toggles descriptor
@@ -326,7 +327,9 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         // The created adapter should enable overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {allowUnsafeApisToggle}, {});
+        // Enabling AllowUnsafeAPIs also enables EnableImmediateData.
+        CreateAdapterAndValidateToggles(&adapterTogglesDesc,
+                                        {allowUnsafeApisToggle, enableImmediateData}, {});
     }
 
     // Create adapter with UseDXC enabled and explicitly overriding AllowUnsafeAPIs in toggles
@@ -338,8 +341,9 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
         adapterTogglesDesc.enabledToggles = enableAdapterToggles.data();
 
         // The created adapter should enable required UseDXC and overridden AllowUnsafeAPIs toggle.
-        CreateAdapterAndValidateToggles(&adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle},
-                                        {});
+        // Enabling AllowUnsafeAPIs also enables EnableImmediateData.
+        CreateAdapterAndValidateToggles(
+            &adapterTogglesDesc, {useDXCToggle, allowUnsafeApisToggle, enableImmediateData}, {});
     }
 }
 
