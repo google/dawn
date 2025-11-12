@@ -985,10 +985,7 @@ TEST_F(TextureViewValidationTest, Usage) {
     {
         wgpu::TextureViewDescriptor descriptor = base2DTextureViewDescriptor;
         descriptor.format = wgpu::TextureFormat::RGBA8UnormSrgb;
-
-        // TODO(363903526): Change this to inherited usage when inherited and explicit usages are
-        // validated the same way.
-        descriptor.usage = textureDescriptor.usage;
+        descriptor.usage = wgpu::TextureUsage::None;
 
         ASSERT_DEVICE_ERROR(texture.CreateView(&descriptor));
     }

@@ -148,6 +148,21 @@ TEST_F(TextureInternalUsageValidationTest, UsageValidation) {
     }
 }
 
+// Check that it is ok to create a view on a texture with no usages but only internal usages.
+TEST_F(TextureInternalUsageValidationTest, CreateViewWithNoExternalUsages) {
+    wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
+    internalDesc.internalUsage = wgpu::TextureUsage::RenderAttachment;
+
+    wgpu::TextureDescriptor textureDesc = {};
+    textureDesc.nextInChain = &internalDesc;
+    textureDesc.size = {1, 1};
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.usage = wgpu::TextureUsage::None;
+
+    wgpu::Texture tex = device.CreateTexture(&textureDesc);
+    tex.CreateView();
+}
+
 // Test that internal usage does not add to the validated usage
 // for command encoding
 TEST_F(TextureInternalUsageValidationTest, DeprecatedCommandValidation) {
