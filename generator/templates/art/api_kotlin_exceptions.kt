@@ -88,7 +88,7 @@ public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String)
     public class {{ exception_name }} (
         public val reason: String = "",
         @{{ enum.name.CamelCase() }} public val status: Int = {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) : Exception(
-            (if (status != {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) "${Status.toString(status)}: " else "") + reason) {
+            (if (status != {{ enum.name.CamelCase() }}.{{ success.name.CamelCase() }}) "${ {{ enum.name.CamelCase() }}.toString(status)}: " else "") + reason) {
     }
 
 {% endfor %}
