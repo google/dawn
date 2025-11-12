@@ -61,13 +61,17 @@ namespace {
 thread_local ContextEGL* gCurrentContextInScope = nullptr;
 
 void MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& state) {
-    EGLBoolean success = display->egl.MakeCurrent(display->GetDisplay(), state.drawSurface,
+    if (display->egl.GetCurrentContext() != state.context ||
+        display->egl.GetCurrentSurface(EGL_DRAW) != state.drawSurface ||
+        display->egl.GetCurrentSurface(EGL_READ) != state.readSurface) {
+        EGLBoolean success = display->egl.MakeCurrent(display->GetDisplay(), state.drawSurface,
 
-                                                  state.readSurface, state.context);
+                                                      state.readSurface, state.context);
 
-    IgnoreErrors(
+        IgnoreErrors(
 
-        CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
+            CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
+    }
 }
 
 }  // namespace
