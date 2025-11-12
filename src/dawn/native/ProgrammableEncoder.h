@@ -51,7 +51,7 @@ class ProgrammableEncoder : public ApiObjectBase {
     void APIInsertDebugMarker(StringView groupLabel);
     void APIPopDebugGroup();
     void APIPushDebugGroup(StringView groupLabel);
-    void APISetImmediateData(uint32_t offset, const void* data, size_t size);
+    void APISetImmediates(uint32_t offset, const void* data, size_t size);
 
   protected:
     bool IsValidationEnabled() const;

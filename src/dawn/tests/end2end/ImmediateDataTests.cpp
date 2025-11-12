@@ -150,8 +150,8 @@ TEST_P(ImmediateDataTests, BasicRenderPipeline) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder renderPassEncoder =
         commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
-    renderPassEncoder.SetImmediateData(0, immediateData.data(),
-                                       immediateData.size() * sizeof(uint32_t));
+    renderPassEncoder.SetImmediates(0, immediateData.data(),
+                                    immediateData.size() * sizeof(uint32_t));
     renderPassEncoder.SetPipeline(CreateRenderPipeline());
     renderPassEncoder.SetBindGroup(0, CreateBindGroup());
     renderPassEncoder.Draw(3);
@@ -168,8 +168,8 @@ TEST_P(ImmediateDataTests, BasicComputePipeline) {
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
     wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
     computePassEncoder.SetPipeline(CreateComputePipeline());
-    computePassEncoder.SetImmediateData(0, immediateData.data(),
-                                        immediateData.size() * sizeof(uint32_t));
+    computePassEncoder.SetImmediates(0, immediateData.data(),
+                                     immediateData.size() * sizeof(uint32_t));
     computePassEncoder.SetBindGroup(0, CreateBindGroup());
     computePassEncoder.DispatchWorkgroups(1);
     computePassEncoder.End();
@@ -191,7 +191,7 @@ TEST_P(ImmediateDataTests, ImmediateDataInitialization) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder =
             commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
-        renderPassEncoder.SetImmediateData(4, immediateData.data(), 8);
+        renderPassEncoder.SetImmediates(4, immediateData.data(), 8);
         renderPassEncoder.SetPipeline(CreateRenderPipeline());
         renderPassEncoder.SetBindGroup(0, CreateBindGroup());
         renderPassEncoder.Draw(3);
@@ -208,7 +208,7 @@ TEST_P(ImmediateDataTests, ImmediateDataInitialization) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(CreateComputePipeline());
-        computePassEncoder.SetImmediateData(4, immediateData.data(), 8);
+        computePassEncoder.SetImmediates(4, immediateData.data(), 8);
         computePassEncoder.SetBindGroup(0, CreateBindGroup());
         computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
@@ -220,8 +220,8 @@ TEST_P(ImmediateDataTests, ImmediateDataInitialization) {
     }
 }
 
-// SetImmediateData with offset on immediate data range.
-TEST_P(ImmediateDataTests, SetImmediateDataWithRangeOffset) {
+// SetImmediates with offset on immediate data range.
+TEST_P(ImmediateDataTests, SetImmediatesWithRangeOffset) {
     constexpr uint32_t kHalfImmediateDataSize = 8;
     // Render Pipeline
     {
@@ -233,11 +233,11 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithRangeOffset) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder renderPassEncoder =
             commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
-        renderPassEncoder.SetImmediateData(0, immediateData.data(), 16);
+        renderPassEncoder.SetImmediates(0, immediateData.data(), 16);
         // Update {0.1, 0.3, 0.5} to {0.1，0.5，0.7} and + {0.1 diff} => {0.2, 0.6, 0.8} => {51,
         // 153, 204, 255}
         std::array<float, 2> immediateDataUpdated = {0.5, 0.7};
-        renderPassEncoder.SetImmediateData(4, immediateDataUpdated.data(), 8);
+        renderPassEncoder.SetImmediates(4, immediateDataUpdated.data(), 8);
         renderPassEncoder.SetPipeline(CreateRenderPipeline());
         renderPassEncoder.SetBindGroup(0, CreateBindGroup());
         renderPassEncoder.Draw(3);
@@ -254,11 +254,11 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithRangeOffset) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(CreateComputePipeline());
-        // Using two SetImmediateData + Offset to swap first half and second half value in immediate
+        // Using two SetImmediates + Offset to swap first half and second half value in immediate
         // data range.
-        computePassEncoder.SetImmediateData(kHalfImmediateDataSize, immediateData.data(),
-                                            kHalfImmediateDataSize);
-        computePassEncoder.SetImmediateData(0, immediateData.data() + 2, kHalfImmediateDataSize);
+        computePassEncoder.SetImmediates(kHalfImmediateDataSize, immediateData.data(),
+                                         kHalfImmediateDataSize);
+        computePassEncoder.SetImmediates(0, immediateData.data() + 2, kHalfImmediateDataSize);
         computePassEncoder.SetBindGroup(0, CreateBindGroup());
         computePassEncoder.DispatchWorkgroups(1);
         computePassEncoder.End();
@@ -270,9 +270,9 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithRangeOffset) {
     }
 }
 
-// SetImmediateData should upload dirtied, latest contents between pipeline switches before draw or
+// SetImmediates should upload dirtied, latest contents between pipeline switches before draw or
 // dispatch.
-TEST_P(ImmediateDataTests, SetImmediateDataMultipleTimes) {
+TEST_P(ImmediateDataTests, SetImmediatesMultipleTimes) {
     // Render Pipeline
     {
         wgpu::RenderPipeline pipeline = CreateRenderPipeline();
@@ -284,13 +284,13 @@ TEST_P(ImmediateDataTests, SetImmediateDataMultipleTimes) {
         wgpu::RenderPassEncoder renderPassEncoder =
             commandEncoder.BeginRenderPass(&renderPass.renderPassInfo);
 
-        // Using 4 SetImmediateData to update all immediate data to 0.1.
-        renderPassEncoder.SetImmediateData(0, immediateData.data(), immediateData.size() * 4);
-        renderPassEncoder.SetImmediateData(4, immediateData.data(), (immediateData.size() - 1) * 4);
+        // Using 4 SetImmediates to update all immediate data to 0.1.
+        renderPassEncoder.SetImmediates(0, immediateData.data(), immediateData.size() * 4);
+        renderPassEncoder.SetImmediates(4, immediateData.data(), (immediateData.size() - 1) * 4);
         renderPassEncoder.SetPipeline(CreateRenderPipeline());
-        renderPassEncoder.SetImmediateData(8, immediateData.data(), 8);
+        renderPassEncoder.SetImmediates(8, immediateData.data(), 8);
         renderPassEncoder.SetPipeline(CreateRenderPipeline());
-        renderPassEncoder.SetImmediateData(12, immediateData.data(), 4);
+        renderPassEncoder.SetImmediates(12, immediateData.data(), 4);
         renderPassEncoder.SetBindGroup(0, CreateBindGroup());
         renderPassEncoder.Draw(3);
         renderPassEncoder.End();
@@ -306,14 +306,13 @@ TEST_P(ImmediateDataTests, SetImmediateDataMultipleTimes) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
 
-        // Using 4 SetImmediateData to update all immediate data to 25.
-        computePassEncoder.SetImmediateData(0, immediateData.data(), immediateData.size() * 4);
-        computePassEncoder.SetImmediateData(4, immediateData.data(),
-                                            (immediateData.size() - 1) * 4);
+        // Using 4 SetImmediates to update all immediate data to 25.
+        computePassEncoder.SetImmediates(0, immediateData.data(), immediateData.size() * 4);
+        computePassEncoder.SetImmediates(4, immediateData.data(), (immediateData.size() - 1) * 4);
         computePassEncoder.SetPipeline(CreateComputePipeline());
-        computePassEncoder.SetImmediateData(8, immediateData.data(), 8);
+        computePassEncoder.SetImmediates(8, immediateData.data(), 8);
         computePassEncoder.SetPipeline(CreateComputePipeline());
-        computePassEncoder.SetImmediateData(12, immediateData.data(), 4);
+        computePassEncoder.SetImmediates(12, immediateData.data(), 4);
 
         computePassEncoder.SetBindGroup(0, CreateBindGroup());
         computePassEncoder.DispatchWorkgroups(1);
@@ -370,7 +369,7 @@ TEST_P(ImmediateDataTests, UsingImmediateDataDontAffectClampFragDepth) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPassDesc);
     pass.SetViewport(0, 0, 1, 1, 0.0, 0.5);
-    pass.SetImmediateData(0, immediateData.data(), immediateData.size() * 4);
+    pass.SetImmediates(0, immediateData.data(), immediateData.size() * 4);
     pass.SetPipeline(pipeline);
     pass.Draw(1);
     pass.End();
@@ -381,8 +380,8 @@ TEST_P(ImmediateDataTests, UsingImmediateDataDontAffectClampFragDepth) {
     EXPECT_PIXEL_FLOAT_EQ(0.5f, depthTexture, 0, 0);
 }
 
-// SetImmediateData Multiple times should upload dirtied, latest contents.
-TEST_P(ImmediateDataTests, SetImmediateDataWithPipelineSwitch) {
+// SetImmediates Multiple times should upload dirtied, latest contents.
+TEST_P(ImmediateDataTests, SetImmediatesWithPipelineSwitch) {
     wgpu::ShaderModule shaderModuleWithLessImmediateData = utils::CreateShaderModule(device, R"(
         enable chromium_experimental_immediate;
         struct Immediate {
@@ -438,12 +437,12 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithPipelineSwitch) {
 
         // rgba8unorm: {0.2, 0.4, 0.6} + {0.1 diff} => {0.3, 0.5, 0.7}
         std::array<float, 4> immediateData = {0.2, 0.4, 0.6, 0.1};
-        renderPassEncoder.SetImmediateData(0, immediateData.data(), immediateData.size() * 4);
+        renderPassEncoder.SetImmediates(0, immediateData.data(), immediateData.size() * 4);
         renderPassEncoder.SetPipeline(CreateRenderPipeline());
 
         // replace the pipeline and rgba8unorm: {0.4, 0.4, 0.6} => {102, 102, 153}
         float data = 0.4;
-        renderPassEncoder.SetImmediateData(0, &data, 4);
+        renderPassEncoder.SetImmediates(0, &data, 4);
         renderPassEncoder.SetPipeline(pipelineWithLessImmediateData);
         renderPassEncoder.Draw(3);
         renderPassEncoder.End();
@@ -467,11 +466,11 @@ TEST_P(ImmediateDataTests, SetImmediateDataWithPipelineSwitch) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
 
-        computePassEncoder.SetImmediateData(0, immediateData.data(), immediateData.size() * 4);
+        computePassEncoder.SetImmediates(0, immediateData.data(), immediateData.size() * 4);
         computePassEncoder.SetPipeline(CreateComputePipeline());
 
         uint32_t data = 128;
-        computePassEncoder.SetImmediateData(0, &data, 4);
+        computePassEncoder.SetImmediates(0, &data, 4);
         computePassEncoder.SetPipeline(pipelineWithLessImmediateData);
 
         computePassEncoder.SetBindGroup(0, bindGroup);

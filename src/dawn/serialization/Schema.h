@@ -69,7 +69,7 @@ enum class ComputePassCommand : uint32_t {
     InsertDebugMarker,
     PopDebugGroup,
     PushDebugGroup,
-    SetImmediateData,
+    SetImmediates,
     End,
 };
 
@@ -93,7 +93,7 @@ enum class RenderPassCommand : uint32_t {
     InsertDebugMarker,
     PopDebugGroup,
     PushDebugGroup,
-    SetImmediateData,
+    SetImmediates,
     End,
 };
 

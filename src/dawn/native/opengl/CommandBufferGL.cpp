@@ -1186,8 +1186,8 @@ MaybeError CommandBuffer::ExecuteComputePass(const OpenGLFunctions& gl) {
                 return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
             }
 
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+            case Command::SetImmediates:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediates unimplemented");
 
             default:
                 DAWN_UNREACHABLE();
@@ -1590,8 +1590,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             case Command::WriteTimestamp:
                 return DAWN_UNIMPLEMENTED_ERROR("WriteTimestamp unimplemented");
 
-            case Command::SetImmediateData:
-                return DAWN_UNIMPLEMENTED_ERROR("SetImmediateData unimplemented");
+            case Command::SetImmediates:
+                return DAWN_UNIMPLEMENTED_ERROR("SetImmediates unimplemented");
 
             default: {
                 DAWN_TRY(DoRenderBundleCommand(&mCommands, type));

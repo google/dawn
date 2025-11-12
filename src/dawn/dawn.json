@@ -1150,7 +1150,7 @@
                 ]
             },
             {
-                "name": "set immediate data",
+                "name": "set immediates",
                 "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},
@@ -3098,7 +3098,7 @@
                 ]
             },
             {
-                "name": "set immediate data",
+                "name": "set immediates",
                 "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},
@@ -3416,7 +3416,7 @@
                 ]
             },
             {
-                "name": "set immediate data",
+                "name": "set immediates",
                 "tags": ["dawn"],
                 "args": [
                     {"name": "offset", "type": "uint32_t"},

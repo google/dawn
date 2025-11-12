@@ -40,7 +40,7 @@ namespace {
 // Storage buffer size in bytes.
 enum class Size { Small = 64u, Medium = 256u, Large = 512u };
 
-// Test fixture specifically for testing the interaction between immediate data (SetImmediateData)
+// Test fixture specifically for testing the interaction between immediate data (SetImmediates)
 // and storage buffer length tracking. This is critical to ensure that when both immediate
 // constants and buffer length data are uploaded to the same GPU buffer, they don't interfere
 // with each other across multiple Apply calls with changing pipeline/bind group state.
@@ -239,8 +239,8 @@ class ImmediateDataBufferLengthTest : public DawnTest {
         std::vector<uint32_t> immediateData;
         immediateData.push_back(resultIndex);
         immediateData.insert(immediateData.end(), immediates.begin(), immediates.end());
-        pass.SetImmediateData(0, reinterpret_cast<uint8_t*>(immediateData.data()),
-                              immediateData.size() * sizeof(uint32_t));
+        pass.SetImmediates(0, reinterpret_cast<uint8_t*>(immediateData.data()),
+                           immediateData.size() * sizeof(uint32_t));
         for (uint32_t i = 0; i < immediates.size(); ++i) {
             mCurrentImmediateData[i] = immediates[i];
         }
@@ -375,7 +375,7 @@ class ImmediateDataBufferLengthRenderPipelineTest : public ImmediateDataBufferLe
     wgpu::TextureView mRenderTargetView;
 };
 
-// Test: SetBindGroup + SetImmediateData + Draw
+// Test: SetBindGroup + SetImmediates + Draw
 // This is the basic case to ensure immediate data and buffer lengths work together
 TEST_P(ImmediateDataBufferLengthComputePipelineTest, BasicImmediateAndBufferLength) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -393,7 +393,7 @@ TEST_P(ImmediateDataBufferLengthComputePipelineTest, BasicImmediateAndBufferLeng
     CheckExpectedResults();
 }
 
-// Test: SetBindGroup + SetImmediateData + Draw + SetPipeline (different immediates) + Draw
+// Test: SetBindGroup + SetImmediates + Draw + SetPipeline (different immediates) + Draw
 // This tests that changing pipelines with different immediate counts still preserves buffer lengths
 TEST_P(ImmediateDataBufferLengthComputePipelineTest, PipelineChangeWithDifferentImmediates) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -442,7 +442,7 @@ TEST_P(ImmediateDataBufferLengthComputePipelineTest, PipelineChangeWithReducedIm
     CheckExpectedResults();
 }
 
-// Test: SetBindGroup + SetImmediateData + Draw + SetPipeline (different buffer count) +
+// Test: SetBindGroup + SetImmediates + Draw + SetPipeline (different buffer count) +
 // SetBindGroup + Draw This tests changing both pipeline and bind group, ensuring buffer length
 // tracking adapts correctly
 TEST_P(ImmediateDataBufferLengthComputePipelineTest, PipelineAndBindGroupChange) {
@@ -469,7 +469,7 @@ TEST_P(ImmediateDataBufferLengthComputePipelineTest, PipelineAndBindGroupChange)
     CheckExpectedResults();
 }
 
-// Test: Multiple SetImmediateData calls with buffer length updates
+// Test: Multiple SetImmediates calls with buffer length updates
 // This tests the edge case where immediate data is updated multiple times
 TEST_P(ImmediateDataBufferLengthComputePipelineTest, MultipleImmediateDataUpdates) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -490,7 +490,7 @@ TEST_P(ImmediateDataBufferLengthComputePipelineTest, MultipleImmediateDataUpdate
     CheckExpectedResults();
 }
 
-// Test: Interleaved SetBindGroup and SetImmediateData calls
+// Test: Interleaved SetBindGroup and SetImmediates calls
 // This tests complex state management scenarios
 TEST_P(ImmediateDataBufferLengthComputePipelineTest, InterleavedUpdates) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -523,7 +523,7 @@ DAWN_INSTANTIATE_TEST(ImmediateDataBufferLengthComputePipelineTest,
                       VulkanBackend(),
                       WebGPUBackend());
 
-// Test: Render pipeline with SetBindGroup + SetImmediateData + Draw
+// Test: Render pipeline with SetBindGroup + SetImmediates + Draw
 // This tests the basic case for render pipelines
 TEST_P(ImmediateDataBufferLengthRenderPipelineTest, RenderPipelineBasicImmediateAndBufferLength) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

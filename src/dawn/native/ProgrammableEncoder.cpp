@@ -116,7 +116,7 @@ void ProgrammableEncoder::APIPushDebugGroup(StringView groupLabelIn) {
         "encoding %s.PushDebugGroup(%s).", this, groupLabel);
 }
 
-void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data, size_t size) {
+void ProgrammableEncoder::APISetImmediates(uint32_t offset, const void* data, size_t size) {
     mEncodingContext->TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -139,13 +139,12 @@ void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data,
                                 offset, size, maxImmediateSize);
             }
 
-            // Skip SetImmediateData when uploading constants are empty.
+            // Skip SetImmediates when uploading constants are empty.
             if (size == 0) {
                 return {};
             }
 
-            SetImmediateDataCmd* cmd =
-                allocator->Allocate<SetImmediateDataCmd>(Command::SetImmediateData);
+            SetImmediatesCmd* cmd = allocator->Allocate<SetImmediatesCmd>(Command::SetImmediates);
             cmd->offset = offset;
             cmd->size = size;
             uint8_t* immediateDatas = allocator->AllocateData<uint8_t>(cmd->size);
@@ -153,7 +152,7 @@ void ProgrammableEncoder::APISetImmediateData(uint32_t offset, const void* data,
 
             return {};
         },
-        "encoding %s.SetImmediateData(%u, %u, ...).", this, offset, size);
+        "encoding %s.SetImmediates(%u, %u, ...).", this, offset, size);
 }
 
 MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,

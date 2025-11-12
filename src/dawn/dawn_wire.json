@@ -129,19 +129,19 @@
             { "name": "device lost future", "type": "future" },
             { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
         ],
-        "render pass encoder set immediate data": [
+        "render pass encoder set immediates": [
             { "name": "render pass encoder id", "type": "ObjectId", "id_type": "render pass encoder"},
             {"name": "offset", "type": "uint32_t"},
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
             { "name": "size", "type": "size_t"}
         ],
-        "render bundle encoder set immediate data": [
+        "render bundle encoder set immediates": [
             { "name": "render bundle encoder id", "type": "ObjectId", "id_type": "render bundle encoder"},
             {"name": "offset", "type": "uint32_t"},
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
             { "name": "size", "type": "size_t"}
         ],
-        "compute pass encoder set immediate data": [
+        "compute pass encoder set immediates": [
             { "name": "compute pass encoder id", "type": "ObjectId", "id_type": "compute pass encoder"},
             {"name": "offset", "type": "uint32_t"},
             { "name": "data", "type": "uint8_t", "annotation": "const*", "length": "size", "wire_is_data_only": true},
@@ -262,7 +262,7 @@
             "BufferGetMapState",
             "BufferGetSize",
             "BufferGetUsage",
-            "ComputePassEncoderSetImmediateData",
+            "ComputePassEncoderSetImmediates",
             "DeviceCreateBuffer",
             "DeviceCreateComputePipelineAsync",
             "DeviceCreateRenderPipelineAsync",
@@ -283,8 +283,8 @@
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
             "QueueWriteTexture",
-            "RenderBundleEncoderSetImmediateData",
-            "RenderPassEncoderSetImmediateData",
+            "RenderBundleEncoderSetImmediates",
+            "RenderPassEncoderSetImmediates",
             "ShaderModuleGetCompilationInfo",
             "SurfaceGetCapabilities",
             "SurfaceGetCurrentTexture",

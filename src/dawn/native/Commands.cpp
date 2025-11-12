@@ -216,12 +216,12 @@ void FreeCommands(CommandIterator* commands) {
                 cmd->~SetBindGroupCmd();
                 break;
             }
-            case Command::SetImmediateData: {
-                SetImmediateDataCmd* cmd = commands->NextCommand<SetImmediateDataCmd>();
+            case Command::SetImmediates: {
+                SetImmediatesCmd* cmd = commands->NextCommand<SetImmediatesCmd>();
                 if (cmd->size > 0) {
                     commands->NextData<uint8_t>(cmd->size);
                 }
-                cmd->~SetImmediateDataCmd();
+                cmd->~SetImmediatesCmd();
                 break;
             }
             case Command::SetIndexBuffer: {
@@ -392,8 +392,8 @@ void SkipCommand(CommandIterator* commands, Command type) {
             break;
         }
 
-        case Command::SetImmediateData: {
-            SetImmediateDataCmd* cmd = commands->NextCommand<SetImmediateDataCmd>();
+        case Command::SetImmediates: {
+            SetImmediatesCmd* cmd = commands->NextCommand<SetImmediatesCmd>();
             if (cmd->size > 0) {
                 commands->NextData<uint8_t>(cmd->size);
             }
@@ -503,8 +503,8 @@ SetRenderPipelineCmd::~SetRenderPipelineCmd() = default;
 SetBindGroupCmd::SetBindGroupCmd() = default;
 SetBindGroupCmd::~SetBindGroupCmd() = default;
 
-SetImmediateDataCmd::SetImmediateDataCmd() = default;
-SetImmediateDataCmd::~SetImmediateDataCmd() = default;
+SetImmediatesCmd::SetImmediatesCmd() = default;
+SetImmediatesCmd::~SetImmediatesCmd() = default;
 
 SetIndexBufferCmd::SetIndexBufferCmd() = default;
 SetIndexBufferCmd::~SetIndexBufferCmd() = default;

@@ -50,12 +50,12 @@ TEST_F(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
     ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
 }
 
-// Check that SetImmediateData doesn't work (even with size=0) without maxImmediateSize>0.
-TEST_F(ImmediateDataDisableTest, SetImmediateData) {
+// Check that SetImmediates doesn't work (even with size=0) without maxImmediateSize>0.
+TEST_F(ImmediateDataDisableTest, SetImmediates) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.SetImmediateData(0, nullptr, 0);
+        pass.SetImmediates(0, nullptr, 0);
         pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -64,7 +64,7 @@ TEST_F(ImmediateDataDisableTest, SetImmediateData) {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.SetImmediateData(0, &data, 4);
+        pass.SetImmediates(0, &data, 4);
         pass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -122,14 +122,14 @@ TEST_F(ImmediateDataTest, ValidateImmediateSize) {
     }
 }
 
-// Check that SetImmediateData offset and length must be aligned to 4 bytes.
-TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
+// Check that SetImmediates offset and length must be aligned to 4 bytes.
+TEST_F(ImmediateDataTest, ValidateSetImmediatesAlignment) {
     // Success cases
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         uint32_t data = 0;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(0, &data, 4);
+        computePass.SetImmediates(0, &data, 4);
         computePass.End();
         encoder.Finish();
     }
@@ -137,7 +137,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(4, nullptr, 0);
+        computePass.SetImmediates(4, nullptr, 0);
         computePass.End();
         encoder.Finish();
     }
@@ -146,7 +146,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(2, nullptr, 0);
+        computePass.SetImmediates(2, nullptr, 0);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -156,20 +156,20 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataAlignment) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         uint8_t data = 0;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(0, &data, 2);
+        computePass.SetImmediates(0, &data, 2);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 }
 
-// Check that SetImmediateData offset + length must be in bound.
-TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
+// Check that SetImmediates offset + length must be in bound.
+TEST_F(ImmediateDataTest, ValidateSetImmediatesOOB) {
     // Success cases
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         std::vector<uint32_t> data(kDefaultMaxImmediateDataBytes / 4, 0);
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(0, data.data(), kDefaultMaxImmediateDataBytes);
+        computePass.SetImmediates(0, data.data(), kDefaultMaxImmediateDataBytes);
         computePass.End();
         encoder.Finish();
     }
@@ -177,7 +177,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(kDefaultMaxImmediateDataBytes, nullptr, 0);
+        computePass.SetImmediates(kDefaultMaxImmediateDataBytes, nullptr, 0);
         computePass.End();
         encoder.Finish();
     }
@@ -186,7 +186,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         uint32_t data = 0;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(kDefaultMaxImmediateDataBytes - 4, &data, 4);
+        computePass.SetImmediates(kDefaultMaxImmediateDataBytes - 4, &data, 4);
         computePass.End();
         encoder.Finish();
     }
@@ -196,7 +196,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         uint32_t offset = kDefaultMaxImmediateDataBytes + 4;
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(offset, nullptr, 0);
+        computePass.SetImmediates(offset, nullptr, 0);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -207,7 +207,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         uint32_t size = kDefaultMaxImmediateDataBytes + 4;
         std::vector<uint32_t> data(size / 4, 0);
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(0, data.data(), size);
+        computePass.SetImmediates(0, data.data(), size);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -218,7 +218,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         uint32_t offset = kDefaultMaxImmediateDataBytes;
         uint32_t data[] = {0};
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(offset, data, 4);
+        computePass.SetImmediates(offset, data, 4);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
@@ -229,7 +229,7 @@ TEST_F(ImmediateDataTest, ValidateSetImmediateDataOOB) {
         uint32_t offset = std::numeric_limits<uint32_t>::max() - 3;
         uint32_t data[] = {0};
         wgpu::ComputePassEncoder computePass = encoder.BeginComputePass();
-        computePass.SetImmediateData(offset, data, 4);
+        computePass.SetImmediates(offset, data, 4);
         computePass.End();
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
