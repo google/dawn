@@ -1372,7 +1372,7 @@ $B1: {  # root
 // Test clamping non-pointer values.
 ////////////////////////////////////////////////////////////////
 
-TEST_P(IR_RobustnessTest, ConstantVector_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, ConstantVector_DynamicIndex) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -1408,13 +1408,12 @@ TEST_P(IR_RobustnessTest, ConstantVector_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_value = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, ConstantArray_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, ConstantArray_DynamicIndex) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -1451,13 +1450,12 @@ TEST_P(IR_RobustnessTest, ConstantArray_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_value = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, ParamValueArray_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, ParamValueArray_DynamicIndex) {
     auto* func = b.Function("foo", ty.u32());
     auto* arr = b.FunctionParam("arr", ty.array<u32, 4>());
     auto* idx = b.FunctionParam("idx", ty.u32());
@@ -1488,10 +1486,9 @@ TEST_P(IR_RobustnessTest, ParamValueArray_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_value = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
 ////////////////////////////////////////////////////////////////

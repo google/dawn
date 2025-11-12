@@ -51,9 +51,6 @@ const Capabilities kRobustnessCapabilities{
 
 /// Configuration options that control when to clamp accesses.
 struct RobustnessConfig {
-    /// Should non-pointer accesses be clamped?
-    bool clamp_value = true;
-
     /// Should texture accesses be clamped?
     bool clamp_texture = true;
 
@@ -83,7 +80,6 @@ struct RobustnessConfig {
 
     /// Reflection for this class
     TINT_REFLECT(RobustnessConfig,
-                 clamp_value,
                  clamp_texture,
                  clamp_private,
                  clamp_immediate_data,

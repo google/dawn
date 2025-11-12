@@ -85,9 +85,7 @@ struct State {
                             accesses.Push(access);
                         }
                     } else {
-                        if (config.clamp_value) {
-                            accesses.Push(access);
-                        }
+                        accesses.Push(access);
                     }
                 },
                 [&](ir::LoadVectorElement* lve) {
