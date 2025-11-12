@@ -48,6 +48,8 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+using IR_RobustnessDefaultTest = TransformTest;
+
 // Tests for non-binding variables
 using IR_RobustnessTest = TransformTestWithParam<bool>;
 
@@ -70,7 +72,7 @@ using IR_RobustnessWithIntegerRangeAnalysisTest = TransformTest;
 // Test signed vs unsigned indices.
 ////////////////////////////////////////////////////////////////
 
-TEST_P(IR_RobustnessTest, VectorLoad_ConstIndexViaLet) {
+TEST_F(IR_RobustnessDefaultTest, VectorLoad_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
@@ -104,13 +106,12 @@ TEST_P(IR_RobustnessTest, VectorLoad_ConstIndexViaLet) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, VectorLoad_DynamicIndex) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -143,13 +144,12 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex_Signed) {
+TEST_F(IR_RobustnessDefaultTest, VectorLoad_DynamicIndex_Signed) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
@@ -183,13 +183,12 @@ TEST_P(IR_RobustnessTest, VectorLoad_DynamicIndex_Signed) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, VectorStore_ConstIndexViaLet) {
+TEST_F(IR_RobustnessDefaultTest, VectorStore_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* vec = b.Var("vec", ty.ptr(function, ty.vec4<u32>()));
@@ -223,13 +222,12 @@ TEST_P(IR_RobustnessTest, VectorStore_ConstIndexViaLet) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, VectorStore_DynamicIndex) {
     auto* func = b.Function("foo", ty.void_());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -262,13 +260,12 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex_Signed) {
+TEST_F(IR_RobustnessDefaultTest, VectorStore_DynamicIndex_Signed) {
     auto* func = b.Function("foo", ty.void_());
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
@@ -302,13 +299,12 @@ TEST_P(IR_RobustnessTest, VectorStore_DynamicIndex_Signed) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Matrix_ConstIndex) {
+TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndex) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
@@ -332,13 +328,12 @@ TEST_P(IR_RobustnessTest, Matrix_ConstIndex) {
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Matrix_ConstIndexViaLet) {
+TEST_F(IR_RobustnessDefaultTest, Matrix_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     b.Append(func->Block(), [&] {
         auto* mat = b.Var("mat", ty.ptr(function, ty.mat4x4<f32>()));
@@ -375,13 +370,12 @@ TEST_P(IR_RobustnessTest, Matrix_ConstIndexViaLet) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Matrix_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, Matrix_DynamicIndex) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -417,13 +411,12 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Matrix_DynamicIndex_Signed) {
+TEST_F(IR_RobustnessDefaultTest, Matrix_DynamicIndex_Signed) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
@@ -460,13 +453,12 @@ TEST_P(IR_RobustnessTest, Matrix_DynamicIndex_Signed) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndex) {
+TEST_F(IR_RobustnessDefaultTest, Array_ConstSize_ConstIndex) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 4>()));
@@ -490,13 +482,12 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndex) {
     auto* expect = src;
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndexViaLet) {
+TEST_F(IR_RobustnessDefaultTest, Array_ConstSize_ConstIndexViaLet) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* arr = b.Var("arr", ty.ptr(function, ty.array<u32, 4>()));
@@ -533,13 +524,12 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_ConstIndexViaLet) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex) {
+TEST_F(IR_RobustnessDefaultTest, Array_ConstSize_DynamicIndex) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.u32());
     func->SetParams({idx});
@@ -575,13 +565,12 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex_Signed) {
+TEST_F(IR_RobustnessDefaultTest, Array_ConstSize_DynamicIndex_Signed) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx = b.FunctionParam("idx", ty.i32());
     func->SetParams({idx});
@@ -618,13 +607,12 @@ TEST_P(IR_RobustnessTest, Array_ConstSize_DynamicIndex_Signed) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, NestedArrays) {
+TEST_F(IR_RobustnessDefaultTest, NestedArrays) {
     auto* func = b.Function("foo", ty.u32());
     auto* idx1 = b.FunctionParam("idx1", ty.u32());
     auto* idx2 = b.FunctionParam("idx2", ty.u32());
@@ -667,13 +655,12 @@ TEST_P(IR_RobustnessTest, NestedArrays) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, NestedMixedTypes) {
+TEST_F(IR_RobustnessDefaultTest, NestedMixedTypes) {
     auto* structure = ty.Struct(mod.symbols.Register("structure"),
                                 {
                                     {mod.symbols.Register("arr"), ty.array(ty.mat3x4<f32>(), 4)},
@@ -726,10 +713,9 @@ structure = struct @align(16) {
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
 ////////////////////////////////////////////////////////////////
@@ -5504,7 +5490,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5582,7 +5567,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5661,7 +5645,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5693,7 +5676,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_IndexNoRa
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5789,7 +5771,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithExpression_MaxB
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5869,7 +5850,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_I32_Negat
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -5947,7 +5927,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6026,7 +6005,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest,
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6107,7 +6085,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest,
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6140,7 +6117,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, AccessArrayWithIndex_IndexNoRa
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6227,7 +6203,6 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.clamp_storage = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
@@ -6304,7 +6279,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_E
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6380,7 +6354,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_L
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6457,7 +6430,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_MaxBound_G
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6487,7 +6459,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_IndexNoRan
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6565,7 +6536,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, LoadVectorWithIndex_I32_Negati
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6641,7 +6611,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6717,7 +6686,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6794,7 +6762,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_MaxBound_
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6824,7 +6791,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_IndexNoRa
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 
@@ -6902,7 +6868,6 @@ TEST_F(IR_RobustnessWithIntegerRangeAnalysisTest, StoreVectorWithIndex_I32_Negat
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_function = true;
     cfg.use_integer_range_analysis = true;
     Run(Robustness, cfg);
 

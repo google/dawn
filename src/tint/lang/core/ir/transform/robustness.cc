@@ -166,7 +166,7 @@ struct State {
         TINT_IR_ASSERT(ir, ptr);
         switch (ptr->AddressSpace()) {
             case AddressSpace::kFunction:
-                return config.clamp_function;
+                return true;
             case AddressSpace::kPrivate:
                 return config.clamp_private;
             case AddressSpace::kImmediate:
