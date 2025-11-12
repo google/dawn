@@ -1084,6 +1084,11 @@ crbug.com/445245324 [ android android-brya webgpu-no-worker ] webgpu:web_platfor
 crbug.com/445537566 [ android android-brya webgpu-dedicated-worker ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:canvasType="offscreen";* [ Failure ]
 crbug.com/459533669 [ android android-brya webgpu-dedicated-worker ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg32float";dstPremultiplied=false [ Failure ]
 crbug.com/459533669 [ android android-brya webgpu-service-worker ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rgb10a2unorm";dstPremultiplied=true [ Failure ]
+crbug.com/459848489 [ android android-brya ] webgpu:api,validation,buffer,create:limit: [ Failure ]
+crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
+crbug.com/459848489 [ android android-brya ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
+crbug.com/459848489 [ android android-brya ] webgpu:shader,execution,expression,call,builtin,texture* [ RetryOnFailure ]
+crbug.com/459848489 [ android android-brya ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=true;dstColorFormat="r32float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 
 # Pixel 4 timeouts
 crbug.com/448716473 [ android-pixel-4 ] webgpu:api,validation,buffer,mapping:gc_behavior,mapAsync:* [ Skip ]
