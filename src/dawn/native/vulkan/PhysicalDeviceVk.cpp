@@ -1030,7 +1030,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // previously bound to a 2D VkImage. To work around that bug we have to disable the resource
         // sub-allocation for 2D textures with CopyDst or RenderAttachment usage.
         const gpu_info::DriverVersion kBuggyDriverVersion = {21, 3, 6, 0};
-        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kBuggyDriverVersion) >= 0) {
+        if (GetDriverVersion() >= kBuggyDriverVersion) {
             deviceToggles->Default(
                 Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
         }
@@ -1038,7 +1038,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // chromium:1361662: Mesa driver has a bug clearing R8 mip-leveled textures on Intel Gen12
         // GPUs. Work around it by clearing the whole texture as soon as they are created.
         const gpu_info::DriverVersion kFixedDriverVersion = {23, 1, 0, 0};
-        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kFixedDriverVersion) < 0) {
+        if (GetDriverVersion() < kFixedDriverVersion) {
             deviceToggles->Default(Toggle::VulkanClearGen12TextureWithCCSAmbiguateOnCreation, true);
         }
     }
@@ -1052,8 +1052,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         // driver version < 23.1.3.
         const gpu_info::DriverVersion kBuggyDriverVersion = {21, 2, 0, 0};
         const gpu_info::DriverVersion kFixedDriverVersion = {23, 1, 3, 0};
-        if (gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kBuggyDriverVersion) >= 0 &&
-            gpu_info::CompareIntelMesaDriverVersion(GetDriverVersion(), kFixedDriverVersion) < 0) {
+        if (GetDriverVersion() >= kBuggyDriverVersion && GetDriverVersion() < kFixedDriverVersion) {
             deviceToggles->Default(Toggle::ClearBufferBeforeResolveQueries, true);
         }
     }

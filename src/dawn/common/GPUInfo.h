@@ -53,6 +53,8 @@ class DriverVersion {
     uint32_t size() const;
     std::string ToString() const;
 
+    std::strong_ordering operator<=>(const DriverVersion& other) const;
+
   private:
     absl::InlinedVector<uint16_t, kMaxVersionFields> mDriverVersion;
 };
@@ -66,12 +68,6 @@ class IntelWindowsDriverVersion {
   private:
     uint32_t mBuildNumber = 0;
 };
-
-// Do comparison between two Intel Mesa driver versions.
-// - Return a negative number if build number of version1 is smaller
-// - Return a positive number if build number of version1 is bigger
-// - Return 0 if version1 and version2 represent same driver version
-int CompareIntelMesaDriverVersion(const DriverVersion& version1, const DriverVersion& version2);
 
 // Intel architectures
 bool IsSkylake(PCIDeviceID deviceId);
