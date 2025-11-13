@@ -933,8 +933,8 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixStoreTest,
                             false,
                         });
 
-using NoArgConstructor = bool;
-DAWN_TEST_PARAM_STRUCT(MatrixConstructorParams, NoArgConstructor);
+using WithArgument = bool;
+DAWN_TEST_PARAM_STRUCT(MatrixConstructorParams, WithArgument);
 class SubgroupMatrix_MatrixConstructorTest : public DawnTestWithParams<MatrixConstructorParams> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
@@ -951,8 +951,8 @@ class SubgroupMatrix_MatrixConstructorTest : public DawnTestWithParams<MatrixCon
     wgpu::ComputePipeline GetComputePipelineFromSubgroupMatrixConfig(
         const wgpu::SubgroupMatrixConfig& config,
         uint32_t subgroupMaxSize,
-        bool noArgConstructor) {
-        // Generate a shader that stores a subgroup matrix into a storage buffer.
+        bool withArgument) {
+        // Generate a shader that constructs a subgroup matrix and stores it into a storage buffer.
         std::ostringstream shader;
         shader << "enable chromium_experimental_subgroup_matrix;\n";
         if (config.componentType == wgpu::SubgroupMatrixComponentType::F16 ||
@@ -984,8 +984,8 @@ fn main() {
 
         std::string loadInput;
         std::string storeResult;
-        loadInput = "let input_matrix = subgroup_matrix_right<ComponentType, K, M>(";
-        if (!noArgConstructor) {
+        loadInput = "let input_matrix = subgroup_matrix_left<ComponentType, K, M>(";
+        if (withArgument) {
             loadInput += "5";
         }
         loadInput += ");";
@@ -1000,11 +1000,11 @@ fn main() {
 
     void TestSubgroupMatrixConfig(const wgpu::SubgroupMatrixConfig& config,
                                   uint32_t subgroupMaxSize,
-                                  bool noArgConstructor) {
-        // In the tests we use a compute pipeline to store a subgroup matrix into a storage buffer
-        // and check if the data in the buffer matches the expectation.
+                                  bool withArgument) {
+        // In the tests we use a compute pipeline to construct a subgroup matrix and store it into a
+        // storage buffer and check if the data in the buffer matches the expectation.
         wgpu::ComputePipeline pipeline =
-            GetComputePipelineFromSubgroupMatrixConfig(config, subgroupMaxSize, noArgConstructor);
+            GetComputePipelineFromSubgroupMatrixConfig(config, subgroupMaxSize, withArgument);
 
         Matrix inputMatrix(config.K, config.M, config.componentType, false);
 
@@ -1027,26 +1027,26 @@ fn main() {
         queue.Submit(1, &commands);
 
         // Verify the result in the output buffer.
-        Matrix expected(config.N, config.M, config.componentType, false);
-        GenerateReferenceResult(expected, noArgConstructor);
+        Matrix expected(config.K, config.M, config.componentType, false);
+        GenerateReferenceResult(expected, withArgument);
         EXPECT_BUFFER_U8_RANGE_EQ(expected.data, output, 0, expected.TotalByteSize());
     }
 
-    void GenerateReferenceResult(Matrix& expected, bool noArgConstructor) {
+    void GenerateReferenceResult(Matrix& expected, bool withArgument) {
         const bool is_float = expected.component_type == wgpu::SubgroupMatrixComponentType::F16 ||
                               expected.component_type == wgpu::SubgroupMatrixComponentType::F32;
         for (uint32_t r = 0; r < expected.rows; r++) {
             for (uint32_t c = 0; c < expected.cols; c++) {
                 if (is_float) {
                     float ref = 0.f;
-                    if (!noArgConstructor) {
+                    if (withArgument) {
                         ref += 5.f;
                     }
 
                     expected.SetFloat(ref, c, r);
                 } else {
                     int64_t ref = 0;
-                    if (!noArgConstructor) {
+                    if (withArgument) {
                         ref = 5;
                     }
                     expected.SetInt(ref, c, r);
@@ -1076,7 +1076,7 @@ TEST_P(SubgroupMatrix_MatrixConstructorTest, MatrixConstruct) {
                    << ComponentTypeToWgslType(config.resultComponentType);
         SCOPED_TRACE(configInfo.str());
 
-        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mNoArgConstructor);
+        TestSubgroupMatrixConfig(config, info.subgroupMaxSize, GetParam().mWithArgument);
     }
 }
 
@@ -1087,7 +1087,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixConstructorTest,
                             VulkanBackend({"use_vulkan_memory_model"}),
                         },
                         {
-                            // Use the no argument constructor
+                            // Pass an argument to the constructor
                             true,
                             false,
                         });
