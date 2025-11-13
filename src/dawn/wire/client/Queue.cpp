@@ -174,15 +174,47 @@ void Queue::APIWriteTexture(const WGPUTexelCopyTextureInfo* destination,
                             size_t dataSize,
                             const WGPUTexelCopyBufferLayout* dataLayout,
                             const WGPUExtent3D* writeSize) {
+    Client* client = GetClient();
+
+    // Create write handle and prepare to serialize command.
+    size_t writeHandleCreateInfoLength = 0;
+    std::unique_ptr<MemoryTransferService::WriteHandle> writeHandle(
+        client->GetMemoryTransferService()->CreateWriteHandle(dataSize));
+    if (writeHandle == nullptr) {
+        // Trigger a device loss.
+        client->Disconnect();
+        return;
+    }
+    writeHandleCreateInfoLength = writeHandle->SerializeCreateSize();
+
+    // Write the data to the allocated memory.
+    memcpy(writeHandle->GetData(), data, dataSize);
+
+    // Prepare to serialize data update command.
+    size_t writeDataUpdateInfoLength = writeHandle->SizeOfSerializeDataUpdate(0u, dataSize);
+
     QueueWriteTextureCmd cmd;
     cmd.queueId = GetWireHandle(GetClient()).id;
     cmd.destination = destination;
-    cmd.data = static_cast<const uint8_t*>(data);
     cmd.dataSize = dataSize;
     cmd.dataLayout = dataLayout;
     cmd.writeSize = writeSize;
+    // Set the pointer lengths, but the pointed-to data itself won't be serialized as usual (due
+    // to skip_serialize). Instead, the custom CommandExtensions below fill that memory. [*]
+    cmd.writeHandleCreateInfoLength = writeHandleCreateInfoLength;
+    cmd.writeHandleCreateInfo = nullptr;  // Skipped by skip_serialize.
+    cmd.writeDataUpdateInfoLength = writeDataUpdateInfoLength;
+    cmd.writeDataUpdateInfo = nullptr;  // Skipped by skip_serialize.
 
-    GetClient()->SerializeCommand(cmd);
+    client->SerializeCommand(
+        cmd,
+        // Extensions to replace fields skipped by skip_serialize.
+        CommandExtension{
+            writeHandleCreateInfoLength,
+            [&](char* writeHandleBuffer) { writeHandle->SerializeCreate(writeHandleBuffer); }},
+        CommandExtension{writeDataUpdateInfoLength, [&](char* writeHandleBuffer) {
+                             writeHandle->SerializeDataUpdate(writeHandleBuffer, 0u, cmd.dataSize);
+                         }});
 }
 
 }  // namespace dawn::wire::client
