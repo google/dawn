@@ -299,6 +299,11 @@ crbug.com/407109048 [ arm ] webgpu:api,validation,capability_checks,limits,maxBu
 crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:format:* [ Skip ]
 crbug.com/41489034 [ dawn-backend-validation intel ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:viewFormats:* [ Skip ]
 
+# Workgroup memory zero-init failures on Qualcomm GPUs.
+# Fixed on newer Qualcomm drivers.
+crbug.com/42240969 [ android qualcomm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
+crbug.com/42240969 [ android-chromium android-pixel-4 android-r angle-opengles graphite-disabled mobile qualcomm target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Skip ]
+
 ################################################################################
 # Triaged or Manually-Added Flakes and Failures
 ################################################################################
@@ -309,9 +314,6 @@ crbug.com/408556424 [ dawn-backend-validation linux ] webgpu:web_platform,extern
 
 # Flaky on MacBookPro16,1 (AMD) machines
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
-
-# Android failures
-crbug.com/42240969 [ android qualcomm ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
 
 # cameraCapture gives PermissionDenied by default, but a flag could be added for testing.
 crbug.com/346799721 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
@@ -495,7 +497,6 @@ crbug.com/42241269 [ amd mac ] webgpu:shader,execution,zero_init:compute,zero_in
 
 crbug.com/373670513 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 crbug.com/373485785 [ intel win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
-crbug.com/373485785 [ android-chromium android-pixel-4 android-r angle-opengles graphite-disabled mobile qualcomm target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
 # textureSampleCompare(Level):arrayed_3d_coords on Pixel 4
 crbug.com/408250014 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_3d_coords:* [ Failure ]
