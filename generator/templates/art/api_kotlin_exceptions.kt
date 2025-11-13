@@ -57,13 +57,18 @@ public class DeviceLostException(
   message: String
 ) : Exception(message)
 
+/**
+ * Base class for exceptions that can happen at runtime.
+ */
+public open class WebGpuRuntimeException(message: String): Exception(message)
+
 {% for value in ns.error.values if value.name.get() != "no error" %}
     /**
      * Exception for {{value.name.CamelCase()}} type errors.
      *
      * @param message A message explaining the error.
      */
-    public class {{value.name.CamelCase()}}Exception(message: String) : Exception(message);
+    public class {{value.name.CamelCase()}}Exception(message: String) : WebGpuRuntimeException(message);
 
 {% endfor %}
 
@@ -72,7 +77,7 @@ public class DeviceLostException(
  * @param type The [{{ kotlin_name(ns.error) }}].
  * @param message A human-readable message describing the device loss.
  */
-public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String): Exception =
+public fun getException(@{{ kotlin_name(ns.error) }} type: Int, message: String): WebGpuRuntimeException =
     when (type) {
         {% for value in ns.error.values if value.name.get() != "no error" %}
             {{ kotlin_name(ns.error) }}.{{value.name.CamelCase()}} -> {{value.name.CamelCase()}}Exception(message)

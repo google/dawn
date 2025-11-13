@@ -63,6 +63,8 @@ package {{ kotlin_package }}
     {%- endif %}
     //* The wrapped method has executor and callback function stripped out (the wrapper supplies
     //* those so the client doesn't have to).
+    {% set exception_name = (ns.status_arg.name.chunks[:-1] if len(ns.status_arg.name.chunks) > 1 else ['web', 'gpu']) | map('title') | join + 'Exception' %}
+    @Throws({{ exception_name}}::class{% if ns.payload_arg and ns.payload_arg.type.name.get() == 'error type' %}, WebGpuRuntimeException::class{% endif %})
     public suspend fun {{ method.name.camelCase() }}(
         {%- for arg in kotlin_record_members(method.arguments) if not (
             arg.type.category == 'callback function' or
@@ -83,7 +85,6 @@ package {{ kotlin_package }}
                             // Coroutine was aborted.
                         }
                         //* Throw the associated custom exception if the status is not 'success'.
-                        {% set exception_name = (ns.status_arg.name.chunks[:-1] if len(ns.status_arg.name.chunks) > 1 else ['web', 'gpu']) | map('title') | join + 'Exception' %}
                         else if ({{ as_varName(ns.status_arg.name) }} != {{ ns.status_arg.name.CamelCase() }}.Success) {
                             it.resumeWithException({{ exception_name}} (
                                 {%- if ns.status_arg %}status = {{ as_varName(ns.status_arg.name) }},{% endif %}
