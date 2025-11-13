@@ -334,6 +334,11 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             core::BuiltinValue::kVertexIndex, param->Type(), param->Declaration()->attributes);
         entry_point.instance_index_used |= ContainsBuiltin(
             core::BuiltinValue::kInstanceIndex, param->Type(), param->Declaration()->attributes);
+
+        if (entry_point.stage == PipelineStage::kFragment) {
+            entry_point.frag_position_used = ContainsBuiltin(
+                core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
+        }
     }
 
     if (!sem->ReturnType()->Is<core::type::Void>()) {

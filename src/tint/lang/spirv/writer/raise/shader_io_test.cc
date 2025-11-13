@@ -1349,5 +1349,430 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleInterpolation) {
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+    color->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                core::InterpolationSampling::kSample});
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%position:vec4<f32> [@position], %color:f32 [@location(0), @interpolate(linear, sample)]):void {
+  $B1: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0) @interpolate(linear, sample)
+  %foo_loc1_Input:ptr<__in, vec4<f32>, read> = var undef @location(1) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %color:f32):void {
+  $B2: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc1_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:f32 = load %foo_loc0_Input
+    %18:void = call %foo_inner, %16, %17
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleIndex) {
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    idx->SetBuiltin(core::BuiltinValue::kSampleIndex);
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, idx});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%position:vec4<f32> [@position], %idx:u32 [@sample_index]):void {
+  $B1: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_sample_index_Input:ptr<__in, u32, read> = var undef @interpolate(flat) @builtin(sample_index)
+  %foo_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %idx:u32):void {
+  $B2: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc0_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:u32 = load %foo_sample_index_Input
+    %18:void = call %foo_inner, %16, %17
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_NoModification) {
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%position:vec4<f32> [@position], %color:f32 [@location(0)]):void {
+  $B1: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0)
+  %foo_loc1_Input:ptr<__in, vec4<f32>, read> = var undef @location(1) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %color:f32):void {
+  $B2: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc1_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:f32 = load %foo_loc0_Input
+    %18:void = call %foo_inner, %16, %17
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleInterpolation_InStruct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {
+                                     mod.symbols.New("color"),
+                                     ty.f32(),
+                                     core::IOAttributes{
+                                         .location = 1u,
+                                         .interpolation =
+                                             core::Interpolation{
+                                                 core::InterpolationType::kLinear,
+                                                 core::InterpolationSampling::kSample,
+                                             },
+                                     },
+                                 },
+                             });
+
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* str_param = b.FunctionParam("input", str_ty);
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, str_param});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  color:f32 @offset(0), @location(1), @interpolate(linear, sample)
+}
+
+%foo = @fragment func(%position:vec4<f32> [@position], %input:MyStruct):void {
+  $B1: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  color:f32 @offset(0)
+}
+
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_loc1_Input:ptr<__in, f32, read> = var undef @location(1) @interpolate(linear, sample)
+  %foo_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %input:MyStruct):void {
+  $B2: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc0_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:f32 = load %foo_loc1_Input
+    %18:MyStruct = construct %17
+    %19:void = call %foo_inner, %16, %18
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_SampleIndex_InStruct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {
+                                     mod.symbols.New("idx"),
+                                     ty.u32(),
+                                     core::IOAttributes{
+                                         .builtin = core::BuiltinValue::kSampleIndex,
+                                     },
+                                 },
+                             });
+
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* str_param = b.FunctionParam("input", str_ty);
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, str_param});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("p", position);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4) {
+  idx:u32 @offset(0), @builtin(sample_index)
+}
+
+%foo = @fragment func(%position:vec4<f32> [@position], %input:MyStruct):void {
+  $B1: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+MyStruct = struct @align(4) {
+  idx:u32 @offset(0)
+}
+
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_sample_index_Input:ptr<__in, u32, read> = var undef @interpolate(flat) @builtin(sample_index)
+  %foo_loc0_Input:ptr<__in, vec4<f32>, read> = var undef @location(0) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %input:MyStruct):void {
+  $B2: {
+    %p:vec4<f32> = let %position
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc0_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:u32 = load %foo_sample_index_Input
+    %18:MyStruct = construct %17
+    %19:void = call %foo_inner, %16, %18
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ForcePixelCenters_PositionNotUsed) {
+    auto* position = b.FunctionParam("position", ty.vec4<f32>());
+    position->SetBuiltin(core::BuiltinValue::kPosition);
+    auto* color = b.FunctionParam("color", ty.f32());
+    color->SetLocation(0);
+    color->SetInterpolation(core::Interpolation{core::InterpolationType::kLinear,
+                                                core::InterpolationSampling::kSample});
+
+    auto* ep = b.Function("foo", ty.void_());
+    ep->SetParams({position, color});
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {
+        b.Let("c", color);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%position:vec4<f32> [@position], %color:f32 [@location(0), @interpolate(linear, sample)]):void {
+  $B1: {
+    %c:f32 = let %color
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var undef @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var undef @location(0) @interpolate(linear, sample)
+  %foo_loc1_Input:ptr<__in, vec4<f32>, read> = var undef @location(1) @interpolate(linear, center)
+}
+
+%foo_inner = func(%position:vec4<f32>, %color:f32):void {
+  $B2: {
+    %c:f32 = let %color
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B3: {
+    %9:vec4<f32> = load %foo_position_Input
+    %10:vec2<f32> = swizzle %9, xy
+    %11:vec2<f32> = floor %10
+    %12:vec2<f32> = add %11, vec2<f32>(0.5f)
+    %13:vec4<f32> = load %foo_loc1_Input
+    %14:f32 = swizzle %13, z
+    %15:f32 = swizzle %13, w
+    %16:vec4<f32> = construct %12, %14, %15
+    %17:f32 = load %foo_loc0_Input
+    %18:void = call %foo_inner, %16, %17
+    ret
+  }
+}
+)";
+
+    core::ir::transform::ImmediateDataLayout immediate_data;
+    ShaderIOConfig config{immediate_data};
+    config.apply_pixel_center_polyfill = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

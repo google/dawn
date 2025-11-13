@@ -1064,6 +1064,9 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
     if (HasStage(SingleShaderStage::Fragment)) {
         mUsesFragDepth = GetStage(SingleShaderStage::Fragment).metadata->usesFragDepth;
+        mUsesFragPosition = GetStage(SingleShaderStage::Fragment).metadata->usesFragPosition;
+        mIsFragMultiSampled = GetStage(SingleShaderStage::Fragment).metadata->isFragMultiSampled;
+        mUsesSampleIndex = GetStage(SingleShaderStage::Fragment).metadata->usesSampleIndex;
     }
 
     if (HasStage(SingleShaderStage::Vertex)) {
@@ -1274,6 +1277,21 @@ bool RenderPipelineBase::WritesStencil() const {
 bool RenderPipelineBase::UsesFragDepth() const {
     DAWN_ASSERT(!IsError());
     return mUsesFragDepth;
+}
+
+bool RenderPipelineBase::UsesSampleIndex() const {
+    DAWN_ASSERT(!IsError());
+    return mUsesSampleIndex;
+}
+
+bool RenderPipelineBase::UsesFragPosition() const {
+    DAWN_ASSERT(!IsError());
+    return mUsesFragPosition;
+}
+
+bool RenderPipelineBase::IsFragMultiSampled() const {
+    DAWN_ASSERT(!IsError());
+    return mIsFragMultiSampled;
 }
 
 bool RenderPipelineBase::UsesVertexIndex() const {

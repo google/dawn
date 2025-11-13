@@ -139,6 +139,9 @@ class RenderPipelineBase : public PipelineBase,
     bool WritesDepth() const;
     bool WritesStencil() const;
     bool UsesFragDepth() const;
+    bool UsesFragPosition() const;
+    bool IsFragMultiSampled() const;
+    bool UsesSampleIndex() const;
     bool UsesVertexIndex() const;
     bool UsesInstanceIndex() const;
 
@@ -180,6 +183,9 @@ class RenderPipelineBase : public PipelineBase,
     bool mWritesDepth = false;
     bool mWritesStencil = false;
     bool mUsesFragDepth = false;
+    bool mUsesFragPosition = false;
+    bool mIsFragMultiSampled = false;
+    bool mUsesSampleIndex = false;
     bool mUsesVertexIndex = false;
     bool mUsesInstanceIndex = false;
 };

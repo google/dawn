@@ -124,6 +124,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     const ProgrammableStage& programmableStage,
     const PipelineLayout* layout,
     bool emitPointSize,
+    bool isSampled,
     const ImmediateConstantMask& pipelineImmediateMask) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
@@ -266,6 +267,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         req.tintOptions.depth_range_offsets = {
             offsetStartBytes, offsetStartBytes + kImmediateConstantElementByteSize};
     }
+
+    req.tintOptions.apply_pixel_center_polyfill = isSampled;
 
     req.tintOptions.enable_integer_range_analysis =
         GetDevice()->IsToggleEnabled(Toggle::EnableIntegerRangeAnalysisInRobustness);

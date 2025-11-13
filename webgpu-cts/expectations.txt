@@ -753,11 +753,8 @@ crbug.com/407076135 [ apple-angle-metal-renderer:-apple-m2 mac ] webgpu:shader,e
 crbug.com/407109061 [ clang-coverage dawn-no-backend-validation linux nvidia-0x2184 nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 
 # fragment_builtins with multisampling and "sample" mode failing on many Vulkan devices
-crbug.com/407144390 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ android-14 android-pixel-6 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
-crbug.com/407144390 [ intel linux ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ intel linux ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
-crbug.com/407144390 [ linux no-clang-coverage nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 crbug.com/407144390 [ linux nvidia-0x2184 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_mask:nearFar=*;sampleCount=4;interpolation={"type":"*","sampling":"sample"} [ Failure ]
 
 # depth_bias test failures on Linux NVIDIA

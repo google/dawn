@@ -58,6 +58,8 @@ struct ShaderIOConfig {
     bool emit_vertex_point_size = false;
     /// true if f16 IO types should be replaced with f32 types and converted
     bool polyfill_f16_io = false;
+    /// true if we should force pixel centers via polyfill when multi-sampling.
+    bool apply_pixel_center_polyfill = false;
     /// offsets for clamping frag depth
     std::optional<Options::RangeOffsets> depth_range_offsets{};
 };

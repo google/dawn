@@ -1011,6 +1011,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
 
             metadata->usedInterStageVariables[location] = true;
             metadata->interStageVariables[location] = variable;
+            if (inputVar.interpolation_sampling ==
+                tint::inspector::InterpolationSampling::kSample) {
+                metadata->isFragMultiSampled = true;
+            }
         }
 
         uint32_t totalInterStageShaderVariables = entryPoint.input_variables.size();
@@ -1023,6 +1027,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             ++totalInterStageShaderVariables;
         }
         metadata->usesFragDepth = entryPoint.frag_depth_used;
+        metadata->usesFragPosition = entryPoint.frag_position_used;
 
         metadata->totalInterStageShaderVariables = totalInterStageShaderVariables;
         if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {

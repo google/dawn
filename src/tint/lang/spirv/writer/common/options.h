@@ -115,6 +115,9 @@ struct Options {
     /// Set to `true` to always pass matrices to user functions by pointer instead of by value.
     bool pass_matrix_by_pointer = false;
 
+    /// Set to `true` to apply builtin 'position' pixel center emulation.
+    bool apply_pixel_center_polyfill = false;
+
     /// Set to `true` to generate polyfill for `dot4I8Packed` and `dot4U8Packed` builtins
     bool polyfill_dot_4x8_packed = false;
 
@@ -175,6 +178,7 @@ struct Options {
                  use_storage_input_output_16,
                  emit_vertex_point_size,
                  pass_matrix_by_pointer,
+                 apply_pixel_center_polyfill,
                  polyfill_dot_4x8_packed,
                  polyfill_pack_unpack_4x8_norm,
                  polyfill_case_switch,

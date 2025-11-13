@@ -108,6 +108,10 @@
     EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),            \
                   new ::dawn::detail::ExpectEq<float>(expected, count))
 
+#define EXPECT_BUFFER_FLOAT_RANGE_TOLERANCE_EQ(expected, buffer, offset, count, tolerance) \
+    EXPECT_BUFFER(buffer, offset, sizeof(float) * (count),                                 \
+                  new ::dawn::detail::ExpectEq<float>(expected, count, tolerance))
+
 // Test a pixel of the mip level 0 of a 2D texture.
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})

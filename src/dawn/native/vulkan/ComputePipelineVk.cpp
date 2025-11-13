@@ -87,7 +87,8 @@ MaybeError ComputePipeline::InitializeImpl() {
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
     DAWN_TRY_ASSIGN(moduleAndSpirv,
                     module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
-                                              /*emitPointSize*/ false, GetImmediateMask()));
+                                              /*emitPointSize*/ false, /*isSampled*/ false,
+                                              GetImmediateMask()));
 
     createInfo.stage.module = moduleAndSpirv.module;
     // string_view returned by GetIsolatedEntryPointName() points to a null-terminated string.
