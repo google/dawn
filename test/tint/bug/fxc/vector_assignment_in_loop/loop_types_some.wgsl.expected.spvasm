@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 126
+; Bound: 130
 ; Schema: 0
                OpCapability Shader
          %68 = OpExtInstImport "GLSL.std.450"
@@ -109,25 +109,29 @@
                OpBranch %61
         %111 = OpLabel
         %113 = OpLoad %int %i_0 None
-        %114 = OpAccessChain %_ptr_Function_float %v2f %113
+        %115 = OpBitcast %uint %113
+        %114 = OpAccessChain %_ptr_Function_float %v2f %115
                OpStore %114 %float_1 None
-        %115 = OpLoad %int %i_0 None
-        %116 = OpAccessChain %_ptr_Function_int %v2i %115
-               OpStore %116 %int_1 None
-        %117 = OpLoad %int %i_0 None
-        %118 = OpAccessChain %_ptr_Function_uint %v2u %117
-               OpStore %118 %uint_1 None
+        %116 = OpLoad %int %i_0 None
+        %118 = OpBitcast %uint %116
+        %117 = OpAccessChain %_ptr_Function_int %v2i %118
+               OpStore %117 %int_1 None
         %119 = OpLoad %int %i_0 None
-        %120 = OpAccessChain %_ptr_Function_bool %v2b %119
-               OpStore %120 %true None
+        %121 = OpBitcast %uint %119
+        %120 = OpAccessChain %_ptr_Function_uint %v2u %121
+               OpStore %120 %uint_1 None
+        %122 = OpLoad %int %i_0 None
+        %124 = OpBitcast %uint %122
+        %123 = OpAccessChain %_ptr_Function_bool %v2b %124
+               OpStore %123 %true None
                OpBranch %59
          %59 = OpLabel
-        %121 = OpLoad %int %i_0 None
-        %122 = OpBitcast %uint %121
-        %123 = OpBitcast %uint %int_1
-        %124 = OpIAdd %uint %122 %123
-        %125 = OpBitcast %int %124
-               OpStore %i_0 %125 None
+        %125 = OpLoad %int %i_0 None
+        %126 = OpBitcast %uint %125
+        %127 = OpBitcast %uint %int_1
+        %128 = OpIAdd %uint %126 %127
+        %129 = OpBitcast %int %128
+               OpStore %i_0 %129 None
                OpBranch %60
          %61 = OpLabel
                OpStore %i %int_0

@@ -1168,6 +1168,20 @@ class Printer {
         EmitExitPhis(i);
     }
 
+    uint32_t GetAccessChainIndexId(core::ir::Value* idx) {
+        if (idx->Type()->Is<core::type::U32>()) {
+            return Value(idx);
+        }
+
+        // If the index isn't a unsigned value, then bitcast it to unsigned. A negative
+        // value is never allowed as a constant access index in SPIR-V. This cast fixes that
+        // potential issue.
+        uint32_t spv_id = module_.NextId();
+        current_function_.PushInst(spv::Op::OpBitcast,
+                                   {Type(ir_.Types().u32()), spv_id, Value(idx)});
+        return spv_id;
+    }
+
     /// Emit an access instruction
     /// @param access the access instruction to emit
     void EmitAccess(core::ir::Access* access) {
@@ -1179,7 +1193,7 @@ class Printer {
         if (ty->Is<core::type::Pointer>()) {
             // Use OpAccessChain for accesses into pointer types.
             for (auto* idx : access->Indices()) {
-                operands.push_back(Value(idx));
+                operands.push_back(GetAccessChainIndexId(idx));
             }
             current_function_.PushInst(spv::Op::OpAccessChain, std::move(operands));
             return;
@@ -2463,9 +2477,9 @@ class Printer {
         auto* el_ty = load->Result()->Type();
         auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
         auto el_ptr_id = module_.NextId();
-        current_function_.PushInst(
-            spv::Op::OpAccessChain,
-            {Type(el_ptr_ty), el_ptr_id, Value(load->From()), Value(load->Index())});
+        current_function_.PushInst(spv::Op::OpAccessChain,
+                                   {Type(el_ptr_ty), el_ptr_id, Value(load->From()),
+                                    GetAccessChainIndexId(load->Index())});
         current_function_.PushInst(spv::Op::OpLoad,
                                    {Type(load->Result()->Type()), Value(load), el_ptr_id,
                                     U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
@@ -2603,9 +2617,9 @@ class Printer {
         auto* el_ty = store->Value()->Type();
         auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
         auto el_ptr_id = module_.NextId();
-        current_function_.PushInst(
-            spv::Op::OpAccessChain,
-            {Type(el_ptr_ty), el_ptr_id, Value(store->To()), Value(store->Index())});
+        current_function_.PushInst(spv::Op::OpAccessChain,
+                                   {Type(el_ptr_ty), el_ptr_id, Value(store->To()),
+                                    GetAccessChainIndexId(store->Index())});
         current_function_.PushInst(
             spv::Op::OpStore,
             {el_ptr_id, Value(store->Value()), U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});

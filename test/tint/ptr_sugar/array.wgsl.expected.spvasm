@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 73
+; Bound: 75
 ; Schema: 0
                OpCapability Shader
-         %48 = OpExtInstImport "GLSL.std.450"
+         %50 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -76,63 +76,65 @@
          %27 = OpLabel
         %a_1 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
         %b_1 = OpVariable %_ptr_Function_int Function
-         %30 = OpAccessChain %_ptr_Function_int %a_1 %i
-         %31 = OpLoad %int %30 None
-               OpStore %b_1 %31
-         %33 = OpAccessChain %_ptr_Function_int %a_1 %uint_0
-               OpStore %33 %int_42 None
+         %31 = OpBitcast %uint %i
+         %30 = OpAccessChain %_ptr_Function_int %a_1 %31
+         %32 = OpLoad %int %30 None
+               OpStore %b_1 %32
+         %34 = OpAccessChain %_ptr_Function_int %a_1 %uint_0
+               OpStore %34 %int_42 None
                OpReturn
                OpFunctionEnd
 %no_deref_let = OpFunction %void None %3
-         %35 = OpLabel
+         %36 = OpLabel
         %a_2 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
         %b_2 = OpVariable %_ptr_Function_int Function
-         %37 = OpAccessChain %_ptr_Function_int %a_2 %i
-         %38 = OpLoad %int %37 None
-               OpStore %b_2 %38
-         %40 = OpAccessChain %_ptr_Function_int %a_2 %uint_0
-               OpStore %40 %int_42 None
+         %39 = OpBitcast %uint %i
+         %38 = OpAccessChain %_ptr_Function_int %a_2 %39
+         %40 = OpLoad %int %38 None
+               OpStore %b_2 %40
+         %42 = OpAccessChain %_ptr_Function_int %a_2 %uint_0
+               OpStore %42 %int_42 None
                OpReturn
                OpFunctionEnd
   %deref_var = OpFunction %void None %3
-         %42 = OpLabel
+         %44 = OpLabel
         %a_3 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
         %i_0 = OpVariable %_ptr_Function_int Function
         %b_3 = OpVariable %_ptr_Function_int Function
                OpStore %i_0 %i
-         %45 = OpLoad %int %i_0 None
-         %46 = OpBitcast %uint %45
-         %47 = OpExtInst %uint %48 UMin %46 %uint_9
-         %50 = OpAccessChain %_ptr_Function_int %a_3 %47
-         %51 = OpLoad %int %50 None
-               OpStore %b_3 %51
-         %53 = OpAccessChain %_ptr_Function_int %a_3 %uint_0
-               OpStore %53 %int_42 None
+         %47 = OpLoad %int %i_0 None
+         %48 = OpBitcast %uint %47
+         %49 = OpExtInst %uint %50 UMin %48 %uint_9
+         %52 = OpAccessChain %_ptr_Function_int %a_3 %49
+         %53 = OpLoad %int %52 None
+               OpStore %b_3 %53
+         %55 = OpAccessChain %_ptr_Function_int %a_3 %uint_0
+               OpStore %55 %int_42 None
                OpReturn
                OpFunctionEnd
 %no_deref_var = OpFunction %void None %3
-         %55 = OpLabel
+         %57 = OpLabel
         %a_4 = OpVariable %_ptr_Function__arr_int_uint_10 Function %11
         %i_1 = OpVariable %_ptr_Function_int Function
         %b_4 = OpVariable %_ptr_Function_int Function
                OpStore %i_1 %i
-         %58 = OpLoad %int %i_1 None
-         %59 = OpBitcast %uint %58
-         %60 = OpExtInst %uint %48 UMin %59 %uint_9
-         %61 = OpAccessChain %_ptr_Function_int %a_4 %60
-         %62 = OpLoad %int %61 None
-               OpStore %b_4 %62
-         %64 = OpAccessChain %_ptr_Function_int %a_4 %uint_0
-               OpStore %64 %int_42 None
+         %60 = OpLoad %int %i_1 None
+         %61 = OpBitcast %uint %60
+         %62 = OpExtInst %uint %50 UMin %61 %uint_9
+         %63 = OpAccessChain %_ptr_Function_int %a_4 %62
+         %64 = OpLoad %int %63 None
+               OpStore %b_4 %64
+         %66 = OpAccessChain %_ptr_Function_int %a_4 %uint_0
+               OpStore %66 %int_42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %3
-         %66 = OpLabel
-         %67 = OpFunctionCall %void %deref_const
-         %68 = OpFunctionCall %void %no_deref_const
-         %69 = OpFunctionCall %void %deref_let
-         %70 = OpFunctionCall %void %no_deref_let
-         %71 = OpFunctionCall %void %deref_var
-         %72 = OpFunctionCall %void %no_deref_var
+         %68 = OpLabel
+         %69 = OpFunctionCall %void %deref_const
+         %70 = OpFunctionCall %void %no_deref_const
+         %71 = OpFunctionCall %void %deref_let
+         %72 = OpFunctionCall %void %no_deref_let
+         %73 = OpFunctionCall %void %deref_var
+         %74 = OpFunctionCall %void %no_deref_var
                OpReturn
                OpFunctionEnd

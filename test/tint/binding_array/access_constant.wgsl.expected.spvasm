@@ -1,11 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 33
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
-         %22 = OpExtInstImport "GLSL.std.450"
+         %23 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fs "fs"
                OpExecutionMode %fs OriginUpperLeft
@@ -28,22 +28,23 @@
       %int_0 = OpConstant %int 0
      %uint_1 = OpConstant %uint 1
      %v2uint = OpTypeVector %uint 2
-         %26 = OpConstantComposite %v2uint %uint_1 %uint_1
+         %27 = OpConstantComposite %v2uint %uint_1 %uint_1
       %v2int = OpTypeVector %int 2
-         %28 = OpConstantNull %v2int
+         %29 = OpConstantNull %v2int
     %v4float = OpTypeVector %float 4
          %fs = OpFunction %void None %10
          %11 = OpLabel
-         %12 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %int_0
-         %16 = OpLoad %4 %12 None
-         %17 = OpImageQueryLevels %uint %16
-         %18 = OpISub %uint %17 %uint_1
-         %20 = OpBitcast %uint %int_0
-         %21 = OpExtInst %uint %22 UMin %20 %18
-         %23 = OpImageQuerySizeLod %v2uint %16 %21
-         %25 = OpISub %v2uint %23 %26
-         %27 = OpBitcast %v2uint %28
-         %30 = OpExtInst %v2uint %22 UMin %27 %25
-%texture_load = OpImageFetch %v4float %16 %30 Lod %21
+         %14 = OpBitcast %uint %int_0
+         %12 = OpAccessChain %_ptr_UniformConstant_4 %sampled_textures %14
+         %17 = OpLoad %4 %12 None
+         %18 = OpImageQueryLevels %uint %17
+         %19 = OpISub %uint %18 %uint_1
+         %21 = OpBitcast %uint %int_0
+         %22 = OpExtInst %uint %23 UMin %21 %19
+         %24 = OpImageQuerySizeLod %v2uint %17 %22
+         %26 = OpISub %v2uint %24 %27
+         %28 = OpBitcast %v2uint %29
+         %31 = OpExtInst %v2uint %23 UMin %28 %26
+%texture_load = OpImageFetch %v4float %17 %31 Lod %22
                OpReturn
                OpFunctionEnd

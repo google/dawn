@@ -53,6 +53,33 @@ TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
     EXPECT_INST("%result = OpCompositeExtract %int %arr 1");
 }
 
+TEST_F(SpirvWriterTest, Access_Array_Value_Index_Negative) {
+    auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arr_val});
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("l", -1_i);
+        auto* result = b.Access(ty.i32(), arr_val, l);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* eb = b.ComputeFunction("main");
+    b.Append(eb->Block(), [&] {
+        b.Let("x", b.Call(func, b.Zero(ty.array(ty.i32(), 4))));
+        b.Return(eb);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(
+        R"(%14 = OpBitcast %uint %l
+         %12 = OpAccessChain %_ptr_Function_int %9 %14)");
+}
+
 TEST_F(SpirvWriterTest, Access_Array_Pointer_ConstantIndex) {
     auto* func = b.Function("foo", ty.i32());
     b.Append(func->Block(), [&] {
@@ -312,6 +339,26 @@ TEST_F(SpirvWriterTest, LoadVectorElement_ConstantIndex) {
     EXPECT_INST("%result = OpLoad %int %10");
 }
 
+TEST_F(SpirvWriterTest, LoadVectorElement_NegativeIndex) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        auto* l = b.Let("l", -1_i);
+        auto* result = b.LoadVectorElement(vec_var, l);
+        b.Return(func);
+        mod.SetName(result, "result");
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(R"(%13 = OpBitcast %uint %l
+         %11 = OpAccessChain %_ptr_Function_int %vec %13
+     %result = OpLoad %int %11 None)");
+}
+
 TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -349,6 +396,26 @@ TEST_F(SpirvWriterTest, StoreVectorElement_ConstantIndex) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%10 = OpAccessChain %_ptr_Function_int %vec %uint_1");
     EXPECT_INST("OpStore %10 %int_42");
+}
+
+TEST_F(SpirvWriterTest, StoreVectorElement_NegativeIndex) {
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
+        auto* l = b.Let("l", -1_i);
+        b.StoreVectorElement(vec_var, l, b.Constant(42_i));
+        b.Return(func);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .disable_robustness = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(
+        R"(%13 = OpBitcast %uint %l
+         %11 = OpAccessChain %_ptr_Function_int %vec %13
+               OpStore %11 %int_42 None)");
 }
 
 TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
