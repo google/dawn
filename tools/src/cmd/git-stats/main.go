@@ -43,6 +43,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // Flags
@@ -56,7 +57,7 @@ var (
 // main entry point
 func main() {
 	flag.Parse()
-	if err := run(); err != nil {
+	if err := run(oswrapper.GetRealOSWrapper()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -109,7 +110,7 @@ func shouldConsiderLinesOfCommit(hash string) bool {
 // ____________^^^^^^^^^^^^^^^_
 var reEmail = regexp.MustCompile(`<([^>]+)>`)
 
-func run() error {
+func run(osW oswrapper.OSWrapper) error {
 	// Parse the --after and --before flags
 	var after, before time.Time
 	var err error
@@ -137,7 +138,7 @@ func run() error {
 	}
 
 	// Create the git.Git wrapper
-	g, err := git.New(gitExe)
+	g, err := git.New(gitExe, osW)
 	if err != nil {
 		return err
 	}

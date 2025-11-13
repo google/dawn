@@ -127,7 +127,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return fmt.Errorf("failed to find git on PATH: %w", err)
 	}
 
-	git, err := git.New(gitExe)
+	git, err := git.New(gitExe, cfg.OsWrapper)
 	if err != nil {
 		return err
 	}

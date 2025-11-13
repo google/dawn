@@ -34,12 +34,13 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // Hash is a 20 byte, git object hash.
@@ -71,12 +72,14 @@ var DefaultTimeout = 5 * time.Minute
 type Git struct {
 	// Path to the git executable
 	exe string
+	// OS is the wrapper for all os functions
+	os oswrapper.OSWrapper
 	// Debug flag to print all command to the `git` executable
 	LogAllActions bool
 }
 
 // New returns a new Git instance
-func New(exe string) (*Git, error) {
+func New(exe string, osWrapper oswrapper.OSWrapper) (*Git, error) {
 	if exe == "" {
 		g, err := exec.LookPath("git")
 		if err != nil {
@@ -84,10 +87,10 @@ func New(exe string) (*Git, error) {
 		}
 		exe = g
 	}
-	if _, err := os.Stat(exe); err != nil {
+	if _, err := osWrapper.Stat(exe); err != nil {
 		return nil, err
 	}
-	return &Git{exe: exe}, nil
+	return &Git{exe: exe, os: osWrapper}, nil
 }
 
 // Credentials holds the user name and password used to perform git operations.
@@ -120,7 +123,7 @@ var ErrRepositoryDoesNotExist = errors.New("repository does not exist")
 // Open opens an existing git repo at path. If the repository does not exist at
 // path then ErrRepositoryDoesNotExist is returned.
 func (g Git) Open(path string) (*Repository, error) {
-	info, err := os.Stat(filepath.Join(path, ".git"))
+	info, err := g.os.Stat(filepath.Join(path, ".git"))
 	if err != nil || !info.IsDir() {
 		return nil, ErrRepositoryDoesNotExist
 	}
@@ -139,7 +142,7 @@ type CloneOptions struct {
 
 // Clone performs a clone of the repository at url to path.
 func (g Git) Clone(path, urlStr string, opt *CloneOptions) (*Repository, error) {
-	if err := os.MkdirAll(path, 0777); err != nil {
+	if err := g.os.MkdirAll(path, 0777); err != nil {
 		return nil, err
 	}
 	if opt == nil {
@@ -492,7 +495,7 @@ func (g Git) run(dir string, env []string, timeout time.Duration, args ...string
 		// Godocs for exec.Cmd.Env:
 		// "If Env contains duplicate environment keys, only the last value in
 		// the slice for each duplicate key is used.
-		cmd.Env = append(os.Environ(), env...)
+		cmd.Env = append(g.os.Environ(), env...)
 	}
 	if g.LogAllActions {
 		fmt.Printf("%v> %v %v\n", dir, g.exe, strings.Join(args, " "))

@@ -54,16 +54,16 @@ const (
 
 var (
 	repoFlag    = flag.String("repo", "dawn", "the repo")
-	userFlag    = flag.String("user", defaultUser(), "user name / email")
+	userFlag    = flag.String("user", defaultUser(oswrapper.GetRealOSWrapper()), "user name / email")
 	verboseFlag = flag.Bool("v", false, "verbose mode")
 	dryrunFlag  = flag.Bool("dry", false, "dry mode. Don't apply any labels")
 	authFlags   = authcli.Flags{}
 )
 
-func defaultUser() string {
+func defaultUser(osW oswrapper.OSWrapper) string {
 	if gitExe, err := exec.LookPath("git"); err == nil {
-		if g, err := git.New(gitExe); err == nil {
-			if cwd, err := os.Getwd(); err == nil {
+		if g, err := git.New(gitExe, osW); err == nil {
+			if cwd, err := osW.Getwd(); err == nil {
 				if r, err := g.Open(cwd); err == nil {
 					if cfg, err := r.Config(nil); err == nil {
 						return cfg["user.email"]

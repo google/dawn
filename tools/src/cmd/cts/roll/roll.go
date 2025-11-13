@@ -160,7 +160,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Create the various service clients and ensure required permissions are
 	// available.
-	gitInstance, err := git.New(c.flags.gitPath)
+	gitInstance, err := git.New(c.flags.gitPath, cfg.OsWrapper)
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
 	}
