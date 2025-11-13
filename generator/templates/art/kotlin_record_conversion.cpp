@@ -115,7 +115,7 @@
                                                 {%- for callbackArg in kotlin_record_members(member.type.arguments) %}
                                                     {{- ', ' }}
                                                     {%- if member.type.category == 'kotlin type' -%}
-                                                        nullptr  {#- We can't make these. TODO(b/451995459): Don't even create the converter. #}
+                                                        {{ unreachable_code() }}
                                                     {%- else -%}
                                                         _{{ callbackArg.name.camelCase() }}
                                                     {%- endif -%}

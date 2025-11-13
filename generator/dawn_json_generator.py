@@ -792,6 +792,70 @@ def compute_wire_params(api_params, wire_json):
 ############################################################
 
 
+# Color the structures to determine which converters
+# (Kotlin -> Native and Native -> Kotlin) are required.
+def analyze_converter_usage(params_kotlin):
+    # Initialize flags for both standard structures and callback info structures.
+    for struct in params_kotlin['by_category']['structure'] + params_kotlin[
+            'by_category']['callback info']:
+        struct.needs_n2k = False
+        struct.needs_k2n = False
+
+    # Get the map of chained structs.
+    chain_children = params_kotlin.get('chain_children', {})
+
+    def mark_n2k(typ):
+        # Only proceed if it's a structure and hasn't been marked yet to avoid infinite recursion.
+        if isinstance(typ, StructureType) and not typ.needs_n2k:
+            typ.needs_n2k = True
+            # Recursively mark all members of this structure.
+            for member in typ.members:
+                mark_n2k(member.type)
+
+    def mark_k2n(typ):
+        # Only proceed if it's a structure and hasn't been marked yet to avoid infinite recursion.
+        if isinstance(typ, StructureType) and not typ.needs_k2n:
+            typ.needs_k2n = True
+            # Recursively mark all members of this structure.
+            for member in typ.members:
+                mark_k2n(member.type)
+            # Recursively mark all potential chained children.
+            for child in chain_children.get(typ.name.get(), []):
+                mark_k2n(child)
+
+    # Scan Objects and Methods for roots.
+    for obj in params_kotlin['by_category']['object']:
+        for method in obj.methods:
+            if not params_kotlin['include_method'](obj, method):
+                continue
+
+            # Root A: Return values are always Native -> Kotlin.
+            if method.returns:
+                mark_n2k(method.returns.type)
+
+            # Root B: Output parameters (mutable pointers '*') are Native -> Kotlin.
+            for arg in method.arguments:
+                if arg.annotation == '*':
+                    mark_n2k(arg.type)
+                else:
+                    mark_k2n(arg.type)
+
+    # Scan Callback Functions for roots.
+    for cb in params_kotlin['by_category']['callback function']:
+        for arg in cb.arguments:
+            mark_n2k(arg.type)
+
+    # Scan global functions if API exposes them.
+    for func in params_kotlin['by_category']['function']:
+        if func.returns:
+            mark_n2k(func.returns.type)
+        for arg in func.arguments:
+            if arg.annotation == '*':
+                mark_n2k(arg.type)
+            else:
+                mark_k2n(arg.type)
+
+
 def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
     params_kotlin = parse_json(loaded_json, enabled_tags=['art'])
     params_kotlin['kotlin_package'] = kotlin_json['kotlin_package']
@@ -1031,6 +1095,8 @@ def compute_kotlin_params(loaded_json, kotlin_json, webgpu_json_data=None):
         structure for structure in by_category['structure']
         if include_structure(structure)
     ]
+
+    analyze_converter_usage(params_kotlin)
 
     return params_kotlin
 
