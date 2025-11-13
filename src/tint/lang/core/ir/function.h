@@ -146,7 +146,7 @@ class Function : public Castable<Function, Value> {
     /// @returns the return IO attributes
     const IOAttributes& ReturnAttributes() const { return return_.attributes; }
 
-    /// Sets the return attributes
+    /// Sets the return builtin attribute
     /// @param builtin the builtin to set
     void SetReturnBuiltin(BuiltinValue builtin) {
         TINT_ASSERT(!return_.attributes.builtin.has_value());
@@ -154,6 +154,13 @@ class Function : public Castable<Function, Value> {
     }
     /// @returns the return builtin attribute
     std::optional<BuiltinValue> ReturnBuiltin() const { return return_.attributes.builtin; }
+
+    /// Sets the return depth mode attribute
+    /// @param depth_mode the depth mode to set
+    void SetReturnDepthMode(BuiltinDepthMode depth_mode) {
+        TINT_ASSERT(!return_.attributes.depth_mode.has_value());
+        return_.attributes.depth_mode = depth_mode;
+    }
 
     /// Sets the return location.
     /// @param loc the optional location to set

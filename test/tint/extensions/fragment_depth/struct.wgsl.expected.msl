@@ -1,0 +1,69 @@
+//
+// any
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct FragDepthAnyOutput {
+  float frag_depth;
+};
+
+struct any_outputs {
+  float FragDepthAnyOutput_frag_depth [[depth(any)]];
+};
+
+FragDepthAnyOutput any_inner() {
+  return FragDepthAnyOutput{.frag_depth=1.0f};
+}
+
+fragment any_outputs any() {
+  any_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragDepthAnyOutput_frag_depth = any_inner().frag_depth;
+  return tint_wrapper_result;
+}
+//
+// less
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct FragDepthLessOutput {
+  float frag_depth;
+};
+
+struct less_outputs {
+  float FragDepthLessOutput_frag_depth [[depth(less)]];
+};
+
+FragDepthLessOutput less_inner() {
+  return FragDepthLessOutput{.frag_depth=1.0f};
+}
+
+fragment less_outputs less() {
+  less_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragDepthLessOutput_frag_depth = less_inner().frag_depth;
+  return tint_wrapper_result;
+}
+//
+// greater
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct FragDepthGreaterOutput {
+  float frag_depth;
+};
+
+struct greater_outputs {
+  float FragDepthGreaterOutput_frag_depth [[depth(greater)]];
+};
+
+FragDepthGreaterOutput greater_inner() {
+  return FragDepthGreaterOutput{.frag_depth=1.0f};
+}
+
+fragment greater_outputs greater() {
+  greater_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragDepthGreaterOutput_frag_depth = greater_inner().frag_depth;
+  return tint_wrapper_result;
+}

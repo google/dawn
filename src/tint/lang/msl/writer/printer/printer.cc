@@ -1633,7 +1633,7 @@ class Printer : public tint::TextGenerator {
             auto& attributes = mem->Attributes();
 
             if (auto builtin = attributes.builtin) {
-                auto name = BuiltinToAttribute(builtin.value());
+                auto name = BuiltinToAttribute(builtin.value(), attributes.depth_mode);
                 if (name.empty()) {
                     TINT_IR_ICE(ir_) << "unknown builtin";
                 }

@@ -24,7 +24,7 @@ fragment any_outputs any() {
 using namespace metal;
 
 struct less_outputs {
-  float tint_symbol [[depth(any)]];
+  float tint_symbol [[depth(less)]];
 };
 
 float less_inner() {
@@ -43,7 +43,7 @@ fragment less_outputs less() {
 using namespace metal;
 
 struct greater_outputs {
-  float tint_symbol [[depth(any)]];
+  float tint_symbol [[depth(greater)]];
 };
 
 float greater_inner() {
