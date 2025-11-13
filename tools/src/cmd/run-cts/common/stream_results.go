@@ -77,8 +77,9 @@ type Coverage struct {
 	OutputFile string
 }
 
-// TODO(crbug.com/344014313): Split into smaller functions and add unittest
-// coverage.
+// TODO(crbug.com/416755658): Split into smaller functions and add unittest
+// coverage once the exec calls in browser.Open() are handled via dependency
+// injection.
 // StreamResults reads from the chan 'results', printing the results in test-id
 // sequential order.
 // Once all the results have been printed, a summary will be printed and the
@@ -361,7 +362,7 @@ func splitCTSQuery(testcase TestCase) cov.Path {
 	s := 0
 	for e, r := range testcase {
 		switch r {
-		case ':', '.':
+		case ':', '.', ',':
 			out = append(out, string(testcase[s:e+1]))
 			s = e + 1
 		}
