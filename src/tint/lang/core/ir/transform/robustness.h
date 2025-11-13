@@ -54,8 +54,6 @@ struct RobustnessConfig {
     /// Should texture accesses be clamped?
     bool clamp_texture = true;
 
-    /// Should accesses to pointers with the 'private' address space be clamped?
-    bool clamp_private = true;
     /// Should accesses to pointers with the 'immediate' address space be clamped?
     bool clamp_immediate_data = true;
     /// Should accesses to pointers with the 'storage' address space be clamped?
@@ -81,7 +79,6 @@ struct RobustnessConfig {
     /// Reflection for this class
     TINT_REFLECT(RobustnessConfig,
                  clamp_texture,
-                 clamp_private,
                  clamp_immediate_data,
                  clamp_storage,
                  clamp_uniform,

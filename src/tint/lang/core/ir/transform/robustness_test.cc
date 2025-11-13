@@ -722,7 +722,7 @@ structure = struct @align(16) {
 // Test the clamp toggles for every other address space.
 ////////////////////////////////////////////////////////////////
 
-TEST_P(IR_RobustnessTest, Private_LoadVectorElement) {
+TEST_F(IR_RobustnessDefaultTest, Private_LoadVectorElement) {
     auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
@@ -763,13 +763,12 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_private = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Private_StoreVectorElement) {
+TEST_F(IR_RobustnessDefaultTest, Private_StoreVectorElement) {
     auto* vec = b.Var("vec", ty.ptr(private_, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
@@ -810,13 +809,12 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_private = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Private_Access) {
+TEST_F(IR_RobustnessDefaultTest, Private_Access) {
     auto* arr = b.Var("arr", ty.ptr(private_, ty.array<u32, 4>()));
     mod.root_block->Append(arr);
 
@@ -860,10 +858,9 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_private = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
 TEST_P(IR_RobustnessTest, ImmediateData_LoadVectorElement) {
