@@ -437,7 +437,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Location_InvalidType) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:27 error: fragment entry point param members can only be a bool if decorated with @builtin(front_facing)
+            R"(:5:27 error: fragment entry point params can only be a bool if decorated with @builtin(front_facing)
 %my_func = @fragment func(%my_param:MyStruct):void {
                           ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1389,7 +1389,7 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:17 error: invariant can only decorate a param if it is also decorated with position
+            R"(:1:17 error: invariant can only decorate a value if it is also decorated with position
 %my_func = func(%my_param:vec4<f32> [@invariant]):void {
                 ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1434,7 +1434,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:17 error: invariant can only decorate a param member if it is also decorated with position
+            R"(:5:17 error: invariant can only decorate a value if it is also decorated with position
 %my_func = func(%my_param:MyStruct):void {
                 ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1460,7 +1460,7 @@ TEST_F(IR_ValidatorTest, Function_Param_StructNested_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:9:17 error: invariant can only decorate a param member if it is also decorated with position
+            R"(:9:17 error: invariant can only decorate a value if it is also decorated with position
 %my_func = func(%my_param:MyStruct):void {
                 ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1676,7 +1676,7 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:1:1 error: invariant can only decorate outputs if they are also position builtins
+            R"(:1:1 error: invariant can only decorate a value if it is also decorated with position
 %my_func = func():vec4<f32> [@invariant] {
 ^^^^^^^^
 )")) << res.Failure();
@@ -1698,7 +1698,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
+TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
@@ -1721,13 +1721,13 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:9:1 error: invariant can only decorate members if they are also position builtins
-%my_func = @fragment func():void {
-^^^^^^^^
+            R"(:6:41 error: var: invariant can only decorate a value if it is also decorated with position
+  %v:ptr<__out, MyStruct, read_write> = var undef
+                                        ^^^
 )")) << res.Failure();
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV) {
+TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
     IOAttributes attr;
     attr.invariant = true;
 
@@ -1744,7 +1744,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV)
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: invariant can only decorate output members if they are also position builtins
+            R"(:5:1 error: invariant can only decorate a value if it is also decorated with position
 %my_func = func():MyStruct {
 ^^^^^^^^
 )")) << res.Failure();
@@ -1767,9 +1767,9 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition_ViaMSV) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: invariant can only decorate vars if they are also position builtins
-%my_func = @fragment func():void {
-^^^^^^^^
+            R"(:2:42 error: var: invariant can only decorate a value if it is also decorated with position
+  %v:ptr<__out, vec4<f32>, read_write> = var undef @invariant
+                                         ^^^
 )")) << res.Failure();
 }
 
@@ -2160,7 +2160,7 @@ TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:6:1 error: entry point return members can not be 'bool'
+                testing::HasSubstr(R"(:6:1 error: entry point returns can not be 'bool'
 %f = @vertex func():OutputStruct {
 ^^
 )")) << res.Failure();
@@ -2217,9 +2217,9 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
-^^
+            R"(:2:37 error: var: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
+  %1:ptr<__out, bool, read_write> = var undef @location(0)
+                                    ^^^
 )")) << res.Failure();
 }
 
@@ -2242,9 +2242,9 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
     EXPECT_THAT(
         res.Failure().reason,
         testing::HasSubstr(
-            R"(:5:1 error: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
-%f = @fragment func():void {
-^^
+            R"(:2:36 error: var: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
+  %invalid:ptr<__in, bool, read> = var undef @location(0)
+                                   ^^^
 )")) << res.Failure();
 }
 

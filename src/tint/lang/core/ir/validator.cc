@@ -133,6 +133,23 @@ struct ValidatedType {
 
 namespace {
 
+/// @returns a human-readable string of all the entries in a EnumSet
+template <typename T>
+std::string ToString(const EnumSet<T>& values) {
+    std::stringstream result;
+    result << "[ ";
+    bool first = true;
+    for (auto v : values) {
+        if (!first) {
+            result << ", ";
+        }
+        first = false;
+        result << ToString(v);
+    }
+    result << " ]";
+    return result.str();
+}
+
 /// @returns the parent block of @p block
 const Block* ParentBlockOf(const Block* block) {
     if (auto* parent = block->Parent()) {
@@ -149,12 +166,6 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
         }
     }
     return false;
-}
-
-/// @return true if @param attr does not have invariant decoration or if it also has position
-/// decoration
-bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
-    return !attr.invariant || attr.builtin == BuiltinValue::kPosition;
 }
 
 /// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
@@ -190,134 +201,24 @@ bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
     return attr.builtin == BuiltinValue::kPosition;
 }
 
-/// Utility for running checks on attributes.
-/// If the type that the attributes are attached to is a struct, the check is run over the members,
-/// otherwise it run on the attributes directly.
-///
-/// @param msg_anchor what to associate errors with, e.g. the 'foo' of AddError(foo)
-/// @param ty_attr the directly attached attributes
-/// @param ty the type of the thing that the attributes are attached to
-/// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&)' and
-///        is called when @p ty is not a struct
-/// @param is_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&)' and is
-///        called when @p ty is a struct
-template <typename MSG_ANCHOR, typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckIOAttributes(const MSG_ANCHOR* msg_anchor,
-                       const IOAttributes& ty_attr,
-                       const core::type::Type* ty,
-                       IS_NOT_STRUCT&& is_not_struct_impl,
-                       IS_STRUCT&& is_struct_impl) {
-    if (auto* ty_struct = ty->As<core::type::Struct>()) {
-        for (const auto* mem : ty_struct->Members()) {
-            is_struct_impl(msg_anchor, mem->Attributes());
-
-            if (mem->Type()->Is<core::type::Struct>()) {
-                CheckIOAttributes(msg_anchor, ty_attr, mem->Type(), is_not_struct_impl,
-                                  is_struct_impl);
-            }
+/// Helper for walking a type that maybe a struct, calling a impl function for the type and each of
+/// its members.
+/// @param ctx a context object to pass to the implementation function
+/// @param type the type to walk
+/// @param attr the attributes for @p type
+/// @param impl a function with the signature `void(const core::type::Type*, const IOAttributes&,
+///             CTX&)` that is called for each type.
+template <typename CTX, typename IMPL>
+void WalkTypeAndMembers(CTX& ctx,
+                        const core::type::Type* type,
+                        const IOAttributes& attr,
+                        IMPL&& impl) {
+    impl(type, attr, ctx);
+    if (auto* str = type->As<core::type::Struct>()) {
+        for (auto* member : str->Members()) {
+            WalkTypeAndMembers(ctx, member->Type(), member->Attributes(), impl);
         }
-    } else {
-        is_not_struct_impl(msg_anchor, ty_attr);
     }
-}
-
-/// Helper for calling CheckIOAttributes on a function return
-/// @param func function whose return is to be tested
-/// See @ref CheckIOAttributes for more details
-template <typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckFunctionReturnAttributes(const Function* func,
-                                   IS_NOT_STRUCT&& is_not_struct_impl,
-                                   IS_STRUCT&& is_struct_impl) {
-    CheckIOAttributes(func, func->ReturnAttributes(), func->ReturnType(),
-                      std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
-                      std::forward<IS_STRUCT>(is_struct_impl));
-}
-
-/// Helper for calling CheckIOAttributes on a function param
-/// @param param function param to be tested
-/// See @ref CheckIOAttributes for more details
-template <typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckFunctionParamAttributes(const FunctionParam* param,
-                                  IS_NOT_STRUCT&& is_not_struct_impl,
-                                  IS_STRUCT&& is_struct_impl) {
-    CheckIOAttributes(param, param->Attributes(), param->Type(),
-                      std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
-                      std::forward<IS_STRUCT>(is_struct_impl));
-}
-
-/// Utility for running checks on attributes and type.
-/// If the type that the attributes are attached to is a struct, the check is run over the members,
-/// otherwise it run on the attributes directly.
-///
-/// @param msg_anchor what to associate errors with, e.g. the 'foo' of AddError(foo)
-/// @param ty_attr the directly attached attributes
-/// @param ty the type of the thing that the attributes are attached to
-/// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&, const
-/// core::type::Type* ty)'
-///        and is called when @p ty is not a struct
-/// @param is_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&, const
-/// core::type::Type* ty)'
-///        and is called when @p ty is a struct
-template <typename MSG_ANCHOR, typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
-                              const IOAttributes& ty_attr,
-                              const core::type::Type* ty,
-                              IS_NOT_STRUCT&& is_not_struct_impl,
-                              IS_STRUCT&& is_struct_impl) {
-    if (auto* ty_struct = ty->As<core::type::Struct>()) {
-        for (const auto* mem : ty_struct->Members()) {
-            is_struct_impl(msg_anchor, mem->Attributes(), mem->Type());
-        }
-    } else {
-        is_not_struct_impl(msg_anchor, ty_attr, ty);
-    }
-}
-
-// Wrapper for CheckIOAttributesAndType, when the struct and non-struct impl are the same
-/// See @ref IOAttributesAndType for more details
-template <typename MSG_ANCHOR, typename IMPL>
-void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
-                              const IOAttributes& ty_attr,
-                              const core::type::Type* ty,
-                              IMPL&& impl) {
-    CheckIOAttributesAndType(msg_anchor, ty_attr, ty, impl, impl);
-}
-
-/// Helper for calling IOAttributesAndType on a function param
-/// @param param function param to be tested
-/// See @ref IOAttributesAndType for more details
-template <typename IS_NOT_STRUCT, typename IS_STRUCT>
-void CheckFunctionParamAttributesAndType(const FunctionParam* param,
-                                         IS_NOT_STRUCT&& is_not_struct_impl,
-                                         IS_STRUCT&& is_struct_impl) {
-    CheckIOAttributesAndType(param, param->Attributes(), param->Type(),
-                             std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
-                             std::forward<IS_STRUCT>(is_struct_impl));
-}
-
-/// Helper for calling IOAttributesAndType on a function param
-/// @param param function param to be tested
-/// See @ref IOAttributesAndType for more details
-template <typename IMPL>
-void CheckFunctionParamAttributesAndType(const FunctionParam* param, IMPL&& impl) {
-    CheckIOAttributesAndType(param, param->Attributes(), param->Type(), std::forward<IMPL>(impl));
-}
-
-/// @returns a human-readable string of all the entries in a EnumSet
-template <typename T>
-std::string ToString(const EnumSet<T>& values) {
-    std::stringstream result;
-    result << "[ ";
-    bool first = true;
-    for (auto v : values) {
-        if (!first) {
-            result << ", ";
-        }
-        first = false;
-        result << ToString(v);
-    }
-    result << " ]";
-    return result.str();
 }
 
 /// The IO direction of an operation.
@@ -1064,44 +965,6 @@ class Validator {
     /// @param ep the function to validate
     void CheckVertexEntryPoint(const Function* ep);
 
-    /// Helper for calling IOAttributesAndType on a function return
-    /// @param func function's return to be tested
-    /// See @ref IOAttributesAndType for more details
-    template <typename IS_NOT_STRUCT, typename IS_STRUCT>
-    void CheckFunctionReturnAttributesAndType(const Function* func,
-                                              IS_NOT_STRUCT&& is_not_struct_impl,
-                                              IS_STRUCT&& is_struct_impl) {
-        CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
-                                 std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
-                                 std::forward<IS_STRUCT>(is_struct_impl));
-    }
-
-    /// Helper for calling IOAttributesAndType on a function return
-    /// @param func function's return to be tested
-    /// See @ref IOAttributesAndType for more details
-    template <typename IMPL>
-    void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
-        if (func->ReturnType()->Is<core::type::Struct>() &&
-            func->ReturnAttributes().builtin.has_value()) {
-            AddError(func) << ToString(func->ReturnAttributes().builtin.value())
-                           << " cannot be attached to a structure";
-        }
-
-        CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
-                                 std::forward<IMPL>(impl));
-    }
-
-    /// @returns a function that validates rules for invariant decorations
-    /// @param err error message to log when check fails
-    template <typename MSG_ANCHOR>
-    auto CheckInvariantFunc(const std::string& err) {
-        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
-            if (!InvariantOnlyIfAlsoPosition(attr)) {
-                AddError(msg_anchor) << err;
-            }
-        };
-    }
-
     /// @returns a function that validates builtins on function params
     auto CheckBuiltinFunctionParam(const std::string& err) {
         return [this, err](const FunctionParam* param, const IOAttributes& attr,
@@ -1170,6 +1033,15 @@ class Validator {
                 AddError(msg_anchor) << err;
             }
         };
+    }
+
+    /// Checks spec rules for invariant attributes
+    template <typename MSG_ANCHOR>
+    void CheckInvariant(const MSG_ANCHOR* msg_anchor, IOAttributes attr) {
+        if (attr.invariant && attr.builtin != BuiltinValue::kPosition) {
+            AddError(msg_anchor)
+                << "invariant can only decorate a value if it is also decorated with position";
+        }
     }
 
     /// Validates the given instruction
@@ -2541,30 +2413,30 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        CheckFunctionParamAttributesAndType(param, CheckBuiltinFunctionParam(""));
-        CheckFunctionParamAttributesAndType(param, CheckColorFunctionParam(""));
-
-        CheckFunctionParamAttributes(
-            param,
-            CheckInvariantFunc<FunctionParam>(
-                "invariant can only decorate a param if it is also decorated with position"),
-            CheckInvariantFunc<FunctionParam>(
-                "invariant can only decorate a param member if it is also "
-                "decorated with position"));
+        WalkTypeAndMembers(
+            param, param->Type(), param->Attributes(),
+            [this](const core::type::Type* t, const IOAttributes& a, const FunctionParam* p) {
+                CheckBuiltinFunctionParam("")(p, a, t);
+                CheckColorFunctionParam("")(p, a, t);
+                if (!t->Is<core::type::Struct>()) {
+                    CheckInvariant(p, a);
+                }
+            });
 
         if (func->IsFragment()) {
-            CheckFunctionParamAttributesAndType(
-                param,
-                CheckFrontFacingIfBoolFunc<FunctionParam>(
-                    "fragment entry point params can only be a bool if decorated with "
-                    "@builtin(front_facing)"),
-                CheckFrontFacingIfBoolFunc<FunctionParam>(
-                    "fragment entry point param members can only be a bool if "
-                    "decorated with @builtin(front_facing)"));
+            WalkTypeAndMembers(param, param->Type(), param->Attributes(),
+                               [this](const auto* t, const auto& a, const auto* p) {
+                                   CheckFrontFacingIfBoolFunc<FunctionParam>(
+                                       "fragment entry point params can only be a bool if "
+                                       "decorated with @builtin(front_facing)")(p, a, t);
+                               });
         } else if (func->IsEntryPoint()) {
-            CheckFunctionParamAttributesAndType(
-                param, CheckNotBool<FunctionParam>(
-                           "entry point params can only be a bool for fragment shaders"));
+            WalkTypeAndMembers(
+                param, param->Type(), param->Attributes(),
+                [this](const auto* t, const auto& a, const auto* p) {
+                    CheckNotBool<FunctionParam>(
+                        "entry point params can only be a bool for fragment shaders")(p, a, t);
+                });
         }
 
         AddressSpace address_space = AddressSpace::kUndefined;
@@ -2620,14 +2492,13 @@ void Validator::CheckFunction(const Function* func) {
         func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
         Capabilities{Capability::kAllowRefTypes});
 
-    CheckFunctionReturnAttributesAndType(func, CheckBuiltinFunctionReturn(""));
-
-    CheckFunctionReturnAttributes(
-        func,
-        CheckInvariantFunc<Function>(
-            "invariant can only decorate outputs if they are also position builtins"),
-        CheckInvariantFunc<Function>(
-            "invariant can only decorate output members if they are also position builtins"));
+    WalkTypeAndMembers(func, func->ReturnType(), func->ReturnAttributes(),
+                       [this](const core::type::Type* t, const IOAttributes& a, const Function* f) {
+                           CheckBuiltinFunctionReturn("")(f, a, t);
+                           if (!t->Is<core::type::Struct>()) {
+                               CheckInvariant(f, a);
+                           }
+                       });
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
     if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
@@ -2658,10 +2529,12 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         CheckEntryPointLocationsAndBlendSrc(func);
-
-        CheckFunctionReturnAttributesAndType(
-            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
-            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
+        WalkTypeAndMembers(
+            func, func->ReturnType(), func->ReturnAttributes(),
+            [this](const core::type::Type* t, const IOAttributes& a, const Function* f) {
+                CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'")(f, a,
+                                                                                              t);
+            });
 
         Hashset<BindingPoint, 4> binding_points{};
 
@@ -2682,12 +2555,13 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
-            CheckIOAttributes(
-                func, attr, ty,
-                CheckInvariantFunc<Function>(
-                    "invariant can only decorate vars if they are also position builtins"),
-                CheckInvariantFunc<Function>(
-                    "invariant can only decorate members if they are also position builtins"));
+            WalkTypeAndMembers(
+                var, ty, attr,
+                [this](const core::type::Type* t, const IOAttributes& a, const Var* v) {
+                    if (!t->Is<core::type::Struct>()) {
+                        CheckInvariant(v, a);
+                    }
+                });
 
             if (mv->AddressSpace() != AddressSpace::kIn &&
                 mv->AddressSpace() != AddressSpace::kOut) {
@@ -2695,19 +2569,21 @@ void Validator::CheckFunction(const Function* func) {
             }
 
             if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
-                CheckIOAttributesAndType(
-                    func, attr, ty,
-                    CheckFrontFacingIfBoolFunc<Function>(
-                        "input address space values referenced by fragment shaders can only be "
-                        "'bool' if decorated with @builtin(front_facing)"));
-
+                WalkTypeAndMembers(
+                    var, ty, attr, [this](const auto* t, const auto& a, const auto* v) {
+                        CheckFrontFacingIfBoolFunc<Var>(
+                            "input address space values referenced by fragment shaders "
+                            "can only be 'bool' if decorated with "
+                            "@builtin(front_facing)")(v, a, t);
+                    });
             } else {
-                CheckIOAttributesAndType(
-                    func, attr, ty,
-                    CheckNotBool<Function>(
-                        "IO address space values referenced by shader entry points can only be "
-                        "'bool' if in the input space, used only by fragment shaders and decorated "
-                        "with @builtin(front_facing)"));
+                WalkTypeAndMembers(
+                    var, ty, attr, [this](const auto* t, const auto& a, const auto* v) {
+                        CheckNotBool<Var>(
+                            "IO address space values referenced by shader entry points can only be "
+                            "'bool' if in the input space, used only by fragment shaders and "
+                            "decorated with @builtin(front_facing)")(v, a, t);
+                    });
             }
         }
     }
@@ -2884,13 +2760,12 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
             contains_position = IsPositionPresent(attr, ty);
         }
 
-        CheckIOAttributes(
-            ep, attr, ty,
-            CheckInvariantFunc<Function>(
-                "invariant can only decorate vars if they are also position builtins"),
-            CheckInvariantFunc<Function>(
-                "invariant can only decorate members if they are also position builtins"));
-
+        WalkTypeAndMembers(var, ty, attr,
+                           [this](const core::type::Type* t, const IOAttributes& a, const Var* v) {
+                               if (!t->Is<core::type::Struct>()) {
+                                   CheckInvariant(v, a);
+                               }
+                           });
         // Builtin rules are not checked on module-scope variables, because they are often generated
         // as part of the backend transforms, and have different rules for correctness.
     }
@@ -3322,36 +3197,49 @@ void Validator::RejectBlendSrcAnnotationOnArrayElement(BlendSrcContext& ctx,
 void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locations,
                               const CastableBase* target,
                               const IOAttributes& attr,
-                              Function::PipelineStage stage,
+                              const Function::PipelineStage stage,
                               const core::type::Type* type,
-                              IODirection dir) {
-    if (auto* str = type->As<core::type::Struct>()) {
-        for (auto* member : str->Members()) {
-            if (!member->Attributes().blend_src.has_value()) {
-                CheckLocation(locations, target, member->Attributes(), stage, member->Type(), dir);
+                              const IODirection dir) {
+    struct WalkContext {
+        Validator* validator;
+        Hashmap<uint32_t, const CastableBase*, 4>& locations;
+        const CastableBase* target;
+        const Function::PipelineStage stage;
+        const IODirection dir;
+    };
+    WalkContext ctx{this, locations, target, stage, dir};
+
+    WalkTypeAndMembers(
+        ctx, type, attr,
+        [](const core::type::Type* ty, const IOAttributes& attribute, WalkContext& context) {
+            if (ty->Is<core::type::Struct>()) {
+                return;
             }
-        }
-    }
 
-    if (attr.blend_src) {
-        // locations associated with a blend_src usage should already be pre-populated in locations
-        return;
-    }
+            if (attribute.blend_src) {
+                // locations associated with a blend_src usage should already be
+                // pre-populated in locations
+                return;
+            }
 
-    if (attr.location.has_value()) {
-        if (stage == Function::PipelineStage::kCompute && dir == IODirection::kInput) {
-            AddError(target) << "location attribute is not valid for compute shader inputs";
-        }
+            if (attribute.location.has_value()) {
+                if (context.stage == Function::PipelineStage::kCompute &&
+                    context.dir == IODirection::kInput) {
+                    context.validator->AddError(context.target)
+                        << "location attribute is not valid for compute shader inputs";
+                }
 
-        auto loc = attr.location.value();
-        if (auto conflict = locations.Get(loc)) {
-            AddError(target) << "duplicate location(" << loc << ") on entry point "
-                             << ToString(dir);
-            AddDeclarationNote(*conflict.value);
-        } else {
-            locations.Add(loc, target);
-        }
-    }
+                auto loc = attribute.location.value();
+                if (const auto conflict = context.locations.Get(loc)) {
+                    context.validator->AddError(context.target)
+                        << "duplicate location(" << loc << ") on entry point "
+                        << ToString(context.dir);
+                    context.validator->AddDeclarationNote(*conflict.value);
+                } else {
+                    context.locations.Add(loc, context.target);
+                }
+            }
+        });
 }
 
 Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(

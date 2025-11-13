@@ -62,7 +62,7 @@ TEST_F(IR_ValidatorTest, Builtin_PointSize_WrongStage) {
 }
 
 TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_BuiltinChecker) {
-    auto* f = FragmentEntryPoint();
+    auto* f = VertexEntryPoint();
     auto* str_ty = ty.Struct(mod.symbols.New("OutputStruct"), {
                                                                   {mod.symbols.New(""), ty.i32()},
                                                               });
@@ -76,9 +76,8 @@ TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_BuiltinChecker) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:1 error: __point_size cannot be attached to a structure
-%f = @fragment func():OutputStruct [@__point_size] {
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:1 error: __point_size must be a f32
+%f = @vertex func():OutputStruct [@__point_size] {
 ^^
 )")) << res.Failure();
 }
@@ -100,7 +99,7 @@ TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_Position) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:1 error: position cannot be attached to a structure
+                testing::HasSubstr(R"(:5:1 error: position must be an vec4<f32>
 %f = @vertex func():OutputStruct [@position] {
 ^^
 )")) << res.Failure();
@@ -121,8 +120,7 @@ TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_SampleMask) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:1 error: sample_mask cannot be attached to a structure
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:5:1 error: sample_mask must be an u32
 %f = @fragment func():OutputStruct [@sample_mask] {
 ^^
 )")) << res.Failure();
@@ -144,8 +142,9 @@ TEST_F(IR_ValidatorTest, Builtin_OnStructReturn_ClipDistances) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(R"(:5:1 error: clip_distances cannot be attached to a structure
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(R"(:5:1 error: clip_distances must be an array<f32, N>, where N <= 8
 %f = @vertex func():OutputStruct [@clip_distances] {
 ^^
 )")) << res.Failure();
