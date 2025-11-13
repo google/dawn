@@ -78,6 +78,8 @@ type Git struct {
 	LogAllActions bool
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // New returns a new Git instance
 func New(exe string, osWrapper oswrapper.OSWrapper) (*Git, error) {
 	if exe == "" {
@@ -140,6 +142,8 @@ type CloneOptions struct {
 	Credentials Credentials
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Clone performs a clone of the repository at url to path.
 func (g Git) Clone(path, urlStr string, opt *CloneOptions) (*Repository, error) {
 	if err := g.os.MkdirAll(path, 0777); err != nil {
@@ -181,6 +185,8 @@ type FetchOptions struct {
 	Credentials Credentials
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Fetch performs a fetch of a reference from the remote, returning the Hash of
 // the fetched reference.
 func (r Repository) Fetch(ref string, opt *FetchOptions) (Hash, error) {
@@ -210,6 +216,8 @@ type PushOptions struct {
 	Credentials Credentials
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Push performs a push of the local reference to the remote reference.
 func (r Repository) Push(localRef, remoteRef string, opt *PushOptions) error {
 	if opt == nil {
@@ -240,6 +248,8 @@ type AddOptions struct {
 	Credentials Credentials
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Add stages the listed files
 func (r Repository) Add(path string, opt *AddOptions) error {
 	if opt == nil {
@@ -263,6 +273,8 @@ type CommitOptions struct {
 	Amend bool
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Commit commits the staged files with the given message, returning the hash of
 // commit
 func (r Repository) Commit(msg string, opt *CommitOptions) (Hash, error) {
@@ -302,6 +314,8 @@ type CleanOptions struct {
 	Timeout time.Duration
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Clean deletes all the untracked files in the repo
 func (r Repository) Clean(opt *CleanOptions) error {
 	if opt == nil {
@@ -319,6 +333,8 @@ type CheckoutOptions struct {
 	Timeout time.Duration
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Checkout performs a checkout of a reference.
 func (r Repository) Checkout(ref string, opt *CheckoutOptions) error {
 	if opt == nil {
@@ -342,6 +358,8 @@ type LogOptions struct {
 
 const logPrettyFormatArg = "--pretty=format:ǁ%Hǀ%cIǀ%an <%ae>ǀ%sǀ%b"
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Log returns the list of commits between two references (inclusive).
 // The first returned commit is the most recent.
 func (r Repository) Log(opt *LogOptions) ([]CommitInfo, error) {
@@ -370,6 +388,8 @@ type LogBetweenOptions struct {
 	Timeout time.Duration
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // LogBetween returns the list of commits between two timestamps
 // The first returned commit is the most recent.
 func (r Repository) LogBetween(since, until time.Time, opt *LogBetweenOptions) ([]CommitInfo, error) {
@@ -403,6 +423,8 @@ type StatsOptions struct {
 	Timeout time.Duration
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // StatsOptions returns the statistics for a given change
 func (r Repository) Stats(commit CommitInfo, opt *StatsOptions) (CommitStats, error) {
 	if opt == nil {
@@ -458,6 +480,8 @@ type ConfigOptions struct {
 	Timeout time.Duration
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 // Config returns the git configuration values for the repo
 func (r Repository) Config(opt *ConfigOptions) (map[string]string, error) {
 	if opt == nil {
@@ -483,6 +507,8 @@ func (r Repository) run(env []string, timeout time.Duration, args ...string) (st
 	return r.Git.run(r.Path, env, timeout, args...)
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 func (g Git) run(dir string, env []string, timeout time.Duration, args ...string) (string, error) {
 	if timeout == 0 {
 		timeout = DefaultTimeout
