@@ -36,10 +36,8 @@ import (
 )
 
 func TestDefaultAuthOptions_NoAdditionalScopes(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
-	wrapper.Environment = map[string]string{
-		"HOME": "/home",
-	}
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	wrapper.Setenv("HOME", "/home")
 
 	authOptions := DefaultAuthOptions(wrapper)
 
@@ -55,10 +53,8 @@ func TestDefaultAuthOptions_NoAdditionalScopes(t *testing.T) {
 }
 
 func TestDefaultAuthOptions_AdditionalScopes(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
-	wrapper.Environment = map[string]string{
-		"HOME": "/home",
-	}
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	wrapper.Setenv("HOME", "/home")
 
 	authOptions := DefaultAuthOptions(wrapper, "scope1", "scope2")
 

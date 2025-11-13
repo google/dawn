@@ -56,10 +56,10 @@ import (
  ******************************************************************************/
 
 func getCacheResultsSharedSetupData() (
-	context.Context, Config, oswrapper.MemMapOSWrapper, gerrit.Patchset, string) {
+	context.Context, Config, oswrapper.FSTestOSWrapper, gerrit.Patchset, string) {
 
 	ctx := context.Background()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	patchset := gerrit.Patchset{
 		Change:   1,
 		Patchset: 2,
@@ -1122,7 +1122,7 @@ func getExpectedMultiPrefixResults() result.ResultsByExecutionMode {
 func TestCacheRecentUniqueSuppressedCoreResults_ErrorSurfaced(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	results := getMultiPrefixQueryResults()
 	results["core_prefix"][0].TestId = "bad_test"
@@ -1140,7 +1140,7 @@ func TestCacheRecentUniqueSuppressedCoreResults_ErrorSurfaced(t *testing.T) {
 func TestCacheRecentUniqueSuppressedCoreResults_Success(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
@@ -1155,7 +1155,7 @@ func TestCacheRecentUniqueSuppressedCoreResults_Success(t *testing.T) {
 func TestCAcheRecentUniqueSuppressedCompatResults_ErrorSurfaced(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	results := getMultiPrefixQueryResults()
 	results["compat_prefix"][0].TestId = "bad_test"
@@ -1173,7 +1173,7 @@ func TestCAcheRecentUniqueSuppressedCompatResults_ErrorSurfaced(t *testing.T) {
 func TestCacheRecentUniqueSuppressedCompatResults_Success(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
@@ -1188,7 +1188,7 @@ func TestCacheRecentUniqueSuppressedCompatResults_Success(t *testing.T) {
 func TestCacheRecentUniqueSuppressedResults_CacheHit(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	// Technically this could run into a race condition if we run this test at the
 	// exact time the day changes so the file is created on a different day than
@@ -1213,7 +1213,7 @@ func TestCacheRecentUniqueSuppressedResults_CacheHit(t *testing.T) {
 func TestCacheRecentUniqueSuppressedResults_CacheSkippedIfUnspecified(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	modifiedResults := getExpectedMultiPrefixResults()
 	modifiedResults["core"] = append(modifiedResults["core"], result.Result{
@@ -1245,7 +1245,7 @@ func TestCacheRecentUniqueSuppressedResults_CacheSkippedIfUnspecified(t *testing
 func TestCacheRecentUniqueSuppressedResults_GetResultsError(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	modifiedQueryResults := getMultiPrefixQueryResults()
 	modifiedQueryResults["core_prefix"][0].Tags[0].Key = "non_typ_tag"
@@ -1263,7 +1263,7 @@ func TestCacheRecentUniqueSuppressedResults_GetResultsError(t *testing.T) {
 func TestCacheRecentUniqueSuppressedResults_Success(t *testing.T) {
 	ctx := context.Background()
 	cfg := getMultiPrefixConfig()
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	client := resultsdb.MockBigQueryClient{
 		RecentUniqueSuppressedReturnValues: getMultiPrefixQueryResults(),
 	}
