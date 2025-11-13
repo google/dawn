@@ -138,6 +138,10 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return nil, nil
 }
 
+// TODO(crbug.com/460178080): Add unittest coverage or revise this comment once
+// Gerrit interactions support dependency injection. There are other network
+// interactions in this function that also need dependency injection, so
+// unittest coverage is blocked until all support that.
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Validate command line arguments
 	options, err := c.flags.auth.Options()
@@ -686,6 +690,8 @@ func (r *roller) rollCommitMessage(
 	return msg.String()
 }
 
+// TODO(crbug.com/460178080): Add unittests for this once Gerrit interactions
+// support dependency injection.
 // findExistingRolls looks for all existing open CTS rolls by this user
 func (r *roller) findExistingRolls() ([]gerrit.ChangeInfo, error) {
 	// Look for an existing gerrit change to update
@@ -699,6 +705,8 @@ func (r *roller) findExistingRolls() ([]gerrit.ChangeInfo, error) {
 	return changes, nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage for this once the repo
+// exec uses are handled via dependency injection.
 // checkout performs a git checkout of the repo at host to dir at the given hash
 func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, error) {
 	log.Printf("cloning %v to '%v'...", project, dir)
@@ -718,6 +726,8 @@ func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, err
 	return repo, nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage for this once InstallCTSDeps
+// supports dependency injection.
 // Call 'npm ci' in the CTS directory, and generates a map of project-relative
 // file path to file content for the CTS roll's change. This includes:
 // * type-script source files
@@ -788,6 +798,8 @@ func (r *roller) generateFiles(ctx context.Context, fsReader oswrapper.Filesyste
 	return files, nil
 }
 
+// TODO(crbug.com/416731783): Add unittest coverage for this once gitiles
+// network interactions can be mocked out via dependency injection.
 // updateDEPS fetches and updates the Dawn DEPS file at 'dawnRef' so that all CTS hashes are changed to newCTSHash
 func (r *roller) updateDEPS(ctx context.Context, dawnRef, newCTSHash string) (newDEPS, oldCTSHash string, err error) {
 	deps, err := r.gitiles.dawn.DownloadFile(ctx, dawnRef, depsRelPath)
@@ -802,6 +814,8 @@ func (r *roller) updateDEPS(ctx context.Context, dawnRef, newCTSHash string) (ne
 	return newDEPS, oldCTSHash, nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec calls are handled
+// via dependency injection.
 // genTSDepList returns a list of source files, for the CTS checkout at r.ctsDir
 // This list can be used to populate the ts_sources.txt file.
 // Requires tsc to be found at './node_modules/.bin/tsc' in the CTS directory
@@ -838,6 +852,8 @@ func (r *roller) genTSDepList(
 	return strings.Join(deps, "\n") + "\n", nil
 }
 
+// TODO(crbug.com/416755658): Add unittest coverage once GetnTestList supports
+// dependency injection for exec calls.
 // genTestList returns the newline delimited list of test names, for the CTS checkout at r.ctsDir
 func (r *roller) genTestList(
 	ctx context.Context, fsReader oswrapper.FilesystemReader) (string, error) {

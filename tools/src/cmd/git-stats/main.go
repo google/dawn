@@ -33,6 +33,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"sort"
@@ -84,7 +85,11 @@ func shouldConsiderLinesOfFile(path string) bool {
 		"webgpu-cts/",
 		"src/external/petamoriken",
 	} {
-		if strings.HasPrefix(path, ignore) {
+		if strings.Contains(ignore, "*") {
+			if matched, _ := filepath.Match(ignore, path); matched {
+				return false
+			}
+		} else if strings.HasPrefix(path, ignore) {
 			return false
 		}
 	}
@@ -110,6 +115,8 @@ func shouldConsiderLinesOfCommit(hash string) bool {
 // ____________^^^^^^^^^^^^^^^_
 var reEmail = regexp.MustCompile(`<([^>]+)>`)
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec calls are handled
+// via dependency injection.
 func run(osW oswrapper.OSWrapper) error {
 	// Parse the --after and --before flags
 	var after, before time.Time

@@ -58,6 +58,8 @@ var (
 	authFlags   = authcli.Flags{}
 )
 
+// TODO(crbug.com/416755658): Add unittest coverage once exec is handled via
+// dependency injection.
 func defaultUser(osW oswrapper.OSWrapper) string {
 	if gitExe, err := exec.LookPath("git"); err == nil {
 		if g, err := git.New(gitExe, osW); err == nil {
@@ -83,6 +85,8 @@ func main() {
 	}
 }
 
+// TODO(crbug.com/460178080): Add unittest coverage once Gerrit interactions
+// support dependency injection.
 func run() error {
 	var after, before time.Time
 	var err error

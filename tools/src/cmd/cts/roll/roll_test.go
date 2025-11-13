@@ -34,6 +34,8 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
+	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
+	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/google/go-cmp/cmp"
@@ -52,6 +54,59 @@ func MustParseHash(s string) git.Hash {
 		panic(err)
 	}
 	return hash
+}
+
+func TestUpdateExpectationUpdateTimestamp(t *testing.T) {
+	// Test case where the timestamp already exists and should be updated.
+	t.Run("TimestampExists", func(t *testing.T) {
+		content := &expectations.Content{
+			Chunks: []expectations.Chunk{
+				{Comments: []string{"# Some comment", "# Last rolled: 2022-01-01 12:00:00PM"}},
+				{Expectations: []expectations.Expectation{{Bug: "crbug.com/123", Query: "test1", Tags: result.NewTags("tag1"), Status: []string{"Failure"}}}},
+			},
+		}
+		updateExpectationUpdateTimestamp(content)
+		require.Len(t, content.Chunks, 2)
+		require.Len(t, content.Chunks[0].Comments, 2)
+		require.Equal(t, "# Some comment", content.Chunks[0].Comments[0])
+		require.Contains(t, content.Chunks[0].Comments[1], "# Last rolled: ")
+	})
+
+	// Test case where the timestamp does not exist and should be added.
+	t.Run("TimestampDoesNotExist_WithOtherChunks", func(t *testing.T) {
+		content := &expectations.Content{
+			Chunks: []expectations.Chunk{
+				{Comments: []string{"# Some other comment"}},
+				{Expectations: []expectations.Expectation{{Bug: "crbug.com/123", Query: "test1", Tags: result.NewTags("tag1"), Status: []string{"Failure"}}}},
+			},
+		}
+		updateExpectationUpdateTimestamp(content)
+		require.Len(t, content.Chunks, 4)
+		require.Len(t, content.Chunks[2].Comments, 1)
+		require.Contains(t, content.Chunks[2].Comments[0], "# Last rolled: ")
+	})
+
+	// Test case where the timestamp does not exist and there's only one chunk.
+	t.Run("TimestampDoesNotExist_WithOneChunk", func(t *testing.T) {
+		content := &expectations.Content{
+			Chunks: []expectations.Chunk{
+				{Expectations: []expectations.Expectation{{Bug: "crbug.com/123", Query: "test1", Tags: result.NewTags("tag1"), Status: []string{"Failure"}}}},
+			},
+		}
+		updateExpectationUpdateTimestamp(content)
+		require.Len(t, content.Chunks, 3)
+		require.Len(t, content.Chunks[2].Comments, 1)
+		require.Contains(t, content.Chunks[2].Comments[0], "# Last rolled: ")
+	})
+
+	// Test case where the content is empty.
+	t.Run("EmptyContent", func(t *testing.T) {
+		content := &expectations.Content{}
+		updateExpectationUpdateTimestamp(content)
+		require.Len(t, content.Chunks, 1)
+		require.Len(t, content.Chunks[0].Comments, 1)
+		require.Contains(t, content.Chunks[0].Comments[0], "# Last rolled: ")
+	})
 }
 
 func rollCommitMessageFor(ctsGitURL string) string {
