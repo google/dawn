@@ -78,7 +78,7 @@ class SurfaceTest {
     assertEquals(currentTexture.format, desiredFormat)
     assertEquals(currentTexture.height, HEIGHT)
     assertEquals(currentTexture.width, WIDTH)
-    // The testcase will fail in case present() throws DawnException
+    // The testcase will fail in case present() throws WebGpuException
     surface.present()
   }
 

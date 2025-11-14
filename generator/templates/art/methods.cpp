@@ -160,9 +160,13 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
         }
         {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
             if (result != WGPUStatus_Success) {
-                jclass exClass = env->FindClass("androidx/webgpu/DawnException");
-                std::string message = "Dawn method failed with status: " + std::to_string(result);
-                env->ThrowNew(exClass, message.c_str());
+                jclass exClass = env->FindClass("androidx/webgpu/WebGpuException");
+                jmethodID exConstructor =
+                    env->GetMethodID(exClass, "<init>", "(Ljava/lang/String;I)V");
+                std::string message = "Method GPU{% if object %}{{ object.name.CamelCase() + "." }}{% endif %}{{ method.name.camelCase() }} failed.";
+                jstring jmessage = env->NewStringUTF(message.c_str());
+                jobject exception = env->NewObject(exClass, exConstructor, jmessage, result);
+                env->Throw(static_cast<jthrowable>(exception));
                 return{{ ' 0' if _kotlin_return }};
             }
         {% endif %}

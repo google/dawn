@@ -4,8 +4,6 @@ import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
-import androidx.webgpu.DawnException
-import androidx.webgpu.ValidationException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlinx.coroutines.runBlocking
@@ -228,7 +226,7 @@ class BufferTest {
 
     val readByteBuffer =
       ByteBuffer.allocateDirect(bufferSize.toInt()).order(ByteOrder.nativeOrder())
-    // The testcase will fail in case readMappedRange throws DawnException
+    // The testcase will fail in case readMappedRange throws WebGpuException
     buffer.readMappedRange(0, readByteBuffer)
     val readByteBufferFloat = readByteBuffer.asFloatBuffer()
     val readData = FloatArray(readByteBufferFloat.remaining())
@@ -255,7 +253,7 @@ class BufferTest {
     )
     val byteBuffer = ByteBuffer.allocateDirect(16)
 
-    assertThrows(DawnException::class.java) {
+    assertThrows(WebGpuException::class.java) {
       buffer.writeMappedRange(0, byteBuffer)
     }
   }

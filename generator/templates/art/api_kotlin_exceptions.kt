@@ -73,7 +73,7 @@ public open class WebGpuRuntimeException(message: String): Exception(message)
 {% endfor %}
 
 /**
- * Create the execption for the appropriate error type.
+ * Create the exception for the appropriate error type.
  * @param type The [{{ kotlin_name(ns.error) }}].
  * @param message A human-readable message describing the device loss.
  */
