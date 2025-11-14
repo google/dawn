@@ -479,8 +479,7 @@ struct State {
             x = b.ShiftLeft(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
                               b.LessThanEqual(bool_ty, x, V(0x7fffffff)));
-            auto* b0 =
-                b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
+            auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
             Instruction* result = b.Add(
                 uint_ty,
                 b.Or(
@@ -501,7 +500,6 @@ struct State {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
-        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -528,21 +526,20 @@ struct State {
                 x = b.Bitcast(uint_ty, x)->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
-                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000ffff)), V(0)));
+                               b.Equal(b.And(uint_ty, x, V(0x0000ffff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x000000ff)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x000000ff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000000f)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x0000000f)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000003)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x00000003)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000001)), V(0)));
-            auto* b0 =
-                b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x00000001)), V(0)));
+            auto* b0 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1), b.Equal(x, V(0)));
             Instruction* result = b.Add(
                 uint_ty,
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
@@ -708,23 +705,23 @@ struct State {
                         ->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(16), V(0),
-                               b.Equal(bool_ty, b.And(uint_ty, x, V(0xffff0000)), V(0)));
+                               b.Equal(b.And(uint_ty, x, V(0xffff0000)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(8), V(0),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000ff00)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x0000ff00)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(4), V(0),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x000000f0)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x000000f0)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(2), V(0),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000000c)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x0000000c)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(1), V(0),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000002)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x00000002)), V(0)));
             Instruction* result =
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
-            result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
-                            b.Equal(bool_ty, x, V(0)));
+            result =
+                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
@@ -739,7 +736,6 @@ struct State {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
         auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
-        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -766,23 +762,23 @@ struct State {
                 x = b.Bitcast(uint_ty, x)->Result();
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
-                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000ffff)), V(0)));
+                               b.Equal(b.And(uint_ty, x, V(0x0000ffff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b16)->Result();
             auto* b8 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(8),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x000000ff)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x000000ff)), V(0)));
             x = b.ShiftRight(uint_ty, x, b8)->Result();
             auto* b4 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(4),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000000f)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x0000000f)), V(0)));
             x = b.ShiftRight(uint_ty, x, b4)->Result();
             auto* b2 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(2),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000003)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x00000003)), V(0)));
             x = b.ShiftRight(uint_ty, x, b2)->Result();
             auto* b1 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(1),
-                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000001)), V(0)));
+                              b.Equal(b.And(uint_ty, x, V(0x00000001)), V(0)));
             Instruction* result =
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
-            result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
-                            b.Equal(bool_ty, x, V(0)));
+            result =
+                b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff), b.Equal(x, V(0)));
             if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }

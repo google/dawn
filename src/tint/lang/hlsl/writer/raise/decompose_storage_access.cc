@@ -313,7 +313,7 @@ struct State {
                 b.InsertConvertIfNeeded(type, OffsetToValue(offset)), cmp, args[2], original_value);
 
             auto* o = b.Load(original_value);
-            b.ConstructWithResult(call->DetachResult(), o, b.Equal(ty.bool_(), o, cmp));
+            b.ConstructWithResult(call->DetachResult(), o, b.Equal(o, cmp));
         });
         call->Destroy();
     }

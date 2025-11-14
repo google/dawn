@@ -356,7 +356,7 @@ struct State {
         } else {
             auto* false_ = b.Value(1_u);
             auto* true_ = b.Value(0_u);
-            auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
+            auto* cond = b.Equal(b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
 
             Vector<core::ir::Value*, 3> args{false_, true_, cond->Result()};
             element_index = b.Call(ty.u32(), core::BuiltinFn::kSelect, args)->Result();
@@ -413,7 +413,7 @@ struct State {
                 auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
                 // else -> xy
                 auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
-                auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
+                auto* cond = b.Equal(vec_idx, 2_u);
 
                 Vector<core::ir::Value*, 3> args{sw_rhs->Result(), sw_lhs->Result(),
                                                  cond->Result()};
@@ -459,7 +459,7 @@ struct State {
                 auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
                 // else -> xy
                 auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
-                auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
+                auto* cond = b.Equal(vec_idx, 2_u);
                 auto args = Vector{sw_rhs->Result(), sw_lhs->Result(), cond->Result()};
                 load = b.Call(ty.vec2<u32>(), core::BuiltinFn::kSelect, std::move(args));
             }

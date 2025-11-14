@@ -712,24 +712,16 @@ class Builder {
     }
 
     /// Creates an Equal operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* Equal(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kEqual, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an Equal operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* Equal(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Equal(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type),
+                                                           BinaryOp::kEqual, lhs_value, rhs_value));
     }
 
     /// Creates an NotEqual operation

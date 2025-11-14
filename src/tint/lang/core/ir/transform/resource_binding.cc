@@ -172,8 +172,7 @@ struct State {
             auto* type_val = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 1_u, idx);
 
             auto* v = b.Load(type_val);
-            auto* eq = b.Equal(ty.bool_(), v,
-                               u32(static_cast<uint32_t>(core::type::TypeToResourceType(type))));
+            auto* eq = b.Equal(v, u32(static_cast<uint32_t>(core::type::TypeToResourceType(type))));
             b.ExitIf(has_check, eq);
         });
 

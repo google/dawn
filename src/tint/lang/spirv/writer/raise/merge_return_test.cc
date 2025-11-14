@@ -217,7 +217,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_EntryPoint_IfElse_OneSideReturns) {
     auto* func = b.ComputeFunction("entrypointfunction", 2_u, 3_u, 4_u);
     func->SetParams({cond});
     b.Append(func->Block(), [&] {
-        auto* ifelse = b.If(b.Equal(ty.bool_(), cond, 0_u));
+        auto* ifelse = b.If(b.Equal(cond, 0_u));
         b.Append(ifelse->True(), [&] { b.Return(func); });
         b.Append(ifelse->False(), [&] { b.ExitIf(ifelse); });
 
@@ -1528,15 +1528,15 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Consecutive) {
 
     b.Append(func->Block(), [&] {
         {
-            auto* ifelse = b.If(b.Equal(ty.bool_(), value, 1_i));
+            auto* ifelse = b.If(b.Equal(value, 1_i));
             b.Append(ifelse->True(), [&] { b.Return(func, 101_i); });
         }
         {
-            auto* ifelse = b.If(b.Equal(ty.bool_(), value, 2_i));
+            auto* ifelse = b.If(b.Equal(value, 2_i));
             b.Append(ifelse->True(), [&] { b.Return(func, 202_i); });
         }
         {
-            auto* ifelse = b.If(b.Equal(ty.bool_(), value, 3_i));
+            auto* ifelse = b.If(b.Equal(value, 3_i));
             b.Append(ifelse->True(), [&] { b.Return(func, 303_i); });
         }
         b.Return(func, 404_i);
@@ -1635,11 +1635,11 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_Consecutive_ThenUnreachable) {
 
     b.Append(func->Block(), [&] {
         {
-            auto* if_ = b.If(b.Equal(ty.bool_(), value, 1_i));
+            auto* if_ = b.If(b.Equal(value, 1_i));
             b.Append(if_->True(), [&] { b.Return(func, 101_i); });
         }
         {
-            auto* ifelse = b.If(b.Equal(ty.bool_(), value, 2_i));
+            auto* ifelse = b.If(b.Equal(value, 2_i));
             b.Append(ifelse->True(), [&] { b.Return(func, 202_i); });
             b.Append(ifelse->False(), [&] { b.Return(func, 303_i); });
         }
@@ -1719,21 +1719,21 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_NestedConsecutives) {
     func->SetParams({value});
 
     b.Append(func->Block(), [&] {
-        auto* outer = b.If(b.Equal(ty.bool_(), value, 1_i));
+        auto* outer = b.If(b.Equal(value, 1_i));
         b.Append(outer->True(), [&] {
-            auto* middle_first = b.If(b.Equal(ty.bool_(), value, 2_i));
+            auto* middle_first = b.If(b.Equal(value, 2_i));
             b.Append(middle_first->True(), [&] {  //
                 b.Return(func, 202_i);
             });
 
-            auto* middle_second = b.If(b.Equal(ty.bool_(), value, 3_i));
+            auto* middle_second = b.If(b.Equal(value, 3_i));
             b.Append(middle_second->True(), [&] {
-                auto* inner_first = b.If(b.Equal(ty.bool_(), value, 4_i));
+                auto* inner_first = b.If(b.Equal(value, 4_i));
                 b.Append(inner_first->True(), [&] {  //
                     b.Return(func, 404_i);
                 });
 
-                auto* inner_second = b.If(b.Equal(ty.bool_(), value, 5_i));
+                auto* inner_second = b.If(b.Equal(value, 5_i));
                 b.Append(inner_second->True(), [&] {  //
                     b.Return(func, 505_i);
                 });
@@ -1864,25 +1864,25 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_NestedConsecutives_WithResults) {
 
     b.Append(func->Block(), [&] {
         auto* outer_result = b.InstructionResult(ty.i32());
-        auto* outer = b.If(b.Equal(ty.bool_(), value, 1_i));
+        auto* outer = b.If(b.Equal(value, 1_i));
         outer->SetResult(outer_result);
         b.Append(outer->True(), [&] {
-            auto* middle_first = b.If(b.Equal(ty.bool_(), value, 2_i));
+            auto* middle_first = b.If(b.Equal(value, 2_i));
             b.Append(middle_first->True(), [&] {  //
                 b.Return(func, 202_i);
             });
 
             auto middle_result = b.InstructionResult(ty.i32());
-            auto* middle_second = b.If(b.Equal(ty.bool_(), value, 3_i));
+            auto* middle_second = b.If(b.Equal(value, 3_i));
             middle_second->SetResult(middle_result);
             b.Append(middle_second->True(), [&] {
-                auto* inner_first = b.If(b.Equal(ty.bool_(), value, 4_i));
+                auto* inner_first = b.If(b.Equal(value, 4_i));
                 b.Append(inner_first->True(), [&] {  //
                     b.Return(func, 404_i);
                 });
 
                 auto inner_result = b.InstructionResult(ty.i32());
-                auto* inner_second = b.If(b.Equal(ty.bool_(), value, 5_i));
+                auto* inner_second = b.If(b.Equal(value, 5_i));
                 inner_second->SetResult(inner_result);
                 b.Append(inner_second->True(), [&] {  //
                     b.ExitIf(inner_second, 505_i);
@@ -2711,7 +2711,7 @@ TEST_F(SpirvWriter_MergeReturnTest, Switch_ConditionalReturnInBody) {
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
         b.Append(b.Case(sw, {b.Constant(1_i)}), [&] {
-            auto* ifcond = b.Equal(ty.bool_(), cond, 1_i);
+            auto* ifcond = b.Equal(cond, 1_i);
             auto* ifelse = b.If(ifcond);
             b.Append(ifelse->True(), [&] { b.Return(func, 42_i); });
             b.Append(ifelse->False(), [&] { b.ExitIf(ifelse); });

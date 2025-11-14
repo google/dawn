@@ -1189,7 +1189,7 @@ TEST_F(IRToProgramTest, BinaryOp_Equal) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Equal(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Equal(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -2755,7 +2755,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
     auto* a = b.Function("a", ty.bool_());
     auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
-    b.Append(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
+    b.Append(a->Block(), [&] { b.Return(a, b.Equal(v, 1_i)); });
 
     auto* fn = b.Function("f", ty.i32());
 
@@ -2808,7 +2808,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
     auto* a = b.Function("a", ty.bool_());
     auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
-    b.Append(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
+    b.Append(a->Block(), [&] { b.Return(a, b.Equal(v, 1_i)); });
 
     auto* fn = b.Function("f", ty.i32());
 
@@ -2860,7 +2860,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
     auto* a = b.Function("a", ty.bool_());
     auto* v = b.FunctionParam("v", ty.i32());
     a->SetParams({v});
-    b.Append(a->Block(), [&] { b.Return(a, b.Equal(ty.bool_(), v, 1_i)); });
+    b.Append(a->Block(), [&] { b.Return(a, b.Equal(v, 1_i)); });
 
     auto* fn = b.Function("f", ty.i32());
 
@@ -3366,7 +3366,7 @@ TEST_F(IRToProgramTest, Loop_VarsDeclaredOutsideAndInside) {
 
             auto* body_load_a = b.Load(var_a);
             auto* body_load_b = b.Load(var_b);
-            auto* if_ = b.If(b.Equal(ty.bool_(), body_load_a, body_load_b));
+            auto* if_ = b.If(b.Equal(body_load_a, body_load_b));
             b.Append(if_->True(), [&] { b.Return(fn); });
             b.Append(if_->False(), [&] { b.ExitIf(if_); });
             b.Continue(loop);

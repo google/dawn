@@ -1315,7 +1315,7 @@ class Impl {
             case core::BinaryOp::kXor:
                 return builder_.Xor(ty, lhs, rhs);
             case core::BinaryOp::kEqual:
-                return builder_.Equal(ty, lhs, rhs);
+                return builder_.Equal(lhs, rhs);
             case core::BinaryOp::kNotEqual:
                 return builder_.NotEqual(ty, lhs, rhs);
             case core::BinaryOp::kLessThan:

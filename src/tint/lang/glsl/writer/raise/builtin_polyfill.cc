@@ -377,7 +377,7 @@ struct State {
                 Vector<core::ir::Value*, 3>{dest, bitcast_cmp_value->Result(),
                                             bitcast_value->Result()});
 
-            auto* exchanged = b.Equal(ty.bool_(), swap, compare_value);
+            auto* exchanged = b.Equal(swap, compare_value);
 
             auto* result = b.Construct(result_type, swap, exchanged)->Result();
             call->Result()->ReplaceAllUsesWith(result);

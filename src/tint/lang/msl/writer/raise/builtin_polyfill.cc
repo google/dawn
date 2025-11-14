@@ -584,7 +584,7 @@ struct State {
                 auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
                                     b.GreaterThan(bool_type, arg, zero));
                 b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, sign, zero,
-                                 b.Equal(bool_type, arg, zero));
+                                 b.Equal(arg, zero));
             } else {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kSign, arg);

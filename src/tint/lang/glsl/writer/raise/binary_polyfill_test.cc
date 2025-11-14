@@ -189,7 +189,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualF16) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f16>(), 1_h));
         auto* r = b.Let("right", b.Splat(ty.vec2<f16>(), 2_h));
-        auto* bin = b.Equal(ty.vec2<bool>(), l, r);
+        auto* bin = b.Equal(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -228,7 +228,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualBool) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<bool>(), true));
         auto* r = b.Let("right", b.Splat(ty.vec2<bool>(), false));
-        auto* bin = b.Equal(ty.vec2<bool>(), l, r);
+        auto* bin = b.Equal(l, r);
         b.Let("val", bin);
         b.Return(func);
     });

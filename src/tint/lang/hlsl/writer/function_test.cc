@@ -696,7 +696,7 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithContinueExecution) {
     func->SetParams({p});
 
     b.Append(func->Block(), [&] {
-        auto* i = b.If(b.Equal(ty.bool_(), p, 0_i));
+        auto* i = b.If(b.Equal(p, 0_i));
         b.Append(i->True(), [&] {
             b.Discard();
             b.ExitIf(i);
@@ -746,7 +746,7 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturnWithPlatformDiscard) {
     func->SetParams({p});
 
     b.Append(func->Block(), [&] {
-        auto* i = b.If(b.Equal(ty.bool_(), p, 0_i));
+        auto* i = b.If(b.Equal(p, 0_i));
         b.Append(i->True(), [&] {
             b.Discard();
             b.ExitIf(i);
@@ -792,7 +792,7 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithContinueExecution)
     func->SetParams({a});
 
     b.Append(func->Block(), [&] {
-        auto* i = b.If(b.Equal(ty.bool_(), a, 0_i));
+        auto* i = b.If(b.Equal(a, 0_i));
         b.Append(i->True(), [&] {
             b.Discard();
             b.ExitIf(i);
@@ -845,7 +845,7 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturnWithPlatformDiscard) {
     func->SetParams({a});
 
     b.Append(func->Block(), [&] {
-        auto* i = b.If(b.Equal(ty.bool_(), a, 0_i));
+        auto* i = b.If(b.Equal(a, 0_i));
         b.Append(i->True(), [&] {
             b.Discard();
             b.ExitIf(i);

@@ -1181,7 +1181,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprSuccess) {
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
-            auto* four = b.Equal(ty.bool_(), three, 0.0_f);
+            auto* four = b.Equal(three, 0.0_f);
             b.ExitIf(constexpr_if, four);
         });
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
@@ -1245,7 +1245,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondConstExprFailure) {
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 0.0_f);
-            auto* four = b.Equal(ty.bool_(), three, 0.0_f);
+            auto* four = b.Equal(three, 0.0_f);
             b.ExitIf(constexpr_if, four);
         });
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
@@ -1303,7 +1303,7 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprSuccess) {
         constexpr_if->SetResult(b.InstructionResult(ty.bool_()));
         b.Append(constexpr_if->True(), [&] {
             auto* three = b.Divide(ty.f32(), one_f32, 1.0_f);
-            auto* four = b.Equal(ty.bool_(), three, 1.0_f);
+            auto* four = b.Equal(three, 1.0_f);
             b.ExitIf(constexpr_if, four);
         });
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, true); });
@@ -1372,12 +1372,12 @@ TEST_F(IR_SubstituteOverridesTest, OverrideCondComplexConstExprNestedSuccess) {
             constexpr_if_inner->SetResult(b.InstructionResult(ty.bool_()));
             b.Append(constexpr_if_inner->True(), [&] {
                 auto* bad_eval = b.Divide(ty.f32(), 1.0_f, zero_f32);
-                auto* bad_eval_equal = b.Equal(ty.bool_(), bad_eval, 1.0_f);
+                auto* bad_eval_equal = b.Equal(bad_eval, 1.0_f);
                 b.ExitIf(constexpr_if_inner, bad_eval_equal);
             });
             b.Append(constexpr_if_inner->False(), [&] {
                 auto* bad_eval = b.Divide(ty.f32(), 1.0_f, zero_f32);
-                auto* bad_eval_equal = b.Equal(ty.bool_(), bad_eval, 1.0_f);
+                auto* bad_eval_equal = b.Equal(bad_eval, 1.0_f);
                 b.ExitIf(constexpr_if_inner, bad_eval_equal);
             });
             b.ExitIf(constexpr_if, constexpr_if_inner);
@@ -1459,7 +1459,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExprIfInsideKernel) {
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Add(ty.u32(), 10_u, 5_u);
             auto* k = b.Divide(ty.u32(), k4, x);
-            auto* k2 = b.Equal(ty.bool_(), k, 10_u);
+            auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
         });
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });
@@ -1526,7 +1526,7 @@ TEST_F(IR_SubstituteOverridesTest, ConstExpIfDuplicateUsage) {
         b.Append(constexpr_if->True(), [&] {
             auto* k4 = b.Divide(ty.u32(), 10_u, 0_u);
             auto* k = b.Add(ty.u32(), k4, k4);
-            auto* k2 = b.Equal(ty.bool_(), k, 10_u);
+            auto* k2 = b.Equal(k, 10_u);
             b.ExitIf(constexpr_if, k2);
         });
         b.Append(constexpr_if->False(), [&] { b.ExitIf(constexpr_if, false); });

@@ -208,7 +208,7 @@ struct State {
             auto* uint_vec_ty = ty.MatchWidth(ty.u32(), vec_ty);
             auto* lhs = b.Construct(uint_vec_ty, b.InsertConvertIfNeeded(ty.u32(), index_param));
             auto* rhs = b.Construct(uint_vec_ty, select_indices);
-            auto* cond = b.Equal(ty.MatchWidth(ty.bool_(), vec_ty), lhs, rhs);
+            auto* cond = b.Equal(lhs, rhs);
 
             // NOTE: Using Select means we depend on BuiltinPolyfill to run after this transform. We
             // could also just emit a Ternary instruction.

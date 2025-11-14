@@ -430,7 +430,7 @@ struct State {
             auto* rgb_result = b.InstructionResult(vec3f);
             auto* alpha_result = b.InstructionResult(ty.f32());
             auto* num_planes = b.Access(ty.u32(), params, 0_u);
-            auto* if_planes_eq_1 = b.If(b.Equal(ty.bool_(), num_planes, 1_u));
+            auto* if_planes_eq_1 = b.If(b.Equal(num_planes, 1_u));
             if_planes_eq_1->SetResults(rgb_result, alpha_result);
             b.Append(if_planes_eq_1->True(), [&] {
                 // Load the texel from the first plane and split into separate rgb and a values.
@@ -464,7 +464,7 @@ struct State {
 
             // Apply gamma correction if needed.
             auto* final_result = b.InstructionResult(vec3f);
-            auto* if_gamma_correct = b.If(b.Equal(ty.bool_(), yuv_to_rgb_conversion_only, 0_u));
+            auto* if_gamma_correct = b.If(b.Equal(yuv_to_rgb_conversion_only, 0_u));
             if_gamma_correct->SetResult(final_result);
             b.Append(if_gamma_correct->True(), [&] {
                 auto* gamma_decode_params = b.Access(GammaTransferParams(), params, 3_u);
@@ -550,7 +550,7 @@ struct State {
             auto* rgb_result = b.InstructionResult(vec3f);
             auto* alpha_result = b.InstructionResult(ty.f32());
             auto* num_planes = b.Access(ty.u32(), params, 0_u);
-            auto* if_planes_eq_1 = b.If(b.Equal(ty.bool_(), num_planes, 1_u));
+            auto* if_planes_eq_1 = b.If(b.Equal(num_planes, 1_u));
             if_planes_eq_1->SetResults(rgb_result, alpha_result);
             b.Append(if_planes_eq_1->True(), [&] {
                 // Sample the texel from the first plane and split into separate rgb and a values.
@@ -583,7 +583,7 @@ struct State {
 
             // Apply gamma correction if needed.
             auto* final_result = b.InstructionResult(vec3f);
-            auto* if_gamma_correct = b.If(b.Equal(ty.bool_(), yuv_to_rgb_conversion_only, 0_u));
+            auto* if_gamma_correct = b.If(b.Equal(yuv_to_rgb_conversion_only, 0_u));
             if_gamma_correct->SetResult(final_result);
             b.Append(if_gamma_correct->True(), [&] {
                 auto* gamma_decode_params = b.Access(GammaTransferParams(), params, 3_u);

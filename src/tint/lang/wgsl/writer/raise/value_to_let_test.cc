@@ -1623,7 +1623,7 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideIf) {
 TEST_F(WgslWriter_ValueToLetTest, UnsequencedUsedByIfCondition) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
-        auto* v = b.Equal(ty.bool_(), 1_i, 2_i);
+        auto* v = b.Equal(1_i, 2_i);
         auto* if_ = b.If(v);
         b.Append(if_->True(), [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
@@ -1670,7 +1670,7 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedUsedByIfCondition) {
         auto* var = b.Var<function, i32>();
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
-        auto* v_2 = b.Equal(ty.bool_(), v_1, 2_i);
+        auto* v_2 = b.Equal(v_1, 2_i);
         auto* if_ = b.If(v_2);
         b.Append(if_->True(), [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
@@ -2327,7 +2327,7 @@ TEST_F(WgslWriter_ValueToLetTest, UnsequencedOutsideLoopContinuing) {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] { b.Continue(loop); });
-        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v, 3_i)); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(v, 3_i)); });
         b.Return(fn, 0_i);
     });
 
@@ -2366,7 +2366,7 @@ TEST_F(WgslWriter_ValueToLetTest, SequencedOutsideLoopContinuing) {
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* loop = b.Loop();
         b.Append(loop->Body(), [&] { b.Continue(loop); });
-        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v_2, 3_i)); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(v_2, 3_i)); });
         b.Return(fn, 0_i);
     });
 

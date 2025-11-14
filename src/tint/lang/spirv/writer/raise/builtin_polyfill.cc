@@ -477,7 +477,7 @@ struct State {
 
                 // Compare the original value to the comparator to see if an exchange happened.
                 auto* original = call->Result();
-                auto* compare = b.Equal(ty.bool_(), original, cmp);
+                auto* compare = b.Equal(original, cmp);
                 compare->InsertBefore(builtin);
 
                 // Construct the atomicCompareExchange result structure.
