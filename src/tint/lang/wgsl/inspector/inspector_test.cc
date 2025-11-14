@@ -201,8 +201,6 @@ TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeNone) {
 // Test that immediate_data_size is 4 (bytes) if there is a single F32 immediate data.
 TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeOneWord) {
     auto* src = R"(
-enable chromium_experimental_immediate;
-
 var<immediate> pc: f32;
 
 @fragment fn foo() { _ = pc; }
@@ -220,8 +218,6 @@ var<immediate> pc: f32;
 // each of i32, f32 and u32.
 TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeThreeWords) {
     auto* src = R"(
-enable chromium_experimental_immediate;
-
 struct S {
   a: i32,
   b: f32,
@@ -245,8 +241,6 @@ var<immediate> pc : S;
 // point containing a struct of size 12 bytes.
 TEST_F(InspectorGetEntryPointTest, ImmediateDataSizeTwoConstants) {
     auto* src = R"(
-enable chromium_experimental_immediate;
-
 struct S {
   a: i32,
   b: f32,

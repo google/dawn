@@ -39,6 +39,7 @@ FeatureStatus GetLanguageFeatureStatus(LanguageFeature f) {
         case LanguageFeature::kSizedBindingArray:
         case LanguageFeature::kTexelBuffers:
         case LanguageFeature::kFragmentDepth:
+        case LanguageFeature::kImmediateAddressSpace:
             return FeatureStatus::kUnsafeExperimental;
 
             ////////////////////////////////////////////////////////////////////

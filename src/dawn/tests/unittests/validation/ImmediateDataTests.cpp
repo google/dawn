@@ -38,28 +38,70 @@
 namespace dawn {
 namespace {
 
-class ImmediateDataDisableTest : public ValidationTest {
-    std::vector<const char*> GetDisabledToggles() override { return {"enable_immediate_data"}; }
+enum class FeatureMode {
+    Enabled,
+    DisabledViaNotAllowUnsafeAPIs,
+    DisabledViaBlocklistedFeatures,
+};
+
+// Test that the feature only works when enabled
+struct ImmediateDataDisableTest : ValidationTestWithParam<FeatureMode> {
+    std::vector<const char*> GetWGSLBlocklistedFeatures() override {
+        switch (GetParam()) {
+            case FeatureMode::Enabled:
+                return {};
+            case FeatureMode::DisabledViaNotAllowUnsafeAPIs:
+                return {};
+            case FeatureMode::DisabledViaBlocklistedFeatures:
+                return {"immediate_address_space"};
+        }
+        DAWN_UNREACHABLE();
+        return {};
+    }
+
+    bool AllowUnsafeAPIs() override {
+        switch (GetParam()) {
+            case FeatureMode::Enabled:
+                // Currently the only way to enable ImmediateAddressSpace is via AllowUnsafeAPIs.
+                // See GetLanguageFeatureStatus.
+                return true;
+            case FeatureMode::DisabledViaNotAllowUnsafeAPIs:
+                return false;
+            case FeatureMode::DisabledViaBlocklistedFeatures:
+                // Enabling AllowUnsafeAPIs while disabling via blocklist should still fail.
+                return true;
+        }
+        DAWN_UNREACHABLE();
+        return false;
+    }
 };
 
 // Check that creating a PipelineLayout with non-zero immediateSize is disallowed
 // without the feature enabled.
-TEST_F(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
+TEST_P(ImmediateDataDisableTest, ImmediateSizeNotAllowed) {
     wgpu::PipelineLayoutDescriptor desc;
     desc.bindGroupLayoutCount = 0;
     desc.immediateSize = 1;
 
-    ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    if (GetParam() == FeatureMode::Enabled) {
+        device.CreatePipelineLayout(&desc);
+    } else {
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&desc));
+    }
 }
 
 // Check that SetImmediates doesn't work (even with size=0) without the feature enabled.
-TEST_F(ImmediateDataDisableTest, SetImmediates) {
+TEST_P(ImmediateDataDisableTest, SetImmediates) {
     {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetImmediates(0, nullptr, 0);
         pass.End();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
+        if (GetParam() == FeatureMode::Enabled) {
+            encoder.Finish();
+        } else {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
     }
     {
         const uint32_t data = 0;
@@ -68,18 +110,32 @@ TEST_F(ImmediateDataDisableTest, SetImmediates) {
         wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
         pass.SetImmediates(0, &data, 4);
         pass.End();
-        ASSERT_DEVICE_ERROR(encoder.Finish());
+        if (GetParam() == FeatureMode::Enabled) {
+            encoder.Finish();
+        } else {
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
     }
 }
 
+// Check that limits.maxImmediateSize is 0 when the feature is disabled, and kMaxImmediateDataBytes
+// otherwise.
+TEST_P(ImmediateDataDisableTest, MaxImmediateSizeIsZero) {
+    if (GetParam() == FeatureMode::Enabled) {
+        ASSERT_EQ(GetSupportedLimits().maxImmediateSize, kMaxImmediateDataBytes);
+    } else {
+        ASSERT_EQ(GetSupportedLimits().maxImmediateSize, 0u);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(,
+                         ImmediateDataDisableTest,
+                         ::testing::ValuesIn({FeatureMode::Enabled,
+                                              FeatureMode::DisabledViaNotAllowUnsafeAPIs,
+                                              FeatureMode::DisabledViaBlocklistedFeatures}));
+
 class ImmediateDataTest : public ValidationTest {
   protected:
-    std::vector<const char*> GetEnabledToggles() override {
-        // Not actually necessary as AllowUnsafeAPIs is enabled, which already enables
-        // EnableImmediateData
-        return {"enable_immediate_data"};
-    }
-
     wgpu::BindGroupLayout CreateBindGroupLayout() {
         wgpu::BindGroupLayoutEntry entries[1];
         entries[0].binding = 0;
@@ -242,7 +298,6 @@ TEST_F(ImmediateDataTest, ValidateSetImmediatesOOB) {
 TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
     constexpr uint32_t kShaderImmediateDataBytes = 12u;
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-        enable chromium_experimental_immediate;
         var<immediate> fragmentConstants: vec3f;
         var<immediate> computeConstants: vec3u;
         @vertex fn vsMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -324,7 +379,6 @@ TEST_F(ImmediateDataTest, ValidatePipelineLayoutImmediateDataBytesAndShaders) {
 // Check that default pipelineLayout has too many immediate data bytes .
 TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, R"(
-            enable chromium_experimental_immediate;
             var<immediate> fragmentConstants: array<vec4f, 4>;
             var<immediate> computeConstants: array<vec4u, 4>;
             @vertex fn vsMain(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -349,7 +403,6 @@ TEST_F(ImmediateDataTest, ValidateDefaultPipelineLayout) {
             })");
 
     wgpu::ShaderModule oobShaderModule = utils::CreateShaderModule(device, R"(
-            enable chromium_experimental_immediate;
             struct FragmentConstants {
                 constants: array<vec4f, 4>,
                 constantsOOB: f32,

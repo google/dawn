@@ -1,5 +1,3 @@
-enable chromium_experimental_immediate;
-
 var<immediate> a : i32;
 var<immediate> b : i32;
 var<immediate> c : i32; // unused

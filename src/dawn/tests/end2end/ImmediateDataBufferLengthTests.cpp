@@ -125,7 +125,6 @@ class ImmediateDataBufferLengthTest : public DawnTest {
 
         // Unified shader with all entry points
         std::string shader = R"(
-            enable chromium_experimental_immediate;
             struct ResultData {
                 bufferLengths : array<u32, 3>,
                 immediates : array<u32, 4>,

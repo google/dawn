@@ -111,7 +111,7 @@ constexpr std::string_view kChromiumDiagnosticRuleStrings[] = {
 };
 
 /// An enumerator of WGSL extensions
-/// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
+/// @see src/tint/lang/wgsl/wgsl.def for extension descriptions
 enum class Extension : uint8_t {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
@@ -194,6 +194,7 @@ enum class LanguageFeature : uint8_t {
     kChromiumTestingUnimplemented,
     kChromiumTestingUnsafeExperimental,
     kFragmentDepth,
+    kImmediateAddressSpace,
     kPacked4X8IntegerDotProduct,
     kPointerCompositeAccess,
     kReadonlyAndReadwriteStorageTextures,
@@ -221,6 +222,7 @@ constexpr std::string_view kLanguageFeatureStrings[] = {
     "chromium_testing_unimplemented",
     "chromium_testing_unsafe_experimental",
     "fragment_depth",
+    "immediate_address_space",
     "packed_4x8_integer_dot_product",
     "pointer_composite_access",
     "readonly_and_readwrite_storage_textures",
@@ -240,6 +242,7 @@ static constexpr LanguageFeature kAllLanguageFeatures[] = {
     LanguageFeature::kChromiumTestingUnimplemented,
     LanguageFeature::kChromiumTestingUnsafeExperimental,
     LanguageFeature::kFragmentDepth,
+    LanguageFeature::kImmediateAddressSpace,
     LanguageFeature::kPacked4X8IntegerDotProduct,
     LanguageFeature::kPointerCompositeAccess,
     LanguageFeature::kReadonlyAndReadwriteStorageTextures,

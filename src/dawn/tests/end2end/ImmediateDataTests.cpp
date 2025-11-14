@@ -44,7 +44,6 @@ class ImmediateDataTests : public DawnTest {
         DawnTest::SetUp();
 
         mShaderModule = utils::CreateShaderModule(device, R"(
-            enable chromium_experimental_immediate;
             struct Immediate {
                 color: vec3<f32>,
                 colorDiff: f32,
@@ -324,7 +323,6 @@ TEST_P(ImmediateDataTests, SetImmediatesMultipleTimes) {
 // works fine when shaders have user immediate data
 TEST_P(ImmediateDataTests, UsingImmediateDataDontAffectClampFragDepth) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        enable chromium_experimental_immediate;
         var<immediate> constants: vec4f;
         @vertex fn vs() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.5, 1.0);
@@ -378,7 +376,6 @@ TEST_P(ImmediateDataTests, UsingImmediateDataDontAffectClampFragDepth) {
 // SetImmediates Multiple times should upload dirtied, latest contents.
 TEST_P(ImmediateDataTests, SetImmediatesWithPipelineSwitch) {
     wgpu::ShaderModule shaderModuleWithLessImmediateData = utils::CreateShaderModule(device, R"(
-        enable chromium_experimental_immediate;
         struct Immediate {
             color: vec3<f32>,
         };

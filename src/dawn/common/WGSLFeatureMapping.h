@@ -37,6 +37,7 @@
     X(kSizedBindingArray, SizedBindingArray)                                       \
     X(kTexelBuffers, TexelBuffers)                                                 \
     X(kFragmentDepth, FragmentDepth)                                               \
+    X(kImmediateAddressSpace, ImmediateAddressSpace)                               \
     X(kChromiumPrint, ChromiumPrint)                                               \
     X(kUniformBufferStandardLayout, UniformBufferStandardLayout)                   \
     X(kSubgroupId, SubgroupId)                                                     \

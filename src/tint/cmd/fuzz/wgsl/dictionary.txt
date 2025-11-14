@@ -264,6 +264,7 @@
 "image"
 "image_operands"
 "immediate"
+"immediate_address_space"
 "info"
 "inputAttachmentLoad"
 "input_attachment"

@@ -132,6 +132,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     void RemoveDevice(DeviceBase* device);
 
     bool HasFeature(wgpu::InstanceFeatureName feature) const;
+    bool HasFeature(wgpu::WGSLLanguageFeatureName feature) const;
 
     const std::vector<std::string>& GetRuntimeSearchPaths() const;
 

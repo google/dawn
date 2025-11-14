@@ -518,9 +518,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverrideExpr) {
 }
 
 TEST_F(ResolverVariableValidationTest, GlobalVariable_ImmediateWithInitializer) {
-    // enable chromium_experimental_immediate;
     // var<immediate> a : u32 = 0u;
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), core::AddressSpace::kImmediate,
               Expr(Source{{3u, 4u}}, u32(0)));
 

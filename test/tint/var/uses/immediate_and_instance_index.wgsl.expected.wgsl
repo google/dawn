@@ -1,5 +1,3 @@
-enable chromium_experimental_immediate;
-
 var<immediate> a : f32;
 
 @vertex

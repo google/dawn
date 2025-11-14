@@ -637,7 +637,6 @@ class State {
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
             case core::AddressSpace::kImmediate:
-                Enable(wgsl::Extension::kChromiumExperimentalImmediate);
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
             default:

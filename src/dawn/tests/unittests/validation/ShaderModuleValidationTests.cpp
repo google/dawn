@@ -887,7 +887,6 @@ const struct WGSLExtensionInfo kExtensions[] = {
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
-    {"chromium_experimental_immediate", true, {}},
     {"chromium_internal_relaxed_uniform_layout", true, {}},
     */
 };

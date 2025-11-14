@@ -233,13 +233,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
 
 // Detect unaligned member for immediate data buffers
 TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_UnalignedMember) {
-    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(1) b : f32;
     // };
     // var<immediate> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure(Ident(Source{{12, 34}}, "S"),
               Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                      Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
@@ -259,13 +257,11 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_UnalignedMember) {
 }
 
 TEST_F(ResolverAddressSpaceLayoutValidationTest, Immediate_Aligned) {
-    // enable chromium_experimental_immediate;
     // struct S {
     //     @size(5) a : f32;
     //     @align(4) b : f32;
     // };
     // var<immediate> a : S;
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                           Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
     GlobalVar("a", ty("S"), core::AddressSpace::kImmediate);

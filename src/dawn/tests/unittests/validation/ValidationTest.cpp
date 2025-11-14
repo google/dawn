@@ -191,8 +191,14 @@ void ValidationTest::SetUp() {
         instanceToggles.enabledToggles = &allowUnsafeApisToggle;
     }
 
+    dawn::native::DawnWGSLBlocklist blockList;
+    auto blocklistedFeatures = GetWGSLBlocklistedFeatures();
+    blockList.blocklistedFeatureCount = blocklistedFeatures.size();
+    blockList.blocklistedFeatures = blocklistedFeatures.data();
+    blockList.nextInChain = &instanceToggles;
+
     wgpu::InstanceDescriptor instanceDesc = {};
-    instanceDesc.nextInChain = &instanceToggles;
+    instanceDesc.nextInChain = &blockList;
     static constexpr auto kRequiredFeatures =
         std::array{wgpu::InstanceFeatureName::MultipleDevicesPerAdapter,
                    wgpu::InstanceFeatureName::ShaderSourceSPIRV};
@@ -300,6 +306,10 @@ std::vector<const char*> ValidationTest::GetEnabledToggles() {
 }
 
 std::vector<const char*> ValidationTest::GetDisabledToggles() {
+    return {};
+}
+
+std::vector<const char*> ValidationTest::GetWGSLBlocklistedFeatures() {
     return {};
 }
 

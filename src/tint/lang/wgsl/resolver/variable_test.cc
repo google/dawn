@@ -1050,8 +1050,6 @@ TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
 TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
-
     auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* private_ = GlobalVar("p", ty.i32(), core::AddressSpace::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), core::AddressSpace::kWorkgroup);

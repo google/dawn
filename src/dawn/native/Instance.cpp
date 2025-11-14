@@ -597,6 +597,10 @@ bool InstanceBase::HasFeature(wgpu::InstanceFeatureName feature) const {
     return mInstanceFeatures.contains(feature);
 }
 
+bool InstanceBase::HasFeature(wgpu::WGSLLanguageFeatureName feature) const {
+    return mWGSLFeatures.contains(feature);
+}
+
 bool InstanceBase::ProcessEvents() {
     std::vector<Ref<DeviceBase>> devices;
     mDevicesList.Use([&](auto deviceList) {
@@ -730,7 +734,7 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
 }
 
 bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const {
-    return mWGSLFeatures.contains(feature);
+    return HasFeature(feature);
 }
 
 void InstanceBase::APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const {

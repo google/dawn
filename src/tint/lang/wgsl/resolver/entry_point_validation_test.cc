@@ -445,32 +445,30 @@ TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
               "in its return type");
 }
 
-TEST_F(ResolverEntryPointValidationTest, ImmediateAllowedWithEnable) {
-    // enable chromium_experimental_immediate;
+TEST_F(ResolverEntryPointValidationTest, ImmediateAllowedWithFeatureEnabled) {
     // var<immediate> a : u32;
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar("a", ty.u32(), core::AddressSpace::kImmediate);
 
     EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverEntryPointValidationTest, ImmediateDisallowedWithoutEnable) {
+TEST_F(ResolverEntryPointValidationTest, ImmediateDisallowedWithFeatureDisabled) {
     // var<immediate> a : u32;
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), core::AddressSpace::kImmediate);
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "1:2 error: use of variable address space 'immediate' requires enabling extension "
-              "'chromium_experimental_immediate'");
+    auto resolver = Resolver{this, wgsl::AllowedFeatures{}};
+    EXPECT_FALSE(resolver.Resolve());
+    EXPECT_EQ(
+        resolver.error(),
+        "1:2 error: use of variable address space 'immediate' requires the immediate_address_space "
+        "language feature, which is not allowed in the current environment");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ImmediateOneVariableUsedInEntryPoint) {
-    // enable chromium_experimental_immediate;
     // var<immediate> a : u32;
     // @compute @workgroup_size(1) fn main() {
     //   _ = a;
     // }
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar("a", ty.u32(), core::AddressSpace::kImmediate);
 
     Func("main", {}, ty.void_(), Vector{Assign(Phony(), "a")},
@@ -480,14 +478,12 @@ TEST_F(ResolverEntryPointValidationTest, ImmediateOneVariableUsedInEntryPoint) {
 }
 
 TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInEntryPoint) {
-    // enable chromium_experimental_immediate;
     // var<immediate> a : u32;
     // var<immediate> b : u32;
     // @compute @workgroup_size(1) fn main() {
     //   _ = a;
     //   _ = b;
     // }
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), core::AddressSpace::kImmediate);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), core::AddressSpace::kImmediate);
 
@@ -502,7 +498,6 @@ TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInEntryPoint) 
 }
 
 TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInEntryPointWithFunctionGraph) {
-    // enable chromium_experimental_immediate;
     // var<immediate> a : u32;
     // var<immediate> b : u32;
     // fn uses_a() {
@@ -515,7 +510,6 @@ TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInEntryPointWi
     //   uses_a();
     //   uses_b();
     // }
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), core::AddressSpace::kImmediate);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), core::AddressSpace::kImmediate);
 
@@ -538,7 +532,6 @@ TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInEntryPointWi
 }
 
 TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInDifferentEntryPoint) {
-    // enable chromium_experimental_immediate;
     // var<immediate> a : u32;
     // var<immediate> b : u32;
     // @compute @workgroup_size(1) fn uses_a() {
@@ -547,7 +540,6 @@ TEST_F(ResolverEntryPointValidationTest, ImmediateTwoVariablesUsedInDifferentEnt
     // @compute @workgroup_size(1) fn uses_b() {
     //   _ = a;
     // }
-    Enable(wgsl::Extension::kChromiumExperimentalImmediate);
     GlobalVar("a", ty.u32(), core::AddressSpace::kImmediate);
     GlobalVar("b", ty.u32(), core::AddressSpace::kImmediate);
 

@@ -35,6 +35,7 @@
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/ValidationUtils_autogen.h"
@@ -121,8 +122,9 @@ void ProgrammableEncoder::APISetImmediates(uint32_t offset, const void* data, si
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                DAWN_INVALID_IF(!GetDevice()->IsToggleEnabled(Toggle::EnableImmediateData),
-                                "ImmediateData is not enabled");
+                DAWN_INVALID_IF(!GetDevice()->GetInstance()->HasFeature(
+                                    wgpu::WGSLLanguageFeatureName::ImmediateAddressSpace),
+                                "ImmediateAddressSpace feature is not enabled");
 
                 // Validate offset and size are aligned to 4 bytes.
                 DAWN_INVALID_IF(offset % 4 != 0, "offset (%u) is not a multiple of 4", offset);

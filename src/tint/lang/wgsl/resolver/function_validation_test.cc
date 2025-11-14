@@ -1088,9 +1088,6 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithoutUnrestrictedP
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
-    if (param.address_space == core::AddressSpace::kImmediate) {
-        Enable(wgsl::Extension::kChromiumExperimentalImmediate);
-    }
     if (param.address_space == core::AddressSpace::kPixelLocal) {
         Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
@@ -1119,9 +1116,6 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithUnrestrictedPoin
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
-    if (param.address_space == core::AddressSpace::kImmediate) {
-        Enable(wgsl::Extension::kChromiumExperimentalImmediate);
-    }
     if (param.address_space == core::AddressSpace::kPixelLocal) {
         Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }

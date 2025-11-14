@@ -1,5 +1,3 @@
-enable chromium_experimental_immediate;
-
 var<immediate> value: u32;
 
 @group(0) @binding(1)

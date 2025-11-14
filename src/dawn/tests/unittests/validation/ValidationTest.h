@@ -179,6 +179,7 @@ class ValidationTest : public testing::Test {
                                    dawn::utils::ComboLimits& required);
     virtual std::vector<const char*> GetEnabledToggles();
     virtual std::vector<const char*> GetDisabledToggles();
+    virtual std::vector<const char*> GetWGSLBlocklistedFeatures();
 
     // Sets up the internal members by initializing the instances, adapter, and device.
     void SetUp(const wgpu::InstanceDescriptor* nativeDesc,
@@ -210,5 +211,8 @@ class ValidationTest : public testing::Test {
     testing::Matcher<std::string> mErrorMatcher;
     bool mExpectDestruction = false;
 };
+
+template <typename T>
+class ValidationTestWithParam : public ValidationTest, public testing::WithParamInterface<T> {};
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_VALIDATION_VALIDATIONTEST_H_

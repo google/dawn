@@ -84,7 +84,7 @@ enum extension {
 
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
-  // A Chromium-specific extension for immediate data
+  // TODO(crbug.com/460481195): Remove once no longer emitted (e.g. by Skia).
   chromium_experimental_immediate
   // A Chromium-specific extension that enables features for graphite
   chromium_internal_graphite
@@ -116,6 +116,7 @@ enum language_feature {
   uniform_buffer_standard_layout
   subgroup_id
   fragment_depth
+  immediate_address_space
 
   // Non-standard language features for Chromium developers.
   chromium_print
