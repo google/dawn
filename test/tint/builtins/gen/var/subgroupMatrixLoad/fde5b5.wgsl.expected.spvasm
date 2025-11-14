@@ -51,7 +51,7 @@
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
 %_ptr_Function_13 = OpTypePointer Function %13
-         %35 = OpConstantComposite %13 %uint_0
+         %35 = OpConstantNull %13
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
        %void = OpTypeVoid
          %47 = OpTypeFunction %void %uint

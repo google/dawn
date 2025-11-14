@@ -33,28 +33,28 @@
      %uint_1 = OpConstant %uint 1
           %8 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_1
          %12 = OpTypeFunction %8
-     %uint_0 = OpConstant %uint 0
-         %14 = OpConstantComposite %8 %uint_0
+         %14 = OpConstantNull %8
 %_ptr_Function_8 = OpTypePointer Function %8
        %void = OpTypeVoid
-         %23 = OpTypeFunction %void
+         %22 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
+     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
 %subgroupMatrixScalarAdd_ee0ec0 = OpFunction %8 None %12
          %13 = OpLabel
         %res = OpVariable %_ptr_Function_8 Function
-         %16 = OpCompositeConstruct %8 %uint_8
-         %17 = OpIAdd %8 %14 %16
-               OpStore %res %17
-         %20 = OpLoad %8 %res None
-               OpReturnValue %20
+         %15 = OpCompositeConstruct %8 %uint_8
+         %16 = OpIAdd %8 %14 %15
+               OpStore %res %16
+         %19 = OpLoad %8 %res None
+               OpReturnValue %19
                OpFunctionEnd
-%compute_main = OpFunction %void None %23
-         %24 = OpLabel
-         %25 = OpFunctionCall %8 %subgroupMatrixScalarAdd_ee0ec0
-         %26 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %28 = OpAccessChain %_ptr_StorageBuffer_uint %26 %uint_0
-               OpCooperativeMatrixStoreKHR %28 %25 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %22
+         %23 = OpLabel
+         %24 = OpFunctionCall %8 %subgroupMatrixScalarAdd_ee0ec0
+         %25 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %25 %uint_0
+               OpCooperativeMatrixStoreKHR %28 %24 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd

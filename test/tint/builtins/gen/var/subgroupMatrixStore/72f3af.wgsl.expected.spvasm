@@ -42,10 +42,10 @@
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
          %16 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_1
-     %uint_0 = OpConstant %uint 0
-         %15 = OpConstantComposite %16 %uint_0
+         %15 = OpConstantNull %16
 %_ptr_Function_16 = OpTypePointer Function %16
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
+     %uint_0 = OpConstant %uint 0
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
@@ -57,7 +57,7 @@
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %15
                OpStore %arg_4 %uint_8
-         %23 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0 %uint_0
+         %22 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0 %uint_0
          %25 = OpLoad %uint %arg_1 None
          %26 = OpLoad %16 %arg_2 None
          %27 = OpLoad %uint %arg_4 None
@@ -69,7 +69,7 @@
                OpSelectionMerge %36 None
                OpBranchConditional %34 %37 %36
          %37 = OpLabel
-         %38 = OpAccessChain %_ptr_StorageBuffer_uint %23 %25
+         %38 = OpAccessChain %_ptr_StorageBuffer_uint %22 %25
                OpCooperativeMatrixStoreKHR %38 %26 %uint_1 %28 NonPrivatePointer
                OpBranch %36
          %36 = OpLabel

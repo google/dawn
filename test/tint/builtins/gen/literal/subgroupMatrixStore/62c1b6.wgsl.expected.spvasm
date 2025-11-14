@@ -32,7 +32,7 @@
      %uint_8 = OpConstant %uint 8
      %uint_0 = OpConstant %uint 0
          %13 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_0
-         %12 = OpConstantComposite %13 %uint_0
+         %12 = OpConstantNull %13
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
      %uint_1 = OpConstant %uint 1
          %23 = OpTypeFunction %void %uint

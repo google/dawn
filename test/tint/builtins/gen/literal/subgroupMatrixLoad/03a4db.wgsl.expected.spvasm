@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 60
+; Bound: 59
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -56,11 +56,10 @@
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
 %_ptr_Function_13 = OpTypePointer Function %13
-     %char_0 = OpConstant %char 0
-         %35 = OpConstantComposite %13 %char_0
+         %35 = OpConstantNull %13
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
        %void = OpTypeVoid
-         %49 = OpTypeFunction %void
+         %48 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_int_uint_1024 = OpTypePointer StorageBuffer %_arr_int_uint_1024
     %uint_64 = OpConstant %uint 64
 %_ptr_StorageBuffer_int_0 = OpTypePointer StorageBuffer %int
@@ -75,28 +74,28 @@
          %28 = OpIAdd %uint %uint_1 %26
          %30 = OpIAdd %uint %28 %uint_8
          %31 = OpULessThanEqual %bool %30 %24
-               OpSelectionMerge %37 None
-               OpBranchConditional %31 %38 %37
-         %38 = OpLabel
-         %42 = OpUDiv %uint %uint_8 %uint_4
-         %43 = OpUDiv %uint %uint_1 %uint_4
-         %44 = OpAccessChain %_ptr_StorageBuffer_int %20 %43
-         %46 = OpCooperativeMatrixLoadKHR %13 %44 %uint_1 %42 NonPrivatePointer
-               OpStore %33 %46 None
-               OpBranch %37
+               OpSelectionMerge %36 None
+               OpBranchConditional %31 %37 %36
          %37 = OpLabel
-         %39 = OpLoad %13 %33 None
-               OpStore %res %39
-         %41 = OpLoad %13 %res None
-               OpReturnValue %41
+         %41 = OpUDiv %uint %uint_8 %uint_4
+         %42 = OpUDiv %uint %uint_1 %uint_4
+         %43 = OpAccessChain %_ptr_StorageBuffer_int %20 %42
+         %45 = OpCooperativeMatrixLoadKHR %13 %43 %uint_1 %41 NonPrivatePointer
+               OpStore %33 %45 None
+               OpBranch %36
+         %36 = OpLabel
+         %38 = OpLoad %13 %33 None
+               OpStore %res %38
+         %40 = OpLoad %13 %res None
+               OpReturnValue %40
                OpFunctionEnd
-%compute_main = OpFunction %void None %49
-         %50 = OpLabel
-         %51 = OpFunctionCall %13 %subgroupMatrixLoad_03a4db
-         %52 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
-         %54 = OpUDiv %uint %uint_64 %uint_4
-         %56 = OpUDiv %uint %uint_0 %uint_4
-         %57 = OpAccessChain %_ptr_StorageBuffer_int_0 %52 %56
-               OpCooperativeMatrixStoreKHR %57 %51 %uint_0 %54 NonPrivatePointer
+%compute_main = OpFunction %void None %48
+         %49 = OpLabel
+         %50 = OpFunctionCall %13 %subgroupMatrixLoad_03a4db
+         %51 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_1024 %1 %uint_0
+         %53 = OpUDiv %uint %uint_64 %uint_4
+         %55 = OpUDiv %uint %uint_0 %uint_4
+         %56 = OpAccessChain %_ptr_StorageBuffer_int_0 %51 %55
+               OpCooperativeMatrixStoreKHR %56 %50 %uint_0 %53 NonPrivatePointer
                OpReturn
                OpFunctionEnd

@@ -182,23 +182,6 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         [&](Default) { return ty; });
 }
 
-/// @returns true if @p type is or contains a subgroup matrix type at any nesting
-bool ContainsSubgroupMatrix(const core::type::Type* type) {
-    return tint::Switch(
-        type,  //
-        [&](const core::type::SubgroupMatrix*) { return true; },
-        [&](const core::type::Array* arr) { return ContainsSubgroupMatrix(arr->ElemType()); },
-        [&](const core::type::Struct* str) {
-            for (auto& member : str->Members()) {
-                if (ContainsSubgroupMatrix(member->Type())) {
-                    return true;
-                }
-            }
-            return false;
-        },
-        [](Default) { return false; });
-}
-
 /// PIMPL class for SPIR-V writer
 class Printer {
   public:
@@ -517,40 +500,7 @@ class Printer {
     uint32_t ConstantNull(const core::type::Type* type) {
         return constant_nulls_.GetOrAdd(type, [&] {
             auto id = module_.NextId();
-
-            if (ContainsSubgroupMatrix(type)) {
-                // OpConstantNull is not supported for CooperativeMatrix types on some drivers, so
-                // use OpConstantComposite instead.
-                // See crbug.com/407532165.
-                Switch(
-                    type,
-                    [&](const core::type::SubgroupMatrix* sm) {
-                        module_.PushType(spv::Op::OpConstantComposite,
-                                         {Type(type), id, Constant(b_.Zero(sm->Type()))});
-                    },
-                    [&](const core::type::Array* arr) {
-                        OperandList operands = {Type(arr), id};
-                        for (uint32_t i = 0; i < arr->ConstantCount(); i++) {
-                            operands.push_back(ConstantNull(arr->ElemType()));
-                        }
-                        module_.PushType(spv::Op::OpConstantComposite, operands);
-                    },
-                    [&](const core::type::Struct* str) {
-                        OperandList operands = {Type(str), id};
-                        for (auto* member : str->Members()) {
-                            if (ContainsSubgroupMatrix(member->Type())) {
-                                operands.push_back(ConstantNull(member->Type()));
-                            } else {
-                                operands.push_back(Constant(b_.Zero(member->Type())));
-                            }
-                        }
-                        module_.PushType(spv::Op::OpConstantComposite, operands);
-                    },
-                    TINT_ICE_ON_NO_MATCH);
-            } else {
-                module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
-            }
-
+            module_.PushType(spv::Op::OpConstantNull, {Type(type), id});
             return id;
         });
     }

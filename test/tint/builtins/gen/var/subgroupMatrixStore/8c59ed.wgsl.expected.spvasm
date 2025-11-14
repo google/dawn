@@ -39,7 +39,7 @@
      %uint_8 = OpConstant %uint 8
      %uint_0 = OpConstant %uint 0
          %14 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_0
-         %13 = OpConstantComposite %14 %uint_0
+         %13 = OpConstantNull %14
 %_ptr_Function_14 = OpTypePointer Function %14
 %_ptr_StorageBuffer__runtimearr_uint = OpTypePointer StorageBuffer %_runtimearr_uint
      %uint_7 = OpConstant %uint 7

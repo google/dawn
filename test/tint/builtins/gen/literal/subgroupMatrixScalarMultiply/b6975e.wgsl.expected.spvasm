@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 41
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -10,7 +10,7 @@
                OpCapability Int8
                OpExtension "SPV_KHR_vulkan_memory_model"
                OpExtension "SPV_KHR_cooperative_matrix"
-         %18 = OpExtInstImport "GLSL.std.450"
+         %17 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -36,13 +36,12 @@
      %uint_2 = OpConstant %uint 2
           %8 = OpTypeCooperativeMatrixKHR %uchar %uint_3 %uint_8 %uint_8 %uint_2
          %13 = OpTypeFunction %8
-    %uchar_0 = OpConstant %uchar 0
-         %15 = OpConstantComposite %8 %uchar_0
+         %15 = OpConstantNull %8
      %uint_0 = OpConstant %uint 0
    %uint_255 = OpConstant %uint 255
 %_ptr_Function_8 = OpTypePointer Function %8
        %void = OpTypeVoid
-         %29 = OpTypeFunction %void
+         %28 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
     %uint_64 = OpConstant %uint 64
      %uint_4 = OpConstant %uint 4
@@ -50,21 +49,21 @@
 %subgroupMatrixScalarMultiply_b6975e = OpFunction %8 None %13
          %14 = OpLabel
         %res = OpVariable %_ptr_Function_8 Function
-         %17 = OpExtInst %uint %18 UClamp %uint_8 %uint_0 %uint_255
-         %21 = OpUConvert %uchar %17
-         %22 = OpCompositeConstruct %8 %21
-         %23 = OpIMul %8 %15 %22
-               OpStore %res %23
-         %26 = OpLoad %8 %res None
-               OpReturnValue %26
+         %16 = OpExtInst %uint %17 UClamp %uint_8 %uint_0 %uint_255
+         %20 = OpUConvert %uchar %16
+         %21 = OpCompositeConstruct %8 %20
+         %22 = OpIMul %8 %15 %21
+               OpStore %res %22
+         %25 = OpLoad %8 %res None
+               OpReturnValue %25
                OpFunctionEnd
-%compute_main = OpFunction %void None %29
-         %30 = OpLabel
-         %31 = OpFunctionCall %8 %subgroupMatrixScalarMultiply_b6975e
-         %32 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %34 = OpUDiv %uint %uint_64 %uint_4
-         %37 = OpUDiv %uint %uint_0 %uint_4
-         %38 = OpAccessChain %_ptr_StorageBuffer_uint %32 %37
-               OpCooperativeMatrixStoreKHR %38 %31 %uint_0 %34 NonPrivatePointer
+%compute_main = OpFunction %void None %28
+         %29 = OpLabel
+         %30 = OpFunctionCall %8 %subgroupMatrixScalarMultiply_b6975e
+         %31 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %33 = OpUDiv %uint %uint_64 %uint_4
+         %36 = OpUDiv %uint %uint_0 %uint_4
+         %37 = OpAccessChain %_ptr_StorageBuffer_uint %31 %36
+               OpCooperativeMatrixStoreKHR %37 %30 %uint_0 %33 NonPrivatePointer
                OpReturn
                OpFunctionEnd

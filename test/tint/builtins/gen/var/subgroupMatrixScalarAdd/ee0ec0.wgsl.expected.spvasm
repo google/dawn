@@ -35,13 +35,13 @@
      %uint_1 = OpConstant %uint 1
           %8 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_8 %uint_1
          %12 = OpTypeFunction %8
-     %uint_0 = OpConstant %uint 0
-         %14 = OpConstantComposite %8 %uint_0
+         %14 = OpConstantNull %8
 %_ptr_Function_8 = OpTypePointer Function %8
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
-         %28 = OpTypeFunction %void
+         %27 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
+     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
 %subgroupMatrixScalarAdd_ee0ec0 = OpFunction %8 None %12
@@ -51,19 +51,19 @@
         %res = OpVariable %_ptr_Function_8 Function
                OpStore %arg_0 %14
                OpStore %arg_1 %uint_8
-         %20 = OpLoad %8 %arg_0 None
-         %21 = OpLoad %uint %arg_1 None
-         %22 = OpCompositeConstruct %8 %21
-         %23 = OpIAdd %8 %20 %22
-               OpStore %res %23
-         %25 = OpLoad %8 %res None
-               OpReturnValue %25
+         %19 = OpLoad %8 %arg_0 None
+         %20 = OpLoad %uint %arg_1 None
+         %21 = OpCompositeConstruct %8 %20
+         %22 = OpIAdd %8 %19 %21
+               OpStore %res %22
+         %24 = OpLoad %8 %res None
+               OpReturnValue %24
                OpFunctionEnd
-%compute_main = OpFunction %void None %28
-         %29 = OpLabel
-         %30 = OpFunctionCall %8 %subgroupMatrixScalarAdd_ee0ec0
-         %31 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %33 = OpAccessChain %_ptr_StorageBuffer_uint %31 %uint_0
-               OpCooperativeMatrixStoreKHR %33 %30 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %27
+         %28 = OpLabel
+         %29 = OpFunctionCall %8 %subgroupMatrixScalarAdd_ee0ec0
+         %30 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %33 = OpAccessChain %_ptr_StorageBuffer_uint %30 %uint_0
+               OpCooperativeMatrixStoreKHR %33 %29 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 35
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -35,8 +35,7 @@
      %uint_3 = OpConstant %uint 3
      %uint_8 = OpConstant %uint 8
          %15 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_8 %uint_0
-      %int_0 = OpConstant %int 0
-         %14 = OpConstantComposite %15 %int_0
+         %14 = OpConstantNull %15
      %uint_7 = OpConstant %uint 7
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
@@ -44,22 +43,22 @@
 %subgroupMatrixStore_3ea76e = OpFunction %void None %8
           %9 = OpLabel
          %10 = OpAccessChain %_ptr_StorageBuffer__runtimearr_int %sb_rw %uint_0
-         %19 = OpArrayLength %uint %sb_rw 0
-         %20 = OpIMul %uint %uint_8 %uint_7
-         %22 = OpIAdd %uint %uint_1 %20
-         %24 = OpIAdd %uint %22 %uint_8
-         %25 = OpULessThanEqual %bool %24 %19
-               OpSelectionMerge %27 None
-               OpBranchConditional %25 %28 %27
-         %28 = OpLabel
-         %29 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_1
-               OpCooperativeMatrixStoreKHR %29 %14 %uint_1 %uint_8 NonPrivatePointer
-               OpBranch %27
+         %18 = OpArrayLength %uint %sb_rw 0
+         %19 = OpIMul %uint %uint_8 %uint_7
+         %21 = OpIAdd %uint %uint_1 %19
+         %23 = OpIAdd %uint %21 %uint_8
+         %24 = OpULessThanEqual %bool %23 %18
+               OpSelectionMerge %26 None
+               OpBranchConditional %24 %27 %26
          %27 = OpLabel
+         %28 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_1
+               OpCooperativeMatrixStoreKHR %28 %14 %uint_1 %uint_8 NonPrivatePointer
+               OpBranch %26
+         %26 = OpLabel
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %subgroupMatrixStore_3ea76e
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %subgroupMatrixStore_3ea76e
                OpReturn
                OpFunctionEnd

@@ -1106,14 +1106,13 @@ TEST_F(SpirvWriterTest, Add_SubgroupMatrix) {
     EXPECT_INST(R"(
           %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_2
 %_ptr_Function_7 = OpTypePointer Function %7
-    %float_0 = OpConstant %float 0
-         %13 = OpConstantComposite %7 %float_0
+         %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
           %v = OpVariable %_ptr_Function_7 Function %13
-         %15 = OpCompositeConstruct %7 %float_2
-         %17 = OpLoad %7 %v None
-         %18 = OpFAdd %7 %17 %15
+         %14 = OpCompositeConstruct %7 %float_2
+         %16 = OpLoad %7 %v None
+         %17 = OpFAdd %7 %16 %14
 )");
 }
 
@@ -1140,14 +1139,13 @@ TEST_F(SpirvWriterTest, Subtract_SubgroupMatrix) {
     EXPECT_INST(R"(
           %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_2
 %_ptr_Function_7 = OpTypePointer Function %7
-    %float_0 = OpConstant %float 0
-         %13 = OpConstantComposite %7 %float_0
+         %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
           %v = OpVariable %_ptr_Function_7 Function %13
-         %15 = OpCompositeConstruct %7 %float_2
-         %17 = OpLoad %7 %v None
-         %18 = OpFSub %7 %17 %15
+         %14 = OpCompositeConstruct %7 %float_2
+         %16 = OpLoad %7 %v None
+         %17 = OpFSub %7 %16 %14
 )");
 }
 
@@ -1174,14 +1172,13 @@ TEST_F(SpirvWriterTest, Multiply_SubgroupMatrix) {
     EXPECT_INST(R"(
           %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_8 %uint_8 %uint_2
 %_ptr_Function_7 = OpTypePointer Function %7
-    %float_0 = OpConstant %float 0
-         %13 = OpConstantComposite %7 %float_0
+         %13 = OpConstantNull %7
 )");
     EXPECT_INST(R"(
           %v = OpVariable %_ptr_Function_7 Function %13
-         %15 = OpCompositeConstruct %7 %float_2
-         %17 = OpLoad %7 %v None
-         %18 = OpFMul %7 %17 %15
+         %14 = OpCompositeConstruct %7 %float_2
+         %16 = OpLoad %7 %v None
+         %17 = OpFMul %7 %16 %14
 )");
 }
 

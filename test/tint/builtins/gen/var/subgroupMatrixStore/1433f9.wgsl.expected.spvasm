@@ -9,7 +9,7 @@
                OpCapability CooperativeMatrixKHR
                OpExtension "SPV_KHR_vulkan_memory_model"
                OpExtension "SPV_KHR_cooperative_matrix"
-         %29 = OpExtInstImport "GLSL.std.450"
+         %28 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical Vulkan
                OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_local_invocation_index_Input
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -39,15 +39,15 @@
      %uint_8 = OpConstant %uint 8
      %uint_0 = OpConstant %uint 0
          %17 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_8 %uint_0
-      %int_0 = OpConstant %int 0
-         %16 = OpConstantComposite %17 %int_0
+         %16 = OpConstantNull %17
 %_ptr_Function_17 = OpTypePointer Function %17
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
-         %43 = OpTypeFunction %void %uint
+         %42 = OpTypeFunction %void %uint
      %uint_2 = OpConstant %uint 2
  %uint_24840 = OpConstant %uint 24840
+      %int_0 = OpConstant %int 0
 %subgroupMatrixStore_1433f9 = OpFunction %void None %11
          %12 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_uint Function
@@ -56,49 +56,49 @@
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %16
                OpStore %arg_4 %uint_8
-         %25 = OpLoad %uint %arg_1 None
-         %26 = OpLoad %17 %arg_2 None
-         %27 = OpLoad %uint %arg_4 None
-         %28 = OpExtInst %uint %29 UMax %27 %uint_8
-         %30 = OpIMul %uint %28 %uint_7
-         %32 = OpIAdd %uint %25 %30
-         %33 = OpIAdd %uint %32 %uint_8
-         %34 = OpULessThanEqual %bool %33 %uint_1024
-               OpSelectionMerge %36 None
-               OpBranchConditional %34 %37 %36
-         %37 = OpLabel
-         %38 = OpAccessChain %_ptr_Workgroup_int %arg_0 %25
-               OpCooperativeMatrixStoreKHR %38 %26 %uint_1 %28 NonPrivatePointer
-               OpBranch %36
+         %24 = OpLoad %uint %arg_1 None
+         %25 = OpLoad %17 %arg_2 None
+         %26 = OpLoad %uint %arg_4 None
+         %27 = OpExtInst %uint %28 UMax %26 %uint_8
+         %29 = OpIMul %uint %27 %uint_7
+         %31 = OpIAdd %uint %24 %29
+         %32 = OpIAdd %uint %31 %uint_8
+         %33 = OpULessThanEqual %bool %32 %uint_1024
+               OpSelectionMerge %35 None
+               OpBranchConditional %33 %36 %35
          %36 = OpLabel
+         %37 = OpAccessChain %_ptr_Workgroup_int %arg_0 %24
+               OpCooperativeMatrixStoreKHR %37 %25 %uint_1 %27 NonPrivatePointer
+               OpBranch %35
+         %35 = OpLabel
                OpReturn
                OpFunctionEnd
-%compute_main_inner = OpFunction %void None %43
+%compute_main_inner = OpFunction %void None %42
 %tint_local_index = OpFunctionParameter %uint
+         %43 = OpLabel
+               OpBranch %44
          %44 = OpLabel
-               OpBranch %45
-         %45 = OpLabel
-               OpBranch %48
-         %48 = OpLabel
-         %50 = OpPhi %uint %tint_local_index %45 %51 %47
-               OpLoopMerge %49 %47 None
-               OpBranch %46
-         %46 = OpLabel
-         %56 = OpUGreaterThanEqual %bool %50 %uint_1024
-               OpSelectionMerge %57 None
-               OpBranchConditional %56 %58 %57
-         %58 = OpLabel
-               OpBranch %49
-         %57 = OpLabel
-         %59 = OpAccessChain %_ptr_Workgroup_int %arg_0 %50
-               OpStore %59 %int_0 NonPrivatePointer
                OpBranch %47
          %47 = OpLabel
-         %51 = OpIAdd %uint %50 %uint_1
+         %49 = OpPhi %uint %tint_local_index %44 %50 %46
+               OpLoopMerge %48 %46 None
+               OpBranch %45
+         %45 = OpLabel
+         %55 = OpUGreaterThanEqual %bool %49 %uint_1024
+               OpSelectionMerge %56 None
+               OpBranchConditional %55 %57 %56
+         %57 = OpLabel
                OpBranch %48
-         %49 = OpLabel
+         %56 = OpLabel
+         %58 = OpAccessChain %_ptr_Workgroup_int %arg_0 %49
+               OpStore %58 %int_0 NonPrivatePointer
+               OpBranch %46
+         %46 = OpLabel
+         %50 = OpIAdd %uint %49 %uint_1
+               OpBranch %47
+         %48 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
-         %55 = OpFunctionCall %void %subgroupMatrixStore_1433f9
+         %54 = OpFunctionCall %void %subgroupMatrixStore_1433f9
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11

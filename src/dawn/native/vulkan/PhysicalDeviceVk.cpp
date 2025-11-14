@@ -525,7 +525,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
         (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE);
     if (hasCooperativeMatrix && hasVulkanMemoryModel && hasComputeFullSubgroups) {
-        EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
+        // crbug.com/415828149: Older Mesa drivers have bugs around subgroup matrix initialization,
+        // so we blocklist SubgroupMatrix for Mesa drivers older than 25.2.
+        const gpu_info::DriverVersion kGoodMesaDriver = {25, 2, 0, 0};
+        const bool badDriver = IsIntelMesa() && GetDriverVersion() < kGoodMesaDriver;
+        if (!badDriver) {
+            EnableFeature(Feature::ChromiumExperimentalSubgroupMatrix);
+        }
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&

@@ -203,11 +203,11 @@ TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_ZeroValue) {
     options.use_vulkan_memory_model = true;
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("%6 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
-    EXPECT_INST("%left = OpConstantComposite %6 %float_0");
-    EXPECT_INST("%15 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
-    EXPECT_INST("%right = OpConstantComposite %15 %int_0");
-    EXPECT_INST("%20 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2");
-    EXPECT_INST("%result = OpConstantComposite %20 %uint_0");
+    EXPECT_INST("%left = OpConstantNull %6");
+    EXPECT_INST("%14 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%right = OpConstantNull %14");
+    EXPECT_INST("%18 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%result = OpConstantNull %18");
 }
 
 TEST_F(SpirvWriterTest, Construct_SubgroupMatrix_SingleValue) {
@@ -255,21 +255,16 @@ TEST_F(SpirvWriterTest, Construct_ArrayOfSubgroupMatrix_ZeroValue) {
     EXPECT_INST(R"(
           %7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0
 %_arr_7_uint_4 = OpTypeArray %7 %uint_4
-    %float_0 = OpConstant %float 0
-         %14 = OpConstantComposite %7 %float_0
-       %left = OpConstantComposite %_arr_7_uint_4 %14 %14 %14 %14
+       %left = OpConstantNull %_arr_7_uint_4
         %int = OpTypeInt 32 1
      %uint_1 = OpConstant %uint 1
-         %18 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1
-%_arr_18_uint_4 = OpTypeArray %18 %uint_4
-      %int_0 = OpConstant %int 0
-         %21 = OpConstantComposite %18 %int_0
-      %right = OpConstantComposite %_arr_18_uint_4 %21 %21 %21 %21
+         %16 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_8 %uint_4 %uint_1
+%_arr_16_uint_4 = OpTypeArray %16 %uint_4
+      %right = OpConstantNull %_arr_16_uint_4
      %uint_2 = OpConstant %uint 2
-         %25 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2
-%_arr_25_uint_4 = OpTypeArray %25 %uint_4
-         %27 = OpConstantComposite %25 %uint_0
-     %result = OpConstantComposite %_arr_25_uint_4 %27 %27 %27 %27
+         %21 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2
+%_arr_21_uint_4 = OpTypeArray %21 %uint_4
+     %result = OpConstantNull %_arr_21_uint_4
 )");
 }
 
@@ -304,15 +299,7 @@ TEST_F(SpirvWriterTest, Construct_StructOfSubgroupMatrix_ZeroValue) {
          %20 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_2 %uint_2 %uint_2
 %_arr_20_uint_4 = OpTypeArray %20 %uint_4
    %MyStruct = OpTypeStruct %_arr_8_uint_4 %_arr_16_uint_4 %_arr_20_uint_4
-    %float_0 = OpConstant %float 0
-         %23 = OpConstantComposite %8 %float_0
-         %22 = OpConstantComposite %_arr_8_uint_4 %23 %23 %23 %23
-      %int_0 = OpConstant %int 0
-         %26 = OpConstantComposite %16 %int_0
-         %25 = OpConstantComposite %_arr_16_uint_4 %26 %26 %26 %26
-         %29 = OpConstantComposite %20 %uint_0
-         %28 = OpConstantComposite %_arr_20_uint_4 %29 %29 %29 %29
-          %s = OpConstantComposite %MyStruct %22 %25 %28
+          %s = OpConstantNull %MyStruct
 )");
 }
 

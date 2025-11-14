@@ -51,7 +51,7 @@
      %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
 %_ptr_Function_12 = OpTypePointer Function %12
-         %31 = OpConstantComposite %12 %uint_0
+         %31 = OpConstantNull %12
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
        %void = OpTypeVoid
          %42 = OpTypeFunction %void

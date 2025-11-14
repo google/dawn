@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 31
+; Bound: 30
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -41,21 +41,20 @@
       %uchar = OpTypeInt 8 0
      %uint_1 = OpConstant %uint 1
          %16 = OpTypeCooperativeMatrixKHR %uchar %uint_3 %uint_8 %uint_8 %uint_1
-    %uchar_0 = OpConstant %uchar 0
-         %15 = OpConstantComposite %16 %uchar_0
+         %15 = OpConstantNull %16
      %uint_4 = OpConstant %uint 4
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %subgroupMatrixStore_c18bf3 = OpFunction %void None %10
          %11 = OpLabel
          %12 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0 %uint_0
-         %22 = OpUDiv %uint %uint_8 %uint_4
-         %24 = OpUDiv %uint %uint_1 %uint_4
-         %25 = OpAccessChain %_ptr_StorageBuffer_uint %12 %24
-               OpCooperativeMatrixStoreKHR %25 %15 %uint_1 %22 NonPrivatePointer
+         %21 = OpUDiv %uint %uint_8 %uint_4
+         %23 = OpUDiv %uint %uint_1 %uint_4
+         %24 = OpAccessChain %_ptr_StorageBuffer_uint %12 %23
+               OpCooperativeMatrixStoreKHR %24 %15 %uint_1 %21 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %10
-         %29 = OpLabel
-         %30 = OpFunctionCall %void %subgroupMatrixStore_c18bf3
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %subgroupMatrixStore_c18bf3
                OpReturn
                OpFunctionEnd

@@ -932,8 +932,8 @@ TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
     EXPECT_INST("OpCapability CooperativeMatrixKHR");
     EXPECT_INST("OpExtension \"SPV_KHR_cooperative_matrix\"");
     EXPECT_INST("%7 = OpTypeCooperativeMatrixKHR %float %uint_3 %uint_4 %uint_8 %uint_0");
-    EXPECT_INST("%18 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_4 %uint_1");
-    EXPECT_INST("%23 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
+    EXPECT_INST("%17 = OpTypeCooperativeMatrixKHR %uint %uint_3 %uint_8 %uint_4 %uint_1");
+    EXPECT_INST("%22 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
 }
 
 // Test that we can emit multiple types.

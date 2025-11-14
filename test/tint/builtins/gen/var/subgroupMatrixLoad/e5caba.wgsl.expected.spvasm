@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 59
+; Bound: 58
 ; Schema: 0
                OpCapability Shader
                OpCapability VulkanMemoryModel
@@ -56,11 +56,10 @@
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
 %_ptr_Function_13 = OpTypePointer Function %13
-    %float_0 = OpConstant %float 0
-         %39 = OpConstantComposite %13 %float_0
+         %39 = OpConstantNull %13
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %void = OpTypeVoid
-         %51 = OpTypeFunction %void
+         %50 = OpTypeFunction %void
 %_ptr_StorageBuffer__arr_float_uint_1024 = OpTypePointer StorageBuffer %_arr_float_uint_1024
     %uint_64 = OpConstant %uint 64
 %subgroupMatrixLoad_e5caba = OpFunction %13 None %17
@@ -80,24 +79,24 @@
          %33 = OpIAdd %uint %26 %31
          %34 = OpIAdd %uint %33 %uint_8
          %35 = OpULessThanEqual %bool %34 %30
-               OpSelectionMerge %41 None
-               OpBranchConditional %35 %42 %41
-         %42 = OpLabel
-         %46 = OpAccessChain %_ptr_StorageBuffer_float %23 %26
-         %48 = OpCooperativeMatrixLoadKHR %13 %46 %uint_1 %28 NonPrivatePointer
-               OpStore %37 %48 None
-               OpBranch %41
+               OpSelectionMerge %40 None
+               OpBranchConditional %35 %41 %40
          %41 = OpLabel
-         %43 = OpLoad %13 %37 None
-               OpStore %res %43
-         %45 = OpLoad %13 %res None
-               OpReturnValue %45
+         %45 = OpAccessChain %_ptr_StorageBuffer_float %23 %26
+         %47 = OpCooperativeMatrixLoadKHR %13 %45 %uint_1 %28 NonPrivatePointer
+               OpStore %37 %47 None
+               OpBranch %40
+         %40 = OpLabel
+         %42 = OpLoad %13 %37 None
+               OpStore %res %42
+         %44 = OpLoad %13 %res None
+               OpReturnValue %44
                OpFunctionEnd
-%compute_main = OpFunction %void None %51
-         %52 = OpLabel
-         %53 = OpFunctionCall %13 %subgroupMatrixLoad_e5caba
-         %54 = OpAccessChain %_ptr_StorageBuffer__arr_float_uint_1024 %1 %uint_0
-         %56 = OpAccessChain %_ptr_StorageBuffer_float %54 %uint_0
-               OpCooperativeMatrixStoreKHR %56 %53 %uint_0 %uint_64 NonPrivatePointer
+%compute_main = OpFunction %void None %50
+         %51 = OpLabel
+         %52 = OpFunctionCall %13 %subgroupMatrixLoad_e5caba
+         %53 = OpAccessChain %_ptr_StorageBuffer__arr_float_uint_1024 %1 %uint_0
+         %55 = OpAccessChain %_ptr_StorageBuffer_float %53 %uint_0
+               OpCooperativeMatrixStoreKHR %55 %52 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd

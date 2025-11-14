@@ -50,14 +50,14 @@
      %uint_7 = OpConstant %uint 7
        %bool = OpTypeBool
 %_ptr_Function_13 = OpTypePointer Function %13
-     %uint_0 = OpConstant %uint 0
-         %34 = OpConstantComposite %13 %uint_0
+         %34 = OpConstantNull %13
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
        %void = OpTypeVoid
-         %47 = OpTypeFunction %void %uint
+         %46 = OpTypeFunction %void %uint
      %uint_2 = OpConstant %uint 2
  %uint_24840 = OpConstant %uint 24840
 %_ptr_StorageBuffer__arr_uint_uint_1024 = OpTypePointer StorageBuffer %_arr_uint_uint_1024
+     %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
     %uint_64 = OpConstant %uint 64
          %71 = OpTypeFunction %void
@@ -76,48 +76,48 @@
          %28 = OpIAdd %uint %22 %26
          %29 = OpIAdd %uint %28 %uint_8
          %30 = OpULessThanEqual %bool %29 %uint_1024
-               OpSelectionMerge %36 None
-               OpBranchConditional %30 %37 %36
-         %37 = OpLabel
-         %41 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %22
-         %43 = OpCooperativeMatrixLoadKHR %13 %41 %uint_1 %24 NonPrivatePointer
-               OpStore %32 %43 None
-               OpBranch %36
+               OpSelectionMerge %35 None
+               OpBranchConditional %30 %36 %35
          %36 = OpLabel
-         %38 = OpLoad %13 %32 None
-               OpStore %res %38
-         %40 = OpLoad %13 %res None
-               OpReturnValue %40
+         %40 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %22
+         %42 = OpCooperativeMatrixLoadKHR %13 %40 %uint_1 %24 NonPrivatePointer
+               OpStore %32 %42 None
+               OpBranch %35
+         %35 = OpLabel
+         %37 = OpLoad %13 %32 None
+               OpStore %res %37
+         %39 = OpLoad %13 %res None
+               OpReturnValue %39
                OpFunctionEnd
-%compute_main_inner = OpFunction %void None %47
+%compute_main_inner = OpFunction %void None %46
 %tint_local_index = OpFunctionParameter %uint
+         %47 = OpLabel
+               OpBranch %48
          %48 = OpLabel
+               OpBranch %51
+         %51 = OpLabel
+         %53 = OpPhi %uint %tint_local_index %48 %54 %50
+               OpLoopMerge %52 %50 None
                OpBranch %49
          %49 = OpLabel
-               OpBranch %52
-         %52 = OpLabel
-         %54 = OpPhi %uint %tint_local_index %49 %55 %51
-               OpLoopMerge %53 %51 None
-               OpBranch %50
-         %50 = OpLabel
-         %66 = OpUGreaterThanEqual %bool %54 %uint_1024
+         %66 = OpUGreaterThanEqual %bool %53 %uint_1024
                OpSelectionMerge %67 None
                OpBranchConditional %66 %68 %67
          %68 = OpLabel
-               OpBranch %53
-         %67 = OpLabel
-         %69 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %54
-               OpStore %69 %uint_0 NonPrivatePointer
-               OpBranch %51
-         %51 = OpLabel
-         %55 = OpIAdd %uint %54 %uint_1
                OpBranch %52
-         %53 = OpLabel
+         %67 = OpLabel
+         %69 = OpAccessChain %_ptr_Workgroup_uint %arg_0 %53
+               OpStore %69 %uint_0 NonPrivatePointer
+               OpBranch %50
+         %50 = OpLabel
+         %54 = OpIAdd %uint %53 %uint_1
+               OpBranch %51
+         %52 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_24840
-         %59 = OpFunctionCall %13 %subgroupMatrixLoad_f406f6
-         %60 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
-         %62 = OpAccessChain %_ptr_StorageBuffer_uint %60 %uint_0
-               OpCooperativeMatrixStoreKHR %62 %59 %uint_0 %uint_64 NonPrivatePointer
+         %58 = OpFunctionCall %13 %subgroupMatrixLoad_f406f6
+         %59 = OpAccessChain %_ptr_StorageBuffer__arr_uint_uint_1024 %1 %uint_0
+         %62 = OpAccessChain %_ptr_StorageBuffer_uint %59 %uint_0
+               OpCooperativeMatrixStoreKHR %62 %58 %uint_0 %uint_64 NonPrivatePointer
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %71
