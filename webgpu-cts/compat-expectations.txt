@@ -121,6 +121,12 @@ crbug.com/42241110 webgpu:api,validation,error_scope:current_scope:errorFilter="
 crbug.com/42241110 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";* [ Skip ]
 crbug.com/42241110 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";* [ Skip ]
 
+# Timeouts for large const array limits
+crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+
+
 ################################################################################
 # Temporary Skip Expectations
 #
@@ -1449,7 +1455,6 @@ crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,bu
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=0 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=1 [ Failure ]
 crbug.com/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureStore:texel_formats:format="rgba8unorm";viewDimension="2d";stage="fragment";access="write";mipLevel=2 [ Failure ]
-crbug.com/0000 [ linux nvidia ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:shader,validation,shader_io,workgroup_size:workgroup_size:attr="override_expr" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/0000 [ android-pixel-6 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
