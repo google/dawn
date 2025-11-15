@@ -1132,6 +1132,7 @@ fn ep_func() {}
     EXPECT_FALSE(result[0].sample_index_used);
     EXPECT_FALSE(result[0].num_workgroups_used);
     EXPECT_FALSE(result[0].frag_depth_used);
+    EXPECT_FALSE(result[0].fine_derivative_builtin_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
@@ -1320,6 +1321,108 @@ fn ep_func() -> out_struct {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].frag_depth_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, DpdxFineDirectlyUsed) {
+    auto* src = R"(
+@fragment
+fn ep_func(@location(0) i: f32) {
+  _ = dpdxFine(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, DpdxFineTransientlyUsed) {
+    auto* src = R"(
+fn foo(i: f32) {
+  _ = dpdxFine(i);
+}
+
+@fragment
+fn ep_func(@location(0) i: f32) {
+    foo(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, DpdyFineDirectlyUsed) {
+    auto* src = R"(
+@fragment
+fn ep_func(@location(0) i: f32) {
+  _ = dpdyFine(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, DpdyFineTransientlyUsed) {
+    auto* src = R"(
+fn foo(i: f32) {
+  _ = dpdyFine(i);
+}
+
+@fragment
+fn ep_func(@location(0) i: f32) {
+    foo(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FwidthFineDirectlyUsed) {
+    auto* src = R"(
+@fragment
+fn ep_func(@location(0) i: f32) {
+  _ = fwidthFine(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FwidthFineTransientlyUsed) {
+    auto* src = R"(
+fn foo(i: f32) {
+  _ = fwidthFine(i);
+}
+
+@fragment
+fn ep_func(@location(0) i: f32) {
+    foo(i);
+}
+)";
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].fine_derivative_builtin_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, ClipDistancesReferenced) {

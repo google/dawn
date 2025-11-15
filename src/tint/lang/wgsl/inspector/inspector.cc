@@ -269,6 +269,30 @@ inspector::Override MkOverride(const sem::GlobalVariable* global, OverrideId id)
     return override;
 }
 
+bool IsFineDerivativeBuiltin(const sem::BuiltinFn* builtin) {
+    auto fn = builtin->Fn();
+    return fn == wgsl::BuiltinFn::kDpdxFine || fn == wgsl::BuiltinFn::kDpdyFine ||
+           fn == wgsl::BuiltinFn::kFwidthFine;
+}
+
+bool UsesFineDerivatives(const sem::Function* func) {
+    for (auto& b : func->DirectlyCalledBuiltins()) {
+        if (IsFineDerivativeBuiltin(b)) {
+            return true;
+        }
+    }
+
+    for (auto& call : func->TransitivelyCalledFunctions()) {
+        for (auto& b : call->DirectlyCalledBuiltins()) {
+            if (IsFineDerivativeBuiltin(b)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 }  // namespace
 
 Inspector::Inspector(const Program& program) : program_(program) {}
@@ -365,6 +389,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         texture_metadata.has_texture_load_with_depth_texture;
     entry_point.has_depth_texture_with_non_comparison_sampler =
         texture_metadata.has_depth_texture_with_non_comparison_sampler;
+
+    entry_point.fine_derivative_builtin_used = UsesFineDerivatives(sem);
 
     return entry_point;
 }
