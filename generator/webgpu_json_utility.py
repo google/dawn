@@ -38,12 +38,66 @@ import re
 # ####################################################################################
 
 
+def is_method_reference(ref, object_methods):
+    """Checks if a reference is a valid method of an object.
+
+    The reference can be a C-style function name (e.g., wgpuBufferMapAsync)
+    or an object/method name (e.g., BufferMapAsync). This function handles
+    various formats by stripping prefixes and converting to camelCase for
+    validation against the list of known methods.
+    """
+    cleaned_ref = ref.rstrip('.,)')
+    if not object_methods:
+        return False
+
+    object_ref = cleaned_ref
+    if object_ref.lower().startswith("wgpu"):
+        object_ref = object_ref[4:]
+
+    for obj_name, methods in object_methods.items():
+        if object_ref.startswith(obj_name):
+            method_part = object_ref[len(obj_name):].replace("-", "")
+            if method_part:
+                method_camel = method_part[0].lower() + method_part[1:]
+                if method_camel in methods:
+                    return True
+    return False
+
+
+def is_other_reference_valid(ref, valid_names_normalized):
+    """Checks if a reference is a valid hyphenated, wgpu-prefixed, or simple name.
+
+    Handles cases like 'my-struct-name', 'wgpuMyObject', or 'MyEnum' by
+    normalizing them to a consistent format for validation.
+    """
+    cleaned_ref = ref.rstrip('.,)')
+    if "-" in cleaned_ref:
+        normalized_ref = cleaned_ref.replace("-", "").lower()
+        return normalized_ref in valid_names_normalized
+    elif cleaned_ref.lower().startswith("wgpu"):
+        rest = cleaned_ref[4:]
+        return "_" in rest or rest.lower() in valid_names_normalized
+    else:
+        return cleaned_ref.lower() in valid_names_normalized
+
 def clean_doc_for_kotlin(doc,
                          valid_names_normalized,
                          enum_names,
                          params=None,
                          object_methods=None):
     """Cleans a docstring by validating and formatting references for Kotlin KDoc."""
+    # These are special-cased references that are not part of the API but are
+    # used in the documentation. They are manually mapped in the `dawn_kotlin` JSON config.
+    KOTLIN_HARDCODED_LINK_REFS = [
+        "CallbackStatuses",
+        "LocalizableHumanReadableMessageString",
+        "CallbackReentrancy",
+        "ErrorScopes",
+        "DeviceError",
+        "DeviceRelease",
+        "Asynchronous-Operations",
+        "MappedRangeBehavior",
+    ]
     if not doc:
         return doc
 
@@ -75,7 +129,6 @@ def clean_doc_for_kotlin(doc,
     # Extracts all referenced names from @see tags to validate them.
     references = re.findall(r"@see (\S+)", doc)
     for ref in references:
-        is_valid = False
         # Convert C++ scope resolution (::) to Kotlin (.).
         if "::" in ref:
             new_ref = ref.replace("::", ".")
@@ -85,19 +138,11 @@ def clean_doc_for_kotlin(doc,
         if ref.startswith("Constants."):
             continue
 
-        ref = ref.replace(".", "").replace(")", "")
-
-        # Handle hyphenated references (e.g., 'my-struct-name').
-        if "-" in ref:
-            normalized_ref = ref.replace("-", "").lower()
-            is_valid = normalized_ref in valid_names_normalized
-        # Handle 'wgpu' prefixed references, including enum values.
-        elif ref.lower().startswith("wgpu"):
-            rest = ref[4:]
-            is_valid = "_" in rest or rest.lower() in valid_names_normalized
-        # Assume other simple references (e.g., 'MyObject') are valid.
-        else:
+        if any(s in ref for s in KOTLIN_HARDCODED_LINK_REFS):
             is_valid = True
+        else:
+            is_valid = (is_method_reference(ref, object_methods) or
+                        is_other_reference_valid(ref, valid_names_normalized))
 
         # Discard docstring if any reference is invalid to avoid incorrect KDoc.
         if not is_valid:
@@ -127,7 +172,8 @@ def clean_doc_for_kotlin(doc,
                 arg_name = match.group(2)  # The arg name, e.g., "WaitAny"
                 y_camel = arg_name[0].lower() + arg_name[1:]  # e.g., "waitAny"
                 if y_camel in methods:
-                    return f'@see {object_name}.{y_camel}'
+                    kotlin_str = f'{object_name}.{y_camel}'
+                    return kotlin_str if "@see" in doc else f'@see {kotlin_str}'
                 return match.group(0)  # Return original if not a valid method
 
             doc = re.sub(pattern, replacer, doc)
