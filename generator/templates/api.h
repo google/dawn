@@ -36,9 +36,6 @@
 
 #ifndef {{metadata.api.upper()}}_H_
 #define {{metadata.api.upper()}}_H_
-{% if 'dawn' in enabled_tags %}
-    #define WGPU_BREAKING_CHANGE_SET_IMMEDIATES
-{% endif %}
 
 //* -------------------------------------------------------------------------------------
 //* The follow block defines Dawn generator specific macros
