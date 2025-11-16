@@ -205,6 +205,13 @@ def clean_doc_for_kotlin(doc,
     # Wraps qualified member references in @see tags with brackets for KDoc linking.
     doc = re.sub(r"(@see\s+)(\w+\.\w+)", r"\1[\2]", doc)
 
+    # Example: @see Adapter -> @see GPUAdapter
+    # Prefixes object names with 'GPU' for Kotlin references.
+    if object_methods:
+        for obj_name in object_methods.keys():
+            doc = re.sub(r'\b' + re.escape(obj_name) + r'\b', 'GPU' + obj_name,
+                         doc)
+
     return doc
 
 
