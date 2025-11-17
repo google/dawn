@@ -66,6 +66,7 @@
                OpEntryPoint Fragment %less "less" %less_frag_depth_Output
                OpExecutionMode %less OriginUpperLeft
                OpExecutionMode %less DepthReplacing
+               OpExecutionMode %less DepthLess
                OpMemberName %tint_immediate_data_struct 0 "tint_frag_depth_min"
                OpMemberName %tint_immediate_data_struct 1 "tint_frag_depth_max"
                OpName %tint_immediate_data_struct "tint_immediate_data_struct"
@@ -120,6 +121,7 @@
                OpEntryPoint Fragment %greater "greater" %greater_frag_depth_Output
                OpExecutionMode %greater OriginUpperLeft
                OpExecutionMode %greater DepthReplacing
+               OpExecutionMode %greater DepthGreater
                OpMemberName %tint_immediate_data_struct 0 "tint_frag_depth_min"
                OpMemberName %tint_immediate_data_struct 1 "tint_frag_depth_max"
                OpName %tint_immediate_data_struct "tint_immediate_data_struct"

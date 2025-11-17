@@ -889,10 +889,19 @@ class Printer {
                 operands.push_back(Value(var));
             }
 
-            // Add the `DepthReplacing` execution mode if `frag_depth` is used.
+            // Add the necessary SPIR-V execution modes for `frag_depth` usage.
             if (var->Attributes().builtin == core::BuiltinValue::kFragDepth) {
+                // Always add `DepthReplacing` when `frag_depth` is written to.
                 module_.PushExecutionMode(spv::Op::OpExecutionMode,
                                           {id, U32Operand(SpvExecutionModeDepthReplacing)});
+                // Add `DepthGreater` or `DepthLess` if the depth movement direction is constrained.
+                if (var->Attributes().depth_mode == core::BuiltinDepthMode::kGreater) {
+                    module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                              {id, U32Operand(SpvExecutionModeDepthGreater)});
+                } else if (var->Attributes().depth_mode == core::BuiltinDepthMode::kLess) {
+                    module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                              {id, U32Operand(SpvExecutionModeDepthLess)});
+                }
             }
         }
 
