@@ -1051,7 +1051,7 @@ TEST_F(IRToProgramTest, UnaryOp_Not) {
     auto* i = b.FunctionParam("b", ty.bool_());
     fn->SetParams({i});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Not(ty.bool_(), i)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Not(i)); });
 
     EXPECT_WGSL(R"(
 fn f(b : bool) -> bool {
@@ -3483,7 +3483,7 @@ TEST_F(IRToProgramTest, Override_UnaryInitializer) {
         auto* lhs = b.Override("cond", true);
         lhs->SetOverrideId(OverrideId{10});
 
-        o = b.Override("o", b.Not<bool>(lhs));
+        o = b.Override("o", b.Not(lhs));
     });
 
     auto* fn = b.Function("f", ty.bool_());

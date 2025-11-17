@@ -58,7 +58,7 @@ TEST_F(GlslWriterTest, Not_Scalar) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(false));
-        auto* op = b.Not(ty.bool_(), l);
+        auto* op = b.Not(l);
         b.Let("val", op);
         b.Return(func);
     });
@@ -77,7 +77,7 @@ TEST_F(GlslWriterTest, Not_Vector) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec3<bool>(), false));
-        auto* op = b.Not(ty.vec3<bool>(), l);
+        auto* op = b.Not(l);
         b.Let("val", op);
         b.Return(func);
     });

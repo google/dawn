@@ -181,7 +181,7 @@ struct State {
             if (exit_target->IsAnyOf<core::ir::Loop, core::ir::Switch>()) {
                 b.InsertBefore(next, [&] {
                     auto* load = b.Load(continue_execution);
-                    auto* cond = b.If(b.Not<bool>(load));
+                    auto* cond = b.If(b.Not(load));
                     b.Append(cond->True(), [&] {  //
                         ExitFromControl(exit_target);
                     });

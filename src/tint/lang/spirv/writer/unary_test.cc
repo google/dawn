@@ -55,7 +55,7 @@ TEST_P(Arithmetic, Scalar) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Unary(params.op, MakeScalarType(params.type), arg);
+        auto* result = b.Unary(params.op, arg);
         mod.SetName(result, "result");
         b.Return(func);
     });
@@ -77,7 +77,7 @@ TEST_P(Arithmetic, Vector) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Unary(params.op, MakeVectorType(params.type), arg);
+        auto* result = b.Unary(params.op, arg);
         mod.SetName(result, "result");
         b.Return(func);
     });
@@ -104,7 +104,7 @@ TEST_F(SpirvWriterTest, Unary_Negate_i32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Unary(core::UnaryOp::kNegation, MakeVectorType(kI32), arg);
+        auto* result = b.Unary(core::UnaryOp::kNegation, arg);
         b.Return(func);
         mod.SetName(result, "result");
     });
@@ -153,7 +153,7 @@ TEST_F(SpirvWriterTest, Unary_Negate_Vector_i32) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Unary(core::UnaryOp::kNegation, MakeScalarType(kI32), arg);
+        auto* result = b.Unary(core::UnaryOp::kNegation, arg);
         b.Return(func);
         mod.SetName(result, "result");
     });

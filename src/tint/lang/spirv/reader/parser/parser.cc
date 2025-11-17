@@ -3540,7 +3540,7 @@ class Parser {
                 return true;
             }
             if (false_id == merge_id && true_is_header) {
-                auto* val = b_.Not(cond->Type(), cond);
+                auto* val = b_.Not(cond);
                 EmitWithoutSpvResult(val);
                 EmitWithoutResult(b_.BreakIf(loop, val));
                 return true;
@@ -4168,7 +4168,7 @@ class Parser {
                    core::UnaryOp op,
                    uint32_t first_operand_idx = 2) {
         auto* val = Value(inst.GetSingleWordOperand(first_operand_idx));
-        auto* unary = b_.Unary(op, Type(inst.type_id()), val);
+        auto* unary = b_.Unary(op, val);
         Emit(unary, inst.result_id());
     }
 
@@ -4192,7 +4192,7 @@ class Parser {
         auto* binary = b_.Binary(op, Type(inst.type_id()), lhs, rhs);
         EmitWithoutSpvResult(binary);
 
-        auto* res = b_.Not(Type(inst.type_id()), binary);
+        auto* res = b_.Not(binary);
         Emit(res, inst.result_id());
     }
 

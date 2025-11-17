@@ -58,7 +58,7 @@ TEST_F(HlslWriterTest, UnaryNot) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<bool>());
-        b.Var("b", b.Not<bool>(b.Load(a)));
+        b.Var("b", b.Not(b.Load(a)));
         b.Return(func);
     });
 

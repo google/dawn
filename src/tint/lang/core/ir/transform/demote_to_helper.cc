@@ -192,7 +192,7 @@ struct State {
                     if (ret->Func()->IsFragment()) {
                         b.InsertBefore(ret, [&] {
                             auto* cond = b.Load(continue_execution);
-                            auto* ifelse = b.If(b.Not<bool>(cond));
+                            auto* ifelse = b.If(b.Not(cond));
                             b.Append(ifelse->True(), [&] {  //
                                 b.TerminateInvocation();
                             });

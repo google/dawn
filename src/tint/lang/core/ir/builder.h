@@ -991,17 +991,6 @@ class Builder {
 
     /// Creates an op for `op val`
     /// @param op the unary operator
-    /// @param type the result type of the binary expression
-    /// @param val the value of the operation
-    /// @returns the operation
-    template <typename VAL>
-    ir::CoreUnary* Unary(UnaryOp op, const core::type::Type* type, VAL&& val) {
-        auto* value = Value(std::forward<VAL>(val));
-        return Append(ir.CreateInstruction<ir::CoreUnary>(InstructionResult(type), op, value));
-    }
-
-    /// Creates an op for `op val`
-    /// @param op the unary operator
     /// @param val the value of the operation
     /// @returns the operation
     template <typename VAL>
@@ -1032,22 +1021,11 @@ class Builder {
     }
 
     /// Creates a Not operation
-    /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Not(const core::type::Type* type, VAL&& val) {
-        return Unary(UnaryOp::kNot, type, std::forward<VAL>(val));
-    }
-
-    /// Creates a Not operation
-    /// @tparam TYPE the result type of the expression
-    /// @param val the value
-    /// @returns the operation
-    template <typename TYPE, typename VAL>
     ir::CoreUnary* Not(VAL&& val) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Not(type, std::forward<VAL>(val));
+        return Unary(UnaryOp::kNot, std::forward<VAL>(val));
     }
 
     /// Creates a bitcast instruction

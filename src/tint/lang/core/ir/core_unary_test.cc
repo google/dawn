@@ -65,7 +65,7 @@ TEST_F(IR_UnaryTest, CreateNegation) {
 }
 
 TEST_F(IR_UnaryTest, CreateNot) {
-    auto* inst = b.Not(mod.Types().bool_(), true);
+    auto* inst = b.Not(true);
 
     ASSERT_TRUE(inst->Is<Unary>());
     EXPECT_EQ(inst->Op(), UnaryOp::kNot);

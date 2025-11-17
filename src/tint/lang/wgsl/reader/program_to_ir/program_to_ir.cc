@@ -937,7 +937,6 @@ class Impl {
                     return;
                 }
                 core::ir::Instruction* inst = nullptr;
-                auto* sem = impl.program_.Sem().Get(expr);
                 switch (expr->op) {
                     case core::UnaryOp::kAddressOf:
                     case core::UnaryOp::kIndirection:
@@ -954,8 +953,7 @@ class Impl {
                         break;
                     }
                     case core::UnaryOp::kNot: {
-                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
-                        inst = impl.builder_.Not(ty, val);
+                        inst = impl.builder_.Not(val);
                         break;
                     }
                 }
