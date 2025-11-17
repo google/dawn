@@ -64,6 +64,11 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&,
         return Failure{check.Failure().reason};
     }
 
+    // TODO(454378504): Remove this when we always decompose uniform buffers.
+    if (!options.decompose_uniform_buffers) {
+        return Failure{"fuzzing requires decomposing uniform buffers"};
+    }
+
     options.bindings = GenerateBindings(module, ep_name, false, false);
     options.resource_binding = tint::core::ir::transform::GenerateResourceBindingConfig(module);
 
