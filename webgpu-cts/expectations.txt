@@ -265,6 +265,10 @@ crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,te
 crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
 crbug.com/407088838 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_3d_coords:* [ Skip ]
 
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Skip ]
+crbug.com/408244895 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Skip ]
+crbug.com/407109060 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";*offset=true [ Skip ]
+
 crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:* [ Skip ]
 crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ]
 crbug.com/364595481 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Skip ]
@@ -1328,7 +1332,6 @@ crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,call,builtin,tex
 crbug.com/0000 [ dawn-backend-validation intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleBaseClampToEdge:2d_coords:stage="f";textureType="texture_external";filt="linear";modeU="r";modeV="r" [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:stage="c";format="r16snorm";filt="nearest";modeU="c";modeV="c";offset=false [ Failure ]
 crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:stage="f";format="etc2-rgba8unorm";dim="cube";filt="linear";modeU="c";modeV="r";modeW="c";offset=false [ Failure ]
-crbug.com/0000 [ android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="f";format="rg11b10ufloat";filt="nearest";modeU="m";modeV="r";offset=false [ Failure ]
 crbug.com/0000 [ intel mac ] webgpu:shader,execution,expression,call,builtin,texture_utils:weights:stage="compute" [ Failure ]
 crbug.com/0000 [ android-t ] webgpu:shader,execution,expression,constructor,non_zero:concrete_matrix_elements:* [ Failure ]
 crbug.com/0000 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win ] webgpu:shader,execution,limits:struct_members: [ Failure ]
