@@ -913,14 +913,36 @@ schema::ColorAttachment ToSchema(CaptureContext& captureContext,
 schema::RenderPassDepthStencilAttachment ToSchema(
     CaptureContext& captureContext,
     const RenderPassDepthStencilAttachmentInfo& info) {
+    // The front end does not save the user's actual loadOp/storeOp settings so we derive what they
+    // were.
+    // TODO(460491958): Save the actual user's loadOp/storeOp settings and adjust the backends.
+    wgpu::LoadOp depthLoadOp = info.depthLoadOp;
+    wgpu::StoreOp depthStoreOp = info.depthStoreOp;
+    wgpu::LoadOp stencilLoadOp = info.stencilLoadOp;
+    wgpu::StoreOp stencilStoreOp = info.stencilStoreOp;
+
+    bool haveAttachment = info.view != nullptr;
+    bool haveDepth = haveAttachment && info.view->GetFormat().HasDepth();
+    bool haveStencil = haveAttachment && info.view->GetFormat().HasStencil();
+
+    if (!haveAttachment || !haveDepth || info.depthReadOnly) {
+        depthLoadOp = wgpu::LoadOp::Undefined;
+        depthStoreOp = wgpu::StoreOp::Undefined;
+    }
+
+    if (!haveAttachment || !haveStencil || info.stencilReadOnly) {
+        stencilLoadOp = wgpu::LoadOp::Undefined;
+        stencilStoreOp = wgpu::StoreOp::Undefined;
+    }
+
     return {{
         .viewId = captureContext.GetId(info.view),
-        .depthLoadOp = info.depthLoadOp,
-        .depthStoreOp = info.depthStoreOp,
+        .depthLoadOp = depthLoadOp,
+        .depthStoreOp = depthStoreOp,
         .depthClearValue = info.clearDepth,
         .depthReadOnly = info.depthReadOnly,
-        .stencilLoadOp = info.stencilLoadOp,
-        .stencilStoreOp = info.stencilStoreOp,
+        .stencilLoadOp = stencilLoadOp,
+        .stencilStoreOp = stencilStoreOp,
         .stencilClearValue = info.clearStencil,
         .stencilReadOnly = info.stencilReadOnly,
     }};

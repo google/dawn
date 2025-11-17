@@ -1467,6 +1467,43 @@ TEST_P(CaptureAndReplayTests, CaptureSamplerUsageWithExplicitBindGroupLayout) {
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
+// Capture and replay a pass uses a depth attachment.
+// This was failing because the front end does not save the user's
+// stencilLoadOp and stencilStoreOp as the spec requires "undefined"
+TEST_P(CaptureAndReplayTests, CaptureDepthRenderPass) {
+    wgpu::Texture texture = CreateTexture("texture", {1}, wgpu::TextureFormat::RGBA8Unorm,
+                                          wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::Texture depthTexture =
+        CreateTexture("depthTexture", {1}, wgpu::TextureFormat::Depth16Unorm,
+                      wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({texture.CreateView()},
+                                                        depthTexture.CreateView());
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // We just expect no errors.
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace
