@@ -31,7 +31,7 @@ struct FragDepthLessOutput {
 };
 
 struct less_outputs {
-  float FragDepthLessOutput_frag_depth : SV_Depth;
+  float FragDepthLessOutput_frag_depth : SV_DepthLessEqual;
 };
 
 
@@ -54,7 +54,7 @@ struct FragDepthGreaterOutput {
 };
 
 struct greater_outputs {
-  float FragDepthGreaterOutput_frag_depth : SV_Depth;
+  float FragDepthGreaterOutput_frag_depth : SV_DepthGreaterEqual;
 };
 
 

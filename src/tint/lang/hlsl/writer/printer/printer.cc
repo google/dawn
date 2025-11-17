@@ -1618,7 +1618,7 @@ class Printer : public tint::TextGenerator {
                         name = "SV_ClipDistance" + std::to_string(which_clip_distance);
                         ++which_clip_distance;
                     } else {
-                        name = builtin_to_attribute(builtin.value());
+                        name = builtin_to_attribute(builtin.value(), attributes.depth_mode);
 
                         switch (builtin.value()) {
                             case core::BuiltinValue::kVertexIndex:
@@ -1665,7 +1665,8 @@ class Printer : public tint::TextGenerator {
         preamble_buffer_.Append(str_buf);
     }
 
-    std::string builtin_to_attribute(core::BuiltinValue builtin) const {
+    std::string builtin_to_attribute(core::BuiltinValue builtin,
+                                     std::optional<core::BuiltinDepthMode> depth_mode) const {
         switch (builtin) {
             case core::BuiltinValue::kPosition:
                 return "SV_Position";
@@ -1676,6 +1677,12 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinValue::kFrontFacing:
                 return "SV_IsFrontFace";
             case core::BuiltinValue::kFragDepth:
+                if (depth_mode == core::BuiltinDepthMode::kGreater) {
+                    return "SV_DepthGreaterEqual";
+                }
+                if (depth_mode == core::BuiltinDepthMode::kLess) {
+                    return "SV_DepthLessEqual";
+                }
                 return "SV_Depth";
             case core::BuiltinValue::kLocalInvocationId:
                 return "SV_GroupThreadID";

@@ -19,7 +19,7 @@ any_outputs any() {
 // less
 //
 struct less_outputs {
-  float tint_symbol : SV_Depth;
+  float tint_symbol : SV_DepthLessEqual;
 };
 
 
@@ -36,7 +36,7 @@ less_outputs less() {
 // greater
 //
 struct greater_outputs {
-  float tint_symbol : SV_Depth;
+  float tint_symbol : SV_DepthGreaterEqual;
 };
 
 
