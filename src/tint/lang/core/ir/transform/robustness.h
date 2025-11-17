@@ -60,8 +60,6 @@ struct RobustnessConfig {
     bool clamp_storage = true;
     /// Should accesses to pointers with the 'uniform' address space be clamped?
     bool clamp_uniform = true;
-    /// Should accesses to pointers with the 'workgroup' address space be clamped?
-    bool clamp_workgroup = true;
 
     /// Should subgroup matrix builtins be predicated?
     /// Note that the stride parameter will still be clamped if predication is disabled.
@@ -82,7 +80,6 @@ struct RobustnessConfig {
                  clamp_immediate_data,
                  clamp_storage,
                  clamp_uniform,
-                 clamp_workgroup,
                  predicate_subgroup_matrix,
                  bindings_ignored,
                  disable_runtime_sized_array_index_clamping,

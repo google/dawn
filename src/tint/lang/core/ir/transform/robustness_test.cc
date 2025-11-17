@@ -1221,7 +1221,7 @@ $B1: {  # root
     EXPECT_EQ((GetParam().enabled && !GetParam().ignore_bindings) ? expect : src, str());
 }
 
-TEST_P(IR_RobustnessTest, Workgroup_LoadVectorElement) {
+TEST_F(IR_RobustnessDefaultTest, Workgroup_LoadVectorElement) {
     auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
@@ -1262,13 +1262,12 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_workgroup = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Workgroup_StoreVectorElement) {
+TEST_F(IR_RobustnessDefaultTest, Workgroup_StoreVectorElement) {
     auto* vec = b.Var("vec", ty.ptr(workgroup, ty.vec4<u32>()));
     mod.root_block->Append(vec);
 
@@ -1309,13 +1308,12 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_workgroup = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
-TEST_P(IR_RobustnessTest, Workgroup_Access) {
+TEST_F(IR_RobustnessDefaultTest, Workgroup_Access) {
     auto* arr = b.Var("arr", ty.ptr(workgroup, ty.array<u32, 4>()));
     mod.root_block->Append(arr);
 
@@ -1359,10 +1357,9 @@ $B1: {  # root
 )";
 
     RobustnessConfig cfg;
-    cfg.clamp_workgroup = GetParam();
     Run(Robustness, cfg);
 
-    EXPECT_EQ(GetParam() ? expect : src, str());
+    EXPECT_EQ(expect, str());
 }
 
 ////////////////////////////////////////////////////////////////
