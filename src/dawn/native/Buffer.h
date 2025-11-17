@@ -182,7 +182,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
     // `newState` is the state the buffer will be in after this returns.
-    virtual void FinalizeMapImpl(BufferState newState) = 0;
+    virtual MaybeError FinalizeMapImpl(BufferState newState) = 0;
     virtual void* GetMappedPointerImpl() = 0;
     // `oldState` is the state of the buffer before unmap operation started.
     virtual void UnmapImpl(BufferState oldState) = 0;
@@ -199,7 +199,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     MaybeError UnmapInternal(std::string_view earlyUnmapMessage);
 
     // Updates internal state to reflect that the buffer is now mapped.
-    void FinalizeMap(BufferState newState);
+    MaybeError FinalizeMap(BufferState newState);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;

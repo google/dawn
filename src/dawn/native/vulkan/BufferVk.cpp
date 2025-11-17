@@ -566,7 +566,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     return {};
 }
 
-void Buffer::FinalizeMapImpl(BufferState newState) {
+MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     Device* device = ToBackend(GetDevice());
 
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
@@ -606,6 +606,7 @@ void Buffer::FinalizeMapImpl(BufferState newState) {
             device->fn.InvalidateMappedMemoryRanges(device->GetVkDevice(), 1, &range);
         }
     }
+    return {};
 }
 
 void Buffer::UnmapImpl(BufferState oldState) {

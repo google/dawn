@@ -93,7 +93,7 @@ class ErrorBuffer final : public BufferBase {
         return {};
     }
 
-    void FinalizeMapImpl(BufferState newState) override {}
+    MaybeError FinalizeMapImpl(BufferState newState) override { return {}; }
 
     MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) override {
         DAWN_UNREACHABLE();
@@ -312,8 +312,16 @@ class BufferBase::MapAsyncEvent final : public EventManager::TrackedEvent {
         }
 
         DAWN_ASSERT(buffer);
-        buffer->FinalizeMap(BufferState::Mapped);
-        RunCallback(WGPUMapAsyncStatus_Success, "");
+        MaybeError result = buffer->FinalizeMap(BufferState::Mapped);
+        if (result.IsError()) {
+            auto error = result.AcquireError();
+            DAWN_ASSERT(error->GetType() != InternalErrorType::Validation);
+            std::string errorMsg = error->GetFormattedMessage();
+            std::ignore = buffer->GetDevice()->ConsumedError(std::move(error));
+            RunCallback(WGPUMapAsyncStatus_Error, errorMsg);
+        } else {
+            RunCallback(WGPUMapAsyncStatus_Success, "");
+        }
     }
 
     // MapAsyncEvent stores a WeakRef to the buffer so that it can access the mutex and update the
@@ -523,13 +531,16 @@ wgpu::BufferMapState BufferBase::APIGetMapState() const {
     }
 }
 
-void BufferBase::FinalizeMap(BufferState newState) {
+MaybeError BufferBase::FinalizeMap(BufferState newState) {
     // There are only 2 valid transitions:
     //   1) Nominal: PendingMap -> Mapped
     //   2) MappedAtCreation case because initial state is unmapped: Unmapped -> MappedAtCreation.
     BufferState oldState = mState.load(std::memory_order::acquire);
     DAWN_ASSERT((oldState == BufferState::PendingMap && newState == BufferState::Mapped) ||
                 (oldState == BufferState::Unmapped && newState == BufferState::MappedAtCreation));
+
+    DAWN_TRY_WITH_CLEANUP(FinalizeMapImpl(newState),
+                          { mState.store(BufferState::Unmapped, std::memory_order::release); });
 
     if (mStagingBuffer) {
         mMappedPointer = mStagingBuffer->GetMappedPointerImpl();
@@ -539,9 +550,8 @@ void BufferBase::FinalizeMap(BufferState newState) {
         mMappedPointer = GetMappedPointerImpl();
     }
 
-    FinalizeMapImpl(newState);
-
     mState.store(newState, std::memory_order::release);
+    return {};
 }
 
 MaybeError BufferBase::MapAtCreation() {
@@ -608,7 +618,7 @@ ResultOrError<bool> BufferBase::MapAtCreationInternal() {
     mMapOffset = 0;
     mMapSize = mSize;
     mStagingBuffer = std::move(stagingBuffer);
-    FinalizeMap(BufferState::MappedAtCreation);
+    DAWN_TRY(FinalizeMap(BufferState::MappedAtCreation));
     return mStagingBuffer != nullptr;
 }
 
