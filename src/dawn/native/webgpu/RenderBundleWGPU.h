@@ -25,57 +25,33 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
-#define SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_
+#define SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_
 
-#include "dawn/native/ToBackend.h"
+#include "dawn/native/RenderBundle.h"
+#include "dawn/native/RenderBundleEncoder.h"
+#include "dawn/native/webgpu/ObjectWGPU.h"
 
 namespace dawn::native::webgpu {
 
-class Backend;
-class BindGroup;
-class BindGroupLayout;
-class Buffer;
-class CommandBuffer;
-class ComputePipeline;
 class Device;
-class PhysicalDevice;
-class PipelineLayout;
-class QuerySet;
-class Queue;
-class RenderBundle;
-class RenderPipeline;
-class Sampler;
-class ShaderModule;
-class SwapChain;
-class Texture;
-class TextureView;
 
-struct WebGPUBackendTraits {
-    using BindGroupType = BindGroup;
-    using BindGroupLayoutType = BindGroupLayout;
-    using BufferType = Buffer;
-    using CommandBufferType = CommandBuffer;
-    using ComputePipelineType = ComputePipeline;
-    using DeviceType = Device;
-    using PhysicalDeviceType = PhysicalDevice;
-    using PipelineLayoutType = PipelineLayout;
-    using QuerySetType = QuerySet;
-    using QueueType = Queue;
-    using RenderBundleType = RenderBundle;
-    using RenderPipelineType = RenderPipeline;
-    using SamplerType = Sampler;
-    using ShaderModuleType = ShaderModule;
-    using SwapChainType = SwapChain;
-    using TextureType = Texture;
-    using TextureViewType = TextureView;
+class RenderBundle final : public RenderBundleBase, public ObjectWGPU<WGPURenderBundle> {
+  public:
+    static Ref<RenderBundleBase> Create(RenderBundleEncoderBase* encoder,
+                                        const RenderBundleDescriptor* descriptor,
+                                        RenderPassResourceUsage usages,
+                                        IndirectDrawMetadata indirectDrawMetaData);
+
+    RenderBundle(RenderBundleEncoderBase* encoder,
+                 const RenderBundleDescriptor* descriptor,
+                 RenderPassResourceUsage usages,
+                 IndirectDrawMetadata indirectDrawMetaData);
+
+  private:
+    void DestroyImpl() override;
 };
-
-template <typename T>
-auto ToBackend(T&& common) -> decltype(ToBackendBase<WebGPUBackendTraits>(common)) {
-    return ToBackendBase<WebGPUBackendTraits>(common);
-}
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_FORWARD_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_

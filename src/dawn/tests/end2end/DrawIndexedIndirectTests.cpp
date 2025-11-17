@@ -515,6 +515,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitOutOfOrder) {
 TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+    // TODO(crbug.com/413053623): Fix indirect buffer validation for WebGPU backend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
@@ -566,6 +568,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
 TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
+    // TODO(crbug.com/413053623): Fix indirect buffer validation for WebGPU backend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
@@ -633,6 +637,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
 
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    // TODO(crbug.com/413053623): Fix indirect buffer validation for WebGPU backend.
+    DAWN_SUPPRESS_TEST_IF(IsWebGPUOnWebGPU());
 
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));

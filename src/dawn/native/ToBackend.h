@@ -88,6 +88,11 @@ struct ToBackendTraits<QuerySetBase, BackendTraits> {
 };
 
 template <typename BackendTraits>
+struct ToBackendTraits<RenderBundleBase, BackendTraits> {
+    using BackendType = typename BackendTraits::RenderBundleType;
+};
+
+template <typename BackendTraits>
 struct ToBackendTraits<QueueBase, BackendTraits> {
     using BackendType = typename BackendTraits::QueueType;
 };

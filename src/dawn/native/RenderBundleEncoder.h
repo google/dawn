@@ -53,6 +53,9 @@ class RenderBundleEncoder final : public RenderEncoderBase {
 
     CommandIterator AcquireCommands();
 
+    RenderPassResourceUsage AcquireRenderPassUsages();
+    IndirectDrawMetadata AcquireIndirectDrawMetadata();
+
   private:
     RenderBundleEncoder(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
     RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, StringView label);
@@ -63,6 +66,9 @@ class RenderBundleEncoder final : public RenderEncoderBase {
     MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
 
     EncodingContext mBundleEncodingContext;
+
+    // Temporarily store for validation and will be moved to RenderBundle afterwards.
+    RenderPassResourceUsage mUsages;
 };
 
 }  // namespace dawn::native

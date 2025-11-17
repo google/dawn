@@ -2206,6 +2206,17 @@ ResultOrError<Ref<RenderBundleEncoder>> DeviceBase::CreateRenderBundleEncoder(
     return RenderBundleEncoder::Create(this, descriptor);
 }
 
+ResultOrError<Ref<RenderBundleBase>> DeviceBase::CreateRenderBundle(
+    RenderBundleEncoder* encoder,
+    const RenderBundleDescriptor* descriptor) {
+    // This is the default behavior for all backends other than WebGPU backend.
+    // This is called by RenderBundleEncoder::Finish.
+    return AcquireRef(new RenderBundleBase(encoder, descriptor, encoder->AcquireAttachmentState(),
+                                           encoder->IsDepthReadOnly(), encoder->IsStencilReadOnly(),
+                                           encoder->AcquireRenderPassUsages(),
+                                           encoder->AcquireIndirectDrawMetadata()));
+}
+
 ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
     const RenderPipelineDescriptor* descriptor,
     bool allowInternalBinding) {

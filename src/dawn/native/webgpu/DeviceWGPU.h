@@ -81,6 +81,9 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,
         const CommandBufferDescriptor* descriptor) override;
+    ResultOrError<Ref<RenderBundleBase>> CreateRenderBundle(
+        RenderBundleEncoderBase* encoder,
+        const RenderBundleDescriptor* descriptor) override;
     Ref<ComputePipelineBase> CreateUninitializedComputePipelineImpl(
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) override;
     ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
