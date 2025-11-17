@@ -66,6 +66,9 @@ class SubgroupMatrix : public Castable<SubgroupMatrix, Type> {
     TypeAndCount Elements(const type::Type* type_if_invalid = nullptr,
                           uint32_t count_if_invalid = 0) const override;
 
+    /// @copydoc Type::Element
+    const type::Type* Element(uint32_t) const override { return subtype_; }
+
     /// @returns the alignment in bytes of the type. This may include tail
     /// padding.
     uint32_t Align() const override;
