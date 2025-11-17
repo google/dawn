@@ -94,6 +94,8 @@ enum class RenderPassCommand : uint32_t {
     PopDebugGroup,
     PushDebugGroup,
     SetImmediates,
+    BeginOcclusionQuery,
+    EndOcclusionQuery,
     End,
 };
 
@@ -519,6 +521,15 @@ DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginComputePass, BEGIN_COMPUTE_PASS_C
 
 DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginRenderPass, BEGIN_RENDER_PASS_CMD_DATA_MEMBER){};
 
+#define RESOLVE_QUERYSET_CMD_DATA_MEMBER(X) \
+    X(ObjectId, querySetId)                 \
+    X(uint32_t, firstQuery)                 \
+    X(uint32_t, queryCount)                 \
+    X(ObjectId, destinationId)              \
+    X(uint64_t, destinationOffset)
+
+DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(ResolveQuerySet, RESOLVE_QUERYSET_CMD_DATA_MEMBER){};
+
 #define SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
 
 DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetComputePipeline,
@@ -543,6 +554,11 @@ DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEMBE
 DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetPipeline, SET_PIPELINE_CMD_DATA_MEMBER){};
 
 DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+
+#define BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER(X) X(uint32_t, queryIndex)
+
+DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(BeginOcclusionQuery,
+                                              BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER){};
 
 #define SET_VERTEX_BUFFER_CMD_DATA_MEMBER(X) \
     X(uint32_t, slot)                        \

@@ -633,6 +633,8 @@ MaybeError GatherReferencedResourcesFromRenderPass(CaptureContext& captureContex
                 usedResources.bindGroups.push_back(cmd->group.Get());
                 break;
             }
+                DAWN_SKIP_COMMAND(BeginOcclusionQuery)
+                DAWN_SKIP_COMMAND(EndOcclusionQuery)
                 DAWN_SKIP_COMMAND(Draw)
                 DAWN_SKIP_COMMAND(DrawIndexed)
                 DAWN_SKIP_COMMAND(DrawIndirect)
@@ -770,6 +772,21 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, data);
                 break;
             }
+            case Command::BeginOcclusionQuery: {
+                const auto& cmd = *commands.NextCommand<BeginOcclusionQueryCmd>();
+                schema::RenderPassCommandBeginOcclusionQueryCmd data{{
+                    .data = {{
+                        .queryIndex = cmd.queryIndex,
+                    }},
+                }};
+                Serialize(captureContext, data);
+                break;
+            }
+            case Command::EndOcclusionQuery: {
+                commands.NextCommand<EndOcclusionQueryCmd>();
+                Serialize(captureContext, schema::RenderPassCommand::EndOcclusionQuery);
+                break;
+            }
             default:
                 DAWN_CHECK(false);
         }
@@ -842,11 +859,10 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     while (commands.NextCommandId(&type)) {
         switch (type) {
             case Command::BeginComputePass: {
-                commands.NextCommand<BeginComputePassCmd>();
-                // TODO(451389800): Handle QuerySet
-                // if (cmd.timestampWrites.querySet != nullptr) {
-                //     DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
-                // }
+                const auto& cmd = *commands.NextCommand<BeginComputePassCmd>();
+                if (cmd.timestampWrites.querySet != nullptr) {
+                    DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                }
                 DAWN_TRY(GatherReferencedResourcesFromComputePass(captureContext, commands,
                                                                   usedResources));
                 break;
@@ -864,10 +880,12 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                 if (cmd.depthStencilAttachment.view != nullptr) {
                     DAWN_TRY(captureContext.AddResource(cmd.depthStencilAttachment.view.Get()));
                 }
-                // TODO(451389800): Handle QuerySet
-                // if (cmd.timestampWrites.querySet != nullptr) {
-                //     DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
-                // }
+                if (cmd.timestampWrites.querySet != nullptr) {
+                    DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                }
+                if (cmd.occlusionQuerySet != nullptr) {
+                    DAWN_TRY(captureContext.AddResource(cmd.occlusionQuerySet.Get()));
+                }
                 DAWN_TRY(GatherReferencedResourcesFromRenderPass(captureContext, commands,
                                                                  usedResources));
                 break;
@@ -1028,16 +1046,27 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                         .colorAttachments = colorAttachments,
                         .depthStencilAttachment =
                             ToSchema(captureContext, cmd.depthStencilAttachment),
-                        // TODO(451389800): Handle QuerySet
-                        // .occlusionQuerySetId =
-                        // captureContext.GetId(cmd.occlusionQuerySet.Get()),
-                        .occlusionQuerySetId = 0,
+                        .occlusionQuerySetId = captureContext.GetId(cmd.occlusionQuerySet.Get()),
                         .timestampWrites = ToSchema(captureContext, cmd.timestampWrites),
                     }},
                 }};
                 Serialize(captureContext, data);
                 // Capture commands inside the compute pass
                 DAWN_TRY(CaptureRenderPass(captureContext, commands));
+                break;
+            }
+            case Command::ResolveQuerySet: {
+                const auto& cmd = *commands.NextCommand<ResolveQuerySetCmd>();
+                schema::EncoderCommandResolveQuerySetCmd data{{
+                    .data = {{
+                        .querySetId = captureContext.GetId(cmd.querySet.Get()),
+                        .firstQuery = cmd.firstQuery,
+                        .queryCount = cmd.queryCount,
+                        .destinationId = captureContext.GetId(cmd.destination.Get()),
+                        .destinationOffset = cmd.destinationOffset,
+                    }},
+                }};
+                Serialize(captureContext, data);
                 break;
             }
             default:

@@ -406,6 +406,22 @@ ResultOrError<wgpu::PipelineLayout> CreatePipelineLayout(const Replay& replay,
     return {pipelineLayout};
 }
 
+ResultOrError<wgpu::QuerySet> CreateQuerySet(const Replay& replay,
+                                             wgpu::Device device,
+                                             ReadHead& readHead,
+                                             const std::string& label) {
+    schema::QuerySet querySetData;
+    DAWN_TRY(Deserialize(readHead, &querySetData));
+
+    wgpu::QuerySetDescriptor desc{
+        .label = wgpu::StringView(label),
+        .type = querySetData.type,
+        .count = querySetData.count,
+    };
+    wgpu::QuerySet querySet = device.CreateQuerySet(&desc);
+    return {querySet};
+}
+
 ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
                                                          wgpu::Device device,
                                                          ReadHead& readHead,
@@ -677,6 +693,16 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                           data.firstInstance);
                 break;
             }
+            case schema::RenderPassCommand::BeginOcclusionQuery: {
+                schema::RenderPassCommandBeginOcclusionQueryCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                pass.BeginOcclusionQuery(data.queryIndex);
+                break;
+            }
+            case schema::RenderPassCommand::EndOcclusionQuery: {
+                pass.EndOcclusionQuery();
+                break;
+            }
             default:
                 return DAWN_INTERNAL_ERROR("Render Pass Command not implemented");
         }
@@ -790,6 +816,15 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
             case schema::EncoderCommand::End: {
                 return {};
             }
+            case schema::EncoderCommand::ResolveQuerySet: {
+                schema::EncoderCommandResolveQuerySetCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                encoder.ResolveQuerySet(replay.GetObjectById<wgpu::QuerySet>(data.querySetId),
+                                        data.firstQuery, data.queryCount,
+                                        replay.GetObjectById<wgpu::Buffer>(data.destinationId),
+                                        data.destinationOffset);
+                break;
+            }
             default:
                 return DAWN_INTERNAL_ERROR("Encoder Command not implemented");
         }
@@ -867,6 +902,13 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             DAWN_TRY_ASSIGN(pipelineLayout,
                             CreatePipelineLayout(*this, device, readHead, resource.label));
             mResources.insert({resource.id, {resource.label, pipelineLayout}});
+            return {};
+        }
+
+        case schema::ObjectType::QuerySet: {
+            wgpu::QuerySet querySet;
+            DAWN_TRY_ASSIGN(querySet, CreateQuerySet(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, querySet}});
             return {};
         }
 

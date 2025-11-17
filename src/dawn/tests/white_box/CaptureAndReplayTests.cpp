@@ -29,6 +29,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "dawn/native/WebGPUBackend.h"
 #include "dawn/replay/Capture.h"
@@ -1502,6 +1503,153 @@ TEST_P(CaptureAndReplayTests, CaptureDepthRenderPass) {
     auto replay = capture.Replay(device);
 
     // We just expect no errors.
+}
+
+constexpr static uint64_t kSentinelValue = ~uint64_t(0u);
+class OcclusionExpectation : public detail::Expectation {
+  public:
+    enum class Result { Zero, NonZero };
+
+    ~OcclusionExpectation() override = default;
+
+    explicit OcclusionExpectation(const std::vector<Result> expected) { mExpected = expected; }
+
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
+        DAWN_ASSERT(size / sizeof(uint64_t) == mExpected.size());
+        const uint64_t* actual = static_cast<const uint64_t*>(data);
+        for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
+            if (actual[i] == kSentinelValue) {
+                return testing::AssertionFailure()
+                       << "Data[" << i << "] was not written (it kept the sentinel value of "
+                       << kSentinelValue << ").\n";
+            }
+            Result expected = mExpected[i];
+            if (expected == Result::Zero && actual[i] != 0) {
+                return testing::AssertionFailure()
+                       << "Expected data[" << i << "] to be zero, actual: " << actual[i] << ".\n";
+            }
+            if (expected == Result::NonZero && actual[i] == 0) {
+                return testing::AssertionFailure()
+                       << "Expected data[" << i << "] to be non-zero.\n";
+            }
+        }
+
+        return testing::AssertionSuccess();
+    }
+
+  private:
+    std::vector<Result> mExpected;
+};
+
+// Capture and replay a pass that uses a QuerySet.
+// We use a point-list vertex shader that we can set the z value by passing a different vertex_index
+// via the firstVertex argument to draw.
+TEST_P(CaptureAndReplayTests, CaptureQuerySetBasic) {
+    const char* shader = R"(
+        @vertex fn vs(@builtin(vertex_index) vNdx: u32) -> @builtin(position) vec4f {
+            return vec4f(0, 0, f32(vNdx) / 10.0, 1);
+        }
+
+        @fragment fn fs() -> @location(0) vec4f {
+            return vec4f(0);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+
+    wgpu::DepthStencilState* depthStencil =
+        desc.EnableDepthStencil(wgpu::TextureFormat::Depth16Unorm);
+    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+    depthStencil->depthCompare = wgpu::CompareFunction::Less;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Unorm,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+    wgpu::Texture depthTexture =
+        CreateTexture("depthTexture", {1}, wgpu::TextureFormat::Depth16Unorm,
+                      wgpu::TextureUsage::RenderAttachment);
+
+    constexpr uint32_t kNumQueries = 4;
+    wgpu::QuerySetDescriptor qsDesc;
+    qsDesc.label = "myQuerySet";
+    qsDesc.count = kNumQueries;
+    qsDesc.type = wgpu::QueryType::Occlusion;
+    wgpu::QuerySet querySet = device.CreateQuerySet(&qsDesc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()},
+                                                        depthTexture.CreateView());
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+        passDescriptor.occlusionQuerySet = querySet;
+
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.SetPipeline(pipeline);
+
+        uint32_t nextIndex = 0;
+        auto DrawPixelAtDepthWithOcclusionTest = [&](uint32_t depth) {
+            pass.BeginOcclusionQuery(nextIndex++);
+            pass.Draw(1, 1, depth, 0);
+            pass.EndOcclusionQuery();
+        };
+
+        DrawPixelAtDepthWithOcclusionTest(5);  // draws at 0.5 (not occluded)
+        DrawPixelAtDepthWithOcclusionTest(7);  // draws at 0.7 (occluded)
+        DrawPixelAtDepthWithOcclusionTest(2);  // draws at 0.2 (not-occluded)
+        DrawPixelAtDepthWithOcclusionTest(5);  // draws at 0.5 (occluded)
+
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    {
+        auto qs = replay->GetObjectByLabel<wgpu::QuerySet>("myQuerySet");
+        ASSERT_TRUE(qs);
+
+        uint64_t size = sizeof(uint64_t) * kNumQueries;
+        auto resolveBuffer =
+            CreateBuffer("", size,
+                         wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc |
+                             wgpu::BufferUsage::CopyDst);
+        std::vector<uint64_t> sentinels(kNumQueries, kSentinelValue);
+        queue.WriteBuffer(resolveBuffer, 0, sentinels.data(), size);
+
+        {
+            wgpu::CommandBuffer commands;
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            encoder.ResolveQuerySet(qs, 0, kNumQueries, resolveBuffer, 0);
+            commands = encoder.Finish();
+            queue.Submit(1, &commands);
+        }
+
+        EXPECT_BUFFER(
+            resolveBuffer, 0, size,
+            new OcclusionExpectation(
+                {OcclusionExpectation::Result::NonZero, OcclusionExpectation::Result::Zero,
+                 OcclusionExpectation::Result::NonZero, OcclusionExpectation::Result::Zero}));
+    }
 }
 
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
