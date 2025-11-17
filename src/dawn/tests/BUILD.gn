@@ -881,6 +881,7 @@ source_set("white_box_tests_sources") {
   if (dawn_enable_d3d11) {
     sources += [
       "white_box/D3D11BufferTests.cpp",
+      "white_box/D3D11MultithreadTests.cpp",
       "white_box/D3D11ShaderCachingTests.cpp",
     ]
   }

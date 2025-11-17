@@ -42,9 +42,25 @@
 
 namespace dawn::native::d3d11 {
 
-ScopedCommandRecordingContext::ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard)
-    : CommandRecordingContext::Guard(std::move(guard)) {
+ScopedCommandRecordingContext::ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard,
+                                                             bool lockD3D11Scope)
+    : mGuard(std::move(guard)),
+      mLockD3D11Scope(lockD3D11Scope && this->Get() && this->Get()->mD3D11Multithread) {
+    if (mLockD3D11Scope) {
+        DAWN_ASSERT(this->Get());
+        DAWN_ASSERT(this->Get()->mD3D11Multithread);
+        this->Get()->mD3D11Multithread->Enter();
+    }
+
     DAWN_ASSERT(Get()->mIsOpen);
+}
+
+ScopedCommandRecordingContext::~ScopedCommandRecordingContext() {
+    if (mLockD3D11Scope) {
+        DAWN_ASSERT(this->Get());
+        DAWN_ASSERT(this->Get()->mD3D11Multithread);
+        this->Get()->mD3D11Multithread->Leave();
+    }
 }
 
 Device* ScopedCommandRecordingContext::GetDevice() const {
@@ -176,9 +192,11 @@ MaybeError ScopedCommandRecordingContext::FlushBuffersForSyncingWithCPU() const 
     return {};
 }
 
+// Since the states are changed in this scope, we need to lock D3D11 to ensure states are set
+// together correctly.
 ScopedSwapStateCommandRecordingContext::ScopedSwapStateCommandRecordingContext(
-    CommandRecordingContextGuard&& guard)
-    : ScopedCommandRecordingContext(std::move(guard)) {
+    CommandRecordingContext::Guard&& guard)
+    : ScopedCommandRecordingContext(std::move(guard), /*lockD3D11Scope*/ true) {
     Get()->mD3D11DeviceContext3->SwapDeviceContextState(Get()->mD3D11DeviceContextState.Get(),
                                                         &mPreviousState);
 }

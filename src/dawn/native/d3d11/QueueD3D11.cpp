@@ -265,12 +265,13 @@ ResultOrError<Ref<d3d::SharedFence>> Queue::GetOrCreateSharedFence() {
     return mSharedFence;
 }
 
-ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode) {
+ScopedCommandRecordingContext Queue::GetScopedPendingCommandContext(SubmitMode submitMode,
+                                                                    bool lockD3D11Scope) {
     return mPendingCommands.Use([&](auto commands) {
         if (submitMode == SubmitMode::Normal) {
             mPendingCommandsNeedSubmit.store(true, std::memory_order_release);
         }
-        return ScopedCommandRecordingContext(std::move(commands));
+        return ScopedCommandRecordingContext(std::move(commands), lockD3D11Scope);
     });
 }
 
@@ -702,7 +703,13 @@ ResultOrError<ExecutionSerial> DelayFlushQueue::WaitForQueueSerialImpl(Execution
             uint64_t(waitSerial), uint64_t(GetLastSubmittedCommandSerial()));
     }
 
-    auto commandContext = GetScopedPendingCommandContext(SubmitMode::Passive);
+    // A coarse-grained D3D11 scope lock is unnecessary here. When D3D11 multithread protection is
+    // enabled, calls to ID3D11DeviceContext::GetData() are already implicitly lock-protected. This
+    // function polls for completion by repeatedly calling GetData(). Holding a scope lock for the
+    // entire polling duration would be inefficient and could lead to deadlocks if the driver
+    // attempts to acquire the same lock internally.
+    auto commandContext =
+        GetScopedPendingCommandContext(SubmitMode::Passive, /*lockD3D11Scope=*/false);
 
     if (mPendingQueries.empty() || waitSerial < mPendingQueries.front().Serial()) {
         // Empty list must mean the serial have already completed.

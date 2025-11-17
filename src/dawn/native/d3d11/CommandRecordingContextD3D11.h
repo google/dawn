@@ -50,10 +50,8 @@ class CommandRecordingContext;
 template <typename Ctx, typename Traits>
 class CommandRecordingContextGuard;
 
-// CommandRecordingContext::Guard is an implementation of Guard that uses two locks.
-// It uses its own lock to synchronize access within Dawn.
-// It also acquires a D3D11 lock if multithread protected mode is enabled.
-// When enabled, it synchronizes access to the D3D11 context external to Dawn.
+// Inherits dawn::detail::Guard and makes constructors public so that ScopedCommandRecordingContext
+// can move it.
 template <typename Ctx, typename Traits>
 class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
   public:
@@ -64,14 +62,6 @@ class CommandRecordingContextGuard : public ::dawn::detail::Guard<Ctx, Traits> {
                                  typename Traits::MutexType& mutex,
                                  Defer* defer = nullptr)
         : Base(ctx, mutex, defer) {
-        if (this->Get() && this->Get()->mD3D11Multithread) {
-            this->Get()->mD3D11Multithread->Enter();
-        }
-    }
-    ~CommandRecordingContextGuard() {
-        if (this->Get() && this->Get()->mD3D11Multithread) {
-            this->Get()->mD3D11Multithread->Leave();
-        }
     }
 
     CommandRecordingContextGuard(const CommandRecordingContextGuard& other) = delete;
@@ -128,9 +118,14 @@ class CommandRecordingContext {
 };
 
 // For using ID3D11DeviceContext methods which don't change device context state.
-class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
+// This class holds two locks.
+// - It uses a Guard lock to synchronize access within Dawn.
+// - It also acquires a D3D11 lock if multithread protected mode is enabled.
+// When enabled, it synchronizes access to the D3D11 context external to Dawn.
+class ScopedCommandRecordingContext : NonCopyable {
   public:
-    explicit ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard);
+    ScopedCommandRecordingContext(CommandRecordingContext::Guard&& guard, bool lockD3D11Scope);
+    ~ScopedCommandRecordingContext();
 
     Device* GetDevice() const;
 
@@ -182,6 +177,19 @@ class ScopedCommandRecordingContext : public CommandRecordingContext::Guard {
     // the end of a command buffer when it is about to be submitted.
     void AddBufferForSyncingWithCPU(GPUUsableBuffer* buffer) const;
     MaybeError FlushBuffersForSyncingWithCPU() const;
+
+    // Allow calling CommandRecordingContext's methods via -> operator.
+    CommandRecordingContext* operator->() const { return Get(); }
+
+  protected:
+    CommandRecordingContext* Get() const {
+        // Guard's Get() is not public, so use its operator* which returns CommandRecordingContext&.
+        return &(*mGuard);
+    }
+
+  private:
+    CommandRecordingContext::Guard mGuard;
+    const bool mLockD3D11Scope = false;
 };
 
 // For using ID3D11DeviceContext directly. It swaps and resets ID3DDeviceContextState of
