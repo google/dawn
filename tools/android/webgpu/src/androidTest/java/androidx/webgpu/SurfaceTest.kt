@@ -31,7 +31,7 @@ class SurfaceTest {
 
   @Before
   fun setup() {
-    surfaceTexture = SurfaceTexture(false)
+    surfaceTexture = SurfaceTexture(0)
     surfaceTexture.setDefaultBufferSize(WIDTH, HEIGHT)
     validSurface = Surface(surfaceTexture)
 
