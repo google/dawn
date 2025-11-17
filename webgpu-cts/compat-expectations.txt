@@ -90,7 +90,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-11-14 10:12:19AM
+# Last rolled: 2025-11-17 08:22:42AM
 
 # conflicts_allowed: true
 # full_wildcard_support: true
@@ -125,7 +125,6 @@ crbug.com/42241110 webgpu:api,validation,error_scope:simple:errorType="out-of-me
 crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
 crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
 crbug.com/407076121 [ linux nvidia ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
-
 
 ################################################################################
 # Temporary Skip Expectations
@@ -657,7 +656,6 @@ crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,bu
 crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="i32" [ Failure ]
 crbug.com/42241359 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-
 
 # image_copy of depth/stencil flaky on Pixel 6
 crbug.com/384676198 [ android-pixel-6 android-t ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:* [ RetryOnFailure ]
@@ -1590,6 +1588,7 @@ crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,c
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="default";srcFlipYInCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="r16float";dstPremultiplied=false [ Failure ]
+crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=false;dstFormat="r8unorm";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rgba8unorm-srgb";dstPremultiplied=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="bgra8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/0000 [ intel-0x4680 linux renderer-skia-vulkan ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
