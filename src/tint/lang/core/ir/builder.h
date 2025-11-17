@@ -1007,8 +1007,12 @@ class Builder {
     template <typename VAL>
     ir::CoreUnary* Unary(UnaryOp op, VAL&& val) {
         auto* value = Value(std::forward<VAL>(val));
-        return Append(
-            ir.CreateInstruction<ir::CoreUnary>(InstructionResult(value->Type()), op, value));
+
+        core::ir::InstructionResult* result = nullptr;
+        if (value) {
+            result = InstructionResult(value->Type());
+        }
+        return Append(ir.CreateInstruction<ir::CoreUnary>(result, op, value));
     }
 
     /// Creates a Complement operation
@@ -1020,22 +1024,11 @@ class Builder {
     }
 
     /// Creates a Negation operation
-    /// @param type the result type of the expression
     /// @param val the value
     /// @returns the operation
     template <typename VAL>
-    ir::CoreUnary* Negation(const core::type::Type* type, VAL&& val) {
-        return Unary(UnaryOp::kNegation, type, std::forward<VAL>(val));
-    }
-
-    /// Creates a Negation operation
-    /// @tparam TYPE the result type of the expression
-    /// @param val the value
-    /// @returns the operation
-    template <typename TYPE, typename VAL>
     ir::CoreUnary* Negation(VAL&& val) {
-        auto* type = ir.Types().Get<TYPE>();
-        return Negation(type, std::forward<VAL>(val));
+        return Unary(UnaryOp::kNegation, std::forward<VAL>(val));
     }
 
     /// Creates a Not operation

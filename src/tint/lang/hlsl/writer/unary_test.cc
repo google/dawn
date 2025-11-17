@@ -77,7 +77,7 @@ TEST_F(HlslWriterTest, UnaryNegation) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* a = b.Var("a", b.Zero<f32>());
-        b.Var("b", b.Negation<f32>(b.Load(a)));
+        b.Var("b", b.Negation(b.Load(a)));
         b.Return(func);
     });
 

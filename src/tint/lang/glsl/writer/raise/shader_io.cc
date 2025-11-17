@@ -201,7 +201,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
             // Negate the gl_Position.y value
             auto* y = builder.Swizzle(ty.f32(), value, {1});
-            auto* new_y = builder.Negation(ty.f32(), y);
+            auto* new_y = builder.Negation(y);
 
             // Recalculate gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
             auto* z = builder.Swizzle(ty.f32(), value, {2});

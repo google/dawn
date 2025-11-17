@@ -391,7 +391,7 @@ struct State {
 
             if (args[1]->Type()->Is<core::type::I32>()) {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, args[0],
-                                 b.Negation(args[1]->Type(), args[1]));
+                                 b.Negation(args[1]));
             } else {
                 // Negating a u32 isn't possible in the IR, so pass a fake GLSL function and
                 // handle in the printer.

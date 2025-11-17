@@ -43,7 +43,7 @@ namespace {
 using IR_EvaluatorTest = ir::IRTestHelper;
 
 TEST_F(IR_EvaluatorTest, InvalidExpression) {
-    auto* inst = b.Negation(mod.Types().u32(), 4_u);
+    auto* inst = b.Negation(4_u);
     b.ir.SetSource(inst, Source{{2, 3}});
     auto res = Eval(b, inst);
     ASSERT_NE(res, Success);
@@ -387,7 +387,7 @@ TEST_F(IR_EvaluatorTest, NonConstBuiltinCallArg) {
 
 TEST_F(IR_EvaluatorTest, NonConstCallInsideUnary) {
     auto* dpdx = b.Call(ty.f32(), core::BuiltinFn::kDpdx, 2.0_f);
-    auto* inst = b.Unary(core::UnaryOp::kNegation, ty.f32(), dpdx);
+    auto* inst = b.Negation(dpdx);
 
     auto res = Eval(b, inst);
     ASSERT_EQ(res, Success) << res.Failure();

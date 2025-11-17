@@ -950,8 +950,7 @@ class Impl {
                         break;
                     }
                     case core::UnaryOp::kNegation: {
-                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
-                        inst = impl.builder_.Negation(ty, val);
+                        inst = impl.builder_.Negation(val);
                         break;
                     }
                     case core::UnaryOp::kNot: {

@@ -96,7 +96,7 @@ TEST_F(GlslWriterTest, Negation) {
     auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_i));
-        auto* op = b.Negation(ty.i32(), l);
+        auto* op = b.Negation(l);
         b.Let("val", op);
         b.Return(func);
     });

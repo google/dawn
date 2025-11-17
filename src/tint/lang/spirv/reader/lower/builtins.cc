@@ -467,7 +467,7 @@ struct State {
             if (val->Type() != neg_ty) {
                 val = b.Bitcast(neg_ty, val)->Result();
             }
-            val = b.Negation(neg_ty, val)->Result();
+            val = b.Negation(val)->Result();
 
             if (neg_ty != res_ty) {
                 val = b.Bitcast(res_ty, val)->Result();
@@ -872,7 +872,7 @@ struct State {
 
         b.InsertBefore(call, [&] {
             if (I->Type()->IsFloatScalar()) {
-                auto* neg = b.Negation(N->Type(), N);
+                auto* neg = b.Negation(N);
                 auto* sel = b.Multiply(I->Type(), I, Nref)->Result();
                 sel = b.LessThan(ty.bool_(), sel, b.Zero(sel->Type()))->Result();
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
@@ -1135,7 +1135,7 @@ struct State {
 
             switch (mat_ty->Columns()) {
                 case 2: {
-                    auto* neg_inv_det = b.Negation(elem_ty, inv_det);
+                    auto* neg_inv_det = b.Negation(inv_det);
 
                     auto* ma = b.Access(elem_ty, arg, 0_u, 0_u);
                     auto* mb = b.Access(elem_ty, arg, 0_u, 1_u);
@@ -1248,7 +1248,7 @@ struct State {
                     // ejfi = e * j - f * i;
                     auto* ejfi = sub_mul2(me, mj, mf, mi);
 
-                    auto* neg_b = b.Negation(elem_ty, mb);
+                    auto* neg_b = b.Negation(mb);
                     // f * kplo - g * jpln + h * jokn
                     auto* r_00 = sub_add_mul3(mf, kplo, mg, jpln, mh, jokn);
                     // -b * kplo + c * jpln - d * jokn
@@ -1258,8 +1258,8 @@ struct State {
                     // -b * glhk + c * flhj - d * fkgj
                     auto* r_03 = add_sub_mul3(neg_b, glhk, mc, flhj, md, fkgj);
 
-                    auto* neg_e = b.Negation(elem_ty, me);
-                    auto* neg_a = b.Negation(elem_ty, ma);
+                    auto* neg_e = b.Negation(me);
+                    auto* neg_a = b.Negation(ma);
                     // -e * kplo + g * iplm - h * iokm
                     auto* r_10 = add_sub_mul3(neg_e, kplo, mg, iplm, mh, iokm);
                     // a * kplo - c * iplm + d * iokm

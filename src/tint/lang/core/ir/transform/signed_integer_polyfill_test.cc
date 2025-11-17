@@ -46,7 +46,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_F32) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
-        auto* result = b.Negation<f32>(value);
+        auto* result = b.Negation(value);
         b.Return(func, result);
     });
 
@@ -72,7 +72,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
-        auto* result = b.Negation<i32>(value);
+        auto* result = b.Negation(value);
         b.Return(func, result);
     });
 
@@ -108,7 +108,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_Negation_I32_Scalar) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
-        auto* result = b.Negation<i32>(value);
+        auto* result = b.Negation(value);
         b.Return(func, result);
     });
 
@@ -134,7 +134,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Negation_I32_Vector) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
-        auto* result = b.Negation<vec4<i32>>(value);
+        auto* result = b.Negation(value);
         b.Return(func, result);
     });
 
@@ -171,7 +171,7 @@ TEST_F(IR_SignedIntegerPolyfillTest, Disabled_Negation_I32_Vector) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({value});
     b.Append(func->Block(), [&] {
-        auto* result = b.Negation<vec4<i32>>(value);
+        auto* result = b.Negation(value);
         b.Return(func, result);
     });
 

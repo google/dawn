@@ -1387,14 +1387,22 @@ TEST_F(IR_ValidatorTest, Unary_Value_Nullptr) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    sb.Negation(ty.i32(), nullptr);
+    sb.Negation(nullptr);
     sb.Return(f);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:23 error: unary: operand is undefined
-    %2:i32 = negation undef
-                      ^^^^^
+    EXPECT_THAT(res.Failure().reason, testing::HasSubstr(R"(:3:5 error: unary: result is undefined
+    undef = negation undef
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:22 error: unary: operand is undefined
+    undef = negation undef
+                     ^^^^^
 )")) << res.Failure();
 }
 
@@ -1440,7 +1448,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingOperands) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(ty.f32(), 2_f);
+    auto* u = b.Negation(2_f);
     u->ClearOperands();
     sb.Append(u);
     sb.Return(f);
@@ -1458,7 +1466,7 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
-    auto* u = b.Negation(ty.f32(), 2_f);
+    auto* u = b.Negation(2_f);
     u->ClearResults();
     sb.Append(u);
     sb.Return(f);
@@ -1473,10 +1481,9 @@ TEST_F(IR_ValidatorTest, Unary_MissingResults) {
 }
 
 TEST_F(IR_ValidatorTest, Unary_Valid) {
-    auto* i32 = ty.i32();
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Negation(i32, b.Constant(1_i));
+        b.Negation(b.Constant(1_i));
         b.Return(func);
     });
 
@@ -1485,11 +1492,10 @@ TEST_F(IR_ValidatorTest, Unary_Valid) {
 }
 
 TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
-    auto* i32 = ty.i32();
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         // Manually create a negation with an extra operand.
-        auto* neg = b.Negation(i32, b.Constant(1_i));
+        auto* neg = b.Negation(b.Constant(1_i));
         neg->PushOperand(b.Constant(2_i));
         b.Return(func);
     });
@@ -1504,13 +1510,12 @@ TEST_F(IR_ValidatorTest, Unary_TooManyOperands) {
 }
 
 TEST_F(IR_ValidatorTest, Unary_OperandWrongType) {
-    auto* i32 = ty.i32();
     auto* other_func = b.Function("other", ty.void_());
     b.Append(other_func->Block(), [&] { b.Return(other_func); });
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Negation(i32, other_func);
+        b.Negation(other_func);
         b.Return(func);
     });
 

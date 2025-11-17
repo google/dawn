@@ -1023,7 +1023,7 @@ TEST_F(IRToProgramTest, UnaryOp_Negate) {
     auto* i = b.FunctionParam("i", ty.i32());
     fn->SetParams({i});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.Negation(ty.i32(), i)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.Negation(i)); });
 
     EXPECT_WGSL(R"(
 fn f(i : i32) -> i32 {

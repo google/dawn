@@ -425,10 +425,9 @@ struct State {
     /// Polyfill a `abs()` builtin call for signed integers.
     /// @param call the builtin call instruction
     void AbsSignedInt(ir::CoreBuiltinCall* call) {
-        auto* type = call->Result()->Type();
         auto* e = call->Args()[0];
         b.InsertBefore(call, [&] {
-            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kMax, e, b.Negation(type, e));
+            b.CallWithResult(call->DetachResult(), core::BuiltinFn::kMax, e, b.Negation(e));
         });
         call->Destroy();
     }
