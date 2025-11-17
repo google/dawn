@@ -59,6 +59,46 @@ struct IOAttributes {
     bool invariant = false;
 };
 
+/// Used for referencing/tagging a specific IOAttribute.
+/// IOAttributes above is intentionally not a key-value map (e.g. HashSet) using this enum, since it
+/// has heterogeneous value types and would also cease to be a POD.
+enum class IOAttributeKind : uint8_t {
+    kLocation,
+    kBlendSrc,
+    kColor,
+    kBuiltin,
+    kDepthMode,
+    kInterpolation,
+    kInputAttachmentIndex,
+    kBindingPoint,
+    kInvariant,
+};
+
+/// @returns a human-readable string representation of @p kind
+inline std::string_view ToString(const IOAttributeKind kind) {
+    switch (kind) {
+        case IOAttributeKind::kLocation:
+            return "location";
+        case IOAttributeKind::kBlendSrc:
+            return "blend src";
+        case IOAttributeKind::kColor:
+            return "color";
+        case IOAttributeKind::kBuiltin:
+            return "builtin";
+        case IOAttributeKind::kDepthMode:
+            return "depth mode";
+        case IOAttributeKind::kInterpolation:
+            return "interpolation";
+        case IOAttributeKind::kInputAttachmentIndex:
+            return "input attachment index";
+        case IOAttributeKind::kBindingPoint:
+            return "binding point";
+        case IOAttributeKind::kInvariant:
+            return "invariant";
+    }
+    TINT_ICE() << "Unknown kind passed to ToString(IOAttributeKind)";
+}
+
 }  // namespace tint::core
 
 #endif  // SRC_TINT_LANG_CORE_IO_ATTRIBUTES_H_

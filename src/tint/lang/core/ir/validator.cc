@@ -213,7 +213,7 @@ void WalkTypeAndMembers(CTX& ctx,
                         const core::type::Type* type,
                         const IOAttributes& attr,
                         IMPL&& impl) {
-    impl(type, attr, ctx);
+    impl(ctx, type, attr);
     if (auto* str = type->As<core::type::Struct>()) {
         for (auto* member : str->Members()) {
             WalkTypeAndMembers(ctx, member->Type(), member->Attributes(), impl);
@@ -224,7 +224,7 @@ void WalkTypeAndMembers(CTX& ctx,
 /// The IO direction of an operation.
 enum class IODirection : uint8_t { kInput, kOutput };
 
-/// @returns a human-reabable string for an IODirection
+/// @returns a human-readable string for an IODirection
 std::string_view ToString(IODirection value) {
     switch (value) {
         case IODirection::kInput:
@@ -573,8 +573,51 @@ const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Capabilities
     }
 }
 
+/// IOAttributeChecker is the interface used to check that a usage of an IO attribute
+/// meets the spec rules for a given context.
+struct IOAttributeChecker {
+    IOAttributeKind kind;
+    /// What combination of stage and IO direction is this attribute legal for.
+    EnumSet<IOAttributeUsage> valid_usages;
+
+    /// Implements the validation logic for a specific attribute.
+    using CheckFn = Result<SuccessType, std::string>(const core::type::Type* ty,
+                                                     const IOAttributes& attr,
+                                                     const Capabilities& cap);
+
+    /// The validation function.
+    CheckFn* const check;
+};
+
+constexpr IOAttributeChecker kInvariantChecker{
+    .kind = IOAttributeKind::kInvariant,
+    .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
+                                              IOAttributeUsage::kFragmentInputUsage},
+    .check = [](const core::type::Type*,
+                const IOAttributes& attr,
+                const Capabilities&) -> Result<SuccessType, std::string> {
+        if (attr.builtin != BuiltinValue::kPosition) {
+            return {"invariant can only decorate a value if it is also decorated with position"};
+        }
+        return Success;
+    },
+};
+
+/// @returns all the appropriate IOAttributeCheckers for @p attr
+/// Note: The ordering of the vector is the order that the checkers will be run in, so for
+/// location/blend_src they need to be sequenced correctly to initialize their shared context
+Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr) {
+    Vector<const IOAttributeChecker*, 4> checkers{};
+    if (attr.invariant) {
+        checkers.Push(&kInvariantChecker);
+    }
+    // TODO(455376684): Implement all the other checkers
+    return checkers;
+}
+
 /// Annotations that can be associated with a value that are used for shader IO,
 /// e.g. binding_points, @location, being in workgroup address space, etc.
+/// These are a subset of IOAttributes.
 enum class IOAnnotation : uint8_t {
     /// @group + @binding
     kBindingPoint,
@@ -923,7 +966,7 @@ class Validator {
 
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
-    void CheckVertexEntryPoint(const Function* ep);
+    void CheckPositionPresentForVertexOutput(const Function* ep);
 
     /// Validates builtins on function params.
     /// @param param the function parameter
@@ -960,6 +1003,19 @@ class Validator {
                          const core::type::Type* ty,
                          const std::string& err);
 
+    /// Validates the spec rules for IO attribute usage
+    /// @param msg_anchor the object to anchor the error message to
+    /// @param ty the data type being decorated by the attributes
+    /// @param attr the attributes to test
+    /// @param stage the shader stage the builtin is being used
+    /// @param dir is value being used as an input or an output
+    template <typename MSG_ANCHOR>
+    void ValidateIOAttributes(const MSG_ANCHOR* msg_anchor,
+                              const core::type::Type* ty,
+                              const IOAttributes& attr,
+                              Function::PipelineStage stage,
+                              IODirection dir);
+
     /// Validates color attributes on function params.
     /// @param param the function parameter
     /// @param attr the IO attributes
@@ -987,10 +1043,6 @@ class Validator {
     void CheckNotBool(const MSG_ANCHOR* msg_anchor,
                       const core::type::Type* ty,
                       const std::string& err);
-
-    /// Checks spec rules for invariant attributes
-    template <typename MSG_ANCHOR>
-    void CheckInvariant(const MSG_ANCHOR* msg_anchor, IOAttributes attr);
 
     /// Validates the given instruction
     /// @param inst the instruction to validate
@@ -2361,19 +2413,19 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
+        ValidateIOAttributes(param, param->Type(), param->Attributes(), func->Stage(),
+                             IODirection::kInput);
+
         WalkTypeAndMembers(
             param, param->Type(), param->Attributes(),
-            [this](const core::type::Type* t, const IOAttributes& a, const FunctionParam* p) {
+            [this](const FunctionParam* p, const core::type::Type* t, const IOAttributes& a) {
                 CheckBuiltinFunctionParam(p, a, t, "");
                 CheckColorFunctionParam(p, a, "");
-                if (!t->Is<core::type::Struct>()) {
-                    CheckInvariant(p, a);
-                }
             });
 
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
-                               [this](const auto* t, const auto& a, const auto* p) {
+                               [this](const auto* p, const auto* t, const auto& a) {
                                    CheckFrontFacingIfBool(
                                        p, a, t,
                                        "fragment entry point params can only be a bool if "
@@ -2382,7 +2434,7 @@ void Validator::CheckFunction(const Function* func) {
         } else if (func->IsEntryPoint()) {
             WalkTypeAndMembers(
                 param, param->Type(), param->Attributes(),
-                [this](const auto* t, const auto&, const auto* p) {
+                [this](const auto* p, const auto* t, const auto&) {
                     CheckNotBool(p, t,
                                  "entry point params can only be a bool for fragment shaders");
                 });
@@ -2441,12 +2493,12 @@ void Validator::CheckFunction(const Function* func) {
         func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
         Capabilities{Capability::kAllowRefTypes});
 
+    ValidateIOAttributes(func, func->ReturnType(), func->ReturnAttributes(), func->Stage(),
+                         IODirection::kOutput);
+
     WalkTypeAndMembers(func, func->ReturnType(), func->ReturnAttributes(),
-                       [this](const core::type::Type* t, const IOAttributes& a, const Function* f) {
+                       [this](const Function* f, const core::type::Type* t, const IOAttributes& a) {
                            CheckBuiltinFunctionReturn(f, a, t, "");
-                           if (!t->Is<core::type::Struct>()) {
-                               CheckInvariant(f, a);
-                           }
                        });
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -2480,7 +2532,7 @@ void Validator::CheckFunction(const Function* func) {
         CheckEntryPointLocationsAndBlendSrc(func);
         WalkTypeAndMembers(
             func, func->ReturnType(), func->ReturnAttributes(),
-            [this](const core::type::Type* t, const IOAttributes&, const Function* f) {
+            [this](const Function* f, const core::type::Type* t, const IOAttributes&) {
                 CheckNotBool(f, t, "entry point returns can not be 'bool'");
             });
 
@@ -2503,22 +2555,18 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
-            WalkTypeAndMembers(
-                var, ty, attr,
-                [this](const core::type::Type* t, const IOAttributes& a, const Var* v) {
-                    if (!t->Is<core::type::Struct>()) {
-                        CheckInvariant(v, a);
-                    }
-                });
 
             if (mv->AddressSpace() != AddressSpace::kIn &&
                 mv->AddressSpace() != AddressSpace::kOut) {
                 continue;
             }
+            ValidateIOAttributes(var, ty, attr, func->Stage(),
+                                 mv->AddressSpace() == AddressSpace::kIn ? IODirection::kInput
+                                                                         : IODirection::kOutput);
 
             if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
                 WalkTypeAndMembers(
-                    var, ty, attr, [this](const auto* t, const auto& a, const auto* v) {
+                    var, ty, attr, [this](const auto* v, const auto* t, const auto& a) {
                         CheckFrontFacingIfBool(
                             v, a, t,
                             "input address space values referenced by fragment shaders "
@@ -2527,7 +2575,7 @@ void Validator::CheckFunction(const Function* func) {
                     });
             } else {
                 WalkTypeAndMembers(
-                    var, ty, attr, [this](const auto* t, const auto&, const auto* v) {
+                    var, ty, attr, [this](const auto* v, const auto* t, const auto&) {
                         CheckNotBool(
                             v, t,
                             "IO address space values referenced by shader entry points can "
@@ -2539,7 +2587,7 @@ void Validator::CheckFunction(const Function* func) {
     }
 
     if (func->IsVertex()) {
-        CheckVertexEntryPoint(func);
+        CheckPositionPresentForVertexOutput(func);
     }
 
     QueueBlock(func->Block());
@@ -2577,6 +2625,46 @@ void Validator::ValidateBuiltIn(const MSG_ANCHOR* msg_anchor,
 }
 
 template <typename MSG_ANCHOR>
+void Validator::ValidateIOAttributes(const MSG_ANCHOR* msg_anchor,
+                                     const core::type::Type* ty,
+                                     const IOAttributes& attr,
+                                     const Function::PipelineStage stage,
+                                     const IODirection dir) {
+    WalkTypeAndMembers(
+        *this, ty, attr,
+        [stage, dir, msg_anchor](Validator& v, const core::type::Type* t, const IOAttributes& a) {
+            const auto checkers = IOAttributeCheckersFor(a);
+            if (checkers.IsEmpty()) {
+                return;
+            }
+
+            if (stage != Function::PipelineStage::kUndefined) {
+                const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
+                for (const auto* checker : checkers) {
+                    if (!checker->valid_usages.Contains(usage)) {
+                        std::stringstream msg;
+                        msg << ToString(checker->kind) << " IO attributes cannot be declared for a "
+                            << ToString(usage) << ". ";
+                        if (checker->valid_usages.Size() == 1) {
+                            const auto u = *checker->valid_usages.begin();
+                            msg << "They can only be used for a " << ToString(u) << ".";
+                        } else {
+                            msg << "They can only be used for " << ToString(checker->valid_usages);
+                        }
+                        v.AddError(msg_anchor) << msg.str();
+                    }
+                }
+            }
+
+            for (const auto& checker : checkers) {
+                if (auto res = checker->check(t, a, v.capabilities_); res != Success) {
+                    v.AddError(msg_anchor) << res.Failure();
+                }
+            }
+        });
+}
+
+template <typename MSG_ANCHOR>
 void Validator::CheckFrontFacingIfBool(const MSG_ANCHOR* msg_anchor,
                                        const IOAttributes& attr,
                                        const core::type::Type* ty,
@@ -2592,14 +2680,6 @@ void Validator::CheckNotBool(const MSG_ANCHOR* msg_anchor,
                              const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
         AddError(msg_anchor) << err;
-    }
-}
-
-template <typename MSG_ANCHOR>
-void Validator::CheckInvariant(const MSG_ANCHOR* msg_anchor, IOAttributes attr) {
-    if (attr.invariant && attr.builtin != BuiltinValue::kPosition) {
-        AddError(msg_anchor)
-            << "invariant can only decorate a value if it is also decorated with position";
     }
 }
 
@@ -2786,33 +2866,23 @@ void Validator::CheckWorkgroupSize(const Function* func) {
     }
 }
 
-void Validator::CheckVertexEntryPoint(const Function* ep) {
-    bool contains_position = IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType());
+void Validator::CheckPositionPresentForVertexOutput(const Function* ep) {
+    if (IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType())) {
+        return;
+    }
 
-    for (auto var : referenced_module_vars_.TransitiveReferences(ep)) {
+    for (const auto& var : referenced_module_vars_.TransitiveReferences(ep)) {
         const auto* ty = var->Result()->Type()->UnwrapPtrOrRef();
-        const auto attr = var->Attributes();
         if (!ty) {
             continue;
         }
 
-        if (!contains_position) {
-            contains_position = IsPositionPresent(attr, ty);
+        const auto attr = var->Attributes();
+        if (IsPositionPresent(attr, ty)) {
+            return;
         }
-
-        WalkTypeAndMembers(var, ty, attr,
-                           [this](const core::type::Type* t, const IOAttributes& a, const Var* v) {
-                               if (!t->Is<core::type::Struct>()) {
-                                   CheckInvariant(v, a);
-                               }
-                           });
-        // Builtin rules are not checked on module-scope variables, because they are often generated
-        // as part of the backend transforms, and have different rules for correctness.
     }
-
-    if (DAWN_UNLIKELY(!contains_position)) {
-        AddError(ep) << "position must be declared for vertex entry point output";
-    }
+    AddError(ep) << "position must be declared for vertex entry point output";
 }
 
 void Validator::ProcessTasks() {
@@ -3251,7 +3321,7 @@ void Validator::CheckLocation(Hashmap<uint32_t, const CastableBase*, 4>& locatio
 
     WalkTypeAndMembers(
         ctx, type, attr,
-        [](const core::type::Type* ty, const IOAttributes& attribute, WalkContext& context) {
+        [](WalkContext& context, const core::type::Type* ty, const IOAttributes& attribute) {
             if (ty->Is<core::type::Struct>()) {
                 return;
             }
