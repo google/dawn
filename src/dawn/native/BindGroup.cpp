@@ -903,6 +903,21 @@ void BindGroupBase::APIDestroy() {
     }
 }
 
+wgpu::Status BindGroupBase::APIUpdate(const BindGroupEntry* entry) {
+    // TODO(435317394): Implement bindless bindgroup updates.
+    DAWN_UNREACHABLE();
+}
+
+uint32_t BindGroupBase::APIInsertBinding(const BindGroupEntryContents* contents) {
+    // TODO(435317394): Implement bindless bindgroup updates.
+    DAWN_UNREACHABLE();
+}
+
+void BindGroupBase::APIRemoveBinding(uint32_t binding) {
+    // TODO(435317394): Implement bindless bindgroup updates.
+    DAWN_UNREACHABLE();
+}
+
 BindGroupLayoutBase* BindGroupBase::GetFrontendLayout() {
     DAWN_ASSERT(!IsError());
     return mLayout.Get();

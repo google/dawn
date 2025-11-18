@@ -93,6 +93,8 @@ dawn_component("wire") {
     "client/Adapter.cpp",
     "client/Adapter.h",
     "client/ApiObjects.h",
+    "client/BindGroup.cpp",
+    "client/BindGroup.h",
     "client/Buffer.cpp",
     "client/Buffer.h",
     "client/Client.cpp",

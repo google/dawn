@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,25 +25,31 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
-#define SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
-
-#include "dawn/wire/client/ObjectBase.h"
-
-#include "dawn/wire/client/Adapter.h"
 #include "dawn/wire/client/BindGroup.h"
-#include "dawn/wire/client/Buffer.h"
-#include "dawn/wire/client/ComputePassEncoder.h"
-#include "dawn/wire/client/Device.h"
-#include "dawn/wire/client/Instance.h"
-#include "dawn/wire/client/QuerySet.h"
-#include "dawn/wire/client/Queue.h"
-#include "dawn/wire/client/RenderBundleEncoder.h"
-#include "dawn/wire/client/RenderPassEncoder.h"
-#include "dawn/wire/client/ShaderModule.h"
-#include "dawn/wire/client/Surface.h"
-#include "dawn/wire/client/Texture.h"
 
-#include "dawn/wire/client/ApiObjects_autogen.h"
+namespace dawn::wire::client {
 
-#endif  // SRC_DAWN_WIRE_CLIENT_APIOBJECTS_H_
+BindGroup::BindGroup(const ObjectBaseParams& params) : ObjectBase(params) {}
+
+BindGroup::~BindGroup() = default;
+
+ObjectType BindGroup::GetObjectType() const {
+    return ObjectType::BindGroup;
+}
+
+WGPUStatus BindGroup::APIUpdate(const WGPUBindGroupEntry* entry) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_UNREACHABLE();
+}
+
+uint32_t BindGroup::APIInsertBinding(const WGPUBindGroupEntryContents* contents) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_UNREACHABLE();
+}
+
+void BindGroup::APIRemoveBinding(uint32_t binding) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_UNREACHABLE();
+}
+
+}  // namespace dawn::wire::client

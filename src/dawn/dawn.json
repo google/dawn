@@ -328,6 +328,30 @@
                 "tags": ["dawn"]
             },
             {
+                "name": "update",
+                "tags": ["dawn"],
+                "returns": "status",
+                "args": [
+                    {"name": "entry", "type": "bind group entry", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "insert binding",
+                "tags": ["dawn"],
+                "returns": "uint32_t",
+                "args": [
+                    {"name": "contents", "type": "bind group entry contents", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "remove binding",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "binding", "type": "uint32_t"}
+                ]
+            },
+
+            {
                 "name": "set label",
                 "args": [
                     {"name": "label", "type": "string view"}
@@ -340,6 +364,18 @@
         "extensible": "in",
         "members": [
             {"name": "binding", "type": "uint32_t"},
+            {"name": "buffer", "type": "buffer", "optional": true},
+            {"name": "offset", "type": "uint64_t", "default": "0"},
+            {"name": "size", "type": "uint64_t", "default": "whole size"},
+            {"name": "sampler", "type": "sampler", "optional": true},
+            {"name": "texture view", "type": "texture view", "optional": true}
+        ]
+    },
+    "bind group entry contents": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn"],
+        "members": [
             {"name": "buffer", "type": "buffer", "optional": true},
             {"name": "offset", "type": "uint64_t", "default": "0"},
             {"name": "size", "type": "uint64_t", "default": "whole size"},

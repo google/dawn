@@ -257,6 +257,8 @@
             "AdapterGetLimits",
             "AdapterHasFeature",
             "AdapterRequestDevice",
+            "BindGroupUpdate",
+            "BindGroupInsertBinding",
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
@@ -318,6 +320,7 @@
         ],
         "client_special_objects": [
             "Adapter",
+            "BindGroup",
             "Buffer",
             "Device",
             "Instance",
