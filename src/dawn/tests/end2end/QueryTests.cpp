@@ -860,6 +860,10 @@ TEST_P(TimestampQueryTests, QuerySetCreation) {
 
 // Test calling timestamp query from command encoder
 TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
+    // TODO(crbug.com/458607667): Flaky on WARP, but seemingly only on Debug
+    // builds built with MSVC.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsWARP() && IsWebGPUOnWebGPU());
+
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
