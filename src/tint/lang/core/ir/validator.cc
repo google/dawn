@@ -643,6 +643,12 @@ constexpr IOAttributeChecker kBuiltinChecker{
     },
 };
 
+constexpr IOAttributeChecker kColorChecker{
+    .kind = IOAttributeKind::kColor,
+    .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
+    .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
+        -> Result<SuccessType, std::string> { return Success; }};
+
 /// @returns all the appropriate IOAttributeCheckers for @p attr
 /// Note: The ordering of the vector is the order that the checkers will be run in, so for
 /// location/blend_src they need to be sequenced correctly to initialize their shared context
@@ -654,6 +660,9 @@ Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& 
     }
     if (!skip_builtin && attr.builtin.has_value()) {
         checkers.Push(&kBuiltinChecker);
+    }
+    if (attr.color.has_value()) {
+        checkers.Push(&kColorChecker);
     }
     // TODO(455376684): Implement all the other checkers
     return checkers;
@@ -1023,14 +1032,6 @@ class Validator {
                               const IOAttributes& attr,
                               Function::PipelineStage stage,
                               IODirection dir);
-
-    /// Validates color attributes on function params.
-    /// @param param the function parameter
-    /// @param attr the IO attributes
-    /// @param err an optional prefix for the error message
-    void CheckColorFunctionParam(const FunctionParam* param,
-                                 const IOAttributes& attr,
-                                 const std::string& err);
 
     /// Validates that a type is a bool only if it is decorated with @builtin(front_facing).
     /// @param msg_anchor the message anchor
@@ -2424,10 +2425,6 @@ void Validator::CheckFunction(const Function* func) {
         ValidateIOAttributes(param, param->Type(), param->Attributes(), func->Stage(),
                              IODirection::kInput);
 
-        WalkTypeAndMembers(param, param->Type(), param->Attributes(),
-                           [this](const FunctionParam* p, const core::type::Type*,
-                                  const IOAttributes& a) { CheckColorFunctionParam(p, a, ""); });
-
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
                                [this](const auto* p, const auto* t, const auto& a) {
@@ -2653,19 +2650,6 @@ void Validator::CheckNotBool(const MSG_ANCHOR* msg_anchor,
                              const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
         AddError(msg_anchor) << err;
-    }
-}
-
-void Validator::CheckColorFunctionParam(const FunctionParam* param,
-                                        const IOAttributes& attr,
-                                        const std::string& err) {
-    if (!attr.color.has_value()) {
-        return;
-    }
-
-    auto* func = param->Function();
-    if (func->IsEntryPoint() && func->Stage() != Function::PipelineStage::kFragment) {
-        AddError(param) << err << "@color can only be used on fragment shader inputs";
     }
 }
 

@@ -1476,9 +1476,10 @@ TEST_F(IR_ValidatorTest, Function_Param_Color_NonFragment) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(
-                    R"(:1:54 error: @color can only be used on fragment shader inputs
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:54 error: color IO attributes cannot be declared for a compute shader input. They can only be used for a fragment shader input.
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:vec4<f32> [@color(0)]):void {
                                                      ^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
@@ -1501,9 +1502,10 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Color_NonFragment) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason,
-                testing::HasSubstr(
-                    R"(:5:54 error: @color can only be used on fragment shader inputs
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:54 error: color IO attributes cannot be declared for a compute shader input. They can only be used for a fragment shader input.
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
                                                      ^^^^^^^^^^^^^^^^^^
 )")) << res.Failure();
