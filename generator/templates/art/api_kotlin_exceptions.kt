@@ -47,8 +47,8 @@ public class DawnException(message: String) : Exception(message)
 /**
  * Exception thrown when a [{{kotlin_name(ns.device)}}] is lost and can no longer be used.
  *
- * @property device The [{{kotlin_name(ns.device)}}] that was lost.
- * @property reason The reason code indicating why the device was lost.
+ * @param device The [{{kotlin_name(ns.device)}}] that was lost.
+ * @param reason The reason code indicating why the device was lost.
  * @param message A human-readable message describing the device loss.
  */
 public class DeviceLostException(
