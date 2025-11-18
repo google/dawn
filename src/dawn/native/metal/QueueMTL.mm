@@ -91,7 +91,7 @@ MaybeError Queue::Initialize() {
             // logging callback.
             NSError* error = nil;
             MTLLogStateDescriptor* logStateDesc = [MTLLogStateDescriptor new];
-            logStateDesc.bufferSize = 4096;
+            logStateDesc.bufferSize = 65536;
             logStateDesc.level = MTLLogLevelInfo;
             id<MTLLogState> mtlLogState = [mtlDevice newLogStateWithDescriptor:logStateDesc
                                                                          error:&error];
