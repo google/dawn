@@ -1028,6 +1028,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
         metadata->usesFragDepth = entryPoint.frag_depth_used;
         metadata->usesFragPosition = entryPoint.frag_position_used;
+        metadata->usesFineDerivativeBuiltin = entryPoint.fine_derivative_builtin_used;
 
         metadata->totalInterStageShaderVariables = totalInterStageShaderVariables;
         if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {

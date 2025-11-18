@@ -215,6 +215,44 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithNonZeroDepthBiasClamp) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&testDescriptor));
 }
 
+TEST_F(CompatValidationTest, CanNotCreatePipelineWithFineDerivatives) {
+    std::string builtins[] = {"dpdx", "dpdxFine", "dpdyFine", "fwidthFine"};
+    for (auto builtin : builtins) {
+        auto wgsl = absl::StrFormat(
+            R"(
+                struct VOut {
+                  @builtin(position) pos: vec4f,
+                  @location(0) i: vec4f,
+                };
+
+                @vertex fn vs() -> VOut {
+                    return VOut(vec4f(0), vec4f(0));
+                }
+
+                @fragment fn fs(v: VOut) -> @location(0) vec4f {
+                    _ = %s(v.i);
+                    return vec4f(0);
+                }
+            )",
+            builtin);
+
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, wgsl);
+
+        utils::ComboRenderPipelineDescriptor testDescriptor;
+        testDescriptor.layout = {};
+        testDescriptor.vertex.module = module;
+        testDescriptor.cFragment.module = module;
+        testDescriptor.cFragment.targetCount = 1;
+        testDescriptor.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        if (builtin == "dpdx") {
+            device.CreateRenderPipeline(&testDescriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&testDescriptor));
+        }
+    }
+}
+
 TEST_F(CompatValidationTest, CanNotCreatePipelineWithTextureLoadOfDepthTexture) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @group(0) @binding(0) var<storage, read_write> dstBuf : array<vec4f>;

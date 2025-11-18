@@ -143,6 +143,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         "stage (%s), entry point \"%s\"",
         metadata.stage, entryPoint.name);
 
+    DAWN_INVALID_IF(device->IsCompatibilityMode() && metadata.usesFineDerivativeBuiltin,
+                    "fine derivative builtins (dpdxFine, dpdyFine, fwidthFine) can not be used in "
+                    "compatibility mode in stage (%s), entry point \"%s\"",
+                    metadata.stage, entryPoint.name);
+
     const CombinedLimits& limits = device->GetLimits();
     uint32_t maxCombos =
         std::min(limits.v1.maxSampledTexturesPerShaderStage, limits.v1.maxSamplersPerShaderStage);

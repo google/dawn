@@ -331,6 +331,7 @@ using OverridesMap = absl::flat_hash_map<std::string, Override>;
     X(bool, usesTextureLoadWithDepthTexture)                                                      \
     X(bool, usesDepthTextureWithNonComparisonSampler)                                             \
     X(bool, usesSubgroupMatrix)                                                                   \
+    X(bool, usesFineDerivativeBuiltin)                                                            \
     /* Immediate Data block byte size */                                                          \
     X(uint32_t, immediateDataRangeByteSize)
 DAWN_SERIALIZABLE(struct, EntryPointMetadata, ENTRY_POINT_METADATA_MEMBER) {
