@@ -3,6 +3,7 @@ package androidx.webgpu
 import androidx.test.filters.SmallTest
 import androidx.webgpu.helper.WebGpu
 import androidx.webgpu.helper.createWebGpu
+import java.nio.ByteOrder
 import java.util.concurrent.Executor
 import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
@@ -217,5 +218,187 @@ class QuerySetTest {
     assertThrows(ValidationException::class.java) {
       runBlocking { device.popErrorScope() }
     }
+  }
+
+  /**
+   * Helper function to execute a render pass, resolve an occlusion query,
+   * and read the result back from the GPU.
+   *
+   * @param drawAction A lambda to execute drawing commands within the render pass.
+   * @param expectedResult The expected long value (sample count) after resolving the query.
+   */
+  private fun executeQueryResolveTest(
+    drawAction: (GPURenderPassEncoder) -> Unit,
+    expectedResult: Long,
+  ) {
+    // Create a 1x1 render target texture for the render pass.
+    val renderTarget = device.createTexture(
+      TextureDescriptor(
+        size = Extent3D(1, 1, 1),
+        format = TextureFormat.RGBA8Unorm,
+        usage = TextureUsage.RenderAttachment or TextureUsage.CopySrc
+      )
+    )
+    val renderTargetView = renderTarget.createView()
+
+    // Create a depth texture, required for the depth/stencil part of the render pass.
+    val depthTexture = device.createTexture(
+      TextureDescriptor(
+        size = Extent3D(1, 1, 1),
+        format = TextureFormat.Depth24Plus,
+        usage = TextureUsage.RenderAttachment
+      )
+    )
+    val depthView = depthTexture.createView()
+
+    val queryCount = 1
+    // Create the occlusion QuerySet used in the render pass.
+    val querySet = device.createQuerySet(
+      QuerySetDescriptor(type = QueryType.Occlusion, count = queryCount)
+    )
+
+    val resolveBufferSize = queryCount * Long.SIZE_BYTES.toLong()
+    // Create a buffer for resolveQuerySet to write the 64-bit query result into.
+    val resolveBuffer = device.createBuffer(
+      BufferDescriptor(
+        size = resolveBufferSize,
+        usage = BufferUsage.QueryResolve or BufferUsage.CopySrc
+      )
+    )
+    // Create a staging buffer for CPU readback (CopyDst for GPU copy, MapRead for CPU mapping).
+    val readbackBuffer = device.createBuffer(
+      BufferDescriptor(
+        size = resolveBufferSize,
+        usage = BufferUsage.CopyDst or BufferUsage.MapRead
+      )
+    )
+
+    // Simple vertex shader to draw a full-screen triangle.
+    val vertexShaderCode = """
+        @vertex
+        fn main(@builtin(vertex_index) VertexIndex : u32)
+             -> @builtin(position) vec4<f32> {
+            var positions = array<vec2<f32>, 3>(
+                vec2<f32>(0.0, 0.5),
+                vec2<f32>(-0.5, -0.5),
+                vec2<f32>(0.5, -0.5)
+            );
+            let pos = positions[VertexIndex];
+            return vec4<f32>(pos, 0.0, 1.0);
+        }
+    """.trimIndent()
+
+    // Simple fragment shader to output red color.
+    val fragmentShaderCode = """
+        @fragment
+        fn main() -> @location(0) vec4<f32> {
+            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        }
+    """.trimIndent()
+
+    val shaderModuleVert = device.createShaderModule(
+      ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(vertexShaderCode))
+    )
+    val shaderModuleFrag = device.createShaderModule(
+      ShaderModuleDescriptor(shaderSourceWGSL = ShaderSourceWGSL(fragmentShaderCode))
+    )
+
+    // Create a basic rendering pipeline.
+    val pipeline = device.createRenderPipeline(
+      RenderPipelineDescriptor(
+        vertex = VertexState(module = shaderModuleVert, entryPoint = "main"),
+        fragment = FragmentState(
+          module = shaderModuleFrag,
+          entryPoint = "main",
+          targets = arrayOf(ColorTargetState(format = TextureFormat.RGBA8Unorm))
+        ),
+        primitive = PrimitiveState(topology = PrimitiveTopology.TriangleList),
+        depthStencil = DepthStencilState(
+          format = TextureFormat.Depth24Plus,
+          depthWriteEnabled = OptionalBool.True,
+          depthCompare = CompareFunction.Less
+        )
+      )
+    )
+
+    val encoder = device.createCommandEncoder()
+
+    // Begin render pass with the occlusion query set attached.
+    val passEncoder = encoder.beginRenderPass(
+      RenderPassDescriptor(
+        colorAttachments = arrayOf(
+          RenderPassColorAttachment(
+            view = renderTargetView,
+            loadOp = LoadOp.Clear,
+            storeOp = StoreOp.Store,
+            clearValue = Color(0.0, 0.0, 0.0, 1.0)
+          )
+        ),
+        depthStencilAttachment = RenderPassDepthStencilAttachment(
+          view = depthView,
+          depthLoadOp = LoadOp.Clear,
+          depthStoreOp = StoreOp.Store,
+          depthClearValue = 1.0f
+        ),
+        occlusionQuerySet = querySet
+      )
+    )
+
+    // Execute the draw logic provided by the caller (drawAction).
+    passEncoder.beginOcclusionQuery(0)
+    passEncoder.setPipeline(pipeline)
+    drawAction(passEncoder) // The action determines the query result
+    passEncoder.endOcclusionQuery()
+    passEncoder.end()
+
+    // Resolve the query result from the QuerySet into the resolveBuffer.
+    encoder.resolveQuerySet(querySet, firstQuery = 0, queryCount, resolveBuffer, 0)
+    // Copy the resolved data into the readbackBuffer for CPU access.
+    encoder.copyBufferToBuffer(resolveBuffer, 0, readbackBuffer, 0, resolveBufferSize)
+
+    val commandBuffer = encoder.finish()
+    device.queue.submit(arrayOf(commandBuffer))
+
+    runBlocking {
+      device.queue.onSubmittedWorkDone()
+      readbackBuffer.mapAsync(MapMode.Read, 0, resolveBufferSize)
+    }
+
+    val mappedBuffer = readbackBuffer.getConstMappedRange(size = resolveBufferSize)
+    // WebGPU resolves query data as a little-endian unsigned 64-bit integer.
+    val result = mappedBuffer.order(ByteOrder.LITTLE_ENDIAN).getLong(0)
+
+    assertEquals(expectedResult, result)
+
+    readbackBuffer.unmap()
+    readbackBuffer.destroy()
+    resolveBuffer.destroy()
+    querySet.destroy()
+    renderTarget.destroy()
+    depthTexture.destroy()
+  }
+
+  /**
+   * Test case: Draw a triangle to get a positive occlusion query result.
+   * Since the test uses a 1x1 render target with 1 sample per pixel,
+   * and the triangle successfully draws, the query must return the exact sample count.
+   */
+  @Test
+  fun testResolveQuerySetAndReadback() {
+    executeQueryResolveTest(
+      drawAction = { passEncoder -> passEncoder.draw(3) },
+      expectedResult = 1L
+    )
+  }
+
+  /**
+   * Perform no drawing, which should result in an occlusion query count of 0.
+   */
+  @Test
+  fun testResolveQuerySetWithZeroResult() {
+    executeQueryResolveTest(
+      drawAction = { },
+      expectedResult = 0L
+    )
   }
 }
