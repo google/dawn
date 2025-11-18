@@ -58,6 +58,8 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
 
     float GetTimestampPeriodInNS() const override;
 
+    bool NeedsIndirectDrawGPUValidation() const override;
+
     WGPUInstance GetInnerInstance() const;
 
     void StartCapture(CaptureStream& commandStream, CaptureStream& contentStream);

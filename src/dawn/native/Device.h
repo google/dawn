@@ -409,6 +409,9 @@ class DeviceBase : public ErrorSink,
                                                               wgpu::BufferUsage originalUsage,
                                                               size_t bufferSize) const;
 
+    // Whether the backend needs to validate the indirect buffer on GPU compute pass.
+    virtual bool NeedsIndirectDrawGPUValidation() const;
+
     bool HasFeature(Feature feature) const;
 
     const CombinedLimits& GetLimits() const;

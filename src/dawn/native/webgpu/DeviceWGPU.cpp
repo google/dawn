@@ -302,6 +302,12 @@ bool Device::CanResolveSubRect() const {
     return true;
 }
 
+bool Device::NeedsIndirectDrawGPUValidation() const {
+    // WebGPU backend never actually dispatch compute pass to validate indirect draw cmds,
+    // since the inner backend will take care of it.
+    return false;
+}
+
 void Device::StartCapture(CaptureStream& commandStream, CaptureStream& contentStream) {
     MaybeError result = ToBackend(GetQueue())
                             ->SetCaptureContext(std::unique_ptr<CaptureContext>(

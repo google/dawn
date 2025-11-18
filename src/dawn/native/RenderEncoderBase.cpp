@@ -223,7 +223,8 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
             bool duplicateBaseVertexInstance =
                 GetDevice()->ShouldDuplicateParametersForDrawIndirect(
                     mCommandBufferState.GetRenderPipeline());
-            if (IsValidationEnabled() || duplicateBaseVertexInstance) {
+            if (NeedsIndirectDrawGPUValidation() &&
+                (IsValidationEnabled() || duplicateBaseVertexInstance)) {
                 // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
                 // buffer which will store the validated or duplicated indirect data. The buffer
                 // and offset will be updated to point to it.
@@ -285,8 +286,9 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                     mCommandBufferState.GetRenderPipeline());
             bool applyIndexBufferOffsetToFirstIndex =
                 GetDevice()->ShouldApplyIndexBufferOffsetToFirstIndex();
-            if (IsValidationEnabled() || duplicateBaseVertexInstance ||
-                applyIndexBufferOffsetToFirstIndex) {
+            if (NeedsIndirectDrawGPUValidation() &&
+                (IsValidationEnabled() || duplicateBaseVertexInstance ||
+                 applyIndexBufferOffsetToFirstIndex)) {
                 // Later, EncodeIndirectDrawValidationCommands will allocate a scratch storage
                 // buffer which will store the validated or duplicated indirect data. The buffer
                 // and offset will be updated to point to it.
@@ -397,8 +399,9 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                 mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
                 duplicateBaseVertexInstance, cmd);
 
-            if (GetDevice()->IsValidationEnabled() ||
-                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+            if (NeedsIndirectDrawGPUValidation() &&
+                (IsValidationEnabled() ||
+                 GetDevice()->MayRequireDuplicationOfIndirectParameters())) {
                 // We only set usage as `kIndirectBufferForFrontendValidation` because
                 // `indirectBuffer` may not be used as an indirect buffer. The usage of
                 // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in
@@ -506,8 +509,9 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                 mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
                 duplicateBaseVertexInstance, cmd);
 
-            if (GetDevice()->IsValidationEnabled() ||
-                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+            if (NeedsIndirectDrawGPUValidation() &&
+                (IsValidationEnabled() ||
+                 GetDevice()->MayRequireDuplicationOfIndirectParameters())) {
                 // We only set usage as `kIndirectBufferForFrontendValidation` because
                 // `indirectBuffer` may not be used as an indirect buffer. The usage of
                 // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in

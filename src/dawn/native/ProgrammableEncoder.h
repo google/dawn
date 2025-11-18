@@ -55,6 +55,7 @@ class ProgrammableEncoder : public ApiObjectBase {
 
   protected:
     bool IsValidationEnabled() const;
+    bool NeedsIndirectDrawGPUValidation() const;
     MaybeError ValidateProgrammableEncoderEnd() const;
 
     // Compute and render passes do different things on SetBindGroup. These are helper functions
@@ -83,6 +84,7 @@ class ProgrammableEncoder : public ApiObjectBase {
 
   private:
     const bool mValidationEnabled;
+    const bool mNeedsIndirectDrawGPUValidation;
 };
 
 }  // namespace dawn::native
