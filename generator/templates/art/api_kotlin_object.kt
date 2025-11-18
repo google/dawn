@@ -65,6 +65,9 @@ public class {{ kotlin_name(obj) }} private constructor(public val handle: Long)
                 @JvmOverloads
             {% break %}{% endif %}
         {% endfor %}
+        {% if method.returns and method.returns.type.name.canonical_case() == 'status' %}
+            @Throws({{"WebGpuException::class"}})
+        {% endif %}
         {{ kotlin_annotation(_kotlin_return) if _kotlin_return else '' }} public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
