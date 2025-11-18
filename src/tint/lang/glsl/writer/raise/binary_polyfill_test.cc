@@ -267,7 +267,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalNotEqualI32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<i32>(), 1_i));
         auto* r = b.Let("right", b.Splat(ty.vec2<i32>(), 2_i));
-        auto* bin = b.NotEqual(ty.vec2<bool>(), l, r);
+        auto* bin = b.NotEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -306,7 +306,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanF32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.LessThan(ty.vec2<bool>(), l, r);
+        auto* bin = b.LessThan(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -345,7 +345,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanEqualU32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<u32>(), 1_u));
         auto* r = b.Let("right", b.Splat(ty.vec2<u32>(), 2_u));
-        auto* bin = b.LessThanEqual(ty.vec2<bool>(), l, r);
+        auto* bin = b.LessThanEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -384,7 +384,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanF32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.GreaterThan(ty.vec2<bool>(), l, r);
+        auto* bin = b.GreaterThan(l, r);
         b.Let("val", bin);
         b.Return(func);
     });
@@ -423,7 +423,7 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanEqualF32) {
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
-        auto* bin = b.GreaterThanEqual(ty.vec2<bool>(), l, r);
+        auto* bin = b.GreaterThanEqual(l, r);
         b.Let("val", bin);
         b.Return(func);
     });

@@ -355,7 +355,7 @@ struct State {
             auto* D_splat = b.Construct(vec3f, D);
             auto* abs_v = b.Call(vec3f, core::BuiltinFn::kAbs, v);
             auto* sign_v = b.Call(vec3f, core::BuiltinFn::kSign, v);
-            auto* cond = b.LessThan(ty.vec3<bool>(), abs_v, D_splat);
+            auto* cond = b.LessThan(abs_v, D_splat);
             auto* t = b.Multiply(vec3f, sign_v, b.Add(vec3f, b.Multiply(vec3f, C, abs_v), F));
             auto* f =
                 b.Multiply(vec3f, sign_v,

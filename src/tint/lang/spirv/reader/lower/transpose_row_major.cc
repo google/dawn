@@ -586,7 +586,7 @@ struct State {
 
             b.Append(fn->Block(), [&] {
                 auto* res = b.Var(ty.ptr(function, to_ty));
-                b.LoopRange(ty, u32(0), u32(*count), u32(1), [&](core::ir::Value* idx) {
+                b.LoopRange(u32(0), u32(*count), u32(1), [&](core::ir::Value* idx) {
                     core::ir::Value* transposed = nullptr;
                     auto* cur = b.Access(from_ty->ElemType(), in, idx);
                     if (auto* nested = outer_ty->ElemType()->As<core::type::Array>()) {

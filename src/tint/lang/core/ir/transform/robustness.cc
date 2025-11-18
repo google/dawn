@@ -495,7 +495,7 @@ struct State {
             // We then add another `min_stride` elements to get to the end of the accessed memory.
             auto* last_slice = b.Add<u32>(offset, b.Multiply<u32>(stride, u32(major_dim - 1)));
             auto* end = b.Add<u32>(last_slice, u32(min_stride));
-            auto* in_bounds = b.LessThanEqual<bool>(end, array_length);
+            auto* in_bounds = b.LessThanEqual(end, array_length);
             if (call->Func() == BuiltinFn::kSubgroupMatrixLoad) {
                 // Declare a variable to hold the result of the load, or a zero-initialized matrix.
                 auto* result = b.Var(ty.ptr<function>(matrix_ty));

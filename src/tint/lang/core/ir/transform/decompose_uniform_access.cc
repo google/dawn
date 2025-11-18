@@ -555,7 +555,7 @@ struct State {
                 auto* count = arr->Count()->As<core::type::ConstantArrayCount>();
                 TINT_IR_ASSERT(ir, count);
 
-                b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
+                b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
                     auto* stride = b.Multiply<u32>(idx, u32(arr->ImplicitStride()))->Result();
                     OffsetData od{0, {start_byte_offset, stride}};
                     auto* byte_idx = OffsetToValue(od);

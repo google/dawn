@@ -874,7 +874,7 @@ struct State {
             if (I->Type()->IsFloatScalar()) {
                 auto* neg = b.Negation(N);
                 auto* sel = b.Multiply(I->Type(), I, Nref)->Result();
-                sel = b.LessThan(ty.bool_(), sel, b.Zero(sel->Type()))->Result();
+                sel = b.LessThan(sel, b.Zero(sel->Type()))->Result();
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I, Nref);

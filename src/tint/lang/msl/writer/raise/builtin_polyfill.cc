@@ -579,10 +579,9 @@ struct State {
             if (type->IsIntegerScalarOrVector()) {
                 core::ir::Value* pos_one = b.MatchWidth(i32(1), type);
                 core::ir::Value* neg_one = b.MatchWidth(i32(-1), type);
-                const core::type::Type* bool_type = ty.MatchWidth(ty.bool_(), type);
                 auto* zero = b.Zero(type);
                 auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
-                                    b.GreaterThan(bool_type, arg, zero));
+                                    b.GreaterThan(arg, zero));
                 b.CallWithResult(builtin->DetachResult(), core::BuiltinFn::kSelect, sign, zero,
                                  b.Equal(arg, zero));
             } else {

@@ -1314,15 +1314,15 @@ class Impl {
             case core::BinaryOp::kEqual:
                 return builder_.Equal(lhs, rhs);
             case core::BinaryOp::kNotEqual:
-                return builder_.NotEqual(ty, lhs, rhs);
+                return builder_.NotEqual(lhs, rhs);
             case core::BinaryOp::kLessThan:
-                return builder_.LessThan(ty, lhs, rhs);
+                return builder_.LessThan(lhs, rhs);
             case core::BinaryOp::kGreaterThan:
-                return builder_.GreaterThan(ty, lhs, rhs);
+                return builder_.GreaterThan(lhs, rhs);
             case core::BinaryOp::kLessThanEqual:
-                return builder_.LessThanEqual(ty, lhs, rhs);
+                return builder_.LessThanEqual(lhs, rhs);
             case core::BinaryOp::kGreaterThanEqual:
-                return builder_.GreaterThanEqual(ty, lhs, rhs);
+                return builder_.GreaterThanEqual(lhs, rhs);
             case core::BinaryOp::kShiftLeft:
                 return builder_.ShiftLeft(ty, lhs, rhs);
             case core::BinaryOp::kShiftRight:

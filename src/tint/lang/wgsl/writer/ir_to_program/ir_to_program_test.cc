@@ -1204,7 +1204,7 @@ TEST_F(IRToProgramTest, BinaryOp_NotEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.NotEqual(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.NotEqual(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -1219,7 +1219,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThan) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.LessThan(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.LessThan(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -1234,7 +1234,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThan) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.GreaterThan(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.GreaterThan(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -1249,7 +1249,7 @@ TEST_F(IRToProgramTest, BinaryOp_LessThanEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.LessThanEqual(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -1264,7 +1264,7 @@ TEST_F(IRToProgramTest, BinaryOp_GreaterThanEqual) {
     auto* pb = b.FunctionParam("b", ty.i32());
     fn->SetParams({pa, pb});
 
-    b.Append(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(ty.bool_(), pa, pb)); });
+    b.Append(fn->Block(), [&] { b.Return(fn, b.GreaterThanEqual(pa, pb)); });
 
     EXPECT_WGSL(R"(
 fn f(a : i32, b : i32) -> bool {
@@ -2667,7 +2667,7 @@ TEST_F(IRToProgramTest, For_Empty) {
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
-                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                auto* if_ = b.If(b.LessThan(b.Load(i), 5_i));
                 b.Append(if_->True(), [&] { b.ExitIf(if_); });
                 b.Append(if_->False(), [&] { b.ExitLoop(loop); });
                 b.Continue(loop);
@@ -2699,7 +2699,7 @@ TEST_F(IRToProgramTest, For_Empty_NoInit) {
         auto* loop = b.Loop();
 
         b.Append(loop->Body(), [&] {
-            auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+            auto* if_ = b.If(b.LessThan(b.Load(i), 5_i));
             b.Append(if_->True(), [&] { b.ExitIf(if_); });
             b.Append(if_->False(), [&] { b.ExitLoop(loop); });
             b.Continue(loop);
@@ -2733,7 +2733,7 @@ TEST_F(IRToProgramTest, For_Empty_NoCont) {
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
-                auto* if_ = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                auto* if_ = b.If(b.LessThan(b.Load(i), 5_i));
                 b.Append(if_->True(), [&] { b.ExitIf(if_); });
                 b.Append(if_->False(), [&] { b.ExitLoop(loop); });
                 b.Continue(loop);
@@ -2767,7 +2767,7 @@ TEST_F(IRToProgramTest, For_ComplexBody) {
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
-                auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                auto* if1 = b.If(b.LessThan(b.Load(i), 5_i));
                 b.Append(if1->True(), [&] { b.ExitIf(if1); });
                 b.Append(if1->False(), [&] { b.ExitLoop(loop); });
 
@@ -2818,7 +2818,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoInit) {
         auto* loop = b.Loop();
 
         b.Append(loop->Body(), [&] {
-            auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+            auto* if1 = b.If(b.LessThan(b.Load(i), 5_i));
             b.Append(if1->True(), [&] { b.ExitIf(if1); });
             b.Append(if1->False(), [&] { b.ExitLoop(loop); });
 
@@ -2872,7 +2872,7 @@ TEST_F(IRToProgramTest, For_ComplexBody_NoCont) {
             b.NextIteration(loop);
 
             b.Append(loop->Body(), [&] {
-                auto* if1 = b.If(b.LessThan(ty.bool_(), b.Load(i), 5_i));
+                auto* if1 = b.If(b.LessThan(b.Load(i), 5_i));
                 b.Append(if1->True(), [&] { b.ExitIf(if1); });
                 b.Append(if1->False(), [&] { b.ExitLoop(loop); });
 
@@ -2923,7 +2923,7 @@ TEST_F(IRToProgramTest, For_CallInInitCondCont) {
             b.Append(loop->Body(), [&] {
                 auto* load = b.Load(i);
                 auto* call = b.Call(ty.i32(), fn_n, 1_i);
-                auto* if_ = b.If(b.LessThan(ty.bool_(), load, call));
+                auto* if_ = b.If(b.LessThan(load, call));
                 b.Append(if_->True(), [&] { b.ExitIf(if_); });
                 b.Append(if_->False(), [&] { b.ExitLoop(loop); });
 
@@ -3001,7 +3001,7 @@ TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
 
             b.Append(loop->Body(), [&] {
                 auto* load_i = b.Load(i);
-                auto* cmp = b.LessThan(ty.bool_(), load_i, 10_u);
+                auto* cmp = b.LessThan(load_i, 10_u);
                 auto* if_ = b.If(cmp);
                 b.Append(if_->True(), [&] { b.ExitIf(if_); });
                 b.Append(if_->False(), [&] { b.ExitLoop(loop); });

@@ -142,7 +142,7 @@ struct State {
         //   tint_subgroup_size_mask[0u] = high;
         //   tint_subgroup_size_mask[1u] = low;
         b.InsertBefore(ep->Block()->Front(), [&] {
-            auto* gt32 = b.GreaterThan<bool>(subgroup_size, u32(32));
+            auto* gt32 = b.GreaterThan(subgroup_size, u32(32));
             auto* high_mask =
                 b.ShiftRight<u32>(u32::Highest(), b.Subtract<u32>(u32(32), subgroup_size));
             auto* high = b.Call<u32>(core::BuiltinFn::kSelect, high_mask, u32::Highest(), gt32);

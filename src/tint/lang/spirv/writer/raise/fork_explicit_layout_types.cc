@@ -356,7 +356,7 @@ struct State {
         // Create a local variable to hold the converted result.
         // Convert each element one at a time, writing into the local variable.
         auto* result = b.Var(ty.ptr<function>(dst_array));
-        b.LoopRange(ty, 0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
+        b.LoopRange(0_u, u32(count->value), 1_u, [&](core::ir::Value* idx) {
             auto* extracted = b.Access(src_array->ElemType(), input, idx)->Result();
             auto* converted = ConvertIfNeeded(dst_array->ElemType(), extracted);
             auto* dst_ptr = b.Access(ty.ptr(function, dst_array->ElemType()), result, idx);

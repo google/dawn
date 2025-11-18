@@ -489,7 +489,7 @@ struct State {
                     b.Return(func, b.Construct(unpacked_arr, std::move(elements)));
                 } else {
                     auto* result = b.Var(ty.ptr<function>(unpacked_arr));
-                    b.LoopRange(ty, u32(0), u32(count), u32(1), [&](core::ir::Value* idx) {
+                    b.LoopRange(u32(0), u32(count), u32(1), [&](core::ir::Value* idx) {
                         auto* to =
                             b.Access(ty.ptr(function, unpacked_arr->ElemType()), result, idx);
                         auto* unpacked_el = load_array_element(idx);
@@ -631,7 +631,7 @@ struct State {
                         store_array_element(b.Constant(u32(i)));
                     }
                 } else {
-                    b.LoopRange(ty, u32(0), u32(count), u32(1), [&](core::ir::Value* idx) {  //
+                    b.LoopRange(u32(0), u32(count), u32(1), [&](core::ir::Value* idx) {  //
                         store_array_element(idx);
                     });
                 }

@@ -642,7 +642,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         auto* cont_param = b.BlockParam(ty.i32());
         loop->Continuing()->SetParams({cont_param});
         b.Append(loop->Continuing(), [&] {
-            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            auto* cmp = b.GreaterThan(cont_param, 5_i);
             b.BreakIf(loop, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 
@@ -703,7 +703,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
         auto* cont_param_b = b.BlockParam(ty.bool_());
         loop->Continuing()->SetParams({cont_param_a, cont_param_b});
         b.Append(loop->Continuing(), [&] {
-            auto* cmp = b.GreaterThan(ty.bool_(), cont_param_a, 5_i);
+            auto* cmp = b.GreaterThan(cont_param_a, 5_i);
             auto* not_b = b.Not(cont_param_b);
             b.BreakIf(loop, cmp, b.Values(cont_param_a, not_b), Empty);
         });
@@ -771,7 +771,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
         auto* cont_param = b.BlockParam(ty.i32());
         loop->Continuing()->SetParams({cont_param});
         b.Append(loop->Continuing(), [&] {
-            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            auto* cmp = b.GreaterThan(cont_param, 5_i);
             b.BreakIf(loop, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 
@@ -844,7 +844,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
         auto* cont_param = b.BlockParam(ty.i32());
         outer->Continuing()->SetParams({cont_param});
         b.Append(outer->Continuing(), [&] {
-            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            auto* cmp = b.GreaterThan(cont_param, 5_i);
             b.BreakIf(outer, cmp, /* next_iter */ Vector{cont_param}, /* exit */ Empty);
         });
 

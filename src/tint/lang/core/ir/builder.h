@@ -719,116 +719,86 @@ class Builder {
     ir::CoreBinary* Equal(LHS&& lhs, RHS&& rhs) {
         auto* lhs_value = Value(std::forward<LHS>(lhs));
         auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
         auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
         return Append(ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type),
                                                            BinaryOp::kEqual, lhs_value, rhs_value));
     }
 
     /// Creates an NotEqual operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* NotEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kNotEqual, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an NotEqual operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* NotEqual(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return NotEqual(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(type), BinaryOp::kNotEqual, lhs_value, rhs_value));
     }
 
     /// Creates an LessThan operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* LessThan(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kLessThan, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an LessThan operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* LessThan(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return LessThan(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(type), BinaryOp::kLessThan, lhs_value, rhs_value));
     }
 
-    /// Creates an GreaterThan operation
-    /// @param type the result type of the expression
+    /// Creates an LessThan operation
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* GreaterThan(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kGreaterThan, type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
-    }
-
-    /// Creates an GreaterThan operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* GreaterThan(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return GreaterThan(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(type), BinaryOp::kGreaterThan, lhs_value, rhs_value));
     }
 
     /// Creates an LessThanEqual operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* LessThanEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kLessThanEqual, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
-    }
-
-    /// Creates an LessThanEqual operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* LessThanEqual(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return LessThanEqual(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(type), BinaryOp::kLessThanEqual, lhs_value, rhs_value));
     }
 
     /// Creates an GreaterThanEqual operation
-    /// @param type the result type of the expression
     /// @param lhs the lhs of the add
     /// @param rhs the rhs of the add
     /// @returns the operation
     template <typename LHS, typename RHS>
-    ir::CoreBinary* GreaterThanEqual(const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
-        return Binary(BinaryOp::kGreaterThanEqual, type, std::forward<LHS>(lhs),
-                      std::forward<RHS>(rhs));
-    }
-
-    /// Creates an GreaterThanEqual operation
-    /// @tparam TYPE the result type of the expression
-    /// @param lhs the lhs of the add
-    /// @param rhs the rhs of the add
-    /// @returns the operation
-    template <typename TYPE, typename LHS, typename RHS>
     ir::CoreBinary* GreaterThanEqual(LHS&& lhs, RHS&& rhs) {
-        auto* type = ir.Types().Get<TYPE>();
-        return GreaterThanEqual(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+        auto* lhs_value = Value(std::forward<LHS>(lhs));
+        auto* rhs_value = Value(std::forward<RHS>(rhs));
+        TINT_ASSERT(lhs_value);
+        TINT_ASSERT(rhs_value);
+        auto* type = ir.Types().MatchWidth(ir.Types().bool_(), lhs_value->Type());
+        return Append(ir.CreateInstruction<ir::CoreBinary>(
+            InstructionResult(type), BinaryOp::kGreaterThanEqual, lhs_value, rhs_value));
     }
 
     /// Creates an ShiftLeft operation
@@ -1790,13 +1760,12 @@ class Builder {
     }
 
     /// Create a ranged loop with a callback to build the loop body.
-    /// @param ty the type manager to use for new types
     /// @param start the first loop index
     /// @param end one past the last loop index
     /// @param step the loop index step amount
     /// @param cb the callback to call for the loop body
     template <typename START, typename END, typename STEP, typename FUNCTION>
-    void LoopRange(core::type::Manager& ty, START&& start, END&& end, STEP&& step, FUNCTION&& cb) {
+    void LoopRange(START&& start, END&& end, STEP&& step, FUNCTION&& cb) {
         auto* start_value = Value(std::forward<START>(start));
         auto* end_value = Value(std::forward<END>(end));
         auto* step_value = Value(std::forward<STEP>(step));
@@ -1810,7 +1779,7 @@ class Builder {
         });
         Append(loop->Body(), [&] {
             // Loop until `idx == end`.
-            auto* breakif = If(GreaterThanEqual(ty.bool_(), idx, end_value));
+            auto* breakif = If(GreaterThanEqual(idx, end_value));
             Append(breakif->True(), [&] {  //
                 ExitLoop(loop);
             });

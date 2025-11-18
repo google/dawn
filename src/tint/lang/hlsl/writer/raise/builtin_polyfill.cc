@@ -538,7 +538,7 @@ struct State {
         b.InsertBefore(call, [&] {
             args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result());
             args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result());
-            args.Push(b.LessThan(ty.MatchWidth(ty.bool_(), type), val, b.Zero(type))->Result());
+            args.Push(b.LessThan(val, b.Zero(type))->Result());
         });
         auto* trunc = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
         trunc->InsertBefore(call);

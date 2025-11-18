@@ -300,7 +300,7 @@ struct State {
                 // Create a loop that copies and converts each element of the array.
                 auto* el_ty = source->Type()->Elements().type;
                 auto* new_arr = b.Var(ty.ptr(function, arr));
-                b.LoopRange(ty, 0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
+                b.LoopRange(0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
                     // Convert arr[idx] and store to new_arr[idx];
                     auto* to = b.Access(ty.ptr(function, arr->ElemType()), new_arr, idx);
                     auto* from = b.Access(el_ty, source, idx)->Result();

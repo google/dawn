@@ -128,7 +128,7 @@ TEST_F(IR_BinaryTest, CreateEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateNotEqual) {
-    auto* inst = b.NotEqual(mod.Types().bool_(), 4_i, 2_i);
+    auto* inst = b.NotEqual(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kNotEqual);
@@ -145,7 +145,7 @@ TEST_F(IR_BinaryTest, CreateNotEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThan) {
-    auto* inst = b.LessThan(mod.Types().bool_(), 4_i, 2_i);
+    auto* inst = b.LessThan(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kLessThan);
@@ -162,7 +162,7 @@ TEST_F(IR_BinaryTest, CreateLessThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThan) {
-    auto* inst = b.GreaterThan(mod.Types().bool_(), 4_i, 2_i);
+    auto* inst = b.GreaterThan(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kGreaterThan);
@@ -179,7 +179,7 @@ TEST_F(IR_BinaryTest, CreateGreaterThan) {
 }
 
 TEST_F(IR_BinaryTest, CreateLessThanEqual) {
-    auto* inst = b.LessThanEqual(mod.Types().bool_(), 4_i, 2_i);
+    auto* inst = b.LessThanEqual(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kLessThanEqual);
@@ -196,7 +196,7 @@ TEST_F(IR_BinaryTest, CreateLessThanEqual) {
 }
 
 TEST_F(IR_BinaryTest, CreateGreaterThanEqual) {
-    auto* inst = b.GreaterThanEqual(mod.Types().bool_(), 4_i, 2_i);
+    auto* inst = b.GreaterThanEqual(4_i, 2_i);
 
     ASSERT_TRUE(inst->Is<Binary>());
     EXPECT_EQ(inst->Op(), BinaryOp::kGreaterThanEqual);

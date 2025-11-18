@@ -59,7 +59,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition) {
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            condition = b.LessThan<bool>(b.Load(idx), 10_u);
+            condition = b.LessThan(b.Load(idx), 10_u);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -141,7 +141,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformArray) {
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 3_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan<bool>(load, 10_u);
+            condition = b.LessThan(load, 10_u);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -237,7 +237,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure) {
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 0_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan<bool>(load, 10_u);
+            condition = b.LessThan(load, 10_u);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -340,7 +340,7 @@ TEST_F(IR_ForLoopAnalysisTest, ConditionUniformStructure_WithInfiniteLoopPrevent
         b.Append(loop->Body(), [&] {
             auto* access = b.Access(ty.ptr<uniform, vec4<u32>>(), U, 0_i);
             auto* load = b.LoadVectorElement(access, 0_u);
-            condition = b.LessThan<bool>(load, 10_u);
+            condition = b.LessThan(load, 10_u);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -445,7 +445,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailLet) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan<bool>(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -518,7 +518,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailStore) {
         b.Append(loop->Body(), [&] {
             b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan<bool>(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitIf(ifelse);
@@ -593,7 +593,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfFlipped) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan<bool>(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let);
             ifelse = b.If(condition);
             b.Append(ifelse->False(), [&] {  //
                 b.ExitIf(ifelse);
@@ -665,7 +665,7 @@ TEST_F(IR_ForLoopAnalysisTest, SimpleLoopCondition_FailNonCanonicalIfOnlyExit) {
         });
         b.Append(loop->Body(), [&] {
             auto* as_let = b.Let(10_u);
-            condition = b.LessThan<bool>(b.Load(idx), as_let);
+            condition = b.LessThan(b.Load(idx), as_let);
             ifelse = b.If(condition);
             b.Append(ifelse->True(), [&] {  //
                 b.ExitLoop(loop);

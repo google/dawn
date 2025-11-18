@@ -1576,7 +1576,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -1652,7 +1652,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
         });
         b.Append(loop->Body(), [&] {
             // 10 < idx
-            binary = b.LessThan<bool>(10_i, b.Load(idx));
+            binary = b.LessThan(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -1727,7 +1727,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThan_Const
         });
         b.Append(loop->Body(), [&] {
             // idx < 20u
-            binary = b.LessThan<bool>(b.Load(idx), 20_u);
+            binary = b.LessThan(b.Load(idx), 20_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -1803,7 +1803,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_LessThan_in
         });
         b.Append(loop->Body(), [&] {
             // 10u < idx
-            binary = b.LessThan<bool>(10_u, b.Load(idx));
+            binary = b.LessThan(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -1878,7 +1878,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 10
-            binary = b.LessThanEqual<bool>(b.Load(idx), 10_i);
+            binary = b.LessThanEqual(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -1953,7 +1953,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_LessThanEqual_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 10
-            binary = b.LessThanEqual<bool>(b.Load(idx), 10_u);
+            binary = b.LessThanEqual(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2028,7 +2028,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
         });
         b.Append(loop->Body(), [&] {
             // 10 <= idx
-            binary = b.LessThanEqual<bool>(10_i, b.Load(idx));
+            binary = b.LessThanEqual(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2103,7 +2103,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_LessThanEqu
         });
         b.Append(loop->Body(), [&] {
             // 10 <= idx
-            binary = b.LessThanEqual<bool>(10_u, b.Load(idx));
+            binary = b.LessThanEqual(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2178,7 +2178,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
         });
         b.Append(loop->Body(), [&] {
             // idx > 10
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_i);
+            binary = b.GreaterThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2254,7 +2254,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThan_co
         });
         b.Append(loop->Body(), [&] {
             // idx > 10u
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_u);
+            binary = b.GreaterThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2330,7 +2330,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
         });
         b.Append(loop->Body(), [&] {
             // 10 > idx
-            binary = b.GreaterThan<bool>(10_i, b.Load(idx));
+            binary = b.GreaterThan(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2406,7 +2406,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_constant_GreaterThan
         });
         b.Append(loop->Body(), [&] {
             // 10u > idx
-            binary = b.GreaterThan<bool>(10_u, b.Load(idx));
+            binary = b.GreaterThan(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2482,7 +2482,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
         });
         b.Append(loop->Body(), [&] {
             // idx >= 10
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 10_i);
+            binary = b.GreaterThanEqual(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2558,7 +2558,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_index_GreaterThanEqu
         });
         b.Append(loop->Body(), [&] {
             // idx >= 10
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 10_u);
+            binary = b.GreaterThanEqual(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2634,7 +2634,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
         });
         b.Append(loop->Body(), [&] {
             // 10 >= idx
-            binary = b.GreaterThanEqual<bool>(10_i, b.Load(idx));
+            binary = b.GreaterThanEqual(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2710,7 +2710,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_Constant_GreaterThan
         });
         b.Append(loop->Body(), [&] {
             // 10u >= idx
-            binary = b.GreaterThanEqual<bool>(10_u, b.Load(idx));
+            binary = b.GreaterThanEqual(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2786,7 +2786,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_InstructionsOtherTha
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.GreaterThanEqual<bool>(10_i, b.Load(idx));
+            binary = b.GreaterThanEqual(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2855,7 +2855,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_FirstInstructionIsNo
         b.Append(loop->Body(), [&] {
             // Initialize idy to 1
             Var* idy = b.Var("idy", 1_i);
-            binary = b.LessThan<bool>(b.Load(idy), 10_i);
+            binary = b.LessThan(b.Load(idy), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2923,7 +2923,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoLoadFromLoopContro
         });
         b.Append(loop->Body(), [&] {
             // idy < 10
-            binary = b.LessThan<bool>(b.Load(idy), 10_i);
+            binary = b.LessThan(b.Load(idy), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -2990,11 +2990,11 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_StoreLoopControlVari
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
-            auto* ifelse_y = b.If(b.LessThan<bool>(b.Load(idy), 10_i));
+            auto* ifelse_y = b.If(b.LessThan(b.Load(idy), 10_i));
             b.Append(ifelse_y->True(), [&] {
                 b.Store(idx, 2_i);
                 b.ExitIf(ifelse_y);
@@ -3071,7 +3071,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_SecondInstructionNot
         b.Append(loop->Body(), [&] {
             // bitcastX = bitcast<i32>(idx)
             auto* bitcastX = b.Bitcast<i32>(b.Load(idx));
-            binary = b.LessThan<bool>(bitcastX, 10_i);
+            binary = b.LessThan(bitcastX, 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3139,7 +3139,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_BinaryOpIsNotCompari
         b.Append(loop->Body(), [&] {
             // shl = idx << 1
             auto* shl = b.ShiftLeft<i32>(b.Load(idx), 1_u);
-            binary = b.LessThan<bool>(10_i, shl);
+            binary = b.LessThan(10_i, shl);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3208,7 +3208,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_IndexCompareWithNonC
         });
         b.Append(loop->Body(), [&] {
             // idx < end
-            binary = b.LessThan<bool>(b.Load(idx), end);
+            binary = b.LessThan(b.Load(idx), end);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3276,7 +3276,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonConstCompareWithI
         });
         b.Append(loop->Body(), [&] {
             // end > idx
-            binary = b.GreaterThan<bool>(end, b.Load(idx));
+            binary = b.GreaterThan(end, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3345,7 +3345,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NonIndexCompareWithC
         b.Append(loop->Body(), [&] {
             b.Load(idx);
             // end < 10
-            binary = b.LessThan<bool>(end, 10_i);
+            binary = b.LessThan(end, 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3414,7 +3414,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ConstCompareWithNonI
         b.Append(loop->Body(), [&] {
             b.Load(idx);
             // 10 > end
-            binary = b.GreaterThan<bool>(10_i, end);
+            binary = b.GreaterThan(10_i, end);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3480,7 +3480,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Zero_
         });
         b.Append(loop->Body(), [&] {
             // idx < 0u
-            binary = b.LessThan<bool>(b.Load(idx), 0_u);
+            binary = b.LessThan(b.Load(idx), 0_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3546,7 +3546,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Zero_GreaterThan_Ind
         });
         b.Append(loop->Body(), [&] {
             // 0u > idx
-            binary = b.GreaterThan<bool>(0_u, b.Load(idx));
+            binary = b.GreaterThan(0_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3612,7 +3612,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
         });
         b.Append(loop->Body(), [&] {
             // idx > 4294967295u (maximum uint32_t value)
-            binary = b.GreaterThan<bool>(b.Load(idx), u32::Highest());
+            binary = b.GreaterThan(b.Load(idx), u32::Highest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3678,7 +3678,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_LessThan_Ind
         });
         b.Append(loop->Body(), [&] {
             // 4294967295u (maximum uint32_t value) < idx
-            binary = b.LessThan<bool>(u32::Highest(), b.Load(idx));
+            binary = b.LessThan(u32::Highest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3744,7 +3744,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThan_Min_I
         });
         b.Append(loop->Body(), [&] {
             // idx < -2147483648 (minimum int32_t value)
-            binary = b.LessThan<bool>(b.Load(idx), i32::Lowest());
+            binary = b.LessThan(b.Load(idx), i32::Lowest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3810,7 +3810,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_I32_GreaterThan_
         });
         b.Append(loop->Body(), [&] {
             // -2147483648 (minimum int32_t value) > idx
-            binary = b.GreaterThan<bool>(i32::Lowest(), b.Load(idx));
+            binary = b.GreaterThan(i32::Lowest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3876,7 +3876,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThan_Ma
         });
         b.Append(loop->Body(), [&] {
             // idx > 2147483647 (maximum int32_t value)
-            binary = b.GreaterThan<bool>(b.Load(idx), i32::Highest());
+            binary = b.GreaterThan(b.Load(idx), i32::Highest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -3942,7 +3942,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_I32_LessThan_Ind
         });
         b.Append(loop->Body(), [&] {
             // 2147483647i (maximum int32_t value) < idx
-            binary = b.LessThan<bool>(i32::Highest(), b.Load(idx));
+            binary = b.LessThan(i32::Highest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4008,7 +4008,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 4294967295u (maximum uint32_t value)
-            binary = b.LessThanEqual<bool>(b.Load(idx), u32::Highest());
+            binary = b.LessThanEqual(b.Load(idx), u32::Highest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4074,7 +4074,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_LessThanEqual_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 2147483647 (maximum int32_t value)
-            binary = b.LessThanEqual<bool>(b.Load(idx), i32::Highest());
+            binary = b.LessThanEqual(b.Load(idx), i32::Highest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4140,7 +4140,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_i32_LessThanEqua
         });
         b.Append(loop->Body(), [&] {
             // -2147483648 (minimum int32_t value) <= idx
-            binary = b.LessThanEqual<bool>(i32::Lowest(), b.Load(idx));
+            binary = b.LessThanEqual(i32::Lowest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4206,7 +4206,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Min_u32_LessThanEqua
         });
         b.Append(loop->Body(), [&] {
             // 0 (minimum uint32_t value) <= idx
-            binary = b.LessThanEqual<bool>(u32::Lowest(), b.Load(idx));
+            binary = b.LessThanEqual(u32::Lowest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4272,7 +4272,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
         });
         b.Append(loop->Body(), [&] {
             // idx >= 0u (minimum uint32_t value)
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), u32::Lowest());
+            binary = b.GreaterThanEqual(b.Load(idx), u32::Lowest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4338,7 +4338,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Index_GreaterThanEqu
         });
         b.Append(loop->Body(), [&] {
             // idx >= -2147483648 (minimum int32_t value)
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), i32::Lowest());
+            binary = b.GreaterThanEqual(b.Load(idx), i32::Lowest());
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4404,7 +4404,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_i32_GreaterThanE
         });
         b.Append(loop->Body(), [&] {
             // 2147483647 (maximum int32_t value) >= idx
-            binary = b.GreaterThanEqual<bool>(i32::Highest(), b.Load(idx));
+            binary = b.GreaterThanEqual(i32::Highest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4470,7 +4470,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_Max_u32_GreaterThanE
         });
         b.Append(loop->Body(), [&] {
             // 4294967295 (maximum uint32_t value) >= idx
-            binary = b.GreaterThanEqual<bool>(u32::Highest(), b.Load(idx));
+            binary = b.GreaterThanEqual(u32::Highest(), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4535,7 +4535,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotIfElseAfterCompar
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             // Now idx can be 10 before the if-statement
             b.Add<i32>(b.Load(idx), 1_i);
             auto* ifelse = b.If(binary);
@@ -4600,14 +4600,14 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NotUseLastComparison
     auto* func = b.Function("func", ty.void_());
     func->AppendParam(param);
     b.Append(func->Block(), [&] {
-        Binary* binaryOnParam = b.LessThan<bool>(param, 30_i);
+        Binary* binaryOnParam = b.LessThan(param, 30_i);
         loop = b.Loop();
         b.Append(loop->Initializer(), [&] {
             idx = b.Var("idx", 0_i);
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binaryOnParam);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4673,7 +4673,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_MultipleInstructions
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] {
                 // Now idx < 10
@@ -4744,7 +4744,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_ExitLoopInTrueBlock)
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitLoop(loop); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -4809,7 +4809,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_TooManyInstructionsI
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] {
@@ -4879,7 +4879,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_NoExitLoopInFalseBlo
             b.NextIteration(loop);
         });
         b.Append(loop->Body(), [&] {
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitIf(ifelse); });
@@ -4946,7 +4946,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_EmptyFalseBlock) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.ExitLoop(loop);
@@ -5010,7 +5010,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
         });
         b.Append(loop->Body(), [&] {
             // idx <= 10
-            binary = b.LessThanEqual<bool>(b.Load(idx), 10_i);
+            binary = b.LessThanEqual(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5087,7 +5087,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_LessThanEqual_init_equal
         });
         b.Append(loop->Body(), [&] {
             // idx <= 10
-            binary = b.LessThanEqual<bool>(b.Load(idx), 10_u);
+            binary = b.LessThanEqual(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5164,7 +5164,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
         });
         b.Append(loop->Body(), [&] {
             // idx <= 1
-            binary = b.LessThanEqual<bool>(b.Load(idx), 1_i);
+            binary = b.LessThanEqual(b.Load(idx), 1_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5235,7 +5235,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThanEqual_init_great
         });
         b.Append(loop->Body(), [&] {
             // idx <= 1
-            binary = b.LessThanEqual<bool>(b.Load(idx), 1_u);
+            binary = b.LessThanEqual(b.Load(idx), 1_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5306,7 +5306,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThanEqual_cons
         });
         b.Append(loop->Body(), [&] {
             // idx <= 10
-            binary = b.LessThanEqual<bool>(b.Load(idx), 10_u);
+            binary = b.LessThanEqual(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5377,7 +5377,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
         });
         b.Append(loop->Body(), [&] {
             // idx >= 20
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 20_i);
+            binary = b.GreaterThanEqual(b.Load(idx), 20_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5453,7 +5453,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_GreaterThanEqual_init_eq
         });
         b.Append(loop->Body(), [&] {
             // idx >= 20
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 20_u);
+            binary = b.GreaterThanEqual(b.Load(idx), 20_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5529,7 +5529,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
         });
         b.Append(loop->Body(), [&] {
             // idx >= 20
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 20_i);
+            binary = b.GreaterThanEqual(b.Load(idx), 20_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5600,7 +5600,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThanEqual_init_le
         });
         b.Append(loop->Body(), [&] {
             // idx >= 20
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 20_u);
+            binary = b.GreaterThanEqual(b.Load(idx), 20_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5672,7 +5672,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Body(), [&] {
             // idx >= 10
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), 10_u);
+            binary = b.GreaterThanEqual(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5743,7 +5743,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 4294967294u
-            binary = b.LessThanEqual<bool>(b.Load(idx), u32(u32::kHighestValue - 1u));
+            binary = b.LessThanEqual(b.Load(idx), u32(u32::kHighestValue - 1u));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5818,7 +5818,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_LessThanEqual_max_
         });
         b.Append(loop->Body(), [&] {
             // idx <= 2147483646
-            binary = b.LessThanEqual<bool>(b.Load(idx), i32(i32::kHighestValue - 1));
+            binary = b.LessThanEqual(b.Load(idx), i32(i32::kHighestValue - 1));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5893,7 +5893,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
         });
         b.Append(loop->Body(), [&] {
             // idx >= 1u
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), u32(u32::kLowestValue + 1u));
+            binary = b.GreaterThanEqual(b.Load(idx), u32(u32::kLowestValue + 1u));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -5968,7 +5968,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_index_GreaterThanEqual_m
         });
         b.Append(loop->Body(), [&] {
             // idx >= -2147483647
-            binary = b.GreaterThanEqual<bool>(b.Load(idx), i32(i32::kLowestValue + 1));
+            binary = b.GreaterThanEqual(b.Load(idx), i32(i32::kLowestValue + 1));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6043,7 +6043,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
         });
         b.Append(loop->Body(), [&] {
             // idx < 1
-            binary = b.LessThan<bool>(b.Load(idx), 1_i);
+            binary = b.LessThan(b.Load(idx), 1_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6114,7 +6114,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6185,7 +6185,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_greater_th
         });
         b.Append(loop->Body(), [&] {
             // idx < 1
-            binary = b.LessThan<bool>(b.Load(idx), 1_u);
+            binary = b.LessThan(b.Load(idx), 1_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6256,7 +6256,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_LessThan_init_equals_rhs
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6327,7 +6327,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_LessThan_constant_
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6398,7 +6398,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
         });
         b.Append(loop->Body(), [&] {
             // idx > 10
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_i);
+            binary = b.GreaterThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6469,7 +6469,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
         });
         b.Append(loop->Body(), [&] {
             // idx > 10
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_i);
+            binary = b.GreaterThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6540,7 +6540,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_less_th
         });
         b.Append(loop->Body(), [&] {
             // idx > 10
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_u);
+            binary = b.GreaterThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6611,7 +6611,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_GreaterThan_init_equals_
         });
         b.Append(loop->Body(), [&] {
             // idx > 10
-            binary = b.GreaterThan<bool>(b.Load(idx), 10_u);
+            binary = b.GreaterThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6682,7 +6682,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Failure_index_GreaterThan_consta
         });
         b.Append(loop->Body(), [&] {
             // idx > 1
-            binary = b.GreaterThan<bool>(b.Load(idx), 1_u);
+            binary = b.GreaterThan(b.Load(idx), 1_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6754,7 +6754,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
         });
         b.Append(loop->Body(), [&] {
             // 20 <= idx
-            binary = b.LessThanEqual<bool>(20_i, b.Load(idx));
+            binary = b.LessThanEqual(20_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6829,7 +6829,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_LessThanEqual_init_e
         });
         b.Append(loop->Body(), [&] {
             // 20 <= idx
-            binary = b.LessThanEqual<bool>(20_u, b.Load(idx));
+            binary = b.LessThanEqual(20_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6904,7 +6904,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
         });
         b.Append(loop->Body(), [&] {
             // 30 <= idx
-            binary = b.LessThanEqual<bool>(30_i, b.Load(idx));
+            binary = b.LessThanEqual(30_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -6975,7 +6975,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThanEqual_init_L
         });
         b.Append(loop->Body(), [&] {
             // 30u <= idx
-            binary = b.LessThanEqual<bool>(30_u, b.Load(idx));
+            binary = b.LessThanEqual(30_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7047,7 +7047,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Body(), [&] {
             // 10u <= idx
-            binary = b.LessThanEqual<bool>(10_u, b.Load(idx));
+            binary = b.LessThanEqual(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7118,7 +7118,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_u32_add_1_LessThanEq
         });
         b.Append(loop->Body(), [&] {
             // 1u >= idx
-            binary = b.LessThanEqual<bool>(u32(u32::kLowestValue + 1u), b.Load(idx));
+            binary = b.LessThanEqual(u32(u32::kLowestValue + 1u), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7193,7 +7193,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_min_i32_add_1_LessThanEq
         });
         b.Append(loop->Body(), [&] {
             // -2147483647 >= idx
-            binary = b.LessThanEqual<bool>(i32(i32::kLowestValue + 1), b.Load(idx));
+            binary = b.LessThanEqual(i32(i32::kLowestValue + 1), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7269,7 +7269,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
         });
         b.Append(loop->Body(), [&] {
             // 20 >= idx
-            binary = b.GreaterThanEqual<bool>(20_i, b.Load(idx));
+            binary = b.GreaterThanEqual(20_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7345,7 +7345,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThanEqual_ini
         });
         b.Append(loop->Body(), [&] {
             // 20 >= idx
-            binary = b.GreaterThanEqual<bool>(20_u, b.Load(idx));
+            binary = b.GreaterThanEqual(20_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7422,7 +7422,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Body(), [&] {
             // 10 >= idx
-            binary = b.GreaterThanEqual<bool>(10_i, b.Load(idx));
+            binary = b.GreaterThanEqual(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7494,7 +7494,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Body(), [&] {
             // 10u >= idx
-            binary = b.GreaterThanEqual<bool>(10_u, b.Load(idx));
+            binary = b.GreaterThanEqual(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7566,7 +7566,7 @@ TEST_F(IR_IntegerRangeAnalysisTest,
         });
         b.Append(loop->Body(), [&] {
             // 30u >= idx
-            binary = b.GreaterThanEqual<bool>(30_u, b.Load(idx));
+            binary = b.GreaterThanEqual(30_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7637,7 +7637,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_u32_minus_1_GreaterT
         });
         b.Append(loop->Body(), [&] {
             // 4294967294u >= idx
-            binary = b.GreaterThanEqual<bool>(u32(u32::kHighestValue - 1u), b.Load(idx));
+            binary = b.GreaterThanEqual(u32(u32::kHighestValue - 1u), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7712,7 +7712,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoop_Success_max_i32_minus_1_GreaterT
         });
         b.Append(loop->Body(), [&] {
             // 2147483646 >= idx
-            binary = b.GreaterThanEqual<bool>(i32(i32::kHighestValue - 1), b.Load(idx));
+            binary = b.GreaterThanEqual(i32(i32::kHighestValue - 1), b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7788,7 +7788,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
         });
         b.Append(loop->Body(), [&] {
             // 20 < idx
-            binary = b.LessThan<bool>(20_i, b.Load(idx));
+            binary = b.LessThan(20_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7859,7 +7859,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_equals
         });
         b.Append(loop->Body(), [&] {
             // 20 < idx
-            binary = b.LessThan<bool>(20_u, b.Load(idx));
+            binary = b.LessThan(20_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -7930,7 +7930,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
         });
         b.Append(loop->Body(), [&] {
             // 30 < idx
-            binary = b.LessThan<bool>(30_i, b.Load(idx));
+            binary = b.LessThan(30_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8001,7 +8001,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_LessThan_init_LessTh
         });
         b.Append(loop->Body(), [&] {
             // 30u < idx
-            binary = b.LessThan<bool>(30_u, b.Load(idx));
+            binary = b.LessThan(30_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8072,7 +8072,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_LessThan_in
         });
         b.Append(loop->Body(), [&] {
             // 10u < idx
-            binary = b.LessThan<bool>(10_u, b.Load(idx));
+            binary = b.LessThan(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8144,7 +8144,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_equ
         });
         b.Append(loop->Body(), [&] {
             // 20 > idx
-            binary = b.GreaterThan<bool>(20_i, b.Load(idx));
+            binary = b.GreaterThan(20_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8215,7 +8215,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Success_GreaterThan_init_equ
         });
         b.Append(loop->Body(), [&] {
             // 20 > idx
-            binary = b.GreaterThan<bool>(20_u, b.Load(idx));
+            binary = b.GreaterThan(20_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8286,7 +8286,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
         });
         b.Append(loop->Body(), [&] {
             // 10 > idx
-            binary = b.GreaterThan<bool>(10_i, b.Load(idx));
+            binary = b.GreaterThan(10_i, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8357,7 +8357,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_GreaterThan_init_Gre
         });
         b.Append(loop->Body(), [&] {
             // 10u > idx
-            binary = b.GreaterThan<bool>(10_u, b.Load(idx));
+            binary = b.GreaterThan(10_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8428,7 +8428,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, AnalyzeLoopBody_Failure_constant_GreaterThan
         });
         b.Append(loop->Body(), [&] {
             // 30u > idx
-            binary = b.GreaterThan<bool>(30_u, b.Load(idx));
+            binary = b.GreaterThan(30_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8499,7 +8499,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithRange) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -8587,7 +8587,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LoadFromLoopControlVariableWithoutRange) {
         });
         b.Append(loop->Body(), [&] {
             // 30u > idx
-            binary = b.GreaterThan<bool>(30_u, b.Load(idx));
+            binary = b.GreaterThan(30_u, b.Load(idx));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9083,7 +9083,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsLoadAndConstant) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9177,7 +9177,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ValueAsVar) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9299,7 +9299,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, LetWithLoad) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9467,7 +9467,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, MultipleBinaryAdds) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9591,7 +9591,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Overflow) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9668,7 +9668,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryAdd_I32_Underflow) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 1
-            auto* binary = b.LessThan<bool>(b.Load(idx), 1_i);
+            auto* binary = b.LessThan(b.Load(idx), 1_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9748,7 +9748,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9829,7 +9829,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9843,7 +9843,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Success_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 4
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 4_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -9956,7 +9956,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -9970,7 +9970,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 7
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 7_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 7_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -10082,7 +10082,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Overflow_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10159,7 +10159,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinarySubtract_Failure_Underflow_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 0
-            auto* binary = b.LessThan<bool>(b.Load(idx), 0_i);
+            auto* binary = b.LessThan(b.Load(idx), 0_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10233,7 +10233,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10247,7 +10247,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 4
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 4_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -10360,7 +10360,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 11
-            auto* binary = b.LessThan<bool>(b.Load(idx), 11_u);
+            auto* binary = b.LessThan(b.Load(idx), 11_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10374,7 +10374,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Success_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 20
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 20_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 20_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -10487,7 +10487,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10501,7 +10501,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_lhs) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 4
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 4_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -10610,7 +10610,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10624,7 +10624,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_negative_rhs) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 4
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 4_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -10736,7 +10736,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_I32
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10813,7 +10813,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_I32
         });
         b.Append(loop->Body(), [&] {
             // idx < 21
-            auto* binary = b.LessThan<bool>(b.Load(idx), 21_i);
+            auto* binary = b.LessThan(b.Load(idx), 21_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10890,7 +10890,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MaxBound_U32
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -10967,7 +10967,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryMultiply_Failure_Overflow_MinBound_U32
         });
         b.Append(loop->Body(), [&] {
             // idx < 21
-            auto* binary = b.LessThan<bool>(b.Load(idx), 21_u);
+            auto* binary = b.LessThan(b.Load(idx), 21_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11074,7 +11074,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Success_I32ToU32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11150,7 +11150,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_NegativeI32ToU32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11221,8 +11221,8 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_LargeU32ToI32) {
         });
         b.Append(loop->Body(), [&] {
             // idx <= u32(i32::kHighestValue) + 1u
-            auto* binary = b.LessThanEqual<bool>(
-                b.Load(idx), u32(static_cast<uint32_t>(i32::kHighestValue) + 1u));
+            auto* binary =
+                b.LessThanEqual(b.Load(idx), u32(static_cast<uint32_t>(i32::kHighestValue) + 1u));
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11293,7 +11293,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Convert_Failure_ConvertToNonInteger) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11364,7 +11364,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11378,7 +11378,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -11492,7 +11492,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11506,7 +11506,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Divisible_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -11620,7 +11620,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) 
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11634,7 +11634,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_GreaterThanOne) 
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 4
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 4_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 4_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -11748,7 +11748,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11762,7 +11762,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_Nondivisible_LessThanOne) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 10
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 10_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 10_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -11876,7 +11876,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -11890,7 +11890,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 9
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 9_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12004,7 +12004,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_u);
+            auto* binary = b.LessThan(b.Load(idx), 17_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12018,7 +12018,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Success_ZeroLHS_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 9
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 9_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12132,7 +12132,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12146,7 +12146,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeLHS) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 9
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 9_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12256,7 +12256,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12270,7 +12270,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_NegativeRHS) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 9
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 9_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12380,7 +12380,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 17
-            auto* binary = b.LessThan<bool>(b.Load(idx), 17_i);
+            auto* binary = b.LessThan(b.Load(idx), 17_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12394,7 +12394,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 9
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 9_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 9_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12504,7 +12504,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12518,7 +12518,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Divide_Failure_ZeroRHS_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12628,7 +12628,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12642,7 +12642,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12757,7 +12757,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_NonZero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12771,7 +12771,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_NonZero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -12886,7 +12886,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_Zero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -12900,7 +12900,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Success_I32_Zero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13015,7 +13015,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Negative) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13029,7 +13029,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Negative) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13139,7 +13139,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13153,7 +13153,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_NoLessThan32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 33
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 33_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 33_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13263,7 +13263,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13277,7 +13277,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_NoLessThan32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 34
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 34_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 34_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13387,7 +13387,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 5
-            auto* binary = b.LessThan<bool>(b.Load(idx), 5_u);
+            auto* binary = b.LessThan(b.Load(idx), 5_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13401,7 +13401,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_Overflow) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 31
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 31_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 31_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13512,7 +13512,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_U32_HighestValue_Overflow)
         });
         b.Append(loop->Body(), [&] {
             // idx < 32
-            auto* binary = b.LessThan<bool>(b.Load(idx), 32_u);
+            auto* binary = b.LessThan(b.Load(idx), 32_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13587,7 +13587,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 5
-            auto* binary = b.LessThan<bool>(b.Load(idx), 5_i);
+            auto* binary = b.LessThan(b.Load(idx), 5_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13601,7 +13601,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_Overflow) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 30
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 30_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 30_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13712,7 +13712,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftLeft_Failure_I32_HighestValue_Overflow)
         });
         b.Append(loop->Body(), [&] {
             // idx < 32
-            auto* binary = b.LessThan<bool>(b.Load(idx), 32_u);
+            auto* binary = b.LessThan(b.Load(idx), 32_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13787,7 +13787,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13801,7 +13801,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_NonZero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -13916,7 +13916,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_NonZero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -13930,7 +13930,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_NonZero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -14045,7 +14045,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_Zero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14059,7 +14059,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_U32_Zero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 5
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 5_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 5_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -14174,7 +14174,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_Zero) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14188,7 +14188,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Success_I32_Zero) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 6
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 6_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 6_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -14303,7 +14303,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_Negative) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14317,7 +14317,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_Negative) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 6
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 6_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 6_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -14427,7 +14427,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_U32_NoLessThan32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 33
-            auto* binary = b.LessThan<bool>(b.Load(idx), 33_u);
+            auto* binary = b.LessThan(b.Load(idx), 33_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14505,7 +14505,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, ShiftRight_Failure_I32_NoLessThan32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 33
-            auto* binary = b.LessThan<bool>(b.Load(idx), 33_u);
+            auto* binary = b.LessThan(b.Load(idx), 33_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14745,7 +14745,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_I3
         });
         b.Append(loop->Body(), [&] {
             // idx < -3
-            auto* binary = b.LessThan<bool>(b.Load(idx), -3_i);
+            auto* binary = b.LessThan(b.Load(idx), -3_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14759,7 +14759,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_I3
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -14874,7 +14874,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_U3
         });
         b.Append(loop->Body(), [&] {
             // idx < 6u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 6_u);
+            auto* binary = b.LessThan(b.Load(idx), 6_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -14888,7 +14888,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothAreConstantValues_U3
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 2u
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 2_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 2_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -15003,7 +15003,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15017,7 +15017,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 6
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 6_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 6_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -15132,7 +15132,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15146,7 +15146,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_BothValidRange_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 8u
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 8_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 8_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -15392,7 +15392,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_I32)
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15478,7 +15478,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_FirstIsInvalidRange_U32)
         });
         b.Append(loop->Body(), [&] {
             // idx < 10u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15564,7 +15564,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_I32
         });
         b.Append(loop->Body(), [&] {
             // idx < -2
-            auto* binary = b.LessThan<bool>(b.Load(idx), -2_i);
+            auto* binary = b.LessThan(b.Load(idx), -2_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15650,7 +15650,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Min_Success_SecondIsInvalidRange_U32
         });
         b.Append(loop->Body(), [&] {
             // idx < 20u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 20_u);
+            auto* binary = b.LessThan(b.Load(idx), 20_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15894,7 +15894,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_I3
         });
         b.Append(loop->Body(), [&] {
             // idx < -3
-            auto* binary = b.LessThan<bool>(b.Load(idx), -3_i);
+            auto* binary = b.LessThan(b.Load(idx), -3_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -15908,7 +15908,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_I3
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 3
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 3_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 3_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -16023,7 +16023,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_U3
         });
         b.Append(loop->Body(), [&] {
             // idx < 6u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 6_u);
+            auto* binary = b.LessThan(b.Load(idx), 6_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16037,7 +16037,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothAreConstantValues_U3
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 2u
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 2_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 2_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -16152,7 +16152,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_i);
+            auto* binary = b.LessThan(b.Load(idx), 9_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16166,7 +16166,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_I32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 6
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 6_i);
+                auto* binary_inner = b.LessThan(b.Load(idy), 6_i);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -16281,7 +16281,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 9u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 9_u);
+            auto* binary = b.LessThan(b.Load(idx), 9_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16295,7 +16295,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_BothValidRange_U32) {
             });
             b.Append(loop2->Body(), [&] {
                 // idy < 8u
-                auto* binary_inner = b.LessThan<bool>(b.Load(idy), 8_u);
+                auto* binary_inner = b.LessThan(b.Load(idy), 8_u);
                 auto* ifelse_inner = b.If(binary_inner);
                 b.Append(ifelse_inner->True(), [&] { b.ExitIf(ifelse_inner); });
                 b.Append(ifelse_inner->False(), [&] { b.ExitLoop(loop2); });
@@ -16541,7 +16541,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_I32)
         });
         b.Append(loop->Body(), [&] {
             // idx < 10
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_i);
+            auto* binary = b.LessThan(b.Load(idx), 10_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16627,7 +16627,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_FirstIsInvalidRange_U32)
         });
         b.Append(loop->Body(), [&] {
             // idx < 10u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 10_u);
+            auto* binary = b.LessThan(b.Load(idx), 10_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16713,7 +16713,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_I32
         });
         b.Append(loop->Body(), [&] {
             // idx < -2
-            auto* binary = b.LessThan<bool>(b.Load(idx), -2_i);
+            auto* binary = b.LessThan(b.Load(idx), -2_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -16799,7 +16799,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, Builtin_Max_Success_SecondIsInvalidRange_U32
         });
         b.Append(loop->Body(), [&] {
             // idx < 20u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 20_u);
+            auto* binary = b.LessThan(b.Load(idx), 20_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -17372,7 +17372,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_I32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 1
-            auto* binary = b.LessThan<bool>(b.Load(idx), 1_i);
+            auto* binary = b.LessThan(b.Load(idx), 1_i);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });
@@ -17465,7 +17465,7 @@ TEST_F(IR_IntegerRangeAnalysisTest, BinaryModulo_Failure_RHS_Zero_U32) {
         });
         b.Append(loop->Body(), [&] {
             // idx < 1u
-            auto* binary = b.LessThan<bool>(b.Load(idx), 1_u);
+            auto* binary = b.LessThan(b.Load(idx), 1_u);
             auto* ifelse = b.If(binary);
             b.Append(ifelse->True(), [&] { b.ExitIf(ifelse); });
             b.Append(ifelse->False(), [&] { b.ExitLoop(loop); });

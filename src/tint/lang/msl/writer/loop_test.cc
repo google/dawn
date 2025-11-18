@@ -301,7 +301,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
             b.NextIteration(l);
 
             b.Append(l->Body(), [&] {
-                auto* ifelse = b.If(b.LessThan<bool>(b.Load(v), 10_u));
+                auto* ifelse = b.If(b.LessThan(b.Load(v), 10_u));
                 b.Append(ifelse->True(), [&] {  //
                     b.ExitIf(ifelse);
                 });

@@ -163,7 +163,7 @@ struct State {
                        core::ir::Value* idx,
                        core::ir::Var* storage_buffer) {
         auto* length = b.Access(ty.ptr<storage, u32, read>(), storage_buffer, 0_u);
-        auto* len_check = b.LessThan(ty.bool_(), idx, b.Load(length));
+        auto* len_check = b.LessThan(idx, b.Load(length));
 
         auto* has_check = b.If(len_check);
         has_check->SetResult(result);

@@ -143,7 +143,7 @@ struct State {
                 // No loop is required if we have at least as many invocations than counts.
                 if (count <= wgsize) {
                     // Make the first |count| invocations in the group perform the arrayed stores.
-                    auto* ifelse = b.If(b.LessThan(ty.bool_(), local_index, u32(count)));
+                    auto* ifelse = b.If(b.LessThan(local_index, u32(count)));
                     b.Append(ifelse->True(), [&] {
                         for (auto& store : *element_stores) {
                             GenerateStore(store, count, local_index);
@@ -152,7 +152,7 @@ struct State {
                     });
                 } else {
                     // Use a loop for arrayed stores that exceed the wgsize
-                    b.LoopRange(ty, local_index, u32(count), u32(wgsize), [&](Value* index) {
+                    b.LoopRange(local_index, u32(count), u32(wgsize), [&](Value* index) {
                         for (auto& store : *element_stores) {
                             GenerateStore(store, count, index);
                         }
