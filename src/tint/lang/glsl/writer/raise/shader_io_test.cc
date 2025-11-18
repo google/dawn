@@ -37,7 +37,12 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using GlslWriter_ShaderIOTest = core::ir::transform::TransformTest;
+class GlslWriter_ShaderIOTest : public core::ir::transform::TransformTest {
+  public:
+    GlslWriter_ShaderIOTest() {
+        capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+    }
+};
 
 TEST_F(GlslWriter_ShaderIOTest, NoInputsOrOutputs) {
     auto* ep = b.ComputeFunction("foo");
@@ -602,7 +607,6 @@ $B1: {  # root
 }
 
 TEST_F(GlslWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
-    capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
     auto* str_ty = ty.Struct(mod.symbols.New("Output"), {
                                                             {
                                                                 mod.symbols.New("color1"),

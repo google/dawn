@@ -174,7 +174,7 @@ void main() {
 TEST_F(GlslWriterTest, VarOutBuiltin) {
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.f32()));
         v->SetBuiltin(core::BuiltinValue::kFragDepth);
     });
 
@@ -196,7 +196,7 @@ void main() {
 TEST_F(GlslWriterTest, VarBuiltinSampleIndex_ES) {
     core::ir::Var* v = nullptr;
     b.Append(b.ir.root_block, [&] {
-        v = b.Var("v", ty.ptr(core::AddressSpace::kOut, ty.u32()));
+        v = b.Var("v", ty.ptr(core::AddressSpace::kIn, ty.u32()));
         v->SetBuiltin(core::BuiltinValue::kSampleIndex);
     });
 

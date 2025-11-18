@@ -37,7 +37,12 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_ShaderIOTest = core::ir::transform::TransformTest;
+class SpirvWriter_ShaderIOTest : public core::ir::transform::TransformTest {
+  public:
+    SpirvWriter_ShaderIOTest() {
+        capabilities.Add(core::ir::Capability::kLoosenValidationForShaderIO);
+    }
+};
 
 TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
     auto* ep = b.ComputeFunction("foo");
