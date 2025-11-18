@@ -684,6 +684,9 @@ def main() -> None:
     chromium_deps = _parse_deps_file(
         _read_remote_chromium_file('DEPS', revision_range.new_revision))
     changed_entries = _get_changed_deps_entries(dawn_deps, chromium_deps)
+    # We change the variable directly instead of using ChangedRepo since
+    # 'gclient setdep --revision' does not work for repos if there is no entry
+    # in .gitmodules.
     changed_entries.append(
         ChangedVariable(
             name=CHROMIUM_REVISION_VAR,
