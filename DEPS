@@ -287,7 +287,7 @@ deps = {
   },
 
   'third_party/angle': {
-    'url': '{chromium_git}/angle/angle@127a84404b88dbc4327ffb7f831a9a36c3b111bc',
+    'url': '{chromium_git}/angle/angle@59964ffafb96f17a0d51c645faf6f99a44296cea',
     'condition': 'dawn_standalone',
   },
 
