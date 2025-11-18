@@ -1034,22 +1034,20 @@ class Validator {
                               IODirection dir);
 
     /// Validates that a type is a bool only if it is decorated with @builtin(front_facing).
-    /// @param msg_anchor the message anchor
+    /// @param msg_anchor where to attach errors to
     /// @param attr the IO attributes
     /// @param ty the type
     /// @param err error message to log when check fails
-    template <typename MSG_ANCHOR>
-    void CheckFrontFacingIfBool(const MSG_ANCHOR* msg_anchor,
+    void CheckFrontFacingIfBool(const CastableBase* msg_anchor,
                                 const IOAttributes& attr,
                                 const core::type::Type* ty,
                                 const std::string& err);
 
     /// Validates that a type is not a bool.
-    /// @param msg_anchor the message anchor
+    /// @param msg_anchor where to attach errors to
     /// @param ty the type
     /// @param err error message to log when check fails
-    template <typename MSG_ANCHOR>
-    void CheckNotBool(const MSG_ANCHOR* msg_anchor,
+    void CheckNotBool(const CastableBase* msg_anchor,
                       const core::type::Type* ty,
                       const std::string& err);
 
@@ -2634,8 +2632,7 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
         });
 }
 
-template <typename MSG_ANCHOR>
-void Validator::CheckFrontFacingIfBool(const MSG_ANCHOR* msg_anchor,
+void Validator::CheckFrontFacingIfBool(const CastableBase* msg_anchor,
                                        const IOAttributes& attr,
                                        const core::type::Type* ty,
                                        const std::string& err) {
@@ -2644,8 +2641,7 @@ void Validator::CheckFrontFacingIfBool(const MSG_ANCHOR* msg_anchor,
     }
 }
 
-template <typename MSG_ANCHOR>
-void Validator::CheckNotBool(const MSG_ANCHOR* msg_anchor,
+void Validator::CheckNotBool(const CastableBase* msg_anchor,
                              const core::type::Type* ty,
                              const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
