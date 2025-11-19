@@ -36,12 +36,11 @@ package {{ kotlin_package }}
 {% set main_doc = funtion_pointer_info.doc if funtion_pointer_info else "" %}
 {% set arg_docs_map =  funtion_pointer_info.args if funtion_pointer_info else {} %}
 
-{% set function_pointer_args = function_pointer.arguments[:-1] | list %}
-{% if check_if_doc_present(main_doc, "", arg_docs_map, function_pointer_args) == 'True' %}
-    {{ generate_kdoc(main_doc, return_str, arg_docs_map, function_pointer_args , line_wrap_prefix = "\n * ") }}
-
-{%- endif %}
+{% set function_pointer_args = function_pointer.arguments | list %}
 public fun interface {{ function_pointer.name.CamelCase() }} {
+    {% if check_if_doc_present(main_doc, "", arg_docs_map, function_pointer_args) == 'True' %}
+    {{ generate_kdoc(main_doc, return_str, arg_docs_map, function_pointer_args , indent_prefix = "    ",line_wrap_prefix = "\n     * ") }}
+    {%- endif %}
     @Suppress("INAPPLICABLE_JVM_NAME")  //* Required for @JvmName on global function.
     @JvmName("{{ callbackName }}")  //* Required to access Inline Value Class parameters via JNI.
     public fun {{ callbackName }}(
