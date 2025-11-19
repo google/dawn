@@ -29,9 +29,9 @@
 #define SRC_DAWN_NATIVE_OPENGL_CONTEXTEGL_H_
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
-#include "dawn/common/Mutex.h"
 #include "dawn/common/NonMovable.h"
 #include "dawn/common/egl_platform.h"
 #include "dawn/native/opengl/DeviceGL.h"
@@ -50,17 +50,11 @@ class ContextEGL : NonMovable {
                                                              bool disableEGL15Robustness,
                                                              bool useANGLETextureSharing,
                                                              bool forceES31AndMinExtensions,
+                                                             bool bindContextOnlyDuringUse,
                                                              EGLint angleVirtualizationGroup);
 
-    explicit ContextEGL(Ref<DisplayEGL> display);
     ~ContextEGL();
 
-    MaybeError Initialize(wgpu::BackendType backend,
-                          bool useRobustness,
-                          bool useANGLETextureSharing,
-                          bool disableEGL15Robustness,
-                          bool forceES31AndMinExtensions,
-                          EGLint angleVirtualizationGroup);
     void RequestRequiredExtensionsExplicitly();
     bool IsInScopedMakeCurrent() const;
 
@@ -87,26 +81,53 @@ class ContextEGL : NonMovable {
         bool operator!=(const ContextState& other) const;
     };
 
-    class ScopedMakeCurrent : NonMovable {
+    class ScopedMakeCurrent {
       public:
-        explicit ScopedMakeCurrent(ContextEGL* context);
+        ScopedMakeCurrent() = default;
+        ScopedMakeCurrent(ScopedMakeCurrent&& src);
+        ScopedMakeCurrent(const ScopedMakeCurrent&) = delete;
         ~ScopedMakeCurrent();
 
+        ScopedMakeCurrent& operator=(ScopedMakeCurrent&& src);
+        ScopedMakeCurrent& operator=(const ScopedMakeCurrent&) = delete;
+
+        MaybeError End();
+
       private:
-        raw_ptr<ContextEGL> mContext;
+        friend class ContextEGL;
+
+        explicit ScopedMakeCurrent(ContextEGL* context);
+        MaybeError Initialize();
+
+        raw_ptr<ContextEGL> mContext = nullptr;
         ContextState mPrevState;
-        Mutex::AutoLock mLock;
+        std::unique_lock<std::mutex> mLock;
     };
-    [[nodiscard]] ScopedMakeCurrent MakeCurrent();
+
+    ResultOrError<ScopedMakeCurrent> MakeCurrent();
 
   private:
+    explicit ContextEGL(Ref<DisplayEGL> display, bool bindContextOnlyDuringUse);
+
+    MaybeError Initialize(wgpu::BackendType backend,
+                          bool useRobustness,
+                          bool useANGLETextureSharing,
+                          bool disableEGL15Robustness,
+                          bool forceES31AndMinExtensions,
+                          EGLint angleVirtualizationGroup);
+
     // This mutex is used to make sure only one thread can enter ScopedMakeCurrent at a time.
-    Ref<Mutex> mExclusiveMakeCurrentMutex;
+    std::mutex mExclusiveMakeCurrentMutex;
 
     Ref<DisplayEGL> mDisplay;
     ContextState mState;
     EGLSurface mOffscreenSurface = EGL_NO_SURFACE;
     bool mForceES31AndMinExtensions = false;
+
+    // Flag to allow this context to be used on multiple threads. A GL context cannot be used on
+    // multiple threads at the same time. But if one thread locks the context, then unbinds it, that
+    // will allow the context to be used on another thread.
+    const bool mBindContextOnlyDuringUse = false;
 };
 
 }  // namespace dawn::native::opengl

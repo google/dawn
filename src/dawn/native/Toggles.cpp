@@ -764,6 +764,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Don't validate the required VkImage size against the size of the AHardwareBuffer on import. "
       "Some drivers report the wrong size.",
       "https://crbug.com/333424893", ToggleStage::Device}},
+    {Toggle::GLAllowContextOnMultiThreads,
+     {"gl_allow_context_on_multi_threads",
+      "Allows GL backend to use GL context on multiple threads. This will add certain "
+      "synchronizations' overheads.",
+      "https://crbug.com/dawn/451928481", ToggleStage::Device}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 

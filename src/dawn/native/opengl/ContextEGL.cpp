@@ -60,7 +60,7 @@ namespace {
 
 thread_local ContextEGL* gCurrentContextInScope = nullptr;
 
-void MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& state) {
+MaybeError MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& state) {
     if (display->egl.GetCurrentContext() != state.context ||
         display->egl.GetCurrentSurface(EGL_DRAW) != state.drawSurface ||
         display->egl.GetCurrentSurface(EGL_READ) != state.readSurface) {
@@ -68,10 +68,10 @@ void MakeContextCurrent(DisplayEGL* display, const ContextEGL::ContextState& sta
 
                                                       state.readSurface, state.context);
 
-        IgnoreErrors(
-
-            CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE), "eglMakeCurrent"));
+        return CheckEGL(display->egl, static_cast<EGLBoolean>(success == EGL_TRUE),
+                        "eglMakeCurrent");
     }
+    return {};
 }
 
 }  // namespace
@@ -83,16 +83,18 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> di
                                                               bool disableEGL15Robustness,
                                                               bool useANGLETextureSharing,
                                                               bool forceES31AndMinExtensions,
+                                                              bool bindContextOnlyDuringUse,
                                                               EGLint angleVirtualizationGroup) {
-    auto context = std::make_unique<ContextEGL>(std::move(display));
+    auto context =
+        std::unique_ptr<ContextEGL>(new ContextEGL(std::move(display), bindContextOnlyDuringUse));
     DAWN_TRY(context->Initialize(backend, useRobustness, disableEGL15Robustness,
                                  useANGLETextureSharing, forceES31AndMinExtensions,
                                  angleVirtualizationGroup));
     return std::move(context);
 }
 
-ContextEGL::ContextEGL(Ref<DisplayEGL> display)
-    : mExclusiveMakeCurrentMutex(AcquireRef(new Mutex())), mDisplay(std::move(display)) {}
+ContextEGL::ContextEGL(Ref<DisplayEGL> display, bool bindContextOnlyDuringUse)
+    : mDisplay(std::move(display)), mBindContextOnlyDuringUse(bindContextOnlyDuringUse) {}
 
 ContextEGL::~ContextEGL() {
     if (mOffscreenSurface != EGL_NO_SURFACE) {
@@ -100,6 +102,10 @@ ContextEGL::~ContextEGL() {
         mOffscreenSurface = EGL_NO_SURFACE;
     }
     if (mState.context != EGL_NO_CONTEXT) {
+        if (mState.context == mDisplay->egl.GetCurrentContext()) {
+            mDisplay->egl.MakeCurrent(mDisplay->GetDisplay(), EGL_NO_SURFACE, EGL_NO_SURFACE,
+                                      EGL_NO_CONTEXT);
+        }
         mDisplay->egl.DestroyContext(mDisplay->GetDisplay(), mState.context);
         mState.context = EGL_NO_CONTEXT;
     }
@@ -257,7 +263,7 @@ bool ContextEGL::IsInScopedMakeCurrent() const {
 }
 
 void ContextEGL::DeprecatedMakeCurrent() {
-    MakeContextCurrent(mDisplay.Get(), mState);
+    IgnoreErrors(MakeContextCurrent(mDisplay.Get(), mState));
 }
 
 // ScopedSetCurrentSurface
@@ -292,27 +298,72 @@ bool ContextEGL::ContextState::operator!=(const ContextState& other) const {
 
 // ScopedMakeCurrent
 
-ContextEGL::ScopedMakeCurrent::ScopedMakeCurrent(ContextEGL* context)
-    : mContext(context), mLock(mContext->mExclusiveMakeCurrentMutex.Get()) {
+ContextEGL::ScopedMakeCurrent::ScopedMakeCurrent(ContextEGL* context) : mContext(context) {}
+
+ContextEGL::ScopedMakeCurrent::ScopedMakeCurrent(ScopedMakeCurrent&& src)
+    : mContext(std::move(src.mContext)),
+      mPrevState(std::move(src.mPrevState)),
+      mLock(std::move(src.mLock)) {
+    src.mContext = nullptr;
+}
+
+ContextEGL::ScopedMakeCurrent& ContextEGL::ScopedMakeCurrent::operator=(ScopedMakeCurrent&& src) {
+    if (&src == this) {
+        return *this;
+    }
+    mContext = std::move(src.mContext);
+    src.mContext = nullptr;
+    mPrevState = std::move(src.mPrevState);
+    mLock = std::move(src.mLock);
+    return *this;
+}
+
+ContextEGL::ScopedMakeCurrent::~ScopedMakeCurrent() {
+    auto result = End();
+    DAWN_ASSERT(result.IsSuccess());
+    IgnoreErrors(std::move(result));
+}
+
+MaybeError ContextEGL::ScopedMakeCurrent::Initialize() {
+    if (!mContext) {
+        return {};
+    }
+    mLock = std::unique_lock<std::mutex>(mContext->mExclusiveMakeCurrentMutex);
+
     mPrevState.context = mContext->mDisplay->egl.GetCurrentContext();
     mPrevState.drawSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_DRAW);
     mPrevState.readSurface = mContext->mDisplay->egl.GetCurrentSurface(EGL_READ);
 
     if (mPrevState != mContext->mState) {
-        MakeContextCurrent(mContext->mDisplay.Get(), mContext->mState);
+        auto result = MakeContextCurrent(mContext->mDisplay.Get(), mContext->mState);
+        if (DAWN_UNLIKELY(result.IsError())) {
+            mContext = nullptr;
+            return result;
+        }
     }
     gCurrentContextInScope = mContext;
+    return {};
 }
 
-ContextEGL::ScopedMakeCurrent::~ScopedMakeCurrent() {
-    if (mPrevState != mContext->mState) {
-        MakeContextCurrent(mContext->mDisplay.Get(), mPrevState);
+MaybeError ContextEGL::ScopedMakeCurrent::End() {
+    if (!mContext) {
+        return {};
+    }
+
+    MaybeError result;
+    if (mContext->mBindContextOnlyDuringUse && mPrevState != mContext->mState) {
+        // Unmake current this context so that other threads can use it.
+        result = MakeContextCurrent(mContext->mDisplay.Get(), mPrevState);
     }
     gCurrentContextInScope = nullptr;
+    mContext = nullptr;
+    return result;
 }
 
-[[nodiscard]] ContextEGL::ScopedMakeCurrent ContextEGL::MakeCurrent() {
-    return ScopedMakeCurrent(this);
+ResultOrError<ContextEGL::ScopedMakeCurrent> ContextEGL::MakeCurrent() {
+    ScopedMakeCurrent scopedMakeCurrent(IsInScopedMakeCurrent() ? nullptr : this);
+    DAWN_TRY(scopedMakeCurrent.Initialize());
+    return std::move(scopedMakeCurrent);
 }
 
 }  // namespace dawn::native::opengl

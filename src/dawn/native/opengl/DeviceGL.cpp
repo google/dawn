@@ -157,7 +157,8 @@ Device::~Device() {
 MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     // Directly set the context current and use mGL instead of calling GetGL as GetGL will notify
     // the (yet inexistent) queue that GL was used.
-    auto scopedCurrentContext = mContext->MakeCurrent();
+    ContextEGL::ScopedMakeCurrent scopedCurrentContext;
+    DAWN_TRY_ASSIGN(scopedCurrentContext, mContext->MakeCurrent());
     mContext->RequestRequiredExtensionsExplicitly();
 
     const OpenGLFunctions& gl = mGL;
@@ -236,7 +237,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
         mArrayLengthBuffer = ToBackend(std::move(buffer));
     }
 
-    return {};
+    return scopedCurrentContext.End();
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
@@ -383,7 +384,8 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     // TODO(451928481): We cannot defer the GL work here because the external texture may be
     // deleted after this method returns. In the future, we should deprecate this method and
     // require clients to use SharedTextureMemory for better lifetime management.
-    auto scopedCurrentContext = mContext->MakeCurrent();
+    ContextEGL::ScopedMakeCurrent scopedCurrentContext;
+    DAWN_TRY_ASSIGN(scopedCurrentContext, mContext->MakeCurrent());
     const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
@@ -422,6 +424,9 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingEGLImageImpl(
     auto result = AcquireRef(new Texture(this, textureDescriptor, tex, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
+
+    DAWN_TRY(scopedCurrentContext.End());
+
     return result;
 }
 
@@ -441,7 +446,8 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     // TODO(451928481): We cannot defer the GL work here because the external texture may be
     // deleted after this method returns. In the future, we should deprecate this method and
     // require clients to use SharedTextureMemory for better lifetime management.
-    auto scopedCurrentContext = mContext->MakeCurrent();
+    ContextEGL::ScopedMakeCurrent scopedCurrentContext;
+    DAWN_TRY_ASSIGN(scopedCurrentContext, mContext->MakeCurrent());
     const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
 
     TextureDescriptor reifiedDescriptor =
@@ -471,6 +477,9 @@ ResultOrError<Ref<TextureBase>> Device::CreateTextureWrappingGLTextureImpl(
     auto result = AcquireRef(new Texture(this, textureDescriptor, texture, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
+
+    DAWN_TRY(scopedCurrentContext.End());
+
     return result;
 }
 
@@ -487,12 +496,13 @@ MaybeError Device::ExecutePendingGLWork() {
         return {};
     }
 
-    auto scopedCurrentContext = mContext->MakeCurrent();
+    ContextEGL::ScopedMakeCurrent scopedCurrentContext;
+    DAWN_TRY_ASSIGN(scopedCurrentContext, mContext->MakeCurrent());
     const OpenGLFunctions& gl = GetGL(/*makeCurrent=*/false);
     for (auto& work : workList) {
         DAWN_TRY(work(gl));
     }
-    return {};
+    return scopedCurrentContext.End();
 }
 
 MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,

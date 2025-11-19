@@ -117,20 +117,23 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // that we can query the limits and other properties. Assumes that the limit are the same
     // irrespective of the context creation options.
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context,
-                    ContextEGL::Create(display, backendType, /*useRobustness*/ false,
-                                       /*disableEGL15Robustness */ false,
-                                       /*useANGLETextureSharing*/ false,
-                                       /*forceES31AndMinExtensions*/ forceES31AndMinExtensions,
-                                       angleVirtualizationGroup));
+    DAWN_TRY_ASSIGN(
+        context, ContextEGL::Create(display, backendType, /*useRobustness*/ false,
+                                    /*disableEGL15Robustness */ false,
+                                    /*useANGLETextureSharing*/ false,
+                                    /*forceES31AndMinExtensions*/ forceES31AndMinExtensions,
+                                    /*bindContextOnlyDuringUse*/ true, angleVirtualizationGroup));
 
-    auto scopedMakeCurrent = context->MakeCurrent();
+    ContextEGL::ScopedMakeCurrent scopedCurrentContext;
+    DAWN_TRY_ASSIGN(scopedCurrentContext, context->MakeCurrent());
     // Needed to request extensions here to initialize supported gl extensions set
     context->RequestRequiredExtensionsExplicitly();
 
     Ref<PhysicalDevice> physicalDevice =
         AcquireRef(new PhysicalDevice(backendType, std::move(display), angleVirtualizationGroup));
     DAWN_TRY(physicalDevice->Initialize());
+
+    DAWN_TRY(scopedCurrentContext.End());
 
     return physicalDevice;
 }
@@ -531,12 +534,13 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     // Use the pre-1.5 extension enum instead.
     bool disableEGL15Robustness = mVendorId == gpu_info::kVendorID_ImgTec;
     bool forceES31AndMinExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
+    bool bindContextOnlyDuringUse = deviceToggles.IsEnabled(Toggle::GLAllowContextOnMultiThreads);
 
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context,
-                    ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                       disableEGL15Robustness, useANGLETextureSharing,
-                                       forceES31AndMinExtensions, mAngleVirtualizationGroup));
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
+                                                disableEGL15Robustness, useANGLETextureSharing,
+                                                forceES31AndMinExtensions, bindContextOnlyDuringUse,
+                                                mAngleVirtualizationGroup));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));
