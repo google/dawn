@@ -473,6 +473,11 @@ class DeviceBase : public ErrorSink,
 
     tint::InternalCompilerErrorCallbackInfo GetTintInternalCompilerErrorCallback();
 
+    // During adapter's creation of devices, if device initialization fails, adapter will trigger
+    // the device lost event. After that, adapter should reset the lost event to avoid double
+    // triggering it when the device object get destructed.
+    void ResetLostEvent();
+
   protected:
     // Constructor used only for mocking and testing.
     DeviceBase();
@@ -490,11 +495,6 @@ class DeviceBase : public ErrorSink,
         DAWN_UNREACHABLE();
     }
 
-    // The DeviceLostEvent passed to this device in the constructor. To avoid triggering it before
-    // the Device is initialized, it's held in this 'pending' member and moved to mLostEvent after
-    // initialization. Otherwise if it were triggered during initialization, it would be
-    // double-triggered by the adapater due to device creation failure.
-    Ref<DeviceLostEvent> mPendingLostEvent = nullptr;
     // Device lost event needs to be protected for now because mock device needs it.
     // TODO(dawn:1702) Make this private and move the class in the implementation file when we mock
     // the adapter.
