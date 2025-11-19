@@ -1529,6 +1529,67 @@ TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Param_InputIndexAttachment) {
+    auto* f = b.Function("my_func", ty.void_());
+    f->SetStage(Function::PipelineStage::kFragment);
+
+    IOAttributes attr;
+    attr.input_attachment_index = 0;
+    auto* p = b.FunctionParam("p", ty.u32());
+    p->SetAttributes(attr);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:27 error: input attachment index IO attributes cannot be declared for a fragment shader input. They can only be used for a fragment shader resource.
+%my_func = @fragment func(%p:u32):void {
+                          ^^^^^^
+)")) << res.Failure();
+
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:27 error: input attachment index IO attributes cannot be declared on a input param. They can only be used on a module scope variable.
+%my_func = @fragment func(%p:u32):void {
+                          ^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_InputIndexAttachment) {
+    auto* f = b.Function("my_func", ty.void_());
+    f->SetStage(Function::PipelineStage::kFragment);
+
+    IOAttributes attr;
+    attr.input_attachment_index = 0;
+    f->SetReturnAttributes(attr);
+    f->SetReturnType(ty.u32());
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:1 error: input attachment index IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader resource.
+%my_func = @fragment func():u32 {
+^^^^^^^^
+)")) << res.Failure();
+
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:1 error: input attachment index IO attributes cannot be declared on a return value. They can only be used on a module scope variable.
+%my_func = @fragment func():u32 {
+^^^^^^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Return_MultipleIOAnnotations) {
     auto* f = VertexEntryPoint("my_func");
     f->SetReturnLocation(0);

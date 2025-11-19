@@ -222,7 +222,7 @@ void WalkTypeAndMembers(CTX& ctx,
 }
 
 /// The IO direction of an operation.
-enum class IODirection : uint8_t { kInput, kOutput };
+enum class IODirection : uint8_t { kInput, kOutput, kResource };
 
 /// @returns a human-readable string for an IODirection
 std::string_view ToString(IODirection value) {
@@ -231,18 +231,57 @@ std::string_view ToString(IODirection value) {
             return "input";
         case IODirection::kOutput:
             return "output";
+        case IODirection::kResource:
+            return "resource";
     }
     TINT_ICE() << "Unknown enum passed to ToString(IODirection)";
+}
+
+IODirection IODirectionFor(AddressSpace address_space) {
+    switch (address_space) {
+        case AddressSpace::kIn:
+            return IODirection::kInput;
+        case AddressSpace::kOut:
+            return IODirection::kOutput;
+        case AddressSpace::kHandle:
+            return IODirection::kResource;
+        default:
+            TINT_ICE() << "Unexpected address_space '" << ToString(address_space)
+                       << "' passed to IODirectionFrom()";
+    }
+}
+
+/// The kind of shader IO being validated.
+enum class ShaderIOKind : uint8_t {
+    kInputParam,
+    kResultValue,
+    kModuleScopeVar,
+};
+
+/// @returns text describing the shader IO kind for error logging
+std::string ToString(ShaderIOKind value) {
+    switch (value) {
+        case ShaderIOKind::kInputParam:
+            return "input param";
+        case ShaderIOKind::kResultValue:
+            return "return value";
+        case ShaderIOKind::kModuleScopeVar:
+            return "module scope variable";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(ShaderIOKind)";
 }
 
 /// How an attribute is being used, a tuple of the shader stage and IO direction
 enum class IOAttributeUsage : uint8_t {
     kComputeInputUsage,
     kComputeOutputUsage,
+    kComputeResourceUsage,
     kFragmentInputUsage,
     kFragmentOutputUsage,
+    kFragmentResourceUsage,
     kVertexInputUsage,
     kVertexOutputUsage,
+    kVertexResourceUsage,
     kUndefinedUsage,
 };
 
@@ -253,16 +292,22 @@ std::string ToString(IOAttributeUsage value) {
             return "compute shader input";
         case IOAttributeUsage::kComputeOutputUsage:
             return "compute shader output";
+        case IOAttributeUsage::kComputeResourceUsage:
+            return "compute shader resource";
         case IOAttributeUsage::kFragmentInputUsage:
             return "fragment shader input";
         case IOAttributeUsage::kFragmentOutputUsage:
             return "fragment shader output";
+        case IOAttributeUsage::kFragmentResourceUsage:
+            return "fragment shader resource";
         case IOAttributeUsage::kVertexInputUsage:
             return "vertex shader input";
         case IOAttributeUsage::kVertexOutputUsage:
             return "vertex shader output";
+        case IOAttributeUsage::kVertexResourceUsage:
+            return "vertex shader resourcee";
         case IOAttributeUsage::kUndefinedUsage:
-            return "non-entry point i/o";
+            return "non-entry point usage";
     }
     TINT_ICE() << "Unknown enum passed to ToString(IOAttribute)";
 }
@@ -276,6 +321,8 @@ IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection 
                     return IOAttributeUsage::kComputeInputUsage;
                 case IODirection::kOutput:
                     return IOAttributeUsage::kComputeOutputUsage;
+                case IODirection::kResource:
+                    return IOAttributeUsage::kComputeResourceUsage;
             }
         case Function::PipelineStage::kFragment:
             switch (direction) {
@@ -283,6 +330,8 @@ IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection 
                     return IOAttributeUsage::kFragmentInputUsage;
                 case IODirection::kOutput:
                     return IOAttributeUsage::kFragmentOutputUsage;
+                case IODirection::kResource:
+                    return IOAttributeUsage::kFragmentResourceUsage;
             }
         case Function::PipelineStage::kVertex:
             switch (direction) {
@@ -290,6 +339,8 @@ IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection 
                     return IOAttributeUsage::kVertexInputUsage;
                 case IODirection::kOutput:
                     return IOAttributeUsage::kVertexOutputUsage;
+                case IODirection::kResource:
+                    return IOAttributeUsage::kVertexResourceUsage;
             }
         case Function::PipelineStage::kUndefined:
             return IOAttributeUsage::kUndefinedUsage;
@@ -303,12 +354,15 @@ IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection 
     switch (usage) {
         case IOAttributeUsage::kComputeInputUsage:
         case IOAttributeUsage::kComputeOutputUsage:
+        case IOAttributeUsage::kComputeResourceUsage:
             return Function::PipelineStage::kCompute;
         case IOAttributeUsage::kFragmentInputUsage:
         case IOAttributeUsage::kFragmentOutputUsage:
+        case IOAttributeUsage::kFragmentResourceUsage:
             return Function::PipelineStage::kFragment;
         case IOAttributeUsage::kVertexInputUsage:
         case IOAttributeUsage::kVertexOutputUsage:
+        case IOAttributeUsage::kVertexResourceUsage:
             return Function::PipelineStage::kVertex;
         case IOAttributeUsage::kUndefinedUsage:
             return Function::PipelineStage::kUndefined;
@@ -327,9 +381,13 @@ IOAttributeUsage IOAttributeUsageFor(Function::PipelineStage stage, IODirection 
         case IOAttributeUsage::kFragmentOutputUsage:
         case IOAttributeUsage::kVertexOutputUsage:
             return IODirection::kOutput;
+        case IOAttributeUsage::kComputeResourceUsage:
+        case IOAttributeUsage::kFragmentResourceUsage:
+        case IOAttributeUsage::kVertexResourceUsage:
         case IOAttributeUsage::kUndefinedUsage:
-            return IODirection::kInput;  // Technically isn't either input or output, but something
-                                         // needs to be returned to avoid later complexity
+            return IODirection::kResource;  // Technically it could also be a kInput or kOutput, but
+                                            // no validation depends on differentiate between these
+                                            // cases currently.
     }
     TINT_ICE() << "Unknown IOAttribute usage " << ToString(usage);
 }
@@ -574,9 +632,14 @@ const BuiltInChecker& BuiltinCheckerFor(BuiltinValue builtin, const Capabilities
 /// IOAttributeChecker is the interface used to check that a usage of an IO attribute
 /// meets the spec rules for a given context.
 struct IOAttributeChecker {
+    /// What kinda of IO attribute is being checked
     IOAttributeKind kind;
+
     /// What combination of stage and IO direction is this attribute legal for.
     EnumSet<IOAttributeUsage> valid_usages;
+
+    /// What type of shader IO values is this attribute legal for.
+    EnumSet<ShaderIOKind> valid_io_kinds;
 
     /// Implements the validation logic for a specific attribute.
     using CheckFn = Result<SuccessType, std::string>(const core::type::Type* ty,
@@ -592,6 +655,8 @@ constexpr IOAttributeChecker kInvariantChecker{
     .kind = IOAttributeKind::kInvariant,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kVertexOutputUsage,
                                               IOAttributeUsage::kFragmentInputUsage},
+    .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kResultValue,
+                                            ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type*,
                 const IOAttributes& attr,
                 const Capabilities&,
@@ -614,6 +679,8 @@ constexpr IOAttributeChecker kBuiltinChecker{
             IOAttributeUsage::kVertexInputUsage,
             IOAttributeUsage::kVertexOutputUsage,
         },
+    .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kResultValue,
+                                            ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type* ty,
                 const IOAttributes& attr,
                 const Capabilities& cap,
@@ -646,6 +713,15 @@ constexpr IOAttributeChecker kBuiltinChecker{
 constexpr IOAttributeChecker kColorChecker{
     .kind = IOAttributeKind::kColor,
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentInputUsage},
+    .valid_io_kinds =
+        EnumSet<ShaderIOKind>{ShaderIOKind::kInputParam, ShaderIOKind::kModuleScopeVar},
+    .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
+        -> Result<SuccessType, std::string> { return Success; }};
+
+constexpr IOAttributeChecker kInputAttachmentIndexChecker{
+    .kind = IOAttributeKind::kInputAttachmentIndex,
+    .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentResourceUsage},
+    .valid_io_kinds = EnumSet<ShaderIOKind>{ShaderIOKind::kModuleScopeVar},
     .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
         -> Result<SuccessType, std::string> { return Success; }};
 
@@ -663,6 +739,9 @@ Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& 
     }
     if (attr.color.has_value()) {
         checkers.Push(&kColorChecker);
+    }
+    if (attr.input_attachment_index.has_value()) {
+        checkers.Push(&kInputAttachmentIndexChecker);
     }
     // TODO(455376684): Implement all the other checkers
     return checkers;
@@ -731,26 +810,6 @@ Result<SuccessType, IOAnnotation> AddIOAnnotationsFromIOAttributes(
     }
 
     return Success;
-}
-
-/// The kind of shader IO being validated.
-enum class ShaderIOKind : uint8_t {
-    kInputParam,
-    kResultValue,
-    kModuleScopeVar,
-};
-
-/// @returns text describing the shader IO kind for error logging
-std::string ToString(ShaderIOKind value) {
-    switch (value) {
-        case ShaderIOKind::kInputParam:
-            return "input param";
-        case ShaderIOKind::kResultValue:
-            return "return value";
-        case ShaderIOKind::kModuleScopeVar:
-            return "module scope variable";
-    }
-    TINT_ICE() << "Unknown enum passed to ToString(ShaderIOKind)";
 }
 
 /// State for validating blend_src attributes.
@@ -1027,11 +1086,13 @@ class Validator {
     /// @param attr the attributes to test
     /// @param stage the shader stage the builtin is being used
     /// @param dir is value being used as an input or an output
+    /// @param io_kind is the type of shader IO object the attribute is attached to
     void ValidateIOAttributes(const CastableBase* msg_anchor,
                               const core::type::Type* ty,
                               const IOAttributes& attr,
                               Function::PipelineStage stage,
-                              IODirection dir);
+                              IODirection dir,
+                              ShaderIOKind io_kind);
 
     /// Validates that a type is a bool only if it is decorated with @builtin(front_facing).
     /// @param msg_anchor where to attach errors to
@@ -2421,7 +2482,7 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         ValidateIOAttributes(param, param->Type(), param->Attributes(), func->Stage(),
-                             IODirection::kInput);
+                             IODirection::kInput, ShaderIOKind::kInputParam);
 
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
@@ -2494,7 +2555,7 @@ void Validator::CheckFunction(const Function* func) {
         Capabilities{Capability::kAllowRefTypes});
 
     ValidateIOAttributes(func, func->ReturnType(), func->ReturnAttributes(), func->Stage(),
-                         IODirection::kOutput);
+                         IODirection::kOutput, ShaderIOKind::kResultValue);
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -2551,14 +2612,19 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
+            if (mv->AddressSpace() != AddressSpace::kIn &&
+                mv->AddressSpace() != AddressSpace::kOut &&
+                mv->AddressSpace() != AddressSpace::kHandle) {
+                continue;
+            }
+
+            ValidateIOAttributes(var, ty, attr, func->Stage(), IODirectionFor(mv->AddressSpace()),
+                                 ShaderIOKind::kModuleScopeVar);
 
             if (mv->AddressSpace() != AddressSpace::kIn &&
                 mv->AddressSpace() != AddressSpace::kOut) {
                 continue;
             }
-            ValidateIOAttributes(var, ty, attr, func->Stage(),
-                                 mv->AddressSpace() == AddressSpace::kIn ? IODirection::kInput
-                                                                         : IODirection::kOutput);
 
             if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
                 WalkTypeAndMembers(
@@ -2594,15 +2660,15 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
                                      const core::type::Type* ty,
                                      const IOAttributes& attr,
                                      const Function::PipelineStage stage,
-                                     const IODirection dir) {
-    bool skip_builtins =
-        capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
-        msg_anchor->Is<Var>();  // Using ->Is<Var>() to determine if this is being called for a MSV
+                                     const IODirection dir,
+                                     const ShaderIOKind io_kind) {
+    bool skip_builtins = capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
+                         io_kind == ShaderIOKind::kModuleScopeVar;
     const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
     WalkTypeAndMembers(
         *this, ty, attr,
-        [usage, msg_anchor, skip_builtins](Validator& v, const core::type::Type* t,
-                                           const IOAttributes& a) {
+        [msg_anchor, usage, io_kind, skip_builtins](Validator& v, const core::type::Type* t,
+                                                    const IOAttributes& a) {
             const auto checkers = IOAttributeCheckersFor(a, skip_builtins);
             if (checkers.IsEmpty()) {
                 return;
@@ -2624,6 +2690,22 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
                     }
                 }
             }
+
+            for (const auto& checker : checkers) {
+                if (!checker->valid_io_kinds.Contains(io_kind)) {
+                    std::stringstream msg;
+                    msg << ToString(checker->kind) << " IO attributes cannot be declared on a "
+                        << ToString(io_kind) << ". ";
+                    if (checker->valid_io_kinds.Size() == 1) {
+                        const auto& k = *checker->valid_io_kinds.begin();
+                        msg << "They can only be used on a " << ToString(k) << ".";
+                    } else {
+                        msg << "They can only be used on a " << ToString(checker->valid_usages);
+                    }
+                    v.AddError(msg_anchor) << msg.str();
+                }
+            }
+
             for (const auto& checker : checkers) {
                 if (auto res = checker->check(t, a, v.capabilities_, usage); res != Success) {
                     v.AddError(msg_anchor) << res.Failure();
