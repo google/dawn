@@ -949,9 +949,7 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
         GetDeviceInfo().vulkanMemoryModelFeatures.vulkanMemoryModelDeviceScope == VK_FALSE) {
         adapterToggles->ForceSet(Toggle::UseVulkanMemoryModel, false);
     }
-    adapterToggles->Default(
-        Toggle::UseVulkanMemoryModel,
-        platform->IsFeatureEnabled(platform::Features::kWebGPUUseVulkanMemoryModel));
+    adapterToggles->Default(Toggle::UseVulkanMemoryModel, true);
 
     adapterToggles->Default(
         Toggle::DecomposeUniformBuffers,

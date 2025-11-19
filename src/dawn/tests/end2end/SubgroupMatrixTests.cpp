@@ -323,10 +323,7 @@ fn main() {
     }
 }
 
-DAWN_INSTANTIATE_TEST(SubgroupMatrixTest,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      VulkanBackend({"use_vulkan_memory_model"}));
+DAWN_INSTANTIATE_TEST(SubgroupMatrixTest, D3D12Backend(), MetalBackend(), VulkanBackend());
 
 enum MatrixOp {
     MatrixMultiply,
@@ -557,7 +554,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixMatrixArithmeticTest,
                         {
                             D3D12Backend(),
                             MetalBackend(),
-                            VulkanBackend({"use_vulkan_memory_model"}),
+                            VulkanBackend(),
                         },
                         {
                             // MatrixOp
@@ -759,7 +756,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixScalarArithmeticTest,
                         {
                             D3D12Backend(),
                             MetalBackend(),
-                            VulkanBackend({"use_vulkan_memory_model"}),
+                            VulkanBackend(),
                         },
                         {
                             // MatrixOp
@@ -925,7 +922,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixStoreTest,
                         {
                             D3D12Backend(),
                             MetalBackend(),
-                            VulkanBackend({"use_vulkan_memory_model"}),
+                            VulkanBackend(),
                         },
                         {
                             // Input matrix is in column-major or not
@@ -1084,7 +1081,7 @@ DAWN_INSTANTIATE_TEST_P(SubgroupMatrix_MatrixConstructorTest,
                         {
                             D3D12Backend(),
                             MetalBackend(),
-                            VulkanBackend({"use_vulkan_memory_model"}),
+                            VulkanBackend(),
                         },
                         {
                             // Pass an argument to the constructor
