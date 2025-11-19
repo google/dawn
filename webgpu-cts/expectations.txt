@@ -109,6 +109,9 @@ crbug.com/407076121 [ android-pixel-4 ] webgpu:shader,execution,limits:const_arr
 # Pixel 6 timeouts
 crbug.com/407076121 [ android-pixel-6 ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
 
+# Intel Linux timeouts. This passes if the Mesa cache is warmed up.
+crbug.com/407076121 [ intel linux ] webgpu:shader,execution,limits:const_array_elements:sizeDivisor=1 [ Skip ]
+
 # SharedWorker is not available on Android
 crbug.com/42241436 [ android webgpu-shared-worker ] * [ Skip ]
 
