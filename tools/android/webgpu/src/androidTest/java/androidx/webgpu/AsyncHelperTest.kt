@@ -50,7 +50,7 @@ class AsyncHelperTest {
             val exception = assertThrows(WebGpuException::class.java) {
                 runBlocking {
                     /* Call an asynchronous method, converted from a callback pattern by a helper. */
-                    device.createRenderPipelineAsync(
+                    device.createRenderPipelineAndAwait(
                         RenderPipelineDescriptor(vertex = VertexState(module = shaderModule))
                     )
                 }
@@ -74,7 +74,7 @@ class AsyncHelperTest {
             )
 
             /* Call an asynchronous method, converted from a callback pattern by a helper. */
-            val unused = device.createRenderPipelineAsync(
+            val unused = device.createRenderPipelineAndAwait(
                 RenderPipelineDescriptor(
                     vertex = VertexState(module = shaderModule), fragment = FragmentState(
                         module = shaderModule,
@@ -97,7 +97,7 @@ class AsyncHelperTest {
 
             /* Launch the function in a new coroutine, giving us a job handle we can cancel. */
             val job = launch {
-                var unused = device.createRenderPipelineAsync(
+                var unused = device.createRenderPipelineAndAwait(
                     RenderPipelineDescriptor(vertex = VertexState(module = shaderModule),
                         fragment = FragmentState(
                             module = shaderModule,

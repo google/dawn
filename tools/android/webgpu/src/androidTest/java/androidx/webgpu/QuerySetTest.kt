@@ -361,7 +361,7 @@ class QuerySetTest {
 
     runBlocking {
       device.queue.onSubmittedWorkDone()
-      readbackBuffer.mapAsync(MapMode.Read, 0, resolveBufferSize)
+      readbackBuffer.mapAndAwait(MapMode.Read, 0, resolveBufferSize)
     }
 
     val mappedBuffer = readbackBuffer.getConstMappedRange(size = resolveBufferSize)

@@ -65,7 +65,7 @@ package {{ kotlin_package }}
     //* those so the client doesn't have to).
     {% set exception_name = (ns.status_arg.name.chunks[:-1] if len(ns.status_arg.name.chunks) > 1 else ['web', 'gpu']) | map('title') | join + 'Exception' %}
     @Throws({{ exception_name}}::class{% if ns.payload_arg and ns.payload_arg.type.name.get() == 'error type' %}, WebGpuRuntimeException::class{% endif %})
-    public suspend fun {{ method.name.camelCase() }}(
+    public suspend fun {{ method.name.camelCase() | replace('Async', 'AndAwait') }}(
         {%- for arg in kotlin_record_members(method.arguments) if not (
             arg.type.category == 'callback function' or
             (arg.type.category == 'kotlin type' and arg.type.name.get() == 'java.util.concurrent.Executor')

@@ -38,7 +38,7 @@ class ComputePassEncoderTest {
 
     val layout = device.createPipelineLayout(PipelineLayoutDescriptor())
 
-    pipeline = device.createComputePipeline(
+    pipeline = device.createComputePipelineAndAwait(
       ComputePipelineDescriptor(
         layout = layout,
         compute = ComputeState(module = shaderModule, entryPoint = "main")

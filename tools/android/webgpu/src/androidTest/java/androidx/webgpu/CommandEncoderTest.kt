@@ -198,7 +198,7 @@ class CommandEncoderTest {
 
     queue.submit(arrayOf(commandBuffer))
 
-    runBlocking { readbackBuffer.mapAsync(MapMode.Read, 0, bufferSize) }
+    runBlocking { readbackBuffer.mapAndAwait(MapMode.Read, 0, bufferSize) }
 
     val mappedData: ByteBuffer = readbackBuffer.getConstMappedRange(0, bufferSize)
 

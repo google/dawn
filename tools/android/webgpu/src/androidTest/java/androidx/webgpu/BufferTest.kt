@@ -108,7 +108,7 @@ class BufferTest {
     // After destroying the buffer, further operations should fail.
     assertThrows(ValidationException::class.java) {
       runBlocking {
-        buffer.mapAsync(MapMode.Read, 0, 16)
+        buffer.mapAndAwait(MapMode.Read, 0, 16)
       }
     }
   }
@@ -153,7 +153,7 @@ class BufferTest {
     val gpuCommand = commandEncoder.finish()
     queue.submit(arrayOf(gpuCommand))
     runBlocking { queue.onSubmittedWorkDone() }
-    runBlocking { gpuReadBuffer.mapAsync(mode = MapMode.Read, size = bufferSize, offset = 0) }
+    runBlocking { gpuReadBuffer.mapAndAwait(mode = MapMode.Read, size = bufferSize, offset = 0) }
 
     val arrayBuffer = gpuReadBuffer.getConstMappedRange(size = bufferSize).asFloatBuffer()
     gpuReadBuffer.unmap()
@@ -185,7 +185,7 @@ class BufferTest {
 
     assertEquals(BufferMapState.Unmapped, buffer.mapState)
 
-    runBlocking { buffer.mapAsync(MapMode.Read, 0, bufferSize) }
+    runBlocking { buffer.mapAndAwait(MapMode.Read, 0, bufferSize) }
 
     assertEquals(BufferMapState.Mapped, buffer.mapState)
 
@@ -221,7 +221,7 @@ class BufferTest {
     device.getQueue().writeBuffer(buffer, 0, byteBuffer)
 
     runBlocking {
-      val unusedBufferMapReturn = buffer.mapAsync(MapMode.Read, offset = 0, size = bufferSize)
+      val unusedBufferMapReturn = buffer.mapAndAwait(MapMode.Read, offset = 0, size = bufferSize)
     }
 
     val readByteBuffer =
