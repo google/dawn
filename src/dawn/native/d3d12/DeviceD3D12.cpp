@@ -590,10 +590,15 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
 
     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
-    RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection::B2T,
-                                            commandContext->GetCommandList(),
-                                            ToBackend(source)->GetD3D12Resource(), src.offset,
-                                            src.bytesPerRow, src.rowsPerImage, dst, copySizePixels);
+    const TypedTexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(dst.aspect).block;
+    BlockCount blocksPerRow = blockInfo.BytesToBlocks(src.bytesPerRow);
+    BlockCount rowsPerImage{src.rowsPerImage};
+    BlockExtent3D copySizePixelsInBlocks = blockInfo.ToBlock(copySizePixels);
+
+    RecordBufferTextureCopyWithBufferHandle(
+        BufferTextureCopyDirection::B2T, commandContext->GetCommandList(),
+        ToBackend(source)->GetD3D12Resource(), src.offset, blocksPerRow, rowsPerImage, dst,
+        copySizePixelsInBlocks);
     return {};
 }
 

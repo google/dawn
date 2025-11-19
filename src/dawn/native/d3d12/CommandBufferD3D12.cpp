@@ -208,24 +208,21 @@ bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
 MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordingContext,
                                                 const TextureCopy& srcCopy,
                                                 const TextureCopy& dstCopy,
-                                                const Extent3D& copySize) {
+                                                const BlockExtent3D& copySize) {
     DAWN_ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
     DAWN_ASSERT(srcCopy.aspect == dstCopy.aspect);
     dawn::native::Format format = srcCopy.texture->GetFormat();
-    const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
-    DAWN_ASSERT(copySize.width % blockInfo.width == 0);
-    uint32_t widthInBlocks = copySize.width / blockInfo.width;
-    DAWN_ASSERT(copySize.height % blockInfo.height == 0);
-    uint32_t heightInBlocks = copySize.height / blockInfo.height;
+    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
 
     // Create tempBuffer
-    uint32_t bytesPerRow = Align(blockInfo.byteSize * widthInBlocks, kTextureBytesPerRowAlignment);
-    uint32_t rowsPerImage = heightInBlocks;
+    uint32_t bytesPerRow = Align(blockInfo.ToBytes(copySize.width), kTextureBytesPerRowAlignment);
+    uint32_t rowsPerImage = static_cast<uint32_t>(copySize.height);
 
     // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
     // need to set mappedAtCreation to be true.
-    auto tempBufferSize =
-        ComputeRequiredBytesInCopy(blockInfo, copySize, bytesPerRow, rowsPerImage);
+    auto tempBufferSize = ComputeRequiredBytesInCopy(blockInfo.ToTexelBlockInfo(),
+                                                     blockInfo.ToTexel(copySize).ToExtent3D(),
+                                                     bytesPerRow, rowsPerImage);
 
     BufferDescriptor tempBufferDescriptor;
     tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -276,15 +273,16 @@ MaybeError RecordBufferTextureCopyWithTemporaryBuffer(CommandRecordingContext* r
                                                       BufferTextureCopyDirection copyDirection,
                                                       const BufferCopy& bufferCopy,
                                                       const TextureCopy& textureCopy,
-                                                      const Extent3D& copySize) {
+                                                      const BlockExtent3D& copySize) {
     dawn::native::Format format = textureCopy.texture->GetFormat();
-    const TexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
 
     // Create tempBuffer
     // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
     // need to set mappedAtCreation to be true.
-    auto tempBufferSize = ComputeRequiredBytesInCopy(blockInfo, copySize, bufferCopy.bytesPerRow,
-                                                     bufferCopy.rowsPerImage);
+    auto tempBufferSize = ComputeRequiredBytesInCopy(
+        blockInfo.ToTexelBlockInfo(), blockInfo.ToTexel(copySize).ToExtent3D(),
+        bufferCopy.bytesPerRow, bufferCopy.rowsPerImage);
 
     BufferDescriptor tempBufferDescriptor;
     tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -1014,14 +1012,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst,
                                                     subresources);
 
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(copy->destination.aspect).block;
                 if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->source, copy->destination)) {
                     DAWN_TRY(RecordBufferTextureCopyWithTemporaryBuffer(
                         commandContext, BufferTextureCopyDirection::B2T, copy->source,
-                        copy->destination, copy->copySize));
+                        copy->destination, blockInfo.ToBlock(copy->copySize)));
                     break;
                 }
                 RecordBufferTextureCopy(BufferTextureCopyDirection::B2T, commandList, copy->source,
-                                        copy->destination, copy->copySize);
+                                        copy->destination, blockInfo.ToBlock(copy->copySize));
 
                 break;
             }
@@ -1048,14 +1048,17 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                                     subresources);
                 buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(copy->source.aspect).block;
                 if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->destination, copy->source)) {
                     DAWN_TRY(RecordBufferTextureCopyWithTemporaryBuffer(
                         commandContext, BufferTextureCopyDirection::T2B, copy->destination,
-                        copy->source, copy->copySize));
+                        copy->source, blockInfo.ToBlock(copy->copySize)));
                     break;
                 }
                 RecordBufferTextureCopy(BufferTextureCopyDirection::T2B, commandList,
-                                        copy->destination, copy->source, copy->copySize);
+                                        copy->destination, copy->source,
+                                        blockInfo.ToBlock(copy->copySize));
 
                 break;
             }
@@ -1102,8 +1105,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
                 DAWN_ASSERT(srcRange.aspects == dstRange.aspects);
                 if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->source, copy->destination)) {
+                    const TypedTexelBlockInfo& blockInfo =
+                        destination->GetFormat().GetAspectInfo(copy->destination.aspect).block;
                     DAWN_TRY(RecordCopyTextureWithTemporaryBuffer(
-                        commandContext, copy->source, copy->destination, copy->copySize));
+                        commandContext, copy->source, copy->destination,
+                        blockInfo.ToBlock(copy->copySize)));
                     break;
                 }
 

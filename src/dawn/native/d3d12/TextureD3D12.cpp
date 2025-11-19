@@ -888,16 +888,17 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
         TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST, range);
 
         for (Aspect aspect : IterateEnumMask(range.aspects)) {
-            const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
+            const TypedTexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(aspect).block;
 
-            Extent3D largestMipSize =
-                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect);
+            BlockExtent3D largestMipSize = blockInfo.ToBlock(
+                GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, aspect));
 
-            uint32_t bytesPerRow =
-                Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
-                      kTextureBytesPerRowAlignment);
-            uint64_t uploadSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
-                                  largestMipSize.depthOrArrayLayers;
+            uint64_t bytesPerRow{
+                Align(blockInfo.ToBytes(largestMipSize.width), kTextureBytesPerRowAlignment)};
+
+            uint64_t uploadSize =
+                bytesPerRow *
+                blockInfo.ToBytes(largestMipSize.height * largestMipSize.depthOrArrayLayers);
 
             DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
                 uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
@@ -906,7 +907,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                     for (uint32_t level = range.baseMipLevel;
                          level < range.baseMipLevel + range.levelCount; ++level) {
                         // compute d3d12 texture copy locations for texture and buffer
-                        Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level, aspect);
+                        BlockExtent3D copySize = blockInfo.ToBlock(
+                            GetMipLevelSingleSubresourcePhysicalSize(level, aspect));
 
                         for (uint32_t layer = range.baseArrayLayer;
                              layer < range.baseArrayLayer + range.layerCount; ++layer) {
@@ -917,6 +919,9 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                                 continue;
                             }
 
+                            BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
+                            BlockCount rowsPerImage = largestMipSize.height;
+
                             TextureCopy textureCopy;
                             textureCopy.texture = this;
                             textureCopy.origin = {0, 0, layer};
@@ -925,8 +930,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                             RecordBufferTextureCopyWithBufferHandle(
                                 BufferTextureCopyDirection::B2T, commandList,
                                 ToBackend(reservation.buffer)->GetD3D12Resource(),
-                                reservation.offsetInBuffer, bytesPerRow,
-                                largestMipSize.height / blockInfo.height, textureCopy, copySize);
+                                reservation.offsetInBuffer, blocksPerRow, rowsPerImage, textureCopy,
+                                copySize);
                         }
                     }
                     return {};
