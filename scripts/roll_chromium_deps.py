@@ -303,6 +303,37 @@ def _add_depot_tools_to_path() -> None:
     find_depot_tools.add_depot_tools_to_path()
 
 
+def _is_tree_clean() -> bool:
+    """Checks for untracked/uncommitted files.
+
+    Returns:
+        True iff there are no untracked or uncommitted files.
+    """
+    proc = subprocess.run(['git', 'status', '--porcelain'],
+                          capture_output=True,
+                          text=True,
+                          check=True)
+    if not proc.stdout:
+        return True
+
+    logging.error('Dirty or untracked files:\n%s', proc.stdout)
+    return False
+
+
+def _ensure_updated_main_branch() -> None:
+    """Ensures that the main branch is checked out and up to date."""
+    proc = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                          capture_output=True,
+                          text=True,
+                          check=True)
+    current_branch = proc.stdout.splitlines()[0]
+    if current_branch != 'main':
+        raise RuntimeError('Please run this from the main branch')
+
+    logging.info('Updating main branch...')
+    subprocess.run(['git', 'pull'], check=True)
+
+
 def _get_remote_head_revision(remote_url: str) -> str:
     """Retrieves the HEAD revision for a remote git URL.
 
@@ -660,6 +691,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument('--autoroll',
                         action='store_true',
                         help='Run the script in autoroll mode')
+    parser.add_argument('--ignore-unclean-workdir',
+                        action='store_true',
+                        help=('Ignore uncommitted changes and being on a '
+                              'non-main branch'))
     parser.add_argument('--revision',
                         help=('A Chromium revision to roll to. If '
                               'unspecified, HEAD is used.'))
@@ -674,9 +709,17 @@ def main() -> None:
         logging.basicConfig(level=logging.INFO)
 
     # The autoroller does not have locally synced dependencies, so we cannot use
-    # the copy under //third_party.
+    # the copy under //third_party. Instead, we have to assume that it has
+    # depot_tools in PATH already.
     if not args.autoroll:
         _add_depot_tools_to_path()
+
+    if not args.ignore_unclean_workdir:
+        if not _is_tree_clean():
+            raise RuntimeError(
+                'Uncommitted or untracked files found. Please commit them or '
+                'pass --ignore-unclean-workdir')
+        _ensure_updated_main_branch()
 
     with open(DEPS_FILE, encoding='utf-8') as infile:
         dawn_deps = _parse_deps_file(infile.read())
