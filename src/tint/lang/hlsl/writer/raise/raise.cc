@@ -27,10 +27,12 @@
 
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
 
+#include <algorithm>
 #include <unordered_set>
 #include <utility>
 
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/transform/array_length_from_immediate.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
@@ -53,6 +55,7 @@
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
@@ -84,6 +87,19 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
                   options.substitute_overrides_config);
 
+    // PopulateBindingRelatedOptions must come before PrepareImmediateData so that
+    // buffer_sizes_offset is available when configuring immediate data.
+    tint::transform::multiplanar::BindingsMap multiplanar_map{};
+    RemapperData remapper_data{};
+    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
+    ArrayOffsetFromUniformOptions array_offset_from_uniform_options{};
+    PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
+                                  array_length_from_uniform_options,
+                                  array_offset_from_uniform_options);
+
+    // The number of vec4s used to store buffer sizes that will be set into the immediate block.
+    uint32_t buffer_sizes_array_elements_num = 0;
+
     // PrepareImmediateData must come before any transform that needs internal push constants.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
     if (options.first_index_offset) {
@@ -103,19 +119,30 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             options.num_workgroups_start_offset.value(),
             module.symbols.New("tint_num_workgroups_start_offset"), module.Types().vec3u());
     }
+
+    if (array_length_from_uniform_options.buffer_sizes_offset) {
+        // Find the largest index declared in the map, in order to determine the number of
+        // elements needed in the array of buffer sizes. The buffer sizes will be packed into
+        // vec4s to satisfy the 16-byte alignment requirement for array elements in constant
+        // buffers.
+        uint32_t max_index = 0;
+        for (const auto& entry : array_length_from_uniform_options.bindpoint_to_size_index) {
+            max_index = std::max(max_index, entry.second);
+        }
+        buffer_sizes_array_elements_num = (max_index / 4) + 1;
+
+        immediate_data_config.AddInternalImmediateData(
+            array_length_from_uniform_options.buffer_sizes_offset.value(),
+            module.symbols.New("buffer_sizes"),
+            module.Types().array(module.Types().vec4<core::u32>(),
+                                 buffer_sizes_array_elements_num));
+    }
+
     auto immediate_data_layout =
         core::ir::transform::PrepareImmediateData(module, immediate_data_config);
     if (immediate_data_layout != Success) {
         return immediate_data_layout.Failure();
     }
-
-    tint::transform::multiplanar::BindingsMap multiplanar_map{};
-    RemapperData remapper_data{};
-    ArrayLengthFromUniformOptions array_length_from_uniform_options{};
-    ArrayOffsetFromUniformOptions array_offset_from_uniform_options{};
-    PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
-                                  array_length_from_uniform_options,
-                                  array_offset_from_uniform_options);
 
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
@@ -192,11 +219,27 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(raise::ReplaceDefaultOnlySwitch, module);
     }
 
-    // ArrayLengthFromUniform must run after Robustness, which introduces arrayLength calls.
-    RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform, module,
-                  BindingPoint{array_length_from_uniform_options.ubo_binding.group,
-                               array_length_from_uniform_options.ubo_binding.binding},
-                  array_length_from_uniform_options.bindpoint_to_size_index);
+    // ArrayLength must run after Robustness, which introduces arrayLength calls.
+    // TODO(crbug.com/366291600): Replace ArrayLengthFromUniform with ArrayLengthFromImmediates
+    if (array_length_from_uniform_options.buffer_sizes_offset) {
+        // Use ArrayLengthFromImmediates when buffer_sizes_offset is provided.
+        TINT_ASSERT(!array_length_from_uniform_options.ubo_binding.group &&
+                    !array_length_from_uniform_options.ubo_binding.binding);
+
+        RUN_TRANSFORM(core::ir::transform::ArrayLengthFromImmediates, module,
+                      immediate_data_layout.Get(),
+                      array_length_from_uniform_options.buffer_sizes_offset.value(),
+                      buffer_sizes_array_elements_num,
+                      array_length_from_uniform_options.bindpoint_to_size_index);
+    } else {
+        // Always fall back to ArrayLengthFromUniform when buffer_sizes_offset is not provided.
+        // This preserves the behavior from before ArrayLengthFromImmediates was introduced,
+        // ensuring that arrayLength() calls are properly handled even without explicit options.
+        RUN_TRANSFORM(core::ir::transform::ArrayLengthFromUniform, module,
+                      BindingPoint{array_length_from_uniform_options.ubo_binding.group,
+                                   array_length_from_uniform_options.ubo_binding.binding},
+                      array_length_from_uniform_options.bindpoint_to_size_index);
+    }
 
     if (!options.disable_workgroup_init) {
         // Must run before ShaderIO as it may introduce a builtin parameter (local_invocation_index)

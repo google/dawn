@@ -48,10 +48,13 @@ namespace tint::hlsl::writer {
 constexpr uint32_t kMaxInterStageLocations = 30;
 
 /// Options used to specify a mapping of binding points to indices into a UBO
-/// from which to load buffer sizes.
+/// from which to load buffer sizes, or to load them from immediate blocks.
+/// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
 struct ArrayLengthFromUniformOptions {
     /// The HLSL binding point to use to generate a uniform buffer from which to read buffer sizes.
     BindingPoint ubo_binding;
+    /// The offset in immediate block for buffer sizes.
+    std::optional<uint32_t> buffer_sizes_offset{};
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
     /// into the uniform buffer where the length of the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_size_index;
@@ -59,7 +62,10 @@ struct ArrayLengthFromUniformOptions {
     bool operator==(const ArrayLengthFromUniformOptions& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
+    TINT_REFLECT(ArrayLengthFromUniformOptions,
+                 ubo_binding,
+                 buffer_sizes_offset,
+                 bindpoint_to_size_index);
 };
 
 struct ArrayOffsetFromUniformOptions {
