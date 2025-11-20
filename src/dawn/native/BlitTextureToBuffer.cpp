@@ -1137,11 +1137,10 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     dst.buffer->SetInitialized(fullSizeCopy || dst.buffer->IsInitialized());
 
     Ref<BufferBase> destinationBuffer = dst.buffer.Get();
-    const uint32_t bytesPerRow = dst.bytesPerRow == wgpu::kCopyStrideUndefined
-                                     ? (copyExtent.width * bytesPerTexel)
-                                     : dst.bytesPerRow;
-    const uint32_t rowsPerImage =
-        dst.rowsPerImage == wgpu::kCopyStrideUndefined ? copyExtent.height : dst.rowsPerImage;
+    DAWN_ASSERT(dst.bytesPerRow != wgpu::kCopyStrideUndefined);
+    const uint32_t bytesPerRow = dst.bytesPerRow;
+    DAWN_ASSERT(dst.rowsPerImage != wgpu::kCopyStrideUndefined);
+    const uint32_t rowsPerImage = dst.rowsPerImage;
     const uint64_t numBytesToCopy =
         ComputeRequiredBytesInCopy(blockInfo, copyExtent, bytesPerRow, rowsPerImage)
             .AcquireSuccess();

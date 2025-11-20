@@ -1838,9 +1838,9 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
 
                 BufferCopy dst;
                 dst.buffer = destination->buffer;
-                dst.bytesPerRow = destination->layout.bytesPerRow;
-                dst.rowsPerImage = destination->layout.rowsPerImage;
-                dst.offset = destination->layout.offset;
+                dst.bytesPerRow = dstLayout.bytesPerRow;
+                dst.rowsPerImage = dstLayout.rowsPerImage;
+                dst.offset = dstLayout.offset;
                 DAWN_TRY_CONTEXT(BlitTextureToBuffer(GetDevice(), this, src, dst, *copySize),
                                  "copying texture %s to %s using blit workaround.",
                                  src.texture.Get(), destination->buffer);
