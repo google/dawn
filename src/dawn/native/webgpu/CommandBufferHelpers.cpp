@@ -47,7 +47,7 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
     switch (type) {
         case Command::SetRenderPipeline: {
             const auto& cmd = *commands.NextCommand<SetRenderPipelineCmd>();
-            schema::RenderPassCommandSetPipelineCmd data{{
+            schema::CommandBufferCommandSetRenderPipelineCmd data{{
                 .data = {{
                     .pipelineId = captureContext.GetId(cmd.pipeline.Get()),
                 }},
@@ -60,7 +60,7 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
             const uint32_t* dynamicOffsetsData =
                 cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
                                            : nullptr;
-            schema::RenderPassCommandSetBindGroupCmd data{{
+            schema::CommandBufferCommandSetBindGroupCmd data{{
                 .data = {{
                     .index = uint32_t(cmd.index),
                     .bindGroupId = captureContext.GetId(cmd.group),
@@ -73,7 +73,7 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
         }
         case Command::SetVertexBuffer: {
             const auto& cmd = *commands.NextCommand<SetVertexBufferCmd>();
-            schema::RenderPassCommandSetVertexBufferCmd data{{
+            schema::CommandBufferCommandSetVertexBufferCmd data{{
                 .data = {{
                     .slot = uint32_t(cmd.slot),
                     .bufferId = captureContext.GetId(cmd.buffer),
@@ -86,7 +86,7 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
         }
         case Command::Draw: {
             const auto& cmd = *commands.NextCommand<DrawCmd>();
-            schema::RenderPassCommandDrawCmd data{{
+            schema::CommandBufferCommandDrawCmd data{{
                 .data = {{
                     .vertexCount = cmd.vertexCount,
                     .instanceCount = cmd.instanceCount,

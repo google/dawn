@@ -267,7 +267,7 @@ MaybeError RenderBundle::CaptureCreationParameters(CaptureContext& captureContex
     while (commands.NextCommandId(&type)) {
         DAWN_TRY(CaptureRenderCommand(captureContext, commands, type));
     }
-    Serialize(captureContext, schema::RenderPassCommand::End);
+    Serialize(captureContext, schema::CommandBufferCommand::End);
 
     return {};
 }

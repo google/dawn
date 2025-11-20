@@ -73,62 +73,42 @@ enum class BindGroupLayoutEntryType : uint32_t {
     InputAttachmentBindingInfo,
 };
 
-enum class ComputePassCommand : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    Dispatch,
-    DispatchIndirect,
-    SetComputePipeline,
-    SetBindGroup,
-    WriteTimestamp,
-    InsertDebugMarker,
-    PopDebugGroup,
-    PushDebugGroup,
-    SetImmediates,
-    End,
-};
-
-enum class RenderPassCommand : uint32_t {
-    Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
-    Draw,
-    DrawIndexed,
-    DrawIndirect,
-    DrawIndexedIndirect,
-    SetPipeline,
-    SetBindGroup,
-    SetIndexBuffer,
-    SetVertexBuffer,
-    SetViewport,
-    SetScissorRect,
-    SetBlendConstant,
-    SetStencilReference,
-    EndRenderPass,
-    ExecuteBundles,
-    WriteTimestamp,
-    InsertDebugMarker,
-    PopDebugGroup,
-    PushDebugGroup,
-    SetImmediates,
-    BeginOcclusionQuery,
-    EndOcclusionQuery,
-    End,
-};
-
-enum class EncoderCommand : uint32_t {
+enum class CommandBufferCommand : uint32_t {
     Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
     BeginComputePass,
+    BeginOcclusionQuery,
     BeginRenderPass,
+    ClearBuffer,
     CopyBufferToBuffer,
     CopyBufferToTexture,
     CopyTextureToBuffer,
     CopyTextureToTexture,
-    ClearBuffer,
-    ResolveQuerySet,
-    WriteTimestamp,
+    Dispatch,
+    DispatchIndirect,
+    Draw,
+    DrawIndexed,
+    DrawIndexedIndirect,
+    DrawIndirect,
+    End,
+    EndOcclusionQuery,
+    EndRenderPass,
+    ExecuteBundles,
     InsertDebugMarker,
     PopDebugGroup,
     PushDebugGroup,
+    ResolveQuerySet,
+    SetBindGroup,
+    SetBlendConstant,
+    SetComputePipeline,
+    SetImmediates,
+    SetIndexBuffer,
+    SetRenderPipeline,
+    SetScissorRect,
+    SetStencilReference,
+    SetVertexBuffer,
+    SetViewport,
     WriteBuffer,
-    End,
+    WriteTimestamp,
 };
 
 enum class RootCommand : uint32_t {
@@ -501,38 +481,39 @@ DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(QueueSubmit, QUEUE_SUBMIT_CMD_DATA_MEMBER
     X(uint64_t, dstOffset)                       \
     X(uint64_t, size)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyBufferToBuffer,
-                                          COPY_BUFFER_TO_BUFFER_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyBufferToBuffer,
+                                                 COPY_BUFFER_TO_BUFFER_CMD_DATA_MEMBER){};
 
 #define COPY_BUFFER_TO_TEXTURE_CMD_DATA_MEMBER(X) \
     X(TexelCopyBufferInfo, source)                \
     X(TexelCopyTextureInfo, destination)          \
     X(Extent3D, copySize)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyBufferToTexture,
-                                          COPY_BUFFER_TO_TEXTURE_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyBufferToTexture,
+                                                 COPY_BUFFER_TO_TEXTURE_CMD_DATA_MEMBER){};
 
 #define COPY_TEXTURE_TO_BUFFER_CMD_DATA_MEMBER(X) \
     X(TexelCopyTextureInfo, source)               \
     X(TexelCopyBufferInfo, destination)           \
     X(Extent3D, copySize)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToBuffer,
-                                          COPY_TEXTURE_TO_BUFFER_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyTextureToBuffer,
+                                                 COPY_TEXTURE_TO_BUFFER_CMD_DATA_MEMBER){};
 
 #define COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER(X) \
     X(TexelCopyTextureInfo, source)                \
     X(TexelCopyTextureInfo, destination)           \
     X(Extent3D, copySize)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(CopyTextureToTexture,
-                                          COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(CopyTextureToTexture,
+                                                 COPY_TEXTURE_TO_TEXTURE_CMD_DATA_MEMBER){};
 
 #define BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER(X) \
     X(std::string, label)                     \
     X(TimestampWrites, timestampWrites)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginComputePass, BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginComputePass,
+                                                 BEGIN_COMPUTE_PASS_CMD_DATA_MEMBER){};
 
 #define BEGIN_RENDER_PASS_CMD_DATA_MEMBER(X)                    \
     X(std::string, label)                                       \
@@ -542,7 +523,8 @@ DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginComputePass, BEGIN_COMPUTE_PASS_C
     X(TimestampWrites, timestampWrites)                         \
     X(uint64_t, maxDrawCount)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginRenderPass, BEGIN_RENDER_PASS_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginRenderPass,
+                                                 BEGIN_RENDER_PASS_CMD_DATA_MEMBER){};
 
 #define RESOLVE_QUERYSET_CMD_DATA_MEMBER(X) \
     X(ObjectId, querySetId)                 \
@@ -551,41 +533,41 @@ DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(BeginRenderPass, BEGIN_RENDER_PASS_CMD
     X(ObjectId, destinationId)              \
     X(uint64_t, destinationOffset)
 
-DAWN_REPLAY_MAKE_ENCODER_CMD_AND_CMD_DATA(ResolveQuerySet, RESOLVE_QUERYSET_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(ResolveQuerySet,
+                                                 RESOLVE_QUERYSET_CMD_DATA_MEMBER){};
 
 #define SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
 
-DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetComputePipeline,
-                                               SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetComputePipeline,
+                                                 SET_COMPUTE_PIPELINE_CMD_DATA_MEMBER){};
 
 #define SET_BIND_GROUP_CMD_DATA_MEMBER(X) \
     X(uint32_t, index)                    \
     X(ObjectId, bindGroupId)              \
     X(std::vector<uint32_t>, dynamicOffsets)
 
-DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
 
 #define DISPATCH_CMD_DATA_MEMBER(X) \
     X(uint32_t, x)                  \
     X(uint32_t, y)                  \
     X(uint32_t, z)
 
-DAWN_REPLAY_MAKE_COMPUTE_PASS_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEMBER){};
 
-#define SET_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
+#define SET_RENDER_PIPELINE_CMD_DATA_MEMBER(X) X(ObjectId, pipelineId)
 
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetPipeline, SET_PIPELINE_CMD_DATA_MEMBER){};
-
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetBindGroup, SET_BIND_GROUP_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetRenderPipeline,
+                                                 SET_RENDER_PIPELINE_CMD_DATA_MEMBER){};
 
 #define BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER(X) X(uint32_t, queryIndex)
 
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(BeginOcclusionQuery,
-                                              BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginOcclusionQuery,
+                                                 BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER){};
 
 #define EXECUTE_BUNDLES_CMD_DATA_MEMBER(X) X(std::vector<ObjectId>, bundleIds)
 
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(ExecuteBundles, EXECUTE_BUNDLES_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(ExecuteBundles, EXECUTE_BUNDLES_CMD_DATA_MEMBER){};
 
 #define SET_VERTEX_BUFFER_CMD_DATA_MEMBER(X) \
     X(uint32_t, slot)                        \
@@ -593,7 +575,8 @@ DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(ExecuteBundles, EXECUTE_BUNDLES_CM
     X(uint64_t, offset)                      \
     X(uint64_t, size)
 
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetVertexBuffer, SET_VERTEX_BUFFER_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetVertexBuffer,
+                                                 SET_VERTEX_BUFFER_CMD_DATA_MEMBER){};
 
 #define DRAW_CMD_DATA_MEMBER(X) \
     X(uint32_t, vertexCount)    \
@@ -601,7 +584,7 @@ DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(SetVertexBuffer, SET_VERTEX_BUFFER
     X(uint32_t, firstVertex)    \
     X(uint32_t, firstInstance)
 
-DAWN_REPLAY_MAKE_RENDER_PASS_CMD_AND_CMD_DATA(Draw, DRAW_CMD_DATA_MEMBER){};
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(Draw, DRAW_CMD_DATA_MEMBER){};
 
 }  // namespace schema
 

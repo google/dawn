@@ -494,12 +494,12 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
         switch (type) {
             case Command::EndComputePass: {
                 commands.NextCommand<EndComputePassCmd>();
-                Serialize(captureContext, schema::ComputePassCommand::End);
+                Serialize(captureContext, schema::CommandBufferCommand::End);
                 return {};
             }
             case Command::SetComputePipeline: {
                 const auto& cmd = *commands.NextCommand<SetComputePipelineCmd>();
-                schema::ComputePassCommandSetComputePipelineCmd data{{
+                schema::CommandBufferCommandSetComputePipelineCmd data{{
                     .data = {{
                         .pipelineId = captureContext.GetId(cmd.pipeline.Get()),
                     }},
@@ -512,7 +512,7 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 const uint32_t* dynamicOffsetsData =
                     cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
                                                : nullptr;
-                schema::ComputePassCommandSetBindGroupCmd data{{
+                schema::CommandBufferCommandSetBindGroupCmd data{{
                     .data = {{
                         .index = uint32_t(cmd.index),
                         .bindGroupId = captureContext.GetId(cmd.group),
@@ -525,7 +525,7 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
             }
             case Command::Dispatch: {
                 const auto& cmd = *commands.NextCommand<DispatchCmd>();
-                schema::ComputePassCommandDispatchCmd data{{
+                schema::CommandBufferCommandDispatchCmd data{{
                     .data = {{
                         .x = cmd.x,
                         .y = cmd.y,
@@ -548,7 +548,7 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
         switch (type) {
             case Command::EndRenderPass: {
                 commands.NextCommand<EndRenderPassCmd>();
-                Serialize(captureContext, schema::RenderPassCommand::End);
+                Serialize(captureContext, schema::CommandBufferCommand::End);
                 return {};
             }
             case Command::ExecuteBundles: {
@@ -558,7 +558,7 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 for (uint32_t i = 0; i < cmd.count; ++i) {
                     bundleIds.push_back(captureContext.GetId(bundles[i].Get()));
                 }
-                schema::RenderPassCommandExecuteBundlesCmd data{{
+                schema::CommandBufferCommandExecuteBundlesCmd data{{
                     .data = {{
                         .bundleIds = bundleIds,
                     }},
@@ -568,7 +568,7 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
             }
             case Command::BeginOcclusionQuery: {
                 const auto& cmd = *commands.NextCommand<BeginOcclusionQueryCmd>();
-                schema::RenderPassCommandBeginOcclusionQueryCmd data{{
+                schema::CommandBufferCommandBeginOcclusionQueryCmd data{{
                     .data = {{
                         .queryIndex = cmd.queryIndex,
                     }},
@@ -578,7 +578,7 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
             }
             case Command::EndOcclusionQuery: {
                 commands.NextCommand<EndOcclusionQueryCmd>();
-                Serialize(captureContext, schema::RenderPassCommand::EndOcclusionQuery);
+                Serialize(captureContext, schema::CommandBufferCommand::EndOcclusionQuery);
                 break;
             }
             default:
@@ -758,7 +758,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
         switch (type) {
             case Command::CopyBufferToBuffer: {
                 const auto& cmd = *commands.NextCommand<CopyBufferToBufferCmd>();
-                schema::EncoderCommandCopyBufferToBufferCmd data{{
+                schema::CommandBufferCommandCopyBufferToBufferCmd data{{
                     .data = {{
                         .srcBufferId = captureContext.GetId(cmd.source.Get()),
                         .srcOffset = cmd.sourceOffset,
@@ -772,7 +772,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::CopyBufferToTexture: {
                 const auto& cmd = *commands.NextCommand<CopyBufferToTextureCmd>();
-                schema::EncoderCommandCopyBufferToTextureCmd data{{
+                schema::CommandBufferCommandCopyBufferToTextureCmd data{{
                     .data = {{
                         .source = ToSchema(captureContext, cmd.source),
                         .destination = ToSchema(captureContext, cmd.destination),
@@ -784,7 +784,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::CopyTextureToBuffer: {
                 const auto& cmd = *commands.NextCommand<CopyTextureToBufferCmd>();
-                schema::EncoderCommandCopyTextureToBufferCmd data{{
+                schema::CommandBufferCommandCopyTextureToBufferCmd data{{
                     .data = {{
                         .source = ToSchema(captureContext, cmd.source),
                         .destination = ToSchema(captureContext, cmd.destination),
@@ -796,7 +796,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::CopyTextureToTexture: {
                 const auto& cmd = *commands.NextCommand<CopyTextureToTextureCmd>();
-                schema::EncoderCommandCopyTextureToTextureCmd data{{
+                schema::CommandBufferCommandCopyTextureToTextureCmd data{{
                     .data = {{
                         .source = ToSchema(captureContext, cmd.source),
                         .destination = ToSchema(captureContext, cmd.destination),
@@ -808,7 +808,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::BeginComputePass: {
                 const auto& cmd = *commands.NextCommand<BeginComputePassCmd>();
-                schema::EncoderCommandBeginComputePassCmd data{{
+                schema::CommandBufferCommandBeginComputePassCmd data{{
                     .data = {{
                         .label = cmd.label,
                         .timestampWrites = ToSchema(captureContext, cmd.timestampWrites),
@@ -825,7 +825,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 for (ColorAttachmentIndex i : cmd.attachmentState->GetColorAttachmentsMask()) {
                     colorAttachments.push_back(ToSchema(captureContext, cmd.colorAttachments[i]));
                 }
-                schema::EncoderCommandBeginRenderPassCmd data{{
+                schema::CommandBufferCommandBeginRenderPassCmd data{{
                     .data = {{
                         .label = cmd.label,
                         .colorAttachments = colorAttachments,
@@ -842,7 +842,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::ResolveQuerySet: {
                 const auto& cmd = *commands.NextCommand<ResolveQuerySetCmd>();
-                schema::EncoderCommandResolveQuerySetCmd data{{
+                schema::CommandBufferCommandResolveQuerySetCmd data{{
                     .data = {{
                         .querySetId = captureContext.GetId(cmd.querySet.Get()),
                         .firstQuery = cmd.firstQuery,
@@ -858,7 +858,7 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 DAWN_CHECK(false);
         }
     }
-    Serialize(captureContext, schema::EncoderCommand::End);
+    Serialize(captureContext, schema::CommandBufferCommand::End);
     return {};
 }
 

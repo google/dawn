@@ -426,31 +426,31 @@ template <typename T>
 MaybeError ProcessRenderCommand(const Replay& replay,
                                 ReadHead& readHead,
                                 wgpu::Device device,
-                                schema::RenderPassCommand cmd,
+                                schema::CommandBufferCommand cmd,
                                 T pass) {
     switch (cmd) {
-        case schema::RenderPassCommand::SetPipeline: {
-            schema::RenderPassCommandSetPipelineCmdData data;
+        case schema::CommandBufferCommand::SetRenderPipeline: {
+            schema::CommandBufferCommandSetRenderPipelineCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.SetPipeline(replay.GetObjectById<wgpu::RenderPipeline>(data.pipelineId));
             break;
         }
-        case schema::RenderPassCommand::SetBindGroup: {
-            schema::RenderPassCommandSetBindGroupCmdData data;
+        case schema::CommandBufferCommand::SetBindGroup: {
+            schema::CommandBufferCommandSetBindGroupCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.SetBindGroup(data.index, replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
                               data.dynamicOffsets.size(), data.dynamicOffsets.data());
             break;
         }
-        case schema::RenderPassCommand::SetVertexBuffer: {
-            schema::RenderPassCommandSetVertexBufferCmdData data;
+        case schema::CommandBufferCommand::SetVertexBuffer: {
+            schema::CommandBufferCommandSetVertexBufferCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.SetVertexBuffer(data.slot, replay.GetObjectById<wgpu::Buffer>(data.bufferId),
                                  data.offset, data.size);
             break;
         }
-        case schema::RenderPassCommand::Draw: {
-            schema::RenderPassCommandDrawCmdData data;
+        case schema::CommandBufferCommand::Draw: {
+            schema::CommandBufferCommandDrawCmdData data;
             DAWN_TRY(Deserialize(readHead, &data));
             pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex, data.firstInstance);
             break;
@@ -465,12 +465,12 @@ MaybeError ProcessRenderBundleCommands(const Replay& replay,
                                        ReadHead& readHead,
                                        wgpu::Device device,
                                        wgpu::RenderBundleEncoder pass) {
-    schema::RenderPassCommand cmd;
+    schema::CommandBufferCommand cmd;
 
     while (!readHead.IsDone()) {
         DAWN_TRY(Deserialize(readHead, &cmd));
         switch (cmd) {
-            case schema::RenderPassCommand::End: {
+            case schema::CommandBufferCommand::End: {
                 return {};
             }
             default:
@@ -700,31 +700,31 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                                       ReadHead& readHead,
                                       wgpu::Device device,
                                       wgpu::ComputePassEncoder pass) {
-    schema::ComputePassCommand cmd;
+    schema::CommandBufferCommand cmd;
 
     while (!readHead.IsDone()) {
         DAWN_TRY(Deserialize(readHead, &cmd));
         switch (cmd) {
-            case schema::ComputePassCommand::End: {
+            case schema::CommandBufferCommand::End: {
                 pass.End();
                 return {};
             }
-            case schema::ComputePassCommand::SetComputePipeline: {
-                schema::ComputePassCommandSetComputePipelineCmdData data;
+            case schema::CommandBufferCommand::SetComputePipeline: {
+                schema::CommandBufferCommandSetComputePipelineCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 pass.SetPipeline(replay.GetObjectById<wgpu::ComputePipeline>(data.pipelineId));
                 break;
             }
-            case schema::ComputePassCommand::SetBindGroup: {
-                schema::ComputePassCommandSetBindGroupCmdData data;
+            case schema::CommandBufferCommand::SetBindGroup: {
+                schema::CommandBufferCommandSetBindGroupCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 pass.SetBindGroup(data.index,
                                   replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
                                   data.dynamicOffsets.size(), data.dynamicOffsets.data());
                 break;
             }
-            case schema::ComputePassCommand::Dispatch: {
-                schema::ComputePassCommandDispatchCmdData data;
+            case schema::CommandBufferCommand::Dispatch: {
+                schema::CommandBufferCommandDispatchCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 pass.DispatchWorkgroups(data.x, data.y, data.z);
                 break;
@@ -740,17 +740,17 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                                      ReadHead& readHead,
                                      wgpu::Device device,
                                      wgpu::RenderPassEncoder pass) {
-    schema::RenderPassCommand cmd;
+    schema::CommandBufferCommand cmd;
 
     while (!readHead.IsDone()) {
         DAWN_TRY(Deserialize(readHead, &cmd));
         switch (cmd) {
-            case schema::RenderPassCommand::End: {
+            case schema::CommandBufferCommand::End: {
                 pass.End();
                 return {};
             }
-            case schema::RenderPassCommand::ExecuteBundles: {
-                schema::RenderPassCommandExecuteBundlesCmdData data;
+            case schema::CommandBufferCommand::ExecuteBundles: {
+                schema::CommandBufferCommandExecuteBundlesCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 std::vector<wgpu::RenderBundle> bundles;
                 for (auto bundleId : data.bundleIds) {
@@ -759,13 +759,13 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.ExecuteBundles(bundles.size(), bundles.data());
                 break;
             }
-            case schema::RenderPassCommand::BeginOcclusionQuery: {
-                schema::RenderPassCommandBeginOcclusionQueryCmdData data;
+            case schema::CommandBufferCommand::BeginOcclusionQuery: {
+                schema::CommandBufferCommandBeginOcclusionQueryCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 pass.BeginOcclusionQuery(data.queryIndex);
                 break;
             }
-            case schema::RenderPassCommand::EndOcclusionQuery: {
+            case schema::CommandBufferCommand::EndOcclusionQuery: {
                 pass.EndOcclusionQuery();
                 break;
             }
@@ -781,13 +781,13 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                                   ReadHead& readHead,
                                   wgpu::Device device,
                                   wgpu::CommandEncoder encoder) {
-    schema::EncoderCommand cmd;
+    schema::CommandBufferCommand cmd;
 
     while (!readHead.IsDone()) {
         DAWN_TRY(Deserialize(readHead, &cmd));
         switch (cmd) {
-            case schema::EncoderCommand::BeginComputePass: {
-                schema::EncoderCommandBeginComputePassCmdData data;
+            case schema::CommandBufferCommand::BeginComputePass: {
+                schema::CommandBufferCommandBeginComputePassCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::PassTimestampWrites timestampWrites = ToWGPU(replay, data.timestampWrites);
                 wgpu::ComputePassDescriptor desc{
@@ -798,8 +798,8 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 DAWN_TRY(ProcessComputePassCommands(replay, readHead, device, pass));
                 break;
             }
-            case schema::EncoderCommand::BeginRenderPass: {
-                schema::EncoderCommandBeginRenderPassCmdData data;
+            case schema::CommandBufferCommand::BeginRenderPass: {
+                schema::CommandBufferCommandBeginRenderPassCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::PassTimestampWrites timestampWrites = ToWGPU(replay, data.timestampWrites);
                 std::vector<wgpu::RenderPassColorAttachment> colorAttachments;
@@ -844,8 +844,8 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 DAWN_TRY(ProcessRenderPassCommands(replay, readHead, device, pass));
                 break;
             }
-            case schema::EncoderCommand::CopyBufferToBuffer: {
-                schema::EncoderCommandCopyBufferToBufferCmdData data;
+            case schema::CommandBufferCommand::CopyBufferToBuffer: {
+                schema::CommandBufferCommandCopyBufferToBufferCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 encoder.CopyBufferToBuffer(replay.GetObjectById<wgpu::Buffer>(data.srcBufferId),
                                            data.srcOffset,
@@ -853,8 +853,8 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                                            data.dstOffset, data.size);
                 break;
             }
-            case schema::EncoderCommand::CopyBufferToTexture: {
-                schema::EncoderCommandCopyBufferToTextureCmdData data;
+            case schema::CommandBufferCommand::CopyBufferToTexture: {
+                schema::CommandBufferCommandCopyBufferToTextureCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::TexelCopyBufferInfo src = ToWGPU(replay, data.source);
                 wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, data.destination);
@@ -862,8 +862,8 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 encoder.CopyBufferToTexture(&src, &dst, &copySize);
                 break;
             }
-            case schema::EncoderCommand::CopyTextureToBuffer: {
-                schema::EncoderCommandCopyTextureToBufferCmdData data;
+            case schema::CommandBufferCommand::CopyTextureToBuffer: {
+                schema::CommandBufferCommandCopyTextureToBufferCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::TexelCopyTextureInfo src = ToWGPU(replay, data.source);
                 wgpu::TexelCopyBufferInfo dst = ToWGPU(replay, data.destination);
@@ -871,8 +871,8 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 encoder.CopyTextureToBuffer(&src, &dst, &copySize);
                 break;
             }
-            case schema::EncoderCommand::CopyTextureToTexture: {
-                schema::EncoderCommandCopyTextureToTextureCmdData data;
+            case schema::CommandBufferCommand::CopyTextureToTexture: {
+                schema::CommandBufferCommandCopyTextureToTextureCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 wgpu::TexelCopyTextureInfo src = ToWGPU(replay, data.source);
                 wgpu::TexelCopyTextureInfo dst = ToWGPU(replay, data.destination);
@@ -880,11 +880,11 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                 encoder.CopyTextureToTexture(&src, &dst, &copySize);
                 break;
             }
-            case schema::EncoderCommand::End: {
+            case schema::CommandBufferCommand::End: {
                 return {};
             }
-            case schema::EncoderCommand::ResolveQuerySet: {
-                schema::EncoderCommandResolveQuerySetCmdData data;
+            case schema::CommandBufferCommand::ResolveQuerySet: {
+                schema::CommandBufferCommandResolveQuerySetCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
                 encoder.ResolveQuerySet(replay.GetObjectById<wgpu::QuerySet>(data.querySetId),
                                         data.firstQuery, data.queryCount,
