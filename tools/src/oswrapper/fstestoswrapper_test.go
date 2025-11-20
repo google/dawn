@@ -1410,6 +1410,10 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 			name: "Stat non-existent path",
 			path: "nonexistent",
 		},
+		{
+			name: "Stat empty path",
+			path: "",
+		},
 	}
 
 	for _, tc := range tests {
@@ -1423,7 +1427,16 @@ func TestFSTestOSWrapper_Stat_MatchesReal(t *testing.T) {
 
 			requireErrorsMatch(t, realErr, testErr)
 			if realErr == nil {
-				require.Equal(t, realInfo.Name(), testInfo.Name())
+				// An empty path appears to be treated as the CWD, so the real and test
+				// names cannot be directly compared.
+				// TODO(crbug.com/436025865): Update this to check for the fake CWD
+				// instead of "." when the filesystem is CWD-aware.
+				if tc.path == "" {
+					require.Equal(t, testInfo.Name(), ".")
+					require.Equal(t, realInfo.Name(), filepath.Base(realRoot))
+				} else {
+					require.Equal(t, realInfo.Name(), testInfo.Name())
+				}
 				require.Equal(t, realInfo.IsDir(), testInfo.IsDir())
 				// The size of a directory is system-dependent, so only compare sizes for files.
 				if !realInfo.IsDir() {

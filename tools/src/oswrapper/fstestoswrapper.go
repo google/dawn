@@ -65,6 +65,8 @@ var (
 //     to open file.txt will fail. This cannot currently be easily worked
 //     around at the moment since the CWD-aware logic lives in EnvironProvider
 //     while filesystem operations live in FilesystemReaderWriter.
+//     TODO(crbug.com/436025865): Merge everything into FSTestOSWrapper so that
+//     the filesystem can be CWD-aware.
 type FSTestOSWrapper struct {
 	FSTestEnvironProvider
 	FSTestFilesystemReaderWriter

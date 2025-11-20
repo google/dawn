@@ -115,7 +115,7 @@ func createRunSampleQueryResults() resultsdb.PrefixGroupedQueryResults {
 }
 
 func TestRun_GetTrimmedContentFailure(t *testing.T) {
-	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
+	wrapper, err := common.CreateFSTestOSWrapperWithFakeDefaultPaths()
 	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)
 	client := resultsdb.MockBigQueryClient{}
 
@@ -136,7 +136,7 @@ crbug.com/0000 [ android ] foo
 }
 
 func TestRun_GetResultsFailure(t *testing.T) {
-	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
+	wrapper, err := common.CreateFSTestOSWrapperWithFakeDefaultPaths()
 	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)
 	client := resultsdb.MockBigQueryClient{}
 
@@ -161,7 +161,7 @@ func TestRun_GetResultsFailure(t *testing.T) {
 }
 
 func TestRun_SuccessCore(t *testing.T) {
-	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
+	wrapper, err := common.CreateFSTestOSWrapperWithFakeDefaultPaths()
 	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)
 	client := resultsdb.MockBigQueryClient{}
 
@@ -178,7 +178,7 @@ func TestRun_SuccessCore(t *testing.T) {
 }
 
 func TestRun_SuccessCompat(t *testing.T) {
-	wrapper, err := common.CreateMemMapOSWrapperWithFakeDefaultPaths()
+	wrapper, err := common.CreateFSTestOSWrapperWithFakeDefaultPaths()
 	require.NoErrorf(t, err, "Error creating fake Dawn directories: %v", err)
 	client := resultsdb.MockBigQueryClient{}
 

@@ -43,13 +43,13 @@ func TestDefaultCtsPath_NoDawnRoot(t *testing.T) {
 }
 
 func TestDefaultCtsPath_NoCts(t *testing.T) {
-	wrapper, err := fileutils.CreateMemMapOSWrapperWithFakeDawnRoot()
+	wrapper, err := fileutils.CreateFSTestOSWrapperWithFakeDawnRoot()
 	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
 	require.Equal(t, "", defaultCtsPath(wrapper))
 }
 
 func TestDefaultCtsPath_CtsExists(t *testing.T) {
-	wrapper, err := fileutils.CreateMemMapOSWrapperWithFakeDawnRoot()
+	wrapper, err := fileutils.CreateFSTestOSWrapperWithFakeDawnRoot()
 	require.NoErrorf(t, err, "Error creating fake Dawn root: %v", err)
 	expectedPath := filepath.Join(fileutils.DawnRoot(wrapper), "third_party", "webgpu-cts")
 	wrapper.MkdirAll(expectedPath, 0o666)
