@@ -2674,9 +2674,13 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
                 return;
             }
 
+            auto failed = tint::Hashset<const IOAttributeChecker*, 4>();
+
             if (usage != IOAttributeUsage::kUndefinedUsage) {
                 for (const auto* checker : checkers) {
                     if (!checker->valid_usages.Contains(usage)) {
+                        failed.Add(checker);
+
                         std::stringstream msg;
                         msg << ToString(checker->kind) << " IO attributes cannot be declared for a "
                             << ToString(usage) << ". ";
@@ -2692,7 +2696,13 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
             }
 
             for (const auto& checker : checkers) {
+                if (failed.Contains(checker)) {
+                    continue;
+                }
+
                 if (!checker->valid_io_kinds.Contains(io_kind)) {
+                    failed.Add(checker);
+
                     std::stringstream msg;
                     msg << ToString(checker->kind) << " IO attributes cannot be declared on a "
                         << ToString(io_kind) << ". ";
@@ -2700,14 +2710,20 @@ void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
                         const auto& k = *checker->valid_io_kinds.begin();
                         msg << "They can only be used on a " << ToString(k) << ".";
                     } else {
-                        msg << "They can only be used on a " << ToString(checker->valid_usages);
+                        msg << "They can only be used on " << ToString(checker->valid_io_kinds);
                     }
                     v.AddError(msg_anchor) << msg.str();
                 }
             }
 
             for (const auto& checker : checkers) {
+                if (failed.Contains(checker)) {
+                    continue;
+                }
+
                 if (auto res = checker->check(t, a, v.capabilities_, usage); res != Success) {
+                    failed.Add(checker);
+
                     v.AddError(msg_anchor) << res.Failure();
                 }
             }

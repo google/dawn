@@ -1511,6 +1511,193 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_Color_NonFragment) {
 )")) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Function_Return_Color) {
+    auto* f = FragmentEntryPoint("my_func");
+    f->SetReturnType(ty.vec4<f32>());
+
+    IOAttributes attr;
+    attr.color = 0;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(ty.vec4<f32>())); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:1:1 error: color IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader input.
+%my_func = @fragment func():vec4<f32> {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_Struct_Color) {
+    IOAttributes attr;
+    attr.color = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = FragmentEntryPoint("my_func");
+    f->SetReturnType(str_ty);
+
+    b.Append(f->Block(), [&] { b.Return(f, b.Zero(str_ty)); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:5:1 error: color IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader input.
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Color_Output) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kOut, ty.vec4<f32>());
+    v->SetColor(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(ty.vec4<f32>()));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:42 error: var: color IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader input.
+  %v:ptr<__out, vec4<f32>, read_write> = var undef
+                                         ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Output) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.color = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* v = b.Var("v", AddressSpace::kOut, str_ty);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(str_ty));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:41 error: var: color IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader input.
+  %v:ptr<__out, MyStruct, read_write> = var undef
+                                        ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Color_Input_Fragment) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4<f32>());
+    v->SetColor(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Load(v);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_Fragment) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.color = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* v = b.Var("v", AddressSpace::kIn, str_ty);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Load(v);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Color_Input_NonFragment) {
+    auto* f = VertexEntryPoint("my_func");
+
+    auto* v = b.Var("v", AddressSpace::kIn, ty.vec4<f32>());
+    v->SetColor(0);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Load(v);
+        b.Return(f, b.Zero(ty.vec4<f32>()));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:2:35 error: var: color IO attributes cannot be declared for a vertex shader input. They can only be used for a fragment shader input.
+  %v:ptr<__in, vec4<f32>, read> = var undef
+                                  ^^^
+)")) << res.Failure();
+}
+
+TEST_F(IR_ValidatorTest, Function_MSV_Struct_Color_Input_NonFragment) {
+    auto* f = VertexEntryPoint("my_func");
+
+    IOAttributes attr;
+    attr.color = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("col"), ty.vec4<f32>(), attr},
+                                               });
+    auto* v = b.Var("v", AddressSpace::kIn, str_ty);
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Store(v, b.Zero(str_ty));
+        b.Return(f, b.Zero(ty.vec4<f32>()));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason,
+        testing::HasSubstr(
+            R"(:6:34 error: var: color IO attributes cannot be declared for a vertex shader input. They can only be used for a fragment shader input.
+  %v:ptr<__in, MyStruct, read> = var undef
+                                 ^^^
+)")) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.ptr<uniform, i32>());
@@ -1530,8 +1717,7 @@ TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_InputIndexAttachment) {
-    auto* f = b.Function("my_func", ty.void_());
-    f->SetStage(Function::PipelineStage::kFragment);
+    auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
     attr.input_attachment_index = 0;
@@ -1550,19 +1736,10 @@ TEST_F(IR_ValidatorTest, Function_Param_InputIndexAttachment) {
 %my_func = @fragment func(%p:u32):void {
                           ^^^^^^
 )")) << res.Failure();
-
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:1:27 error: input attachment index IO attributes cannot be declared on a input param. They can only be used on a module scope variable.
-%my_func = @fragment func(%p:u32):void {
-                          ^^^^^^
-)")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InputIndexAttachment) {
-    auto* f = b.Function("my_func", ty.void_());
-    f->SetStage(Function::PipelineStage::kFragment);
+    auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
     attr.input_attachment_index = 0;
@@ -1577,14 +1754,6 @@ TEST_F(IR_ValidatorTest, Function_Return_InputIndexAttachment) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:1:1 error: input attachment index IO attributes cannot be declared for a fragment shader output. They can only be used for a fragment shader resource.
-%my_func = @fragment func():u32 {
-^^^^^^^^
-)")) << res.Failure();
-
-    EXPECT_THAT(
-        res.Failure().reason,
-        testing::HasSubstr(
-            R"(:1:1 error: input attachment index IO attributes cannot be declared on a return value. They can only be used on a module scope variable.
 %my_func = @fragment func():u32 {
 ^^^^^^^^
 )")) << res.Failure();
@@ -1754,7 +1923,9 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
                                                    {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
                                                });
 
-    auto* f = b.Function("my_func", str_ty, Function::PipelineStage::kVertex);
+    auto* f = VertexEntryPoint("my_func");
+    f->SetReturnType(str_ty);
+    f->SetReturnAttributes({});
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
@@ -1762,7 +1933,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition_ViaMSV) {
-    auto* f = FragmentEntryPoint("my_func");
+    auto* f = VertexEntryPoint("my_func");
 
     IOAttributes attr;
     attr.invariant = true;
@@ -1799,7 +1970,8 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
                                                    {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
                                                });
 
-    auto* f = b.Function("my_func", str_ty);
+    auto* f = VertexEntryPoint("my_func");
+    f->SetReturnType(str_ty);
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
@@ -1808,13 +1980,13 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
         res.Failure().reason,
         testing::HasSubstr(
             R"(:5:1 error: invariant can only decorate a value if it is also decorated with position
-%my_func = func():MyStruct {
+%my_func = @vertex func():MyStruct [@position] {
 ^^^^^^^^
 )")) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition_ViaMSV) {
-    auto* f = FragmentEntryPoint("my_func");
+    auto* f = VertexEntryPoint("my_func");
 
     auto* v = b.Var("v", AddressSpace::kOut, ty.vec4<f32>());
     v->SetInvariant(true);
