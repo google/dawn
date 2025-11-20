@@ -36,6 +36,7 @@
 #include "dawn/replay/Replay.h"
 #include "dawn/tests/DawnTest.h"
 #include "dawn/tests/MockCallback.h"
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -1650,6 +1651,67 @@ TEST_P(CaptureAndReplayTests, CaptureQuerySetBasic) {
                 {OcclusionExpectation::Result::NonZero, OcclusionExpectation::Result::Zero,
                  OcclusionExpectation::Result::NonZero, OcclusionExpectation::Result::Zero}));
     }
+}
+
+// Capture and replay a render bundle.
+TEST_P(CaptureAndReplayTests, CaptureRenderBundleBasic) {
+    const char* shader = R"(
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 1);
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return vec4u(0x11, 0x22, 0x33, 0x44);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    utils::ComboRenderPipelineDescriptor passDesc;
+    passDesc.vertex.module = module;
+    passDesc.cFragment.module = module;
+    passDesc.cFragment.targetCount = 1;
+    passDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+    passDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&passDesc);
+
+    utils::ComboRenderBundleEncoderDescriptor desc = {};
+    desc.colorFormatCount = 1;
+    desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Uint;
+
+    wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
+
+    renderBundleEncoder.SetPipeline(pipeline);
+    renderBundleEncoder.Draw(1);
+
+    wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
+
+    wgpu::Texture dstTexture =
+        CreateTexture("dstTexture", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+
+        utils::ComboRenderPassDescriptor passDescriptor({dstTexture.CreateView()});
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+        pass.ExecuteBundles(1, &renderBundle);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    uint8_t expected[] = {0x11, 0x22, 0x33, 0x44};
+    ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());

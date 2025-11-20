@@ -35,6 +35,7 @@
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
 #include "dawn/native/webgpu/CaptureContext.h"
+#include "dawn/native/webgpu/CommandBufferHelpers.h"
 #include "dawn/native/webgpu/ComputePipelineWGPU.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/QuerySetWGPU.h"
@@ -56,14 +57,6 @@ CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescrip
     : CommandBufferBase(encoder, descriptor), RecordableObject(schema::ObjectType::CommandBuffer) {}
 
 namespace {
-
-// Note: These are fine to be pointers and not Refs as this object
-// does not outlast a CommandBuffer which itself uses Refs.
-struct CommandBufferResourceUsages {
-    std::vector<ComputePipelineBase*> computePipelines;
-    std::vector<RenderPipelineBase*> renderPipelines;
-    std::vector<BindGroupBase*> bindGroups;
-};
 
 void EncodeComputePass(const DawnProcTable& wgpu,
                        WGPUCommandEncoder innerEncoder,
@@ -475,32 +468,18 @@ MaybeError GatherReferencedResourcesFromRenderPass(CaptureContext& captureContex
                 commands.NextCommand<EndRenderPassCmd>();
                 return {};
             }
-            case Command::SetRenderPipeline: {
-                auto cmd = commands.NextCommand<SetRenderPipelineCmd>();
-                usedResources.renderPipelines.push_back(cmd->pipeline.Get());
+            case Command::ExecuteBundles: {
+                auto cmd = commands.NextCommand<ExecuteBundlesCmd>();
+                auto bundles = commands.NextData<Ref<RenderBundleBase>>(cmd->count);
+                for (uint32_t i = 0; i < cmd->count; ++i) {
+                    usedResources.renderBundles.push_back(bundles[i].Get());
+                }
                 break;
             }
-            case Command::SetBindGroup: {
-                auto cmd = commands.NextCommand<SetBindGroupCmd>();
-                usedResources.bindGroups.push_back(cmd->group.Get());
+            default:
+                DAWN_TRY(GatherReferencedResourcesFromRenderCommand(captureContext, commands,
+                                                                    usedResources, type));
                 break;
-            }
-                DAWN_SKIP_COMMAND(BeginOcclusionQuery)
-                DAWN_SKIP_COMMAND(EndOcclusionQuery)
-                DAWN_SKIP_COMMAND(Draw)
-                DAWN_SKIP_COMMAND(DrawIndexed)
-                DAWN_SKIP_COMMAND(DrawIndirect)
-                DAWN_SKIP_COMMAND(DrawIndexedIndirect)
-                DAWN_SKIP_COMMAND(InsertDebugMarker)
-                DAWN_SKIP_COMMAND(PopDebugGroup)
-                DAWN_SKIP_COMMAND(PushDebugGroup)
-                DAWN_SKIP_COMMAND(WriteTimestamp)
-                DAWN_SKIP_COMMAND(SetImmediates)
-                DAWN_SKIP_COMMAND(SetVertexBuffer)
-            default: {
-                DAWN_CHECK(false);
-                break;
-            }
         }
     }
 
@@ -572,53 +551,16 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 Serialize(captureContext, schema::RenderPassCommand::End);
                 return {};
             }
-            case Command::SetRenderPipeline: {
-                const auto& cmd = *commands.NextCommand<SetRenderPipelineCmd>();
-                schema::RenderPassCommandSetPipelineCmd data{{
+            case Command::ExecuteBundles: {
+                const auto& cmd = *commands.NextCommand<ExecuteBundlesCmd>();
+                auto bundles = commands.NextData<Ref<RenderBundleBase>>(cmd.count);
+                std::vector<schema::ObjectId> bundleIds;
+                for (uint32_t i = 0; i < cmd.count; ++i) {
+                    bundleIds.push_back(captureContext.GetId(bundles[i].Get()));
+                }
+                schema::RenderPassCommandExecuteBundlesCmd data{{
                     .data = {{
-                        .pipelineId = captureContext.GetId(cmd.pipeline.Get()),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            case Command::SetBindGroup: {
-                const auto& cmd = *commands.NextCommand<SetBindGroupCmd>();
-                const uint32_t* dynamicOffsetsData =
-                    cmd.dynamicOffsetCount > 0 ? commands.NextData<uint32_t>(cmd.dynamicOffsetCount)
-                                               : nullptr;
-                schema::RenderPassCommandSetBindGroupCmd data{{
-                    .data = {{
-                        .index = uint32_t(cmd.index),
-                        .bindGroupId = captureContext.GetId(cmd.group),
-                        .dynamicOffsets = std::vector<uint32_t>(
-                            dynamicOffsetsData, dynamicOffsetsData + cmd.dynamicOffsetCount),
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            case Command::SetVertexBuffer: {
-                const auto& cmd = *commands.NextCommand<SetVertexBufferCmd>();
-                schema::RenderPassCommandSetVertexBufferCmd data{{
-                    .data = {{
-                        .slot = uint32_t(cmd.slot),
-                        .bufferId = captureContext.GetId(cmd.buffer),
-                        .offset = cmd.offset,
-                        .size = cmd.size,
-                    }},
-                }};
-                Serialize(captureContext, data);
-                break;
-            }
-            case Command::Draw: {
-                const auto& cmd = *commands.NextCommand<DrawCmd>();
-                schema::RenderPassCommandDrawCmd data{{
-                    .data = {{
-                        .vertexCount = cmd.vertexCount,
-                        .instanceCount = cmd.instanceCount,
-                        .firstVertex = cmd.firstVertex,
-                        .firstInstance = cmd.firstInstance,
+                        .bundleIds = bundleIds,
                     }},
                 }};
                 Serialize(captureContext, data);
@@ -640,7 +582,8 @@ MaybeError CaptureRenderPass(CaptureContext& captureContext, CommandIterator& co
                 break;
             }
             default:
-                DAWN_CHECK(false);
+                DAWN_TRY(CaptureRenderCommand(captureContext, commands, type));
+                break;
         }
     }
     return {};
@@ -751,17 +694,7 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
         }
     }
 
-    // We must serialize pipelines before bindGroups since some bindGroups use implicitly created
-    // bindGroupLayout.
-    for (auto pipeline : usedResources.computePipelines) {
-        DAWN_TRY(captureContext.AddResource(pipeline));
-    }
-    for (auto pipeline : usedResources.renderPipelines) {
-        DAWN_TRY(captureContext.AddResource(pipeline));
-    }
-    for (auto bindGroup : usedResources.bindGroups) {
-        DAWN_TRY(captureContext.AddResource(bindGroup));
-    }
+    DAWN_TRY(AddUsedResources(captureContext, usedResources));
 
     return {};
 }

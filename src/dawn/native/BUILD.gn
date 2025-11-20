@@ -719,6 +719,8 @@ source_set("sources") {
       "webgpu/BufferWGPU.h",
       "webgpu/CaptureContext.cpp",
       "webgpu/CaptureContext.h",
+      "webgpu/CommandBufferHelpers.cpp",
+      "webgpu/CommandBufferHelpers.h",
       "webgpu/CommandBufferWGPU.cpp",
       "webgpu/CommandBufferWGPU.h",
       "webgpu/ComputePipelineWGPU.cpp",

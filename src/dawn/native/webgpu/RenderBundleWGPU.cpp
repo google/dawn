@@ -35,8 +35,11 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/webgpu/BindGroupWGPU.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
+#include "dawn/native/webgpu/CaptureContext.h"
+#include "dawn/native/webgpu/CommandBufferHelpers.h"
 #include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/RenderPipelineWGPU.h"
+#include "dawn/native/webgpu/TextureWGPU.h"
 #include "dawn/native/webgpu/ToWGPU.h"
 
 namespace dawn::native::webgpu {
@@ -179,6 +182,7 @@ RenderBundle::RenderBundle(RenderBundleEncoderBase* encoder,
                        encoder->IsStencilReadOnly(),
                        std::move(usages),
                        std::move(indirectDrawMetaData)),
+      RecordableObject(schema::ObjectType::RenderBundle),
       ObjectWGPU(ToBackend(GetDevice())->wgpu.renderBundleRelease) {
     Device* device = ToBackend(GetDevice());
 
@@ -222,6 +226,50 @@ void RenderBundle::DestroyImpl() {
     RenderBundleBase::DestroyImpl();
     ToBackend(GetDevice())->wgpu.renderBundleRelease(mInnerHandle);
     mInnerHandle = nullptr;
+}
+
+MaybeError RenderBundle::AddReferenced(CaptureContext& captureContext) {
+    CommandBufferResourceUsages usedResources;
+    CommandIterator& commands = *GetCommands();
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        DAWN_TRY(GatherReferencedResourcesFromRenderCommand(captureContext, commands, usedResources,
+                                                            type));
+    }
+
+    DAWN_TRY(AddUsedResources(captureContext, usedResources));
+
+    return {};
+}
+
+MaybeError RenderBundle::CaptureCreationParameters(CaptureContext& captureContext) {
+    std::vector<wgpu::TextureFormat> colorFormats;
+
+    const AttachmentState* attachmentState = GetAttachmentState();
+
+    for (ColorAttachmentIndex i : attachmentState->GetColorAttachmentsMask()) {
+        colorFormats.push_back(attachmentState->GetColorAttachmentFormat(i));
+    }
+
+    schema::RenderBundle bundle{{
+        .colorFormats = colorFormats,
+        .depthStencilFormat = attachmentState->HasDepthStencilAttachment()
+                                  ? attachmentState->GetDepthStencilFormat()
+                                  : wgpu::TextureFormat::Undefined,
+        .sampleCount = attachmentState->GetSampleCount(),
+        .depthReadOnly = IsDepthReadOnly(),
+        .stencilReadOnly = IsStencilReadOnly(),
+    }};
+    Serialize(captureContext, bundle);
+
+    CommandIterator& commands = *GetCommands();
+    Command type;
+    while (commands.NextCommandId(&type)) {
+        DAWN_TRY(CaptureRenderCommand(captureContext, commands, type));
+    }
+    Serialize(captureContext, schema::RenderPassCommand::End);
+
+    return {};
 }
 
 }  // namespace dawn::native::webgpu

@@ -422,6 +422,90 @@ ResultOrError<wgpu::QuerySet> CreateQuerySet(const Replay& replay,
     return {querySet};
 }
 
+template <typename T>
+MaybeError ProcessRenderCommand(const Replay& replay,
+                                ReadHead& readHead,
+                                wgpu::Device device,
+                                schema::RenderPassCommand cmd,
+                                T pass) {
+    switch (cmd) {
+        case schema::RenderPassCommand::SetPipeline: {
+            schema::RenderPassCommandSetPipelineCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetPipeline(replay.GetObjectById<wgpu::RenderPipeline>(data.pipelineId));
+            break;
+        }
+        case schema::RenderPassCommand::SetBindGroup: {
+            schema::RenderPassCommandSetBindGroupCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetBindGroup(data.index, replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
+                              data.dynamicOffsets.size(), data.dynamicOffsets.data());
+            break;
+        }
+        case schema::RenderPassCommand::SetVertexBuffer: {
+            schema::RenderPassCommandSetVertexBufferCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.SetVertexBuffer(data.slot, replay.GetObjectById<wgpu::Buffer>(data.bufferId),
+                                 data.offset, data.size);
+            break;
+        }
+        case schema::RenderPassCommand::Draw: {
+            schema::RenderPassCommandDrawCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex, data.firstInstance);
+            break;
+        }
+        default:
+            return DAWN_INTERNAL_ERROR("Render Pass/Bundle Command not implemented");
+    }
+    return {};
+}
+
+MaybeError ProcessRenderBundleCommands(const Replay& replay,
+                                       ReadHead& readHead,
+                                       wgpu::Device device,
+                                       wgpu::RenderBundleEncoder pass) {
+    schema::RenderPassCommand cmd;
+
+    while (!readHead.IsDone()) {
+        DAWN_TRY(Deserialize(readHead, &cmd));
+        switch (cmd) {
+            case schema::RenderPassCommand::End: {
+                return {};
+            }
+            default:
+                DAWN_TRY(ProcessRenderCommand(replay, readHead, device, cmd, pass));
+                break;
+        }
+    }
+    return DAWN_INTERNAL_ERROR("Missing RenderBundle End command");
+}
+
+ResultOrError<wgpu::RenderBundle> CreateRenderBundle(const Replay& replay,
+                                                     wgpu::Device device,
+                                                     ReadHead& readHead,
+                                                     const std::string& label) {
+    schema::RenderBundle bundle;
+    DAWN_TRY(Deserialize(readHead, &bundle));
+
+    wgpu::RenderBundleEncoderDescriptor desc{
+        .colorFormatCount = bundle.colorFormats.size(),
+        .colorFormats = bundle.colorFormats.data(),
+        .depthStencilFormat = bundle.depthStencilFormat,
+        .sampleCount = bundle.sampleCount,
+        .depthReadOnly = bundle.depthReadOnly,
+        .stencilReadOnly = bundle.stencilReadOnly,
+    };
+    wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
+    DAWN_TRY(ProcessRenderBundleCommands(replay, readHead, device, encoder));
+
+    wgpu::RenderBundleDescriptor bundleDesc{
+        .label = wgpu::StringView(label),
+    };
+    wgpu::RenderBundle renderBundle = encoder.Finish(&bundleDesc);
+    return {renderBundle};
+}
+
 ResultOrError<wgpu::RenderPipeline> CreateRenderPipeline(const Replay& replay,
                                                          wgpu::Device device,
                                                          ReadHead& readHead,
@@ -665,32 +749,14 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 pass.End();
                 return {};
             }
-            case schema::RenderPassCommand::SetPipeline: {
-                schema::RenderPassCommandSetPipelineCmdData data;
+            case schema::RenderPassCommand::ExecuteBundles: {
+                schema::RenderPassCommandExecuteBundlesCmdData data;
                 DAWN_TRY(Deserialize(readHead, &data));
-                pass.SetPipeline(replay.GetObjectById<wgpu::RenderPipeline>(data.pipelineId));
-                break;
-            }
-            case schema::RenderPassCommand::SetBindGroup: {
-                schema::RenderPassCommandSetBindGroupCmdData data;
-                DAWN_TRY(Deserialize(readHead, &data));
-                pass.SetBindGroup(data.index,
-                                  replay.GetObjectById<wgpu::BindGroup>(data.bindGroupId),
-                                  data.dynamicOffsets.size(), data.dynamicOffsets.data());
-                break;
-            }
-            case schema::RenderPassCommand::SetVertexBuffer: {
-                schema::RenderPassCommandSetVertexBufferCmdData data;
-                DAWN_TRY(Deserialize(readHead, &data));
-                pass.SetVertexBuffer(data.slot, replay.GetObjectById<wgpu::Buffer>(data.bufferId),
-                                     data.offset, data.size);
-                break;
-            }
-            case schema::RenderPassCommand::Draw: {
-                schema::RenderPassCommandDrawCmdData data;
-                DAWN_TRY(Deserialize(readHead, &data));
-                pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex,
-                          data.firstInstance);
+                std::vector<wgpu::RenderBundle> bundles;
+                for (auto bundleId : data.bundleIds) {
+                    bundles.push_back(replay.GetObjectById<wgpu::RenderBundle>(bundleId));
+                }
+                pass.ExecuteBundles(bundles.size(), bundles.data());
                 break;
             }
             case schema::RenderPassCommand::BeginOcclusionQuery: {
@@ -704,7 +770,8 @@ MaybeError ProcessRenderPassCommands(const Replay& replay,
                 break;
             }
             default:
-                return DAWN_INTERNAL_ERROR("Render Pass Command not implemented");
+                DAWN_TRY(ProcessRenderCommand(replay, readHead, device, cmd, pass));
+                break;
         }
     }
     return DAWN_INTERNAL_ERROR("Missing RenderPass End command");
@@ -909,6 +976,16 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
             wgpu::QuerySet querySet;
             DAWN_TRY_ASSIGN(querySet, CreateQuerySet(*this, device, readHead, resource.label));
             mResources.insert({resource.id, {resource.label, querySet}});
+            return {};
+        }
+
+        case schema::ObjectType::RenderBundle: {
+            // Command buffers are special and don't have any resources to create.
+            // They are just a sequence of commands.
+            wgpu::RenderBundle renderBundle;
+            DAWN_TRY_ASSIGN(renderBundle,
+                            CreateRenderBundle(*this, device, readHead, resource.label));
+            mResources.insert({resource.id, {resource.label, renderBundle}});
             return {};
         }
 

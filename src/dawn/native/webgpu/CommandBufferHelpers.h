@@ -1,3 +1,5 @@
+
+
 // Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
@@ -25,39 +27,48 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_
-#define SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_
+#ifndef SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERHELPERS_H_
+#define SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERHELPERS_H_
 
-#include "dawn/native/RenderBundle.h"
-#include "dawn/native/RenderBundleEncoder.h"
-#include "dawn/native/webgpu/ObjectWGPU.h"
-#include "dawn/native/webgpu/RecordableObject.h"
+#include <vector>
+
+#include "dawn/native/Commands.h"
+
+namespace dawn::native {
+
+class BindGroupBase;
+class CommandIterator;
+class ComputerPipelineBase;
+class RenderBundleBase;
+class RenderPipelineBase;
+
+}  // namespace dawn::native
 
 namespace dawn::native::webgpu {
 
-class Device;
+class CaptureContext;
 
-class RenderBundle final : public RenderBundleBase,
-                           public RecordableObject,
-                           public ObjectWGPU<WGPURenderBundle> {
-  public:
-    static Ref<RenderBundleBase> Create(RenderBundleEncoderBase* encoder,
-                                        const RenderBundleDescriptor* descriptor,
-                                        RenderPassResourceUsage usages,
-                                        IndirectDrawMetadata indirectDrawMetaData);
-
-    RenderBundle(RenderBundleEncoderBase* encoder,
-                 const RenderBundleDescriptor* descriptor,
-                 RenderPassResourceUsage usages,
-                 IndirectDrawMetadata indirectDrawMetaData);
-
-    MaybeError AddReferenced(CaptureContext& captureContext) override;
-    MaybeError CaptureCreationParameters(CaptureContext& context) override;
-
-  private:
-    void DestroyImpl() override;
+// Note: These are fine to be pointers and not Refs as this object
+// does not outlast a CommandBuffer which itself uses Refs.
+struct CommandBufferResourceUsages {
+    std::vector<ComputePipelineBase*> computePipelines;
+    std::vector<RenderPipelineBase*> renderPipelines;
+    std::vector<BindGroupBase*> bindGroups;
+    std::vector<RenderBundleBase*> renderBundles;
 };
+
+// Captures shared commands from both render passes and render bundles
+MaybeError CaptureRenderCommand(CaptureContext& captureContext,
+                                CommandIterator& commands,
+                                Command type);
+// Gathers resources from shared commands from both render passes and render bundles
+MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureContext,
+                                                      CommandIterator& commands,
+                                                      CommandBufferResourceUsages& usedResources,
+                                                      Command type);
+MaybeError AddUsedResources(CaptureContext& captureContext,
+                            const CommandBufferResourceUsages& usedResources);
 
 }  // namespace dawn::native::webgpu
 
-#endif  // SRC_DAWN_NATIVE_WEBGPU_RENDERBUNDLEWGPU_H_
+#endif  // SRC_DAWN_NATIVE_WEBGPU_COMMANDBUFFERHELPERS_H_
