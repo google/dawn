@@ -1071,28 +1071,27 @@ class Validator {
     /// @param func the function to validate
     void CheckWorkgroupSize(const Function* func);
 
-    /// Validates the entry point IO locations for an entry point.
-    /// Additionally validates usages of blend_src, since they are intrinsically tied with location.
-    /// @param func the function to validate
-    void CheckEntryPointLocationsAndBlendSrc(const Function* func);
-
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
     void CheckPositionPresentForVertexOutput(const Function* ep);
 
-    /// Validates the spec rules for IO attribute usage
+    /// Validates the spec rules for IO attribute usage for a function.
+    /// @param func the function to validate
+    void ValidateIOAttributes(const Function* func);
+
+    /// Implementation for validating the spec rules for IO attribute usage.
     /// @param msg_anchor the object to anchor the error message to
     /// @param ty the data type being decorated by the attributes
     /// @param attr the attributes to test
     /// @param stage the shader stage the builtin is being used
     /// @param dir is value being used as an input or an output
     /// @param io_kind is the type of shader IO object the attribute is attached to
-    void ValidateIOAttributes(const CastableBase* msg_anchor,
-                              const core::type::Type* ty,
-                              const IOAttributes& attr,
-                              Function::PipelineStage stage,
-                              IODirection dir,
-                              ShaderIOKind io_kind);
+    void ValidateIOAttributesImpl(const CastableBase* msg_anchor,
+                                  const core::type::Type* ty,
+                                  const IOAttributes& attr,
+                                  Function::PipelineStage stage,
+                                  IODirection dir,
+                                  ShaderIOKind io_kind);
 
     /// Validates that a type is a bool only if it is decorated with @builtin(front_facing).
     /// @param msg_anchor where to attach errors to
@@ -1146,6 +1145,16 @@ class Validator {
         const std::optional<struct BindingPoint>& binding_point,
         const core::IOAttributes& attr,
         ShaderIOKind kind);
+
+    /// Pre-populates the location hash with values that have a blend_src attribute.
+    /// @param ctx the blend_src context.
+    /// @param target the object that has the struct ty.
+    /// @param ty the ty to validate.
+    /// @param attr the IO attributes for the object.
+    void PrePopulateBlendSrcLocations(BlendSrcContext& ctx,
+                                      const CastableBase* target,
+                                      const core::type::Type* ty,
+                                      const IOAttributes& attr);
 
     /// Validates the blend_src annotations for a ty.
     /// Note: Assumes that it is being called on a non-struct member
@@ -2481,9 +2490,6 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        ValidateIOAttributes(param, param->Type(), param->Attributes(), func->Stage(),
-                             IODirection::kInput, ShaderIOKind::kInputParam);
-
         if (func->IsFragment()) {
             WalkTypeAndMembers(param, param->Type(), param->Attributes(),
                                [this](const auto* p, const auto* t, const auto& a) {
@@ -2554,15 +2560,14 @@ void Validator::CheckFunction(const Function* func) {
         func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
         Capabilities{Capability::kAllowRefTypes});
 
-    ValidateIOAttributes(func, func->ReturnType(), func->ReturnAttributes(), func->Stage(),
-                         IODirection::kOutput, ShaderIOKind::kResultValue);
-
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
     if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
                       !func->ReturnType()->IsConstructible())) {
         AddError(func) << "function return type must be constructible";
     }
+
+    ValidateIOAttributes(func);
 
     if (func->IsEntryPoint()) {
         if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
@@ -2586,7 +2591,6 @@ void Validator::CheckFunction(const Function* func) {
             AddError(func) << result.Failure();
         }
 
-        CheckEntryPointLocationsAndBlendSrc(func);
         WalkTypeAndMembers(
             func, func->ReturnType(), func->ReturnAttributes(),
             [this](const Function* f, const core::type::Type* t, const IOAttributes&) {
@@ -2611,15 +2615,6 @@ void Validator::CheckFunction(const Function* func) {
             if (!mv || !ty) {
                 continue;
             }
-
-            if (mv->AddressSpace() != AddressSpace::kIn &&
-                mv->AddressSpace() != AddressSpace::kOut &&
-                mv->AddressSpace() != AddressSpace::kHandle) {
-                continue;
-            }
-
-            ValidateIOAttributes(var, ty, attr, func->Stage(), IODirectionFor(mv->AddressSpace()),
-                                 ShaderIOKind::kModuleScopeVar);
 
             if (mv->AddressSpace() != AddressSpace::kIn &&
                 mv->AddressSpace() != AddressSpace::kOut) {
@@ -2656,12 +2651,93 @@ void Validator::CheckFunction(const Function* func) {
     ProcessTasks();
 }
 
-void Validator::ValidateIOAttributes(const CastableBase* msg_anchor,
-                                     const core::type::Type* ty,
-                                     const IOAttributes& attr,
-                                     const Function::PipelineStage stage,
-                                     const IODirection dir,
-                                     const ShaderIOKind io_kind) {
+void Validator::ValidateIOAttributes(const Function* func) {
+    const auto stage = func->Stage();
+    struct Task {
+        const CastableBase* anchor;
+        const core::type::Type* type;
+        const IOAttributes& attr;
+        IODirection dir;
+        ShaderIOKind io_kind;
+    };
+    Vector<Task, 16> tasks;
+
+    // Gather parameters.
+    for (auto* param : func->Params()) {
+        tasks.Push({param, param->Type(), param->Attributes(), IODirection::kInput,
+                    ShaderIOKind::kInputParam});
+    }
+
+    // Gather return value.
+    tasks.Push({func, func->ReturnType(), func->ReturnAttributes(), IODirection::kOutput,
+                ShaderIOKind::kResultValue});
+
+    // Gather referenced module variables.
+    for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
+        auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
+        if (mv == nullptr) {
+            continue;
+        }
+        if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut ||
+            mv->AddressSpace() == AddressSpace::kHandle) {
+            tasks.Push({var, mv->StoreType(), var->Attributes(), IODirectionFor(mv->AddressSpace()),
+                        ShaderIOKind::kModuleScopeVar});
+        }
+    }
+
+    BlendSrcContext input_ctx{func->Stage(), {}, {}, nullptr, IODirection::kInput};
+    BlendSrcContext output_ctx{func->Stage(), {}, {}, nullptr, IODirection::kOutput};
+
+    if (stage != Function::PipelineStage::kUndefined) {
+        // First pass: pre-populate location hashes for blend_src.
+        for (const auto& task : tasks) {
+            if (task.dir == IODirection::kInput) {
+                PrePopulateBlendSrcLocations(input_ctx, task.anchor, task.type, task.attr);
+            } else if (task.dir == IODirection::kOutput) {
+                PrePopulateBlendSrcLocations(output_ctx, task.anchor, task.type, task.attr);
+            }
+        }
+
+        // Second pass: validates blend_src usages.
+        for (const auto& task : tasks) {
+            if (task.dir == IODirection::kInput) {
+                CheckBlendSrc(input_ctx, task.anchor, task.type, task.attr);
+            } else if (task.dir == IODirection::kOutput) {
+                CheckBlendSrc(output_ctx, task.anchor, task.type, task.attr);
+            }
+        }
+
+        if (!output_ctx.blend_srcs.IsEmpty()) {
+            if (output_ctx.blend_srcs.Count() != 2) {
+                AddError(func) << "if any @blend_src is used on an output, then @blend_src(0) and "
+                                  "@blend_src(1) must be used";
+            }
+        }
+
+        // Third pass: validates all non-blend_src usages.
+        for (const auto& task : tasks) {
+            if (task.dir == IODirection::kInput) {
+                CheckLocation(input_ctx.locations, task.anchor, task.attr, func->Stage(), task.type,
+                              task.dir);
+            } else if (task.dir == IODirection::kOutput) {
+                CheckLocation(output_ctx.locations, task.anchor, task.attr, func->Stage(),
+                              task.type, task.dir);
+            }
+        }
+    }
+
+    // Validate attributes on IO objects
+    for (const auto& task : tasks) {
+        ValidateIOAttributesImpl(task.anchor, task.type, task.attr, stage, task.dir, task.io_kind);
+    }
+}
+
+void Validator::ValidateIOAttributesImpl(const CastableBase* msg_anchor,
+                                         const core::type::Type* ty,
+                                         const IOAttributes& attr,
+                                         Function::PipelineStage stage,
+                                         IODirection dir,
+                                         ShaderIOKind io_kind) {
     bool skip_builtins = capabilities_.Contains(Capability::kLoosenValidationForShaderIO) &&
                          io_kind == ShaderIOKind::kModuleScopeVar;
     const IOAttributeUsage usage = IOAttributeUsageFor(stage, dir);
@@ -2744,63 +2820,6 @@ void Validator::CheckNotBool(const CastableBase* msg_anchor,
                              const std::string& err) {
     if (ty->Is<core::type::Bool>()) {
         AddError(msg_anchor) << err;
-    }
-}
-
-void Validator::CheckEntryPointLocationsAndBlendSrc(const Function* func) {
-    BlendSrcContext input_ctx{func->Stage(), {}, {}, nullptr, IODirection::kInput};
-    BlendSrcContext output_ctx{func->Stage(), {}, {}, nullptr, IODirection::kOutput};
-
-    // First pass validates blend_src usages and pre-populates location hash with related values
-    for (auto* param : func->Params()) {
-        CheckBlendSrc(input_ctx, param, param->Type(), param->Attributes());
-    }
-    CheckBlendSrc(output_ctx, func, func->ReturnType(), func->ReturnAttributes());
-
-    for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
-        auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
-        if (mv != nullptr) {
-            if (mv->AddressSpace() == AddressSpace::kIn) {
-                CheckBlendSrc(input_ctx, var, mv->StoreType(), var->Attributes());
-            }
-
-            if (mv->AddressSpace() == AddressSpace::kOut) {
-                CheckBlendSrc(output_ctx, var, mv->StoreType(), var->Attributes());
-            }
-        }
-    }
-
-    // No check for number inputs, since there is no case where blend_src on an input value is
-    // allowed, and will cause errors earlier, so don't need a duplicate error here.
-
-    if (!output_ctx.blend_srcs.IsEmpty()) {
-        if (output_ctx.blend_srcs.Count() != 2) {
-            AddError(func) << "if any @blend_src is used on an output, then @blend_src(0) and "
-                              "@blend_src(1) must be used";
-        }
-    }
-
-    // Second pass validates all non-blend_src usages
-    for (auto* param : func->Params()) {
-        CheckLocation(input_ctx.locations, param, param->Attributes(), func->Stage(), param->Type(),
-                      IODirection::kInput);
-    }
-    CheckLocation(output_ctx.locations, func, func->ReturnAttributes(), func->Stage(),
-                  func->ReturnType(), IODirection::kOutput);
-
-    for (auto* var : referenced_module_vars_.TransitiveReferences(func)) {
-        auto* mv = var->Result()->Type()->As<core::type::MemoryView>();
-        if (mv != nullptr) {
-            if (mv->AddressSpace() == AddressSpace::kIn) {
-                CheckLocation(input_ctx.locations, var, var->Attributes(), func->Stage(),
-                              mv->StoreType(), IODirection::kInput);
-            }
-
-            if (mv->AddressSpace() == AddressSpace::kOut) {
-                CheckLocation(output_ctx.locations, var, var->Attributes(), func->Stage(),
-                              mv->StoreType(), IODirection::kOutput);
-            }
-        }
     }
 }
 
@@ -3224,6 +3243,26 @@ Result<SuccessType, std::string> Validator::ValidateBindingPoint(
     return Success;
 }
 
+void Validator::PrePopulateBlendSrcLocations(BlendSrcContext& ctx,
+                                             const CastableBase* target,
+                                             const core::type::Type* ty,
+                                             const IOAttributes& attr) {
+    if (attr.blend_src.has_value() && attr.location.has_value()) {
+        ctx.locations.Add(attr.location.value(), target);
+    }
+
+    if (auto* s = ty->As<core::type::Struct>()) {
+        if (s->Members().Any([](auto* m) { return m->Attributes().blend_src.has_value(); })) {
+            for (const auto* mem : s->Members()) {
+                if (mem->Attributes().blend_src.has_value() &&
+                    mem->Attributes().location.has_value()) {
+                    ctx.locations.Add(mem->Attributes().location.value(), target);
+                }
+            }
+        }
+    }
+}
+
 void Validator::CheckBlendSrc(BlendSrcContext& ctx,
                               const CastableBase* target,
                               const core::type::Type* ty,
@@ -3284,10 +3323,6 @@ void Validator::CheckBlendSrcAnnotation(BlendSrcContext& ctx,
     }
     if (!attr.location.has_value() || attr.location.value() != 0) {
         AddError(target) << "struct members with blend_src must be located at 0";
-    }
-
-    if (attr.location.has_value()) {
-        ctx.locations.Add(attr.location.value(), target);
     }
 
     if (!ctx.blend_src_type) {
