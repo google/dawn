@@ -31,12 +31,13 @@ import abc
 import argparse
 import base64
 import dataclasses
+import datetime
 import logging
 import pathlib
 import posixpath
 import subprocess
 import sys
-from typing import Any, Self
+from typing import Any, Self, Type
 
 import requests
 
@@ -45,6 +46,8 @@ DEPS_FILE = DAWN_ROOT / 'DEPS'
 
 CHROMIUM_SRC_URL = 'https://chromium.googlesource.com/chromium/src'
 CHROMIUM_REVISION_VAR = 'chromium_revision'
+
+DEFAULT_REVISION_CHARACTERS = 10
 
 # GN variables that need to be synced. A map from Dawn variable name to
 # Chromium variable name.
@@ -136,8 +139,11 @@ EXPORTED_CHROMIUM_REPOS = {
 }
 
 
+@dataclasses.dataclass
 class ChangedDepsEntry(abc.ABC):
     """Base class for all changed DEPS entries."""
+    # The name of the dependency in Dawn's DEPS file.
+    name: str
 
     @abc.abstractmethod
     def setdep_args(self) -> list[str]:
@@ -147,12 +153,14 @@ class ChangedDepsEntry(abc.ABC):
         file content to the new version.
         """
 
+    @abc.abstractmethod
+    def commit_message_lines(self) -> list[str]:
+        """Returns lines to add to the commit message."""
+
 
 @dataclasses.dataclass
 class ChangedVariable(ChangedDepsEntry):
     """Represents a single changed DEPS variable."""
-    # The name of the variable in Dawn's DEPS file.
-    name: str
     # The old version in Dawn's DEPS file.
     old_version: str
     # The new version that Dawn's DEPS file will contain.
@@ -164,12 +172,17 @@ class ChangedVariable(ChangedDepsEntry):
             f'{self.name}={self.new_version}',
         ]
 
+    def commit_message_lines(self) -> list[str]:
+        return [
+            f'  {self.name}: {self.old_version} -> {self.new_version}',
+        ]
+
 
 @dataclasses.dataclass
 class ChangedRepo(ChangedDepsEntry):
     """Represents a single changed DEPS repo entry."""
-    # The name of the dependency in Dawn's DEPS file.
-    name: str
+    # The URL of the repo that Dawn depends on.
+    url: str
     # The old revision in Dawn's DEPS file.
     old_revision: str
     # The new revision that Dawn's DEPS file will contain.
@@ -180,6 +193,21 @@ class ChangedRepo(ChangedDepsEntry):
             '--revision',
             f'{self.name}@{self.new_revision}',
         ]
+
+    def commit_message_lines(self) -> list[str]:
+        return [f'  {self.name}: {self.log_link()}']
+
+    def revision_range(self, num_characters: int | None = None) -> str:
+        num_characters = num_characters or DEFAULT_REVISION_CHARACTERS
+        return (f'{self.old_revision[:num_characters]}'
+                f'..'
+                f'{self.new_revision[:num_characters]}')
+
+    def log_link(self, num_characters: int | None = None) -> str:
+        return f'{self.url}/+log/{self.revision_range(num_characters)}'
+
+    def commit_link(self, num_characters: int | None = None) -> str:
+        return f'{self.url}/+/{self.revision_range(num_characters)}'
 
 
 @dataclasses.dataclass
@@ -214,8 +242,6 @@ class CipdPackage:
 @dataclasses.dataclass
 class ChangedCipd(ChangedDepsEntry):
     """Represents a single changed DEPS CIPD entry."""
-    # The name of the dependency in Dawn's DEPS file.
-    name: str
     # The old packages in Dawn's DEPS file
     old_packages: list[CipdPackage]
     # The new packages that Dawn's DEPS file will contain.
@@ -226,6 +252,11 @@ class ChangedCipd(ChangedDepsEntry):
             f'{self.name}:{p.setdep_str()}' for p in self.new_packages
         ]
         return ['--revision'] + revisions
+
+    def commit_message_lines(self) -> list[str]:
+        return [
+            f'  {self.name}',
+        ]
 
 
 @dataclasses.dataclass
@@ -262,8 +293,6 @@ class GcsObject:
 @dataclasses.dataclass
 class ChangedGcs(ChangedDepsEntry):
     """Represents a single changed DEPS GCS entry."""
-    # The name of the dependency in Dawn's DEPS file.
-    name: str
     # The old objects in Dawn's DEPS file.
     old_objects: list[GcsObject]
     # The new objects that Dawn's DEPS file will contain.
@@ -275,6 +304,11 @@ class ChangedGcs(ChangedDepsEntry):
         ]
         object_string = '?'.join(comma_separated_objects)
         return ['--revision', f'{self.name}@{object_string}']
+
+    def commit_message_lines(self) -> list[str]:
+        return [
+            f'  {self.name}',
+        ]
 
 
 def _parse_deps_file(deps_content: str) -> dict[str, Any]:
@@ -334,6 +368,60 @@ def _ensure_updated_main_branch() -> None:
     subprocess.run(['git', 'pull'], check=True)
 
 
+def _create_roll_branch() -> None:
+    """Creates a unique branch for a roll."""
+    # YYYY-MM-DD-HH-MM-SS
+    now = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    branch_name = f'roll-chromium-deps-{now}'
+    logging.info('Creating branch %s', branch_name)
+    _ = subprocess.run(['git', 'checkout', '-b', branch_name], check=True)
+
+
+def _amend_commit(commit_message: str) -> None:
+    """Amends the most recent commit.
+
+    Args:
+        commit_message: The commit message to add to the existing commit
+            message. This will be inserted towards the end of the existing
+            message, just before "Bug:".
+    """
+    logging.info('Amending changes to local commit')
+
+    proc = subprocess.run(['git', 'log', '-1', '--pretty=%B'],
+                          capture_output=True,
+                          text=True,
+                          check=True)
+    old_commit_message = proc.stdout.strip()
+    logging.debug('Existing commit message:\n%s', old_commit_message)
+
+    bug_index = old_commit_message.rfind('Bug:')
+    if bug_index == -1:
+        raise RuntimeError('"Bug:" not found in existing commit message.')
+
+    new_commit_message = (f'{old_commit_message[:bug_index]}'
+                          f'{commit_message}'
+                          f'\n'
+                          f'{old_commit_message[bug_index:]}')
+
+    _ = subprocess.run(
+        ['git', 'commit', '-a', '--amend', '-m', new_commit_message],
+        capture_output=True,
+        check=True)
+
+
+def _commit(commit_message: str) -> None:
+    """Commits all changed files.
+
+    Args:
+        commit_message: The commit message to use for the new commit.
+    """
+    # `gclient setdep` should have already staged changes and running
+    # `git add -u` actually undoes the submodule changes, so commit as-is.
+    _ = subprocess.run(['git', 'commit', '-m', commit_message],
+                       capture_output=True,
+                       check=True)
+
+
 def _get_remote_head_revision(remote_url: str) -> str:
     """Retrieves the HEAD revision for a remote git URL.
 
@@ -376,6 +464,7 @@ def _get_roll_revision_range(target_revision: str | None,
         new_revision = _get_remote_head_revision(CHROMIUM_SRC_URL)
         logging.info('Using %s as the HEAD revision.', new_revision)
     return ChangedRepo(name='chromium/src',
+                       url=CHROMIUM_SRC_URL,
                        old_revision=old_revision,
                        new_revision=new_revision)
 
@@ -578,7 +667,7 @@ def _get_changed_non_exported_repos(dawn_deps: dict,
                 f'Unable to find Chromium repo {chromium_name}. Was it '
                 f'removed?')
 
-        _, dawn_revision = _get_url_and_revision(
+        url, dawn_revision = _get_url_and_revision(
             _get_raw_url_for_dep_entry(dawn_name, dawn_deps),
             dawn_deps['vars'])
         _, chromium_revision = _get_url_and_revision(
@@ -588,6 +677,7 @@ def _get_changed_non_exported_repos(dawn_deps: dict,
             changed_repos.append(
                 ChangedRepo(
                     name=dawn_name,
+                    url=url,
                     old_revision=dawn_revision,
                     new_revision=chromium_revision,
                 ))
@@ -619,6 +709,7 @@ def _get_changed_exported_repos(dawn_deps: dict) -> list[ChangedRepo]:
             changed_repos.append(
                 ChangedRepo(
                     name=dawn_name,
+                    url=url,
                     old_revision=dawn_revision,
                     new_revision=head_revision,
                 ))
@@ -664,6 +755,171 @@ def _get_url_and_revision(deps_url: str, vars: dict) -> tuple[str, str]:
         search_str = f'{{{var}}}'
         url = url.replace(search_str, value)
     return url, revision
+
+
+def _generate_commit_message(changed_entries: list[ChangedDepsEntry],
+                             chromium_revision_range: ChangedRepo,
+                             autoroll: bool) -> str:
+    """Generates a commit message for a roll.
+
+    Args:
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+        chromium_revision_range: The ChangedRepo entry for Chromium for this
+            roll.
+        autoroll: Whether this roll is being done by the autoroller.
+
+    Returns:
+        A string containing the commit message to use.
+    """
+    commit_message_lines = []
+    commit_message_lines.extend(
+        _generate_chromium_section(chromium_revision_range, autoroll))
+    commit_message_lines.append('')
+    commit_message_lines.extend(_generate_repo_section(changed_entries))
+    commit_message_lines.append('')
+    commit_message_lines.extend(_generate_cipd_section(changed_entries))
+    commit_message_lines.append('')
+    commit_message_lines.extend(_generate_gcs_section(changed_entries))
+    commit_message_lines.append('')
+    commit_message_lines.extend(_generate_variables_section(changed_entries))
+    commit_message_lines.append('')
+    commit_message_lines.extend(_generate_footers_section(autoroll))
+    return '\n'.join(commit_message_lines)
+
+
+def _generate_chromium_section(chromium_revision_range: ChangedRepo,
+                               autoroll: bool) -> list[str]:
+    """Generates the commit message section for Chromium.
+
+    Args:
+        chromium_revision_range: The ChangedRepo entry for Chromium for this
+            roll.
+        autoroll: Whether this roll is being done by the autoroller.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    chromium_lines = []
+    # Autorolls already add information about chromium_revision to the commit
+    # message.
+    if autoroll:
+        return chromium_lines
+
+    chromium_lines.extend([
+        f'Roll chromium_revision {chromium_revision_range.revision_range()}',
+        f'',
+        f'Change log: {chromium_revision_range.log_link()}',
+        f'Full diff: {chromium_revision_range.commit_link()}',
+    ])
+    return chromium_lines
+
+
+def _generate_section_for_entry_type(entry_type: Type[ChangedDepsEntry],
+                                     changed_entries: list[ChangedDepsEntry],
+                                     empty_message: str,
+                                     header: str) -> list[str]:
+    """Generates the commit message section for a given ChangedDepsEntry type.
+
+    Args:
+        entry_type: The type of DEPS entry that should be included in this
+            section.
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+        empty_message: The message to use if no matching entries are found.
+        header: The message to use at the beginning of the section if at least
+            one matching entry is found.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    matching_entries = []
+    for ce in changed_entries:
+        if isinstance(ce, entry_type):
+            matching_entries.append(ce)
+
+    if not matching_entries:
+        return [empty_message]
+
+    matching_entries.sort(key=lambda e: e.name)
+    lines = [header]
+    for me in matching_entries:
+        lines.extend(me.commit_message_lines())
+    return lines
+
+
+def _generate_variables_section(
+        changed_entries: list[ChangedDepsEntry]) -> list[str]:
+    """Generates the commit message section for changed variables.
+
+    Args:
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    return _generate_section_for_entry_type(
+        ChangedVariable, changed_entries,
+        'No explicitly synced GN variables in this roll',
+        'Explicitly synced GN variables:')
+
+
+def _generate_cipd_section(
+        changed_entries: list[ChangedDepsEntry]) -> list[str]:
+    """Generates the commit message section for changed CIPD entries.
+
+    Args:
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    return _generate_section_for_entry_type(
+        ChangedCipd, changed_entries, 'No CIPD entries changed in this roll',
+        'CIPD entries:')
+
+
+def _generate_gcs_section(
+        changed_entries: list[ChangedDepsEntry]) -> list[str]:
+    """Generates the commit message section for changed GCS entries.
+
+    Args:
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    return _generate_section_for_entry_type(
+        ChangedGcs, changed_entries, 'No GCS entries changed in this roll',
+        'GCS entries:')
+
+
+def _generate_repo_section(
+        changed_entries: list[ChangedDepsEntry]) -> list[str]:
+    """Generates the commit message section for change repo entries.
+
+    Args:
+        changed_entries: A list of all ChangedDepsEntry for this roll.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    return _generate_section_for_entry_type(
+        ChangedRepo, changed_entries, 'No repo entries changed in this roll',
+        'Repo entries:')
+
+
+def _generate_footers_section(autoroll: bool) -> list[str]:
+    """Generates the commit message section for CL footers.
+
+    Args:
+        autoroll: Whether this roll is being done by the autoroller.
+
+    Returns:
+        A list of strings containing lines to append to the commit message.
+    """
+    lines = []
+    if not autoroll:
+        lines.append('Bug: None')
+    return lines
 
 
 def _apply_changed_deps(changed_entries: list[ChangedDepsEntry]) -> None:
@@ -727,6 +983,10 @@ def main() -> None:
     chromium_deps = _parse_deps_file(
         _read_remote_chromium_file('DEPS', revision_range.new_revision))
     changed_entries = _get_changed_deps_entries(dawn_deps, chromium_deps)
+    # Create the commit message before adding the entry for the Chromium
+    # revision since Chromium information is explicitly added to the message.
+    commit_message = _generate_commit_message(changed_entries, revision_range,
+                                              args.autoroll)
     # We change the variable directly instead of using ChangedRepo since
     # 'gclient setdep --revision' does not work for repos if there is no entry
     # in .gitmodules.
@@ -736,7 +996,22 @@ def main() -> None:
             old_version=revision_range.old_revision,
             new_version=revision_range.new_revision,
         ))
+
+    # When running as part of the autoroller, we update the existing commit
+    # on the current branch.
+    if not args.autoroll:
+        _create_roll_branch()
+
     _apply_changed_deps(changed_entries)
+
+    if args.autoroll:
+        _amend_commit(commit_message)
+    else:
+        if _is_tree_clean():
+            logging.info('No DEPS changes detected, skipping commit')
+        else:
+            _commit(commit_message)
+            logging.info('Changes committed locally and are ready for upload')
 
 
 if __name__ == '__main__':
