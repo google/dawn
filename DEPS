@@ -302,7 +302,7 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@4f291467d9900fb616b5dd2ece60e20c60ad94d8',
+    'url': '{chromium_git}/vulkan-deps@b7b8946e9bdfe989446222417f3a49df0270216a',
     'condition': 'dawn_standalone',
   },
 
@@ -337,12 +337,12 @@ deps = {
   },
 
   'third_party/vulkan-utility-libraries/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@c3e5c14dfa167b50813ad7649a71287d4d4ec9db',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-Utility-Libraries@c86d03c738d5cbf78479a53e1e776b72353a4301',
     'condition': 'dawn_standalone',
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@2f8c9de8d791cd19436f2d10e696e81b73fcc659',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@3187070c3b0e40d8c2c21c3ac9d7be258f5cd7b1',
     'condition': 'dawn_standalone',
   },
 
