@@ -60,6 +60,8 @@ var (
 //     exist will have the error message "open root: file does not exist". This
 //     is a side-effect of fs.FS requiring that Open() reject names that do not
 //     satisfy fs.ValidPath(), which requires that there is no leading /.
+//     TODO(crbug.com/436025865): Update the implementation to correctly add
+//     leading / back in.
 //   - The current working directory is not taken into account. For example,
 //     creating /root/subdir/file.txt, changing to /root/subdir, and attempting
 //     to open file.txt will fail. This cannot currently be easily worked
