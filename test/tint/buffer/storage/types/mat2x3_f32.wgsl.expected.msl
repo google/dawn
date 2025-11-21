@@ -28,6 +28,7 @@ void tint_store_and_preserve_padding(device tint_array<tint_packed_vec3_f32_arra
   (*target)[1u].packed = packed_float3(value_param[1u]);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const device tint_array<tint_packed_vec3_f32_array_element, 2>* in [[buffer(0)]], device tint_array<tint_packed_vec3_f32_array_element, 2>* out [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
   tint_array<tint_packed_vec3_f32_array_element, 2> const v_1 = (*tint_module_vars.in);

@@ -6,6 +6,7 @@ struct frexp_result_f32 {
   int exp;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   float const in = 1.25f;
   frexp_result_f32 v_1 = {};

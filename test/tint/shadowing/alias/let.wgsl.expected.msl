@@ -8,6 +8,7 @@ void f() {
   int const b_1 = a_1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   f();
 }

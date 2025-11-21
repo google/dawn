@@ -5,6 +5,7 @@ struct tint_module_vars_struct {
   thread uint3* v;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1() {
   thread uint3 v = uint3(0u, 1u, 2u);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};

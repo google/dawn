@@ -21,6 +21,7 @@ void clamp_d396af() {
   int4 res = int4(1);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   clamp_d396af();
 }

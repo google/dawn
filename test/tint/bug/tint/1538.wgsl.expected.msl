@@ -36,6 +36,7 @@ int f() {
   return 0;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device tint_array<uint, 1>* buf [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
   {

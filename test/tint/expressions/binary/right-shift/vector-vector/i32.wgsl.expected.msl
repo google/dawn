@@ -1,6 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   int3 const a = int3(1, 2, 3);
   uint3 const b = uint3(4u, 5u, 6u);

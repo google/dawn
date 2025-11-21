@@ -24,6 +24,7 @@ void main_inner(uint3 global_id, uint3 local_id, uint tint_local_index, tint_mod
   }
 }
 
+[[max_total_threads_per_threadgroup(256)]]
 kernel void v_1(uint3 global_id [[thread_position_in_grid]], uint3 local_id [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]], device uint* output [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sh_atomic_failed=(&(*v_2).tint_symbol), .output=output};
   main_inner(global_id, local_id, tint_local_index, tint_module_vars);

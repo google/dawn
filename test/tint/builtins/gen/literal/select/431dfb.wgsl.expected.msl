@@ -21,6 +21,7 @@ void select_431dfb() {
   int2 res = int2(1);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_431dfb();
 }

@@ -26,6 +26,7 @@ void main_inner(uint num_subgroups, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.output)[min(num_subgroups, (tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)}.tint_array_length_0_0 - 1u))] = num_subgroups;
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void v(uint num_subgroups [[simdgroups_per_threadgroup]], device tint_array<uint, 1>* output [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(num_subgroups, tint_module_vars);

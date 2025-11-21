@@ -45,6 +45,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   subgroupMatrixStore_45de0c(tint_module_vars);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=(&(*v_2).tint_symbol)};
   compute_main_inner(tint_local_index, tint_module_vars);

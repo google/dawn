@@ -26,6 +26,7 @@ struct tint_module_vars_struct {
   const constant tint_array<Outer, 4>* a;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<Outer, 4>* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   const constant tint_array<Outer, 4>* const p_a = tint_module_vars.a;

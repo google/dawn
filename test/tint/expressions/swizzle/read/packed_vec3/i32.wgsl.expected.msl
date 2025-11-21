@@ -22,6 +22,7 @@ struct tint_module_vars_struct {
   const constant S_packed_vec3* U;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant S_packed_vec3* U [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.U=U};
   int3 v = int3((*tint_module_vars.U).v);

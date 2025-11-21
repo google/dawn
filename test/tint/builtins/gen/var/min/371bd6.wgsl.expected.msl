@@ -21,6 +21,7 @@ void min_371bd6() {
   int3 res = int3(1);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   min_371bd6();
 }

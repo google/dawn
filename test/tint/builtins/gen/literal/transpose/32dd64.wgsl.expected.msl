@@ -21,6 +21,7 @@ void transpose_32dd64() {
   float4x3 res = float4x3(float3(1.0f), float3(1.0f), float3(1.0f), float3(1.0f));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   transpose_32dd64();
 }

@@ -5,6 +5,7 @@ struct tint_module_vars_struct {
   thread half2* u;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread half2 u = half2(1.0h);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};

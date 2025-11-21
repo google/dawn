@@ -21,6 +21,7 @@ void sign_ab6301() {
   float3 res = float3(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sign_ab6301();
 }

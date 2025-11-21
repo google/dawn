@@ -5,6 +5,7 @@ float get_f32() {
   return 1.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   float2 v2 = float2(get_f32());
   float3 v3 = float3(get_f32());

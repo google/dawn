@@ -40,6 +40,7 @@ void atomicStore_cdc29e(tint_module_vars_struct tint_module_vars) {
   atomic_store_explicit((&(*tint_module_vars.sb_rw).arg_0), arg_1, memory_order_relaxed);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw};
   atomicStore_cdc29e(tint_module_vars);

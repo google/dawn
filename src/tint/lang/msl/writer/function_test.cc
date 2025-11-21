@@ -42,6 +42,7 @@ TEST_F(MslWriterTest, Function_EntryPoint_Compute) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(128)]]
 kernel void entry() {
 }
 )");

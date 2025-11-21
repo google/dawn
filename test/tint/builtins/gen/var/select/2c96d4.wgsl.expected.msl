@@ -23,6 +23,7 @@ void select_2c96d4() {
   float3 res = select(float3(1.0f), float3(1.0f), arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_2c96d4();
 }

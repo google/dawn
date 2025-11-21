@@ -21,6 +21,7 @@ void acos_4dac75() {
   float4 res = float4(0.25f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   acos_4dac75();
 }

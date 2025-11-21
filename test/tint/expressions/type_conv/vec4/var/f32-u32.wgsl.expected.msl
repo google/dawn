@@ -9,6 +9,7 @@ uint4 tint_v4f32_to_v4u32(float4 value) {
   return uint4(clamp(value, float4(0.0f), float4(4294967040.0f)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread float4 u = float4(1.0f);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};

@@ -21,6 +21,7 @@ void clamp_96e56a() {
   int res = 1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   clamp_96e56a();
 }

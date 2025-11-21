@@ -32,6 +32,7 @@ void push_output(uint value, tint_array_lengths_struct tint_array_lengths, tint_
   (*tint_module_vars.count) = ((*tint_module_vars.count) + 1u);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device Outputs* outputs [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint count = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.count=(&count), .outputs=outputs, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};

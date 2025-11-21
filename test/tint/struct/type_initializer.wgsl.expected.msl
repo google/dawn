@@ -35,6 +35,7 @@ struct T {
   tint_array<int, 2> a;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   int const x = 42;
   S1 const empty = S1{};

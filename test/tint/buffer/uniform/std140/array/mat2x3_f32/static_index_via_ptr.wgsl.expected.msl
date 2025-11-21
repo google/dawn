@@ -34,6 +34,7 @@ tint_array<float2x3, 4> tint_load_array_packed_vec3(const constant tint_array<ti
   return tint_array<float2x3, 4>{v_1, v_3, v_5, float2x3(float3(v_6[0u].packed), float3(v_6[1u].packed))};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* a [[buffer(0)]], device float* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .s=s};
   const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* const p_a = tint_module_vars.a;

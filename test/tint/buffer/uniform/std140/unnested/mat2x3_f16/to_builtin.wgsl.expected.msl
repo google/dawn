@@ -22,6 +22,7 @@ struct tint_module_vars_struct {
   const constant tint_array<tint_packed_vec3_f16_array_element, 2>* u;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 2>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   tint_array<tint_packed_vec3_f16_array_element, 2> const v = (*tint_module_vars.u);

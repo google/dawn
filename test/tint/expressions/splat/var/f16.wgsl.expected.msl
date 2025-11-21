@@ -1,6 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   half v = 3.0h;
   half2 v2 = half2(v);

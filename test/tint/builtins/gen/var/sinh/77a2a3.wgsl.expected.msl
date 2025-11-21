@@ -21,6 +21,7 @@ void sinh_77a2a3() {
   float3 res = float3(1.17520117759704589844f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sinh_77a2a3();
 }

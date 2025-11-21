@@ -57,6 +57,7 @@ S ret_struct() {
   return S{};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   bool const a = ret_bool();
   int const b = ret_i32();

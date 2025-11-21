@@ -29,6 +29,7 @@ float f3(tint_array<tint_array<tint_array<float, 4>, 3>, 2> a) {
   return a[1u][2u][3u];
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device float* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   tint_array<float, 4> const a1 = tint_array<float, 4>{};

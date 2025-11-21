@@ -29,6 +29,7 @@ void tint_store_and_preserve_padding(device tint_array<tint_packed_vec3_f16_arra
   (*target)[2u].packed = packed_half3(value_param[2u]);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(device tint_array<tint_packed_vec3_f16_array_element, 3>* out [[buffer(0)]]) {
   thread half3x3 m = half3x3(half3(0.0h, 1.0h, 2.0h), half3(3.0h, 4.0h, 5.0h), half3(6.0h, 7.0h, 8.0h));
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=(&m), .out=out};

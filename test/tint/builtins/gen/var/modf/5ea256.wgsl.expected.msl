@@ -37,6 +37,7 @@ void modf_5ea256() {
   modf_result_vec3_f32 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_5ea256();
 }

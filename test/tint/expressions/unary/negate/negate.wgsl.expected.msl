@@ -9,6 +9,7 @@ int4 vi(int4 x) {
   return as_type<int4>((~(as_type<uint4>(x)) + uint4(1u)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   i(1);
   vi(int4(0));

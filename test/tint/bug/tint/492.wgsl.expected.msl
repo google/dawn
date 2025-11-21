@@ -9,6 +9,7 @@ struct tint_module_vars_struct {
   device S* buf;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device S* buf [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
   device int* const p = (&(*tint_module_vars.buf).a);

@@ -6,6 +6,7 @@ struct tint_module_vars_struct {
   thread float* b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   thread float a = 1.0f;
   thread float b = 0.0f;

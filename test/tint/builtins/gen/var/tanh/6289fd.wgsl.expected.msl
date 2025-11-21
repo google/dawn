@@ -21,6 +21,7 @@ void tanh_6289fd() {
   float3 res = float3(0.76159417629241943359f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   tanh_6289fd();
 }

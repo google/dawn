@@ -21,6 +21,7 @@ void ldexp_71ebe3() {
   float res = 2.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   ldexp_71ebe3();
 }

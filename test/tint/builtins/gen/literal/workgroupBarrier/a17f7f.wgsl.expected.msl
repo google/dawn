@@ -5,6 +5,7 @@ void workgroupBarrier_a17f7f() {
   threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   workgroupBarrier_a17f7f();
 }

@@ -48,6 +48,7 @@ void asinh_468a48() {
   half res = asinh(arg_0);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void rgba32uintin() {
   asinh_468a48();
 }
@@ -200,6 +201,7 @@ void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_modul
   tint_store_and_preserve_padding((&(*tint_module_vars.data).particles[min(idx, (v.tint_array_length_0_1 - 1u))]), particle);
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void simulate(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant SimulationParams* sim_params [[buffer(0)]], device Particles_packed_vec3* data [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread float2 rand_seed = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rand_seed=(&rand_seed), .sim_params=sim_params, .data=data, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
@@ -260,6 +262,7 @@ void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
   }
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void export_level(uint3 coord [[thread_position_in_grid]], const constant UBO* ubo [[buffer(0)]], const device Buffer* buf_in [[buffer(1)]], device Buffer* buf_out [[buffer(2)]], texture2d<float, access::write> tex_out [[texture(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .buf_in=buf_in, .buf_out=buf_out, .tex_out=tex_out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   export_level_inner(coord, tint_module_vars);

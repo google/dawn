@@ -42,6 +42,7 @@ TEST_F(MslWriterTest, LetU32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const l = 42u;
 }
@@ -58,6 +59,7 @@ TEST_F(MslWriterTest, LetDuplicate) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const l1 = 42u;
   uint const l2 = 42u;
@@ -74,6 +76,7 @@ TEST_F(MslWriterTest, LetF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float const l = 42.0f;
 }
@@ -89,6 +92,7 @@ TEST_F(MslWriterTest, LetI32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const l = 42;
 }
@@ -105,6 +109,7 @@ TEST_F(MslWriterTest, LetF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half const l = 42.0h;
 }
@@ -120,6 +125,7 @@ TEST_F(MslWriterTest, LetVec3F32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float3 const l = float3(1.0f, 2.0f, 3.0f);
 }
@@ -136,6 +142,7 @@ TEST_F(MslWriterTest, LetVec3F16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half3 const l = half3(1.0h, 2.0h, 3.0h);
 }
@@ -152,6 +159,7 @@ TEST_F(MslWriterTest, LetMat2x3F32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float2x3 const l = float2x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f));
 }
@@ -169,6 +177,7 @@ TEST_F(MslWriterTest, LetMat2x3F16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half2x3 const l = half2x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h));
 }
@@ -184,6 +193,7 @@ TEST_F(MslWriterTest, LetArrF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<float, 3> const l = tint_array<float, 3>{1.0f, 2.0f, 3.0f};
 }
@@ -201,6 +211,7 @@ TEST_F(MslWriterTest, LetArrVec2Bool) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<bool2, 3> const l = tint_array<bool2, 3>{bool2(true, false), bool2(false, true), bool2(true, false)};
 }

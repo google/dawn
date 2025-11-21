@@ -23,6 +23,7 @@ void select_3a14be() {
   int2 res = select(int2(1), int2(1), arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_3a14be();
 }

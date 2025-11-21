@@ -31,6 +31,7 @@ void frexp_bf45ae() {
   frexp_result_vec3_f32 res = frexp_result_vec3_f32{.fract=float3(0.5f), .exp=int3(1)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_bf45ae();
 }

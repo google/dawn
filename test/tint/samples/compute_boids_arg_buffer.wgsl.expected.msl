@@ -120,6 +120,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, const constant SimParams* cons
   (*particlesB).particles[min(index, 4u)].vel = vVel;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant tint_arg_buffer_struct_0* tint_arg_buffer_0 [[buffer(20)]], const device tint_array<uint, 1>* tint_dynamic_offset_buffer_0 [[buffer(23)]], const constant tint_arg_buffer_struct_1* tint_arg_buffer_1 [[buffer(21)]], const constant tint_arg_buffer_struct_2* tint_arg_buffer_2 [[buffer(22)]]) {
   comp_main_inner(gl_GlobalInvocationID, reinterpret_cast<const constant SimParams*>(reinterpret_cast<const constant char*>((*tint_arg_buffer_0).params) + (*tint_dynamic_offset_buffer_0)[2u]), (*tint_arg_buffer_1).particlesA, (*tint_arg_buffer_2).particlesB);
 }

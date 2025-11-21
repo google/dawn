@@ -5,6 +5,7 @@ int f(int a, int b, int c) {
   return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) * as_type<uint>(b)))) + as_type<uint>(c)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   int const v_1 = f(1, 2, 3);
   int const v_2 = f(4, 5, 6);

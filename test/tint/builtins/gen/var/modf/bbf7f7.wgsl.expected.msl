@@ -37,6 +37,7 @@ void modf_bbf7f7() {
   modf_result_f32 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_bbf7f7();
 }

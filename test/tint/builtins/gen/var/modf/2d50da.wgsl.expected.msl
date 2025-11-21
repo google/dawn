@@ -37,6 +37,7 @@ void modf_2d50da() {
   modf_result_vec2_f32 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_2d50da();
 }

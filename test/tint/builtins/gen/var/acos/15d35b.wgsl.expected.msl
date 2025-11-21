@@ -21,6 +21,7 @@ void acos_15d35b() {
   float2 res = float2(0.25f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   acos_15d35b();
 }

@@ -99,6 +99,7 @@ void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_va
   }
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_7(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(GlobalInvocationID, tint_module_vars);

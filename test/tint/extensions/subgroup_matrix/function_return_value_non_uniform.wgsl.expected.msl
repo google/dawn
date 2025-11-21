@@ -111,6 +111,7 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   }
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void v_8(uint idx [[thread_index_in_threadgroup]], device tint_array<float, 1>* v_9 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread bool non_uniform_condition = false;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_9, .non_uniform_condition=(&non_uniform_condition), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};

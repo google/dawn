@@ -31,6 +31,7 @@ void frexp_34bbfb() {
   frexp_result_vec4_f32 res = frexp_result_vec4_f32{.fract=float4(0.5f), .exp=int4(1)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_34bbfb();
 }

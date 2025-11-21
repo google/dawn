@@ -62,6 +62,7 @@ TEST_P(MslWriterBinaryTest, Emit) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -95,6 +96,7 @@ uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / select(rhs, 1u, (rhs == 0u)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -119,6 +121,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
   return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -139,6 +142,7 @@ TEST_F(MslWriterTest, BinaryShiftLeft) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -159,6 +163,7 @@ TEST_F(MslWriterTest, BinaryShiftRight) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -182,6 +187,7 @@ TEST_P(MslWriterBinaryBoolTest, Emit) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const left = 1u;
   uint const right = 2u;
@@ -216,6 +222,7 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, Emit_Scalar) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const left = 1;
   int const right = 3;
@@ -240,6 +247,7 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, Emit_Vector) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int4 const left = int4(1);
   int4 const right = int4(3);
@@ -273,6 +281,7 @@ TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour, Emit) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const left = 1;
   uint const right = 2u;
@@ -307,6 +316,7 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const left = 1;
   int const right = 2;
@@ -344,6 +354,7 @@ TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, Emit) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const left = 1;
   uint const right = 2u;
@@ -377,6 +388,7 @@ TEST_F(MslWriterTest, BinaryModF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float left = 0.0f;
   float right = 0.0f;
@@ -401,6 +413,7 @@ TEST_F(MslWriterTest, BinaryModF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half left = 0.0h;
   half right = 0.0h;
@@ -425,6 +438,7 @@ TEST_F(MslWriterTest, BinaryModVec3F32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float3 left = 0.0f;
   float3 right = 0.0f;
@@ -449,6 +463,7 @@ TEST_F(MslWriterTest, BinaryModVec3F16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half3 left = 0.0h;
   half3 right = 0.0h;

@@ -21,6 +21,7 @@ void refract_8c192a() {
   float4 res = float4(-7.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   refract_8c192a();
 }

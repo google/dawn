@@ -5,6 +5,7 @@ struct tint_struct {
   device uint* tint_member;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void tint_entry_point(device uint* v_1 [[buffer(0)]]) {
   tint_struct const v_2 = tint_struct{.tint_member=v_1};
   (*v_2.tint_member) = 0u;

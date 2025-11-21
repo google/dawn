@@ -294,6 +294,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index, tint_mod
   }
 }
 
+[[max_total_threads_per_threadgroup(256)]]
 kernel void v_7(uint3 local_id [[thread_position_in_threadgroup]], uint3 global_id [[thread_position_in_grid]], uint tint_local_index [[thread_index_in_threadgroup]], const device Matrix* firstMatrix [[buffer(1)]], const device Matrix* secondMatrix [[buffer(2)]], device Matrix* resultMatrix [[buffer(3)]], const constant Uniforms* uniforms [[buffer(0)]], threadgroup tint_symbol_2* v_8 [[threadgroup(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .mm_Asub=(&(*v_8).tint_symbol), .mm_Bsub=(&(*v_8).tint_symbol_1), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(local_id, global_id, tint_local_index, tint_module_vars);

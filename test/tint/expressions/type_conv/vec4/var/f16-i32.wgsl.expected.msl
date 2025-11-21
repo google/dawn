@@ -9,6 +9,7 @@ int4 tint_v4f16_to_v4i32(half4 value) {
   return int4(clamp(value, half4(-65504.0h), half4(65504.0h)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread half4 u = half4(1.0h);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};

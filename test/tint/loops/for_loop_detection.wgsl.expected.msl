@@ -74,6 +74,7 @@ void main_inner(uint3 lid, uint tint_local_index, tint_module_vars_struct tint_m
   }
 }
 
+[[max_total_threads_per_threadgroup(256)]]
 kernel void v_1(uint3 lid [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], const constant Scalars* U [[buffer(0)]], texture2d<uint, access::write> dst_image2d [[texture(0)]], texture2d<float, access::sample> src_image2d [[texture(1)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.U=U, .dst_image2d=dst_image2d, .src_image2d=src_image2d, .outputs=(&(*v_2).tint_symbol)};
   main_inner(lid, tint_local_index, tint_module_vars);

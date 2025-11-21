@@ -21,6 +21,7 @@ void atan2_3c2865() {
   float3 res = float3(0.78539818525314331055f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   atan2_3c2865();
 }

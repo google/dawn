@@ -21,6 +21,7 @@ void sign_3bdab6() {
   int4 res = int4(1);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sign_3bdab6();
 }

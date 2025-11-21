@@ -21,6 +21,7 @@ void exp2_8bd72d() {
   float4 res = float4(2.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   exp2_8bd72d();
 }

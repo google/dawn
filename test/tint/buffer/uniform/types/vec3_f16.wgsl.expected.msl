@@ -6,6 +6,7 @@ struct tint_module_vars_struct {
   device packed_half3* s;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant packed_half3* u [[buffer(0)]], device packed_half3* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   half3 const x = half3((*tint_module_vars.u));

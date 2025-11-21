@@ -28,6 +28,7 @@ struct tint_module_vars_struct {
   device Result* result;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result};
   (*tint_module_vars.result).out = (*tint_module_vars.ubo).data[min(uint((*tint_module_vars.ubo).dynamic_idx), 3u)].x;

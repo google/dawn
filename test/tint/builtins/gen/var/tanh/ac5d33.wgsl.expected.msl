@@ -21,6 +21,7 @@ void tanh_ac5d33() {
   float4 res = float4(0.76159417629241943359f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   tanh_ac5d33();
 }

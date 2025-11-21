@@ -37,6 +37,7 @@ void frexp_4b2200() {
   frexp_result_f32 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_4b2200();
 }

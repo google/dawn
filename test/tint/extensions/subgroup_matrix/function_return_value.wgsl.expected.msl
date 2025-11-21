@@ -56,6 +56,7 @@ S_Nested make_nested_struct() {
   return m_nested_struct;
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void v(device tint_array<float, 1>* v_1 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_array_lengths_struct const v_2 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};

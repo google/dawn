@@ -5,6 +5,7 @@ struct a {
   int a;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   a const a_1 = a{};
   a const b = a_1;

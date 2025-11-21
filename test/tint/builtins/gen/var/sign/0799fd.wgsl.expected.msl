@@ -21,6 +21,7 @@ void sign_0799fd() {
   float2 res = float2(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sign_0799fd();
 }

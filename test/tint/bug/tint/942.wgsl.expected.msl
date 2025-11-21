@@ -175,6 +175,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
   }
 }
 
+[[max_total_threads_per_threadgroup(64)]]
 kernel void v_12(uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint tint_local_index [[thread_index_in_threadgroup]], sampler samp [[sampler(0)]], const constant Params* params [[buffer(0)]], texture2d<float, access::sample> inputTex [[texture(0)]], texture2d<float, access::write> outputTex [[texture(1)]], const constant Flip* flip [[buffer(1)]], threadgroup tint_symbol_1* v_13 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.samp=samp, .params=params, .inputTex=inputTex, .outputTex=outputTex, .flip=flip, .tile=(&(*v_13).tint_symbol)};
   main_inner(WorkGroupID, LocalInvocationID, tint_local_index, tint_module_vars);

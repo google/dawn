@@ -21,6 +21,7 @@ void radians_524a91() {
   float4 res = float4(0.01745329238474369049f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   radians_524a91();
 }

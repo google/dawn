@@ -17,6 +17,7 @@ void F_inner(uint mat2x2_1, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.W)[0u] = ((*tint_module_vars.W)[0u] + 0.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void F(uint mat2x2 [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.W=(&(*v).tint_symbol)};
   F_inner(mat2x2, tint_module_vars);

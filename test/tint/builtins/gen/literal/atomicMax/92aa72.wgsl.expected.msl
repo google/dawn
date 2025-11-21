@@ -42,6 +42,7 @@ int atomicMax_92aa72(tint_module_vars_struct tint_module_vars) {
   return res;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device int* prevent_dce [[buffer(0)]], device SB_RW* sb_rw [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_rw=sb_rw};
   (*tint_module_vars.prevent_dce) = atomicMax_92aa72(tint_module_vars);

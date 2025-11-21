@@ -21,6 +21,7 @@ void saturate_4ed8d7() {
   float4 res = float4(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   saturate_4ed8d7();
 }

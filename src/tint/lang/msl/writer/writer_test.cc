@@ -49,6 +49,7 @@ TEST_F(MslWriterTest, WorkgroupAllocations_NoAllocations) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
 }
 )");
@@ -93,6 +94,7 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>((*tint_module_vars.b))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
   entry_inner(tint_local_index, tint_module_vars);
@@ -143,6 +145,7 @@ struct tint_module_vars_struct {
   const constant tint_immediate_data_struct* tint_immediate_data;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   (*tint_module_vars.a)[0u] = 42u;
@@ -198,6 +201,7 @@ struct tint_array_lengths_struct {
   uint tint_array_length_0_0;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint_immediate_data_struct* tint_immediate_data [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .tint_immediate_data=tint_immediate_data};
   (*tint_module_vars.a)[0u] = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_immediate_data).tint_storage_buffer_sizes[0u].x / 4u)}.tint_array_length_0_0;
@@ -252,6 +256,7 @@ void v_2(uint v_3) {
   uint const v_5 = v(v_3);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void tint_entry_point(uint v_7 [[thread_index_in_threadgroup]]) {
   v_2(v_7);
 }

@@ -21,6 +21,7 @@ void sin_15b2c6() {
   float4 res = float4(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sin_15b2c6();
 }

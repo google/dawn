@@ -21,6 +21,7 @@ int f(S3 s3) {
   return s3.s2.s1.i;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device int* out [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
   (*tint_module_vars.out) = f(S3{.s2=S2{.s1=S1{.i=42}}});

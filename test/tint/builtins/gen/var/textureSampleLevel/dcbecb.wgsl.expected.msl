@@ -42,6 +42,7 @@ float4 textureSampleLevel_dcbecb(tint_module_vars_struct tint_module_vars) {
   return res;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device float4* prevent_dce [[buffer(0)]], texture3d<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0, .arg_1=arg_1};
   (*tint_module_vars.prevent_dce) = textureSampleLevel_dcbecb(tint_module_vars);

@@ -21,6 +21,7 @@ void normalize_e7def8() {
   float3 res = float3(0.57735025882720947266f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   normalize_e7def8();
 }

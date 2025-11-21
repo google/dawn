@@ -34,6 +34,7 @@ void x(thread S* const p, tint_module_vars_struct tint_module_vars) {
   (*p).data[min(uint((*tint_module_vars.ubo).dynamic_idx), 63u)] = 1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant UBO* ubo [[buffer(1)]], device Result* result [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result};
   S s = {};

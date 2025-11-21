@@ -38,6 +38,7 @@ void subgroupMatrixStore_bb2478(tint_array_lengths_struct tint_array_lengths, ti
   }
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device SB_RW* sb_rw [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb_rw=sb_rw, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   subgroupMatrixStore_bb2478(tint_array_lengths_struct{.tint_array_length_0_0=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u)}, tint_module_vars);

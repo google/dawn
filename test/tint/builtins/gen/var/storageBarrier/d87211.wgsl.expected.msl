@@ -5,6 +5,7 @@ void storageBarrier_d87211() {
   threadgroup_barrier(mem_flags::mem_device);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   storageBarrier_d87211();
 }

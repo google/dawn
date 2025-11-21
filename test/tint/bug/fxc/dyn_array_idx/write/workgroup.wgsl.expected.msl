@@ -56,6 +56,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.result).out = (*tint_module_vars.s).data[3u];
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(1)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result, .s=(&(*v_2).tint_symbol)};
   f_inner(tint_local_index, tint_module_vars);

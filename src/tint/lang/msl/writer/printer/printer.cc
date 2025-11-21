@@ -332,11 +332,19 @@ class Printer : public tint::TextGenerator {
 
             switch (func->Stage()) {
                 case core::ir::Function::PipelineStage::kCompute: {
-                    out << "kernel ";
-
                     auto const_wg_size = func->WorkgroupSizeAsConst();
                     TINT_IR_ASSERT(ir_, const_wg_size);
                     auto wg_size = *const_wg_size;
+
+                    // Tell the MSL compiler how large the threadgroup is going to be.
+                    // Without this, the MSL compiler will decide on a maximum threadgroup size
+                    // based on its own heuristics. This can result in a pipeline that cannot
+                    // support the workgroup size that was specified in the WGSL shader.
+                    // See crbug.com/443794633
+                    auto total_threads = wg_size[0] * wg_size[1] * wg_size[2];
+                    out << "[[max_total_threads_per_threadgroup(" << total_threads << ")]]\n";
+
+                    out << "kernel ";
 
                     // Store the workgroup information away to return from the generator.
                     result_.workgroup_info.x = wg_size[0];

@@ -42,6 +42,7 @@ TEST_F(MslWriterTest, VarF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float a = 0.0f;
 }
@@ -58,6 +59,7 @@ TEST_F(MslWriterTest, VarI32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int a = 1;
 }
@@ -74,6 +76,7 @@ TEST_F(MslWriterTest, VarU32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint a = 1u;
 }
@@ -89,6 +92,7 @@ TEST_F(MslWriterTest, VarArrayF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<float, 5> a = {};
 }
@@ -112,6 +116,7 @@ struct MyStruct {
   int4 b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   MyStruct a = {};
 }
@@ -127,6 +132,7 @@ TEST_F(MslWriterTest, VarVecF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float2 a = 0.0f;
 }
@@ -143,6 +149,7 @@ TEST_F(MslWriterTest, VarVecF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half2 a = 0.0h;
 }
@@ -158,6 +165,7 @@ TEST_F(MslWriterTest, VarMatF32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float3x2 a = float3x2(0.0f);
 }
@@ -174,6 +182,7 @@ TEST_F(MslWriterTest, VarMatF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half3x2 a = half3x2(0.0h);
 }
@@ -190,6 +199,7 @@ TEST_F(MslWriterTest, VarVecF32SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float3 a = float3(0.0f);
 }
@@ -207,6 +217,7 @@ TEST_F(MslWriterTest, VarVecF16SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half3 a = half3(0.0h);
 }
@@ -224,6 +235,7 @@ TEST_F(MslWriterTest, VarMatF32SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float2x3 a = float2x3(float3(0.0f), float3(0.0f));
 }
@@ -242,6 +254,7 @@ TEST_F(MslWriterTest, VarMatF16SplatZero) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half2x3 a = half2x3(half3(0.0h), half3(0.0h));
 }
@@ -316,6 +329,7 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   float a = (*tint_module_vars.v);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol)};
   entry_inner(tint_local_index, tint_module_vars);

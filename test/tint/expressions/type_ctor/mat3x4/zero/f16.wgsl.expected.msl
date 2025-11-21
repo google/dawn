@@ -6,6 +6,7 @@ struct tint_module_vars_struct {
   device half3x4* out;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(device half3x4* out [[buffer(0)]]) {
   thread half3x4 m = half3x4(half4(0.0h), half4(0.0h), half4(0.0h));
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=(&m), .out=out};

@@ -66,6 +66,7 @@ tint_array<S, 4> tint_load_array_packed_vec3(const constant tint_array<S_packed_
   return tint_array<S, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a(tint_load_array_packed_vec3(tint_module_vars.u));

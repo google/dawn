@@ -23,6 +23,7 @@ void select_17441a() {
   float4 res = select(float4(1.0f), float4(1.0f), arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_17441a();
 }

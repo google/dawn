@@ -170,6 +170,7 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.s) = as_type<int>((as_type<uint>(v_36) + as_type<uint>(tint_f16_to_i32(arr2_mat4x2_f16[0u][0u].x))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_37(uint idx [[thread_index_in_threadgroup]], const constant S_packed_vec3* ub [[buffer(0)]], device int* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ub=ub, .s=s};
   main_inner(idx, tint_module_vars);

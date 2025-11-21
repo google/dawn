@@ -21,6 +21,7 @@ void determinant_c8251d() {
   float res = 0.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   determinant_c8251d();
 }

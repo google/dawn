@@ -21,6 +21,7 @@ void radians_bff231() {
   float res = 0.01745329238474369049f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   radians_bff231();
 }

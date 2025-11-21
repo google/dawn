@@ -19,6 +19,7 @@ void no_deref() {
   (*p).x = 42;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   deref();
   no_deref();

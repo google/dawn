@@ -70,6 +70,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_6) + as_type<uint>(call_builtin_with_mod_scope_ptr(tint_module_vars))))) + as_type<uint>(t1)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_7(uint tint_local_index [[thread_index_in_threadgroup]], device int* s [[buffer(0)]], threadgroup tint_symbol_1* v_8 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s, .g1=(&(*v_8).tint_symbol)};
   main_inner(tint_local_index, tint_module_vars);

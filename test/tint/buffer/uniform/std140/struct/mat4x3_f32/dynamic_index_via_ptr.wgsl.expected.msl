@@ -67,6 +67,7 @@ tint_array<Outer, 4> tint_load_array_packed_vec3_1(const constant tint_array<Out
   return tint_array<Outer, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3_1((&(*from)[3u]))};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) {
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .counter=(&counter)};

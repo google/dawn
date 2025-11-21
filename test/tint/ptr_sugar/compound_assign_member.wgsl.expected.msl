@@ -13,6 +13,7 @@ void no_deref() {
   (*p).x = as_type<int>((as_type<uint>((*p).x) + as_type<uint>(42)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   deref();
   no_deref();

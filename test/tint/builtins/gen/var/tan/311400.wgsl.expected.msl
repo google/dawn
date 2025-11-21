@@ -21,6 +21,7 @@ void tan_311400() {
   float res = 1.55740773677825927734f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   tan_311400();
 }

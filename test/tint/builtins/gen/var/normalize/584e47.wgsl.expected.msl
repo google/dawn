@@ -21,6 +21,7 @@ void normalize_584e47() {
   float2 res = float2(0.70710676908493041992f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   normalize_584e47();
 }

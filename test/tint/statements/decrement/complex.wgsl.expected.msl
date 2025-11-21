@@ -57,6 +57,7 @@ int idx6(tint_module_vars_struct tint_module_vars) {
   return 2;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(device tint_array<S, 1>* v_2 [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint v = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_2, .v=(&v), .tint_storage_buffer_sizes=tint_storage_buffer_sizes};

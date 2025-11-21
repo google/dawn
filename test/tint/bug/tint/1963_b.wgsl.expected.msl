@@ -16,6 +16,7 @@ atomic_compare_exchange_result_i32 v_1(device atomic_int* const atomic_ptr, int 
   return atomic_compare_exchange_result_i32{.old_value=old_value, .exchanged=v_2};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device atomic_int* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   int const v = v_1(tint_module_vars.a, 1, 1).old_value;

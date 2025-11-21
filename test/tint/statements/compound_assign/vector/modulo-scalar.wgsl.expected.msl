@@ -17,6 +17,7 @@ int4 tint_mod_v4i32(int4 lhs, int4 rhs) {
   return as_type<int4>((as_type<uint4>(lhs) - as_type<uint4>(as_type<int4>((as_type<uint4>((lhs / v_4)) * as_type<uint4>(v_4))))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void foo(device S* v [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   int4 const v_5 = (*tint_module_vars.v).a;

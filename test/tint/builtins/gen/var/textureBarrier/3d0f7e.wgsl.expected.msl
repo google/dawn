@@ -5,6 +5,7 @@ void textureBarrier_3d0f7e() {
   threadgroup_barrier(mem_flags::mem_texture);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   textureBarrier_3d0f7e();
 }

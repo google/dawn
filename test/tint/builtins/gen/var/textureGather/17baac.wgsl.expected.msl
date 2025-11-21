@@ -40,6 +40,7 @@ float4 textureGather_17baac(tint_module_vars_struct tint_module_vars) {
   return res;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device float4* prevent_dce [[buffer(0)]], texture2d_array<float, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_1=arg_1, .arg_2=arg_2};
   (*tint_module_vars.prevent_dce) = textureGather_17baac(tint_module_vars);

@@ -125,6 +125,7 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
   tint_store_array_packed_vec3(tint_module_vars.wbuffer, S{});
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], const constant S_packed_vec3* ubuffer [[buffer(0)]], device S_packed_vec3* sbuffer [[buffer(1)]], threadgroup tint_symbol_1* v_8 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubuffer=ubuffer, .sbuffer=sbuffer, .wbuffer=(&(*v_8).tint_symbol)};
   foo_inner(tint_local_index, tint_module_vars);

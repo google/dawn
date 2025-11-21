@@ -23,6 +23,7 @@ void select_9b478d() {
   int res = select(1, 1, arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_9b478d();
 }

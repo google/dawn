@@ -5,6 +5,7 @@ struct tint_module_vars_struct {
   device float4x4* out;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(device float4x4* out [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.out=out};
   float4x4 m = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));

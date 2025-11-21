@@ -6,6 +6,7 @@ void constant_with_non_constant() {
   float2 b = float2(1.0f, a);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   bool bool_var1 = true;
   bool bool_var2 = true;

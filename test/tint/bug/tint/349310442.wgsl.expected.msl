@@ -110,6 +110,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void i(texture2d<float, access::sample> t_plane0 [[texture(0)]], texture2d<float, access::sample> t_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* t_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t_plane0=t_plane0, .t_plane1=t_plane1, .t_params=t_params};
   tint_ExternalTextureParams const v_17 = tint_load_struct_packed_vec3(tint_module_vars.t_params);

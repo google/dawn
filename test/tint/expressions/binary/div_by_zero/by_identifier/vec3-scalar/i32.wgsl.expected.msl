@@ -8,6 +8,7 @@ int3 tint_div_v3i32(int3 lhs, int3 rhs) {
   return (lhs / select(rhs, int3(1), bool3((v_2 | uint3(v_1)))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   int3 a = int3(1, 2, 3);
   int b = 0;

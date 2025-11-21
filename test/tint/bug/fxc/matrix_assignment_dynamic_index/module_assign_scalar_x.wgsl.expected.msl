@@ -11,6 +11,7 @@ struct tint_module_vars_struct {
   thread float2x4* m1;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant Uniforms* uniforms [[buffer(0)]]) {
   thread float2x4 m1 = float2x4(0.0f);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .m1=(&m1)};

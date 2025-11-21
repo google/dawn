@@ -21,6 +21,7 @@ void ceil_11b1dc() {
   float4 res = float4(2.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   ceil_11b1dc();
 }

@@ -30,6 +30,7 @@ struct S {
   S_inner member_struct;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   S const s = S{};
 }

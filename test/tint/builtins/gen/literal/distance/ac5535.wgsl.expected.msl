@@ -21,6 +21,7 @@ void distance_ac5535() {
   float res = 0.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   distance_ac5535();
 }

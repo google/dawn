@@ -21,6 +21,7 @@ void func(thread tint_array<int, 4>* const pointer) {
   (*pointer) = tint_array<int, 4>{};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   str F = {};
   func((&F.arr));

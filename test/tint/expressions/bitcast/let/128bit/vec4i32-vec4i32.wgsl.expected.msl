@@ -1,6 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   int4 const a = int4(1073757184, -1006616064, -998242304, 987654321);
   int4 const b = as_type<int4>(a);

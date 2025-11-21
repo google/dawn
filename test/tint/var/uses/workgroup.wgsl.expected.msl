@@ -25,6 +25,7 @@ void main1_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   uses_a(tint_module_vars);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol)};
   main1_inner(tint_local_index, tint_module_vars);
@@ -56,6 +57,7 @@ void main2_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   uses_b(tint_module_vars);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=(&(*v).tint_symbol)};
   main2_inner(tint_local_index, tint_module_vars);
@@ -109,6 +111,7 @@ void main3_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   no_uses();
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main3(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&(*v).tint_symbol), .b=(&(*v).tint_symbol_1)};
   main3_inner(tint_local_index, tint_module_vars);
@@ -122,6 +125,7 @@ using namespace metal;
 void no_uses() {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main4() {
   no_uses();
 }

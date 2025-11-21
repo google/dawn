@@ -26,6 +26,7 @@ int foo(tint_array_lengths_struct tint_array_lengths, tint_module_vars_struct ti
   return (*tint_module_vars.data)[min(uint(0), (tint_array_lengths.tint_array_length_0_0 - 1u))];
 }
 
+[[max_total_threads_per_threadgroup(256)]]
 kernel void v(const device tint_array<int, 1>* data [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   foo(tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)}, tint_module_vars);

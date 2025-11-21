@@ -41,6 +41,7 @@ void d(float4 v) {
 void e(float f_1) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));

@@ -23,6 +23,7 @@ void select_dfab3b() {
   int3 res = select(int3(1), int3(1), arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_dfab3b();
 }

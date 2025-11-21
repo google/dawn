@@ -23,6 +23,7 @@ void select_e381c3() {
   int4 res = select(int4(1), int4(1), arg_2);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_e381c3();
 }

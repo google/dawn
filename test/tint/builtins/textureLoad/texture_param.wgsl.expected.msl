@@ -77,6 +77,7 @@ void doTextureLoad(tint_module_vars_struct tint_module_vars) {
   int4 res = textureLoad2d(tint_module_vars.arg_0, int2(0), 0);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(texture2d<int, access::sample> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
   doTextureLoad(tint_module_vars);

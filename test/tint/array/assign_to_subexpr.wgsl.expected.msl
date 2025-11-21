@@ -37,6 +37,7 @@ int foo() {
   return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((*dst_ptr)[0u]) + as_type<uint>((*dst_struct_ptr).arr[0u])))) + as_type<uint>((*dst_array_ptr)[0u][0u])));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device int* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   (*tint_module_vars.s) = foo();

@@ -78,6 +78,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.s) = (*tint_module_vars.w)[1u][0u].packed.x;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 2>, 4>* u [[buffer(0)]], device half* s [[buffer(1)]], threadgroup tint_symbol_1* v_11 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s, .w=(&(*v_11).tint_symbol)};
   f_inner(tint_local_index, tint_module_vars);

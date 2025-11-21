@@ -21,6 +21,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.w)[0u].y = (*tint_module_vars.u)[1u].x;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant float3x2* u [[buffer(0)]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v).tint_symbol)};
   f_inner(tint_local_index, tint_module_vars);

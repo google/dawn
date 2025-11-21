@@ -21,6 +21,7 @@ void atanh_70d5bd() {
   float2 res = float2(0.54930615425109863281f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   atanh_70d5bd();
 }

@@ -31,6 +31,7 @@ void modf_f3d1f9() {
   modf_result_vec4_f32 res = modf_result_vec4_f32{.fract=float4(-0.5f), .whole=float4(-1.0f)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_f3d1f9();
 }

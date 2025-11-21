@@ -21,6 +21,7 @@ void smoothstep_66e4bd() {
   float3 res = float3(0.5f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   smoothstep_66e4bd();
 }

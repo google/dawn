@@ -17,6 +17,7 @@ struct tint_module_vars_struct {
   thread tint_array<float2x2, 2>* arr;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread tint_array<float2x2, 2> arr = tint_array<float2x2, 2>{float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f)), float2x2(float2(5.0f, 6.0f), float2(7.0f, 8.0f))};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arr=(&arr)};

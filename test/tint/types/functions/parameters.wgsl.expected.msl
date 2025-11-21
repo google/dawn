@@ -20,6 +20,7 @@ struct S {
 void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 param_v2i32, uint3 param_v3u32, float4 param_v4f32, float2x3 param_m2x3, tint_array<float, 4> param_arr, S param_struct, thread float* const param_ptr_f32, thread float4* const param_ptr_vec, thread tint_array<float, 4>* const param_ptr_arr) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   tint_array<float, 4> const a = tint_array<float, 4>{};
   float b = 1.0f;

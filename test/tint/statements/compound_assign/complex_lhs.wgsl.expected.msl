@@ -31,6 +31,7 @@ int bar(tint_module_vars_struct tint_module_vars) {
   return (*tint_module_vars.counter);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.counter=(&counter)};

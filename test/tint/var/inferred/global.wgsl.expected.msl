@@ -36,6 +36,7 @@ struct tint_module_vars_struct {
   thread float3* v16;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread int v1 = 1;
   thread uint v2 = 1u;

@@ -32,6 +32,7 @@ float4 subgroupMax_0b0375() {
   return res;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device float4* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
   (*tint_module_vars.prevent_dce) = subgroupMax_0b0375();

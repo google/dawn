@@ -43,6 +43,7 @@ void runtime_size_array(tint_array_lengths_struct tint_array_lengths, tint_modul
   float const x = (*tint_module_vars.rarr)[min(uint(idx), (tint_array_lengths.tint_array_length_0_0 - 1u))];
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const device tint_array<float, 1>* rarr [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.rarr=rarr, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_array_lengths_struct const v_1 = tint_array_lengths_struct{.tint_array_length_0_0=((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u)};

@@ -5,6 +5,7 @@ float3 v() {
   return float3(0.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   float3 const a = float3(1.0f);
   float3 const b = float3(a);

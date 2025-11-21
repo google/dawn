@@ -32,6 +32,7 @@ void foo(int maybe_zero, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.b) = fmod((*tint_module_vars.b), v_8);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_9() {
   thread int a = 0;
   thread float b = 0.0f;

@@ -19,6 +19,7 @@ struct tint_module_vars_struct {
   thread tint_array<half4x2, 4>* p;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<half4x2, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {
   thread tint_array<half4x2, 4> p = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s, .p=(&p)};

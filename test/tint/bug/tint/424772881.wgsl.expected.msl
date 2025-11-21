@@ -23,6 +23,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   (*tint_module_vars.result) = packed_uint3(uint3(bool3(uint3((*tint_module_vars.wgvar)))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], device packed_uint3* result [[buffer(0)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.result=result, .wgvar=(&(*v_2).tint_symbol)};
   main_inner(tint_local_index, tint_module_vars);

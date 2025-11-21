@@ -21,6 +21,7 @@ void ldexp_cb0faf() {
   float4 res = float4(2.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   ldexp_cb0faf();
 }

@@ -21,6 +21,7 @@ void refract_d7569b() {
   float3 res = float3(-5.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   refract_d7569b();
 }

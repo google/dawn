@@ -9,6 +9,7 @@ void func(device float4* const pointer) {
   (*pointer) = float4(0.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device float2x4* S [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=S};
   func((&(*tint_module_vars.S)[1u]));

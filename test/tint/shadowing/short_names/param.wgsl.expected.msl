@@ -5,6 +5,7 @@ void f(float3 vec3f) {
   float3 const b = vec3f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   f(float3(0.0f));
 }

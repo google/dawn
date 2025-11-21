@@ -21,6 +21,7 @@ void log2_6b8954() {
   float2 res = float2(0.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   log2_6b8954();
 }

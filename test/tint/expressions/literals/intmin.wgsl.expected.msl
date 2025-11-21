@@ -8,6 +8,7 @@ int add_int_min_explicit() {
   return c;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   add_int_min_explicit();
 }

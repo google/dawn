@@ -31,6 +31,7 @@ void modf_8dbbbf() {
   modf_result_f16 res = modf_result_f16{.fract=-0.5h, .whole=-1.0h};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_8dbbbf();
 }

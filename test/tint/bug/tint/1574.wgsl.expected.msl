@@ -71,6 +71,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   atomic_compare_exchange_result_i32 const r3_3 = v(tint_module_vars.b_i32, 0, value_3);
 }
 
+[[max_total_threads_per_threadgroup(16)]]
 kernel void v_8(uint tint_local_index [[thread_index_in_threadgroup]], device atomic_uint* a_u32 [[buffer(0)]], device atomic_int* a_i32 [[buffer(1)]], threadgroup tint_symbol_2* v_9 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a_u32=a_u32, .a_i32=a_i32, .b_u32=(&(*v_9).tint_symbol), .b_i32=(&(*v_9).tint_symbol_1)};
   main_inner(tint_local_index, tint_module_vars);

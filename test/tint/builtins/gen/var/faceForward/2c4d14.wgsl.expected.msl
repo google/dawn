@@ -21,6 +21,7 @@ void faceForward_2c4d14() {
   float4 res = float4(-1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   faceForward_2c4d14();
 }

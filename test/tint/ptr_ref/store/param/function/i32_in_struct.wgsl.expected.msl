@@ -9,6 +9,7 @@ void func(thread int* const pointer) {
   (*pointer) = 42;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   str F = {};
   func((&F.i));

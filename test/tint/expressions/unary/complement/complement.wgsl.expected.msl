@@ -17,6 +17,7 @@ uint4 vu(uint4 x) {
   return ~(x);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   i(1);
   u(1u);

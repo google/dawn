@@ -9,6 +9,7 @@ int2 tint_v2f32_to_v2i32(float2 value) {
   return int2(clamp(value, float2(-2147483648.0f), float2(2147483520.0f)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread float2 u = float2(1.0f);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=(&u)};

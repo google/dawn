@@ -26,6 +26,7 @@ struct tint_module_vars_struct {
   thread S* s;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant Constants* constants [[buffer(0)]]) {
   thread S s = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.constants=constants, .s=(&s)};

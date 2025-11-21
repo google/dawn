@@ -8,6 +8,7 @@ struct S {
   bool b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   S v = S{};
 }

@@ -21,6 +21,7 @@ void cosh_c892bb() {
   float res = 1.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   cosh_c892bb();
 }

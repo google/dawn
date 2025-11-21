@@ -52,6 +52,7 @@ TEST_F(MslWriterTest, Loop) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
@@ -79,6 +80,7 @@ TEST_F(MslWriterTest, Loop_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     while(true) {
@@ -102,6 +104,7 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
@@ -136,6 +139,7 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     while(true) {
@@ -166,6 +170,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
@@ -205,6 +210,7 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     while(true) {
@@ -237,6 +243,7 @@ TEST_F(MslWriterTest, LoopInitializer) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     uint2 tint_loop_idx = uint2(4294967295u);
@@ -277,6 +284,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     bool v = true;
@@ -322,6 +330,7 @@ TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
     EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   {
     uint v = 0u;

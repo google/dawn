@@ -21,6 +21,7 @@ void select_17441a() {
   float4 res = float4(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_17441a();
 }

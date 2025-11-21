@@ -7,6 +7,7 @@ struct tint_module_vars_struct {
   thread int* _a;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(device int* s [[buffer(0)]]) {
   thread int a = 1;
   thread int _a = 2;

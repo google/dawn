@@ -100,6 +100,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.w)[1u].m[0u].packed = packed_half3(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_10 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_10).tint_symbol)};
   f_inner(tint_local_index, tint_module_vars);

@@ -21,6 +21,7 @@ void ceil_32c946() {
   float3 res = float3(2.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   ceil_32c946();
 }

@@ -12,6 +12,7 @@ void uses_a(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>(1)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main1() {
   thread int a = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a)};
@@ -32,6 +33,7 @@ void uses_b(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.b) = as_type<int>((as_type<uint>((*tint_module_vars.b)) * as_type<uint>(2)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main2() {
   thread int b = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.b=(&b)};
@@ -72,6 +74,7 @@ void outer(tint_module_vars_struct tint_module_vars) {
   no_uses();
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main3() {
   thread int a = 0;
   thread int b = 0;
@@ -88,6 +91,7 @@ using namespace metal;
 void no_uses() {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void main4() {
   no_uses();
 }

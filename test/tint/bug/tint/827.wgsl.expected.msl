@@ -36,6 +36,7 @@ void main_inner(uint3 GlobalInvocationId, tint_module_vars_struct tint_module_va
   (*v) = tint_module_vars.tex.read(min(uint2(v_2), v_4), v_3);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_5(uint3 GlobalInvocationId [[thread_position_in_grid]], depth2d<float, access::sample> tex [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tex=tex, .result=result, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(GlobalInvocationId, tint_module_vars);

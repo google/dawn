@@ -6,6 +6,7 @@ void c(int x, int y, int z) {
   a = as_type<int>((as_type<uint>(a) + as_type<uint>(2)));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void b() {
   c(1, 2, 3);
   c(4, 5, 6);

@@ -137,6 +137,7 @@ void tint_store_and_preserve_padding_4(device S3_packed_vec3* const target, S3 v
   tint_store_and_preserve_padding_1((&(*target).s), value_param.s);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_6(device tint_array<tint_packed_vec3_f32_array_element, 3>* buffer0 [[buffer(0)]], device S_packed_vec3* buffer1 [[buffer(1)]], device S2_packed_vec3* buffer2 [[buffer(2)]], device S3_packed_vec3* buffer3 [[buffer(3)]], device S4_packed_vec3* buffer4 [[buffer(4)]], device tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 1>* buffer5 [[buffer(5)]], device tint_array<S_packed_vec3, 1>* buffer6 [[buffer(6)]], device tint_array<S2_packed_vec3, 1>* buffer7 [[buffer(7)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buffer0=buffer0, .buffer1=buffer1, .buffer2=buffer2, .buffer3=buffer3, .buffer4=buffer4, .buffer5=buffer5, .buffer6=buffer6, .buffer7=buffer7};
   float3x3 m = float3x3(0.0f);

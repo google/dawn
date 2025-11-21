@@ -63,6 +63,7 @@ void main_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.resultMatrix).numbers[min(index, (v.tint_array_length_0_0 - 1u))] = result;
 }
 
+[[max_total_threads_per_threadgroup(4)]]
 kernel void v_1(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(global_id, tint_module_vars);

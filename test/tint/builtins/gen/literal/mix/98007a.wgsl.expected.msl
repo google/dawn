@@ -21,6 +21,7 @@ void mix_98007a() {
   float4 res = float4(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   mix_98007a();
 }

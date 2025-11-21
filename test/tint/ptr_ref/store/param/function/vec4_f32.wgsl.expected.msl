@@ -5,6 +5,7 @@ void func(thread float4* const pointer) {
   (*pointer) = float4(0.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   float4 F = 0.0f;
   func((&F));

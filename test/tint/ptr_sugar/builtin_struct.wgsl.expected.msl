@@ -39,6 +39,7 @@ void no_deref_frexp() {
   int exp = (*p).exp;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   deref_modf();
   no_deref_modf();

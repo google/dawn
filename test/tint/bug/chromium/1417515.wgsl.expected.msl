@@ -6,6 +6,7 @@ struct modf_result_f32 {
   float whole;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void foo() {
   modf_result_f32 const s1 = modf_result_f32{};
 }

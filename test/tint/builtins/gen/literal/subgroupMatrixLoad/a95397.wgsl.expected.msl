@@ -38,6 +38,7 @@ simdgroup_half8x8 subgroupMatrixLoad_a95397(tint_array_lengths_struct tint_array
   return res;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(device tint_array<half, 1024>* prevent_dce [[buffer(0)]], const device SB_RO* sb_ro [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .sb_ro=sb_ro, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   simdgroup_store(subgroupMatrixLoad_a95397(tint_array_lengths_struct{.tint_array_length_0_1=(((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 2u)}, tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);

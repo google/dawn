@@ -5,6 +5,7 @@ struct S {
   bool e;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1() {
   bool b = false;
   bool const v_2 = b;

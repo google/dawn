@@ -4,6 +4,7 @@ using namespace metal;
 void f() {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   f();
 }

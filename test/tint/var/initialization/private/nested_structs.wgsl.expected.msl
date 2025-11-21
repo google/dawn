@@ -18,6 +18,7 @@ struct tint_module_vars_struct {
   device int* out;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device int* out [[buffer(0)]]) {
   thread S3 P = S3{.s2=S2{.s1=S1{.i=42}}};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.P=(&P), .out=out};

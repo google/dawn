@@ -6,6 +6,7 @@ struct frexp_result_vec2_f32 {
   int2 exp;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   float2 const in = float2(1.25f, 3.75f);
   frexp_result_vec2_f32 v_1 = {};

@@ -1,6 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   float3x4 v = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
 }

@@ -126,6 +126,7 @@ void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mod
   int triangleOffset = atomic_fetch_add_explicit((&(*tint_module_vars.LUT).values[min(i1, (v.tint_array_length_0_2 - 1u))]), 1, memory_order_relaxed);
 }
 
+[[max_total_threads_per_threadgroup(128)]]
 kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(1)]], device F32s* positions [[buffer(3)]], device AU32s* counters [[buffer(4)]], device AI32s* LUT [[buffer(2)]], device Dbg* dbg [[buffer(5)]], const constant tint_array<uint4, 2>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_count_inner(GlobalInvocationID, tint_module_vars);

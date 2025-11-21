@@ -37,6 +37,7 @@ void frexp_ae4a66() {
   frexp_result_vec3_f16 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_ae4a66();
 }

@@ -17,6 +17,7 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   int const i = (*tint_module_vars.v);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_2).tint_symbol)};
   main_inner(tint_local_index, tint_module_vars);

@@ -31,6 +31,7 @@ void b(half3 v) {
 void c(half f_1) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   tint_array<tint_packed_vec3_f16_array_element, 4> const v_1 = (*tint_module_vars.u);

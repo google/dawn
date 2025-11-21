@@ -5,6 +5,7 @@ struct tint_module_vars_struct {
   device packed_float3* s;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1(device packed_float3* s [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s};
   float3 const v = float3(1.0f, 2.0f, 3.0f);

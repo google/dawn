@@ -18,6 +18,7 @@ struct tint_module_vars_struct {
   thread tint_array<tint_array<int, 3>, 2>* init;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   thread tint_array<tint_array<int, 3>, 2> zero = {};
   thread tint_array<tint_array<int, 3>, 2> init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};

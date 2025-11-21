@@ -31,6 +31,7 @@ void frexp_eb2421() {
   frexp_result_vec2_f32 res = frexp_result_vec2_f32{.fract=float2(0.5f), .exp=int2(1)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_eb2421();
 }

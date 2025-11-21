@@ -30,6 +30,7 @@ struct tint_module_vars_struct {
   thread S* struct_var;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   thread bool bool_var = false;
   thread int i32_var = 0;

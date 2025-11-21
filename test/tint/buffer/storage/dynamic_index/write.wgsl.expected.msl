@@ -124,6 +124,7 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   tint_store_and_preserve_padding_3((&(*tint_module_vars.sb).arr[min(idx, (v_2.tint_array_length_0_0 - 1u))].arr2_vec3_f32), tint_array<float3, 2>{});
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_3(uint idx [[thread_index_in_threadgroup]], device S_packed_vec3* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(idx, tint_module_vars);

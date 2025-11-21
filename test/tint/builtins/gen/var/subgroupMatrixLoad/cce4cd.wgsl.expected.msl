@@ -57,6 +57,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
   simdgroup_store(subgroupMatrixLoad_cce4cd(tint_module_vars), (&(*tint_module_vars.prevent_dce)[0u]), ulong(64u), ulong2(0ul), false);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], device tint_array<float, 1024>* prevent_dce [[buffer(0)]], threadgroup tint_symbol_1* v_6 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=(&(*v_6).tint_symbol)};
   compute_main_inner(tint_local_index, tint_module_vars);

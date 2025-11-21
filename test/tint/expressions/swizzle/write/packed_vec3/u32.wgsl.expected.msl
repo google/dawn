@@ -22,6 +22,7 @@ struct tint_module_vars_struct {
   device S_packed_vec3* U;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(device S_packed_vec3* U [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.U=U};
   (*tint_module_vars.U).v = packed_uint3(uint3(1u, 2u, 3u));

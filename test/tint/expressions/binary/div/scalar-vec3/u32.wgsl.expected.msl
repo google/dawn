@@ -5,6 +5,7 @@ uint3 tint_div_v3u32(uint3 lhs, uint3 rhs) {
   return (lhs / select(rhs, uint3(1u), (rhs == uint3(0u))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   uint const a = 4u;
   uint3 const b = uint3(1u, 2u, 3u);

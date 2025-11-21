@@ -31,6 +31,7 @@ void modf_a545b9() {
   modf_result_vec2_f16 res = modf_result_vec2_f16{.fract=half2(-0.5h), .whole=half2(-1.0h)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_a545b9();
 }

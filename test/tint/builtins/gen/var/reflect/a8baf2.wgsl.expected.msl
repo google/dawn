@@ -21,6 +21,7 @@ void reflect_a8baf2() {
   float3 res = float3(-5.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   reflect_a8baf2();
 }

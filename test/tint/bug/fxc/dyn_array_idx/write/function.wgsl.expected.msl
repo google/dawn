@@ -30,6 +30,7 @@ struct S {
   tint_array<int, 64> data;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ubo=ubo, .result=result};
   S s = {};

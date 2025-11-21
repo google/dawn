@@ -21,6 +21,7 @@ void select_089657() {
   float3 res = float3(1.0f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   select_089657();
 }

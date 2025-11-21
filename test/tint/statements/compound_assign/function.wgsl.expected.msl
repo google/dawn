@@ -8,6 +8,7 @@ int tint_div_i32(int lhs, int rhs) {
   return (lhs / select(rhs, 1, bool((v_2 | uint(v_1)))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void foo() {
   int a = 0;
   float4 b = 0.0f;

@@ -8,6 +8,7 @@ void b(thread int* const x) {
   a(x);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   int c = 1;
   b((&c));

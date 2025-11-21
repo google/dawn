@@ -21,6 +21,7 @@ void round_773a8f() {
   float res = 4.0f;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   round_773a8f();
 }

@@ -5,6 +5,7 @@ struct tint_module_vars_struct {
   thread bool2* v;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v_1() {
   thread bool2 v = bool2(false, true);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&v)};

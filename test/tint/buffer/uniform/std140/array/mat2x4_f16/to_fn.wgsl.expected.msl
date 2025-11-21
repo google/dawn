@@ -34,6 +34,7 @@ half d(half f_1) {
   return f_1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f(const constant tint_array<half2x4, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   half const v_1 = a((*tint_module_vars.u));

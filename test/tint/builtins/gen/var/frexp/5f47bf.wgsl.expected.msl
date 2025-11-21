@@ -37,6 +37,7 @@ void frexp_5f47bf() {
   frexp_result_vec2_f16 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_5f47bf();
 }

@@ -1,6 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   float3 const a = float3(2.003662109375f, -513.03125f, -1024.25f);
   int3 const b = as_type<int3>(a);

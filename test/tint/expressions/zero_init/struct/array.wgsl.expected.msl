@@ -17,6 +17,7 @@ struct S {
   tint_array<float, 4> a;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   S v = S{};
 }

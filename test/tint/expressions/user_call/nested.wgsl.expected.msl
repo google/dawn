@@ -12,6 +12,7 @@ void b() {
   c();
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void a() {
   b();
 }

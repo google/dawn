@@ -42,6 +42,7 @@ TEST_F(MslWriterTest, If) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   if (true) {
   }
@@ -64,6 +65,7 @@ TEST_F(MslWriterTest, IfWithElseIf) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   if (true) {
   } else {
@@ -85,6 +87,7 @@ TEST_F(MslWriterTest, IfWithElse) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   if (true) {
   } else {
@@ -105,6 +108,7 @@ TEST_F(MslWriterTest, IfBothBranchesReturn) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   if (true) {
     return;
@@ -143,6 +147,7 @@ uint foo() {
   return 0u;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint const x = foo();
 }
@@ -165,6 +170,7 @@ TEST_F(MslWriterTest, IfWithSinglePhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int v = 0;
   if (true) {
@@ -192,6 +198,7 @@ TEST_F(MslWriterTest, IfWithMultiPhi) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int v = 0;
   bool v_1 = false;
@@ -241,6 +248,7 @@ int foo() {
   return v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const x = foo();
 }
@@ -282,6 +290,7 @@ bool foo() {
   return v_1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   bool const x = foo();
 }

@@ -37,6 +37,7 @@ void modf_a545b9() {
   modf_result_vec2_f16 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_a545b9();
 }

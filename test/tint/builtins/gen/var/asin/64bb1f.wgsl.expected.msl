@@ -21,6 +21,7 @@ void asin_64bb1f() {
   float4 res = float4(0.5f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   asin_64bb1f();
 }

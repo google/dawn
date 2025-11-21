@@ -22,6 +22,7 @@ struct tint_module_vars_struct {
   const constant UniformBuffer_packed_vec3* u_input;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant UniformBuffer_packed_vec3* u_input [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u_input=u_input};
   int3 const temp = as_type<int3>((as_type<uint3>(int3((*tint_module_vars.u_input).d)) << (uint3(0u) & uint3(31u))));

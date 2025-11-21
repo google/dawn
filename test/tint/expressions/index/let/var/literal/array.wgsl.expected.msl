@@ -19,6 +19,7 @@ int f() {
   return a[min(uint(i), 7u)];
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   f();
 }

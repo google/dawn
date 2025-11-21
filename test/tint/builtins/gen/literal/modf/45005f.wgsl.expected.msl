@@ -31,6 +31,7 @@ void modf_45005f() {
   modf_result_vec3_f16 res = modf_result_vec3_f16{.fract=half3(-0.5h), .whole=half3(-1.0h)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_45005f();
 }

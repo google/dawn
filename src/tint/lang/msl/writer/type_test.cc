@@ -54,6 +54,7 @@ TEST_F(MslWriterTest, EmitType_Array) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<bool, 4> a = {};
 }
@@ -69,6 +70,7 @@ TEST_F(MslWriterTest, EmitType_ArrayOfArray) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<tint_array<bool, 4>, 5> a = {};
 }
@@ -85,6 +87,7 @@ TEST_F(MslWriterTest, EmitType_ArrayOfArrayOfArray) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   tint_array<tint_array<tint_array<bool, 4>, 5>, 6> a = {};
 }
@@ -124,6 +127,7 @@ struct tint_module_vars_struct {
 void foo(device tint_array<int, 1>* const param) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(device S* v [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo((&(*tint_module_vars.v).a));
@@ -140,6 +144,7 @@ TEST_F(MslWriterTest, EmitType_Bool) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   bool a = false;
 }
@@ -155,6 +160,7 @@ TEST_F(MslWriterTest, EmitType_F32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float a = 0.0f;
 }
@@ -170,6 +176,7 @@ TEST_F(MslWriterTest, EmitType_F16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half a = 0.0h;
 }
@@ -185,6 +192,7 @@ TEST_F(MslWriterTest, EmitType_I32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int a = 0;
 }
@@ -200,6 +208,7 @@ TEST_F(MslWriterTest, EmitType_Matrix_F32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float2x3 a = float2x3(0.0f);
 }
@@ -215,6 +224,7 @@ TEST_F(MslWriterTest, EmitType_Matrix_F16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   half2x3 a = half2x3(0.0h);
 }
@@ -229,6 +239,7 @@ TEST_F(MslWriterTest, EmitType_U32) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   uint a = 0u;
 }
@@ -245,6 +256,7 @@ TEST_F(MslWriterTest, EmitType_U64) {
     // Use `Print()` as u64 types are only support after certain transforms have run.
     ASSERT_TRUE(Print()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   ulong a = 0u;
 }
@@ -289,6 +301,7 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   foo(tint_module_vars.v);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol)};
   entry_inner(tint_local_index, tint_module_vars);
@@ -334,6 +347,7 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   foo(tint_module_vars.v);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol)};
   entry_inner(tint_local_index, tint_module_vars);
@@ -350,6 +364,7 @@ TEST_F(MslWriterTest, EmitType_Vector) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   float3 a = 0.0f;
 }
@@ -365,6 +380,7 @@ TEST_F(MslWriterTest, EmitType_VectorPacked) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   packed_float3 a = 0.0f;
 }
@@ -380,6 +396,7 @@ TEST_F(MslWriterTest, EmitType_Void) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
 }
 )");
@@ -423,6 +440,7 @@ void entry_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars
   foo(tint_module_vars.v);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_1).tint_symbol)};
   entry_inner(tint_local_index, tint_module_vars);
@@ -457,6 +475,7 @@ struct tint_module_vars_struct {
 void foo(const device int* const param) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(const device int* v [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -482,6 +501,7 @@ struct S {
   float b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   S a = {};
 }
@@ -507,6 +527,7 @@ struct S {
   float b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   S a = {};
   S b = {};
@@ -989,6 +1010,7 @@ S tint_load_struct_packed_vec3(device S_packed_vec3* const from) {
   return S{.a=v, .b=v_1, .c=v_2, .d=v_3, .e=v_5, .f=v_7, .g=v_9, .h=v_10, .i=v_11, .j=(*from).j};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(device S_packed_vec3* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   tint_load_struct_packed_vec3(tint_module_vars.a);
@@ -1123,6 +1145,7 @@ struct tint_module_vars_struct {
 void foo(sampler a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(sampler v [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -1157,6 +1180,7 @@ struct tint_module_vars_struct {
 void foo(sampler a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(sampler v [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -1194,6 +1218,7 @@ struct tint_module_vars_struct {
 void foo(array<texture2d<float, access::sample>, 4> a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(array<texture2d<float, access::sample>, 4> v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -1244,6 +1269,7 @@ void foo()" + params.result +
                                R"( a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry()" + params.result +
                                R"( v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
@@ -1292,6 +1318,7 @@ struct tint_module_vars_struct {
 void foo(depth2d_ms<float, access::read> a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(depth2d_ms<float, access::read> v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -1342,6 +1369,7 @@ void foo()" + params.result +
                                R"( a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry()" + params.result +
                                R"( v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
@@ -1391,6 +1419,7 @@ struct tint_module_vars_struct {
 void foo(texture2d_ms<uint, access::read> a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry(texture2d_ms<uint, access::read> v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
   foo(tint_module_vars.v);
@@ -1440,6 +1469,7 @@ void foo()" + params.result +
                                R"( a) {
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry()" + params.result +
                                R"( v [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=v};
@@ -1469,6 +1499,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixLeft) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
 }
@@ -1485,6 +1516,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixRight) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   simdgroup_half8x8 a = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
 }
@@ -1502,6 +1534,7 @@ TEST_F(MslWriterTest, EmitType_SubgroupMatrixResult) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
 }

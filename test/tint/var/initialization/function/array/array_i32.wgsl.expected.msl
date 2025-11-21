@@ -13,6 +13,7 @@ struct tint_array {
   T elements[N];
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   tint_array<tint_array<int, 3>, 2> zero = {};
   tint_array<tint_array<int, 3>, 2> init = tint_array<tint_array<int, 3>, 2>{tint_array<int, 3>{1, 2, 3}, tint_array<int, 3>{4, 5, 6}};

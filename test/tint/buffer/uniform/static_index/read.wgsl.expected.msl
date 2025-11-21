@@ -71,6 +71,7 @@ tint_array<float3, 2> tint_load_array_packed_vec3(const constant tint_array<tint
   return tint_array<float3, 2>{float3((*from)[0u].packed), float3((*from)[1u].packed)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant S_packed_vec3* ub [[buffer(0)]], device int* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.ub=ub, .s=s};
   float const scalar_f32 = (*tint_module_vars.ub).scalar_f32;

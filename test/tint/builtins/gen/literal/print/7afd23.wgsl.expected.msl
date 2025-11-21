@@ -43,6 +43,7 @@ void compute_main_inner(uint3 tint_symbol, tint_module_vars_struct tint_module_v
   print_7afd23(tint_module_vars);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main(uint3 tint_symbol [[thread_position_in_grid]]) {
   thread uint3 tint_print_invocation_id = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_print_invocation_id=(&tint_print_invocation_id)};

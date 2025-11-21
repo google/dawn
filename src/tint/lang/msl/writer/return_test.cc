@@ -42,6 +42,7 @@ TEST_F(MslWriterTest, Return) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   if (true) {
     return;
@@ -56,6 +57,7 @@ TEST_F(MslWriterTest, ReturnAtEndOfVoidDropped) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
 }
 )");
@@ -77,6 +79,7 @@ int foo() {
   return 123;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void entry() {
   int const x = foo();
 }

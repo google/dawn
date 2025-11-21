@@ -9,6 +9,7 @@ struct tint_module_vars_struct {
   device Buffer* tint_member;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(device Buffer* v_1 [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1};
   (*tint_module_vars.tint_member).data = ((*tint_module_vars.tint_member).data + 1u);

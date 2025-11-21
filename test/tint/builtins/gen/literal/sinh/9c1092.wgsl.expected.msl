@@ -21,6 +21,7 @@ void sinh_9c1092() {
   float2 res = float2(1.17520117759704589844f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   sinh_9c1092();
 }

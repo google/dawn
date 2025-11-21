@@ -37,6 +37,7 @@ void frexp_77af93() {
   frexp_result_vec4_f32 res = v;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   frexp_77af93();
 }

@@ -21,6 +21,7 @@ void fract_ed2f79() {
   float3 res = float3(0.25f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   fract_ed2f79();
 }

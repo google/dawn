@@ -9,6 +9,7 @@ int3 tint_mod_v3i32(int3 lhs, int3 rhs) {
   return as_type<int3>((as_type<uint3>(lhs) - as_type<uint3>(as_type<int3>((as_type<uint3>((lhs / v_3)) * as_type<uint3>(v_3))))));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   int3 a = int3(1, 2, 3);
   int b = 0;

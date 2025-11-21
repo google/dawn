@@ -28,6 +28,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
   }
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   thread float2 v2f = 0.0f;
   thread int3 v3i = 0;

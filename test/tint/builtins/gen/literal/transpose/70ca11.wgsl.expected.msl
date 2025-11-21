@@ -21,6 +21,7 @@ void transpose_70ca11() {
   float3x2 res = float3x2(float2(1.0f), float2(1.0f), float2(1.0f));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   transpose_70ca11();
 }

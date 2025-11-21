@@ -31,6 +31,7 @@ uint tint_dot(uint3 lhs, uint3 rhs) {
   return (((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v(const constant g_packed_vec3* i [[buffer(0)]], device h* j [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.i=i, .j=j};
   uint const l = tint_dot(uint3((*tint_module_vars.i).a), uint3((*tint_module_vars.i).a));

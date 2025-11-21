@@ -21,6 +21,7 @@ void asin_a5dd88() {
   float2 res = float2(0.5f);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   asin_a5dd88();
 }

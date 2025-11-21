@@ -21,6 +21,7 @@ void max_19070a() {
   int4 res = int4(1);
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   max_19070a();
 }

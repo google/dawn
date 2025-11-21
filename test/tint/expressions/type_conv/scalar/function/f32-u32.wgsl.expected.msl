@@ -14,6 +14,7 @@ uint tint_f32_to_u32(float value) {
   return uint(clamp(value, 0.0f, 4294967040.0f));
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   thread float t = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=(&t)};

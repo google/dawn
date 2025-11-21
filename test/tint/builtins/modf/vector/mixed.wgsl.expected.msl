@@ -6,6 +6,7 @@ struct modf_result_vec2_f32 {
   float2 whole;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void v() {
   float2 const runtime_in = float2(1.25f, 3.75f);
   modf_result_vec2_f32 res = modf_result_vec2_f32{.fract=float2(0.25f, 0.75f), .whole=float2(1.0f, 3.0f)};

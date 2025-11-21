@@ -21,6 +21,7 @@ void max_caa3d7() {
   int res = 1;
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   max_caa3d7();
 }

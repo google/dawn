@@ -20,6 +20,7 @@ struct S {
   bool b;
 };
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void f() {
   tint_array<S, 4> v = tint_array<S, 4>{};
 }

@@ -29,6 +29,7 @@ void v(uint v_1, tint_struct v_2) {
   uint const v_6 = (*v_2.tint_member)[min(v_1, (tint_struct_1{.tint_member_2=((*v_2.tint_member_1)[0u].x / 4u)}.tint_member_2 - 1u))];
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void tint_entry_point(uint v_8 [[thread_index_in_threadgroup]], const device tint_array<uint, 1>* v_9 [[buffer(0)]], const constant tint_array<uint4, 1>* v_10 [[buffer(30)]]) {
   tint_struct const v_11 = tint_struct{.tint_member=v_9, .tint_member_1=v_10};
   v(v_8, v_11);

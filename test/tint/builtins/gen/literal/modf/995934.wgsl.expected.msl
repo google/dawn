@@ -31,6 +31,7 @@ void modf_995934() {
   modf_result_vec4_f16 res = modf_result_vec4_f16{.fract=half4(-0.5h), .whole=half4(-1.0h)};
 }
 
+[[max_total_threads_per_threadgroup(1)]]
 kernel void compute_main() {
   modf_995934();
 }
