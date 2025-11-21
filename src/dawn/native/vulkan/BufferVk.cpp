@@ -299,26 +299,6 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
                                     mMemoryAllocation.GetOffset()),
         "vkBindBufferMemory"));
 
-    // The buffers with mappedAtCreation == true will be initialized in
-    // BufferBase::MapAtCreation().
-    if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
-        !mappedAtCreation) {
-        ClearBuffer(ToBackend(device->GetQueue())->GetPendingRecordingContext(), 0x01010101);
-    }
-
-    // Initialize the padding bytes to zero.
-    if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) && !mappedAtCreation) {
-        uint32_t paddingBytes = GetAllocatedSize() - GetSize();
-        if (paddingBytes > 0) {
-            uint32_t clearSize = Align(paddingBytes, 4);
-            uint64_t clearOffset = GetAllocatedSize() - clearSize;
-
-            CommandRecordingContext* recordingContext =
-                ToBackend(device->GetQueue())->GetPendingRecordingContext();
-            ClearBuffer(recordingContext, 0, clearOffset, clearSize);
-        }
-    }
-
     // Get if buffer is host visible and coherent. This can be the case even if the buffer was not
     // created with map usages, as on integrated GPUs all memory will typically be host visible.
     const size_t memoryType = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemoryType();
@@ -326,7 +306,42 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
         device->GetDeviceInfo().memoryTypes[memoryType].propertyFlags;
     mHostVisible = IsSubset(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, memoryPropertyFlags);
     mHostCoherent = IsSubset(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, memoryPropertyFlags);
-    mHasWriteTransitioned = false;
+
+    // The buffers with mappedAtCreation == true will be initialized in BufferBase::MapAtCreation().
+    if (!mappedAtCreation) {
+        uint32_t paddingClearSize = Align(GetAllocatedSize() - GetSize(), 4);
+        uint64_t paddingClearOffset = GetAllocatedSize() - paddingClearSize;
+
+        if (mHostVisible && GetSize() > 0) {
+            // For host visible buffers do initialization on CPU to avoid a GPU write that
+            // interferes with using the UploadData() fast path.
+            if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+                DAWN_TRY(MapMemoryAndPerformOperation(
+                    0, mAllocatedSize,
+                    [](std::span<uint8_t> mapped) { std::ranges::fill(mapped, 0x01); }));
+            }
+            if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+                paddingClearSize > 0) {
+                DAWN_TRY(
+                    MapMemoryAndPerformOperation(paddingClearOffset, paddingClearSize,
+                                                 [&paddingClearSize](std::span<uint8_t> mapped) {
+                                                     DAWN_ASSERT(mapped.size() == paddingClearSize);
+                                                     std::ranges::fill(mapped, 0x0);
+                                                 }));
+            }
+        } else {
+            if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
+                ClearBuffer(ToBackend(device->GetQueue())->GetPendingRecordingContext(),
+                            0x01010101);
+            }
+            if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
+                paddingClearSize > 0) {
+                CommandRecordingContext* recordingContext =
+                    ToBackend(device->GetQueue())->GetPendingRecordingContext();
+                ClearBuffer(recordingContext, 0, paddingClearOffset, paddingClearSize);
+            }
+        }
+    }
 
     SetLabelImpl();
 
@@ -414,10 +429,6 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
 
     mHostMappedDisposeCallback = hostMappedDesc->disposeCallback;
     mHostMappedDisposeUserdata = hostMappedDesc->userdata;
-
-    mHostVisible = false;
-    mHostCoherent = false;
-    mHasWriteTransitioned = false;
 
     SetLabelImpl();
 
@@ -637,91 +648,103 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
     Device* device = ToBackend(GetDevice());
 
     const bool isInUse = GetLastUsageSerial() > device->GetQueue()->GetCompletedCommandSerial();
-    const bool isMappable = GetInternalUsage() & kMappableBufferUsages;
     // Get if buffer has pending writes on the GPU. Even if the write workload has finished, the
     // write may still need a barrier to make the write available.
     const bool hasPendingWrites = !IsSubset(mLastWriteUsage, wgpu::BufferUsage::MapWrite);
 
-    if (!isInUse && !hasPendingWrites && mHostVisible) {
-        // Buffer does not have any pending uses and is CPU writable. We can map the buffer directly
-        // and write the contents, skipping the scratch buffer.
-        VkDeviceMemory deviceMemory = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory();
-        uint8_t* memory;
-        uint64_t realOffset = bufferOffset;
-        if (!isMappable) {
-            // TODO(crbug.com/dawn/774): Persistently map frequently updated buffers instead of
-            // mapping/unmapping each time.
-
-            VkDeviceSize offset = mMemoryAllocation.GetOffset();
-            VkDeviceSize mapSize = mAllocatedSize;
-            if (!NeedsInitialization() && mHostCoherent) {
-                // We can map only the part of the buffer we need to upload the data.
-                // We avoid this for non-coherent memory as the mapping needs to be aligned to
-                // nonCoherentAtomSize.
-                offset += bufferOffset;
-                mapSize = size;
-                realOffset = 0;
-            }
-
-            void* mappedPointer;
-            DAWN_TRY(CheckVkSuccess(device->fn.MapMemory(device->GetVkDevice(), deviceMemory,
-                                                         offset, mapSize, 0, &mappedPointer),
-                                    "vkMapMemory"));
-            memory = static_cast<uint8_t*>(mappedPointer);
-        } else {
-            // Mappable buffers are already persistently mapped.
-            memory = mMemoryAllocation.GetMappedPointer();
-        }
-
-        VkMappedMemoryRange mappedMemoryRange = {};
-        mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedMemoryRange.memory = deviceMemory;
-        mappedMemoryRange.offset = mMemoryAllocation.GetOffset();
-        mappedMemoryRange.size = mAllocatedSize;
-        if (!mHostCoherent) {
-            // For non-coherent memory we need to explicitly invalidate the memory range to make
-            // available GPU writes visible.
-            device->fn.InvalidateMappedMemoryRanges(device->GetVkDevice(), 1, &mappedMemoryRange);
-        }
-
-        if (NeedsInitialization()) {
-            memset(memory, 0, mAllocatedSize);
-            device->IncrementLazyClearCountForTesting();
-            SetInitialized(true);
-        }
-
-        // Copy data.
-        memcpy(memory + realOffset, data, size);
-
-        if (!mHostCoherent) {
-            // For non-coherent memory we need to explicitly flush the memory range to make the host
-            // write visible.
-            // TODO(crbug.com/dawn/774): Batch the flush calls instead of doing one per writeBuffer.
-            device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &mappedMemoryRange);
-        }
-
-        if (!isMappable) {
-            device->fn.UnmapMemory(device->GetVkDevice(), deviceMemory);
-        }
-        return {};
+    if (isInUse || hasPendingWrites || !mHostVisible) {
+        // Write to scratch buffer and copy into final destination buffer.
+        return BufferBase::UploadData(bufferOffset, data, size);
     }
 
-    // Write to scratch buffer and copy into final destination buffer.
-    MaybeError error = BufferBase::UploadData(bufferOffset, data, size);
+    // Buffer does not have any pending uses and is CPU writable. We can map the buffer directly
+    // and write the contents, skipping the scratch buffer.
 
-    if (mHostVisible && !mHasWriteTransitioned) {
-        // Transition to MapWrite so the next time we try to upload data to this buffer, we can take
-        // the fast path. This avoids the issue where the first write will take the slow path due to
-        // zero initialization. Only attempt this once to avoid transitioning a buffer many times
-        // despite never getting the fast path.
-        CommandRecordingContext* recordingContext =
-            ToBackend(device->GetQueue())->GetPendingRecordingContext();
-        TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
-        device->GetQueue()->ForceEventualFlushOfCommands();
-        mHasWriteTransitioned = true;
+    // If the buffer needs initialization request the full buffer is mapped.
+    bool needsZeroInitialization = NeedsInitialization() && size < GetSize();
+    uint64_t mapSize = needsZeroInitialization ? mAllocatedSize : size;
+    uint64_t mapOffset = needsZeroInitialization ? 0 : bufferOffset;
+
+    return MapMemoryAndPerformOperation(mapOffset, mapSize, [&](std::span<uint8_t> mapped) {
+        uint64_t dstOffset = 0;
+        if (needsZeroInitialization) {
+            DAWN_ASSERT(mapped.size() == mAllocatedSize);
+            std::ranges::fill(mapped, 0x0);
+            GetDevice()->IncrementLazyClearCountForTesting();
+            dstOffset = bufferOffset;
+        }
+        // The buffer is always initialized here, either by explicit zero initialization
+        // above or memcpy below.
+        SetInitialized(true);
+
+        DAWN_ASSERT(mapped.size() >= dstOffset + size);
+        memcpy(mapped.data() + dstOffset, data, size);
+    });
+}
+
+template <typename F>
+MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
+                                                size_t requestedSize,
+                                                F&& op) {
+    Device* device = ToBackend(GetDevice());
+    const bool isMappable = GetInternalUsage() & kMappableBufferUsages;
+
+    DAWN_ASSERT(mHostVisible);
+    DAWN_ASSERT(GetLastUsageSerial() <= device->GetQueue()->GetCompletedCommandSerial());
+
+    VkDeviceMemory deviceMemory = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory();
+    uint8_t* memory = nullptr;
+    uint64_t realOffset = requestedOffset;
+
+    if (isMappable) {
+        // Mappable buffers are already persistently mapped.
+        memory = mMemoryAllocation.GetMappedPointer();
+    } else {
+        // TODO(crbug.com/dawn/774): Persistently map frequently updated buffers instead of
+        // mapping/unmapping each time.
+        VkDeviceSize offset = mMemoryAllocation.GetOffset();
+        VkDeviceSize mapSize = mAllocatedSize;
+        if (mHostCoherent) {
+            // We can map only the part of the buffer we need to upload the data.
+            // We avoid this for non-coherent memory as the mapping needs to be aligned to
+            // nonCoherentAtomSize.
+            offset += requestedOffset;
+            mapSize = requestedSize;
+            realOffset = 0;
+        }
+
+        void* mappedPointer;
+        DAWN_TRY(CheckVkSuccess(device->fn.MapMemory(device->GetVkDevice(), deviceMemory, offset,
+                                                     mapSize, 0, &mappedPointer),
+                                "vkMapMemory"));
+        memory = static_cast<uint8_t*>(mappedPointer);
     }
 
-    return error;
+    VkMappedMemoryRange mappedMemoryRange = {};
+    mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    mappedMemoryRange.memory = deviceMemory;
+    mappedMemoryRange.offset = mMemoryAllocation.GetOffset();
+    mappedMemoryRange.size = mAllocatedSize;
+    if (!mHostCoherent) {
+        // For non-coherent memory we need to explicitly invalidate the memory range to make
+        // available GPU writes visible.
+        device->fn.InvalidateMappedMemoryRanges(device->GetVkDevice(), 1, &mappedMemoryRange);
+    }
+
+    // Pass a span that is exactly the offset/size requested even if a larger range was mapped.
+    op(std::span(memory + realOffset, requestedSize));
+
+    if (!mHostCoherent) {
+        // For non-coherent memory we need to explicitly flush the memory range to make the host
+        // write visible.
+        // TODO(crbug.com/dawn/774): Batch the flush calls instead of doing one per writeBuffer.
+        device->fn.FlushMappedMemoryRanges(device->GetVkDevice(), 1, &mappedMemoryRange);
+    }
+
+    if (!isMappable) {
+        device->fn.UnmapMemory(device->GetVkDevice(), deviceMemory);
+    }
+    return {};
 }
 
 void Buffer::DestroyImpl() {
