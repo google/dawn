@@ -542,12 +542,6 @@ BufferBarrier Buffer::TrackUsageAndGetResourceBarrier(wgpu::BufferUsage usage,
         }
     }
 
-    if (isMapUsage) {
-        // CPU usage, but a pipeline barrier is needed, so mark the buffer as used within the
-        // pending commands.
-        MarkUsedInPendingCommands();
-    }
-
     return BufferBarrier{.srcAccessMask = srcAccess,
                          .dstAccessMask = VulkanAccessFlags(usage),
                          .srcStages = srcStage,
@@ -564,21 +558,20 @@ MaybeError Buffer::MapAtCreationImpl() {
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
-    CommandRecordingContext* recordingContext =
-        ToBackend(GetDevice()->GetQueue())->GetPendingRecordingContext();
-
-    if (mode & wgpu::MapMode::Read) {
-        TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
-    } else {
-        DAWN_ASSERT(mode & wgpu::MapMode::Write);
-        TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
-    }
-
     return {};
 }
 
 MaybeError Buffer::FinalizeMapImpl(BufferState newState) {
     Device* device = ToBackend(GetDevice());
+
+    // Any required barriers for mapping must have been inserted before map finalizes. This is done
+    // by eagerly transitioning mappable buffers at the end of GPU submissions that use them. If
+    // this ASSERT triggers, there is likely a missing call to CheckBufferNeedsEagerTransition()
+    // after a transition of the buffer for GPU usage.
+    wgpu::BufferUsage usage = (MapMode() & wgpu::MapMode::Read) ? wgpu::BufferUsage::MapRead
+                                                                : wgpu::BufferUsage::MapWrite;
+    BufferBarrier barrier = TrackUsageAndGetResourceBarrier(usage, wgpu::ShaderStage::None);
+    DAWN_ASSERT(barrier.IsEmpty());
 
     if (NeedsInitialization() && GetSize() > 0 && newState == BufferState::Mapped) {
         // Clear full allocated size, including padding bytes, except for zero sized buffers. For
