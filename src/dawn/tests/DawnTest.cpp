@@ -370,6 +370,41 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             mHasBackendTypeFilter = true;
             continue;
         }
+
+        constexpr const char kWebGPUInnerBackendTypeArg[] = "--webgpu-inner-backend=";
+        argLen = sizeof(kWebGPUInnerBackendTypeArg) - 1;
+        if (strncmp(argv[i], kWebGPUInnerBackendTypeArg, argLen) == 0) {
+            const char* param = argv[i] + argLen;
+            if (strcmp("undefined", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Undefined;
+            } else if (strcmp("d3d11", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::D3D11;
+            } else if (strcmp("d3d12", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::D3D12;
+            } else if (strcmp("metal", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Metal;
+            } else if (strcmp("null", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Null;
+            } else if (strcmp("opengl", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::OpenGL;
+            } else if (strcmp("opengles", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::OpenGLES;
+            } else if (strcmp("vulkan", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Vulkan;
+            } else if (strcmp("fallback", param) == 0) {
+                mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Undefined;
+                mWebGPUInnerForceFallbackAdapter = true;
+            } else {
+                ErrorLog()
+                    << "Invalid inner backend \"" << param
+                    << "\". Valid backends are: undefined, d3d11, d3d12, metal, null, opengl, "
+                       "opengles, vulkan, fallback.";
+                DAWN_UNREACHABLE();
+            }
+            mHasWebGPUInnerBackendTypeFilter = true;
+            continue;
+        }
+
         if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
             InfoLog()
                 << "\n\nUsage: " << argv[0]
@@ -394,7 +429,10 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "  --adapter-vendor-id: Select adapter by vendor id to run end2end tests"
                    "on multi-GPU systems \n"
                    "  --backend: Select adapter by backend type. Valid backends are: d3d12, metal, "
-                   "null, opengl, opengles, vulkan\n"
+                   "null, opengl, opengles, vulkan, webgpu\n"
+                   "  --webgpu-inner-backend: Select inner backend for WebGPU backend. "
+                   "Valid backends are: undefined, d3d11, d3d12, metal, null, opengl, opengles, "
+                   "vulkan, fallback\n"
                    "  --exclusive-device-type-preference: Comma-delimited list of preferred device "
                    "types. For each backend, tests will run only on adapters that match the first "
                    "available device type\n"
@@ -496,13 +534,17 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     std::set<std::tuple<wgpu::BackendType, std::string, bool>> adapterNameSet;
     for (wgpu::FeatureLevel featureLevel :
          {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
-        wgpu::RequestAdapterOptions adapterOptions;
+        wgpu::RequestAdapterOptions adapterOptions = {};
         adapterOptions.featureLevel = featureLevel;
 
         auto adapters = instance->EnumerateAdapters(&adapterOptions);
 
         // Include enumerating WebGPU-on-WebGPU backends.
         wgpu::RequestAdapterWebGPUBackendOptions webgpuBackendOptions = {};
+        if (HasWebGPUInnerBackendTypeFilter()) {
+            adapterOptions.backendType = GetWebGPUInnerBackendTypeFilter();
+            adapterOptions.forceFallbackAdapter = GetWebGPUInnerForceFallbackAdapter();
+        }
         adapterOptions.nextInChain = &webgpuBackendOptions;
 
         {
@@ -751,6 +793,18 @@ wgpu::BackendType DawnTestEnvironment::GetBackendTypeFilter() const {
     return mBackendTypeFilter;
 }
 
+bool DawnTestEnvironment::HasWebGPUInnerBackendTypeFilter() const {
+    return mHasWebGPUInnerBackendTypeFilter;
+}
+
+wgpu::BackendType DawnTestEnvironment::GetWebGPUInnerBackendTypeFilter() const {
+    return mWebGPUInnerBackendTypeFilter;
+}
+
+bool DawnTestEnvironment::GetWebGPUInnerForceFallbackAdapter() const {
+    return mWebGPUInnerForceFallbackAdapter;
+}
+
 const char* DawnTestEnvironment::GetWireTraceDir() const {
     if (mWireTraceDir.length() == 0) {
         return nullptr;
@@ -793,6 +847,13 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         wgpu::RequestAdapterWebGPUBackendOptions webgpuBackendOptions = {};
         if (gCurrentTest->mParam.adapterProperties.backendType == wgpu::BackendType::WebGPU) {
             adapterOptions.backendType = wgpu::BackendType::Undefined;
+
+            if (gTestEnv->HasWebGPUInnerBackendTypeFilter()) {
+                adapterOptions.backendType = gTestEnv->GetWebGPUInnerBackendTypeFilter();
+                adapterOptions.forceFallbackAdapter =
+                    gTestEnv->GetWebGPUInnerForceFallbackAdapter();
+            }
+
             webgpuBackendOptions.nextInChain = adapterOptions.nextInChain;
             adapterOptions.nextInChain = &webgpuBackendOptions;
         } else {

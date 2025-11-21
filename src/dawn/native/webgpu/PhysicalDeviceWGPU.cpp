@@ -59,7 +59,8 @@ PhysicalDevice::PhysicalDevice(Backend* backend, WGPUAdapter innerAdapter)
     mArchitectureName = ToString(info.architecture);
     mVendorId = info.vendorID;
     mDeviceId = info.deviceID;
-    mName = absl::StrFormat("WebGPU backend on %s", FromAPI(info.backendType));
+    mName = absl::StrFormat("WebGPU backend on %s %s", FromAPI(info.backendType),
+                            ToString(info.device));
     mAdapterType = FromAPI(info.adapterType);
     mDriverDescription = ToString(info.description);
     mSubgroupMinSize = info.subgroupMinSize;

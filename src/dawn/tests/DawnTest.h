@@ -210,6 +210,9 @@ class DawnTestEnvironment : public testing::Environment {
     uint32_t GetVendorIdFilter() const;
     bool HasBackendTypeFilter() const;
     wgpu::BackendType GetBackendTypeFilter() const;
+    bool HasWebGPUInnerBackendTypeFilter() const;
+    wgpu::BackendType GetWebGPUInnerBackendTypeFilter() const;
+    bool GetWebGPUInnerForceFallbackAdapter() const;
     const char* GetWireTraceDir() const;
 
     const std::vector<std::string>& GetEnabledToggles() const;
@@ -241,6 +244,9 @@ class DawnTestEnvironment : public testing::Environment {
     uint32_t mVendorIdFilter = 0;
     bool mHasBackendTypeFilter = false;
     wgpu::BackendType mBackendTypeFilter;
+    bool mHasWebGPUInnerBackendTypeFilter = false;
+    wgpu::BackendType mWebGPUInnerBackendTypeFilter = wgpu::BackendType::Undefined;
+    bool mWebGPUInnerForceFallbackAdapter = false;
     std::string mWireTraceDir;
     bool mRunSuppressedTests = false;
     bool mIsTestLauncherBotMode = false;

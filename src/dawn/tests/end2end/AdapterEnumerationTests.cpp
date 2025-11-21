@@ -360,6 +360,22 @@ TEST_F(AdapterEnumerationTests, WebGPUBackend) {
         }
     }
 
+    // Test selecting a force fallback adapter.
+    {
+        adapterOptions.backendType = wgpu::BackendType::Undefined;
+        adapterOptions.forceFallbackAdapter = true;
+        const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
+        for (const auto& nativeAdapter : adapters) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
+
+            EXPECT_EQ(info.backendType, wgpu::BackendType::WebGPU);
+            EXPECT_NE(std::string_view(info.device.data, info.device.length).find("SwiftShader"),
+                      std::string_view::npos);
+        }
+    }
+
     // Test selecting WebGPUBackend on WebGPUBackend gives nothing.
     {
         adapterOptions.backendType = wgpu::BackendType::WebGPU;
