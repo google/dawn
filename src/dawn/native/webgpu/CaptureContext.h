@@ -97,25 +97,6 @@ class CaptureContext {
         return {};
     }
 
-    // This is for resources that are not explicitly created on Replay.
-    // For example, bindGroupLayouts created by a pipeline using auto layout.
-    // We need to give them an id but not generate any creation commands.
-    template <typename T>
-    schema::ObjectId AddAndGetIdForImplicitResource(T* object) {
-        assert(object != nullptr);
-        schema::ObjectId id;
-        Ref<ApiObjectBase> ref(object);
-        auto it = mObjectIds.find(ref);
-        bool newResource = it == mObjectIds.end();
-        if (newResource) {
-            id = mNextObjectId++;
-            mObjectIds[std::move(ref)] = id;
-        } else {
-            id = it->second;
-        }
-        return id;
-    }
-
     // You must have called AddResource at some point before calling GetId.
     template <typename T>
     schema::ObjectId GetId(T ref) {

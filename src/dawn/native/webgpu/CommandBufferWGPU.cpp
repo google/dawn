@@ -615,35 +615,6 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
         DAWN_TRY(AddReferencedPassResourceUsages(captureContext, pass.dispatchUsages));
     }
 
-    // We need to process all pipelines (setPipeline calls) before we deal with
-    // any bindGroups (setBindGroup calls). The reason is, bindGroups reference
-    // a bindGroupLayout but that bindGroupLayout might have been implicitly
-    // created from a `layout: 'auto'` pipeline. That means, in order to create
-    // the bindGroup we need to have first created the correct pipeline.
-    // Unfortunately there is no association from an implicitly created
-    // bindGroupLayout to the pipeline that created it.
-    //
-    // So, we gather all the pipelines and all the bindGroups referenced in the
-    // command buffer. We then serialize all the pipelines. Pipelines that
-    // create implicit bindGroupLayouts will make schema::ObjectIds for those
-    // implicit bindGroupLayouts which means we can then serialize bindGroups
-    // from the calls to `setBindGroup`.
-    //
-    // This has one issue though, the user can call `setBindGroup` that
-    // references an implicit bindGroupLayout that is never used. Example:
-    //
-    //     setBindGroup(0, bindGroupWithImplicitBGLForPipelineThatIsNotInCommandBuffer);
-    //     setBindGroup(0, otherBindGroup);
-    //
-    // That first call is effectively a no-op as it's replaced. Even if it
-    // wasn't replaced it's a no-op because it could not have been used,
-    // otherwise an error would have been generated during encoding.
-    //
-    // So, our solution is to not serialize both the bindGroup and the call to
-    // setBindGroup. To skip serializing the unused bindGroup and unused call,
-    // we check if the implicit bindGroupLayout been assigned an id because we
-    // previously serialized the pipeline that created it. If there is no id
-    // then don't serialize either as they weren't used.
     CommandBufferResourceUsages usedResources;
 
     CommandIterator& commands = mCommands;

@@ -101,8 +101,6 @@ class Replay {
     Replay(wgpu::Device device, const Capture* capture);
 
     MaybeError CreateResource(wgpu::Device device, ReadHead& readHead);
-    void RegisterImplicitBindGroupLayouts(wgpu::ComputePipeline pipeline,
-                                          const std::vector<uint32_t> groupIndicies);
 
     wgpu::Device mDevice;
     const Capture* mCapture;
