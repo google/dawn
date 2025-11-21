@@ -411,14 +411,6 @@ void EncodeRenderPass(const Device* device,
     DAWN_UNREACHABLE();
 }
 
-// Commands are encoded with a command id followed by command-specific data.
-// so we're required to read each command to skip over them.
-#define DAWN_SKIP_COMMAND(cmdName)            \
-    case Command::cmdName: {                  \
-        commands.NextCommand<cmdName##Cmd>(); \
-        break;                                \
-    }
-
 MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureContext,
                                                     CommandIterator& commands,
                                                     CommandBufferResourceUsages& usedResources) {
@@ -439,16 +431,17 @@ MaybeError GatherReferencedResourcesFromComputePass(CaptureContext& captureConte
                 usedResources.bindGroups.push_back(cmd->group.Get());
                 break;
             }
-                DAWN_SKIP_COMMAND(Dispatch)
-                DAWN_SKIP_COMMAND(DispatchIndirect)
-                DAWN_SKIP_COMMAND(InsertDebugMarker)
-                DAWN_SKIP_COMMAND(PopDebugGroup)
-                DAWN_SKIP_COMMAND(PushDebugGroup)
-                DAWN_SKIP_COMMAND(WriteTimestamp)
-                DAWN_SKIP_COMMAND(SetImmediates)
-            default: {
-                DAWN_CHECK(false);
+            case Command::Dispatch:
+            case Command::DispatchIndirect:
+            case Command::WriteTimestamp:
+            case Command::SetImmediates:
+            case Command::PushDebugGroup:
+            case Command::InsertDebugMarker:
+            case Command::PopDebugGroup:
+                SkipCommand(&commands, type);
                 break;
+            default: {
+                return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
             }
         }
     }
@@ -535,8 +528,12 @@ MaybeError CaptureComputePass(CaptureContext& captureContext, CommandIterator& c
                 Serialize(captureContext, data);
                 break;
             }
-            default:
-                DAWN_CHECK(false);
+            default: {
+                if (!CaptureDebugCommand(captureContext, commands, type)) {
+                    return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
+                }
+                break;
+            }
         }
     }
     return {};
@@ -685,12 +682,18 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                                                                  usedResources));
                 break;
             }
-                DAWN_SKIP_COMMAND(CopyBufferToBuffer)
-                DAWN_SKIP_COMMAND(CopyBufferToTexture)
-                DAWN_SKIP_COMMAND(CopyTextureToBuffer)
-                DAWN_SKIP_COMMAND(CopyTextureToTexture)
-            default:
-                DAWN_CHECK(false);
+            case Command::CopyBufferToBuffer:
+            case Command::CopyBufferToTexture:
+            case Command::CopyTextureToBuffer:
+            case Command::CopyTextureToTexture:
+            case Command::PushDebugGroup:
+            case Command::InsertDebugMarker:
+            case Command::PopDebugGroup:
+                SkipCommand(&commands, type);
+                break;
+            default: {
+                return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
+            }
         }
     }
 
@@ -854,8 +857,12 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
                 Serialize(captureContext, data);
                 break;
             }
-            default:
-                DAWN_CHECK(false);
+            default: {
+                if (!CaptureDebugCommand(captureContext, commands, type)) {
+                    return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
+                }
+                break;
+            }
         }
     }
     Serialize(captureContext, schema::CommandBufferCommand::End);

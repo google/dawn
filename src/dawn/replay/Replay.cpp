@@ -423,6 +423,32 @@ ResultOrError<wgpu::QuerySet> CreateQuerySet(const Replay& replay,
 }
 
 template <typename T>
+MaybeError ProcessDebugCommands(T pass, schema::CommandBufferCommand cmd, ReadHead& readHead) {
+    switch (cmd) {
+        case schema::CommandBufferCommand::PushDebugGroup: {
+            schema::CommandBufferCommandPushDebugGroupCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.PushDebugGroup(wgpu::StringView(data.groupLabel));
+            break;
+        }
+        case schema::CommandBufferCommand::InsertDebugMarker: {
+            schema::CommandBufferCommandInsertDebugMarkerCmdData data;
+            DAWN_TRY(Deserialize(readHead, &data));
+            pass.InsertDebugMarker(wgpu::StringView(data.markerLabel));
+            break;
+        }
+        case schema::CommandBufferCommand::PopDebugGroup: {
+            // PopDebugGroup has no data
+            pass.PopDebugGroup();
+            break;
+        }
+        default:
+            DAWN_UNREACHABLE();
+    }
+    return {};
+}
+
+template <typename T>
 MaybeError ProcessRenderCommand(const Replay& replay,
                                 ReadHead& readHead,
                                 wgpu::Device device,
@@ -455,6 +481,11 @@ MaybeError ProcessRenderCommand(const Replay& replay,
             pass.Draw(data.vertexCount, data.instanceCount, data.firstVertex, data.firstInstance);
             break;
         }
+        case schema::CommandBufferCommand::PushDebugGroup:
+        case schema::CommandBufferCommand::InsertDebugMarker:
+        case schema::CommandBufferCommand::PopDebugGroup:
+            DAWN_TRY(ProcessDebugCommands(pass, cmd, readHead));
+            break;
         default:
             return DAWN_INTERNAL_ERROR("Render Pass/Bundle Command not implemented");
     }
@@ -729,6 +760,11 @@ MaybeError ProcessComputePassCommands(const Replay& replay,
                 pass.DispatchWorkgroups(data.x, data.y, data.z);
                 break;
             }
+            case schema::CommandBufferCommand::PushDebugGroup:
+            case schema::CommandBufferCommand::InsertDebugMarker:
+            case schema::CommandBufferCommand::PopDebugGroup:
+                DAWN_TRY(ProcessDebugCommands(pass, cmd, readHead));
+                break;
             default:
                 return DAWN_INTERNAL_ERROR("Compute Pass Command not implemented");
         }
@@ -892,6 +928,11 @@ MaybeError ProcessEncoderCommands(const Replay& replay,
                                         data.destinationOffset);
                 break;
             }
+            case schema::CommandBufferCommand::PushDebugGroup:
+            case schema::CommandBufferCommand::InsertDebugMarker:
+            case schema::CommandBufferCommand::PopDebugGroup:
+                DAWN_TRY(ProcessDebugCommands(encoder, cmd, readHead));
+                break;
             default:
                 return DAWN_INTERNAL_ERROR("Encoder Command not implemented");
         }

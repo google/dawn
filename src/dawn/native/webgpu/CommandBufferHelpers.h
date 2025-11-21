@@ -57,6 +57,9 @@ struct CommandBufferResourceUsages {
     std::vector<RenderBundleBase*> renderBundles;
 };
 
+// Returns true if command was handled.
+bool CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& commands, Command type);
+
 // Captures shared commands from both render passes and render bundles
 MaybeError CaptureRenderCommand(CaptureContext& captureContext,
                                 CommandIterator& commands,

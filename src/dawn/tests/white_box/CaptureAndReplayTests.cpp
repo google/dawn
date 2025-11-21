@@ -1714,6 +1714,43 @@ TEST_P(CaptureAndReplayTests, CaptureRenderBundleBasic) {
     ExpectTextureEQ(replay.get(), "dstTexture", {1}, expected);
 }
 
+// Test debug commands don't fail.
+TEST_P(CaptureAndReplayTests, PushPopInsertDebug) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4, 4);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.PushDebugGroup("Event Start");
+    encoder.InsertDebugMarker("Marker");
+    encoder.PopDebugGroup();
+    {
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.PushDebugGroup("Event Start");
+        pass.InsertDebugMarker("Marker");
+        pass.PopDebugGroup();
+        pass.End();
+    }
+    {
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.PushDebugGroup("Event Start");
+        pass.InsertDebugMarker("Marker");
+        pass.PopDebugGroup();
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    // --- capture ---
+    auto recorder = Recorder::CreateAndStart(device);
+
+    queue.Submit(1, &commands);
+
+    // --- replay ---
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    // just expect no errors.
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

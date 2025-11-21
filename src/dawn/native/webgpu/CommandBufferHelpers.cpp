@@ -40,6 +40,43 @@
 
 namespace dawn::native::webgpu {
 
+// Returns true if command was handled
+bool CaptureDebugCommand(CaptureContext& captureContext, CommandIterator& commands, Command type) {
+    switch (type) {
+        case Command::PushDebugGroup: {
+            const auto& cmd = *commands.NextCommand<PushDebugGroupCmd>();
+            const char* label = commands.NextData<char>(cmd.length + 1);
+            schema::CommandBufferCommandPushDebugGroupCmd data{{
+                .data = {{
+                    .groupLabel = label,
+                }},
+            }};
+            Serialize(captureContext, data);
+            break;
+        }
+        case Command::PopDebugGroup: {
+            commands.NextCommand<PopDebugGroupCmd>();
+            Serialize(captureContext, schema::CommandBufferCommand::PopDebugGroup);
+            break;
+        }
+        case Command::InsertDebugMarker: {
+            const auto& cmd = *commands.NextCommand<InsertDebugMarkerCmd>();
+            const char* label = commands.NextData<char>(cmd.length + 1);
+            schema::CommandBufferCommandInsertDebugMarkerCmd data{{
+                .data = {{
+                    .markerLabel = label,
+                }},
+            }};
+            Serialize(captureContext, data);
+            break;
+        }
+        default: {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Captures commands common to a render pass and a render bundle
 MaybeError CaptureRenderCommand(CaptureContext& captureContext,
                                 CommandIterator& commands,
@@ -97,20 +134,16 @@ MaybeError CaptureRenderCommand(CaptureContext& captureContext,
             Serialize(captureContext, data);
             break;
         }
-        default:
-            return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
+        default: {
+            if (!CaptureDebugCommand(captureContext, commands, type)) {
+                return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
+            }
+            break;
+        }
     }
 
     return {};
 }
-
-// Commands are encoded with a command id followed by command-specific data.
-// so we're required to read each command to skip over them.
-#define DAWN_SKIP_COMMAND(cmdName)            \
-    case Command::cmdName: {                  \
-        commands.NextCommand<cmdName##Cmd>(); \
-        break;                                \
-    }
 
 // Gathers resources used by commands from both render passes and render bundles.
 MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureContext,
@@ -128,22 +161,23 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
             usedResources.bindGroups.push_back(cmd->group.Get());
             break;
         }
-            DAWN_SKIP_COMMAND(BeginOcclusionQuery)
-            DAWN_SKIP_COMMAND(EndOcclusionQuery)
-            DAWN_SKIP_COMMAND(Draw)
-            DAWN_SKIP_COMMAND(DrawIndexed)
-            DAWN_SKIP_COMMAND(DrawIndirect)
-            DAWN_SKIP_COMMAND(DrawIndexedIndirect)
-            DAWN_SKIP_COMMAND(InsertDebugMarker)
-            DAWN_SKIP_COMMAND(PopDebugGroup)
-            DAWN_SKIP_COMMAND(PushDebugGroup)
-            DAWN_SKIP_COMMAND(WriteTimestamp)
-            DAWN_SKIP_COMMAND(SetImmediates)
-            DAWN_SKIP_COMMAND(SetIndexBuffer)
-            DAWN_SKIP_COMMAND(SetVertexBuffer)
-        default: {
+        case Command::BeginOcclusionQuery:
+        case Command::EndOcclusionQuery:
+        case Command::Draw:
+        case Command::DrawIndexed:
+        case Command::DrawIndirect:
+        case Command::DrawIndexedIndirect:
+        case Command::WriteTimestamp:
+        case Command::SetImmediates:
+        case Command::SetIndexBuffer:
+        case Command::SetVertexBuffer:
+        case Command::PushDebugGroup:
+        case Command::InsertDebugMarker:
+        case Command::PopDebugGroup:
+            SkipCommand(&commands, type);
+            break;
+        default:
             return DAWN_UNIMPLEMENTED_ERROR("Unimplemented command");
-        }
     }
     return {};
 }

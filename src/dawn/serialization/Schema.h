@@ -560,6 +560,16 @@ DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(Dispatch, DISPATCH_CMD_DATA_MEM
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(SetRenderPipeline,
                                                  SET_RENDER_PIPELINE_CMD_DATA_MEMBER){};
 
+#define PUSH_DEBUG_GROUP_CMD_DATA_MEMBER(X) X(std::string, groupLabel)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(PushDebugGroup,
+                                                 PUSH_DEBUG_GROUP_CMD_DATA_MEMBER){};
+
+#define INSERT_DEBUG_MARKER_CMD_DATA_MEMBER(X) X(std::string, markerLabel)
+
+DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(InsertDebugMarker,
+                                                 INSERT_DEBUG_MARKER_CMD_DATA_MEMBER){};
+
 #define BEGIN_OCCLUSION_QUERY_CMD_DATA_MEMBER(X) X(uint32_t, queryIndex)
 
 DAWN_REPLAY_MAKE_COMMAND_BUFFER_CMD_AND_CMD_DATA(BeginOcclusionQuery,
