@@ -98,7 +98,9 @@ MaybeError ComputePipeline::InitializeImpl() {
     // This is required to ensure SubgroupSize is reported as the actual size of the subgroups
     // (even if some invocations may be disabled), and that the subgroup size will be uniform
     // across the entire dispatch. This becomes unnecessary with SPIR-V 1.6.
-    createInfo.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT;
+    if (!device->IsToggleEnabled(Toggle::VulkanDisallowVaryingSubgroupSize)) {
+        createInfo.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT;
+    }
 
     // If the shader stage uses subgroup matrix types, we need to enable full subgroups to guarantee
     // that all shader invocations are active. This becomes unnecessary with SPIR-V 1.6.
