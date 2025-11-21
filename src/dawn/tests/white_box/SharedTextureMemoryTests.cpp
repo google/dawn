@@ -2270,6 +2270,10 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
+    // TODO(crbug.com/462477486): Catches a mutex issue when run with
+    // TSAN/Vulkan/SwiftShader.
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsTsan() && IsVulkan() && IsSwiftshader());
+
     auto DoTest = [&](auto DestroyOrLoseDevice) {
         std::vector<wgpu::Device> devices = {CreateDevice(), CreateDevice()};
         auto perDeviceMemories =
