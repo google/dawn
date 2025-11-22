@@ -1953,6 +1953,7 @@
       }
     ]
   },
+  "dawn-mac-x64-amd-555x-rel": {},
   "dawn-mac-x64-builder-dbg": {
     "additional_compile_targets": [
       "default"
