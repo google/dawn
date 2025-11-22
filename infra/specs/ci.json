@@ -22,6 +22,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -47,6 +48,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -78,6 +80,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -103,6 +106,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -137,6 +141,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -166,6 +171,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -194,6 +200,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -223,6 +230,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -252,6 +260,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -280,6 +289,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -312,6 +322,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -342,6 +353,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -371,6 +383,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -401,6 +414,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -431,6 +445,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -460,6 +475,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -493,6 +509,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -522,6 +539,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -550,6 +568,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -579,6 +598,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -608,6 +628,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -636,6 +657,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -673,6 +695,7 @@
           ],
           "script": "//scripts/merge_scripts/generate_wire_trace_fuzz_corpora.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_wire_trace_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -706,6 +729,7 @@
           ],
           "script": "//scripts/merge_scripts/generate_wire_trace_fuzz_corpora.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_trace_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -740,6 +764,7 @@
           ],
           "script": "//scripts/merge_scripts/generate_tint_fuzz_corpora.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_ir_fuzzer_corpus_generate_tests",
         "resultdb": {
           "result_format": "single"
@@ -771,6 +796,7 @@
           ],
           "script": "//scripts/merge_scripts/generate_tint_fuzz_corpora.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_wgsl_fuzzer_corpus_generate_tests",
         "resultdb": {
           "result_format": "single"
@@ -801,6 +827,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -826,6 +853,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -848,6 +876,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -872,6 +901,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -893,6 +923,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -923,6 +954,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_sws_cts",
         "resultdb": {
           "result_format": "single"
@@ -944,6 +976,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -974,6 +1007,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -999,6 +1033,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1021,6 +1056,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1045,6 +1081,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1066,6 +1103,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1096,6 +1134,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_sws_cts",
         "resultdb": {
           "result_format": "single"
@@ -1117,6 +1156,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -1157,6 +1197,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -1182,6 +1223,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -1213,6 +1255,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_ir_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -1238,6 +1281,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:fuzzer_corpus_tests",
         "name": "tint_wgsl_fuzzer_corpus_check_tests",
         "resultdb": {
           "result_format": "single"
@@ -1269,6 +1313,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1294,6 +1339,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1316,6 +1362,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1340,6 +1387,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1361,6 +1409,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1391,6 +1440,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1416,6 +1466,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1438,6 +1489,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1462,6 +1514,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1483,6 +1536,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1515,6 +1569,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1547,6 +1602,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1578,6 +1634,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1610,6 +1667,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1642,6 +1700,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1673,6 +1732,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1713,6 +1773,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1744,6 +1805,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1774,6 +1836,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1805,6 +1868,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1836,6 +1900,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1866,6 +1931,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1910,6 +1976,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1939,6 +2006,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1967,6 +2035,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -1996,6 +2065,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2025,6 +2095,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2053,6 +2124,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2083,6 +2155,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2108,6 +2181,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2130,6 +2204,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2154,6 +2229,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2175,6 +2251,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2205,6 +2282,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_sws_cts",
         "resultdb": {
           "result_format": "single"
@@ -2226,6 +2304,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -2256,6 +2335,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2281,6 +2361,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2303,6 +2384,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2327,6 +2409,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2348,6 +2431,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2378,6 +2462,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_sws_cts",
         "resultdb": {
           "result_format": "single"
@@ -2399,6 +2484,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -2463,6 +2549,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2493,6 +2580,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2523,6 +2611,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2552,6 +2641,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2582,6 +2672,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2612,6 +2703,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2640,6 +2732,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2673,6 +2766,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2703,6 +2797,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2734,6 +2829,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2764,6 +2860,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2793,6 +2890,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2823,6 +2921,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2853,6 +2952,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2881,6 +2981,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2915,6 +3016,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2945,6 +3047,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -2975,6 +3078,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3004,6 +3108,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3034,6 +3139,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3064,6 +3170,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3092,6 +3199,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3125,6 +3233,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3155,6 +3264,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3186,6 +3296,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3216,6 +3327,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3245,6 +3357,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3275,6 +3388,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3305,6 +3419,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3333,6 +3448,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3363,6 +3479,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3388,6 +3505,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3413,6 +3531,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3435,6 +3554,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3459,6 +3579,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3480,6 +3601,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3510,6 +3632,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
@@ -3531,6 +3654,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -3561,6 +3685,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3586,6 +3711,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3611,6 +3737,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3633,6 +3760,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3657,6 +3785,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3678,6 +3807,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3708,6 +3838,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
@@ -3729,6 +3860,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -3759,6 +3891,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3784,6 +3917,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3809,6 +3943,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3831,6 +3966,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3855,6 +3991,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3876,6 +4013,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3906,6 +4044,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
@@ -3927,6 +4066,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -3957,6 +4097,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -3982,6 +4123,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4007,6 +4149,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4029,6 +4172,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4053,6 +4197,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4074,6 +4219,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4104,6 +4250,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//scripts/dawn_node_cts:dawn_node_cts",
         "name": "dawn_node_software_d3d12_cts",
         "resultdb": {
           "result_format": "single"
@@ -4125,6 +4272,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint:benchmarks",
         "name": "tint_benchmark",
         "resultdb": {
           "result_format": "single"
@@ -4168,6 +4316,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4198,6 +4347,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4229,6 +4379,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4259,6 +4410,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4288,6 +4440,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4318,6 +4471,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4348,6 +4502,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4376,6 +4531,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4409,6 +4565,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_implicit_sync_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4439,6 +4596,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4470,6 +4628,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_no_dxc_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4500,6 +4659,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_skip_validation_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4529,6 +4689,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4559,6 +4720,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_validation_layers_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4589,6 +4751,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_wire_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4617,6 +4780,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_perf_tests",
         "name": "dawn_perf_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4647,6 +4811,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4672,6 +4837,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4697,6 +4863,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4719,6 +4886,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4743,6 +4911,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4764,6 +4933,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4794,6 +4964,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_swangle_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4819,6 +4990,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_sws_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4844,6 +5016,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_end2end_tests",
         "name": "dawn_end2end_warp_tests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4866,6 +5039,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4890,6 +5064,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/dawn/tests:dawn_unittests",
         "name": "dawn_wire_unittests",
         "resultdb": {
           "result_format": "gtest_json"
@@ -4911,6 +5086,7 @@
         "merge": {
           "script": "//scripts/merge_scripts/true_noop_merge.py"
         },
+        "module_name": "//src/tint/cmd/test:tint_unittests",
         "name": "tint_unittests",
         "resultdb": {
           "result_format": "gtest_json"
