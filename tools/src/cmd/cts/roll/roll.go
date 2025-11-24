@@ -906,6 +906,9 @@ func (r *roller) genWebTestSources(ctx context.Context, fsReader oswrapper.Files
 
 			// Find the index after the starting html tag.
 			i := strings.Index(contents, "<html")
+			if i < 0 {
+				return fmt.Errorf("Unable to find starting HTML tag in %s", path)
+			}
 			i = i + strings.Index(contents[i:], ">")
 			i = i + 1
 

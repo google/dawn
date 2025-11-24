@@ -204,17 +204,19 @@ Change-Id: I4aa059c6c183e622975b74dbdfdfe0b12341ae15
 }
 
 func TestRoller_GenResourceFilesList_NonExistentDirectory(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	r := roller{
 		ctsDir: "/non_existent",
 	}
 
 	_, err := r.genResourceFilesList(context.Background(), wrapper)
-	require.ErrorContains(t, err, "open /non_existent/src/resources: file does not exist")
+	// TODO(crbug.com/436025865): Add a leading / when FSTestOSWrapper properly
+	// reports absolute paths in errors.
+	require.ErrorContains(t, err, "open non_existent/src/resources: file does not exist")
 }
 
 func TestRoller_GenResourceFilesList_Success(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	err := wrapper.MkdirAll("/root/src/resources/subdir_1", 0o700)
 	require.NoErrorf(t, err, "Error creating directory: %v", err)
 	err = wrapper.MkdirAll("/root/src/resources/subdir_2", 0o700)
@@ -243,21 +245,18 @@ subdir_2/file_1.txt
 }
 
 func TestRoller_GenWebTestSources_NonExistentDirectory(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	r := roller{
 		ctsDir: "/non_existent",
 	}
 
 	_, err := r.genWebTestSources(context.Background(), wrapper)
-	require.ErrorContains(t, err, "open /non_existent/src/webgpu: file does not exist")
+	// TODO(crbug.com/436025865): Add a leading / when FSTestOSWrapper properly
+	// reports absolute paths in errors.
+	require.ErrorContains(t, err, "open non_existent/src/webgpu: file does not exist")
 }
 
-func TestRoller_GenWebTestSources_Success(t *testing.T) {
-	htmlContent := `<!-- Comment -->
-<html name=foo>
-</html>`
-
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+func _setupGenWebTestSourcesFilesystem(wrapper oswrapper.FSTestOSWrapper, htmlContent string, t *testing.T) {
 	directories := []string{"subdir_1", "subdir_2"}
 	files := []string{"file_1.html", "file_2.txt", "file_3.html"}
 	for _, directory := range directories {
@@ -268,9 +267,31 @@ func TestRoller_GenWebTestSources_Success(t *testing.T) {
 			f, err := wrapper.Create(fmt.Sprintf("%s/%s", directory_path, filename))
 			require.NoErrorf(t, err, "Error creating file: %v", err)
 			defer f.Close()
-			f.Write([]byte(htmlContent))
+			_, err = f.Write([]byte(htmlContent))
+			require.NoErrorf(t, err, "Error writing to file: %v", err)
 		}
 	}
+}
+
+func TestRoller_GenWebTestSources_MissingHtmlContent(t *testing.T) {
+	htmlContent := ""
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	_setupGenWebTestSourcesFilesystem(wrapper, htmlContent, t)
+
+	r := roller{
+		ctsDir: "/root",
+	}
+	_, err := r.genWebTestSources(context.Background(), wrapper)
+	require.ErrorContains(t, err, "Unable to find starting HTML tag")
+}
+
+func TestRoller_GenWebTestSources_Success(t *testing.T) {
+	htmlContent := `<!-- Comment -->
+<html name=foo>
+</html>`
+
+	wrapper := oswrapper.CreateFSTestOSWrapper()
+	_setupGenWebTestSourcesFilesystem(wrapper, htmlContent, t)
 
 	r := roller{
 		ctsDir: "/root",
