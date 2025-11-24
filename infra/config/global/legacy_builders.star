@@ -331,92 +331,6 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
             builder = "dawn:try/" + name,
         )
 
-def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False, disable_reuse = False):
-    for milestone, details in ACTIVE_MILESTONES.items():
-        if os not in details.platforms:
-            continue
-        if min_milestone != None and int(milestone[1:]) < min_milestone:
-            continue
-        luci.cq_tryjob_verifier(
-            cq_group = "Dawn-CQ-" + milestone,
-            builder = "{}:try/{}".format(details.chromium_project, builder_name),
-            includable_only = includable_only,
-            disable_reuse = disable_reuse,
-        )
-
-# We use the DEPS version for branches because ToT builders do not make sense on
-# branches and the DEPS versions already exist.
-_os_arch_to_branch_builder = {
-    "android-arm": "dawn-android-arm-deps-rel",
-    "android-arm64": "dawn-android-arm64-deps-rel",
-    "linux": "dawn-linux-x64-deps-rel",
-    "mac": "dawn-mac-x64-deps-rel",
-    "mac-arm64": "dawn-mac-arm64-deps-rel",
-    "win": "dawn-win10-x64-deps-rel",
-    "win-arm64": "dawn-win11-arm64-deps-rel",
-}
-
-_os_arch_to_dawn_cq_builder = {
-    "android-arm": "android-dawn-arm-rel",
-    "android-arm64": "android-dawn-arm64-rel",
-    "linux": "linux-dawn-rel",
-    "mac": "mac-dawn-rel",
-    "mac-arm64": "mac-arm64-dawn-rel",
-    "win": "win-dawn-rel",
-    "win-arm64": "win11-arm64-dawn-rel",
-}
-
-# The earliest milestone that the builder is relevant for
-_os_arch_to_min_milestone = {
-    "android-arm": None,
-    "android-arm64": None,
-    "linux": 112,
-    "mac": 112,
-    "mac-arm64": 122,
-    "win": 112,
-    "win-arm64": 126,
-}
-
-def chromium_dawn_tryjob(os, arch = None):
-    """Adds a tryjob that tests against Chromium
-
-    Args:
-      os: string for the OS, should be one or linux|mac|win
-      arch: string for the arch, or None
-    """
-
-    if arch:
-        luci.cq_tryjob_verifier(
-            cq_group = "Dawn-CQ",
-            builder = "chromium:try/{builder}".format(builder =
-                                                          _os_arch_to_dawn_cq_builder["{os}-{arch}".format(os = os, arch = arch)]),
-            location_filters = [
-                cq.location_filter(path_regexp = ".*"),
-                cq.location_filter(
-                    path_regexp = "\\.github/.+",
-                    exclude = True,
-                ),
-            ],
-        )
-        _add_branch_verifiers(
-            _os_arch_to_branch_builder["{os}-{arch}".format(os = os, arch = arch)],
-            os,
-            _os_arch_to_min_milestone["{os}-{arch}".format(os = os, arch = arch)],
-        )
-    else:
-        luci.cq_tryjob_verifier(
-            cq_group = "Dawn-CQ",
-            builder = "chromium:try/{}-dawn-rel".format(os),
-            location_filters = [
-                cq.location_filter(path_regexp = ".*"),
-                cq.location_filter(
-                    path_regexp = "\\.github/.+",
-                    exclude = True,
-                ),
-            ],
-        )
-        _add_branch_verifiers(_os_arch_to_branch_builder[os], os)
-
 def clang_tidy_dawn_tryjob():
     """Adds a tryjob that runs clang tidy on new patchset upload."""
     luci.cq_tryjob_verifier(
@@ -535,24 +449,7 @@ dawn_cmake_standalone_builder("cmake-mac-rel", clang = True, debug = False, cpu 
 dawn_cmake_standalone_builder("cmake-win-msvc-dbg-x64", clang = False, debug = True, cpu = "x64", asan = False, ubsan = False)
 dawn_cmake_standalone_builder("cmake-win-msvc-rel-x64", clang = False, debug = False, cpu = "x64", asan = False, ubsan = False)
 
-chromium_dawn_tryjob("linux")
-chromium_dawn_tryjob("mac")
-chromium_dawn_tryjob("mac", "arm64")
-chromium_dawn_tryjob("win")
-chromium_dawn_tryjob("win", "arm64")
-chromium_dawn_tryjob("android", "arm")
-chromium_dawn_tryjob("android", "arm64")
-
 clang_tidy_dawn_tryjob()
-
-# This is separate from the "presubmit" builder since we need branch-specific
-# branch builders unlike stock presubmit.
-luci.cq_tryjob_verifier(
-    cq_group = "Dawn-CQ",
-    builder = "chromium:try/dawn-chromium-presubmit",
-    disable_reuse = True,
-)
-_add_branch_verifiers("dawn-chromium-presubmit", "linux", min_milestone = 130, disable_reuse = True)
 
 # CQ
 
