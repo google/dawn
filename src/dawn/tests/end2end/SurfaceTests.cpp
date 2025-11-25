@@ -324,6 +324,10 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // crbug.com/358166481
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
+    // TODO(crbug.com/463614521): Flakily causes a device loss on Snapdragon X
+    // Elite SoCs which causes all subsequent tests to fail.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D12());
+
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Fifo,

@@ -410,6 +410,9 @@ TEST_P(D3D12DescriptorHeapTests, GrowHeapsInPendingSubmit) {
 // once no longer pending.
 // Switches over many times until |kNumOfPooledHeaps| heaps are pool-allocated.
 TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
+    // TODO(crbug.com/463661448): Flaky on Snapdragon X Elite SoCs.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
+
     auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};

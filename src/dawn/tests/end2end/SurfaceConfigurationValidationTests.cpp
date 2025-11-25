@@ -191,6 +191,9 @@ TEST_P(SurfaceConfigurationValidationTests, AnyCombinationOfCapabilities) {
     // builders but not locally. This is a similar limitation to SurfaceTests.SwitchPresentMode.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
+    // TODO(crbug.com/463551855): Flaky on Snapdragon X Elite SoCs.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
+
     wgpu::Surface surface = CreateTestSurface();
 
     wgpu::SurfaceConfiguration config = baseConfig;

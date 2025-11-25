@@ -491,6 +491,9 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
                                format == wgpu::TextureFormat::RGBA16Float ||
                                format == wgpu::TextureFormat::RG11B10Ufloat) &&
                               (IsD3D11() || IsOpenGLES()) && IsIntelGen12());
+
+        // TODO(crbug.com/463661449): Flaky on Snapdragon X Elite SoCs w/ D3D11.
+        DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
     }
 
     void DoTest(
