@@ -29,8 +29,10 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
@@ -52,18 +54,19 @@ class UniformityAnalysisTestBase {
     /// Build and resolve a program from a ProgramBuilder object.
     /// @param program the program
     /// @param should_pass true if `builder` program should pass the analysis, otherwise false
-    void RunTest(Program&& program, bool should_pass) {
+    /// @param src the shader source, if non-empty.
+    void RunTest(Program&& program, bool should_pass, std::string src = "") {
         error_ = program.Diagnostics().Str();
 
         bool valid = program.IsValid();
         if (should_pass) {
-            EXPECT_TRUE(valid) << error_;
+            EXPECT_TRUE(valid) << error_ << "\n" << src;
             EXPECT_FALSE(program.Diagnostics().ContainsErrors());
         } else {
             if (kUniformityFailuresAsError) {
-                EXPECT_FALSE(valid);
+                EXPECT_FALSE(valid) << "\n" << src;
             } else {
-                EXPECT_TRUE(valid) << error_;
+                EXPECT_TRUE(valid) << error_ << "\n" << src;
             }
         }
     }
@@ -76,7 +79,7 @@ class UniformityAnalysisTestBase {
         options.allowed_features = wgsl::AllowedFeatures::Everything();
         auto file = std::make_unique<Source::File>("test", src);
         auto program = wgsl::reader::Parse(file.get(), options);
-        return RunTest(std::move(program), should_pass);
+        return RunTest(std::move(program), should_pass, src);
     }
 
     /// Build and resolve a program from a ProgramBuilder object.
@@ -3481,6 +3484,521 @@ fn foo() {
     RunTest(src, true);
 }
 
+// We need to enumerate the potential uniformity graphs, as defined
+// in the WGSL spec. Some edges always exist, and sometimes they exist
+// only if the behaviour of the loop body has certain behaviours.
+//
+// To test analysis of loops, we place code fragments in various key spots to:
+//  - attack: generate non-uniform control flow (or not)
+//  - detect: potentially observe non-uniform control flow (or not)
+//  - a uniformity error should result if and only if there is a path
+//    in the uniformity graph from the detector to the attacker.
+//
+// Define labels A, B, C, D for locations of statements:
+//   A: before the loop
+//   B: in the loop body
+//   C: in the continuing statement
+//   D: after the loop
+//
+// Without loss of generality, the attacker must occur dynamically before the
+// detector.  We avoid generating cases that are covered by uniformity tests
+// for straight-line code, and therefore avoid:
+//  - when A is both attacker and detector
+//  - when D is both attacker and detector
+//  - when the attacker appears before the detector in B or C
+//
+//  The scenarios are as enumerated as pairs (attacker,detector) as follows:
+//   loop without continuing block:
+//    (A,B)  (A,D)
+//    (B,B)  (B,D)
+//
+//   loop with continuing block:
+//    (A,B)  (A,C)  (A,D)
+//    (B,B)  (B,C)  (B,D)
+//    (C,B)  (C,C)  (C,D)
+//
+//  Note: The cases (B,B), (C,B), (C,C) transmit non-uniformity via
+//    the loop backedge.
+//
+// The detecting code fragment is always a call to workgroupBarrier().
+// The attacking code fragment changes depending on where it is:
+//  A:   if nonuniform_condition { return; }
+//  B:   if nonuniform_condition { break; }
+//  C:   break if nonuniform-condition;
+//
+//
+// The attacker code fragment
+//
+// Nodes in the uniformity graph are:
+//   CF: node before the loop
+//   CF': node at the top of the loop body
+//   CF1: node after statements in the body
+//   CF2: node after statements in the continuing block
+//   CFResult: resulting control flow node, after the loop.
+//     Not named directly in the spec, but identified with the
+//     node listed as the "resulting node" in the spec.
+//
+// Schematically the loops take these forms:
+//
+//  without continuing block:
+//    // A
+//    // CF
+//    loop {
+//         // CF'
+//      s1 // B
+//         // CF1
+//    }
+//    // D
+//    // CFResult
+//
+//
+//  with continuing block:
+//    // A
+//    // CF
+//    loop {
+//         // CF'
+//      s1 // B
+//         // CF1
+//      continuing {
+//        s2 // C
+//           // CF2
+//    }
+//    // D
+//    // CFResult
+//
+//
+// The potential graphs including conditional edges are:
+//
+//  without continuing block:
+//
+//                   ?
+//               +------------+
+//               |            v
+//    CF  <---  CF' <- s1 <- CF1
+//    ^                       ^
+//    |?                      |
+//    CFResult ---------------+
+//                   ?
+//
+//    CF' -> CF1 if Next or Continue in s1's behaviour.
+//
+//    CFResult -> CF1 if Return in s1's behaviour
+//            else CFResult -> CF
+//
+//
+//  with continuing block:
+//
+//   when behaviour of s1={Break}
+//
+//    CF <- s1 <- CF1
+//    ^
+//    |
+//    CFResult
+//
+//   when behaviour of s1={Return} or {Break,Return}
+//
+//    CF <- s1 <- CF1
+//                 ^
+//                 |
+//    CFResult ----+
+//
+//   else, i.e. behaviour of s1 includes Next or Continue
+//                       ?
+//               +------------------------+
+//               |                        v
+//    CF  <---  CF' <- s1 <- CF1 <- s2 <-cF2
+//    ^          ^
+//    |?         |?
+//    CFResult --+
+//
+//
+//    CF' -> CF2 if Next or Continue in s1's behaviour.
+//
+//    CFResult -> CF' if Return in s1's behaviour
+//            else CFResult -> CF
+//
+// We'll use a concise representation of each tested scenario.
+// A scenario is represented by a positional sequence of strings,
+// representing the roles of A, B, C, D.
+//
+//  Attacker notation:
+//    #   attacker
+//
+//  Detector notation:
+//    _   detector
+//
+//  When a code node both attacks and detects, the detector always comes first.
+//  That's because the non-loop tests already check for the cases where the
+//  detector obviously follows the attacker.
+//
+//  Behaviour notation:
+//    includes 'b!':  has unconditional break
+//    includes 'b=':  has uniform break
+//    includes 'bx':  has non-uniform break
+//    includes 'r!':  has unconditional return
+//    includes 'r=':  has uniform return
+//    includes 'rx':  has non-uniform return
+//    includes 'c!':  has unconditional continue
+//    includes 'c=':  has uniform continue
+//    includes 'cx':  has non-uniform continue
+//  The Next behaviours are covered by combinations of the above.
+//  For example:
+//    if the full behaviour is "b=" then that implies a uniform Next.
+//    if the full behaviour is "b=r!" then then Next is not in the behaviour.
+
+enum Verdict {
+    // The shader is valid, and always passes uniformity analysis.
+    kAccept,
+    // The shader is valid any time the attacker is present.
+    kAcceptLoopExitFromAttack,
+    // The shader is valid but only when the attacker is present, and
+    // the detector is absent.
+    kAcceptLoopExitFromAttackWithoutDetect,
+    // The shader is rejected by uniformity analysis.
+    kReject,
+    // The shader is rejected for reasons other than uniformity failure,
+    // e.g. because of an infinite loop.
+    kRejectForOtherReasons,
+};
+
+enum class Part {
+    kBefore,
+    kBody,
+    kContinuing,
+    kAfter,
+};
+
+// Encodes the role for a code fragment in the test scenario.
+struct Role {
+    Role(Part part_, std::string r) : part(part_), role(r) {
+        // The following integrity checks are checked during the behave() method.
+        //  -  at most one !
+        //  -  ! occurs after uniform and non-uniform interruptions
+    }
+
+    // Returns a WGSL fragment that behaves according to the specified part
+    // and role, and according to whether to enable the attack (if any) or
+    // the detection mechanism (if any).
+    std::string behave(bool enable_attack, bool enable_detect) const {
+        int num_unconditional = 0;
+        std::string_view remaining = role.data();
+        std::ostringstream ss;
+        while (!remaining.empty()) {
+            switch (part) {
+                case Part::kBody:
+                    ss << "    ";
+                    break;
+                case Part::kContinuing:
+                    ss << "      ";
+                    break;
+                default:
+                    ss << "  ";
+                    break;
+            }
+            if (remaining.starts_with("_")) {
+                remaining.remove_prefix(1);
+                if (enable_detect) {
+                    ss << "workgroupBarrier();\n";
+                } else {
+                    ss << "/*disabled detect*/;\n";
+                }
+                continue;
+            }
+            if (remaining.starts_with("#")) {
+                remaining.remove_prefix(1);
+                if (enable_attack) {
+                    switch (part) {
+                        case Part::kBefore:
+                            ss << "if nonuniform_cond { return; }\n";
+                            break;
+                        case Part::kBody:
+                            ss << "if nonuniform_cond { break; }\n";
+                            break;
+                        case Part::kContinuing:
+                            ss << "break if nonuniform_cond;\n";
+                            break;
+                        case Part::kAfter:
+                            TINT_ICE() << "Don't test an attacker placed after the loop";
+                    }
+                } else {
+                    ss << "/*disabled attack*/\n";
+                }
+                continue;
+            }
+            if (remaining.starts_with("b!")) {
+                remaining.remove_prefix(2);
+                ss << "break;\n";
+                TINT_ASSERT(num_unconditional == 0) << "b! must not follow !";
+                num_unconditional++;
+                continue;
+            }
+            if (remaining.starts_with("r!")) {
+                remaining.remove_prefix(2);
+                ss << "return;\n";
+                TINT_ASSERT(num_unconditional == 0) << "r! must not follow !";
+                num_unconditional++;
+                continue;
+            }
+            if (remaining.starts_with("c!")) {
+                remaining.remove_prefix(2);
+                ss << "continue;\n";
+                TINT_ASSERT(num_unconditional == 0) << "c! must not follow !";
+                num_unconditional++;
+                continue;
+            }
+            if (remaining.starts_with("b=")) {
+                remaining.remove_prefix(2);
+                ss << "if uniform_cond { break; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "b= must not follow !";
+                continue;
+            }
+            if (remaining.starts_with("bx")) {
+                remaining.remove_prefix(2);
+                ss << "if nonuniform_cond { break; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "bx must not follow !";
+                continue;
+            }
+            if (remaining.starts_with("r=")) {
+                remaining.remove_prefix(2);
+                ss << "if uniform_cond { return; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "r= must not follow !";
+                continue;
+            }
+            if (remaining.starts_with("rx")) {
+                remaining.remove_prefix(2);
+                ss << "if nonuniform_cond { return; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "rx must not follow !";
+                continue;
+            }
+            if (remaining.starts_with("c=")) {
+                remaining.remove_prefix(2);
+                ss << "if uniform_cond { continue; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "c= must not follow !";
+                continue;
+            }
+            if (remaining.starts_with("cx")) {
+                remaining.remove_prefix(2);
+                ss << "if nonuniform_cond { continue; }\n";
+                TINT_ASSERT(num_unconditional == 0) << "cx must not follow !";
+                continue;
+            }
+            TINT_ICE() << "invalid token " << remaining << "; in role spec " << role;
+        }
+        return ss.str();
+    }
+    const Part part;
+    const std::string role = "";
+};
+
+struct LoopGraphCase {
+    LoopGraphCase(std::string before_spec,
+                  std::string body_spec,
+                  std::string continuing_spec,
+                  std::string after_spec,
+                  Verdict verdict_)
+        : before(Part::kBefore, before_spec),
+          body(Part::kBody, body_spec),
+          continuing(Part::kContinuing, continuing_spec),
+          after(Part::kAfter, after_spec),
+          verdict(verdict_) {}
+
+    std::string Shader(bool enable_attack, bool enable_detect) const {
+        std::ostringstream ss;
+        ss << "// \"" << before.role << "\", \"" << body.role << "\", \"" << continuing.role
+           << "\", \"" << after.role << "\"\n";
+        ss << R"(@compute @workgroup_size(8)
+fn main(@builtin(local_invocation_index) nonuniform_var: u32, @builtin(num_workgroups) nw: vec3u) {
+  let uniform_cond = 42 == nw.x;
+  let nonuniform_cond = 42 == nonuniform_var;
+)";
+        ss << before.behave(enable_attack, enable_detect);
+        ss << "  loop {\n";
+        ss << body.behave(enable_attack, enable_detect);
+        if (!continuing.role.empty()) {
+            ss << "    continuing {\n";
+            ss << continuing.behave(enable_attack, enable_detect);
+            ss << "    }\n";
+        }
+        ss << "  }\n";
+        ss << after.behave(enable_attack, enable_detect);
+        ss << "}\n";
+        return ss.str();
+    }
+
+    const Role before;
+    const Role body;
+    const Role continuing;
+    const Role after;
+    const Verdict verdict;
+};
+
+std::vector<LoopGraphCase> LoopGraphCases() {
+    auto L = [](std::string a, std::string b, std::string c, Verdict v) -> LoopGraphCase {
+        return LoopGraphCase(a, b, "", c, v);
+    };
+
+    return std::vector<LoopGraphCase>{
+        // clang-format off
+        // Loop without continue:
+
+        // Scenario (A,B), i.e. A attacks, B detects
+        // Tests CF <- CF'
+        L("#", "_b!", "", kReject),
+        L("#", "_b=", "", kReject),
+        L("#", "_bx", "", kReject),
+        L("#", "_r!", "", kReject),
+        L("#", "_r=", "", kReject),
+        L("#", "_rx", "", kReject),
+        L("#", "_b=c!", "", kReject),  // add some continues
+        L("#", "_b=c=", "", kReject),
+        L("#", "_b=cx", "", kReject),
+        L("#", "_r=c!", "", kReject),
+        L("#", "_r=c=", "", kReject),
+        L("#", "_r=cx", "", kReject),
+
+        // Scenario (A,D)
+        //   Return not in s1 behaviour
+        //   By infinite loop rule, Break must be in s1's behavior.
+        //     Tests CF <- CFResult
+        L("#", "", "_", kRejectForOtherReasons),  // infinite loop
+        L("#", "b=", "_", kReject),
+        L("#", "bx", "_", kReject),
+        L("#", "b!", "_", kReject),
+        L("#", "b=c!", "_", kReject),
+        L("#", "b=c=", "_", kReject),
+        L("#", "b=cx", "_", kReject),
+        L("#", "bxc!", "_", kReject),
+        L("#", "bxc=", "_", kReject),
+        L("#", "bxcx", "_", kReject),
+        //   Return is in s1's behavior
+        //     Break is also in s1's behavior
+        //     The detector is only reached when Break is in s1's behavior.
+        //     Tests CF <- CF1 <- CFResult
+        L("#", "b=r!", "_", kReject),
+        L("#", "b=r=", "_", kReject),
+        L("#", "b=rx", "_", kReject),
+        L("#", "bxr!", "_", kReject),
+        L("#", "bxr=", "_", kReject),
+        L("#", "bxrx", "_", kReject),
+        //   Return is in s1's behavior
+        //     Break is not in s1's behavior.
+        //     Therefore the behaviour of the whole loop is {Return}
+        //     Therefore by the recursive analysis rule for "s1 s2",
+        //     there are no downstream connections in the graph.
+        //     Any code after the loop can't be tainted.
+        L("#", "r!", "_", kAccept),
+        L("#", "r=", "_", kAccept),
+        L("#", "rx", "_", kAccept),
+        L("#", "c=r!", "_", kAccept),
+        L("#", "c=r=", "_", kAccept),
+        L("#", "c=rx", "_", kAccept),
+        L("#", "cxr!", "_", kAccept),
+        L("#", "cxr=", "_", kAccept),
+        L("#", "cxrx", "_", kAccept),
+
+        // Scenario (B,B).  Recall: Only check via the backage.
+        // Backedge exists if and only if Next or Continue in s1's behaviour.
+        // Test s1 <- CF1 <- CF' <- s1
+        L("", "_#", "", kAcceptLoopExitFromAttackWithoutDetect),
+        L("", "_#b=", "", kReject),
+        L("", "_#bx", "", kReject),
+        L("", "_#b!", "", kAccept),  // no backedge
+        L("", "_#c=", "", kAcceptLoopExitFromAttackWithoutDetect),
+        L("", "_#cx", "", kAcceptLoopExitFromAttackWithoutDetect),
+        L("", "_#c!", "", kAcceptLoopExitFromAttackWithoutDetect),
+        L("", "_#r=", "", kReject),
+        L("", "_#rx", "", kReject),
+        L("", "_#r!", "", kAccept),  // no backedge
+        L("", "_#b=c=", "", kReject),
+        L("", "_#b=cx", "", kReject),
+        L("", "_#b=c!", "", kReject),
+        L("", "_#bxc=", "", kReject),
+        L("", "_#bxcx", "", kReject),
+        L("", "_#bxc!", "", kReject),
+        L("", "_#b=r=", "", kReject),
+        L("", "_#b=rx", "", kReject),
+        L("", "_#b=r!", "", kAccept),  // no backedge
+        L("", "_#bxr=", "", kReject),
+        L("", "_#bxrx", "", kReject),
+        L("", "_#bxr!", "", kAccept),  // no backedge
+        L("", "_#c=r=", "", kReject),
+        L("", "_#c=rx", "", kReject),
+        L("", "_#c=r!", "", kReject),  // continue provides backedge
+        L("", "_#cxr=", "", kReject),
+        L("", "_#cxrx", "", kReject),
+        L("", "_#cxr!", "", kReject),  // continue provides backedege
+
+        // Scenario (B,D)
+        // Test CF1 <- CFResult
+        // Edge exists if and only if Return is in s1's behaviour.
+        L("", "#", "_", kAcceptLoopExitFromAttack),
+        L("", "#b=", "_", kAccept),
+        L("", "#bx", "_", kAccept),
+        L("", "#b!", "_", kAccept),
+        L("", "#c=b=", "_", kAccept),  // need a break to avoid infinite loop
+        L("", "#cxb=", "_", kAccept),
+        L("", "#r=", "_", kReject),    // The attacker provides the break
+        L("", "#rx", "_", kReject),  // The attacker provides the break
+        L("", "#r!", "_", kReject),
+        // Move the attacker after the control construct.
+        L("", "b=#", "_", kAccept),
+        L("", "bx#", "_", kAccept),
+        L("", "b!#", "_", kAccept),
+        L("", "c=#b=", "_", kAccept),
+        L("", "cx#b=", "_", kAccept),
+        L("", "r=#", "_", kReject),   // The attacker provides the break
+        L("", "rx#", "_", kReject),  // The attacker provides the break
+        L("", "r!#", "_", kAccept),  // unreachable
+        // clang-format on
+    };
+}
+
+class LoopGraphTest : public UniformityAnalysisTestBase,
+                      public ::testing::TestWithParam<LoopGraphCase> {};
+
+TEST_P(LoopGraphTest, BothAttackAndDetect) {
+    const auto src = GetParam().Shader(true, true);
+    const auto verdict = GetParam().verdict;
+    const bool should_accept = verdict == kAccept || verdict == kAcceptLoopExitFromAttack;
+    RunTest(src, should_accept);
+    // The accept case may still generate warnings.
+    // But failure cases always generate an error.
+    if (!should_accept) {
+        EXPECT_FALSE(error_.empty()) << "need an error string for:\n" << src;
+    }
+}
+
+// Don't try the OnlyDetect case because many cases generate their
+// own non-uniformity. For example, L("", "_bx", "") which translates
+// to:
+//    loop {
+//       workgroupBarrier();
+//       if nonuniform_var == 42 { break; }
+//    }
+// Those cases are already tested by using an explicit attacker.
+// For example, the above is covered by L("", "_#c!", "")
+//
+
+TEST_P(LoopGraphTest, OnlyAttack) {
+    const auto src = GetParam().Shader(true, false);
+    const auto verdict = GetParam().verdict;
+    const bool should_accept = verdict == kAccept || verdict == kAcceptLoopExitFromAttack ||
+                               verdict == kAcceptLoopExitFromAttackWithoutDetect ||
+                               verdict == kReject;
+    RunTest(src, should_accept);
+}
+
+TEST_P(LoopGraphTest, NeitherAttackNorDetect) {
+    const auto src = GetParam().Shader(false, false);
+    const auto verdict = GetParam().verdict;
+    // In the kAcceptLoopExitFromAttackWithoutDetect, the loop exit is
+    // provided only by the attacker. Without the attacker, the loop
+    // is statically infinite, and hence rejected.
+    const bool should_accept = verdict == kAccept || verdict == kReject;
+    RunTest(src, should_accept);
+}
+
+INSTANTIATE_TEST_SUITE_P(AllLoops, LoopGraphTest, ::testing::ValuesIn(LoopGraphCases()));
 }  // namespace LoopTest
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1121,7 +1121,13 @@ class UniformityGraph {
                 // processing the loop body BlockStatement. This is so that variable declarations
                 // inside the loop body are visible to the continuing statement.
                 auto* cf1 = ProcessStatement(cfx, l->body);
-                cfx->AddEdge(cf1);
+                const auto& body_behaviors = sem_.Get(l->body)->Behaviors();
+                if (body_behaviors.Contains(sem::Behavior::kNext) ||
+                    body_behaviors.Contains(sem::Behavior::kContinue)) {
+                    // Control reaches the backedge, so add an edge from the top
+                    // of the loop to the latch block.
+                    cfx->AddEdge(cf1);
+                }
                 cfx->AddEdge(cf);
 
                 // Set each variable's exit node as its value in the outer scope.
@@ -1131,10 +1137,10 @@ class UniformityGraph {
 
                 current_function_->RemoveLoopSwitchInfoFor(sem_loop);
 
-                if (sem_loop->Behaviors() == sem::Behaviors{sem::Behavior::kNext}) {
-                    return cf;
+                if (sem_loop->Behaviors().Contains(sem::Behavior::kReturn)) {
+                    return cf1;
                 } else {
-                    return cfx;
+                    return cf;
                 }
             },
 
