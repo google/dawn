@@ -99,8 +99,6 @@ bool Platform::IsFeatureEnabled(Features feature) {
 #else
             return false;
 #endif
-        case Features::kWebGPUUseVulkanMemoryModel:
-            return false;
         case Features::kWebGPUEnableRangeAnalysisForRobustness:
             return true;
         case Features::kWebGPUUseSpirv14:
