@@ -2437,6 +2437,10 @@ TEST_P(CopyTests_B2T, OffsetBufferAligned) {
 
 // Test that copying without a 512-byte aligned buffer offset works
 TEST_P(CopyTests_B2T, OffsetBufferUnaligned) {
+    // TODO(crbug.com/459848482): Flaky on Win/Snapdragon X Elite w/ D3D11 and
+    // backend validation.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11() && IsBackendValidationEnabled());
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
 
@@ -2457,6 +2461,10 @@ TEST_P(CopyTests_B2T, OffsetBufferUnaligned) {
 // Test that copying without a 512-byte aligned buffer offset that is greater than the bytes per row
 // works
 TEST_P(CopyTests_B2T, OffsetBufferUnalignedSmallBytesPerRow) {
+    // TODO(crbug.com/459848482): Flaky on Win/Snapdragon X Elite w/ D3D11 and
+    // backend validation.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11() && IsBackendValidationEnabled());
+
     constexpr uint32_t kWidth = 32;
     constexpr uint32_t kHeight = 128;
 

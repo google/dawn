@@ -272,6 +272,10 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
 TEST_P(MultithreadTests, T2BThenMapInParallel) {
     // TODO(451928481): multithread support in GL is incomplete
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
+
+    // TODO(crbug.com/459848483): Flaky on Win/Snapdragon X Elite.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
+
     constexpr uint32_t kTextureSize = 512;
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
     constexpr uint32_t kBytesPerPixel = 4;

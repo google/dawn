@@ -282,6 +282,9 @@ TEST_P(TierArchInfoTest_TieredMaxLimits, ExhaustiveTestAllFeatures) {
     // SwiftShader will return a lower limit than any modern device on CQ.
     DAWN_TEST_UNSUPPORTED_IF(IsSwiftshader());
 
+    // TODO(crbug.com/459848477): Fails on Windows/Snapdragon X Elite.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm());
+
     std::multimap<std::string, std::set<uint32_t>> device_map;
 
     using enum wgpu::FeatureName;

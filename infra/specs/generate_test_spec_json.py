@@ -110,6 +110,14 @@ ADDITIONAL_MIXINS = {
             'script': '//scripts/merge_scripts/true_noop_merge.py',
         },
     },
+    'win_snapdragon_x_elite_gtest_args': {
+        'args': [
+            # Only use the physical GPU. On these devices, SwiftShader (0x1AE0),
+            # WARP (0x1414), and some unknown "integrated GPU" (0x5143) are all
+            # reported in addition to this.
+            '--adapter-vendor-id=0x4D4F4351',
+        ],
+    },
     'wire_trace_merge': {
         'merge': {
             'script':

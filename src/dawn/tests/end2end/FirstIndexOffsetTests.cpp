@@ -372,6 +372,9 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
+    // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     // Draw once: vertex_index starts at 9
     {
         TestVertexIndex(DrawMode::NonIndexedIndirect, {{9, 0}});
@@ -405,6 +408,9 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
     // TODO(crbug.com/347223100): failing on ANGLE/D3D11
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
 
+    // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
+
     // Draw once: vertex_index starts at 7 and instance_index starts at 13
     {
         TestBothIndices(DrawMode::NonIndexedIndirect, {{9, 0}});
@@ -422,6 +428,9 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
 
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
+
+    // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
 
     // Draw once: vertex_index starts at 9
     {
