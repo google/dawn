@@ -381,20 +381,19 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
                                        const TexelCopyBufferLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {
     const Format& format = destination.texture->GetFormat();
-    const TexelBlockInfo& blockInfo = format.GetAspectInfo(destination.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(destination.aspect).block;
+    BlockExtent3D writeSize = blockInfo.ToBlock(writeSizePixel);
 
     // We are only copying the part of the data that will appear in the texture.
     // Note that validating texture copy range ensures that writeSizePixel->width and
     // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
-    DAWN_ASSERT(writeSizePixel.width % blockInfo.width == 0);
-    DAWN_ASSERT(writeSizePixel.height % blockInfo.height == 0);
-    uint32_t rowsPerImage = writeSizePixel.height / blockInfo.height;
-    uint32_t bytesPerRow = writeSizePixel.width / blockInfo.width * blockInfo.byteSize;
+    BlockCount rowsPerImage = writeSize.height;
+    uint32_t bytesPerRow = blockInfo.ToBytes(writeSize.width);
     uint32_t alignedBytesPerRow = Align(bytesPerRow, GetDevice()->GetOptimalBytesPerRowAlignment());
+    BlockCount alignedBlocksPerRow = blockInfo.BytesToBlocks(alignedBytesPerRow);
 
-    uint64_t packedDataSize;
-    DAWN_TRY_ASSIGN(packedDataSize, ComputeRequiredBytesInCopy(blockInfo, writeSizePixel,
-                                                               alignedBytesPerRow, rowsPerImage));
+    uint64_t packedDataSize =
+        ComputeRequiredBytesInCopy(blockInfo, writeSize, alignedBlocksPerRow, rowsPerImage);
 
     // We need the offset to be aligned to both the optimal offset for that device and
     // blockByteSize, since both of them are powers of two, we only need to align to the max value.
@@ -413,14 +412,14 @@ MaybeError QueueBase::WriteTextureImpl(const TexelCopyTextureInfo& destination,
         packedDataSize, offsetAlignment, [&](UploadReservation reservation) -> MaybeError {
             const uint8_t* srcPointer = reinterpret_cast<const uint8_t*>(data) + dataLayout.offset;
             uint8_t* dstPointer = reinterpret_cast<uint8_t*>(reservation.mappedPointer);
-            CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers, rowsPerImage,
-                            dataLayout.rowsPerImage, bytesPerRow, alignedBytesPerRow,
-                            dataLayout.bytesPerRow);
+            CopyTextureData(dstPointer, srcPointer, writeSizePixel.depthOrArrayLayers,
+                            static_cast<uint32_t>(rowsPerImage), dataLayout.rowsPerImage,
+                            bytesPerRow, alignedBytesPerRow, dataLayout.bytesPerRow);
 
             TexelCopyBufferLayout passDataLayout = dataLayout;
             passDataLayout.offset = reservation.offsetInBuffer;
             passDataLayout.bytesPerRow = alignedBytesPerRow;
-            passDataLayout.rowsPerImage = rowsPerImage;
+            passDataLayout.rowsPerImage = static_cast<uint32_t>(rowsPerImage);
 
             TextureCopy textureCopy;
             textureCopy.texture = destination.texture;

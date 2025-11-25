@@ -646,20 +646,19 @@ MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
     CommandRecordingContext* recordingContext,
     const TextureCopy& srcCopy,
     const TextureCopy& dstCopy,
-    const Extent3D& copySize) {
+    const Extent3D& copySize_in) {
     DAWN_ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
     DAWN_ASSERT(srcCopy.aspect == dstCopy.aspect);
     dawn::native::Format format = srcCopy.texture->GetFormat();
-    const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
-    DAWN_ASSERT(copySize.width % blockInfo.width == 0);
-    uint32_t widthInBlocks = copySize.width / blockInfo.width;
-    DAWN_ASSERT(copySize.height % blockInfo.height == 0);
-    uint32_t heightInBlocks = copySize.height / blockInfo.height;
+    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
+    const BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
+    BlockCount widthInBlocks = copySize.width;
+    BlockCount heightInBlocks = copySize.height;
 
     // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
     // because it isn't a hard constraint in Vulkan.
     uint64_t tempBufferSize =
-        widthInBlocks * heightInBlocks * copySize.depthOrArrayLayers * blockInfo.byteSize;
+        blockInfo.ToBytes(widthInBlocks * heightInBlocks * copySize.depthOrArrayLayers);
     BufferDescriptor tempBufferDescriptor;
     tempBufferDescriptor.size = tempBufferSize;
     tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -673,7 +672,7 @@ MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
     tempBufferCopy.buffer = tempBuffer;
     tempBufferCopy.rowsPerImage = heightInBlocks;
     tempBufferCopy.offset = 0;
-    tempBufferCopy.bytesPerRow = copySize.width / blockInfo.width * blockInfo.byteSize;
+    tempBufferCopy.blocksPerRow = widthInBlocks;
 
     VkCommandBuffer commands = recordingContext->commandBuffer;
     VkImage srcImage = ToBackend(srcCopy.texture)->GetHandle();
@@ -768,7 +767,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 ToBackend(src.buffer)->EnsureDataInitialized(recordingContext);
 
-                VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, dst, copy->copySize);
+                const TypedTexelBlockInfo& blockInfo =
+                    dst.texture->GetFormat().GetAspectInfo(dst.aspect).block;
+
+                VkBufferImageCopy region =
+                    ComputeBufferImageCopyRegion(src, dst, blockInfo.ToBlock(copy->copySize));
                 VkImageSubresourceLayers subresource = region.imageSubresource;
 
                 SubresourceRange range =
@@ -811,7 +814,11 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 ToBackend(dst.buffer)->EnsureDataInitializedAsDestination(recordingContext, copy);
 
-                VkBufferImageCopy region = ComputeBufferImageCopyRegion(dst, src, copy->copySize);
+                const TypedTexelBlockInfo& blockInfo =
+                    src.texture->GetFormat().GetAspectInfo(src.aspect).block;
+
+                VkBufferImageCopy region =
+                    ComputeBufferImageCopyRegion(dst, src, blockInfo.ToBlock(copy->copySize));
 
                 SubresourceRange range =
                     GetSubresourcesAffectedByCopy(copy->source, copy->copySize);

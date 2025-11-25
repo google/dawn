@@ -216,17 +216,17 @@ MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordi
 
     // Create tempBuffer
     uint32_t bytesPerRow = Align(blockInfo.ToBytes(copySize.width), kTextureBytesPerRowAlignment);
-    uint32_t rowsPerImage = static_cast<uint32_t>(copySize.height);
+    BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
+    BlockCount rowsPerImage = copySize.height;
 
     // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
     // need to set mappedAtCreation to be true.
-    auto tempBufferSize = ComputeRequiredBytesInCopy(blockInfo.ToTexelBlockInfo(),
-                                                     blockInfo.ToTexel(copySize).ToExtent3D(),
-                                                     bytesPerRow, rowsPerImage);
+    uint64_t tempBufferSize =
+        ComputeRequiredBytesInCopy(blockInfo, copySize, blocksPerRow, rowsPerImage);
 
     BufferDescriptor tempBufferDescriptor;
     tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
+    tempBufferDescriptor.size = tempBufferSize;
     Device* device = ToBackend(srcCopy.texture->GetDevice());
     Ref<BufferBase> tempBufferBase;
     DAWN_TRY_ASSIGN(tempBufferBase, device->CreateBuffer(&tempBufferDescriptor));
@@ -235,7 +235,7 @@ MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordi
     BufferCopy bufferCopy;
     bufferCopy.buffer = tempBuffer;
     bufferCopy.offset = 0;
-    bufferCopy.bytesPerRow = bytesPerRow;
+    bufferCopy.blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
     bufferCopy.rowsPerImage = rowsPerImage;
 
     // Copy from source texture into tempBuffer
@@ -280,13 +280,12 @@ MaybeError RecordBufferTextureCopyWithTemporaryBuffer(CommandRecordingContext* r
     // Create tempBuffer
     // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
     // need to set mappedAtCreation to be true.
-    auto tempBufferSize = ComputeRequiredBytesInCopy(
-        blockInfo.ToTexelBlockInfo(), blockInfo.ToTexel(copySize).ToExtent3D(),
-        bufferCopy.bytesPerRow, bufferCopy.rowsPerImage);
+    uint64_t tempBufferSize = ComputeRequiredBytesInCopy(
+        blockInfo, copySize, bufferCopy.blocksPerRow, bufferCopy.rowsPerImage);
 
     BufferDescriptor tempBufferDescriptor;
     tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-    tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
+    tempBufferDescriptor.size = tempBufferSize;
     Device* device = ToBackend(textureCopy.texture->GetDevice());
     Ref<BufferBase> tempBufferBase;
     DAWN_TRY_ASSIGN(tempBufferBase, device->CreateBuffer(&tempBufferDescriptor));
@@ -298,7 +297,7 @@ MaybeError RecordBufferTextureCopyWithTemporaryBuffer(CommandRecordingContext* r
     BufferCopy tempBufferCopy;
     tempBufferCopy.buffer = tempBuffer;
     tempBufferCopy.offset = 0;
-    tempBufferCopy.bytesPerRow = bufferCopy.bytesPerRow;
+    tempBufferCopy.blocksPerRow = bufferCopy.blocksPerRow;
     tempBufferCopy.rowsPerImage = bufferCopy.rowsPerImage;
 
     tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopyDst);

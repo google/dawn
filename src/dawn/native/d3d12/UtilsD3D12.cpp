@@ -77,26 +77,13 @@ uint64_t RequiredCopySizeByD3D12(const BlockCount blocksPerRow,
     return blockInfo.ToBytes(requiredCopySizeByD3D12);
 }
 
-// TODO(crbug.com/424536624): Modify BufferCopy to contain strong types instead
-struct TypedBufferCopy {
-    Ref<BufferBase> buffer;
-    uint64_t offset;
-    BlockCount blocksPerRow;
-    BlockCount rowsPerImage;
-};
-TypedBufferCopy AsTyped(const TypedTexelBlockInfo& blockInfo, const BufferCopy& bufferCopy) {
-    // BufferCopy's values are already in block space (rows == rows of blocks).
-    return {bufferCopy.buffer, bufferCopy.offset, blockInfo.BytesToBlocks(bufferCopy.bytesPerRow),
-            BlockCount{bufferCopy.rowsPerImage}};
-}
-
 // This function is used to access whether we need a workaround for D3D12's algorithm of
 // calculating required buffer size for B2T/T2B copy. The workaround is needed only when
 //   - It is a 3D texture.
 //   - There are multiple depth images to be copied (copySize.depthOrArrayLayers > 1).
 //   - It has rowsPerImage paddings (rowsPerImage > copySize.height).
 //   - The buffer size doesn't meet D3D12's requirement.
-bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const TypedBufferCopy& bufferCopy,
+bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& bufferCopy,
                                                          const TextureCopy& textureCopy,
                                                          const BlockExtent3D& copySize) {
     TextureBase* texture = textureCopy.texture.Get();
@@ -379,13 +366,12 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
 
 void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
                              ID3D12GraphicsCommandList* commandList,
-                             const BufferCopy& bufferCopy_in,
+                             const BufferCopy& bufferCopy,
                              const TextureCopy& textureCopy,
                              const BlockExtent3D& copySize) {
     TextureBase* texture = textureCopy.texture.Get();
     const TypedTexelBlockInfo& blockInfo =
         texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
-    TypedBufferCopy bufferCopy = AsTyped(blockInfo, bufferCopy_in);
     ID3D12Resource* bufferResource = ToBackend(bufferCopy.buffer)->GetD3D12Resource();
 
     if (NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(bufferCopy, textureCopy, copySize)) {

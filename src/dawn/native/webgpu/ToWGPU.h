@@ -44,6 +44,7 @@ struct RenderPassColorAttachmentInfo;
 struct RenderPassDepthStencilAttachmentInfo;
 struct TextureCopy;
 struct TimestampWrites;
+struct TypedTexelBlockInfo;
 
 }  // namespace dawn::native
 
@@ -64,7 +65,7 @@ WGPURenderPassDepthStencilAttachment ToWGPU(const RenderPassDepthStencilAttachme
 WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
 WGPUStencilFaceState ToWGPU(const StencilFaceState* desc);
 WGPUStoreOp ToWGPU(const wgpu::StoreOp op);
-WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy);
+WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy, const TypedTexelBlockInfo& blockInfo);
 WGPUTexelCopyBufferInfo ToWGPU(const TexelCopyBufferLayout& copy, const BufferBase* buffer);
 WGPUTexelCopyBufferLayout ToWGPU(const TexelCopyBufferLayout& copy);
 WGPUTexelCopyTextureInfo ToWGPU(const TextureCopy& copy);

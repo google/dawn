@@ -1251,15 +1251,17 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         // need to clear the texture with a copy from buffer
         DAWN_ASSERT(range.aspects == Aspect::Color || range.aspects == Aspect::Plane0 ||
                     range.aspects == Aspect::Plane1 || range.aspects == Aspect::Plane2);
-        const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
+        const TypedTexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
 
-        Extent3D largestMipSize =
-            GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, range.aspects);
+        BlockExtent3D largestMipSize = blockInfo.ToBlock(
+            GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel, range.aspects));
 
-        uint32_t bytesPerRow = Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
+        uint64_t bytesPerRow = Align(blockInfo.ToBytes(largestMipSize.width),
                                      device->GetOptimalBytesPerRowAlignment());
-        uint64_t uploadSize = bytesPerRow * (largestMipSize.height / blockInfo.height) *
-                              largestMipSize.depthOrArrayLayers;
+        BlockCount blocksPerRow = blockInfo.BytesToBlocks(bytesPerRow);
+        BlockCount uploadBlocks =
+            blocksPerRow * largestMipSize.height * largestMipSize.depthOrArrayLayers;
+        uint64_t uploadSize = blockInfo.ToBytes(uploadBlocks);
 
         DAWN_TRY(device->GetDynamicUploader()->WithUploadReservation(
             uploadSize, blockInfo.byteSize, [&](UploadReservation reservation) -> MaybeError {
@@ -1268,8 +1270,8 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 std::vector<VkBufferImageCopy> regions;
                 for (uint32_t level = range.baseMipLevel;
                      level < range.baseMipLevel + range.levelCount; ++level) {
-                    Extent3D copySize =
-                        GetMipLevelSingleSubresourcePhysicalSize(level, range.aspects);
+                    BlockExtent3D copySize = blockInfo.ToBlock(
+                        GetMipLevelSingleSubresourcePhysicalSize(level, range.aspects));
                     imageRange.baseMipLevel = level;
                     for (uint32_t layer = range.baseArrayLayer;
                          layer < range.baseArrayLayer + range.layerCount; ++layer) {
@@ -1280,10 +1282,11 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                             continue;
                         }
 
-                        TexelCopyBufferLayout dataLayout;
-                        dataLayout.offset = reservation.offsetInBuffer;
-                        dataLayout.rowsPerImage = copySize.height / blockInfo.height;
-                        dataLayout.bytesPerRow = bytesPerRow;
+                        BufferCopy bufferCopy;
+                        bufferCopy.offset = reservation.offsetInBuffer;
+                        bufferCopy.blocksPerRow = blocksPerRow;
+                        bufferCopy.rowsPerImage = copySize.height;
+
                         TextureCopy textureCopy;
                         textureCopy.aspect = range.aspects;
                         textureCopy.mipLevel = level;
@@ -1291,7 +1294,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                         textureCopy.texture = this;
 
                         regions.push_back(
-                            ComputeBufferImageCopyRegion(dataLayout, textureCopy, copySize));
+                            ComputeBufferImageCopyRegion(bufferCopy, textureCopy, copySize));
                     }
                 }
 

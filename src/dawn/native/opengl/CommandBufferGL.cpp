@@ -844,10 +844,14 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle()));
 
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(dst.aspect).block;
+
+                // TODO(crbug.com/424536624): Replace TexelCopyBufferLayout with BufferCopy
                 TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = 0;
-                dataLayout.bytesPerRow = src.bytesPerRow;
-                dataLayout.rowsPerImage = src.rowsPerImage;
+                dataLayout.bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
+                dataLayout.rowsPerImage = static_cast<uint32_t>(src.rowsPerImage);
 
                 DAWN_TRY(DoTexSubImage(gl, dst, reinterpret_cast<void*>(src.offset), dataLayout,
                                        copy->copySize));
@@ -890,12 +894,12 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 DAWN_GL_TRY(gl, GenFramebuffers(1, &readFBO));
                 DAWN_GL_TRY(gl, BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO));
 
-                const TexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle()));
                 DAWN_GL_TRY(gl, PixelStorei(GL_PACK_ALIGNMENT, std::min(8u, blockInfo.byteSize)));
-                DAWN_GL_TRY(gl,
-                            PixelStorei(GL_PACK_ROW_LENGTH, dst.bytesPerRow / blockInfo.byteSize));
+                DAWN_GL_TRY(
+                    gl, PixelStorei(GL_PACK_ROW_LENGTH, static_cast<uint32_t>(dst.blocksPerRow)));
 
                 GLenum glAttachment;
                 GLenum glFormat;
@@ -941,7 +945,8 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                             break;
                         } else if (target == GL_TEXTURE_CUBE_MAP) {
                             DAWN_ASSERT(texture->GetArrayLayers() == 6);
-                            const uint64_t bytesPerImage = dst.bytesPerRow * dst.rowsPerImage;
+                            const uint64_t bytesPerImage =
+                                blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
                             for (uint32_t z = 0; z < copySize.depthOrArrayLayers; ++z) {
                                 GLenum cubeMapTarget =
                                     GL_TEXTURE_CUBE_MAP_POSITIVE_X + z + src.origin.z;
@@ -961,7 +966,8 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                     }
 
                     case wgpu::TextureDimension::e3D: {
-                        const uint64_t bytesPerImage = dst.bytesPerRow * dst.rowsPerImage;
+                        const uint64_t bytesPerImage =
+                            blockInfo.ToBytes(dst.blocksPerRow * dst.rowsPerImage);
                         for (uint32_t z = 0; z < copySize.depthOrArrayLayers; ++z) {
                             DAWN_GL_TRY(gl,
                                         FramebufferTextureLayer(GL_READ_FRAMEBUFFER, glAttachment,
@@ -1616,6 +1622,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
     data = static_cast<const uint8_t*>(data) + dataLayout.offset;
     DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0));
     DAWN_GL_TRY(gl, BindTexture(target, texture->GetHandle()));
+    // TODO(crbug.com/424536624): TypedTexelBlockInfo and rework code below
     const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(destination.aspect).block;
 
     uint32_t x = destination.origin.x;

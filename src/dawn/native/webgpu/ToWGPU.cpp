@@ -29,6 +29,7 @@
 
 #include "dawn/common/Math.h"
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/BlockInfo.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/dawn_platform_autogen.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
@@ -71,13 +72,13 @@ WGPUTexelCopyBufferLayout ToWGPU(const TexelCopyBufferLayout& copy) {
     };
 }
 
-WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy) {
+WGPUTexelCopyBufferInfo ToWGPU(const BufferCopy& copy, const TypedTexelBlockInfo& blockInfo) {
     return {
         .layout =
             {
                 .offset = copy.offset,
-                .bytesPerRow = copy.bytesPerRow,
-                .rowsPerImage = copy.rowsPerImage,
+                .bytesPerRow = static_cast<uint32_t>(blockInfo.ToBytes(copy.blocksPerRow)),
+                .rowsPerImage = static_cast<uint32_t>(copy.rowsPerImage),
             },
         .buffer = ToBackend(copy.buffer)->GetInnerHandle(),
     };

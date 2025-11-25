@@ -38,6 +38,7 @@
 
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
+#include "dawn/native/BlockInfo.h"
 #include "dawn/native/Texture.h"
 
 #include "dawn/native/dawn_platform.h"
@@ -191,8 +192,8 @@ struct BufferCopy {
 
     Ref<BufferBase> buffer;
     uint64_t offset;
-    uint32_t bytesPerRow;
-    uint32_t rowsPerImage;
+    BlockCount blocksPerRow;
+    BlockCount rowsPerImage;
 };
 
 struct TextureCopy {

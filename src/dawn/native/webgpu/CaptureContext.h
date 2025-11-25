@@ -49,6 +49,7 @@ struct BufferCopy;
 struct ProgrammableStage;
 struct TextureCopy;
 struct TimestampWrites;
+struct TypedTexelBlockInfo;
 
 }  // namespace dawn::native
 
@@ -170,8 +171,11 @@ schema::Origin3D ToSchema(const Origin3D& origin);
 schema::Extent3D ToSchema(const Extent3D& extent);
 schema::Color ToSchema(const Color& color);
 schema::ProgrammableStage ToSchema(CaptureContext& captureContext, const ProgrammableStage& stage);
-schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy);
-schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext, const BufferCopy& bufferCopy);
+schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy,
+                                       const TypedTexelBlockInfo& blockInfo);
+schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext,
+                                     const BufferCopy& bufferCopy,
+                                     const TypedTexelBlockInfo& blockInfo);
 schema::TexelCopyTextureInfo ToSchema(CaptureContext& captureContext,
                                       const TextureCopy& textureCopy);
 schema::TexelCopyBufferLayout ToSchema(const TexelCopyBufferLayout& layout);

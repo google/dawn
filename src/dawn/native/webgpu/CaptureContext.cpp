@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/native/BlockInfo.h"
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
@@ -189,18 +190,21 @@ schema::Color ToSchema(const Color& color) {
     }};
 }
 
-schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy) {
+schema::TexelCopyBufferLayout ToSchema(const BufferCopy& bufferCopy,
+                                       const TypedTexelBlockInfo& blockInfo) {
     return {{
         .offset = bufferCopy.offset,
-        .bytesPerRow = bufferCopy.bytesPerRow,
-        .rowsPerImage = bufferCopy.rowsPerImage,
+        .bytesPerRow = static_cast<uint32_t>(blockInfo.ToBytes(bufferCopy.blocksPerRow)),
+        .rowsPerImage = static_cast<uint32_t>(bufferCopy.rowsPerImage),
     }};
 }
 
-schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext, const BufferCopy& bufferCopy) {
+schema::TexelCopyBufferInfo ToSchema(CaptureContext& captureContext,
+                                     const BufferCopy& bufferCopy,
+                                     const TypedTexelBlockInfo& blockInfo) {
     return {{
         .bufferId = captureContext.GetId(bufferCopy.buffer),
-        .layout = ToSchema(bufferCopy),
+        .layout = ToSchema(bufferCopy, blockInfo),
     }};
 }
 

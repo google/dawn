@@ -1246,6 +1246,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 auto& copySize = copy->copySize;
                 Buffer* buffer = ToBackend(src.buffer.Get());
                 Texture* texture = ToBackend(dst.texture.Get());
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(dst.aspect).block;
 
                 buffer->EnsureDataInitialized(commandContext);
                 DAWN_TRY(
@@ -1254,7 +1256,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 buffer->TrackUsage();
                 texture->SynchronizeTextureBeforeUse(commandContext);
                 RecordCopyBufferToTexture(commandContext, buffer->GetMTLBuffer(), buffer->GetSize(),
-                                          src.offset, src.bytesPerRow, src.rowsPerImage, texture,
+                                          src.offset, blockInfo.ToBytes(src.blocksPerRow),
+                                          static_cast<uint32_t>(src.rowsPerImage), texture,
                                           dst.mipLevel, dst.origin, dst.aspect, copySize);
                 break;
             }
@@ -1271,6 +1274,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 auto& copySize = copy->copySize;
                 Texture* texture = ToBackend(src.texture.Get());
                 Buffer* buffer = ToBackend(dst.buffer.Get());
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(src.aspect).block;
 
                 buffer->EnsureDataInitializedAsDestination(commandContext, copy);
 
@@ -1281,7 +1286,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
 
                 TextureBufferCopySplit splitCopies = ComputeTextureBufferCopySplit(
                     texture, src.mipLevel, src.origin, copySize, buffer->GetSize(), dst.offset,
-                    dst.bytesPerRow, dst.rowsPerImage, src.aspect);
+                    blockInfo.ToBytes(dst.blocksPerRow), static_cast<uint32_t>(dst.rowsPerImage),
+                    src.aspect);
 
                 for (const auto& copyInfo : splitCopies) {
                     MTLBlitOption blitOption = texture->ComputeMTLBlitOption(src.aspect);

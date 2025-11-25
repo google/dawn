@@ -261,13 +261,12 @@ ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockIn
                                                    uint32_t rowsPerImage) {
     DAWN_ASSERT(copySize.width % blockInfo.width == 0);
     DAWN_ASSERT(copySize.height % blockInfo.height == 0);
-    uint32_t widthInBlocks = copySize.width / blockInfo.width;
-    uint32_t heightInBlocks = copySize.height / blockInfo.height;
-    uint64_t bytesInLastRow = Safe32x32(widthInBlocks, blockInfo.byteSize);
-
     if (copySize.depthOrArrayLayers == 0) {
         return 0;
     }
+    uint32_t widthInBlocks = copySize.width / blockInfo.width;
+    uint32_t heightInBlocks = copySize.height / blockInfo.height;
+    uint64_t bytesInLastRow = Safe32x32(widthInBlocks, blockInfo.byteSize);
 
     // Check for potential overflows for the rest of the computations. We have the following
     // invariants:
@@ -297,6 +296,33 @@ ResultOrError<uint64_t> ComputeRequiredBytesInCopy(const TexelBlockInfo& blockIn
     if (heightInBlocks > 0) {
         DAWN_ASSERT(heightInBlocks <= 1 || bytesPerRow != wgpu::kCopyStrideUndefined);
         uint64_t bytesInLastImage = Safe32x32(bytesPerRow, heightInBlocks - 1) + bytesInLastRow;
+        requiredBytesInCopy += bytesInLastImage;
+    }
+    return requiredBytesInCopy;
+}
+
+uint64_t ComputeRequiredBytesInCopy(const TypedTexelBlockInfo& blockInfo,
+                                    const BlockExtent3D& copySize,
+                                    BlockCount blocksPerRow,
+                                    BlockCount rowsPerImage) {
+    // See ComputeRequiredBytesInCopy overload as this is mostly the same modulo some validation.
+    if (copySize.depthOrArrayLayers == BlockCount{0}) {
+        return 0;
+    }
+    BlockCount widthInBlocks = copySize.width;
+    BlockCount heightInBlocks = copySize.height;
+    BlockCount blocksInLastRow = widthInBlocks;
+    BlockCount blocksPerImage = blocksPerRow * rowsPerImage;
+    uint64_t bytesPerImage = blockInfo.ToBytes(blocksPerImage);
+    uint64_t maxBytesPerImage =
+        std::numeric_limits<uint64_t>::max() / static_cast<uint64_t>(copySize.depthOrArrayLayers);
+    DAWN_ASSERT(bytesPerImage <= maxBytesPerImage);
+    BlockCount blocksToCopy = blocksPerImage * (copySize.depthOrArrayLayers - BlockCount{1});
+    uint64_t requiredBytesInCopy = blockInfo.ToBytes(blocksToCopy);
+    if (heightInBlocks > BlockCount{0}) {
+        BlockCount blocksInLastImage =
+            blocksPerRow * (heightInBlocks - BlockCount{1}) + blocksInLastRow;
+        uint64_t bytesInLastImage = blockInfo.ToBytes(blocksInLastImage);
         requiredBytesInCopy += bytesInLastImage;
     }
     return requiredBytesInCopy;

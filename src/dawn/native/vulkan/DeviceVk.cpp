@@ -743,7 +743,10 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     CommandRecordingContext* recordingContext =
         ToBackend(GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
 
-    VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, dst, copySizePixels);
+    const TypedTexelBlockInfo& blockInfo = dst.texture->GetFormat().GetAspectInfo(dst.aspect).block;
+
+    VkBufferImageCopy region =
+        ComputeBufferImageCopyRegion(src, dst, blockInfo.ToBlock(copySizePixels));
     VkImageSubresourceLayers subresource = region.imageSubresource;
 
     SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copySizePixels);

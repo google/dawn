@@ -746,9 +746,12 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::CopyBufferToTexture: {
                 const auto& cmd = *commands.NextCommand<CopyBufferToTextureCmd>();
+                const TypedTexelBlockInfo& blockInfo = cmd.destination.texture->GetFormat()
+                                                           .GetAspectInfo(cmd.destination.aspect)
+                                                           .block;
                 schema::CommandBufferCommandCopyBufferToTextureCmd data{{
                     .data = {{
-                        .source = ToSchema(captureContext, cmd.source),
+                        .source = ToSchema(captureContext, cmd.source, blockInfo),
                         .destination = ToSchema(captureContext, cmd.destination),
                         .copySize = ToSchema(cmd.copySize),
                     }},
@@ -758,10 +761,12 @@ MaybeError CommandBuffer::CaptureCreationParameters(CaptureContext& captureConte
             }
             case Command::CopyTextureToBuffer: {
                 const auto& cmd = *commands.NextCommand<CopyTextureToBufferCmd>();
+                const TypedTexelBlockInfo& blockInfo =
+                    cmd.source.texture->GetFormat().GetAspectInfo(cmd.source.aspect).block;
                 schema::CommandBufferCommandCopyTextureToBufferCmd data{{
                     .data = {{
                         .source = ToSchema(captureContext, cmd.source),
-                        .destination = ToSchema(captureContext, cmd.destination),
+                        .destination = ToSchema(captureContext, cmd.destination, blockInfo),
                         .copySize = ToSchema(cmd.copySize),
                     }},
                 }};
@@ -874,7 +879,10 @@ WGPUCommandBuffer CommandBuffer::Encode() {
             }
             case Command::CopyBufferToTexture: {
                 auto cmd = mCommands.NextCommand<CopyBufferToTextureCmd>();
-                WGPUTexelCopyBufferInfo source = ToWGPU(cmd->source);
+                const TypedTexelBlockInfo& blockInfo = cmd->destination.texture->GetFormat()
+                                                           .GetAspectInfo(cmd->destination.aspect)
+                                                           .block;
+                WGPUTexelCopyBufferInfo source = ToWGPU(cmd->source, blockInfo);
                 WGPUTexelCopyTextureInfo destination = ToWGPU(cmd->destination);
                 WGPUExtent3D size = ToWGPU(cmd->copySize);
                 wgpu.commandEncoderCopyBufferToTexture(innerEncoder, &source, &destination, &size);
@@ -883,8 +891,10 @@ WGPUCommandBuffer CommandBuffer::Encode() {
             }
             case Command::CopyTextureToBuffer: {
                 auto cmd = mCommands.NextCommand<CopyTextureToBufferCmd>();
+                const TypedTexelBlockInfo& blockInfo =
+                    cmd->source.texture->GetFormat().GetAspectInfo(cmd->source.aspect).block;
                 WGPUTexelCopyTextureInfo source = ToWGPU(cmd->source);
-                WGPUTexelCopyBufferInfo destination = ToWGPU(cmd->destination);
+                WGPUTexelCopyBufferInfo destination = ToWGPU(cmd->destination, blockInfo);
                 WGPUExtent3D size = ToWGPU(cmd->copySize);
                 wgpu.commandEncoderCopyTextureToBuffer(innerEncoder, &source, &destination, &size);
                 break;

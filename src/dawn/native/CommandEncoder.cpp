@@ -1722,21 +1722,22 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
                 // checked in validating texture copy range.
                 DAWN_TRY(ValidateTextureCopyRange(GetDevice(), destination, *copySize));
             }
-            const TexelBlockInfo& blockInfo =
+            const TypedTexelBlockInfo& blockInfo =
                 destination.texture->GetFormat().GetAspectInfo(destination.aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
-                    source->layout, blockInfo,
+                    source->layout, blockInfo.ToTexelBlockInfo(),
                     destination.texture->GetFormat().HasDepthOrStencil()));
                 DAWN_TRY(ValidateLinearTextureData(source->layout, source->buffer->GetSize(),
-                                                   blockInfo, *copySize));
+                                                   blockInfo.ToTexelBlockInfo(), *copySize));
             }
 
             mTopLevelBuffers.insert(source->buffer);
             mTopLevelTextures.insert(destination.texture);
 
             TexelCopyBufferLayout srcLayout = source->layout;
-            ApplyDefaultTexelCopyBufferLayoutOptions(&srcLayout, blockInfo, *copySize);
+            ApplyDefaultTexelCopyBufferLayoutOptions(&srcLayout, blockInfo.ToTexelBlockInfo(),
+                                                     *copySize);
 
             TextureCopy dst;
             dst.texture = destination.texture;
@@ -1786,8 +1787,8 @@ void CommandEncoder::APICopyBufferToTexture(const TexelCopyBufferInfo* source,
                 allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
             copy->source.buffer = source->buffer;
             copy->source.offset = srcLayout.offset;
-            copy->source.bytesPerRow = srcLayout.bytesPerRow;
-            copy->source.rowsPerImage = srcLayout.rowsPerImage;
+            copy->source.blocksPerRow = blockInfo.BytesToBlocks(srcLayout.bytesPerRow);
+            copy->source.rowsPerImage = BlockCount{srcLayout.rowsPerImage};
             copy->destination = dst;
             copy->copySize = *copySize;
 
@@ -1828,21 +1829,23 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
                         source.texture));
                 }
             }
-            const TexelBlockInfo& blockInfo =
+            const TypedTexelBlockInfo& blockInfo =
                 source.texture->GetFormat().GetAspectInfo(source.aspect).block;
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(
-                    destination->layout, blockInfo,
+                    destination->layout, blockInfo.ToTexelBlockInfo(),
                     source.texture->GetFormat().HasDepthOrStencil()));
-                DAWN_TRY(ValidateLinearTextureData(
-                    destination->layout, destination->buffer->GetSize(), blockInfo, *copySize));
+                DAWN_TRY(ValidateLinearTextureData(destination->layout,
+                                                   destination->buffer->GetSize(),
+                                                   blockInfo.ToTexelBlockInfo(), *copySize));
             }
 
             mTopLevelTextures.insert(source.texture);
             mTopLevelBuffers.insert(destination->buffer);
 
             TexelCopyBufferLayout dstLayout = destination->layout;
-            ApplyDefaultTexelCopyBufferLayoutOptions(&dstLayout, blockInfo, *copySize);
+            ApplyDefaultTexelCopyBufferLayoutOptions(&dstLayout, blockInfo.ToTexelBlockInfo(),
+                                                     *copySize);
 
             auto format = source.texture->GetFormat();
             auto aspect = ConvertAspect(format, source.aspect);
@@ -1862,12 +1865,13 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
 
                 BufferCopy dst;
                 dst.buffer = destination->buffer;
-                dst.bytesPerRow = dstLayout.bytesPerRow;
-                dst.rowsPerImage = dstLayout.rowsPerImage;
+                dst.blocksPerRow = blockInfo.BytesToBlocks(dstLayout.bytesPerRow);
+                dst.rowsPerImage = BlockCount{dstLayout.rowsPerImage};
                 dst.offset = dstLayout.offset;
-                DAWN_TRY_CONTEXT(BlitTextureToBuffer(GetDevice(), this, src, dst, *copySize),
-                                 "copying texture %s to %s using blit workaround.",
-                                 src.texture.Get(), destination->buffer);
+                DAWN_TRY_CONTEXT(
+                    BlitTextureToBuffer(GetDevice(), this, src, dst, blockInfo.ToBlock(*copySize)),
+                    "copying texture %s to %s using blit workaround.", src.texture.Get(),
+                    destination->buffer);
 
                 return {};
             }
@@ -1880,8 +1884,8 @@ void CommandEncoder::APICopyTextureToBuffer(const TexelCopyTextureInfo* sourceOr
             t2b->source.aspect = ConvertAspect(source.texture->GetFormat(), source.aspect);
             t2b->destination.buffer = destination->buffer;
             t2b->destination.offset = dstLayout.offset;
-            t2b->destination.bytesPerRow = dstLayout.bytesPerRow;
-            t2b->destination.rowsPerImage = dstLayout.rowsPerImage;
+            t2b->destination.blocksPerRow = blockInfo.BytesToBlocks(dstLayout.bytesPerRow);
+            t2b->destination.rowsPerImage = BlockCount{dstLayout.rowsPerImage};
             t2b->copySize = *copySize;
 
             return {};

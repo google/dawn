@@ -64,6 +64,7 @@ struct TexelOrigin3D {
     constexpr TexelOrigin3D(const Origin3D& o) : x(o.x), y(o.y), z(o.z) {}
 
     // Convert to Origin3D
+    // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr Origin3D ToOrigin3D() const {
         return {static_cast<uint32_t>(x), static_cast<uint32_t>(y), static_cast<uint32_t>(z)};
     }
@@ -105,6 +106,7 @@ struct TexelExtent3D {
         : width(e.width), height(e.height), depthOrArrayLayers(e.depthOrArrayLayers) {}
 
     // Convert to Extent3D
+    // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr Extent3D ToExtent3D() const {
         return {static_cast<uint32_t>(width), static_cast<uint32_t>(height),
                 static_cast<uint32_t>(depthOrArrayLayers)};
@@ -149,6 +151,7 @@ struct TypedTexelBlockInfo {
         : byteSize(blockInfo.byteSize), width(blockInfo.width), height(blockInfo.height) {}
 
     // Convert to TexelBlockInfo
+    // TODO(crbug.com/424536624): Remove once strong types are used everywhere.
     constexpr TexelBlockInfo ToTexelBlockInfo() const {
         return {byteSize, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     }

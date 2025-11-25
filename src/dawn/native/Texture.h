@@ -201,6 +201,7 @@ class TextureBase : public RefCountedWithExternalCount<SharedResource> {
     // size is the one with paddings if necessary, which is always a multiple of the block size
     // and used in texture copying. The virtual size is the one without paddings, which is not
     // required to be a multiple of the block size and used in texture sampling.
+    // TODO(crbug.com/424536624): Return BlockExtent3D for these functions.
     Extent3D GetMipLevelSingleSubresourcePhysicalSize(uint32_t level, Aspect aspect) const;
     Extent3D GetMipLevelSingleSubresourceVirtualSize(uint32_t level, Aspect aspect) const;
     Extent3D ClampToMipLevelVirtualSize(uint32_t level,

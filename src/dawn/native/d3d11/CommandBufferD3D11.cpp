@@ -377,16 +377,17 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 Buffer* buffer = ToBackend(src.buffer.Get());
                 uint64_t bufferOffset = src.offset;
                 Ref<BufferBase> stagingBuffer;
+                const TypedTexelBlockInfo& blockInfo =
+                    ToBackend(dst.texture)->GetFormat().GetAspectInfo(dst.aspect).block;
+
                 // If the buffer is not mappable, we need to create a staging buffer and copy the
                 // data from the buffer to the staging buffer.
                 if (!buffer->IsCPUReadable()) {
-                    const TexelBlockInfo& blockInfo =
-                        ToBackend(dst.texture)->GetFormat().GetAspectInfo(dst.aspect).block;
                     // TODO(dawn:1768): use compute shader to copy data from buffer to texture.
                     BufferDescriptor desc;
-                    DAWN_TRY_ASSIGN(desc.size,
-                                    ComputeRequiredBytesInCopy(blockInfo, copy->copySize,
-                                                               src.bytesPerRow, src.rowsPerImage));
+                    desc.size =
+                        ComputeRequiredBytesInCopy(blockInfo, blockInfo.ToBlock(copy->copySize),
+                                                   src.blocksPerRow, src.rowsPerImage);
                     desc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
                     DAWN_TRY_ASSIGN(stagingBuffer, Buffer::Create(ToBackend(GetDevice()),
                                                                   Unpack(&desc), commandContext));
@@ -409,8 +410,10 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 
                 DAWN_ASSERT(scopedMap.GetMappedData());
                 const uint8_t* data = scopedMap.GetMappedData() + bufferOffset;
+                uint64_t bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
                 DAWN_TRY(texture->Write(commandContext, subresources, dst.origin, copy->copySize,
-                                        data, src.bytesPerRow, src.rowsPerImage));
+                                        data, static_cast<uint32_t>(bytesPerRow),
+                                        static_cast<uint32_t>(src.rowsPerImage)));
 
                 buffer->MarkUsedInPendingCommands();
                 break;
@@ -447,9 +450,14 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                     return {};
                 };
 
+                const TypedTexelBlockInfo& blockInfo =
+                    texture->GetFormat().GetAspectInfo(src.aspect).block;
+                uint64_t bytesPerRow = blockInfo.ToBytes(dst.blocksPerRow);
+
                 DAWN_TRY(ToBackend(src.texture)
                              ->Read(commandContext, subresources, src.origin, copy->copySize,
-                                    dst.bytesPerRow, dst.rowsPerImage, callback));
+                                    static_cast<uint32_t>(bytesPerRow),
+                                    static_cast<uint32_t>(dst.rowsPerImage), callback));
 
                 dst.buffer->MarkUsedInPendingCommands();
                 break;
