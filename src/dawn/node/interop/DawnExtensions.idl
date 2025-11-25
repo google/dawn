@@ -80,7 +80,6 @@ enum GPUFeatureName {
     "multi-draw-indirect",
 };
 
-// Not in webgpu.idl yet.
 interface GPURenderPassEncoder {
     undefined multiDrawIndirect(GPUBuffer indirectBuffer, GPUSize64 indirectOffset, GPUSize32 maxDrawCount,
         GPUBuffer? drawCountBuffer, optional GPUSize64 drawCountBufferOffset = 0);
@@ -107,19 +106,6 @@ interface GPURenderPassEncoder {
 interface GPUSupportedLimits {
     readonly attribute unsigned long maxImmediateSize;
 }
-
-// ============================================================================
-// WebGPU compat
-// ============================================================================
-dictionary GPUTextureDescriptor {
-    GPUTextureViewDimension textureBindingViewDimension;
-};
-interface GPUSupportedLimits {
-    readonly attribute unsigned long maxStorageBuffersInFragmentStage;
-    readonly attribute unsigned long maxStorageTexturesInFragmentStage;
-    readonly attribute unsigned long maxStorageBuffersInVertexStage;
-    readonly attribute unsigned long maxStorageTexturesInVertexStage;
-};
 
 // ============================================================================
 // Write timestamp

@@ -142,6 +142,12 @@ interop::GPUFlagsConstant GPUTexture::getUsage(Napi::Env env) {
     return result;
 }
 
+std::variant<interop::GPUTextureViewDimension, interop::UndefinedType>
+GPUTexture::getTextureBindingViewDimension(Napi::Env) {
+    // TODO(https://issues.chromium.org/458616688): Implement once the getter is added to dawn.json
+    return interop::UndefinedType{};
+}
+
 std::string GPUTexture::getLabel(Napi::Env) {
     return label_;
 }
