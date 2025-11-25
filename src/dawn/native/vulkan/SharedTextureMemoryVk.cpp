@@ -33,7 +33,6 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
-#include "dawn/native/SystemHandle.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/PhysicalDeviceVk.h"
@@ -43,6 +42,7 @@
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
 #include "dawn/native/wgpu_structs_autogen.h"
+#include "dawn/utils/SystemHandle.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/hardware_buffer.h>
@@ -442,8 +442,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         memoryRequirements, MemoryKind::DeviceLocal);
     DAWN_INVALID_IF(memoryTypeIndex == -1, "Unable to find an appropriate memory type for import.");
 
-    SystemHandle memoryFD;
-    DAWN_TRY_ASSIGN(memoryFD, SystemHandle::Duplicate(fd));
+    utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(fd);
 
     VkMemoryAllocateInfo memoryAllocateInfo = {};
     memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -903,8 +902,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                         "allocation size (%u).",
                         requirements.size, descriptor->allocationSize);
 
-        SystemHandle memoryFD;
-        DAWN_TRY_ASSIGN(memoryFD, SystemHandle::Duplicate(descriptor->memoryFD));
+        utils::SystemHandle memoryFD = utils::SystemHandle::Duplicate(descriptor->memoryFD);
 
         VkMemoryDedicatedAllocateInfo dedicatedAllocateInfo{};
         dedicatedAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
@@ -1042,7 +1040,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
                     wgpu::SharedFenceType::VkSemaphoreOpaqueFD, wgpu::SharedFenceType::SyncFD);
 #endif
 
-    SystemHandle handle;
+    utils::SystemHandle handle;
     {
         ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
@@ -1053,7 +1051,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
         // TODO(dawn:1745): Consider using one event per submit that is tracked by the
         // CommandRecordingContext so that we don't need to create one handle per texture,
         // and so we don't need to acquire it here to close it.
-        handle = SystemHandle::Acquire(semaphoreHandle);
+        handle = utils::SystemHandle::Acquire(semaphoreHandle);
         vkLayoutEndState->oldLayout = releasedOldLayout;
         vkLayoutEndState->newLayout = releasedNewLayout;
     }

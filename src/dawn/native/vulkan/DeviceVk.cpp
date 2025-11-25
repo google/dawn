@@ -41,7 +41,6 @@
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/IntegerTypes.h"
-#include "dawn/native/SystemHandle.h"
 #include "dawn/native/VulkanBackend.h"
 #include "dawn/native/vulkan/BackendVk.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
@@ -815,7 +814,7 @@ MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descript
         // Therefore, on success, because ImportSemaphore has dup'ed the handle,
         // we need to close the old handle by acquiring and dropping it.
         // TODO(dawn:1745): This entire code path will be deprecated and removed.
-        SystemHandle::Acquire(handle);
+        utils::SystemHandle::Acquire(handle);
         outWaitSemaphores->push_back(semaphore);
     }
 

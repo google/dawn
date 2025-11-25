@@ -31,7 +31,7 @@
 #include "dawn/common/Platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/SharedFence.h"
-#include "dawn/native/SystemHandle.h"
+#include "dawn/utils/SystemHandle.h"
 
 namespace dawn::native::vulkan {
 
@@ -53,16 +53,16 @@ class SharedFence final : public SharedFenceBase {
         StringView label,
         const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor);
 
-    const SystemHandle& GetHandle() const;
+    const utils::SystemHandle& GetHandle() const;
 
   private:
-    SharedFence(Device* device, StringView label, SystemHandle handle);
+    SharedFence(Device* device, StringView label, utils::SystemHandle handle);
     void DestroyImpl() override;
 
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;
 
     wgpu::SharedFenceType mType;
-    SystemHandle mHandle;
+    utils::SystemHandle mHandle;
 };
 
 }  // namespace dawn::native::vulkan

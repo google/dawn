@@ -37,9 +37,9 @@
 #include <vector>
 
 #include "dawn/native/D3D12Backend.h"
-#include "dawn/native/D3DBackend.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/tests/white_box/SharedTextureMemoryTests.h"
+#include "dawn/utils/SystemHandle.h"
 
 namespace dawn {
 namespace {
@@ -276,22 +276,20 @@ TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeatureD3D12) 
     ASSERT_EQ(hr, S_OK);
 
     // Create a shared handle for the fence.
-    HANDLE fenceSharedHandle = nullptr;
+    utils::SystemHandle fenceSharedHandle;
     hr = d3d12Device->CreateSharedHandle(d3d12Fence.Get(), nullptr, GENERIC_ALL, nullptr,
-                                         &fenceSharedHandle);
+                                         fenceSharedHandle.GetMut());
     ASSERT_EQ(hr, S_OK);
 
     // Attempt to import without the feature enabled; should be a device error.
     wgpu::SharedFenceDXGISharedHandleDescriptor sharedHandleDesc;
-    sharedHandleDesc.handle = fenceSharedHandle;
+    sharedHandleDesc.handle = fenceSharedHandle.Get();
 
     wgpu::SharedFenceDescriptor fenceDesc;
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc),
                             testing::HasSubstr("is not enabled"));
-
-    ::CloseHandle(fenceSharedHandle);
 }
 
 // Test that a shared handle can be imported, and then exported, using a D3D12 fence.
@@ -306,22 +304,19 @@ TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExportD3D12) {
     ASSERT_EQ(hr, S_OK);
 
     // Export a shared handle for the fence.
-    HANDLE fenceSharedHandle = nullptr;
+    utils::SystemHandle fenceSharedHandle;
     hr = d3d12Device->CreateSharedHandle(d3d12Fence.Get(), nullptr, GENERIC_ALL, nullptr,
-                                         &fenceSharedHandle);
+                                         fenceSharedHandle.GetMut());
     ASSERT_EQ(hr, S_OK);
 
     // Import into Dawn as a shared fence.
     wgpu::SharedFenceDXGISharedHandleDescriptor sharedHandleDesc;
-    sharedHandleDesc.handle = fenceSharedHandle;
+    sharedHandleDesc.handle = fenceSharedHandle.Get();
 
     wgpu::SharedFenceDescriptor fenceDesc;
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
-
-    // We can close our local HANDLE after import (ownership transferred / duplicated internally).
-    ::CloseHandle(fenceSharedHandle);
 
     // Export info back out.
     wgpu::SharedFenceDXGISharedHandleExportInfo sharedHandleInfo;
@@ -356,12 +351,12 @@ TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExportD3D12) {
     ASSERT_EQ(hr, S_OK);
 
     // Wait on the fence via event.
-    HANDLE ev = ::CreateEvent(nullptr, TRUE, FALSE, TEXT("FenceCompleteD3D12"));
-    ASSERT_NE(ev, (HANDLE) nullptr);
-    hr = d3d12Fence->SetEventOnCompletion(fenceValue + 1, ev);
+    utils::SystemHandle ev = utils::SystemHandle::Acquire(
+        ::CreateEvent(nullptr, TRUE, FALSE, TEXT("FenceCompleteD3D12")));
+    ASSERT_TRUE(ev.IsValid());
+    hr = d3d12Fence->SetEventOnCompletion(fenceValue + 1, ev.Get());
     ASSERT_EQ(hr, S_OK);
-    ::WaitForSingleObject(ev, INFINITE);
-    ::CloseHandle(ev);
+    ::WaitForSingleObject(ev.Get(), INFINITE);
 
     // Both fence objects should now report the updated value.
     EXPECT_EQ(fenceValue + 1, d3d12Fence->GetCompletedValue());
@@ -381,22 +376,19 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoNoChainedStructD3D12) {
     ASSERT_EQ(hr, S_OK);
 
     // Create a shared handle for the fence.
-    HANDLE fenceSharedHandle = nullptr;
+    utils::SystemHandle fenceSharedHandle;
     hr = d3d12Device->CreateSharedHandle(d3d12Fence.Get(), nullptr, GENERIC_ALL, nullptr,
-                                         &fenceSharedHandle);
+                                         fenceSharedHandle.GetMut());
     ASSERT_EQ(hr, S_OK);
 
     // Import into Dawn.
     wgpu::SharedFenceDXGISharedHandleDescriptor sharedHandleDesc;
-    sharedHandleDesc.handle = fenceSharedHandle;
+    sharedHandleDesc.handle = fenceSharedHandle.Get();
 
     wgpu::SharedFenceDescriptor fenceDesc;
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
-
-    // Close our local handle after import.
-    ::CloseHandle(fenceSharedHandle);
 
     // Export info with no chained struct.
     wgpu::SharedFenceExportInfo exportInfo;
@@ -419,22 +411,19 @@ TEST_P(SharedTextureMemoryTests, SharedFenceExportInfoInvalidChainedStructD3D12)
     ASSERT_EQ(hr, S_OK);
 
     // Create a shared handle for the fence.
-    HANDLE fenceSharedHandle = nullptr;
+    utils::SystemHandle fenceSharedHandle;
     hr = d3d12Device->CreateSharedHandle(d3d12Fence.Get(), nullptr, GENERIC_ALL, nullptr,
-                                         &fenceSharedHandle);
+                                         fenceSharedHandle.GetMut());
     ASSERT_EQ(hr, S_OK);
 
     // Import into Dawn.
     wgpu::SharedFenceDXGISharedHandleDescriptor sharedHandleDesc;
-    sharedHandleDesc.handle = fenceSharedHandle;
+    sharedHandleDesc.handle = fenceSharedHandle.Get();
 
     wgpu::SharedFenceDescriptor fenceDesc;
     fenceDesc.nextInChain = &sharedHandleDesc;
 
     wgpu::SharedFence fence = device.ImportSharedFence(&fenceDesc);
-
-    // Close our local handle after import.
-    ::CloseHandle(fenceSharedHandle);
 
     // Provide an invalid chained struct to ExportInfo.
     wgpu::ChainedStructOut otherStruct;

@@ -103,6 +103,8 @@ static_library("system_utils") {
     "CommandLineParser.cpp",
     "CommandLineParser.h",
     "PlatformDebugLogger.h",
+    "SystemHandle.cpp",
+    "SystemHandle.h",
     "SystemUtils.cpp",
     "SystemUtils.h",
     "Timer.h",

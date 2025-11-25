@@ -278,9 +278,14 @@ TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
     exportInfo.nextInChain = &syncFdExportInfo;
     endState.fences[0].ExportInfo(&exportInfo);
 
+    // AHardwareBuffer_lock consumes the fd, so duplicate it before passing.
+    // The original fd will be closed when endState is destroyed.
+    const int dupFd = dup(syncFdExportInfo.handle);
+    EXPECT_GE(dupFd, 0);
+
     void* ptr;
-    EXPECT_EQ(AHardwareBuffer_lock(aHardwareBuffer, AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN,
-                                   syncFdExportInfo.handle, nullptr, &ptr),
+    EXPECT_EQ(AHardwareBuffer_lock(aHardwareBuffer, AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN, dupFd,
+                                   nullptr, &ptr),
               0);
 
     auto* pixels = static_cast<utils::RGBA8*>(ptr);

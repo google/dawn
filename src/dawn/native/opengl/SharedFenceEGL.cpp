@@ -30,10 +30,11 @@
 #include <utility>
 
 #include "dawn/native/ChainUtils.h"
-#include "dawn/native/SystemHandle.h"
 #include "dawn/native/opengl/DeviceGL.h"
+#include "dawn/native/opengl/DisplayEGL.h"
 #include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/PhysicalDeviceGL.h"
+#include "dawn/utils/SystemHandle.h"
 
 namespace dawn::native::opengl {
 ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
@@ -44,8 +45,7 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
     DAWN_INVALID_IF(descriptor->handle < 0, "File descriptor (%d) was invalid.",
                     descriptor->handle);
 
-    SystemHandle handleForSyncCreation;
-    DAWN_TRY_ASSIGN(handleForSyncCreation, SystemHandle::Duplicate(descriptor->handle));
+    utils::SystemHandle handleForSyncCreation = utils::SystemHandle::Duplicate(descriptor->handle);
 
     const EGLint attribs[] = {
         EGL_SYNC_NATIVE_FENCE_FD_ANDROID,
@@ -62,8 +62,9 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
     EGLint fdForSharedFence;
     DAWN_TRY_ASSIGN(fdForSharedFence, sync->DupFD());
 
-    auto fence = AcquireRef(new SharedFenceEGL(device, label, wgpu::SharedFenceType::SyncFD,
-                                               SystemHandle::Acquire(fdForSharedFence), sync));
+    auto fence =
+        AcquireRef(new SharedFenceEGL(device, label, wgpu::SharedFenceType::SyncFD,
+                                      utils::SystemHandle::Acquire(fdForSharedFence), sync));
     return fence;
 #else
     DAWN_UNREACHABLE();
@@ -81,15 +82,15 @@ ResultOrError<Ref<SharedFence>> SharedFenceEGL::Create(
     Ref<WrappedEGLSync> sync;
     DAWN_TRY_ASSIGN(sync, WrappedEGLSync::AcquireExternal(display, descriptor->sync));
 
-    auto fence = AcquireRef(
-        new SharedFenceEGL(device, label, wgpu::SharedFenceType::EGLSync, SystemHandle(), sync));
+    auto fence = AcquireRef(new SharedFenceEGL(device, label, wgpu::SharedFenceType::EGLSync,
+                                               utils::SystemHandle(), sync));
     return fence;
 }
 
 SharedFenceEGL::SharedFenceEGL(Device* device,
                                StringView label,
                                wgpu::SharedFenceType type,
-                               SystemHandle&& handle,
+                               utils::SystemHandle&& handle,
                                Ref<WrappedEGLSync> sync)
     : SharedFence(device, label), mType(type), mHandle(std::move(handle)), mSync(sync) {}
 

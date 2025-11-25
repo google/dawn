@@ -103,11 +103,13 @@ dawn_add_library(
 set(private_system_headers
     "CommandLineParser.h"
     "PlatformDebugLogger.h"
+    "SystemHandle.h"
     "SystemUtils.h"
     "Timer.h"
 )
 set(system_sources
     "CommandLineParser.cpp"
+    "SystemHandle.cpp"
     "SystemUtils.cpp"
 )
 set(private_system_depends)

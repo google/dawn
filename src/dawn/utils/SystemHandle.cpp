@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2025 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,10 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/native/SystemHandle.h"
+#include "src/dawn/utils/SystemHandle.h"
 
 #include <utility>
 
+#include "dawn/common/Assert.h"
 #include "dawn/common/Log.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
@@ -39,7 +40,7 @@
 #include <unistd.h>
 #endif
 
-namespace dawn::native {
+namespace dawn::utils {
 
 namespace {
 
@@ -51,18 +52,16 @@ inline bool IsHandleValid(HANDLE handle) {
     return handle != nullptr;
 }
 
-inline ResultOrError<HANDLE> DuplicateHandle(HANDLE handle) {
+inline HANDLE DuplicateHandle(HANDLE handle) {
     HANDLE currentProcess = ::GetCurrentProcess();
     HANDLE outHandle;
-    DAWN_INTERNAL_ERROR_IF(!::DuplicateHandle(currentProcess, handle, currentProcess, &outHandle, 0,
-                                              FALSE, DUPLICATE_SAME_ACCESS),
-                           "DuplicateHandle failed");
+    DAWN_CHECK(::DuplicateHandle(currentProcess, handle, currentProcess, &outHandle, 0, FALSE,
+                                 DUPLICATE_SAME_ACCESS));
     return outHandle;
 }
 
-inline MaybeError CloseHandle(HANDLE handle) {
-    DAWN_INTERNAL_ERROR_IF(!::CloseHandle(handle), "CloseHandle failed");
-    return {};
+inline void CloseHandle(HANDLE handle) {
+    DAWN_CHECK(::CloseHandle(handle));
 }
 
 #elif DAWN_PLATFORM_IS(FUCHSIA)
@@ -73,16 +72,14 @@ inline bool IsHandleValid(zx_handle_t handle) {
     return handle > 0;
 }
 
-inline ResultOrError<zx_handle_t> DuplicateHandle(zx_handle_t handle) {
+inline zx_handle_t DuplicateHandle(zx_handle_t handle) {
     zx_handle_t outHandle = ZX_HANDLE_INVALID;
-    DAWN_INTERNAL_ERROR_IF(zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &outHandle) != ZX_OK,
-                           "zx_handle_duplicate failed");
+    DAWN_CHECK(zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &outHandle) == ZX_OK);
     return outHandle;
 }
 
-inline MaybeError CloseHandle(zx_handle_t handle) {
-    DAWN_INTERNAL_ERROR_IF(zx_handle_close(handle) != ZX_OK, "zx_handle_close failed");
-    return {};
+inline void CloseHandle(zx_handle_t handle) {
+    DAWN_CHECK(zx_handle_close(handle) == ZX_OK);
 }
 
 #elif DAWN_PLATFORM_IS(POSIX)
@@ -93,15 +90,14 @@ inline bool IsHandleValid(int handle) {
     return handle >= 0;
 }
 
-inline ResultOrError<int> DuplicateHandle(int handle) {
+inline int DuplicateHandle(int handle) {
     int outHandle = dup(handle);
-    DAWN_INTERNAL_ERROR_IF(outHandle < 0, "dup failed");
+    DAWN_CHECK(outHandle >= 0);
     return outHandle;
 }
 
-inline MaybeError CloseHandle(int handle) {
-    DAWN_INTERNAL_ERROR_IF(close(handle) < 0, "close failed");
-    return {};
+inline void CloseHandle(int handle) {
+    DAWN_CHECK(close(handle) >= 0);
 }
 
 #endif
@@ -153,21 +149,18 @@ SystemHandle::Handle SystemHandle::Detach() {
     return handle;
 }
 
-ResultOrError<SystemHandle> SystemHandle::Duplicate() const {
-    Handle handle;
-    DAWN_TRY_ASSIGN(handle, DuplicateHandle(mHandle));
+SystemHandle SystemHandle::Duplicate() const {
+    DAWN_CHECK(IsValid());
+
+    Handle handle = DuplicateHandle(mHandle);
     return SystemHandle(handle);
 }
 
 void SystemHandle::Close() {
     DAWN_ASSERT(IsValid());
-    auto result = CloseHandle(mHandle);
-    // Still invalidate the handle if Close failed.
-    // If Close failed, the handle surely was invalid already.
+    CloseHandle(mHandle);
+    // Invalidate the handle after closing.
     mHandle = kInvalidHandle;
-    if (result.IsError()) [[unlikely]] {
-        dawn::ErrorLog() << result.AcquireError()->GetFormattedMessage();
-    }
 }
 
 SystemHandle::~SystemHandle() {
@@ -176,4 +169,4 @@ SystemHandle::~SystemHandle() {
     }
 }
 
-}  // namespace dawn::native
+}  // namespace dawn::utils

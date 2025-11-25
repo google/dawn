@@ -151,7 +151,6 @@ set(private_headers
     "Surface.h"
     "SwapChain.h"
     "SystemEvent.h"
-    "SystemHandle.h"
     "Texture.h"
     "TexelBufferView.h"
     "TintUtils.h"
@@ -260,7 +259,6 @@ set(sources
     "Surface.cpp"
     "SwapChain.cpp"
     "SystemEvent.cpp"
-    "SystemHandle.cpp"
     "Texture.cpp"
     "TexelBufferView.cpp"
     "TintUtils.cpp"
@@ -899,6 +897,7 @@ set(dawn_native_private_depends
     absl::inlined_vector
     absl::str_format_internal
     absl::strings
+    dawn::dawn_system_utils
     libtint
     ${conditional_private_depends}
 )
