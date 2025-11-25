@@ -3606,7 +3606,7 @@ fn foo() {
 //                       ?
 //               +------------------------+
 //               |                        v
-//    CF  <---  CF' <- s1 <- CF1 <- s2 <-cF2
+//    CF  <---  CF' <- s1 <- CF1 <- s2 <-CF2
 //    ^          ^
 //    |?         |?
 //    CFResult --+
@@ -3641,6 +3641,7 @@ fn foo() {
 //    includes 'c!':  has unconditional continue
 //    includes 'c=':  has uniform continue
 //    includes 'cx':  has non-uniform continue
+//    includes ' ':   empty statement; used to force a continuing block.
 //  The Next behaviours are covered by combinations of the above.
 //  For example:
 //    if the full behaviour is "b=" then that implies a uniform Next.
@@ -3695,6 +3696,11 @@ struct Role {
                     ss << "  ";
                     break;
             }
+            if (remaining.starts_with(" ")) {
+                remaining.remove_prefix(1);
+                ss << ";/* empty statement */\n";
+                continue;
+            }
             if (remaining.starts_with("_")) {
                 remaining.remove_prefix(1);
                 if (enable_detect) {
@@ -3748,13 +3754,21 @@ struct Role {
             }
             if (remaining.starts_with("b=")) {
                 remaining.remove_prefix(2);
-                ss << "if uniform_cond { break; }\n";
+                if (part == Part::kContinuing) {
+                    ss << "break if uniform_cond;\n";
+                } else {
+                    ss << "if uniform_cond { break; }\n";
+                }
                 TINT_ASSERT(num_unconditional == 0) << "b= must not follow !";
                 continue;
             }
             if (remaining.starts_with("bx")) {
                 remaining.remove_prefix(2);
-                ss << "if nonuniform_cond { break; }\n";
+                if (part == Part::kContinuing) {
+                    ss << "break if nonuniform_cond;\n";
+                } else {
+                    ss << "if nonuniform_cond { break; }\n";
+                }
                 TINT_ASSERT(num_unconditional == 0) << "bx must not follow !";
                 continue;
             }
@@ -3786,7 +3800,7 @@ struct Role {
         }
         return ss.str();
     }
-    const Part part;
+    const Part part = Part::kBefore;
     const std::string role = "";
 };
 
@@ -3833,13 +3847,17 @@ fn main(@builtin(local_invocation_index) nonuniform_var: u32, @builtin(num_workg
 };
 
 std::vector<LoopGraphCase> LoopGraphCases() {
+    // L is for Loop
     auto L = [](std::string a, std::string b, std::string c, Verdict v) -> LoopGraphCase {
         return LoopGraphCase(a, b, "", c, v);
     };
+    // LC is for Loop with Continuing
+    auto LC = [](std::string a, std::string b, std::string c, std::string d,
+                 Verdict v) -> LoopGraphCase { return LoopGraphCase(a, b, c, d, v); };
 
-    return std::vector<LoopGraphCase>{
+    auto cases = std::vector<LoopGraphCase>{
         // clang-format off
-        // Loop without continue:
+        // Loop without continuing:
 
         // Scenario (A,B), i.e. A attacks, B detects
         // Tests CF <- CF'
@@ -3949,8 +3967,207 @@ std::vector<LoopGraphCase> LoopGraphCases() {
         L("", "r=#", "_", kReject),   // The attacker provides the break
         L("", "rx#", "_", kReject),  // The attacker provides the break
         L("", "r!#", "_", kAccept),  // unreachable
+
+        // Loop with continuing:
+        //
+        // Recall the scenarios are:
+        //    (A,B)  (A,C)  (A,D)
+        //    (B,B)  (B,C)  (B,D)
+        //    (C,B)  (C,C)  (C,D)
+        // Cases without C are those where the continuing block is not
+        // involved in uniformity.  For those, cases are already derived
+        // automatically from the corresponding case without the continuing
+        // block. (An empty continuing{} construct is inserted by the
+        // LoopGraphCases() function.)
+        // What remains is:
+        //           (A,C)
+        //           (B,C)
+        //    (C,B)  (C,C)  (C,D)
+        //
+        // Recall that a continuing block behaviour must be a subset of
+        // {Next,Break}
+
+        // Scenario (A,C)
+        LC("#", "", "_", "", kRejectForOtherReasons),  // infinite loop
+        LC("#", "", "_b=", "", kReject),
+        LC("#", "", "_bx", "", kReject),
+        LC("#", "", "_b!", "", kRejectForOtherReasons),  // invalid unconditional break
+        LC("#", "b=", "c=", "", kRejectForOtherReasons),  // invalid behaviour
+        LC("#", "b=", "cx", "", kRejectForOtherReasons),  // invalid behaviour
+        LC("#", "b=", "c!", "", kRejectForOtherReasons),  // invalid behaviour
+        LC("#", "b=", "r=", "", kRejectForOtherReasons),  // invalid behaviour
+        LC("#", "b=", "rx", "", kRejectForOtherReasons),  // invalid behaviour
+        LC("#", "b=", "r!", "", kRejectForOtherReasons),  // invalid behaviour
+
+        // Scenario (B,C)
+        //   Continuing block has behaviour {Next}
+        LC("", "#b=", "_", "", kReject),
+        LC("", "#bx", "_", "", kReject),
+        LC("", "#b!", "_", "", kAccept),  // detector unreachable
+        LC("", "#b=c=", "_", "", kReject),
+        LC("", "#b=cx", "_", "", kReject),
+        LC("", "#b=c!", "_", "", kReject),
+        LC("", "#bxc=", "_", "", kReject),
+        LC("", "#bxcx", "_", "", kReject),
+        LC("", "#bxc!", "_", "", kReject),
+        LC("", "#r=", "_", "", kReject),
+        LC("", "#rx", "_", "", kReject),
+        LC("", "#r!", "_", "", kAccept),  // detector unreachable
+        LC("", "#r=c=", "_", "", kReject),
+        LC("", "#r=cx", "_", "", kReject),
+        LC("", "#r=c!", "_", "", kReject),
+        LC("", "#rxc=", "_", "", kReject),
+        LC("", "#rxcx", "_", "", kReject),
+        LC("", "#rxc!", "_", "", kReject),
+        //   Continuing block behaviour includes Break.
+        //   (Exclude "b!" subcases because that's a naked 'break;',
+        //   which is disallowed.
+        LC("", "#", "_b=", "", kReject),
+        LC("", "#", "_bx", "", kReject),
+        LC("", "#b=", "_b=", "", kReject),
+        LC("", "#bx", "_bx", "", kReject),
+        LC("", "#b!", "_bx", "", kAccept),  // detector unreachable
+        LC("", "#r=", "_b=", "", kReject),
+        LC("", "#rx", "_bx", "", kReject),
+        LC("", "#r!", "_bx", "", kAccept),  // detector unreachable
+
+        // Scenario (C,B)
+        // i.e. attacker in continuing block, detector in body.
+        // This fails when there's an edge from CF' to CF2, which occurs
+        // when the behavior of s1 includes Next or Continue.
+        LC("", "_", "#", "", kAcceptLoopExitFromAttackWithoutDetect),  // not infinite; attacker is a break-if
+        // Try "break" first.
+        LC("", "_b=", "#", "", kReject),
+        LC("", "_bx", "#", "", kReject),
+        LC("", "_b!", "#", "", kAccept),  // attacker unreachable
+        LC("", "_b=c=", "#", "", kReject),
+        LC("", "_b=cx", "#", "", kReject),
+        LC("", "_b=c!", "#", "", kReject),
+        LC("", "_bxc=", "#", "", kReject),
+        LC("", "_bxcx", "#", "", kReject),
+        LC("", "_bxc!", "#", "", kReject),
+        // Try "return" first.
+        LC("", "_r=", "#", "", kReject),
+        LC("", "_rx", "#", "", kReject),
+        LC("", "_r!", "#", "", kAccept),  // attacker unreachable
+        LC("", "_r=c=", "#", "", kReject),
+        LC("", "_r=cx", "#", "", kReject),
+        LC("", "_r=c!", "#", "", kReject),
+        LC("", "_rxc=", "#", "", kReject),
+        LC("", "_rxcx", "#", "", kReject),
+        LC("", "_rxc!", "#", "", kReject),
+        // Try "continue" first.
+        LC("", "_c=", "#", "", kAcceptLoopExitFromAttackWithoutDetect),  // not infinite; attacker is a break-if
+        LC("", "_cx", "#", "", kAcceptLoopExitFromAttackWithoutDetect),  // not infinite; attacker is a break-if
+        LC("", "_c!", "#", "", kAcceptLoopExitFromAttackWithoutDetect),  // not infinite; attacker is a break-if
+        LC("", "_c=b=", "#", "", kReject),
+        LC("", "_c=bx", "#", "", kReject),
+        LC("", "_c=b!", "#", "", kReject),
+        LC("", "_cxb=", "#", "", kReject),
+        LC("", "_cxbx", "#", "", kReject),
+        LC("", "_cxb!", "#", "", kReject),
+        LC("", "_c=r=", "#", "", kReject),
+        LC("", "_c=rx", "#", "", kReject),
+        LC("", "_c=r!", "#", "", kReject),
+        LC("", "_cxr=", "#", "", kReject),
+        LC("", "_cxrx", "#", "", kReject),
+        LC("", "_cxr!", "#", "", kReject),
+
+        // Scenario (C,C)
+        // Continuing block has detector, then attacker.
+        // Fails only when the continuing block is reachable,
+        // and there is a backedge.
+        LC("", "", "_#", "", kAcceptLoopExitFromAttackWithoutDetect),  // not infinite; attacker is a break-if
+        LC("", "b=", "_#", "", kReject),
+        LC("", "bx", "_#", "", kReject),
+        LC("", "b!", "_#", "", kAccept),
+        LC("", "r=", "_#", "", kReject),
+        LC("", "rx", "_#", "", kReject),
+        LC("", "r!", "_#", "", kAccept),
+        LC("", "c=", "_#", "", kAcceptLoopExitFromAttackWithoutDetect),
+        LC("", "cx", "_#", "", kAcceptLoopExitFromAttackWithoutDetect),
+        LC("", "c!", "_#", "", kAcceptLoopExitFromAttackWithoutDetect),
+
+        // Scenario (C,D)
+        //  i.e. attacker in continuing block, detector after the loop.
+        //
+        //  Option 1: s1 behaviour is {Break,Return}, in which case uniformity
+        //  after the loop depends on the body, not the continuing block.
+        //
+        //  Option 2: s1 behaviour intersects {Next,Continue}.
+        //  Rejects when there is a path from CFResult to CF2.
+        //  This occurs when both:
+        //    CFResult -> CF' exists, i.e. Return in s1's behaviour, and
+        //    CF' -> CF2 exists, i.e. Next or Continue in s1's behaviour.
+        //  When Return is not in s1's behaviour, divergence from a break
+        //  within the loop will resolve (reconverge) at the end of the loop.
+        LC("", "", "#", "_", kAcceptLoopExitFromAttack),  // not infinite; attacker is a break-if
+        LC("", "b=", "#", "_", kAccept),
+        LC("", "bx", "#", "_", kAccept),
+        LC("", "b!", "#", "_", kAccept),
+        LC("", "b=c=", "#", "_", kAccept),
+        LC("", "b=cx", "#", "_", kAccept),
+        LC("", "b=c!", "#", "_", kAccept),
+        LC("", "bxc=", "#", "_", kAccept),
+        LC("", "bxcx", "#", "_", kAccept),
+        LC("", "bxc!", "#", "_", kAccept),
+        LC("", "b=r=", "#", "_", kReject),
+        LC("", "b=rx", "#", "_", kReject),
+        LC("", "b=r!", "#", "_", kAccept),  // s1 behavior is {Break,Return}
+                                            // so CFResult -> CF1, uniform
+        LC("", "bxr=", "#", "_", kReject),
+        LC("", "bxrx", "#", "_", kReject),
+        LC("", "bxr!", "#", "_", kReject),  // s1 behavior is {Break,Return}
+                                            // so CFResult -> CF1, nonuniform
+        LC("", "r=", "#", "_", kReject),
+        LC("", "rx", "#", "_", kReject),
+        LC("", "r!", "#", "_", kAccept),  // detector is unreachable
+        LC("", "r=b=", "#", "_", kReject),
+        LC("", "r=bx", "#", "_", kReject),
+        LC("", "r=b!", "#", "_", kAccept),  // s1 behavior is {Break,Return}
+                                            // so CFResult -> CF1, uniform
+        LC("", "r=c=", "#", "_", kReject),
+        LC("", "r=cx", "#", "_", kReject),
+        LC("", "r=c!", "#", "_", kReject),
+        LC("", "rxb=", "#", "_", kReject),
+        LC("", "rxbx", "#", "_", kReject),
+        LC("", "rxb!", "#", "_", kReject),  // s1 behavior is {Break,Return}
+                                            // so CFResult -> CF1, nonuniform
+        LC("", "rxc=", "#", "_", kReject),
+        LC("", "rxcx", "#", "_", kReject),
+        LC("", "rxc!", "#", "_", kReject),
+        // Put "continue" first.
+        LC("", "c=", "#", "_", kAcceptLoopExitFromAttack),
+        LC("", "cx", "#", "_", kAcceptLoopExitFromAttack),
+        LC("", "c!", "#", "_", kAcceptLoopExitFromAttack),
+        LC("", "c=b=", "#", "_", kAccept),
+        LC("", "c=bx", "#", "_", kAccept),
+        LC("", "c=b!", "#", "_", kAccept),
+        LC("", "cxb=", "#", "_", kAccept),
+        LC("", "cxbx", "#", "_", kAccept),
+        LC("", "cxb!", "#", "_", kAccept),
+        LC("", "c=r=", "#", "_", kReject),
+        LC("", "c=rx", "#", "_", kReject),
+        LC("", "c=r!", "#", "_", kReject),
+        LC("", "cxr=", "#", "_", kReject),
+        LC("", "cxrx", "#", "_", kReject),
+        LC("", "cxr!", "#", "_", kReject),
         // clang-format on
     };
+
+    // Automatically derive loop-continuing cases from loop-without-continuing
+    // cases.
+    const auto n = cases.size();
+    for (size_t i = 0; i < n; i++) {
+        auto& case_ = cases[i];
+        if (case_.continuing.role.empty()) {
+            // Construct a new loop case, with an empty continuing clause.
+            cases.emplace_back(case_.before.role, case_.body.role, " ", case_.after.role,
+                               case_.verdict);
+        }
+    }
+
+    return cases;
 }
 
 class LoopGraphTest : public UniformityAnalysisTestBase,
