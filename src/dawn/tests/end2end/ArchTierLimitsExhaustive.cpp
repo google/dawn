@@ -69,6 +69,17 @@ class TierArchInfoTest_TieredMaxLimits : public TierArchInfoTestBase {
         supported.UnlinkedCopyTo(&required);
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> features;
+        if (SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix})) {
+            features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix);
+        }
+        if (SupportsFeatures({wgpu::FeatureName::ShaderF16})) {
+            features.push_back(wgpu::FeatureName::ShaderF16);
+        }
+        return features;
+    }
+
     std::string GetFullParamString(int alternate = 0) {
         std::stringstream param_names_all;
         param_names_all << this->GetParam();
@@ -92,6 +103,17 @@ class TierArchInfoTest_TieredMaxLimits : public TierArchInfoTestBase {
             return feature_name_string;
         }
         return feature_name_string.substr(prefix.size());
+    }
+
+    std::string SubgroupMatrixComponentTypeToString(wgpu::SubgroupMatrixComponentType ty) {
+        std::stringstream component_name;
+        component_name << ty;
+        auto component_name_string = component_name.str();
+        std::string prefix = "SubgroupMatrixComponentType::";
+        if (component_name_string.find(prefix) == std::string::npos) {
+            return component_name_string;
+        }
+        return component_name_string.substr(prefix.size());
     }
 };
 
@@ -465,7 +487,6 @@ AddDevice({0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 
     // We need alternates mostly due to differences in driver versions.
     // Some devices might be on one driver that supports limit X while others might be on a driver
     // that supports limit Y.
-    // In the case of alternates we append a "_alt{n}" where n starts at 1 (first alternate).
     bool encountered_error = false;
     std::string full_param = GetFullParamString();
     auto iter = device_map.equal_range(full_param);
@@ -539,6 +560,112 @@ AddDevice({0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 
             }
             first = false;
             expected_str += supported_features.contains(feature) ? "1" : "0";
+        }
+        expected_str += "}, \"" + full_param + "\");\n";
+
+        SCOPED_TRACE(expected_str);
+        EXPECT_FALSE(encountered_error);
+    }
+}
+
+TEST_P(TierArchInfoTest_TieredMaxLimits, SemiExhaustiveTestSubgroupMatrixConfigs) {
+    DAWN_TEST_UNSUPPORTED_IF(
+        !adapter.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroupMatrix));
+
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesSubgroupMatrixConfigs subgroupMatrixConfigs;
+    info.nextInChain = &subgroupMatrixConfigs;
+    ASSERT_EQ(adapter.GetInfo(&info), wgpu::Status::Success);
+
+    std::multimap<std::string, std::vector<wgpu::SubgroupMatrixConfig>> device_map;
+
+    auto AddDevice = [&](const std::vector<wgpu::SubgroupMatrixConfig>& vec,
+                         std::string device_str) { device_map.insert({device_str, vec}); };
+
+    // clang-format off
+    {
+            using enum wgpu::SubgroupMatrixComponentType;
+
+  AddDevice({{F16, F32, 8, 8, 16},
+            {I8, I32, 8, 8, 32},
+            {U8, U32, 8, 8, 32},
+            }, "Vulkan_Intel_R__Iris_R__Xe_Graphics__TGL_GT2");
+  AddDevice({{F32, F32, 8, 8, 8},
+            {F16, F16, 8, 8, 8},
+            }, "Metal_Apple_M2");
+   }
+    // clang-format on
+
+    // We need alternates mostly due to differences in driver versions.
+    // Some devices might be on one driver that supports limit X while others might be on a driver
+    // that supports limit Y.
+    bool encountered_error = false;
+    std::string full_param = GetFullParamString();
+    auto iter = device_map.equal_range(full_param);
+    auto iter_match = iter.first;
+    auto iter_end = iter.second;
+
+    if (iter_match == iter_end) {
+        // CQ bots will pass in '--test-launcher-bot-mode' as a command line parameter.
+        // In this case, we didn't find any results, so we want to make sure we report an error
+        // as this is a new CQ bot and we need to update the  test results.
+        if (IsTestLauncherBotMode()) {
+            encountered_error = true;
+        } else {
+            // Skipping the test when the device params does not match allows us to only
+            // test known CQ (and try) bots.
+            GTEST_SKIP();
+        }
+    } else {
+        std::string error_str;
+        for (; iter_match != iter_end; iter_match++) {
+            encountered_error = false;
+            auto& expect_configs = iter_match->second;
+            if (subgroupMatrixConfigs.configCount != expect_configs.size()) {
+                // Try next alternate
+                encountered_error = true;
+                continue;
+            }
+
+            for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+                auto& config = subgroupMatrixConfigs.configs[i];
+                auto& expect_config = expect_configs[i];
+                if (config.componentType != expect_config.componentType ||
+                    config.resultComponentType != expect_config.resultComponentType ||
+                    config.N != expect_config.N || config.M != expect_config.M ||
+                    config.K != expect_config.K) {
+                    encountered_error = true;
+                    break;
+                }
+            }
+
+            if (!encountered_error) {
+                // If there was no error then all of the configs for this device match.
+                // We're done, and can break out at this point. In the case of a config
+                // error we keep looking at any other configs for this device.
+                break;
+            }
+        }
+    }
+
+    if (encountered_error) {
+        std::string expected_str =
+            "\n  Mismatch found! The full set of correct subgroup matrix configs for this device "
+            "are:\n"
+            "  AddDevice({";
+        for (size_t i = 0; i < subgroupMatrixConfigs.configCount; i++) {
+            auto& config = subgroupMatrixConfigs.configs[i];
+            expected_str += "{";
+            expected_str += SubgroupMatrixComponentTypeToString(config.componentType);
+            expected_str += ", ";
+            expected_str += SubgroupMatrixComponentTypeToString(config.resultComponentType);
+            expected_str += ", ";
+            expected_str += std::to_string(config.N);
+            expected_str += ", ";
+            expected_str += std::to_string(config.M);
+            expected_str += ", ";
+            expected_str += std::to_string(config.K);
+            expected_str += "},\n            ";
         }
         expected_str += "}, \"" + full_param + "\");\n";
 
