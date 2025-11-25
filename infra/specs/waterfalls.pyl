@@ -202,7 +202,9 @@
         'mixins': [
           'mac_retina_amd_555x_gpu_stable',
         ],
-        'test_suites': {},
+        'test_suites': {
+          'gtest_tests': 'real_hardware_common_gtests',
+        },
       },
       'dawn-mac-x64-intel-uhd630-rel': {
         'os_type': 'mac',
