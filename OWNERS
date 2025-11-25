@@ -17,6 +17,10 @@ per-file README.md=file://docs/OWNERS
 per-file CMake*=rharrison@chromium.org,amaiorano@google.com
 per-file BUILD.*=rharrison@chromium.org,amaiorano@google.com
 
+# go.* is only relevant to the Go code under //tools/src/
+per-file go.mod=file://tools/OWNERS
+per-file go.sum=file://tools/OWNERS
+
 # gitlinks that anyone can update just like DEPS
 per-file build=*
 per-file buildtools=*
