@@ -58,6 +58,9 @@ default_args = {
 
   # Chromium defaults to minimum 15 at least.
   mac_sdk_min = "12"
+
+  # Dawn needs to stay in C++20 for longer than Chromium due to some partners.
+  use_cxx23 = false
 }
 
 # Export compile_commands.json to build dir for all generated targets.
