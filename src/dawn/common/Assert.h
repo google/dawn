@@ -88,7 +88,7 @@
 #else  // DAWN_COMPILER_IS(*)
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition) \
     do {                                                         \
-        [[maybe_unused]] auto unused = sizeof(condition);        \
+        [[maybe_unused]] auto unused = sizeof(!!(condition));    \
     } while (DAWN_ASSERT_LOOP_CONDITION)
 #endif  // DAWN_COMPILER_IS(*)
 
