@@ -641,11 +641,11 @@ MaybeError Buffer::SynchronizeBufferBeforeMapping() {
         SharedBufferMemoryBase::PendingFenceList fences;
         contents->AcquirePendingFences(&fences);
         for (const auto& fence : fences) {
-            HANDLE fenceEvent = 0;
             ComPtr<ID3D12Fence> d3dFence = ToBackend(fence.object)->GetD3DFence();
             if (d3dFence->GetCompletedValue() < fence.signaledValue) {
-                d3dFence->SetEventOnCompletion(fence.signaledValue, fenceEvent);
-                WaitForSingleObject(fenceEvent, INFINITE);
+                // If hEvent is NULL, SetEventOnCompletion will return when fence reaches
+                // fence.signaledValue.
+                d3dFence->SetEventOnCompletion(fence.signaledValue, NULL);
             }
         }
     }
