@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_BINDGROUP_H_
 
 #include <array>
+#include <optional>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -61,7 +62,7 @@ struct BufferBinding {
 
 class BindGroupBase : public ApiObjectBase {
   public:
-    static Ref<BindGroupBase> MakeError(DeviceBase* device, StringView label);
+    static Ref<BindGroupBase> MakeError(DeviceBase* device, const BindGroupDescriptor* descriptor);
 
     MaybeError Initialize(const UnpackedPtr<BindGroupDescriptor>& descriptor);
 
@@ -71,7 +72,7 @@ class BindGroupBase : public ApiObjectBase {
     void APIDestroy();
     wgpu::Status APIUpdate(const BindGroupEntry* entry);
     uint32_t APIInsertBinding(const BindGroupEntryContents* contents);
-    void APIRemoveBinding(uint32_t binding);
+    wgpu::Status APIRemoveBinding(uint32_t binding);
 
     BindGroupLayoutBase* GetFrontendLayout();
     const BindGroupLayoutBase* GetFrontendLayout() const;
@@ -130,6 +131,7 @@ class BindGroupBase : public ApiObjectBase {
     BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     MaybeError ValidateDestroy() const;
+    std::optional<BindingIndex> GetValidDynamicArraySlotFor(BindingNumber binding) const;
 
     Ref<BindGroupLayoutBase> mLayout;
     BindGroupLayoutInternalBase::BindingDataPointers mBindingData;

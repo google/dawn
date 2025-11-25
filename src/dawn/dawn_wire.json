@@ -259,6 +259,7 @@
             "AdapterRequestDevice",
             "BindGroupUpdate",
             "BindGroupInsertBinding",
+            "BindGroupRemoveBinding",
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",

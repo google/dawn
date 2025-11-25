@@ -346,6 +346,7 @@
             {
                 "name": "remove binding",
                 "tags": ["dawn"],
+                "returns": "status",
                 "args": [
                     {"name": "binding", "type": "uint32_t"}
                 ]
@@ -4529,6 +4530,12 @@
         "category": "constant",
         "type": "size_t",
         "value": "SIZE_MAX"
+    },
+    "invalid binding" : {
+        "category": "constant",
+        "tags": ["dawn"],
+        "type": "uint32_t",
+        "value": "UINT32_MAX"
     },
     "ObjectType": {
       "_comment": "Only used for the wire",

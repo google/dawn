@@ -27,6 +27,7 @@
 
 #include "dawn/native/BindGroup.h"
 
+#include <algorithm>
 #include <limits>
 #include <variant>
 
@@ -169,7 +170,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateTextureBindGroupEntry(DeviceBase* device, const BindGroupEntry& entry) {
+MaybeError ValidateTextureBindGroupEntry(const DeviceBase* device, const BindGroupEntry& entry) {
     DAWN_INVALID_IF(entry.textureView == nullptr, "Binding entry textureView not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.buffer != nullptr,
@@ -480,7 +481,29 @@ MaybeError ValidateStaticSamplersWithSampledTextures(
     return {};
 }
 
-MaybeError ValidateBindGroupDynamicBindingArray(DeviceBase* device,
+MaybeError ValidateDynamicBindingArrayEntry(const DeviceBase* device,
+                                            wgpu::DynamicBindingKind kind,
+                                            const BindGroupEntry& entry) {
+    switch (kind) {
+        case wgpu::DynamicBindingKind::SampledTexture: {
+            DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
+            TextureViewBase* view = entry.textureView;
+            DAWN_INVALID_IF(
+                (view->GetUsage() & kTextureViewOnlyUsages) != wgpu::TextureUsage::TextureBinding,
+                "%s's usages (%s) are not exactly %s.", view,
+                view->GetUsage() & kTextureViewOnlyUsages, wgpu::TextureUsage::TextureBinding);
+            DAWN_INVALID_IF(view->IsYCbCr(), "%s is YCbCr.", view);
+            break;
+        }
+
+        case wgpu::DynamicBindingKind::Undefined:
+            DAWN_UNREACHABLE();
+    }
+
+    return {};
+}
+
+MaybeError ValidateBindGroupDynamicBindingArray(const DeviceBase* device,
                                                 const UnpackedPtr<BindGroupDescriptor> descriptor,
                                                 UsageValidationMode mode) {
     auto* dynamic = descriptor.Get<BindGroupDynamicBindingArray>();
@@ -525,26 +548,13 @@ MaybeError ValidateBindGroupDynamicBindingArray(DeviceBase* device,
                         i, binding, dynamicArrayStart, dynamicArrayStart + dynamicArraySize);
 
         DAWN_INVALID_IF(dynamicBindingsSeen.contains(binding),
-                        "In entries[%u], binding index %u already used by a previous entry", i,
+                        "In entries[%u], binding index %u already used by a previous entry.", i,
                         binding);
         dynamicBindingsSeen.insert(binding);
 
-        switch (layout->GetDynamicArrayKind()) {
-            case wgpu::DynamicBindingKind::SampledTexture: {
-                DAWN_TRY(ValidateTextureBindGroupEntry(device, entry));
-                TextureViewBase* view = entry.textureView;
-                DAWN_INVALID_IF((view->GetUsage() & kTextureViewOnlyUsages) !=
-                                    wgpu::TextureUsage::TextureBinding,
-                                "In entries[%u], the %s's usages (%s) are not exactly %s.", i, view,
-                                view->GetUsage() & kTextureViewOnlyUsages,
-                                wgpu::TextureUsage::TextureBinding);
-                DAWN_INVALID_IF(view->IsYCbCr(), "In entries[%u], %s is YCbCr.", i, view);
-                break;
-            }
-
-            case wgpu::DynamicBindingKind::Undefined:
-                DAWN_UNREACHABLE();
-        }
+        DAWN_TRY_CONTEXT(
+            ValidateDynamicBindingArrayEntry(device, layout->GetDynamicArrayKind(), entry),
+            "validating that entries[%i] can be used in the dynamic binding array.", i);
     }
 
     return {};
@@ -873,15 +883,45 @@ BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, Strin
     : ApiObjectBase(device, tag, label), mBindingData() {}
 
 // static
-Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, StringView label) {
+Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device,
+                                            const BindGroupDescriptor* descriptor) {
     class ErrorBindGroupBase final : public BindGroupBase {
       public:
-        explicit ErrorBindGroupBase(DeviceBase* device, StringView label)
-            : BindGroupBase(device, ObjectBase::kError, label) {}
+        explicit ErrorBindGroupBase(DeviceBase* device, const BindGroupDescriptor* descriptor)
+            : BindGroupBase(device, ObjectBase::kError, descriptor->label) {
+            // Create a DynamicArrayState even for an error bindgroup because we need to do state
+            // tracking used for the validation of synchronous errors.
+            BindGroupLayoutBase* layout = descriptor->layout;
+            if (!layout->IsError() && layout->GetInternalBindGroupLayout()->HasDynamicArray()) {
+                SetErrorDynamicArrayState(descriptor);
+            }
+        }
+
+        void SetErrorDynamicArrayState(const BindGroupDescriptor* descriptor) {
+            // Avoid allocating tons of memory if dynamicArraySize is huge, instead clamp to
+            // maxDynamicBindingArraySize.
+            uint32_t dynamicArraySize =
+                GetDevice()->GetLimits().dynamicBindingArrayLimits.maxDynamicBindingArraySize;
+
+            for (const wgpu::ChainedStruct* chain = descriptor->nextInChain; chain != nullptr;
+                 chain = chain->nextInChain) {
+                if (chain->sType == wgpu::SType::BindGroupDynamicBindingArray) {
+                    auto* dynamic = reinterpret_cast<const BindGroupDynamicBindingArray*>(chain);
+                    dynamicArraySize = std::min(dynamicArraySize, dynamic->dynamicArraySize);
+                    break;
+                }
+            }
+
+            mLayout = descriptor->layout;
+            mDynamicArray = AcquireRef(new DynamicArrayState(
+                BindingIndex(dynamicArraySize),
+                mLayout->GetInternalBindGroupLayout()->GetDynamicArrayKind()));
+        }
 
         MaybeError InitializeImpl() override { DAWN_UNREACHABLE(); }
     };
-    return AcquireRef(new ErrorBindGroupBase(device, label));
+
+    return AcquireRef(new ErrorBindGroupBase(device, descriptor));
 }
 
 ObjectType BindGroupBase::GetType() const {
@@ -904,18 +944,51 @@ void BindGroupBase::APIDestroy() {
 }
 
 wgpu::Status BindGroupBase::APIUpdate(const BindGroupEntry* entry) {
+    std::optional<BindingIndex> slot = GetValidDynamicArraySlotFor(BindingNumber(entry->binding));
+    if (!slot.has_value()) {
+        return wgpu::Status::Error;
+    }
+
+    // TODO(435317394): Check if the slot is already in use and return a synchronous error.
+
+    if (GetDevice()->ConsumedError(  //
+            ([&]() -> MaybeError {
+                DAWN_TRY(GetDevice()->ValidateObject(this));
+                return ValidateDynamicBindingArrayEntry(GetDevice(), mDynamicArray->GetKind(),
+                                                        *entry);
+            })(),
+            "validating %s.Update()", this)) {
+        // TODO(435317394): Should this still mark the entry as used in the dynamic array.
+        return wgpu::Status::Success;
+    }
+
     // TODO(435317394): Implement bindless bindgroup updates.
-    DAWN_UNREACHABLE();
+    return wgpu::Status::Success;
 }
 
 uint32_t BindGroupBase::APIInsertBinding(const BindGroupEntryContents* contents) {
+    if (mDynamicArray == nullptr || mDynamicArray->IsDestroyed()) {
+        return wgpu::kInvalidBinding;
+    }
+
     // TODO(435317394): Implement bindless bindgroup updates.
     DAWN_UNREACHABLE();
 }
 
-void BindGroupBase::APIRemoveBinding(uint32_t binding) {
-    // TODO(435317394): Implement bindless bindgroup updates.
-    DAWN_UNREACHABLE();
+wgpu::Status BindGroupBase::APIRemoveBinding(uint32_t binding) {
+    std::optional<BindingIndex> slot = GetValidDynamicArraySlotFor(BindingNumber(binding));
+    if (!slot.has_value()) {
+        return wgpu::Status::Error;
+    }
+
+    if (GetDevice()->ConsumedError(GetDevice()->ValidateObject(this),
+                                   "validating %s.RemoveBinding(%u)", this, binding)) {
+        // TODO(435317394): Should this still mark the entry as unused in the dynamic array.
+        return wgpu::Status::Success;
+    }
+
+    // TODO(435317394): Implement bindless bindgroup removeBinding.
+    return wgpu::Status::Success;
 }
 
 BindGroupLayoutBase* BindGroupBase::GetFrontendLayout() {
@@ -929,12 +1002,12 @@ const BindGroupLayoutBase* BindGroupBase::GetFrontendLayout() const {
 }
 
 BindGroupLayoutInternalBase* BindGroupBase::GetLayout() {
-    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mLayout != nullptr);
     return mLayout->GetInternalBindGroupLayout();
 }
 
 const BindGroupLayoutInternalBase* BindGroupBase::GetLayout() const {
-    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mLayout != nullptr);
     return mLayout->GetInternalBindGroupLayout();
 }
 
@@ -1027,13 +1100,31 @@ DynamicArrayState* BindGroupBase::GetDynamicArray() const {
 }
 
 MaybeError BindGroupBase::ValidateDestroy() const {
-    DAWN_TRY(GetDevice()->ValidateObject(this));
-
     // On the queue we only validate that dynamic array bind groups are alive in a submit because
     // validating for all bind groups would be too expensive. For that reason only allow dynamic
     // arrays to be destroyed early.
-    DAWN_INVALID_IF(!HasDynamicArray(), "%s doesn't contain a dynamic array.", this);
+    DAWN_INVALID_IF(mDynamicArray == nullptr, "%s doesn't contain a dynamic array.", this);
     return {};
+}
+
+std::optional<BindingIndex> BindGroupBase::GetValidDynamicArraySlotFor(
+    BindingNumber binding) const {
+    // Some validation is required to return a synchronous error. It needs to be able to run even on
+    // error BindGroups because it must act the same way as an implementation running on top of the
+    // wire client-side and doesn't know if objects are errors or not.
+    if (mDynamicArray == nullptr || mDynamicArray->IsDestroyed()) {
+        return {};
+    }
+
+    if (binding < GetLayout()->GetAPIDynamicArrayStart()) {
+        return {};
+    }
+    BindingIndex slot = GetLayout()->GetDynamicBindingIndex(binding);
+    if (slot >= mDynamicArray->GetAPISize()) {
+        return {};
+    }
+
+    return slot;
 }
 
 }  // namespace dawn::native

@@ -47,7 +47,7 @@ uint32_t BindGroup::APIInsertBinding(const WGPUBindGroupEntryContents* contents)
     DAWN_UNREACHABLE();
 }
 
-void BindGroup::APIRemoveBinding(uint32_t binding) {
+WGPUStatus BindGroup::APIRemoveBinding(uint32_t binding) {
     // TODO(435317394): Implemented bindless in the wire.
     DAWN_UNREACHABLE();
 }

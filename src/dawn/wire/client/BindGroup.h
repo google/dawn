@@ -43,7 +43,7 @@ class BindGroup final : public ObjectBase {
 
     WGPUStatus APIUpdate(const WGPUBindGroupEntry* entry);
     uint32_t APIInsertBinding(const WGPUBindGroupEntryContents* contents);
-    void APIRemoveBinding(uint32_t binding);
+    WGPUStatus APIRemoveBinding(uint32_t binding);
 };
 
 }  // namespace dawn::wire::client

@@ -254,6 +254,14 @@ void DynamicArrayState::Destroy() {
     mDestroyed = true;
 }
 
+wgpu::DynamicBindingKind DynamicArrayState::GetKind() const {
+    return mKind;
+}
+
+BindingIndex DynamicArrayState::GetAPISize() const {
+    return mAPISize;
+}
+
 ityp::span<BindingIndex, const Ref<TextureViewBase>> DynamicArrayState::GetBindings() const {
     DAWN_ASSERT(!mDestroyed);
     return {mBindings.data(), mBindings.size()};

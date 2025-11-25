@@ -51,7 +51,8 @@ ObjectType BindGroupLayoutBase::GetType() const {
 }
 
 bool BindGroupLayoutBase::IsEmpty() const {
-    return mInternalLayout == nullptr || mInternalLayout->IsEmpty();
+    DAWN_ASSERT(mInternalLayout != nullptr);
+    return mInternalLayout->IsEmpty();
 }
 
 // static

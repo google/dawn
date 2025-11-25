@@ -1273,8 +1273,7 @@ BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descrip
     Ref<BindGroupBase> result;
     if (ConsumedError(CreateBindGroup(descriptor), &result, "calling %s.CreateBindGroup(%s).", this,
                       descriptor)) {
-        return ReturnToAPI(
-            BindGroupBase::MakeError(this, descriptor ? descriptor->label : nullptr));
+        return ReturnToAPI(BindGroupBase::MakeError(this, descriptor));
     }
     return ReturnToAPI(std::move(result));
 }
