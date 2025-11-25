@@ -61,7 +61,7 @@ def get_dimension(os):
         A string containing the dimensions the given OS should target.
     """
     if os.category == os_category.LINUX:
-        return "Ubuntu-22.04|Ubuntu-24.04"
+        return "Ubuntu-24.04"
     elif os.category == os_category.MAC:
         return "Mac-12|Mac-13|Mac-14|Mac-15"
     elif os.category == os_category.WINDOWS:
