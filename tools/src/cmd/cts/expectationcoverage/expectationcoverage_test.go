@@ -200,7 +200,7 @@ func TestRun_SuccessCompat(t *testing.T) {
  ******************************************************************************/
 
 func TestGetTrimmedContent_NonExistentFile(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	content, err := getTrimmedContent(
 		"/expectations.txt",
 		/*individualExpectations=*/ false,
@@ -213,7 +213,7 @@ func TestGetTrimmedContent_NonExistentFile(t *testing.T) {
 }
 
 func TestGetTrimmedContent_InvalidFile(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	expectationFileContent := `# BEGIN TAG HEADER
 # OS
 # tags: [ android linux mac win10 ]
@@ -276,7 +276,7 @@ crbug.com/0000 [ win10 ] bar [ Failure ]
 }
 
 func TestGetTrimmedContent_GroupedWithSkips(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	expectationFileContent := getExpectationContentForTrimmedContentTest()
 	wrapper.WriteFile("/expectations.txt", []byte(expectationFileContent), 0o700)
 
@@ -352,7 +352,7 @@ func TestGetTrimmedContent_GroupedWithSkips(t *testing.T) {
 }
 
 func TestGetTrimmedContent_GroupedWithoutSkips(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	expectationFileContent := getExpectationContentForTrimmedContentTest()
 	wrapper.WriteFile("/expectations.txt", []byte(expectationFileContent), 0o700)
 
@@ -409,7 +409,7 @@ func TestGetTrimmedContent_GroupedWithoutSkips(t *testing.T) {
 }
 
 func TestGetTrimmedContent_IndividualWithSkips(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	expectationFileContent := getExpectationContentForTrimmedContentTest()
 	wrapper.WriteFile("/expectations.txt", []byte(expectationFileContent), 0o700)
 
@@ -500,7 +500,7 @@ func TestGetTrimmedContent_IndividualWithSkips(t *testing.T) {
 }
 
 func TestGetTrimmedContent_IndividualWithoutSkips(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	expectationFileContent := getExpectationContentForTrimmedContentTest()
 	wrapper.WriteFile("/expectations.txt", []byte(expectationFileContent), 0o700)
 

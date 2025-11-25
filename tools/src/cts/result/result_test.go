@@ -792,7 +792,7 @@ func TestStatuses(t *testing.T) {
 }
 
 func TestSaveLoad(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 
 	in := result.ResultsByExecutionMode{
 		"bar": result.List{

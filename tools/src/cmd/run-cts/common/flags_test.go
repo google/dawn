@@ -38,7 +38,7 @@ import (
 )
 
 func TestDefaultCtsPath_NoDawnRoot(t *testing.T) {
-	wrapper := oswrapper.CreateMemMapOSWrapper()
+	wrapper := oswrapper.CreateFSTestOSWrapper()
 	require.Equal(t, "", defaultCtsPath(wrapper))
 }
 
