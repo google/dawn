@@ -184,7 +184,6 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
                                           MemoryDump::kUnitsBytes, /*size=*/0));
 
     // Create a transient attachment (memoryless) texture and check that its size is not counted.
-    mDeviceMock->ForceEnableFeatureForTesting(Feature::TransientAttachments);
     const wgpu::TextureDescriptor kTransientAttachmentTextureDesc = {
         .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment,
         .size = {.width = 30, .height = 20},

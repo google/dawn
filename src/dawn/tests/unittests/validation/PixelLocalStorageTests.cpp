@@ -1196,8 +1196,7 @@ TEST_F(PixelLocalStorageAndRenderToSingleSampledTest, CombinationIsNotAllowed) {
 
 class PixelLocalStorageAndTransientAttachmentTest : public PixelLocalStorageTest {
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::PixelLocalStorageNonCoherent,
-                wgpu::FeatureName::TransientAttachments};
+        return {wgpu::FeatureName::PixelLocalStorageNonCoherent};
     }
 };
 

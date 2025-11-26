@@ -1369,22 +1369,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithScissor) {
     VerifyResolveTarget(kGreen, mResolveTexture, 0, 0, kMSAACoverage, kGreenX, kGreenY);
 }
 
-class MultisampledRenderingWithTransientAttachmentTest : public MultisampledRenderingTest {
-    void SetUp() override {
-        MultisampledRenderingTest::SetUp();
-
-        // Skip all tests if the transient attachments feature is not supported.
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::TransientAttachments}));
-    }
-
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::TransientAttachments})) {
-            requiredFeatures.push_back(wgpu::FeatureName::TransientAttachments);
-        }
-        return requiredFeatures;
-    }
-};
+class MultisampledRenderingWithTransientAttachmentTest : public MultisampledRenderingTest {};
 
 // Test using one multisampled color transient attachment with resolve target can render correctly.
 TEST_P(MultisampledRenderingWithTransientAttachmentTest, ResolveTransientAttachmentInto2DTexture) {

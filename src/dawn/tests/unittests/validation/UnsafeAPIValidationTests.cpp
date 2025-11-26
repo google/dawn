@@ -105,6 +105,16 @@ TEST_F(UnsafeAPIValidationTest, BindingArrayInWGSL) {
     )"));
 }
 
+// Check that using a transient attachment is an unsafe API.
+TEST_F(UnsafeAPIValidationTest, TransientAttachment) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment;
+
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&desc));
+}
+
 class TimestampQueryUnsafeAPIValidationTest : public ValidationTest {
   protected:
     std::vector<const char*> GetDisabledToggles() override { return {"allow_unsafe_apis"}; }

@@ -1963,7 +1963,7 @@ TEST_F(MSAARenderToSingleSampledRenderPassDescriptorValidationTest,
 class DawnLoadResolveTextureValidationTest : public MultisampledRenderPassDescriptorValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::DawnLoadResolveTexture, wgpu::FeatureName::TransientAttachments};
+        return {wgpu::FeatureName::DawnLoadResolveTexture};
     }
 
     // Create a view for a resolve texture that can be used with LoadOp::ExpandResolveTexture.
@@ -2311,10 +2311,6 @@ TEST_F(DawnPartialLoadResolveTextureValidationTest, ResolveRectInvalidSizeAndOff
 class TransientAttachmentRenderPassDescriptorValidationTest
     : public RenderPassDescriptorValidationTest {
   protected:
-    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        return {wgpu::FeatureName::TransientAttachments};
-    }
-
     wgpu::Texture CreateTexture(wgpu::TextureUsage textureUsage, wgpu::TextureFormat format) {
         wgpu::TextureDescriptor textureDescriptor;
         textureDescriptor.usage = textureUsage;
