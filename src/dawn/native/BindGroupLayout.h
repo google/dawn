@@ -61,6 +61,7 @@ class BindGroupLayoutBase final : public ApiObjectBase {
 
   protected:
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 
   private:
     BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);

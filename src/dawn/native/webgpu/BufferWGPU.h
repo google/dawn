@@ -58,6 +58,7 @@ class Buffer final : public BufferBase, public RecordableObject, public ObjectWG
     MaybeError MapAtCreationImpl() override;
     void* GetMappedPointerImpl() override;
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 
     MaybeError AddContentToCapture(CaptureContext& captureContext);
 

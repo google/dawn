@@ -47,6 +47,7 @@ typedef std::variant<wgpu::BindGroup,
                      wgpu::Buffer,
                      wgpu::CommandBuffer,
                      wgpu::ComputePipeline,
+                     wgpu::Device,
                      wgpu::PipelineLayout,
                      wgpu::QuerySet,
                      wgpu::RenderBundle,
@@ -101,6 +102,7 @@ class Replay {
     Replay(wgpu::Device device, const Capture* capture);
 
     MaybeError CreateResource(wgpu::Device device, ReadHead& readHead);
+    MaybeError SetLabel(schema::ObjectId id, schema::ObjectType type, const std::string& label);
 
     wgpu::Device mDevice;
     const Capture* mCapture;

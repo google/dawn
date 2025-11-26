@@ -49,6 +49,7 @@ class CommandBuffer final : public CommandBufferBase, public RecordableObject {
 
   private:
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

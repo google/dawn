@@ -55,6 +55,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase,
   private:
     BindGroupLayout(Device* device, const UnpackedPtr<BindGroupLayoutDescriptor>& descriptor);
     ~BindGroupLayout() override = default;
+    void SetLabelImpl() override;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 };

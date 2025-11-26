@@ -186,6 +186,10 @@ MaybeError RenderPipeline::InitializeImpl() {
     return {};
 }
 
+void RenderPipeline::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError RenderPipeline::AddReferenced(CaptureContext& captureContext) {
     DAWN_TRY(
         captureContext.AddResource(ToBackend(GetStage(SingleShaderStage::Vertex).module.Get())));

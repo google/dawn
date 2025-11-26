@@ -42,6 +42,8 @@ namespace schema {
 // want to capture.
 
 using ObjectId = uint64_t;
+// device is always 1
+const ObjectId kDeviceId = 1;
 
 enum class ObjectType : uint32_t {
     Invalid = 0,  // 0 is invalid at it's more likely to catch bugs.
@@ -118,6 +120,7 @@ enum class RootCommand : uint32_t {
     WriteBuffer,
     WriteTexture,
     UnmapBuffer,
+    SetLabel,
 
     End,
 };
@@ -447,6 +450,13 @@ DAWN_REPLAY_SERIALIZABLE(struct,
 #define CREATE_RESOURCE_CMD_DATA_MEMBER(X) X(LabeledResource, resource)
 
 DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(CreateResource, CREATE_RESOURCE_CMD_DATA_MEMBER){};
+
+#define SET_LABEL_CMD_DATA_MEMBER(X) \
+    X(ObjectId, id)                  \
+    X(ObjectType, type)              \
+    X(std::string, label)
+
+DAWN_REPLAY_MAKE_ROOT_CMD_AND_CMD_DATA(SetLabel, SET_LABEL_CMD_DATA_MEMBER){};
 
 #define WRITE_BUFFER_CMD_DATA_MEMBER(X) \
     X(ObjectId, bufferId)               \

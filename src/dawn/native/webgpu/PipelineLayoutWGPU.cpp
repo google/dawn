@@ -72,6 +72,10 @@ PipelineLayout::PipelineLayout(Device* device,
     DAWN_ASSERT(mInnerHandle);
 }
 
+void PipelineLayout::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError PipelineLayout::AddReferenced(CaptureContext& captureContext) {
     for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
         auto frontendLayout = GetFrontendBindGroupLayout(groupIndex);

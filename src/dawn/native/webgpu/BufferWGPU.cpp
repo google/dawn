@@ -177,6 +177,10 @@ void Buffer::DestroyImpl() {
     wgpu.bufferDestroy(mInnerHandle);
 }
 
+void Buffer::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError Buffer::AddReferenced(CaptureContext& captureContext) {
     // Buffers do not reference other objects.
     return {};

@@ -51,6 +51,7 @@ class QuerySet final : public QuerySetBase,
     ~QuerySet() override;
 
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

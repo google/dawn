@@ -51,6 +51,7 @@ class ComputePipeline final : public ComputePipelineBase,
 
   protected:
     ComputePipeline(Device* device, const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

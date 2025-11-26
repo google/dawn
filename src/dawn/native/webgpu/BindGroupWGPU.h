@@ -54,6 +54,7 @@ class BindGroup final : public BindGroupBase,
 
     MaybeError InitializeImpl() override;
     void DeleteThis() override;
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

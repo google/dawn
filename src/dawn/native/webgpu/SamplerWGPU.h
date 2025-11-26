@@ -53,6 +53,7 @@ class Sampler final : public SamplerBase, public RecordableObject, public Object
     schema::Sampler mSamplerParams;
 
     MaybeError Initialize();
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

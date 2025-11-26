@@ -77,6 +77,10 @@ MaybeError ComputePipeline::InitializeImpl() {
     return {};
 }
 
+void ComputePipeline::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError ComputePipeline::AddReferenced(CaptureContext& captureContext) {
     DAWN_TRY(
         captureContext.AddResource(ToBackend(GetStage(SingleShaderStage::Compute).module.Get())));

@@ -1751,6 +1751,161 @@ TEST_P(CaptureAndReplayTests, PushPopInsertDebug) {
     // just expect no errors.
 }
 
+// Test capturing setting a label
+TEST_P(CaptureAndReplayTests, CaptureSetLabel) {
+    wgpu::Buffer buffer = CreateBuffer("buf", 4, wgpu::BufferUsage::CopyDst);
+    wgpu::Texture texture =
+        CreateTexture("tex", {1}, wgpu::TextureFormat::RGBA8Uint,
+                      wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc);
+    wgpu::TextureView view = texture.CreateView();
+    wgpu::Sampler sampler = device.CreateSampler();
+
+    wgpu::QuerySetDescriptor qsDesc;
+    qsDesc.count = 1;
+    qsDesc.type = wgpu::QueryType::Occlusion;
+    wgpu::QuerySet querySet = device.CreateQuerySet(&qsDesc);
+
+    const char* shader = R"(
+        @group(0) @binding(0) var tex: texture_storage_2d<rgba8uint, write>;
+
+        @compute @workgroup_size(1) fn main() {
+            textureStore(tex, vec2u(0), vec4<u32>(0));
+        }
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0);
+        }
+
+        @fragment fn fs() -> @location(0) vec4u {
+            return vec4u(0);
+        }
+    )";
+    auto module = utils::CreateShaderModule(device, shader);
+
+    wgpu::BindGroupLayoutEntry entries[1];
+    entries[0].binding = 0;
+    entries[0].visibility = wgpu::ShaderStage::Compute;
+    entries[0].buffer.type = wgpu::BufferBindingType::Storage;
+
+    wgpu::BindGroupLayoutDescriptor bglDesc;
+    bglDesc.entryCount = 1;
+    bglDesc.entries = entries;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bglDesc);
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.bindGroupLayoutCount = 1;
+    plDesc.bindGroupLayouts = &layout;
+    wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&plDesc);
+
+    wgpu::ComputePipelineDescriptor csDesc;
+    csDesc.compute.module = module;
+    wgpu::ComputePipeline cPipeline = device.CreateComputePipeline(&csDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, cPipeline.GetBindGroupLayout(0),
+                                                     {
+                                                         {0, view},
+                                                     });
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.cFragment.module = module;
+    desc.cFragment.targetCount = 1;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Uint;
+    desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    wgpu::RenderPipeline rPipeline = device.CreateRenderPipeline(&desc);
+
+    utils::ComboRenderBundleEncoderDescriptor rbDesc = {};
+    rbDesc.colorFormatCount = 1;
+    rbDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Uint;
+
+    wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&rbDesc);
+    wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+
+    auto recorder = Recorder::CreateAndStart(device);
+
+    // Note: the first time capture see's a resource here is
+    // on SetLabel. The label is set before the resource is captured
+    // so we won't see the original label. So, set them twice so we
+    // can verify the label changed.
+    bindGroup.SetLabel("bgA");
+    bindGroup.SetLabel("bgB");
+    buffer.SetLabel("bufA");
+    buffer.SetLabel("bufB");
+    commandBuffer.SetLabel("cbA");
+    commandBuffer.SetLabel("cbB");
+    cPipeline.SetLabel("cpA");
+    cPipeline.SetLabel("cpB");
+    device.SetLabel("devA");
+    device.SetLabel("devB");
+    layout.SetLabel("loA");
+    layout.SetLabel("loB");
+    pipelineLayout.SetLabel("plA");
+    pipelineLayout.SetLabel("plB");
+    querySet.SetLabel("qsA");
+    querySet.SetLabel("qsB");
+    rPipeline.SetLabel("rpA");
+    rPipeline.SetLabel("rpB");
+    renderBundle.SetLabel("rbA");
+    renderBundle.SetLabel("rbB");
+    sampler.SetLabel("smpA");
+    sampler.SetLabel("smpB");
+    module.SetLabel("modA");
+    module.SetLabel("modB");
+    texture.SetLabel("texA");
+    texture.SetLabel("texB");
+    view.SetLabel("viewA");
+    view.SetLabel("viewB");
+
+    auto capture = recorder.Finish();
+    auto replay = capture.Replay(device);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::BindGroup>("bgA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::BindGroup>("bgB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Buffer>("buf") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Buffer>("bufA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Buffer>("bufB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::CommandBuffer>("cbA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::CommandBuffer>("cbB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::ComputePipeline>("cpA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::ComputePipeline>("cpB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Device>("devA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Device>("devB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::BindGroupLayout>("loA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::BindGroupLayout>("loB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::PipelineLayout>("plA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::PipelineLayout>("plB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::RenderBundle>("rbA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::RenderBundle>("rbB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::RenderPipeline>("rpA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::RenderPipeline>("rpB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::QuerySet>("qsA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::QuerySet>("qsB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Sampler>("smpA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Sampler>("smpB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::ShaderModule>("modA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::ShaderModule>("modB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("texA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::Texture>("texB") != nullptr);
+
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::TextureView>("viewA") == nullptr);
+    EXPECT_TRUE(replay->GetObjectByLabel<wgpu::TextureView>("viewB") != nullptr);
+}
+
 DAWN_INSTANTIATE_TEST(CaptureAndReplayTests, WebGPUBackend());
 
 }  // anonymous namespace

@@ -958,7 +958,9 @@ std::unique_ptr<Replay> Replay::Create(wgpu::Device device, const Capture* captu
     return std::unique_ptr<Replay>(new Replay(device, capture));
 }
 
-Replay::Replay(wgpu::Device device, const Capture* capture) : mDevice(device), mCapture(capture) {}
+Replay::Replay(wgpu::Device device, const Capture* capture) : mDevice(device), mCapture(capture) {
+    mResources.insert({schema::kDeviceId, {"", device}});
+}
 
 MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
     schema::LabeledResource resource;
@@ -1071,6 +1073,40 @@ MaybeError Replay::CreateResource(wgpu::Device device, ReadHead& readHead) {
     }
 }
 
+MaybeError Replay::SetLabel(schema::ObjectId id,
+                            schema::ObjectType type,
+                            const std::string& label) {
+// We update both the object's label and our own copy of the label
+// as there is no API to get an object's label from WebGPU
+#define DAWN_SET_LABEL(type)                                                                \
+    case schema::ObjectType::type: {                                                        \
+        auto iter = mResources.find(id);                                                    \
+        std::get_if<wgpu::type>(&iter->second.resource)->SetLabel(wgpu::StringView(label)); \
+        iter->second.label = label;                                                         \
+        break;                                                                              \
+    }
+
+    switch (type) {
+        DAWN_SET_LABEL(BindGroup)
+        DAWN_SET_LABEL(BindGroupLayout)
+        DAWN_SET_LABEL(Buffer)
+        DAWN_SET_LABEL(CommandBuffer)
+        DAWN_SET_LABEL(ComputePipeline)
+        DAWN_SET_LABEL(Device)
+        DAWN_SET_LABEL(PipelineLayout)
+        DAWN_SET_LABEL(QuerySet)
+        DAWN_SET_LABEL(RenderBundle)
+        DAWN_SET_LABEL(RenderPipeline)
+        DAWN_SET_LABEL(Sampler)
+        DAWN_SET_LABEL(ShaderModule)
+        DAWN_SET_LABEL(Texture)
+        DAWN_SET_LABEL(TextureView)
+        default:
+            return DAWN_INTERNAL_ERROR("unhandled resource type");
+    }
+    return {};
+}
+
 MaybeError Replay::Play() {
     auto readHead = mCapture->GetCommandReadHead();
     auto contentReadHead = mCapture->GetContentReadHead();
@@ -1117,6 +1153,12 @@ MaybeError Replay::Play() {
                 wgpu::Buffer buffer = GetObjectById<wgpu::Buffer>(data.bufferId);
                 DAWN_TRY(MapContentIntoBuffer(contentReadHead, mDevice, buffer, data.bufferOffset,
                                               data.size));
+                break;
+            }
+            case schema::RootCommand::SetLabel: {
+                schema::RootCommandSetLabelCmdData data;
+                DAWN_TRY(Deserialize(readHead, &data));
+                DAWN_TRY(SetLabel(data.id, data.type, data.label));
                 break;
             }
             default: {

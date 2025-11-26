@@ -240,6 +240,10 @@ void Device::DestroyImpl() {
     }
 }
 
+void Device::SetLabelImpl() {
+    CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError Device::CopyFromStagingToBuffer(BufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,

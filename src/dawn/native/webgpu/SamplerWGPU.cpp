@@ -90,6 +90,10 @@ MaybeError Sampler::Initialize() {
     return {};
 }
 
+void Sampler::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError Sampler::AddReferenced(CaptureContext& captureContext) {
     // Samplers don't reference anything
     return {};

@@ -58,6 +58,7 @@ class ShaderModule final : public ShaderModuleBase,
                  std::vector<tint::wgsl::Extension> internalExtensions,
                  WGPUShaderModule innerShaderModule);
     ~ShaderModule() override = default;
+    void SetLabelImpl() override;
 
     // TODO(452840621): Make this use a chain instead of hard coded to WGSL only and handle other
     // chained structs.

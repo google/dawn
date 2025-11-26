@@ -52,6 +52,9 @@ class RenderPipeline final : public RenderPipelineBase,
 
   protected:
     RenderPipeline(Device* device, const UnpackedPtr<RenderPipelineDescriptor>& descriptor);
+
+  private:
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

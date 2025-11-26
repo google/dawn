@@ -33,15 +33,16 @@
 #include <string>
 #include <utility>
 
-#include "absl/container/flat_hash_set.h"
+#include "absl/container/flat_hash_map.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ObjectBase.h"
-#include "dawn/native/webgpu/DeviceWGPU.h"
+#include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/Serialization.h"
 
 namespace dawn::native {
 
 class BufferBase;
+class DeviceBase;
 struct Color;
 struct Origin3D;
 struct Extent3D;
@@ -55,7 +56,7 @@ struct TypedTexelBlockInfo;
 
 namespace dawn::native::webgpu {
 
-class CaptureContext;
+class Device;
 class RecordableObject;
 
 class CaptureContext {
@@ -125,6 +126,35 @@ class CaptureContext {
         return mObjectIds.find(Ref<ApiObjectBase>(object)) != mObjectIds.end();
     }
 
+    template <typename T>
+    void CaptureSetLabel(T* object, const std::string& label) {
+        auto result = AddResourceAndGetId(object);
+        if (result.IsSuccess()) {
+            schema::RootCommandSetLabelCmd data{{
+                .data{{
+                    .id = result.AcquireSuccess(),
+                    .type = object->GetObjectType(),
+                    .label = label,
+                }},
+            }};
+            Serialize(*this, data);
+        }
+    }
+
+    // Special case for Device as it's not a RecordableObject
+    // so we don't want to call AddResourceAndGetId on it.
+    template <>
+    void CaptureSetLabel(Device* object, const std::string& label) {
+        schema::RootCommandSetLabelCmd data{{
+            .data{{
+                .id = schema::kDeviceId,
+                .type = schema::ObjectType::Device,
+                .label = label,
+            }},
+        }};
+        Serialize(*this, data);
+    }
+
     void WriteCommandBytes(const void* data, size_t size);
     void WriteContentBytes(const void* data, size_t size);
 
@@ -160,7 +190,7 @@ class CaptureContext {
     std::ostream& mCommandStream;
     std::ostream& mContentStream;
     absl::flat_hash_map<Ref<ApiObjectBase>, schema::ObjectId> mObjectIds;
-    schema::ObjectId mNextObjectId = 1;
+    schema::ObjectId mNextObjectId = 2;  // 1 = the device itself.
 
     WGPUBuffer mCopyBuffer = nullptr;
 };

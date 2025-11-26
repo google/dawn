@@ -37,7 +37,7 @@
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/webgpu/BufferWGPU.h"
-#include "dawn/native/webgpu/Forward.h"
+#include "dawn/native/webgpu/DeviceWGPU.h"
 #include "dawn/native/webgpu/QuerySetWGPU.h"
 #include "dawn/native/webgpu/QueueWGPU.h"
 #include "dawn/native/webgpu/Serialization.h"

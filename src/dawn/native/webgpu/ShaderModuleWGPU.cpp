@@ -66,6 +66,10 @@ ShaderModule::ShaderModule(Device* device,
     }
 }
 
+void ShaderModule::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError ShaderModule::AddReferenced(CaptureContext& captureContext) {
     return {};
 }

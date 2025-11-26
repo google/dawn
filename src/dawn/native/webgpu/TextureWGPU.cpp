@@ -98,6 +98,10 @@ void Texture::DestroyImpl() {
     wgpu.textureDestroy(mInnerHandle);
 }
 
+void Texture::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 // TextureView
 
 // static
@@ -281,6 +285,10 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
         }
     }
     return {};
+}
+
+void TextureView::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
 }
 
 MaybeError TextureView::AddReferenced(CaptureContext& captureContext) {

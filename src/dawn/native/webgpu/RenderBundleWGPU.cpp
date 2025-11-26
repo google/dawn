@@ -228,6 +228,10 @@ void RenderBundle::DestroyImpl() {
     mInnerHandle = nullptr;
 }
 
+void RenderBundle::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError RenderBundle::AddReferenced(CaptureContext& captureContext) {
     CommandBufferResourceUsages usedResources;
     CommandIterator& commands = *GetCommands();

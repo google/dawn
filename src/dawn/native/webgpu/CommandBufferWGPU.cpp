@@ -56,6 +56,10 @@ Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
 CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
     : CommandBufferBase(encoder, descriptor), RecordableObject(schema::ObjectType::CommandBuffer) {}
 
+void CommandBuffer::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 namespace {
 
 void EncodeComputePass(const DawnProcTable& wgpu,

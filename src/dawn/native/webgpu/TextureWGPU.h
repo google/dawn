@@ -53,6 +53,7 @@ class Texture final : public TextureBase, public RecordableObject, public Object
   private:
     Texture(Device* device, const UnpackedPtr<TextureDescriptor>& descriptor);
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 };
 
 class TextureView final : public TextureViewBase,
@@ -71,6 +72,7 @@ class TextureView final : public TextureViewBase,
                 const UnpackedPtr<TextureViewDescriptor>& descriptor,
                 WGPUTextureView innerView);
     ~TextureView() override = default;
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

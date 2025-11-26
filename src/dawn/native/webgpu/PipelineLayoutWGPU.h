@@ -48,6 +48,9 @@ class PipelineLayout : public PipelineLayoutBase,
 
   protected:
     PipelineLayout(Device* device, const UnpackedPtr<PipelineLayoutDescriptor>& descriptor);
+
+  private:
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

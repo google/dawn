@@ -29,13 +29,16 @@
 #define SRC_DAWN_NATIVE_WEBGPU_DEVICEWGPU_H_
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "dawn/native/Device.h"
 #include "dawn/native/ToBackend.h"
 #include "dawn/native/WebGPUBackend.h"
+#include "dawn/native/webgpu/CaptureContext.h"
 #include "dawn/native/webgpu/Forward.h"
 #include "dawn/native/webgpu/ObjectWGPU.h"
+#include "dawn/native/webgpu/QueueWGPU.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
 namespace dawn::native::webgpu {
@@ -64,6 +67,14 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
 
     void StartCapture(CaptureStream& commandStream, CaptureStream& contentStream);
     void EndCapture();
+
+    template <typename T>
+    void CaptureSetLabel(T* object, const std::string& label) {
+        Queue* q = ToBackend(GetQueue());
+        if (q->IsCapturing()) {
+            q->GetCaptureContext()->CaptureSetLabel(object, label);
+        }
+    }
 
     const DawnProcTable& wgpu;
 
@@ -121,6 +132,7 @@ class Device final : public DeviceBase, public ObjectWGPU<WGPUDevice> {
                                             const Extent3D& copySizePixels) override;
 
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

@@ -61,6 +61,10 @@ void QuerySet::DestroyImpl() {
     QuerySetBase::DestroyImpl();
 }
 
+void QuerySet::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError QuerySet::AddReferenced(CaptureContext& captureContext) {
     // QuerySet do not reference other objects.
     return {};

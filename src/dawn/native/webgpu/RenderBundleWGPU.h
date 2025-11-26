@@ -56,6 +56,7 @@ class RenderBundle final : public RenderBundleBase,
 
   private:
     void DestroyImpl() override;
+    void SetLabelImpl() override;
 };
 
 }  // namespace dawn::native::webgpu

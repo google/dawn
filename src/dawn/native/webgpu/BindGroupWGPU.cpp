@@ -116,6 +116,10 @@ void BindGroup::DeleteThis() {
     layout->DeallocateBindGroup(this);
 }
 
+void BindGroup::SetLabelImpl() {
+    ToBackend(GetDevice())->CaptureSetLabel(this, GetLabel());
+}
+
 MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     // We have to include any referenced bound textures views as the front end does
     // not track texture views.
