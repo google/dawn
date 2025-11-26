@@ -125,7 +125,7 @@ class AdapterTest {
       "Adapter should be consumed after one device request", WebGpuException::class.java
     ) {
       runBlocking {
-        val secondDeviceStatus = runBlocking { adapter.requestDevice() }
+        val secondDeviceStatus = adapter.requestDevice()
       }
     }
   }
@@ -174,7 +174,6 @@ class AdapterTest {
    */
   @Test
   fun requestDeviceWithWorseThanDefaultLimitClamps() {
-    runBlocking {
       val worseLimit = kDefaultLimits.getValue("maxBindGroups") - 1
       assert(worseLimit > 0) // Ensure the value is still valid, just worse.
       val device = runBlocking { requestTestDevice(limits = Limits(maxBindGroups = worseLimit)) }
@@ -185,7 +184,6 @@ class AdapterTest {
         deviceLimits.maxBindGroups
       )
       runCatching { device.destroy() }
-    }
   }
 
   /**
