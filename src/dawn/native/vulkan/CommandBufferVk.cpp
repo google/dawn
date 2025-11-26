@@ -649,8 +649,7 @@ MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
     const Extent3D& copySize_in) {
     DAWN_ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
     DAWN_ASSERT(srcCopy.aspect == dstCopy.aspect);
-    dawn::native::Format format = srcCopy.texture->GetFormat();
-    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(srcCopy);
     const BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
     BlockCount widthInBlocks = copySize.width;
     BlockCount heightInBlocks = copySize.height;
@@ -767,9 +766,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 ToBackend(src.buffer)->EnsureDataInitialized(recordingContext);
 
-                const TypedTexelBlockInfo& blockInfo =
-                    dst.texture->GetFormat().GetAspectInfo(dst.aspect).block;
-
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
                 VkBufferImageCopy region =
                     ComputeBufferImageCopyRegion(src, dst, blockInfo.ToBlock(copy->copySize));
                 VkImageSubresourceLayers subresource = region.imageSubresource;
@@ -814,9 +811,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
 
                 ToBackend(dst.buffer)->EnsureDataInitializedAsDestination(recordingContext, copy);
 
-                const TypedTexelBlockInfo& blockInfo =
-                    src.texture->GetFormat().GetAspectInfo(src.aspect).block;
-
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
                 VkBufferImageCopy region =
                     ComputeBufferImageCopyRegion(dst, src, blockInfo.ToBlock(copy->copySize));
 

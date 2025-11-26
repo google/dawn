@@ -46,6 +46,8 @@
 namespace dawn::native {
 
 class CommandAllocator;
+struct TexelBlockInfo;
+struct TexelCopyTextureInfo;
 
 // Definition of the commands that are present in the CommandIterator given by the
 // CommandBufferBuilder. There are not defined in CommandBuffer.h to break some header
@@ -207,6 +209,9 @@ struct TextureCopy {
     Origin3D origin;  // Texels / array layer
     Aspect aspect;
 };
+
+// Returns the TexelBlockInfo for t's texture and aspect
+const TexelBlockInfo& GetBlockInfo(const TextureCopy& t);
 
 struct CopyBufferToBufferCmd {
     CopyBufferToBufferCmd();

@@ -467,6 +467,10 @@ TextureCopy::TextureCopy(const TextureCopy&) = default;
 TextureCopy& TextureCopy::operator=(const TextureCopy&) = default;
 TextureCopy::~TextureCopy() = default;
 
+const TexelBlockInfo& GetBlockInfo(const TextureCopy& t) {
+    return t.texture->GetFormat().GetAspectInfo(t.aspect).block;
+}
+
 CopyBufferToBufferCmd::CopyBufferToBufferCmd() = default;
 CopyBufferToBufferCmd::~CopyBufferToBufferCmd() = default;
 

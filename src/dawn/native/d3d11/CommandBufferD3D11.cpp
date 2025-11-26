@@ -377,8 +377,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                 Buffer* buffer = ToBackend(src.buffer.Get());
                 uint64_t bufferOffset = src.offset;
                 Ref<BufferBase> stagingBuffer;
-                const TypedTexelBlockInfo& blockInfo =
-                    ToBackend(dst.texture)->GetFormat().GetAspectInfo(dst.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
 
                 // If the buffer is not mappable, we need to create a staging buffer and copy the
                 // data from the buffer to the staging buffer.
@@ -450,8 +449,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
                     return {};
                 };
 
-                const TypedTexelBlockInfo& blockInfo =
-                    texture->GetFormat().GetAspectInfo(src.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
                 uint64_t bytesPerRow = blockInfo.ToBytes(dst.blocksPerRow);
 
                 DAWN_TRY(ToBackend(src.texture)

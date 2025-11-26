@@ -1246,8 +1246,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 auto& copySize = copy->copySize;
                 Buffer* buffer = ToBackend(src.buffer.Get());
                 Texture* texture = ToBackend(dst.texture.Get());
-                const TypedTexelBlockInfo& blockInfo =
-                    texture->GetFormat().GetAspectInfo(dst.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
 
                 buffer->EnsureDataInitialized(commandContext);
                 DAWN_TRY(
@@ -1274,8 +1273,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 auto& copySize = copy->copySize;
                 Texture* texture = ToBackend(src.texture.Get());
                 Buffer* buffer = ToBackend(dst.buffer.Get());
-                const TypedTexelBlockInfo& blockInfo =
-                    texture->GetFormat().GetAspectInfo(src.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
 
                 buffer->EnsureDataInitializedAsDestination(commandContext, copy);
 

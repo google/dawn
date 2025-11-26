@@ -742,7 +742,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
     CommandRecordingContext* recordingContext =
         ToBackend(GetQueue())->GetPendingRecordingContext(Queue::SubmitMode::Passive);
 
-    const TypedTexelBlockInfo& blockInfo = dst.texture->GetFormat().GetAspectInfo(dst.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
 
     VkBufferImageCopy region =
         ComputeBufferImageCopyRegion(src, dst, blockInfo.ToBlock(copySizePixels));

@@ -590,7 +590,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(BufferBase* source,
 
     texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
-    const TypedTexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(dst.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
     BlockCount blocksPerRow = blockInfo.BytesToBlocks(src.bytesPerRow);
     BlockCount rowsPerImage{src.rowsPerImage};
     BlockExtent3D copySizePixelsInBlocks = blockInfo.ToBlock(copySizePixels);

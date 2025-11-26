@@ -162,9 +162,7 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
 VkBufferImageCopy ComputeBufferImageCopyRegion(const TexelCopyBufferLayout& dataLayout,
                                                const TextureCopy& textureCopy,
                                                const BlockExtent3D& copySize) {
-    const Texture* texture = ToBackend(textureCopy.texture.Get());
-    const TypedTexelBlockInfo& blockInfo =
-        texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
 
     BufferCopy bufferCopy;
     bufferCopy.offset = dataLayout.offset;
@@ -177,13 +175,10 @@ VkBufferImageCopy ComputeBufferImageCopyRegion(const TexelCopyBufferLayout& data
 VkBufferImageCopy ComputeBufferImageCopyRegion(const BufferCopy& bufferCopy,
                                                const TextureCopy& textureCopy,
                                                const BlockExtent3D& copySize) {
-    const Texture* texture = ToBackend(textureCopy.texture.Get());
-
     VkBufferImageCopy region;
 
     region.bufferOffset = bufferCopy.offset;
-    const TypedTexelBlockInfo& blockInfo =
-        texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
     TexelExtent3D copySizeTexels = blockInfo.ToTexel(copySize);
 
     // In Vulkan the row length is in texels while it is in blocks for Dawn

@@ -87,15 +87,13 @@ bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& buffe
                                                          const TextureCopy& textureCopy,
                                                          const BlockExtent3D& copySize) {
     TextureBase* texture = textureCopy.texture.Get();
-    const TypedTexelBlockInfo& blockInfo =
-        texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
-
     if (texture->GetDimension() != wgpu::TextureDimension::e3D ||
         copySize.depthOrArrayLayers <= BlockCount{1} ||
         bufferCopy.rowsPerImage <= copySize.height) {
         return false;
     }
 
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
     uint64_t requiredCopySizeByD3D12 = RequiredCopySizeByD3D12(
         bufferCopy.blocksPerRow, bufferCopy.rowsPerImage, copySize, blockInfo);
     return (bufferCopy.buffer->GetAllocatedSize() - bufferCopy.offset) < requiredCopySizeByD3D12;
@@ -313,8 +311,7 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
     DAWN_ASSERT(HasOneBit(textureCopy.aspect));
 
     TextureBase* texture = textureCopy.texture.Get();
-    const TypedTexelBlockInfo& blockInfo =
-        texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
     BlockOrigin3D origin = blockInfo.ToBlock(textureCopy.origin);
 
     bool useRelaxedRowPitchAndOffset = texture->GetDevice()->IsToggleEnabled(
@@ -369,9 +366,7 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
                              const BufferCopy& bufferCopy,
                              const TextureCopy& textureCopy,
                              const BlockExtent3D& copySize) {
-    TextureBase* texture = textureCopy.texture.Get();
-    const TypedTexelBlockInfo& blockInfo =
-        texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
     ID3D12Resource* bufferResource = ToBackend(bufferCopy.buffer)->GetD3D12Resource();
 
     if (NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(bufferCopy, textureCopy, copySize)) {

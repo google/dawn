@@ -844,10 +844,8 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle()));
 
-                const TypedTexelBlockInfo& blockInfo =
-                    texture->GetFormat().GetAspectInfo(dst.aspect).block;
-
                 // TODO(crbug.com/424536624): Replace TexelCopyBufferLayout with BufferCopy
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(dst);
                 TexelCopyBufferLayout dataLayout;
                 dataLayout.offset = 0;
                 dataLayout.bytesPerRow = blockInfo.ToBytes(src.blocksPerRow);
@@ -894,7 +892,7 @@ MaybeError CommandBuffer::Execute(const OpenGLFunctions& gl) {
                 DAWN_GL_TRY(gl, GenFramebuffers(1, &readFBO));
                 DAWN_GL_TRY(gl, BindFramebuffer(GL_READ_FRAMEBUFFER, readFBO));
 
-                const TypedTexelBlockInfo& blockInfo = formatInfo.GetAspectInfo(src.aspect).block;
+                const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
 
                 DAWN_GL_TRY(gl, BindBuffer(GL_PIXEL_PACK_BUFFER, buffer->GetHandle()));
                 DAWN_GL_TRY(gl, PixelStorei(GL_PACK_ALIGNMENT, std::min(8u, blockInfo.byteSize)));
@@ -1623,7 +1621,7 @@ MaybeError DoTexSubImage(const OpenGLFunctions& gl,
     DAWN_GL_TRY(gl, ActiveTexture(GL_TEXTURE0));
     DAWN_GL_TRY(gl, BindTexture(target, texture->GetHandle()));
     // TODO(crbug.com/424536624): TypedTexelBlockInfo and rework code below
-    const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(destination.aspect).block;
+    const TexelBlockInfo& blockInfo = GetBlockInfo(destination);
 
     uint32_t x = destination.origin.x;
     uint32_t y = destination.origin.y;

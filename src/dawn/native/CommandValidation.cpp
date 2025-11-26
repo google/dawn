@@ -514,7 +514,7 @@ MaybeError ValidateTextureCopyRange(DeviceBase const* device,
 
     // Validation for the texel block alignments:
     if (format.isCompressed) {
-        const TexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
+        const TexelBlockInfo& blockInfo = GetBlockInfo(textureCopy);
         DAWN_INVALID_IF(
             textureCopy.origin.x % blockInfo.width != 0,
             "Texture copy origin.x (%u) is not a multiple of compressed texture format block "

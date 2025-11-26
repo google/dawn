@@ -282,8 +282,7 @@ bool IsFullBufferOverwrittenInTextureToBufferCopy(const TextureCopy& source,
         return false;
     }
 
-    const TextureBase* texture = source.texture.Get();
-    const TypedTexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(source.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(source);
     BlockExtent3D copySize = blockInfo.ToBlock(copySize_in);
     const bool multiSlice = copySize.depthOrArrayLayers > BlockCount{1};
     const bool multiRow = multiSlice || copySize.height > BlockCount{1};

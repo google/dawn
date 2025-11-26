@@ -1075,9 +1075,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     DAWN_TRY_ASSIGN(pipeline,
                     GetOrCreateTextureToBufferPipeline(device, src, textureViewDimension));
 
-    const Format& format = src.texture->GetFormat();
-
-    const TypedTexelBlockInfo& blockInfo = format.GetAspectInfo(src.aspect).block;
+    const TypedTexelBlockInfo& blockInfo = GetBlockInfo(src);
     // As the texture is uncompressed, texel and block space extents are the same, but we still use
     // texel space here because the compute shader works on texels.
     const TexelExtent3D texCopyExtent = blockInfo.ToTexel(copyExtent);
@@ -1100,6 +1098,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     // change if we use an intermediate buffer.
     uint64_t shaderBindingOffset = dst.offset - shaderStartOffset;
     bool readPreviousRow = false;
+    const Format& format = src.texture->GetFormat();
     if (bytesPerTexel < 4 && !format.HasDepthOrStencil()) {
         uint32_t extraBytes = shaderStartOffset % 4;
 
