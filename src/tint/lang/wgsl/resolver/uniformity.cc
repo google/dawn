@@ -833,14 +833,14 @@ class UniformityGraph {
 
             [&](const ast::ForLoopStatement* f) {
                 auto* sem_loop = sem_.Get(f);
-                auto* cfx = CreateNode({"loop_start"});
+                auto* cf_iter_start = CreateNode({"loop_start"});
 
                 // Insert the initializer before the loop.
-                auto* cf_init = cf;
+                auto* cf_init_end = cf;
                 if (f->initializer) {
-                    cf_init = ProcessStatement(cf, f->initializer);
+                    cf_init_end = ProcessStatement(cf, f->initializer);
                 }
-                auto* cf_start = cf_init;
+                auto* cf_body_start = cf_init_end;
 
                 auto& info = current_function_->LoopSwitchInfoFor(sem_loop);
                 info.type = "forloop";
@@ -855,11 +855,11 @@ class UniformityGraph {
 
                 // Insert the condition at the start of the loop body.
                 if (f->condition) {
-                    auto [cf_cond, v] = ProcessExpression(cfx, f->condition);
+                    auto [cf_cond, v] = ProcessExpression(cf_iter_start, f->condition);
                     auto* cf_condition_end = CreateNode({"for_condition_CFend"}, f);
                     cf_condition_end->affects_control_flow = true;
                     cf_condition_end->AddEdge(v);
-                    cf_start = cf_condition_end;
+                    cf_body_start = cf_condition_end;
 
                     // Propagate assignments to the loop exit nodes.
                     for (auto& var : current_function_->local_var_decls) {
@@ -870,7 +870,7 @@ class UniformityGraph {
                         exit_node->AddEdge(current_function_->variables.Get(var));
                     }
                 }
-                auto* cf1 = ProcessStatement(cf_start, f->body);
+                auto* cf1 = ProcessStatement(cf_body_start, f->body);
 
                 auto& loop_body_behavior = sem_.Get(f->body)->Behaviors();
 
@@ -895,11 +895,11 @@ class UniformityGraph {
                     }
 
                     auto* cf2 = ProcessStatement(cf1, f->continuing);
-                    cfx->AddEdge(cf2);
+                    cf_iter_start->AddEdge(cf2);
                 } else {
-                    cfx->AddEdge(cf1);
+                    cf_iter_start->AddEdge(cf1);
                 }
-                cfx->AddEdge(cf);
+                cf_iter_start->AddEdge(cf);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop
                 // (including the loop continuing statement).
@@ -928,7 +928,7 @@ class UniformityGraph {
                 if (sem_loop->Behaviors() == sem::Behaviors{sem::Behavior::kNext}) {
                     return cf;
                 } else {
-                    return cfx;
+                    return cf_iter_start;
                 }
             },
 
