@@ -4317,7 +4317,9 @@ std::vector<LoopGraphCase> LoopGraphCases() {
     // cases.
     const auto n = cases.size();
     for (size_t i = 0; i < n; i++) {
-        auto& case_ = cases[i];
+        // Take copy instead of a reference because the vector will expand at
+        // some point, invalidating references.
+        const auto case_ = cases[i];
         if (case_.continuing.role.empty()) {
             // Construct a new loop case, with an empty continuing clause.
             cases.emplace_back(case_.before.role, case_.body.role, " ", case_.after.role,
