@@ -549,9 +549,6 @@ TEST_P(MaxLimitTests, MaxStorageBuffersPerShaderStage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
-    // TODO(crbug.com/dawn/590): Crashing on ANGLE/D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // TODO(crbug.com/dawn/590): Failing on Pixel4
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 

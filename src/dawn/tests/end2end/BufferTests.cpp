@@ -1069,10 +1069,6 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 
 // Test that creating a very large buffers fails gracefully.
 TEST_P(BufferTests, CreateBufferOOM) {
-    // TODO(crbug.com/346377856): fails on ANGLE/D3D11, but is likely a Dawn/GL bug that only
-    // repros on Windows for some reason
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
@@ -1115,10 +1111,6 @@ TEST_P(BufferTests, CreateBufferOOMWithValidationError) {
 
 // Test that a very large buffer mappedAtCreation fails gracefully.
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
-    // TODO(crbug.com/346377856): fails on ANGLE/D3D11, but is likely a Dawn/GL bug that only
-    // repros on Windows for some reason
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());
@@ -1242,10 +1234,6 @@ TEST_P(BufferTests, CreateErrorBuffer) {
 
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
-    // TODO(crbug.com/346377856): fails on ANGLE/D3D11, but is likely a Dawn/GL bug that only
-    // repros on Windows for some reason
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsAsan());

@@ -1203,9 +1203,6 @@ TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
 
 // Test copying the non-zero mip, stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests, FromNonZeroMipStencilAspect) {
-    // TODO(crbug.com/dawn/2273): Failing on ANGLE/D3D11 for unknown reasons.
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // TODO(42242119): hang/crash on Qualcomm Adreno X1.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsQualcomm());
 
@@ -1437,8 +1434,6 @@ TEST_P(StencilCopyTests_Compat, FromStencilAspectAtNonZeroOffset) {
 
 // Test copying the non-zero mip, stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests_Compat, FromNonZeroMipStencilAspect) {
-    // TODO(crbug.com/dawn/2273): Failing on ANGLE/D3D11 for unknown reasons.
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
     constexpr uint32_t kWidth = 9;
     constexpr uint32_t kHeight = 9;
     constexpr uint32_t kBufferCopyOffset = 0;

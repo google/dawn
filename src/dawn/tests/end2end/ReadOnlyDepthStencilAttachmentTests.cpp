@@ -293,10 +293,6 @@ class ReadOnlyDepthStencilAttachmentTests
 class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
 
 TEST_P(ReadOnlyDepthAttachmentTests, SampleFromAttachment) {
-    // TODO(dawn:2163): The texture reads zeroes, maybe ANGLE's TextureStorageD3D11 is missing a
-    // copy between the storages?
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     TestSpec spec;
     spec.readonlyAspects = wgpu::TextureAspect::DepthOnly;
     spec.sampledAspect = wgpu::TextureAspect::DepthOnly;
@@ -362,9 +358,6 @@ TEST_P(ReadOnlyDepthAttachmentTests, UnusedAspectWithReadOnly) {
 class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {};
 
 TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
-    // TODO(anglebug.com/344950145): assert failed in rx::TextureStorage11::verifySwizzleExists
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
     // samples from stencil buffer and writes into color buffer.
     {
@@ -422,9 +415,6 @@ class ReadOnlyDepthAndStencilAttachmentTests : public ReadOnlyDepthStencilAttach
 
 // Test that using stencilReadOnly while modifying the depth aspect works.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {
-    // TODO(anglebug.com/344950145): assert failed in rx::TextureStorage11::verifySwizzleExists
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // Stencil test is always true but the depth test passes only for the
     TestSpec spec1;
     spec1.readonlyAspects = wgpu::TextureAspect::StencilOnly;
@@ -451,10 +441,6 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {
 
 // Test that using depthReadOnly while modifying the stencil aspect works.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, SampleDepthModifyStencil) {
-    // TODO(dawn:2163): The texture reads zeroes, maybe ANGLE's TextureStorageD3D11 is missing a
-    // copy between the storages?
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // Depth/stencil tests are true, the depth is correctly sampled from the depthClearValue.
     // The stencil is written to the value of the stencil ref.
     TestSpec spec1;
@@ -480,10 +466,6 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, SampleDepthModifyStencil) {
 
 // Test sampling depth with both the depth and stencil readonly.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleDepth) {
-    // TODO(dawn:2163): The texture reads zeroes, maybe ANGLE's TextureStorageD3D11 is missing a
-    // copy between the storages?
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // Sample the depth while using both depth an stencil testing.
 
     // First render: depth test passes only for the bottom half, stencil passes.
@@ -506,8 +488,6 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleDepth) {
 
 // Test sampling stencil with both the depth and stencil readonly.
 TEST_P(ReadOnlyDepthAndStencilAttachmentTests, BothReadOnlySampleStencil) {
-    // TODO(anglebug.com/344950145): assert failed in rx::TextureStorage11::verifySwizzleExists
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
     // Sample the stencil while using both depth an stencil testing.
 
     // First render: depth test passes only for the bottom half, stencil passes.

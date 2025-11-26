@@ -637,8 +637,6 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsIntel() && IsAndroid());
-    // TODO(crbug.com/dawn/2131): diagnose this failure on Win Angle D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
     // TODO(crbug.com/dawn/42241333): diagnose stencil8 failure on Angle Swiftshader
     DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsANGLESwiftShader());
 

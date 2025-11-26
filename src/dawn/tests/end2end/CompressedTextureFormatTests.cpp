@@ -751,8 +751,6 @@ TEST_P(CompressedTextureFormatTest, Basic) {
 // Made for compatibility mode.
 TEST_P(CompressedTextureFormatTest, Cube) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
-    // TODO(crbug.com/dawn/2131): diagnose this failure on Win Angle D3D11
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
     const wgpu::TextureFormat format = GetParam().mTextureFormat;
 

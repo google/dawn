@@ -91,11 +91,6 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
     return deviceId;
 }
 
-bool IsANGLED3D11(std::string_view renderer) {
-    return renderer.find("ANGLE") != std::string::npos &&
-           renderer.find("Direct3D11") != std::string::npos;
-}
-
 bool IsANGLEDesktopGL(std::string_view renderer) {
     return renderer.find("ANGLE") != std::string::npos &&
            renderer.find("OpenGL") != std::string::npos &&
@@ -591,7 +586,7 @@ void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info,
 bool PhysicalDevice::SupportTextureComponentSwizzle() const {
     // Texture component swizzle requires GLES 3.0 / GL 3.3+ and is known to be incomplete or
     // unsupported on the ANGLE D3D11 backend (as D3D11 lacks native support).
-    return (mFunctions.IsAtLeastGLES(3, 0) || mFunctions.IsAtLeastGL(3, 3)) && !IsANGLED3D11(mName);
+    return (mFunctions.IsAtLeastGLES(3, 0) || mFunctions.IsAtLeastGL(3, 3));
 }
 
 }  // namespace dawn::native::opengl

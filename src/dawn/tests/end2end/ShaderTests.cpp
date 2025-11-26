@@ -2609,9 +2609,6 @@ TEST_P(ShaderTests, CollisionHandle) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInVertexStage < 2);
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
 
-    // TODO(crbug.com/394915257): ANGLE D3D11 bug
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 @group(0) @binding(1) var u0_1: texture_storage_2d<r32float, read>;
 @group(0) @binding(0) var u0_0: texture_storage_2d<r32float, read>;
@@ -2642,9 +2639,6 @@ TEST_P(ShaderTests, CollisionHandle) {
 TEST_P(ShaderTests, CollisionHandle_DifferentModules) {
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInVertexStage < 2);
     DAWN_TEST_UNSUPPORTED_IF(GetSupportedLimits().maxStorageTexturesInFragmentStage < 1);
-
-    // TODO(crbug.com/394915257): ANGLE D3D11 bug
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
     wgpu::ShaderModule vmodule = utils::CreateShaderModule(device, R"(
 @group(0) @binding(1) var v1: texture_storage_2d<r32float, read>;

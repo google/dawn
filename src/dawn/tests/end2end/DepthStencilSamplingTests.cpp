@@ -641,9 +641,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
 // Repro test for crbug.com/dawn/1187 where sampling a depth texture returns values not in [0, 1]
 TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
-    // TODO(crbug.com/dawn/1187): The test fails on ANGLE D3D11, investigate why.
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     // TODO(crbug.com/444741058): Fails on Intel-based brya devices running Android Desktop.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsIntel() && IsAndroid());
 
@@ -930,9 +927,6 @@ TEST_P(DepthSamplingTest, SampleDepthOnly) {
 
     // TODO(crbug.com/dawn/2552): diagnose this flake on Pixel 6 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
-    // TODO(crbug.com/341258943): Fails on Win/Intel UHD 770.
-    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsIntelGen12() && IsANGLED3D11());
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 

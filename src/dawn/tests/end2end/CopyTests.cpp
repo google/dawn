@@ -463,10 +463,6 @@ class CopyTests_T2B : public CopyTests_WithFormatParam {
 
         auto format = GetParam().mTextureFormat;
 
-        // TODO(dawn:2129): Fail for Win ANGLE D3D11
-        DAWN_SUPPRESS_TEST_IF((format == wgpu::TextureFormat::RGB9E5Ufloat) && IsANGLED3D11() &&
-                              IsWindows());
-
         // TODO(crbug.com/dawn/2294): diagnose BGRA T2B failures on Pixel 4 OpenGLES
         DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::BGRA8Unorm && IsOpenGLES() &&
                               IsAndroid() && IsQualcomm());
@@ -973,10 +969,6 @@ class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTextureFor
 
     void SetUp() override {
         DawnTestWithParams<CopyTextureFormatParams>::SetUp();
-
-        // TODO(dawn:2129): Fail for Win ANGLE D3D11
-        DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::RGB9E5Ufloat) &&
-                              IsANGLED3D11() && IsWindows());
     }
 };
 

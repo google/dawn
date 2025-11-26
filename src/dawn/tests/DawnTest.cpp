@@ -490,11 +490,7 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
         if (!mANGLEBackend.empty()) {
             anglePlatform = mANGLEBackend.c_str();
         } else {
-#if DAWN_PLATFORM_IS(WINDOWS)
-            anglePlatform = "d3d11";
-#else
             anglePlatform = "swiftshader";
-#endif
         }
         SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", anglePlatform);
     }
@@ -1032,11 +1028,6 @@ bool DawnTestBase::IsANGLE() const {
 bool DawnTestBase::IsANGLESwiftShader() const {
     return (mParam.adapterProperties.name.find("ANGLE") == 0u) &&
            (mParam.adapterProperties.name.find("SwiftShader") != std::string::npos);
-}
-
-bool DawnTestBase::IsANGLED3D11() const {
-    return (mParam.adapterProperties.name.find("ANGLE") == 0u) &&
-           (mParam.adapterProperties.name.find("Direct3D11") != std::string::npos);
 }
 
 bool DawnTestBase::IsWARP() const {

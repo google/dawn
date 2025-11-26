@@ -366,9 +366,6 @@ TEST_P(FirstIndexOffsetTests, IndexedBothOffset) {
 
 // Test that vertex_index when drawn using DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
@@ -388,9 +385,6 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectVertexOffset) {
 
 // Test that instance_index when drawn using DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectInstanceOffset) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // Draw once: instance_index starts at 13
     {
         TestInstanceIndex(DrawMode::NonIndexedIndirect, {{0, 13}});
@@ -405,9 +399,6 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectInstanceOffset) {
 // Test that vertex_index and instance_index respectively when drawn using
 // DrawIndirect()
 TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(crbug.com/459864802): Fails on Win/Snapdragon X Elite w/ D3D11.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsQualcomm() && IsD3D11());
 
@@ -423,9 +414,6 @@ TEST_P(FirstIndexOffsetTests, NonIndexedIndirectBothOffset) {
 
 // Test that vertex_index when drawn using DrawIndexedIndirect()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // TODO(crbug.com/dawn/1429): Fails with the full validation turned on.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsFullBackendValidationEnabled());
 
@@ -445,9 +433,6 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectVertex) {
 
 // Test that instance_index when drawn using DrawIndexed()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectInstance) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // Draw once: instance_index starts at 13
     {
         TestInstanceIndex(DrawMode::IndexedIndirect, {{0, 13}});
@@ -462,9 +447,6 @@ TEST_P(FirstIndexOffsetTests, IndexedIndirectInstance) {
 // Test that vertex_index and instance_index start at 7 and 11 respectively when drawn using
 // DrawIndexed()
 TEST_P(FirstIndexOffsetTests, IndexedIndirectBothOffset) {
-    // TODO(crbug.com/347223100): failing on ANGLE/D3D11
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // Draw once: vertex_index starts at 7 and instance_index starts at 13
     {
         TestBothIndices(DrawMode::IndexedIndirect, {{7, 13}});

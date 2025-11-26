@@ -91,9 +91,6 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     // TODO(dawn:1805): Load ByteAddressBuffer in Pixel Shader doesn't work with NVIDIA on D3D11
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsNvidia());
 
-    // TODO(dawn:2393): ANGLE/D3D11 fails in HLSL shader compilation (UAV vs PS register bug)
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
-
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {
             return vec4f(0.0, 0.0, 0.5, 1.0);

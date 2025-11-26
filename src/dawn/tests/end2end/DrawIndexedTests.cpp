@@ -171,7 +171,6 @@ TEST_P(DrawIndexedTest, NegativeBaseVertex) {
 
     // TODO(crbug.com/343178421): ANGLE/SwiftShader and ANGLE/D3D11 fail with negative baseVertex.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
-    DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
     // Also failing on Qualcomm and ARM GLES.
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && (IsQualcomm() || IsARM()));

@@ -260,7 +260,7 @@ DAWN_INSTANTIATE_TEST(RenderPassTest_RegressionDawn1071,
 class RenderPassTest_RegressionDawn1389 : public RenderPassTest {};
 TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16Unorm) {
     // TODO(dawn:1705): fix this test for Intel D3D11.
-    DAWN_SUPPRESS_TEST_IF((IsD3D11() || IsANGLED3D11()) && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     // TODO(crbug.com/dawn/1989): Failed on Intel Gen12 GPUs because of Windows Vulkan driver issue,
     // when copying to a D16_UNORM depth texture and clearing one subresource, other subresources
