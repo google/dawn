@@ -39,6 +39,7 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "raise",
   srcs = [
+    "array_offset_from_immediate.cc",
     "array_offset_from_uniform.cc",
     "binary_polyfill.cc",
     "builtin_polyfill.cc",
@@ -52,6 +53,7 @@ cc_library(
     "shader_io.cc",
   ],
   hdrs = [
+    "array_offset_from_immediate.h",
     "array_offset_from_uniform.h",
     "binary_polyfill.h",
     "builtin_polyfill.h",
@@ -96,6 +98,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "array_offset_from_immediate_test.cc",
     "array_offset_from_uniform_test.cc",
     "binary_polyfill_test.cc",
     "builtin_polyfill_test.cc",

@@ -68,10 +68,15 @@ struct ArrayLengthFromUniformOptions {
                  bindpoint_to_size_index);
 };
 
+/// Options used to specify a mapping of binding points to indices into a UBO
+/// from which to load buffer offsets, or to load them from immediate blocks.
+/// TODO(crbug.com/366291600): Remove ubo_binding after switch to immediates.
 struct ArrayOffsetFromUniformOptions {
     /// The HLSL binding point to use to generate a uniform buffer from which to read buffer
     /// offsets.
     BindingPoint ubo_binding;
+    /// The offset in immediate block for buffer offsets.
+    std::optional<uint32_t> buffer_offsets_offset{};
     /// The mapping from the storage buffer binding points in WGSL binding-point space to the index
     /// into the uniform buffer where the offset into the buffer is stored.
     std::unordered_map<BindingPoint, uint32_t> bindpoint_to_offset_index;
@@ -79,7 +84,10 @@ struct ArrayOffsetFromUniformOptions {
     bool operator==(const ArrayOffsetFromUniformOptions& other) const = default;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(ArrayOffsetFromUniformOptions, ubo_binding, bindpoint_to_offset_index);
+    TINT_REFLECT(ArrayOffsetFromUniformOptions,
+                 ubo_binding,
+                 buffer_offsets_offset,
+                 bindpoint_to_offset_index);
 };
 
 /// Data for a single pixel local attachment

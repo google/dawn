@@ -91,6 +91,7 @@ tint_add_target(tint_lang_hlsl_writer_test test
   lang/hlsl/writer/constant_test.cc
   lang/hlsl/writer/construct_test.cc
   lang/hlsl/writer/convert_test.cc
+  lang/hlsl/writer/dynamic_offset_test.cc
   lang/hlsl/writer/function_test.cc
   lang/hlsl/writer/helper_test.h
   lang/hlsl/writer/if_test.cc

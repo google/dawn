@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise lib
+  lang/hlsl/writer/raise/array_offset_from_immediate.cc
+  lang/hlsl/writer/raise/array_offset_from_immediate.h
   lang/hlsl/writer/raise/array_offset_from_uniform.cc
   lang/hlsl/writer/raise/array_offset_from_uniform.h
   lang/hlsl/writer/raise/binary_polyfill.cc
@@ -97,6 +99,7 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_raise lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer_raise_test test
+  lang/hlsl/writer/raise/array_offset_from_immediate_test.cc
   lang/hlsl/writer/raise/array_offset_from_uniform_test.cc
   lang/hlsl/writer/raise/binary_polyfill_test.cc
   lang/hlsl/writer/raise/builtin_polyfill_test.cc

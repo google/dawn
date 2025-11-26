@@ -81,6 +81,7 @@ cc_library(
     "constant_test.cc",
     "construct_test.cc",
     "convert_test.cc",
+    "dynamic_offset_test.cc",
     "function_test.cc",
     "helper_test.h",
     "if_test.cc",

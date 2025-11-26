@@ -60,6 +60,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/hlsl/writer/common/option_helpers.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
+#include "src/tint/lang/hlsl/writer/raise/array_offset_from_immediate.h"
 #include "src/tint/lang/hlsl/writer/raise/array_offset_from_uniform.h"
 #include "src/tint/lang/hlsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
@@ -99,6 +100,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // The number of vec4s used to store buffer sizes that will be set into the immediate block.
     uint32_t buffer_sizes_array_elements_num = 0;
+    // The number of vec4s used to store buffer offsets that will be set into the immediate block.
+    uint32_t buffer_offsets_array_elements_num = 0;
 
     // PrepareImmediateData must come before any transform that needs internal push constants.
     core::ir::transform::PrepareImmediateDataConfig immediate_data_config;
@@ -136,6 +139,24 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             module.symbols.New("buffer_sizes"),
             module.Types().array(module.Types().vec4<core::u32>(),
                                  buffer_sizes_array_elements_num));
+    }
+
+    if (array_offset_from_uniform_options.buffer_offsets_offset) {
+        // Find the largest index declared in the map, in order to determine the number of
+        // elements needed in the array of buffer offsets. The buffer offsets will be packed into
+        // vec4s to satisfy the 16-byte alignment requirement for array elements in constant
+        // buffers.
+        uint32_t max_index = 0;
+        for (const auto& entry : array_offset_from_uniform_options.bindpoint_to_offset_index) {
+            max_index = std::max(max_index, entry.second);
+        }
+        buffer_offsets_array_elements_num = (max_index / 4) + 1;
+
+        immediate_data_config.AddInternalImmediateData(
+            array_offset_from_uniform_options.buffer_offsets_offset.value(),
+            module.symbols.New("buffer_offsets"),
+            module.Types().array(module.Types().vec4<core::u32>(),
+                                 buffer_offsets_array_elements_num));
     }
 
     auto immediate_data_layout =
@@ -278,6 +299,25 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
     RUN_TRANSFORM(raise::DecomposeStorageAccess, module);
 
+    // ArrayOffsetFrom* transforms must come after both DirectVariableAccess and
+    // DecomposeStorageAccess, and BEFORE ChangeImmediateToUniform.
+    // TODO(crbug.com/366291600): Replace ArrayOffsetFromUniform with ArrayOffsetFromImmediates
+    if (array_offset_from_uniform_options.buffer_offsets_offset) {
+        // Use ArrayOffsetFromImmediates when buffer_offsets_offset is provided.
+        TINT_ASSERT(!array_offset_from_uniform_options.ubo_binding.group &&
+                    !array_offset_from_uniform_options.ubo_binding.binding);
+
+        RUN_TRANSFORM(raise::ArrayOffsetFromImmediates, module, immediate_data_layout.Get(),
+                      array_offset_from_uniform_options.buffer_offsets_offset.value(),
+                      buffer_offsets_array_elements_num,
+                      array_offset_from_uniform_options.bindpoint_to_offset_index);
+    } else if (array_offset_from_uniform_options.ubo_binding.group ||
+               array_offset_from_uniform_options.ubo_binding.binding) {
+        // Fall back to ArrayOffsetFromUniform when UBO binding is provided.
+        // ArrayOffsetFromUniform operates on uniform buffers and must come after
+        // ChangeImmediateToUniform (see below after ChangeImmediateToUniform transform).
+    }
+
     // ChangeImmediateToUniformConfig must come before DecomposeUniformAccess (to write correct
     // uniform access instructions).
     {
@@ -287,14 +327,18 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ChangeImmediateToUniform, module, config);
     }
 
-    // ArrayOffsetFromUniform must come after both DirectVariableAccess and DecomposeStorageAccess.
-    RUN_TRANSFORM(raise::ArrayOffsetFromUniform, module,
-                  BindingPoint{array_offset_from_uniform_options.ubo_binding.group,
-                               array_offset_from_uniform_options.ubo_binding.binding},
-                  array_offset_from_uniform_options.bindpoint_to_offset_index);
+    // ArrayOffsetFromUniform must come after ChangeImmediateToUniform, DirectVariableAccess, and
+    // DecomposeStorageAccess.
+    if (array_offset_from_uniform_options.ubo_binding.group ||
+        array_offset_from_uniform_options.ubo_binding.binding) {
+        RUN_TRANSFORM(raise::ArrayOffsetFromUniform, module,
+                      BindingPoint{array_offset_from_uniform_options.ubo_binding.group,
+                                   array_offset_from_uniform_options.ubo_binding.binding},
+                      array_offset_from_uniform_options.bindpoint_to_offset_index);
+    }
 
     // DecomposeUniformAccess must come after DecomposeStorageAccess, ChangeImmediateToUniform, and
-    // ArrayOffsetFromUniform
+    // ArrayOffsetFrom* transforms
     RUN_TRANSFORM(core::ir::transform::DecomposeUniformAccess, module);
 
     // PixelLocal must run after DirectVariableAccess to avoid chasing pointer parameters.

@@ -221,6 +221,8 @@ void PopulateBindingRelatedOptions(
         remap(options.array_length_from_uniform.bindpoint_to_size_index);
 
     array_offset_from_uniform_options.ubo_binding = options.array_offset_from_uniform.ubo_binding;
+    array_offset_from_uniform_options.buffer_offsets_offset =
+        options.array_offset_from_uniform.buffer_offsets_offset;
     array_offset_from_uniform_options.bindpoint_to_offset_index =
         remap(options.array_offset_from_uniform.bindpoint_to_offset_index);
 }

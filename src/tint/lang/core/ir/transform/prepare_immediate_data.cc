@@ -32,6 +32,8 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/struct.h"
+#include "src/tint/utils/ice/ice.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
@@ -69,7 +71,7 @@ struct State {
                 continue;
             }
             auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
-            if (ptr->AddressSpace() != core::AddressSpace::kImmediate) {
+            if (!ptr || ptr->AddressSpace() != core::AddressSpace::kImmediate) {
                 continue;
             }
 
