@@ -579,6 +579,10 @@ void PhysicalDevice::CleanUpDebugLayerFilters() {
 
 void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platform,
                                                 TogglesState* adapterToggles) const {
+    // We don't check if the compiler libraries is available here. Compiler libraries are checked
+    // and loaded according to device's UseDXC toggle during device creation, and the creation would
+    // just fail if required compiler is not available. This is to avoid expensive loading of DLLs
+    // that we will not use immediately (or at all).
 #ifdef DAWN_USE_BUILT_DXC
     if (GetDeviceInfo().highestSupportedShaderModel < 60) {
         // If shader model < 6.0, though, we must use FXC.
