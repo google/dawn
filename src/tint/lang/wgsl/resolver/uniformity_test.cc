@@ -1138,7 +1138,7 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                              return ToStr(interrupt) + "_" + ToStr(condition);
                          });
 
-TEST_P(LoopTest, CallInBody_InterruptAfter) {
+TEST_P(LoopTest, Loop_CallInBody_InterruptAfter) {
     // Test control-flow interrupt in a loop after a function call that requires uniform control
     // flow.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
@@ -1177,7 +1177,7 @@ fn foo() {
     }
 }
 
-TEST_P(LoopTest, CallInBody_InterruptBefore) {
+TEST_P(LoopTest, Loop_CallInBody_InterruptBefore) {
     // Test control-flow interrupt in a loop before a function call that requires uniform control
     // flow.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
@@ -1217,7 +1217,7 @@ fn foo() {
     }
 }
 
-TEST_P(LoopTest, CallInContinuing_InterruptInBody) {
+TEST_P(LoopTest, Loop_CallInContinuing_InterruptInBody) {
     // Test control-flow interrupt in a loop with a function call that requires uniform control flow
     // in the continuing statement.
     auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
@@ -1255,6 +1255,164 @@ fn foo() {
                                          "'nonuniform_var' may result in a non-uniform value"));
     } else {
         RunTest(src, true);
+    }
+}
+
+TEST_P(LoopTest, ForUnconditional_CallInBody_InterruptAfter) {
+    auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
+    auto condition = static_cast<Condition>(std::get<1>(GetParam()));
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read> uniform_var : i32;
+@group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
+
+fn foo() {
+  for ( ; ; ) {
+    workgroupBarrier();
+    )" + MakeInterrupt(interrupt, condition) +
+                      R"(;
+  }
+}
+)";
+    const bool infinite_loop = interrupt == kContinue;
+    const bool uniformity_failure = condition == kNonUniform;
+    const bool expect_pass = !uniformity_failure && !infinite_loop;
+
+    RunTest(src, expect_pass);
+    // Check infinite loop first, because uniformity analysis may trigger later.
+    if (infinite_loop) {
+        EXPECT_FALSE(error_.empty());
+    } else if (uniformity_failure) {
+        EXPECT_THAT(
+            error_,
+            ::testing::StartsWith(
+                R"(test:7:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"));
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:8:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"));
+    } else {
+        EXPECT_TRUE(error_.empty());
+    }
+}
+
+TEST_P(LoopTest, ForUnconditional_CallInBody_InterruptBefore) {
+    auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
+    auto condition = static_cast<Condition>(std::get<1>(GetParam()));
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read> uniform_var : i32;
+@group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
+
+fn foo() {
+  for ( ; ; ) {
+    )" + MakeInterrupt(interrupt, condition) +
+                      R"(;
+    workgroupBarrier();
+  }
+}
+)";
+    const bool infinite_loop = interrupt == kContinue;
+    const bool exit_immediately = (interrupt != kContinue) && condition == kNone;
+    const bool uniformity_failure = condition == kNonUniform;
+    const bool expect_pass = exit_immediately || (!uniformity_failure && !infinite_loop);
+
+    RunTest(src, expect_pass);
+    // Check infinite loop first, because uniformity analysis may trigger later.
+    if (infinite_loop) {
+        EXPECT_FALSE(error_.empty());
+    } else if (uniformity_failure) {
+        EXPECT_THAT(
+            error_,
+            ::testing::StartsWith(
+                R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"))
+            << src;
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:7:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"))
+            << src;
+    } else if (exit_immediately) {
+        EXPECT_FALSE(error_.empty());  // Warns that code is unreachable.
+    } else {
+        EXPECT_TRUE(error_.empty());
+    }
+}
+
+TEST_P(LoopTest, ForConditional_CallInBody_InterruptAfter) {
+    auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
+    auto condition = static_cast<Condition>(std::get<1>(GetParam()));
+    // The for-loop condition desugars to a conditional break, so the infinite
+    // loop check will not trigger.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read> uniform_var : i32;
+@group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
+
+fn foo() {
+  for ( ; true ; ) {
+    workgroupBarrier();
+    )" + MakeInterrupt(interrupt, condition) +
+                      R"(;
+  }
+}
+)";
+    const bool uniformity_failure = condition == kNonUniform;
+    const bool expect_pass = !uniformity_failure;
+
+    RunTest(src, expect_pass);
+    if (uniformity_failure) {
+        EXPECT_THAT(
+            error_,
+            ::testing::StartsWith(
+                R"(test:7:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"));
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:8:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"));
+    } else {
+        EXPECT_TRUE(error_.empty());
+    }
+}
+
+TEST_P(LoopTest, ForConditional_CallInBody_InterruptBefore) {
+    auto interrupt = static_cast<ControlFlowInterrupt>(std::get<0>(GetParam()));
+    auto condition = static_cast<Condition>(std::get<1>(GetParam()));
+    // The for-loop condition desugars to a conditional break, so the infinite
+    // loop check will not trigger.
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read> uniform_var : i32;
+@group(0) @binding(0) var<storage, read_write> nonuniform_var : i32;
+
+fn foo() {
+  for ( ; true ; ) {
+    )" + MakeInterrupt(interrupt, condition) +
+                      R"(;
+    workgroupBarrier();
+  }
+}
+)";
+    // The barrier is unreachable whenever the interruption is unconditional:
+    // - a continue will jump over the barrier to the end of the iteration.
+    // - a break or return will exit the loop entirely.
+    const bool barrier_unreachable = condition == kNone;
+    const bool exit_immediately = (condition == kNone) && (interrupt != kContinue);
+    const bool uniformity_failure = condition == kNonUniform;
+    const bool expect_pass = exit_immediately || !uniformity_failure;
+
+    RunTest(src, expect_pass);
+    if (uniformity_failure) {
+        EXPECT_THAT(
+            error_,
+            ::testing::StartsWith(
+                R"(test:8:5 error: 'workgroupBarrier' must only be called from uniform control flow
+    workgroupBarrier();)"))
+            << src;
+        EXPECT_THAT(error_,
+                    ::testing::HasSubstr("test:7:9 note: reading from read_write storage buffer "
+                                         "'nonuniform_var' may result in a non-uniform value"))
+            << src;
+    } else if (barrier_unreachable) {
+        EXPECT_FALSE(error_.empty());  // Warns that code is unreachable.
+    } else {
+        EXPECT_TRUE(error_.empty()) << error_ << src;
     }
 }
 

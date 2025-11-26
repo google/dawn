@@ -840,7 +840,7 @@ class UniformityGraph {
                 if (f->initializer) {
                     cf_init_end = ProcessStatement(cf, f->initializer);
                 }
-                auto* cf_body_start = cf_init_end;
+                auto* cf_body_start = cf_iter_start;
 
                 auto& info = current_function_->LoopSwitchInfoFor(sem_loop);
                 info.type = "forloop";
@@ -899,7 +899,7 @@ class UniformityGraph {
                 } else {
                     cf_iter_start->AddEdge(cf1);
                 }
-                cf_iter_start->AddEdge(cf);
+                cf_iter_start->AddEdge(cf_init_end);
 
                 // Add edges from variable loop input nodes to their values at the end of the loop
                 // (including the loop continuing statement).
