@@ -117,7 +117,7 @@ MaybeError SwapChainEGL::PresentImpl() {
         GLuint readFbo = 0;
         DAWN_GL_TRY(gl, GenFramebuffers(1, &readFbo));
         DAWN_GL_TRY(gl, BindFramebuffer(GL_READ_FRAMEBUFFER, readFbo));
-        DAWN_TRY(mTextureView->BindToFramebuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0));
+        DAWN_TRY(mTextureView->BindToFramebuffer(gl, GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0));
 
         DAWN_GL_TRY(gl, BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
         DAWN_GL_TRY(gl, Scissor(0, 0, surfaceWidth, surfaceHeight));

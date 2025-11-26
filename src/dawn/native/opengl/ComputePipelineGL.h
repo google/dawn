@@ -44,7 +44,7 @@ class ComputePipeline final : public ComputePipelineBase, public PipelineGL {
         Device* device,
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
 
-    MaybeError ApplyNow();
+    MaybeError ApplyNow(const OpenGLFunctions& gl);
 
     MaybeError InitializeImpl() override;
 

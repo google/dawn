@@ -357,7 +357,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     bool* needsSSBOLengthUniformBuffer) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "TranslateToGLSL");
 
-    const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
+    const OpenGLVersion& version = gl.GetVersion();
 
     GLSLCompilationRequest req = {};
 

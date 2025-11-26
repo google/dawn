@@ -158,15 +158,15 @@ MaybeError Queue::WriteTextureImpl(const TexelCopyTextureInfo& destination,
         return {};
     }
 
+    auto gl = ToBackend(GetDevice())->GetGL();
     SubresourceRange range = GetSubresourcesAffectedByCopy(textureCopy, writeSizePixel);
     if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel, destination.mipLevel,
                                       destination.aspect)) {
         destination.texture->SetIsSubresourceContentInitialized(true, range);
     } else {
-        DAWN_TRY(ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range));
+        DAWN_TRY(ToBackend(destination.texture)->EnsureSubresourceContentInitialized(gl, range));
     }
-    return DoTexSubImage(ToBackend(GetDevice())->GetGL(), textureCopy, data, dataLayout,
-                         writeSizePixel);
+    return DoTexSubImage(gl, textureCopy, data, dataLayout, writeSizePixel);
 }
 
 void Queue::OnGLUsed() {
