@@ -420,6 +420,11 @@ struct BuiltInChecker {
     /// What combination of stage and IO direction is this builtin legal for
     EnumSet<IOAttributeUsage> valid_usages;
 
+    /// What values for depth_mode are valid for this builtin.
+    /// Currently, kUndefined is the only valid option for non-frag_depth
+    EnumSet<BuiltinDepthMode> valid_depth_modes =
+        EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined};
+
     /// Implements logic for checking if the given type is valid or not. Is not a data entry (i.e. a
     /// type or set of types), because types are part of the IR module and created at runtime.
     using TypeCheckFn = bool(const core::type::Type* type);
@@ -474,6 +479,9 @@ constexpr BuiltInChecker kCullDistanceChecker{
 
 constexpr BuiltInChecker kFragDepthChecker{
     .valid_usages = EnumSet<IOAttributeUsage>{IOAttributeUsage::kFragmentOutputUsage},
+    .valid_depth_modes =
+        EnumSet<BuiltinDepthMode>{BuiltinDepthMode::kUndefined, BuiltinDepthMode::kAny,
+                                  BuiltinDepthMode::kGreater, BuiltinDepthMode::kLess},
     .type_check = [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
     .type_error = "frag_depth must be a f32",
 };
@@ -726,6 +734,21 @@ constexpr IOAttributeChecker kBuiltinChecker{
         if (!checker.type_check(ty)) {
             return std::string(checker.type_error);
         }
+
+        const auto depth_mode = attr.depth_mode.value_or(BuiltinDepthMode::kUndefined);
+        if (!checker.valid_depth_modes.Contains(depth_mode)) {
+            std::stringstream msg;
+            msg << ToString(builtin) << " cannot have a depth mode of " << ToString(depth_mode)
+                << ". ";
+            if (checker.valid_depth_modes.Size() == 1) {
+                const auto v = *checker.valid_depth_modes.begin();
+                msg << "It can only be " << ToString(v) << ".";
+            } else {
+                msg << "It must be one of " << ToString(checker.valid_depth_modes);
+            }
+            return msg.str();
+        }
+
         return Success;
     },
 };
@@ -745,7 +768,22 @@ constexpr IOAttributeChecker kInputAttachmentIndexChecker{
     .check = [](const core::type::Type*, const IOAttributes&, const Capabilities&, IOAttributeUsage)
         -> Result<SuccessType, std::string> { return Success; }};
 
-// kBlendSrcChecker + kLocationChecker are intentionally not implemented
+constexpr IOAttributeChecker kDepthModeChecker{
+    .kind = IOAttributeKind::kDepthMode,
+    .valid_usages = kBuiltinChecker.valid_usages,
+    .valid_io_kinds = kBuiltinChecker.valid_io_kinds,
+    .check = [](const core::type::Type*,
+                const IOAttributes& attr,
+                const Capabilities&,
+                IOAttributeUsage) -> Result<SuccessType, std::string> {
+        if (!attr.builtin.has_value()) {
+            return {"cannot have a depth_mode without a builtin"};
+        }
+        return Success;  // kBuiltInChecker does the checking of the depth_mode value for the
+                         // specific builtin.
+    }};
+
+// kBlendSrcChecker kLocationChecker are intentionally not implemented
 
 /// @returns all the appropriate IOAttributeCheckers for @p attr
 Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& attr,
@@ -762,6 +800,9 @@ Vector<const IOAttributeChecker*, 4> IOAttributeCheckersFor(const IOAttributes& 
     }
     if (attr.input_attachment_index.has_value()) {
         checkers.Push(&kInputAttachmentIndexChecker);
+    }
+    if (attr.depth_mode.has_value()) {
+        checkers.Push(&kDepthModeChecker);
     }
     // attr.blend_src and attr.location are intentionally skipped, because their rules are not
     // amendable to implementing via IOAttributeChecker.
