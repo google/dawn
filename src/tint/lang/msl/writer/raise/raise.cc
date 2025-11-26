@@ -69,6 +69,7 @@
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
+#include "src/tint/lang/msl/writer/raise/validate_subgroup_matrix.h"
 
 namespace tint::msl::writer {
 
@@ -85,6 +86,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::SubstituteOverrides, module,
                   options.substitute_overrides_config);
+
+    RUN_TRANSFORM(raise::ValidateSubgroupMatrix, module);
 
     RaiseResult raise_result;
 

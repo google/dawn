@@ -65,6 +65,8 @@ if (tint_build_msl_writer) {
       "shader_io.h",
       "simd_ballot.cc",
       "simd_ballot.h",
+      "validate_subgroup_matrix.cc",
+      "validate_subgroup_matrix.h",
     ]
     deps = [
       "${dawn_root}/src/utils",
@@ -73,6 +75,7 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/intrinsic",
       "${tint_src_dir}/lang/core/ir",
+      "${tint_src_dir}/lang/core/ir/analysis",
       "${tint_src_dir}/lang/core/ir/transform",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/msl",
@@ -109,6 +112,7 @@ if (tint_build_unittests) {
         "packed_vec3_test.cc",
         "shader_io_test.cc",
         "simd_ballot_test.cc",
+        "validate_subgroup_matrix_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils",

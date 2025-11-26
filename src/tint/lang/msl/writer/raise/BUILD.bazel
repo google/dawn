@@ -49,6 +49,7 @@ cc_library(
     "raise.cc",
     "shader_io.cc",
     "simd_ballot.cc",
+    "validate_subgroup_matrix.cc",
   ],
   hdrs = [
     "argument_buffers.h",
@@ -61,6 +62,7 @@ cc_library(
     "raise.h",
     "shader_io.h",
     "simd_ballot.h",
+    "validate_subgroup_matrix.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -68,6 +70,7 @@ cc_library(
     "//src/tint/lang/core/constant",
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
+    "//src/tint/lang/core/ir/analysis",
     "//src/tint/lang/core/ir/transform",
     "//src/tint/lang/core/type",
     "//src/tint/lang/msl",
@@ -107,6 +110,7 @@ cc_library(
     "packed_vec3_test.cc",
     "shader_io_test.cc",
     "simd_ballot_test.cc",
+    "validate_subgroup_matrix_test.cc",
   ],
   deps = [
     "//src/tint/api/common",
