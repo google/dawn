@@ -33,6 +33,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "src/tint/api/common/subgroup_matrix.h"
+
 namespace tint::spirv::writer {
 
 /// The output produced when generating SPIR-V.
@@ -68,6 +70,9 @@ struct Output {
 
     /// The workgroup size information, if the entry point was a compute shader
     WorkgroupInfo workgroup_info{};
+
+    /// The subgroup matrix information
+    SubgroupMatrixInfo subgroup_matrix_info{};
 };
 
 }  // namespace tint::spirv::writer

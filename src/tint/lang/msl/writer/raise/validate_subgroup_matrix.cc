@@ -57,8 +57,7 @@ struct State {
                 break;
             }
 
-            if (i.type != core::ir::analysis::SubgroupMatrixType::kF32 &&
-                i.type != core::ir::analysis::SubgroupMatrixType::kF16) {
+            if (i.type != SubgroupMatrixType::kF32 && i.type != SubgroupMatrixType::kF16) {
                 diagnostics_.AddError(Source{})
                     << "subgroup_matrix requires a type of `f32` or `f16` for the selected device";
                 break;

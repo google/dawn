@@ -48,6 +48,7 @@ cc_library(
     "resource_binding_config.h",
     "resource_table_config.h",
     "resource_type.h",
+    "subgroup_matrix.h",
     "substitute_overrides_config.h",
     "vertex_pulling_config.h",
   ],

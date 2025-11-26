@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/ir/analysis/subgroup_matrix.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -149,7 +150,14 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return std::move(res.Failure());
     }
 
-    return Print(ir, options);
+    auto res = Print(ir, options);
+    if (res != Success) {
+        return res;
+    }
+
+    res->subgroup_matrix_info = core::ir::analysis::GatherSubgroupMatrixInfo(ir);
+
+    return res;
 }
 
 }  // namespace tint::spirv::writer

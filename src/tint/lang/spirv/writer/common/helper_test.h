@@ -102,6 +102,9 @@ class SpirvWriterTestHelperBase : public BASE {
     /// Workgroup info
     Output::WorkgroupInfo workgroup_info;
 
+    /// Subgroup Matrix Info
+    SubgroupMatrixInfo subgroup_matrix_info;
+
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
@@ -128,6 +131,7 @@ class SpirvWriterTestHelperBase : public BASE {
             return false;
         }
         workgroup_info = result->workgroup_info;
+        subgroup_matrix_info = result->subgroup_matrix_info;
 
         return true;
     }

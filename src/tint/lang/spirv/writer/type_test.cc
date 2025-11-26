@@ -936,6 +936,23 @@ TEST_F(SpirvWriterTest, Type_SubgroupMatrix) {
     EXPECT_INST("%22 = OpTypeCooperativeMatrixKHR %int %uint_3 %uint_2 %uint_2 %uint_2");
 }
 
+TEST_F(SpirvWriterTest, SubgroupMatrix_ConfigReturned) {
+    auto* fn = b.ComputeFunction("main");
+    b.Append(fn->Block(), [&] {
+        b.Var("left", ty.ptr<function>(ty.subgroup_matrix_left(ty.f32(), 8, 4)));
+        b.Var("right", ty.ptr<function>(ty.subgroup_matrix_right(ty.u32(), 4, 8)));
+        b.Var("result", ty.ptr<function>(ty.subgroup_matrix_result(ty.i32(), 2, 2)));
+        b.Return(fn);
+    });
+
+    Options options{
+        .entry_point_name = "main",
+        .use_vulkan_memory_model = true,
+    };
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_EQ(3u, subgroup_matrix_info.configs.size());
+}
+
 // Test that we can emit multiple types.
 // Includes types with the same opcode but different parameters.
 TEST_F(SpirvWriterTest, Type_Multiple) {
