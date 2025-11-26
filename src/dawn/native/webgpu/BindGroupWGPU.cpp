@@ -120,7 +120,7 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
     // We have to include any referenced bound textures views as the front end does
     // not track texture views.
     BindGroupLayoutInternalBase* layout = GetLayout();
-    DAWN_TRY(captureContext.AddResource(layout));
+    DAWN_TRY(captureContext.AddResource(ToBackend(layout)));
 
     {
         const auto& bindingMap = layout->GetBindingMap();
@@ -131,13 +131,15 @@ MaybeError BindGroup::AddReferenced(CaptureContext& captureContext) {
             DAWN_TRY(MatchVariant(
                 bindingInfo.bindingLayout,
                 [&](const SamplerBindingInfo& info) -> MaybeError {
-                    return captureContext.AddResource(GetBindingAsSampler(bindingIndex));
+                    return captureContext.AddResource(ToBackend(GetBindingAsSampler(bindingIndex)));
                 },
                 [&](const StorageTextureBindingInfo& info) -> MaybeError {
-                    return captureContext.AddResource(GetBindingAsTextureView(bindingIndex));
+                    return captureContext.AddResource(
+                        ToBackend(GetBindingAsTextureView(bindingIndex)));
                 },
                 [&](const TextureBindingInfo& info) -> MaybeError {
-                    return captureContext.AddResource(GetBindingAsTextureView(bindingIndex));
+                    return captureContext.AddResource(
+                        ToBackend(GetBindingAsTextureView(bindingIndex)));
                 },
                 [&](const auto& info) -> MaybeError { return {}; }));
         }

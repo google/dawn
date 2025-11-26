@@ -73,21 +73,20 @@ class CaptureContext {
     template <typename T>
     ResultOrError<schema::ObjectId> AddResourceAndGetId(T* object) {
         assert(object != nullptr);
-        const auto backendObject = ToBackend(object);
         schema::ObjectId id;
         Ref<ApiObjectBase> ref(object);
         auto it = mObjectIds.find(ref);
         bool newResource = it == mObjectIds.end();
         if (newResource) {
-            DAWN_TRY(backendObject->AddReferenced(*this));
+            DAWN_TRY(object->AddReferenced(*this));
 
             id = mNextObjectId++;
             mObjectIds[std::move(ref)] = id;
-            DAWN_TRY(CaptureCreation(id, object->GetLabel(), backendObject));
+            DAWN_TRY(CaptureCreation(id, object->GetLabel(), object));
         } else {
             id = it->second;
         }
-        DAWN_TRY(backendObject->CaptureContentIfNeeded(*this, id, newResource));
+        DAWN_TRY(object->CaptureContentIfNeeded(*this, id, newResource));
         return {id};
     }
 
@@ -129,11 +128,11 @@ class CaptureContext {
     void WriteCommandBytes(const void* data, size_t size);
     void WriteContentBytes(const void* data, size_t size);
 
-    MaybeError CaptureQueueWriteBuffer(BufferBase* buffer,
+    MaybeError CaptureQueueWriteBuffer(Buffer* buffer,
                                        uint64_t bufferOffset,
                                        const void* data,
                                        size_t size);
-    MaybeError CaptureUnmapBuffer(BufferBase* buffer,
+    MaybeError CaptureUnmapBuffer(Buffer* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size);

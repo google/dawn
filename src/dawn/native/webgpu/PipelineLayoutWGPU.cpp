@@ -75,7 +75,8 @@ PipelineLayout::PipelineLayout(Device* device,
 MaybeError PipelineLayout::AddReferenced(CaptureContext& captureContext) {
     for (BindGroupIndex groupIndex : GetBindGroupLayoutsMask()) {
         auto frontendLayout = GetFrontendBindGroupLayout(groupIndex);
-        DAWN_TRY(captureContext.AddResource(frontendLayout->GetInternalBindGroupLayout()));
+        DAWN_TRY(
+            captureContext.AddResource(ToBackend(frontendLayout->GetInternalBindGroupLayout())));
     }
     return {};
 }

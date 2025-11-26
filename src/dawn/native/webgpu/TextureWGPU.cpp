@@ -284,7 +284,7 @@ MaybeError Texture::CaptureContentIfNeeded(CaptureContext& captureContext,
 }
 
 MaybeError TextureView::AddReferenced(CaptureContext& captureContext) {
-    return captureContext.AddResource(GetTexture());
+    return captureContext.AddResource(ToBackend(GetTexture()));
 }
 
 MaybeError TextureView::CaptureCreationParameters(CaptureContext& captureContext) {

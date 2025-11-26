@@ -91,7 +91,7 @@ void CaptureContext::WriteCommandBytes(const void* data, size_t size) {
     mCommandBytesWritten += size;
 }
 
-MaybeError CaptureContext::CaptureQueueWriteBuffer(BufferBase* buffer,
+MaybeError CaptureContext::CaptureQueueWriteBuffer(Buffer* buffer,
                                                    uint64_t bufferOffset,
                                                    const void* data,
                                                    size_t size) {
@@ -110,7 +110,7 @@ MaybeError CaptureContext::CaptureQueueWriteBuffer(BufferBase* buffer,
     return {};
 }
 
-MaybeError CaptureContext::CaptureUnmapBuffer(BufferBase* buffer,
+MaybeError CaptureContext::CaptureUnmapBuffer(Buffer* buffer,
                                               uint64_t bufferOffset,
                                               const void* data,
                                               size_t size) {
@@ -134,7 +134,7 @@ MaybeError CaptureContext::CaptureQueueWriteTexture(const TexelCopyTextureInfo& 
                                                     size_t dataSize,
                                                     const TexelCopyBufferLayout& dataLayout,
                                                     const Extent3D& writeSizePixel) {
-    DAWN_TRY(AddResource(destination.texture));
+    DAWN_TRY(AddResource(ToBackend(destination.texture)));
     schema::RootCommandWriteTextureCmd cmd{{
         .data = {{
             .destination = ToSchema(*this, destination),

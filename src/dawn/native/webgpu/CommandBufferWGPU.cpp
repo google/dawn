@@ -591,10 +591,10 @@ MaybeError AddReferencedPassResourceUsages(CaptureContext& captureContext,
                                            const std::vector<T>& syncScopeResourceUsages) {
     for (const auto& usages : syncScopeResourceUsages) {
         for (auto buffer : usages.buffers) {
-            DAWN_TRY(captureContext.AddResource(buffer));
+            DAWN_TRY(captureContext.AddResource(ToBackend(buffer)));
         }
         for (auto texture : usages.textures) {
-            DAWN_TRY(captureContext.AddResource(texture));
+            DAWN_TRY(captureContext.AddResource(ToBackend(texture)));
         }
     }
     return {};
@@ -605,10 +605,10 @@ MaybeError AddReferencedPassResourceUsages(CaptureContext& captureContext,
 MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
     const auto& resourceUsages = GetResourceUsages();
     for (auto buffer : resourceUsages.topLevelBuffers) {
-        DAWN_TRY(captureContext.AddResource(buffer));
+        DAWN_TRY(captureContext.AddResource(ToBackend(buffer)));
     }
     for (auto texture : resourceUsages.topLevelTextures) {
-        DAWN_TRY(captureContext.AddResource(texture));
+        DAWN_TRY(captureContext.AddResource(ToBackend(texture)));
     }
     DAWN_TRY(AddReferencedPassResourceUsages(captureContext, resourceUsages.renderPasses));
     for (const auto& pass : resourceUsages.computePasses) {
@@ -624,7 +624,8 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
             case Command::BeginComputePass: {
                 const auto& cmd = *commands.NextCommand<BeginComputePassCmd>();
                 if (cmd.timestampWrites.querySet != nullptr) {
-                    DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                    DAWN_TRY(
+                        captureContext.AddResource(ToBackend(cmd.timestampWrites.querySet.Get())));
                 }
                 DAWN_TRY(GatherReferencedResourcesFromComputePass(captureContext, commands,
                                                                   usedResources));
@@ -634,20 +635,23 @@ MaybeError CommandBuffer::AddReferenced(CaptureContext& captureContext) {
                 const auto& cmd = *commands.NextCommand<BeginRenderPassCmd>();
                 for (const auto& attachment : cmd.colorAttachments) {
                     if (attachment.view != nullptr) {
-                        DAWN_TRY(captureContext.AddResource(attachment.view.Get()));
+                        DAWN_TRY(captureContext.AddResource(ToBackend(attachment.view.Get())));
                     }
                     if (attachment.resolveTarget != nullptr) {
-                        DAWN_TRY(captureContext.AddResource(attachment.resolveTarget.Get()));
+                        DAWN_TRY(
+                            captureContext.AddResource(ToBackend(attachment.resolveTarget.Get())));
                     }
                 }
                 if (cmd.depthStencilAttachment.view != nullptr) {
-                    DAWN_TRY(captureContext.AddResource(cmd.depthStencilAttachment.view.Get()));
+                    DAWN_TRY(captureContext.AddResource(
+                        ToBackend(cmd.depthStencilAttachment.view.Get())));
                 }
                 if (cmd.timestampWrites.querySet != nullptr) {
-                    DAWN_TRY(captureContext.AddResource(cmd.timestampWrites.querySet.Get()));
+                    DAWN_TRY(
+                        captureContext.AddResource(ToBackend(cmd.timestampWrites.querySet.Get())));
                 }
                 if (cmd.occlusionQuerySet != nullptr) {
-                    DAWN_TRY(captureContext.AddResource(cmd.occlusionQuerySet.Get()));
+                    DAWN_TRY(captureContext.AddResource(ToBackend(cmd.occlusionQuerySet.Get())));
                 }
                 DAWN_TRY(GatherReferencedResourcesFromRenderPass(captureContext, commands,
                                                                  usedResources));

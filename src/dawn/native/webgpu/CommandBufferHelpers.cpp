@@ -185,16 +185,16 @@ MaybeError GatherReferencedResourcesFromRenderCommand(CaptureContext& captureCon
 MaybeError AddUsedResources(CaptureContext& captureContext,
                             const CommandBufferResourceUsages& usedResources) {
     for (auto pipeline : usedResources.computePipelines) {
-        DAWN_TRY(captureContext.AddResource(pipeline));
+        DAWN_TRY(captureContext.AddResource(ToBackend(pipeline)));
     }
     for (auto pipeline : usedResources.renderPipelines) {
-        DAWN_TRY(captureContext.AddResource(pipeline));
+        DAWN_TRY(captureContext.AddResource(ToBackend(pipeline)));
     }
     for (auto bindGroup : usedResources.bindGroups) {
-        DAWN_TRY(captureContext.AddResource(bindGroup));
+        DAWN_TRY(captureContext.AddResource(ToBackend(bindGroup)));
     }
     for (auto bundle : usedResources.renderBundles) {
-        DAWN_TRY(captureContext.AddResource(bundle));
+        DAWN_TRY(captureContext.AddResource(ToBackend(bundle)));
     }
     return {};
 }

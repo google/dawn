@@ -187,11 +187,13 @@ MaybeError RenderPipeline::InitializeImpl() {
 }
 
 MaybeError RenderPipeline::AddReferenced(CaptureContext& captureContext) {
-    DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Vertex).module.Get()));
+    DAWN_TRY(
+        captureContext.AddResource(ToBackend(GetStage(SingleShaderStage::Vertex).module.Get())));
     if (HasStage(SingleShaderStage::Fragment)) {
-        DAWN_TRY(captureContext.AddResource(GetStage(SingleShaderStage::Fragment).module.Get()));
+        DAWN_TRY(captureContext.AddResource(
+            ToBackend(GetStage(SingleShaderStage::Fragment).module.Get())));
     }
-    DAWN_TRY(captureContext.AddResource(GetLayout()));
+    DAWN_TRY(captureContext.AddResource(ToBackend(GetLayout())));
     return {};
 }
 

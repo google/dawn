@@ -63,7 +63,7 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
 
         for (uint32_t i = 0; i < commandCount; ++i) {
             schema::ObjectId id;
-            DAWN_TRY_ASSIGN(id, mCaptureContext->AddResourceAndGetId(commands[i]));
+            DAWN_TRY_ASSIGN(id, mCaptureContext->AddResourceAndGetId(ToBackend(commands[i])));
             commandBufferIds.emplace_back(id);
         }
 
@@ -100,7 +100,8 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   const void* data,
                                   size_t size) {
     if (IsCapturing()) {
-        DAWN_TRY(mCaptureContext->CaptureQueueWriteBuffer(buffer, bufferOffset, data, size));
+        DAWN_TRY(
+            mCaptureContext->CaptureQueueWriteBuffer(ToBackend(buffer), bufferOffset, data, size));
     }
 
     auto innerBuffer = ToBackend(buffer)->GetInnerHandle();
