@@ -1,7 +1,12 @@
 # Chromium Experimental Dynamic Binding
 
-The `chromium_experimental_dynamic_binding` is an experimental extension that allows using a new
-`resource_binding` type. This provides the needed basis for dynamic binding (a.k.a. bind-less).
+The `chromium_experimental_dynamic_binding` is an experimental extension that provides different
+prototype options to support the WebGPU bindless prototypes.
+
+There are currently two different prototypes included in this extension:
+
+* A `resource_binding` type.
+* A `Resource Table which is accessible through `getResource` and `hasResource`
 
 # Status
 
@@ -64,11 +69,41 @@ returned. If the item at `index` is not of type `T` then a default texture of ty
 ```
 @must_use fn arrayLength(a: resource_binding) -> u32
 ```
-
 Returns the length of the array.
+
+## Resource table
+
+The concept of a `Resource Table` is added to WGSL. This is not a type which can be written, or
+an address space, but a data table available to use with the `getResource` and `hasResource`
+methods. The table is made available by the system and is just accessible.
+
+### `hasResource`
+```
+@must_use fn hasResource<T>(index: I) -> bool
+```
+* `I` is an `i32` or `u32`
+* `T` is a format-less storage texture (e.g. `texture_storage_2d<f32>`), sampled texture, multisampled
+  texture, or depth texture.
+
+`hasResource` returns true if the item a `index` of the resource table is of type `T`.
+
+### `getResource`
+```
+@must_use fn getResource<T>(index: I) -> T
+```
+* `I` is an `i32` or `u32`
+* `T` is a format-less storage texture (e.g. `texture_storage_2d<f32>`), sampled texture, multisampled
+  texture, or depth texture.
+
+`getResource` returns the value in the resource table at `index` of type `T`.
+
+If `index` is outside the bounds of the resource table then a default value of type `T` will be
+returned. If the item at `index` is not of type `T` then a default value of type `T` is returned.
+Essentially, a value is always returned, it may just be a synthensized default value.
 
 # Example usage
 
+## `resource_binding`
 ```
 enable chromium_experimental_dynamic_binding;
 
@@ -77,6 +112,19 @@ enable chromium_experimental_dynamic_binding;
 @fragment fn fs() {
     if (hasBinding<texture_2d<f32>>(textures, 0)) {
         let tex = textureLoad(getBinding<texture_2d<f32>>(textures, 0));
+    }
+}
+```
+
+## Resource Table
+```
+enable chromium_experimental_dynamic_binding;
+
+const kHouseTexture = 0u;
+
+@fragment fn fs() {
+    if (hasResource<texture_2d<f32>>(kHouseTexture)) {
+        let tex = textureLoad(getResource<texture_2d<f32>>(kHouseTexture));
     }
 }
 ```
