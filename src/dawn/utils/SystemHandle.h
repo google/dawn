@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_UTILS_SYSTEMHANDLE_H_
 #define SRC_DAWN_UTILS_SYSTEMHANDLE_H_
 
+#include <cstdint>
 #include <type_traits>
 #include <utility>
 
