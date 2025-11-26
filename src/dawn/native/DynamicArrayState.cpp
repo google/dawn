@@ -30,6 +30,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Queue.h"
 #include "tint/api/common/resource_type.h"
 
 namespace dawn::native {
@@ -190,25 +191,17 @@ BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind) {
     return GetDefaultBindingOrder(kind).size();
 }
 
-DynamicArrayState::DynamicArrayState(BindingIndex size, wgpu::DynamicBindingKind kind)
-    : mKind(kind), mAPISize(size) {
+DynamicArrayState::DynamicArrayState(DeviceBase* device,
+                                     BindingIndex size,
+                                     wgpu::DynamicBindingKind kind)
+    : mKind(kind), mAPISize(size), mDevice(device) {
     mBindings.resize(size + GetDefaultBindingCount(mKind));
 
     DAWN_ASSERT(ComputeTypeId(nullptr) == BindingState{}.typeId);
     mBindingState.resize(mBindings.size());
 }
 
-MaybeError DynamicArrayState::Initialize(DeviceBase* device) {
-    // Add the default bindings at the end of mBindings
-    ityp::span<BindingIndex, Ref<TextureViewBase>> defaultBindings;
-    DAWN_TRY_ASSIGN(
-        defaultBindings,
-        device->GetDynamicArrayDefaultBindings()->GetOrCreateSampledTextureDefaults(device));
-
-    for (auto [i, defaultBinding] : Enumerate(defaultBindings)) {
-        Update(mAPISize + i, defaultBinding.Get());
-    }
-
+MaybeError DynamicArrayState::Initialize() {
     // Create a storage buffer that will hold the shader-visible metadata for the dynamic array.
     uint32_t metadataArrayLength = uint32_t(mAPISize);
     BufferDescriptor metadataDesc{
@@ -217,7 +210,7 @@ MaybeError DynamicArrayState::Initialize(DeviceBase* device) {
         .size = sizeof(uint32_t) * (metadataArrayLength + 1),
         .mappedAtCreation = true,
     };
-    DAWN_TRY_ASSIGN(mMetadataBuffer, device->CreateBuffer(&metadataDesc));
+    DAWN_TRY_ASSIGN(mMetadataBuffer, mDevice->CreateBuffer(&metadataDesc));
 
     // Initialize the metadata buffer with the arrayLength and a bunch of zeroes that correspond to
     // empty entries.
@@ -229,6 +222,19 @@ MaybeError DynamicArrayState::Initialize(DeviceBase* device) {
     *data = metadataArrayLength;
     memset(data + 1, 0, metadataDesc.size - sizeof(uint32_t));
     DAWN_TRY(mMetadataBuffer->Unmap());
+
+    // Add the default bindings at the end of mBindings
+    ityp::span<BindingIndex, Ref<TextureViewBase>> defaultBindings;
+    DAWN_TRY_ASSIGN(
+        defaultBindings,
+        mDevice->GetDynamicArrayDefaultBindings()->GetOrCreateSampledTextureDefaults(mDevice));
+
+    for (auto [i, defaultBinding] : Enumerate(defaultBindings)) {
+        BindGroupEntryContents entryContents = {
+            .textureView = defaultBinding.Get(),
+        };
+        Update(mAPISize + i, entryContents);
+    }
 
     return {};
 }
@@ -276,8 +282,21 @@ bool DynamicArrayState::IsDestroyed() const {
     return mDestroyed;
 }
 
-void DynamicArrayState::Update(BindingIndex i, TextureViewBase* view) {
+bool DynamicArrayState::CanBeUpdated(BindingIndex i) const {
     DAWN_ASSERT(!mDestroyed);
+    return mBindingState[i].availableAfter <= mDevice->GetQueue()->GetCompletedCommandSerial();
+}
+
+void DynamicArrayState::Update(BindingIndex i, const BindGroupEntryContents& contents) {
+    DAWN_ASSERT(CanBeUpdated(i));
+    DAWN_ASSERT(mBindingState[i].typeId == tint::ResourceType::kEmpty);
+
+    mBindingState[i].availableAfter = kMaxExecutionSerial;
+
+    // TODO(435317394): Support bindings that aren't TextureViews
+    DAWN_ASSERT(contents.buffer == nullptr && contents.sampler == nullptr);
+    TextureViewBase* view = contents.textureView;
+
     if (mBindings[i] == view) {
         return;
     }
@@ -290,17 +309,20 @@ void DynamicArrayState::Update(BindingIndex i, TextureViewBase* view) {
         view->GetTexture()->AddDynamicArraySlot(this, i);
     }
     mBindings[i] = view;
+    // TODO(https://crbug.com/435317394): Track the resources that are added so we can tell the
+    // backend to update them.
 
     // Update the mBindingState with information for the updated binding.
     tint::ResourceType typeId = ComputeTypeId(view);
     bool pinned = view != nullptr && view->GetTexture()->HasPinnedUsage();
+    SetMetadata(i, typeId, pinned);
+}
 
-    BindingState& state = mBindingState[i];
-    if (state.typeId != typeId || state.pinned != pinned) {
-        state.typeId = typeId;
-        state.pinned = pinned;
-        MarkStateDirty(i);
-    }
+void DynamicArrayState::Remove(BindingIndex i) {
+    // Prevent all accesses to the binding which means it will be possible to update it once all
+    // current GPU work is finished.
+    mBindingState[i].availableAfter = mDevice->GetQueue()->GetLastSubmittedCommandSerial();
+    SetMetadata(i, tint::ResourceType::kEmpty, false);
 }
 
 void DynamicArrayState::OnPinned(BindingIndex i, TextureBase* texture) {
@@ -354,6 +376,15 @@ void DynamicArrayState::MarkStateDirty(BindingIndex i) {
     if (!mBindingState[i].dirty) {
         mDirtyBindings.push_back(i);
         mBindingState[i].dirty = true;
+    }
+}
+
+void DynamicArrayState::SetMetadata(BindingIndex i, tint::ResourceType typeId, bool pinned) {
+    BindingState& state = mBindingState[i];
+    if (state.typeId != typeId || state.pinned != pinned) {
+        state.typeId = typeId;
+        state.pinned = pinned;
+        MarkStateDirty(i);
     }
 }
 

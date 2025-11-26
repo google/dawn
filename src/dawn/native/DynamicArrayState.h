@@ -64,9 +64,9 @@ BindingIndex GetDefaultBindingCount(wgpu::DynamicBindingKind kind);
 // WeakRef to avoid a reference cycle between the dynamic array and its bindings).
 class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayState> {
   public:
-    DynamicArrayState(BindingIndex size, wgpu::DynamicBindingKind kind);
+    DynamicArrayState(DeviceBase* device, BindingIndex size, wgpu::DynamicBindingKind kind);
 
-    MaybeError Initialize(DeviceBase* device);
+    MaybeError Initialize();
     void Destroy();
 
     wgpu::DynamicBindingKind GetKind() const;
@@ -74,11 +74,15 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     ityp::span<BindingIndex, const Ref<TextureViewBase>> GetBindings() const;
     BufferBase* GetMetadataBuffer() const;
     bool IsDestroyed() const;
+    bool CanBeUpdated(BindingIndex i) const;
 
     // Methods that mutate the state of bindings in the dynamic array. They keep track of the
     // necessary metadata buffer updates required for dynamic type checks in the shader to match
     // what's in the binding array.
-    void Update(BindingIndex i, TextureViewBase* view);
+    // `contents` can contain no resources, this is useful to mark the slot used even when an error
+    // happens, to match what client-side validation would do.
+    void Update(BindingIndex i, const BindGroupEntryContents& contents);
+    void Remove(BindingIndex i);
     void OnPinned(BindingIndex i, TextureBase* texture);
     void OnUnpinned(BindingIndex i, TextureBase* texture);
 
@@ -94,6 +98,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     bool mDestroyed = false;
     wgpu::DynamicBindingKind mKind;
     BindingIndex mAPISize;
+    raw_ptr<DeviceBase> mDevice;
 
     ityp::vector<BindingIndex, Ref<TextureViewBase>> mBindings;
     // Buffer that contains a WGSL metadata struct of the following shape:
@@ -108,6 +113,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
         // Matches the value of the Tint enum for type IDs but kept as u32 to keep usage of Tint
         // headers local.
         tint::ResourceType typeId = tint::ResourceType(0);
+        ExecutionSerial availableAfter = kBeginningOfGPUTime;
         bool dirty = false;
         bool pinned = false;
     };
@@ -116,6 +122,7 @@ class DynamicArrayState : public RefCounted, public WeakRefSupport<DynamicArrayS
     // The list of bindings that need to be updated before the next use of the dynamic array.
     std::vector<BindingIndex> mDirtyBindings;
     void MarkStateDirty(BindingIndex i);
+    void SetMetadata(BindingIndex i, tint::ResourceType typeId, bool pinned);
 };
 
 class DynamicArrayDefaultBindings : public NonMovable {

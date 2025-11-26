@@ -762,6 +762,21 @@ class DynamicBindingArrayTests : public DawnTest {
         EXPECT_BUFFER_U32_RANGE_EQ(expectedU32.data(), resultBuffer, 0, expectedU32.size())
             << " for WGSL type " << wgslType;
     }
+
+    void DoSomeWorkInSubmit() {
+        wgpu::BufferDescriptor bufDesc = {
+            .usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::CopySrc,
+            .size = 4,
+        };
+        wgpu::Buffer src = device.CreateBuffer(&bufDesc);
+        wgpu::Buffer dst = device.CreateBuffer(&bufDesc);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyBufferToBuffer(src, 0, dst, 0, 4);
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+    }
 };
 
 // Tests that creating the bind group that's only a dynamic array doesn't crash in backends.
@@ -1675,6 +1690,104 @@ TEST_P(DynamicBindingArrayTests, PinDoesZeroInit) {
         tex.Unpin();
 
         EXPECT_BUFFER_U32_EQ(0, resultBuffer, 0);
+    }
+}
+
+// Check that a dynamic array slot can be updated only after all commands submitted prior to
+// RemoveBinding are completed.
+TEST_P(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntry entry{.binding = 0, .textureView = tex.CreateView()};
+
+    wgpu::BindGroupLayout bgl = MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture);
+    wgpu::BindGroup bg = MakeBindGroup(bgl, 1, {{0, tex.CreateView()}});
+
+    // Removing while the dynamic array is still potentially in used by the GPU is an error. But
+    // immediately after we know that the GPU is finished, it is valid.
+    bool updateValid = false;
+    DoSomeWorkInSubmit();
+    queue.OnSubmittedWorkDone(
+        wgpu::CallbackMode::AllowSpontaneous,
+        [&](wgpu::QueueWorkDoneStatus, wgpu::StringView) { updateValid = true; });
+    EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(0));
+
+    if (updateValid) {
+        EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+        updateValid = false;
+    } else {
+        EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
+    }
+
+    WaitForAllOperations();
+
+    if (updateValid) {
+        EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+    } else {
+        EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
+    }
+}
+
+// Check that a dynamic array slot can be updated only after all commands submitted prior to
+// RemoveBinding are completed.
+TEST_P(DynamicBindingArrayTests, UpdateAfterRemoveRequiresGPUIsFinished_ErrorBindGroup) {
+    // TODO(435317394): Implemented bindless in the wire.
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
+
+    wgpu::TextureDescriptor tDesc{
+        .usage = wgpu::TextureUsage::TextureBinding,
+        .size = {1, 1},
+        .format = wgpu::TextureFormat::R32Uint,
+    };
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+    wgpu::BindGroupEntry entry{.binding = 1, .textureView = tex.CreateView()};
+
+    wgpu::BindGroupLayout bgl =
+        MakeBindGroupLayout(wgpu::DynamicBindingKind::SampledTexture, 1,
+                            {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
+    wgpu::BindGroup bg;
+    ASSERT_DEVICE_ERROR(bg = MakeBindGroup(bgl, 1, {{1, tex.CreateView()}}));
+
+    {
+        // Ignore all validation errors for this test as they are tested in other places, and we're
+        // checking immediate validation returned as a wgpu::Status and supposed to be the same for
+        // valid and invalid objects.
+        device.PushErrorScope(wgpu::ErrorFilter::Validation);
+
+        // Removing while the dynamic array is still potentially in used by the GPU is an error. But
+        // immediately after we know that the GPU is finished, it is valid.
+        bool updateValid = false;
+        DoSomeWorkInSubmit();
+        queue.OnSubmittedWorkDone(
+            wgpu::CallbackMode::AllowSpontaneous,
+            [&](wgpu::QueueWorkDoneStatus, wgpu::StringView) { updateValid = true; });
+        EXPECT_EQ(wgpu::Status::Success, bg.RemoveBinding(1));
+
+        if (updateValid) {
+            EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+            updateValid = false;
+        } else {
+            EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
+        }
+
+        WaitForAllOperations();
+
+        if (updateValid) {
+            EXPECT_EQ(wgpu::Status::Success, bg.Update(&entry));
+        } else {
+            EXPECT_EQ(wgpu::Status::Error, bg.Update(&entry));
+        }
+
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [](wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView) {});
     }
 }
 
