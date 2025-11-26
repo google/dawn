@@ -190,10 +190,7 @@ class BufferBase : public SharedResource, public WeakRefSupport<BufferBase> {
     virtual bool IsCPUWritableAtCreation() const = 0;
     MaybeError CopyFromStagingBuffer();
 
-    MaybeError ValidateMapAsync(wgpu::MapMode mode,
-                                size_t offset,
-                                size_t size,
-                                WGPUMapAsyncStatus* status) const;
+    MaybeError ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
     MaybeError UnmapInternal(std::string_view earlyUnmapMessage);

@@ -370,6 +370,7 @@ dawn_test("dawn_unittests") {
     "unittests/WeakRefTests.cpp",
     "unittests/native/AllowedErrorTests.cpp",
     "unittests/native/BlobTests.cpp",
+    "unittests/native/BufferBaseTests.cpp",
     "unittests/native/CacheRequestTests.cpp",
     "unittests/native/CommandBufferEncodingTests.cpp",
     "unittests/native/CreatePipelineAsyncEventTests.cpp",

@@ -641,7 +641,7 @@ TEST_P(BufferMappingValidationTest, UnmapDestroyedBuffer) {
 // Test that unmap then mapping a destroyed buffer is an error.
 // Regression test for crbug.com/1388920.
 TEST_P(BufferMappingValidationTest, MapDestroyedBufferAfterUnmap) {
-    wgpu::Buffer buffer = CreateMapReadBuffer(4);
+    wgpu::Buffer buffer = CreateBuffer(4);
     buffer.Destroy();
     buffer.Unmap();
 

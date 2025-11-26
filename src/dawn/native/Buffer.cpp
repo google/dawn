@@ -679,18 +679,36 @@ Future BufferBase::APIMapAsync(wgpu::MapMode mode,
             size = mSize - offset;
         }
 
-        WGPUMapAsyncStatus status = WGPUMapAsyncStatus_Error;
+        WGPUMapAsyncStatus errorStatus = WGPUMapAsyncStatus_Aborted;
         MaybeError maybeError = [&]() -> MaybeError {
-            DAWN_INVALID_IF(mState.load(std::memory_order::acquire) == BufferState::PendingMap,
-                            "%s already has an outstanding map pending.", this);
-            DAWN_TRY(ValidateMapAsync(mode, offset, size, &status));
+            DAWN_TRY(GetDevice()->ValidateIsAlive());
+            errorStatus = WGPUMapAsyncStatus_Error;
+            DAWN_TRY(ValidateMapAsync(mode, offset, size));
+
+            switch (mState.load(std::memory_order::acquire)) {
+                case BufferState::Mapped:
+                case BufferState::MappedAtCreation:
+                    return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
+                case BufferState::PendingMap:
+                    return DAWN_VALIDATION_ERROR("%s already has an outstanding map pending.",
+                                                 this);
+                case BufferState::Destroyed:
+                    return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
+                case BufferState::HostMappedPersistent:
+                    return DAWN_VALIDATION_ERROR("Host-mapped %s cannot be mapped again.", this);
+                case BufferState::SharedMemoryNoAccess:
+                    return DAWN_VALIDATION_ERROR("%s used without shared memory access.", this);
+                case BufferState::Unmapped:
+                    break;
+            }
+
             DAWN_TRY(MapAsyncImpl(mode, offset, size));
             return {};
         }();
 
         if (maybeError.IsError()) {
             auto error = maybeError.AcquireError();
-            event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), status));
+            event = AcquireRef(new MapAsyncEvent(callbackInfo, error->GetMessage(), errorStatus));
             [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
                 std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
                 size);
@@ -857,14 +875,7 @@ MaybeError BufferBase::UnmapInternal(std::string_view earlyUnmapMessage) {
     return {};
 }
 
-MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
-                                        size_t offset,
-                                        size_t size,
-                                        WGPUMapAsyncStatus* status) const {
-    *status = WGPUMapAsyncStatus_Aborted;
-    DAWN_TRY(GetDevice()->ValidateIsAlive());
-
-    *status = WGPUMapAsyncStatus_Error;
+MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode, size_t offset, size_t size) const {
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     DAWN_INVALID_IF(uint64_t(offset) > mSize,
@@ -876,22 +887,6 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
     DAWN_INVALID_IF(uint64_t(size) > mSize - uint64_t(offset),
                     "Mapping range (offset:%u, size: %u) doesn't fit in the size (%u) of %s.",
                     offset, size, mSize, this);
-
-    switch (mState.load(std::memory_order::acquire)) {
-        case BufferState::Mapped:
-        case BufferState::MappedAtCreation:
-            return DAWN_VALIDATION_ERROR("%s is already mapped.", this);
-        case BufferState::PendingMap:
-            DAWN_UNREACHABLE();
-        case BufferState::Destroyed:
-            return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
-        case BufferState::HostMappedPersistent:
-            return DAWN_VALIDATION_ERROR("Host-mapped %s cannot be mapped again.", this);
-        case BufferState::SharedMemoryNoAccess:
-            return DAWN_VALIDATION_ERROR("%s used without shared memory access.", this);
-        case BufferState::Unmapped:
-            break;
-    }
 
     bool isReadMode = mode & wgpu::MapMode::Read;
     bool isWriteMode = mode & wgpu::MapMode::Write;
@@ -909,7 +904,6 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                         wgpu::BufferUsage::MapWrite);
     }
 
-    *status = WGPUMapAsyncStatus_Success;
     return {};
 }
 
