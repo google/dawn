@@ -82,6 +82,10 @@ class Inspector {
     std::vector<ResourceBindingInfo> GetResourceBindingInfo(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
+    /// @returns vector of all types returned from any resource table calls.
+    std::unordered_set<ResourceType> GetResourceTableInfo(const std::string& entry_point);
+
+    /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the resource bindings.
     std::vector<ResourceBinding> GetResourceBindings(const std::string& entry_point);
 

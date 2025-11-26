@@ -84,6 +84,7 @@ using InspectorOverridesTest = InspectorTest;
 using InspectorGetConstantNameToIdMapTest = InspectorTest;
 using InspectorGetResourceBindingsTest = InspectorTest;
 using InspectorGetResourceBindingInfoTest = InspectorTest;
+using InspectorGetResourceTableInfoTest = InspectorTest;
 using InspectorGetUsedExtensionNamesTest = InspectorTest;
 using InspectorGetBlendSrcTest = InspectorTest;
 using InspectorSubgroupMatrixTest = InspectorTest;
@@ -2995,6 +2996,107 @@ enable chromium_experimental_dynamic_binding;
     std::sort(arr.type_info.begin(), arr.type_info.end());
     EXPECT_EQ(ResourceType::kTexture2d_f32, arr.type_info[0]);
     EXPECT_EQ(ResourceType::kTexture3d_f32, arr.type_info[1]);
+}
+
+TEST_F(InspectorGetResourceTableInfoTest, NoResourceBinding) {
+    auto* src = R"(
+@group(0) @binding(1) var toto: texture_2d<f32>;
+@fragment fn ep() {
+  _ = textureDimensions(toto);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceTableInfo("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    EXPECT_TRUE(result.empty());
+}
+
+TEST_F(InspectorGetResourceTableInfoTest, ResourceTable) {
+    auto* src = R"(
+enable chromium_experimental_dynamic_binding;
+
+@fragment fn ep() {
+  _ = hasResource<texture_2d<f32>>(0);
+  _ = getResource<texture_3d<i32>>(1);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceTableInfo("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(2u, result.size());
+
+    std::vector<ResourceType> types(result.begin(), result.end());
+    std::sort(types.begin(), types.end());
+    EXPECT_EQ(ResourceType::kTexture2d_f32, types[0]);
+    EXPECT_EQ(ResourceType::kTexture3d_i32, types[1]);
+}
+
+TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Multiple) {
+    auto* src = R"(
+enable chromium_experimental_dynamic_binding;
+
+@fragment fn ep() {
+  _ = textureDimensions(getResource<texture_cube<f32>>(3));
+  _ = textureDimensions(getResource<texture_1d<f32>>(3));
+
+  _ = hasResource<texture_2d<f32>>(0);
+  _ = getResource<texture_3d<f32>>(1);
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceTableInfo("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(4u, result.size());
+
+    std::vector<ResourceType> types(result.begin(), result.end());
+    std::sort(types.begin(), types.end());
+
+    EXPECT_EQ(ResourceType::kTexture1d_f32, types[0]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32, types[1]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32, types[2]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32, types[3]);
+}
+
+TEST_F(InspectorGetResourceTableInfoTest, ResourceTable_Nested) {
+    auto* src = R"(
+enable chromium_experimental_dynamic_binding;
+
+fn nested() {
+  _ = textureDimensions(getResource<texture_cube<f32>>(3));
+  _ = textureDimensions(getResource<texture_1d<f32>>(3));
+
+  _ = hasResource<texture_2d<f32>>(0);
+  _ = getResource<texture_3d<f32>>(1);
+}
+
+@fragment fn ep() {
+  nested();
+}
+)";
+
+    Inspector& inspector = Initialize(src);
+
+    auto result = inspector.GetResourceTableInfo("ep");
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(4u, result.size());
+
+    std::vector<ResourceType> types(result.begin(), result.end());
+    std::sort(types.begin(), types.end());
+
+    EXPECT_EQ(ResourceType::kTexture1d_f32, types[0]);
+    EXPECT_EQ(ResourceType::kTexture2d_f32, types[1]);
+    EXPECT_EQ(ResourceType::kTexture3d_f32, types[2]);
+    EXPECT_EQ(ResourceType::kTextureCube_f32, types[3]);
 }
 
 class InspectorGetSamplerTextureUsesTest : public TestHelper, public testing::Test {
