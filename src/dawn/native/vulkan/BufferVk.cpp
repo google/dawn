@@ -682,7 +682,7 @@ MaybeError Buffer::MapMemoryAndPerformOperation(uint64_t requestedOffset,
     Device* device = ToBackend(GetDevice());
     const bool isMappable = GetInternalUsage() & kMappableBufferUsages;
 
-    DAWN_ASSERT(!!mHostVisible);
+    DAWN_ASSERT(mHostVisible);
     DAWN_ASSERT(GetLastUsageSerial() <= device->GetQueue()->GetCompletedCommandSerial());
 
     VkDeviceMemory deviceMemory = ToBackend(mMemoryAllocation.GetResourceHeap())->GetMemory();
