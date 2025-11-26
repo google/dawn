@@ -63,6 +63,8 @@ tint_add_target(tint_lang_spirv_writer_raise lib
   lang/spirv/writer/raise/remove_unreachable_in_loop_continuing.h
   lang/spirv/writer/raise/resource_binding.cc
   lang/spirv/writer/raise/resource_binding.h
+  lang/spirv/writer/raise/resource_table.cc
+  lang/spirv/writer/raise/resource_table.h
   lang/spirv/writer/raise/shader_io.cc
   lang/spirv/writer/raise/shader_io.h
   lang/spirv/writer/raise/var_for_dynamic_index.cc

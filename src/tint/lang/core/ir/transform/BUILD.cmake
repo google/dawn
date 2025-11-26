@@ -90,6 +90,10 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/resource_binding.h
   lang/core/ir/transform/resource_binding_helper.cc
   lang/core/ir/transform/resource_binding_helper.h
+  lang/core/ir/transform/resource_table.cc
+  lang/core/ir/transform/resource_table.h
+  lang/core/ir/transform/resource_table_helper.cc
+  lang/core/ir/transform/resource_table_helper.h
   lang/core/ir/transform/robustness.cc
   lang/core/ir/transform/robustness.h
   lang/core/ir/transform/shader_io.cc

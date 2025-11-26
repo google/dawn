@@ -1,5 +1,62 @@
-SKIP: FAILED
-
-resource tables not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpExtension "SPV_EXT_descriptor_indexing"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpMemberName %tint_resource_table_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_table_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_table_buffer_tint_explicit_layout "tint_resource_table_buffer_tint_explicit_layout"
+               OpName %fs "fs"
+               OpName %t "t"
+               OpDecorate %1 DescriptorSet 42
+               OpDecorate %1 Binding 41
+               OpMemberDecorate %tint_resource_table_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_table_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_table_buffer_tint_explicit_layout Block
+               OpDecorate %6 DescriptorSet 42
+               OpDecorate %6 Binding 42
+               OpDecorate %6 NonWritable
+        %int = OpTypeInt 32 1
+          %4 = OpTypeImage %int 2D 0 0 0 1 Unknown
+%_runtimearr_4 = OpTypeRuntimeArray %4
+%_ptr_UniformConstant__runtimearr_4 = OpTypePointer UniformConstant %_runtimearr_4
+          %1 = OpVariable %_ptr_UniformConstant__runtimearr_4 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_table_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_table_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_table_buffer_tint_explicit_layout
+          %6 = OpVariable %_ptr_StorageBuffer_tint_resource_table_buffer_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+     %uint_4 = OpConstant %uint 4
+       %bool = OpTypeBool
+      %false = OpConstantFalse %bool
+     %uint_1 = OpConstant %uint 1
+     %uint_5 = OpConstant %uint 5
+         %fs = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0
+         %18 = OpLoad %uint %15 None
+         %19 = OpULessThan %bool %uint_4 %18
+               OpSelectionMerge %22 None
+               OpBranchConditional %19 %23 %24
+         %23 = OpLabel
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_1 %uint_4
+         %30 = OpLoad %uint %28 None
+         %26 = OpIEqual %bool %30 %uint_5
+               OpBranch %22
+         %24 = OpLabel
+               OpBranch %22
+         %22 = OpLabel
+          %t = OpPhi %bool %26 %23 %false %24
+               OpReturn
+               OpFunctionEnd

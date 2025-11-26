@@ -1,5 +1,110 @@
-SKIP: FAILED
-
-resource tables not supported by the SPIR-V backend
-
-tint executable returned error: exit status 1
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 67
+; Schema: 0
+               OpCapability Shader
+               OpCapability RuntimeDescriptorArray
+               OpCapability ImageQuery
+               OpExtension "SPV_EXT_descriptor_indexing"
+         %51 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fs "fs"
+               OpExecutionMode %fs OriginUpperLeft
+               OpMemberName %index_block_tint_explicit_layout 0 "inner"
+               OpName %index_block_tint_explicit_layout "index_block_tint_explicit_layout"
+               OpMemberName %tint_resource_table_buffer_tint_explicit_layout 0 "array_length"
+               OpMemberName %tint_resource_table_buffer_tint_explicit_layout 1 "bindings"
+               OpName %tint_resource_table_buffer_tint_explicit_layout "tint_resource_table_buffer_tint_explicit_layout"
+               OpName %fs "fs"
+               OpName %texture_load "texture_load"
+               OpDecorate %_arr_v4uint_uint_1 ArrayStride 16
+               OpMemberDecorate %index_block_tint_explicit_layout 0 Offset 0
+               OpDecorate %index_block_tint_explicit_layout Block
+               OpDecorate %1 DescriptorSet 1
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+               OpDecorate %8 DescriptorSet 42
+               OpDecorate %8 Binding 41
+               OpMemberDecorate %tint_resource_table_buffer_tint_explicit_layout 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_resource_table_buffer_tint_explicit_layout 1 Offset 4
+               OpDecorate %tint_resource_table_buffer_tint_explicit_layout Block
+               OpDecorate %13 DescriptorSet 42
+               OpDecorate %13 Binding 42
+               OpDecorate %13 NonWritable
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+     %uint_1 = OpConstant %uint 1
+%_arr_v4uint_uint_1 = OpTypeArray %v4uint %uint_1
+%index_block_tint_explicit_layout = OpTypeStruct %_arr_v4uint_uint_1
+%_ptr_Uniform_index_block_tint_explicit_layout = OpTypePointer Uniform %index_block_tint_explicit_layout
+          %1 = OpVariable %_ptr_Uniform_index_block_tint_explicit_layout Uniform
+      %float = OpTypeFloat 32
+         %11 = OpTypeImage %float 3D 0 0 0 1 Unknown
+%_runtimearr_11 = OpTypeRuntimeArray %11
+%_ptr_UniformConstant__runtimearr_11 = OpTypePointer UniformConstant %_runtimearr_11
+          %8 = OpVariable %_ptr_UniformConstant__runtimearr_11 UniformConstant
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_resource_table_buffer_tint_explicit_layout = OpTypeStruct %uint %_runtimearr_uint
+%_ptr_StorageBuffer_tint_resource_table_buffer_tint_explicit_layout = OpTypePointer StorageBuffer %tint_resource_table_buffer_tint_explicit_layout
+         %13 = OpVariable %_ptr_StorageBuffer_tint_resource_table_buffer_tint_explicit_layout StorageBuffer
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+%_ptr_Uniform_v4uint = OpTypePointer Uniform %v4uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+       %bool = OpTypeBool
+      %false = OpConstantFalse %bool
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+     %v3uint = OpTypeVector %uint 3
+         %55 = OpConstantComposite %v3uint %uint_1 %uint_1 %uint_1
+      %v3int = OpTypeVector %int 3
+         %57 = OpConstantNull %v3int
+    %v4float = OpTypeVector %float 4
+    %uint_10 = OpConstant %uint 10
+         %fs = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpAccessChain %_ptr_Uniform_v4uint %1 %uint_0 %uint_0
+         %24 = OpLoad %v4uint %21 None
+         %25 = OpCompositeExtract %uint %24 0
+         %26 = OpAccessChain %_ptr_StorageBuffer_uint %13 %uint_0
+         %28 = OpLoad %uint %26 None
+         %29 = OpULessThan %bool %25 %28
+               OpSelectionMerge %31 None
+               OpBranchConditional %29 %32 %33
+         %32 = OpLabel
+         %62 = OpAccessChain %_ptr_StorageBuffer_uint %13 %uint_1 %25
+         %63 = OpLoad %uint %62 None
+         %35 = OpIEqual %bool %63 %uint_10
+               OpBranch %31
+         %33 = OpLabel
+               OpBranch %31
+         %31 = OpLabel
+         %34 = OpPhi %bool %35 %32 %false %33
+               OpSelectionMerge %37 None
+               OpBranchConditional %34 %38 %39
+         %38 = OpLabel
+               OpBranch %37
+         %39 = OpLabel
+         %65 = OpAccessChain %_ptr_StorageBuffer_uint %13 %uint_0
+         %66 = OpLoad %uint %65 None
+         %41 = OpIAdd %uint %uint_0 %66
+               OpBranch %37
+         %37 = OpLabel
+         %40 = OpPhi %uint %25 %38 %41 %39
+         %42 = OpAccessChain %_ptr_UniformConstant_11 %8 %40
+         %44 = OpLoad %11 %42 None
+         %45 = OpImageQueryLevels %uint %44
+         %46 = OpISub %uint %45 %uint_1
+         %47 = OpBitcast %uint %int_0
+         %50 = OpExtInst %uint %51 UMin %47 %46
+         %52 = OpImageQuerySizeLod %v3uint %44 %50
+         %54 = OpISub %v3uint %52 %55
+         %56 = OpBitcast %v3uint %57
+         %59 = OpExtInst %v3uint %51 UMin %56 %54
+%texture_load = OpImageFetch %v4float %44 %59 Lod %50
+               OpReturn
+               OpFunctionEnd
