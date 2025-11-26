@@ -1,8 +1,8 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/resource_table/access_as_constant.wgsl:6:36 error: unresolved call target 'getResource'
-    let texture_load = textureLoad(getResource<texture_1d<f32>>(kHouseTexture), 0, 0);
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+const kHouseTexture = 2u;
 
-
-tint executable returned error: exit status 1
+@fragment
+fn fs() {
+  let texture_load = textureLoad(getResource<texture_1d<f32>>(kHouseTexture), 0, 0);
+}

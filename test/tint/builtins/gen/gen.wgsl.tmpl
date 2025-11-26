@@ -13,7 +13,7 @@ See:
 
 {{- /* For each permutation of each overload of each function... */ -}}
 {{- range $I.Sem.Builtins -}}
-{{    if and (not (HasPrefix .Name "_")) (not (HasPrefix .Name "getBinding")) }}
+{{    if and (and (not (HasPrefix .Name "_")) (not (HasPrefix .Name "getBinding"))) (not (HasPrefix .Name "getResource")) }}
 {{-     range .Overloads  -}}
 {{-       range $I.Permute . -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using

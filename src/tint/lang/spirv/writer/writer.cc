@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -85,6 +86,18 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    for (auto* i : ir.Instructions()) {
+        auto* call = i->As<core::ir::CoreBuiltinCall>();
+        if (!call) {
+            continue;
+        }
+
+        if (call->Func() == core::BuiltinFn::kGetResource ||
+            call->Func() == core::BuiltinFn::kHasResource) {
+            return Failure("resource tables not supported by the SPIR-V backend");
+        }
+    }
+
     core::ir::Function* ep_func = nullptr;
     for (auto* f : ir.functions) {
         if (!f->IsEntryPoint()) {
@@ -95,6 +108,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             break;
         }
     }
+
     // No entrypoint, so no bindings needed
     if (!ep_func) {
         return Failure("entry point not found");

@@ -1410,6 +1410,10 @@ struct Encoder {
                 return pb::BuiltinFn::has_binding;
             case core::BuiltinFn::kGetBinding:
                 return pb::BuiltinFn::get_binding;
+            case core::BuiltinFn::kHasResource:
+                return pb::BuiltinFn::has_resource;
+            case core::BuiltinFn::kGetResource:
+                return pb::BuiltinFn::get_resource;
             case core::BuiltinFn::kNone:
                 break;
         }

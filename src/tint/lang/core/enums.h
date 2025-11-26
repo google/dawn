@@ -964,6 +964,8 @@ enum class BuiltinFn : uint8_t {
     kPrint,
     kHasBinding,
     kGetBinding,
+    kHasResource,
+    kGetResource,
     kNone,
 };
 
@@ -1142,6 +1144,8 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kPrint,
     BuiltinFn::kHasBinding,
     BuiltinFn::kGetBinding,
+    BuiltinFn::kHasResource,
+    BuiltinFn::kGetResource,
 };
 
 /// All builtin function names
@@ -1301,6 +1305,8 @@ constexpr const char* kBuiltinFnStrings[] = {
     "print",
     "hasBinding",
     "getBinding",
+    "hasResource",
+    "getResource",
 };
 
 /// Determines if the given `f` is a coarse derivative.

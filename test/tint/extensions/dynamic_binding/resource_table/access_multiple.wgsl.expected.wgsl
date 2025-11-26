@@ -1,8 +1,14 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/resource_table/access_multiple.wgsl:8:27 error: unresolved call target 'getResource'
-    let t1d = textureLoad(getResource<texture_1d<f32>>(kHouseTexture), 0, 0);
-                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+const kHouseTexture = 0u;
 
+const kMouseTexture = 1i;
 
-tint executable returned error: exit status 1
+const kCatTexture = 2i;
+
+@fragment
+fn fs() {
+  let t1d = textureLoad(getResource<texture_1d<f32>>(kHouseTexture), 0, 0);
+  let t2d = textureLoad(getResource<texture_2d<i32>>(kMouseTexture), vec2(0, 1), 0);
+  let tcube = textureLoad(getResource<texture_3d<u32>>(kCatTexture), vec3(2, 1, 0), 0);
+}

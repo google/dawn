@@ -460,6 +460,8 @@ enum class BuiltinFn : uint8_t {
     kTintMaterialize,
     kHasBinding,
     kGetBinding,
+    kHasResource,
+    kGetResource,
     kNone,
 };
 
@@ -641,6 +643,8 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kTintMaterialize,
     BuiltinFn::kHasBinding,
     BuiltinFn::kGetBinding,
+    BuiltinFn::kHasResource,
+    BuiltinFn::kGetResource,
 };
 
 /// All builtin function names
@@ -803,6 +807,8 @@ constexpr const char* kBuiltinFnStrings[] = {
     "__tint_materialize",
     "hasBinding",
     "getBinding",
+    "hasResource",
+    "getResource",
 };
 
 /// Determines if the given `f` is a coarse derivative.

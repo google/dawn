@@ -1,8 +1,8 @@
-SKIP: FAILED
+enable chromium_experimental_dynamic_binding;
 
-<dawn>/test/tint/extensions/dynamic_binding/resource_table/access_as_uniform.wgsl:6:36 error: unresolved call target 'getResource'
-    let texture_load = textureLoad(getResource<texture_3d<f32>>(index), vec3(0, 0, 0), 0);
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+@group(1) @binding(0) var<uniform> index : u32;
 
-
-tint executable returned error: exit status 1
+@fragment
+fn fs() {
+  let texture_load = textureLoad(getResource<texture_3d<f32>>(index), vec3(0, 0, 0), 0);
+}

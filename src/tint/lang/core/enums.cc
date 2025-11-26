@@ -1805,6 +1805,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "getBinding") {
         return BuiltinFn::kGetBinding;
     }
+    if (name == "hasResource") {
+        return BuiltinFn::kHasResource;
+    }
+    if (name == "getResource") {
+        return BuiltinFn::kGetResource;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -2122,6 +2128,10 @@ const char* str(BuiltinFn i) {
             return "hasBinding";
         case BuiltinFn::kGetBinding:
             return "getBinding";
+        case BuiltinFn::kHasResource:
+            return "hasResource";
+        case BuiltinFn::kGetResource:
+            return "getResource";
     }
     return "<unknown>";
 }

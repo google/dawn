@@ -63,6 +63,18 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
         }
     }
 
+    for (auto* i : ir.Instructions()) {
+        auto* call = i->As<core::ir::CoreBuiltinCall>();
+        if (!call) {
+            continue;
+        }
+
+        if (call->Func() == core::BuiltinFn::kGetResource ||
+            call->Func() == core::BuiltinFn::kHasResource) {
+            return Failure("resource tables not supported by the GLSL backend");
+        }
+    }
+
     core::ir::Function* ep_func = nullptr;
     for (auto* f : ir.functions) {
         if (!f->IsEntryPoint()) {
@@ -73,6 +85,7 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
             break;
         }
     }
+
     // No entrypoint, so no bindings needed
     if (!ep_func) {
         return Failure("entry point not found");
