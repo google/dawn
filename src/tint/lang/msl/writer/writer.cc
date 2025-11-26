@@ -193,8 +193,6 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& optio
 }
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
-    Output output;
-
     // Raise from core-dialect to MSL-dialect.
     auto raise_result = Raise(ir, options);
     if (raise_result != Success) {

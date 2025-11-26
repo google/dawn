@@ -51,6 +51,8 @@ libtint_source_set("analysis") {
     "integer_range_analysis.h",
     "loop_analysis.cc",
     "loop_analysis.h",
+    "subgroup_matrix.cc",
+    "subgroup_matrix.h",
   ]
   deps = [
     "${dawn_root}/src/utils",
@@ -78,6 +80,7 @@ if (tint_build_unittests) {
       "for_loop_analysis_test.cc",
       "integer_range_analysis_test.cc",
       "loop_analysis_test.cc",
+      "subgroup_matrix_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils",
