@@ -111,7 +111,7 @@ TEST_F(GlslWriterTest, VarSampler) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -359,7 +359,7 @@ TEST_F(GlslWriterTest, VarHandleStorageTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -382,7 +382,7 @@ TEST_F(GlslWriterTest, VarHandleDepthTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 

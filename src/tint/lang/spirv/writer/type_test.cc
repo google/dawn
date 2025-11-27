@@ -402,7 +402,7 @@ TEST_F(SpirvWriterTest, Type_BindingArray_SampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -520,7 +520,7 @@ TEST_F(SpirvWriterTest, Type_Sampler) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -537,7 +537,7 @@ TEST_F(SpirvWriterTest, Type_SamplerComparison) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -557,8 +557,8 @@ TEST_F(SpirvWriterTest, Type_Samplers_Dedup) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v1);
-        b.Let("y", v2);
+        b.Load(v1);
+        b.Load(v2);
         b.Return(eb);
     });
 
@@ -586,8 +586,8 @@ TEST_F(SpirvWriterTest, Type_StorageTexture_Dedup) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v1);
-        b.Let("y", v2);
+        b.Load(v1);
+        b.Load(v2);
         b.Return(eb);
     });
 
@@ -618,7 +618,7 @@ TEST_P(Type_SampledTexture, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -660,7 +660,7 @@ TEST_P(Type_MultisampledTexture, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -685,7 +685,7 @@ TEST_P(Type_DepthTexture, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -713,8 +713,8 @@ TEST_F(SpirvWriterTest, Type_DepthTexture_DedupWithSampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v1);
-        b.Let("y", v2);
+        b.Load(v1);
+        b.Load(v2);
         b.Return(eb);
     });
 
@@ -740,7 +740,7 @@ TEST_F(SpirvWriterTest, Type_DepthMultiSampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -762,8 +762,8 @@ TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTextu
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v1);
-        b.Let("y", v2);
+        b.Load(v1);
+        b.Load(v2);
         b.Return(eb);
     });
 
@@ -797,7 +797,7 @@ TEST_P(Type_StorageTexture, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -872,7 +872,7 @@ TEST_P(Type_TexelBuffer, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 

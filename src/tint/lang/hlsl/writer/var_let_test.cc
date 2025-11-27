@@ -103,7 +103,7 @@ TEST_F(HlslWriterTest, VarSampler) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -125,7 +125,7 @@ TEST_F(HlslWriterTest, VarSamplerComparison) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -148,7 +148,7 @@ TEST_F(HlslWriterTest, VarBindingArraySampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -184,7 +184,7 @@ TEST_P(VarDepthTextureTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -217,7 +217,7 @@ TEST_F(HlslWriterTest, VarDepthMultiSampled) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -269,7 +269,7 @@ TEST_P(VarSampledTextureTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -386,7 +386,7 @@ TEST_F(HlslWriterTest, VarMultisampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 
@@ -426,7 +426,7 @@ TEST_P(VarStorageTextureTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", s);
+        b.Load(s);
         b.Return(eb);
     });
 

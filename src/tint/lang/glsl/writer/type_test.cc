@@ -508,7 +508,7 @@ TEST_P(GlslWriterDepthTextureESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -540,7 +540,7 @@ TEST_P(GlslWriterDepthTextureNonESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -574,7 +574,7 @@ TEST_F(GlslWriterTest, EmitType_DepthMultisampledTexture) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -628,7 +628,7 @@ TEST_P(GlslWriterSampledTextureESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -688,7 +688,7 @@ TEST_P(GlslWriterSampledTextureNonESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -757,7 +757,7 @@ TEST_P(GlslWriterMultisampledTextureESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -802,7 +802,7 @@ TEST_P(GlslWriterMultisampledTextureNonESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -867,7 +867,7 @@ TEST_P(GlslWriterStorageTextureESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 
@@ -974,7 +974,7 @@ TEST_P(GlslWriterStorageTextureNonESTest, Emit) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", var);
+        b.Load(var);
         b.Return(eb);
     });
 

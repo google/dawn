@@ -3561,7 +3561,12 @@ void Validator::CheckLet(const Let* l) {
 
     auto* result_ty = l->Result()->Type();
     if (!capabilities_.Contains(Capability::kAllowAnyLetType)) {
-        if (!result_ty->IsConstructible() && !result_ty->Is<core::type::Pointer>()) {
+        if (auto* ptr = result_ty->As<core::type::Pointer>()) {
+            if (ptr->AddressSpace() == AddressSpace::kHandle &&
+                !capabilities_.Contains(Capability::kAllowPointerToHandle)) {
+                AddError(l) << "handle pointer cannot be captured in a let";
+            }
+        } else if (!result_ty->IsConstructible()) {
             AddError(l) << "result type, " << NameOf(result_ty)
                         << ", must be concrete constructible type or a pointer type";
         }

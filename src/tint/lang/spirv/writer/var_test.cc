@@ -532,10 +532,11 @@ TEST_F(SpirvWriterTest, SamplerVar) {
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
-    auto* eb = b.ComputeFunction("main");
-    b.Append(eb->Block(), [&] {
-        b.Let("x", v);
-        b.Return(eb);
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        b.Return(func);
+        mod.SetName(load, "load");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -548,21 +549,6 @@ TEST_F(SpirvWriterTest, SamplerVar) {
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
           %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
 )");
-}
-
-TEST_F(SpirvWriterTest, SamplerVar_Load) {
-    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler(), core::Access::kRead));
-    v->SetBindingPoint(0, 0);
-    mod.root_block->Append(v);
-
-    auto* func = b.ComputeFunction("main");
-    b.Append(func->Block(), [&] {
-        auto* load = b.Load(v);
-        b.Return(func);
-        mod.SetName(load, "load");
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%load = OpLoad %3 %v");
 }
 
@@ -573,10 +559,11 @@ TEST_F(SpirvWriterTest, TextureVar) {
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
-    auto* eb = b.ComputeFunction("main");
-    b.Append(eb->Block(), [&] {
-        b.Let("x", v);
-        b.Return(eb);
+    auto* func = b.ComputeFunction("main");
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        b.Return(func);
+        mod.SetName(load, "load");
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
@@ -589,23 +576,6 @@ TEST_F(SpirvWriterTest, TextureVar) {
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
           %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
 )");
-}
-
-TEST_F(SpirvWriterTest, TextureVar_Load) {
-    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
-                                ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
-                                core::Access::kRead));
-    v->SetBindingPoint(0, 0);
-    mod.root_block->Append(v);
-
-    auto* func = b.ComputeFunction("main");
-    b.Append(func->Block(), [&] {
-        auto* load = b.Load(v);
-        b.Return(func);
-        mod.SetName(load, "load");
-    });
-
-    ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%load = OpLoad %3 %v");
 }
 
@@ -684,7 +654,7 @@ TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -712,7 +682,7 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
@@ -740,7 +710,7 @@ TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
 
     auto* eb = b.ComputeFunction("main");
     b.Append(eb->Block(), [&] {
-        b.Let("x", v);
+        b.Load(v);
         b.Return(eb);
     });
 
